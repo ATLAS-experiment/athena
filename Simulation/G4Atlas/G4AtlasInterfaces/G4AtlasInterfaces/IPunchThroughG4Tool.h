@@ -41,7 +41,7 @@ class IPunchThroughG4Tool : virtual public IAlgTool
 
     /** Creates new vector of G4Track out of a given G4Track */
     virtual std::vector<std::map<std::string, double>> computePunchThroughParticles(const G4FastTrack& fastTrack, CLHEP::HepRandomEngine* rndmEngine, double punchThroughProbability, double punchThroughClassifierRand) = 0;
-    virtual void createAllSecondaryTracks(G4ParticleTable &ptable, G4FastStep& fastStep, const G4Track& g4PrimaryTrack, std::vector<std::map<std::string, double>> &secKinematicsMapVect, G4TrackVector& secTrackCont, std::vector<double> caloMSVars) = 0;
+    virtual void createAllSecondaryTracks(G4ParticleTable &ptable, G4FastStep& fastStep, const G4Track& g4PrimaryTrack, std::vector<std::map<std::string, double>> &secKinematicsMapVect, G4TrackVector& secTrackCont, const std::vector<double> &caloMSVars) = 0;
 
     /** Other methods */
     virtual std::vector<double> getCaloMSVars() = 0;

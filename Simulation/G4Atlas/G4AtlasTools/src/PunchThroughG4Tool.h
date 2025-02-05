@@ -54,19 +54,19 @@ class PunchThroughG4Tool : virtual public extends<AthAlgTool, IPunchThroughG4Too
     virtual ~PunchThroughG4Tool () = default;
 
     /** AlgTool initialize method */
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override;
     /** AlgTool finalize method */
-    virtual StatusCode finalize();
+    virtual StatusCode finalize() override;
 
     /** interface function: fill a vector with the punch-through particles */
     //virtual const G4TrackVector* computePunchThroughParticles(G4ParticleTable &ptable, const G4FastTrack& fastTrack, G4FastStep& fastStep, const TFCSSimulationState& simulstate, CLHEP::HepRandomEngine* rndmEngine);
-    virtual std::vector<std::map<std::string, double>> computePunchThroughParticles(const G4FastTrack& fastTrack, CLHEP::HepRandomEngine* rndmEngine, double punchThroughProbability, double punchThroughClassifierRand);
+    virtual std::vector<std::map<std::string, double>> computePunchThroughParticles(const G4FastTrack& fastTrack, CLHEP::HepRandomEngine* rndmEngine, double punchThroughProbability, double punchThroughClassifierRand) override;
 
     /** create all secondary tracks  from kinematics map */
-    virtual void createAllSecondaryTracks(G4ParticleTable &ptable, G4FastStep& fastStep, const G4Track& g4PrimaryTrack, std::vector<std::map<std::string, double>> &secKinematicsMapVect, G4TrackVector& secTrackCont, std::vector<double> caloMSVars);
+    virtual void createAllSecondaryTracks(G4ParticleTable &ptable, G4FastStep& fastStep, const G4Track& g4PrimaryTrack, std::vector<std::map<std::string, double>> &secKinematicsMapVect, G4TrackVector& secTrackCont, const std::vector<double> &caloMSVars) override;
 
     /*helpers*/
-    virtual std::vector<double> getCaloMSVars();
+    virtual std::vector<double> getCaloMSVars() override;
 
   private:
     /*---------------------------------------------------------------------
@@ -120,7 +120,7 @@ class PunchThroughG4Tool : virtual public extends<AthAlgTool, IPunchThroughG4Too
     std::vector<std::map<std::string, double>> checkEnergySumFromSecondaries(double mainEnergyInit, std::vector<std::map<std::string, double>> &secKinematicsMapVect);
     /** create secondary track for each given the kinematics */
     G4Track* createSecondaryTrack( G4ParticleTable &ptable, G4FastStep& fastStep, double currentTime, int secondarySignedPDG,
-                                   double energy, double theta, double phi,double momTheta, double momPhi, std::vector<double> caloMSVars);
+                                   double energy, double theta, double phi,double momTheta, double momPhi, const std::vector<double> &caloMSVars);
 
     /** get the right number of particles for the given pdg while considering
      *  the correlation to an other particle type, which has already created
@@ -137,7 +137,7 @@ class PunchThroughG4Tool : virtual public extends<AthAlgTool, IPunchThroughG4Too
     std::vector<double> inversePCA(int pcaCdfIterator, std::vector<double> &variables) const;
 
     //apply the inverse CDF trainsform
-    static double inverseCdfTransform(double variable, std::map<double, double> inverse_cdf_map) ;
+    static double inverseCdfTransform(double variable, const std::map<double, double> &inverse_cdf_map) ;
 
     //dot product between matrix and vector, used to inverse PCA
     static std::vector<double> dotProduct(const std::vector<std::vector<double>> &m, const std::vector<double> &v) ;
