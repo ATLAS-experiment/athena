@@ -117,6 +117,7 @@ namespace DerivationFramework {
     m_massKs(-1),
     m_massDpm(-1),
     m_massD0(-1),
+    m_massJXV0(-1),
     m_massMainV(-1),
     m_constrJX(false),
     m_constrJpsi(false),
@@ -125,9 +126,11 @@ namespace DerivationFramework {
     m_constrV0(false),
     m_constrDpm(false),
     m_constrD0(false),
+    m_constrJXV0(false),
     m_constrMainV(false),
     m_doPostMainVContrFit(false),
     m_JXSubVtx(false),
+    m_JXV0SubVtx(false),
     m_chi2cut_JX(-1.0),
     m_chi2cut_V0(-1.0),
     m_chi2cut_DisV(-1.0),
@@ -218,6 +221,7 @@ namespace DerivationFramework {
     declareProperty("KsMass",                     m_massKs);
     declareProperty("DpmMass",                    m_massDpm);
     declareProperty("D0Mass",                     m_massD0);
+    declareProperty("JXV0Mass",                   m_massJXV0);
     declareProperty("MainVtxMass",                m_massMainV);
     declareProperty("ApplyJXMassConstraint",      m_constrJX); // only effective when m_jxDaug_num>2
     declareProperty("ApplyJpsiMassConstraint",    m_constrJpsi);
@@ -226,9 +230,11 @@ namespace DerivationFramework {
     declareProperty("ApplyV0MassConstraint",      m_constrV0);
     declareProperty("ApplyDpmMassConstraint",     m_constrDpm); // only for D+/-
     declareProperty("ApplyD0MassConstraint",      m_constrD0); // only for D0
+    declareProperty("ApplyJXV0MassConstraint",    m_constrJXV0);
     declareProperty("ApplyMainVMassConstraint",   m_constrMainV);
     declareProperty("DoPostMainVContrFit",        m_doPostMainVContrFit); // only effective when m_constrMainV=false
     declareProperty("HasJXSubVertex",             m_JXSubVtx);
+    declareProperty("HasJXV0SubVertex",           m_JXV0SubVtx); // only for cases with D0/Dpm
     declareProperty("Chi2CutJX",                  m_chi2cut_JX);
     declareProperty("Chi2CutV0",                  m_chi2cut_V0);
     declareProperty("Chi2CutDisV",                m_chi2cut_DisV); // only effective when m_disVDaug_num=3
@@ -336,6 +342,7 @@ namespace DerivationFramework {
     m_mass_Dpm = BPhysPVCascadeTools::getParticleMass(pdt, MC::DPLUS);
     m_mass_D0 = BPhysPVCascadeTools::getParticleMass(pdt, MC::D0);
     m_mass_BCPLUS = BPhysPVCascadeTools::getParticleMass(pdt, MC::BCPLUS);
+    m_mass_Lambdab = BPhysPVCascadeTools::getParticleMass(pdt, MC::LAMBDAB0);
 
     m_massesV0_ppi.push_back(m_mass_proton);
     m_massesV0_ppi.push_back(m_mass_pion);
@@ -356,6 +363,7 @@ namespace DerivationFramework {
     if(m_massMainV<0) m_massMainV = m_mass_BCPLUS;
     if(m_constrDpm && m_massDpm<0) m_massDpm = m_mass_Dpm;
     if(m_constrD0 && m_massD0<0) m_massD0 = m_mass_D0;
+    if(m_constrJXV0 && m_massJXV0<0) m_massJXV0 = m_mass_Lambdab;
 
     if(m_jxDaug1MassHypo < 0.) m_jxDaug1MassHypo = m_mass_mu;
     if(m_jxDaug2MassHypo < 0.) m_jxDaug2MassHypo = m_mass_mu;
@@ -526,7 +534,10 @@ namespace DerivationFramework {
   StatusCode JpsiXPlusDisplaced::addBranches() const {
     size_t topoN = (m_disVDaug_num==2 ? 3 : 4);
     if(!m_JXSubVtx) topoN--;
-    if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0) topoN = 3; // special cases
+    if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0) { // special cases
+      if(m_JXV0SubVtx) topoN = 4;
+      else topoN = 3;
+    }
 
     if(m_cascadeOutputKeys.size() != topoN) {
       ATH_MSG_FATAL("Incorrect number of output cascade vertices");
@@ -593,30 +604,33 @@ namespace DerivationFramework {
     }
 
     // Get Jpsi+X container
+    // Note: If the event does not contain a JX candidate, it is skipped and the V0 container will not be constructed if not previously available in StoreGate
     SG::ReadHandle<xAOD::VertexContainer> jxContainer(m_vertexJXContainerKey);
     ATH_CHECK( jxContainer.isValid() );
     if(jxContainer->size()==0) return StatusCode::SUCCESS;
 
     // Select the displaced tracks
     std::vector<const xAOD::TrackParticle*> tracksDisplaced;
-    for(const xAOD::TrackParticle* TP : *trackContainer.cptr()) {
-      // V0 track selection (https://gitlab.cern.ch/atlas/athena/-/blob/main/InnerDetector/InDetRecTools/InDetTrackSelectorTool/src/InDetConversionTrackSelectorTool.cxx)
-      if(m_v0TrkSelector->decision(*TP, primaryVertex)) {
-        uint8_t temp(0);
-        uint8_t nclus(0);
-        if(TP->summaryValue(temp, xAOD::numberOfPixelHits)) nclus += temp;
-        if(TP->summaryValue(temp, xAOD::numberOfSCTHits)  ) nclus += temp; 
-        if(!m_useTRT && nclus == 0) continue;
+    if(m_v0VtxOutputKey.key()!="" || m_disVDaug_num==3) {
+      for(const xAOD::TrackParticle* TP : *trackContainer.cptr()) {
+	// V0 track selection (https://gitlab.cern.ch/atlas/athena/-/blob/main/InnerDetector/InDetRecTools/InDetTrackSelectorTool/src/InDetConversionTrackSelectorTool.cxx)
+	if(m_v0TrkSelector->decision(*TP, primaryVertex)) {
+	  uint8_t temp(0);
+	  uint8_t nclus(0);
+	  if(TP->summaryValue(temp, xAOD::numberOfPixelHits)) nclus += temp;
+	  if(TP->summaryValue(temp, xAOD::numberOfSCTHits)  ) nclus += temp; 
+	  if(!m_useTRT && nclus == 0) continue;
 
-        bool trk_cut = false;
-        if(nclus != 0) trk_cut = true;
-        if(nclus == 0 && TP->pt()>=m_ptTRT) trk_cut = true;
-        if(!trk_cut) continue;
+	  bool trk_cut = false;
+	  if(nclus != 0) trk_cut = true;
+	  if(nclus == 0 && TP->pt()>=m_ptTRT) trk_cut = true;
+	  if(!trk_cut) continue;
 
-        // track is used if std::abs(d0/sig_d0) > d0_cut for PV
-        if(!d0Pass(TP,primaryVertex)) continue;
+	  // track is used if std::abs(d0/sig_d0) > d0_cut for PV
+	  if(!d0Pass(TP,primaryVertex)) continue;
 
-        tracksDisplaced.push_back(TP);
+	  tracksDisplaced.push_back(TP);
+	}
       }
     }
 
@@ -711,6 +725,7 @@ namespace DerivationFramework {
     if(m_maxV0Candidates>0 && selectedV0Candidates.size()>m_maxV0Candidates) {
       selectedV0Candidates.erase(selectedV0Candidates.begin()+m_maxV0Candidates, selectedV0Candidates.end());
     }
+    if(selectedV0Candidates.size()==0) return StatusCode::SUCCESS;
 
     std::vector<std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> > cascadeinfoContainer;
     ATH_CHECK( performSearch(cascadeinfoContainer, selectedV0Candidates, tracksDisplaced) );
@@ -724,6 +739,7 @@ namespace DerivationFramework {
       }
       cascadeinfoContainer.erase(cascadeinfoContainer.begin()+m_maxMainVCandidates, cascadeinfoContainer.end());
     }
+    if(cascadeinfoContainer.size()==0) return StatusCode::SUCCESS;
 
     SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key);
     ATH_CHECK( evt.isValid() );
@@ -780,7 +796,10 @@ namespace DerivationFramework {
 
       // Identify the input JX
       int ijx = m_JXSubVtx ? topoN-2 : topoN-1;
-      if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0) ijx = topoN-1;
+      if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0) {
+	if(m_JXV0SubVtx) ijx = topoN-1;
+	else ijx = 1;
+      }
       const xAOD::Vertex* jxVtx(nullptr);
       if(m_jxDaug_num==4) jxVtx = FindVertex<4>(jxContainer.ptr(), cascadeVertices[ijx]);
       else if(m_jxDaug_num==3) jxVtx = FindVertex<3>(jxContainer.ptr(), cascadeVertices[ijx]);
@@ -806,48 +825,74 @@ namespace DerivationFramework {
       chi2_decor(*mainVertex)     = cascade_info_pair.first->fitChi2();
       ndof_decor(*mainVertex)     = cascade_info_pair.first->nDoF();
 
-      if(m_disVDaug_num==2) {
-	// decorate the newly fitted V0 vertex
-	lxy_SV1_decor(*cascadeVertices[0])     = m_CascadeTools->lxy(moms[0],cascadeVertices[0],mainVertex);
-	lxyErr_SV1_decor(*cascadeVertices[0])  = m_CascadeTools->lxyError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],mainVertex);
-	a0z_SV1_decor(*cascadeVertices[0])     = m_CascadeTools->a0z(moms[0],cascadeVertices[0],mainVertex);
-	a0zErr_SV1_decor(*cascadeVertices[0])  = m_CascadeTools->a0zError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],mainVertex);
-	a0xy_SV1_decor(*cascadeVertices[0])    = m_CascadeTools->a0xy(moms[0],cascadeVertices[0],mainVertex);
-	a0xyErr_SV1_decor(*cascadeVertices[0]) = m_CascadeTools->a0xyError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],mainVertex);
+      if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0) { // special cases
+	if(m_JXV0SubVtx) {
+	  lxy_SV0_decor(*cascadeVertices[0])     = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[1]);
+	  lxyErr_SV0_decor(*cascadeVertices[0])  = m_CascadeTools->lxyError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],cascadeVertices[1]);
+	  a0z_SV0_decor(*cascadeVertices[0])     = m_CascadeTools->a0z(moms[0],cascadeVertices[0],cascadeVertices[1]);
+	  a0zErr_SV0_decor(*cascadeVertices[0])  = m_CascadeTools->a0zError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],cascadeVertices[1]);
+	  a0xy_SV0_decor(*cascadeVertices[0])    = m_CascadeTools->a0xy(moms[0],cascadeVertices[0],cascadeVertices[1]);
+	  a0xyErr_SV0_decor(*cascadeVertices[0]) = m_CascadeTools->a0xyError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],cascadeVertices[1]);
+	  lxy_SV1_decor(*cascadeVertices[1])     = m_CascadeTools->lxy(moms[1],cascadeVertices[1],mainVertex);
+	  lxyErr_SV1_decor(*cascadeVertices[1])  = m_CascadeTools->lxyError(moms[1],cascade_info_pair.first->getCovariance()[1],cascadeVertices[1],mainVertex);
+	  a0z_SV1_decor(*cascadeVertices[1])     = m_CascadeTools->a0z(moms[1],cascadeVertices[1],mainVertex);
+	  a0zErr_SV1_decor(*cascadeVertices[1])  = m_CascadeTools->a0zError(moms[1],cascade_info_pair.first->getCovariance()[1],cascadeVertices[1],mainVertex);
+	  a0xy_SV1_decor(*cascadeVertices[1])    = m_CascadeTools->a0xy(moms[1],cascadeVertices[1],mainVertex);
+	  a0xyErr_SV1_decor(*cascadeVertices[1]) = m_CascadeTools->a0xyError(moms[1],cascade_info_pair.first->getCovariance()[1],cascadeVertices[1],mainVertex);
+	  lxy_SV2_decor(*cascadeVertices[2])     = m_CascadeTools->lxy(moms[2],cascadeVertices[2],mainVertex);
+	  lxyErr_SV2_decor(*cascadeVertices[2])  = m_CascadeTools->lxyError(moms[2],cascade_info_pair.first->getCovariance()[2],cascadeVertices[2],mainVertex);
+	  a0z_SV2_decor(*cascadeVertices[2])     = m_CascadeTools->a0z(moms[2],cascadeVertices[2],mainVertex);
+	  a0zErr_SV2_decor(*cascadeVertices[2])  = m_CascadeTools->a0zError(moms[2],cascade_info_pair.first->getCovariance()[2],cascadeVertices[2],mainVertex);
+	  a0xy_SV2_decor(*cascadeVertices[2])    = m_CascadeTools->a0xy(moms[2],cascadeVertices[2],mainVertex);
+	  a0xyErr_SV2_decor(*cascadeVertices[2]) = m_CascadeTools->a0xyError(moms[2],cascade_info_pair.first->getCovariance()[2],cascadeVertices[2],mainVertex);
+	}
+	else {
+	  lxy_SV1_decor(*cascadeVertices[0])     = m_CascadeTools->lxy(moms[0],cascadeVertices[0],mainVertex);
+	  lxyErr_SV1_decor(*cascadeVertices[0])  = m_CascadeTools->lxyError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],mainVertex);
+	  a0z_SV1_decor(*cascadeVertices[0])     = m_CascadeTools->a0z(moms[0],cascadeVertices[0],mainVertex);
+	  a0zErr_SV1_decor(*cascadeVertices[0])  = m_CascadeTools->a0zError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],mainVertex);
+	  a0xy_SV1_decor(*cascadeVertices[0])    = m_CascadeTools->a0xy(moms[0],cascadeVertices[0],mainVertex);
+	  a0xyErr_SV1_decor(*cascadeVertices[0]) = m_CascadeTools->a0xyError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],mainVertex);
+	  lxy_SV2_decor(*cascadeVertices[1])     = m_CascadeTools->lxy(moms[1],cascadeVertices[1],mainVertex);
+	  lxyErr_SV2_decor(*cascadeVertices[1])  = m_CascadeTools->lxyError(moms[1],cascade_info_pair.first->getCovariance()[1],cascadeVertices[1],mainVertex);
+	  a0z_SV2_decor(*cascadeVertices[1])     = m_CascadeTools->a0z(moms[1],cascadeVertices[1],mainVertex);
+	  a0zErr_SV2_decor(*cascadeVertices[1])  = m_CascadeTools->a0zError(moms[1],cascade_info_pair.first->getCovariance()[1],cascadeVertices[1],mainVertex);
+	  a0xy_SV2_decor(*cascadeVertices[1])    = m_CascadeTools->a0xy(moms[1],cascadeVertices[1],mainVertex);
+	  a0xyErr_SV2_decor(*cascadeVertices[1]) = m_CascadeTools->a0xyError(moms[1],cascade_info_pair.first->getCovariance()[1],cascadeVertices[1],mainVertex);
+	}
       }
-      else {
-	// decorate the newly fitted V0 vertex
-	lxy_SV0_decor(*cascadeVertices[0])     = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[1]);
-	lxyErr_SV0_decor(*cascadeVertices[0])  = m_CascadeTools->lxyError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],cascadeVertices[1]);
-	a0z_SV0_decor(*cascadeVertices[0])     = m_CascadeTools->a0z(moms[0],cascadeVertices[0],cascadeVertices[1]);
-	a0zErr_SV0_decor(*cascadeVertices[0])  = m_CascadeTools->a0zError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],cascadeVertices[1]);
-	a0xy_SV0_decor(*cascadeVertices[0])    = m_CascadeTools->a0xy(moms[0],cascadeVertices[0],cascadeVertices[1]);
-	a0xyErr_SV0_decor(*cascadeVertices[0]) = m_CascadeTools->a0xyError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],cascadeVertices[1]);
+      else { // other normal cases
+	if(m_disVDaug_num==2) {
+	  lxy_SV1_decor(*cascadeVertices[0])     = m_CascadeTools->lxy(moms[0],cascadeVertices[0],mainVertex);
+	  lxyErr_SV1_decor(*cascadeVertices[0])  = m_CascadeTools->lxyError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],mainVertex);
+	  a0z_SV1_decor(*cascadeVertices[0])     = m_CascadeTools->a0z(moms[0],cascadeVertices[0],mainVertex);
+	  a0zErr_SV1_decor(*cascadeVertices[0])  = m_CascadeTools->a0zError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],mainVertex);
+	  a0xy_SV1_decor(*cascadeVertices[0])    = m_CascadeTools->a0xy(moms[0],cascadeVertices[0],mainVertex);
+	  a0xyErr_SV1_decor(*cascadeVertices[0]) = m_CascadeTools->a0xyError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],mainVertex);
+	}
+	else {
+	  lxy_SV0_decor(*cascadeVertices[0])     = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[1]);
+	  lxyErr_SV0_decor(*cascadeVertices[0])  = m_CascadeTools->lxyError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],cascadeVertices[1]);
+	  a0z_SV0_decor(*cascadeVertices[0])     = m_CascadeTools->a0z(moms[0],cascadeVertices[0],cascadeVertices[1]);
+	  a0zErr_SV0_decor(*cascadeVertices[0])  = m_CascadeTools->a0zError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],cascadeVertices[1]);
+	  a0xy_SV0_decor(*cascadeVertices[0])    = m_CascadeTools->a0xy(moms[0],cascadeVertices[0],cascadeVertices[1]);
+	  a0xyErr_SV0_decor(*cascadeVertices[0]) = m_CascadeTools->a0xyError(moms[0],cascade_info_pair.first->getCovariance()[0],cascadeVertices[0],cascadeVertices[1]);
+	  lxy_SV1_decor(*cascadeVertices[1])     = m_CascadeTools->lxy(moms[1],cascadeVertices[1],mainVertex);
+	  lxyErr_SV1_decor(*cascadeVertices[1])  = m_CascadeTools->lxyError(moms[1],cascade_info_pair.first->getCovariance()[1],cascadeVertices[1],mainVertex);
+	  a0xy_SV1_decor(*cascadeVertices[1])    = m_CascadeTools->a0z(moms[1],cascadeVertices[1],mainVertex);
+	  a0xyErr_SV1_decor(*cascadeVertices[1]) = m_CascadeTools->a0zError(moms[1],cascade_info_pair.first->getCovariance()[1],cascadeVertices[1],mainVertex);
+	  a0z_SV1_decor(*cascadeVertices[1])     = m_CascadeTools->a0xy(moms[1],cascadeVertices[1],mainVertex);
+	  a0zErr_SV1_decor(*cascadeVertices[1])  = m_CascadeTools->a0xyError(moms[1],cascade_info_pair.first->getCovariance()[1],cascadeVertices[1],mainVertex);
+	}
 
-	// decorate the newly fitted disV vertex
-	lxy_SV1_decor(*cascadeVertices[1])     = m_CascadeTools->lxy(moms[1],cascadeVertices[1],mainVertex);
-	lxyErr_SV1_decor(*cascadeVertices[1])  = m_CascadeTools->lxyError(moms[1],cascade_info_pair.first->getCovariance()[1],cascadeVertices[1],mainVertex);
-	a0xy_SV1_decor(*cascadeVertices[1])    = m_CascadeTools->a0z(moms[1],cascadeVertices[1],mainVertex);
-	a0xyErr_SV1_decor(*cascadeVertices[1]) = m_CascadeTools->a0zError(moms[1],cascade_info_pair.first->getCovariance()[1],cascadeVertices[1],mainVertex);
-	a0z_SV1_decor(*cascadeVertices[1])     = m_CascadeTools->a0xy(moms[1],cascadeVertices[1],mainVertex);
-	a0zErr_SV1_decor(*cascadeVertices[1])  = m_CascadeTools->a0xyError(moms[1],cascade_info_pair.first->getCovariance()[1],cascadeVertices[1],mainVertex);
-      }
-
-      if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0) {
-	lxy_SV2_decor(*cascadeVertices[1])     = m_CascadeTools->lxy(moms[1],cascadeVertices[1],mainVertex);
-	lxyErr_SV2_decor(*cascadeVertices[1])  = m_CascadeTools->lxyError(moms[1],cascade_info_pair.first->getCovariance()[1],cascadeVertices[1],mainVertex);
-	a0z_SV2_decor(*cascadeVertices[1])     = m_CascadeTools->a0z(moms[1],cascadeVertices[1],mainVertex);
-	a0zErr_SV2_decor(*cascadeVertices[1])  = m_CascadeTools->a0zError(moms[1],cascade_info_pair.first->getCovariance()[1],cascadeVertices[1],mainVertex);
-	a0xy_SV2_decor(*cascadeVertices[1])    = m_CascadeTools->a0xy(moms[1],cascadeVertices[1],mainVertex);
-	a0xyErr_SV2_decor(*cascadeVertices[1]) = m_CascadeTools->a0xyError(moms[1],cascade_info_pair.first->getCovariance()[1],cascadeVertices[1],mainVertex);
-      }
-      else if(m_JXSubVtx) { // decorate the newly fitted JX vertex
-	lxy_SV2_decor(*cascadeVertices[ijx])     = m_CascadeTools->lxy(moms[ijx],cascadeVertices[ijx],mainVertex);
-	lxyErr_SV2_decor(*cascadeVertices[ijx])  = m_CascadeTools->lxyError(moms[ijx],cascade_info_pair.first->getCovariance()[ijx],cascadeVertices[ijx],mainVertex);
-	a0z_SV2_decor(*cascadeVertices[ijx])     = m_CascadeTools->a0z(moms[ijx],cascadeVertices[ijx],mainVertex);
-	a0zErr_SV2_decor(*cascadeVertices[ijx])  = m_CascadeTools->a0zError(moms[ijx],cascade_info_pair.first->getCovariance()[ijx],cascadeVertices[ijx],mainVertex);
-	a0xy_SV2_decor(*cascadeVertices[ijx])    = m_CascadeTools->a0xy(moms[ijx],cascadeVertices[ijx],mainVertex);
-	a0xyErr_SV2_decor(*cascadeVertices[ijx]) = m_CascadeTools->a0xyError(moms[ijx],cascade_info_pair.first->getCovariance()[ijx],cascadeVertices[ijx],mainVertex);
+	if(m_JXSubVtx) {
+	  lxy_SV2_decor(*cascadeVertices[ijx])     = m_CascadeTools->lxy(moms[ijx],cascadeVertices[ijx],mainVertex);
+	  lxyErr_SV2_decor(*cascadeVertices[ijx])  = m_CascadeTools->lxyError(moms[ijx],cascade_info_pair.first->getCovariance()[ijx],cascadeVertices[ijx],mainVertex);
+	  a0z_SV2_decor(*cascadeVertices[ijx])     = m_CascadeTools->a0z(moms[ijx],cascadeVertices[ijx],mainVertex);
+	  a0zErr_SV2_decor(*cascadeVertices[ijx])  = m_CascadeTools->a0zError(moms[ijx],cascade_info_pair.first->getCovariance()[ijx],cascadeVertices[ijx],mainVertex);
+	  a0xy_SV2_decor(*cascadeVertices[ijx])    = m_CascadeTools->a0xy(moms[ijx],cascadeVertices[ijx],mainVertex);
+	  a0xyErr_SV2_decor(*cascadeVertices[ijx]) = m_CascadeTools->a0xyError(moms[ijx],cascade_info_pair.first->getCovariance()[ijx],cascadeVertices[ijx],mainVertex);
+	}
       }
 
       chi2_V2_decor(*cascadeVertices[ijx])     = m_V0Tools->chisq(jxVtx);
@@ -880,7 +925,7 @@ namespace DerivationFramework {
       }
       CascadeLinksDecor(*mainVertex) = cascadeVertexLinks;
 
-      // process the posterior cascade with main vertex mass constraint
+      // process the posterior cascade with mass constraint for the main vertex
       if(cascade_info_pair.second) {
 	const std::vector<xAOD::Vertex*> &cascadeVertices_mvc = cascade_info_pair.second->vertices();
 	if(cascadeVertices_mvc.size() != topoN) ATH_MSG_ERROR("Incorrect number of vertices (mvc)");
@@ -892,7 +937,10 @@ namespace DerivationFramework {
 	const std::vector< std::vector<TLorentzVector> > &moms_mvc = cascade_info_pair.second->getParticleMoms();
 	// Identify the input JX
 	int ijx_mvc = m_JXSubVtx ? topoN-2 : topoN-1;
-	if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0) ijx_mvc = topoN-1;
+	if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0) {
+	  if(m_JXV0SubVtx) ijx_mvc = 1;
+	  else ijx_mvc = topoN-1;
+	}
 	const xAOD::Vertex* jxVtx_mvc(nullptr);
 	if(m_jxDaug_num==4) jxVtx_mvc = FindVertex<4>(jxContainer.ptr(), cascadeVertices_mvc[ijx_mvc]);
 	else if(m_jxDaug_num==3) jxVtx_mvc = FindVertex<3>(jxContainer.ptr(), cascadeVertices_mvc[ijx_mvc]);
@@ -909,49 +957,77 @@ namespace DerivationFramework {
 	chi2_decor(*mainVertex_mvc)     = cascade_info_pair.second->fitChi2();
 	ndof_decor(*mainVertex_mvc)     = cascade_info_pair.second->nDoF();
 
-	if(m_disVDaug_num==2) {
-	  lxy_SV1_decor(*cascadeVertices_mvc[0])     = m_CascadeTools->lxy(moms_mvc[0],cascadeVertices_mvc[0],mainVertex_mvc);
-	  lxyErr_SV1_decor(*cascadeVertices_mvc[0])  = m_CascadeTools->lxyError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],mainVertex_mvc);
-	  a0z_SV1_decor(*cascadeVertices_mvc[0])     = m_CascadeTools->a0z(moms_mvc[0],cascadeVertices_mvc[0],mainVertex_mvc);
-	  a0zErr_SV1_decor(*cascadeVertices_mvc[0])  = m_CascadeTools->a0zError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],mainVertex_mvc);
-	  a0xy_SV1_decor(*cascadeVertices_mvc[0])    = m_CascadeTools->a0xy(moms_mvc[0],cascadeVertices_mvc[0],mainVertex_mvc);
-	  a0xyErr_SV1_decor(*cascadeVertices_mvc[0]) = m_CascadeTools->a0xyError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],mainVertex_mvc);
+	if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0) { // special cases
+	  if(m_JXV0SubVtx) {
+	    lxy_SV0_decor(*cascadeVertices_mvc[0])     = m_CascadeTools->lxy(moms_mvc[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
+	    lxyErr_SV0_decor(*cascadeVertices_mvc[0])  = m_CascadeTools->lxyError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
+	    a0z_SV0_decor(*cascadeVertices_mvc[0])     = m_CascadeTools->a0z(moms_mvc[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
+	    a0zErr_SV0_decor(*cascadeVertices_mvc[0])  = m_CascadeTools->a0zError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
+	    a0xy_SV0_decor(*cascadeVertices_mvc[0])    = m_CascadeTools->a0xy(moms_mvc[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
+	    a0xyErr_SV0_decor(*cascadeVertices_mvc[0]) = m_CascadeTools->a0xyError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
+	    lxy_SV1_decor(*cascadeVertices_mvc[1])     = m_CascadeTools->lxy(moms_mvc[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    lxyErr_SV1_decor(*cascadeVertices_mvc[1])  = m_CascadeTools->lxyError(moms_mvc[1],cascade_info_pair.second->getCovariance()[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    a0z_SV1_decor(*cascadeVertices_mvc[1])     = m_CascadeTools->a0z(moms_mvc[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    a0zErr_SV1_decor(*cascadeVertices_mvc[1])  = m_CascadeTools->a0zError(moms_mvc[1],cascade_info_pair.second->getCovariance()[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    a0xy_SV1_decor(*cascadeVertices_mvc[1])    = m_CascadeTools->a0xy(moms_mvc[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    a0xyErr_SV1_decor(*cascadeVertices_mvc[1]) = m_CascadeTools->a0xyError(moms_mvc[1],cascade_info_pair.second->getCovariance()[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    lxy_SV2_decor(*cascadeVertices_mvc[2])     = m_CascadeTools->lxy(moms_mvc[2],cascadeVertices_mvc[2],mainVertex_mvc);
+	    lxyErr_SV2_decor(*cascadeVertices_mvc[2])  = m_CascadeTools->lxyError(moms_mvc[2],cascade_info_pair.second->getCovariance()[2],cascadeVertices_mvc[2],mainVertex_mvc);
+	    a0z_SV2_decor(*cascadeVertices_mvc[2])     = m_CascadeTools->a0z(moms_mvc[2],cascadeVertices_mvc[2],mainVertex_mvc);
+	    a0zErr_SV2_decor(*cascadeVertices_mvc[2])  = m_CascadeTools->a0zError(moms_mvc[2],cascade_info_pair.second->getCovariance()[2],cascadeVertices_mvc[2],mainVertex_mvc);
+	    a0xy_SV2_decor(*cascadeVertices_mvc[2])    = m_CascadeTools->a0xy(moms_mvc[2],cascadeVertices_mvc[2],mainVertex_mvc);
+	    a0xyErr_SV2_decor(*cascadeVertices_mvc[2]) = m_CascadeTools->a0xyError(moms_mvc[2],cascade_info_pair.second->getCovariance()[2],cascadeVertices_mvc[2],mainVertex_mvc);
+	  }
+	  else {
+	    lxy_SV1_decor(*cascadeVertices_mvc[0])     = m_CascadeTools->lxy(moms_mvc[0],cascadeVertices_mvc[0],mainVertex_mvc);
+	    lxyErr_SV1_decor(*cascadeVertices_mvc[0])  = m_CascadeTools->lxyError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],mainVertex_mvc);
+	    a0z_SV1_decor(*cascadeVertices_mvc[0])     = m_CascadeTools->a0z(moms_mvc[0],cascadeVertices_mvc[0],mainVertex_mvc);
+	    a0zErr_SV1_decor(*cascadeVertices_mvc[0])  = m_CascadeTools->a0zError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],mainVertex_mvc);
+	    a0xy_SV1_decor(*cascadeVertices_mvc[0])    = m_CascadeTools->a0xy(moms_mvc[0],cascadeVertices_mvc[0],mainVertex_mvc);
+	    a0xyErr_SV1_decor(*cascadeVertices_mvc[0]) = m_CascadeTools->a0xyError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],mainVertex_mvc);
+	    lxy_SV2_decor(*cascadeVertices_mvc[1])     = m_CascadeTools->lxy(moms_mvc[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    lxyErr_SV2_decor(*cascadeVertices_mvc[1])  = m_CascadeTools->lxyError(moms_mvc[1],cascade_info_pair.second->getCovariance()[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    a0z_SV2_decor(*cascadeVertices_mvc[1])     = m_CascadeTools->a0z(moms_mvc[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    a0zErr_SV2_decor(*cascadeVertices_mvc[1])  = m_CascadeTools->a0zError(moms_mvc[1],cascade_info_pair.second->getCovariance()[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    a0xy_SV2_decor(*cascadeVertices_mvc[1])    = m_CascadeTools->a0xy(moms_mvc[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    a0xyErr_SV2_decor(*cascadeVertices_mvc[1]) = m_CascadeTools->a0xyError(moms_mvc[1],cascade_info_pair.second->getCovariance()[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	  }
 	}
-	else {
-	  lxy_SV0_decor(*cascadeVertices_mvc[0])     = m_CascadeTools->lxy(moms_mvc[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
-	  lxyErr_SV0_decor(*cascadeVertices_mvc[0])  = m_CascadeTools->lxyError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
-	  a0z_SV0_decor(*cascadeVertices_mvc[0])     = m_CascadeTools->a0z(moms_mvc[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
-	  a0zErr_SV0_decor(*cascadeVertices_mvc[0])  = m_CascadeTools->a0zError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
-	  a0xy_SV0_decor(*cascadeVertices_mvc[0])    = m_CascadeTools->a0xy(moms_mvc[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
-	  a0xyErr_SV0_decor(*cascadeVertices_mvc[0]) = m_CascadeTools->a0xyError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
-
-	  lxy_SV1_decor(*cascadeVertices_mvc[1])     = m_CascadeTools->lxy(moms_mvc[1],cascadeVertices_mvc[1],mainVertex_mvc);
-	  lxyErr_SV1_decor(*cascadeVertices_mvc[1])  = m_CascadeTools->lxyError(moms_mvc[1],cascade_info_pair.second->getCovariance()[1],cascadeVertices_mvc[1],mainVertex_mvc);
-	  a0xy_SV1_decor(*cascadeVertices_mvc[1])    = m_CascadeTools->a0z(moms_mvc[1],cascadeVertices_mvc[1],mainVertex_mvc);
-	  a0xyErr_SV1_decor(*cascadeVertices_mvc[1]) = m_CascadeTools->a0zError(moms_mvc[1],cascade_info_pair.second->getCovariance()[1],cascadeVertices_mvc[1],mainVertex_mvc);
-	  a0z_SV1_decor(*cascadeVertices_mvc[1])     = m_CascadeTools->a0xy(moms_mvc[1],cascadeVertices_mvc[1],mainVertex_mvc);
-	  a0zErr_SV1_decor(*cascadeVertices_mvc[1])  = m_CascadeTools->a0xyError(moms_mvc[1],cascade_info_pair.second->getCovariance()[1],cascadeVertices_mvc[1],mainVertex_mvc);
-	}
-
-	if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0) {
-	  lxy_SV2_decor(*cascadeVertices_mvc[1])     = m_CascadeTools->lxy(moms_mvc[1],cascadeVertices_mvc[1],mainVertex_mvc);
-	  lxyErr_SV2_decor(*cascadeVertices_mvc[1])  = m_CascadeTools->lxyError(moms_mvc[1],cascade_info_pair.second->getCovariance()[1],cascadeVertices_mvc[1],mainVertex_mvc);
-	  a0z_SV2_decor(*cascadeVertices_mvc[1])     = m_CascadeTools->a0z(moms_mvc[1],cascadeVertices_mvc[1],mainVertex_mvc);
-	  a0zErr_SV2_decor(*cascadeVertices_mvc[1])  = m_CascadeTools->a0zError(moms_mvc[1],cascade_info_pair.second->getCovariance()[1],cascadeVertices_mvc[1],mainVertex_mvc);
-	  a0xy_SV2_decor(*cascadeVertices_mvc[1])    = m_CascadeTools->a0xy(moms_mvc[1],cascadeVertices_mvc[1],mainVertex_mvc);
-	  a0xyErr_SV2_decor(*cascadeVertices_mvc[1]) = m_CascadeTools->a0xyError(moms_mvc[1],cascade_info_pair.second->getCovariance()[1],cascadeVertices_mvc[1],mainVertex_mvc);
-	}
-	else if(m_JXSubVtx) {
-	  lxy_SV2_decor(*cascadeVertices_mvc[ijx_mvc])     = m_CascadeTools->lxy(moms_mvc[ijx_mvc],cascadeVertices_mvc[ijx_mvc],mainVertex_mvc);
-	  lxyErr_SV2_decor(*cascadeVertices_mvc[ijx_mvc])  = m_CascadeTools->lxyError(moms_mvc[ijx_mvc],cascade_info_pair.second->getCovariance()[ijx_mvc],cascadeVertices_mvc[ijx_mvc],mainVertex_mvc);
-	  a0z_SV2_decor(*cascadeVertices_mvc[ijx_mvc])     = m_CascadeTools->a0z(moms_mvc[ijx_mvc],cascadeVertices_mvc[ijx_mvc],mainVertex_mvc);
-	  a0zErr_SV2_decor(*cascadeVertices_mvc[ijx_mvc])  = m_CascadeTools->a0zError(moms_mvc[ijx_mvc],cascade_info_pair.second->getCovariance()[ijx_mvc],cascadeVertices_mvc[ijx_mvc],mainVertex_mvc);
-	  a0xy_SV2_decor(*cascadeVertices_mvc[ijx_mvc])    = m_CascadeTools->a0xy(moms_mvc[ijx_mvc],cascadeVertices_mvc[ijx_mvc],mainVertex_mvc);
-	  a0xyErr_SV2_decor(*cascadeVertices_mvc[ijx_mvc]) = m_CascadeTools->a0xyError(moms_mvc[ijx_mvc],cascade_info_pair.second->getCovariance()[ijx_mvc],cascadeVertices_mvc[ijx_mvc],mainVertex_mvc);
+	else { // other normal cases
+	  if(m_disVDaug_num==2) {
+	    lxy_SV1_decor(*cascadeVertices_mvc[0])     = m_CascadeTools->lxy(moms_mvc[0],cascadeVertices_mvc[0],mainVertex_mvc);
+	    lxyErr_SV1_decor(*cascadeVertices_mvc[0])  = m_CascadeTools->lxyError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],mainVertex_mvc);
+	    a0z_SV1_decor(*cascadeVertices_mvc[0])     = m_CascadeTools->a0z(moms_mvc[0],cascadeVertices_mvc[0],mainVertex_mvc);
+	    a0zErr_SV1_decor(*cascadeVertices_mvc[0])  = m_CascadeTools->a0zError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],mainVertex_mvc);
+	    a0xy_SV1_decor(*cascadeVertices_mvc[0])    = m_CascadeTools->a0xy(moms_mvc[0],cascadeVertices_mvc[0],mainVertex_mvc);
+	    a0xyErr_SV1_decor(*cascadeVertices_mvc[0]) = m_CascadeTools->a0xyError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],mainVertex_mvc);
+	  }
+	  else {
+	    lxy_SV0_decor(*cascadeVertices_mvc[0])     = m_CascadeTools->lxy(moms_mvc[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
+	    lxyErr_SV0_decor(*cascadeVertices_mvc[0])  = m_CascadeTools->lxyError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
+	    a0z_SV0_decor(*cascadeVertices_mvc[0])     = m_CascadeTools->a0z(moms_mvc[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
+	    a0zErr_SV0_decor(*cascadeVertices_mvc[0])  = m_CascadeTools->a0zError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
+	    a0xy_SV0_decor(*cascadeVertices_mvc[0])    = m_CascadeTools->a0xy(moms_mvc[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
+	    a0xyErr_SV0_decor(*cascadeVertices_mvc[0]) = m_CascadeTools->a0xyError(moms_mvc[0],cascade_info_pair.second->getCovariance()[0],cascadeVertices_mvc[0],cascadeVertices_mvc[1]);
+	    lxy_SV1_decor(*cascadeVertices_mvc[1])     = m_CascadeTools->lxy(moms_mvc[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    lxyErr_SV1_decor(*cascadeVertices_mvc[1])  = m_CascadeTools->lxyError(moms_mvc[1],cascade_info_pair.second->getCovariance()[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    a0xy_SV1_decor(*cascadeVertices_mvc[1])    = m_CascadeTools->a0z(moms_mvc[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    a0xyErr_SV1_decor(*cascadeVertices_mvc[1]) = m_CascadeTools->a0zError(moms_mvc[1],cascade_info_pair.second->getCovariance()[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    a0z_SV1_decor(*cascadeVertices_mvc[1])     = m_CascadeTools->a0xy(moms_mvc[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	    a0zErr_SV1_decor(*cascadeVertices_mvc[1])  = m_CascadeTools->a0xyError(moms_mvc[1],cascade_info_pair.second->getCovariance()[1],cascadeVertices_mvc[1],mainVertex_mvc);
+	  }
+	  if(m_JXSubVtx) {
+	    lxy_SV2_decor(*cascadeVertices_mvc[ijx_mvc])     = m_CascadeTools->lxy(moms_mvc[ijx_mvc],cascadeVertices_mvc[ijx_mvc],mainVertex_mvc);
+	    lxyErr_SV2_decor(*cascadeVertices_mvc[ijx_mvc])  = m_CascadeTools->lxyError(moms_mvc[ijx_mvc],cascade_info_pair.second->getCovariance()[ijx_mvc],cascadeVertices_mvc[ijx_mvc],mainVertex_mvc);
+	    a0z_SV2_decor(*cascadeVertices_mvc[ijx_mvc])     = m_CascadeTools->a0z(moms_mvc[ijx_mvc],cascadeVertices_mvc[ijx_mvc],mainVertex_mvc);
+	    a0zErr_SV2_decor(*cascadeVertices_mvc[ijx_mvc])  = m_CascadeTools->a0zError(moms_mvc[ijx_mvc],cascade_info_pair.second->getCovariance()[ijx_mvc],cascadeVertices_mvc[ijx_mvc],mainVertex_mvc);
+	    a0xy_SV2_decor(*cascadeVertices_mvc[ijx_mvc])    = m_CascadeTools->a0xy(moms_mvc[ijx_mvc],cascadeVertices_mvc[ijx_mvc],mainVertex_mvc);
+	    a0xyErr_SV2_decor(*cascadeVertices_mvc[ijx_mvc]) = m_CascadeTools->a0xyError(moms_mvc[ijx_mvc],cascade_info_pair.second->getCovariance()[ijx_mvc],cascadeVertices_mvc[ijx_mvc],mainVertex_mvc);
+	  }
 	}
 	chi2_V2_decor(*cascadeVertices_mvc[ijx_mvc])     = m_V0Tools->chisq(jxVtx_mvc);
 	ndof_V2_decor(*cascadeVertices_mvc[ijx_mvc])     = m_V0Tools->ndof(jxVtx_mvc);
-      
+
 	double Mass_Moth_mvc = m_CascadeTools->invariantMass(moms_mvc[topoN-1]);
 	ATH_CHECK(helper.FillCandwithRefittedVertices(m_refitPV, pvContainer.cptr(), m_refitPV ? refPvContainer.ptr() : 0, &(*m_pvRefitter), m_PV_max, m_DoVertexType, cascade_info_pair.second, topoN-1, Mass_Moth_mvc, vtx_mvc));
 
@@ -982,7 +1058,7 @@ namespace DerivationFramework {
 	VertexLink vertexLink_mvc;
 	vertexLink_mvc.setElement(cascadeVertices[topoN-1]);
 	vertexLink_mvc.setStorableObject(*VtxWriteHandles[topoN-1].ptr());
-	if( vertexLink_mvc.isValid() ) cascadeVertexLinks_mvc.push_back( vertexLink_mvc );
+	if( vertexLink_mvc.isValid() ) precedingVertexLinks_mvc.push_back( vertexLink_mvc );
 	PrecedingLinksDecor(*mainVertex_mvc) = precedingVertexLinks_mvc;
       } // cascade_info_pair.second!=0
     } // loop over cascadeinfoContainer
@@ -1726,46 +1802,100 @@ namespace DerivationFramework {
 	// Build up the topology
 	// Vertex list
 	std::vector<Trk::VertexID> vrtList;
+	std::vector<Trk::VertexID> vrtList2;
 	// https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkVertexFitter/TrkVKalVrtFitter/TrkVKalVrtFitter/IVertexCascadeFitter.h
-	// V0 vertex
-	Trk::VertexID vID1;
-	if (m_constrV0) {
-	  vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state,V0==KS?m_massKs:m_massLd);
-	} else {
-	  vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state);
-	}
-	vrtList.push_back(vID1);
-	// Dpm vertex
-	Trk::VertexID vID2;
-	if (m_constrDpm) {
-	  vID2 = m_iVertexFitter->nextVertex(tracksExtra,massesExtra,*state,m_massDpm);
-	} else {
-	  vID2 = m_iVertexFitter->nextVertex(tracksExtra,massesExtra,*state);
-	}
-	vrtList.push_back(vID2);
-	// Mother vertex includes two subvertices: V0, Dpm and JX tracks
-	Trk::VertexID vID3;
-	if(m_constrMainV) {
-	  vID3 = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList,*state,m_massMainV);
-	} else {
-	  vID3 = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList,*state);
-	}
-	if (m_constrJX && m_jxDaug_num>2) {
-	  std::vector<Trk::VertexID> cnstV;
-	  if ( !m_iVertexFitter->addMassConstraint(vID3,tracksJX,cnstV,*state,m_massJX).isSuccess() ) {
-	    ATH_MSG_WARNING("addMassConstraint for JX failed");
+	if(m_JXV0SubVtx) {
+	  // V0 vertex
+	  Trk::VertexID vID1;
+	  if (m_constrV0) {
+	    vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state,V0==KS?m_massKs:m_massLd);
+	  } else {
+	    vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state);
+	  }
+	  vrtList.push_back(vID1);
+	  // JX+V0 vertex
+	  Trk::VertexID vID2;
+	  if(m_constrJXV0) {
+	    vID2 = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList,*state,m_massJXV0);
+	  } else {
+	    vID2 = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList,*state);
+	  }
+	  vrtList2.push_back(vID2);
+	  Trk::VertexID vID3;
+	  if (m_constrDpm) {
+	    vID3 = m_iVertexFitter->nextVertex(tracksExtra,massesExtra,*state,m_massDpm);
+	  } else {
+	    vID3 = m_iVertexFitter->nextVertex(tracksExtra,massesExtra,*state);
+	  }
+	  vrtList2.push_back(vID3);
+	  // Mother vertex includes two subvertices: V0, Dpm and JX tracks
+	  std::vector<const xAOD::TrackParticle*> tp;
+	  std::vector<double> tp_masses;
+	  if(m_constrMainV) {
+	    m_iVertexFitter->nextVertex(tp,tp_masses,vrtList2,*state,m_massMainV);
+	  } else {
+	    m_iVertexFitter->nextVertex(tp,tp_masses,vrtList2,*state);
+	  }
+	  if (m_constrJX && m_jxDaug_num>2) {
+	    std::vector<Trk::VertexID> cnstV;
+	    if ( !m_iVertexFitter->addMassConstraint(vID2,tracksJX,cnstV,*state,m_massJX).isSuccess() ) {
+	      ATH_MSG_WARNING("addMassConstraint for JX failed");
+	    }
+	  }
+	  if (m_constrJpsi) {
+	    std::vector<Trk::VertexID> cnstV;
+	    if ( !m_iVertexFitter->addMassConstraint(vID2,tracksJpsi,cnstV,*state,m_massJpsi).isSuccess() ) {
+	      ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
+	    }
+	  }
+	  if (m_constrX && m_jxDaug_num==4) {
+	    std::vector<Trk::VertexID> cnstV;
+	    if ( !m_iVertexFitter->addMassConstraint(vID2,tracksX,cnstV,*state,m_massX).isSuccess() ) {
+	      ATH_MSG_WARNING("addMassConstraint for X failed");
+	    }
 	  }
 	}
-	if (m_constrJpsi) {
-	  std::vector<Trk::VertexID> cnstV;
-	  if ( !m_iVertexFitter->addMassConstraint(vID3,tracksJpsi,cnstV,*state,m_massJpsi).isSuccess() ) {
-	    ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
+	else { // m_JXV0SubVtx==false
+	  // V0 vertex
+	  Trk::VertexID vID1;
+	  if (m_constrV0) {
+	    vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state,V0==KS?m_massKs:m_massLd);
+	  } else {
+	    vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state);
 	  }
-	}
-	if (m_constrX && m_jxDaug_num==4) {
-	  std::vector<Trk::VertexID> cnstV;
-	  if ( !m_iVertexFitter->addMassConstraint(vID3,tracksX,cnstV,*state,m_massX).isSuccess() ) {
-	    ATH_MSG_WARNING("addMassConstraint for X failed");
+	  vrtList.push_back(vID1);
+	  // Dpm vertex
+	  Trk::VertexID vID2;
+	  if (m_constrDpm) {
+	    vID2 = m_iVertexFitter->nextVertex(tracksExtra,massesExtra,*state,m_massDpm);
+	  } else {
+	    vID2 = m_iVertexFitter->nextVertex(tracksExtra,massesExtra,*state);
+	  }
+	  vrtList.push_back(vID2);
+	  // Mother vertex includes two subvertices: V0, Dpm and JX tracks
+	  Trk::VertexID vID3;
+	  if(m_constrMainV) {
+	    vID3 = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList,*state,m_massMainV);
+	  } else {
+	    vID3 = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList,*state);
+	  }
+	  if (m_constrJX && m_jxDaug_num>2) {
+	    std::vector<Trk::VertexID> cnstV;
+	    if ( !m_iVertexFitter->addMassConstraint(vID3,tracksJX,cnstV,*state,m_massJX).isSuccess() ) {
+	      ATH_MSG_WARNING("addMassConstraint for JX failed");
+	    }
+	  }
+	  if (m_constrJpsi) {
+	    std::vector<Trk::VertexID> cnstV;
+	    if ( !m_iVertexFitter->addMassConstraint(vID3,tracksJpsi,cnstV,*state,m_massJpsi).isSuccess() ) {
+	      ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
+	    }
+	  }
+	  if (m_constrX && m_jxDaug_num==4) {
+	    std::vector<Trk::VertexID> cnstV;
+	    if ( !m_iVertexFitter->addMassConstraint(vID3,tracksX,cnstV,*state,m_massX).isSuccess() ) {
+	      ATH_MSG_WARNING("addMassConstraint for X failed");
+	    }
 	  }
 	}
 	// Do the work
@@ -1790,8 +1920,15 @@ namespace DerivationFramework {
 	  const std::vector<std::vector<TLorentzVector> > &moms = fit_result->getParticleMoms();
 	  const std::vector<xAOD::Vertex*> &cascadeVertices = fit_result->vertices();
 	  size_t iMoth = cascadeVertices.size()-1;
-	  double lxy_SV1 = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[iMoth]);
-	  double lxy_SV2 = m_CascadeTools->lxy(moms[1],cascadeVertices[1],cascadeVertices[iMoth]);
+	  double lxy_SV1(0), lxy_SV2(0);
+	  if(m_JXV0SubVtx) {
+	    lxy_SV1 = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[1]);
+	    lxy_SV2 = m_CascadeTools->lxy(moms[2],cascadeVertices[2],cascadeVertices[iMoth]);
+	  }
+	  else {
+	    lxy_SV1 = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[iMoth]);
+	    lxy_SV2 = m_CascadeTools->lxy(moms[1],cascadeVertices[1],cascadeVertices[iMoth]);
+	  }
 	  if(chi2CutPassed && lxy_SV1>m_lxyV0_cut && lxy_SV2>m_lxyDpm_cut) {
 	    chi2_V1_decor(*cascadeVertices[0]) = V0vtx->chiSquared();
 	    ndof_V1_decor(*cascadeVertices[0]) = V0vtx->numberDoF();
@@ -1833,37 +1970,84 @@ namespace DerivationFramework {
 		int robustness_mvc = 0;
 		m_iVertexFitter->setRobustness(robustness_mvc, *state_mvc);
 		std::vector<Trk::VertexID> vrtList_mvc;
-		Trk::VertexID vID1_mvc; // V0 vertex
-		if (m_constrV0) {
-		  vID1_mvc = m_iVertexFitter->startVertex(tracksV0,massesV0,*state_mvc,V0==KS?m_massKs:m_massLd);
-		} else {
-		  vID1_mvc = m_iVertexFitter->startVertex(tracksV0,massesV0,*state_mvc);
-		}
-		vrtList_mvc.push_back(vID1_mvc);
-		Trk::VertexID vID2_mvc; // Dpm vertex
-		if (m_constrDpm) {
-		  vID2_mvc = m_iVertexFitter->nextVertex(tracksExtra,massesExtra,*state_mvc,m_massDpm);
-		} else {
-		  vID2_mvc = m_iVertexFitter->nextVertex(tracksExtra,massesExtra,*state_mvc);
-		}
-		vrtList_mvc.push_back(vID2_mvc);
-		Trk::VertexID vID3_mvc = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList_mvc,*state_mvc,m_massMainV); // Mother vertex
-		if (m_constrJX && m_jxDaug_num>2) {
-		  std::vector<Trk::VertexID> cnstV_mvc;
-		  if ( !m_iVertexFitter->addMassConstraint(vID3_mvc,tracksJX,cnstV_mvc,*state_mvc,m_massJX).isSuccess() ) {
-		    ATH_MSG_WARNING("addMassConstraint for JX failed");
+		std::vector<Trk::VertexID> vrtList2_mvc;
+		if(m_JXV0SubVtx) {
+		  Trk::VertexID vID1_mvc; // V0 vertex
+		  if (m_constrV0) {
+		    vID1_mvc = m_iVertexFitter->startVertex(tracksV0,massesV0,*state_mvc,V0==KS?m_massKs:m_massLd);
+		  } else {
+		    vID1_mvc = m_iVertexFitter->startVertex(tracksV0,massesV0,*state_mvc);
+		  }
+		  vrtList_mvc.push_back(vID1_mvc);
+		  Trk::VertexID vID2_mvc; // JX+V0 vertex
+		  if(m_constrJXV0) {
+		    vID2_mvc = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList_mvc,*state_mvc,m_massJXV0);
+		  } else {
+		    vID2_mvc = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList_mvc,*state_mvc);
+		  }
+		  vrtList2_mvc.push_back(vID2_mvc);
+		  Trk::VertexID vID3_mvc; // Dpm vertex
+		  if (m_constrDpm) {
+		    vID3_mvc = m_iVertexFitter->nextVertex(tracksExtra,massesExtra,*state_mvc,m_massDpm);
+		  } else {
+		    vID3_mvc = m_iVertexFitter->nextVertex(tracksExtra,massesExtra,*state_mvc);
+		  }
+		  vrtList2_mvc.push_back(vID3_mvc);
+		  std::vector<const xAOD::TrackParticle*> tp;
+		  std::vector<double> tp_masses;
+		  m_iVertexFitter->nextVertex(tp,tp_masses,vrtList2_mvc,*state_mvc,m_massMainV); // Mother vertex
+		  if (m_constrJX && m_jxDaug_num>2) {
+		    std::vector<Trk::VertexID> cnstV_mvc;
+		    if ( !m_iVertexFitter->addMassConstraint(vID2_mvc,tracksJX,cnstV_mvc,*state_mvc,m_massJX).isSuccess() ) {
+		      ATH_MSG_WARNING("addMassConstraint for JX failed");
+		    }
+		  }
+		  if (m_constrJpsi) {
+		    std::vector<Trk::VertexID> cnstV_mvc;
+		    if ( !m_iVertexFitter->addMassConstraint(vID2_mvc,tracksJpsi,cnstV_mvc,*state_mvc,m_massJpsi).isSuccess() ) {
+		      ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
+		    }
+		  }
+		  if (m_constrX && m_jxDaug_num==4) {
+		    std::vector<Trk::VertexID> cnstV_mvc;
+		    if ( !m_iVertexFitter->addMassConstraint(vID2_mvc,tracksX,cnstV_mvc,*state_mvc,m_massX).isSuccess() ) {
+		      ATH_MSG_WARNING("addMassConstraint for X failed");
+		    }
 		  }
 		}
-		if (m_constrJpsi) {
-		  std::vector<Trk::VertexID> cnstV_mvc;
-		  if ( !m_iVertexFitter->addMassConstraint(vID3_mvc,tracksJpsi,cnstV_mvc,*state_mvc,m_massJpsi).isSuccess() ) {
-		    ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
+		else {
+		  Trk::VertexID vID1_mvc; // V0 vertex
+		  if (m_constrV0) {
+		    vID1_mvc = m_iVertexFitter->startVertex(tracksV0,massesV0,*state_mvc,V0==KS?m_massKs:m_massLd);
+		  } else {
+		    vID1_mvc = m_iVertexFitter->startVertex(tracksV0,massesV0,*state_mvc);
 		  }
-		}
-		if (m_constrX && m_jxDaug_num==4) {
-		  std::vector<Trk::VertexID> cnstV_mvc;
-		  if ( !m_iVertexFitter->addMassConstraint(vID3_mvc,tracksX,cnstV_mvc,*state_mvc,m_massX).isSuccess() ) {
-		  ATH_MSG_WARNING("addMassConstraint for X failed");
+		  vrtList_mvc.push_back(vID1_mvc);
+		  Trk::VertexID vID2_mvc; // Dpm vertex
+		  if (m_constrDpm) {
+		    vID2_mvc = m_iVertexFitter->nextVertex(tracksExtra,massesExtra,*state_mvc,m_massDpm);
+		  } else {
+		    vID2_mvc = m_iVertexFitter->nextVertex(tracksExtra,massesExtra,*state_mvc);
+		  }
+		  vrtList_mvc.push_back(vID2_mvc);
+		  Trk::VertexID vID3_mvc = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList_mvc,*state_mvc,m_massMainV); // Mother vertex
+		  if (m_constrJX && m_jxDaug_num>2) {
+		    std::vector<Trk::VertexID> cnstV_mvc;
+		    if ( !m_iVertexFitter->addMassConstraint(vID3_mvc,tracksJX,cnstV_mvc,*state_mvc,m_massJX).isSuccess() ) {
+		      ATH_MSG_WARNING("addMassConstraint for JX failed");
+		    }
+		  }
+		  if (m_constrJpsi) {
+		    std::vector<Trk::VertexID> cnstV_mvc;
+		    if ( !m_iVertexFitter->addMassConstraint(vID3_mvc,tracksJpsi,cnstV_mvc,*state_mvc,m_massJpsi).isSuccess() ) {
+		      ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
+		    }
+		  }
+		  if (m_constrX && m_jxDaug_num==4) {
+		    std::vector<Trk::VertexID> cnstV_mvc;
+		    if ( !m_iVertexFitter->addMassConstraint(vID3_mvc,tracksX,cnstV_mvc,*state_mvc,m_massX).isSuccess() ) {
+		      ATH_MSG_WARNING("addMassConstraint for X failed");
+		    }
 		  }
 		}
 		// Do the work
