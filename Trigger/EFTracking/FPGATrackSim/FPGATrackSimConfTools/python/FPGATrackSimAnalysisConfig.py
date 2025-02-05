@@ -250,7 +250,10 @@ def FPGATrackSimRoadUnionToolGNNCfg(flags):
     result = ComponentAccumulator()
     RF = CompFactory.FPGATrackSimRoadUnionTool()
 
+    GNNGraphHitSelectorTool = CompFactory.FPGATrackSimGNNGraphHitSelectorTool()
+
     patternRecoTool = CompFactory.FPGATrackSimGNNPatternRecoTool()
+    patternRecoTool.GNNGraphHitSelector = GNNGraphHitSelectorTool
     
     RF.tools = [patternRecoTool]
     result.addPublicTool(RF, primary=True)
