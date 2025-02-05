@@ -71,7 +71,8 @@ private:
 
 	bool buildChannelId(Identifier& channelId, unsigned int elinkId, unsigned int vmm, unsigned int channel) const;
 
-	Gaudi::Property<bool> m_isData  {this, "isData"  , true , "Processing data"};
+	Gaudi::Property<bool> m_isData           {this, "isData"           , true, "Processing data"};
+	Gaudi::Property<bool> m_processThresholds{this, "processThresholds", false, "Process threshold data"};
 	
 	ServiceHandle<ICondSvc> m_condSvc{this, "CondSvc", "CondSvc"};
 	ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

@@ -3,6 +3,7 @@
 */
 
 #include "MSVertexRecoTool.h"
+
 #include "xAODTracking/VertexAuxContainer.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h" //Amg::error
 #include "AthenaKernel/RNGWrapper.h"
@@ -42,6 +43,10 @@ namespace Muon {
         ATH_CHECK(m_tgcTESKey.initialize());
         ATH_CHECK(m_mdtTESKey.initialize());
 
+        for (const std::string& str : m_accMDT_str) m_nMDT_accs.push_back(SG::AuxElement::Accessor<int>(str));
+        for (const std::string& str : m_accRPC_str) m_nRPC_accs.push_back(SG::AuxElement::Accessor<int>(str));
+        for (const std::string& str : m_accTGC_str) m_nTGC_accs.push_back(SG::AuxElement::Accessor<int>(str));
+
         return StatusCode::SUCCESS;
     }
 
@@ -55,14 +60,6 @@ namespace Muon {
 
         SG::WriteHandle<xAOD::VertexContainer> xAODVxContainer(m_xAODContainerKey, ctx);
         ATH_CHECK(xAODVxContainer.record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()));
-
-        // decorators for the number of hits in the MDT, RPC, and TGC layers
-        std::vector<SG::AuxElement::Decorator<int>> nMDT_decs;
-        for (const std::string& str : m_decMDT_str) nMDT_decs.push_back(SG::AuxElement::Decorator<int>(str));
-        std::vector<SG::AuxElement::Decorator<int>> nRPC_decs;
-        for (const std::string& str : m_decRPC_str) nRPC_decs.push_back(SG::AuxElement::Decorator<int>(str));
-        std::vector<SG::AuxElement::Decorator<int>> nTGC_decs;
-        for (const std::string& str : m_decTGC_str) nTGC_decs.push_back(SG::AuxElement::Decorator<int>(str));
 
         if (tracklets.size() < 3) { 
             ATH_MSG_DEBUG("Fewer than 3 tracks found, vertexing not possible. Exiting...");
@@ -172,7 +169,7 @@ namespace Muon {
 
         }  // end loop on endcap tracklet clusters
 
-        ATH_CHECK(FillOutputContainer(vertices, xAODVxContainer, nMDT_decs, nRPC_decs, nTGC_decs));
+        ATH_CHECK(FillOutputContainer(vertices, xAODVxContainer));
         return StatusCode::SUCCESS;
     }  // end find vertices
 
@@ -243,7 +240,7 @@ namespace Muon {
                 } 
 
                 eta_new = eta_new / ntracks_new;
-                phi_new = std::atan2(sinPhi_new, cosPhi_new);
+                phi_new = std::atan2(sinPhi_new / ntracks_new, cosPhi_new / ntracks_new);
 
                 if (ntracks_new > clu.ntrks) {
                     // better cluster found - update the centre and number of tracklets 
@@ -346,7 +343,7 @@ namespace Muon {
             double r0 = trkgpos.perp();
 
             // decide which way the tracklet gets rotated -- positive or negative phi
-            double anglesign = ((trk.globalPosition().phi() - avePhi) < 0) ? -1.0 : 1.0;
+            double anglesign = xAOD::P4Helpers::deltaPhi(trk.globalPosition().phi(), avePhi) < 0 ? -1.0 : 1.0;
             double NominalTrkAng = anglesign * NominalAngle;   // in case there is a nominal tracklet angle
             double MaxTrkAng = anglesign * RotationAngle;      // the rotated tracklet phi position
 
@@ -798,10 +795,10 @@ namespace Muon {
 
     //** ----------------------------------------------------------------------------------------------------------------- **//
 
-    void MSVertexRecoTool::dressVtxHits(xAOD::Vertex* xAODVx, std::vector<SG::AuxElement::Decorator<int>>& decs, const std::vector<int> & hits){
+    void MSVertexRecoTool::dressVtxHits(xAOD::Vertex* xAODVx, const std::vector<SG::AuxElement::Accessor<int>>& accs, const std::vector<int>& hits) const {
             unsigned int i{0};
-            for (SG::AuxElement::Decorator<int> &dec : decs) {
-                dec(*xAODVx) = hits[i];
+            for (const SG::AuxElement::Accessor<int> &acc : accs) {
+                acc(*xAODVx) = hits[i];
                 ++i;    
             }
 
@@ -811,10 +808,7 @@ namespace Muon {
     //** ----------------------------------------------------------------------------------------------------------------- **//
 
     StatusCode MSVertexRecoTool::FillOutputContainer(const std::vector<std::unique_ptr<MSVertex>>& vertices,
-                                                     SG::WriteHandle<xAOD::VertexContainer>& xAODVxContainer,
-                                                     std::vector<SG::AuxElement::Decorator<int>>& nMDT_decs,
-                                                     std::vector<SG::AuxElement::Decorator<int>>& nRPC_decs,
-                                                     std::vector<SG::AuxElement::Decorator<int>>& nTGC_decs){
+                                                     SG::WriteHandle<xAOD::VertexContainer>& xAODVxContainer) const {
         for (const std::unique_ptr<MSVertex> &vtx : vertices){
             xAOD::Vertex* xAODVx = new xAOD::Vertex();
             xAODVx->makePrivateStore();
@@ -832,9 +826,9 @@ namespace Muon {
             xAODVxContainer->push_back(xAODVx);
 
             // dress the vertex with the hit counts
-            dressVtxHits(xAODVx, nMDT_decs, vtx->getNMDT_all()); 
-            dressVtxHits(xAODVx, nRPC_decs, vtx->getNRPC_all()); 
-            dressVtxHits(xAODVx, nTGC_decs, vtx->getNTGC_all());     
+            dressVtxHits(xAODVx, m_nMDT_accs, vtx->getNMDT_all()); 
+            dressVtxHits(xAODVx, m_nRPC_accs, vtx->getNRPC_all()); 
+            dressVtxHits(xAODVx, m_nTGC_accs, vtx->getNTGC_all());     
         }
 
         return StatusCode::SUCCESS;

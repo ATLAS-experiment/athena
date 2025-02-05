@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -16,11 +16,14 @@
  *          through monitored variables, separately from the actual algorithm.
  *********************************************************************/
 
-#include "GaudiKernel/StatusCode.h"
-
-#include "AthenaMonitoringKernel/Monitored.h"
-
 #include "TrigCaloClusterMonitor.h"
+
+#include "AthenaMonitoringKernel/MonitoredCollection.h"
+#include "AthenaMonitoringKernel/MonitoredGroup.h"
+#include "AthenaMonitoringKernel/MonitoredScalar.h"
+#include "AthenaMonitoringKernel/MonitoredTimer.h"
+#include "StoreGate/ReadDecorHandle.h"
+#include "GaudiKernel/StatusCode.h"
 
 
 /////////////////////////////////////////////////////////////////////

@@ -11,7 +11,6 @@
 # art-output: mem.full.*
 # art-output: runargs.*
 # art-output: *.pkl
-# art-output: *Config.txt
 
 events=2
 
@@ -24,7 +23,7 @@ Overlay_tf.py \
 --maxEvents $events \
 --conditionsTag CONDBR2-BLKPA-RUN2-10 \
 --preInclude 'Campaigns.DataOverlayPPTest' \
---postInclude 'OverlayConfiguration.DataOverlayConditions.PPTestCfg' 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
+--postInclude 'OverlayConfiguration.DataOverlayConditions.PPTestCfg' \
 --postExec 'with open("ConfigOverlay.pkl", "wb") as f: cfg.store(f)' \
 --imf False \
 --athenaopts="--threads=1"

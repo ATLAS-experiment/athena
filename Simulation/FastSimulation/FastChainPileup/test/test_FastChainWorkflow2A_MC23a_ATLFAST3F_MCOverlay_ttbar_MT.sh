@@ -6,7 +6,6 @@
 # art-include: 24.0/Athena
 # art-output: log.*
 # art-output: *.pkl
-# art-output: *.txt
 # art-output: HITS.pool.root
 # art-output: AOD.pool.root
 # art-output: DAOD_PHYS.OUT.pool.root
@@ -41,7 +40,7 @@ FastChain_tf.py \
    --digiSeedOffset1 511 \
    --digiSeedOffset2 727 \
    --preInclude 'EVNTtoRDO:Campaigns.MC23aSimulationMultipleIoV' 'Campaigns.MC23a' \
-   --postInclude 'PyJobTransforms.UseFrontier' 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
+   --postInclude 'PyJobTransforms.UseFrontier' \
    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-07' \
    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
    --postExec 'with open("Config.pkl", "wb") as f: cfg.store(f)' \

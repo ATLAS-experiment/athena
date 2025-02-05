@@ -105,7 +105,6 @@ namespace LVL1 {
     SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauAltOutKey {this,"Key_eFexAltTauOutputContainer","","Output eFexTau alternative (BDT/heuristic) algorithm TOB container"};
     SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauAltxTOBOutKey {this,"Key_eFexAltTauxTOBOutputContainer","","Output eFexTau alternative (BDT/heuristic) algorithm xTOB container"};
     ToolHandle<IeFEXFPGATowerIdProvider> m_eFEXFPGATowerIdProviderTool {this, "eFEXFPGATowerIdProviderTool", "LVL1::eFEXFPGATowerIdProvider", "Tool that provides tower-FPGA mapping"};
-    ToolHandle<IeFEXFPGA> m_eFEXFPGATool {this, "eFEXFPGATool", "LVL1::eFEXFPGA", "Tool that simulates the FPGA hardware"};
 
     //std::map<int,eTower> m_eTowersColl;
 

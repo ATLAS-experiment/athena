@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 // ********************************************************************
@@ -15,12 +15,14 @@
 //
 
 #include "CaloGlobalRoIBuilder.h"
-#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
-#include "GaudiKernel/StatusCode.h"
 #include "CxxUtils/phihelper.h"
-#include "xAODTrigCalo/TrigEMClusterContainer.h"
-#include "xAODTrigCalo/TrigEMCluster.h"
+#include "GaudiKernel/StatusCode.h"
+#include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "TrigT2CaloEgamma/RingerReFex.h"
+#include "xAODTrigCalo/TrigEMCluster.h"
+#include "xAODTrigCalo/TrigEMClusterContainer.h"
+#include "xAODTrigCalo/TrigEMClusterAuxContainer.h"
+
 
 // Constructor
 CaloGlobalRoIBuilder::CaloGlobalRoIBuilder(const std::string& name, ISvcLocator* pSvcLocator)

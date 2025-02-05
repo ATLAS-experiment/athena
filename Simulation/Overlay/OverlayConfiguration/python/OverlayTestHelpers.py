@@ -1,19 +1,13 @@
 #!/usr/bin/env python
 """Overlay test helpers
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 
 from argparse import ArgumentParser
 from AthenaCommon.Debugging import DbgStage
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from AthenaConfiguration.Enums import LHCPeriod
-from AthenaConfiguration.JobOptsDumper import JobOptsDumperCfg
-
-
-def OverlayJobOptsDumperCfg(flags):
-    """Configure event loop for overlay"""
-    return JobOptsDumperCfg(flags, FileName="OverlayTestConfig.txt")
 
 
 def CommonTestArgumentParser(prog):

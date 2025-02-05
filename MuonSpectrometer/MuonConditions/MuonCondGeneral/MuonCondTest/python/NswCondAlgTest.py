@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 def NSWCondAlgTest(flags,alg_name="NSWCondTestAlg", **kwargs):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
     from AthenaConfiguration.ComponentFactory import CompFactory
     from MuonConfig.MuonCondAlgConfig import NswCalibDbAlgCfg
-    result.merge(NswCalibDbAlgCfg(flags))
+    result.merge(NswCalibDbAlgCfg(flags, processThresholds=True))
     the_alg = CompFactory.NswCondTestAlg(alg_name, **kwargs)
     result.addEventAlgo(the_alg, primary=True)
     return result
