@@ -277,6 +277,7 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('reverse','True')
     cf.addFlag('binFilter','IncrementalBuild')
     cf.addFlag('layerStudy',False)
+    cf.addFlag('layerMapFile','')
 
 
     return cf
