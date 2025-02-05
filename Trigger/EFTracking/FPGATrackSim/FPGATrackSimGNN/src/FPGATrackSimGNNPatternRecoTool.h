@@ -29,7 +29,10 @@
 
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
+#include "FPGATrackSimObjects/FPGATrackSimGNNEdge.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFinderTool.h"
+
+#include "FPGATrackSimGNNGraphHitSelectorTool.h"
 
 class FPGATrackSimGNNPatternRecoTool : public extends <AthAlgTool, IFPGATrackSimRoadFinderTool>
 {
@@ -40,11 +43,19 @@ class FPGATrackSimGNNPatternRecoTool : public extends <AthAlgTool, IFPGATrackSim
 
         FPGATrackSimGNNPatternRecoTool(const std::string&, const std::string&, const IInterface*);
 
+        virtual StatusCode initialize() override;
+
         ///////////////////////////////////////////////////////////////////////
         // FPGATrackSimRoadFinderToolI
 
         virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) override;
-        virtual int getSubRegion() const override{ return -1; }
+        virtual int getSubRegion() const override{ return 0; }
+
+    private: 
+
+        ///////////////////////////////////////////////////////////////////////
+        // Handles
+        ToolHandle<FPGATrackSimGNNGraphHitSelectorTool>   m_GNNGraphHitSelectorTool {this, "GNNGraphHitSelector", "FPGATrackSimGNNGraphHitSelectorTool", "Graph HitSelector Tool"};
 };
 
 
