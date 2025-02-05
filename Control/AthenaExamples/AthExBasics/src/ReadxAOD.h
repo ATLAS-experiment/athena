@@ -34,7 +34,7 @@ class ReadxAOD : public AthReentrantAlgorithm {
     /** pT cut in MeV */
     Gaudi::Property<float> m_cut
       {this, "PtCut", 500.0, "pT Cut to apply to the tracks in MeV"}; 
-    /** Read handle for the offline object container - set to muons by default. **/
+    /** Read handle for the offline object container - set to ID tracks by default. **/
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackKey{this, "TrackParticlesKey", "InDetTrackParticles"};
     /** Tool handle for the track selection tool */
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelectionTool{this, "TrackSelectionTool", "InDetTrackSelectionTool", "Tool for selecting tracks"};
