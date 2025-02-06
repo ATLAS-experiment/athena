@@ -39,6 +39,8 @@ int main(int argc, char** argv) {
     int i = std::strtod(myline.substr(0,10).c_str(),nullptr);
     current.clear();
     current = std::to_string(i);
+    TEST_FUNCTION(baryonNumber)
+    TEST_FUNCTION(baryonNumber3)
     TEST_FUNCTION(charge)
     TEST_FUNCTION(charge3)
     TEST_FUNCTION(hasBottom)
@@ -48,9 +50,9 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isBBbarMeson)
     TEST_FUNCTION(isBSM)
     TEST_FUNCTION(isBaryon)
-    TEST_FUNCTION(isBoson) // 10
+    TEST_FUNCTION(isBoson)
     TEST_FUNCTION(isBottom)
-    TEST_FUNCTION(isBottomBaryon)
+    TEST_FUNCTION(isBottomBaryon) // 10
     TEST_FUNCTION(isBottomHadron)
     TEST_FUNCTION(isBottomMeson)
     TEST_FUNCTION(isCCbarMeson)
@@ -58,9 +60,9 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isCharged)
     TEST_FUNCTION(isCharm)
     TEST_FUNCTION(isCharmBaryon)
-    TEST_FUNCTION(isCharmHadron) // 20
+    TEST_FUNCTION(isCharmHadron)
     TEST_FUNCTION(isCharmMeson)
-    TEST_FUNCTION(isDM)
+    TEST_FUNCTION(isDM) // 20
     TEST_FUNCTION(isDiquark)
     TEST_FUNCTION(isEMInteracting)
     TEST_FUNCTION(isElectron)
@@ -68,9 +70,9 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isGaugino)
     TEST_FUNCTION(isGeantino)
     TEST_FUNCTION(isGenSpecific)
-    TEST_FUNCTION(isGenericMultichargedParticle) // 30
+    TEST_FUNCTION(isGenericMultichargedParticle)
     TEST_FUNCTION(isGlueball)
-    TEST_FUNCTION(isGluon)
+    TEST_FUNCTION(isGluon) // 30
     TEST_FUNCTION(isGraviton)
     TEST_FUNCTION(isHadron)
     TEST_FUNCTION(isHeavyBaryon)
@@ -78,9 +80,9 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isHeavyMeson)
     TEST_FUNCTION(isHiddenValley)
     TEST_FUNCTION(isHiggs)
-    TEST_FUNCTION(isKK) // 40
+    TEST_FUNCTION(isKK)
     TEST_FUNCTION(isLeptoQuark)
-    TEST_FUNCTION(isLepton)
+    TEST_FUNCTION(isLepton) // 40
     TEST_FUNCTION(isLightBaryon)
     TEST_FUNCTION(isLightHadron)
     TEST_FUNCTION(isLightMeson)
@@ -88,9 +90,9 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isMonopole)
     TEST_FUNCTION(isMuon)
     TEST_FUNCTION(isNeutral)
-    TEST_FUNCTION(isNeutrino) // 50
+    TEST_FUNCTION(isNeutrino)
     TEST_FUNCTION(isNucleus)
-    TEST_FUNCTION(isParton)
+    TEST_FUNCTION(isParton) // 50
     TEST_FUNCTION(isPentaquark)
     TEST_FUNCTION(isPhoton)
     TEST_FUNCTION(isPythia8Specific)
@@ -98,9 +100,9 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isRBaryon)
     TEST_FUNCTION(isRGlueball)
     TEST_FUNCTION(isRHadron)
-    TEST_FUNCTION(isRMeson) // 60
+    TEST_FUNCTION(isRMeson)
     TEST_FUNCTION(isResonance)
-    TEST_FUNCTION(isSlepton)
+    TEST_FUNCTION(isSlepton) // 60
     TEST_FUNCTION(isSleptonLH)
     TEST_FUNCTION(isSleptonRH)
     TEST_FUNCTION(isSMLepton)
@@ -108,9 +110,9 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isSUSY)
     TEST_FUNCTION(isSquark)
     TEST_FUNCTION(isSquarkLH)
-    TEST_FUNCTION(isSquarkRH) // 70
+    TEST_FUNCTION(isSquarkRH)
     TEST_FUNCTION(isStrange)
-    TEST_FUNCTION(isStrangeBaryon)
+    TEST_FUNCTION(isStrangeBaryon) // 70
     TEST_FUNCTION(isStrangeHadron)
     TEST_FUNCTION(isStrangeMeson)
     TEST_FUNCTION(isStrongInteracting)
@@ -118,9 +120,9 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isTechnicolor)
     TEST_FUNCTION(isTetraquark)
     TEST_FUNCTION(isTop)
-    TEST_FUNCTION(isTopBaryon) // 80
+    TEST_FUNCTION(isTopBaryon)
     TEST_FUNCTION(isTopHadron)
-    TEST_FUNCTION(isTopMeson)
+    TEST_FUNCTION(isTopMeson) // 80
     TEST_FUNCTION(isTrajectory)
     TEST_FUNCTION(isTransportable)
     TEST_FUNCTION(isValid)
@@ -129,7 +131,10 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isWeaklyDecayingCHadron)
     TEST_FUNCTION(isZ)
     TEST_FUNCTION(leadingQuark) // 90
+    TEST_FUNCTION(numberOfLambdas)
+    TEST_FUNCTION(numberOfProtons)
     TEST_FUNCTION(spin2)
+    TEST_FUNCTION(strangeness)
     TEST_FUNCTION(threeCharge)
     processed=true;
     // uncomment when updating reference file
