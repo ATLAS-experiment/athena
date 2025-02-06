@@ -94,6 +94,8 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
         double cottracktheta = 0.5*(exp(tracketa)-exp(-tracketa));
         double trackqoverpt = track->getQOverPt();
 
+	std::vector<int> numHits(m_nLayers_2ndStage + m_nLayers_1stStage, 0);
+
         // Copy over the existing hits. We require that the layer assignment in the first stage
         // is equal to the layer assignment in the second stage.
         std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> road_hits;
@@ -105,11 +107,9 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
             if (hit.isReal()) {
                 nhit += 1;
                 hitLayers |= 1 << hit.getLayer();
+		numHits[hit.getLayer()]++;
             }
         }
-
-        // At this point we should have copied over all the hits.
-        std::vector<int> numHits(m_nLayers_2ndStage + m_nLayers_1stStage, 0);
 
         size_t slice = track->getSubRegion();
         pmap_2nd = m_FPGATrackSimMapping->PlaneMap_2nd(slice);
