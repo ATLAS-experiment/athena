@@ -402,6 +402,6 @@ then
     echo "$outputSqliteOnl: Containing UPD1 version of bad-channel list for ONLINE DB."
     echo "Upload to ONLINE oracle server using"
     echo "export COOL_FLASK=https://cool-proxy-app.cern.ch"
-    echo "/afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py --online BadChannels.db CONDBR2 ATONR_COOL ATLAS_COOLONL_LAR_W <password>"
+    echo "/afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py --online BadChannelsOnl.db CONDBR2 ATONR_COOL ATLAS_COOLONL_LAR_W <password>"
 fi 
 

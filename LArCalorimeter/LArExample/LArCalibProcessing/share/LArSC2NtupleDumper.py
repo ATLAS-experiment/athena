@@ -117,6 +117,7 @@ if __name__=='__main__':
         if args.samples:
            flags.LArSCDump.digitsKey="SC"
         CKeys=["SC_ET"]
+        log.debug(runinfo.streamTypes(), ' ',runinfo.streamLengths())
      else:
         CKeys=[]
         flags.LArSCDump.digitsKey=""
@@ -268,6 +269,7 @@ if __name__=='__main__':
   acc.getService("MessageSvc").defaultLimit=999999
 
   # some logging
+  acc.getService("MessageSvc").defaultLimit=99999999 
   log.info("Input files to be processed:")
   for f in flags.Input.Files:
       log.info(f)

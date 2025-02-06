@@ -3,9 +3,14 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-def LArDigits2NtupleCfg(flags, isEMF=False, **kwargs):
+def LArDigits2NtupleCfg(flags, isEMF=False, isCalib=False, **kwargs):
        cfg=ComponentAccumulator()
        if 'isSC' in kwargs and kwargs['isSC']:
+          from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
+          cfg.merge(LArOnOffIdMappingSCCfg(flags))
+          if kwargs['AddCalib']:
+             from LArCabling.LArCablingConfig import LArCalibIdMappingSCCfg
+             cfg.merge(LArCalibIdMappingSCCfg(flags))
           if isEMF:
              # FIXME there could be also another digits types....
              cfg.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccCalibDigitKey = flags.LArSCDump.accdigitsKey,
@@ -16,14 +21,32 @@ def LArDigits2NtupleCfg(flags, isEMF=False, **kwargs):
              from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
              cfg.merge(LArRawSCDataReadingCfg(flags))
        else:
-          if isEMF:
-             Digit = kwargs['ContainerKey'] if 'ContainerKey' in kwargs else "" 
-             accDigit = kwargs['AccContainerKey'] if 'AccContainerKey' in kwargs else ""
-             accCalibDigit = kwargs['AccCalibContainerKey'] if 'AccCalibContainerKey'in kwargs else ""
+          from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
+          cfg.merge(LArOnOffIdMappingCfg(flags))
+          if kwargs['AddCalib']:
+             from LArCabling.LArCablingConfig import LArCalibIdMappingCfg
+             cfg.merge(LArCalibIdMappingCfg(flags))
+          if isCalib:
              from LArByteStream.LArRawCalibDataReadingConfig import LArRawCalibDataReadingCfg 
-             cfg.merge(LArRawCalibDataReadingCfg(flags,gain = flags.LArSCDump.digitsKey,
-                                                 doDigit = Digit,doAccDigit = accDigit, 
-                                                 doAccCalibDigit = accCalibDigit)) 
+             if 'ContainerKey' in kwargs and kwargs['ContainerKey'] != "":
+                Digit=True
+                gain = kwargs['ContainerKey']
+             else:
+                Digit = False 
+             if 'AccContainerKey' in kwargs and kwargs['AccContainerKey'] != "":
+                accDigit = True
+                gain = kwargs['AccContainerKey']
+             else:
+                accDigit = False
+             if 'AccCalibContainerKey' in kwargs and kwargs['AccCalibContainerKey'] != "":
+                accCalibDigit = True
+                gain = kwargs['AccCalibContainerKey']
+             else:
+                accCalibDigit = False
+             print('keys: c ',Digit, ' acc ',accDigit,' acccalib ', accCalibDigit)
+             cfg.merge(LArRawCalibDataReadingCfg(flags,gain = gain,
+                                                  doDigit = Digit, doAccDigit = accDigit, 
+                                                  doAccCalibDigit = accCalibDigit)) 
           else:
              from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
              cfg.merge(LArRawDataReadingCfg(flags))

@@ -10,6 +10,7 @@ def LArRawCalibDataReadingCfg(configFlags,gain="HIGH",doAccDigit=False,doAccCali
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     acc.merge(LArGMCfg(configFlags))
     acc.merge(ByteStreamReadCfg(configFlags))    
+    print('LArRawCalibDataReadingCfg gain: ',gain,' doAccDigit: ',doAccDigit,' doAccCalibDigit: ',doAccCalibDigit,' doCalibDigit: ',doCalibDigit,' doDigit: ',doDigit)
     accKey=""
     accCalibKey=""
     calibKey=""
@@ -29,6 +30,7 @@ def LArRawCalibDataReadingCfg(configFlags,gain="HIGH",doAccDigit=False,doAccCali
        return acc
 
     if configFlags.hasCategory("LArCalib"):
+       print('LArRawCalibDataReadingCfg accKey: ',accKey,' accCalibKey: ',accCalibKey,' calibKey: ',calibKey,' digKey: ',digKey)
        acc.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArDigitKey=digKey, LArAccDigitKey=accKey, 
                                       LArAccCalibDigitKey=accCalibKey,
                                       LArCalibDigitKey=calibKey, LArFebHeaderKey="LArFebHeader",

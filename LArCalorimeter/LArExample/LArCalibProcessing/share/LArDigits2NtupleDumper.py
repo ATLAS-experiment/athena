@@ -22,13 +22,20 @@ if __name__=='__main__':
   parser.add_argument('-x','--outlevel', dest='olevel', default=3, help='OuputLevel for dumping algo', type=int)
   parser.add_argument('-o','--outfile', dest='outfile', default="Digits.root", help='Output root filename', type=str)
   parser.add_argument('-n','--nsamp', dest='nsamp', default=0, help='Number of samples to dump', type=int)
-  parser.add_argument('-d','--addHash', dest='ahash', default=False, help='Add hash number to output ntuple', type=bool)
-  parser.add_argument('-j','--addOffline', dest='offline', default=False, help='Add offline Id to output ntuple', type=bool)
-  parser.add_argument('-k','--addCalib', dest='calib', default=False, help='Add calib. info to output ntuple', type=bool)
-  parser.add_argument('-t','--addGeom', dest='geom', default=False, help='Add real geom info to output ntuple', type=bool)
-  parser.add_argument('-u','--addBC', dest='bc', default=False, help='Add Bad. chan info to output ntuple', type=bool)
-  parser.add_argument('-v','--addEvTree', dest='evtree', default=False, help='Add tree with per event info to output ntuple', type=bool)
+  parser.add_argument('-a','--addHash', dest='ahash', default=False, help='Add hash number to output ntuple', action="store_true")
+  parser.add_argument('-j','--addOffline', dest='offline', default=False, help='Add offline Id to output ntuple', action="store_true")
+  parser.add_argument('-k','--addCalib', dest='calib', default=False, help='Add calib. info to output ntuple', action="store_true")
+  parser.add_argument('-t','--addGeom', dest='geom', default=False, help='Add real geom info to output ntuple', action="store_true")
+  parser.add_argument('-u','--addBC', dest='bc', default=False, help='Add Bad. chan info to output ntuple', action="store_true")
+  parser.add_argument('--addBCID', dest='bcid', default=False, help='Add BCID info to output ntuple', action="store_true")
+  parser.add_argument('-v','--addEvTree', dest='evtree', default=False, help='Add tree with per event info to output ntuple', action="store_true")
   parser.add_argument('--EMF', dest='emf', default=False, help='Is it for EMF', action='store_true')
+  parser.add_argument('-d','--digikey', dest='dkey', default="FREE", help='Input digits key', type=str)
+  parser.add_argument('-e','--acckey', dest='acckey', default="", help='Input accumulated calib digits key', type=str)
+  parser.add_argument('--CALIB', dest='iscalib', default=False, help='Is it from calib run ?', action='store_true')
+  parser.add_argument('--FTs', dest='ft', default=[], nargs="+", type=int, help='list of FT which will be read out (space separated).')
+  parser.add_argument('--posneg', dest='posneg', default=[], nargs="+", help='side to read out (-1 means both), can give multiple arguments (space separated). Default %(default)s.', type=int,choices=range(-1,2))
+  parser.add_argument('--barrel_ec', dest='be', default=[], nargs="+", help='subdet to read out (-1 means both), can give multiple arguments (space separated) Default %(default)s.', type=int,choices=range(-1,2))
 
   args = parser.parse_args()
   if help in args and args.help is not None and args.help:
@@ -60,6 +67,14 @@ if __name__=='__main__':
   if args.run != 0:
      flags.Input.RunNumbers = [args.run]
 
+  from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
+  addLArCalibFlags(flags)  
+  if len(args.posneg) >= 0:
+     flags.LArCalib.Preselection.Side = args.posneg
+  if len(args.be) >=0:
+     flags.LArCalib.Preselection.BEC = args.be
+  if len(args.ft) > 0:
+     flags.LArCalib.Preselection.FT = args.ft   
   # first autoconfig
   from LArConditionsCommon.LArRunFormat import getLArFormatForRun
   try:
@@ -73,12 +88,12 @@ if __name__=='__main__':
   else:
      flags.LArSCDump.nSamples=runinfo.nSamples()
 
-  flags.LArSCDump.digitsKey="FREE"
+  flags.LArSCDump.digitsKey=args.dkey
   if  args.nsamp > 0 and args.nsamp < flags.LArSCDump.nSamples:
       flags.LArSCDump.nSamples=args.nsamp
   
   log.info("Autoconfigured: ")
-  log.info("nSamples: %d digitsKey %s",flags.LArSCDump.nSamples, flags.LArSCDump.digitsKey)
+  log.info("nSamples: %d digitsKey %s accKey %s",flags.LArSCDump.nSamples, flags.LArSCDump.digitsKey, args.acckey)
 
   #GEometry
   from AthenaConfiguration.TestDefaults import defaultGeometryTags
@@ -103,6 +118,7 @@ if __name__=='__main__':
      flags.IOVDb.SqliteFolders = ("/LAR/BadChannelsOfl/BadChannels","/LAR/BadChannelsOfl/KnownBADFEBs","/LAR/BadChannelsOfl/KnownMNBFEBs","/LAR/BadChannelsOfl/MissingFEBs","/LAR/Identifier/OnOffIdMap",)
 
   flags.lock()
+  flags.dump()  
 
   #Import the MainServices (boilerplate)
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -139,8 +155,9 @@ if __name__=='__main__':
   from LArCalibTools.LArDigits2NtupleConfig import LArDigits2NtupleCfg
   acc.merge(LArDigits2NtupleCfg(flags, AddBadChannelInfo=args.bc, AddFEBTempInfo=False, isSC=False, isFlat=True, 
                             OffId=args.offline, AddHash=args.ahash, AddCalib=args.calib, RealGeometry=args.geom, # from LArCond2NtupleBase 
-                            NSamples=flags.LArSCDump.nSamples, FTlist=[], ContainerKey=flags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
-                            FillLB=args.evtree, 
+                            NSamples=flags.LArSCDump.nSamples, FTlist=flags.LArCalib.Preselection.FT, Slotlist=flags.LArCalib.Preselection.Slot, BElist=flags.LArCalib.Preselection.BEC, Sidelist=flags.LArCalib.Preselection.Side,
+                            ContainerKey=flags.LArSCDump.digitsKey,  AccContainerKey=args.acckey, isCalib=args.iscalib, # from LArDigits2Ntuple
+                            FillLB=args.evtree, FillBCID=args.bcid, 
                             OutputLevel=args.olevel
                            ))
   # ROOT file writing

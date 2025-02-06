@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARPHYSWAVEFROMTuple_H
@@ -14,15 +14,11 @@
 
 This algorithm allows to read wave forms from ntuples and builds a 
 LArPhysWaveContainer conating the corresponding PhysWave. The root tree should
-be named "outfit" and contain the following branches :
-- BarEC :  int:  0 = Barrel  1 = EndCap
-    for backwards compatibility, a missing BarEC branch assumes all values to
-    be Barrel.
-- Side (or BarAC) :  int:  0 = barrel C   1 = barrel A
-- FT :  int: feedthrough number (0-31) 
-- Channel :  int:  channel number (0-127)
-- Slot :  int: slot number (1-14)
-- tphys :  float array:  waveform
+ contain the following branches :
+- channelId online ID
+- timeIndex : number of samples
+- Time[timeIndex] : double array of times
+- Amplitude[timeIndex] : double array of amplitudes
  */
 
 
@@ -34,33 +30,32 @@ class LArPhysWaveFromTuple : public AthAlgorithm
   ~LArPhysWaveFromTuple();
 
   //standard algorithm methods
-  /// implements IAlgorithm::initialize() 
   StatusCode initialize() ; 
 
-  /// implements IAlgorithm::execute()  : Does nothing
   StatusCode execute() {return StatusCode::SUCCESS;}
 
-  /// IAlgorithm::finalize() : Where the action takes place...
   StatusCode finalize(){return StatusCode::SUCCESS;}
   StatusCode stop();
  
  private:
-  /// number of points of the waveform in the ntuple
-  unsigned int m_NPoints;
+  /// max number of points of the waveform in the ntuple
+  Gaudi::Property<unsigned int> m_NPoints{this, "NPoints", 800, "Max number of points in ntuple"};
   /// the first  m_skipPoints points of the waveform in the ntuple are skipped
-  unsigned int m_skipPoints;
+  Gaudi::Property<unsigned int> m_skipPoints{this, "SkipPoints", 0, "How many points to skip"};
   /// make a PhysWave with the first m_prefixPoints as zeros
-  unsigned int m_prefixPoints;
-  /// time step of the the waveform in the ntuple
-  double m_deltaT;
+  Gaudi::Property<unsigned int> m_prefixPoints{this, "PrefixPoints", 0, "How many points to add on front"};
   /// flag for the PhysWave container
-  unsigned int m_flag;
-  /// list of input ntuple file names 
-  std::vector<std::string> m_root_file_names;
+  Gaudi::Property<unsigned int> m_flag{this, "LArWaveFlag", 20, "Flag to store with PhysWave"};
+  /// input file name 
+  Gaudi::Property<std::string> m_root_file_name{this, "FileName", "", "which file to open"};
+  /// ntuple name
+  Gaudi::Property<std::string> m_ntuple_name{this, "NtupleName", "PHYSWAVE", "which ntuple to read"};
   /// key of the PhysWave collection in Storegate
-  std::string m_store_key;
+  Gaudi::Property<std::string> m_store_key{this, "StoreKey", "FROMTUPLE", "SG key of created container"};
   /// Grouping type.  Default is Feedthrough.
-  std::string m_groupingType;
+  Gaudi::Property<std::string> m_groupingType{this, "GroupingType", "ExtendedFeedThrough", "container grouping type"};
+  Gaudi::Property< bool > m_isSC{this, "isSC", false, "Running for SuperCells ?"};
+  Gaudi::Property< int > m_gain{this, "Gain", 0, "which gain to use ?"};
 };
 
 #endif
