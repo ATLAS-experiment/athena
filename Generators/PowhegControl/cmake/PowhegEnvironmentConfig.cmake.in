@@ -22,6 +22,8 @@ set( POWHEGENVIRONMENT_ENVIRONMENT
       /cvmfs/sft.cern.ch/lcg/external/lhapdfsets/current
     PREPEND LHAPATH
       /cvmfs/sft.cern.ch/lcg/external/lhapdfsets/current    
+    APPEND PYTHONPATH
+      "${_LHAPDF_PYTHON_PATH}"
     )
 
 # Silently declare the module found.
