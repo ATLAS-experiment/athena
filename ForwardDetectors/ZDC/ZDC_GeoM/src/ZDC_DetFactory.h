@@ -34,12 +34,8 @@ public:
   virtual const ZDC_DetManager *getDetectorManager() const override;
   void buildMaterials(StoredMaterialManager *materialManager);
 
-  /*************************************************
-  * The scene of the crime. Still inlined because
-  * the function is just to push_back
-  **************************************************/
   inline void addModule(std::unique_ptr<ZDC_ModuleBase> module) { m_modules.push_back(std::move(module) ); }
-  void setTANSlot(uint iside, double width, double height, double depth, const GeoTrf::Transform3D trf, std::string name);
+  void setTANSlot(uint iside, double width, double height, double depth, const GeoTrf::Transform3D trf, const std::string& name);
   
 private:
 
