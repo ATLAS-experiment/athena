@@ -68,6 +68,9 @@ class ElectronCalibrationConfig (ConfigBlock) :
         self.addOption ('writeTrackD0Z0', False, type = bool,
             info="save the d0 significance and z0sinTheta variables so they can be written out")
 
+        self.addOption ('decorateSamplingPattern', False, type=bool,
+            info="add samplingPattern decorations to clusters as part of PHYSLITE")
+
 
     def makeCalibrationAndSmearingAlg (self, config, name) :
         """Create the calibration and smearing algorithm
@@ -125,6 +128,9 @@ class ElectronCalibrationConfig (ConfigBlock) :
                                            reentrant=True )
             alg.particles = config.readName(self.containerName)
             config.addOutputVar (self.containerName, 'caloEta2', 'caloEta2', noSys=True)
+
+        if self.decorateSamplingPattern:
+            config.createAlgorithm( 'CP::EgammaSamplingPatternDecoratorAlg', 'EgammaSamplingPatternDecoratorAlg' + self.postfix )
 
         # Set up a shallow copy to decorate
         if config.wantCopy (self.containerName) :
