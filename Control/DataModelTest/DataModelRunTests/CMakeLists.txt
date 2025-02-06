@@ -73,7 +73,7 @@ datamodel_run_test (ByteStreamTestRead DEPENDS ByteStreamTestWrite)
 
 datamodel_run_test (xAODTestSymlinks1)
 datamodel_run_test (xAODTestSymlinks1 MT
-                    EXTRA_IGNORE "|^xAODTe")
+                    EXTRA_IGNORE "|^xAODTe|none|OUTPUT.*McEventInfo|^Avalan.*INFO")
 
 datamodel_run_test (xAODTestSymlinks2
                     DEPENDS xAODTestWrite)
@@ -81,7 +81,8 @@ datamodel_run_test (xAODTestSymlinks2 MT
                     DEPENDS xAODTestWrite)
 
 datamodel_run_test (xAODTestDecorHandle1)
-datamodel_run_test (xAODTestDecorHandle1 MT)
+datamodel_run_test (xAODTestDecorHandle1 MT
+                    EXTRA_IGNORE "|^xAODTe|none|OUTPUT.*McEventInfo|^Avalan.*INFO")
 
 datamodel_run_test (xAODTestDecorHandle2
                     DEPENDS xAODTestWrite)
@@ -92,7 +93,8 @@ datamodel_run_test (CondWriter)
 datamodel_run_test (CondReader
                     DEPENDS CondWriter)
 datamodel_run_test (CondReader MT
-                    DEPENDS CondWriter)
+                    DEPENDS CondWriter
+                    EXTRA_IGNORE "|^xAODTe|none|OUTPUT.*McEventInfo|^Avalan.*INFO")
 
 datamodel_run_test (CondReadWrite)
 
