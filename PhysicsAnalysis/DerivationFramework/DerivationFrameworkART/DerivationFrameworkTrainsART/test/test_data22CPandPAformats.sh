@@ -234,6 +234,18 @@ checkIndexRefs.py DAOD_TRIG8.art.pool.root > checkIndexRefs_TRIG8.txt 2>&1
 
 echo "art-result: $?  checkIndexRefs"
 
+checkFile.py DAOD_TRIG9.art.pool.root > checkFile_TRIG9.txt
+
+echo "art-result: $?  checkfile"
+
+checkxAOD.py DAOD_TRIG9.art.pool.root > checkxAOD_TRIG9.txt
+
+echo "art-result: $?  checkxAOD"
+
+checkIndexRefs.py DAOD_TRIG9.art.pool.root > checkIndexRefs_TRIG9.txt 2>&1
+
+echo "art-result: $?  checkIndexRefs"
+
 checkFile.py DAOD_LLP1.art.pool.root > checkFile_LLP1.txt
 
 echo "art-result: $?  checkfile"
