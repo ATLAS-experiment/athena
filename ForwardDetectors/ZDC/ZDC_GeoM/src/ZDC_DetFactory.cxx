@@ -4,6 +4,7 @@
 
 #include "ZDC_DetFactory.h"
 #include "ZdcIdentifier/ZdcID.h"
+#include "ZDC_ModuleBase.h"
 
 
 #include "GeoModelInterfaces/StoredMaterialManager.h"
@@ -22,8 +23,7 @@
 #include "GeoModelKernel/GeoMaterial.h"
 #include "GeoModelUtilities/GeoExtendedMaterial.h"
 #include "AthenaKernel/getMessageSvc.h"
-#include "src/ZDC_ModuleBase.h"
-#include <GeoModelKernel/GeoAlignableTransform.h>
+#include "GeoModelKernel/GeoAlignableTransform.h"
 
 // Author Chad Lantz
 // chad.stephen.lantz@cern.ch
@@ -56,7 +56,7 @@ ZDC_DetFactory::ZDC_DetFactory(StoreGateSvc *detStore) :
 
 ZDC_DetFactory::~ZDC_DetFactory() {}
 
-void ZDC_DetFactory::setTANSlot(uint iside, double width, double height, double depth, const GeoTrf::Transform3D trf, std::string name){
+void ZDC_DetFactory::setTANSlot(uint iside, double width, double height, double depth, const GeoTrf::Transform3D trf, const std::string& name){
     m_tanW.at(iside) = width;
     m_tanH.at(iside) = height;
     m_tanD.at(iside) = depth;
@@ -103,7 +103,6 @@ void ZDC_DetFactory::create(GeoPhysVol *world)
     /*************************************************
     * Place TAN/TAXN slots
     **************************************************/
-    Identifier id;
     for(int side : {0, 1}){
         int sideSign = (side == 0) ? -1 : 1;
         world->add(new GeoNameTag(m_tanSlotName.at(side)));
@@ -113,6 +112,7 @@ void ZDC_DetFactory::create(GeoPhysVol *world)
 
         m_detectorManager->addTreeTop(Envelope_Physical.at(side));
     }
+
 }
 
 void ZDC_DetFactory::buildMaterials(StoredMaterialManager *materialManager){

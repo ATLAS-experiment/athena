@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDC_DetTool.h"
 #include "ZDC_DetFactory.h" 
 #include "ZDC_ZDCModule.h" 
 #include "ZDC_RPDModule.h" 
-#include "ZDC_BRANModule.h" 
-#include "ZDC_DetManager.h" 
+#include "ZDC_BRANModule.h"
+#include "ZDC_DetManager.h"
 #include "ZdcConditions/ZdcGeometryDB.h" 
 #include "GeoModelUtilities/GeoModelExperiment.h"
 #include "GaudiKernel/IService.h"

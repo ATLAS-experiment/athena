@@ -10,7 +10,7 @@
 class ZDC_ZDCModule : public ZDC_ModuleBase{
   public:
     ZDC_ZDCModule();
-    ZDC_ZDCModule(std::string name, int side, int module, int modType);
+    ZDC_ZDCModule(const std::string& name, int side, int module, int modType);
     ZDC_ZDCModule(ZDC_ZDCModule *right, int side, int module);
 
     virtual ~ZDC_ZDCModule() = default;

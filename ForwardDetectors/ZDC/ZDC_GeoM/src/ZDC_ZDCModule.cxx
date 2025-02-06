@@ -30,7 +30,7 @@ ZDC_ZDCModule::ZDC_ZDCModule()
 {
 }
 
-ZDC_ZDCModule::ZDC_ZDCModule(std::string name, int side, int module, int modType)
+ZDC_ZDCModule::ZDC_ZDCModule(const std::string& name, int side, int module, int modType)
     : ZDC_ModuleBase(name, side, module),
       m_modType(modType)
 {

@@ -33,10 +33,10 @@ class ZDC_ModuleBase{
     virtual void create(GeoFullPhysVol* mother, StoredMaterialManager *materialManager, const ZdcID *zdcID) = 0;
     inline void setTransform(const GeoTrf::Transform3D trf){m_trf = trf;}
     
-    inline int getSide() const {return m_side;}
-    inline int getModule() const {return m_module;}
-    inline std::string getName() const {return m_name;}
-    inline GeoTrf::Transform3D getTransform() const {return m_trf;}
+    inline const int& getSide() const {return m_side;}
+    inline const int& getModule() const {return m_module;}
+    inline const std::string& getName() const {return m_name;}
+    inline const GeoTrf::Transform3D& getTransform() const {return m_trf;}
 
   protected:
 
