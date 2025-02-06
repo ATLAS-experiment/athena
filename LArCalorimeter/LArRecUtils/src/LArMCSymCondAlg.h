@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- C++ -*- 
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRECCONDITIONS_LARMCSYMCONDGALG_H
@@ -28,6 +28,7 @@ public:
  private:
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_readKey  {this,"ReadKey","LArOnOffIdMap"};
   SG::WriteCondHandleKey<LArMCSym>         m_writeKey {this,"WriteKey","LArMCSym"};
+  BooleanProperty m_isSC {this, "SuperCell", false, "Creating for SC ?"};
 };
 
 

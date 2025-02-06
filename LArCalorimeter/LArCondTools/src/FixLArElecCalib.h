@@ -68,7 +68,11 @@ class FixLArElecCalib : public AthAlgorithm
  private: 
 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
-  SG::ReadCondHandleKey<LArCalibLineMapping>  m_CLKey{this, "SCCalibLineKey", "LArCalibLineMap", "SG calib line key"};
+  SG::ReadCondHandleKey<LArCalibLineMapping>  m_CLKey{this, "CalibLineKey", "LArCalibLineMap", "calib line key"};
+
+  IntegerProperty m_fixFlag{this, "FixFlag", 1, "which fix to apply"};
+  StringProperty m_g4Phys{this, "G4Phys", "", "which physics list to use"};
+  StringProperty m_infile{this, "InputFile", "", "name of inpput file"};
 
   StatusCode ReadFile(const std::string& filename, const LArOnOffIdMapping *cabling, bool EM, bool withGain, int nvar );
   StatusCode ReadFileAll(const std::string& filename, const LArOnOffIdMapping *cabling, bool withGain, int nvar );
@@ -119,17 +123,12 @@ class FixLArElecCalib : public AthAlgorithm
   StatusCode updateEM_DACuAMeV ATLAS_NOT_THREAD_SAFE (const std::string& filename, const LArOnOffIdMapping *cabling);
   StatusCode updateHADfSampl ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling);
 
-  int  m_fixFlag ; 
-  std::string m_g4Phys; 
-  std::string m_infile; 
-
   const LArEM_ID* m_em_idhelper;
   const LArHEC_ID* m_hec_idhelper;
   const LArFCAL_ID* m_fcal_idhelper;
   const LArOnlineID* m_online_idhelper;
   const LArEM_SuperCell_ID* m_sem_idhelper;
   const LArHEC_SuperCell_ID* m_shec_idhelper;
-  const LArFCAL_SuperCell_ID* m_sfcal_idhelper;
   const LArOnline_SuperCellID* m_sonline_idhelper;
   const CaloCell_SuperCell_ID* m_scell_idhelper;
 

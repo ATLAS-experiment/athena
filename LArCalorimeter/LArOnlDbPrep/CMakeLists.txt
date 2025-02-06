@@ -14,3 +14,4 @@ atlas_add_component( LArOnlDbPrep
                      INCLUDE_DIRS ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
                      LINK_LIBRARIES ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CaloIdentifier CaloTriggerToolLib AthenaBaseComps GaudiKernel LArRecConditions LArCablingLib CaloDetDescrLib StoreGateLib AthenaPoolUtilities LArCOOLConditions LArIdentifier CaloInterfaceLib )
 
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

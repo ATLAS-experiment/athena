@@ -101,6 +101,7 @@ if [ $? -ne 0 ];  then
 fi
 
 echo "Running athena to compute new HV corrections"
+echo parameters are " $time $run $lb -g $globalTag "
 python -m LArCalibProcessing.LArCalib_HVCorrConfig $time $run $lb -g $globalTag > hv.log 2>&1
 #athena.py -c "date=\"${time}\";GlobalTag=\"${globalTag}\""  LArCalibProcessing/LArCalib_Example_HVCorr.py > hv.log 2>&1
 if [ $? -ne 0 ];  then

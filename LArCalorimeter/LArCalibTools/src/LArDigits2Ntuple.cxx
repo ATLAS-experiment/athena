@@ -235,6 +235,19 @@ StatusCode LArDigits2Ntuple::execute()
           continue;
         }
       }
+
+      if(m_Sidelist.size() > 0) {	// should do a selection
+        if(std::find(std::begin(m_Sidelist), std::end(m_Sidelist), m_pos_neg)  == std::end(m_Sidelist)) {	// is our side in list ?
+          continue;
+        }
+      }
+
+      if(m_BElist.size() > 0) {	// should do a selection
+        if(std::find(std::begin(m_BElist), std::end(m_BElist), m_barrel_ec)  == std::end(m_BElist)) {	// is our BE in list ?
+          continue;
+        }
+      }
+
       for(unsigned i =	0; i<trueMaxSample;++i) m_samples[i]	   = digi->samples().at(i);
  
  

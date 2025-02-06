@@ -117,14 +117,9 @@ FixLArElecCalib::FixLArElecCalib(const std::string& name, ISvcLocator* pSvcLocat
   m_online_idhelper(nullptr),
   m_sem_idhelper(nullptr),
   m_shec_idhelper(nullptr),
-  m_sfcal_idhelper(nullptr),
   m_sonline_idhelper(nullptr),
   m_scell_idhelper(nullptr)
 { 
-
-    declareProperty("FixFlag",      m_fixFlag);
-    declareProperty("G4Phys",       m_g4Phys);
-    declareProperty("InputFile",    m_infile="");
 
 }
 
@@ -136,7 +131,6 @@ StatusCode FixLArElecCalib::initialize() {
   ATH_CHECK( detStore()->retrieve(m_fcal_idhelper) );
   ATH_CHECK( detStore()->retrieve(m_sem_idhelper) );
   ATH_CHECK( detStore()->retrieve(m_shec_idhelper) );
-  ATH_CHECK( detStore()->retrieve(m_sfcal_idhelper) );
   ATH_CHECK( detStore()->retrieve(m_online_idhelper) );
   ATH_CHECK( detStore()->retrieve(m_sonline_idhelper) );
   ATH_CHECK( detStore()->retrieve(m_scell_idhelper) );
@@ -2089,7 +2083,7 @@ StatusCode FixLArElecCalib::fix14(const LArOnOffIdMapping *cabling) {
    ATH_CHECK( minbias_av->setGroupingType("Single", msg()) );
    ATH_CHECK( minbias_av->initialize() );
    //
-   std::unique_ptr<TFile> fin= std::make_unique<TFile>("ntuple_av.root");
+   std::unique_ptr<TFile> fin= std::make_unique<TFile>(m_infile.value().c_str());
    TTree *tin=dynamic_cast<TTree*>(fin->Get("m_tree"));
    int           ncell;
    int           identifier[2862];   
@@ -2230,7 +2224,7 @@ StatusCode FixLArElecCalib::fix17 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping
     ATH_MSG_INFO ( " in fix17() " );
 
     //                                                          withGain , nvar
-    ATH_CHECK( update_All<LArShape32MC>(m_infile, cabling, true, 32 ) );
+    ATH_CHECK( update_All<LArShape32MC>(m_infile.value(), cabling, true, 32 ) );
 
     return StatusCode::SUCCESS;
 }

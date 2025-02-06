@@ -8,6 +8,7 @@
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/CaloCell_ID.h"
+#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 
 #include "LArSimEvent/LArHit.h"
 #include "LArSimEvent/LArHitContainer.h"
@@ -67,9 +68,11 @@
 
     const CaloIdManager* mgr = nullptr;
     ATH_CHECK( detStore()->retrieve( mgr ) );
-    m_larem_id   = mgr->getEM_ID();
-    m_calo_id    = mgr->getCaloCell_ID();
-
+    if(m_isSC) {
+       m_calo_id = (const CaloCell_Base_ID*)mgr->getCaloCell_SuperCell_ID();
+    } else {
+       m_calo_id = (const CaloCell_Base_ID*)mgr->getCaloCell_ID();
+    }
 
     ATH_CHECK(m_mcSymKey.initialize());
 
@@ -77,7 +80,14 @@
 
     ATH_CHECK(m_caloMgrKey.initialize());
 
+    ATH_CHECK(m_caloSCMgrKey.initialize(m_isSC));
+
     ATH_CHECK(m_eventInfoKey.initialize());
+
+    ATH_CHECK(m_larHitKeys.assign(m_inputKeys.value()));
+    ATH_CHECK(m_larHitKeys.initialize(!m_inputKeys.empty() ));
+
+    if(m_isSC) ATH_CHECK( m_scidtool.retrieve() );
 
     m_n1=0;
     m_n2=0;
@@ -113,8 +123,16 @@
 
     if (m_first) {
 
-      SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
-      ATH_CHECK(caloMgrHandle.isValid());
+      const CaloDetDescrManager_Base *cMgr=nullptr;
+      if(m_isSC){
+         SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloMgrHandle{m_caloSCMgrKey};
+         ATH_CHECK(caloMgrHandle.isValid());
+         cMgr=(const CaloDetDescrManager_Base *)(*caloMgrHandle);
+      } else {
+         SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+         ATH_CHECK(caloMgrHandle.isValid());
+         cMgr=(const CaloDetDescrManager_Base *)(*caloMgrHandle);
+      }
 
       SG::ReadCondHandle<LArMCSym>  mcsym      (m_mcSymKey, ctx);
       SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl (m_cablingKey, ctx);
@@ -125,6 +143,7 @@
       }
 
       m_ncell = m_calo_id->calo_cell_hash_max();
+      ATH_MSG_DEBUG("Hash max: "<<m_ncell);
 
       ATH_MSG_INFO(" --- first event " << m_ncell);
       m_symCellIndex.resize(m_ncell,-1);
@@ -153,13 +172,15 @@
         // we have already processed this hash => just need to associate cell i to the same symmetric cell
         if (doneCell[i2]>=0) {
            m_symCellIndex[i]=doneCell[i2];
+           ATH_MSG_DEBUG("Adding cell "<<id.get_identifier32().get_compact()<<" to a symmetrized  cell "<<id2.get_identifier32().get_compact());
         }
         // we have not already processed this hash, add an entry for this new symmetric cell
         else {  
+           ATH_MSG_DEBUG("New symmetrized  cell "<<id2.get_identifier32().get_compact());
            doneCell[i2]=nsym;
            m_symCellIndex[i] = nsym; 
            CellInfo cell;
-           const CaloDetDescrElement* calodde = (*caloMgrHandle)->get_element(id);
+           const CaloDetDescrElement* calodde = cMgr->get_element(id);
            cell.eta =  calodde->eta();
            cell.phi = calodde->phi();
            cell.region = m_calo_id->region(id);
@@ -214,21 +235,27 @@
 
    for (int i=0;i<m_ncell;i++) m_eCell[i]=0.;
 
-    std::vector <std::string> HitContainer;
-    HitContainer.emplace_back("LArHitEMB");
-    HitContainer.emplace_back("LArHitEMEC");
-    HitContainer.emplace_back("LArHitHEC");
-    HitContainer.emplace_back("LArHitFCAL");
-    for (unsigned int iHitContainer=0;iHitContainer<HitContainer.size();iHitContainer++)
-    {
-      const LArHitContainer* hit_container ;
-      ATH_CHECK(evtStore()->retrieve(hit_container,HitContainer[iHitContainer]));
-      for (const LArHit* hit : *hit_container)
+   auto hitVectorHandles = m_larHitKeys.makeHandles(ctx);
+   for (auto & inputHits : hitVectorHandles) {
+      if (!inputHits.isValid()) {
+        ATH_MSG_ERROR("BAD HANDLE"); //FIXME improve error here
+        //return StatusCode::FAILURE;
+        continue;
+      }
+
+      for (const LArHit* hit : *inputHits)
       {       
-          Identifier cellID=hit->cellID();
+          Identifier hitCellID=hit->cellID();
           double energy = hit->energy(); 
           double time =hit->time();
+          Identifier cellID;
+          if(m_isSC){
+             cellID=m_scidtool->offlineToSuperCellID(hitCellID);
+          } else {
+             cellID=hitCellID;
+          }
           int index = (int) (m_calo_id->calo_cell_hash(cellID));
+
           if (index < m_ncell && index>=0 && fabs(time)<25.) {
              m_eCell[index] += energy;
         }
