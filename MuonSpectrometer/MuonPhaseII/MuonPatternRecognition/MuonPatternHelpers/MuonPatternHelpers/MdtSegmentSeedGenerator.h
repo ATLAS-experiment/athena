@@ -73,6 +73,8 @@ namespace MuonR4 {
                 double chi2{0.};
                 /** @brief Pointer to the parent bucket */
                 const SpacePointBucket* parentBucket{nullptr};
+                /** @brief number of Mdt hits on the seed */
+                unsigned int nMdt{0};
             };
         
         /** @brief Standard constructor taking the segmentSeed to start with and then few

@@ -91,6 +91,8 @@ namespace MuonR4{
                 }
                 /// skip empty truth matches for now
                 if (!genParticle || (m_useOnlyMuonHits && std::abs(simHit->pdgId()) != 13)) {
+                    ATH_MSG_VERBOSE("Skip hit "<<m_idHelperSvc->toString(simHit->identify())<<
+                                  " pdgId: "<<simHit->pdgId()<<", energy: "<<simHit->kineticEnergy());
                     continue;
                 }
                 hitCollector[id][genParticle].push_back(simHit); 

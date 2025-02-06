@@ -21,7 +21,7 @@ def MuonEtaHoughTransformAlgCfg(flags, name = "MuonEtaHoughTransformAlg", **kwar
 def MuonSegmentFittingAlgCfg(flags, name = "MuonSegmentFittingAlg", **kwargs):
     result = ComponentAccumulator()
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
-    kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags, mdtErrorScaleFactor=2.0, MdtPropagationTimeUncert=True)))
+    kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
     kwargs.setdefault("ResoSeedHitAssoc", 5. )
     kwargs.setdefault("RecoveryPull", 3.)
     kwargs.setdefault("fitSegmentT0", False)

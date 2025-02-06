@@ -431,35 +431,35 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                // and then add the bounds of the element - this is technology dependent 
                if (RE->detectorType()==ActsTrk::DetectorType::Mdt){
                      const MuonGMR4::MdtReadoutElement* MDT = dynamic_cast<const MuonGMR4::MdtReadoutElement*>(RE); 
-                     sectorArgs.chamberLocs.emplace_back(origin.y() - MDT->getParameters().halfY, 
+                     sectorArgs.detectorLocs.emplace_back(origin.y() - MDT->getParameters().halfY, 
                                                          origin.y() + MDT->getParameters().halfY, 
                                                          origin.z() - MDT->getParameters().halfHeight, 
                                                          origin.z() + MDT->getParameters().halfHeight, 
-                                                         RE->detectorType()); 
+                                                         RE); 
                }
                else if (RE->detectorType()==ActsTrk::DetectorType::Rpc){
                      const MuonGMR4::RpcReadoutElement* RPC = dynamic_cast<const MuonGMR4::RpcReadoutElement*>(RE);
-                     sectorArgs.chamberLocs.emplace_back(origin.y() - RPC->getParameters().halfLength, 
+                     sectorArgs.detectorLocs.emplace_back(origin.y() - RPC->getParameters().halfLength, 
                                                          origin.y() + RPC->getParameters().halfLength, 
                                                          origin.z() - RPC->getParameters().halfThickness, 
                                                          origin.z() + RPC->getParameters().halfThickness, 
-                                                         RE->detectorType()); 
+                                                         RE); 
                }
                else if (RE->detectorType()==ActsTrk::DetectorType::Tgc){
                      const MuonGMR4::TgcReadoutElement* TGC = dynamic_cast<const MuonGMR4::TgcReadoutElement*>(RE);
-                     sectorArgs.chamberLocs.emplace_back(origin.y() - TGC->getParameters().halfHeight, 
+                     sectorArgs.detectorLocs.emplace_back(origin.y() - TGC->getParameters().halfHeight, 
                                                          origin.y() + TGC->getParameters().halfHeight, 
                                                          origin.z() - TGC->getParameters().halfThickness, 
                                                          origin.z() + TGC->getParameters().halfThickness, 
-                                                         RE->detectorType()); 
+                                                         RE); 
                }
                else if (RE->detectorType() == ActsTrk::DetectorType::Mm){
                    const MuonGMR4::MmReadoutElement* MM = dynamic_cast<const MuonGMR4::MmReadoutElement*>(RE);
-                   sectorArgs.chamberLocs.emplace_back(origin.y() - MM->getParameters().halfHeight,
+                   sectorArgs.detectorLocs.emplace_back(origin.y() - MM->getParameters().halfHeight,
                                                        origin.y() + MM->getParameters().halfHeight,
                                                        origin.z() - MM->getParameters().halfThickness,
                                                        origin.z() + MM->getParameters().halfThickness,
-                                                       RE->detectorType());
+                                                       RE);
                }
             }
          }

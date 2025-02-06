@@ -111,11 +111,7 @@ namespace MuonR4{
                         fitState =  State::FailedCalib;
                         diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(dc->readoutElement()->innerTubeRadius(), 2);
                     } else {
-                        double uncert = calibOutput.driftRadiusUncert();
-                        if(m_doMdtUncertFromProp) {
-                            uncert = std::hypot(uncert, calibOutput.driftUncertSigProp());
-                        }
-                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(m_mdtErrorScale * uncert, 2);
+                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(calibOutput.driftRadiusUncert(), 2);
                     }
                     calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir), fitState);
                     calibSP->setCovariance<2>(jac.inverse()*diagCov*jac);
@@ -143,7 +139,7 @@ namespace MuonR4{
                         diagCov(toInt(AxisDefs::eta), toInt(AxisDefs::eta)) = std::pow(0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash()), 2);
                         fitState = State::FailedCalib;
                     } else {
-                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(m_mdtErrorScale * calibOutput.uncertPrimaryR(), 2);
+                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(calibOutput.uncertPrimaryR(), 2);
                         diagCov(toInt(AxisDefs::eta), toInt(AxisDefs::eta)) = std::pow(calibOutput.sigmaZ(), 2);
                     }
                     calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir), fitState);

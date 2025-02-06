@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibrationTool.h"
@@ -29,8 +29,7 @@ namespace {
 using SingleTubeCalib = MuonCalib::MdtTubeCalibContainer::SingleTubeCalib;
 using MdtDriftCircleStatus = MdtCalibOutput::MdtDriftCircleStatus;
 using ToolSettings = MdtCalibrationTool::ToolSettings;
-MdtCalibrationTool::MdtCalibrationTool(const std::string& type, const std::string &name, const IInterface* parent) :
-    base_class(type, name, parent) {}
+
 
 ToolSettings MdtCalibrationTool::getSettings() const {
     ToolSettings settings{};
@@ -280,6 +279,7 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
           <<" --> driftRadius: "<<r<<" pm "<<reso<<", prop-up: "<<radiusUp<<", prop-dn: "<<radiusDn
           <<" delta: "<<(radiusUp-radiusDn));
       calibResult.setDriftUncertSigProp(0.5*std::abs(radiusUp - radiusDn));
+      reso = std::hypot(reso, calibResult.driftUncertSigProp());
   }
 
   calibResult.setDriftRadius(r, reso);

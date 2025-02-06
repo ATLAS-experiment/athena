@@ -50,7 +50,7 @@ namespace MuonGMR4 {
                 double yRight{0.};     // right edge 
                 double zBottom{0.};     // bottom edge 
                 double zTop{0.};     // top edge 
-                ActsTrk::DetectorType type{ActsTrk::DetectorType::UnDefined}; 
+                const MuonGMR4::MuonReadoutElement* reEle{nullptr};
             };
 
             struct defineArgs{
@@ -61,7 +61,7 @@ namespace MuonGMR4 {
                 /// Transformation to the chamber volume
                 Amg::Transform3D locToGlobTrf{Amg::Transform3D::Identity()};
 
-                std::vector<chamberLocation> chamberLocs{}; 
+                std::vector<chamberLocation> detectorLocs{}; 
             };
 
             /** @brief Standard constructor taking the defining parameters */

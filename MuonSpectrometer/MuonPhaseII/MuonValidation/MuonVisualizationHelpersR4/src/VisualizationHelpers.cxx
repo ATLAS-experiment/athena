@@ -19,7 +19,16 @@ namespace MuonValR4{
         ellipse->SetFillColorAlpha(color, 0.2);
         return ellipse;
     }
-
+    std::unique_ptr<TArrow> drawArrow(const Amg::Vector3D& start, const Amg::Vector3D& dir,
+                                      const int color, const int lineStyle, const int view){
+        constexpr double arrowLength = 2.*Gaudi::Units::cm; 
+        const Amg::Vector3D end = start + (arrowLength / std::hypot(dir[view], dir.z()) ) * dir;
+        auto arrow = std::make_unique<TArrow>(start[view], start.z(), end[view], end.z(),0.01);
+        arrow->SetLineColor(color);
+        arrow->SetLineWidth(2);
+        arrow->SetLineStyle(lineStyle);
+        return arrow;
+    }
     std::unique_ptr<TLatex> drawLabel(const std::string& text, 
                                       const double xPos, const double yPos,
                                       const unsigned int fontSize) {

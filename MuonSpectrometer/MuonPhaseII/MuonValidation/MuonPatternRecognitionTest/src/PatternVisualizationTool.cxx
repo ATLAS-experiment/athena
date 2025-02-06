@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "PatternVisualizationTool.h"
 
@@ -56,8 +56,6 @@ namespace MuonValR4 {
     using namespace SegmentFit;
     using LabeledSegmentSet = PatternVisualizationTool::LabeledSegmentSet;
     std::mutex PatternVisualizationTool::s_mutex{};
-    PatternVisualizationTool::PatternVisualizationTool(const std::string& type, const std::string& name, const IInterface* parent):
-            base_class{type,name,parent} {}
 
     StatusCode PatternVisualizationTool::initialize(){        
         if (m_canvasLimit > 0) {
@@ -247,7 +245,27 @@ namespace MuonValR4 {
             closeSummaryCanvas();
         }
     }
-
+    void PatternVisualizationTool::paintSimHits(const EventContext& ctx,
+                                                const xAOD::MuonSegment& truthSeg,
+                                                PrimitiveVec& primitives,
+                                                const int view) const {
+        if (!m_paintTruthHits) {
+            return;
+        }
+        auto truthHits = getMatchingSimHits(truthSeg);
+        SG::ReadHandle geoCtx{m_geoCtxKey, ctx};
+        for (const xAOD::MuonSimHit* simHit :  truthHits) {
+            const MuonGMR4::MuonReadoutElement* re = m_detMgr->getReadoutElement(simHit->identify());
+            const IdentifierHash hash = re->detectorType() == ActsTrk::DetectorType::Mdt ?
+                                        re->measurementHash(simHit->identify()) :
+                                        re->layerHash(simHit->identify());
+            const Amg::Transform3D trf = re->msSector()->globalToLocalTrans(*geoCtx) *
+                                         re->localToGlobalTrans(*geoCtx, hash);
+            const Amg::Vector3D locPos = trf * xAOD::toEigen(simHit->localPosition());
+            const Amg::Vector3D locDir = trf.linear() * xAOD::toEigen(simHit->localDirection());
+            primitives.push_back(drawArrow(locPos, locDir, truthColor, kDashed, view));
+        }
+    }
     void PatternVisualizationTool::visualizeSeed(const EventContext& ctx,
                                                  const MuonR4::SegmentSeed& seed,
                                                  const std::string& extraLabel) const {
@@ -289,10 +307,10 @@ namespace MuonValR4 {
             if (!drawHits(*seed.parentBucket(), seed.getHitsInMax(), primitives, canvasDim, view)) {
                 continue;
             }
-
             for (const xAOD::MuonSegment* segment : truthSegs) {
                 primitives.push_back(drawLine(localSegmentPars(*segment), canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
                                                truthColor, kDotted, view));
+                paintSimHits(ctx,*segment, primitives, view);
             }
             primitives.push_back(drawLine(seed.parameters(), canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
                                          parLineColor, kDashed, view));
@@ -371,6 +389,7 @@ namespace MuonValR4 {
                     primitives.push_back(drawLabel(std::format("true parameters: {:}",makeLabel(localSegmentPars(*segment))),0.2, 0.89));
                     drawnTrueLabel = true;
                 }
+                paintSimHits(ctx,*segment, primitives, view);
             }
             
             std::stringstream legendLabel{};
@@ -453,6 +472,7 @@ namespace MuonValR4 {
             for (const xAOD::MuonSegment* segment : truthSegs) {
                 primitives.push_back(drawLine(localSegmentPars(*segment), canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
                                            truthColor, kDotted, view));
+                paintSimHits(ctx,*segment, primitives, view);
             }
             writeChi2(segPars, segment.measurements(), primitives);
 

@@ -12,7 +12,7 @@ if __name__=="__main__":
     #parser.set_defaults(condTag="CONDBR2-BLKPA-2023-02")
     parser.set_defaults(inputFile=[
                                     #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
-                                    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R3SimHits.pool.root"
+                                    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"
                                     ])
     parser.set_defaults(eventPrintoutLevel = 500)
    
@@ -23,7 +23,7 @@ if __name__=="__main__":
     flags.Muon.doFastMMDigitization = False
     flags, cfg = setupGeoR4TestCfg(args,flags)
     
-
+    # cfg.getService("MessageSvc").setVerbose = ["MuonSegmentFittingAlg"]
     # from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonEtaHoughTransformTest"))
@@ -52,16 +52,16 @@ if __name__=="__main__":
     if not args.noMonitorPlots:
         cfg.getEventAlgo("MuonEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="EtaHoughPlotValid",
-                                                                                                AllCanvasName="AllEtaHoughiDiPuffPlots",                                         displayTruthOnly = True,
-                                                                                                saveSinglePDFs = True, saveSummaryPDF= True))
+                                                                                                AllCanvasName="AllEtaHoughiDiPuffPlots", doPhiBucketViews = False,
+                                                                                                displayTruthOnly = True, saveSinglePDFs = False, saveSummaryPDF= False))
         cfg.getEventAlgo("MuonPhiHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="PhiHoughPlotValid",
-                                                                                                AllCanvasName="AllPhiHoughiDiPuffPlots",                                   displayTruthOnly = True,
-                                                                                                saveSinglePDFs = False, saveSummaryPDF= False))
+                                                                                                AllCanvasName="AllPhiHoughiDiPuffPlots",doEtaBucketViews = False,
+                                                                                                displayTruthOnly = True, saveSinglePDFs = False, saveSummaryPDF= False))
         cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="SegmentPlotValid",
-                                                                                                AllCanvasName="AllSegmentFitPlots",                                   displayTruthOnly = True,
-                                                                                                saveSinglePDFs = True, saveSummaryPDF= False))
+                                                                                                AllCanvasName="AllSegmentFitPlots", doPhiBucketViews = False,
+                                                                                                displayTruthOnly = True, saveSinglePDFs = True, saveSummaryPDF= False))
 
     executeTest(cfg)
     
