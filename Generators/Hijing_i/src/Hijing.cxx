@@ -243,7 +243,7 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
                       ion->event_plane_angle=bphi;
                       ion->event_plane_angle=-1;
                       ion->sigma_inel_NN=sigmainel;
-    evt->set_heavy_ion(ion);                      
+    evt->set_heavy_ion(std::move(ion));                      
 #else
     HepMC::HeavyIon ion
       (
@@ -261,7 +261,7 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
        -1,                     // eccentricity
        sigmainel     );        // sigma_inel_NN
 
-    evt->set_heavy_ion(ion);
+    evt->set_heavy_ion(std::move(ion));
     std::cout << " heavy ion " << evt->heavy_ion() << std::endl;
 #endif
 

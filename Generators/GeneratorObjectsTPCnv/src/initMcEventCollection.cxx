@@ -150,18 +150,15 @@ namespace Athena_test {
     }
 #else
     if (!ge.vertices_empty()) {
-      HepMC::GenEvent::vertex_iterator itvtx = ge.vertices_begin();
-      while (itvtx != ge.vertices_end()) {
-        HepMC::GenVertexPtr pvtx = *itvtx;
-        ++itvtx;
-        ge.remove_vertex(pvtx);
-        delete pvtx;
+      for (auto itvtx = ge.vertices_begin(); itvtx != ge.vertices_end();
+           ++itvtx) {
+        ge.remove_vertex(*itvtx);
       }
     }
 #endif
 
     //.....add new vertex with geantino
-    ge.add_vertex(genVertex);
+    ge.add_vertex(std::move(genVertex));
     HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE );
   }
 }

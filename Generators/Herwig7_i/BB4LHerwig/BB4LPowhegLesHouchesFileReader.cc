@@ -921,7 +921,7 @@ bool BB4LPowhegLesHouchesFileReader::doReadEvent  () {
       std::string IdLabel = hs.substr(0, hs.find(">", 0));
       IdLabel = std::regex_replace(IdLabel, std::regex(R"([\D])"), "");
       std::string weightName = m_optionalWeightsLabel[IdLabel];
-      std::string value=hs;
+      std::string value = std::move(hs);
       erase_substr(value, "<wgtid='"+IdLabel+"'>");
       erase_substr(value, "<wgtid=\""+IdLabel+"\">");
       erase_substr(value, "</wgt>");
