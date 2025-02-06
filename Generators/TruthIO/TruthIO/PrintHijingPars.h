@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHIO_PRINTHIJINGPARS_H
 #define TRUTHIO_PRINTHIJINGPARS_H
 
 #include "GeneratorModules/GenBase.h"
+
+#include <cstdint>
 
 class PrintHijingPars:public GenBase {
 public:
@@ -19,8 +21,8 @@ private:
   // Setable Properties:-
   std::string m_key; 
   bool  m_VerboseOutput;
-  int  m_firstEvt;
-  int  m_lastEvt;
+  uint64_t  m_firstEvt;
+  uint64_t  m_lastEvt;
 };
 
 #endif
