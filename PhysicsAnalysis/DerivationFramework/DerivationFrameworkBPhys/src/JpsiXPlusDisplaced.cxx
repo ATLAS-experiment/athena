@@ -797,8 +797,8 @@ namespace DerivationFramework {
       // Identify the input JX
       int ijx = m_JXSubVtx ? topoN-2 : topoN-1;
       if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0) {
-	if(m_JXV0SubVtx) ijx = topoN-1;
-	else ijx = 1;
+	if(m_JXV0SubVtx) ijx = 1;
+	else ijx = topoN-1;
       }
       const xAOD::Vertex* jxVtx(nullptr);
       if(m_jxDaug_num==4) jxVtx = FindVertex<4>(jxContainer.ptr(), cascadeVertices[ijx]);
