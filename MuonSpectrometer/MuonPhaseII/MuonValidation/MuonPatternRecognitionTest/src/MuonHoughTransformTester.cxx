@@ -222,7 +222,9 @@ namespace MuonValR4 {
         ATH_CHECK(retrieveContainer(ctx, m_truthSegmentKey, readTruthSegments));
         
 
-        ATH_MSG_DEBUG("Succesfully retrieved input collections");
+        ATH_MSG_DEBUG("Succesfully retrieved input collections. Seeds: "<<(readSegmentSeeds ? readSegmentSeeds->size() : -1)
+                <<", segments: "<<(readMuonSegments ? readMuonSegments->size() : -1)
+                <<", truth segments: "<<(readTruthSegments? readTruthSegments->size() : -1)<<".");
 
         std::vector<ObjectMatching> objects = matchWithTruth(gctx, readTruthSegments, readSegmentSeeds, readMuonSegments);
         for (const ObjectMatching& obj : objects) {

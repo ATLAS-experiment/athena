@@ -43,7 +43,7 @@ namespace MuonR4{
             constexpr double timeTange = 25 * Gaudi::Units::ns;
             rng[toInt(ParamDefs::y0)] = std::array{-spatRang, spatRang};
             rng[toInt(ParamDefs::x0)] = std::array{-spatRang, spatRang};
-            rng[toInt(ParamDefs::phi)] = std::array{-175.* Gaudi::Units::deg, 175. * Gaudi::Units::deg};
+            rng[toInt(ParamDefs::phi)] = std::array{-179.* Gaudi::Units::deg, 179. * Gaudi::Units::deg};
             rng[toInt(ParamDefs::theta)] = std::array{-85. * Gaudi::Units::deg,  85. * Gaudi::Units::deg};
             rng[toInt(ParamDefs::time)] = std::array{-timeTange, timeTange};            
             return rng;
@@ -512,8 +512,8 @@ namespace MuonR4{
                             residual.gradient[toInt(par)].block<2,1>(0, 0) = - partialPlaneIntersect(normal, planeOffSet, segmentLine, par).block<2,1>(0,0);
 
                             residual.gradient[toInt(par)][toInt(AxisDefs::t0)] = 0;
-                            ATH_MSG_VERBOSE("Partial derivative of "<<idHelperSvc->toString(hit->spacePoint()->identify())
-                                          <<" residual "<<Amg::toString(residual.residual)<<" w.r.t "<<toString(par)<<"="
+                            ATH_MSG_VERBOSE("Check partial derivatives of BS constraint, residual "
+                                          <<Amg::toString(residual.residual)<<" w.r.t "<<toString(par)<<"="
                                           <<Amg::toString(residual.gradient[toInt(par)]));
                         
                         }
@@ -683,13 +683,20 @@ namespace MuonR4{
             }
             /// Check that all parameters remain within the parameter boundary window
             unsigned int nOutOfBound{0};
-            for (unsigned int p =0; p< nDim; ++p) {
-                if (m_cfg.ranges[p][0] > currPars[p] || m_cfg.ranges[p][1]< currPars[p]) {
+            for (unsigned int p = 0; p< nDim; ++p) {
+                double& parValue{currPars[p]};
+                if constexpr(nDim  == 3) {
+                    /// Recall that for 3x3 the dimensions are [y0, theta, time]
+                    if (p == 2) {
+                        p = toInt(ParamDefs::time);
+                    }
+                }
+                if (m_cfg.ranges[p][0] > parValue || m_cfg.ranges[p][1] < parValue) {
                     ATH_MSG_VERBOSE("The "<<p<<"-th parameter "<<toString(static_cast<ParamDefs>(p))<<" is out of range "<<currPars[p]
                                     <<"["<<m_cfg.ranges[p][0]<<"-"<<m_cfg.ranges[p][1]<<"]");
                     ++nOutOfBound;
                 }
-                currPars[p] = std::clamp(currPars[p], m_cfg.ranges[p][0], m_cfg.ranges[p][1]);
+                parValue = std::clamp(parValue, m_cfg.ranges[p][0], m_cfg.ranges[p][1]);
             }
             if (nOutOfBound > m_cfg.nParsOutOfBounds){
                 return UpdateStatus::outOfBounds;

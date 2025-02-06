@@ -253,7 +253,9 @@ def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", RDOContainer = None, **kw
     
     ### Disable the twin tubes in the Phase II geometry setup
     tool_kwargs["UseR4DetMgr"]  = flags.Muon.usePhaseIIGeoSetup
-    tool_kwargs["CalibrationTool"] = acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, TimeWindowSetting = 2, DoPropagationCorrection = False))
+    tool_kwargs["CalibrationTool"] = acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, TimeWindowSetting = 2, 
+                                                                                DoPropagationCorrection = False,
+                                                                                DoPropagationTimeUncert = flags.Muon.usePhaseIIGeoSetup))
     if RDOContainer: tool_kwargs["RDOContainer"] = RDOContainer
     # Get the RDO -> PRD tool
     kwargs.setdefault("DecodingTool", CompFactory.Muon.MdtRdoToPrepDataToolMT(name="MdtPrepDataProviderTool", **tool_kwargs))

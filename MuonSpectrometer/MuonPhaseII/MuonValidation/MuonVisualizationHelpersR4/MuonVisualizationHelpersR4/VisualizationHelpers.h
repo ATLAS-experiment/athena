@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONR4_MUONVISUALIZATIONHELPERS_H
 #define MUONR4_MUONVISUALIZATIONHELPERS_H
@@ -13,6 +13,7 @@
 #include "TBox.h"
 #include "TLatex.h"
 #include "TLine.h"
+#include "TArrow.h"
 
 namespace MuonValR4 {
     /** @brief Filling codes for hollow / fullFilling / hatched filling */
@@ -64,12 +65,24 @@ namespace MuonValR4 {
                                   const double y2,
                                   const int color = kGreen +2,
                                   const int fillStyle = hollowFilling);
-    
+    /** @brief Draws a line from the segment fit parameters
+     *  @param pars: Segment fit parameters to extract position & direction from
+     *  @param lowEnd: Lower boundary in Canvas-y of the line
+     *  @param highEnd: Upper boundaty in Canbas-y of the line
+     *  @param color: Color of the line (Cf. TColor documentation)
+     *  @param lineStyle: Style of the drawn line (cf. TAttLine documentation)
+     *  @param view: Is the line placed in the y-z or in the x-z plane */
     std::unique_ptr<TLine> drawLine(const MuonR4::SegmentFit::Parameters& pars,
                                     const double lowEnd, const double highEnd,
                                     const int color = kRed +1,
                                     const int lineStyle = kDashed,
                                     const int view = objViewEta);
+    
+    std::unique_ptr<TArrow> drawArrow(const Amg::Vector3D& start,
+                                      const Amg::Vector3D& dir,
+                                      const int color = kRed +1,
+                                      const int lineStyle = kDashed,
+                                      const int view = objViewEta);
     /** @brief Create a TLatex label,
      *  @param text: Label text
      *  @param xPos: x-position of the label on the Canvas
@@ -95,9 +108,5 @@ namespace MuonValR4 {
                                           const double yPos,
                                           const std::string_view sqrtS="14",
                                           const std::string_view lumi = "");
-
-
-
-
 }
 #endif

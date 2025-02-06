@@ -79,11 +79,6 @@ namespace MuonR4{
             /*** Resolution of the rpc time measurement  */
             Gaudi::Property<double> m_rpcTimeResolution{this, "rpcTimeResolution", 0.6 * Gaudi::Units::nanosecond,
                                                           "Estimated time resolution of the strip readout"};
-
-            Gaudi::Property<double> m_mdtErrorScale{this, "mdtErrorScaleFactor", 1.0, "Scaling to apply to MDT errors for the pattern"}; 
-
-            Gaudi::Property<bool> m_doMdtUncertFromProp{this, "MdtPropagationTimeUncert", false};
-
     };
 
 }

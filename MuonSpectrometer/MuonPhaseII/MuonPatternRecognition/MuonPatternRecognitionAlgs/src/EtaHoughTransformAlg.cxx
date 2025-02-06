@@ -181,7 +181,9 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
         // skip any we don't touch 
         if (!passesThrough(muonChamber, maximum.y, maximum.x)) continue; 
         // for MDT multilayers, we increase our expected number of crossed chambers / tubes
-        if (muonChamber.type == ActsTrk::DetectorType::Mdt || muonChamber.type == ActsTrk::DetectorType::Mm){
+        const ActsTrk::DetectorType type = muonChamber.reEle->detectorType();
+        if (type == ActsTrk::DetectorType::Mdt || type == ActsTrk::DetectorType::Mm ||
+            type == ActsTrk::DetectorType::sTgc){
             ++expectedPrecisionChambers; 
         }
         // now we check if we have a compatible measurement on our seed
@@ -195,7 +197,8 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
             }
         }
         // if we find an MDT hit, we increment the counter for seen chambers
-        if (muonChamber.type == ActsTrk::DetectorType::Mdt || muonChamber.type == ActsTrk::DetectorType::Mm){
+        if (type == ActsTrk::DetectorType::Mdt || type == ActsTrk::DetectorType::Mm ||
+            type == ActsTrk::DetectorType::sTgc){
             seenPrecisionChambers += (hasHit); 
         }
         // for trigger hits, we set a flag indicating we have at least one 
@@ -209,8 +212,7 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
                 if (SP->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
                     const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(SP->primaryMeasurement());
                     seenLayers.emplace(dc->readoutElement()->multilayer(), dc->tubeLayer()); 
-                }
-                else if(SP->type() == xAOD::UncalibMeasType::MMClusterType){
+                } else if(SP->type() == xAOD::UncalibMeasType::MMClusterType){
                     const xAOD::MMCluster* mmclust = static_cast<const xAOD::MMCluster*>(SP->primaryMeasurement());
                     seenLayers.emplace(mmclust->readoutElement()->multilayer(), mmclust->gasGap()); 
                 }
@@ -324,15 +326,26 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
         }
 
         // apply a seed quality cut. 
-        if (!passSeedQuality(bucket,max)) {
+        if (!passSeedQuality(bucket, max)) {
             // if seed visualisation is enabled, draw the rejected seed 
             if (m_visionTool.isEnabled()) {
                 const HoughMaximum& houghMax{max.x, max.y, (double)hitList.size(), std::move(hitList), bucket.bucket};
                 const SegmentSeed seed{houghMax};
                 MuonValR4::IPatternVisualizationTool::PrimitiveVec primitives{};  
                 MuonValR4::IPatternVisualizationTool::PrimitiveVec primitivesForAcc{};  
-                for (auto & chamber : bucket.bucket->chamberLocations()){
+                for (auto & chamber : bucket.bucket->chamberLocations()) {
                     primitives.push_back(MuonValR4::drawBox(chamber.yLeft, chamber.zBottom, chamber.yRight, chamber.zTop, kGray+2)); 
+                    const Identifier detId{chamber.reEle->identify()};
+                    const int eta = m_idHelperSvc->stationEta(detId);
+                    std::string chLabel = std::format("{:}{:1d}{:}{:2d}", m_idHelperSvc->stationNameString(detId), 
+                                                      std::abs(eta), eta > 0? 'A' : 'C', m_idHelperSvc->stationPhi(detId));
+                    switch (chamber.reEle->detectorType()) {
+                        case ActsTrk::DetectorType::Mdt: {
+                            chLabel += std::format("M{:1d}", m_idHelperSvc->mdtIdHelper().multilayer(detId));
+                        } default:
+                            break;
+                    }
+                    primitives.push_back(MuonValR4::drawLabel(chLabel, chamber.yLeft, chamber.zTop + 0.02,8));
                 }
        
                 primitives.push_back(MuonValR4::drawLabel(std::format("Missed seed - score {}, layer score {}, comprising {} measurements ",data.houghPlane->nHits(accumulatorBins.first, accumulatorBins.second),data.houghPlane->nLayers(accumulatorBins.first, accumulatorBins.second),hitList.size()),0.05,0.03,12)); 

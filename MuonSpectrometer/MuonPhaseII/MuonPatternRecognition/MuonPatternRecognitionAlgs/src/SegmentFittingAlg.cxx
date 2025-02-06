@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SegmentFittingAlg.h"
@@ -69,7 +69,6 @@ namespace MuonR4 {
         return StatusCode::SUCCESS;
     }
     StatusCode SegmentFittingAlg::execute(const EventContext& ctx) const {
-    
         const ActsGeometryContext* gctx{nullptr};
         ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
         const SegmentSeedContainer* segmentSeeds=nullptr; 
@@ -80,7 +79,7 @@ namespace MuonR4 {
         std::vector<std::unique_ptr<Segment>> allSegments{};
         for (const SegmentSeed* seed : *segmentSeeds) {
             std::vector<std::unique_ptr<Segment>> segments = fitSegmentSeed(ctx, *gctx, seed);
-            if (m_visionTool.isEnabled() && segments.size() > 1) {
+             if (m_visionTool.isEnabled() && segments.size() > 1) {
                 auto drawFinalReco = [this, &segments, &gctx, &ctx,&seed](const std::string& nameTag) {
                     PrimitiveVec segmentLines{};
                     double yLegend{0.85};
@@ -112,6 +111,11 @@ namespace MuonR4 {
                 if (nBeforeAmbi != segments.size()) {
                     drawFinalReco("post ambiguity");
                 }
+            } else  if (m_visionTool.isEnabled() && segments.empty() &&
+                      std::ranges::count_if(seed->getHitsInMax(),[this](const SpacePoint* hit){
+                            return  m_visionTool->isLabeled(*hit);
+                      })) {
+                m_visionTool->visualizeSeed(ctx, *seed, "Failed fit");
             }
             allSegments.insert(allSegments.end(), std::make_move_iterator(segments.begin()),
                                                   std::make_move_iterator(segments.end()));
@@ -202,7 +206,7 @@ namespace MuonR4 {
         /// At very high inclanation angles, the muon may traverse 3 hits in the same layer (E.g. BEE)
         genCfg.busyLayerLimit = 2 + 2*(patternSeed->parameters()[toInt(ParamDefs::theta)] > 50 * Gaudi::Units::deg);
         /** Draw the pattern with all possible seeds */
-        if (m_visionTool.isEnabled()) { 
+         if (m_visionTool.isEnabled()) { 
             PrimitiveVec seedLines{};
             MdtSegmentSeedGenerator drawMe{name(), patternSeed, genCfg};
             while(auto s = drawMe.nextSeed(ctx)) {
@@ -219,13 +223,13 @@ namespace MuonR4 {
             data.segmentPars = seed->parameters;
             data.calibMeasurements = std::move(seed->measurements);            
             /// Draw the prefit
-            if (m_visionTool.isEnabled()) {
+             if (m_visionTool.isEnabled()) {
                 auto seedCopy = convertToSegment(locToGlob, patternSeed, copy(data));
                 m_visionTool->visualizeSegment(ctx, *seedCopy, std::format("Pre fit {:d}", seedGen.numGenerated()));
             } 
             data = fitSegmentHits(ctx, gctx, seed->parameters, std::move(data.calibMeasurements));
             data.nIter +=  seed->nIter;
-            if (m_visionTool.isEnabled() && data.converged) {
+             if (m_visionTool.isEnabled() && data.converged) {
                 auto seedCopy = convertToSegment(locToGlob, patternSeed, copy(data));
                 m_visionTool->visualizeSegment(ctx, *seedCopy, std::format("Intermediate fit {:d}", seedGen.numGenerated()));
             }
@@ -235,7 +239,7 @@ namespace MuonR4 {
             if (!plugHoles(ctx, gctx, *patternSeed, data)) {
                 continue;
             }
-            if (m_visionTool.isEnabled()) {
+             if (m_visionTool.isEnabled()) {
                 auto seedCopy = convertToSegment(locToGlob, patternSeed, copy(data));
                 m_visionTool->visualizeSegment(ctx, *seedCopy, std::format("Final fit {:d}", seedGen.numGenerated()));
             }
@@ -314,7 +318,7 @@ namespace MuonR4 {
         if (newAttempt.converged) {
             newAttempt.nIter+=data.nIter;
             data = std::move(newAttempt);
-            if (m_visionTool.isEnabled()) {
+             if (m_visionTool.isEnabled()) {
                 auto seedCopy = convertToSegment(seed.msSector()->localToGlobalTrans(gctx), &seed, copy(data));
                 m_visionTool->visualizeSegment(ctx, *seedCopy, "Bad fit recovery");
             }

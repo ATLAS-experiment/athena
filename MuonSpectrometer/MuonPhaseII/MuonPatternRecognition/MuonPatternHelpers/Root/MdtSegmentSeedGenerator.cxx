@@ -81,7 +81,7 @@ namespace MuonR4{
                 }
             }
             ATH_MSG_VERBOSE("SeedGenerator - sorting of hits done. Mdt layers: "<<m_hitLayers.mdtHits().size()
-                            <<", strip layers: "<<m_hitLayers.stripHits().size()<<std::endl<<sstr.str());
+                            <<", strip layers: "<<m_hitLayers.stripHits().size()<<std::endl<<sstr.str()<<std::endl<<std::endl);
         }
     }
     
@@ -137,7 +137,10 @@ namespace MuonR4{
                                                               m_segmentSeed->positionInChamber(),
                                                               m_segmentSeed->directionInChamber(),0.);
             found->parentBucket = m_segmentSeed->parentBucket();
-            
+            found->nMdt = std::ranges::count_if(m_segmentSeed->getHitsInMax(),
+                                                [](const SpacePoint* hit){
+                                                    return hit->type() == xAOD::UncalibMeasType::MdtDriftCircleType;
+                                                });
             SeedSolution patternSeed{};
             patternSeed.seedHits.resize(2*m_hitLayers.mdtHits().size());
             patternSeed.solutionSigns.resize(2*m_hitLayers.mdtHits().size());
@@ -259,19 +262,18 @@ namespace MuonR4{
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Reject due to similarity");
             return std::nullopt;
         }
-        unsigned int nMdt{0};
         /** Collect all hits close to the seed line */
         for (const auto [layerNr,  hitsInLayer] : Acts::enumerate(m_hitLayers.mdtHits())) {
-            ATH_MSG_VERBOSE( hitsInLayer.size()<<" hits in layer "<<(layerNr +1));
+            ATH_MSG_VERBOSE( __func__<<"() "<<__LINE__<<": "<<hitsInLayer.size()<<" hits in layer "<<(layerNr +1));
             bool hadGoodHit{false};
             for (const HoughHitType testMe : hitsInLayer){
                 const double pull = std::sqrt(SegmentFitHelpers::chiSqTermMdt(seedPos, seedDir, *testMe, msg()));            
-                ATH_MSG_VERBOSE("Test hit "<<idHelperSvc->toString(testMe->identify())
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Test hit "<<idHelperSvc->toString(testMe->identify())
                             <<" "<<Amg::toString(testMe->positionInChamber())<<", pull: "<<pull);              
                 if (pull < m_cfg.hitPullCut) {
                     hadGoodHit = true;
                     solCandidate.seedHits.emplace_back(testMe);
-                    ++nMdt;
+                    ++candidateSeed.nMdt;
                 }/// what ever comes after is not matching onto the segment 
                 else if (hadGoodHit) {
                     break;
@@ -279,14 +281,17 @@ namespace MuonR4{
             }
         }
         /** Reject seeds with too litle Mdt hit association */
-        if (1.*nMdt < std::max(1.*m_cfg.nMdtHitCut, m_cfg.nMdtLayHitCut * m_hitLayers.mdtHits().size())) {
+        const unsigned hitCut = std::max(1.*m_cfg.nMdtHitCut, m_cfg.nMdtLayHitCut * m_hitLayers.mdtHits().size()); 
+
+        if (1.*candidateSeed.nMdt < hitCut) {
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Too few hits associated "<<candidateSeed.nMdt<<", expect: "<<hitCut<<" hits.");
             return std::nullopt;
         }
         /* Calculate the left-right signs of the used hits */
         if (m_cfg.overlapCorridor) {
             solCandidate.solutionSigns = driftSigns(seedPos, seedDir, solCandidate.seedHits, msg());
-            ATH_MSG_VERBOSE("Circle solutions for seed "<<idHelperSvc->toStringChamber(bottomHit->identify())<<" - "
-                           <<solCandidate);
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Circle solutions for seed "
+                          <<idHelperSvc->toStringChamber(bottomHit->identify())<<" - "<<solCandidate);
             /** Last check wheather another seed with the same left-right combination hasn't already been found */
             for (unsigned int a = m_cfg.startWithPattern; a< m_seenSolutions.size() ;++a) { 
                 const SeedSolution& accepted = m_seenSolutions[a];
@@ -325,10 +330,10 @@ namespace MuonR4{
         /** If we found a long Mdt seed, then ensure that all
          *  subsequent seeds have at least the same amount of Mdt hits. */
         if (m_cfg.tightenHitCut) {
-            m_cfg.nMdtHitCut = std::max(m_cfg.nMdtHitCut, nMdt);
+            m_cfg.nMdtHitCut = std::max(m_cfg.nMdtHitCut, candidateSeed.nMdt);
         }
         ++m_nGenSeeds;        
-        ATH_MSG_VERBOSE("In event "<<ctx.eventID().event_number()<<" found new seed solution "<<toString(candidateSeed.parameters));
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": In event "<<ctx.eventID().event_number()<<" found new seed solution "<<toString(candidateSeed.parameters));
         if (m_cfg.fastSeedFit) {
             if (!m_cfg.fastSegFitWithT0) {
                 fitDriftCircles(candidateSeed);
@@ -353,7 +358,7 @@ namespace MuonR4{
                 for (const HoughHitType testMe : hitsInLayer){
                     const double pull = std::sqrt(SegmentFitHelpers::chiSqTermStrip(seedPos, seedDir, *testMe, msg())) 
                                       / testMe->dimension();
-                    ATH_MSG_VERBOSE("Test hit "<<idHelperSvc->toString(testMe->identify())
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Test hit "<<idHelperSvc->toString(testMe->identify())
                                 <<" "<<Amg::toString(testMe->positionInChamber())<<", pull: "<<pull);
                     /// Add all hits with a pull better than the threshold
                     if (pull <= bestPull) {
