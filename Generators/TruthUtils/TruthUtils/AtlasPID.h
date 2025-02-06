@@ -458,14 +458,24 @@ template<> inline bool isGaugino(const int& p){ auto value_digits = DecodedPID(p
 /// the quantum numbers are specified by tech, ij, where i and j are 1 or 2. nLis then 2i+j. The coloron
 /// V8, is a heavy gluon color octet and thus is 3100021
 template<class T> inline bool isTechnicolor(const T& p){return isTechnicolor(p->pdg_id());}
-template<> inline bool isTechnicolor(const DecodedPID& p){ auto pp = (p.ndigits()==7) ? p.shift(2) : DecodedPID(0); return (p.ndigits() == 7 &&  p(0) == 3 && (p(1) == 0 || p(0) == 1) &&
-                                                                                           ( isQuark(pp) || isLepton(pp) || isBoson(pp) || isGlueball(pp) || isDiquark(pp) || isHadron(pp) ) ); }
+template <>
+inline bool isTechnicolor(const DecodedPID& p) {
+  const auto& pp = (p.ndigits() == 7) ? p.shift(2) : DecodedPID(0);
+  return (p.ndigits() == 7 && p(0) == 3 && (p(1) == 0 || p(0) == 1) &&
+          (isQuark(pp) || isLepton(pp) || isBoson(pp) || isGlueball(pp) ||
+           isDiquark(pp) || isHadron(pp)));
+}
 template<> inline bool isTechnicolor(const int& p){ auto value_digits = DecodedPID(p); return isTechnicolor(value_digits);}
 
 /// PDG rule 11f
 /// Excited (composite) quarks and leptons are identified by setting n= 4 and nr= 0
 template<class T> inline bool isExcited(const T& p){return isExcited(p->pdg_id());}
-template<> inline bool isExcited(const DecodedPID& p){ auto pp = (p.ndigits()==7) ? p.shift(2) : DecodedPID(0); return (p.ndigits() == 7 && (p(0) == 4 && p(1) == 0 ) && (isLepton(pp) || isQuark(pp)) );}
+template <>
+inline bool isExcited(const DecodedPID& p) {
+  const auto& pp = (p.ndigits() == 7) ? p.shift(2) : DecodedPID(0);
+  return (p.ndigits() == 7 && (p(0) == 4 && p(1) == 0) &&
+          (isLepton(pp) || isQuark(pp)));
+}
 template<> inline bool isExcited(const int& p){ auto value_digits = DecodedPID(p); return isExcited(value_digits);}
 
 /// PDG rule 11g:
@@ -564,8 +574,13 @@ template<> inline bool isDM(const int& p){ auto sp = std::abs(p); return (sp >= 
 /// as far as possible. Thus 4900021 is the gauge boson g_v of a confining gauge field, 490000n_{q_v} and 490001n_{l_v} fundamental
 /// constituents charged or not under this, 4900022 is the γ_v of a non-confining field, and 4900n_{q_{v1}}n_{q_{v2}}n_J a Hidden Valley meson.
 template<class T> inline bool isHiddenValley(const T& p){return isHiddenValley(p->pdg_id());}
-template<> inline bool isHiddenValley(const DecodedPID& p){ auto pp = (p.ndigits()==7) ? p.shift(2) : DecodedPID(0);  return (p.ndigits() == 7 &&  p(0) == 4 && p(1) == 9 &&
-                                                                                           ( isQuark(pp) || isLepton(pp) || isBoson(pp) || isGlueball(pp) || isDiquark(pp) || isHadron(pp) ) ); }
+template <>
+inline bool isHiddenValley(const DecodedPID& p) {
+  const auto& pp = (p.ndigits() == 7) ? p.shift(2) : DecodedPID(0);
+  return (p.ndigits() == 7 && p(0) == 4 && p(1) == 9 &&
+          (isQuark(pp) || isLepton(pp) || isBoson(pp) || isGlueball(pp) ||
+           isDiquark(pp) || isHadron(pp)));
+}
 template<> inline bool isHiddenValley(const int& p){ auto value_digits = DecodedPID(p); return isHiddenValley(value_digits);}
 
 /// In addition, there is a need to identify ”Q-ball” and similar very exotic (multi-charged) particles which may have large, non-integer charge.
