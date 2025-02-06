@@ -279,7 +279,6 @@
 + MuonSpectrometer/MuonPhaseII/MuonDetDescr/MuonGeoModelR4
 + MuonSpectrometer/MuonPhaseII/MuonG4/MuonSensitiveDetectorsR4
 + MuonSpectrometer/MuonPhaseII/Event/xAOD/xAODMuonSimHit
-+ Reconstruction/RecAlgs
 + Reconstruction/RecEvent
 + Reconstruction/RecEventAthenaPool
 + Reconstruction/RecEventTPCnv
