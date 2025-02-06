@@ -332,7 +332,8 @@ atlas_add_citest( ACTS_WorkflowWithScoreBasedAmbiguity
    SCRIPT ActsWorkflowWithScoreBasedAmbiguity.sh )
 
 atlas_add_citest( ACTS_ActsGx2fRefitting
-   SCRIPT ActsGx2fRefitting.sh )
+   SCRIPT ActsGx2fRefitting.sh
+   LOG_IGNORE_PATTERN "Gx2fRefitNavigator.*ERROR No Volume | No start volume resolved. Nothing left to do." )
    
 atlas_add_citest( ACTS_ActsKfRefitting
    SCRIPT ActsKfRefitting.sh )
