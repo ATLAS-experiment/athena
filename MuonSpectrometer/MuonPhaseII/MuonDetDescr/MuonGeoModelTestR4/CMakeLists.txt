@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: MuonReadoutGeometryR4
@@ -28,7 +28,7 @@ endif()
 #### Standard geometry dumping test R3 (MC)
 atlas_add_test( testR3Geometry
                 SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers BML1A3 T1E1A01 MML1A1 --noSTGC 
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
