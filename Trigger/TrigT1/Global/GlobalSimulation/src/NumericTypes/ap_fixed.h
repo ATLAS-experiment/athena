@@ -1,12 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_AP_FIXED_H
 #define GLOBALSIM_AP_FIXED_H
-
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // due to statics used for debugging
 
 #include <cstddef>
 #include <sstream>
@@ -49,10 +46,6 @@ namespace GlobalSim {
     T m_value = T{0};
     static constexpr T m_overflow_mask = max_to_overflow<width, T>();
 
-    static inline bool s_check_overflow{false};
-    static inline bool s_print_value{false};
-    static inline bool s_debug{s_check_overflow or s_print_value};
-    
     bool m_ovflw{false};
     friend std::ostream& operator<<(std::ostream& os,
 				    const ap_fixed<width, dp, S,  T, WS> ap) {
