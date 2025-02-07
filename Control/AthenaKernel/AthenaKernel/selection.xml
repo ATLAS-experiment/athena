@@ -34,4 +34,6 @@
    <function name="Athena::getMessageSvc"/>
 
    <function name="ATHRNG::calculateSeedsPython"/>
+
+   <class name="implements<IProxyDict>" />
 </lcgdict>
