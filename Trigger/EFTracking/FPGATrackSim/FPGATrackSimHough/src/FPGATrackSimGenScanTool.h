@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimGenScanTool_H
 #define FPGATrackSimGenScanTool_H
@@ -324,7 +324,7 @@ protected:
     FPGATrackSimGenScanArray<int> m_validSliceAndScan;
 
     // structure is indexed on bin, then layer, then a set of modules
-    void readLayerMap(const string & filename);
+    void readLayerMap(const std::string & filename);
     FPGATrackSimGenScanArray< std::vector <std::set<unsigned> > > m_lyr_to_mod_map;
     FPGATrackSimGenScanArray< std::map<unsigned,unsigned> > m_mod_to_lyr_map;
 
