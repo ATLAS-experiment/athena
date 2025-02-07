@@ -31,7 +31,6 @@ DbSession                                            INFO     Open     DbSession
 Domain[ROOT_All]                                     INFO >   Access   DbDomain     READ      [ROOT_All] 
 AthenaPoolCnvSvc                                    DEBUG Setting StorageType to ROOTTREEINDEX
 MetaDataSvc                                          INFO Found MetaDataTools = PublicToolHandleArray(['xAODMaker::FileMetaDataTool/xAODMaker::FileMetaDataTool'])
-EventSelector                                        INFO EventSelection with query 
 PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile3.root, name=SimplePoolFile3.root, contextID=0
 MetaDataSvc                                         DEBUG handle() FirstInputFile for FID:A811B014-0297-AD47-AF4C-B75EF418982D
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name FID:A811B014-0297-AD47-AF4C-B75EF418982D

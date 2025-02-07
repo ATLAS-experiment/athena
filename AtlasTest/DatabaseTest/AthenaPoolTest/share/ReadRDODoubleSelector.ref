@@ -1,6 +1,5 @@
 SecondaryEventS...  DEBUG Initializing secondary event selector SecondaryEventSelector
 SecondaryEventS...  DEBUG reinitialization...
-SecondaryEventS...   INFO EventSelection with query 
 RDOReaderDouble...   INFO RDOReaderDoubleSelector::initialize()
 SecondaryEventS...  DEBUG EventSelectorAthenaPool::nextWithSkip
 RDOReaderDouble...  DEBUG RDOReaderDoubleSelector::execute()

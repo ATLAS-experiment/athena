@@ -8,7 +8,6 @@ AthDictLoaderSvc     INFO acquired Dso-registry
 Stream...ream1Tool   INFO Initializing StreamStream1.StreamStream1Tool
 StreamStream1        INFO Data output: SimplePoolFile2.root
 StreamStream1        INFO ../O reinitialization...
-EventSelector        INFO EventSelection with query 
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr       INFO Application Manager Started successfully

@@ -34,7 +34,6 @@ MetaDataSvc                                          INFO Found MetaDataTools = 
 EventSelector                                       DEBUG Initializing EventSelector
 EventSelector                                       DEBUG Service base class initialized successfully
 EventSelector                                       DEBUG reinitialization...
-EventSelector                                        INFO EventSelection with query 
 EventSelector                                       DEBUG Try item: "SimplePoolFile1.root" from the collection list.
 PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile1.root, name=SimplePoolFile1.root, contextID=0
 MetaDataSvc                                         DEBUG handle() FirstInputFile for FID:F2313678-C96A-964F-89E8-08BAB39F2DA7

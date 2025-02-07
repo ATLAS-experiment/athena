@@ -48,7 +48,6 @@ PoolSvc              INFO POOL WriteCatalog is xmlcatalog_file:PoolFileCatalog.x
 DbSession            INFO     Open     DbSession    
 Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
 MetaDataSvc          INFO Found MetaDataTools = PublicToolHandleArray(['IOVDbMetaDataTool'])
-EventSelector        INFO EventSelection with query 
 PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
 DbSession            INFO     Open     DbSession    
 Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] BE39C23A-2D04-71EA-FA08-73E7874A1AAA

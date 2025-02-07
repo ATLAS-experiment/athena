@@ -1,6 +1,5 @@
 SecondaryEventS...  DEBUG Initializing secondary event selector SecondaryEventSelector
 SecondaryEventS...  DEBUG reinitialization...
-SecondaryEventS...   INFO EventSelection with query 
 SecondaryEventS...  DEBUG EventSelectorAthenaPool::nextWithSkip
 AthenaPoolTestD...  DEBUG Executing AthenaPoolTestDataWriter
 AthenaPoolTestD...  DEBUG Collection of A's

@@ -88,7 +88,6 @@ AthenaPoolCnvSvc     INFO Loading POOL XMLAuthenticationService.
 InputMetaDataStore   INFO Initializing InputMetaDataStore - package version StoreGate-02-20-04
 EventSelector        INFO Create PoolCollectionConverter -  CollectionType: ImplicitROOT Connection:  InputCollection: SimplePoolFile2.root
 SimplePoolFile2.root   Always Root file version:51400
-EventSelector        INFO EventSelection with query  'Query':
 EventSelector        INFO ----- EventSelectorAthenaPool Initialized Properly
 StoreGateSvc         INFO Initializing StoreGateSvc - package version StoreGate-02-20-04
 DetDescrCnvSvc       INFO  initializing 

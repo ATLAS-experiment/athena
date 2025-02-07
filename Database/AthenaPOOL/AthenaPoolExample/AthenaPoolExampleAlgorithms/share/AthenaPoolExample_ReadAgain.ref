@@ -41,7 +41,6 @@ EventSelector                                       DEBUG Service base class ini
 EventSelector                                       DEBUG Events to skip: 9, 10
 IoComponentMgr                                       INFO IoComponent EventSelector has already had file EmptyPoolFile.root registered with i/o mode READ
 EventSelector                                       DEBUG reinitialization...
-EventSelector                                        INFO EventSelection with query 
 EventSelector                                       DEBUG Try item: "EmptyPoolFile.root" from the collection list.
 PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:EmptyPoolFile.root, name=EmptyPoolFile.root, contextID=0
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=POOLContainer(DataHeader), contextID=0
