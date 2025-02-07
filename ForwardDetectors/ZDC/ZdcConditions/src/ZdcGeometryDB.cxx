@@ -6,6 +6,8 @@
 #include "GaudiKernel/Bootstrap.h"
 #include "PathResolver/PathResolver.h"
 #include <GaudiKernel/ISvcLocator.h>
+#include "GeoModelInterfaces/IGeoModelSvc.h"
+#include "GeoModelUtilities/DecodeVersionKey.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBRecord.h"
@@ -84,10 +86,18 @@ bool ZdcGeoDBGeometryDB::loadGeoDB()
       ATH_MSG_FATAL("No RDBAccessSvc");
       throw std::runtime_error("No RDBAccessSvc found!");
     }
-  //DecodeVersionKey atlasVersion("ATLAS");
-  //const std::string& AtlasVersion = atlasVersion.tag();
-  IRDBRecordset_ptr tanParams = iAccessSvc->getRecordsetPtr("TanTaxn","TanTaxn-00");
-  IRDBRecordset_ptr zdcParams = iAccessSvc->getRecordsetPtr("ZdcPrd","ZdcPrd-00");
+
+  SmartIF<IGeoModelSvc> geoModel{Gaudi::svcLocator()->service ("GeoModelSvc")};
+  if (!geoModel)
+    {
+      ATH_MSG_FATAL("No GeoModelSvc");
+      throw std::runtime_error("No GeoModelSvc found!");
+    }
+  DecodeVersionKey versionKey(geoModel, "ForwardDetectors");
+
+  ATH_MSG_INFO("Loading ZDC geometry from tag: " << versionKey.tag() << " node: " << versionKey.node());
+  IRDBRecordset_ptr tanParams = iAccessSvc->getRecordsetPtr("TanTaxn",versionKey.tag(), versionKey.node());
+  IRDBRecordset_ptr zdcParams = iAccessSvc->getRecordsetPtr("ZdcPrd",versionKey.tag(), versionKey.node());
 
   IRDBRecordset::const_iterator AccessSvc_iter;
   for(AccessSvc_iter = tanParams->begin(); AccessSvc_iter != tanParams->end(); ++AccessSvc_iter)
@@ -115,8 +125,10 @@ bool ZdcGeoDBGeometryDB::loadGeoDB()
     {
       std::string name = (*AccessSvc_iter)->getString("NAME");
       std::string key = name;
-      if (key.substr(0,2)=="12" || key.substr(0,2)=="81")
+      if ( (key.find("RPD") == std::string::npos) &&
+	   (key.find("BRAN") == std::string::npos) )
 	key = "ZDC"+key;
+	
       int side = (*AccessSvc_iter)->getInt("SIDE");
       int mod = (*AccessSvc_iter)->getInt("MODUL");
       int type = -1;
@@ -135,7 +147,7 @@ bool ZdcGeoDBGeometryDB::loadGeoDB()
       m_mainJson["Detector"][key]["name"]=name;
       m_mainJson["Detector"][key]["module"]=mod;
       m_mainJson["Detector"][key]["side"]=side;
-      if (type>-1) m_mainJson["Detector"][key]["type"]=type; // RPD & BRAN have no "type"
+      if (type>-1) m_mainJson["Detector"][key]["type"]=type; // RPD & BRAN have no "type" in some versions of the GeoDB
       m_mainJson["Detector"][key]["x"]=x;
       m_mainJson["Detector"][key]["y"]=y;
       m_mainJson["Detector"][key]["z"]=z;
@@ -145,7 +157,7 @@ bool ZdcGeoDBGeometryDB::loadGeoDB()
       m_mainJson["Detector"][key]["k"]=k;
     }
 
-  ATH_MSG_INFO("Loaded ZDC DB from GeoDB");
+  ATH_MSG_INFO("Loaded ZDC DB from GeoDB" << versionKey.tag());
   return true;
 }
 
