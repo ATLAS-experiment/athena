@@ -61,14 +61,12 @@ def DataPrepToActsCfg(flags, **kwargs) -> ComponentAccumulator:
     kwargs.setdefault('ActsPixelSeedingAlgCfg.name', 'FPGAActsPixelSeedingAlg')
     kwargs.setdefault('ActsPixelSeedingAlgCfg.InputSpacePoints', ['FPGAPixelSpacePoints'])
     kwargs.setdefault('ActsPixelSeedingAlgCfg.OutputSeeds', 'FPGAPixelSeeds')
-    kwargs.setdefault('ActsPixelSeedingAlgCfg.OutputEstimatedTrackParameters', 'FPGAPixelEstimatedTrackParams')
     acc.merge(ActsPixelSeedingAlgCfg(flags, **extractChildKwargs(prefix='ActsPixelSeedingAlgCfg.', **kwargs)))
     
     # Strip seeding
     kwargs.setdefault('ActsStripSeedingAlgCfg.name', 'FPGAActsStripSeedingAlg')
     kwargs.setdefault('ActsStripSeedingAlgCfg.InputSpacePoints', ['FPGAStripSpacePoints'])
     kwargs.setdefault('ActsStripSeedingAlgCfg.OutputSeeds', 'FPGAStripSeeds')
-    kwargs.setdefault('ActsStripSeedingAlgCfg.OutputEstimatedTrackParameters', 'FPGAStripEstimatedTrackParams')
     acc.merge(ActsStripSeedingAlgCfg(flags, **extractChildKwargs(prefix='ActsStripSeedingAlgCfg.', **kwargs)))
     
     # ACTS Tracking
