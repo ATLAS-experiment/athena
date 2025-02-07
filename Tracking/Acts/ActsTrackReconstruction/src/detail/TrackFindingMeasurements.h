@@ -8,7 +8,7 @@
 #include "src/detail/AtlasUncalibSourceLinkAccessor.h"
 
 namespace ActsTrk {
-  class DetectorElementToActsGeometryIdMap;
+  struct DetectorElementToActsGeometryIdMap;
 }
 
 namespace ActsTrk::detail {
