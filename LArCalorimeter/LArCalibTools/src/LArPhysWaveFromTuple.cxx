@@ -81,7 +81,7 @@ StatusCode LArPhysWaveFromTuple::stop()
     for ( unsigned int i = 0; i < m_NPoints; i++ ) wave[i]=0.;
     unsigned int skipped = 0;
     unsigned int limit = tIndex<m_NPoints.value() ? tIndex : m_NPoints.value();
-    if ( m_skipPoints < m_prefixPoints ) limit = m_NPoints+m_skipPoints-m_prefixPoints;
+    if ( m_skipPoints < m_prefixPoints ) limit = m_NPoints.value() + m_skipPoints.value() - m_prefixPoints.value();
     double dt=Time[1]-Time[0];
     for ( unsigned int i = 0; i < limit; i++ )
     {
