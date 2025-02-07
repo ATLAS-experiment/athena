@@ -15,6 +15,7 @@
 #include "PersistentDataModel/DataHeader.h"
 #include "PersistentDataModel/TokenAddress.h"
 #include "PoolSvc/IPoolSvc.h"
+#include "RootUtils/APRDefaults.h"
 
 // Framework
 #include "GaudiKernel/ClassID.h"
@@ -92,7 +93,7 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
    }
    
    // Create DataHeader iterators
-   pool::ICollectionCursor* headerIterator = &m_poolCollectionConverter->executeQuery();
+   pool::ICollectionCursor* headerIterator = &m_poolCollectionConverter->selectAll();
    for (int verNumber = 0; verNumber < 100; verNumber++) {
       if (!headerIterator->next()) {
          m_poolCollectionConverter->disconnectDb().ignore();
@@ -105,7 +106,7 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
                return(StatusCode::FAILURE);
             }
             // Get DataHeader iterator
-            headerIterator = &m_poolCollectionConverter->executeQuery();
+            headerIterator = &m_poolCollectionConverter->selectAll();
             if (!headerIterator->next()) {
                return(StatusCode::FAILURE);
             }
@@ -159,10 +160,9 @@ StatusCode CondProxyProvider::updateAddress(StoreID::type /*storeID*/,
 //__________________________________________________________________________
 PoolCollectionConverter* CondProxyProvider::getCollectionCnv() {
    ATH_MSG_DEBUG("Try item: \"" << *m_inputCollectionsIterator << "\" from the collection list.");
-   PoolCollectionConverter* pCollCnv = new PoolCollectionConverter("ImplicitROOT",
+   PoolCollectionConverter* pCollCnv = new PoolCollectionConverter(std::string("ImplicitROOT:") + APRDefaults::TTreeNames::DataHeader,
 	   *m_inputCollectionsIterator,
 	   m_contextId,
-	   "",
 	   m_athenaPoolCnvSvc->getPoolSvc());
    if (!pCollCnv->initialize().isSuccess()) {
       // Close previous collection.

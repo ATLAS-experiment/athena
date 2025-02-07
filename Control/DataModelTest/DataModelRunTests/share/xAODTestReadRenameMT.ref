@@ -45,7 +45,6 @@ PoolSvc                      0    INFO Setting up APR FileCatalog and Streams
 PoolSvc                      0    INFO POOL WriteCatalog is file:xAODTestReadRename_catalog.xml
 DbSession                    0    INFO     Open     DbSession    
 Domain[ROOT_All]             0    INFO >   Access   DbDomain     READ      [ROOT_All] 
-EventSelector                0    INFO EventSelection with query 
 PoolSvc                      0    INFO File is not in Catalog! Attempt to open it anyway.
 DbSession                    0    INFO     Open     DbSession    
 Domain[ROOT_All]             0    INFO ->  Access   DbDatabase   READ      [ROOT_All] 1AA9ED5E-1E4B-3A55-A718-0FF0FF0FF0FF

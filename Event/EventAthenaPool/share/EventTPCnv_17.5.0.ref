@@ -51,7 +51,6 @@ PoolXMLFileCatalog Info Xerces-c initialization Number 0
 PoolXMLFileCatalog Info File PoolFileCatalog.xml does not exist, a new one is created
 EventSelector        INFO Initializing EventSelector - package version EventSelectorAthenaPool-00-19-16
 EventSelector        INFO reinitialization...
-EventSelector        INFO EventSelection with query 
 PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
 RootCollection Info Opening Collection File /afs/cern.ch/atlas/maxidisk/d33/referencefiles/aod/AOD-17.5.0/AOD-17.5.0-full.pool.root in mode: READ
 TClass::Init:0: RuntimeWarning: no dictionary for class LumiBlockCollection_p1 is available

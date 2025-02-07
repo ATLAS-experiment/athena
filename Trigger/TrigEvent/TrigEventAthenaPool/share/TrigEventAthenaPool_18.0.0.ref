@@ -21,7 +21,6 @@ PoolSvc                                              INFO Setting up APR FileCat
 PoolSvc                                              INFO POOL WriteCatalog is xmlcatalog_file:PoolFileCatalog.xml
 DbSession                                            INFO     Open     DbSession    
 Domain[ROOT_All]                                     INFO >   Access   DbDomain     READ      [ROOT_All] 
-EventSelector                                        INFO EventSelection with query 
 PoolSvc                                              INFO File is not in Catalog! Attempt to open it anyway.
 Warning in <TClass::Init>: no dictionary for class CosmicMuonCollection_tlp1 is available
 Warning in <TClass::Init>: no dictionary for class MdtTrackSegmentCollection_p2 is available

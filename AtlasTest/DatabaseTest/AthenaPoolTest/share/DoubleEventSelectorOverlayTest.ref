@@ -1,6 +1,5 @@
 SecondaryEventS...  DEBUG Initializing secondary event selector SecondaryEventSelector
 SecondaryEventS...  DEBUG reinitialization...
-SecondaryEventS...   INFO EventSelection with query 
 Stream1.Stream1...   INFO Initializing Stream1.Stream1Tool
 AthenaPoolAddre...  DEBUG Cannot retrieve DataHeader from DetectorStore.
 AthenaPoolAddre...  DEBUG Cannot retrieve DataHeader from DetectorStore.

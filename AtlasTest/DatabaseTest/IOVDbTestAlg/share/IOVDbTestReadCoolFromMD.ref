@@ -46,7 +46,6 @@ PoolSvc                          INFO POOL WriteCatalog is xmlcatalog_file:PoolF
 DbSession                        INFO     Open     DbSession    
 Domain[ROOT_All]                 INFO >   Access   DbDomain     READ      [ROOT_All] 
 MetaDataSvc                      INFO Found MetaDataTools = PublicToolHandleArray(['IOVDbMetaDataTool'])
-EventSelector                    INFO EventSelection with query 
 Domain[ROOT_All]                 INFO ->  Access   DbDatabase   READ      [ROOT_All] 59F33F20-744C-424E-9CE6-BBFC8C8D4789
 Domain[ROOT_All]                 INFO                           SimpleEventPoolFile.root
 RootDatabase.open                INFO SimpleEventPoolFile.root File version:61804

@@ -189,8 +189,6 @@ private: // properties
    /// Connection, connection string.
    // TODO: check if really not used anywhere
    Gaudi::Property<std::string> m_connection{this, "Connection", "", ""};
-   /// RefName, attribute name.
-   Gaudi::Property<std::string> m_refName{this, "RefName", "", ""};
    /// AttributeList SG key
    Gaudi::Property<std::string> m_attrListKey{this, "AttributeListKey", "Input", ""};
 
@@ -200,9 +198,6 @@ private: // properties
    void inputCollectionsHandler(Gaudi::Details::PropertyBase&);
    /// flag to notify the EvSel that the inputs were changed and reinit() needs to be called ASAP
    mutable bool m_inputCollectionsChanged ATLAS_THREAD_SAFE;
-
-   /// Query string passed to APR when opening DataHeader container (kind of useless).
-   Gaudi::Property<std::string> m_query{this, "Query", "", ""};
 
    /// KeepInputFilesOpen, boolean flag to keep files open after PoolCollection reaches end: default = false.
    /// Needed for PilUp to run without PoolFileCatalog. Relies on POOL to close files when reaching DB_AGE_LIMIT.
