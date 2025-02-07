@@ -67,6 +67,8 @@ class ElectronCalibrationConfig (ConfigBlock) :
             info="decorate the calo cluster eta on the reconstructed one")
         self.addOption ('writeTrackD0Z0', False, type = bool,
             info="save the d0 significance and z0sinTheta variables so they can be written out")
+        self.addOption ('decorateEmva', False, type=bool,
+            info="decorate E_mva_only on the objects (needed for columnar tools/PHYSLITE)")
 
         self.addOption ('decorateSamplingPattern', False, type=bool,
             info="add samplingPattern decorations to clusters as part of PHYSLITE")
@@ -102,6 +104,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
         alg.calibrationAndSmearingTool.useFastSim = (
             0 if self.forceFullSimConfig
             else int( config.dataType() is DataType.FastSim ))
+        alg.calibrationAndSmearingTool.decorateEmva = self.decorateEmva
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -194,6 +197,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
             # turn off scale corrections for the smearing step
             alg.calibrationAndSmearingTool.doScaleCorrection = False
             alg.calibrationAndSmearingTool.useMVACalibration = False
+            alg.calibrationAndSmearingTool.decorateEmva = False
 
         if self.minPt > 0 :
             # Set up the the pt selection
