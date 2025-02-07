@@ -7,7 +7,7 @@
 # Read the submission directory as a command line argument. You can
 # extend the list of arguments with your private ones later on.
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-
+import json
 import optparse
 parser = optparse.OptionParser()
 parser.add_option( '-d', '--data-type', dest = 'data_type',
@@ -61,6 +61,9 @@ parser.add_option( '--force-mc', dest='forceMC',
 parser.add_option( '--only-nominal-or', dest='onlyNominalOR',
                    action = 'store_true', default = False,
                    help = 'Only run overlap removal for nominal (skip systematics)')
+parser.add_option('--seq-output-file', dest='seq_out_filename',
+                   action='store',type='str',default='',
+                   help = 'Save the sequence configuration output to the provided file')
 ( options, args ) = parser.parse_args()
 
 # Set up (Py)ROOT.
@@ -150,7 +153,16 @@ algSeq = makeSequence (dataType, yamlPath=textConfig,
                        isPhyslite=options.physlite,
                        autoconfigFromFlags=flags, onlyNominalOR=options.onlyNominalOR,
                        forceEGammaFullSimConfig=forceEGammaFullSimConfig)
-printSequenceAlgs( algSeq ) # For debugging
+
+if options.seq_out_filename:
+    from AnalysisAlgorithmsConfig.SaveConfigUtils import save_algs_from_sequence_ELjob
+    with(open(options.seq_out_filename, 'w', encoding='utf-8')) as seq_out_file:
+        output_dict = {}
+        save_algs_from_sequence_ELjob(algSeq, output_dict) # For debugging
+        json.dump(output_dict, seq_out_file, ensure_ascii=False, indent=4)
+else:
+    printSequenceAlgs( algSeq ) # For debugging
+    
 algSeq.addSelfToJob( job )
 
 # Make sure that both the ntuple and the xAOD dumper have a stream to write to.
@@ -181,3 +193,10 @@ if options.exec_driver :
 
 print ("submitting job now", flush=True)
 driver.submit( job, submitDir )
+
+if options.seq_out_filename:
+    from AnalysisAlgorithmsConfig.SaveConfigUtils import combine_tools_and_algorithms_ELjob
+    _ = combine_tools_and_algorithms_ELjob(True, text_file = 'tool_config.txt',
+                                           alg_file = options.seq_out_filename,
+                                           output_file = 'my_analysis_config.json')
+

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # @author Joseph Lambert
 
@@ -437,6 +437,9 @@ SAVE
     config.setOptions (commands=[
         "disable actualInteractionsPerCrossing",
     ])
+
+    # save the tool configuration to a txt file
+    config.addBlock ('PrintConfiguration')
 
     # configure ConfigSequence
     configSeq = config.configure()

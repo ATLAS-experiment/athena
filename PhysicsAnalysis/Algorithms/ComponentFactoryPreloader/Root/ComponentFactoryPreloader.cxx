@@ -144,6 +144,7 @@
 #include <PhotonEfficiencyCorrection/AsgPhotonEfficiencyCorrectionTool.h>
 #include <PMGTools/PMGTruthWeightTool.h>
 #include <SelectionHelpers/SelectionNameSvc.h>
+#include <StandaloneAnalysisAlgorithms/PrintToolConfigAlg.h>
 #include <StandaloneAnalysisAlgorithms/xAODWriterAlg.h>
 #include <SystematicsHandles/SystematicsSvc.h>
 #include <TauAnalysisAlgorithms/DiTauEfficiencyCorrectionsAlg.h>
@@ -288,6 +289,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::PhotonOriginCorrectionAlg>("CP::PhotonOriginCorrectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::PhotonShowerShapeFudgeAlg>("CP::PhotonShowerShapeFudgeAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::PileupReweightingAlg>("CP::PileupReweightingAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::PrintToolConfigAlg>("CP::PrintToolConfigAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::RunNumberSelectorAlg>("CP::RunNumberSelectorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::SaveFilterAlg>("CP::SaveFilterAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::SecVertexTruthMatchAlg>("CP::SecVertexTruthMatchAlg"));

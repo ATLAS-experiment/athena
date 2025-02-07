@@ -459,6 +459,9 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
         'disable actualInteractionsPerCrossing',
     ])
 
+    # save the tool configuration to a txt file
+    configSeq += config.makeConfig ('PrintConfiguration')
+
     # return configSeq for unit test
     if returnConfigSeq:
         return configSeq

@@ -408,4 +408,8 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import IOStatsBlock
         self.addAlgConfigBlock(algName="IOStats", alg=IOStatsBlock)
 
+        # configuration printer
+        from AsgAnalysisAlgorithms.PrintToolConfigAlgConfig import PrintToolConfigAlgBlock
+        self.addAlgConfigBlock(algName="PrintConfiguration", alg=PrintToolConfigAlgBlock)
+
         return
