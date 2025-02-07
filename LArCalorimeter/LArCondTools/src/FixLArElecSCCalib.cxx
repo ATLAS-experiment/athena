@@ -39,24 +39,19 @@
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "CoralBase/Blob.h"
 
+#include "TTree.h"
+#include "TFile.h"
+
 #include <fstream>
 
 FixLArElecSCCalib::FixLArElecSCCalib(const std::string& name, ISvcLocator* pSvcLocator) : 
   AthAlgorithm(name,pSvcLocator),
-  m_fixFlag(0),
-  m_em_idhelper(nullptr),
-  m_hec_idhelper(nullptr),
-  m_fcal_idhelper(nullptr),
-  m_online_idhelper(nullptr),
   m_sem_idhelper(nullptr),
   m_shec_idhelper(nullptr),
   m_sfcal_idhelper(nullptr),
   m_sonline_idhelper(nullptr),
   m_scell_idhelper(nullptr)
 { 
-
-    declareProperty("FixFlag",      m_fixFlag);
-    declareProperty("FixFactor",    m_fixFactor);
 
 }
 
@@ -66,18 +61,15 @@ FixLArElecSCCalib::~FixLArElecSCCalib()
 StatusCode FixLArElecSCCalib::initialize() {
   ATH_MSG_INFO ( " in initialize " );
   
-  ATH_CHECK( detStore()->retrieve(m_em_idhelper) );
-  ATH_CHECK( detStore()->retrieve(m_hec_idhelper) );
-  ATH_CHECK( detStore()->retrieve(m_fcal_idhelper) );
   ATH_CHECK( detStore()->retrieve(m_sem_idhelper) );
   ATH_CHECK( detStore()->retrieve(m_shec_idhelper) );
   ATH_CHECK( detStore()->retrieve(m_sfcal_idhelper) );
-  ATH_CHECK( detStore()->retrieve(m_online_idhelper) );
   ATH_CHECK( detStore()->retrieve(m_sonline_idhelper) );
   ATH_CHECK( detStore()->retrieve(m_scell_idhelper) );
 
   ATH_CHECK( m_cablingKeySC.initialize() );
   ATH_CHECK( m_CLKeySC.initialize() );
+  ATH_CHECK( m_mcSymKey.initialize() );
 
   return StatusCode::SUCCESS;
 }
@@ -108,6 +100,21 @@ StatusCode FixLArElecSCCalib::stop() {
                      return StatusCode::FAILURE;
                   }
                   return fix2(cabling, clCont);
+               }
+       case 3: {
+                  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKeySC};
+                  const LArOnOffIdMapping* cabling{*cablingHdl};
+                  if(!cabling) {
+                      ATH_MSG_ERROR( "Do not have cabling mapping from key " << m_cablingKeySC.key() );
+                      return StatusCode::FAILURE;
+                  }
+                  SG::ReadCondHandle<LArMCSym> symHdl{m_mcSymKey};
+                  const LArMCSym* sym{*symHdl};
+                  if(!sym) {
+                      ATH_MSG_ERROR( "Do not have MCSym from key " << m_mcSymKey.key() );
+                      return StatusCode::FAILURE;
+                  }
+                  return fix3(cabling,sym);
                }
        default: return StatusCode::SUCCESS;
     }        
@@ -332,4 +339,77 @@ void FixLArElecSCCalib::print (const HWIdentifier& hwid, const LArOnlineID_Base*
     out << " no calib ";
 
   out << std::dec << std::endl;
+}
+
+StatusCode FixLArElecSCCalib::fix3(const LArOnOffIdMapping *cabling, const LArMCSym *sym) {
+    
+   ATH_MSG_INFO ( " in fix3() " );
+
+   // Fix3 is for filling the MinBias blob  from ntuple
+
+   auto spec = new coral::AttributeListSpecification();
+   spec->extend("MinBias", "blob");
+   spec->extend<unsigned>("version");
+   CondAttrListCollection* coll=new CondAttrListCollection(true);
+
+   unsigned hashMax=m_sonline_idhelper->channelHashMax();
+   coral::AttributeList* attrList = new coral::AttributeList(*spec);               
+   (*attrList)["version"].setValue(0U);                               
+   coral::Blob& blob=(*attrList)["MinBias"].data<coral::Blob>();
+   blob.resize(hashMax*sizeof(float));
+   float* pblob=static_cast<float*>(blob.startingAddress());
+
+   std::unique_ptr<TFile> fin= std::make_unique<TFile>(m_infile.value().c_str());
+   TTree *tin=dynamic_cast<TTree*>(fin->Get("m_tree"));
+   int           ncell;
+   int           identifier[2862];   
+   int           layer[2862];   
+   int           region[2862]; 
+   int           ieta[2862];   
+   float         eta[2862];   
+   double        average[2862];   
+   double        rms[2862];   
+   TBranch        *b_ncell;   //!
+   TBranch        *b_identifier;   //!
+   TBranch        *b_layer;   //!
+   TBranch        *b_region;   //!
+   TBranch        *b_ieta;   //!
+   TBranch        *b_eta;   //!
+   TBranch        *b_average;   //!
+   TBranch        *b_rms;   //!
+   tin->SetMakeClass(1);
+   tin->SetBranchAddress("ncell", &ncell, &b_ncell);
+   tin->SetBranchAddress("identifier", identifier, &b_identifier);
+   tin->SetBranchAddress("layer", layer, &b_layer);
+   tin->SetBranchAddress("region", region, &b_region);
+   tin->SetBranchAddress("ieta", ieta, &b_ieta);
+   tin->SetBranchAddress("eta", eta, &b_eta);
+   tin->SetBranchAddress("average", average, &b_average);
+   tin->SetBranchAddress("rms", rms, &b_rms);
+   tin->GetEntry(0);
+
+
+   // read the ntuple (symmetrized)
+   std::map<Identifier, float> vmap;
+   for(int icell=0; icell<ncell; ++icell)  {
+
+       Identifier32 id32(identifier[icell]); 
+       Identifier id(id32);
+       vmap[id] = average[icell];
+
+   }
+   // now fill all SC
+   for (unsigned onlHash=0;onlHash<hashMax;++onlHash) {
+      const HWIdentifier hwid=m_sonline_idhelper->channel_Id(onlHash);
+      const Identifier id = cabling->cnvToIdentifier(hwid);
+      const Identifier idsym = sym->ZPhiSymOfl(id);
+      pblob[onlHash] = vmap[idsym];
+   }
+
+   coll->add(0,*attrList);
+  
+   ATH_CHECK(detStore()->record(coll,"/LAR/ElecCalibMCSC/MinBias"));
+   ATH_MSG_DEBUG("Stored coll with size "<<coll->size()<<" into /LAR/ElecCalibMCSC/MinBias");
+
+     return StatusCode::SUCCESS;
 }

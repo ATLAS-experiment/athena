@@ -8,4 +8,4 @@ find_package( cx_Oracle )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_scripts( share/LAr_updateHVcalib_online.sh share/LAr_updateHVcalibNoise.sh share/LArNewCalib_*.py share/LArSC2NtupleDumper.py share/LArDigits2NtupleDumper.py share/LArNoiseCorrelationMon.py python/LArCalib_postProcessingConfig.py python/LArCalib_ToCoolInlineConfig.py share/LArCellNtuple.py)
+atlas_install_scripts( share/LAr_updateHVcalib_online.sh share/LAr_updateHVcalibNoise.sh share/LArNewCalib_*.py share/LArSC2NtupleDumper.py share/LArDigits2NtupleDumper.py share/LArNoiseCorrelationMon.py python/LArCalib_postProcessingConfig.py python/LArCalib_ToCoolInlineConfig.py share/LArCellNtuple.py share/makeThresholdSet.sh )

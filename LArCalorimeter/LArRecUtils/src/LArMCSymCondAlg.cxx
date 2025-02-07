@@ -1,12 +1,14 @@
 //dear emacs, this is -*-c++-*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArMCSymCondAlg.h"
 #include "LArIdentifier/LArOnlineID.h"
+#include "LArIdentifier/LArOnline_SuperCellID.h"
 #include "CaloIdentifier/CaloCell_ID.h"
+#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 
 
 StatusCode LArMCSymCondAlg::initialize() {
@@ -39,19 +41,28 @@ StatusCode LArMCSymCondAlg::execute() {
   }
   writeHandle.addDependency(readHandle);
 
-  const LArOnlineID* larOnlineID=nullptr;
-  const CaloCell_ID* caloCellID=nullptr;
-  const LArEM_ID* lar_em_id=nullptr;
-  const LArHEC_ID* lar_hec_id=nullptr;
-  const LArFCAL_ID* lar_fcal_id=nullptr;
+  const LArOnlineID_Base *larOnlineID=nullptr;
+  const CaloCell_Base_ID *caloCellID=nullptr;
+  if(m_isSC){
+     const LArOnline_SuperCellID *ll;
+     ATH_CHECK(detStore()->retrieve(ll,"LArOnline_SuperCellID"));
+     larOnlineID=(const LArOnlineID_Base*)ll;
+     const CaloCell_SuperCell_ID *cal;
+     ATH_CHECK(detStore()->retrieve(cal,"CaloCell_SuperCell_ID"));
+     caloCellID=(const CaloCell_Base_ID *)cal;
+  } else {
+     const LArOnlineID *ll;
+     ATH_CHECK(detStore()->retrieve(ll,"LArOnlineID"));
+     larOnlineID=(const LArOnlineID_Base*)ll;
+     const CaloCell_ID *cal;
+     ATH_CHECK(detStore()->retrieve(cal,"CaloCell_ID"));
+     caloCellID=(const CaloCell_Base_ID *)cal;
+  }
 
+  const LArEM_Base_ID* lar_em_id=caloCellID->em_idHelper();
+  const LArHEC_Base_ID* lar_hec_id=caloCellID->hec_idHelper();
+  const LArFCAL_Base_ID* lar_fcal_id=caloCellID->fcal_idHelper();
 
-  ATH_CHECK(detStore()->retrieve(lar_em_id,"LArEM_ID"));
-  ATH_CHECK(detStore()->retrieve(lar_hec_id,"LArHEC_ID"));
-  ATH_CHECK(detStore()->retrieve(lar_fcal_id,"LArFCAL_ID"));
-  ATH_CHECK(detStore()->retrieve(caloCellID,"CaloCell_ID"));
-  ATH_CHECK(detStore()->retrieve(larOnlineID,"LArOnlineID"));
-  
   const unsigned ncellem=lar_em_id->channel_hash_max();
   const unsigned ncellhec=lar_hec_id->channel_hash_max();
   const unsigned ncellfcal=lar_fcal_id->channel_hash_max();

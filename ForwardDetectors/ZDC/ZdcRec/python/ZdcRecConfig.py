@@ -253,6 +253,10 @@ def ZdcRecRun3Cfg(flags):
             doFADCCorr = True
             doNonLinCorr = False
 
+    # No calibration required (or exists) for MC
+    if flags.Input.isMC:
+            doCalib = False
+
     doRPD = flags.Detector.EnableZDC_RPD
 
     print('ZdcRecRun3Cfg: doCalib = '+str(doCalib)+' for project '+flags.Input.ProjectName)
@@ -337,6 +341,7 @@ def ZdcNtupleRun3Cfg(flags,**kwargs):
                            lhcf2022 = False,
                            lhcf2022zdc = False,
                            lhcf2022afp = False,
+                           isMC = flags.Input.isMC,
                            enableTrigger = not flags.Input.isMC,
                            enableOutputSamples = True,
                            enableOutputTree = True,
@@ -519,6 +524,7 @@ if __name__ == '__main__':
     if (flags.Input.isMC):
        print('ZdcRecConfig: Running over MC Samples')
        flags.Input.ProjectName = "data23_hi"
+       flags.Reco.EnableTrigger = False
  
     # supply missing metadata based on project name
     pn = flags.Input.ProjectName
@@ -596,6 +602,7 @@ if __name__ == '__main__':
             # zdcMonitorAcc.getEventAlgo('ZdcMonAlg').OutputLevel = 2 # turn on DEBUG messages
             acc.merge(ZdcInjNtupleCfg(flags))            
     else:
+        acc.merge(ZdcRecCfg(flags))
         acc.merge(ZdcNtupleLocalCfg(flags))
 
     acc.printConfig(withDetails=True)

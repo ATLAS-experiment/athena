@@ -1,24 +1,14 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArMinBias2Ntuple.h"
-#include "LArRawConditions/LArMinBiasMC.h"
-#include "LArRawConditions/LArMinBiasAverageMC.h"
 #include "CaloIdentifier/CaloGain.h"
-/*
-#include "GaudiKernel/INTupleSvc.h"
-#include "GaudiKernel/NTuple.h"
-#include "GaudiKernel/SmartDataPtr.h"
-*/
 
-//#include <fstream>
 
 LArMinBias2Ntuple::LArMinBias2Ntuple(const std::string& name, ISvcLocator* pSvcLocator): 
   LArCond2NtupleBase(name, pSvcLocator),
   m_isPileup(false) { 
-  declareProperty("ContainerKey",m_contKey="LArMinBias");
-  //declareProperty("IsMC",m_isMC = false);
 
   declareProperty("NtupleTitle",m_ntTitle="MinBias");
   declareProperty("NtupleName",m_ntpath="/NTUPLES/FILE1/MINBIAS");
@@ -28,14 +18,31 @@ LArMinBias2Ntuple::LArMinBias2Ntuple(const std::string& name, ISvcLocator* pSvcL
 LArMinBias2Ntuple::~LArMinBias2Ntuple() 
 = default;
 
+StatusCode LArMinBias2Ntuple::initialize() {
+  m_isPileup = m_contKey.key().empty() && (m_contKeyAv.key().find("Pileup") != std::string::npos);
+  ATH_CHECK(m_contKey.initialize(!m_isPileup));
+  ATH_CHECK(m_contKeyAv.initialize());
+  return LArCond2NtupleBase::initialize();
+}
+
 StatusCode LArMinBias2Ntuple::stop() {
    
   const ILArMinBias* LArMinBias = nullptr;
   const ILArMinBiasAverage* LArMinBiasAv = nullptr;
   
-  m_isPileup = m_contKey.find("Pileup") != std::string::npos;
-  if(!m_isPileup) ATH_CHECK( m_detStore->retrieve(LArMinBias,m_contKey) );
-  ATH_CHECK( m_detStore->retrieve(LArMinBiasAv,m_contKey+"Average") );
+  if(!m_isPileup) {
+     LArMinBias=m_detStore->tryConstRetrieve<ILArMinBias>(m_contKey.key());
+     if (!LArMinBias) {
+        SG::ReadCondHandle<ILArMinBias> mbHandle{m_contKey};
+        LArMinBias=*mbHandle;
+     }
+  }
+
+  LArMinBiasAv=m_detStore->tryConstRetrieve<ILArMinBiasAverage>(m_contKeyAv.key());
+  if(!LArMinBiasAv) {
+    SG::ReadCondHandle<ILArMinBiasAverage> mbaHandle{m_contKeyAv};
+    LArMinBiasAv=*mbaHandle;
+  }
 
  NTuple::Item<float> minbias;
  NTuple::Item<float> minbias_av;

@@ -43,7 +43,7 @@ StatusCode RPDAnalysisTool::initialize() {
   RPDConfig finalConfig {};
   std::array<std::vector<float>, 2> finalOutputCalibFactors;
   // first initialize reconstruction parameters from config string
-  if (m_configuration == "default" || m_configuration == "pp2023" || m_configuration == "PbPb2023") {
+  if (m_configuration == "default" || m_configuration == "pp2023" || m_configuration == "PbPb2023" || m_configuration == "MonteCarloPbPb2023") {
     finalConfig.nSamples = 24;
     finalConfig.nBaselineSamples = 7;
     finalConfig.endSignalSample = 23;

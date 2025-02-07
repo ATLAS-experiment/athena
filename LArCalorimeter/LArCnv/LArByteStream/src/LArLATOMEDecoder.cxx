@@ -672,28 +672,27 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
     int nsc = 0;
     unsigned int oldipacket = 0;
     for (unsigned int itimeslot = 0; itimeslot < 6; ++itimeslot) {
-
-      unsigned int l_bcid = (bswap_32(p[s])) >> 16;
-      if (itimeslot != 0) {
-        if (l_bcid != bcid) {
-          ATH_MSG_WARNING("ERROR: inconsistent BCID between time slots");
-        }
-      } else {
-        if (bcid != s_nBunches) {  /// start of packet, bcid still unvalid
-          //// should increase by one but take care of rotation at s_nBunches;
-          unsigned int bcid_c = bcid + 1;
-          if (bcid_c == s_nBunches) {
-            bcid = 0;
-            bcid_c = 0;
-          }
-          if (bcid_c != l_bcid) {
-            ATH_MSG_WARNING("ERROR: BCID not increasing properly between samples, L1ID is: "
-                            << m_l1ID << ", BCID is from payload: " << l_bcid << ", expected BCID is: " << bcid_c << ", LATOME channel is: " << nsc);
-          }
-        }
-        m_BCIDsInEvent[iBC] = l_bcid;
+      unsigned int l_bcid = (bswap_32(p[s]))>>16;
+      if(itimeslot!=0){
+	if(l_bcid!=bcid){
+	  ATH_MSG_WARNING( "ERROR: inconsistent BCID between time slots" );
+	}
       }
-      bcid = l_bcid;
+      else{
+	if(bcid!=s_nBunches){ /// start of packet, bcid still unvalid
+	  //// should increase by one but take care of rotation at s_nBunches;
+	  unsigned int bcid_c = bcid+1;
+	  if(bcid_c==s_nBunches){
+            bcid=0;
+	    bcid_c = 0;
+	  }
+	  if(bcid_c != l_bcid){
+	   ATH_MSG_WARNING( "ERROR: BCID not increasing properly between samples, sourceId: " << m_nthLATOME << " L1ID is: " << m_l1ID << ", BCID is from payload: " << l_bcid << ", expected BCID is: " << bcid_c << ", LATOME channel is: " << nsc );
+	  }
+	}
+	m_BCIDsInEvent[iBC] = l_bcid;
+      }
+      bcid=l_bcid;
 
       unsigned int mux = ((bswap_32(p[s])) >> 8) & 0xff;
       increaseWordShift(s);

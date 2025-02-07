@@ -132,10 +132,16 @@ def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
         runiov=run << 32
         obj=folder.findObject(runiov,0)
         payload=obj.payload()
+        if not quiet:
+           mlog_LRF.info('payload: %s',payload)
         timing=payload['timing_configuration']
         recipe=payload['recipe_tdaq']
+        if not quiet:
+           mlog_LRF.info('recipe_tdaq: %s',recipe)
         mux.append(ord(payload['mux_setting_0']))
         mux.append(ord(payload['mux_setting_1']))
+        if not quiet:
+           mlog_LRF.info('mux_setting: %s',mux)
         adccalib=payload['ADCCalibMode']
     except Exception:
         mlog_LRF.warning("No information in /LAR/Configuration/RunLogDT for run %i", run)
@@ -146,7 +152,8 @@ def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
 
     runDB.closeDatabase()
     mlog_LRF.info("Found DT info for run %d", run)
-    print(mux)
+    if not quiet:
+       mlog_LRF.info(mux)
     # parse recipe string of the type at0_bcX-at1_bcY...
     for s,m in ["at0_bc",0],["at1_bc",1]:
        pos=recipe.find(s)
@@ -167,6 +174,9 @@ def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
                 sTypes.append(15)
           pass      
        pass
+    if not quiet:
+        mlog_LRF.info('sTypes: %s',sTypes)
+        mlog_LRF.info('sLengths: %s',sLengths)
 
     return  LArDTRunInfo(sTypes, sLengths, timing, adccalib)
 

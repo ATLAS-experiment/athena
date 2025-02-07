@@ -211,12 +211,19 @@ namespace LVL1
     //find the highest pt threshold passed - depite the name of this function
     std::string thrName="";
     double thrVal=0;
+    double thrValTmp=0;
     for (unsigned idec=0;idec<decisions.size();++idec) {
       if (!decisions[idec].second) continue;
-      std::shared_ptr<TrigConf::L1Threshold> thr = decisions[idec].first;
-      if (thr->thrValue(eta) > thrVal)
+      std::shared_ptr<TrigConf::L1Threshold_MU> thr = std::static_pointer_cast<TrigConf::L1Threshold_MU>(decisions[idec].first);
+      if(std::abs(eta)<1.05){
+	thrValTmp = thr->ptBarrel();
+      }
+      else{
+	thrValTmp = thr->ptEndcap();
+      }
+      if (thrValTmp > thrVal)
 	{
-	  thrVal = thr->thrValue(eta);
+	  thrVal = thrValTmp;
 	  thrName = thr->name();
 	}
     }

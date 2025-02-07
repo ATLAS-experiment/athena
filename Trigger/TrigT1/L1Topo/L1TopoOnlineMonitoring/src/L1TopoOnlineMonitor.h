@@ -137,10 +137,10 @@ private:
   StatusCode doHwMon(DecisionBits& decisionBits, std::vector<std::vector<unsigned>> &multWeights, const EventContext& ctx) const;
   
   /// Compare hardware and simulation
-  StatusCode doComp(DecisionBits& decisionBits) const;
+  StatusCode doComp(DecisionBits& decisionBits, const EventContext& ctx) const;
 
   /// Compare hardware and simulation for the multiplicity algorithms
-  StatusCode doMultComp(std::vector<std::vector<unsigned>> &multWeightsSim, std::vector<std::vector<unsigned>> &multWeightsHdw) const;
+  StatusCode doMultComp(std::vector<std::vector<unsigned>> &multWeightsSim, std::vector<std::vector<unsigned>> &multWeightsHdw, const EventContext& ctx) const;
     
   /// Get CTP ids from menu
   std::vector<unsigned> getCtpIds(const TrigConf::L1Menu& l1menu);

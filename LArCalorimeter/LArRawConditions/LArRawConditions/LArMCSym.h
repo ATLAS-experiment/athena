@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARMCSYM_H
@@ -12,8 +12,8 @@
 #include "Identifier/HWIdentifier.h"
 #include "Identifier/Identifier32.h"
 #include "Identifier/IdentifierHash.h"
-#include "LArIdentifier/LArOnlineID.h"
-#include "CaloIdentifier/CaloCell_ID.h"
+#include "LArIdentifier/LArOnlineID_Base.h"
+#include "CaloIdentifier/CaloCell_Base_ID.h"
 
 class LArMCSym
 {
@@ -29,8 +29,8 @@ public:
    * @brief onlHashtoSymOnl Symmetric HWID corresponding to each online hash.
    * @brief symIds List of all symmetric HWIDs.  MUST BE SORTED.
    */
-  LArMCSym(const LArOnlineID* onlId, 
-	   const CaloCell_ID* caloId,
+  LArMCSym(const LArOnlineID_Base* onlId, 
+	   const CaloCell_Base_ID* caloId,
 	   std::vector<HWIdentifier>&& oflHashtoSymOnl,
 	   std::vector<HWIdentifier>&& onlHashtoSymOnl,
 	   std::vector<HWIdentifier>&& symIds
@@ -149,8 +149,8 @@ public:
                const std::vector<HWIdentifier>& symIds) const;
 
 
-  const LArOnlineID* m_onlineID;
-  const CaloCell_ID* m_caloCellID;
+  const LArOnlineID_Base* m_onlineID;
+  const CaloCell_Base_ID* m_caloCellID;
   const std::vector<IdPair_t> m_oflHashtoSymOnl;
   const std::vector<IdPair_t> m_onlHashtoSymOnl;
   const std::vector<HWIdentifier> m_symIds;

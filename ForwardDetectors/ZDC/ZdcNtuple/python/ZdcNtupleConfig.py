@@ -4,10 +4,10 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
-def ZdcNtupleCfg(flags, name="AnalysisAlg", **kwargs):
+def ZdcNtupleCfg(flags, name="ZdcNtuple", **kwargs):
     acc = ComponentAccumulator()
 
-    if "TrigDecisionTool" not in kwargs:
+    if "TrigDecisionTool" not in kwargs and not flags.Input.isMC:
         from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
         kwargs.setdefault("TrigDecisionTool", acc.getPrimaryAndMerge(
             TrigDecisionToolCfg(flags)))

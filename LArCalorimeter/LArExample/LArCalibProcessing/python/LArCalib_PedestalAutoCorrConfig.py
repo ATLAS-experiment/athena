@@ -112,7 +112,7 @@ def LArPedestalAutoCorrCfg(flags):
         theLArAcorrPatcher.PatchMethod="FEBNeighbor" ##take the first neigbour
         #theLArAcorrPatcher.PatchMethod = "PhiAverage" ##do an aveage in phi after removing bad and empty event
         if flags.LArCalib.isSC:
-           theLArAcorrPatcher.ProblemsToPatch = [ "problematicForUnknownReason","transmissionErrorFibre","badAutoCorr",]
+           theLArAcorrPatcher.ProblemsToPatch = [ "problematicForUnknownReason","transmissionErrorFibre"]
            theLArAcorrPatcher.OnOffMap="LArOnOffIdMapSC" 
            theLArAcorrPatcher.CalibLineKey="LArCalibIdMapSC"
         else:
