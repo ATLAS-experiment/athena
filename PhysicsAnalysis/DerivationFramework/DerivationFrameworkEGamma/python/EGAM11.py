@@ -207,10 +207,10 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
     acc = ComponentAccumulator()
 
     # Schedule extra jets collections
-    from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMTopo
+    from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track
     from JetRecConfig.JetRecConfig import JetRecCfg
 
-    jetList = [AntiKt4PV0Track, AntiKt4EMTopo]
+    jetList = [AntiKt4PV0Track]
     for jd in jetList:
         acc.merge(JetRecCfg(flags, jd))
 
@@ -245,17 +245,7 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
     # - do event cleaning
     # but taus are missing in HI derivations so need to do differently
 
-    # Decorate if jet passed JVT criteria
-    from JetJvtEfficiency.JetJvtEfficiencyToolConfig import getJvtEffToolCfg
-
-    algName = "DFJet_EventCleaning_passJvtAlg"
-    passJvtTool = acc.popToolsAndMerge(getJvtEffToolCfg(flags, "AntiKt4EMTopo"))
-    passJvtTool.PassJVTKey = "AntiKt4EMTopoJets.DFCommonJets_passJvt"
-    acc.addEventAlgo(
-        CompFactory.JetDecorationAlg(
-            algName, JetContainer="AntiKt4EMTopoJets", Decorators=[passJvtTool]
-        )
-    )
+    # NO JVT criteria in HI data (see pp config for details)
 
     # Decorate if jet passes OR and save decoration DFCommonJets_passOR
     # Use modified OR that does not check overlaps with tauls
@@ -274,6 +264,7 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
         "OverlapRemovalGenUseAlg",
         OverlapLabel=outputLabel,
         OverlapRemovalTool=orTool,
+        JetKey = 'AntiKt4HIJets',
         TauKey=tauKey,
         TauLabel=tauLabel,
         BJetLabel=bJetLabel,
@@ -316,15 +307,7 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
 
         # Alg to calculate event-level and jet-level cleaning variables
         # Only store event-level flags for Loose* WPs
-        eventCleanAlg = CompFactory.EventCleaningTestAlg(
-            "EventCleaningTestAlg_" + wp,
-            EventCleaningTool=ecTool,
-            JetCollectionName="AntiKt4EMTopoJets",
-            EventCleanPrefix=prefix,
-            CleaningLevel=cleaningLevel,
-            doEvent=("Loose" in wp),
-        )
-        acc.addEventAlgo(eventCleanAlg)
+        # NO eventCleanAlg criteria in HI data (see pp config for details)
 
     # EGAM11 augmentations
     augmentationTools = []
@@ -495,7 +478,7 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
             StreamName=streamName,
             SGKey="Electrons",
             SelectionString="Electrons.pt>4*GeV",
-            TopoClCollectionSGKey="CaloCalTopoClusters",
+            TopoClCollectionSGKey="SubtractedCaloCalTopoClusters",
             ConeSize=0.5,
         )
     )
@@ -601,8 +584,9 @@ def EGAM11Cfg(flags):
         "Electrons",
         "GSFTrackParticles",
         "egammaClusters",
-        "CaloCalTopoClusters",
-    ]
+        "AntiKt4HIJets",
+        "BTagging_AntiKt4HI"
+     ]
 
     # on MC we also add:
     if flags.Input.isMC:
@@ -627,8 +611,7 @@ def EGAM11Cfg(flags):
         "Muons",
         "TauJets",
         "PrimaryVertices",
-        "InDetTrackParticles",
-        "AntiKt4EMTopoJets",
+        "InDetTrackParticles"
     ]
     if flags.Input.isMC:
         EGAM11SlimmingHelper.SmartCollections += [
@@ -686,11 +669,7 @@ def EGAM11Cfg(flags):
     EGAM11SlimmingHelper.AllVariables += ["HIEventShape"]
     EGAM11SlimmingHelper.AllVariables += ["CaloSums"]
 
-    # Add full CellContainer
-    EGAM11SlimmingHelper.StaticContent = [
-        "CaloCellContainer#AllCalo",
-        "CaloClusterCellLinkContainer#egammaClusters_links",
-    ]
+    # Full CellContainers not added in HI data (CaloCellContainer#AllCalo and CaloClusterCellLinkContainer#egammaClusters_links)
 
     EGAM11ItemList = EGAM11SlimmingHelper.GetItemList()
     acc.merge(
