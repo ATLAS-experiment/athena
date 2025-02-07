@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -242,12 +242,19 @@ def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", RDOContainer = None, **kw
     acc = ComponentAccumulator()
     from MuonConfig.MuonCalibrationConfig import MdtCalibrationToolCfg
 
+    tool_kwargs = {}
+
+    # Twin tube conditions not available in COMP200.
+    tool_kwargs.setdefault('UseTwin', True)
+    if flags.IOVDb.DatabaseInstance == 'COMP200':
+        tool_kwargs['UseTwin'] = False
+
     # We need the MDT cabling to be setup
     from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg, MdtTwinTubeMapCondAlgCfg
     acc.merge(MDTCablingConfigCfg(flags))
-    acc.merge(MdtTwinTubeMapCondAlgCfg(flags))
+    if tool_kwargs['UseTwin']:
+        acc.merge(MdtTwinTubeMapCondAlgCfg(flags))
 
-    tool_kwargs = {}
     tool_kwargs["xAODKey"] =  "xMdtDriftCircles" if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup else ""
     tool_kwargs["xAODTwinKey"] =  "xMdtTwinDriftCircles" if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup else ""
     
