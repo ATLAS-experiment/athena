@@ -38,6 +38,8 @@
 #include "ActsInterop/TableUtils.h"
 #include "src/detail/AtlasMeasurementSelector.h"
 #include "src/detail/OnTrackCalibrator.h"
+#include "src/detail/TrackFindingMeasurements.h"
+#include "src/detail/SharedHitCounter.h"
 
 // STL
 #include <sstream>
@@ -82,6 +84,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_addPixelStripCounts);
     ATH_MSG_DEBUG("   " << m_doTwoWay);
     ATH_MSG_DEBUG("   " << m_reverseSearch);
+    ATH_MSG_DEBUG("   " << m_countSharedHits);
     ATH_MSG_DEBUG("   " << m_phiMin);
     ATH_MSG_DEBUG("   " << m_phiMax);
     ATH_MSG_DEBUG("   " << m_etaMin);
@@ -307,6 +310,9 @@ namespace ActsTrk
     }
 
     detail::TrackFindingMeasurements measurements(uncalibratedMeasurementContainers.size() /* number of measurement containers*/);
+    std::optional<detail::SharedHitCounter> sharedHits;
+    if (m_countSharedHits || m_trackStatePrinter.isSet())
+      sharedHits.emplace(uncalibratedMeasurementContainers.size());
     const Acts::TrackingGeometry *
        acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
     ATH_CHECK(acts_tracking_geometry != nullptr);
@@ -316,9 +322,12 @@ namespace ActsTrk
       measurements.addMeasurements(icontainer,
                                    *uncalibratedMeasurementContainers[icontainer],
                                    **detectorElementToGeometryIdMap);
+      if (sharedHits.has_value())
+        sharedHits->addMeasurements(*uncalibratedMeasurementContainers[icontainer]);
     }
+    ATH_MSG_DEBUG("measurement index size = " << sharedHits->measurementIndexer().size());
 
-    if (!m_trackStatePrinter.empty()) {
+    if (m_trackStatePrinter.isSet()) {
       m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, **detectorElementToGeometryIdMap, measurements.measurementOffsets());
     }
 
@@ -350,6 +359,7 @@ namespace ActsTrk
                            *acts_tracking_geometry,
                            **detectorElementToGeometryIdMap,
                            measurements,
+                           sharedHits,
                            duplicateSeedDetector,
                            *seedContainers.at(icontainer),
                            *detElementsCollections.at(icontainer),
@@ -390,11 +400,12 @@ namespace ActsTrk
                               const Acts::TrackingGeometry &trackingGeometry,
                               const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
                               const detail::TrackFindingMeasurements &measurements,
+                              std::optional<detail::SharedHitCounter> &sharedHits,
                               detail::DuplicateSeedDetector &duplicateSeedDetector,
                               const ActsTrk::SeedContainer &seeds,
                               const InDetDD::SiDetectorElementCollection& detElements,
                               ActsTrk::MutableTrackContainer &tracksContainer,
-                              size_t typeIndex,
+                              std::size_t typeIndex,
                               const char *seedType,
                               EventStats &event_stat) const
   {
@@ -481,7 +492,6 @@ namespace ActsTrk
     };
 
     std::size_t category_i = 0;
-    const auto measurementContainerOffsets = measurements.measurementContainerOffsets();
 
     using BranchStopperResult = Acts::CombinatorialKalmanFilterBranchStopperResult;
     auto stopBranch = [&](const detail::RecoTrackContainer::TrackProxy &track,
@@ -492,8 +502,8 @@ namespace ActsTrk
         checkPixelStripCounts(track);
       }
 
-      if (!m_trackStatePrinter.empty()) {
-        m_trackStatePrinter->printTrackState(tgContext, trackState, measurementContainerOffsets, true);
+      if (m_trackStatePrinter.isSet()) {
+        m_trackStatePrinter->printTrackState(tgContext, trackState, sharedHits->measurementIndexer(), true);
       }
 
       if (!m_doBranchStopper)
@@ -581,13 +591,13 @@ namespace ActsTrk
     std::size_t nPrinted = 0;
     auto printSeed = [&](std::size_t iseed, const Acts::BoundTrackParameters &seedParameters, bool isKF = false)
     {
-      if (m_trackStatePrinter.empty())
+      if (!m_trackStatePrinter.isSet())
         return;
       if (!nPrinted++)
       {
         ATH_MSG_INFO("CKF results for " << seeds.size() << ' ' << seedType << " seeds:");
       }
-      m_trackStatePrinter->printSeed(tgContext, *seeds[iseed], seedParameters, measurementContainerOffsets, iseed, isKF);
+      m_trackStatePrinter->printSeed(tgContext, *seeds[iseed], seedParameters, sharedHits->measurementIndexer(), iseed, isKF);
     };
 
     // Loop over the track finding results for all initial parameters
@@ -613,7 +623,7 @@ namespace ActsTrk
         category_i = getSeedCategory(typeIndex, *seeds[iseed]);
         ++event_stat[category_i][kNTotalSeeds];
         ++event_stat[category_i][kNDuplicateSeeds];
-        if (m_trackStatePrinter.empty()) continue;  // delay continue to estimate track parms for TrackStatePrinter?
+        if (!m_trackStatePrinter.isSet()) continue;  // delay continue to estimate track parms for TrackStatePrinter?
       }
 
       plainOptions.direction = reverseSearch ? Acts::Direction::Backward : Acts::Direction::Forward;
@@ -742,14 +752,9 @@ namespace ActsTrk
           checkPixelStripCounts(track);
         }
 
-        if (!m_trackStatePrinter.empty()) {
-          m_trackStatePrinter->printTrack(tgContext, tracksContainerTemp, track, measurementContainerOffsets);
-        }
-
         ++ntracks;
         ++event_stat[category_i][kNOutputTracks];
 
-        // copy selected tracks into output tracksContainer
         auto selectPixelStripCountsFinal = [this](const detail::RecoTrackContainer::TrackProxy &track) {
           if (!m_addPixelStripCounts) return true;
           double eta = -std::log(std::tan(0.5 * track.theta()));
@@ -758,16 +763,35 @@ namespace ActsTrk
         };
         if (trackFinder().trackSelector.isValidTrack(track) &&
             selectPixelStripCountsFinal(track)) {
-          auto destProxy = tracksContainer.getTrack(tracksContainer.addTrack());
-          destProxy.copyFrom(track, true);  // make sure we copy track states!
-          ++event_stat[category_i][kNSelectedTracks];
 
           // Fill the track infos into the duplicate seed detector
           if (m_skipDuplicateSeeds) {
             storeSeedInfo(tracksContainerTemp, track, duplicateSeedDetector);
           }
+
+          // copy selected track into output tracksContainer
+          auto destProxy = tracksContainer.getTrack(tracksContainer.addTrack());
+          destProxy.copyFrom(track, true);  // make sure we copy track states!
+
+          if (m_countSharedHits) {
+            auto [nShared, nBadTrackMeasurements] = sharedHits->computeSharedHits(destProxy, tracksContainer);
+            if (nBadTrackMeasurements > 0)
+              ATH_MSG_ERROR("computeSharedHits: " << nBadTrackMeasurements << " track measurements not found in input for " << seedType << " seed " << iseed << " track");
+            ATH_MSG_DEBUG("found " << destProxy.nSharedHits() << " shared hits in " << seedType << " seed " << iseed << " track");
+            event_stat[category_i][kNTotalSharedHits] += nShared;
+          }
+
+          ++event_stat[category_i][kNSelectedTracks];
+
+          if (m_trackStatePrinter.isSet()) {
+            m_trackStatePrinter->printTrack(tgContext, tracksContainer, destProxy, sharedHits->measurementIndexer());
+          }
+
         } else {
           ATH_MSG_DEBUG("Track " << ntracks << " from " << seedType << " seed " << iseed << " failed track selection");
+          if (m_trackStatePrinter.isSet()) {
+            m_trackStatePrinter->printTrack(tgContext, tracksContainerTemp, track, sharedHits->measurementIndexer(), true);
+          }
         }
       };
 
@@ -860,7 +884,7 @@ namespace ActsTrk
       } else if (ntracks >= 2) {
         ++event_stat[category_i][kMultipleBranches];
       }
-      if (!m_trackStatePrinter.empty())
+      if (m_trackStatePrinter.isSet())
         std::cout << std::flush;
     }
 
@@ -1065,7 +1089,8 @@ namespace ActsTrk
                                           std::make_pair(kMultipleBranches, "Seeds with more than one branch"),
                                           std::make_pair(kNoSecond, "Tracks failing second CKF"),
                                           std::make_pair(kNStoppedTracksMinPt, "Stopped tracks below pT cut"),
-                                          std::make_pair(kNStoppedTracksMaxEta, "Stopped tracks above max eta")
+                                          std::make_pair(kNStoppedTracksMaxEta, "Stopped tracks above max eta"),
+                                          std::make_pair(kNTotalSharedHits, "Total shared hits")
                                       });
       assert(stat_labels.size() == kNStat);
       std::vector<std::string> categories;
@@ -1158,7 +1183,8 @@ namespace ActsTrk
                                                       TableUtils::defineSimpleRatio("selected / CKF tracks", kNSelectedTracks, kNOutputTracks),
                                                       TableUtils::defineSimpleRatio("selected tracks / used seeds", kNSelectedTracks, kNUsedSeeds),
                                                       TableUtils::defineSimpleRatio("branched tracks / used seeds", kMultipleBranches, kNUsedSeeds),
-                                                      TableUtils::defineSimpleRatio("no 2nd CKF / CKF tracks", kNoSecond, kNOutputTracks)});
+                                                      TableUtils::defineSimpleRatio("no 2nd CKF / CKF tracks", kNoSecond, kNOutputTracks),
+                                                      TableUtils::defineSimpleRatio("shared hits / CKF tracks", kNTotalSharedHits, kNOutputTracks)});
 
       std::vector<float> ratio = TableUtils::computeRatios(ratio_def,
                                                            nSeedCollections() + 1,

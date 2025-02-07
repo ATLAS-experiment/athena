@@ -37,6 +37,8 @@
 #include "ActsInterop/TableUtils.h"
 #include "src/detail/AtlasMeasurementSelector.h"
 #include "src/detail/OnTrackCalibrator.h"
+#include "src/detail/TrackFindingMeasurements.h"
+#include "src/detail/MeasurementIndex.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 
 // STL
@@ -135,7 +137,16 @@ namespace ActsTrk{
        acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
     ATH_CHECK( acts_tracking_geometry != nullptr);
 
-    detail::TrackFindingMeasurements measurements = collectMeasurements(context, **detectorElementToGeometryIdMap);
+    SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle(m_pixelClusters, context);
+    ATH_MSG_DEBUG("Measurements (pixels only) size: " << pixelClustersHandle->size());
+    // potential TODO: filtering only certain layers
+    detail::TrackFindingMeasurements measurements(1ul /* number of measurement containers*/);
+    measurements.addMeasurements(0, *pixelClustersHandle, **detectorElementToGeometryIdMap);
+    std::optional<detail::MeasurementIndex> measurementIndex;
+    if (m_trackStatePrinter.isSet()) {
+      measurementIndex.emplace(1ul);
+      measurementIndex->addMeasurements(*pixelClustersHandle);
+    }
 
     ActsTrk::detail::UncalibSourceLinkAccessor slAccessor(measurements.measurementRanges());
     Acts::SourceLinkAccessorDelegate<ActsTrk::detail::UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
@@ -210,7 +221,7 @@ namespace ActsTrk{
         ATH_MSG_DEBUG("Reco MTJ size " << trackStateBackend.size() );
         for ( size_t stateIndex=0; stateIndex < trackStateBackend.size(); ++stateIndex) {
           auto state = trackStateBackend.getTrackState(stateIndex);
-          if (m_trackStatePrinter.isSet()) m_trackStatePrinter->printTrackState(tgContext, state, measurements.measurementContainerOffsets(), false);
+          if (m_trackStatePrinter.isSet()) m_trackStatePrinter->printTrackState(tgContext, state, *measurementIndex, false);
         }
         ATH_MSG_DEBUG("Track has: " << tempTrackProxy.nMeasurements() << " measurements ");
         ATH_MSG_DEBUG("track: eta: " <<  -1 * log(tan( tempTrackProxy.theta() * 0.5)) << " phi: " << tempTrackProxy.phi() << " pt:" << abs(1./tempTrackProxy.qOverP() * sin(protoTrack.parameters->theta())));
@@ -230,16 +241,4 @@ namespace ActsTrk{
     return StatusCode::SUCCESS;
   }
 
-
-  detail::TrackFindingMeasurements TrackExtensionAlg::collectMeasurements(
-       const EventContext& context,
-       const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap) const {
-    SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle(m_pixelClusters, context);
-
-    detail::TrackFindingMeasurements measurements(1u /* only one measurement collection: pixel clusters*/);
-    ATH_MSG_DEBUG("Measurements (pixels only) size: " << pixelClustersHandle->size());
-    // potential TODO: filtering only certain layers
-    measurements.addMeasurements(0, *pixelClustersHandle, detectorElementToGeometryIdMap);
-    return measurements;
-  }
 } // EOF namespace

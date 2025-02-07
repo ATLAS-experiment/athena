@@ -130,7 +130,9 @@ def ActsMainTrackFindingAlgCfg(flags,
             kwargs.setdefault("maxOutliers", tolist(flags.Tracking.ActiveConfig.maxHoles))
         else:
             pass  # no maxOutliers cut
-        kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
+        # The shared hits are not calculated until *after* the track selection, so maxSharedHits is not used.
+        # Even if that were not the case, we need the ambiguity solver to decide which track to drop.
+        ### kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
         kwargs.setdefault("ptMinMeasurements", isdet(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", isdet(flags, pixel=[3], strip=[999999]))
 
