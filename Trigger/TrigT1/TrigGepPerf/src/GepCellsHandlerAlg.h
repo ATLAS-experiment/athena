@@ -1,11 +1,11 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef TRIGL0GEPPERF_CaloCellsHandlerTool_H
-#define TRIGL0GEPPERF_CaloCellsHandlerTool_H
+#ifndef TRIGGEPPERF_GepCellsHandlerALG_H
+#define TRIGGEPPERF_GepCellsHandlerALG_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloEvent/CaloCell.h"
@@ -14,30 +14,21 @@
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloConditions/CaloNoise.h"
 
-#include "./GepCaloCell.h"
+#include "GepCellMap.h"
 
 #include <vector>
+#include <map>
 
+class GepCellsHandlerAlg: public ::AthReentrantAlgorithm {
 
-typedef std::map<unsigned int,Gep::GepCaloCell> GepCellMap;
-typedef std::unique_ptr<GepCellMap> pGepCellMap;
+ public:
 
-
-class CaloCellsHandlerTool: public AthAlgTool {
+  GepCellsHandlerAlg( const std::string& name, ISvcLocator* pSvcLocator );
   
-public:
-  
-  CaloCellsHandlerTool(const std::string& type,
-		       const std::string& name,
-		       const IInterface* parent);
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute(const EventContext&) const override;
 
-  virtual ~CaloCellsHandlerTool();
-
-  StatusCode initialize();
-
-  StatusCode getGepCellMap(const CaloCellContainer& cells,
-			   pGepCellMap&,
-			   const EventContext& ctx) const;
+ private:
 
   StatusCode setNumberOfEnergyBits(int value) {
 
@@ -80,11 +71,6 @@ public:
 	return StatusCode::SUCCESS;
   }
  
- private:
-  
-  /** @brief Key of the CaloNoise Conditions data object. Typical values 
-      are '"electronicNoise', 'pileupNoise', or '"totalNoise' (default) */
-
   // Values are set in the initialize function
   int m_nEnergyBits = -1; 
   int m_valLeastSigBit = -1;
@@ -95,24 +81,28 @@ public:
 
   std::map<unsigned int,Gep::GepCaloCell> m_gepCellsBase = {};
 
-  Gaudi::Property<std::string> m_GepEnergyEncodingScheme {this, "GEPEnergyEncodingScheme", "", "String defining the GEP readout scheme according to number of readout bits + '-' + value of LSB in MeV + '-' + gain value"};
-  Gaudi::Property<bool> m_doGepHardwareStyleEnergyEncoding {this, "HardwareStyleEnergyEncoding", false, "Enabling or disabling the hardware-style energy encoding for the GEP"};
-  Gaudi::Property<bool> m_doTruncationOfOverflowingFEBs {this, "TruncationOfOverflowingFEBs", false, "Enabling or disabling the truncation of cells from FEBs with more than the maximum number of cells which can be send"};
-  Gaudi::Property<std::string> m_LArCellMap {this, "LArCellMapFile", "UpgradePerformanceFunctions/LAr_Cell_Map_offlineID_0.csv", "File associating LAr cells with readout FEBs and connection technology"};
+  Gaudi::Property<std::string> m_GepEnergyEncodingScheme {this, "GEPEnergyEncodingScheme", "", 
+    "String defining the GEP readout scheme according to number of readout bits + '-' + value of LSB in MeV + '-' + gain value"};
 
-  SG::ReadCondHandleKey<CaloNoise>
-  m_electronicNoiseKey{this,
-      "electronicNoiseKey",
-      "totalNoise",
-      "SG Key of CaloNoise data object"};
+  Gaudi::Property<bool> m_doGepHardwareStyleEnergyEncoding {this, "HardwareStyleEnergyEncoding", false, 
+    "Enabling or disabling the hardware-style energy encoding for the GEP"};
 
-  
-  SG::ReadCondHandleKey<CaloNoise>
-  m_totalNoiseKey{this,
-		  "totalNoiseKey",
-		  "totalNoise",
-		  "SG Key of CaloNoise data object"};
+  Gaudi::Property<bool> m_doTruncationOfOverflowingFEBs {this, "TruncationOfOverflowingFEBs", false, 
+    "Enabling or disabling the truncation of cells from FEBs with more than the maximum number of cells which can be send"};
 
+  Gaudi::Property<std::string> m_LArCellMap {this, "LArCellMapFile", "UpgradePerformanceFunctions/LAr_Cell_Map_offlineID_0.csv", 
+    "File associating LAr cells with readout FEBs and connection technology"};
+
+  /** @brief Key of the CaloNoise Conditions data object. Typical values 
+      are '"electronicNoise', 'pileupNoise', or '"totalNoise' (default) */
+
+  SG::ReadCondHandleKey<CaloNoise> m_electronicNoiseKey{this, "electronicNoiseKey", "totalNoise", "SG Key of CaloNoise data object"};
+ 
+  SG::ReadCondHandleKey<CaloNoise> m_totalNoiseKey{this, "totalNoiseKey", "totalNoise", "SG Key of CaloNoise data object"};
+
+  SG::WriteHandleKey<Gep::GepCellMap> m_outputGepCellsKey{this, "outputGepCellsKey", "", "Key for GepCell map"};
+
+  SG::ReadHandleKey<CaloCellContainer> m_caloCellsKey {this, "caloCells", "AllCalo", "key to read in a CaloCell constainer"};
 
   const CaloCell_ID* m_CaloCell_ID{nullptr};
   int getGepEnergy(float offline_et) const;
@@ -123,4 +113,4 @@ public:
 
 };
 
-#endif
+#endif //> !TRIGGEPPERF_GEPCELLSHANDLERALG_H

@@ -25,23 +25,18 @@ StatusCode GepClusteringAlg::initialize() {
   ATH_MSG_INFO ("Initializing " << name() << "...");
   ATH_MSG_INFO ("Clustering alg " << m_clusterAlg);
 
-  // Retrieve AlgTools
-  CHECK(m_caloCellsTool.retrieve());
-
-  CHECK(m_caloCellsKey.initialize());
+  // Initialize read and write handles
   CHECK(m_eventInfoKey.initialize());
   CHECK(m_outputCaloClustersKey.initialize());
-
+  CHECK(m_gepCellsKey.initialize());
 
   return StatusCode::SUCCESS;
 }
 
 
 StatusCode GepClusteringAlg::execute(const EventContext& ctx) const {
-  // Read in a CaloCell container. Clean up the collection (noise handling),
-  // and transform the cells to a more congenial format. Feed the cells
-  // to a cluster creation algorithm. Convert these clusters to CaloCells,
-  // and write them out.
+  // Feed the specified cell map to a cluster creation algorithm and writes 
+  // them out
 
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
@@ -49,12 +44,11 @@ StatusCode GepClusteringAlg::execute(const EventContext& ctx) const {
   CHECK(h_eventInfo.isValid());
   ATH_MSG_DEBUG("eventNumber=" << h_eventInfo->eventNumber() );
 
-  //
-  // Read in a container containing (all) CaloCells
+  auto h_gepCellsMap = SG::makeHandle(m_gepCellsKey, ctx);
+  CHECK(h_gepCellsMap.isValid());
+  auto gepCellsMap = *h_gepCellsMap;
 
-  auto h_caloCells = SG::makeHandle(m_caloCellsKey, ctx);
-  CHECK(h_caloCells.isValid());
-  auto cells = *h_caloCells;
+  ATH_MSG_DEBUG("Read in " << gepCellsMap.size() << " GEP cells");
 
   // container for CaloCluster wrappers for Gep Clusters
   SG::WriteHandle<xAOD::CaloClusterContainer> h_outputCaloClusters =
@@ -62,8 +56,6 @@ StatusCode GepClusteringAlg::execute(const EventContext& ctx) const {
   CHECK(h_outputCaloClusters.record(std::make_unique<xAOD::CaloClusterContainer>(),
 				    std::make_unique<xAOD::CaloClusterAuxContainer>()));
 
-  ATH_MSG_INFO("read in " + std::to_string(h_caloCells->size()) + " cells");
-  
   // Run  a cluster algorithm
   std::unique_ptr<Gep::IClusterMaker> clusterMaker{};
 
@@ -79,21 +71,15 @@ StatusCode GepClusteringAlg::execute(const EventContext& ctx) const {
 
   ATH_MSG_DEBUG( "Running " << clusterMaker->getName() << " cluster algorithm." );
 
-  // run the clustering algorthm, and obtain the Gep clusters
-  // first get the massaged  Cells
-  auto cell_map = std::make_unique<GepCellMap>();
-  CHECK(m_caloCellsTool->getGepCellMap(*h_caloCells, cell_map, ctx));
-
   // pass them to the cluster maker
-  std::vector<Gep::Cluster> customClusters =
-    clusterMaker->makeClusters(cell_map);
+  auto pCellMap = gepCellsMap.getCellMap();
+  std::vector<Gep::Cluster> customClusters = clusterMaker->makeClusters(pCellMap);
 
   ATH_MSG_DEBUG( "Clustering completed." );
   ATH_MSG_DEBUG("No of clusters: " << customClusters.size());
   if (!customClusters.empty()){
     ATH_MSG_DEBUG("Cluster 0 Energy: " << (customClusters[0]).vec.E());
   }
-
 
   // Store the Gep clusters to a CaloClusters, and write out.
   h_outputCaloClusters->reserve(customClusters.size());
@@ -115,8 +101,9 @@ StatusCode GepClusteringAlg::execute(const EventContext& ctx) const {
     ptr->setTime(gepclus.time);
 
     CaloClusterCellLink *cccl = new CaloClusterCellLink();
+
     for (auto cell_id : gepclus.cell_id) 
-        cccl->addCell(cell_map->at(cell_id).index, 1.0);
+        cccl->addCell(pCellMap->at(cell_id).index, 1.0);
 
     ptr->addCellLink(cccl);
   }
