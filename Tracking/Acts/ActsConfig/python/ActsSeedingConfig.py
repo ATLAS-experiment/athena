@@ -222,6 +222,7 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
             else:
                 seedTool_pixel = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
         elif flags.Acts.SeedingStrategy is SeedingStrategy.Gbts:
+            kwargs.setdefault("GbtsSeeding",True)
             seedTool_pixel = acc.popToolsAndMerge(ActsPixelGbtsSeedingToolCfg(flags))
         else:
             if flags.Tracking.doITkFastTracking:
