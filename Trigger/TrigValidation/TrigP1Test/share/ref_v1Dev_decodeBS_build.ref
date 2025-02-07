@@ -1123,6 +1123,10 @@ HLT_7j45_ftf_presel7j30_L14jJ40:
   eventCount: 0
 HLT_7j45_pf_ftf_presel7j30_L14jJ40:
   eventCount: 0
+HLT_caloclustermon_L1RD0_EMPTY:
+  eventCount: 0
+HLT_caloclustermon_L1RD0_FILLED:
+  eventCount: 0
 HLT_distrk20_medium_L1gXEJWOJ100:
   eventCount: 0
 HLT_distrk20_medium_L1gXEJWOJ110:

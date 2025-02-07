@@ -13,19 +13,18 @@ from TrigEDMConfig.TriggerEDM import recordable
 mlog = logging.getLogger ('TrigCaloRecConfig')
 
 
-def trigCaloClusterMonitoringTool(flags, doMonCells = False):
+def trigCaloClusterMonitoringTool(flags, doMonCells = False, isFullScan = None):
     """Monitoring tool for TrigCaloClusterMaker"""
 
     monTool = GenericMonitoringTool(flags, 'MonTool')
+    
+    if isFullScan is None:
+        isFullScan = doMonCells
 
-    maxNumberOfClusters = 1200 if doMonCells else 50
-    maxProcTime = 150000 if doMonCells else 4500
+    maxNumberOfClusters = 1200 if isFullScan else 50
 
     monTool.defineHistogram('container_size', path='EXPERT', type='TH1F',  title="Container Size; Number of Clusters; Number of Events", xbins=50, xmin=0.0, xmax=maxNumberOfClusters)
     monTool.defineHistogram('container_size_by_mu', path='EXPERT', type='TH1F',  title="Container Size; Number of Clusters; Number of Events", xbins=50, xmin=0.0, xmax=maxNumberOfClusters/60)
-    monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title="Total Execution Time; Execution time [ us ] ; Number of runs", xbins=100, xmin=0.0, xmax=maxProcTime)
-    monTool.defineHistogram('TIME_ClustMaker', path='EXPERT', type='TH1F', title="Cluster Maker Time; Execution time [ us ] ; Number of runs", xbins=100, xmin=0.0, xmax=maxProcTime)
-    monTool.defineHistogram('TIME_ClustCorr', path='EXPERT', type='TH1F', title="Cluster Correction Time; Execution time [ us ] ; Number of runs", xbins=100, xmin=0.0, xmax=100)
     monTool.defineHistogram('Et', path='EXPERT', type='TH1F',  title="Cluster E_T; E_T [ MeV ] ; Number of Clusters", xbins=135, xmin=-200.0, xmax=2500.0)
     monTool.defineHistogram('Eta', path='EXPERT', type='TH1F', title="Cluster #eta; #eta ; Number of Clusters", xbins=100, xmin=-2.5, xmax=2.5)
     monTool.defineHistogram('Phi', path='EXPERT', type='TH1F', title="Cluster #phi; #phi ; Number of Clusters", xbins=64, xmin=-3.2, xmax=3.2)
@@ -215,8 +214,7 @@ def hltCaloDMCalib(flags, name = "TrigDMCalib" ):
 
 
 @AccumulatorCache
-def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
-                           cellsKey=None, doLC=False, separateMonitoring=False):
+def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS", cellsKey=None, doLC=False):
     acc = ComponentAccumulator()
     cellsFromName = 'CaloCellsFS' if "FS" in clustersKey else "CaloCells"
     cells = cellsFromName if cellsKey is None else cellsKey
@@ -286,36 +284,24 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
 
     doMonCells = "FS" in name
     
-    if separateMonitoring:
-      alg = CompFactory.CaloClusterMaker(
-            name,
-            ClustersOutputName=recordable(clustersKey),
-            ClusterCellLinkOutputName = clustersKey+"_links",
-            ClusterMakerTools = [ topoMaker, topoSplitter, topoMoments],
-            ClusterCorrectionTools = listClusterCorrectionTools,
-            SaveUncalibratedSignalState = True,
-            WriteTriggerSpecificInfo = True)
-    else:
-      alg = CompFactory.TrigCaloClusterMaker(
-            name,
-            Cells=cells,
-            CaloClusters=recordable(clustersKey),
-            CellLinks = clustersKey+"_links",
-            ClusterMakerTools = [ topoMaker, topoSplitter, topoMoments], # moments are missing yet
-            ClusterCorrectionTools = listClusterCorrectionTools,
-            MonCells = doMonCells,
-            MonTool = trigCaloClusterMonitoringTool(flags, doMonCells) )
+    alg = CompFactory.CaloClusterMaker(
+          name,
+          ClustersOutputName=clustersKey if "CaloMon" in name else recordable(clustersKey),
+          ClusterCellLinkOutputName = clustersKey+"_links",
+          ClusterMakerTools = [ topoMaker, topoSplitter, topoMoments],
+          ClusterCorrectionTools = listClusterCorrectionTools,
+          SaveUncalibratedSignalState = True,
+          WriteTriggerSpecificInfo = True)
 
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     acc.merge(CaloNoiseCondAlgCfg(flags))
     acc.addEventAlgo(alg, primary=True)
-    if separateMonitoring:
-      monitor = CompFactory.TrigCaloClusterMonitor(name + 'Monitoring',
-                                                   CellsName = cells,
-                                                   ClustersName = clustersKey,
-                                                   MonitorCells = doMonCells,
-                                                   MonitoringTool = trigCaloClusterMonitoringTool(flags, doMonCells))
-      acc.addEventAlgo(monitor, primary=False)
+    monitor = CompFactory.TrigCaloClusterMonitor(name + 'Monitoring',
+                                                 CellsName = cells,
+                                                 ClustersName = clustersKey,
+                                                 MonitorCells = doMonCells,
+                                                 MonitoringTool = trigCaloClusterMonitoringTool(flags, doMonCells))
+    acc.addEventAlgo(monitor, primary=False)
     return acc
 
 
@@ -397,7 +383,7 @@ def hltCaloTopoClusteringCfg(
       gpuhyb = GPUCaloTopoClusterCfg(flags,
                                      True,
                                      CellsName,
-                                     clustersname = recordable(clusters),
+                                     clustersname = clusters if "CaloMon" in clustermakername else recordable(clusters),
                                      name = clustermakername,
                                      MonitorTool = trigCaloClusterMonitoringTool(flags, monitorCells),
                                      MonitorCells = monitorCells,
