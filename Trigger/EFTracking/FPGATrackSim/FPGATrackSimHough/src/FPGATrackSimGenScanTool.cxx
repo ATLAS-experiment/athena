@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimGenScanTool.cxx
@@ -934,7 +934,7 @@ void FPGATrackSimGenScanTool::computeValidBins() {
 
 
 
-void FPGATrackSimGenScanTool::readLayerMap(const string& filename) {
+void FPGATrackSimGenScanTool::readLayerMap(const std::string& filename) {
   std::ifstream f(filename);
   nlohmann::json data = nlohmann::json::parse(f);
 
