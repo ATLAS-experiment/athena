@@ -2,6 +2,9 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "../GepCellsHandlerAlg.h"
+DECLARE_COMPONENT( GepCellsHandlerAlg )
+
 #include "../GepClusteringAlg.h"
 DECLARE_COMPONENT( GepClusteringAlg )
 
@@ -16,9 +19,6 @@ DECLARE_COMPONENT( GepMETPufitAlg )
 
 #include "../GepClusterTimingAlg.h"
 DECLARE_COMPONENT( GepClusterTimingAlg )
-
-#include "../CaloCellsHandlerTool.h"
-DECLARE_COMPONENT( CaloCellsHandlerTool )
 
 #include "../GepPi0Alg.h"
 DECLARE_COMPONENT(GepPi0Alg)

@@ -1,25 +1,29 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <vector>
 #include <fstream>
 #include "TMath.h"
 #include "PathResolver/PathResolver.h"
-#include "./CaloCellsHandlerTool.h"
-
-CaloCellsHandlerTool::CaloCellsHandlerTool(const std::string& type,
-					   const std::string& name,
-					   const IInterface* parent): AthAlgTool(type, name, parent){
-}
-
-CaloCellsHandlerTool::~CaloCellsHandlerTool() {}
+#include "./GepCellsHandlerAlg.h"
 
 
-StatusCode CaloCellsHandlerTool::initialize() {
+GepCellsHandlerAlg::GepCellsHandlerAlg( const std::string& name, ISvcLocator* pSvcLocator ) :
+AthReentrantAlgorithm( name, pSvcLocator ){
+   }
 
+
+StatusCode GepCellsHandlerAlg::initialize() {
+  ATH_MSG_INFO ("Initializing " << name() << "...");
+  ATH_MSG_INFO ("Target GepCell container name " << m_outputGepCellsKey);
+
+  // Retrieve AlgTools
   ATH_CHECK(m_electronicNoiseKey.initialize());
   ATH_CHECK(m_totalNoiseKey.initialize());
+
+  CHECK(m_caloCellsKey.initialize());
+  CHECK(m_outputGepCellsKey.initialize());
   
   // CaloIndentifier
   CHECK( detStore()->retrieve (m_CaloCell_ID, "CaloCell_ID") );
@@ -52,18 +56,18 @@ StatusCode CaloCellsHandlerTool::initialize() {
 	m_readoutRanges[3] = (m_stepsPerRange+(m_stepsPerRange*m_valG)+((m_stepsPerRange-1)*m_valG*m_valG))*m_valLeastSigBit;
 	m_readoutRanges[4] = (m_stepsPerRange+(m_stepsPerRange*m_valG)+(m_stepsPerRange*m_valG*m_valG)+((m_stepsPerRange-1)*m_valG*m_valG*m_valG))*m_valLeastSigBit;
 
-	ATH_MSG_INFO("Readout scheme with " << m_nEnergyBits << "-bits provides the following four energy thresholds (with " << m_stepsPerRange << " discrete steps on each threshold)");
-	ATH_MSG_INFO("GEP cell energy range 0: min = " << m_readoutRanges[0] << " MeV -> max = " << m_readoutRanges[1] << " MeV");
-	ATH_MSG_INFO("GEP cell energy range 1: min = " << m_readoutRanges[1] + m_valLeastSigBit << " MeV -> max = " << m_readoutRanges[2] << " MeV");
-	ATH_MSG_INFO("GEP cell energy range 2: min = " << m_readoutRanges[2]+(m_valG*m_valLeastSigBit) << " MeV -> max = " << m_readoutRanges[3] << " MeV");
-	ATH_MSG_INFO("GEP cell energy range 3: min = " << m_readoutRanges[3]+(m_valG*m_valG*m_valLeastSigBit) << " MeV -> max = " << m_readoutRanges[4] << " MeV");
+	ATH_MSG_DEBUG("Readout scheme with " << m_nEnergyBits << "-bits provides the following four energy thresholds (with " << m_stepsPerRange << " discrete steps on each threshold)");
+	ATH_MSG_DEBUG("GEP cell energy range 0: min = " << m_readoutRanges[0] << " MeV -> max = " << m_readoutRanges[1] << " MeV");
+	ATH_MSG_DEBUG("GEP cell energy range 1: min = " << m_readoutRanges[1] + m_valLeastSigBit << " MeV -> max = " << m_readoutRanges[2] << " MeV");
+	ATH_MSG_DEBUG("GEP cell energy range 2: min = " << m_readoutRanges[2]+(m_valG*m_valLeastSigBit) << " MeV -> max = " << m_readoutRanges[3] << " MeV");
+	ATH_MSG_DEBUG("GEP cell energy range 3: min = " << m_readoutRanges[3]+(m_valG*m_valG*m_valLeastSigBit) << " MeV -> max = " << m_readoutRanges[4] << " MeV");
   }
 
   if (m_doTruncationOfOverflowingFEBs) {
 	// Loading the invariant cell data and storing in m_gepCellsBase for later use on event-by-event basis
 	m_gepCellsBase.clear();
 
-	ATH_MSG_INFO("Loading cell map associating cells to FEBs");
+	ATH_MSG_DEBUG("Loading cell map associating cells to FEBs");
 
 	std::string cellMapPath = PathResolverFindCalibFile(m_LArCellMap);
 	if(cellMapPath.empty()) ATH_MSG_ERROR("Could not find file with cell map data: " << m_LArCellMap.value());
@@ -106,25 +110,31 @@ StatusCode CaloCellsHandlerTool::initialize() {
 	        return StatusCode::FAILURE;
 	}
 
-	ATH_MSG_INFO("Loaded FEB information for " << n_cells << " cells");
+	ATH_MSG_DEBUG("Loaded FEB information for " << n_cells << " cells");
   }
 
   return StatusCode::SUCCESS;
 }
 
-// Get calo cells map
 
-StatusCode CaloCellsHandlerTool::getGepCellMap(const CaloCellContainer& cells,
-					       pGepCellMap& gepCellsMap, 
-					       const EventContext& ctx) const {
+StatusCode GepCellsHandlerAlg::execute(const EventContext& ctx) const {
 
-  // PS this function creates and returns a map which has Gep::GepCaloCells as its values
+  // PS this function creates and stores a map which has Gep::GepCaloCells as its values
   // The cells are made up of data which is invariant for all events, and dynamic
   // data which varies with event.
   // The invariant data should be setup in initialize(), and the dynamic
   // data should be updated here in a way which is compatible with the const-ness of this
   // function.
   // This will be attended to in the future.
+
+  ATH_MSG_DEBUG ("Executing " << name() << "...");
+
+  // Read in a container containing (all) CaloCells
+  auto h_caloCells = SG::makeHandle(m_caloCellsKey, ctx);
+  CHECK(h_caloCells.isValid());
+  const auto cells = *h_caloCells;
+
+  ATH_MSG_DEBUG("Read in " + std::to_string(h_caloCells->size()) + " cells");
 
   SG::ReadCondHandle<CaloNoise> electronicNoiseHdl{m_electronicNoiseKey,  ctx};
   if (!electronicNoiseHdl.isValid()) {return StatusCode::FAILURE;}
@@ -247,7 +257,9 @@ StatusCode CaloCellsHandlerTool::getGepCellMap(const CaloCellContainer& cells,
     }
   }
 
-  // store cells map
+  Gep::GepCellMap gepCellMap;
+
+  // do truncation
   auto itr = gepCellsPerFEB.begin();
   for ( ;itr != gepCellsPerFEB.end(); ++itr) {
 
@@ -257,16 +269,19 @@ StatusCode CaloCellsHandlerTool::getGepCellMap(const CaloCellContainer& cells,
 		CHECK(removeCellsFromOverloadedFEB(itr->second));
 	}
   	for (const Gep::GepCaloCell& cell : itr->second)
-		gepCellsMap->insert(std::pair<unsigned int, Gep::GepCaloCell>(cell.id, cell)); 
+		gepCellMap.insert(cell.id, cell); 
   }
-  ATH_MSG_DEBUG("GEP is receiving a total of " << gepCellsMap->size() << " cells in this event");
+  ATH_MSG_DEBUG("GEP is receiving a total of " << gepCellMap.size() << " cells in this event");
+
+  SG::WriteHandle<Gep::GepCellMap> h_gepCellMap = SG::makeHandle(m_outputGepCellsKey, ctx);
+  ATH_CHECK( h_gepCellMap.record( std::make_unique<Gep::GepCellMap>(gepCellMap) ) );
 
   return StatusCode::SUCCESS;
 }
 
 
 
-int CaloCellsHandlerTool::getGepEnergy(float offline_et) const {
+int GepCellsHandlerAlg::getGepEnergy(float offline_et) const {
 
   // If cell saturates readout range, largest possible value is send
   if (offline_et > m_readoutRanges[4]) return m_readoutRanges[4];
@@ -289,10 +304,9 @@ int CaloCellsHandlerTool::getGepEnergy(float offline_et) const {
 
 
 // Get neighbours of a given calo cell
-std::vector<unsigned int>
-CaloCellsHandlerTool::getNeighbours(const CaloCellContainer& allcells,
-				    const CaloCell* acell,
-				    const EventContext&) const {
+std::vector<unsigned int> GepCellsHandlerAlg::getNeighbours(const CaloCellContainer& allcells,
+							     const CaloCell* acell,
+				    			     const EventContext&) const {
 
   // get all neighboring cells
   std::vector<IdentifierHash> cellNeighbours;
@@ -319,7 +333,7 @@ CaloCellsHandlerTool::getNeighbours(const CaloCellContainer& allcells,
 
 
 
-StatusCode CaloCellsHandlerTool::removeCellsFromOverloadedFEB(std::vector<Gep::GepCaloCell> &cells) const {
+StatusCode GepCellsHandlerAlg::removeCellsFromOverloadedFEB(std::vector<Gep::GepCaloCell> &cells) const {
 
   std::map<int,Gep::GepCaloCell> orderedCells;
   for (const Gep::GepCaloCell& cell : cells) 

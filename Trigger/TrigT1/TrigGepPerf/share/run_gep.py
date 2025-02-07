@@ -237,6 +237,31 @@ if __name__ == '__main__':
     # These may be produced by statndard ATLAS Alorithms, or by
     # GEP Algorithms.
 
+    # Produce the GEP cell map
+
+    # Defining the Energy encoding scheme used in GEP
+    NumberOfEnergyBits = 6 # Two bits for energy range, rest to encode energy
+    ValueOfLeastSignificantBit = 10 # in MeV
+    ValueG = 4 # Multiplier for high energy ranges
+
+    gepEnergyEncodingScheme = str(NumberOfEnergyBits)+"-"+str(ValueOfLeastSignificantBit)+"-"+str(ValueG)
+
+    from TrigGepPerf.GepCellsHandlerAlgConfig import GepCellsHandlerAlgCfg
+
+    gepcellhandler_cfg = GepCellsHandlerAlgCfg(
+                flags,
+                outputGepCellsKey="GepCells",
+                GEPEnergyEncodingScheme = gepEnergyEncodingScheme,
+                HardwareStyleEnergyEncoding = True,
+                TruncationOfOverflowingFEBs = True,
+                OutputLevel=gepAlgs_output_level)
+
+    info('gepclustering_cfg dump:')
+    gepcellhandler_cfg.printConfig(withDetails=True,
+                                   summariseProps=True)
+
+    acc.merge(gepcellhandler_cfg)
+
     from TrigGepPerf.GepPi0AlgConfig import GepPi0AlgCfg
     # currently caloCellsProducer can be caloCellsFromCaloCells or
     # caloCellsFromCaloClusters
@@ -269,21 +294,12 @@ if __name__ == '__main__':
         if caloClustersKey is None:
             from TrigGepPerf.GepClusteringAlgConfig import GepClusteringAlgCfg
 
-            # Defining the Energy encoding scheme used in GEP
-            NumberOfEnergyBits = 6 # Two bits for energy range, rest to encode energy
-            ValueOfLeastSignificantBit = 10 # in MeV
-            ValueG = 4 # Multiplier for high energy ranges
-
-            gepEnergyEncodingScheme = str(NumberOfEnergyBits)+"-"+str(ValueOfLeastSignificantBit)+"-"+str(ValueG)            
-
             caloClustersKey='GEP'+cluster_alg+'Clusters'
             gepclustering_cfg = GepClusteringAlgCfg(
                 flags,
                 TopoClAlg=cluster_alg,
-                outputCaloClustersKey=caloClustersKey,
-                GEPEnergyEncodingScheme = gepEnergyEncodingScheme,
-                HardwareStyleEnergyEncoding = True,
-                TruncationOfOverflowingFEBs = True,
+                gepCellMapKey="GepCells",
+                outputCaloClusterisKey=caloClustersKey,
                 OutputLevel=gepAlgs_output_level)
 
 
@@ -291,10 +307,7 @@ if __name__ == '__main__':
             gepclustering_cfg.printConfig(withDetails=True,
                                           summariseProps=True)
 
-            acc.merge(gepclustering_cfg)
-
-  
-        
+            acc.merge(gepclustering_cfg) 
 
         puSuppressionAlgs = ['']
 
