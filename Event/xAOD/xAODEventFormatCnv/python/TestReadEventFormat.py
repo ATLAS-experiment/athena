@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 import sys
 
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
@@ -14,6 +14,7 @@ def main():
         eventsPerFile=1,
     )
 
+    flags.fillFromArgs()
     flags.lock()
 
     acc = MainServicesConfig.MainServicesCfg(flags)
