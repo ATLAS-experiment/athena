@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CxxUtils )
@@ -166,7 +166,8 @@ foreach( test sincos_test ArrayScanner_test Arrayrep_test
       CachedValue_test CachedPointer_test CachedUniquePtr_test
       atomic_fetch_minmax_test
       MurmurHash2_test bitmask_test crc64_test Ring_test
-      restrict_test vectorize_test get_unaligned_test aligned_vector_test
+      restrict_test vectorize_test get_unaligned_test set_unaligned_test
+      aligned_vector_test
       vec_int_test vec_float_test vec_fb_int_test vec_fb_float_test
       ConcurrentHashmapImpl_test
       ConcurrentToValMap_test ConcurrentStrToValMap_test
