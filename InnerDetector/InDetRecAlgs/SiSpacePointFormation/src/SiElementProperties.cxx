@@ -18,7 +18,8 @@ namespace InDet{
 SiElementProperties::SiElementProperties(const IdentifierHash&			idHash, 
 					 const SCT_ID&				idHelper,
 					 const InDetDD::SiDetectorElement&	element,
-					 float					epsilonWidth) : m_neighbours(),m_halfWidth(0)
+					 float					epsilonWidth,
+                     const bool doEndcapEtaNeighbours) : m_neighbours(),m_halfWidth(0)
 
 {
     // construct vector of neighbours of this wafer.
@@ -45,12 +46,19 @@ SiElementProperties::SiElementProperties(const IdentifierHash&			idHash,
     // because wafer is at one of the ends
     if (idHelper.is_barrel(compact))
     {
-	res = idHelper.get_prev_in_eta(otherHash, neighbourHash);
-	if (res ==0)
-	    m_neighbours.push_back(neighbourHash);
-	res  = idHelper.get_next_in_eta(otherHash, neighbourHash );
-	if (res ==0)
-	    m_neighbours.push_back(neighbourHash);
+	    res = idHelper.get_prev_in_eta(otherHash, neighbourHash);
+        if (res ==0)
+            m_neighbours.push_back(neighbourHash);
+        res  = idHelper.get_next_in_eta(otherHash, neighbourHash );
+        if (res ==0)
+            m_neighbours.push_back(neighbourHash);
+    }
+    else if(doEndcapEtaNeighbours){
+        const InDetDD::SiDetectorElement* nextInEta = element.nextInEta();
+        if(nextInEta){
+            neighbourHash = nextInEta->identifyHash();
+            m_neighbours.push_back(neighbourHash);
+        }
     }
 
     // Find half width of wafer at centre

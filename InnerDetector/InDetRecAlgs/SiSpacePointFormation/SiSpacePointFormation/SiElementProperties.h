@@ -30,7 +30,8 @@ public:
     SiElementProperties(const IdentifierHash&			idHash, 
 			const SCT_ID&				idHelper,
 			const InDetDD::SiDetectorElement&	element,
-			float					epsilonWidth); 
+			float					epsilonWidth,
+            const bool doEncapEtaNeighbours=false); 
 
     ~SiElementProperties();
 

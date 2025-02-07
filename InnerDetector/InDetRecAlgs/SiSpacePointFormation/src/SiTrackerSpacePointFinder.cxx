@@ -98,6 +98,9 @@ StatusCode SiTrackerSpacePointFinder::initialize()
   if(m_useSCTLayerDep_OverlapCuts)
     ATH_MSG_INFO("Use SCT SP overlap cuts based on layer number parity");
 
+  if(m_doEndcapEtaOverlapSP)
+    ATH_MSG_INFO("Doing eta overlap space points in strips endcap");
+
   return StatusCode::SUCCESS;
 }
 
@@ -257,6 +260,7 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
         }
         ATH_MSG_VERBOSE( size << " SpacePoints successfully added to Container !" );
         nReceivedSPsSCT += size;
+        m_nspacePoints += size;
       }
     }
     m_numberOfSCT+= sct_clcontainer->size();
@@ -321,6 +325,7 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
         ATH_MSG_VERBOSE( size
             << " SpacePoints successfully added to Container !" );
         nReceivedSPsPIX += size;
+        m_nspacePoints += size;
       }
     }
     m_numberOfPixel+= pixel_clcontainer->size();
@@ -330,13 +335,14 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
   // check that the set isn't empty.
   if(m_overlap){
     if (spacepointoverlapCollection->empty())
-      {
-	ATH_MSG_DEBUG( "No overlap space points found" );
-      }
+    {
+      ATH_MSG_DEBUG( "No overlap space points found" );
+    }
     else
-      {
-	ATH_MSG_DEBUG( spacepointoverlapCollection->size() <<" overlap space points registered." );
-      }
+    {
+      ATH_MSG_DEBUG( spacepointoverlapCollection->size() <<" overlap space points registered." );
+      m_nspacePointsOverlap += spacepointoverlapCollection->size();
+    }
   }
 
   if(m_cachemode)//Prevent unnecessary atomic counting
@@ -355,6 +361,9 @@ StatusCode SiTrackerSpacePointFinder::finalize()
   ATH_MSG_DEBUG( m_numberOfEvents << " events processed" );
   ATH_MSG_DEBUG( m_numberOfPixel << " pixel collections processed" );
   ATH_MSG_DEBUG( m_numberOfSCT << " sct collections processed" );
+  ATH_MSG_DEBUG( m_nspacePoints+m_nspacePointsOverlap << " space points made, including "<<
+                 m_nspacePointsOverlap << " overlap space points" );
+  
   if(m_cachemode){
     //These are debug messages because they can be indeterminate in an MT environment and it could
     //lead to confusing log comparisons.
@@ -432,7 +441,8 @@ void SiTrackerSpacePointFinder::addSCT_SpacePoints(const SCT_ClusterCollection* 
   int Nmax = 4      ; 
   
   // In the barrel, test the eta overlaps as well (total 5 elements)
-  if (m_idHelper->is_barrel(thisID)) Nmax = 6;
+  // or also in the endcaps if we specifically request it
+  if (m_idHelper->is_barrel(thisID) || m_doEndcapEtaOverlapSP) Nmax = 6;
   
   // You can remove all the overlaps if requrested. Here you test only the opposite element
   if(!m_overlap) Nmax = 2;

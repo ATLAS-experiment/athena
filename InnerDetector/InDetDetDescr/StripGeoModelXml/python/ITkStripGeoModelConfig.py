@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 def ITkStripGeoModelCfg(flags):
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
@@ -17,6 +17,10 @@ def ITkStripGeoModelCfg(flags):
     if flags.ITk.Geometry.StripClobOutputName:
         ITkStripDetectorTool.ClobOutputName = flags.ITk.Geometry.StripClobOutputName
     geoModelSvc.DetectorTools += [ ITkStripDetectorTool ]
+
+    # If we want to make eta overlap space points in strip endcaps, we need first to search for neighbour elements
+    ITkStripDetectorTool.doEndcapEtaNeighbour = flags.ITk.doEndcapEtaNeighbour
+
     return acc
 
 

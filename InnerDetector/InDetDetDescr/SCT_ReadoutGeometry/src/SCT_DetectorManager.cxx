@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
@@ -26,10 +26,12 @@ namespace InDetDD {
     : SCT_DetectorManager(detStore, "SCT") {}
 
   SCT_DetectorManager::SCT_DetectorManager( StoreGateSvc* detStore,
-                                            const std::string& name )
+                                            const std::string& name,
+                                            const bool doEndcapEtaNeighbour )
     : SiDetectorManager(detStore,name),
       m_idHelper(nullptr),
-      m_isLogical(false) // Change to true to change the definition of local module corrections
+      m_isLogical(false), // Change to true to change the definition of local module corrections
+      m_doEndcapEtaNeighbour(doEndcapEtaNeighbour)
   {
     ATH_MSG_VERBOSE("Creating SCT_DetectorManager named " << name);
     //  
@@ -124,8 +126,16 @@ namespace InDetDD {
 
         int result;
         // If no neighbour, result != 0 in which case we leave neighbour as null
-        result = m_idHelper->get_next_in_eta(idHash, idHashOther);
-        if (result==0) element->setNextInEta(m_elementCollection[idHashOther]);
+        if(element->isBarrel()){
+          result = m_idHelper->get_next_in_eta(idHash, idHashOther);
+          if (result==0) element->setNextInEta(m_elementCollection[idHashOther]);
+        }
+        else if(m_doEndcapEtaNeighbour){
+          // In endcaps the neighbours cannot be found with id+/-1, therefore we cannot rely on SCT_ID and need
+          // a dedicated search, considering only neighbour at larger radius (compatible wih outgoing particle)
+          result = getStripEndcapEtaNeighbour(element, idHashOther);
+          if(result==0) element->setNextInEta(m_elementCollection[idHashOther]);
+        }
 
         result = m_idHelper->get_prev_in_eta(idHash, idHashOther);
         if (result==0) element->setPrevInEta(m_elementCollection[idHashOther]);
@@ -142,6 +152,56 @@ namespace InDetDD {
     }
   }
 
+int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* element, IdentifierHash& idHashNeighbour) const
+{
+  // Check we are well in strip endcap
+  if( !(element->isSCT() && element->isEndcap()) ) return 1;
+
+  // Now we try to find a neighbour at larger radius
+  Identifier id = element->identify();
+  int bec = m_idHelper->barrel_ec(id);
+  int layer_disk = m_idHelper->layer_disk(id);
+  int phi_module = m_idHelper->phi_module(id);
+  int eta_module = m_idHelper->eta_module(id);
+  int side = m_idHelper->side(id);
+
+  // We want to find neighbour only for elements on "main" side 
+  // since the space points are made from trigger cluster (on side 0 for ITk)
+  // and stero cluster (on side 1 for ITk)
+  if(element->isStereo()) return 1;
+
+  // Brute force search, loop on all elements to find a neighbour
+  for(const SiDetectorElement* other_element : m_elementCollection){
+
+    Identifier other_id = other_element->identify();
+    
+    // To speed up the search, screening firt on bec, then layer_disk, etc...
+    int other_bec = m_idHelper->barrel_ec(other_id);
+    if(other_bec != bec) continue;
+
+    int other_layer_disk = m_idHelper->layer_disk(other_id);
+    if(other_layer_disk != layer_disk) continue;
+
+    int other_phi_module = m_idHelper->phi_module(other_id);
+    if(other_phi_module != phi_module) continue;
+
+    // We keep only neighbour at eta_module+1 (larger radius)
+    int other_eta_module = m_idHelper->eta_module(other_id);
+    if( (other_eta_module-eta_module) != 1 ) continue;
+
+    // We keep only neighbour on stereo side (side=1 for ITk)
+    int other_side = m_idHelper->side(other_id);
+    if(other_side==side) continue;
+
+    // If we are here, we found it!
+    idHashNeighbour = other_element->identifyHash();
+    ATH_MSG_VERBOSE(__FUNCTION__<<"found strip endcap neighbour for id="<<id<<" neigh="<<other_id
+                                <<" eta:"<<eta_module<<" "<<other_eta_module);
+    return 0;
+  }
+
+  return 1;
+}
 
   const SCT_ID* SCT_DetectorManager::getIdHelper() const
   {

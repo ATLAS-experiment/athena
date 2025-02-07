@@ -136,6 +136,9 @@ def createTrackingConfigFlags():
                              PrimaryPassConfig.HeavyIon, PrimaryPassConfig.VtxLumiHeavyIon])
                 else "BeamLine")
 
+    # to make eta overlap space points in endcap (aligned with search eta neighbour in strip endcaps)
+    icf.addFlag("Tracking.doEndcapEtaOverlapSpacePoint", lambda prevFlags: prevFlags.ITk.doEndcapEtaNeighbour)
+
     # Tracking passes/configurations scheduled
 
     def doLargeD0(flags):

@@ -208,6 +208,7 @@ namespace InDet {
     BooleanProperty m_useDataPoolWithCache
       {this, "useDataPoolWithCache", false, "use DataPool With Cache"};
     BooleanProperty m_useSCTLayerDep_OverlapCuts{this,"useSCTLayerDep_OverlapCuts", true};
+    BooleanProperty m_doEndcapEtaOverlapSP{this,"doEndcapEtaOverlapSP", false};
     //@}
 
     /**
@@ -250,6 +251,8 @@ namespace InDet {
     mutable std::atomic<int> m_numberOfSCT{0};
     mutable std::atomic<int> m_sctCacheHits{0};
     mutable std::atomic<int> m_pixCacheHits{0};
+    mutable std::atomic<int> m_nspacePoints{0};
+    mutable std::atomic<int> m_nspacePointsOverlap{0};
     //@}
     
   };

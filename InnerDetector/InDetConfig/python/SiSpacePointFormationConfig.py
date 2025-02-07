@@ -34,6 +34,7 @@ def ITkSiElementPropertiesTableCondAlgCfg(
 
     kwargs.setdefault("ReadKey", "ITkStripDetectorElementCollection")
     kwargs.setdefault("WriteKey", "ITkStripElementPropertiesTable")
+    kwargs.setdefault("doEndcapEtaNeighbour", flags.Tracking.doEndcapEtaOverlapSpacePoint)
 
     acc.addCondAlgo(
         CompFactory.InDet.SiElementPropertiesTableCondAlg(name, **kwargs))
@@ -145,6 +146,7 @@ def ITkSiTrackerSpacePointFinderCfg(
     kwargs.setdefault("ProcessSCTs", flags.Detector.EnableITkStrip)
     kwargs.setdefault("ProcessOverlaps", flags.Detector.EnableITkStrip)
     kwargs.setdefault("useSCTLayerDep_OverlapCuts", False)
+    kwargs.setdefault("doEndcapEtaOverlapSP",flags.Tracking.doEndcapEtaOverlapSpacePoint)
 
     if flags.Beam.Type is BeamType.Cosmics:
         kwargs.setdefault("ProcessOverlaps", False)

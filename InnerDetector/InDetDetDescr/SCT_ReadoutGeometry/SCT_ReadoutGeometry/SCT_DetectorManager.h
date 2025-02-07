@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ namespace InDetDD {
     SCT_DetectorManager( StoreGateSvc* detStore );
 
     /// Constructur with name
-    SCT_DetectorManager( StoreGateSvc* detStore, const std::string& name );
+    SCT_DetectorManager( StoreGateSvc* detStore, const std::string& name, const bool doEncapNeighbour=false );
      
     /**
      * @name Access Raw Geometry
@@ -142,6 +142,11 @@ namespace InDetDD {
     void addMotherDesign(std::unique_ptr<const SCT_ModuleSideDesign>&&);
 
   private:
+
+    // Used by initNeighbours() to deal with strip encap eta overlap. 
+    // This can only be done when all elements are built.
+    int getStripEndcapEtaNeighbour(const SiDetectorElement* element, IdentifierHash& idHashNeighbour) const;
+
     /**
      * implements the main alignment update for delta transforms in different frames,
      * it translates into the LocalDelta or GlobalDelta function of SiDetectorManager
@@ -179,7 +184,8 @@ namespace InDetDD {
      */
     bool                                                        m_isLogical;
     //@}
-      
+    
+    bool m_doEndcapEtaNeighbour;
   };
 
 } // namespace InDetDD
