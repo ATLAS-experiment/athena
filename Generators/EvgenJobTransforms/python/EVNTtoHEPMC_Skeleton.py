@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Job transform version of converting an EVNT file into a HEPMC file
 
 # For the exit code at the end
@@ -41,10 +41,10 @@ def fromRunArgs(runArgs):
         log.error('Input EVNT file required for EVNTtoHEPMC')
 
     # Set the output file
-    if hasattr(runArgs, 'outputEvtFile'):
-        my_output_HepMCFile = runArgs.outputEvtFile
+    if hasattr(runArgs, 'outputHEPMCFile'):
+        my_output_HepMCFile = runArgs.outputHEPMCFile
     else:
-        log.error('Output Evt file (HepMC) required for EVNTtoHEPMC')
+        log.error('OutputHEPMCFile required for EVNTtoHEPMC')
 
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
