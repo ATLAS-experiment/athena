@@ -48,6 +48,7 @@
 #include <vector>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 // Handle Keys
 #include "StoreGate/CondHandleKeyArray.h"
@@ -55,10 +56,13 @@
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "src/detail/Definitions.h"
 #include "src/detail/DuplicateSeedDetector.h"
-#include "src/detail/TrackFindingMeasurements.h"
 
 namespace ActsTrk
 {
+  namespace detail {
+    class TrackFindingMeasurements;
+    class SharedHitCounter;
+  }
 
   class TrackFindingAlg : public AthReentrantAlgorithm
   {
@@ -119,6 +123,7 @@ namespace ActsTrk
     Gaudi::Property<std::vector<bool>> m_reverseSearch {this, "reverseSearch", {}, "Whether to run the finding in seed parameter direction (false or not specified) or reverse direction (true), specified separately for each seed collection"};
     Gaudi::Property<double> m_branchStopperPtMinFactor{this, "branchStopperPtMinFactor", 1.0, "factor to multiply ptMin cut when used in the branch stopper"};
     Gaudi::Property<double> m_branchStopperAbsEtaMaxExtra{this, "branchStopperAbsEtaMaxExtra", 0.0, "increase absEtaMax cut when used in the branch stopper"};
+    Gaudi::Property<bool> m_countSharedHits{this, "countSharedHits", true, "add shared hit flags to tracks"};
 
     // Acts::TrackSelector cuts
     // Use max double, because mergeConfdb2.py doesn't like std::numeric_limits<double>::infinity() (produces bad Python "inf.0")
@@ -172,6 +177,7 @@ namespace ActsTrk
       kNoSecond,
       kNStoppedTracksMinPt,
       kNStoppedTracksMaxEta,
+      kNTotalSharedHits,
       kNStat
     };
     using EventStats = std::vector<std::array<unsigned int, kNStat>>;
@@ -183,28 +189,33 @@ namespace ActsTrk
      * @brief invoke track finding procedure
      *
      * @param ctx - event context
-     * @param measurements - measurements container
+     * @param trackingGeometry - Acts tracking geometry
+     * @param detectorElementToGeoId - map Trk detector element to Acts Geometry id
+     * @param measurements - measurements container used in MeasurementSelector
+     * @param sharedHits - measurements container used for shared hit counting
+     * @param duplicateSeedDetector - duplicate seed detector
      * @param seeds - spacepoint triplet seeds
+     * @param detElements - Trk detector elements
      * @param tracksContainer - output tracks
-     * @param tracksCollection - auxiliary output for downstream tools compatibility (to be removed in the future)
-     * @param seedCollectionIndex - index of seeds in measurements
-     * @param seedType name of type of seeds (strip or pixel) - only used for messages
+     * @param seedCollectionIndex - index of this collection of seeds
+     * @param seedType - name of type of seeds (strip or pixel) - only used for messages
+     * @param event_stat - stats, just for this event
      */
     StatusCode
     findTracks(const EventContext &ctx,
                const Acts::TrackingGeometry &trackingGeometry,
                const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
                const detail::TrackFindingMeasurements &measurements,
+               std::optional<detail::SharedHitCounter> &sharedHits,
                detail::DuplicateSeedDetector &duplicateSeedDetector,
                const ActsTrk::SeedContainer &seeds,
                const InDetDD::SiDetectorElementCollection& detElements,
                ActsTrk::MutableTrackContainer &tracksContainer,
-               size_t seedCollectionIndex,
+               std::size_t seedCollectionIndex,
                const char *seedType,
                EventStats &event_stat) const;
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
-
     void storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,
                        const detail::RecoTrackContainerProxy &track,
                        detail::DuplicateSeedDetector &duplicateSeedDetector) const;

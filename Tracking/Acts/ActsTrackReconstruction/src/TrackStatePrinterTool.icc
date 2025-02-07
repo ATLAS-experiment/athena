@@ -26,34 +26,23 @@ namespace ActsTrk
     return os.str();
   }
 
-  template <typename measurement_container_t>
-  static std::size_t
-  containerOffset(const measurement_container_t *container,
-                  const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offsets)
-  {
-    for (const auto &[c, offset] : container_offsets)
-    {
-      if (c == container) return offset;
-    }
-    return 0;
-  }
-
   template <typename track_container_t>
   void
   TrackStatePrinterTool::printTrack(const Acts::GeometryContext &tgContext,
 				    const track_container_t &tracks,
 				    const typename track_container_t::TrackProxy &track,
-				    const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset) const
+				    detail::MeasurementIndex &measurementIndexer,
+				    bool rejected) const
   {
     const auto lastMeasurementIndex = track.tipIndex();
     // to print track states from inside outward, we need to reverse the order of visitBackwards().
-    using PrintTrackStateContainer = std::decay_t<decltype(tracks.trackStateContainer())>;
-    std::vector<typename PrintTrackStateContainer::ConstTrackStateProxy> states;
+    using TrackStateProxy = std::decay_t<decltype(tracks.trackStateContainer())>::ConstTrackStateProxy;
+    std::vector<TrackStateProxy> states;
     states.reserve(lastMeasurementIndex + 1); // could be an overestimate
-    size_t npixel = 0, nstrip = 0;
+    std::size_t npixel = 0, nstrip = 0;
     tracks.trackStateContainer().visitBackwards(
         lastMeasurementIndex,
-        [&states, &npixel, &nstrip](const PrintTrackStateContainer::ConstTrackStateProxy &state) -> void
+        [&states, &npixel, &nstrip](const TrackStateProxy &state) -> void
         {
           if (state.hasCalibrated())
           {
@@ -87,11 +76,12 @@ namespace ActsTrk
               << std::left
               << "#out=" << track.nOutliers()
               << ", #sh=" << track.nSharedHits()
+              << (rejected ? " - REJECTED" : "")
               << std::right << std::defaultfloat << std::setprecision(-1) << '\n';
 
     for (auto i = states.size(); i > 0;)
     {
-      printTrackState(tgContext, states[--i], container_offset);
+      printTrackState(tgContext, states[--i], measurementIndexer);
     }
   }
 
@@ -99,7 +89,7 @@ namespace ActsTrk
   bool
   TrackStatePrinterTool::printTrackState(const Acts::GeometryContext &tgContext,
                                          const track_state_proxy_t &state,
-                                         const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offsets,
+                                         detail::MeasurementIndex &measurementIndexer,
                                          bool useFiltered,
                                          bool newLine) const
   {
@@ -112,7 +102,7 @@ namespace ActsTrk
     {
       ATLASUncalibSourceLink sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
       const xAOD::UncalibratedMeasurement &umeas = getUncalibratedMeasurement(sl);
-      index = umeas.index() + containerOffset(umeas.container(), container_offsets);
+      index = measurementIndexer.index(umeas);
     }
 
     std::cout << std::setw(5) << state.index() << ' ';
@@ -159,4 +149,3 @@ namespace ActsTrk
   }
 
 }  // namespace ActsTrk
-
