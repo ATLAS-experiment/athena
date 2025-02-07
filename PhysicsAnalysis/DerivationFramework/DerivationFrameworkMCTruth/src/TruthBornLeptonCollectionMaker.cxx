@@ -184,10 +184,18 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
       // These particles in PHOTOS are attached to the same vertex, but have different status, e.g. 3. 
       // The momentum conservation, is, of course, violated.  
       if ( !(physical && has_V && !MC::isPhysical(theParticle)) && !MC::Pythia8::isConditionB(theParticle)){
-        // If not a special case, deal with the standard: has a boson parent, is a lepton, and has a descendent that is a bare lepton
-        if (!theParticle->parent()) continue;
-        if (!theParticle->parent()->isZ() && !theParticle->parent()->isW() && !theParticle->parent()->isHiggs()) continue;
+        // Skip if it has no boson parent, or has no descendent that is a bare lepton
         if (!hasBareDescendent( theParticle ) ) continue;
+        const xAOD::TruthVertex * prod = theParticle->prodVtx();
+        if (!prod) continue;
+        if (prod->nIncomingParticles() < 1) continue;
+        size_t bad_parent = 0;
+        for (size_t p = 0; p < prod->nIncomingParticles(); ++p){
+          if (!theParticle->parent(p)) { bad_parent++; continue;}
+          if (!theParticle->parent(p)->isZ() && !theParticle->parent(p)->isW() && !theParticle->parent(p)->isHiggs()) bad_parent++;
+        }
+        if (bad_parent != 0) continue;
+
       }
     } // End of treatment for generators that are not Sherpa
 
