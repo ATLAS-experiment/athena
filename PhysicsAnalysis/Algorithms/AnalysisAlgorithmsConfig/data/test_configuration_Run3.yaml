@@ -273,3 +273,5 @@ Output:
     truth_tau_: OutTruthTaus
     truth_jet_: OutTruthJets
     truth_met_: TruthMET
+
+PrintConfiguration: {}
