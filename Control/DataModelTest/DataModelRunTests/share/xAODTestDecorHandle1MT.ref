@@ -1,13 +1,13 @@
-Mon Feb  3 12:23:54 CET 2025
+Thu Feb  6 12:00:25 CET 2025
 Preloading tcmalloc_minimal.so
 Preloading libexcabort.so
 ApplicationMgr    SUCCESS 
 ====================================================================================================================================
                                                    Welcome to ApplicationMgr (GaudiCoreSvc v38r0)
-                                          running on lxplus973.cern.ch on Mon Feb  3 12:23:57 2025
+                                          running on lxplus987.cern.ch on Thu Feb  6 12:00:29 2025
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
-Py:ComponentAccumulator    INFO Athena job with pid 3941610
+Py:ComponentAccumulator    INFO Athena job with pid 4182340
 CoreDumpSvc                       INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
 Athena...ntLoopMgr                INFO Initializing AthenaHiveEventLoopMgr
 ClassIDSvc                        INFO getRegistryEntries: read 3153 CLIDRegistry entries for module ALL
@@ -70,6 +70,8 @@ Avalan...edulerSvc           0    INFO Data Dependencies for Algorithms:
     o INPUT   ( 'DMTest::C' , 'StoreGateSvc+cinfo.dInt1' ) 
     o INPUT   ( 'DMTest::CVec' , 'StoreGateSvc+cvec' ) 
     o INPUT   ( 'DMTest::CVec' , 'StoreGateSvc+cvec.dInt1' ) 
+    o INPUT   ( 'SG::AuxElement' , 'StoreGateSvc+cinfo' ) 
+    o INPUT   ( 'SG::AuxElement' , 'StoreGateSvc+cinfo.dInt1Base' ) 
     o OUTPUT  ( 'DMTest::C' , 'StoreGateSvc+scopy_cinfo' ) 
     o OUTPUT  ( 'DMTest::C' , 'StoreGateSvc+scopy_cinfo.anInt10' ) 
     o OUTPUT  ( 'DMTest::C' , 'StoreGateSvc+scopy_cinfo.dInt1' ) 
@@ -79,6 +81,7 @@ Avalan...edulerSvc           0    INFO Data Dependencies for Algorithms:
     o OUTPUT  ( 'SG::AuxElement' , 'StoreGateSvc+scopy_cinfo' ) 
     o OUTPUT  ( 'SG::AuxElement' , 'StoreGateSvc+scopy_cinfo.anInt10' ) 
     o OUTPUT  ( 'SG::AuxElement' , 'StoreGateSvc+scopy_cinfo.dInt1' ) 
+    o OUTPUT  ( 'SG::AuxElement' , 'StoreGateSvc+scopy_cinfo.dInt1Base' ) 
     o OUTPUT  ( 'SG::AuxVectorBase' , 'StoreGateSvc+scopy_cvec' ) 
     o OUTPUT  ( 'SG::AuxVectorBase' , 'StoreGateSvc+scopy_cvec.anInt10' ) 
     o OUTPUT  ( 'SG::AuxVectorBase' , 'StoreGateSvc+scopy_cvec.dInt1' ) 
@@ -94,9 +97,7 @@ Avalan...edulerSvc           0    INFO Data Dependencies for Algorithms:
       none
   IncidentProcAlg3
       none
-Avalan...edulerSvc           0    INFO Will attribute the following unmet INPUT dependencies to "SGInputLoader/SGInputLoader" Algorithm
-Avalan...edulerSvc           0    INFO    o  ( 'SG::AuxElement' , 'StoreGateSvc+scopy_cinfo.dInt1Base' )     required by Algorithm: 
-Avalan...edulerSvc           0    INFO        * xAODTestReadDecorSCopy
+Avalan...edulerSvc           0    INFO No unmet INPUT data dependencies were found
 PrecedenceSvc                0    INFO Assembling CF and DF task precedence rules
 PrecedenceSvc                0    INFO PrecedenceSvc initialized successfully
 Avalan...edulerSvc           0    INFO Concurrency level information:
@@ -115,7 +116,6 @@ EventP...stencySvc     0     0    INFO Added successfully Conversion service McC
 Athena...ntLoopMgr     0     0    INFO   ===>>>  start of run 0    <<<===
 Athena...ntLoopMgr     0     0    INFO   ===>>>  start processing event #1, run #0 on slot 0,  0 events processed so far  <<<===
 ClassIDSvc             0     0    INFO getRegistryEntries: read 110 CLIDRegistry entries for module ALL
-SGInputLoader          0     0 WARNING unable to find proxy for  ( 'SG::AuxElement' , 'StoreGateSvc+scopy_cinfo' ) 
 xAODTestReadDecor      0     0    INFO cvec.dInt1: 801 802 803 804 805 806 807 808 809 810
 xAODTestReadDecor      0     0    INFO cinfo.dInt1: 6000
 xAODTestReadDecor      0     0    INFO cinfo.dInt1Base: 6001
@@ -315,7 +315,7 @@ xAODTe...ecorSCopy    19     0    INFO scopy_cinfo.dInt1: 63000
 xAODTe...ecorSCopy    19     0    INFO scopy_cinfo.dInt1Base: 63001
 xAODTe...ecorSCopy    19     0    INFO scopy_cinfo.dInt1: 63000
 Athena...ntLoopMgr    19     0    INFO   ===>>>  done processing event #20, run #0 on slot 0,  20 events processed so far  <<<===
-Athena...ntLoopMgr    19     0    INFO ---> Loop Finished (seconds): 0.0119674
+Athena...ntLoopMgr    19     0    INFO ---> Loop Finished (seconds): 0.0129158
 ApplicationMgr                    INFO Application Manager Stopped successfully
 SGInputLoader                     INFO Finalizing SGInputLoader...
 Avalan...edulerSvc                INFO Joining Scheduler thread
