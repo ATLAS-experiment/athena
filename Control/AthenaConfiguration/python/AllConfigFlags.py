@@ -499,6 +499,11 @@ def initConfigFlags():
         return createFlagsCaloRecGPU()
     _addFlagsCategory(acf, "CaloRecGPU", __caloGPU, 'CaloRecGPU' )
 
+##common derivation flags
+    def __commonDerivation():
+        from DerivationFrameworkConfiguration.DerivationConfigFlags import createDerivationConfigFlags
+        return createDerivationConfigFlags()
+    _addFlagsCategory(acf, "Derivation", __commonDerivation, 'DerivationFrameworkConfiguration' )
 
 #egamma derivation Flags:
     def __egammaDerivation():

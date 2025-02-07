@@ -1,9 +1,9 @@
 """Main derivation transform configuration helpers
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 
-from PyJobTransforms.trfArgClasses import argFactory, argList, argNTUPFile, argPOOLFile, argSubstepBool
+from PyJobTransforms.trfArgClasses import argFactory, argList, argNTUPFile, argPOOLFile, argSubstepBool, argString
 from PyJobTransforms.trfExe import athenaExecutor, reductionFrameworkExecutor
 
 def addDerivationArguments(parser):
@@ -25,6 +25,10 @@ def addDerivationArguments(parser):
                         type=argFactory(argPOOLFile, io='input'),
                         help='Input DAOD_PHYS for D2AOD building',
                         group='Derivation')
+    parser.add_argument('--inputDAOD_PHYSLITEFile', nargs='+',
+                        type=argFactory(argPOOLFile, io='input'),
+                        help='Input DAOD_PHYSLITE for D2AOD building',
+                        group='Derivation')
     parser.add_argument('--inputEVNTFile', nargs='+',
                         type=argFactory(argPOOLFile, io='input'),
                         help='Input EVNT for DAOD_TRUTHX building',
@@ -42,7 +46,16 @@ def addDerivationArguments(parser):
                         metavar='BOOL',
                         help='Disable all skimming and write every event',
                         group='Derivation')
-
+    parser.add_argument('--skimmingExpression', 
+                        type=argFactory(argString),
+                        help='String defining skimming from command line, SKIM format only',
+                        group='Derivation',
+                        default='')
+    parser.add_argument('--skimmingContainers', nargs='+',
+                        type=argFactory(argList),
+                        help='List of containers used for skimming in the skimmingExpression, SKIM format only',
+                        group='Derivation',
+                        )
 
 def addPhysicsValidationArguments(parser):
     """Add validation command-line parser arguments."""
@@ -70,7 +83,7 @@ def addDerivationSubstep(executor_set):
                                           substep='DerivationFramework',
                                           tryDropAndReload=False,
                                           perfMonFile='ntuple.pmon.gz',
-                                          inData=['EVNT', 'AOD', 'DAOD_PHYS'],
+                                          inData=['EVNT', 'AOD', 'DAOD_PHYS', 'DAOD_PHYSLITE'],
                                           outData=['DAOD', 'D2AOD'])
     executor_set.add(executor)
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # All derivation framework formats must be listed here
 
 # Example formats
@@ -30,6 +30,8 @@ from DerivationFrameworkMCTruth.TRUTH3 import TRUTH3Cfg
 from DerivationFrameworkPhys.PHYS import PHYSCfg
 # PHYSLITE - calibrated physics analysis objects, reduced slimming list
 from DerivationFrameworkPhys.PHYSLITE import PHYSLITECfg
+# SKIM - format allowing skimming of PHYS/PHYSLITE via a command line string
+from DerivationFrameworkPhys.SKIM import SKIMCfg
 
 # Physics validation for run 3
 # PHYSVAL - large bulk of the variables from AOD plus PHYS augmentations
@@ -166,7 +168,7 @@ from DerivationFrameworkNCB.NCB1 import NCB1Cfg
 # Avoids compilation warnings from Flake8
 __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TEST7Cfg',
            'TRUTH0Cfg','TRUTH1Cfg','TRUTH3Cfg',
-           'PHYSCfg','PHYSLITECfg',
+           'PHYSCfg','PHYSLITECfg','SKIMCfg',
            'PHYSVALCfg',
            'FTAG1Cfg', 'FTAG2Cfg', 'FTAG3Cfg', 'FTAG4Cfg',
            'HIGG1D1Cfg', 'HIGG9D1Cfg', 'HIGG1D2Cfg',
