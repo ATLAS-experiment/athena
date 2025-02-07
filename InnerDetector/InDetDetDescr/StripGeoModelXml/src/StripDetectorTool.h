@@ -44,6 +44,9 @@ private:
   Gaudi::Property<bool> m_alignable{this, "Alignable", false, ""};
   // This should be changed to an ITk-specific one in future, once available
   Gaudi::Property<std::string> m_alignmentFolderName{this, "AlignmentFolderName", "/Indet/Align", ""};
+
+  Gaudi::Property<bool> m_doEndcapEtaNeighbour{this, "doEndcapEtaNeighbour", false, "Search for 'next in eta' neighbour also in endcaps"};
+
   // Print out how many of each layer/eta/phi etc. have been set up.
   void doNumerology(InDetDD::SCT_DetectorManager *manager);
   ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc",""};

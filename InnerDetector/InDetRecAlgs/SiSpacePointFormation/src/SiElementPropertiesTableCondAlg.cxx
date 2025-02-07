@@ -26,6 +26,10 @@ namespace InDet {
 
     ATH_CHECK(detStore()->retrieve(m_idHelper, "SCT_ID"));
 
+    if(m_doEndcapEtaNeighbour){
+      ATH_MSG_INFO("Processing eta neighbour module also for strip endcaps");
+    }
+
     return StatusCode::SUCCESS;
   }
 
@@ -56,7 +60,7 @@ namespace InDet {
     writeHandle.addDependency(readHandle);
 
     // ____________ Construct new Write Cond Object ____________
-    std::unique_ptr<InDet::SiElementPropertiesTable> writeCdo{std::make_unique<InDet::SiElementPropertiesTable>(*m_idHelper, *readCdo, m_epsWidth)};
+    std::unique_ptr<InDet::SiElementPropertiesTable> writeCdo{std::make_unique<InDet::SiElementPropertiesTable>(*m_idHelper, *readCdo, m_epsWidth, m_doEndcapEtaNeighbour)};
 
     // ____________ Fill writeCdo using readCdo ____________
 

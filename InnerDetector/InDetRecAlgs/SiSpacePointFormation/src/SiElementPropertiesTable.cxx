@@ -18,7 +18,8 @@ namespace InDet{
 
 SiElementPropertiesTable::SiElementPropertiesTable(const SCT_ID&  idHelper,
     const InDetDD::SiDetectorElementCollection& elements,
-    float   epsilonWidth) 
+    float   epsilonWidth,
+    const bool doEndcapEtaNeighbours) 
     {
   size_t maxSCT = idHelper.wafer_hash_max();
   m_properties.reserve(maxSCT);
@@ -26,7 +27,7 @@ SiElementPropertiesTable::SiElementPropertiesTable(const SCT_ID&  idHelper,
      IdentifierHash hash(i);
      const InDetDD::SiDetectorElement* element = elements[hash]; 
      if (element != nullptr){ 
-       m_properties.emplace_back(hash, idHelper,*element,epsilonWidth);
+       m_properties.emplace_back(hash, idHelper,*element,epsilonWidth,doEndcapEtaNeighbours);
      }
   }
 }
