@@ -25,7 +25,7 @@ public:
   const SCT_ID *get_sct_id() const { return m_sctId; }
 
   enum SCT_numbers {NextBC=0, CurrentBC=1, PreviousBC=2, AnyBC=3, NumberOfBCs=3,
-                    NumberOfBitSets=4, NumberOfStrips=768,
+                    NumberOfBitSets=4, NumberOfStrips=1536,
                     BkgSource=0, SignalSource=1, NumberOfSources=2};
 
 private:
