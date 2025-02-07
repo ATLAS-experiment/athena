@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( FPGATrackSimAlgorithms )
@@ -16,8 +16,7 @@ atlas_add_library( FPGATrackSimAlgorithmsLib
    PUBLIC_HEADERS FPGATrackSimAlgorithms
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}  ${ONNXRUNTIME_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib GaudiKernel FPGATrackSimBanksLib FPGATrackSimConfToolsLib FPGATrackSimHoughLib FPGATrackSimInputLib FPGATrackSimLRTLib FPGATrackSimMapsLib FPGATrackSimObjectsLib FPGATrackSimSGInputLib  ${ONNXRUNTIME_LIBRARIES}
-   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} FPGATrackSimBanksLib FPGATrackSimConfToolsLib )
+   PRIVATE_LINK_LIBRARIES FPGATrackSimBanksLib FPGATrackSimConfToolsLib )
  
 # Component(s) in the package:
 atlas_add_component( FPGATrackSimAlgorithms
