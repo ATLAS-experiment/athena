@@ -773,6 +773,9 @@ def getDevSignatures():
     chains['Monitor'] = [
         #ATR-27211, ATR-27203
         ChainProp(name='HLT_l1topoPh1debug_L1All', l1SeedThresholds=['FSNOSEED'], stream=['L1TopoMismatches'], groups=['PS:NoHLTRepro', 'RATE:Monitoring', 'BW:Other']),
+        ChainProp(name='HLT_caloclustermon_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=['RATE:Monitoring']),
+        ChainProp(name='HLT_caloclustermon_L1RD0_EMPTY', l1SeedThresholds=['FSNOSEED'], groups=['RATE:Monitoring']),
+        #ChainProp(name='HLT_caloclustermon_L1RD0_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], groups=['RATE:Monitoring']), #We don't have RD0_FIRSTEMPTY on the Dev L1.
     ]
 
     chains['UnconventionalTracking'] = [

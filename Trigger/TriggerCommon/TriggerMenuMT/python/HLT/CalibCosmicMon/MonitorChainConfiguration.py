@@ -114,6 +114,28 @@ def MistimeMonSequenceCfg(flags):
         return MenuSequence(flags, selAcc,
                 HypoToolGen = TrigGenericHypoToolFromDict)
 
+def CaloClusterMonitorCfg(flags, suffix = ""):
+   from TrigT2CaloCommon.CaloDef import clusterFSInputMaker
+   
+   from TrigCaloRec.TrigCaloRecConfig import ( hltCaloTopoClusteringCfg )
+   
+   reco = InEventRecoCA('CaloClusterMonitoring' + suffix)
+   
+   reco.merge( hltCaloTopoClusteringCfg(flags, namePrefix="CaloMon", nameSuffix="FS" + suffix, CellsName="CaloCellsFS" + suffix, monitorCells=True, clustersKey="HLT_MonitoringCaloClusters" + suffix) )
+      
+   selAcc = SelectionCA('CaloClusterMonitoringSequence' + suffix)
+   
+   selAcc.mergeReco(reco)
+   
+   selAcc.addHypoAlgo(
+       TimeBurnerCfg(flags,
+                     name="CaloClusterMonitoringHypoConfig" + suffix,
+                     SleepTimeMillisec=0
+       )
+   )
+
+   return MenuSequence(flags, selAcc, HypoToolGen=TimeBurnerHypoToolGen)
+                      
 
 #----------------------------------------------------------------
 # Class to configure chain
@@ -145,6 +167,8 @@ class MonitorChainConfiguration(ChainConfigurationBase):
             chainSteps.append(self.getL1TopoOnlineMonitorStep(flags))
         elif monType == 'mistimemonj400':
             chainSteps.append(self.getMistimeMonStep(flags))
+        elif monType == 'caloclustermon':
+            chainSteps.append(self.getCaloClusterMonitorCfg(flags))
         else:
             raise RuntimeError('Unexpected monType '+monType+' in MonitorChainConfiguration')
 
@@ -184,3 +208,17 @@ class MonitorChainConfiguration(ChainConfigurationBase):
     # --------------------
     def getMistimeMonStep(self, flags):
         return self.getStep(flags, 'MistimeMon',[MistimeMonSequenceCfg])
+        
+    # --------------------
+    # CaloClusterMonitor configuration
+    # --------------------
+    def getCaloClusterMonitorCfg(self, flags):
+        this_suffix = ""
+        if "_FILLED" in self.chainL1Item:
+             this_suffix = "_filled"
+        elif "_EMPTY" in self.chainL1Item:
+             this_suffix = "_empty"
+        elif "_FIRSTEMPTY" in self.chainL1Item:
+             this_suffix = "_firstempty"
+        return self.getStep(flags, 'caloclustermon', [CaloClusterMonitorCfg], suffix = this_suffix)
+        
