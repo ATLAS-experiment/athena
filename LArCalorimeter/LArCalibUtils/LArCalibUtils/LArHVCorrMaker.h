@@ -38,7 +38,6 @@ class LArHVCorrMaker : public AthAlgorithm
   virtual StatusCode finalize() override {return StatusCode::SUCCESS;}
   
  private:
-  const LArOnlineID_Base*        m_lar_on_id = nullptr;
 
   Gaudi::Property<std::string> m_folderName{this,"folderName", "/LAR/ElecCalibFlat/HVScaleCorr",
       "Folder to store the CondAttrListCollection containing the HVScale correction"};
