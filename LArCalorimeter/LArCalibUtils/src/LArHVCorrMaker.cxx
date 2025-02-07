@@ -1,14 +1,16 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Include files
 #include "LArCalibUtils/LArHVCorrMaker.h"
 #include "LArIdentifier/LArOnlineID.h"
+#include "LArIdentifier/LArOnline_SuperCellID.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "CoralBase/Blob.h"
 #include "LArCOOLConditions/LArHVScaleCorrFlat.h"
+#include "LArRecConditions/LArHVCorr.h"
 #include "StoreGate/ReadCondHandle.h"
 
 #include <cmath>
@@ -25,7 +27,6 @@ LArHVCorrMaker::~LArHVCorrMaker()
 StatusCode LArHVCorrMaker::initialize()
 {
   ATH_MSG_INFO ( "  in initialize " );
-  ATH_CHECK( detStore()->retrieve(m_lar_on_id,"LArOnlineID") );
   ATH_CHECK( m_scaleCorrKey.initialize() );
   ATH_CHECK( m_cablingKey.initialize() );
   return StatusCode::SUCCESS;
@@ -45,10 +46,23 @@ StatusCode LArHVCorrMaker::stop()
   ATH_MSG_INFO ( " in stop" );
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
-  SG::ReadCondHandle<ILArHVScaleCorr> scaleCorr (m_scaleCorrKey, ctx);
+
   SG::ReadCondHandle<LArOnOffIdMapping> cabling (m_cablingKey, ctx);
 
-  const unsigned hashMax=m_lar_on_id->channelHashMax();
+  SG::ReadCondHandle<ILArHVScaleCorr> scaleCorr (m_scaleCorrKey, ctx);
+
+  const LArOnlineID_Base*  lar_on_id = nullptr;
+  if(m_isSC) {
+     const LArOnline_SuperCellID* scid=nullptr;
+     ATH_CHECK( detStore()->retrieve(scid,"LArOnline_SuperCellID") );
+     lar_on_id=scid;
+  } else {
+     const LArOnlineID* lid=nullptr;
+     ATH_CHECK( detStore()->retrieve(lid,"LArOnlineID") );
+     lar_on_id=lid;
+  }
+
+  const unsigned hashMax=lar_on_id->channelHashMax();
   coral::AttributeListSpecification* spec = new coral::AttributeListSpecification;
   spec->extend("HVScaleCorr", "blob");
   spec->extend<unsigned>("version");
@@ -70,7 +84,12 @@ StatusCode LArHVCorrMaker::stop()
     }
     pblob[hs]=value;
   }
-  coll->add(1,attrList); //Add as channel 1 to AttrListCollection
+
+  if(m_isSC) {
+     coll->add(0,attrList); //Add as channel 0 to AttrListCollection
+  } else {
+     coll->add(1,attrList); //Add as channel 1 to AttrListCollection
+  }
 
   ATH_CHECK( detStore()->record(std::move(coll), m_folderName) );  
   return StatusCode::SUCCESS;

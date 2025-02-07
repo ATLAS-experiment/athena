@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
 
-def LArHVScaleCorr2NtupleCfg(flags, rootfile="hvcorr_read.root"):
+def LArHVScaleCorr2NtupleCfg(flags, rootfile="hvcorr_read.root", addSC=False):
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     result=LArGMCfg(flags)
@@ -17,11 +17,20 @@ def LArHVScaleCorr2NtupleCfg(flags, rootfile="hvcorr_read.root"):
     from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
     result.merge(LArElecCalibDBCfg(flags,["HVScaleCorr"]))
 
+    result.addEventAlgo(CompFactory.LArHVScaleCorr2Ntuple("LArHVScaleCorr2Ntuple", AddFEBTempInfo = False, OffId=True))
 
-    theLArHVScaleCorr2Ntuple = CompFactory.LArHVScaleCorr2Ntuple("LArHVScaleCorr2Ntuple")
-    theLArHVScaleCorr2Ntuple.AddFEBTempInfo = False
-    theLArHVScaleCorr2Ntuple.OffId=True
-    result.addEventAlgo(theLArHVScaleCorr2Ntuple)
+    if addSC:
+       from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
+       result.merge(LArElecCalibDBSCCfg(flags,["HVScaleCorr"]))
+
+       from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
+       result.merge(LArOnOffIdMappingSCCfg(flags))
+
+       result.merge(LArBadChannelCfg(flags, isSC=True))
+
+       result.addEventAlgo(CompFactory.LArHVScaleCorr2Ntuple("LArSCHVScaleCorr2Ntuple", AddFEBTempInfo = False, OffId=True, 
+                                                             ContainerKey="LArHVScaleCorrSC",isSC = True, BadChanKey = "LArBadChannelSC"))
+
 
     import os
     if os.path.exists(rootfile):

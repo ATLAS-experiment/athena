@@ -120,6 +120,7 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1Topo
                                                     EnergyInputProvider = energyProvider,
                                                     ControlHistSvc = controlHistSvc, # if doMonitoring else "",
                                                     IsLegacyTopo = False,
+                                                    doMonitoring = doMonitoring,
                                                     EnableInputDump = flags.Trigger.enableL1TopoDump,
                                                     UseBitwise = flags.Trigger.enableL1TopoBWSimulation
                                                     )

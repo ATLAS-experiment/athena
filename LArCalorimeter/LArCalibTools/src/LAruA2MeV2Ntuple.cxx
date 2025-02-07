@@ -87,8 +87,14 @@ StatusCode LAruA2MeV2Ntuple::stop() {
     }  
   }
 
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
-  const LArOnOffIdMapping* cabling=*cablingHdl;
+  const LArOnOffIdMapping* cabling=nullptr;
+  if(m_isSC) {
+     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingSCKey};
+     cabling=*cablingHdl;
+  } else {
+     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+     cabling=*cablingHdl;
+  }
   if(!cabling) {
     ATH_MSG_WARNING( "Do not have cabling object LArOnOffIdMapping" );
     return StatusCode::FAILURE;

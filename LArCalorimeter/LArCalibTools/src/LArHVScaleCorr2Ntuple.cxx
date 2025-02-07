@@ -21,6 +21,8 @@ StatusCode LArHVScaleCorr2Ntuple::initialize() {
 StatusCode LArHVScaleCorr2Ntuple::stop() {
  
  const EventContext& ctx = Gaudi::Hive::currentContext();
+
+
  SG::ReadCondHandle<ILArHVScaleCorr> hvHdl(m_contKey, ctx);  
  const ILArHVScaleCorr* larHVScaleCorr = hvHdl.cptr();
  if(!larHVScaleCorr) {

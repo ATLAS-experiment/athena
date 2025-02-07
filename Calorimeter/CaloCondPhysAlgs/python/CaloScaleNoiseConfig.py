@@ -76,7 +76,8 @@ if __name__=="__main__":
     parser.add_argument('datestamp',help="time specification like 2007-05-25:14:01:00")
     parser.add_argument('-a', '--absolute', action="store_true", help="Absolute rescaling based on noise derived from MC")
     parser.add_argument('-t', '--globaltag', type=str, help="Global conditions tag ")
-    parser.add_argument('-o', '--output',type=str,default="hvcorr",help="name stub for root and sqlite output files")
+    parser.add_argument('-s', '--sqlite', type=str,help="sqlite with CellNoise and HVCorr folders to be scaled ")
+    parser.add_argument('-o', '--output',type=str,default="cellnoise_data.root",help="name stub for root and sqlite output files")
     args = parser.parse_args()
     print(args)
 
@@ -95,13 +96,15 @@ if __name__=="__main__":
     from LArCalibProcessing.TimeStampToRunLumi import TimeStampToRunLumi
     rlb=TimeStampToRunLumi(TimeStamp_ns)
     if rlb is None:
-        rlb=[0xFFFFFFFF-1,0]
-        print("WARNING: Failed to convert time",TimeStamp_ns,"into a run/lumi number. Using 'infinite' run-number",rlb[0])
+        #rlb=[0x7FFFFFFF-1,0]
+        rlb=[999999,0]
+        print("WARNING: CaloScaleNoise: Failed to convert time",TimeStamp_ns,"into a run/lumi number. Using 'infinite' run-number",rlb[0])
 
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.Input.RunNumbers=[rlb[0]]
+    print("set the runnumber: ",flags.Input.RunNumbers)
     flags.Input.TimeStamps=[TimeStamp]
     flags.Input.Files=[]
     flags.IOVDb.DatabaseInstance="CONDBR2"
@@ -110,6 +113,10 @@ if __name__=="__main__":
   
     if args.globaltag:
         flags.IOVDb.GlobalTag=args.globaltag
+
+    if args.sqlite:
+        flags.IOVDb.SqliteInput=args.sqlite
+        flags.IOVDb.SqliteFolders=("/LAR/NoiseOfl/CellNoise","/LAR/ElecCalibFlat/HVScaleCorr",)
 
     flags.lock()
     cfg=MainEvgenServicesCfg(flags)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -13,8 +13,6 @@
 #include "LArElecCalib/ILArHVScaleCorr.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 
-
-class LArOnlineID;
 
 //-----------------------------------------------------------------------
 class LArHVCorrMaker : public AthAlgorithm
@@ -40,10 +38,10 @@ class LArHVCorrMaker : public AthAlgorithm
   virtual StatusCode finalize() override {return StatusCode::SUCCESS;}
   
  private:
-  const LArOnlineID*        m_lar_on_id = nullptr;
 
   Gaudi::Property<std::string> m_folderName{this,"folderName", "/LAR/ElecCalibFlat/HVScaleCorr",
       "Folder to store the CondAttrListCollection containing the HVScale correction"};
+  BooleanProperty m_isSC{this, "SuperCell", false, "Runnning for SC ?"};
 
   SG::ReadCondHandleKey<ILArHVScaleCorr> m_scaleCorrKey
   { this, "LArHVScaleCorr", "LArHVScaleCorrRecomputed", "" };

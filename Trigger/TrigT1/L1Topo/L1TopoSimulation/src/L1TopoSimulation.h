@@ -90,6 +90,7 @@ namespace LVL1 {
       SG::ReadHandleKey<xAOD::L1TopoRawDataContainer> m_l1topoRawDataKey {this, "L1_TopoRawDataKey", "L1_Phase1L1TopoRAWData", "l1topo Raw Data"};
 
 
+      Gaudi::Property<bool> m_doMonitoring { this, "doMonitoring", false, "Do Monitoring of L1Topo Algorithms" };
       Gaudi::Property<bool> m_isLegacyTopo { this, "IsLegacyTopo", false, "Simulation of Legacy L1Topo boards" };
       Gaudi::Property<bool> m_enableInputDump { this, "EnableInputDump", false, "Enable writing of input data for standalone running" };
       Gaudi::Property<bool> m_enableBitwise { this, "UseBitwise", true, "Boolean to enable the bitwise version of software algorithms"}; 

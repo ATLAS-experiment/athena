@@ -25,6 +25,7 @@ if __name__=='__main__':
   parser.add_argument('--offline',dest="offline", action='store_true', default=False, help='is offline folder?')
   parser.add_argument('--poolcat',dest="poolcat", default="", type=str, help='is offline folder?')
   parser.add_argument('-n', '--ntuple', dest='ntname', default='', help='output ntuple name (if different from default)', type=str)
+  parser.add_argument('--oLevel', dest='olevel', default=3, help='OutputLevel of the job', type=int)
    
   args = parser.parse_args()
   if help in args and args.help is not None and args.help:
@@ -54,6 +55,9 @@ if __name__=='__main__':
             "PHYSWAVE":"PhysWave",
             "OFCCALI":"OFCCali",
             "ACORR":"AutoCorr",    
+            "DSPTHR":"DSPThr",
+            "MINBIAS":"MinBias",
+            "PHYSAC":"PhysAutoCorr",    
           }
 
   objects=set()
@@ -65,7 +69,7 @@ if __name__=='__main__':
       sys.exit(0)
 
     objects.add(objTable[objU])
-    if "OFCCALI" not in obj.upper() and 'WAVE' not in obj.upper() and not args.offline:
+    if "OFCCALI" not in obj.upper() and 'WAVE' not in obj.upper() and 'DSPTHR' not in obj.upper() and 'MINBIAS' not in obj.upper() and not args.offline:
        objectsOnl.add(objTable[objU])
     
   flds=set()
@@ -108,7 +112,9 @@ if __name__=='__main__':
   else: 
     flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2024-01"
 
-  #flags.Exec.OutputLevel=1
+  flags.Exec.OutputLevel=args.olevel
+  flags.Debug.DumpCondStore=True
+  flags.Debug.DumpDetStore=True
 
   if (args.sqlite):
     flags.IOVDb.SqliteInput=args.sqlite
@@ -172,7 +178,10 @@ if __name__=='__main__':
     if flags.LArCalib.isSC:
        cfg.merge(addFolders(flags,'/LAR/ElecCalibOflSC/AutoCorrs/AutoCorr',modifiers='<key>LArAutoCorrSC</key>',className='LArAutoCorrComplete'))
     else:   
-       cfg.merge(addFolders(flags,'/LAR/ElecCalibOfl/AutoCorrs/AutoCorr',className='LArAutoCorrComplete'))
+       if args.ftag:
+          cfg.merge(addFolders(flags,'/LAR/ElecCalibOfl/AutoCorrs/AutoCorr',tag="".join('/LAR/ElecCalibOfl/AutoCorrs/AutoCorr'.split('/')) + args.ftag))
+       else:
+          cfg.merge(addFolders(flags,'/LAR/ElecCalibOfl/AutoCorrs/AutoCorr',className='LArAutoCorrComplete'))
     ckey="LArAutoCorrSC" if flags.LArCalib.isSC else "LArAutoCorr"
     cfg.addEventAlgo(CompFactory.LArAutoCorr2Ntuple(ContainerKey = "LArAutoCorrSym" if flags.Input.isMC else ckey,
                                                     AddFEBTempInfo = False, 
@@ -183,6 +192,27 @@ if __name__=='__main__':
                                                     BadChanKey = bcKey,
 
                                                   ))
+
+  if "PhysAutoCorr" in objects:
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    if flags.LArCalib.isSC:
+       cfg.merge(addFolders(flags,'/LAR/ElecCalibOflSC/AutoCorrs/PhysicsAutoCorr',modifiers='<key>LArAutoCorrSC</key>',className='LArAutoCorrComplete'))
+    else:   
+       if args.ftag:
+          cfg.merge(addFolders(flags,'/LAR/ElecCalibOfl/AutoCorrs/PhysicsAutoCorr',tag="".join('/LAR/ElecCalibOfl/AutoCorrs/PhysicsAutoCorr'.split('/')) + args.ftag))
+       else:
+          cfg.merge(addFolders(flags,'/LAR/ElecCalibOfl/AutoCorrs/PhysicsAutoCorr',className='LArAutoCorrComplete'))
+    ckey="LArPhysAutoCorrSC" if flags.LArCalib.isSC else "LArPhysAutoCorr"
+    cfg.addEventAlgo(CompFactory.LArAutoCorr2Ntuple(ContainerKey =  ckey,
+                                                     AddFEBTempInfo = False, 
+                                                     AddCalib = True,
+                                                     isSC = flags.LArCalib.isSC,
+                                                     ApplyCorrection = not flags.Input.isMC,
+                                                     AddCorrUndo = not flags.Input.isMC,
+                                                     BadChanKey = bcKey,
+ 
+                                                   ))
+
   if "Ramp" in objects:
     ckey = "LArRampSC" if flags.LArCalib.isSC else "LArRamp"
     if args.offline:
@@ -210,11 +240,14 @@ if __name__=='__main__':
              else:
                 cfg.merge(addFolders(flags,fld))
              ckey= 'LArOFC' if '1phase' in fld else 'LArLArOFCPhys4samples'
+             ntname= 'OFC' if '1phase' in fld  else 'OFC_1ns'
              break
     else:         
        ckey = "LArOFCSC" if flags.LArCalib.isSC else "LArOFC"
+       ntname = 'OFC'
     cfg.addEventAlgo(CompFactory.LArOFC2Ntuple(AddFEBTempInfo   = False,   
                                                ContainerKey=ckey,
+                                               NtupleName=ntname,
                                                isSC = flags.LArCalib.isSC,
                                                BadChanKey = bcKey
                                              ))
@@ -284,6 +317,12 @@ if __name__=='__main__':
     
 
   if "HVScaleCorr" in objects:
+    # hack to read from sqlite created by HV computations
+    iovDbSvc=cfg.getService("IOVDbSvc")
+    for i in range(0,len(iovDbSvc.Folders)):
+          if (iovDbSvc.Folders[i].find("HVScaleCorr")>=0):
+              iovDbSvc.Folders[i]+="<key>/LAR/ElecCalibFlatSC/HVScaleCorr</key>"
+
     cfg.addEventAlgo(CompFactory.LArHVScaleCorr2Ntuple(ContainerKey= "LArHVScaleCorrSC" if flags.LArCalib.isSC else "LArHVScaleCorr",
                                                        AddFEBTempInfo = False,
                                                        isSC = flags.LArCalib.isSC,
@@ -330,6 +369,30 @@ if __name__=='__main__':
                                                  BadChanKey = bcKey
                                                ))
 
+  if "DSPThr" in objects:
+     from IOVDbSvc.IOVDbSvcConfig import addFolders
+     cfg.merge(addFolders(flags,"/LAR/Configuration/DSPThresholdFlat/Thresholds",detDb="LAR_ONL"))  
+     cfg.addEventAlgo(CompFactory.LArDSPThresholds2Ntuple(DumpFlat=True,FlatFolder="/LAR/Configuration/DSPThresholdFlat/Thresholds"))
+
+  if "MinBias" in objects:
+     #FIXME different for MC
+     from IOVDbSvc.IOVDbSvcConfig import addFolders
+     if args.offline:
+        myfld="/LAR/ElecCalibOfl/LArPileupAverage"
+        mydb="LAR_OFL"
+     else:
+        myfld="/LAR/LArPileup/LArPileupAverage"
+        mydb="LAR_ONL"  
+     if args.ftag:
+        cfg.merge(addFolders(flags,myfld,detDb=mydb,className="LArMinBiasAverageMC",tag="".join(myfld.split('/')) + args.ftag))  
+     else:
+        cfg.merge(addFolders(flags,myfld,detDb=mydb,className="LArMinBiasAverageMC"))  
+     LArMinBiasAverageSymAlg =  CompFactory.getComp("LArSymConditionsAlg<LArMinBiasAverageMC, LArMinBiasAverageSym>")    
+     LArMCSymCondAlg=CompFactory.LArMCSymCondAlg
+     cfg.addCondAlgo(LArMCSymCondAlg(ReadKey="LArOnOffIdMap"))
+     cfg.addCondAlgo(LArMinBiasAverageSymAlg(ReadKey="LArPileupAverage",WriteKey="LArSymPileupAverage"))
+     cfg.addEventAlgo(CompFactory.LArMinBias2Ntuple(ContainerKey="",ContainerKeyAv="LArSymPileupAverage"))
+  
   rootfile=args.out
   if os.path.exists(rootfile):
     os.remove(rootfile)

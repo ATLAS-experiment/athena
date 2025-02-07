@@ -19,7 +19,9 @@
 #include "xAODEventInfo/EventInfo.h"
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "CaloDetDescr/ICaloSuperCellIDTool.h"
 
+#include "LArSimEvent/LArHitContainer.h"
 
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArRawConditions/LArMCSym.h"
@@ -68,8 +70,13 @@ class ITHistSvc;
       , "CaloDetDescrManager"
       , "SG Key for CaloDetDescrManager in the Condition Store" };
 
-  const LArEM_ID*        m_larem_id = nullptr;
-  const CaloCell_ID*       m_calo_id = nullptr;
+  SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloSCMgrKey { this
+      , "CaloSuperCellDetDescrManager"
+      , "CaloSuperCellDetDescrManager"
+      , "SG Key for CaloSuperCellDetDescrManager in the Condition Store" };
+
+  const CaloCell_Base_ID*       m_calo_id = nullptr;
+
   std::vector<double> m_eCell;
   
 
@@ -110,5 +117,10 @@ class ITHistSvc;
   float m_first;
   int m_ncell = 0;
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EvtInfo", "EventInfo", "EventInfo name"};
+  StringArrayProperty m_inputKeys{this, "InputHitContainers", {"LArHitEMB", "LArHitEMEC", "LArHitHEC", "LArHitFCAL"}, 
+                                "Name of input hit vectors (default=[LArHitEMB, LArHitEMEC, LArHitHEC, LArHitFCAL])" };
+  SG::ReadHandleKeyArray<LArHitContainer> m_larHitKeys;
+  BooleanProperty m_isSC {this, "SuperCell", false, "Creating for SC ?"};
+  ToolHandle<ICaloSuperCellIDTool>   m_scidtool{this, "CaloSuperCellIDTool", "CaloSuperCellIDTool", "Offline / SuperCell ID mapping tool"};
   };
 #endif
