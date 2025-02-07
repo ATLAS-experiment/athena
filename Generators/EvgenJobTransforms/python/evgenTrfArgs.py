@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import PyJobTransforms.trfArgClasses as trfArgClasses
 
@@ -63,9 +63,9 @@ def addStdEvgenArgs(parser):
                         help="Name of YODA file for Rivet histo output",
                         type=trfArgClasses.argFactory(trfArgClasses.argYODAFile, type='yoda', io='output', runarg=True))
 
-    parser.add_argument("--outputEvtFile", group="Evgen",
-                        help="Name of Evt (HepMC) output file",
-                        type=trfArgClasses.argFactory(trfArgClasses.argHepEvtAsciiFile, type='evt', io='output', runarg=True))
+    parser.add_argument("--outputHEPMCFile", group="Evgen",
+                        help="Name of HepMC output file",
+                        type=trfArgClasses.argFactory(trfArgClasses.argHepEvtAsciiFile, type='hepmc', io='output', runarg=True))
 
     parser.add_argument("--rivetAnas", group="Evgen",
                         help="a comma-separated list of Rivet analyses to run on the resulting events",
