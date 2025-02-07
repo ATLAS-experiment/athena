@@ -32,6 +32,7 @@ mc23File = com_dir+"mc23/AOD/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_S
 truthFile = com_dir+"mc23/EVNT/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8514/EVNT.32288062._002040.pool.root.1"
 data18File = com_dir+"data18/AOD/data18_13TeV.00357772.physics_Main.merge.AOD.r13286_p4910/1000events.AOD.27655096._000455.pool.root.1"
 data22File = com_dir+"data22/AOD/data22_13p6TeV.00431906.physics_Main.merge.AOD.r13928_p5279/1000events.AOD.30220215._001367.pool.root.1"
+data23File = com_dir+"data23/AOD/data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357/2012events.data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357._lb1416._0006.1"
 data23CosFile = com_dir+"data23_cos/AOD/data23_cos.00459152.physics_CosmicMuons.merge.AOD.f1383_m2195/data23_cos.00459152.physics_CosmicMuons.merge.AOD.f1383_m2195._lb0124-lb0126._0001.1"
 
 
@@ -126,6 +127,7 @@ if (makeDataDAODs or makeMCDAODs):
       if makeDataDAODs: 
          generateText(formatName,"data18",data18File,False,False,"-1")
          generateText(formatName,"data22",data22File,False,False,"-1")
+         generateText(formatName,"data23",data23File,False,False,"-1") 
       if makeMCDAODs:
          generateText(formatName,"mc20",mc20File,False,True,"-1")
          generateText(formatName,"mc23",mc23File,False,True,"-1")
@@ -139,6 +141,7 @@ if makeTrains:
       if makeDataDAODs: 
          generateTrains(train,"data18",data18File,False,"-1")
          generateTrains(train,"data22",data22File,False,"-1")
+         generateTrains(train,"data23",data23File,False,"-1")
       if makeMCDAODs:
          generateTrains(train,"mc20",mc20File,True,"-1")
          generateTrains(train,"mc23",mc23File,True,"-1")
