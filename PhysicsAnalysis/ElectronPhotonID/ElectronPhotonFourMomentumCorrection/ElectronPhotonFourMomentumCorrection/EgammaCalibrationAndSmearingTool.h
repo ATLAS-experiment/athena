@@ -190,6 +190,7 @@ class EgammaCalibrationAndSmearingTool
   int m_usePSCorrection;
   int m_useS12Correction;
   int m_useSaccCorrection;
+  bool m_decorateEmva;
 
   // 2D histrogram (eta,phi) for a correction to cope with calo distortion
   // (sagging)

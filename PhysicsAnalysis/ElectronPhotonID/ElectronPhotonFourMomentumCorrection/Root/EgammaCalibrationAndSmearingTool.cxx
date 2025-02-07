@@ -339,6 +339,7 @@ EgammaCalibrationAndSmearingTool::EgammaCalibrationAndSmearingTool(
   declareProperty(
       "useAFII", m_use_AFII = -1,
       "This is now deprecated. Kept for explicit error message for now");
+  declareProperty("decorateEmva", m_decorateEmva = false, "whether to decorate the eMVA value");
 }
 
 EgammaCalibrationAndSmearingTool::~EgammaCalibrationAndSmearingTool() {
@@ -963,6 +964,11 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
     ATH_MSG_DEBUG("energy after MVA calibration = " << std::format("{:.2f}", energy));
   } else {
     energy = input.e();
+  }
+  if (m_decorateEmva)
+  {
+    static const SG::AuxElement::Decorator<float> decEmva("E_mva_only");
+    decEmva(input) = energy;
   }
 
   if (m_TESModel == egEnergyCorr::es2011c) {

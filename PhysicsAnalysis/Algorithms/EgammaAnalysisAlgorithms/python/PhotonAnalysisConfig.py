@@ -69,6 +69,8 @@ class PhotonCalibrationConfig (ConfigBlock) :
             info="decorate truth particle information on the reconstructed one")
         self.addOption ('decorateCaloClusterEta', False, type=bool,
             info="decorate the calo cluster eta on the reconstructed one")
+        self.addOption ('decorateEmva', False, type=bool,
+            info="decorate E_mva_only on the objects (needed for columnar tools/PHYSLITE)")
 
 
     def makeCalibrationAndSmearingAlg (self, config, name) :
@@ -101,6 +103,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         alg.calibrationAndSmearingTool.useFastSim = (
             0 if self.forceFullSimConfig
             else int( config.dataType() is DataType.FastSim ))
+        alg.calibrationAndSmearingTool.decorateEmva = self.decorateEmva
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -232,6 +235,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
             # turn off scale corrections for the smearing step
             alg.calibrationAndSmearingTool.doScaleCorrection = False
             alg.calibrationAndSmearingTool.useMVACalibration = False
+            alg.calibrationAndSmearingTool.decorateEmva = False
 
         if self.minPt > 0:
             # Set up the the pt selection
