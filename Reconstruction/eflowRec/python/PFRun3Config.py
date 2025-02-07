@@ -12,9 +12,14 @@ def PFFullCfg(inputFlags,runTauReco=False,**kwargs):
     StoreGateSvc=CompFactory.StoreGateSvc
     result.addService(StoreGateSvc("DetectorStore"))
 
-    #Alias calibrated topoclusters, if they exist already, such that overwrite won't fial
+    #Alias calibrated topoclusters, if they exist already, such that overwrite won't fail
     from SGComps.AddressRemappingConfig import InputRenameCfg
     result.merge(InputRenameCfg("xAOD::CaloClusterContainer","CaloCalTopoClusters",""))
+
+    #This is needed to ensure the convertor is correctly configured for each LHC period
+    #Otherwise a default convertor is provided that is not correctly configured for e.g Run4
+    from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
+    result.merge(TrkEventCnvSuperToolCfg(inputFlags))
 
     #setup magnetic field service
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
