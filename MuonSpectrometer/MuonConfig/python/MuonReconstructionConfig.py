@@ -190,8 +190,14 @@ def MuonReconstructionCfg(flags):
             if not flags.Muon.usePhaseIIGeoSetup:
                 from MuonConfig.MuonRdoDecodeConfig import MuonPRD_MultiTruthMakerCfg
                 result.merge(MuonPRD_MultiTruthMakerCfg(flags))
-                from MuonConfig.MuonTruthAlgsConfig import MuonTruthDecorationAlgCfg
-                result.merge(MuonTruthDecorationAlgCfg(flags))
+                from MuonConfig.MuonTruthAlgsConfig import MuonTruthClassificationAlgCfg
+                result.merge(MuonTruthClassificationAlgCfg(flags))
+                from MuonConfig.MuonTruthAlgsConfig import MuonTruthAddTrackRecordsAlgCfg
+                result.merge(MuonTruthAddTrackRecordsAlgCfg(flags))
+                from MuonConfig.MuonTruthAlgsConfig import MuonTruthHitCountsAlgCfg
+                result.merge(MuonTruthHitCountsAlgCfg(flags))
+                from MuonConfig.MuonTruthAlgsConfig import MuonTruthSegmentCreationAlgCfg
+                result.merge(MuonTruthSegmentCreationAlgCfg(flags))
             else:
                 from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
                 result.merge(MuonTruthAlgsCfg(flags))
