@@ -1,9 +1,9 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ONNXUTIL_H
-#define ONNXUTIL_H
+#ifndef XAODBTAGGINGEFFICIENCY_ONNXUTIL_H
+#define XAODBTAGGINGEFFICIENCY_ONNXUTIL_H
 
 #include <onnxruntime_cxx_api.h>
 #include <string>
@@ -48,4 +48,4 @@ class OnnxUtil final{
 }; // Class OnnxUtil
 
 
-#endif //ONNXUTIL_H
+#endif //XAODBTAGGINGEFFICIENCY_ONNXUTIL_H
