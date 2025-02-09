@@ -71,28 +71,6 @@ StatusCode TrigCaloClusterMonitor::execute(const EventContext & ctx) const
       return StatusCode::FAILURE;
     }
 
-
-  auto time_tot = Monitored::Timer("TIME_execute");
-  auto time_clusMaker = Monitored::Timer("TIME_ClustMaker");
-  auto time_clusCorr = Monitored::Timer("TIME_ClustCorr");
-
-  time_tot.start();
-  time_clusMaker.start();
-  time_clusCorr.start();
-  time_clusMaker.stop();
-  time_clusCorr.stop();
-  time_tot.stop();
-
-  //Dummy values: We will need to find a better way to monitor the times
-  //             (maybe leveraging whatever cost monitoring does?)
-  //
-  //We could add also some monitoring to cluster making itself,
-  //as that would probably be the only good way to get the time
-  //for the actual clustering and the corrections separately,
-  //but this would mean further modifications to the offline algorithm,
-  //which we likely want to avoid, also because it might be more of a mess
-  //to get the histograms in the right places?
-
   std::vector<double>       clus_phi;
   std::vector<double>       clus_eta;
   std::vector<double>       clus_n_bad_cells;
@@ -217,10 +195,10 @@ StatusCode TrigCaloClusterMonitor::execute(const EventContext & ctx) const
       moncount_1thrsigma = count_1thrsigma;
       moncount_2thrsigma = count_2thrsigma;
 
-      auto monitorIt = Monitored::Group( m_moniTool, time_tot, time_clusMaker, time_clusCorr, mon_container_size,
-                                         mon_clusEt, mon_clusPhi, mon_clusEta, mon_clusSignalState, mon_clusSize,
-                                         mon_badCells, mon_engFrac, mon_size, monmu, mon_container_size_by_mu,
-                                         moncount_1thrsigma, moncount_2thrsigma, moncount_1thrsigma_by_mu2, moncount_2thrsigma_by_mu2 );
+      auto monitorIt = Monitored::Group( m_moniTool, mon_container_size, mon_clusEt, mon_clusPhi, mon_clusEta,
+                                         mon_clusSignalState, mon_clusSize, mon_badCells, mon_engFrac, mon_size,
+                                         monmu, mon_container_size_by_mu, moncount_1thrsigma, moncount_2thrsigma,
+                                         moncount_1thrsigma_by_mu2, moncount_2thrsigma_by_mu2 );
     }
   else
     {
@@ -228,9 +206,9 @@ StatusCode TrigCaloClusterMonitor::execute(const EventContext & ctx) const
         {
           mon_container_size_by_mu = cluster_collection_ptr->size() / read_mu;
         }
-      auto monitorIt = Monitored::Group( m_moniTool, time_tot, time_clusMaker, time_clusCorr, mon_container_size,
-                                         mon_clusEt, mon_clusPhi, mon_clusEta, mon_clusSignalState, mon_clusSize,
-                                         mon_badCells, mon_engFrac, mon_size, monmu, mon_container_size_by_mu);
+      auto monitorIt = Monitored::Group( m_moniTool, mon_container_size, mon_clusEt, mon_clusPhi, mon_clusEta, 
+                                         mon_clusSignalState, mon_clusSize, mon_badCells, mon_engFrac, mon_size,
+                                         monmu, mon_container_size_by_mu);
     }
 
   return StatusCode::SUCCESS;

@@ -19,9 +19,39 @@ from ZdcNtuple.ZdcNtupleConfig import ZdcNtupleCfg
 from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
 # added getRun3NavigationContainerFromInput as per Tim Martin's suggestions
 from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput
+from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
 
 zdcConfigMap = {}
 
+defaultGeometryZdcRun2 = "ATLAS-R2-2016-01-03-00"
+defaultGeometryZdc2023 = "ATLAS-R3S-2021-03-03-00"
+defaultGeometryZdc2024 = "ATLAS-R3S-2021-03-04-00"
+
+def zdcGeometry(flags):
+    projName = flags.Input.ProjectName
+    match projName:
+        case "data15_hi":
+            return defaultGeometryZdcRun2
+        case "data18_hi":
+            return defaultGeometryZdcRun2
+        case "data16_hi":
+            return defaultGeometryZdcRun2
+        case "data16_hip":
+            return defaultGeometryZdcRun2
+        case "data23_hi":
+            return defaultGeometryZdc2023
+        case "data24_hi":
+            return defaultGeometryZdc2024
+        case "data24_hicomm":
+            return defaultGeometryZdc2024
+        case _:
+            run = flags.GeoModel.Run
+            if (run == LHCPeriod.RUN2):
+                return defaultGeometryTags.RUN2
+            if (run == LHCPeriod.RUN3):
+                return defaultGeometryTags.RUN3
+            return ""
+        
 def GenerateConfigTagDict():
 
     zdcConfigMap['data15_hi'] = {}
@@ -465,7 +495,6 @@ if __name__ == '__main__':
     """ This is selftest & ZDC calibration transform at the same time"""
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
 
     flags = initConfigFlags()
 
@@ -534,7 +563,6 @@ if __name__ == '__main__':
     if (isInj or isLED or isInj or pn == 'data_test'):
         flags.Trigger.EDMVersion=3
         flags.GeoModel.Run = LHCPeriod.Run3
-        flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
         flags.IOVDb.GlobalTag=defaultConditionsTags.RUN3_DATA
     else:
         year = int(pn.split('_')[0].split('data')[1])
@@ -545,7 +573,6 @@ if __name__ == '__main__':
         elif (year > 20):
             flags.Trigger.EDMVersion=3
             flags.GeoModel.Run = LHCPeriod.Run3
-            flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
             flags.IOVDb.GlobalTag=defaultConditionsTags.RUN3_DATA
 
     if (flags.Input.isMC):
@@ -560,6 +587,8 @@ if __name__ == '__main__':
     if flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # standalone data: no trigger info available
         flags.DQ.useTrigger = False
         flags.DQ.triggerDataAvailable = False 
+
+    flags.GeoModel.AtlasVersion=zdcGeometry(flags)
 
     flags.lock()
     # flags.dump(evaluate=True) # uncomment this line if needed for testing

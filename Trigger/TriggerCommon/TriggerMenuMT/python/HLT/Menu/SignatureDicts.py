@@ -1139,7 +1139,7 @@ AllowedMonitorChainIdentifiers = ['robrequest', 'timeburner',
                                   'l1calooverflow', 'l1topoPh1debug',
                                   'mistimemonl1bccorr','mistimemonl1bccorrnomu',
                                   'mistimemoncaltimenomu','mistimemoncaltime',
-                                  'mistimemonj400',]
+                                  'mistimemonj400', 'caloclustermon']
 
 # ---- Monitor Chain Dictionary of all allowed Values ----
 MonitorChainParts = {
