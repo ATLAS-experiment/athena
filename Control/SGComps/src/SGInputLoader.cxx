@@ -107,7 +107,10 @@ SGInputLoader::execute()
         // Strip any decoration name.
         std::string::size_type ppos = obj.key().find ('.');
         if (ppos < obj.key().size()-1) {
-          obj.updateKey (obj.key().substr (0, ppos));
+          //obj.updateKey (obj.key().substr (0, ppos));
+          // commented out line above, to keep decoration on key so can distinguish undeclared decorations from undeclared objects
+          // undeclared objects will be an error, undeclared decorations will just be a warning
+          // TODO: restore the above modification (and make all transient proxies an error in loadObj, not just non-decorations) when all decorations are declared
         }
         m_load.emplace (std::move(obj));
       }
@@ -183,17 +186,24 @@ SGInputLoader::loadObjs(const DataObjIDColl& objs) const {
 
   for (auto &obj: objs) {
 
+    std::string::size_type ppos = obj.key().substr(0,obj.key().size()-1).find('.');
+
     // use the parsing built into the VarHandleKey to get the correct
     // StoreGate key
-    SG::VarHandleKey vhk(obj.clid(),obj.key(),Gaudi::DataHandle::Reader);
+    SG::VarHandleKey vhk(obj.clid(),obj.key().substr(0,ppos),Gaudi::DataHandle::Reader);
 
     ATH_MSG_DEBUG("trying to load " << obj << "   sgkey: " << vhk.key() );
 
     SG::DataProxy* dp = evtStore()->proxy(obj.clid(), vhk.key());
     if (dp != 0) {
       ATH_MSG_DEBUG(" found proxy for " << obj);
-      if (dp->provider() == 0) {
-	ATH_MSG_DEBUG("   obj " << obj << " has no provider, and is only Transient" );
+      if (dp->provider() == 0 && extraOutputDeps().find(obj)==extraOutputDeps().end()) {
+        if(ppos==std::string::npos) {
+          ATH_MSG_ERROR("   obj " << obj << " has no provider, and is only Transient - indicative of a missing output declaration" );
+          ok =false;
+        } else { // just warning for now for potentially undeclared decorations, instead of error, because too many cases to fix
+          ATH_MSG_WARNING("   decoration " << obj << " has no provider, and is only Transient - indicative of a missing output declaration" );
+        }
       }
     } else {
       ok = false;

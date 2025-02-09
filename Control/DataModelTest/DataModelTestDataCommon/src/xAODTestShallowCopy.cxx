@@ -59,6 +59,13 @@ StatusCode xAODTestShallowCopy::initialize()
   ATH_CHECK( m_cinfoAnInt10Key.initialize( !m_cinfoReadKey.empty() ) );
   ATH_CHECK( m_cinfoDecorDeps.initialize( m_cinfoReadKey, m_cinfoWriteKey, !m_cinfoReadKey.empty() ) );
 
+  if (m_cinfoReadKeyBase.empty()) {
+    m_cinfoWriteKeyBase = "";
+  }
+  ATH_CHECK( m_cinfoReadKeyBase.initialize( !m_cinfoReadKeyBase.empty() ) );
+  ATH_CHECK( m_cinfoWriteKeyBase.initialize( !m_cinfoReadKeyBase.empty() ) );
+  ATH_CHECK( m_cinfoDecorDepsBase.initialize( m_cinfoReadKeyBase, m_cinfoWriteKeyBase, !m_cinfoReadKeyBase.empty() ) );
+  
   if (m_ctrigReadKey.empty()) {
     m_ctrigWriteKey = "";
     m_ctrigAnInt10Key = "";
@@ -111,7 +118,7 @@ StatusCode xAODTestShallowCopy::execute (const EventContext& ctx) const
   }
 
   if (!m_cinfoReadKey.empty()) {
-    SG::ReadHandle<C> cinfo (m_cinfoReadKey, ctx);
+    SG::ReadHandle<DMTest::C> cinfo (m_cinfoReadKey, ctx);
     auto ret = xAOD::shallowCopyObject (*cinfo);
 
     SG::WriteHandle<DMTest::C> copy (m_cinfoWriteKey, ctx);
@@ -122,6 +129,10 @@ StatusCode xAODTestShallowCopy::execute (const EventContext& ctx) const
 
     SG::WriteDecorHandle<DMTest::C, int> anInt10 (m_cinfoAnInt10Key, ctx);
     anInt10(*ret.first) = count * 20000 + ret.first->anInt() * 200;
+  }
+
+  if (!m_cinfoReadKeyBase.empty()) {
+    ATH_CHECK( m_cinfoDecorDepsBase.linkDecors (m_cinfoReadKeyBase, ctx) );
   }
 
   if (!m_ctrigReadKey.empty()) {
