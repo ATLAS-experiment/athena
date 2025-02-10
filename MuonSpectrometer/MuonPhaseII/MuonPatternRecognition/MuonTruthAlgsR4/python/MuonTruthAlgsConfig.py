@@ -1,4 +1,5 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -86,12 +87,39 @@ def PrdMultiTruthMakerCfg(flags):
         result.addEventAlgo(the_alg) 
     return result
 
+def TruthSegmentToTruthPartCfg(flags, name="MuonTruthSegmentToTruthAssocAlg", **kwargs):
+    result = ComponentAccumulator()
+    hitDecors = []
+    if flags.Detector.GeometryMDT:
+        hitDecors+=["truthMdtHits"]
+    if flags.Detector.GeometryRPC:
+        hitDecors+=["truthRpcHits"]
+    if flags.Detector.GeometryTGC:
+        hitDecors+=["truthTgcHits"]
+    if flags.Detector.GeometryMM:
+        hitDecors+=["truthMMHits"]
+    if flags.Detector.GeometrysTGC:
+        hitDecors+=["truthStgcHits"]
+    kwargs.setdefault("SimHitIds", hitDecors)
+    the_alg = CompFactory.MuonR4.TruthSegToTruthPartAssocAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+@AccumulatorCache
 def MuonTruthAlgsCfg(flags):
     result = ComponentAccumulator()
+    if not flags.Input.isMC:
+        return result
     result.merge(TruthHitAssociationCfg(flags))
     from MuonConfig.MuonDataPrepConfig import PrimaryMeasContNamesCfg
     PrdLinkInputs = [( "xAOD::UncalibratedMeasurementContainer" , 
                      "StoreGateSvc+{cont_name}.simHitLink".format(cont_name = cont_name)) for cont_name in PrimaryMeasContNamesCfg(flags) ]
     result.merge(TruthSegmentMakerCfg(flags, ExtraInputs = PrdLinkInputs))
     result.merge(PrdMultiTruthMakerCfg(flags))
+    from MuonConfig.MuonTruthAlgsConfig import MuonTruthClassificationAlgCfg, MuonTruthHitCountsAlgCfg, MuonTruthAddTrackRecordsAlgCfg
+
+    result.merge(MuonTruthClassificationAlgCfg(flags))
+    result.merge(MuonTruthHitCountsAlgCfg(flags))
+    result.merge(MuonTruthAddTrackRecordsAlgCfg(flags))
+    result.merge(TruthSegmentToTruthPartCfg(flags))
     return result
