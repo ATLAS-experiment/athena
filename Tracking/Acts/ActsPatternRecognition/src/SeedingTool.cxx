@@ -288,6 +288,16 @@ ATH_FLATTEN
     
     //TODO POSSIBLE OPTIMISATION come back here: see MR !52399 ( i.e. use static thread_local)
     typename decltype(m_finder)::SeedingState state;
+
+    // Already reserve the state vectors here.
+    
+    state.topSpVec.reserve(m_stateVectorReserveSize);
+    state.curvatures.reserve(m_stateVectorReserveSize);
+    state.impactParameters.reserve(m_stateVectorReserveSize);
+    state.linCircleTop.reserve(m_stateVectorReserveSize);
+    state.compatBottomSP.reserve(m_stateVectorReserveSize);
+    state.compatTopSP.reserve(m_stateVectorReserveSize);
+        
     state.spacePointMutableData.resize(std::distance(spBegin, spEnd));
 
     for (const auto [bottom, middle, top] : spacePointsGrouping) {
