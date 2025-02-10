@@ -109,7 +109,7 @@ namespace VKalVrtAthena {
   {
     
     const xAOD::VertexContainer *secondaryVertexContainer( nullptr );
-    ATH_CHECK( evtStore()->retrieve( secondaryVertexContainer, "VrtSecInclusive_" + m_jp.secondaryVerticesContainerName ) );
+    ATH_CHECK( evtStore()->retrieve( secondaryVertexContainer, "VrtSecInclusive_" + m_jp.secondaryVerticesContainerName + m_jp.augVerString) );
     
     using LeptonContainer = DataVector<LeptonFlavor>;
     
