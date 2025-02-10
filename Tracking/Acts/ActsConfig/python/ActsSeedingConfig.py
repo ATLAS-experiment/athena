@@ -363,7 +363,7 @@ def ActsMainSeedingCfg(flags,
 
     return acc
 
-def ActsSeedingCfg(flags) -> ComponentAccumulator:
+def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     processPixels = flags.Detector.EnableITkPixel
     processStrips = flags.Detector.EnableITkStrip
@@ -375,7 +375,6 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
     elif flags.Tracking.doITkFastTracking:
         processStrips = False
 
-    kwargs = dict()
     kwargs.setdefault('processPixels', processPixels)
     kwargs.setdefault('processStrips', processStrips)
 
