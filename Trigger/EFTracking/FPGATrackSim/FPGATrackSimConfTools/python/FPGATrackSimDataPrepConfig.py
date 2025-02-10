@@ -335,80 +335,104 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
 
 log = AthenaLogger(__name__)
 
-def FPGATrackSimDataPrepConnectToFastTracking(flags,FinalTracks="FPGADataPrep"):
+def FPGATrackSimDataPrepConnectToFastTracking(flagsIn,FinalTracks="F100-",**kwargs):
+        
+    flags = flagsIn.clone()
+    
+    # configure FastTracking based on C-100 flags
+    from ActsConfig.ActsCIFlags import actsAloneFastWorkflowFlags
+    actsAloneFastWorkflowFlags(flags)
+    
+    flags.Tracking.ActiveConfig.extension=FinalTracks 
+    flags.lock()
+    flags.dump()
+    flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass") # TODO: Check if it's really necessary 
+    prefix=flags.Tracking.ActiveConfig.extension # prefix for the name of final tracks (this is what IDTPM reads)
+    
     result = ComponentAccumulator()
-    ACTSTracks="FPGADataPrepActsTracks"
     
+    from ActsConfig.ActsUtilities import extractChildKwargs
+    
+    ################################################################################
+    # set arguments needed to run F-100
+    # -- Seeding args -- 
+    kwargs.setdefault('PixelSeedingAlg.InputSpacePoints',['ITkPixelSpacePoints'])
+    kwargs.setdefault('StripSeedingAlg.InputSpacePoints',['ITkStripSpacePoints']) # possibly will never be used but in case it's needed, the strip SP conversion should be enabled for this container to be available in F100 (off by default)
+
+    # -- Track Finding args -- 
+    kwargs.setdefault('TrackFindingAlg.UncalibratedMeasurementContainerKeys',['ITkPixelClusters','ITkStripClusters'])
+
+    # -- Truth Matching args -- 
+    kwargs.setdefault('PixelClusterToTruthAssociationAlg.Measurements','ITkPixelClusters')
+    kwargs.setdefault('StripClusterToTruthAssociationAlg.Measurements','ITkStripClusters')
+    print (kwargs)
+    
+    ################################################################################
     # ACTS Seeding
-    from ActsConfig.ActsSeedingConfig import ActsStripSeedingAlgCfg, ActsPixelSeedingAlgCfg
-    result.merge(ActsStripSeedingAlgCfg(flags, name="FPGADataPrepActsStripSeedingAlg",
-                                    InputSpacePoints=['xAODStripSpacePoints_1stFromFPGA'],
-                                    OutputSeeds="FPGADataPrepActsStripSeeds"))
+    from ActsConfig.ActsSeedingConfig import ActsSeedingCfg
+    result.merge(ActsSeedingCfg(flags, **kwargs))
     
-    result.merge(ActsPixelSeedingAlgCfg(flags, name="FPGADataPrepActsPixelSeedingAlg",
-                                    InputSpacePoints=['xAODPixelSpacePoints_1stFromFPGA'],
-                                    OutputSeeds="FPGADataPrepActsPixelSeeds"))
+    # ACTS Track Finding
+    from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg,ActsAmbiguityResolutionCfg
+    result.merge(ActsTrackFindingCfg(flags,**extractChildKwargs(prefix='TrackFindingAlg.', **kwargs)))
     
-    # ACTS Tracking
-    from ActsConfig.ActsTrackFindingConfig import ActsMainTrackFindingAlgCfg
-    result.merge(ActsMainTrackFindingAlgCfg(flags, name="FPGADataPrepActsTrackFindingAlg",
-                                SeedContainerKeys=['FPGADataPrepActsPixelSeeds','FPGADataPrepActsStripSeeds'],
-                                UncalibratedMeasurementContainerKeys=["xAODPixelClusters_1stFromFPGACluster","xAODStripClusters_1stFromFPGACluster"],
-                                ACTSTracksLocation=ACTSTracks))
+    # if ambiguity is enabled for FastTracking run here as well
+    if flags.Acts.doAmbiguityResolution:
+        result.merge(ActsAmbiguityResolutionCfg(flags,**extractChildKwargs(prefix='AmbiguityResolutionAlg.',**kwargs)))
+        
+    # modify the tracks' name (not the final one) accordingly in case ambiguity resolution runs
+    acts_tracks=f"{prefix}Tracks" if not flags.Acts.doAmbiguityResolution else f"{prefix}ResolvedTracks"
     
+    ################################################################################
     # Track to Truth association and validation
     from ActsConfig.ActsTruthConfig import ActsTruthParticleHitCountAlgCfg, ActsPixelClusterToTruthAssociationAlgCfg,ActsStripClusterToTruthAssociationAlgCfg
     result.merge(ActsPixelClusterToTruthAssociationAlgCfg(flags,
-                                                       name="FPGADataPrepActsPixelClusterToTruthAssociationAlg",
+                                                       name=f"{prefix}PixelClusterToTruthAssociationAlg",
                                                        InputTruthParticleLinks="xAODTruthLinks",
-                                                       AssociationMapOut="ITkFPGAPixelClustersToTruthParticles",
-                                                       Measurements="xAODPixelClusters_1stFromFPGACluster")) 
+                                                       AssociationMapOut=f"{prefix}ITkPixelClustersToTruthParticles",
+                                                       Measurements=kwargs.get('PixelClusterToTruthAssociationAlg.Measurements'))) 
     
     result.merge(ActsStripClusterToTruthAssociationAlgCfg(flags,
-                                                       name="FPGADataPrepActsStripClusterToTruthAssociationAlg",
+                                                       name=f"{prefix}StripClusterToTruthAssociationAlg",
                                                        InputTruthParticleLinks="xAODTruthLinks",
-                                                       AssociationMapOut="ITkFPGAStripClustersToTruthParticles",
-                                                       Measurements="xAODStripClusters_1stFromFPGACluster"))
+                                                       AssociationMapOut=f"{prefix}ITkStripClustersToTruthParticles",
+                                                       Measurements=kwargs.get('StripClusterToTruthAssociationAlg.Measurements')))
     
     result.merge(ActsTruthParticleHitCountAlgCfg(flags,
-                                              name="FPGADataPrepActsTruthParticleHitCountAlg",
-                                              PixelClustersToTruthAssociationMap="ITkFPGAPixelClustersToTruthParticles",
-                                              StripClustersToTruthAssociationMap="ITkFPGAStripClustersToTruthParticles",
-                                              TruthParticleHitCountsOut="FPGATruthParticleHitCounts"))
+                                              name=f"{prefix}TruthParticleHitCountAlg",
+                                              PixelClustersToTruthAssociationMap=f"{prefix}ITkPixelClustersToTruthParticles",
+                                              StripClustersToTruthAssociationMap=f"{prefix}ITkStripClustersToTruthParticles",
+                                              TruthParticleHitCountsOut=f"{prefix}TruthParticleHitCounts"))
     
     from ActsConfig.ActsTruthConfig import ActsTrackToTruthAssociationAlgCfg, ActsTrackFindingValidationAlgCfg
-    acts_tracks=f"{flags.Tracking.ActiveConfig.extension}Tracks" if not flags.Acts.doAmbiguityResolution else f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks"
     result.merge(ActsTrackToTruthAssociationAlgCfg(flags,
-                                                name=f"{acts_tracks}FPGADataPrepTrackToTruthAssociationAlg",
-                                                PixelClustersToTruthAssociationMap="ITkFPGAPixelClustersToTruthParticles",
-                                                StripClustersToTruthAssociationMap="ITkFPGAStripClustersToTruthParticles",
-                                                ACTSTracksLocation=ACTSTracks,
-                                                AssociationMapOut=acts_tracks+"FPGAToTruthParticleAssociation"))
-    
+                                                name=f"{prefix}TrackToTruthAssociationAlg",
+                                                PixelClustersToTruthAssociationMap=f"{prefix}ITkPixelClustersToTruthParticles",
+                                                StripClustersToTruthAssociationMap=f"{prefix}ITkStripClustersToTruthParticles",
+                                                ACTSTracksLocation=acts_tracks,
+                                                AssociationMapOut=f"{acts_tracks}ToTruthParticleAssociation"))
     
     result.merge(ActsTrackFindingValidationAlgCfg(flags,
-                                                name=f"{acts_tracks}FPGADataPrepTrackFindingValidationAlg",
-                                                TrackToTruthAssociationMap=acts_tracks+"FPGAToTruthParticleAssociation",
-                                                TruthParticleHitCounts="FPGATruthParticleHitCounts"
+                                                name=f"{prefix}TrackFindingValidationAlg",
+                                                TrackToTruthAssociationMap=f"{acts_tracks}ToTruthParticleAssociation",
+                                                TruthParticleHitCounts=f"{prefix}TruthParticleHitCounts"
                                                 ))
     
     ################################################################################
     # Convert ActsTrk::TrackContainer to xAOD::TrackParticleContainer
-    prefix = flags.Tracking.ActiveConfig.extension
     from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
-    result.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, name=f"{prefix}FPGADataPrepActsTrackToTrackParticleCnvAlg",
-                                                ACTSTracksLocation=[ACTSTracks,],
-                                                TrackParticlesOutKey=f"{FinalTracks}TrackParticles"))
+    result.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, name=f"{prefix}TrackToTrackParticleCnvAlg",
+                                                ACTSTracksLocation=[acts_tracks],
+                                                TrackParticlesOutKey=f"{prefix}TrackParticles"))
    
     from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
-    result.merge(ActsTrackParticleTruthDecorationAlgCfg(flags, name=f"{prefix}FPGADataPrepActsTrackParticleTruthDecorationAlg",
-                                                    TrackToTruthAssociationMaps=[acts_tracks+"FPGAToTruthParticleAssociation"],
+    result.merge(ActsTrackParticleTruthDecorationAlgCfg(flags, name=f"{prefix}TrackParticleTruthDecorationAlg",
+                                                    TrackToTruthAssociationMaps=[f"{acts_tracks}ToTruthParticleAssociation"],
                                                     TrackParticleContainerName=f"{FinalTracks}TrackParticles",
-                                                    TruthParticleHitCounts="FPGATruthParticleHitCounts",
+                                                    TruthParticleHitCounts=f"{prefix}TruthParticleHitCounts",
                                                     ComputeTrackRecoEfficiency=True))
     
     return result
-
 
 def runDataPrepChain():
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -418,32 +442,22 @@ def runDataPrepChain():
     FinalDataPrepTrackChainxAODTracksKeyPrefix="FPGADataPrep"
     
     flags = initConfigFlags()
+    from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
+    OnlyTrackingPreInclude(flags)
     
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
     
     ############################################
-    # Flags used in the prototrack chain
-    flags.Detector.EnableCalo = False
 
-    # ensure that the xAOD SP and cluster containers are available
-    flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
+    # ensure that the offline xAOD/ACTS SP and cluster containers are available for DataPrep and FastTrack
     flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
-
-    flags.Acts.doRotCorrection = False
-
-    ###########################################
-    # ITk Acts flags    
-    flags.Detector.EnableITkPixel=True
-    flags.Detector.EnableITkStrip=True
-    
-    flags.Tracking.ITkMainPass.doActsSeed=True
-    flags.Tracking.ITkMainPass.doActsTrack = False # when set to True it seems to be causing issues related to TrackToTruthAssociation. To be investigated...
-    flags.Tracking.doITkFastTracking=False # turn to True to enable Fast Tracking chain
+    flags.Tracking.ITkMainPass.doAthenaSpacePoint=True
+    flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
     
     ############################################
     flags.Concurrency.NumThreads=1
-    flags.Scheduler.ShowDataDeps=True
+    flags.Scheduler.ShowDataDeps=False
     flags.Scheduler.CheckDependencies=True
     flags.Debug.DumpEvtStore=False # Set to Truth to enable Event Store printouts
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
@@ -485,11 +499,20 @@ def runDataPrepChain():
     acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
 
     if flags.Trigger.FPGATrackSim.doEDMConversion:
-        acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=False, doSP = True))
-        if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
+        acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg', stage = '_1st', doActsTrk=False, doSP = True))
         
-        if flags.Trigger.FPGATrackSim.connectToToITkTracking:
-            acc.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks=FinalDataPrepTrackChainxAODTracksKeyPrefix))
+        if flags.Trigger.FPGATrackSim.connectToToITkTracking:     
+            
+            # Run ACTS Fast Tracking on offline objects (starting from seeding)
+            acc.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks="ActsFast"))    
+               
+            # Run ACTS Fast Tracking for FPGA clusters (starting from seeding)
+            acc.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks=FinalDataPrepTrackChainxAODTracksKeyPrefix,
+                            **{'PixelSeedingAlg.InputSpacePoints' : ['xAODPixelSpacePoints_1stFromFPGA'],
+                                'StripSeedingAlg.InputSpacePoints' : ['xAODStripSpacePoints_1stFromFPGA'],
+                                'TrackFindingAlg.UncalibratedMeasurementContainerKeys' : ["xAODPixelClusters_1stFromFPGACluster","xAODStripClusters_1stFromFPGACluster"],
+                                'PixelClusterToTruthAssociationAlg.Measurements' : 'xAODPixelClusters_1stFromFPGACluster',
+                                'StripClusterToTruthAssociationAlg.Measurements' : 'xAODStripClusters_1stFromFPGACluster'}))
         
         if flags.Trigger.FPGATrackSim.writeToAOD:
             acc.merge(WriteToAOD(flags, stage = '_1st',))
