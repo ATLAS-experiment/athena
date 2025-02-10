@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @brief Helper macro to compare the output from the readout geometry dumps:
@@ -323,7 +323,8 @@ int main( int argc, char** argv ) {
         std::set<MmChamber>::const_iterator test_itr = testChambers.find(reference);
         
         if (test_itr == testChambers.end()) {
-            std::cerr<<"The chamber "<<reference<<" is not part of the testing "<<std::endl;
+            std::cerr<<"runMmGeoComparison() "<<__LINE__<<": The chamber "<<reference
+                     <<" is not part of the testing "<<std::endl;
             return_code = EXIT_FAILURE;
             continue;
         }
@@ -338,7 +339,6 @@ int main( int argc, char** argv ) {
         // if (!chamberOkay) continue;
         using MmLayer = MmChamber::MmLayer;
         for (const MmLayer& refLayer : reference.layers) {
-            break;
             std::set<MmLayer>::const_iterator lay_itr = test.layers.find(refLayer);
             if (lay_itr == test.layers.end()) {
                 std::cerr<<"runMmGeoComparison() "<<__LINE__<<": in "<<test<<" "
@@ -372,7 +372,7 @@ int main( int argc, char** argv ) {
                 chamberOkay = false;
             }           
         }
-        unsigned int failedEta{0}, failedStereo{0};
+        unsigned int failedEta{0}, lastGap{0};
         for (const MmChamber::MmChannel& refStrip : reference.channels) {
             std::set<MmChamber::MmChannel>::const_iterator strip_itr = test.channels.find(refStrip);
             if (strip_itr == test.channels.end()) {
@@ -381,31 +381,20 @@ int main( int argc, char** argv ) {
                 chamberOkay = false;
                 continue;
             }
+            if (lastGap != refStrip.gasGap) {
+                lastGap = refStrip.gasGap;
+                failedEta = 0;
+            }
             const MmChamber::MmChannel& testStrip{*strip_itr};
-        
-            /// Eta strips have their centres at local Y = 0 --> Their positions must
-            /// match in absolute terms w.r.t legacy geometry
-            if (!refStrip.isStereo && (failedEta <=10)) {
-                const Amg::Vector3D diffStrip{testStrip.globCenter - refStrip.globCenter};
-                if (diffStrip.mag() > tolerance) {
-                    std::cerr<<"runMmGeoComparison() "<<__LINE__<<": In "
-                             <<test<<" " <<testStrip <<"/local: "<<Amg::toString(testStrip.locCenter, 2) 
-                             <<" should be located at "<<Amg::toString(refStrip.globCenter, 2)
-                             <<"/local: "<<Amg::toString(refStrip.locCenter, 2)
-                             <<" displacement: "<<Amg::toString(diffStrip, 2)<<"  "<<diffStrip.mag()<<std::endl;
-                    chamberOkay = false;
-                }
-                ++failedEta;
-            } 
             /// The centres of the Stereo layers are defined as the bisector of the 
             /// line between the two frame edges. However, thus far the parameter book
             /// deviates from the legacy Run-3 implementation.
             ///  --> Cannot compare the absolute position of the stereo layers. Instead check
             ///      that the left edge, right edge and center point in the new geometry
             ///      are on the same line as defined by the reference system.
-            else if (failedStereo <= 10) {
+            if (failedEta <= 10) {
                 const Amg::Vector3D stripDir{Amg::getRotateZ3D(90*Gaudi::Units::deg)*
-                                             (refStrip.leftEdge - refStrip.rightEdge).unit()};
+                                             (refStrip.rightEdge - refStrip.leftEdge).unit()};
                 const Amg::Vector3D testDir{Amg::getRotateZ3D(90*Gaudi::Units::deg)*
                                             (testStrip.rightEdge - testStrip.leftEdge).unit()};
                 const double centerDist = stripDir.dot(testStrip.globCenter - refStrip.globCenter);
@@ -422,7 +411,7 @@ int main( int argc, char** argv ) {
                              <<std::acos(std::clamp(stripDir.dot(testDir),- 1., 1.)) / Gaudi::Units::deg<<std::endl;
                     chamberOkay = false;
                 }
-                ++failedStereo;
+                ++failedEta;
             }
         }
 

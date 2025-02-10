@@ -9,7 +9,9 @@
 
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+#include "GeoModelKernel/GeoDefinitions.h"
 #include "StoreGate/ReadCondHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 namespace MuonGM {
 
@@ -87,7 +89,7 @@ StatusCode GeoModelMmTest::initialize() {
 StatusCode GeoModelMmTest::execute() {
 
     const EventContext& ctx{Gaudi::Hive::currentContext()};
-    SG::ReadCondHandle<MuonDetectorManager> detMgr{m_detMgrKey, ctx};
+    SG::ReadCondHandle detMgr{m_detMgrKey, ctx};
     if (!detMgr.isValid()) {
         ATH_MSG_FATAL("Failed to retrieve MuonDetectorManager "
                       << m_detMgrKey.fullKey());
@@ -157,7 +159,8 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx, const MuonGM::MMR
     const int multilayer = id_helper.multilayer(detElId);
     m_multilayer = multilayer;
     m_stStripPitch = roEl->getDesign(detElId)->inputPitch;
-
+    const Amg::Transform3D permute{GeoTrf::GeoRotation{90.*Gaudi::Units::deg,90.*Gaudi::Units::deg, 0.}};
+    m_alignableNode = roEl->AmdbLRSToGlobalTransform() * roEl->getDelta().inverse()*permute;
 
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ) 
 

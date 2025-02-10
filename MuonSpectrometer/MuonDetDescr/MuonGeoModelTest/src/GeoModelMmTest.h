@@ -85,6 +85,8 @@ class GeoModelMmTest : public AthHistogramAlgorithm {
 
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
     MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};
+    MuonVal::CoordTransformBranch m_alignableNode {m_tree, "AlignableNode"};
+
 
     /// Rotation matrix of the respective strip layers
     MuonVal::CoordSystemsBranch m_stripRot{m_tree, "stripRot"};    
