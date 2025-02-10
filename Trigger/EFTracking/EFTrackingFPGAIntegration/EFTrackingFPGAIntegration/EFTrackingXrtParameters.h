@@ -8,7 +8,8 @@
 namespace EFTrackingXrtParameters {
 enum InterfaceMode {
   INPUT,
-  OUTPUT
+  OUTPUT,
+  VSIZE,
 };
 
 // In the python we "subtract" the members of EmptyEnum from InterfaceMode to 

@@ -71,6 +71,8 @@ EFTrackingXrtAlgorithm::EFTrackingXrtAlgorithm(
 StatusCode EFTrackingXrtAlgorithm::initialize() {
   ATH_MSG_INFO("Initializing " << name());
 
+  // Too complicated to implement as a Gaudi::Property (would require a new 
+  // grammar) so get a string and make the nlohmann::json in initialize. 
   const std::optional<nlohmann::json> kernelDefinitionsJson {
     [](const std::string& kernelDefinitionsJsonString)->std::optional<nlohmann::json> {
       try {
@@ -153,6 +155,15 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
 
           break;
         }
+        case EFTrackingXrtParameters::InterfaceMode::VSIZE: {
+          m_vsizes.push_back({.runIndex = static_cast<int>(m_runs.size()) - 1,
+                              .argumentIndex = argumentIndex,
+                              .storeGateKey = {storeGateKey}});
+
+          ATH_CHECK(m_vsizes.back().storeGateKey.initialize());
+
+          break;
+        }
         default: {
           ATH_MSG_ERROR("Failed to map kernel definitions to xrt objects.");     
 
@@ -192,6 +203,13 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
     
     m_inputBuffers.at(handleIndex).sync(XCL_BO_SYNC_BO_TO_DEVICE);
     handleIndex++;
+  }
+
+  ATH_MSG_DEBUG("Writing VSizes");
+  for (const VSize& vsize : m_vsizes) {
+    SG::ReadHandle<std::vector<unsigned long>> inputDataStream(vsize.storeGateKey, ctx);
+
+    m_runs.at(vsize.runIndex)->set_arg(vsize.argumentIndex, inputDataStream->size());
   }
 
   ATH_MSG_DEBUG("Starting Kernels");

@@ -22,6 +22,17 @@
 #include "xrt/xrt_device.h"
 #include "xrt/xrt_kernel.h"
 
+namespace {
+// Some kernels require the length of the input test vector. storeGateKey is 
+// used to get the std::vector which we will call size() on to get the 
+// test vector length.
+struct VSize {
+  const int runIndex;
+  const int argumentIndex;
+  SG::ReadHandleKey<std::vector<unsigned long>> storeGateKey;
+};
+}
+
 /**
  *  @class EFTrackingXrtAlgorithm
  *         Generic Athena algorithm for running xclbins (FPGA firmware). The 
@@ -69,9 +80,6 @@ class EFTrackingXrtAlgorithm : public AthReentrantAlgorithm
     "Capacity of xrt buffers in terms of 64bit words."
   };
 
-  // Too complicated to implement as a Gaudi::Property (would require a new 
-  // grammar) so get a string and make the nlohmann::json in initialize. 
-
   // Device pointer
   std::shared_ptr<xrt::device> m_device{};
 
@@ -84,6 +92,9 @@ class EFTrackingXrtAlgorithm : public AthReentrantAlgorithm
   // Buffer objects
   mutable std::vector<xrt::bo> m_inputBuffers ATLAS_THREAD_SAFE {};
   mutable std::vector<xrt::bo> m_outputBuffers ATLAS_THREAD_SAFE {};
+
+  // VSize objects
+  std::vector<VSize> m_vsizes{};
 
  public:
   EFTrackingXrtAlgorithm(const std::string& name, ISvcLocator* pSvcLocator);
