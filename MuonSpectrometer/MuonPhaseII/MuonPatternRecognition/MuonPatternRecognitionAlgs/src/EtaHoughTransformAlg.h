@@ -113,7 +113,8 @@ namespace MuonR4{
             // Flag to steer whether space points shall be downweighted according to their instance
             // multiplicity of the phi measurement such that it effectively contributes with weight 1
             BooleanProperty m_downWeightMultiplePrd{this, "downWeightPrdMultiplicity", false};
-    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+            /// Handle to the IdHelperSvc
+            ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
             // input space points from SG
             SG::ReadHandleKey<SpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};

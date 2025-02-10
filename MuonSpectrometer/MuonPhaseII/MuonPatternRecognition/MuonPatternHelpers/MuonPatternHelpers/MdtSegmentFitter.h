@@ -63,18 +63,38 @@ namespace MuonR4{
                 /** @brief Second order derivatives */
                 std::array<Amg::Vector3D, sumUp(nPars)> hessian{make_array<Amg::Vector3D, sumUp(nPars)>(Amg::Vector3D::Zero())};
             };
+            /** @brief Helper struct carrying the space for all auxillary variables
+             *         needed to calculate the residual from wire measurements */
+            struct ResidualAuxillaries{
+                static constexpr unsigned nLinePars = LineWithPartials::nPars;
+                /** @brief projection of the segment direction onto the wire planes */
+                Amg::Vector3D projDir{Amg::Vector3D::Zero()};
+                /** @brief Partial derivatives of the dir projection w.r.t. line parameters */
+                std::array<Amg::Vector3D, nLinePars> partProjDir{make_array<Amg::Vector3D, nLinePars>(Amg::Vector3D::Zero())};
+                /** @brief Partial derivatives of the dir projection lengths w.r.t line parameters */
+                std::array<double, nLinePars> partWirePlaneProj{make_array<double, nLinePars>(0.)};
+                /** @brief projection of the segment direction along the wire */
+                double projIntoWirePlane{0.};
+                /** @brief Length squared of the projected direction */
+                double projDirLenSq{0.};
+                /** @brief inverse squared of the unnormalized dir projection */
+                double invProjLenSq{0.};
+                /** @brief inverse of the unormalized dir porjection */
+                double invProjLen{0.};
+
+            };
             /** @brief Helper struct carrying the residual with its derivatives */
-            struct ResidualWithPartials{
+            struct ResidualWithPartials: public ResidualAuxillaries{
                 /** @brief Number of parameters */
                 static constexpr unsigned nPars{toInt(ParamDefs::nPars)};
-                /** @brief Flag whether the the residuals w.r.t phi shall be evaluated */
-                bool evalPhiPars{true};
                 /** @brief Vector carrying the residual */
                 Amg::Vector3D residual{Amg::Vector3D::Zero()};
                 /** @brief First order derivatives */
                 std::array<Amg::Vector3D, nPars> gradient{make_array<Amg::Vector3D, nPars>(Amg::Vector3D::Zero())};
                 /** @brief Second order derivatives */
                 std::array<Amg::Vector3D, sumUp(nPars)> hessian{make_array<Amg::Vector3D, sumUp(nPars)>(Amg::Vector3D::Zero())};
+                /** @brief Flag whether the the residuals w.r.t phi shall be evaluated */
+                bool evalPhiPars{true};
             };
 
             /** @brief Standard constructor
@@ -128,17 +148,6 @@ namespace MuonR4{
             void calculateStripResiduals(const LineWithPartials& line,
                                         const CalibratedSpacePoint& spacePoint,
                                         ResidualWithPartials& residual) const;
-
-            /** @brief Calculates the partial derivative of the intersection point between  the segment line and the 
-             *         measurement's strip plane.
-             *  @param normal: Normal vector on the measurment's plane pointing in positive z direction
-             *  @param offset: Offset describing the refrence point of the normal vector
-             *  @param line: Line describing the segment together with its derivatives
-             *  @param fitPar: Parameter to which the derivative shall be calculated */
-            static Amg::Vector3D partialPlaneIntersect(const Amg::Vector3D& normal,
-                                                       const double offset, 
-                                                       const LineWithPartials& line,
-                                                       const ParamDefs fitPar);
         private:   
             /** @brief Update the signs of the measurement */
             void updateDriftSigns(const Amg::Vector3D& segPos, const Amg::Vector3D& segDir, 

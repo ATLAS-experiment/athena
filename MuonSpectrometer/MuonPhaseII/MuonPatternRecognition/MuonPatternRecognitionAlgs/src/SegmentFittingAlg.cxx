@@ -76,6 +76,7 @@ namespace MuonR4 {
     
         SG::WriteHandle writeSegments{m_outSegments, ctx};
         ATH_CHECK(writeSegments.record(std::make_unique<SegmentContainer>()));
+
         std::vector<std::unique_ptr<Segment>> allSegments{};
         for (const SegmentSeed* seed : *segmentSeeds) {
             std::vector<std::unique_ptr<Segment>> segments = fitSegmentSeed(ctx, *gctx, seed);
@@ -183,6 +184,7 @@ namespace MuonR4 {
         MdtSegmentFitter::Config fitCfg{};
         fitCfg.calibrator = m_calibTool.get();
         fitCfg.doTimeFit = m_doT0Fit;
+        fitCfg.reCalibrate = m_recalibInFit;
 
         MdtSegmentFitter fitter{name(), std::move(fitCfg)};
         return fitter.fitSegment(ctx, std::move(calibHits), startPars, locToGlob);

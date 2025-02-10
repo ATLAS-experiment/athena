@@ -274,7 +274,7 @@ void MuonSegmentReader::storeMeasurement(const EventContext& ctx, const MuonGM::
       // add the implement of calibrationTool, initialize global position by mrot 
       MdtCalibInput calibIn{*prd};
       calibIn.setClosestApproach(mrot->globalPosition());
-      calibIn.setTrackDirection(trackPars->momentum().unit());
+      calibIn.setTrackDirection(trackPars->momentum().unit(), true);
       const MdtCalibOutput calibResult{m_calibrationTool->calibrate(ctx, calibIn, false)};
       ATH_MSG_DEBUG("print "<<calibIn  << " calibResult : "<<calibResult);
       m_trkHit_tubeT0.push_back(calibResult.tubeT0());

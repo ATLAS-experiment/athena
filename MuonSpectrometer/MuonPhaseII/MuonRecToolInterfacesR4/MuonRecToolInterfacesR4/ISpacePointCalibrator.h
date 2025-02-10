@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSPACEPOINTCALIBRATOR_ISPACEPOINTCALIBRATOR_H
@@ -16,7 +16,7 @@ namespace MuonR4{
     class SpacePoint;
     class CalibratedSpacePoint;
     /** @brief Interface class to refine the space point calibration with an external seed */
-    class ISpacePointCalibrator : virtual public IAlgTool{
+    class ISpacePointCalibrator : virtual public IAlgTool {
         public:
             DeclareInterfaceID(ISpacePointCalibrator, 1, 0);
             

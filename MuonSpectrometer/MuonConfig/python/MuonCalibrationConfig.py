@@ -86,6 +86,7 @@ def MdtCalibrationToolCfg(flags, name= "MdtCalibrationTool",  **kwargs):
     kwargs.setdefault("DoSlewingCorrection", flags.Muon.Calib.correctMdtRtForTimeSlewing)
     kwargs.setdefault("DoTemperatureCorrection", flags.Muon.Calib.applyRtScaling)
     kwargs.setdefault("DoTofCorrection", flags.Beam.Type is BeamType.Collisions) # No TOF correction if not collisions
+    kwargs.setdefault("DoPropagationTimeUncert", flags.Muon.Calib.applySigPropUncert)
 
     if flags.Beam.Type is BeamType.Collisions:
         from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtCalibWindowNumber
