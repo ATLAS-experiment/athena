@@ -11,14 +11,10 @@
 #include "TruthUtils/MagicNumbers.h"
 
 
-TrackParticleTruthAlg::TrackParticleTruthAlg(const std::string &name,ISvcLocator *pSvcLocator) : AthAlgorithm(name,pSvcLocator) {}
-
 // -----------------------------------------------------------------------------------------------------
-StatusCode TrackParticleTruthAlg::initialize()
-{
-  m_particlesLinkKey=m_particleName+".truthParticleLink";
-  m_particlesTypeKey=m_particleName+".truthType";
-  m_particlesOriginKey=m_particleName+".truthOrigin";
+StatusCode TrackParticleTruthAlg::initialize() {
+
+  ATH_CHECK(m_trkKey.initialize());
   ATH_CHECK(m_particlesLinkKey.initialize());
   ATH_CHECK(m_particlesTypeKey.initialize());
   ATH_CHECK(m_particlesOriginKey.initialize());
@@ -28,39 +24,20 @@ StatusCode TrackParticleTruthAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-// -----------------------------------------------------------------------------------------------------
-StatusCode TrackParticleTruthAlg::finalize() {
-  return StatusCode::SUCCESS;
-}
 
 // -----------------------------------------------------------------------------------------------------
-StatusCode TrackParticleTruthAlg::execute() {
+StatusCode TrackParticleTruthAlg::execute(const EventContext& ctx) const {
 
-  SG::ReadHandle<TrackTruthCollection> truthTracks(m_truthTracksKey);
-  SG::ReadHandle<xAODTruthParticleLinkVector> truthParticleLinkVec(m_truthParticleLinkVecKey);
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer,ElementLink<xAOD::TruthParticleContainer> > particlesLink(m_particlesLinkKey);
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer,int> particlesType(m_particlesTypeKey);
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer,int> particlesOrigin(m_particlesOriginKey);
+  SG::ReadHandle<TrackTruthCollection> truthTracks{m_truthTracksKey, ctx};
+  SG::ReadHandle<xAODTruthParticleLinkVector> truthParticleLinkVec{ m_truthParticleLinkVecKey, ctx};
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer,ElementLink<xAOD::TruthParticleContainer> > particlesLink{m_particlesLinkKey, ctx};
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer,int> particlesType{m_particlesTypeKey, ctx};
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer,int> particlesOrigin{m_particlesOriginKey, ctx};
 
-  if(!particlesLink.isPresent()){ //no track particle container of this name is in SG
-    ATH_MSG_WARNING("TrackParticleTruthAlg: "<<particlesLink.name()<<" not found");
-    return StatusCode::SUCCESS;
-  }
+  ATH_CHECK(particlesLink.isValid());
+  ATH_CHECK(truthParticleLinkVec.isValid());
+  ATH_CHECK(truthTracks.isValid());
 
-  if(!particlesLink.isValid()){
-    ATH_MSG_ERROR("Could not read " << particlesLink.name());
-    return StatusCode::FAILURE;
-  }
-
-  if(!truthParticleLinkVec.isValid()){
-    ATH_MSG_ERROR("Could not read " << truthParticleLinkVec.name());
-    return StatusCode::FAILURE;
-  }
-
-  if(!truthTracks.isValid()){
-    ATH_MSG_ERROR("Could not read " << truthTracks.name());
-    return StatusCode::FAILURE;
-  }
 
   const TrackTruthCollection truthTrackColl=*truthTracks;
   const xAODTruthParticleLinkVector truthParticleLinks=*truthParticleLinkVec;
@@ -72,8 +49,9 @@ StatusCode TrackParticleTruthAlg::execute() {
     /// STACO combined tracks are just added to the muon for completeness
     /// They're not expected to have a valid track link
     if( !particle->trackLink().isValid()){
-      if (!particle->patternRecoInfo()[xAOD::STACO]) 
+      if (!particle->patternRecoInfo()[xAOD::STACO])  {
           ATH_MSG_WARNING("Found TrackParticle with Invalid element link, skipping");
+      }
       //add dummy truth link
       particlesLink(*particle)=ElementLink<xAOD::TruthParticleContainer>();
       particlesType(*particle) = 0;
