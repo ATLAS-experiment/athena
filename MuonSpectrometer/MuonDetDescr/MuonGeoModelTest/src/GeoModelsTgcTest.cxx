@@ -9,7 +9,9 @@
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
 #include "MuonReadoutGeometry/MuonStation.h"
+#include "GeoModelKernel/GeoDefinitions.h"
 #include "StoreGate/ReadCondHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 namespace MuonGM {
 
@@ -86,7 +88,7 @@ StatusCode GeoModelsTgcTest::initialize() {
 }
 StatusCode GeoModelsTgcTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
-    SG::ReadCondHandle<MuonDetectorManager> detMgr{m_detMgrKey, ctx};
+    SG::ReadCondHandle detMgr{m_detMgrKey, ctx};
     if (!detMgr.isValid()) {
         ATH_MSG_FATAL("Failed to retrieve MuonDetectorManager "
                       << m_detMgrKey.fullKey());
@@ -111,15 +113,17 @@ StatusCode GeoModelsTgcTest::execute() {
     }
     return StatusCode::SUCCESS;
 }
-StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReadoutElement* readoutEle) {
+StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReadoutElement* roEl) {
     const sTgcIdHelper& id_helper{m_idHelperSvc->stgcIdHelper()};
 
+    const Amg::Transform3D permute{GeoTrf::GeoRotation{90.*Gaudi::Units::deg,90.*Gaudi::Units::deg, 0.}};
+    m_alignableNode = roEl->AmdbLRSToGlobalTransform() * roEl->getDelta().inverse()*permute;
 //// Identifier of the readout element
-    int stIndex    = readoutEle->getStationIndex();
-    int stEta      = readoutEle->getStationEta();
-    int stPhi      = readoutEle->getStationPhi();
-    int stML      = id_helper.multilayer(readoutEle->identify());
-    std::string chamberDesign = readoutEle->getStationType();
+    int stIndex    = roEl->getStationIndex();
+    int stEta      = roEl->getStationEta();
+    int stPhi      = roEl->getStationPhi();
+    int stML      = id_helper.multilayer(roEl->identify());
+    std::string chamberDesign = roEl->getStationType();
 
     m_stIndex = stIndex;
     m_stEta = stEta;
@@ -133,20 +137,20 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
                     stML, 1, sTgcIdHelper::sTgcChannelTypes::Pad, 1);
 
 //// Chamber Details from sTGCDetectorDescription 
-    int numLayers = readoutEle->numberOfLayers(true); 
-    double yCutout = readoutEle->getDesign(genStripID)->yCutout();
-    double gasTck = readoutEle->getDesign(genStripID)->thickness;
+    int numLayers = roEl->numberOfLayers(true); 
+    double yCutout = roEl->getDesign(genStripID)->yCutout();
+    double gasTck = roEl->getDesign(genStripID)->thickness;
 
     m_numLayers = numLayers;
     m_yCutout = yCutout;
     m_gasTck = gasTck;
 //// Gas Gap lengths for debug
-    double sGapLength = readoutEle->getDesign(genStripID)->minYSize();
-    double lGapLength = readoutEle->getDesign(genStripID)->maxYSize();
-    double gapHeight = readoutEle->getDesign(genStripID)->xSize();
+    double sGapLength = roEl->getDesign(genStripID)->minYSize();
+    double lGapLength = roEl->getDesign(genStripID)->maxYSize();
+    double gapHeight = roEl->getDesign(genStripID)->xSize();
 
-    double sPadLength = readoutEle->getPadDesign(genPadID)->sPadWidth;
-    double lPadLength = readoutEle->getPadDesign(genPadID)->lPadWidth;
+    double sPadLength = roEl->getPadDesign(genPadID)->sPadWidth;
+    double lPadLength = roEl->getPadDesign(genPadID)->lPadWidth;
 
     m_sGapLength = sGapLength;
     m_lGapLength = lGapLength;
@@ -155,16 +159,16 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
     m_sPadLength = sPadLength;
     m_lPadLength = lPadLength;
 //// Chamber lengths for debug
-    double sChamberLength = readoutEle->getPadDesign(genPadID)->sWidth;
-    double lChamberLength = readoutEle->getPadDesign(genPadID)->lWidth;
-    double chamberHeight = readoutEle->getPadDesign(genPadID)->Length;
+    double sChamberLength = roEl->getPadDesign(genPadID)->sWidth;
+    double lChamberLength = roEl->getPadDesign(genPadID)->lWidth;
+    double chamberHeight = roEl->getPadDesign(genPadID)->Length;
 
     m_sChamberLength = sChamberLength;
     m_lChamberLength = lChamberLength;
     m_chamberHeight = chamberHeight;
 
 /// Transformation of the readout element (Translation, ColX, ColY, ColZ) 
-    const Amg::Transform3D& trans{readoutEle->transform()};
+    const Amg::Transform3D& trans{roEl->transform()};
     m_readoutTransform = trans;
 
 //// All the Vectors
@@ -177,13 +181,13 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
                         stML, lay, sTgcIdHelper::sTgcChannelTypes::Pad, 1, 1);
 
 //// Wire Dimensions
-        unsigned int numWires = readoutEle->numberOfWires(layWireID); 
-        unsigned int firstWireGroupWidth = readoutEle->getDesign(layWireID)->firstPitch;
-        int numWireGroups = readoutEle->getDesign(layWireID)->nGroups;
-        double wireCutout = readoutEle->getDesign(layWireID)->wireCutout;
-        double wirePitch = readoutEle->wirePitch(); 
-        double wireWidth = readoutEle->getDesign(layWireID)->inputWidth;
-        double wireGroupWidth = readoutEle->getDesign(layWireID)->groupWidth;
+        unsigned int numWires = roEl->numberOfWires(layWireID); 
+        unsigned int firstWireGroupWidth = roEl->getDesign(layWireID)->firstPitch;
+        int numWireGroups = roEl->getDesign(layWireID)->nGroups;
+        double wireCutout = roEl->getDesign(layWireID)->wireCutout;
+        double wirePitch = roEl->wirePitch(); 
+        double wireWidth = roEl->getDesign(layWireID)->inputWidth;
+        double wireGroupWidth = roEl->getDesign(layWireID)->groupWidth;
 
         m_numWires.push_back(numWires);
         m_firstWireGroupWidth.push_back(firstWireGroupWidth);
@@ -203,24 +207,24 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
             }
             Amg::Vector3D wireGroupPos(Amg::Vector3D::Zero());
             Amg::Vector2D localWireGroupPos(Amg::Vector2D::Zero());
-            readoutEle->stripPosition(wireGroupID, localWireGroupPos);
+            roEl->stripPosition(wireGroupID, localWireGroupPos);
             m_localWireGroupPos.push_back(localWireGroupPos);            
-            readoutEle->stripGlobalPosition(wireGroupID, wireGroupPos);
+            roEl->stripGlobalPosition(wireGroupID, wireGroupPos);
             m_globalWireGroupPos.push_back(wireGroupPos);
             m_wireGroupNum.push_back(wireGroupIndex);
             m_wireGroupGasGap.push_back(lay);
 
             if (wireGroupIndex != 1) continue;
-            const Amg::Transform3D locToGlob = readoutEle->transform(wireGroupID);
+            const Amg::Transform3D locToGlob = roEl->transform(wireGroupID);
             m_wireGroupRot.push_back(locToGlob);                    
             m_wireGroupRotGasGap.push_back(lay);
         }
 
 ////Strip Dimensions
-        int numStrips = readoutEle->getDesign(layStripID)->nch;
-        double stripPitch = readoutEle->channelPitch(layStripID);
-        double stripWidth = readoutEle->getDesign(layStripID)->inputWidth;
-        double firstStripPitch = readoutEle->getDesign(layStripID)->firstPitch;
+        int numStrips = roEl->getDesign(layStripID)->nch;
+        double stripPitch = roEl->channelPitch(layStripID);
+        double stripWidth = roEl->getDesign(layStripID)->inputWidth;
+        double firstStripPitch = roEl->getDesign(layStripID)->firstPitch;
         
         m_numStrips = numStrips;
         m_stripPitch = stripPitch;
@@ -235,33 +239,33 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
             if(!isValid) {
                 ATH_MSG_WARNING("The following strip ID is not valid: " << stripID);
             }
-            double stripLength = readoutEle->getDesign(stripID)->channelLength(stripIndex);
+            double stripLength = roEl->getDesign(stripID)->channelLength(stripIndex);
             Amg::Vector3D globalStripPos(Amg::Vector3D::Zero());
             Amg::Vector2D localStripPos(Amg::Vector2D::Zero());
-            readoutEle->stripPosition(stripID, localStripPos);
+            roEl->stripPosition(stripID, localStripPos);
             m_localStripPos.push_back(localStripPos);
-            readoutEle->stripGlobalPosition(stripID, globalStripPos);
+            roEl->stripGlobalPosition(stripID, globalStripPos);
             m_globalStripPos.push_back(globalStripPos);
             m_stripNum.push_back(stripIndex);
             m_stripGasGap.push_back(lay);
             m_stripLengths.push_back(stripLength);
 
             if (stripIndex != 1) continue;
-            const Amg::Transform3D locToGlob = readoutEle->transform(stripID);
+            const Amg::Transform3D locToGlob = roEl->transform(stripID);
             m_stripRot.push_back(locToGlob);                    
             m_stripRotGasGap.push_back(lay);
         }
 
 ////Pad Dimensions
-        unsigned int numPads = readoutEle->numberOfPads(layPadID);
-        int numPadEta = readoutEle->getPadDesign(layPadID)->nPadH;
-        int numPadPhi = readoutEle->getPadDesign(layPadID)->nPadColumns;
-        double firstPadHeight = readoutEle->getPadDesign(layPadID)->firstRowPos;
-        double padHeight = readoutEle->getPadDesign(layPadID)->inputRowPitch;
-        double padPhiShift = readoutEle->getPadDesign(layPadID)->PadPhiShift;
-        double firstPadPhiDiv = readoutEle->getPadDesign(layPadID)->firstPhiPos;
-        double anglePadPhi = readoutEle->getPadDesign(layPadID)->inputPhiPitch;
-        double beamlineRadius = readoutEle->getPadDesign(layPadID)->radialDistance;
+        unsigned int numPads = roEl->numberOfPads(layPadID);
+        int numPadEta = roEl->getPadDesign(layPadID)->nPadH;
+        int numPadPhi = roEl->getPadDesign(layPadID)->nPadColumns;
+        double firstPadHeight = roEl->getPadDesign(layPadID)->firstRowPos;
+        double padHeight = roEl->getPadDesign(layPadID)->inputRowPitch;
+        double padPhiShift = roEl->getPadDesign(layPadID)->PadPhiShift;
+        double firstPadPhiDiv = roEl->getPadDesign(layPadID)->firstPhiPos;
+        double anglePadPhi = roEl->getPadDesign(layPadID)->inputPhiPitch;
+        double beamlineRadius = roEl->getPadDesign(layPadID)->radialDistance;
 
         m_numPads.push_back(numPads);
         m_numPadEta.push_back(numPadEta);
@@ -287,10 +291,10 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
                 std::array<Amg::Vector2D,4> localPadCorners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
                 std::array<Amg::Vector3D,4> globalPadCorners{make_array<Amg::Vector3D, 4>(Amg::Vector3D::Zero())};
 
-                readoutEle->padPosition(padID, localPadPos);
-                readoutEle->padGlobalPosition(padID, globalPadPos);
-                readoutEle->padCorners(padID, localPadCorners);
-                readoutEle->padGlobalCorners(padID, globalPadCorners);
+                roEl->padPosition(padID, localPadPos);
+                roEl->padGlobalPosition(padID, globalPadPos);
+                roEl->padCorners(padID, localPadCorners);
+                roEl->padGlobalCorners(padID, globalPadCorners);
 
                 m_localPadPos.push_back(localPadPos);
                 m_localPadCornerBL.push_back(localPadCorners[0]);
@@ -301,7 +305,7 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
                 Amg::Vector2D hitCorrection{-.1, -.1};
                 Amg::Vector2D hitPos = localPadCorners[3] + hitCorrection;
                 m_hitPosition.push_back(hitPos);
-                m_padNumber.push_back(readoutEle->padNumber(hitPos, padID));
+                m_padNumber.push_back(roEl->padNumber(hitPos, padID));
 
                 m_globalPadPos.push_back(globalPadPos);
                 m_globalPadCornerBR.push_back(globalPadCorners[0]);
@@ -314,7 +318,7 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
                 m_padGasGap.push_back(lay);
 
                 if (etaIndex != 1 || phiIndex != 1) continue;
-                const Amg::Transform3D locToGlob = readoutEle->transform(padID);
+                const Amg::Transform3D locToGlob = roEl->transform(padID);
                 m_padRot.push_back(locToGlob);                    
                 m_padRotGasGap.push_back(lay);
             }
