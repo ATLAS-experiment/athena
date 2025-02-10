@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "SegmentCnvAlg.h"
 #include "MuonSegment/MuonSegment.h"
@@ -9,6 +9,8 @@
 #include "TrkSurfaces/PlaneSurface.h"
 #include "TrkEventPrimitives/FitQuality.h"
 #include "MuonCompetingRIOsOnTrack/CompetingMuonClustersOnTrack.h"
+#include "MuonSegment/MuonSegmentQuality.h"
+
 
 namespace MuonR4{
     
@@ -57,7 +59,7 @@ namespace MuonR4{
         }
         ATH_MSG_VERBOSE("Translated in total "<<translatedSegments->size()<<" segments.");
         
-        SG::WriteHandle<Trk::SegmentCollection> writeHandle{m_writeKey, ctx};
+        SG::WriteHandle writeHandle{m_writeKey, ctx};
         ATH_CHECK(writeHandle.record(std::move(translatedSegments)));
         return StatusCode::SUCCESS;
     }
@@ -149,6 +151,10 @@ namespace MuonR4{
         std::vector<std::unique_ptr<Trk::RIO_OnTrack>> rots{};
         unsigned int nPrec{0};
         for (const Segment::MeasType& spacePoint : segment.measurements()){
+            if (spacePoint->fitState() != CalibratedSpacePoint::State::Valid) {
+                // ATH_MSG_VERBOSE("Reject in")
+                continue;
+            }
             switch (spacePoint->type()) {
                 case xAOD::UncalibMeasType::MdtDriftCircleType: {
                     ATH_CHECK(convertMeasurement(segment, *spacePoint, mdtPrds, rots));
@@ -224,24 +230,23 @@ namespace MuonR4{
         auto segSurf = std::make_unique<Trk::PlaneSurface>(Amg::getTransformFromRotTransl(locToGlob.linear(), segment.position()));
         Trk::LocalDirection segDir{};
         segSurf->globalToLocalDirection(segment.direction(), segDir);
-        
-        auto fitQuality = std::make_unique<Trk::FitQuality>(segment.chi2(), 
-                                                            static_cast<double>(segment.nDoF()));
-        
+        std::vector<Identifier> holes{};
+        auto fitQuality = std::make_unique<Muon::MuonSegmentQuality>(segment.chi2(), 
+                                                                     static_cast<double>(segment.nDoF()),
+                                                                     std::move(holes));
+
         Amg::MatrixX covMatrix(4, 4);
         covMatrix.setIdentity();
         using namespace MuonR4::SegmentFit;
-        /** TODO: Check that the covariance terms are actually correct */
-        covMatrix(0, 0) = segment.covariance()(toInt(ParamDefs::x0), toInt(ParamDefs::x0));
-        covMatrix(1, 1) = segment.covariance()(toInt(ParamDefs::y0), toInt(ParamDefs::y0));
-                
-        covMatrix(2, 2) = segment.covariance()(toInt(ParamDefs::phi), toInt(ParamDefs::phi));
-        covMatrix(3, 3) = segment.covariance()(toInt(ParamDefs::theta), toInt(ParamDefs::theta));
+        covMatrix(Trk::locX, Trk::locX) = segment.covariance()(toInt(ParamDefs::x0), toInt(ParamDefs::x0));
+        covMatrix(Trk::locY, Trk::locY) = segment.covariance()(toInt(ParamDefs::y0), toInt(ParamDefs::y0));
 
-        auto legacySeg = std::make_unique<Muon::MuonSegment>(Amg::Vector2D::Zero(),std::move(segDir),
+        covMatrix(Trk::phi0, Trk::phi0)   = segment.covariance()(toInt(ParamDefs::phi), toInt(ParamDefs::phi));
+        covMatrix(Trk::theta, Trk::theta) = segment.covariance()(toInt(ParamDefs::theta), toInt(ParamDefs::theta));
+
+        auto legacySeg = std::make_unique<Muon::MuonSegment>(Amg::Vector2D::Zero(), std::move(segDir),
                                                              std::move(covMatrix), segSurf.release(),
                                                              std::move(measurements), fitQuality.release());
-
 
         ATH_MSG_VERBOSE(m_printer->print(*legacySeg)<<", pos: "<<Amg::toString(legacySeg->globalPosition())<<" "
                      <<Amg::toString(legacySeg->globalDirection())<<std::endl<<m_printer->print(legacySeg->containedMeasurements()));

@@ -257,7 +257,7 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
   }
   
 
-  if (m_doPropUncert) {
+  if (m_doPropUncert && !calibIn.trackDirHasPhi()) {
       assert(rtRelation->rt() != nullptr);
       const double driftTimeUp = std::min(rtRelation->rt()->tUpper(),
                                           calibIn.tdc() * tdcBinSize 

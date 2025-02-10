@@ -96,11 +96,13 @@ namespace MuonR4{
                 if (spacePoint->dimension() == 1) {
                     auto* dc = static_cast<const xAOD::MdtDriftCircle*>(spacePoint->primaryMeasurement());
                     MdtCalibInput calibInput{*dc, *gctx};
-                    calibInput.setTrackDirection(locToGlob.linear() * dirInChamb);
+                    calibInput.setTrackDirection(locToGlob.linear() * dirInChamb,
+                                                 dirInChamb.phi() || posInChamb[toInt(AxisDefs::phi)] );
                     calibInput.setTimeOfFlight(timeOfArrival);
                     calibInput.setClosestApproach(std::move(closestApproach));
                     ATH_MSG_VERBOSE("Parse hit calibration "<<m_idHelperSvc->toString(dc->identify())<<", "<<calibInput);
                     MdtCalibOutput calibOutput = m_mdtCalibrationTool->calibrate(ctx, calibInput);
+                    ATH_MSG_VERBOSE("Returned calibration object "<<calibOutput);
                     State fitState{State::Valid};
                     AmgSymMatrix(2) diagCov{AmgSymMatrix(2)::Identity()};
                     diagCov(toInt(AxisDefs::eta), toInt(AxisDefs::eta)) = std::pow(0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash()),2);

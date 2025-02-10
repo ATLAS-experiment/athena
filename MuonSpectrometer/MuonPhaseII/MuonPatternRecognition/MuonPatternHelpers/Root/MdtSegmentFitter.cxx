@@ -116,28 +116,6 @@ namespace MuonR4{
 
         return true;
     }
-    inline Amg::Vector3D MdtSegmentFitter::partialPlaneIntersect(const Amg::Vector3D& normal, const double offset, 
-                                                                 const LineWithPartials& line,
-                                                                 const ParamDefs fitPar) {
-        const double normDot = normal.dot(line.dir);
-        switch (fitPar) {
-           case ParamDefs::phi:
-           case ParamDefs::theta:{                
-                const double travelledDist = (offset - line.pos.dot(normal)) / normDot;
-                const double partialDist = - travelledDist / normDot * normal.dot(line.gradient[toInt(fitPar)]);
-                return travelledDist * line.gradient[toInt(fitPar)] + partialDist * line.dir;
-                break;
-           } case ParamDefs::y0:
-             case ParamDefs::x0:
-                return line.gradient[toInt(fitPar)] - line.gradient[toInt(fitPar)].dot(normal) / normDot * line.dir;
-                break;
-            default:
-                break;
-        }        
-       return Amg::Vector3D::Zero();
-    }
-    
-
     void MdtSegmentFitter::updateLinePartials(const Parameters& params, 
                                               LineWithPartials& line) {
         
@@ -182,79 +160,73 @@ namespace MuonR4{
     }
     void MdtSegmentFitter::calculateWireResiduals(const LineWithPartials& line,
                                                   const CalibratedSpacePoint& hit,
-                                                  ResidualWithPartials& measResidual) const {
+                                                  ResidualWithPartials& resObj) const {
         /** Fetch the hit position & direction */
         const Amg::Vector3D& hitPos{hit.positionInChamber()};
         const Amg::Vector3D& hitDir{hit.directionInChamber()};
         /** Cache the scalar product & the lengths as they're appearing in the formulas below more often */
-        const double planeProject = line.dir.dot(hitDir);
-        const double projDirLenSq = 1. - std::pow(planeProject, 2);
-        if (projDirLenSq < std::numeric_limits<float>::epsilon()) {
-            measResidual.residual.setZero();
-            for (Amg::Vector3D& grad : measResidual.gradient){
+        resObj.projIntoWirePlane = line.dir.dot(hitDir);
+        resObj.projDirLenSq = 1. - resObj.projIntoWirePlane*resObj.projIntoWirePlane;
+        if (resObj.projDirLenSq < std::numeric_limits<float>::epsilon()) {
+            resObj.residual.setZero();
+            for (Amg::Vector3D& grad : resObj.gradient){
                 grad.setZero();
             }
-            if (!m_cfg.useSecOrderDeriv) {
-                return;
-            }
-            for (Amg::Vector3D& hess : measResidual.hessian) {
-                hess.setZero();
+            if (m_cfg.useSecOrderDeriv) {
+                for (Amg::Vector3D& hess : resObj.hessian) {
+                    hess.setZero();
+                }
             }
             ATH_MSG_WARNING("Segment is parallel along the wire");
             return;
         }
-        const double invProjLenSq = 1. / projDirLenSq;
-        const double invProjLen = std::sqrt(invProjLenSq);
+        resObj.invProjLenSq = 1. / resObj.projDirLenSq;
+        resObj.invProjLen = std::sqrt(resObj.invProjLenSq);
         /** Project the segment onto the plane */
-        const Amg::Vector3D projDir = (line.dir - planeProject*hitDir) * invProjLen;
+        resObj.projDir = (line.dir - resObj.projIntoWirePlane*hitDir) * resObj.invProjLen;
         /** Calculate the distance from the two reference points  */
         const Amg::Vector3D hitMinSeg = hitPos - line.pos ;
         /** Distance from the segment line to the tube wire */
-        const double lineDist = projDir.cross(hitDir).dot(hitMinSeg);
+        const double lineDist = resObj.projDir.cross(hitDir).dot(hitMinSeg);
         const double resVal = (lineDist - hit.driftRadius());
-        measResidual.residual = resVal * Amg::Vector3D::Unit(toInt(AxisDefs::eta));
+        resObj.residual = resVal * Amg::Vector3D::Unit(toInt(AxisDefs::eta));
         ATH_MSG_VERBOSE("Mdt drift radius: "<<hit.driftRadius()<<" distance: "<<lineDist<<";"
                         <<Amg::signedDistance(hitPos, hitDir, line.pos, line.dir)<<", residual: "<<resVal);
         /// If the tube is a twin-tube, the hit position is no longer arbitrary along the wire. Calculate the
         /// distance along the wire towards the point of closest approach.
         if (hit.dimension() == 2) {
-            measResidual.residual[toInt(AxisDefs::phi)] = (hitMinSeg.dot(line.dir)*planeProject - hitMinSeg.dot(hitDir)) * invProjLenSq;
+            resObj.residual[toInt(AxisDefs::phi)] = (hitMinSeg.dot(line.dir)*resObj.projIntoWirePlane - hitMinSeg.dot(hitDir)) * resObj.invProjLenSq;
         }
         constexpr unsigned nLinePars = LineWithPartials::nPars;
-        /// Cache of the partial derivatives of the projected line parameters w.r.t the fit parameters
-        auto partProjDir{make_array<Amg::Vector3D, nLinePars>(Amg::Vector3D::Zero())};
-        /// Dot product between the angular derivative & the hit-plane normal
-        auto partPlaneProject{make_array<double, nLinePars>(0.)};
-
         /** Calculate the first derivative of the residual */
         for (const int param : {toInt(ParamDefs::y0), toInt(ParamDefs::x0), 
                                 toInt(ParamDefs::theta), toInt(ParamDefs::phi)}) {
-            if (!measResidual.evalPhiPars && (param == toInt(ParamDefs::x0) || param == toInt(ParamDefs::phi))){
+            if (!resObj.evalPhiPars && (param == toInt(ParamDefs::x0) || param == toInt(ParamDefs::phi))){
                 continue;
             }
             switch (param) {
                 case toInt(ParamDefs::theta):
                 case toInt(ParamDefs::phi): {
-                    partPlaneProject[param] = line.gradient[param].dot(hitDir);
-                    partProjDir[param] = (line.gradient[param] - partPlaneProject[param]*hitDir) * invProjLen
-                                       +  partPlaneProject[param]*planeProject* projDir * invProjLenSq;
-                    const double partialDist = partProjDir[param].cross(hitDir).dot(hitMinSeg);
+                    resObj.partWirePlaneProj[param] = line.gradient[param].dot(hitDir);
+                    resObj.partProjDir[param] = (line.gradient[param] - resObj.partWirePlaneProj[param]*hitDir) * resObj.invProjLen
+                                       +  resObj.partWirePlaneProj[param]*resObj.projIntoWirePlane* resObj.projDir * resObj.invProjLenSq;
+                    const double partialDist = resObj.partProjDir[param].cross(hitDir).dot(hitMinSeg);
 
-                    measResidual.gradient[param] =  partialDist * Amg::Vector3D::Unit(toInt(AxisDefs::eta));
+                    resObj.gradient[param] =  partialDist * Amg::Vector3D::Unit(toInt(AxisDefs::eta));
                     if (hit.dimension() == 2) {
-                        measResidual.gradient[param][toInt(AxisDefs::phi)] = 
-                            ( hitMinSeg.dot(line.gradient[param]) * planeProject +
-                              hitMinSeg.dot(line.dir)*partPlaneProject[param]) * invProjLenSq
-                            +2.* measResidual.residual[toInt(AxisDefs::phi)]*( planeProject * partPlaneProject[param]) * invProjLenSq;
+                        resObj.gradient[param][toInt(AxisDefs::phi)] = 
+                            ( hitMinSeg.dot(line.gradient[param]) * resObj.projIntoWirePlane +
+                              hitMinSeg.dot(line.dir)*resObj.partWirePlaneProj[param]) * resObj.invProjLenSq
+                            +2.* resObj.residual[toInt(AxisDefs::phi)]*( resObj.projIntoWirePlane * resObj.partWirePlaneProj[param]) * resObj.invProjLenSq;
                     }
                     break;
                 } case toInt(ParamDefs::y0):
                   case toInt(ParamDefs::x0): {
-                        const double partialDist = - projDir.cross(hitDir).dot(line.gradient[param]);
-                        measResidual.gradient[param] =  partialDist * Amg::Vector3D::Unit(toInt(AxisDefs::eta));
+                        const double partialDist = - resObj.projDir.cross(hitDir).dot(line.gradient[param]);
+                        resObj.gradient[param] =  partialDist * Amg::Vector3D::Unit(toInt(AxisDefs::eta));
                         if (hit.dimension() == 2) {
-                            measResidual.gradient[param][toInt(AxisDefs::phi)] = -(line.gradient[param].dot(line.dir) * planeProject - 
-                                                                                   line.gradient[param].dot(hitDir)) * invProjLenSq;
+                            resObj.gradient[param][toInt(AxisDefs::phi)] = -(line.gradient[param].dot(line.dir) * resObj.projIntoWirePlane - 
+                                                                                   line.gradient[param].dot(hitDir)) * resObj.invProjLenSq;
                         }
                         break;
                 }
@@ -268,11 +240,11 @@ namespace MuonR4{
         }
         /** Loop to include the second order derivatvies */
         for (int param = toInt(ParamDefs::phi); param >=0; --param){
-            if (!measResidual.evalPhiPars && (param == toInt(ParamDefs::x0) || param == toInt(ParamDefs::phi))){
+            if (!resObj.evalPhiPars && (param == toInt(ParamDefs::x0) || param == toInt(ParamDefs::phi))){
                 continue;
             }
             for (int param1 = param; param1>=0; --param1) {
-                if (!measResidual.evalPhiPars && (param1 == toInt(ParamDefs::x0) || param1 == toInt(ParamDefs::phi))){
+                if (!resObj.evalPhiPars && (param1 == toInt(ParamDefs::x0) || param1 == toInt(ParamDefs::phi))){
                     continue;
                 }
                 const int lineIdx = vecIdxFromSymMat<nLinePars>(param, param1);
@@ -282,35 +254,35 @@ namespace MuonR4{
                      (param1 == toInt(ParamDefs::theta) || param1 == toInt(ParamDefs::phi))) {
                     
                     const double partSqLineProject = line.hessian[lineIdx].dot(hitDir);
-                    const Amg::Vector3D projDirPartSq = (line.hessian[lineIdx] - partSqLineProject * hitDir) * invProjLen
-                                                      + (partPlaneProject[param1] * planeProject) * invProjLenSq * partProjDir[param]
-                                                      + (partPlaneProject[param] * planeProject) * invProjLenSq * partProjDir[param1]
-                                                      + (partSqLineProject*planeProject) * invProjLenSq * projDir
-                                                      + (partPlaneProject[param1] * partPlaneProject[param]) * std::pow(invProjLenSq, 2) * projDir;
+                    const Amg::Vector3D projDirPartSq = (line.hessian[lineIdx] - partSqLineProject * hitDir) * resObj.invProjLen
+                                                      + (resObj.partWirePlaneProj[param1] * resObj.projIntoWirePlane) * resObj.invProjLenSq * resObj.partProjDir[param]
+                                                      + (resObj.partWirePlaneProj[param] * resObj.projIntoWirePlane) * resObj.invProjLenSq * resObj.partProjDir[param1]
+                                                      + (partSqLineProject*resObj.projIntoWirePlane) * resObj.invProjLenSq * resObj.projDir
+                                                      + (resObj.partWirePlaneProj[param1] * resObj.partWirePlaneProj[param]) * std::pow(resObj.invProjLenSq, 2) * resObj.projDir;
 
                     const double partialSqDist =  projDirPartSq.cross(hitDir).dot(hitMinSeg);
-                    measResidual.hessian[resIdx] = partialSqDist * Amg::Vector3D::Unit(toInt(AxisDefs::eta));
+                    resObj.hessian[resIdx] = partialSqDist * Amg::Vector3D::Unit(toInt(AxisDefs::eta));
                      if (hit.dimension() == 2) {
-                         const double partialSqAlongWire =2.*measResidual.residual[toInt(AxisDefs::phi)]*planeProject*partSqLineProject * invProjLenSq
-                                                         +2.*measResidual.residual[toInt(AxisDefs::phi)]*partPlaneProject[param]*partPlaneProject[param1]*invProjLenSq
-                                                         +2.*measResidual.gradient[param1][toInt(AxisDefs::phi)]*planeProject*partPlaneProject[param]*invProjLenSq
-                                                         +2.*measResidual.gradient[param][toInt(AxisDefs::phi)]*planeProject*partPlaneProject[param1]*invProjLenSq
-                                                         + hitMinSeg.dot(line.hessian[lineIdx]) *planeProject * invProjLenSq
-                                                         + hitMinSeg.dot(line.dir)*partSqLineProject * invProjLenSq
-                                                         + hitMinSeg.dot(line.gradient[param])*partPlaneProject[param1]*invProjLenSq
-                                                         + hitMinSeg.dot(line.gradient[param1])*partPlaneProject[param]*invProjLenSq;
-                         measResidual.hessian[resIdx][toInt(AxisDefs::phi)] = partialSqAlongWire;
+                         const double partialSqAlongWire =2.*resObj.residual[toInt(AxisDefs::phi)]*resObj.projIntoWirePlane*partSqLineProject * resObj.invProjLenSq
+                                                         +2.*resObj.residual[toInt(AxisDefs::phi)]*resObj.partWirePlaneProj[param]*resObj.partWirePlaneProj[param1]*resObj.invProjLenSq
+                                                         +2.*resObj.gradient[param1][toInt(AxisDefs::phi)]*resObj.projIntoWirePlane*resObj.partWirePlaneProj[param]*resObj.invProjLenSq
+                                                         +2.*resObj.gradient[param][toInt(AxisDefs::phi)]*resObj.projIntoWirePlane*resObj.partWirePlaneProj[param1]*resObj.invProjLenSq
+                                                         + hitMinSeg.dot(line.hessian[lineIdx]) *resObj.projIntoWirePlane * resObj.invProjLenSq
+                                                         + hitMinSeg.dot(line.dir)*partSqLineProject * resObj.invProjLenSq
+                                                         + hitMinSeg.dot(line.gradient[param])*resObj.partWirePlaneProj[param1]*resObj.invProjLenSq
+                                                         + hitMinSeg.dot(line.gradient[param1])*resObj.partWirePlaneProj[param]*resObj.invProjLenSq;
+                         resObj.hessian[resIdx][toInt(AxisDefs::phi)] = partialSqAlongWire;
                      }
                 }
                 /// Angular & Spatial mixed terms
                 else if (param == toInt(ParamDefs::theta) || param == toInt(ParamDefs::phi)){
-                    const double partialSqDist = - partProjDir[param].cross(hitDir).dot(line.gradient[param1]);    
-                    measResidual.hessian[resIdx] = partialSqDist * Amg::Vector3D::Unit(toInt(AxisDefs::eta));
+                    const double partialSqDist = - resObj.partProjDir[param].cross(hitDir).dot(line.gradient[param1]);    
+                    resObj.hessian[resIdx] = partialSqDist * Amg::Vector3D::Unit(toInt(AxisDefs::eta));
                     if (hit.dimension() == 2) {
-                        const double partialSqAlongWire = -(line.gradient[param1].dot(line.gradient[param])*planeProject +
-                                                            line.gradient[param1].dot(line.dir)*partPlaneProject[param]) * invProjLenSq
-                                                        + 2.* measResidual.gradient[param1][toInt(AxisDefs::phi)]*( planeProject * partPlaneProject[param]) * invProjLenSq;
-                        measResidual.hessian[resIdx][toInt(AxisDefs::phi)] = partialSqAlongWire;
+                        const double partialSqAlongWire = -(line.gradient[param1].dot(line.gradient[param])*resObj.projIntoWirePlane +
+                                                            line.gradient[param1].dot(line.dir)*resObj.partWirePlaneProj[param]) * resObj.invProjLenSq
+                                                        + 2.* resObj.gradient[param1][toInt(AxisDefs::phi)]*( resObj.projIntoWirePlane * resObj.partWirePlaneProj[param]) * resObj.invProjLenSq;
+                        resObj.hessian[resIdx][toInt(AxisDefs::phi)] = partialSqAlongWire;
                     }
                 }
             }
@@ -331,6 +303,11 @@ namespace MuonR4{
             residual.residual.setZero();
             for (Amg::Vector3D& deriv: residual.gradient) {
                 deriv.setZero();
+            }
+            if (m_cfg.useSecOrderDeriv) {
+                for (Amg::Vector3D& hessian : residual.hessian){
+                    hessian.setZero();
+                }
             }
             ATH_MSG_WARNING("The hit parallel with the segment line "<<Amg::toString(line.dir));
             return;
@@ -431,7 +408,7 @@ namespace MuonR4{
  
         unsigned int noChangeIter{0};
         while (fitResult.nIter++ < m_cfg.nMaxCalls) {
-            ATH_MSG_VERBOSE("Iteration: "<<fitResult.nIter<<" parameters: "<<toString(fitResult.segmentPars)<<"chi2: "<<fitResult.chi2);
+            ATH_MSG_DEBUG("Iteration: "<<fitResult.nIter<<" parameters: "<<toString(fitResult.segmentPars)<<", chi2: "<<fitResult.chi2);
             /// Update the partial derivatives of the direction vector
             updateLinePartials(fitResult.segmentPars, segmentLine);
 
@@ -445,82 +422,68 @@ namespace MuonR4{
             gradient.setZero();
 
             /** Loop over the hits to calculate the partial derivatives */
-            for (const HitType& hit : fitResult.calibMeasurements) {
+            for (HitType& hit : fitResult.calibMeasurements) {
                 if (hit->fitState() != State::Valid) {
                     continue;
                 }
                 const Amg::Vector3D& hitPos{hit->positionInChamber()};
                 const Amg::Vector3D& hitDir{hit->directionInChamber()};
-                ATH_MSG_VERBOSE("Update chi2 from measurement "<<(hit->spacePoint() ? idHelperSvc->toString(hit->spacePoint()->identify())  
+                ATH_MSG_DEBUG("Update chi2 from measurement "<<(hit->spacePoint() ? idHelperSvc->toString(hit->spacePoint()->identify())  
                                 : "pseudo meas")<<" position: "<<Amg::toString(hitPos)<<" + "<<Amg::toString(hitDir));
 
-                /// Which parameters are affected by the residual
                 const int start = toInt(fitResult.nPhiMeas ? ParamDefs::phi : ParamDefs::theta);
                 switch (hit->type()) {
                     case xAOD::UncalibMeasType::MdtDriftCircleType: {
+                        /** If the time is fitted the drift radii need to be updated.
+                         *  That's properly only possible with recalibration */
+                        const double dSign = (hit->driftRadius() > 0 ? 1. : -1.);
+                        if (fitResult.timeFit && !m_cfg.reCalibrate && fitResult.nIter > 1) {
+                            hit = m_cfg.calibrator->calibrate(ctx, *hit, segmentLine.pos, segmentLine.dir,
+                                                              fitResult.segmentPars[toInt(ParamDefs::time)]);
+                            hit->setDriftRadius(dSign*hit->driftRadius());
+                        } 
                         calculateWireResiduals(segmentLine, *hit, residual);
+
+                        if (!fitResult.timeFit) {
+                            break;
+                        }
+                        /// Time residual calculation
+                        residual.gradient[toInt(ParamDefs::time)] = dSign*m_cfg.calibrator->driftVelocity(ctx, *hit) * Amg::Vector3D::Unit(toInt(AxisDefs::eta));
+                        if (m_cfg.useSecOrderDeriv) {
+                            constexpr unsigned hessIdx = vecIdxFromSymMat<ResidualWithPartials::nPars>(toInt(ParamDefs::time), toInt(ParamDefs::time));
+                            residual.hessian[hessIdx] = dSign*m_cfg.calibrator->driftAcceleration(ctx, *hit) * Amg::Vector3D::Unit(toInt(AxisDefs::eta));
+                        }
                         break;
                     }
-                    case xAOD::UncalibMeasType::RpcStripType: 
-                    case xAOD::UncalibMeasType::TgcStripType:{
-                        const Amg::Vector3D normal = hit->spacePoint()->planeNormal();
-                        const double planeOffSet = normal.dot(hit->positionInChamber());
-                        const Amg::Vector3D planeIsect = segmentLine.pos 
-                                                        + Amg::intersect<3>(segmentLine.pos, segmentLine.dir, normal, planeOffSet).value_or(0)* segmentLine.dir; 
-
-                        /// The complementary coordinate does not contribute if the measurement is 1D
-                        residual.residual.block<2,1>(0,0) = (hitPos - planeIsect).block<2,1>(0,0);
-
-                        if (fitResult.timeFit && hit->measuresTime()) {
-                           /// need to calculate the global time of flight
-                           const double totFlightDist = (localToGlobal * planeIsect).mag();
-                           residual.residual[toInt(AxisDefs::t0)] = hit->time() - totFlightDist * c_inv - fitResult.segmentPars[toInt(ParamDefs::time)];
+                    case xAOD::UncalibMeasType::RpcStripType:
+                    case xAOD::UncalibMeasType::TgcStripType:
+                    case xAOD::UncalibMeasType::sTgcStripType:
+                    case xAOD::UncalibMeasType::MMClusterType: {
+                        calculateStripResiduals(segmentLine, *hit, residual);
+                        if (!fitResult.timeFit  || !hit->measuresTime()) {
+                            break;
                         }
+                        constexpr ParamDefs par = ParamDefs::time;
+                        residual.gradient[toInt(par)] = -Amg::Vector3D::Unit(toInt(AxisDefs::t0));
+                        const Amg::Vector3D planeIsect = residual.residual + hitPos;
+                        const double totFlightDist = (localToGlobal * planeIsect).mag() * c_inv;
+                        residual.residual[toInt(AxisDefs::t0)] = hit->time() - totFlightDist * c_inv - fitResult.segmentPars[toInt(ParamDefs::time)];
 
                         for (int p = start;  p >= 0; --p) {
-                            const ParamDefs par{static_cast<ParamDefs>(p)};
-                            residual.gradient[toInt(par)].block<2,1>(0, 0) = - partialPlaneIntersect(normal, planeOffSet, segmentLine, par).block<2,1>(0,0);
-
-                            if (fitResult.timeFit && hit->measuresTime()) {
-                                residual.gradient[toInt(par)][toInt(AxisDefs::t0)] = -residual.gradient[toInt(par)].perp() * c_inv;
-                            }
+                            residual.gradient[p][toInt(AxisDefs::t0)] = -residual.gradient[p].perp() * c_inv;
                             ATH_MSG_VERBOSE("Partial derivative of "<<idHelperSvc->toString(hit->spacePoint()->identify())
-                                          <<" residual "<<Amg::toString(residual.residual)<<" "<<
-                                          Amg::toString(multiply(inverse(hit->covariance()), residual.residual))
-                                          <<" "<<std::endl<<toString(hit->covariance())<<std::endl<<" w.r.t "<<toString(par)<<"="
-                                          <<Amg::toString(residual.gradient[toInt(par)]));
-
-                        }
-                        if (fitResult.timeFit && hit->measuresTime()) {
-                           constexpr ParamDefs par = ParamDefs::time;
-                           residual.gradient[toInt(par)] = -Amg::Vector3D::Unit(toInt(AxisDefs::t0));
-                           ATH_MSG_VERBOSE("Partial derivative of "<<idHelperSvc->toString(hit->spacePoint()->identify())
-                                          <<" residual "<<Amg::toString(residual.residual)<<" w.r.t "<<toString(par)<<"="
-                                          <<Amg::toString(residual.gradient[toInt(par)]));
-                       }
-                       break;
-                    } case xAOD::UncalibMeasType::Other:{
-                        static const Amg::Vector3D normal = Amg::Vector3D::UnitZ();
-                        const double planeOffSet = normal.dot(hit->positionInChamber());
-                        const Amg::Vector3D planeIsect = segmentLine.pos + 
-                                            Amg::intersect<3>(segmentLine.pos, segmentLine.dir, normal, planeOffSet).value_or(0)* segmentLine.dir;
-
-                        residual.residual.block<2,1>(0,0) = (hitPos - planeIsect).block<2,1>(0,0);
-                        residual.residual[toInt(AxisDefs::t0)] =0.;
-                        for (int p = start;  p >= 0; --p) {
-                            const ParamDefs par{static_cast<ParamDefs>(p)};
-                            residual.gradient[toInt(par)].block<2,1>(0, 0) = - partialPlaneIntersect(normal, planeOffSet, segmentLine, par).block<2,1>(0,0);
-
-                            residual.gradient[toInt(par)][toInt(AxisDefs::t0)] = 0;
-                            ATH_MSG_VERBOSE("Check partial derivatives of BS constraint, residual "
-                                          <<Amg::toString(residual.residual)<<" w.r.t "<<toString(par)<<"="
-                                          <<Amg::toString(residual.gradient[toInt(par)]));
-                        
+                                           <<" residual "<<Amg::toString(residual.residual)<<" "<<Amg::toString(multiply(inverse(hit->covariance()), residual.residual))
+                                           <<" "<<std::endl<<toString(hit->covariance())<<std::endl<<" w.r.t "
+                                           <<toString(static_cast<ParamDefs>(p))<<"="<<Amg::toString(residual.gradient[p]));
                         }
                         break;
-                    } default:
+                    } case xAOD::UncalibMeasType::Other: {
+                        calculateStripResiduals(segmentLine, *hit, residual);
+                        break;
+                    } default: {
                         const auto &measurement = *hit->spacePoint()->primaryMeasurement();
                         ATH_MSG_WARNING("MdtSegmentFitter() - Unsupported measurment type" <<typeid(measurement).name());
+                    }
                 }
     
                 ATH_MSG_VERBOSE("Update derivatives for hit "<< (hit->spacePoint() ? idHelperSvc->toString(hit->spacePoint()->identify()) : "beamspot"));
@@ -655,7 +618,7 @@ namespace MuonR4{
                                                const AmgSymMatrix(5)& currentHessian) const {
             
             AmgSymMatrix(nDim) miniHessian = currentHessian.block<nDim, nDim>(0,0);
-            ATH_MSG_VERBOSE("Parameter update -- \ncurrenPars: "<<toString(currPars)<<", \ngradient: "<<toString(currGrad)
+            ATH_MSG_DEBUG("Parameter update -- \ncurrenPars: "<<toString(currPars)<<", \ngradient: "<<toString(currGrad)
                           <<", hessian ("<<miniHessian.determinant()<<")"<<std::endl<<miniHessian);
 
             double changeMag{0.};
@@ -666,7 +629,7 @@ namespace MuonR4{
                 changeMag = std::sqrt(updateMe.dot(updateMe));
                 currPars.block<nDim,1>(0,0) -= updateMe;
                 prevGrad.block<nDim,1>(0,0)  = currGrad.block<nDim,1>(0,0);
-                ATH_MSG_VERBOSE("Hessian inverse:\n"<<miniHessian.inverse()<<"\n\nUpdate the parameters by -"
+                ATH_MSG_DEBUG("Hessian inverse:\n"<<miniHessian.inverse()<<"\n\nUpdate the parameters by -"
                              <<Amg::toString(updateMe));
             } else {
                 const AmgVector(nDim) gradDiff = (currGrad - prevGrad).block<nDim,1>(0,0);
@@ -692,11 +655,12 @@ namespace MuonR4{
                     }
                 }
                 if (m_cfg.ranges[p][0] > parValue || m_cfg.ranges[p][1] < parValue) {
-                    ATH_MSG_VERBOSE("The "<<p<<"-th parameter "<<toString(static_cast<ParamDefs>(p))<<" is out of range "<<currPars[p]
-                                    <<"["<<m_cfg.ranges[p][0]<<"-"<<m_cfg.ranges[p][1]<<"]");
+                    ATH_MSG_VERBOSE("The "<<p<<"-th parameter "<<toString(static_cast<ParamDefs>(p))<<" is out of range "<<parValue
+                                    <<" allowed ["<<m_cfg.ranges[p][0]<<"-"<<m_cfg.ranges[p][1]<<"]");
                     ++nOutOfBound;
+                    parValue = std::clamp(parValue, m_cfg.ranges[p][0], m_cfg.ranges[p][1]);
                 }
-                parValue = std::clamp(parValue, m_cfg.ranges[p][0], m_cfg.ranges[p][1]);
+
             }
             if (nOutOfBound > m_cfg.nParsOutOfBounds){
                 return UpdateStatus::outOfBounds;

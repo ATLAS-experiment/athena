@@ -442,12 +442,12 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, Construc
             const Amg::Vector3D translation{copyMe->globalToLocalTrans(gctx) * copyMe->center(gctx, layHash)};            
             newRE->setPlaneZ(translation.x(), gasGap);
         }
-        newRE->setSsize(copyMe->moduleHeight());
-        newRE->setRsize(copyMe->moduleWidthS());
+        newRE->setRsize(copyMe->moduleHeight());
+        newRE->setSsize(copyMe->moduleWidthS());
         newRE->setZsize(copyMe->moduleThickness());
 
-        newRE->setLongSsize(copyMe->moduleHeight());
-        newRE->setLongRsize(copyMe->moduleWidthL());
+        newRE->setLongRsize(copyMe->moduleHeight());
+        newRE->setLongSsize(copyMe->moduleWidthL());
         newRE->setLongZsize(copyMe->moduleThickness());
 
         newRE->setReadOutParams(readOutPars);

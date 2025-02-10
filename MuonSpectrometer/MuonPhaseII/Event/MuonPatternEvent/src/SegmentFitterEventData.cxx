@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonPatternEvent/SegmentFitterEventData.h>
 #include <MuonPatternEvent/Segment.h>
@@ -62,7 +62,7 @@ namespace MuonR4{
             sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::y0), pars[toInt(ParamDefs::y0)]);
             sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::theta), pars[toInt(ParamDefs::theta)]/Gaudi::Units::deg);
             sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::phi),  pars[toInt(ParamDefs::phi)]/Gaudi::Units::deg);
-            sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::time), pars[toInt(ParamDefs::time)]);
+            sstr<< std::format("{}={:.2f}",toString(ParamDefs::time), pars[toInt(ParamDefs::time)]);
             return sstr.str();
         }
         std::string toString(const ParamDefs a) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MDTCALIBINTEFACES_MDTCALIBINPUT_H
 #define MDTCALIBINTEFACES_MDTCALIBINPUT_H
@@ -8,7 +8,6 @@
 
 #include <GaudiKernel/PhysicalConstants.h>
 #include <xAODMuonPrepData/MdtDriftCircleFwd.h>
-#include <CxxUtils/CachedUniquePtr.h>
 #include <Identifier/Identifier.h>
 #include <Identifier/IdentifierHash.h>
 #include <variant>
@@ -42,10 +41,10 @@ class MdtCalibInput {
        *  @param detMgr: Pointer to the associated readout element
        *  @param gctx: Geometry context to globally align the tube within ATLAS */
       MdtCalibInput(const Identifier& id,
-                  const int16_t adc,
-                  const int16_t tdc,
-                  const MuonGMR4::MdtReadoutElement* reEle,
-                  const ActsGeometryContext& gctx);
+                    const int16_t adc,
+                    const int16_t tdc,
+                    const MuonGMR4::MdtReadoutElement* reEle,
+                    const ActsGeometryContext& gctx);
     
       /** @brief Minimal constructor in the legacy geomerty setup. It takes all necessary ingredients to run
        *         later the calibration loop.
@@ -81,8 +80,6 @@ class MdtCalibInput {
                     const ActsGeometryContext& gctx);
 
 
-
-
       MdtCalibInput(MdtCalibInput&& other) = default;
       MdtCalibInput& operator=(MdtCalibInput&& other) = default;
 
@@ -105,9 +102,13 @@ class MdtCalibInput {
 
       /// Returns the track direction (Can be zero)
       const Amg::Vector3D& trackDirection() const;
-      /// Sets the track direction if it's given from an external seed
-      void setTrackDirection(const Amg::Vector3D& trackDir);
-    
+      /** @brief Sets the direction of the externally determined track
+       *  @param trackDir: Direction vector of the track (global frame)
+       *  @param hasPhi: Flag whether the track direction contains phi information*/
+      void setTrackDirection(const Amg::Vector3D& trackDir,
+                             bool hasPhi);
+      /** @brief Returns whether the track has a phi constaint or not */
+      bool trackDirHasPhi() const;
 
       /// Returns the time of flight
       double timeOfFlight() const;
@@ -138,26 +139,33 @@ class MdtCalibInput {
       double tubeLength() const;
       /// Returns the sign of the readout position in local coordinates
       double readOutSide() const;
+      /** @brief set whether the  */
   private:
+    /** @brief Local to global transformation of the tube */
     const Amg::Transform3D& localToGlobal() const;
-
+    /** @brief Translational part of the local -> global transform */
     Amg::Vector3D center() const;
+    /** @brief Tube identifier */
     Identifier m_id{};
-    bool m_isMasked{false};
+    /** @brief Adc counts of the hit */
     int16_t m_adc{0};
+    /** @brief Tdc counts of the hit */
     int16_t m_tdc{0};
 
-
+    /** @brief Geometry context, needed to fetch the alignment */
     const ActsGeometryContext* m_gctx{nullptr};
-
+    /** @brief Variant type to store the legacy & Phase-II style readout geometry in a single variable */
     using ReadoutEle_t = std::variant<const MuonGM::MdtReadoutElement*, const MuonGMR4::MdtReadoutElement*>;
+    /** @brief Pointer to the associated readout element */
     ReadoutEle_t m_RE{};
-  
+    /** @brief Measurement hash of the Identifier (needed for Phase II) */
     IdentifierHash m_hash{};
-  
+    /** @brief Point of closest approach of the track */  
     Amg::Vector3D m_approach{center()};
+    /** @brief Global track direction */
     Amg::Vector3D m_trackDir{Amg::Vector3D::Zero()};
-  
+    /** @brief Does the track direction contain a phi constraint */
+    bool m_trackHasPhi{false};
     /// Time of flight 
     static constexpr double s_inverseSpeed{1. / Gaudi::Units::c_light};
     double m_ToF{center().mag() * s_inverseSpeed};

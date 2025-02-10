@@ -113,6 +113,7 @@ namespace MuonR4{
             ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
 
             Gaudi::Property<bool> m_doT0Fit{this, "fitSegmentT0", true};
+            Gaudi::Property<bool> m_recalibInFit{this, "recalibInFit" , false};
             /// Add beamline constraint
             Gaudi::Property<bool> m_doBeamspotConstraint{this, "doBeamspotConstraint", false};
             Gaudi::Property<double> m_beamSpotR{this, "BeamSpotRadius", 30.* Gaudi::Units::cm};

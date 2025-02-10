@@ -5,7 +5,7 @@ if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
-    #parser.set_defaults(noMM=True)
+    parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
     parser.set_defaults(outRootFile="HoughTransformTester.root")
     # parser.set_defaults(condTag="CONDBR2-BLKPA-2023-03")
@@ -23,11 +23,8 @@ if __name__=="__main__":
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Muon.Align.UseAsBuilt = False
-    flags.Muon.Align.UseBLines = False
-
-   
     # flags.PerfMon.doFullMonMT = True
+
     flags, cfg = setupGeoR4TestCfg(args,flags)
     
 
@@ -59,26 +56,21 @@ if __name__=="__main__":
     if args.runVtune: 
         from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
         cfg.merge(VTuneProfilerServiceCfg(flags, ProfiledAlgs=["MuonHoughTransformAlg"]))
-
+    
+    ## cfg.getService("MessageSvc").setVerbose = ["TrackBuildingFromR4Segments", "TrackBuildingFromHoughR4", "MuonR4SegmentCnvAlg" ]
     if args.monitorPlots:
         from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg
         cfg.getEventAlgo("MuonEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="EtaHoughPlotValid",
-                                                                                                AllCanvasName="AllEtaHoughiDiPuffPlots",
-                                                                                                TruthSegDecors=["HabemusZ"],
-                                                                                                displayTruthOnly = False,
-                                                                                                saveSinglePDFs = True, saveSummaryPDF= True))
+                                                                                                AllCanvasName="AllEtaHoughiDiPuffPlots", doPhiBucketViews = False,
+                                                                                                displayTruthOnly = True, saveSinglePDFs = False, saveSummaryPDF= False))
         cfg.getEventAlgo("MuonPhiHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="PhiHoughPlotValid",
-                                                                                                AllCanvasName="AllPhiHoughiDiPuffPlots",
-                                                                                                TruthSegDecors=["HabemusZ"],
-                                                                                                displayTruthOnly = False,
-                                                                                                saveSinglePDFs = False, saveSummaryPDF= False))
+                                                                                                AllCanvasName="AllPhiHoughiDiPuffPlots",doEtaBucketViews = False,
+                                                                                                displayTruthOnly = True, saveSinglePDFs = False, saveSummaryPDF= False))
         cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="SegmentPlotValid",
-                                                                                                AllCanvasName="AllSegmentFitPlots",
-                                                                                                TruthSegDecors=["HabemusZ"],
-                                                                                                displayTruthOnly = False,
-                                                                                                saveSinglePDFs = False, saveSummaryPDF= False)) 
+                                                                                                AllCanvasName="AllSegmentFitPlots", doPhiBucketViews = False,
+                                                                                                displayTruthOnly = True, saveSinglePDFs = True, saveSummaryPDF= False))
     executeTest(cfg)
     

@@ -152,7 +152,7 @@ MdtRotPtr MdtDriftCircleOnTrackCreator::createRIO_OnTrack(const MdtPrepData& mdt
 
     MdtCalibInput calibInput{mdtPrd};
     calibInput.setClosestApproach(GP);
-    if (GD) calibInput.setTrackDirection((*GD).unit());
+    if (GD) calibInput.setTrackDirection((*GD).unit(), true);
 
     switch (m_timeCorrectionType) {
         case ATLTIME:

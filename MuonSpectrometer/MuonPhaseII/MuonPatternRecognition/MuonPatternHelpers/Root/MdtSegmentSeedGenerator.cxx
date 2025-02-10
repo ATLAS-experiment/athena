@@ -425,10 +425,7 @@ namespace MuonR4{
         
         double theta = inSeed.parameters[toInt(ParamDefs::theta)];
         /// Now it's time to use the guestimate
-        const double thetaMin =  - (auxVars.T_zzyy  - auxVars.T_ry) / (4* auxVars.T_yz + auxVars.T_rz);
-        const double thetaDet =  std::pow(auxVars.T_zzyy -auxVars.T_ry,2) + 4*(auxVars.T_yz + auxVars.T_rz)*(2*auxVars.T_yz + 0.5*auxVars.T_rz);
-        const double thetaGuess =  thetaMin  + (theta > thetaMin ? 1. : -1.)*std::sqrt(thetaDet) / (4*auxVars.T_yz + auxVars.T_rz);
-        // const double thetaGuess = std::atan2( 2.*(T_yz - T_rz), T_zzyy) / 2.;
+        const double thetaGuess = std::atan2( 2.*(auxVars.T_yz - auxVars.T_rz), auxVars.T_zzyy) / 2.;
 
         ATH_MSG_VERBOSE("Start fast fit seed: "<<theta<<", guess: "<<thetaGuess
                     <<", y0: "<<inSeed.parameters[toInt(ParamDefs::y0)]
