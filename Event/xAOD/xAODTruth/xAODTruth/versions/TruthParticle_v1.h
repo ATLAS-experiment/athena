@@ -108,13 +108,13 @@ namespace xAOD {
       size_t nParents() const;
 
       /// Retrieve the i-th mother (TruthParticle) of this TruthParticle
-      const TruthParticle_v1* parent( size_t i = 0 ) const;
+      const TruthParticle_v1* parent( size_t i) const;
 
       /// Number of children of this particle
       size_t nChildren() const;
 
       /// Retrieve the i-th mother (TruthParticle) of this TruthParticle
-      const TruthParticle_v1* child( size_t i = 0 ) const;
+      const TruthParticle_v1* child( size_t i) const;
 
       /// @todo Add mappings of e.g. isPrimary, isDecayed, isPrompt,
       /// isFromDecay, hasHadronicDecay, hasLeptonicDecay,
