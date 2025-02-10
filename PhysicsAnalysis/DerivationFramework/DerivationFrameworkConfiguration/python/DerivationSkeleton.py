@@ -69,17 +69,18 @@ def fromRunArgs(runArgs):
         raise ValueError('No derived formats specified')
 
     # Command line skimming - limited to SKIM format and PHYS/PHYSLITE input
-    if runArgs.skimmingExpression:
-        if not (len(formats)==1 and formats[0]=='SKIM'):
-            raise ValueError('Command-line skimming only available with SKIM format')
-        availableInputTypes = [ hasattr(runArgs, f'input{inputType}File') for inputType in [ 'DAOD_PHYS', 'DAOD_PHYSLITE' ] ]
-        if sum(availableInputTypes) != 1:
-            raise ValueError('Command-line skimming only available with input types '+','.join(map(str, availableInputTypes))) 
-        flags.Derivation.skimmingExpression = runArgs.skimmingExpression
-        if not hasattr(runArgs, 'skimmingContainers'):
-            logDerivation.warning('All containers used for skimming must be listed with the skimmingContainers option - job likely to fail')
-        else:
-            flags.Derivation.dynamicConsumers = runArgs.skimmingContainers
+    if hasattr(runArgs, 'skimmingExpression'):
+        if runArgs.skimmingExpression:
+            if not (len(formats)==1 and formats[0]=='SKIM'):
+                raise ValueError('Command-line skimming only available with SKIM format')
+            availableInputTypes = [ hasattr(runArgs, f'input{inputType}File') for inputType in [ 'DAOD_PHYS', 'DAOD_PHYSLITE' ] ]
+            if sum(availableInputTypes) != 1:
+                raise ValueError('Command-line skimming only available with input types '+','.join(map(str, availableInputTypes))) 
+            flags.Derivation.skimmingExpression = runArgs.skimmingExpression
+            if not hasattr(runArgs, 'skimmingContainers'):
+                logDerivation.warning('All containers used for skimming must be listed with the skimmingContainers option - job likely to fail')
+            else:
+                flags.Derivation.dynamicConsumers = runArgs.skimmingContainers
 
     # Output files
     for runArg in dir(runArgs):
