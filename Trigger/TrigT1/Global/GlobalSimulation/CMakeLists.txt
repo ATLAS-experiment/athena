@@ -11,6 +11,7 @@ atlas_add_component (GlobalSimulation
    src/*.h src/*.cxx src/L1TopoAlgs/*.h src/L1TopoAlgs/*.cxx
    src/GlobalAlgs/*.h src/GlobalAlgs/*.cxx
    src/GlobalAlgs/BDT/*.h src/GlobalAlgs/Egamma1BDT/*.cpp 
+   src/GlobalAlgs/Hypothesis/UCL/*.h src/GlobalAlgs/Hypothesis/UCL/*.cxx 
    src/IO/*.h src/IO/*.cxx
    src/components/*.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
