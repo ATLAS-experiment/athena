@@ -32,6 +32,6 @@ find_package( cln )
 find_package( ginac )
 find_package( nlox )
 find_package( Lhapdf )
-
+find_package( Recola )
 
 
