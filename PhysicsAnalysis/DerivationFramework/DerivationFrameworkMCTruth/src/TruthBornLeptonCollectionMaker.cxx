@@ -131,7 +131,6 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
   static const SG::ConstAccessor<unsigned int> ClassificationAcc("Classification");
 
   // add relevant particles to new collection
-  int sherpLepParentUniqueID = HepMC::UNDEFINED_ID;
   for (unsigned int i=0; i<truthParticles->size(); ++i) {
     // Grab the particle
     const xAOD::TruthParticle* theParticle = (*truthParticles)[i];
@@ -145,18 +144,12 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
       // To do so, we check the first status == 11 leptons, 
       //   check that it has a child a parent barecode corresponding the the lepton's uniqueID
       // If so, then save this parent uniqueID and skip all status 11 leptons with this parent uniqueID.
-
-      if (sherpLepParentUniqueID == HepMC::UNDEFINED_ID) {
-        const xAOD::TruthParticle* thePartchild = theParticle->child();
-        if (thePartchild) {
-          int cparentUniqueID = (thePartchild->parent()) ? HepMC::uniqueID(thePartchild->parent()) : HepMC::UNDEFINED_ID;
-          if (cparentUniqueID == HepMC::uniqueID(theParticle)) {
-            sherpLepParentUniqueID = cparentUniqueID;
-          }
-        }
+      bool has_parent_of_same_flavour = false;
+      if (theParticle->prodVtx())
+      for (size_t p = 0; p < theParticle->prodVtx()->nIncomingParticles(); ++p){
+          if (theParticle->parent(p)->pdg_id() == theParticle->pdg_id()) has_parent_of_same_flavour = true;
       }
-      int puniqueID = (theParticle->parent()) ? HepMC::uniqueID(theParticle->parent()) : HepMC::UNDEFINED_ID;
-      if (sherpLepParentUniqueID > 0 && sherpLepParentUniqueID == puniqueID) continue;
+      if (has_parent_of_same_flavour) continue;
     } else {
       // Some generators, look for leptons  coming from vertices with other leptons
       bool physical = false, has_V = false;
