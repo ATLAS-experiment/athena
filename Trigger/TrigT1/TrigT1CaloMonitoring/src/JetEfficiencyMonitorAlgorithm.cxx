@@ -28,9 +28,6 @@ StatusCode JetEfficiencyMonitorAlgorithm::initialize() {
   ATH_CHECK(m_gFexLRJetContainerKey.initialize()); //initizlize gfex lr jets
   ATH_CHECK(m_gFexSRJetContainerKey.initialize()); //initizlize gfex sr jets
 
-  // TOBs may come from trigger bytestream - renounce from scheduler
-  renounce(m_gFexLRJetContainerKey);
-  renounce(m_gFexSRJetContainerKey);
 
   return AthMonitorAlgorithm::initialize();
 }

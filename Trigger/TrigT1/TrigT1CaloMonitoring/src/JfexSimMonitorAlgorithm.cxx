@@ -44,14 +44,6 @@ StatusCode JfexSimMonitorAlgorithm::initialize() {
 
     ATH_CHECK( m_bcContKey.initialize() );
     
-
-    // TOBs may come from trigger bytestream - renounce from scheduler
-    renounce(m_data_key_jJ);
-    renounce(m_data_key_jLJ);
-    renounce(m_data_key_jTau);
-    renounce(m_data_key_jEM);
-    renounce(m_data_key_jXE);
-    renounce(m_data_key_jTE);  
     
 
     return AthMonitorAlgorithm::initialize();

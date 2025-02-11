@@ -52,6 +52,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/ReadDecorHandle.h"
 #include "DerivationFrameworkInDet/DecoratorUtils.h"
 #include "AthContainers/ConstAccessor.h"
 #include "AthContainers/Accessor.h"
@@ -64,7 +65,7 @@ namespace DerivationFramework {
   TrackStateOnSurfaceDecorator::TrackStateOnSurfaceDecorator(const std::string& t,
       const std::string& n,
       const IInterface* p) :
-    AthAlgTool(t,n,p),
+    base_class(t, n, p),
     m_idHelper(nullptr),
     m_pixId(nullptr),
     m_sctId(nullptr),
@@ -94,7 +95,7 @@ namespace DerivationFramework {
     declareProperty("Updator",                m_updator);
     declareProperty("ResidualPullCalculator", m_residualPullCalculator);
     declareProperty("HoleSearch",             m_holeSearchTool);
-    declareProperty("TRT_CalDbTool",           m_trtcaldbTool);
+    declareProperty("TRT_CalDbTool",          m_trtcaldbTool);
     declareProperty("TRT_ToT_dEdx",           m_TRTdEdxTool);
     declareProperty("TrackExtrapolator",      m_extrapolator);
   }
@@ -116,6 +117,10 @@ namespace DerivationFramework {
     }
     ATH_MSG_DEBUG("Input TrackParticle container: " << m_containerName.key());
     ATH_CHECK( m_containerName.initialize() );
+
+    if (!m_selectionString.empty()) {
+      ATH_CHECK(initializeParser(m_selectionString));
+    }
 
     // need Atlas id-helpers to identify sub-detectors, take them from detStore
     if (detStore()->retrieve(m_idHelper, "AtlasID").isFailure()) {
@@ -181,6 +186,11 @@ namespace DerivationFramework {
     ATH_CHECK( m_sctMsosName.initialize(m_storeSCT && m_addPRD) );
     ATH_CHECK( m_trtMsosName.initialize(m_storeTRT && m_addPRD) );
 
+    ATH_CHECK( m_readDecSiWidthKey.initialize() );
+    ATH_CHECK( m_readDecRdoStripKey.initialize() );
+    ATH_CHECK( m_writeDecSiWidthKey.initialize() );
+    ATH_CHECK( m_writeDecFirstStripKey.initialize() );
+
     if (m_storePixel){
        std::vector<std::string> names;
        names.resize(kNPixFloatDecor);
@@ -226,6 +236,7 @@ namespace DerivationFramework {
         ATH_MSG_ERROR ("Couldn't retrieve TrackParticles with key: " << m_containerName.key() );
         return StatusCode::FAILURE;
     }
+    size_t nTracks = tracks->size();
 
 
     SG::ReadHandle<std::vector<unsigned int> > pixelClusterOffsets;
@@ -319,6 +330,22 @@ namespace DerivationFramework {
        prd_to_track_map_cptr = prd_to_track_map.cptr();
     }
 
+    // Set up a mask with the same entries as the full TrackParticle collection
+    std::vector<bool> mask;
+    mask.assign(nTracks,false); // default: don't keep any tracks
+    if (m_parser) {
+      std::vector<int> entries =  m_parser->evaluateAsVector();
+      unsigned int nEntries = entries.size();
+      // check the sizes are compatible
+      if (nTracks != nEntries ) {
+	ATH_MSG_ERROR("Sizes incompatible! Are you sure your selection string used ID TrackParticles?");
+	return StatusCode::FAILURE;
+      } else {
+	// set mask
+	for (unsigned int i=0; i<nTracks; ++i) if (entries[i]==1) mask[i]=true;
+      }
+    }
+    
     std::vector<SG::WriteDecorHandle<xAOD::TrackParticleContainer,float> > trackTRTFloatDecorators;
     if (m_storeTRT && m_TRTdEdxTool.isEnabled()) {
        trackTRTFloatDecorators = createDecorators<xAOD::TrackParticleContainer,float>(m_trackTRTFloatDecorKeys,ctx);
@@ -326,8 +353,15 @@ namespace DerivationFramework {
     std::vector<SG::WriteDecorHandle<xAOD::TrackParticleContainer,float> >
        trackPixFloatDecorators = createDecorators<xAOD::TrackParticleContainer,float>(m_trackPixFloatDecorKeys,ctx);
     // -- Run over each track and decorate it
+    unsigned i_track = 0;
     for (const auto *const track : *tracks) {
       //-- Start with things that do not need a Trk::Track object
+
+      // mask bit check
+      if(!mask[i_track]) {
+	++i_track;
+	continue;
+      }
 
       // -- Now things that require a Trk::Track object
       if( !track->trackLink().isValid() || track->track() == nullptr ) {
@@ -670,7 +704,6 @@ namespace DerivationFramework {
           }
 	}
 
-
         // Track extrapolation
         std::unique_ptr<const Trk::TrackParameters> extrap( m_extrapolator->extrapolateTrack(ctx,*trkTrack,trackState->surface()) );
 
@@ -756,6 +789,21 @@ namespace DerivationFramework {
           }
         }
 
+	if (m_storeSCT) {
+	  SG::ReadDecorHandle<xAOD::TrackMeasurementValidationContainer, int> readDecSiWidth(m_readDecSiWidthKey, ctx);
+	  SG::ReadDecorHandle<xAOD::TrackMeasurementValidationContainer, std::vector<int>> readDecRdoStrip(m_readDecRdoStripKey, ctx);
+	  SG::WriteDecorHandle<xAOD::TrackStateValidationContainer, int> writeDecSiWidth(m_writeDecSiWidthKey, ctx);
+	  SG::WriteDecorHandle<xAOD::TrackStateValidationContainer, int> writeDecFirstStrip(m_writeDecFirstStripKey, ctx);
+	  if(  msos->trackMeasurementValidationLink().isValid() && *(msos->trackMeasurementValidationLink()) ){
+	    const xAOD::TrackMeasurementValidation* sctCluster =  *(msos->trackMeasurementValidationLink());
+	    writeDecSiWidth(*msos) = readDecSiWidth(*sctCluster);
+	    writeDecFirstStrip(*msos) = (readDecRdoStrip(*sctCluster)).at(0);
+	  } else {
+	    writeDecSiWidth(*msos) = -1;
+	    writeDecFirstStrip(*msos) = -1;
+	  }
+	}
+
         // Add the drift time for the tracks position -- note the position is biased
         if (isTRT) {
           TRTCond::RtRelation const *rtr = m_trtcaldbTool->getRtRelation(surfaceID);
@@ -827,10 +875,11 @@ namespace DerivationFramework {
 
       ATH_MSG_DEBUG("Finished dressing TrackParticle");
 
-
+      ++i_track;
     } // end of loop over tracks
+
     return StatusCode::SUCCESS;
-    }
+  }
 
 
   ElementLink< xAOD::TrackMeasurementValidationContainer >  TrackStateOnSurfaceDecorator::buildElementLink( const Trk::PrepRawData* prd,
