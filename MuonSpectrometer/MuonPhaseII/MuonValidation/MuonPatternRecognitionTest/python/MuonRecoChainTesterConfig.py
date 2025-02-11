@@ -51,6 +51,9 @@ if __name__=="__main__":
     ### What happens if you parse the R4 patterns to the legacy chain?
     cfg.merge(MuonR4SegmentRecoChainCfg(flags))
 
+    from MuonPatternRecognitionTest.PatternTestConfig import TrackTruthMatchCfg
+    cfg.merge(TrackTruthMatchCfg(flags))
+
     from MuonPatternRecognitionTest.PatternTestConfig import MuonRecoChainTesterCfg
     cfg.merge(MuonRecoChainTesterCfg(flags))
     if args.runVtune: 

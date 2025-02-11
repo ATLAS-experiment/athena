@@ -67,7 +67,7 @@ if __name__=="__main__":
     parser = SetupArgParser()
     parser.add_argument("--runTester", help="Choice on the tester to setup", default="SIM", choices=["SIM", "DIGI", "PILEUP"])
     parser.set_defaults(nEvents = -1)
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R3SimHits.pool.root"])
+    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"])
     parser.set_defaults(outRootFile="SimHitDumpNtuple.root")
     parser.set_defaults(eventPrintoutLevel = 500)
 

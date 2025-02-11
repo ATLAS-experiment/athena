@@ -20,4 +20,7 @@ def MuonSimHitToRdoCnvCfg(flags):
     if flags.Detector.GeometryMM:    
         from MuonConfig.MM_DigitizationConfig import MM_DigitizationDigitToRDOCfg
         result.merge(MM_DigitizationDigitToRDOCfg(flags))
+
+    from xAODTruthCnv.RedoTruthLinksConfig import RedoTruthLinksAlgCfg
+    result.merge( RedoTruthLinksAlgCfg(flags) )
     return result

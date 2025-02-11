@@ -15,7 +15,7 @@ if __name__=="__main__":
     parser.add_argument("--setupRun4", default=True, action="store_true")
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(outRootFile="MdtCalibDbAlgTest.root")
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root"])
+    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R4SimHits.pool.root"])
     parser.set_defaults(eventPrintoutLevel = 1000)
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)

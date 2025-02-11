@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -6,7 +6,13 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def MuonDetailedTrackTruthMakerCfg(flags, name="MuonDetailedTrackTruthMaker", **kwargs):
     result = ComponentAccumulator()
     
-    PRD_TruthNames = ["RPC_TruthMap", "TGC_TruthMap", "MDT_TruthMap"]
+    PRD_TruthNames = []
+    if flags.Detector.EnableRPC:
+        PRD_TruthNames+=["RPC_TruthMap"]
+    if flags.Detector.EnableTGC:
+        PRD_TruthNames+=["TGC_TruthMap"]
+    if flags.Detector.EnableMDT:
+        PRD_TruthNames+=["MDT_TruthMap"]
     if flags.Detector.EnableCSC:
         PRD_TruthNames += ["CSC_TruthMap"]
     if flags.Detector.EnableMM:
@@ -43,14 +49,21 @@ def MuonTruthAddTrackRecordsAlgCfg(flags, name="MuonTruthAddTrackRecordsAlg", **
 def MuonTruthHitCountsAlgCfg(flags, name="MuonTruthHitCountsAlg", **kwargs):
     result = ComponentAccumulator()
 
-    PRD_TruthMaps = ["RPC_TruthMap","TGC_TruthMap","MDT_TruthMap"]
-
-    if flags.Detector.EnablesTGC and flags.Detector.EnableMM:
-        PRD_TruthMaps += ["MM_TruthMap", "STGC_TruthMap"]
-    if flags.Detector.EnableCSC: 
-        PRD_TruthMaps += ["CSC_TruthMap"]
+    PRD_TruthNames = []
+    if flags.Detector.EnableRPC:
+        PRD_TruthNames+=["RPC_TruthMap"]
+    if flags.Detector.EnableTGC:
+        PRD_TruthNames+=["TGC_TruthMap"]
+    if flags.Detector.EnableMDT:
+        PRD_TruthNames+=["MDT_TruthMap"]
+    if flags.Detector.EnableCSC:
+        PRD_TruthNames += ["CSC_TruthMap"]
+    if flags.Detector.EnableMM:
+        PRD_TruthNames += ["MM_TruthMap"]
+    if flags.Detector.EnablesTGC:
+        PRD_TruthNames += ["STGC_TruthMap"]
     
-    kwargs.setdefault("PRD_TruthMaps", PRD_TruthMaps)
+    kwargs.setdefault("PRD_TruthMaps", PRD_TruthNames)
   
     result.addEventAlgo(CompFactory.Muon.MuonTruthHitCountsAlg(name, **kwargs))
     return result
