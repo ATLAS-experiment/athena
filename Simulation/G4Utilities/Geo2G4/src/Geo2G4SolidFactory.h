@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEO2G4_Geo2G4SolidFactory_h
@@ -27,7 +27,7 @@ public:
   	typedef std::map<std::string,  LArWheelSolidDef_t> LArWheelSolid_typemap;
 
   Geo2G4SolidFactory();
-  G4VSolid* Build ATLAS_NOT_THREAD_SAFE (const GeoShape*, std::string name=std::string(""));
+  G4VSolid* Build ATLAS_NOT_THREAD_SAFE (const GeoShape*, const std::string & name="");
 
 private:
    G4VSolid* createLArWheelSolid ATLAS_NOT_THREAD_SAFE (const std::string& name, const LArWheelSolidDef_t & lwsdef, const EMECData &emecData) const;

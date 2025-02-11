@@ -43,10 +43,10 @@ public:
     StatusCode initializeCalibrator(const std::string & calibratorConfigFile);
 
     /** interface method to return probability prediction of punch through */
-    virtual double computePunchThroughProbability(const G4FastTrack& fastTrack, const double simE, std::vector<double> simEfrac) const override;
+    virtual double computePunchThroughProbability(const G4FastTrack& fastTrack, const double simE, const std::vector<double> & simEfrac) const override;
 
     /** calcalate NN inputs based on G4FastTrack and simulstate */
-    static std::map<std::string, std::map<std::string, double> > computeInputs(const G4FastTrack& fastTrack, const double simE, std::vector<double> simEfrac);
+    static std::map<std::string, std::map<std::string, double> > computeInputs(const G4FastTrack& fastTrack, const double simE, const std::vector<double> & simEfrac);
 
     /** scale NN inputs using MinMaxScaler */
     std::map<std::string, std::map<std::string, double> > scaleInputs(std::map<std::string, std::map<std::string, double> >& inputs) const;

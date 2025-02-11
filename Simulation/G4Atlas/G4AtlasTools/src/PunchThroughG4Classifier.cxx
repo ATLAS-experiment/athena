@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,7 +8,6 @@
 #include "PunchThroughG4Classifier.h"
 
 #include <fstream>
-#include <memory>
 
 // PathResolver
 #include "PathResolver/PathResolver.h"
@@ -178,7 +177,7 @@ StatusCode PunchThroughG4Classifier::initializeCalibrator(const std::string & ca
     return StatusCode::SUCCESS;
 }
 
-double PunchThroughG4Classifier::computePunchThroughProbability(const G4FastTrack& fastTrack, const double simE, std::vector<double> simEfrac) const {
+double PunchThroughG4Classifier::computePunchThroughProbability(const G4FastTrack& fastTrack, const double simE, const std::vector<double> & simEfrac) const {
 
     std::map<std::string, std::map<std::string, double> > networkInputs = computeInputs(fastTrack, simE, simEfrac); //compute inputs
 
@@ -191,7 +190,7 @@ double PunchThroughG4Classifier::computePunchThroughProbability(const G4FastTrac
     return calibratedOutput;
 }
 
-std::map<std::string, std::map<std::string, double> > PunchThroughG4Classifier::computeInputs(const G4FastTrack& fastTrack, const double simE, std::vector<double> simEfrac) {
+std::map<std::string, std::map<std::string, double> > PunchThroughG4Classifier::computeInputs(const G4FastTrack& fastTrack, const double simE, const std::vector<double> & simEfrac) {
 
     //calculate inputs for NN
 

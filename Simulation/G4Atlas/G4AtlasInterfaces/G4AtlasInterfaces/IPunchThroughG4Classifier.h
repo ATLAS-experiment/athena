@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IPunchThroughG4Classifier_H
@@ -30,7 +30,7 @@ class IPunchThroughG4Classifier : virtual public IAlgTool
     DeclareInterfaceID(IPunchThroughG4Classifier, 1, 0);
 
    /** calculates probability of punch through from G4FastTrack and the energies (simE as simulated total energy and simEfrac as simulated layer energies) */
-   virtual double computePunchThroughProbability(const G4FastTrack& fastTrack, const double simE, std::vector<double> simEfrac) const = 0;
+   virtual double computePunchThroughProbability(const G4FastTrack& fastTrack, const double simE, const std::vector<double> & simEfrac) const = 0;
 };
 
 #endif // IPunchThroughG4Classifier_H
