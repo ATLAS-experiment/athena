@@ -83,6 +83,7 @@ class ParticleGun(EvgenAlg):
         if HepMCVersion == 3:
           evt.set_units(HepMC.Units.MEV, HepMC.Units.MM)
           evt.weights().push_back(1.0)
+          evt.set_event_number(self._ctx.eventID().event_number())
           beamparticle1 = std.shared_ptr['HepMC3::GenParticle'](HepMC.GenParticle(HepMC.FourVector(0,0,-7000,7000),2212,4))
           ROOT.SetOwnership(beamparticle1, False)
           beamparticle2 = std.shared_ptr['HepMC3::GenParticle'](HepMC.GenParticle(HepMC.FourVector(0,0,7000,7000),2212,4))
