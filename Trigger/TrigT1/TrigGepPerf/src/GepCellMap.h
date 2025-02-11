@@ -5,10 +5,10 @@
 #ifndef TRIGGEPPERF_GEPCELLMAP_H
 #define TRIGGEPPERF_GEPCELLMAP_H
 
-#include <vector>
-#include <string>
-#include <memory>
 #include "./GepCaloCell.h"
+#include <map>
+#include <memory>
+#include "AthenaKernel/CLASS_DEF.h"
 
 typedef std::unique_ptr<std::map<unsigned int,Gep::GepCaloCell>> pGepCellMap;
 
@@ -20,12 +20,12 @@ namespace Gep{
     GepCellMap() {}
     ~GepCellMap() {}
 
-  void insert(unsigned int id, Gep::GepCaloCell cell) {
-	m_cellMap.insert(std::pair<unsigned int, Gep::GepCaloCell>(id, cell));
+  void insert(unsigned int id, const Gep::GepCaloCell & cell) {
+	  m_cellMap.emplace(id, cell);
   }
 
   unsigned int size() {
-	return m_cellMap.size();
+	  return m_cellMap.size();
   }
 
   pGepCellMap getCellMap() {

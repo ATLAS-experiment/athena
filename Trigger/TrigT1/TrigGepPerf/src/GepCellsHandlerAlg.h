@@ -8,16 +8,16 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "CaloEvent/CaloCellContainer.h"
-#include "CaloEvent/CaloCell.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
-#include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloConditions/CaloNoise.h"
 
 #include "GepCellMap.h"
 
 #include <vector>
 #include <map>
+class CaloCell;
+class CaloCell_ID;
 
 class GepCellsHandlerAlg: public ::AthReentrantAlgorithm {
 

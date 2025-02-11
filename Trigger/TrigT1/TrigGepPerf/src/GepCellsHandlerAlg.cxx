@@ -1,13 +1,15 @@
 /*
  *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
-
-#include <vector>
-#include <fstream>
-#include "TMath.h"
-#include "PathResolver/PathResolver.h"
 #include "./GepCellsHandlerAlg.h"
 
+#include "CaloEvent/CaloCell.h"
+#include "CaloIdentifier/CaloCell_ID.h"
+
+#include "TMath.h"
+#include "PathResolver/PathResolver.h"
+#include <fstream>
+#include <cmath> //std::pow
 
 GepCellsHandlerAlg::GepCellsHandlerAlg( const std::string& name, ISvcLocator* pSvcLocator ) :
 AthReentrantAlgorithm( name, pSvcLocator ){
@@ -132,7 +134,7 @@ StatusCode GepCellsHandlerAlg::execute(const EventContext& ctx) const {
   // Read in a container containing (all) CaloCells
   auto h_caloCells = SG::makeHandle(m_caloCellsKey, ctx);
   CHECK(h_caloCells.isValid());
-  const auto cells = *h_caloCells;
+  const auto & cells = *h_caloCells;
 
   ATH_MSG_DEBUG("Read in " + std::to_string(h_caloCells->size()) + " cells");
 
@@ -156,9 +158,9 @@ StatusCode GepCellsHandlerAlg::execute(const EventContext& ctx) const {
     auto base_cell_itr = m_gepCellsBase.find(caloCell.id);
     if (base_cell_itr != m_gepCellsBase.end()) caloCell = base_cell_itr->second;
     else {
-	// Tile cells are not included in the cell base map
-	// In the future this might change, for now just setting FEB value to a dummy
-	caloCell.FEB = "Tile";
+      // Tile cells are not included in the cell base map
+      // In the future this might change, for now just setting FEB value to a dummy
+      caloCell.FEB = "Tile";
     }
 
     float electronicNoise = electronicNoiseCDO->getNoise(cell->ID(), cell->gain());
