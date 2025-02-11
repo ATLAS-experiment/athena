@@ -1,20 +1,29 @@
 #!/bin/bash
 set -e
 
-
-source FPGATrackSim_CommonEnv.sh
-
 TEST_LABEL="F600"
+xAODOutput="FPGATrackSim_${TEST_LABEL}_AOD.root"
 
-if [ -z $1 ]; then
-    xAODOutput="FPGATrackSim_${TEST_LABEL}_AOD.root"
-else # this is useful when using the same script for ART
-    xAODOutput=$1
-fi
+FWRD_ARGS=()
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -o|--output)
+            xAODOutput="$2"
+            shift 2
+            ;;
+        *)
+            # Collect all other arguments to forward
+            FWRD_ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+source FPGATrackSim_CommonEnv.sh "${FWRD_ARGS[@]}"
 
 run_InsideOut(){
     python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
         --evtMax=${RDO_EVT_ANALYSIS} \
+        --skipEvents=${SKIP_EVENTS} \
         --filesInput=${RDO_ANALYSIS} \
         Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
         Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
@@ -22,7 +31,7 @@ run_InsideOut(){
         Trigger.FPGATrackSim.region=0 \
         Trigger.FPGATrackSim.pipeline='F-600' \
         Trigger.FPGATrackSim.tracking=True \
-        Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
+        Trigger.FPGATrackSim.sampleType="${SAMPLE_TYPE}" \
         Trigger.FPGATrackSim.doEDMConversion=True \
         Trigger.FPGATrackSim.doOverlapRemoval=True \
         Trigger.FPGATrackSim.Hough.secondStage=True \

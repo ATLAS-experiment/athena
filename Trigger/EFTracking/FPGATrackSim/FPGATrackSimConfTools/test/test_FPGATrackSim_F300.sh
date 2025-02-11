@@ -48,7 +48,7 @@ run () {
 
 
 run "${PREFIX} pipeline" \
-    FPGATrackSim_F300.sh $INPUT_AOD_FILE
+    FPGATrackSim_F300.sh -o $INPUT_AOD_FILE -m
 
 run "IDTPM" \
     runIDTPM.py --inputFileNames=$INPUT_AOD_FILE \
@@ -56,15 +56,19 @@ run "IDTPM" \
                 --writeAOD_IDTPM \
                 --trkAnaCfgFile=$IDTPM_CONFIG
 
+if [ -z $ArtJobType ]; then
+    echo "Not in ART environment. Stopping here..."
+    echo "IDTPM output: IDTPM.${PREFIX}.HIST.root"
+else
+    art.py download --user=artprod --dst=last_results "$ArtPackage" "$ArtJobName"
 
-art.py download --user=artprod --dst=last_results "$ArtPackage" "$ArtJobName"
-
-run "dcube-${PREFIX}-latest" \
-    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-        -p -x dcube_last \
-        --plotopts=ratio \
-        -c ${DCUBE_CONFIG} \
-        -M "${PREFIX}" \
-        -R "${PREFIX}-previous" \
-        -r ${lastref_dir}/IDTPM.${PREFIX}.HIST.root \
-        IDTPM.${PREFIX}.HIST.root
+    run "dcube-${PREFIX}-latest" \
+        $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+            -p -x dcube_last \
+            --plotopts=ratio \
+            -c ${DCUBE_CONFIG} \
+            -M "${PREFIX}" \
+            -R "${PREFIX}-previous" \
+            -r ${lastref_dir}/IDTPM.${PREFIX}.HIST.root \
+            IDTPM.${PREFIX}.HIST.root
+fi    
