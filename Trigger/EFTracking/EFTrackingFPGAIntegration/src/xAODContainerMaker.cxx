@@ -160,11 +160,10 @@ StatusCode xAODContainerMaker::makePixelClusterContainer(
 
 StatusCode xAODContainerMaker::makePixelSpacePointContainer(
     const EFTrackingDataFormats::SpacePointAuxInput &psAux,
-    const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>&
-        pixelsp_meas,
+    const xAOD::PixelClusterContainer &pcluster,
     const EFTrackingDataFormats::Metadata *metadata,
     const EventContext &ctx) const {
-  ATH_MSG_DEBUG("Making xAOD::SpacePointContainer");
+  ATH_MSG_DEBUG("Making xAOD::SpacePointContainer from FTrackingDataFormats::SpacePointAuxInput");
 
   SG::WriteHandle<xAOD::SpacePointContainer> pixelSpacePointsHandle{
       m_pixelSpacePointsKey, ctx};
@@ -180,29 +179,30 @@ StatusCode xAODContainerMaker::makePixelSpacePointContainer(
     // Puch back numPixelSpacePoints of SpacePoint
     auto pxsp =
         pixelSpacePointsHandle->push_back(std::make_unique<xAOD::SpacePoint>());
+
+    // Global position     
     Eigen::Matrix<float, 3, 1> globalPosition(
         psAux.globalPosition.at(i * 3), psAux.globalPosition.at(i * 3 + 1),
         psAux.globalPosition.at(i * 3 + 2));
 
-    std::vector<const xAOD::UncalibratedMeasurement *> pixel_meas(
-        pixelsp_meas.at(i).size());
-    std::copy(pixelsp_meas.at(i).begin(), pixelsp_meas.at(i).end(),
-              pixel_meas.begin());
+    const int meas_idx = psAux.measurementIndexes.at(i);
+
+    // measurement list    
+    std::vector<const xAOD::UncalibratedMeasurement* > measurementLinks( {pcluster.at(meas_idx)});
 
     pxsp->setSpacePoint(psAux.elementIdList.at(i), globalPosition,
                         psAux.varianceR.at(i), psAux.varianceZ.at(i),
-                        pixel_meas);
+                        measurementLinks);
   }
   return StatusCode::SUCCESS;
 }
 
 StatusCode xAODContainerMaker::makeStripSpacePointContainer(
     const EFTrackingDataFormats::SpacePointAuxInput &sspAux,
-    const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>&
-        stripsp_meas,
+    const xAOD::StripClusterContainer& scluster,
     const EFTrackingDataFormats::Metadata *metadata,
     const EventContext &ctx) const {
-  ATH_MSG_DEBUG("Making xAOD::SpacePointContainer");
+  ATH_MSG_DEBUG("Making xAOD::SpacePointContainer  from FTrackingDataFormats::SpacePointAuxInput");
 
   SG::WriteHandle<xAOD::SpacePointContainer> stripSpacePointsHandle{
       m_stripSpacePointsKey, ctx};
@@ -223,10 +223,14 @@ StatusCode xAODContainerMaker::makeStripSpacePointContainer(
         sspAux.globalPosition.at(i * 3), sspAux.globalPosition.at(i * 3 + 1),
         sspAux.globalPosition.at(i * 3 + 2));
 
-    std::vector<const xAOD::UncalibratedMeasurement *> strip_meas(
-        stripsp_meas.at(i).size());
-    std::copy(stripsp_meas.at(i).begin(), stripsp_meas.at(i).end(),
-              strip_meas.begin());
+    std::vector<const xAOD::UncalibratedMeasurement *> strip_meas;
+
+    const int meas_idx1 = sspAux.measurementIndexes.at(i * 2 );
+    const int meas_idx2 = sspAux.measurementIndexes.at(i * 2 + 1);
+
+    //Get measurements
+    strip_meas.push_back(scluster.at(meas_idx1));
+    strip_meas.push_back(scluster.at(meas_idx2));
 
     float topHalfStripLength = sspAux.topHalfStripLength.at(i);
     float bottomHalfStripLength = sspAux.bottomHalfStripLength.at(i);

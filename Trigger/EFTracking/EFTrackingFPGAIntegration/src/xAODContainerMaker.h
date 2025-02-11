@@ -53,8 +53,7 @@ public:
      */
     StatusCode makePixelSpacePointContainer(
         const EFTrackingDataFormats::SpacePointAuxInput &psAux,
-        const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>&
-            pixelsp_meas,
+        const xAOD::PixelClusterContainer& pcluster,
         const EFTrackingDataFormats::Metadata *metadata,
         const EventContext &ctx) const;
 
@@ -64,8 +63,7 @@ public:
      */
     StatusCode makeStripSpacePointContainer(
         const EFTrackingDataFormats::SpacePointAuxInput &sspAux,
-        const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>&
-            stripsp_meas,
+        const xAOD::StripClusterContainer& scluster,
         const EFTrackingDataFormats::Metadata *metadata,
         const EventContext &ctx) const;
 
