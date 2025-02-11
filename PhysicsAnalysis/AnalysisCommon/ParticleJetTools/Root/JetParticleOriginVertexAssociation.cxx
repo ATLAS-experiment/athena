@@ -21,6 +21,11 @@ JetParticleOriginVertexAssociation::JetParticleOriginVertexAssociation(const str
     }
 
 const vector<vector<ElementLink<IParticleContainer> > >*
+JetParticleOriginVertexAssociation::match(const JetContainer& jets, const IParticleContainer& parts) const {
+  std::cerr << "testing .\n";
+  return {};
+}
+const vector<vector<ElementLink<IParticleContainer> > >*
 JetParticleOriginVertexAssociation::match(SG::ReadDecorHandleKey<IParticleContainer> trk_origin_vtx, const JetContainer& jets, const IParticleContainer& parts) const {
 
     //Get the vertex associated to each track by reading the decoration

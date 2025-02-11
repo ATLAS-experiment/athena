@@ -31,26 +31,12 @@ class JetParticleAssociation : public asg::AsgTool,
         virtual StatusCode decorate(const xAOD::JetContainer& jets) const override;
 
         // obvs to be provided by the deriving class
-        
-        virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
-            match(const xAOD::JetContainer&, const xAOD::IParticleContainer&) const{
-                std::cerr << "2-argument match() not implemented in this class.\n";
-                return {};
-            }
-
-        virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
-            match(SG::ReadDecorHandleKey<xAOD::IParticleContainer>, const xAOD::JetContainer&, const xAOD::IParticleContainer&) const{
-                std::cerr << "3-argument match() not implemented in this class.\n";
-                return {};
-            }
-        
-        /*
         virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
             match(const xAOD::JetContainer&, const xAOD::IParticleContainer&) const = 0;
         // Mario: adding this overload because we have an extra argument
         virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
             match(SG::ReadDecorHandleKey<xAOD::IParticleContainer>, const xAOD::JetContainer&, const xAOD::IParticleContainer&) const = 0;
-        */
+        
     private:
 
         // note

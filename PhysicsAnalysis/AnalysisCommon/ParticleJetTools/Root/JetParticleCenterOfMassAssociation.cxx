@@ -21,6 +21,11 @@ JetParticleCenterOfMassAssociation::JetParticleCenterOfMassAssociation(const str
         return;
     }
 
+const vector<vector<ElementLink<IParticleContainer> > >*
+JetParticleCenterOfMassAssociation::match(SG::ReadDecorHandleKey<xAOD::IParticleContainer>, const JetContainer& jets, const IParticleContainer& parts) const {
+  std::cerr << "testing .\n";
+  return {};
+}
 
 const vector<vector<ElementLink<IParticleContainer> > >*
 JetParticleCenterOfMassAssociation::match(const JetContainer& jets, const xAOD::IParticleContainer& parts) const {
