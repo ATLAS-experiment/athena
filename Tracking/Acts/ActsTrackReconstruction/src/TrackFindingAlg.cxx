@@ -29,6 +29,7 @@
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
 #include "Acts/TrackFitting/MbfSmoother.hpp"
+#include "Acts/TrackFinding/TrackStateCreator.hpp"
 
 // ActsTrk
 #include "ActsEvent/TrackContainer.h"
@@ -245,7 +246,6 @@ namespace ActsTrk
     m_trackFinder = std::make_unique<CKF_pimpl>(std::move(ckfConfig));
 
     trackFinder().ckfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<detail::RecoTrackStateContainer>>();
-    trackFinder().ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<detail::RecoTrackStateContainer>>(&trackFinder().measurementSelector);
     initStatTables();
 
     return StatusCode::SUCCESS;
@@ -420,42 +420,69 @@ namespace ActsTrk
     Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
     using AtlUncalibSourceLinkAccessor = detail::UncalibSourceLinkAccessor;
+    using DefaultTrackStateCreator = Acts::TrackStateCreator<ActsTrk::detail::UncalibSourceLinkAccessor::Iterator,detail::RecoTrackContainer>;
 
     AtlUncalibSourceLinkAccessor slAccessor(measurements.measurementRanges());
-    Acts::SourceLinkAccessorDelegate<detail::UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
+    DefaultTrackStateCreator::SourceLinkAccessor slAccessorDelegate;
     slAccessorDelegate.connect<&detail::UncalibSourceLinkAccessor::range>(&slAccessor);
 
     Acts::PropagatorPlainOptions plainOptions{tgContext, mfContext};
     Acts::PropagatorPlainOptions plainSecondOptions{tgContext, mfContext};
 
     plainOptions.maxSteps = m_maxPropagationStep;
-    plainOptions.direction = Acts::Direction::Forward;
+    plainOptions.direction = Acts::Direction::Forward();
     plainSecondOptions.maxSteps = m_maxPropagationStep;
     plainSecondOptions.direction = plainOptions.direction.invert();
 
     // Set the CombinatorialKalmanFilter options
-    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<detail::UncalibSourceLinkAccessor::Iterator, detail::RecoTrackContainer>;
+    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
     TrackFinderOptions options(tgContext,
                                mfContext,
                                calContext,
-                               slAccessorDelegate,
                                trackFinder().ckfExtensions,
                                plainOptions,
                                pSurface.get());
-    if (!m_useDefaultMeasurementSelector.value()) {
-       m_measurementSelector->connect( &options.trackStateCandidateCreator );
+
+    DefaultTrackStateCreator defaultTrackStateCreator;
+    // Measurement calibration
+    // N.B. OnTrackCalibrator expects disabled tool handles when no calibration is requested.
+    // Therefore, passing them without checking if they are enabled is safe.
+
+    auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(trackingGeometry,
+                                                                                 detectorElementToGeoId,
+                                                                                 m_pixelCalibTool,
+                                                                                 m_stripCalibTool,
+                                                                                 m_hgtdCalibTool);
+
+    std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector;
+    if (m_useDefaultMeasurementSelector.value()) {
+       defaultTrackStateCreator = DefaultTrackStateCreator {};
+       defaultTrackStateCreator.sourceLinkAccessor = slAccessorDelegate;
+       defaultTrackStateCreator.calibrator.template connect< &detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
+       defaultTrackStateCreator.measurementSelector.template connect<&Acts::MeasurementSelector::select<detail::RecoTrackContainer>>(&trackFinder().measurementSelector);
+       // for default measurement selector need connect calibrator
+
+       options.extensions.createTrackStates.template connect<
+          &DefaultTrackStateCreator
+            ::createTrackStates>(&defaultTrackStateCreator);
     }
+    else {
+       measurementSelector = ActsTrk::detail::getMeasurementSelector(m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
+                                                                     measurements.measurementRanges(),
+                                                                     m_measurementSelectorConfig.m_etaBins,
+                                                                     m_measurementSelectorConfig.m_chi2CutOffOutlier,
+                                                                     m_numMeasurementsCutOff.value());
+
+       measurementSelector->connect( &options.extensions.createTrackStates );
+    }
+
     TrackFinderOptions secondOptions(tgContext,
                                      mfContext,
                                      calContext,
-                                     slAccessorDelegate,
-                                     trackFinder().ckfExtensions,
+                                     options.extensions,
                                      plainSecondOptions,
                                      pSurface.get());
     secondOptions.targetSurface = pSurface.get();
-    if (!m_useDefaultMeasurementSelector.value()) {
-        m_measurementSelector->connect( &secondOptions.trackStateCandidateCreator );
-    }
     secondOptions.skipPrePropagationUpdate = true;
 
     // ActsTrk::MutableTrackContainer tracksContainerTemp;
@@ -465,22 +492,6 @@ namespace ActsTrk
 
     if (m_addPixelStripCounts) {
       addPixelStripCounts(tracksContainerTemp);
-    }
-
-    // Measurement calibration
-    // N.B. OnTrackCalibrator expects disabled tool handles when no calibration is requested.
-    // Therefore, passing them without checking if they are enabled is safe.
-
-    auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(trackingGeometry,
-                                                                         	 detectorElementToGeoId,
-                                                                         	 m_pixelCalibTool,
-                                                                         	 m_stripCalibTool,
-                                                                         	 m_hgtdCalibTool);
-
-    if (m_useDefaultMeasurementSelector.value()) {
-      // for default measurement selector need connect calibrator
-      options.extensions.calibrator.connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
-      secondOptions.extensions.calibrator.connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
     }
 
     const auto &trackSelectorCfg = trackFinder().trackSelector.config();
@@ -626,7 +637,7 @@ namespace ActsTrk
         if (!m_trackStatePrinter.isSet()) continue;  // delay continue to estimate track parms for TrackStatePrinter?
       }
 
-      plainOptions.direction = reverseSearch ? Acts::Direction::Backward : Acts::Direction::Forward;
+      plainOptions.direction = reverseSearch ? Acts::Direction::Backward() : Acts::Direction::Forward();
       plainSecondOptions.direction = plainOptions.direction.invert();
       options.targetSurface = reverseSearch ? pSurface.get() : nullptr;
       secondOptions.targetSurface = reverseSearch ? nullptr : pSurface.get();
@@ -742,7 +753,7 @@ namespace ActsTrk
            }
         }
 
-        Acts::trimTrack(track, true, true, true);
+        Acts::trimTrack(track, true, true, true, true);
         Acts::calculateTrackQuantities(track);
         if (m_addPixelStripCounts) {
           initPixelStripCounts(track);
@@ -1279,7 +1290,7 @@ namespace ActsTrk
 
 
   StatusCode TrackFindingAlg::initializeMeasurementSelector() {
-    std::vector<std::pair<float, float> > chi2CutOffOutlier ;
+    std::vector<std::pair<float, float> > &chi2CutOffOutlier = m_measurementSelectorConfig.m_chi2CutOffOutlier;
     chi2CutOffOutlier .reserve( m_chi2CutOff.size() );
     if (!m_chi2OutlierCutOff.empty()) {
        if (m_chi2CutOff.size() !=  m_chi2OutlierCutOff.size()) {
@@ -1297,17 +1308,12 @@ namespace ActsTrk
                                                    : std::numeric_limits<float>::max()) );
        ++idx;
     }
-    std::vector<float> etaBinsf;
+    std::vector<float> &etaBinsf = m_measurementSelectorConfig.m_etaBins;
     if (m_etaBins.size() > 2) {
       etaBinsf.assign(m_etaBins.begin() + 1, m_etaBins.end() - 1);
     }
 
-    m_measurementSelector = ActsTrk::detail::getMeasurementSelector(m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
-								    etaBinsf,
-								    chi2CutOffOutlier,
-								    m_numMeasurementsCutOff.value());
-
-    return m_measurementSelector ? StatusCode::SUCCESS : StatusCode::FAILURE;
+    return /*m_measurementSelector ?*/ StatusCode::SUCCESS /*: StatusCode::FAILURE*/;
   }
 
 } // namespace

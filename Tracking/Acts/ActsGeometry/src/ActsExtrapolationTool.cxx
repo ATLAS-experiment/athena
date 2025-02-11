@@ -122,7 +122,7 @@ ActsExtrapolationTool::initialize()
 ActsPropagationOutput
 ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
                                         const Acts::BoundTrackParameters& startParameters,
-                                        Acts::Direction navDir /*= Acts::Direction::Forward*/,
+                                        Acts::Direction navDir /*= Acts::Direction::Forward()*/,
                                         double pathLimit /*= std::numeric_limits<double>::max()*/) const
 {
 
@@ -182,7 +182,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
 std::optional<const Acts::CurvilinearTrackParameters>
 ActsExtrapolationTool::propagate(const EventContext& ctx,
                                  const Acts::BoundTrackParameters& startParameters,
-                                 Acts::Direction navDir /*= Acts::Direction::Forward*/,
+                                 Acts::Direction navDir /*= Acts::Direction::Forward()*/,
                                  double pathLimit /*= std::numeric_limits<double>::max()*/) const
 {
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
@@ -219,7 +219,7 @@ ActsPropagationOutput
 ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
                                         const Acts::BoundTrackParameters& startParameters,
                                         const Acts::Surface& target,
-                                        Acts::Direction navDir /*= Acts::Direction::Forward*/,
+                                        Acts::Direction navDir /*= Acts::Direction::Forward()*/,
                                         double pathLimit /*= std::numeric_limits<double>::max()*/) const
 {
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
@@ -276,7 +276,7 @@ std::optional<const Acts::BoundTrackParameters>
 ActsExtrapolationTool::propagate(const EventContext& ctx,
                                  const Acts::BoundTrackParameters& startParameters,
                                  const Acts::Surface& target,
-                                 Acts::Direction navDir /*= Acts::Direction::Forward*/,
+                                 Acts::Direction navDir /*= Acts::Direction::Forward()*/,
                                  double pathLimit /*= std::numeric_limits<double>::max()*/) const
 {
   

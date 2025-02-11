@@ -258,7 +258,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   // Set the Gx2Fitter options
   Acts::Experimental::Gx2FitterOptions gx2fOptions(
       tgContext, mfContext, calContext, gx2fExtensions, propagationOption,
-      &(*pSurface));
+      &(*pSurface), true, true);
 
   std::vector<Acts::SourceLink> trackSourceLinks =
       m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, inputTrack);
@@ -333,7 +333,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   // Set the Gx2Fitter options
   Acts::Experimental::Gx2FitterOptions gx2fOptions(
       tgContext, mfContext, calContext, gx2fExtensions, propagationOption,
-      &(*pSurface));
+      &(*pSurface), true, true);
 
   std::vector<Acts::SourceLink> trackSourceLinks;
   trackSourceLinks.reserve(inputMeasSet.size());
@@ -407,7 +407,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   // Set the Gx2Fitter options
   Acts::Experimental::Gx2FitterOptions gx2fOptions(
       tgContext, mfContext, calContext, gx2fExtensions, propagationOption,
-      &(*pSurface));
+      &(*pSurface), true, true);
 
   std::vector<Acts::SourceLink> trackSourceLinks;
   trackSourceLinks.reserve(inputPRDColl.size());
@@ -512,7 +512,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   // Set the Gx2Fitter options
   Acts::Experimental::Gx2FitterOptions gx2fOptions(
       tgContext, mfContext, calContext, gx2fExtensions, propagationOption,
-      &(*pSurface));
+      &(*pSurface), true, true);
 
   std::vector<Acts::SourceLink> trackSourceLinks =
       m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, inputTrack);
@@ -607,7 +607,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   // Set the Gx2Fitter options
   Acts::Experimental::Gx2FitterOptions gx2fOptions(
       tgContext, mfContext, calContext, gx2fExtensions, propagationOption,
-      &(*pSurface));
+      &(*pSurface), true, true);
 
   std::vector<Acts::SourceLink> trackSourceLinks =
       m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk1);

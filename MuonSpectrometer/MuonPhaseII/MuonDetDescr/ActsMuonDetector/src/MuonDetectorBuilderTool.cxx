@@ -42,6 +42,7 @@
 #include <GeoModelKernel/GeoTrd.h>
 #include "GeoModelHelpers/getChildNodesWithTrf.h"
 #include "ActsGeometryInterfaces/GeometryDefs.h"
+#include <Acts/Utilities/AxisDefinitions.hpp>
 #include <set>
 #include <climits>
 #include <format>
@@ -226,11 +227,11 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>>
                 auto mdtBounds = std::make_unique<Acts::TrapezoidVolumeBounds>(parameters.shortHalfX, parameters.longHalfX, parameters.halfY, parameters.halfHeight);
                 using BoundsV = Acts::TrapezoidVolumeBounds::BoundValues;
                 mlCfg.mlBounds= mdtBounds->values();
-                mlCfg.mlBinning = {Acts::Experimental::ProtoBinning(Acts::BinningValue::binY, Acts::AxisBoundaryType::Bound,                   
+                mlCfg.mlBinning = {Acts::Experimental::ProtoBinning(Acts::AxisDirection::AxisY, Acts::AxisBoundaryType::Bound,                   
                                                                     -mdtBounds->get(BoundsV::eHalfLengthXnegY), 
                                                                      mdtBounds->get(BoundsV::eHalfLengthXposY), 
                                                                      std::lround(2*mdtBounds->get(BoundsV::eHalfLengthXposY)/parameters.tubePitch), 0u), 
-                                    Acts::Experimental::ProtoBinning(Acts::BinningValue::binZ, Acts::AxisBoundaryType::Bound,                   
+                                    Acts::Experimental::ProtoBinning(Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound,                   
                                                                     -mdtBounds->get(BoundsV::eHalfLengthY), 
                                                                      mdtBounds->get(BoundsV::eHalfLengthY), 
                                                                      std::lround(2*mdtBounds->get(BoundsV::eHalfLengthY)/parameters.tubePitch), 0u)};

@@ -17,7 +17,7 @@ namespace ActsTrk::detail {
                                                    double pathLimit) {
       ActsPropagationOutput result = extrapolator.propagationSteps(ctx,
                                                                    perigee_parameters,
-                                                                   Acts::Direction::Forward,
+                                                                   Acts::Direction::Forward(),
                                                                    pathLimit);
       std::array<unsigned int,4> expected_layer_pattern {0u,0u,0u,0u};
       for (const Acts::detail::Step &step : result.first ) {
