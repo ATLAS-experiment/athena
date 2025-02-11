@@ -76,18 +76,6 @@ StatusCode GfexSimMonitorAlgorithm::initialize() {
 	// TOBs may come from trigger bytestream - renounce from scheduler
 
 
-	renounce ( m_data_gFexRho );
-	renounce ( m_data_gFexBlock );
-	renounce ( m_data_gFexJet );
-	renounce ( m_data_gScalarEJwoj );
-	renounce ( m_data_gMETComponentsJwoj );
-	renounce ( m_data_gMHTComponentsJwoj );
-	renounce ( m_data_gMSTComponentsJwoj );
-	renounce ( m_data_gMETComponentsNoiseCut );
-	renounce ( m_data_gMETComponentsRms );
-	renounce ( m_data_gScalarENoiseCut );
-	renounce ( m_data_gScalarERms );
-
 
 	return AthMonitorAlgorithm::initialize();
 }
