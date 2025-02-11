@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -45,13 +45,7 @@
 #include <fstream>
 
 FixLArElecSCCalib::FixLArElecSCCalib(const std::string& name, ISvcLocator* pSvcLocator) : 
-  AthAlgorithm(name,pSvcLocator),
-  m_sem_idhelper(nullptr),
-  m_shec_idhelper(nullptr),
-  m_sfcal_idhelper(nullptr),
-  m_sonline_idhelper(nullptr),
-  m_scell_idhelper(nullptr)
-{ 
+  AthAlgorithm(name,pSvcLocator){ 
 
 }
 
@@ -350,33 +344,34 @@ StatusCode FixLArElecSCCalib::fix3(const LArOnOffIdMapping *cabling, const LArMC
    auto spec = new coral::AttributeListSpecification();
    spec->extend("MinBias", "blob");
    spec->extend<unsigned>("version");
-   CondAttrListCollection* coll=new CondAttrListCollection(true);
+   auto coll=std::make_unique<CondAttrListCollection>(true);
 
    unsigned hashMax=m_sonline_idhelper->channelHashMax();
-   coral::AttributeList* attrList = new coral::AttributeList(*spec);               
-   (*attrList)["version"].setValue(0U);                               
-   coral::Blob& blob=(*attrList)["MinBias"].data<coral::Blob>();
+   coral::AttributeList attrList = coral::AttributeList(*spec);               
+   attrList["version"].setValue(0U);                               
+   coral::Blob& blob = attrList["MinBias"].data<coral::Blob>();
    blob.resize(hashMax*sizeof(float));
    float* pblob=static_cast<float*>(blob.startingAddress());
 
    std::unique_ptr<TFile> fin= std::make_unique<TFile>(m_infile.value().c_str());
    TTree *tin=dynamic_cast<TTree*>(fin->Get("m_tree"));
-   int           ncell;
-   int           identifier[2862];   
-   int           layer[2862];   
-   int           region[2862]; 
-   int           ieta[2862];   
-   float         eta[2862];   
-   double        average[2862];   
-   double        rms[2862];   
-   TBranch        *b_ncell;   //!
-   TBranch        *b_identifier;   //!
-   TBranch        *b_layer;   //!
-   TBranch        *b_region;   //!
-   TBranch        *b_ieta;   //!
-   TBranch        *b_eta;   //!
-   TBranch        *b_average;   //!
-   TBranch        *b_rms;   //!
+   if (not tin) return StatusCode::FAILURE;
+   int           ncell{};
+   int *         identifier = new int[2862];   
+   int *         layer = new int[2862];   
+   int *         region = new int[2862]; 
+   int *         ieta = new int[2862];   
+   float *       eta = new float[2862];   
+   double *      average = new double[2862];   
+   double *      rms = new double[2862];   
+   TBranch        *b_ncell{};   //!
+   TBranch        *b_identifier{};   //!
+   TBranch        *b_layer{};   //!
+   TBranch        *b_region{};   //!
+   TBranch        *b_ieta{};   //!
+   TBranch        *b_eta{};   //!
+   TBranch        *b_average{};   //!
+   TBranch        *b_rms{};   //!
    tin->SetMakeClass(1);
    tin->SetBranchAddress("ncell", &ncell, &b_ncell);
    tin->SetBranchAddress("identifier", identifier, &b_identifier);
@@ -406,10 +401,10 @@ StatusCode FixLArElecSCCalib::fix3(const LArOnOffIdMapping *cabling, const LArMC
       pblob[onlHash] = vmap[idsym];
    }
 
-   coll->add(0,*attrList);
-  
-   ATH_CHECK(detStore()->record(coll,"/LAR/ElecCalibMCSC/MinBias"));
-   ATH_MSG_DEBUG("Stored coll with size "<<coll->size()<<" into /LAR/ElecCalibMCSC/MinBias");
+   coll->add(0,attrList);
+   auto sz = coll->size();
+   ATH_CHECK(detStore()->record(std::move(coll),"/LAR/ElecCalibMCSC/MinBias"));
+   ATH_MSG_DEBUG("Stored coll with size "<<sz<<" into /LAR/ElecCalibMCSC/MinBias");
 
      return StatusCode::SUCCESS;
 }
