@@ -14,9 +14,10 @@ atlas_add_library( TrigInDetPattRecoToolsLib
 # Component(s) in the package:
 atlas_add_component( TrigInDetPattRecoToolsComp
                      src/TrigInDetTrackSeedingTool.cxx
+                     src/Gbts2ActsSeedingTool.cxx
 		     src/GNN_*.cxx
                      src/components/*.cxx
-		     LINK_LIBRARIES AthenaBaseComps AtlasDetDescr GaudiKernel PathResolver InDetIdentifier InDetPrepRawData MagFieldConditions MagFieldElements StoreGateLib InDetReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry TrigInDetEvent TrigInDetPattRecoEvent TrigInDetToolInterfacesLib TrkEventPrimitives TrkParameters TrkPrepRawData TrkRIO_OnTrack TrkSurfaces TrkToolInterfaces TrkTrack IRegionSelector BeamSpotConditionsData )
+		     LINK_LIBRARIES AthenaBaseComps AtlasDetDescr GaudiKernel PathResolver InDetIdentifier InDetPrepRawData MagFieldConditions MagFieldElements StoreGateLib InDetReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry TrigInDetEvent TrigInDetPattRecoEvent TrigInDetToolInterfacesLib TrkEventPrimitives TrkParameters TrkPrepRawData TrkRIO_OnTrack TrkSurfaces TrkToolInterfaces TrkTrack IRegionSelector BeamSpotConditionsData ActsToolInterfacesLib )
 
 atlas_add_test( mockSeeds
                 SOURCES test/mockSeeds.cxx

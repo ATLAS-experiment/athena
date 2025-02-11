@@ -57,6 +57,10 @@ StatusCode SeedingToolBase<externalSP>::initialize() {
   
   ATH_MSG_INFO("SeedingToolBase initialized ");
 
+  ATH_MSG_DEBUG("Property useML "<< m_useML);
+  ATH_MSG_DEBUG("Property DoPhiFiltering "<<m_filter_phi);
+  ATH_MSG_DEBUG("Property pTmin"<<m_minPt);
+
   return StatusCode::SUCCESS;
 }
 

@@ -39,7 +39,6 @@ void TrigFTF_GNN_EtaBin<externalSP>::sortByPhi() {
   int nBuckets = 31;
 
   for(const auto& n : m_vn) {
-
     int bIdx = (int)(0.5*nBuckets*(n->phi()/(float)M_PI + 1.0f));
     phiBuckets[bIdx].push_back(std::make_pair(n->phi(), n));
   }
