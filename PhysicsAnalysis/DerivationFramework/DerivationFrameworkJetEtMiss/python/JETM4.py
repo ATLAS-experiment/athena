@@ -191,6 +191,13 @@ def JETM4Cfg(flags):
     JETM4SlimmingHelper.ExtraVariables += [".".join(["GlobalChargedParticleFlowObjects"] + FlowElementVariables)]
     JETM4SlimmingHelper.ExtraVariables += [".".join(["GlobalNeutralParticleFlowObjects"] + FlowElementVariables)]
 
+    # Large-Radius jet regression extra content
+    extraListReg = []
+    modelName = "bJR10v00"
+    for score in ["mass", "pt"]:
+        extraListReg.append(f"{modelName}_{score}")
+    JETM4SlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraListReg)]
+
     # Truth containers
     if flags.Input.isMC:
 
