@@ -54,7 +54,7 @@ StatusCode SimTimeEstimate::execute()
         } // Loop over particles in the event
         
         //Report characterisitics of each event  
-        ATH_MSG_INFO("==> EVENT INFORMATION | event number: " << m_total_Events << "| event energy: " << m_eventEnergy); // << " | m_particleNumber: " << m_particleNumber << " | m_particleIDs: " << m_particleIDs << " | etas: " << m_particleEtas << " | energies: " << m_particleEnergies);
+        ATH_MSG_VERBOSE("==> EVENT INFORMATION | event number: " << m_total_Events << "| event energy: " << m_eventEnergy); // << " | m_particleNumber: " << m_particleNumber << " | m_particleIDs: " << m_particleIDs << " | etas: " << m_particleEtas << " | energies: " << m_particleEnergies);
     } // Loop over events in the event collection
     // One more event done!
     m_total_Events++;
