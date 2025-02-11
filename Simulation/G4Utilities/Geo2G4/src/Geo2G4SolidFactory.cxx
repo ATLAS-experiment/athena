@@ -149,7 +149,7 @@ Geo2G4SolidFactory::Geo2G4SolidFactory() :
 {
 }
 
-G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoShape, std::string name)
+G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoShape, const std::string & name)
 {
   G4VSolid* theSolid(nullptr);
 
@@ -161,8 +161,7 @@ G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoSh
   // ------- Variables for boolean operations
   G4VSolid* solidA(nullptr);
   G4VSolid* solidB(nullptr);
-
-  std::string n = std::move(name);
+  auto n = name;
 
   //
   // The Box
@@ -248,7 +247,7 @@ G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoSh
     {
       const GeoPcon* thePcon = dynamic_cast<const GeoPcon*>(geoShape);
       if (nullptr==thePcon) throw std::runtime_error("TypeID did not match cast for pcon");
-      theSolid = new G4Polycone(n.empty()?"G4Polycone":n,
+      theSolid = new G4Polycone(n.empty()?"G4Polycone":std::move(n),
                                 thePcon->getSPhi(),
                                 thePcon->getDPhi(),
                                 thePcon->getNPlanes(),
@@ -317,7 +316,7 @@ G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoSh
 	rOuter[index] = thePgon->getRMaxPlane(index)*cos(alpha);
       }
 
-      theSolid = new G4Polyhedra(n.empty()?"G4Polyhedra":n,
+      theSolid = new G4Polyhedra(n.empty()?"G4Polyhedra":std::move(n),
                                  thePgon->getSPhi(),
                                  thePgon->getDPhi(),
                                  thePgon->getNSides(),
