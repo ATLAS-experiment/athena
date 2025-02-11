@@ -70,4 +70,8 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.SCTxAODPrescale", 
                 lambda prevFlags: 50 if prevFlags.Input.TriggerStream == 'express' else (10 if prevFlags.Input.TriggerStream == 'IDprescaledL1' else 1))
 
+    # SCT skimming flags
+    icf.addFlag("InDet.SCTxAODZmumuSkimming", False)
+    icf.addFlag("InDet.SCTxAODSaveOnlyAssociatedMSOS", False)
+
     return icf

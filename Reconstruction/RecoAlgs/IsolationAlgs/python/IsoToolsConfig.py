@@ -29,6 +29,31 @@ def TrackIsolationToolCfg(flags, **kwargs):
     acc.setPrivateTools(CompFactory.xAOD.TrackIsolationTool(**kwargs))
     return acc
 
+def CaloIsolationToolCfg(flags, **kwargs):
+    acc = ComponentAccumulator()
+        
+    if 'IsoLeakCorrectionTool' not in kwargs:
+        kwargs['IsoLeakCorrectionTool'] = CompFactory.CP.IsolationCorrectionTool(
+            name = 'LeakageCorrTool')
+
+    if 'ClustersInConeTool' not in kwargs:
+        kwargs['ClustersInConeTool'] = CompFactory.xAOD.CaloClustersInConeTool(
+            name = 'MyCaloClustersInConeTool',
+            CaloClusterLocation = "CaloCalTopoClusters")
+
+    if 'ParticleCaloExtensionTool' not in kwargs:
+        from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
+        kwargs['ParticleCaloExtensionTool'] = acc.popToolsAndMerge(
+            ParticleCaloExtensionToolCfg(flags))
+
+    kwargs.setdefault('name','CaloIsolationTool')
+    kwargs.setdefault('ParticleCaloExtensionTool',None)
+    kwargs.setdefault('ParticleCaloCellAssociationTool',None)
+    kwargs.setdefault('isMC',flags.Input.isMC)
+        
+    acc.setPrivateTools(CompFactory.xAOD.CaloIsolationTool(**kwargs))
+    return acc
+
 def ElectronTrackIsolationToolCfg(flags, **kwargs):
     kwargs.setdefault('name','ElectronTrackIsolationTool')
     kwargs.setdefault('CoreTrackEtaRange',0.01)
