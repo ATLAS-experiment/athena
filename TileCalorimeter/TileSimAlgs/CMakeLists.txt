@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileSimAlgs )
@@ -45,5 +45,10 @@ atlas_add_test( TileHitToTTL1Config_test
 
 atlas_add_test( TileDigitizationConfig_test
                 SCRIPT python -m TileSimAlgs.TileDigitizationConfig
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT noerror.sh)
+
+atlas_add_test( RunTilePulseSim_test
+                SCRIPT python -m TileSimAlgs.RunTilePulseSim
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT noerror.sh)
