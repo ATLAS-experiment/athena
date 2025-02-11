@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FIXLARELECSCCALIB_H
@@ -53,11 +53,11 @@ class FixLArElecSCCalib : public AthAlgorithm
   IntegerProperty  m_fixFlag{this, "FixFlag", 1, "which fix to run"} ; 
   StringProperty   m_infile{this, "InputFile", "", "which file to read"}; 
 
-  const LArEM_SuperCell_ID* m_sem_idhelper;
-  const LArHEC_SuperCell_ID* m_shec_idhelper;
-  const LArFCAL_SuperCell_ID* m_sfcal_idhelper;
-  const LArOnline_SuperCellID* m_sonline_idhelper;
-  const CaloCell_SuperCell_ID* m_scell_idhelper;
+  const LArEM_SuperCell_ID* m_sem_idhelper{};
+  const LArHEC_SuperCell_ID* m_shec_idhelper{};
+  const LArFCAL_SuperCell_ID* m_sfcal_idhelper{};
+  const LArOnline_SuperCellID* m_sonline_idhelper{};
+  const CaloCell_SuperCell_ID* m_scell_idhelper{};
 };
 
 #endif // FixLArElecSCCalib
