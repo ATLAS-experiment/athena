@@ -16,6 +16,8 @@ class MuonCalibrationConfig (ConfigBlock):
     def __init__ (self, containerName='') :
         super (MuonCalibrationConfig, self).__init__ ()
         self.setBlockName('Muons')
+        self.addOption ('inputContainer', 'Muons', type=str, 
+            info="select muon input container, by default set to Muons")
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
@@ -58,7 +60,7 @@ class MuonCalibrationConfig (ConfigBlock):
             raise ValueError ("invalid calibMode: \"" + self.calibMode + "\". Allowed values are correctData_CB, correctData_IDMS, notCorrectData_IDMS, notCorrectData_CB")
 
         config.setSourceName (self.containerName,
-                              "AnalysisMuons" if config.isPhyslite() else "Muons",
+                              "AnalysisMuons" if config.isPhyslite() else self.inputContainer,
                               calibMode=calibMode)
 
         # Set up a shallow copy to decorate
@@ -496,3 +498,36 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                     config.addOutputVar (self.containerName, alg.mcEfficiencyDecoration, f"{self.prefixEff}_{trig_short}")
                 if self.saveEffData:
                     config.addOutputVar (self.containerName, alg.dataEfficiencyDecoration, f"{self.prefixEffData}_{trig_short}")
+
+
+class MuonLRTMergedConfig (ConfigBlock) :
+    def __init__ (self, inputMuons = 'Muons', inputLRTMuons = 'MuonsLRT', containerName = 'Muons_LRTMerged', postfix = '') :
+        super (MuonLRTMergedConfig, self).__init__ ()
+        self.addOption (
+            'inputMuons', inputMuons, type=str,
+            noneAction='error',
+            info="the name of the input muon container."
+        )
+        self.addOption (
+            'inputLRTMuons', inputLRTMuons, type=str,
+            noneAction='error',
+            info="the name of the input LRT muon container."
+        )
+        self.addOption (
+            'containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the output container after LRT merging."
+        )
+
+    def makeAlgs (self, config) :
+
+        if config.isPhyslite() :
+            raise(RuntimeError("Muon LRT merging is not available in Physlite mode"))
+
+        alg = config.createAlgorithm( "CP::MuonLRTMergingAlg", "MuonLRTMergingAlg" + self.containerName )
+        alg.PromptMuonLocation = self.inputMuons
+        alg.LRTMuonLocation = self.inputLRTMuons
+        alg.OutputMuonLocation = self.containerName
+        alg.UseRun3WP = config.geometry() >= LHCPeriod.Run3 
+        alg.CreateViewCollection = False
+

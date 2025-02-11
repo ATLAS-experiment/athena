@@ -15,6 +15,7 @@
 #include "xAODMuon/MuonAuxContainer.h"
 #include <AthContainers/ConstDataVector.h>
 #include <AsgTools/AsgToolConfig.h>
+#include "xAODBase/IParticleHelpers.h"
 
 namespace CP{
     MuonLRTMergingAlg::MuonLRTMergingAlg( const std::string& name, ISvcLocator* svcLoc )
@@ -136,6 +137,9 @@ namespace CP{
               ElementLink<xAOD::MuonContainer> myLink;
               myLink.toIndexedElement(muonCol, muon->index());
               originalMuonLink(*newMuon) = myLink;
+              setOriginalObjectLink(*muon, *newMuon);
+              static const SG::AuxElement::Accessor <char> isLRT("isLRT");
+              isLRT(*newMuon) = isLRT(*muon);
               outputCol->push_back(newMuon);
             }
         }
