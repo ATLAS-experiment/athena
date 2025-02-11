@@ -14,6 +14,8 @@ def setupTestOutputCfg(flags,**kwargs):
     from MuonSensitiveDetectorsR4.SensitiveDetectorsCfg import OutputSimContainersCfg
     container_items = ["xAOD::TruthParticleContainer#",
                        "xAOD::TruthParticleAuxContainer#",
+                       "xAOD::TruthEventContainer#",
+                       "xAOD::TruthEventAuxContainer#",
                        "McEventCollection#"] + OutputSimContainersCfg(flags)
 
    

@@ -6,7 +6,7 @@ if __name__=="__main__":
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(outRootFile="MuonBucketDump_R3SimHits.root")
     parser.set_defaults(inputFile=[
-                                   "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R3SimHits.pool.root"
+                                   "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"
                                     ])
     parser.set_defaults(eventPrintoutLevel = 500)
     args = parser.parse_args()
