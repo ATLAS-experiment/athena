@@ -50,7 +50,8 @@ class MetAnalysisConfig (ConfigBlock):
             "of this OR scheme, it should not be used in a regular analysis")
         self.addOption ('saveSignificance', True, type=bool,
             info="whether to save the MET significance (default=True)")
-
+        self.addOption ('useLRT', False, type=bool,
+            info="whether to use LRT MET Core and association map")
 
     def makeAlgs (self, config) :
 
@@ -59,6 +60,8 @@ class MetAnalysisConfig (ConfigBlock):
         else :
             jetContainer = config.originalName (self.jets)
             metSuffix = jetContainer[:-4]
+        if self.useLRT:
+            metSuffix += "_LRT"
 
         if not self.useFJVT and self.treatPUJets:
             raise ValueError ("MET significance pile-up treatment requires fJVT")
