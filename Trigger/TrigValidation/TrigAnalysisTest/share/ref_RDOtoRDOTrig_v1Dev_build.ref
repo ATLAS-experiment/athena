@@ -26433,6 +26433,22 @@ HLT_xe0_nn_L1jXE110:
   stepFeatures:
     0: 5
     1: 5
+HLT_xe0_nn_j0_HT500XX0eta240_pf_ftf_preselcHT450_L1HT190-jJ40s5pETA21:
+  eventCount: 2
+  stepCounts:
+    0: 3
+    1: 2
+  stepFeatures:
+    0: 7
+    1: 11
+HLT_xe0_nn_j0_HT650XX0eta240_pf_ftf_preselcHT450_L1HT190-jJ40s5pETA21:
+  eventCount: 1
+  stepCounts:
+    0: 3
+    1: 1
+  stepFeatures:
+    0: 7
+    1: 7
 HLT_xe0_pfopufit_L1ZeroBias:
   eventCount: 0
 HLT_xe0_pfopufit_L1gXEJWOJ100:
@@ -26467,6 +26483,22 @@ HLT_xe0_pfopufit_L1jXE110:
   stepFeatures:
     0: 5
     1: 5
+HLT_xe0_pfopufit_j0_HT500XX0eta240_pf_ftf_preselcHT450_L1HT190-jJ40s5pETA21:
+  eventCount: 2
+  stepCounts:
+    0: 3
+    1: 2
+  stepFeatures:
+    0: 7
+    1: 11
+HLT_xe0_pfopufit_j0_HT650XX0eta240_pf_ftf_preselcHT450_L1HT190-jJ40s5pETA21:
+  eventCount: 1
+  stepCounts:
+    0: 3
+    1: 1
+  stepFeatures:
+    0: 7
+    1: 7
 HLT_xe0_pfsum_L1ZeroBias:
   eventCount: 0
 HLT_xe0_pfsum_L1gXEJWOJ100:
