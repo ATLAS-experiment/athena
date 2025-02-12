@@ -33,7 +33,9 @@ auto charAccessors = initAccessors<char>(
   "JetFitterSecondaryVertex_isDefaults", "JetFitter_isDefaults", "passPFTrackPresel",
   "muonCaloTag", "tagFakeTrack", "tagIsoTrack", "tagMuonTrack",
   "vsi_isFake", "vsi_isPassMMV", "vsi_trkd0cut", "vsi_twoCircErrcut", "vsi_twoCircRcut", "vsi_fastErrcut", "vsi_fastRcut", "vsi_fitErrcut", "vsi_chi2cut",
-  "overflow");
+  "overflow",
+  "GNTau_VeryLoose", "GNTau_Loose", "GNTau_Medium", "GNTau_Tight"
+  );
 
 auto intAccessors = initAccessors<int>(
   "SctSpBarrel", "SctSpEndcapA", "SctSpEndcapC", "pixClBarrel", "pixClEndcapA", "pixClEndcapC",
@@ -183,6 +185,7 @@ auto floatAccessors = initAccessors<float>(
   "trk_d0","cl_eta2","cl_phi2", "deltaEta1PearDistortion",
   "ClusterEta", "ClusterPhi",
   "d0TJVA", "d0SigTJVA", "z0sinthetaTJVA", "z0sinthetaSigTJVA",
+  "GNTau_Score", "GNTau_ScoreSigTrans", 
   "pixQ2mod"
   );
 

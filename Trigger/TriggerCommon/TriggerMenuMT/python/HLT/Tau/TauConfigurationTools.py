@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 def getPrecisionSequenceTauIDs(precision_sequence: str) -> list[str]:
     '''Get the list of TauIDs for each HLT tau trigger sequence'''
     tau_ids = {
-        'MVA': ['DeepSet', 'MesonCuts'],
+        'MVA': ['GNTau', 'DeepSet', 'MesonCuts'],
         'LLP': ['RNNLLP'],
         'LRT': ['RNNLLP'],
     }
