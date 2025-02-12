@@ -7,6 +7,7 @@ class SeedingStrategy(FlagEnum):
     Default = "Default"
     Orthogonal = "Orthogonal"
     Gbts = "Gbts"
+    Gbts2 = "Gbts2"
 
 class AmbiguitySolverStrategy(FlagEnum):
     Greedy = "GreedySolver"

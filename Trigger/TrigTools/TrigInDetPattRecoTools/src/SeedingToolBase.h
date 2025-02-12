@@ -38,9 +38,9 @@ class SeedingToolBase: public AthAlgTool {
   virtual StatusCode initialize();
   virtual StatusCode finalize();
 
-  std::pair<int, int> buildTheGraph(const IRoiDescriptor&, const std::unique_ptr<TrigFTF_GNN_DataStorage<externalSP>>&, std::vector<TrigFTF_GNN_Edge<externalSP>>&) const;
+  std::pair<int, int> buildTheGraph(const IRoiDescriptor&, const std::unique_ptr<GNN_DataStorage>&, std::vector<GNN_Edge>&) const;
 
-  int runCCA(int, std::vector<TrigFTF_GNN_Edge<externalSP>>&) const;
+  int runCCA(int, std::vector<GNN_Edge>&) const;
   
   ToolHandle<ITrigL2LayerNumberTool> m_layerNumberTool {this, "layerNumberTool", "TrigL2LayerNumberToolITk"};
 
