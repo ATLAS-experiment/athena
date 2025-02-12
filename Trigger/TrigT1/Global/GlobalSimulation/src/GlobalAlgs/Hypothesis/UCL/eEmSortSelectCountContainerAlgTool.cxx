@@ -14,6 +14,7 @@
 #include "AthenaMonitoringKernel/MonitoredCollection.h"
 
 #include <sstream>
+#include <algorithm>
 
 namespace GlobalSim {
 
@@ -236,7 +237,7 @@ namespace GlobalSim {
       std::copy_if(eEmTobs.cbegin(),
 		   eEmTobs.cend(),
 		   std::back_inserter(s_tobs),
-		   selector);
+		   std::move(selector));
       
       selectedTobs.push_back(s_tobs);
       
