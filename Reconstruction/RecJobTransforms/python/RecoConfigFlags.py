@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import HIMode
+from AthenaConfiguration.Enums import ProductionStep
 _all_domains = [
     "Trigger",
     "BeamSpotDecoration",
@@ -76,7 +77,8 @@ def createRecoConfigFlags():
         and prevFlags.Reco.EnableEgamma
         and prevFlags.Reco.EnableCombinedMuon
         and prevFlags.Reco.EnablePFlow
-        and prevFlags.Reco.HIMode is not HIMode.HI))
+        and prevFlags.Reco.HIMode is not HIMode.HI) or
+        prevFlags.Common.ProductionStep is ProductionStep.Derivation)
 
     # Enable Tau Reconstruction
     flags.addFlag("Reco.EnableTau", lambda prevFlags: prevFlags.Reco.EnableJet)

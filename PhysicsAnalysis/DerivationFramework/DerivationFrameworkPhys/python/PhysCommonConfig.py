@@ -89,7 +89,8 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     FTagJetColl = ['AntiKt4EMPFlowJets', 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets']
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         FTagJetColl.append('AntiKt4EMTopoJets')
-    acc.merge(FtagJetCollectionsCfg(flags,FTagJetColl))
+    if flags.Reco.EnableBTagging:
+        acc.merge(FtagJetCollectionsCfg(flags,FTagJetColl))
     acc.merge(METCommonCfg(flags))
 
     # Trigger matching
