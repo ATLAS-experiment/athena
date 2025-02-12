@@ -57,7 +57,7 @@ StatusCode CountHepMC::execute() {
   /// @todo Replace the old event ?
   m_nPass++;
   ATH_MSG_DEBUG("Current count = " << m_nPass);
-  ATH_MSG_INFO("Options for HepMC event number, EvtID event number, EvtID run number = " << m_corHepMC << m_corEvtID << m_corRunNumber );
+  ATH_MSG_DEBUG("Options for HepMC event number, EvtID event number, EvtID run number = " << m_corHepMC << ", " << m_corEvtID << ", " << m_corRunNumber );
   // Fix the event number
   long long int newnum = m_nPass + m_firstEv - 1;
   if (newnum<=0){
