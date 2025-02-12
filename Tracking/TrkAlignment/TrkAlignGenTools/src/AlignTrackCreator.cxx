@@ -4,7 +4,6 @@
 
 
 #include "GaudiKernel/MsgStream.h"
-//#include "GaudiKernel/PropertyMgr.h" deprecated
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "xAODEventInfo/EventInfo.h"
