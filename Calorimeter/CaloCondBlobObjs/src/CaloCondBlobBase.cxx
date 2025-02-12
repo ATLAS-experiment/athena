@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCondBlobObjs/CaloCondBlobBase.h"
 #include "CaloCondBlobObjs/CaloCondType.h"
+#include "CxxUtils/set_unaligned.h"
 #include <algorithm>
 #include <ctime>
 
@@ -121,9 +122,8 @@ CaloCondBlobBase::createBlob(uint16_t objType,
   //==== fill comment fields
   if(commentSizeChar){
     if(!timeStamp) timeStamp = ::time(nullptr);
-    uint64_t* pTimeStamp = reinterpret_cast<uint64_t*>(getBlobStart()+dataSizeByte/sizeof(uint32_t));
-    pTimeStamp[0] = timeStamp;
-    char* pChar = reinterpret_cast<char*>(++pTimeStamp); 
+    uint8_t* pChar = reinterpret_cast<uint8_t*> (getBlobStart()+dataSizeByte/sizeof(uint32_t));
+    CxxUtils::set_unaligned<uint64_t> (pChar, timeStamp);
     std::string::const_iterator iStr = author.begin();
     for(; iStr!=author.end(); ++iStr){ *pChar = *iStr; ++pChar; }
     *pChar = 0; 

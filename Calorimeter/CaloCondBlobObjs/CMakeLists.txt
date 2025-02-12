@@ -12,7 +12,7 @@ atlas_add_library( CaloCondBlobObjs
                    src/*.cxx
                    PUBLIC_HEADERS CaloCondBlobObjs
                    INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${CORAL_LIBRARIES} GaudiKernel
+                   LINK_LIBRARIES ${CORAL_LIBRARIES} GaudiKernel CxxUtils
                    PRIVATE_LINK_LIBRARIES AthenaKernel )
 
 atlas_add_dictionary( CaloCondBlobObjsDict
