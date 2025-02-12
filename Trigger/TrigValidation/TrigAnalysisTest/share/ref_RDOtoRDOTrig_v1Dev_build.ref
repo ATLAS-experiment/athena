@@ -14695,6 +14695,18 @@ HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_boffperf_pf_ftf_presel2c20XX
     1: 36
     2: 105
     3: 37
+HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_boffperf_pf_ftf_presel2c20XX2c20bgtwo85_L1jJ85p0ETA21_3jJ40p0ETA25:
+  eventCount: 5
+  stepCounts:
+    0: 11
+    1: 6
+    2: 5
+    3: 5
+  stepFeatures:
+    0: 44
+    1: 24
+    2: 71
+    3: 24
 HLT_j75c_j55_j45f_SHARED_2j45_0eta290_020jvt_bgn160_pf_ftf_preselc60XXj45XXf40_L1jJ80p0ETA25_2jJ55_jJ50p30ETA49:
   eventCount: 0
 HLT_j75c_j55_j45f_SHARED_2j45_0eta290_020jvt_bgn260_pf_ftf_preselc60XXj45XXf40_L1jJ80p0ETA25_2jJ55_jJ50p30ETA49:
