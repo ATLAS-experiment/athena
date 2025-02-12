@@ -2,7 +2,6 @@
 
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/PropertyMgr.h"
 #include "GaudiKernel/SmartDataPtr.h"
 #include "MuonPrepRawData/MuonPrepDataContainer.h"
 #include "MuonRDO/CscRawDataContainer.h"
