@@ -96,6 +96,7 @@
 #+ DataQuality/GoodRunsLists
 + DetectorDescription/AtlasDetDescr
 + DetectorDescription/GeoModel/AtlasGeoModel
++ DetectorDescription/GeoModel/DumpGeo
 + DetectorDescription/GeoModel/GeoModelInterfaces
 + DetectorDescription/GeoModel/GeoModelUtilities
 + DetectorDescription/GeoPrimitives

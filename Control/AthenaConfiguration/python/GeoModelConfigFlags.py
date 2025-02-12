@@ -97,4 +97,8 @@ def createGeoModelConfigFlags(analysis=False):
 
     gcf.addFlag('GeoModel.IgnoreTagDifference',False, help='Ignore geometry tag difference between the configured value and the value read from the input file metadata')
 
+    # Add the DumpGeo config flags
+    from DumpGeo.DumpGeoConfigFlags import createDumpGeoConfigFlags
+    gcf = createDumpGeoConfigFlags(gcf)
+
     return gcf
