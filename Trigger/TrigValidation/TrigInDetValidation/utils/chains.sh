@@ -12,11 +12,17 @@ if [ $# -eq 0 -o "x$1" == "x-a" ]; then
   cp pre.py pre.py.bak
 
     
-  for git in $(grep "if ( *i=" pre.py | sed "s|or.*||" | sed "s|.*==.||" | sed "s|'.*||" | sed "s|.).*||" ) ; do
+  for gitc in $(grep "^\#.*Chains" pre.py ) ; do 
 
-    echo $git
+    echo $gitc
 
+    git=$(echo $gitc | sed 's|#||' | sed 's|Chains||')
+    
     CHAINS=
+
+    grep "$git:" comparitor.txt
+
+    echo
     
     for CHAIN in $(grep "$git:" comparitor.txt | awk '{print $2}' | sed ' s|:.*||' | sed 's|_HLT.*||' | sort -u ) ; do 
 
@@ -27,7 +33,7 @@ if [ $# -eq 0 -o "x$1" == "x-a" ]; then
 
     printf  "$CHAINS"
 
-    cat pre.py | sed "s|\($git\)Chains|$CHAINS|" > pre2.py
+    cat pre.py | sed "s|\($gitc\)|$CHAINS|" > pre2.py
     mv pre2.py pre.py
 
     echo " --------------------------------------------------"
@@ -37,9 +43,8 @@ if [ $# -eq 0 -o "x$1" == "x-a" ]; then
 
   cp pre.py $TestArea/Trigger/TrigValidation/TrigInDetValidation/python/TrigInDetArtSteps.py 
 
+  
 fi
-
-
 
 
 if [ $# -eq 0 -o "x$1" == "x-d" ]; then
@@ -48,8 +53,13 @@ if [ $# -eq 0 -o "x$1" == "x-d" ]; then
 
   cp chains.save chains.dat
 
-  for git in $(grep "if ( *i="  $TestArea/Trigger/TrigValidation/TrigInDetValidation/python/TrigInDetArtSteps.py | sed "s|or.*||" | sed "s|.*==.||" | sed "s|'.*||" | sed "s|.).*||" ) ; do
-    
+  cp TrigInDetArtSteps.py.pre   pre.py
+  for gitc in $(grep "^\#.*Chains" pre.py ) ; do 
+
+    echo $gitc
+
+    git=$(echo $gitc | sed 's|#||' | sed 's|Chains||')
+
     gitrun=$git
 
     ( grep -q ${git}vtx comparitor.txt ) && gitrun="$git ${git}vtx"
