@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MdtCalibJsonDumpAlg.h"
 #include "StoreGate/ReadCondHandle.h"
@@ -128,6 +128,10 @@ namespace Muon {
         unsigned t0GrpCounter{0};
         for (const auto&[chId, t0Channels] : t0Groups) {
             t0GrpCounter+=t0Channels.size();
+        }
+        if ((rtCounter == 0) or (t0Counter == 0)){
+          ATH_MSG_ERROR("MdtCalibJsonDumpAlg::execute: Counter is zero in numerator");
+          return StatusCode::FAILURE;
         }
         ATH_MSG_INFO(std::format("Grouped {:d} / {:d} ({:.2f}%) rt relations &  {:d}/ {:d}  ({:.2f}%) t0 calibration constants",
                         rtGroups.size(), rtCounter, (100.* rtGroups.size() / rtCounter), 
