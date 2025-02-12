@@ -57,7 +57,7 @@ def CaloCellMakerCfg(flags):
 
     result.addEventAlgo(cellAlgo, primary=True)
 
-    outputContainers = ["CaloCellContainer#AllCalo"]
+    outputContainers = [f'CaloCellContainer#{flags.Egamma.Keys.Input.CaloCells}']
     if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3]:
         outputContainers += ["TileCellContainer#MBTSContainer"]
     if flags.GeoModel.Run is LHCPeriod.Run2:

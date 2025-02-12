@@ -70,11 +70,10 @@ def CaloRecoCfg(flags, clustersname=None):
         from TileRecAlgs.MBTSTimeDiffEventInfoAlgConfig import MBTSTimeDiffEventInfoAlgCfg
         result.merge(MBTSTimeDiffEventInfoAlgCfg(flags))
 
-
-    #Configure AOD Cell-Thinning based on samplings:
-    from CaloRec.CaloThinCellsBySamplingAlgConfig import CaloThinCellsBySamplingAlgCfg
-    result.merge(CaloThinCellsBySamplingAlgCfg(flags,'StreamAOD', ['TileGap3']))
-    
+    if not flags.HeavyIon.Egamma.doSubtractedClusters:
+        #Configure AOD Cell-Thinning based on samplings:
+        from CaloRec.CaloThinCellsBySamplingAlgConfig import CaloThinCellsBySamplingAlgCfg
+        result.merge(CaloThinCellsBySamplingAlgCfg(flags,'StreamAOD', ['TileGap3']))
 
     return result
 
