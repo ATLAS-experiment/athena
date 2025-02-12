@@ -32,6 +32,8 @@ rc=$?
 status=$rc
 echo  "art-result: $rc MTsim"
 
+mv log.AtlasG4Tf log.AtlasG4TfMT
+
 unset ATHENA_CORE_NUMBER
 AtlasG4_tf.py \
     --CA \
