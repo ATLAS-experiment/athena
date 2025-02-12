@@ -161,12 +161,36 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
     cstr_t zTitle = plotDef.contains( "zAxis_title" ) ?
         plotDef.at( "zAxis_title" ).get_ref< cstr_t >() : "";
 
+    /// xAxis bin labels
+    strVec_t xBinLabelsVec;
+    if( plotDef.contains( "xAxis_labels" ) ) xBinLabelsVec = plotDef.at( "xAxis_labels" ).get< strVec_t >();
+    if( not xBinLabelsVec.empty() ) {
+      /// overwiting binning
+      nBinsX = xBinLabelsVec.size(); xLow = 0; xHigh = nBinsX;
+    }
+
+    /// yAxis bin labels
+    strVec_t yBinLabelsVec;
+    if( plotDef.contains( "yAxis_labels" ) ) yBinLabelsVec = plotDef.at( "yAxis_labels" ).get< strVec_t >();
+    if( not yBinLabelsVec.empty() ) {
+      /// overwiting binning
+      nBinsY = yBinLabelsVec.size(); yLow = 0; yHigh = nBinsY;
+    }
+
+    /// zAxis bin labels
+    strVec_t zBinLabelsVec;
+    if( plotDef.contains( "zAxis_labels" ) ) zBinLabelsVec = plotDef.at( "zAxis_labels" ).get< strVec_t >();
+    if( not zBinLabelsVec.empty() ) {
+      /// overwiting binning
+      nBinsZ = zBinLabelsVec.size(); zLow = 0; zHigh = nBinsZ;
+    }
+
     /// Adding new SinglePlotDefinition to vector
     plotDefVec.emplace_back(
         name, type, title,
-        xTitle, nBinsX, xLow, xHigh, xDoLogLinBins, xBinsVec,
-        yTitle, nBinsY, yLow, yHigh, yDoLogLinBins, yBinsVec,
-        zTitle, nBinsZ, zLow, zHigh, zDoLogLinBins, zBinsVec,
+        xTitle, nBinsX, xLow, xHigh, xDoLogLinBins, xBinsVec, xBinLabelsVec,
+        yTitle, nBinsY, yLow, yHigh, yDoLogLinBins, yBinsVec, yBinLabelsVec,
+        zTitle, nBinsZ, zLow, zHigh, zDoLogLinBins, zBinsVec, zBinLabelsVec,
         folder );
 
     /// Check if plot definition is valid. Removing

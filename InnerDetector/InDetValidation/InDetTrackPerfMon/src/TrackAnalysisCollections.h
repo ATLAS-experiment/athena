@@ -160,6 +160,22 @@ namespace IDTPM {
 
     /// --- Utility  methods ---
 
+    /// check if this is a new event
+    /// only true id BOTH m_newChain m_newRoi are true
+    bool isNewEvent() { return ( m_newChain && m_newRoi ); }
+
+    /// check if this is a new chain
+    bool isNewChain() { return m_newChain; }
+
+    /// update before running on new chain
+    void newChain() { m_newChain = false; m_newRoi = true; }
+
+    /// check if this is a new RoI
+    bool isNewRoI() { return m_newRoi; }
+
+    /// update before running on new RoI
+    void newRoI() { m_newRoi = false; }
+
     /// check if collection are empty
     bool empty( Stage stage = FULL );
 
@@ -271,6 +287,7 @@ namespace IDTPM {
     /// TrackAnalysis properties
     std::string m_anaTag;
     SmartIF< ITrackAnalysisDefinitionSvc > m_trkAnaDefSvc;
+    bool m_newChain, m_newRoi;
 
     /// --- Collections class variables ---
     /// EventInfo, TruthEvent, and TruthPUEvent

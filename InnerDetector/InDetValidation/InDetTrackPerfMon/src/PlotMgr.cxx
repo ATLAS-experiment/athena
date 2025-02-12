@@ -95,6 +95,10 @@ StatusCode IDTPM::PlotMgr::book(
     ATH_CHECK( setVariableBins( pHisto, def.xBinsVec(), 'X' ) );
   }
 
+  if( not def.xBinLabelsVec().empty() ) {
+    ATH_CHECK( setBinLabels( pHisto, def.xBinLabelsVec(), 'X' ) );
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -127,6 +131,14 @@ StatusCode IDTPM::PlotMgr::book(
 
   if( def.doVarBinsY() ) {
     ATH_CHECK( setVariableBins( pHisto, def.yBinsVec(), 'Y' ) );
+  }
+
+  if( not def.xBinLabelsVec().empty() ) {
+    ATH_CHECK( setBinLabels( pHisto, def.xBinLabelsVec(), 'X' ) );
+  }
+
+  if( not def.yBinLabelsVec().empty() ) {
+    ATH_CHECK( setBinLabels( pHisto, def.yBinLabelsVec(), 'Y' ) );
   }
 
   return StatusCode::SUCCESS;
@@ -172,6 +184,18 @@ StatusCode IDTPM::PlotMgr::book(
     ATH_CHECK( setVariableBins( pHisto, def.zBinsVec(), 'Z' ) );
   }
 
+  if( not def.xBinLabelsVec().empty() ) {
+    ATH_CHECK( setBinLabels( pHisto, def.xBinLabelsVec(), 'X' ) );
+  }
+
+  if( not def.yBinLabelsVec().empty() ) {
+    ATH_CHECK( setBinLabels( pHisto, def.yBinLabelsVec(), 'Y' ) );
+  }
+
+  if( not def.zBinLabelsVec().empty() ) {
+    ATH_CHECK( setBinLabels( pHisto, def.zBinLabelsVec(), 'Z' ) );
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -196,6 +220,10 @@ StatusCode IDTPM::PlotMgr::book(
 
   if( def.doVarBinsX() ) {
     ATH_CHECK( setVariableBins( pHisto, def.xBinsVec(), 'X' ) );
+  }
+
+  if( not def.xBinLabelsVec().empty() ) {
+    ATH_CHECK( setBinLabels( pHisto, def.xBinLabelsVec(), 'X' ) );
   }
 
   return StatusCode::SUCCESS;
@@ -230,6 +258,14 @@ StatusCode IDTPM::PlotMgr::book(
 
   if( def.doVarBinsY() ) {
     ATH_CHECK( setVariableBins( pHisto, def.yBinsVec(), 'Y' ) );
+  }
+
+  if( not def.xBinLabelsVec().empty() ) {
+    ATH_CHECK( setBinLabels( pHisto, def.xBinLabelsVec(), 'X' ) );
+  }
+
+  if( not def.yBinLabelsVec().empty() ) {
+    ATH_CHECK( setBinLabels( pHisto, def.yBinLabelsVec(), 'Y' ) );
   }
 
   return StatusCode::SUCCESS;

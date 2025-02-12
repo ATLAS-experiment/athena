@@ -28,6 +28,7 @@
 #include "plots/DuplicateRatePlots.h"
 #include "plots/HitsOnTracksPlots.h"
 #include "plots/NtracksPlots.h"
+#include "plots/SummaryPlots.h"
 #include "plots/VertexParametersPlots.h"
 
 /// STD includes
@@ -104,6 +105,8 @@ namespace IDTPM {
     SmartIF< ITrackAnalysisDefinitionSvc > m_trkAnaDefSvc;
 
     /// Plot categories
+    /// summary plots
+    std::unique_ptr< SummaryPlots >          m_plots_summary;
     /// plots w.r.t. test tracks parameters
     std::unique_ptr< TrackParametersPlots >  m_plots_trkParam_vsTest;
     std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsTest;

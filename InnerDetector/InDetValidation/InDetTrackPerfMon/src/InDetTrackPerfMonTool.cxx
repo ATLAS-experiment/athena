@@ -310,8 +310,10 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
                                                  thisChain, ir, thisRoiStr ) );
       }
 
+      thisTrkAnaCollections.newRoI();
     } // close selectedRois loop
 
+    thisTrkAnaCollections.newChain();
   } // close TrkAnalyses loop 
 
   if( m_writeOut ) {

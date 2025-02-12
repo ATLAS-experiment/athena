@@ -44,6 +44,13 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   m_trkAnaDefSvc = Gaudi::svcLocator()->service( "TrkAnaDefSvc"+m_anaTag );
   ATH_CHECK( m_trkAnaDefSvc.isValid() );
 
+  /// Summary plots
+  if( m_trkAnaDefSvc->plotTrackMultiplicities() ) {
+    m_plots_summary = std::make_unique< SummaryPlots >(
+        this, "Tracks/Multiplicities", m_anaTag,
+        m_trkAnaDefSvc->doTrigNavigation() );
+  }
+
   /// Track parameters plots
   if( m_trkAnaDefSvc->plotTrackParameters() ) {
     m_plots_trkParam_vsTest = std::make_unique< TrackParametersPlots >(
@@ -250,6 +257,12 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
 
   std::vector< size_t > testVertexCounts = trkAnaColls.testVertexCounts();
   std::vector< size_t > refVertexCounts = trkAnaColls.refVertexCounts();
+
+  if( m_plots_summary ) {
+    ATH_CHECK( m_plots_summary->fillPlots(
+        testTrackCounts, refTrackCounts,
+        trkAnaColls.isNewRoI(), weight ) );
+  }
 
   if( m_plots_nTracks_vsTest ) {
     ATH_CHECK( m_plots_nTracks_vsTest->fillPlots(

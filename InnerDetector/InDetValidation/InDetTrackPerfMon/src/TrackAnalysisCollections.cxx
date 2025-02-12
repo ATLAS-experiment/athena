@@ -22,7 +22,7 @@
 IDTPM::TrackAnalysisCollections::TrackAnalysisCollections( 
   const std::string& anaTag ) :
     AthMessaging( "TrackAnalysisCollections"+anaTag ),
-    m_anaTag( anaTag )
+    m_anaTag( anaTag ), m_newChain( true ), m_newRoi( true )
 {
   /// tracks
   m_truthPartVec.resize( NStages );
