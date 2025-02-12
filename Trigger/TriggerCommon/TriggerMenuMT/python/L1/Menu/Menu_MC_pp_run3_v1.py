@@ -87,9 +87,6 @@ def defineMenu():
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ40',
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ30',
         'L1_cTAU30M_2cTAU20M_3jJ30p0ETA25',
-        #ATRBoosteddiTau
-        'L1_eTAU20_DR-eTAU20eTAU12-jJ40', 
-        'L1_eTAU20_DR-eTAU20eTAU12-jJ30', 
         #ATR-29523
         'L1_3jJ40p0ETA25',
         
@@ -107,10 +104,6 @@ def defineMenu():
         'L1_MU8F_TAU12IM_3J12',
         'L1_EM15VHI_2TAU12IM_J25_3J12',
         'L1_MU8F_TAU20IM',
-        #ATR-30179
-        'L1_cTAU30M_3DR99-MU8F-eTAU30',
-        'L1_cTAU30M_3DR30-MU8F-eTAU30',
-        'L1_cTAU30M_3DR28-MU8F-eTAU30',
         #
         'L1_TAU20IM_2TAU12IM_J25_2J20_3J12',
         'L1_TAU25IM_2TAU20IM',

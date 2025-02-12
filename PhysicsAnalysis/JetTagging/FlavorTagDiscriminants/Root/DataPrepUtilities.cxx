@@ -135,7 +135,8 @@ namespace FlavorTagDiscriminants {
       track_link_name ("BTagTrackToJetAssociator"),
       track_link_type (TrackLinkType::TRACK_PARTICLE),
       default_output_value (NAN),
-      invalid_ip_key ("invalidIp")
+      invalid_ip_key ("invalidIp"),
+      electron_link_name("FTagElectrons")
   {
   }
 
@@ -331,6 +332,9 @@ namespace FlavorTagDiscriminants {
       }
       if (auto h = remap_scalar.extract(options.invalid_ip_key)) {
         options.invalid_ip_key = h.mapped();
+      }
+      if (auto h = remap_scalar.extract(options.electron_link_name)) {
+        options.electron_link_name = h.mapped();
       }
       options.flip = flip_config;
       options.remap_scalar = remap_scalar;

@@ -105,6 +105,7 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_e26_idperf_loose_L1eEM26M',"
                 chains += "'HLT_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1eEM26M',"
                 chains += "'HLT_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1eEM26M',"
+                chains += "'HLT_e28_idperf_loose_L1eEM28M',"
 
                 flags += "'Egamma',"
             if (i=='tau') :

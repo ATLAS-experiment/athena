@@ -37,7 +37,9 @@ TrigCaloClusterMonitor::TrigCaloClusterMonitor(const std::string & name, ISvcLoc
 
 StatusCode TrigCaloClusterMonitor::initialize()
 {
-  CHECK(m_moniTool.retrieve());
+  if (!m_moniTool.empty()) {
+    ATH_CHECK(m_moniTool.retrieve());
+  }
   ATH_CHECK(m_clustersKey.initialize());
 
   ATH_CHECK(m_avgMuKey.initialize());

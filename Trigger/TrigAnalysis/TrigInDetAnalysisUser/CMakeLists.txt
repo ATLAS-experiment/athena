@@ -67,7 +67,7 @@ atlas_add_executable( TIDAcomparitor
    Analysis/src/AtlasStyle.h Analysis/src/AtlasStyle.cxx
    Analysis/src/AtlasLabels.h Analysis/src/AtlasLabels.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} TrigInDetAnalysis Resplot Readcards
+   LINK_LIBRARIES ${ROOT_LIBRARIES} TrigInDetAnalysis TrigInDetAnalysisExampleLib Resplot Readcards
    TIDAcomputils )
 
 atlas_add_executable( TIDAcpucost

@@ -8,6 +8,7 @@
 #include <xAODPFlow/FlowElement.h>
 #include "AthContainers/AuxElement.h"
 #include "xAODTracking/TrackMeasurementValidation.h"
+#include "xAODEgamma/Electron.h"
 
 #include <optional>
 #include <TVector3.h>
@@ -172,6 +173,11 @@ namespace {
     using Tp = xAOD::TrackParticle;
     using Jet = xAOD::Jet;
 
+    if (name == "qOverP") {
+      return CustomSeqGetter<Tp>([](const Tp& p, const Jet&) {
+        return p.qOverP(); 
+      });
+    }
     if (name == "phiUncertainty") {
       return CustomSeqGetter<Tp>([](const Tp& tp, const Jet&) {
           return std::sqrt(tp.definingParametersCovMatrixDiagVec().at(2));
@@ -190,6 +196,16 @@ namespace {
     if (name == "z0RelativeToBeamspot") {
       return CustomSeqGetter<Tp>([](const Tp& tp, const Jet&) {
           return tp.z0();
+      });
+    }
+    if (name == "d0RelativeToBeamspot") {
+      return CustomSeqGetter<Tp>([](const Tp& tp, const Jet&) {
+          return tp.d0();
+      });
+    }
+    if (name == "d0RelativeToBeamspotSignificance") {
+      return CustomSeqGetter<Tp>([](const Tp& tp, const Jet&) {
+          return tp.d0() / std::sqrt(tp.definingParametersCovMatrixDiagVec().at(0));
       });
     }
     if (name == "log_z0RelativeToBeamspotUncertainty") {
@@ -244,6 +260,13 @@ namespace {
         return barrel_hits(tp) + endcap_hits(tp);
       });
     }
+    const std::regex number_match("numberOf.*");
+    if (std::regex_match(name, number_match)){ 
+      SG::AuxElement::ConstAccessor<unsigned char> pix_hits(name);
+      return CustomSeqGetter<Tp>([pix_hits](const Tp& tp, const Jet&) {
+        return pix_hits(tp);
+      });
+    }
     return std::nullopt;
   }
 
@@ -274,9 +297,19 @@ namespace {
         return std::log(p.pt() / j.pt());
       });
     }
+    if (name == "ptrel") {
+      return CustomSeqGetter<T>([](const T& p, const Jet& j) {
+        return p.p4().Vect().Perp(j.p4().Vect());
+      });
+    }
     if (name == "eta") {
       return CustomSeqGetter<T>([](const T& p, const Jet&) {
         return p.eta();
+      });
+    }
+    if (name == "abs_eta") {
+      return CustomSeqGetter<T>([](const T& p, const Jet&) {
+          return std::abs(p.eta());
       });
     }
     if (name == "deta") {
@@ -323,13 +356,20 @@ namespace {
       return CustomSeqGetter<T>([](const T& p, const Jet&) {
         return p.e();
       });
-    }
-    if constexpr (std::is_same_v<T, xAOD::FlowElement>) {
-      if (name == "isCharged") {
-        return CustomSeqGetter<T>([](const T& p, const Jet&) {
-          return p.isCharged();
-        });
-      }
+    }    
+    return std::nullopt;
+  }
+
+  // Getter from xAOD::FlowElement
+  std::optional<SequenceGetterFunc<xAOD::FlowElement>>
+  getterFromFlowElements(const std::string& name)
+  {   
+    using Fl = xAOD::FlowElement;
+    using Jet = xAOD::Jet;
+    if (name == "isCharged") {
+      return CustomSeqGetter<Fl>([](const Fl& p, const Jet&) {
+        return p.isCharged();
+      });
     }
     return std::nullopt;
   }
@@ -389,6 +429,70 @@ namespace {
   }
 
 
+  // Getters from xAOD::Electron
+  // Based on ElectronPhotonSelectorTools/AsgElectronLikelihoodTool
+  std::optional<SequenceGetterFunc<xAOD::Electron>>
+  getterFromElectrons(const std::string& name, const std::string& prefix)
+  {
+    using Jet = xAOD::Jet;
+    using El = xAOD::Electron;
+
+    SG::AuxElement::ConstAccessor<float> pt_varcone30{"ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000"};
+
+    if ((name == "ftag_et") || (name == "et")) {
+      return CustomSeqGetter<El>([](const El& p, const Jet&) {
+        float energy = p.caloCluster()->e();
+        return energy / std::cosh(p.trackParticle()->eta());
+      });
+    }
+    if ((name == "ftag_deltaPOverP") || (name == "deltaPOverP")) {
+      return CustomSeqGetter<El>([](const El& p, const Jet&) {
+        float el_dpop = -1;
+        unsigned int index;
+        auto track = p.trackParticle();
+        if (track->indexOfParameterAtPosition(index, xAOD::LastMeasurement))
+        {
+            double refittedTrack_LMqoverp = track->charge() / std::sqrt(std::pow(track->parameterPX(index), 2) +
+                                                                        std::pow(track->parameterPY(index), 2) +
+                                                                        std::pow(track->parameterPZ(index), 2));
+            el_dpop = 1 - track->qOverP() / (refittedTrack_LMqoverp);
+        }
+        return el_dpop;
+      });
+    }
+    if ((name == "ftag_ptVarCone30OverPt") || (name == "ptVarCone30OverPt")) {
+      return CustomSeqGetter<El>([pt_varcone30](const El& p, const Jet&) {
+        return pt_varcone30(p) / p.pt();
+      });
+    }
+    if ((name == "ftag_energyOverP") || (name == "energyOverP")) {
+      return CustomSeqGetter<El>([](const El& p, const Jet&) {
+        return p.caloCluster()->e() * std::abs(p.trackParticle()->qOverP());
+      });
+    }
+    if (name == "eProbabilityHT") {
+      return CustomSeqGetter<El>([](const El& p, const Jet&) {
+        float eprob = 0.0;
+        p.trackParticle()->summaryValue(eprob, xAOD::eProbabilityHT);
+        return eprob;
+      });
+    }
+    auto track_getter_no_ipdep = getterFromTracksNoIpDep(name);
+    if (track_getter_no_ipdep) {
+      auto f = *track_getter_no_ipdep;
+      return CustomSeqGetter<El>([f](const El& p, const Jet& j) -> double {
+        return f(j, {p.trackParticle()})[0];
+      });
+    }
+    auto track_getter_ipdep = getterFromTracksWithIpDep(name, prefix);
+    if (track_getter_ipdep) {
+      auto f = *track_getter_ipdep;
+      return CustomSeqGetter<El>([f](const El& p, const Jet& j) -> double {
+        return f(j, {p.trackParticle()})[0];
+      });
+    }
+    return std::nullopt;
+  }
 }
   namespace FlavorTagDiscriminants {
   namespace getter_utils {
@@ -423,6 +527,18 @@ namespace {
           return {*getter, {}};
         }
       }
+      
+      if constexpr (std::is_same_v<T, xAOD::Electron>) {
+        if (auto getter = getterFromElectrons(name, prefix)){
+          return {*getter, {}};
+        }
+      }
+      
+      if constexpr (std::is_same_v<T, xAOD::FlowElement>) {
+        if (auto getter = getterFromFlowElements(name)){
+          return {*getter, {}};
+        }
+      }
 
       if constexpr (std::is_base_of_v<xAOD::IParticle, T>){
         if (auto getter = getterFromIParticles<T>(name)){
@@ -435,6 +551,7 @@ namespace {
           return {*getter, {"HitsXRelToBeamspot", "HitsYRelToBeamspot", "HitsZRelToBeamspot"}};
         }
       }
+
       throw std::logic_error("no match for custom getter " + name);
     }
     
@@ -553,10 +670,11 @@ namespace {
     }
 
 
-    // Explicit instantiations of supported types (IParticle, FlowElement, TrackParticle, TrackMeasurementValidation)
+    // Explicit instantiations of supported types (IParticle, FlowElement, TrackParticle, TrackMeasurementValidation, Electron)
     template class SeqGetter<xAOD::IParticle>;
     template class SeqGetter<xAOD::FlowElement>;
     template class SeqGetter<xAOD::TrackParticle>;
     template class SeqGetter<xAOD::TrackMeasurementValidation>;
+    template class SeqGetter<xAOD::Electron>;
   }
 }

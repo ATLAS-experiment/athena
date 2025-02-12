@@ -139,7 +139,7 @@ StatusCode HLTEDMCreator::initialize()
   for ( auto k: m_##__TYPE##ShallowCopy ) \
     m_##__TYPE##ShallowCopyOut.push_back(k.key()); \
   ATH_CHECK( m_##__TYPE##ShallowCopyOut.initialize() ); \
-  renounceArray( m_##__TYPE##ShallowCopyOut )
+  if(m_renounceOutputs) { renounceArray( m_##__TYPE##ShallowCopyOut ); }
 
   INIT_SHALLOW( CaloClusterContainer );
   INIT_SHALLOW( JetContainer );
