@@ -42,7 +42,7 @@ def fromRunArgs(runArgs):
 
     # Set the output file
     if hasattr(runArgs, 'outputHEPMCFile'):
-        my_output_HepMCFile = runArgs.outputHEPMCFile
+        my_output_HepMCFile = 'tmp_'+runArgs.outputHEPMCFile
     else:
         log.error('OutputHEPMCFile required for EVNTtoHEPMC')
 
@@ -86,6 +86,19 @@ def fromRunArgs(runArgs):
 
     # Run the final accumulator
     sc = cfg.run()
+
+    # Compress the output file
+    log.info('Compressing HEPMC output (may take a moment)')
+    import tarfile
+    with tarfile.open(my_output_HepMCFile[4:],'w:gz') as out_tar:
+        out_tar.add( my_output_HepMCFile )
+
+    # And remove the uncompressed version
+    log.debug('Deleting original (uncompressed) file')
+    import os
+    os.remove( my_output_HepMCFile )
+
+    # All done, now just report back
     log.info("Ran EVNTtoHEPMC in " + str(time.time()-tic) + " seconds")
 
     sys.exit(not sc.isSuccess())

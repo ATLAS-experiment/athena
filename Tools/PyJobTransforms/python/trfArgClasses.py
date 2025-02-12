@@ -1845,15 +1845,19 @@ class argHepEvtAsciiFile(argFile):
         for fname in files:
             try:
                 eventCount = 0
-                f = open(fname, 'r')
-                for line in f:
-                    if line.upper().startswith("E "):
-                        eventCount += 1
+                import tarfile
+                tar = tarfile.open(fname, "r:gz")
+                for untar in tar.getmembers():
+                    fileTXT = tar.extractfile(untar)
+                    if fileTXT is not None :
+                        lines = fileTXT.read().decode("utf-8")
+                        # lines contains the entire file, so we just count the number of event markers
+                        eventCount = lines.count('E ')
                 self._fileMetadata[fname]['nentries'] = eventCount
             except OSError as e:
                 msg.error('Event count for file {0} failed: {1!s}'.format(fname, e))
-                self._fileMetadata[fname]['nentries'] = None
-                
+                self._fileMetadata[fname]['nentries'] = 'UNDEFINED'
+
 ## @brief LHE ASCII file 
 class argLHEFile(argFile):
     def __init__(self, value=list(), io = 'output', type=None, splitter=',', runarg=True, multipleOK=None, name=None):
@@ -1870,7 +1874,7 @@ class argLHEFile(argFile):
         msg.debug('Retrieving event count for LHE file {0}'.format(files))
         import tarfile
         for fname in files:
-            # Attempt to treat this as a pileup reweighting file
+            # Decompress this as we read
             try :
                 tar = tarfile.open(fname, "r:gz")
                 lhecount = 0
