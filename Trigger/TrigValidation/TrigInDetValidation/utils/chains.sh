@@ -16,12 +16,6 @@ if [ $# -eq 0 -o "x$1" == "x-a" ]; then
 
     echo $git
 
-#    grep "$git:" comparitor.txt | awk '{print $2}' 
-#    echo
-#    grep "$git:" comparitor.txt | awk '{print $2}' | sed ' s|:.*||' | sed 's|_HLT.*||'
-#    echo
-#    grep "$git:" comparitor.txt | awk '{print $2}' | sed ' s|:.*||' | sed 's|_HLT.*||' | sort -u  
-
     CHAINS=
     
     for CHAIN in $(grep "$git:" comparitor.txt | awk '{print $2}' | sed ' s|:.*||' | sed 's|_HLT.*||' | sort -u ) ; do 
