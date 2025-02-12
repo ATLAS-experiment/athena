@@ -66,6 +66,15 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
     const FPGATrackSimRegionMap* rmap_2nd = m_FPGATrackSimMapping->SubRegionMap_2nd();
     const FPGATrackSimPlaneMap *pmap_2nd = nullptr;
 
+    // Create one "tower" per slice for this event.
+    // Note that there now might be only one "slice", at least for the time being.
+    if (m_slicedHitHeader) {
+        for (int ireg = 0; ireg < rmap_2nd->getNRegions(); ireg++) {
+            FPGATrackSimTowerInputHeader tower = FPGATrackSimTowerInputHeader(ireg);
+            m_slicedHitHeader->addTower(tower);
+        }
+    }
+
     // Second stage hits may be unmapped, in which case map them.
     for (size_t i=0; i<m_FPGATrackSimMapping->GetPlaneMap_2ndSliceSize(); i++){
         pmap_2nd = m_FPGATrackSimMapping->PlaneMap_2nd(i);
@@ -77,6 +86,8 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
             }
             if (rmap_2nd->isInRegion(i, *hitCopy)) {
                 m_phits_atLayer[i][hitCopy->getLayer()].push_back(hitCopy);
+                // Also store a copy of the hit object in the header class, for ROOT Output + TV creation.
+                if (m_slicedHitHeader) m_slicedHitHeader->getTower(i)->addHit(*hitCopy);
             }
         }
     }

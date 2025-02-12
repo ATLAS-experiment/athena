@@ -20,6 +20,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrack.h"
+#include "FPGATrackSimObjects/FPGATrackSimLogicalEventInputHeader.h"
 
 #include <vector>
 
@@ -40,6 +41,8 @@ class IFPGATrackSimTrackExtensionTool : virtual public IAlgTool
         virtual StatusCode extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
                                         const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
                                         std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) = 0;
+
+        virtual StatusCode setupSlices(FPGATrackSimLogicalEventInputHeader *slicedHitHeader) = 0;
 };
 
 
