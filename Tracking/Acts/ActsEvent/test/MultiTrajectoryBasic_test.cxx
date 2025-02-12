@@ -472,7 +472,7 @@ BOOST_FIXTURE_TEST_CASE(AddTrackStateWithBitMask, EmptyMTJ) {
   BOOST_CHECK(ts.hasPredicted());
   BOOST_CHECK(ts.hasFiltered());
   BOOST_CHECK(ts.hasSmoothed());
-  BOOST_CHECK(ts.hasCalibrated());
+  BOOST_CHECK(!ts.hasCalibrated());
   BOOST_CHECK(ts.hasProjector());
   BOOST_CHECK(ts.hasJacobian());
   alwaysPresent(ts);
@@ -517,7 +517,7 @@ BOOST_FIXTURE_TEST_CASE(AddTrackStateWithBitMask, EmptyMTJ) {
   BOOST_CHECK(!ts.hasPredicted());
   BOOST_CHECK(!ts.hasFiltered());
   BOOST_CHECK(!ts.hasSmoothed());
-  BOOST_CHECK(ts.hasCalibrated());
+  BOOST_CHECK(!ts.hasCalibrated());
   BOOST_CHECK(ts.hasProjector());
   BOOST_CHECK(!ts.hasJacobian());
 
@@ -688,7 +688,7 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyAllocations, EmptyMTJ) {
   // TODO we create a trackState already with "calibrated" and
   // allocateCalibrated not implemented
 
-  BOOST_CHECK(tsall.has<"calibrated"_hash>());
+  BOOST_CHECK(!tsall.has<"calibrated"_hash>());
   BOOST_CHECK(tsall.has<"projector"_hash>());
   // TODO referenceSurface not implemented
 

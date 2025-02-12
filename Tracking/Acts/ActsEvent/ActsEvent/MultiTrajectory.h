@@ -421,6 +421,8 @@ class MultiTrajectory
       DataLink<xAOD::TrackMeasurementAuxContainer> trackMeasurements, 
       DataLink<xAOD::TrackSurfaceAuxContainer> trackSurfaces);
 
+  MultiTrajectory(const ActsTrk::MutableMultiTrajectory& other);
+
   bool has_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
 
   std::any component_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;

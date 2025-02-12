@@ -2,77 +2,6 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-//  has_impl implementation
-namespace ActsTrk {
-namespace details {
-constexpr std::optional<bool> has_impl(
-    const xAOD::TrackStateAuxContainer* trackStates, Acts::HashedString key,
-    ActsTrk::IndexType istate) {
-  using namespace Acts::HashedStringLiteral;
-  using Acts::MultiTrajectoryTraits::kInvalid;
-  INSPECTCALL(key << " " << istate);
-
-  switch (key) {
-    case "previous"_hash:
-      return trackStates->previous[istate] < kInvalid;
-    case "chi2"_hash:{
-      INSPECTCALL(key << " " << istate << " chi2");
-      return true;
-    }
-    case "pathLength"_hash:{
-      INSPECTCALL(key << " " << istate << " pathLength");
-      return true;
-    }
-    case "typeFlags"_hash:{
-      INSPECTCALL(key << " " << istate << " type flags");
-      return true;
-    }
-    case "predicted"_hash:{
-      INSPECTCALL(key << " " << istate << " predicted");
-      return trackStates->predicted[istate] < kInvalid;
-    }
-    case "filtered"_hash:{
-      INSPECTCALL(key << " " << istate << " filtered");
-      return trackStates->filtered[istate] < kInvalid;
-    }
-    case "smoothed"_hash:{
-      INSPECTCALL(key << " " << istate << " smoothed");
-      return trackStates->smoothed[istate] < kInvalid;
-    }
-    case "jacobian"_hash:{
-      INSPECTCALL(key << " " << istate << " jacobian");
-      return trackStates->jacobian[istate] < kInvalid;
-    }
-    case "projector"_hash:{
-      INSPECTCALL(key << " " << istate << " projector");
-      return trackStates->calibrated[istate] < kInvalid;
-    }
-    case "calibrated"_hash:{
-      INSPECTCALL(key << " " << istate << " calibrated");
-      return trackStates->calibrated[istate] < kInvalid;
-    }
-    case "calibratedCov"_hash: {
-      INSPECTCALL(key << " " << istate << " calibratedCov");
-      return trackStates->calibrated[istate] < kInvalid;
-    }
-    case "measdim"_hash: {
-      INSPECTCALL(key << " " << istate << " measdim");
-      return trackStates->measDim[istate] < kInvalid;
-    }
-    case "referenceSurface"_hash: {
-      INSPECTCALL(key << " " << istate << " referenceSurfaceEnco");
-      return true;
-    }
-
-      // TODO restore once only the EL Source Links are in use 
-      // return !trackStates[istate]->uncalibratedMeasurementLink().isDefault();
-  }
-  INSPECTCALL(key << " " << istate << " not a predefined component");
-  return std::optional<bool>();
-}
-}  // namespace details
-}  // namespace ActsTrk
-
 
 constexpr bool ActsTrk::MutableMultiTrajectory::hasColumn_impl(
     Acts::HashedString key) const {
@@ -136,10 +65,16 @@ void ActsTrk::MutableMultiTrajectory::allocateCalibrated_impl(IndexType istate,
 {
   constexpr std::size_t measdim = val_t::RowsAtCompileTime;
 
-  m_trackStatesAux->measDim[istate] = measdim;
-  auto idx = m_trackStatesAux->calibrated[istate];
-  m_trackMeasurementsAux->meas[idx].resize(measdim);
-  m_trackMeasurementsAux->covMatrix[idx].resize(measdim*measdim);
+  if(m_trackStatesAux->measDim.at(istate) != kInvalid
+     && m_trackStatesAux->measDim.at(istate) != measdim) {
+    throw std::invalid_argument{
+      "Measurement dimension does not match the allocated dimension"};
+  }
+
+  m_trackStatesAux->measDim.at(istate) = measdim;
+  auto idx = m_trackStatesAux->calibrated.at(istate);
+  m_trackMeasurementsAux->meas.at(idx).resize(measdim);
+  m_trackMeasurementsAux->covMatrix.at(idx).resize(measdim*measdim);
 
   double* measPtr = m_trackMeasurementsAux->meas[idx].data();
   Eigen::Map<Acts::ActsVector<measdim>> valMap(measPtr);

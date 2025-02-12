@@ -62,6 +62,72 @@ namespace {
       const_span<const xAOD::UncalibratedMeasurement*> vec = getElementVector(aux_container, accessor);
       return vec[index];
    }
+
+constexpr std::optional<bool> has_impl(
+    const xAOD::TrackStateAuxContainer* trackStates, Acts::HashedString key,
+    ActsTrk::IndexType istate) {
+  using namespace Acts::HashedStringLiteral;
+  using Acts::MultiTrajectoryTraits::kInvalid;
+  INSPECTCALL(key << " " << istate);
+
+  switch (key) {
+    case "previous"_hash:
+      return trackStates->previous[istate] < kInvalid;
+    case "chi2"_hash:{
+      INSPECTCALL(key << " " << istate << " chi2");
+      return true;
+    }
+    case "pathLength"_hash:{
+      INSPECTCALL(key << " " << istate << " pathLength");
+      return true;
+    }
+    case "typeFlags"_hash:{
+      INSPECTCALL(key << " " << istate << " type flags");
+      return true;
+    }
+    case "predicted"_hash:{
+      INSPECTCALL(key << " " << istate << " predicted");
+      return trackStates->predicted[istate] < kInvalid;
+    }
+    case "filtered"_hash:{
+      INSPECTCALL(key << " " << istate << " filtered");
+      return trackStates->filtered[istate] < kInvalid;
+    }
+    case "smoothed"_hash:{
+      INSPECTCALL(key << " " << istate << " smoothed");
+      return trackStates->smoothed[istate] < kInvalid;
+    }
+    case "jacobian"_hash:{
+      INSPECTCALL(key << " " << istate << " jacobian");
+      return trackStates->jacobian[istate] < kInvalid;
+    }
+    case "projector"_hash:{
+      INSPECTCALL(key << " " << istate << " projector");
+      return trackStates->calibrated[istate] < kInvalid;
+    }
+    case "calibrated"_hash:{
+      INSPECTCALL(key << " " << istate << " calibrated");
+      return trackStates->measDim[istate] < kInvalid;
+    }
+    case "calibratedCov"_hash: {
+      INSPECTCALL(key << " " << istate << " calibratedCov");
+      return trackStates->measDim[istate] < kInvalid;
+    }
+    case "measdim"_hash: {
+      INSPECTCALL(key << " " << istate << " measdim");
+      return true;
+    }
+    case "referenceSurface"_hash: {
+      INSPECTCALL(key << " " << istate << " referenceSurfaceEnco");
+      return true;
+    }
+
+      // TODO restore once only the EL Source Links are in use 
+      // return !trackStates[istate]->uncalibratedMeasurementLink().isDefault();
+  }
+  INSPECTCALL(key << " " << istate << " not a predefined component");
+  return std::optional<bool>();
+}
 }
 
 
@@ -122,7 +188,6 @@ ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::addTrackState_impl(
   using namespace Acts::HashedStringLiteral;
   INSPECTCALL( this << " " <<  mask << " " << m_trackStatesAux->size() << " " << previous);
   assert(m_trackStatesAux && "Missing Track States backend");
-  constexpr size_t NDim = 6; // TODO take this from somewhere
   stepResize(m_trackStatesAux.get(), m_trackStatesSize);
   m_surfaces.push_back(nullptr);
 
@@ -137,23 +202,23 @@ ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::addTrackState_impl(
   auto addParam = [this]() -> ActsTrk::IndexType {
     stepResize(m_trackParametersAux.get(), m_trackParametersSize, 60);
     // TODO ask AK if this resize could be method of aux container
-    m_trackParametersAux->params[m_trackParametersSize].resize(NDim);
-    m_trackParametersAux->covMatrix[m_trackParametersSize].resize(NDim*NDim);
+    m_trackParametersAux->params[m_trackParametersSize].resize(Acts::eBoundSize);
+    m_trackParametersAux->covMatrix[m_trackParametersSize].resize(Acts::eBoundSize*Acts::eBoundSize);
     m_trackParametersSize++;
     return m_trackParametersSize-1;
   };
 
   auto addJacobian = [this]() -> ActsTrk::IndexType {
     stepResize(m_trackJacobiansAux.get(), m_trackJacobiansSize);
-    m_trackJacobiansAux->jac[m_trackJacobiansSize].resize(NDim*NDim);
+    m_trackJacobiansAux->jac[m_trackJacobiansSize].resize(Acts::eBoundSize*Acts::eBoundSize);
     m_trackJacobiansSize++;
     return m_trackJacobiansSize-1;
   };
 
   auto addMeasurement = [this]() -> ActsTrk::IndexType {
     stepResize(m_trackMeasurementsAux.get(), m_trackMeasurementsSize );
-    m_trackMeasurementsAux->meas[m_trackMeasurementsSize].resize(NDim);
-    m_trackMeasurementsAux->covMatrix[m_trackMeasurementsSize].resize(NDim*NDim);
+    m_trackMeasurementsAux->meas[m_trackMeasurementsSize].resize(Acts::eBoundSize);
+    m_trackMeasurementsAux->covMatrix[m_trackMeasurementsSize].resize(Acts::eBoundSize*Acts::eBoundSize);
     m_trackMeasurementsSize++;
     return m_trackMeasurementsSize-1;
   };
@@ -180,12 +245,11 @@ ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::addTrackState_impl(
 
   m_uncalibratedSourceLinks.emplace_back(std::nullopt);
   m_trackStatesAux->calibrated[m_trackStatesSize] = kInvalid;
-  m_trackStatesAux->measDim[m_trackStatesSize] = 0;
+  m_trackStatesAux->measDim[m_trackStatesSize] = kInvalid;
   // @TODO uncalibrated ?
   if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
-    m_trackStatesAux->calibrated[m_trackStatesSize]  = addMeasurement();
+    m_trackStatesAux->calibrated.at(m_trackStatesSize)  = addMeasurement();
     m_calibratedSourceLinks.emplace_back(std::nullopt);
-    m_trackStatesAux->measDim[m_trackStatesSize] = m_trackMeasurementsAux->meas[m_trackStatesAux->calibrated[m_trackStatesSize]].size();
   }
 
   m_trackStatesAux->geometryId[m_trackStatesSize] = InvalidGeoID; // surface is invalid until set
@@ -201,7 +265,6 @@ void ActsTrk::MutableMultiTrajectory::addTrackStateComponents_impl(
   INSPECTCALL( this << " " <<  mask << " " << m_trackStatesAux->size() << " " << previous);
 
   assert(m_trackStatesAux && "Missing Track States backend");
-  constexpr size_t NDim = 6; // TODO take this from somewhere
 
   // set kInvalid
   using Acts::MultiTrajectoryTraits::kInvalid;
@@ -211,23 +274,23 @@ void ActsTrk::MutableMultiTrajectory::addTrackStateComponents_impl(
   auto addParam = [this]() -> ActsTrk::IndexType {
     stepResize(m_trackParametersAux.get(), m_trackParametersSize, 60);
     // TODO ask AK if this resize could be method of aux container
-    m_trackParametersAux->params[m_trackParametersSize].resize(NDim);
-    m_trackParametersAux->covMatrix[m_trackParametersSize].resize(NDim*NDim);
+    m_trackParametersAux->params[m_trackParametersSize].resize(Acts::eBoundSize);
+    m_trackParametersAux->covMatrix[m_trackParametersSize].resize(Acts::eBoundSize*Acts::eBoundSize);
     m_trackParametersSize++;
     return m_trackParametersSize-1;
   };
 
   auto addJacobian = [this]() -> ActsTrk::IndexType {
     stepResize(m_trackJacobiansAux.get(), m_trackJacobiansSize);
-    m_trackJacobiansAux->jac[m_trackJacobiansSize].resize(NDim*NDim);
+    m_trackJacobiansAux->jac[m_trackJacobiansSize].resize(Acts::eBoundSize*Acts::eBoundSize);
     m_trackJacobiansSize++;
     return m_trackJacobiansSize-1;
   };
 
   auto addMeasurement = [this]() -> ActsTrk::IndexType {
     stepResize(m_trackMeasurementsAux.get(), m_trackMeasurementsSize );
-    m_trackMeasurementsAux->meas[m_trackMeasurementsSize].resize(NDim);
-    m_trackMeasurementsAux->covMatrix[m_trackMeasurementsSize].resize(NDim*NDim);
+    m_trackMeasurementsAux->meas[m_trackMeasurementsSize].resize(Acts::eBoundSize);
+    m_trackMeasurementsAux->covMatrix[m_trackMeasurementsSize].resize(Acts::eBoundSize*Acts::eBoundSize);
     m_trackMeasurementsSize++;
     return m_trackMeasurementsSize-1;
   };
@@ -256,7 +319,6 @@ void ActsTrk::MutableMultiTrajectory::addTrackStateComponents_impl(
       ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
     m_trackStatesAux->calibrated[istate]  = addMeasurement();
     m_calibratedSourceLinks.emplace_back(std::nullopt);
-    m_trackStatesAux->measDim[istate] = m_trackMeasurementsAux->meas[m_trackStatesAux->calibrated[istate]].size();
   }
 }
 
@@ -341,7 +403,7 @@ void ActsTrk::MutableMultiTrajectory::unset_impl(
 
       break;
     case PM::Calibrated:
-      m_trackStatesAux->calibrated[istate] = kInvalid;
+      m_trackStatesAux->measDim[istate] = kInvalid;
       // TODO here m_measOffset[istate] and m_measCovOffset[istate] should be
       // set to kInvalid
 
@@ -446,8 +508,7 @@ std::any ActsTrk::MutableMultiTrajectory::component_impl(
 
 bool ActsTrk::MutableMultiTrajectory::has_impl(
     Acts::HashedString key, ActsTrk::IndexType istate) const {
-  std::optional<bool> inTrackState =
-      ActsTrk::details::has_impl(m_trackStatesAux.get(), key, istate);
+  std::optional<bool> inTrackState = ::has_impl(m_trackStatesAux.get(), key, istate);
   if (inTrackState.has_value())
     return inTrackState.value();
 
@@ -458,11 +519,12 @@ bool ActsTrk::MutableMultiTrajectory::has_impl(
     static const SG::Accessor<const xAOD::UncalibratedMeasurement*> acc{"uncalibratedMeasurement"};
     bool has_auxid= m_trackStatesAux->getAuxIDs().test(acc.auxid());
     if (has_auxid) {
-       return getElement(*m_trackStatesAux, acc, istate) != nullptr;
+      if(getElement(*m_trackStatesAux, acc, istate) != nullptr) {
+        return true;
+      }
     }
-    else {
-       return (istate < m_uncalibratedSourceLinks.size() &&  m_uncalibratedSourceLinks[istate].has_value());
-    }
+
+    return (istate < m_uncalibratedSourceLinks.size() &&  m_uncalibratedSourceLinks[istate].has_value());
   }
 
   for (auto& d : m_decorations) {
@@ -586,11 +648,21 @@ ActsTrk::MultiTrajectory::MultiTrajectory(
       m_decorations = ActsTrk::detail::restoreDecorations(m_trackStatesAux, ActsTrk::MutableMultiTrajectory::s_staticVariables);
 }
 
+ActsTrk::MultiTrajectory::MultiTrajectory(const ActsTrk::MutableMultiTrajectory& other)
+  : m_trackStatesAux(other.m_trackStatesAux.get()),
+  m_trackParametersAux(other.m_trackParametersAux.get()),
+  m_trackJacobiansAux(other.m_trackJacobiansAux.get()),
+  m_trackMeasurementsAux(other.m_trackMeasurementsAux.get()), 
+  m_trackSurfacesAux(other.m_surfacesBackendAux.get()) {
+  INSPECTCALL("ctor " << this << " " << m_trackStatesAux->size());
+  m_decorations = ActsTrk::detail::restoreDecorations(m_trackStatesAux, ActsTrk::MutableMultiTrajectory::s_staticVariables);
+}
+
+
 bool ActsTrk::MultiTrajectory::has_impl(Acts::HashedString key,
                                              ActsTrk::IndexType istate) const {
   // const auto& trackStates = *m_trackStates;
-  std::optional<bool> inTrackState =
-      ActsTrk::details::has_impl(m_trackStatesAux, key, istate);
+  std::optional<bool> inTrackState = ::has_impl(m_trackStatesAux, key, istate);
   if (inTrackState.has_value())
     return inTrackState.value();
   // TODO remove once EL based source links are in use only
@@ -736,11 +808,11 @@ ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
   // or taken from the xAOD backend.
   static const SG::Accessor<const xAOD::UncalibratedMeasurement*> acc{"uncalibratedMeasurement"};
   if (m_trackStatesAux->getAuxIDs().test(acc.auxid())){
-     return Acts::SourceLink( getElement(*m_trackStatesAux, acc, istate) );
+    if(auto* ptr = getElement(*m_trackStatesAux, acc, istate); ptr != nullptr) {
+      return Acts::SourceLink( ptr );
+    }
   }
-  else {
-    return m_uncalibratedSourceLinks[istate].value();
-  }
+  return m_uncalibratedSourceLinks[istate].value();
 }
 
 typename Acts::SourceLink
@@ -754,9 +826,9 @@ ActsTrk::MultiTrajectory::getUncalibratedSourceLink_impl(
   // or taken from the xAOD backend.
   static const SG::Accessor<const xAOD::UncalibratedMeasurement*> acc{"uncalibratedMeasurement"};
   if (m_trackStatesAux->getAuxIDs().test(acc.auxid())){
-     return Acts::SourceLink( getElement(*m_trackStatesAux, acc, istate) );
+    if(auto* ptr = getElement(*m_trackStatesAux, acc, istate); ptr != nullptr) {
+      return Acts::SourceLink( ptr );
+    }
   }
-  else {
-    return m_uncalibratedSourceLinks[istate].value();
-  }
+  return m_uncalibratedSourceLinks[istate].value();
 }
