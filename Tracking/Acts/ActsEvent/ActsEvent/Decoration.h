@@ -34,7 +34,14 @@ struct accepted_decoration_types {
   constexpr static bool value =
       std::is_same<T, float>::value or std::is_same<T, double>::value or
       std::is_same<T, short>::value or std::is_same<T, int>::value or
-      std::is_same<T, std::uint32_t>::value;
+      std::is_same<T, std::uint8_t>::value or
+      std::is_same<T, std::uint16_t>::value or
+      std::is_same<T, std::uint32_t>::value or
+      std::is_same<T, std::uint64_t>::value or
+      std::is_same<T, std::int8_t>::value or
+      std::is_same<T, std::int16_t>::value or
+      std::is_same<T, std::int32_t>::value or
+      std::is_same<T, std::int64_t>::value;
 };
 
 // getter that is good for non-mutable containers
