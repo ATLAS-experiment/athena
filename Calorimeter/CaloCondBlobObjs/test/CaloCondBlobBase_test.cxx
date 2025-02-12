@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #define BOOST_TEST_DYN_LINK
@@ -11,6 +11,7 @@ namespace utf = boost::unit_test;
 
 #include "CaloCondBlobObjs/CaloCondBlobBase.h"
 #include "CoralBase/Blob.h"
+#include "CxxUtils/set_unaligned.h"
 #include <cstdint>
 #include <sstream> 
 #include <iostream>
@@ -117,13 +118,12 @@ BOOST_AUTO_TEST_CASE(PublicMethods, * utf::expected_failures(1)){
   pDestination[2] = num;
   pDestination[3] = 0x80000000 | (gain << 24) | nChans;
   pDestination[4] = comment.size() / wordSize;
-  uint64_t* pTimeStamp = reinterpret_cast<uint64_t*>(pDestination+dataSizeWord);
+  uint8_t* pChar = reinterpret_cast<uint8_t*>(pDestination+dataSizeWord);
   uint64_t timeStamp{0};
-  pTimeStamp[0] = timeStamp;
-  char* pChar = reinterpret_cast<char*>(++pTimeStamp); 
-  strcpy(pChar, author.c_str());
+  CxxUtils::set_unaligned<uint64_t> (pChar, timeStamp);
+  strcpy(reinterpret_cast<char*>(pChar), author.c_str());
   pChar+=(1+author.size());
-  strcpy(pChar, comment.c_str());
+  strcpy(reinterpret_cast<char*>(pChar), comment.c_str());
   //instantiate the class using this blob
   CaloCondBlobStub blobStub(b);
   //checking...

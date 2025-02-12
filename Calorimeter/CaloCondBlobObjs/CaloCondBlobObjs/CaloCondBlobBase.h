@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCONDBLOBOBJS_CALOCONDBLOBBASE_H
@@ -38,6 +38,7 @@
 #include "CoralBase/Blob.h"
 #include "CaloCondBlobObjs/Exception.h"
 #include "CaloCondBlobObjs/CaloCondType.h"
+#include "CxxUtils/get_unaligned.h"
 
 class CaloCondBlobBase{
  public:
@@ -283,8 +284,9 @@ inline uint64_t
 CaloCondBlobBase::getTimeStamp() const 
 {
   if(!getCommentSizeUint32()) return 0;
-  return *(reinterpret_cast<const uint64_t*>(getBlobStart()+getHdrSize() +
-                                             getNObjs()*getObjSizeUint32()));
+  auto p = reinterpret_cast<const uint8_t*>(getBlobStart()+getHdrSize() +
+                                            getNObjs()*getObjSizeUint32());
+  return CxxUtils::get_unaligned64 (p);
 }
 
 #endif
