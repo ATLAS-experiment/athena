@@ -191,6 +191,44 @@ namespace IDTPM {
         unsigned int nBins, float absMin, float absMax,
         bool symmetriseAroundZero = false );
 
+    /// SetBinLabels (for TH* and TProfile* only)
+    template < class P >
+    StatusCode setBinLabels(
+      P*& pHisto, const std::vector< std::string >& binLabels, char axis )
+    {
+      if( axis == 'X' ) {
+        size_t nBinsX = pHisto->GetXaxis()->GetNbins();
+        if( nBinsX != binLabels.size() ) {
+          ATH_MSG_ERROR( "Mismstch in number of X bin labels for : " << pHisto->GetName() );
+          return StatusCode::FAILURE;
+        }
+        for( size_t bin = 0; bin < nBinsX; bin++ ) {
+          pHisto->GetXaxis()->SetBinLabel( bin+1, binLabels[ bin ].c_str() );
+        }
+      }
+      if( axis == 'Y' ) {
+        size_t nBinsY = pHisto->GetYaxis()->GetNbins();
+        if( nBinsY != binLabels.size() ) {
+          ATH_MSG_ERROR( "Mismstch in number of Y bin labels for : " << pHisto->GetName() );
+          return StatusCode::FAILURE;
+        }
+        for( size_t bin = 0; bin < nBinsY; bin++ ) {
+          pHisto->GetYaxis()->SetBinLabel( bin+1, binLabels[ bin ].c_str() );
+        }
+      }
+      if( axis == 'Z' ) {
+        size_t nBinsZ = pHisto->GetZaxis()->GetNbins();
+        if( nBinsZ != binLabels.size() ) {
+          ATH_MSG_ERROR( "Mismstch in number of Z bin labels for : " << pHisto->GetName() );
+          return StatusCode::FAILURE;
+        }
+        for( size_t bin = 0; bin < nBinsZ; bin++ ) {
+          pHisto->GetZaxis()->SetBinLabel( bin+1, binLabels[ bin ].c_str() );
+        }
+      }
+      return StatusCode::SUCCESS;
+    }
+
     std::string m_anaTag;
 
   }; // class PlotMgr
