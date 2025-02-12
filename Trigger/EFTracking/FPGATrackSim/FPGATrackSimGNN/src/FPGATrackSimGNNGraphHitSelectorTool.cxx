@@ -2,6 +2,9 @@
 
 #include "FPGATrackSimGNNGraphHitSelectorTool.h"
 
+#include "TMath.h"
+#include <cmath>
+
 ///////////////////////////////////////////////////////////////////////////////
 // AthAlgTool
 
@@ -28,7 +31,6 @@ StatusCode FPGATrackSimGNNGraphHitSelectorTool::selectHits(const std::vector<std
             graph_hit->setY(hits[i]->getY());
             graph_hit->setZ(hits[i]->getZ());
             graph_hit->setR(hits[i]->getR());
-            graph_hit->setR2(TMath::Power(hits[i]->getR(),2.0) + TMath::Power(hits[i]->getZ(),2.0));
             graph_hit->setPhi(hits[i]->getGPhi());
             graph_hit->setEta(getEta(hits[i]));
             graph_hit->setCluster1X(hits[i]->getX());
@@ -43,7 +45,7 @@ StatusCode FPGATrackSimGNNGraphHitSelectorTool::selectHits(const std::vector<std
             graph_hit->setCluster2R(hits[i]->getR());
             graph_hit->setCluster2Phi(hits[i]->getGPhi());
             graph_hit->setCluster2Eta(graph_hit->getEta());
-            graph_hits.push_back(graph_hit);
+            graph_hits.emplace_back(graph_hit);
         }
         // For strip, two clusters -> one spacepoint -> duplicate SP record in the hit
         // This means we are ignoring single clusters in the strip that are labeled as hits (need to discuss if this is bad or not)
@@ -71,7 +73,7 @@ StatusCode FPGATrackSimGNNGraphHitSelectorTool::selectHits(const std::vector<std
             graph_hit->setCluster2R(cluster2_hit->getR());
             graph_hit->setCluster2Phi(cluster2_hit->getGPhi());
             graph_hit->setCluster2Eta(getEta(cluster2_hit));
-            graph_hits.push_back(graph_hit);
+            graph_hits.emplace_back(graph_hit);
         }
     }
 
@@ -80,7 +82,7 @@ StatusCode FPGATrackSimGNNGraphHitSelectorTool::selectHits(const std::vector<std
 
 float FPGATrackSimGNNGraphHitSelectorTool::getEta(const std::shared_ptr<const FPGATrackSimHit> & hit)
 {
-    float r3 = TMath::Sqrt(hit->getR()*hit->getR() + hit->getZ()*hit->getZ());
+    float r3 = std::sqrt(hit->getR()*hit->getR() + hit->getZ()*hit->getZ());
     float theta = 0.5 * TMath::ACos(hit->getZ() / r3);
     float eta = -1.0 * TMath::Log(TMath::Tan(theta));
     return eta;

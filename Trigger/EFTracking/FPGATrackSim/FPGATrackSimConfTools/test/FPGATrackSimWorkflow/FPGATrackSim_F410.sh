@@ -29,8 +29,11 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.doEDMConversion=True \
     Trigger.FPGATrackSim.runCKF=$RUN_CKF \
     Trigger.FPGATrackSim.pipeline='F-410' \
+    Trigger.FPGATrackSim.GNN.moduleMapPath=$GNN_MODULE_MAP \
+    Trigger.FPGATrackSim.GNN.GNNModelPath=$GNN_ONNX_MODEL \
+    Trigger.FPGATrackSim.GNN.doGNNRootOutput=True \
     Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
-    Trigger.FPGATrackSim.mapsDir=$MAPS_9L \
+    Trigger.FPGATrackSim.mapsDir=$MAPS_9L_GNN \
     Trigger.FPGATrackSim.region=0 \
     Trigger.FPGATrackSim.writeToAOD=True \
     Trigger.FPGATrackSim.bankDir=$BANKS_9L \

@@ -14,6 +14,10 @@ FPGATrackSimGNNPatternRecoTool::FPGATrackSimGNNPatternRecoTool(const std::string
 StatusCode FPGATrackSimGNNPatternRecoTool::initialize()
 {
     ATH_CHECK(m_GNNGraphHitSelectorTool.retrieve());
+    ATH_CHECK(m_GNNGraphConstructionTool.retrieve());
+    ATH_CHECK(m_GNNEdgeClassifierTool.retrieve());
+    ATH_CHECK(m_GNNRoadMakerTool.retrieve());
+    ATH_CHECK(m_GNNRootOutputTool.retrieve());
 
     return StatusCode::SUCCESS;
 }
@@ -24,11 +28,13 @@ StatusCode FPGATrackSimGNNPatternRecoTool::getRoads(const std::vector<std::share
     std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> graph_edges;
     
     ATH_CHECK(m_GNNGraphHitSelectorTool->selectHits(hits, graph_hits)); // Go from FPGATrackSimHits to FPGATrackSimGNNHit -> get information needed for GNNPipeline
-
-    ATH_MSG_DEBUG("Size of graph_hits = " << graph_hits.size()); // Temporary to avoid warnings in build
-    ATH_MSG_DEBUG("Size of graph_edges = " << graph_edges.size()); // Temporary to avoid warnings in build
+    ATH_CHECK(m_GNNGraphConstructionTool->getEdges(graph_hits, graph_edges)); // Build edges using module map (or metric learning)
+    ATH_CHECK(m_GNNEdgeClassifierTool->scoreEdges(graph_hits, graph_edges)); // Score edges using IN GNN
+    ATH_CHECK(m_GNNRoadMakerTool->makeRoads(hits, graph_hits, graph_edges, roads)); // Build road candidates using connected components (need to make a C++ version of it)
+    if(m_doGNNRootOutput) ATH_CHECK(m_GNNRootOutputTool->fillTree(hits, graph_hits, graph_edges, roads)); // Output the hit/edge/road information into a ROOT file
     
-    roads.clear(); // Temporary to avoid warnings in build
+    graph_hits.clear();
+    graph_edges.clear();
     return StatusCode::SUCCESS;
 }
 

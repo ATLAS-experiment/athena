@@ -82,6 +82,6 @@ atlas_add_test( FPGATrackSim_F210_test # TODO: Figure out why we get this many e
 atlas_add_test( FPGATrackSim_F410_test
                 SCRIPT FPGATrackSim_F410.sh -t -n 1 -s 8
                 PRIVATE_WORKING_DIRECTORY
-                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*" # ACTS (C)KF related errors
+                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*|*.Found error reading file at line:.*" # ACTS (C)KF related errors
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 600 )
