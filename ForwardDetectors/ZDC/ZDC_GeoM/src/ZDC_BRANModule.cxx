@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDC_BRANModule.h"
+
 
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoTube.h"
@@ -17,7 +18,8 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "GeoModelKernel/GeoMaterial.h"
-
+#include "GaudiKernel/MsgStream.h"
+#include "ZdcIdentifier/ZdcID.h"
 
 #include "AthenaKernel/getMessageSvc.h"
 

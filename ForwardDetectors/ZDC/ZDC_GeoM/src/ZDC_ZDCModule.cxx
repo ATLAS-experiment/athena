@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDC_ZDCModule.h"
@@ -20,7 +20,7 @@
 #include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "GeoModelKernel/GeoMaterial.h"
 
-
+#include "ZdcIdentifier/ZdcID.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "CLHEP/Geometry/Transform3D.h"
 

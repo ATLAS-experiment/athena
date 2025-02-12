@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDC_RPDModule.h"
@@ -19,9 +19,11 @@
 #include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "GeoModelKernel/GeoMaterial.h"
 #include "GaudiKernel/SystemOfUnits.h"
-
+#include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/getMessageSvc.h"
+#include "ZdcIdentifier/ZdcID.h"
 #include "CLHEP/Geometry/Transform3D.h"
+#include <stdexcept>
 
 void ZDC_RPDModule::create(GeoFullPhysVol* mother, StoredMaterialManager *materialManager, const ZdcID *zdcID){
 
@@ -51,6 +53,9 @@ void ZDC_RPDModule::create(GeoFullPhysVol* mother, StoredMaterialManager *materi
     const float posY = m_trf.translation().y();                 // Y position of center of the tiles
 
     const GeoBox* motherBox = dynamic_cast<const GeoBox*>(mother->getLogVol()->getShape());
+    if (not motherBox){
+      throw (std::runtime_error("ZDC_RPDModule::create: motherBox is a nullptr"));
+    }
     const float halfY = motherBox->getYHalfLength();
 
     // Height of the extension between the main RPD body and the foot
