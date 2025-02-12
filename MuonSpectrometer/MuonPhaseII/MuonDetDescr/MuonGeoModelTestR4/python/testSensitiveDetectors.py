@@ -75,5 +75,7 @@ if __name__=="__main__":
     cfg.merge(GEN_EVNT2xAODCfg(flags,name="GEN_EVNT2xAOD",AODContainerName="TruthEvent"))
 
     cfg.merge(setupTestOutputCfg(flags))
+    from MuonPRDTestR4.MuonHitTestConfig import MuonHitTesterCfg
+    cfg.merge(MuonHitTesterCfg(flags))
     executeTest(cfg)
   

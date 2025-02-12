@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "TgcSensitiveDetector.h"
 #include "MuonSensitiveDetectorsR4/Utils.h"
@@ -104,23 +104,21 @@ G4bool TgcSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
         return true;
     }
     
-    const double globalTime = currentTrack->GetGlobalTime() + (*travelDist) / currentTrack->GetVelocity();
     const Amg::Transform3D gapTrans{readOutEle->globalToLocalTrans(gctx, etaHitID)};
+
+    const Amg::Vector3D locPreStep{gapTrans*Amg::Hep3VectorToEigen(aStep->GetPreStepPoint()->GetPosition())};
+    const Amg::Vector3D locPostStep{gapTrans*Amg::Hep3VectorToEigen(aStep->GetPostStepPoint()->GetPosition())};
+    const Amg::Vector3D locHitPos = 0.5* (locPreStep + locPostStep);
     const Amg::Vector3D locHitDir = gapTrans.linear() * Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection());
-    const Amg::Vector3D locHitPos = gapTrans * gapCenterCross;
+    ATH_MSG_VERBOSE("Current track, prestep: "<<Amg::toString(locPreStep)
+              <<",  post step: "<<Amg::toString(locPostStep) <<" mid point: "<< Amg::toString(locHitPos));
+
+    const double globalTime = currentTrack->GetGlobalTime() + locHitDir.dot(locHitPos-locHitPos) / currentTrack->GetVelocity();
     
-    /// Final check that the hit is located at zero
-    if (std::abs(locHitPos.z()) > tolerance) {
-        ATH_MSG_FATAL("The hit "<<Amg::toString(locHitPos)<<" doest not match "<<m_detMgr->idHelperSvc()->toString(etaHitID));
-        throw std::runtime_error("Picked wrong gas gap");
-    }
+    xAOD::MuonSimHit* hit = m_writeHandle->push_back(std::make_unique<xAOD::MuonSimHit>());
 
     /// At the very last clear the cache of the readout element
     readOutEle->releaseUnAlignedTrfs();
-
-
-    xAOD::MuonSimHit* hit = new xAOD::MuonSimHit();
-    m_writeHandle->push_back(hit);  
   
     TrackHelper trHelp(aStep->GetTrack());
     hit->setIdentifier(etaHitID); 
@@ -132,6 +130,7 @@ G4bool TgcSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
     hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit());
     hit->setKineticEnergy(currentTrack->GetKineticEnergy());
     hit->setGenParticleLink(trHelp.GenerateParticleLink());
+    hit->setStepLength(currentTrack->GetStepLength());
     return true;
 }
 const MuonGMR4::TgcReadoutElement* TgcSensitiveDetector::getReadoutElement(const G4TouchableHistory* touchHist) const {
