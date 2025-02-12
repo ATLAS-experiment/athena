@@ -25,6 +25,7 @@
 #include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
 #include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
+#include "FPGATrackSimObjects/FPGATrackSimTowerInputHeader.h"
 #include "FPGATrackSimNNTrackTool.h"
 
 #include <vector>
@@ -40,6 +41,13 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         virtual StatusCode extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
                                         const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
                                         std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) override;
+
+        // We don't have a "union" tool that sits in front of the extension tool, so this is needed here.
+        virtual StatusCode setupSlices(FPGATrackSimLogicalEventInputHeader *slicedHitHeader) override {
+          m_slicedHitHeader = slicedHitHeader;
+          return StatusCode::SUCCESS;
+        };
+
 
     private:
         ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
@@ -68,7 +76,9 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         static float getYScale() { return 1015.;};
         static float getZScale() { return 3000.;};
 
-
+        // Internal storage for the sliced hits (implemented as a LogicalEventInputHeader,
+        // so we can easily copy to the output ROOT file).
+        FPGATrackSimLogicalEventInputHeader*  m_slicedHitHeader = nullptr;
   
         OnnxRuntimeBase m_extensionVolNN;
         OnnxRuntimeBase m_extensionHitNN;

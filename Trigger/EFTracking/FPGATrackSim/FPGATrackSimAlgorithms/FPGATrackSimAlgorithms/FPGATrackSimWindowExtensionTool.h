@@ -25,6 +25,7 @@
 #include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
 #include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
+#include "FPGATrackSimObjects/FPGATrackSimTowerInputHeader.h"
 #include "FPGATrackSimNNTrackTool.h"
 
 #include <vector>
@@ -40,6 +41,12 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
         virtual StatusCode extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
                                         const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
                                         std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) override;
+
+        // We don't have a "union" tool that sits in front of the extension tool, so this is needed here.
+        virtual StatusCode setupSlices(FPGATrackSimLogicalEventInputHeader *slicedHitHeader) override {
+          m_slicedHitHeader = slicedHitHeader;
+          return StatusCode::SUCCESS;
+        };
 
 
     private:
@@ -69,7 +76,9 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
         unsigned m_nLayers_2ndStage = 0;
         unsigned m_maxMiss = 0;
 
-  
+        // Internal storage for the sliced hits (implemented as a LogicalEventInputHeader,
+        // so we can easily copy to the output ROOT file).
+        FPGATrackSimLogicalEventInputHeader*  m_slicedHitHeader = nullptr;
 
 };
 

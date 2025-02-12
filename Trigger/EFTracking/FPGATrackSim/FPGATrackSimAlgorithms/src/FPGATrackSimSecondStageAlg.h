@@ -36,6 +36,7 @@ class FPGATrackSimTrackFitterTool;
 
 class FPGATrackSimRoad;
 class FPGATrackSimLogicalEventOutputHeader;
+class FPGATrackSimLogicalEventInputHeader;
 class FPGATrackSimTrack;
 class FPGATrackSimDataFlowInfo;
 
@@ -89,9 +90,11 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         Gaudi::Property<bool> m_filterRoads2  {this, "FilterRoads2", false,  "enable second road filter"};
 
         // Properties for the output header tool.
+        Gaudi::Property<std::string> m_sliceBranch  {this, "SliceBranchName", "LogicalEventSlicedHeader", "Name of the branch for slied hits in output ROOT file." };
         Gaudi::Property<std::string> m_outputBranch     {this, "outputBranchName", "LogicalEventOutputHeader", "Name of the branch for output data in output ROOT file." };
 
         // ROOT pointers
+        FPGATrackSimLogicalEventInputHeader*  m_slicedHitHeader = nullptr;
         FPGATrackSimLogicalEventOutputHeader* m_logicEventOutputHeader = nullptr;
 
         // Event storage. ??? do we need anything?
