@@ -10,8 +10,10 @@
 # art-output: log.*
 # art-output: Config*.pkl
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN4)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 # RUN4 setup
-# ATLAS-P2-RUN4-03-00-00 and OFLCOND-MC21-SDR-RUN4-02
 Sim_tf.py \
 --CA \
 --simulator 'FullG4MT_QS'  \
@@ -20,8 +22,8 @@ Sim_tf.py \
 --maxEvents '10' \
 --skipEvents '0' \
 --randomSeed '10' \
---geometryVersion 'default:ATLAS-P2-RUN4-03-00-00' \
---conditionsTag 'default:OFLCOND-MC21-SDR-RUN4-02' \
+--geometryVersion "default:${geometry}" \
+--conditionsTag "default:${conditions}" \
 --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation,SimuJobTransforms.CalHits,SimuJobTransforms.ParticleID' \
 --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
 --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \

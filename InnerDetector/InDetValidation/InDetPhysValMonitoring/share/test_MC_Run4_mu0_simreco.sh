@@ -12,7 +12,7 @@ lastref_dir=last_results
 dcubeXml=dcube_ART_IDPVMPlots_ITk.xml
 
 geometry=ATLAS-P2-RUN4-04-00-00
-condition=OFLCOND-MC21-SDR-RUN4-02
+condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)

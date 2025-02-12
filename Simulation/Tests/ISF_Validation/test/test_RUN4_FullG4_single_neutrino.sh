@@ -11,15 +11,17 @@
 Input="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EVNT/mc21_14TeV.900149.PG_single_nu_Pt50.evgen.EVNT.e8481/EVNT.30810279._000071.pool.root.1"
 Output="test_neutrino.HITS.pool.root"
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN4)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 # RUN4 setup
-# ATLAS-P2-RUN4-03-00-00 and OFLCOND-MC21-SDR-RUN4-02
 Sim_tf.py \
 --CA \
---conditionsTag 'default:OFLCOND-MC21-SDR-RUN4-02' \
+--conditionsTag "default:${conditions}" \
 --simulator 'FullG4MT' \
 --postInclude 'default:PyJobTransforms.UseFrontier' \
 --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
---geometryVersion 'default:ATLAS-P2-RUN4-03-00-00' \
+--geometryVersion "default:${geometry}" \
 --inputEVNTFile "$Input" \
 --outputHITSFile "$Output" \
 --maxEvents 1000 \

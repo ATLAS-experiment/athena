@@ -11,8 +11,10 @@ fi
 
 HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8481_s4149/HITS.33605501._000106.pool.root.1"
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 Reco_tf.py \
-  --conditionsTag OFLCOND-MC21-SDR-RUN4-02 \
+  --conditionsTag "${conditions}" \
   --geometryVersion ATLAS-P2-RUN4-03-00-00 \
   --preInclude "all:Campaigns.PhaseIINoPileUp" \
   --postInclude "all:PyJobTransforms.UseFrontier.py" \
