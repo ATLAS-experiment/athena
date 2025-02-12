@@ -35,6 +35,7 @@ class TrigTauMonAlgBuilder:
   #=============================================
   hlt_tauid_scores = {
     'tracktwoMVA': {
+      'GNTau': ('GNTau_Score', 'GNTau_ScoreSigTrans'),
       'DeepSet': ('RNNJetScore', 'RNNJetScoreSigTrans'),
     },
     'tracktwoLLP': {

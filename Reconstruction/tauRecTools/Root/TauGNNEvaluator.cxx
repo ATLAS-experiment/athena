@@ -24,6 +24,8 @@ TauGNNEvaluator::TauGNNEvaluator(const std::string &name):
   declareProperty("OutputVarname", m_output_varname = "GNTauScore");
   declareProperty("OutputPTau", m_output_ptau = "GNTauProbTau");
   declareProperty("OutputPJet", m_output_pjet = "GNTauProbJet");
+  declareProperty("OutputDiscriminant", m_output_discriminant = Discriminant::NegLogPJet, 
+    "Discriminant used to calculate the output score: 0 -> -log(PJet), 1 -> PTau");
 
   declareProperty("MaxTracks", m_max_tracks = 30);
   declareProperty("MaxClusters", m_max_clusters = 20);
@@ -93,6 +95,10 @@ StatusCode TauGNNEvaluator::initialize() {
     ATH_MSG_INFO("Loading 3-prong TauID GNN");
     m_net_3p = load_network(m_weightfile_3p, config);
     if(!m_net_3p) return StatusCode::FAILURE;
+  }
+
+  if(m_output_discriminant < Discriminant::NegLogPJet || m_output_discriminant > Discriminant::PTau) {
+    ATH_MSG_FATAL("Invalid TauGNNEvaluator discriminant setting: " << m_output_discriminant);
   }
   
   return StatusCode::SUCCESS;
@@ -175,7 +181,12 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
 
   // Store scores only if the inferences actually ran
   if(out_f.contains(m_outnode_tau)) {
-    output(tau) = std::log10(1/(1-out_f.at(m_outnode_tau)));
+    if(m_output_discriminant == Discriminant::NegLogPJet) {
+        output(tau) = std::log10(1/(1-out_f.at(m_outnode_tau)));
+    } else if(m_output_discriminant == Discriminant::PTau) {
+        output(tau) = out_f.at(m_outnode_tau);
+    }
+
     out_ptau(tau) = out_f.at(m_outnode_tau);
     out_pjet(tau) = out_f.at(m_outnode_jet);
 
