@@ -1,7 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "ITkPixelOfflineCalibCondAlg.h"
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
@@ -56,30 +55,21 @@ StatusCode PixelOfflineCalibCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_WARNING("Pixel ITk constants read from text file. Only supported for local developments and debugging!");
 
     auto calibData = std::make_unique<PixelOfflineCalibData>();
-    PixelClusterErrorData* pced = calibData->getClusterErrorData();
 
     // Find and open the text file
     ATH_MSG_INFO("Load ITkPixelErrorData constants from text file");
     std::string fileName = PathResolver::find_file(m_textFileName, "DATAPATH");
     if (fileName.empty()) { ATH_MSG_WARNING("Input file " << fileName << " not found! Default (hardwired) values to be used!"); }
-    else { pced->load(fileName);  }
-
-    ATH_MSG_DEBUG("Get error constants");
-    std::vector<float> constants = calibData->getConstants();
-    if (!constants.empty()) { ATH_MSG_VERBOSE("constants are defined"); }
-    else                  { ATH_MSG_ERROR("constants size is NULL!!!"); }
-
+    else {
+       unsigned int n_entries = calibData->getClusterErrorData()->load(fileName);
+       ATH_MSG_DEBUG("Loaded " << n_entries << " from " << fileName << ".");
+    }
 
     const EventIDBase start{EventIDBase::UNDEFNUM, EventIDBase::UNDEFEVT, 0,                       0,                       EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
     const EventIDBase stop {EventIDBase::UNDEFNUM, EventIDBase::UNDEFEVT, EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
     const EventIDRange rangeW{start, stop};
 
     ATH_MSG_DEBUG("Range of input is " << rangeW);
-
-    if (!constants.empty()) {
-      ATH_MSG_DEBUG("Found constants with new-style Identifier key");
-      writeCdo->setConstants(constants);
-    }
 
     if (writeHandle.record(rangeW, std::move(writeCdo)).isFailure()) {
       ATH_MSG_FATAL("Could not record PixelCalib::ITkPixelOfflineCalibData " << writeHandle.key() << " with EventRange " << rangeW << " into Conditions Store");
@@ -110,8 +100,6 @@ StatusCode PixelOfflineCalibCondAlg::execute(const EventContext& ctx) const {
     }
 
     ATH_MSG_DEBUG("Range of input is " << rangeW);
-
-    std::vector<float> constants;
 
     for(const auto & attrList : *readCdo){
 
@@ -155,40 +143,43 @@ StatusCode PixelOfflineCalibCondAlg::execute(const EventContext& ctx) const {
 
 	int waferHash   = std::atoi(moduleStringHash[1].c_str());
 	IdentifierHash waferID_hash(waferHash);
-	Identifier pixelID = m_pixelid->wafer_id(waferID_hash);
-	constants.emplace_back( pixelID.get_compact() );
 
 	std::stringstream moduleConstants(moduleString[1]);
-	std::vector<float> moduleConstantsVec;
+	std::vector<double> moduleConstantsVec;
 	while (std::getline(moduleConstants,buffer,',')) {  moduleConstantsVec.emplace_back(std::atof(buffer.c_str())); }
+
+
+        std::array<double, ITk::PixelClusterErrorData::kNParam> param{};
+        std::span<double> param_src(param);
 
 	// Format v1 with no incident angle dependance
 	if(moduleConstantsVec.size()==4){
-	  constants.emplace_back(0); // period_phi
-	  constants.emplace_back(0); // period_sinheta
-	  constants.emplace_back(0); // delta_x_slope
-	  constants.emplace_back(moduleConstantsVec[0]); // delta_x_offset
-	  constants.emplace_back(moduleConstantsVec[1]); // delta_error_x
-	  constants.emplace_back(0); // delta_y_slope
-	  constants.emplace_back(moduleConstantsVec[2]); // delta_y_offset
-	  constants.emplace_back(moduleConstantsVec[3]); // delta_error_y
+	  param[ITk::PixelClusterErrorData::kDelta_x_offset]= moduleConstantsVec[0]; // delta_x_offset
+	  param[ITk::PixelClusterErrorData::kError_x] = moduleConstantsVec[1]; // delta_error_x
+	  param[ITk::PixelClusterErrorData::kDelta_y_offset] = moduleConstantsVec[2]; // delta_y_offset
+	  param[ITk::PixelClusterErrorData::kError_y] = moduleConstantsVec[3]; // delta_error_y
 	}
 
 	else if(moduleConstantsVec.size()==7){
-	  constants.emplace_back(moduleConstantsVec[0]); // period_phi
-	  for( auto& x : moduleConstantsVec ) constants.emplace_back(x);
+          assert( moduleConstantsVec.size()+1 == ITk::PixelClusterErrorData::kNParam);
+          assert( ITk::PixelClusterErrorData::kPeriod_phi == 0 );
+          assert( ITk::PixelClusterErrorData::kPeriod_sinheta == 1 );
+          param[0] = moduleConstantsVec[0]; // first value used for kPeriod_phi and kPeriod_sinheta
+          for (unsigned int idx=0; idx<moduleConstantsVec.size(); ++idx) {
+             param[idx+1] = moduleConstantsVec[idx];
+          }
 	}
 
 	// Format v3 with incident angle dependance + different eta-phi periods
 	else if(moduleConstantsVec.size()==8){
-	  for( auto& x : moduleConstantsVec ) constants.emplace_back(x);
+           param_src = std::span<double>(moduleConstantsVec.begin(), moduleConstantsVec.end());
 	}
-
+        assert(writeCdo->getClusterErrorData());
+        writeCdo->getClusterErrorData()->setDeltaError(waferID_hash,param_src);
       }
 
     }
 
-    writeCdo->setConstants(constants);
 
     if (writeHandle.record(rangeW, std::move(writeCdo)).isFailure()) {
       ATH_MSG_FATAL("Could not record PixelCalib::ITkPixelOfflineCalibData " << writeHandle.key() << " with EventRange " << rangeW << " into Conditions Store");

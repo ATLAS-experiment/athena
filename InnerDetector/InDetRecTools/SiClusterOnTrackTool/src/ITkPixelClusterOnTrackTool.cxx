@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -167,7 +167,7 @@ PixelClusterOnTrackTool::correctDefault
   if (!element) {
     return nullptr;
   }
-  IdentifierHash iH = element->identifyHash();
+  IdentifierHash idHash = element->identifyHash();
 
   double errphi = -1;
   double erreta = -1;
@@ -190,7 +190,7 @@ PixelClusterOnTrackTool::correctDefault
     double bowphi = std::atan2(trkphicomp, trknormcomp);
     double boweta = std::atan2(trketacomp, trknormcomp);
 
-    float tanl = m_lorentzAngleTool->getTanLorentzAngle(iH, Gaudi::Hive::currentContext());
+    float tanl = m_lorentzAngleTool->getTanLorentzAngle(idHash, Gaudi::Hive::currentContext());
     int readoutside = element->design().readoutSide();
 
     // map the angles of inward-going tracks onto [-PI/2, PI/2]
@@ -259,7 +259,7 @@ PixelClusterOnTrackTool::correctDefault
       design->positionFromColumnRow(colmax, rowmax);
 
     InDetDD::SiLocalPosition centroid = 0.25 * (pos1 + pos2 + pos3 + pos4);
-    double shift = m_lorentzAngleTool->getLorentzShift(iH, Gaudi::Hive::currentContext());
+    double shift = m_lorentzAngleTool->getLorentzShift(idHash, Gaudi::Hive::currentContext());
     int nrows = rowmax - rowmin + 1;
     int ncol = colmax - colmin + 1;
 
@@ -270,7 +270,7 @@ PixelClusterOnTrackTool::correctDefault
       localphi = centroid.xPhi() + shift;
       localeta = centroid.xEta();
 
-      std::pair<double,double> delta = offlineITkCalibDataHandle->getClusterErrorData()->getDelta(&element_id,nrows,angle,ncol,etaloc);
+      std::pair<double,double> delta = offlineITkCalibDataHandle->getClusterErrorData()->getDelta(idHash,nrows,angle,ncol,etaloc);
       double delta_phi = nrows != 1 ? delta.first : 0.;
       double delta_eta = ncol != 1 ? delta.second : 0.;
       localphi += delta_phi*(omegaphi-0.5);
@@ -305,7 +305,7 @@ PixelClusterOnTrackTool::correctDefault
       errphi = (width.phiR() / nrows) * TOPHAT_SIGMA;
       erreta = (width.z() / ncol) * TOPHAT_SIGMA;
     }else if (m_errorStrategy == 2) {
-      std::pair<double,double> delta_err = offlineITkCalibDataHandle->getClusterErrorData()->getDeltaError(&element_id);
+      std::pair<double,double> delta_err = offlineITkCalibDataHandle->getClusterErrorData()->getDeltaError(idHash);
       errphi = nrows != 1 ? delta_err.first : (width.phiR()/nrows)*TOPHAT_SIGMA;
       erreta = ncol != 1 ? delta_err.second : (width.z()/ncol)*TOPHAT_SIGMA;
     }
@@ -340,7 +340,7 @@ PixelClusterOnTrackTool::correctDefault
   bool isbroad = m_errorStrategy == 0;
   return new InDet::PixelClusterOnTrack(pix, std::move(locpar),
                                         std::move(cov),
-                                        iH, glob, pix->gangedPixel(), isbroad);
+                                        idHash, glob, pix->gangedPixel(), isbroad);
 }
 
 
@@ -387,7 +387,7 @@ PixelClusterOnTrackTool::correctNN
     return nullptr;
   }
 
-  IdentifierHash iH = element->identifyHash();
+  IdentifierHash idHash = element->identifyHash();
 
   if (m_doNotRecalibrateNN) {
     Amg::Vector3D glob(pixelPrepCluster->globalPosition());
@@ -397,7 +397,7 @@ PixelClusterOnTrackTool::correctNN
     Amg::MatrixX cov = pixelPrepCluster->localCovariance();
 
     return new InDet::PixelClusterOnTrack(pixelPrepCluster, std::move(locpar),
-                                          std::move(cov), iH, glob,
+                                          std::move(cov), idHash, glob,
                                           pixelPrepCluster->gangedPixel(), false);
   }
 
@@ -444,7 +444,7 @@ PixelClusterOnTrackTool::correctNN
 
   return new InDet::PixelClusterOnTrack(pixelPrepCluster,
                                         std::move(locpar),
-                                        std::move(cov), iH,
+                                        std::move(cov), idHash,
                                         glob,
                                         pixelPrepCluster->gangedPixel(),
                                         false);

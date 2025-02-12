@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ANALOGUECLUSTERINGTOOLIMPL_ICC
@@ -187,10 +187,11 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getCorrectedPosition(
 
 	std::pair<float, float> centroid = getCentroid(rdos, element);
 
-	Identifier id = element.identify();
+        IdentifierHash idHash = element.identifyHash();
+        
 	std::pair<double, double> delta =
 	    errorData.getDelta(
-		&id,
+		idHash,
 		nrows,
 		anglePhi,
 		ncols,
@@ -234,8 +235,8 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getCorrectedError(
 	    errY = *errY / std::sqrt(12);
 	}
     } else if (nrows > 1 && ncols > 1) {
-	Identifier id = element.identify();
-	auto [vX, vY] = errorData.getDeltaError(&id);
+        IdentifierHash idHash = element.identifyHash();
+	auto [vX, vY] = errorData.getDeltaError(idHash);
 	if (vX > 0)
 	    errX = vX;
 	if (vY > 0)
