@@ -1,6 +1,6 @@
 
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONSIMHIT_VERSION_MUONSIMHIT_V1_H
 #define XAODMUONSIMHIT_VERSION_MUONSIMHIT_V1_H
@@ -30,7 +30,11 @@ class MuonSimHit_v1 : public SG::AuxElement {
     void setLocalDirection(MeasVector<3> vec);
     ///@brief Returns the local direction of the traversing particle
     ConstVectorMap<3> localDirection() const;
-
+    
+    ///@brief Returns the path length of the G4 step
+    float stepLength() const;
+    ///@brief Set the path length of the G4 step
+    void setStepLength(const float length);
     /// @brief Returns the rest-mass of the traversing particle
     float mass() const;
     /// @brief set the rest-mass of the traversing particle

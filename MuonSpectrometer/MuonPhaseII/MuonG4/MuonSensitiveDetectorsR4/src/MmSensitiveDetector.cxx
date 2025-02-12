@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MmSensitiveDetector.h"
@@ -58,7 +58,7 @@ G4bool MmSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   G4Track* currentTrack = aStep->GetTrack();
   // MDTs sensitive to charged particle only
   if (currentTrack->GetDefinition()->GetPDGCharge() == 0.0) {
-    if (currentTrack->GetDefinition()!= G4Geantino::GeantinoDefinition()) return true;
+    if (currentTrack->GetDefinition() != G4Geantino::GeantinoDefinition()) return true;
     else if (currentTrack->GetDefinition()==G4ChargedGeantino::ChargedGeantinoDefinition()) return true;
   }
 
@@ -68,7 +68,7 @@ G4bool MmSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
 
   ActsGeometryContext gctx{};
 
-  SG::ReadHandle<DetectorAlignStore> trfStoreHandle{m_trfCacheKey};
+  SG::ReadHandle trfStoreHandle{m_trfCacheKey};
   if (!trfStoreHandle.isValid()) {
     ATH_MSG_FATAL("Failed to retrieve "<<m_trfCacheKey.fullKey()<<".");
     return false;
@@ -91,7 +91,7 @@ G4bool MmSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
                <<" "<<Amg::toString(localPos, 2)<<" / "<<Amg::toString(localDir, 2));
   
   
-  // The middle of the gas gap is at X= 0
+  // Recall that the volumes are expressed such that local X is along the thickness.
   std::optional<double> travelDist = Amg::intersect<3>(localPos, localDir, Amg::Vector3D::UnitX(), 0.);
   if (!travelDist) return true;
   const Amg::Vector3D locGapCross = localPos + (*travelDist) * localDir;
@@ -103,13 +103,18 @@ G4bool MmSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       ATH_MSG_VERBOSE("No valid hit found");
       return true;
   }
-  const double globalTime = currentTrack->GetGlobalTime() + (*travelDist) / currentTrack->GetVelocity();
   const Amg::Transform3D gapTrans{readOutEle->globalToLocalTrans(gctx, hitID)};
-  const Amg::Vector3D locHitDir = gapTrans.linear() * Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection());
-  const Amg::Vector3D locHitPos = gapTrans * gapCenterCross;
 
-  xAOD::MuonSimHit* hit = new xAOD::MuonSimHit();
-  m_writeHandle->push_back(hit);  
+  const Amg::Vector3D locPreStep{gapTrans*Amg::Hep3VectorToEigen(aStep->GetPreStepPoint()->GetPosition())};
+  const Amg::Vector3D locPostStep{gapTrans*Amg::Hep3VectorToEigen(aStep->GetPostStepPoint()->GetPosition())};
+  const Amg::Vector3D locHitPos = 0.5* (locPreStep + locPostStep);
+  const Amg::Vector3D locHitDir = gapTrans.linear() * Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection());
+  ATH_MSG_VERBOSE("Current track "<<Amg::toString(localPos)<<", prestep: "<<Amg::toString(locPreStep)
+             <<",  post step: "<<Amg::toString(locPostStep) <<" mid point: "<< Amg::toString(locHitPos));
+
+  const double globalTime = currentTrack->GetGlobalTime() + locHitDir.dot(locHitPos-localPos) / currentTrack->GetVelocity();
+  
+  xAOD::MuonSimHit* hit = m_writeHandle->push_back(std::make_unique<xAOD::MuonSimHit>());
   
   TrackHelper trHelp(aStep->GetTrack());
   hit->setIdentifier(hitID); 
@@ -121,6 +126,7 @@ G4bool MmSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit());
   hit->setKineticEnergy(currentTrack->GetKineticEnergy());
   hit->setGenParticleLink(trHelp.GenerateParticleLink());
+  hit->setStepLength(currentTrack->GetStepLength());
   return true;
 }
 

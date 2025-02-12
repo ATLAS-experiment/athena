@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSensitiveDetectorsR4/Utils.h"
@@ -92,7 +92,7 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
 
     ActsGeometryContext gctx{};
 
-    SG::ReadHandle<DetectorAlignStore> trfStoreHandle{m_trfCacheKey};
+    SG::ReadHandle trfStoreHandle{m_trfCacheKey};
     if (!trfStoreHandle.isValid()) {
       ATH_MSG_FATAL("Failed to retrieve "<<m_trfCacheKey.fullKey()<<".");
       return false;
@@ -108,16 +108,20 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     const Amg::Transform3D globalToLocal{reEle->globalToLocalTrans(gctx, reEle->measurementHash(HitID))};
 
     // transform pre and post step positions to local positions
-    const Amg::Vector3D trackPosition{Amg::Hep3VectorToEigen(currentTrack->GetPosition())};
+    const Amg::Vector3D trackPosition{Amg::Hep3VectorToEigen(aStep->GetPreStepPoint()->GetPosition())};
     const Amg::Vector3D trackDirection{Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection())};
 
     const Amg::Vector3D trackLocPos{globalToLocal * trackPosition};  
     const Amg::Vector3D trackLocDir{globalToLocal.linear()* trackDirection};
   
-    /// Calculate the closest approach of the track w.r.t the z-axis
-    const double lambda = Amg::intersect<3>(Amg::Vector3D::Zero(), Amg::Vector3D::UnitZ(),
-                                       trackLocPos, trackLocDir).value_or(0);
-  
+    /// Calculate the closest approach of the track w.r.t. the wire. We're starting with the prestep
+    /// position and if, there's a closer approach to the wire from that, the propagation distance 
+    /// will be greater zero. Otherwise one would need to go backwards along the trajectory
+    double lambda = Amg::intersect<3>(Amg::Vector3D::Zero(), Amg::Vector3D::UnitZ(),
+                                            trackLocPos, trackLocDir).value_or(0);
+    if (std::abs(currentTrack->GetDefinition()->GetPDGEncoding()) == 11) {
+      lambda = std::max(lambda, 0.);
+    }
     const Amg::Vector3D driftHit{trackLocPos + lambda * trackLocDir};
 
     const double globalTime{currentTrack->GetGlobalTime() +  lambda / currentTrack->GetVelocity()};
@@ -126,13 +130,10 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
 
     ATH_MSG_VERBOSE(" Dumping of hit "<<m_detMgr->idHelperSvc()->toString(HitID)
                   <<", barcode: "<<trHelp.GenerateParticleLink().barcode()
-                  <<", "<<(*currentTrack)
-                  <<", driftCircle: "<<Amg::toString(driftHit, 2)
-                  <<", direction "<<Amg::toString(trackLocDir, 2)
-                  <<" to SimHit container ahead. ");
+                  <<", "<<(*currentTrack) <<", driftCircle: "<<Amg::toString(driftHit, 4)
+                  <<", direction "<<Amg::toString(trackLocDir, 4) <<" to SimHit container ahead. ");
 
-    xAOD::MuonSimHit* hit = new xAOD::MuonSimHit();
-    m_writeHandle->push_back(hit);  
+    xAOD::MuonSimHit* hit = m_writeHandle->push_back(std::make_unique<xAOD::MuonSimHit>());
     hit->setIdentifier(HitID); 
     hit->setLocalPosition(xAOD::toStorage(driftHit));  
     hit->setLocalDirection(xAOD::toStorage(trackLocDir));
@@ -142,8 +143,8 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit());
     hit->setKineticEnergy(currentTrack->GetKineticEnergy());
     hit->setGenParticleLink(trHelp.GenerateParticleLink());
-
-  return true;
+    hit->setStepLength(currentTrack->GetStepLength());
+    return true;
 }
 Identifier MdtSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,
                                                const MuonGMR4::MdtReadoutElement* readOutEle,

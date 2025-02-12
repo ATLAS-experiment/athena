@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTgcSensitiveDetector.h"
@@ -109,19 +109,20 @@ G4bool sTgcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       ATH_MSG_VERBOSE("No valid hit found");
       return true;
   }
-  const double globalTime = currentTrack->GetGlobalTime() + (*travelDist) / currentTrack->GetVelocity();
-  const Amg::Transform3D gapTrans{readOutEle->globalToLocalTrans(gctx, etaHitID)};
-  const Amg::Vector3D locHitDir = gapTrans.linear() * Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection());
-  const Amg::Vector3D locHitPos = gapTrans * gapCenterCross;
-  /// Final check that the hit is located at zero
-  if (std::abs(locHitPos.z()) > tolerance) {
-      THROW_EXCEPTION("The hit "<<Amg::toString(locHitPos)<<" doest not match "<<m_detMgr->idHelperSvc()->toString(etaHitID)
-                      <<"Wrong gas gap picked");
-  }
 
-  xAOD::MuonSimHit* hit = new xAOD::MuonSimHit();
-  m_writeHandle->push_back(hit);  
+  const Amg::Transform3D gapTrans{readOutEle->globalToLocalTrans(gctx, etaHitID)};
+
+  const Amg::Vector3D locPreStep{gapTrans*Amg::Hep3VectorToEigen(aStep->GetPreStepPoint()->GetPosition())};
+  const Amg::Vector3D locPostStep{gapTrans*Amg::Hep3VectorToEigen(aStep->GetPostStepPoint()->GetPosition())};
+  const Amg::Vector3D locHitPos = 0.5* (locPreStep + locPostStep);
+  const Amg::Vector3D locHitDir = gapTrans.linear() * Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection());
+  ATH_MSG_VERBOSE("Current track "<<Amg::toString(localPos)<<", prestep: "<<Amg::toString(locPreStep)
+             <<",  post step: "<<Amg::toString(locPostStep) <<" mid point: "<< Amg::toString(locHitPos));
+
+  const double globalTime = currentTrack->GetGlobalTime() + locHitDir.dot(locHitPos-localPos) / currentTrack->GetVelocity();
   
+  xAOD::MuonSimHit* hit = m_writeHandle->push_back(std::make_unique<xAOD::MuonSimHit>());
+
   TrackHelper trHelp(aStep->GetTrack());
   hit->setIdentifier(etaHitID); 
   hit->setLocalPosition(xAOD::toStorage(locHitPos));  
@@ -132,6 +133,7 @@ G4bool sTgcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit());
   hit->setKineticEnergy(currentTrack->GetKineticEnergy());
   hit->setGenParticleLink(trHelp.GenerateParticleLink());
+  hit->setStepLength(currentTrack->GetStepLength());
   return true;
 }
 

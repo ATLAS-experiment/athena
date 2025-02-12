@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -14,7 +14,7 @@ namespace {
    static const xAOD::PosAccessor<3> acc_localDir{"localDirectionDim3"};
 
    static const SG::AuxElement::Accessor<unsigned short> acc_mcEventIndex{preFixStr+"mcEventIndex"};
-   static const SG::AuxElement::Accessor<unsigned int> acc_mcBarcode{preFixStr+"mcBarcode"};
+   static const SG::AuxElement::Accessor<unsigned int> acc_uniqueID{preFixStr+"uniqueID"};
 }
 
 #define IMPLEMENT_SETTER_GETTER( DTYPE, GETTER, SETTER)                          \
@@ -47,6 +47,7 @@ IMPLEMENT_SETTER_GETTER(int, pdgId, setPdgId)
 IMPLEMENT_SETTER_GETTER(float, energyDeposit, setEnergyDeposit)
 IMPLEMENT_SETTER_GETTER(float, kineticEnergy, setKineticEnergy)
 IMPLEMENT_SETTER_GETTER(float, mass, setMass)
+IMPLEMENT_SETTER_GETTER(float, stepLength, setStepLength)
 
 float MuonSimHit_v1::beta() const{
    const float e = kineticEnergy();
@@ -54,27 +55,22 @@ float MuonSimHit_v1::beta() const{
 }
 void MuonSimHit_v1::setLocalPosition(MeasVector<3> vec) {
    VectorMap<3> lPos{acc_localPos(*this).data()};
-   lPos = vec;   
+   lPos = std::move(vec);   
 }
 ConstVectorMap<3> MuonSimHit_v1::localPosition() const { return ConstVectorMap<3>{acc_localPos(*this).data()};}
 
 void MuonSimHit_v1::setLocalDirection(MeasVector<3> vec) {
    VectorMap<3> lPos{acc_localDir(*this).data()};
-   lPos = vec;   
+   lPos = std::move(vec);   
 }
 ConstVectorMap<3> MuonSimHit_v1::localDirection() const { return ConstVectorMap<3>{acc_localDir(*this).data()};}
 
 const HepMcParticleLink& MuonSimHit_v1::genParticleLink() const {
    if (!m_hepMCLink) {
-      const unsigned short eventIndex = acc_mcEventIndex(*this);
-      const HepMcParticleLink::PositionFlag flag =  eventIndex > 0 ? HepMcParticleLink::IS_EVENTNUM :
-                                                                     HepMcParticleLink::IS_POSITION;
-      std::unique_ptr<HepMcParticleLink> link = std::make_unique<HepMcParticleLink>();
-
-      HepMcParticleLink::ExtendedBarCode barcode {acc_mcBarcode(*this),
-                                                  eventIndex,
-                                                  flag, HepMcParticleLink::IS_BARCODE}; // FIXME barcode-based
-      link->setExtendedBarCode(std::move(barcode));
+      auto link = std::make_unique<HepMcParticleLink>(acc_uniqueID(*this),
+                                                      acc_mcEventIndex(*this),
+                                                      HepMcParticleLink::IS_POSITION, 
+                                                      HepMcParticleLink::IS_ID);
       return *m_hepMCLink.set(std::move(link));
    }
    return (*m_hepMCLink);
@@ -82,7 +78,7 @@ const HepMcParticleLink& MuonSimHit_v1::genParticleLink() const {
 void MuonSimHit_v1::setGenParticleLink(const HepMcParticleLink& link) {
    m_hepMCLink.release();
    acc_mcEventIndex(*this) = link.eventIndex();
-   acc_mcBarcode(*this) = link.barcode();
+   acc_uniqueID(*this) = link.id();
 }
 
 }

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -25,9 +25,10 @@ MuonSimHitAuxContainer_v1::MuonSimHitAuxContainer_v1()
     SIM_AUXVARIABLE(pdgId);
     SIM_AUXVARIABLE(identifier);
     SIM_AUXVARIABLE(energyDeposit);
-    SIM_AUXVARIABLE(kineticEnergy);    
+    SIM_AUXVARIABLE(kineticEnergy);
+    SIM_AUXVARIABLE(stepLength);
     SIM_AUXVARIABLE(mcEventIndex);
-    SIM_AUXVARIABLE(mcBarcode);
+    SIM_AUXVARIABLE(uniqueID);
 }
 }  // namespace xAOD
 #undef SIM_AUXVARIABLE
