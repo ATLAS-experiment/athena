@@ -1083,8 +1083,8 @@ class athenaExecutor(scriptExecutor):
                     self._athenaMP = 0
 
         # Small hack to detect cases where there are so few events that it's not worthwhile running in MP mode
-        # which also avoids issues with zero sized files
-        if not self._disableMP and expectedEvents < self._athenaMP:
+        # which also avoids issues with zero sized files. Distinguish from the no-input case (e.g. evgen)
+        if not self._disableMP and expectedEvents < self._athenaMP and not self._inData=={'inNULL'}:
             msg.info("Disabling AthenaMP as number of input events to process is too low ({0} events for {1} workers)".format(expectedEvents, self._athenaMP))
             self._disableMP = True
             self._athenaMP = 0
