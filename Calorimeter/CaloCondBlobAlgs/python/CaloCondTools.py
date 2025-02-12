@@ -183,6 +183,14 @@ def iovFromRunLumi(runNum, lbkNum):
     return (int(runNum)<<32) + int(lbkNum)
 
 #
+#____________________________________________________________________
+def runLumiFromIov(iov):
+    """
+    Returns run and lumi block numbers from COOL timeStamp
+    """
+    return (int(iov >> 32), int(iov & 0xFFFFFFFF))
+
+#
 #______________________________________________________________________
 def decodeTimeString(timeString):
     """
@@ -338,6 +346,28 @@ class CaloBlobReader(CaloCondLogger):
             self.log().error("Fetching of systemId=%i failed with exception %s",systemId,e)
             return None
 
+    #____________________________________________________________________
+    def getDBobjsWithinRange(self, chan, point1inTime=(0,0), point2inTime=(2147483647,4294967295), printError=True):
+        """
+        Returns all DB objects for the given COOL channel, within given validity range -- default: [0-Infinity)
+        """
+
+        validityKey1 = getCoolValidityKey(point1inTime,True)
+        validityKey2 = getCoolValidityKey(point2inTime,False)
+
+        #print "Validity keys range is %s - %s" % (validityKey1, validityKey2)
+        self.log().debug("Validity key range is %s - %s", validityKey1,validityKey2)
+
+        objs = None
+        try:
+            dbChanSel = cool.ChannelSelection(chan)
+            #self.log().debug("Fetching blobs from DB: %s" % obj)
+            objs = self.__folder.browseObjects(validityKey1,validityKey2,dbChanSel,self.__tag)
+        except Exception as e:
+            if printError:
+                self.log().error("CaloCondTools.getDBobjsWithinRange(): Fetching of COOL_chan=%i failed with exception %s", chan,e)
+
+        return objs
 
     #____________________________________________________________________
     def folderIsMultiVersion(self):

@@ -24,10 +24,6 @@ StatusCode GfexMonitorAlgorithm::initialize() {
 	ATH_CHECK( m_gFexRhoTobKeyList.initialize() ) ;
 	ATH_CHECK( m_gFexGlobalTobKeyList.initialize() ) ;
 
-	// TOBs may come from trigger bytestream - renounce from scheduler
-	renounceArray(m_gFexJetTobKeyList);
-	renounceArray(m_gFexRhoTobKeyList);
-	renounceArray(m_gFexGlobalTobKeyList);
 
 	// Fill variable name map for global TOBs
 	m_globTobVarMap.insert({"gScalarEJwoj", {"gFexMet", "gFexSumEt"}});
