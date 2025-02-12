@@ -115,6 +115,7 @@
 + DetectorDescription/DetDescrCond/DetDescrConditions
 + DetectorDescription/DetDescrDictionary
 + DetectorDescription/GeoModel/AtlasGeoModel
++ DetectorDescription/GeoModel/DumpGeo
 + DetectorDescription/GeoModel/GeoModelInterfaces
 + DetectorDescription/GeoModel/GeoModelSvc
 + DetectorDescription/GeoModel/GeoModelUtilities
