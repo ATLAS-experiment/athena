@@ -38,7 +38,7 @@ Input   = 'Zee'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 Release = "current"
 
-Jobs = [ ( "Offline",     " TIDAdata-run3-offline.dat -r Electrons -o data-hists-offline.root" ) ]
+Jobs = [ ( "Offline",     " TIDAdata-run3-offline.dat -r Electrons_MediumLH -o data-hists-offline.root" ) ]
 
 Comp = [ ( "L2eleoffline",       "L2electron",      "data-hists-offline.root", " -c TIDAhisto-panel.dat  -d HLTL2-plots-offline " ),
          ( "L2eleoffline-lowpt", "L2electronLowpt", "data-hists-offline.root", " -c TIDAhisto-panel.dat  -d HLTL2-plots-lowpt-offline " ),

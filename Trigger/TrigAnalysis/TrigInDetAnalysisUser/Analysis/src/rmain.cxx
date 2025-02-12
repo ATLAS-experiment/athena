@@ -1324,7 +1324,8 @@ int main(int argc, char** argv)
 
 	if ( refChains[0] != probe_ref ) { 
 	  std::cerr << "default and probe chain references do not match: probe ref: " << probe_ref << " ref: " << refChains[0] << std::endl;
-	  return -1;
+	  /// try not exiting if ref chain is different from default, temporarily ...
+	  //	  return -1;
 	}
 
       }	

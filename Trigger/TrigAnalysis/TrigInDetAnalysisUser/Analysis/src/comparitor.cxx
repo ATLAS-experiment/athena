@@ -26,6 +26,8 @@
 #include "TrigInDetAnalysis/Efficiency1D.h"
 #include "TrigInDetAnalysis/Efficiency2D.h"
 
+#include "TrigInDetAnalysisExample/ChainString.h"
+
 #include "ReadCards.h"
 
 #include "Resplot.h"
@@ -854,6 +856,8 @@ int main(int argc, char** argv) {
 	}
 
 	std::string chain = arg;
+
+	if ( chain.find("=")!=std::string::npos ) chain = ChainString(arg);
 
 	replace ( chain, ':', '_' );
 	replace ( chain, ';', '_' );
