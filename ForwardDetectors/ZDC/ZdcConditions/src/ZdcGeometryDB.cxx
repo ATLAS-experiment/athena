@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcConditions/ZdcGeometryDB.h"
@@ -102,7 +102,7 @@ bool ZdcGeoDBGeometryDB::loadGeoDB()
   IRDBRecordset::const_iterator AccessSvc_iter;
   for(AccessSvc_iter = tanParams->begin(); AccessSvc_iter != tanParams->end(); ++AccessSvc_iter)
     {
-      std::string name = (*AccessSvc_iter)->getString("NAME");
+      const std::string & name = (*AccessSvc_iter)->getString("NAME");
       int side = (*AccessSvc_iter)->getInt("SIDE");
       double x = (*AccessSvc_iter)->getDouble("X");
       double y = (*AccessSvc_iter)->getDouble("Y");
@@ -123,7 +123,7 @@ bool ZdcGeoDBGeometryDB::loadGeoDB()
   
   for(AccessSvc_iter = zdcParams->begin(); AccessSvc_iter != zdcParams->end(); ++AccessSvc_iter)
     {
-      std::string name = (*AccessSvc_iter)->getString("NAME");
+      const std::string & name = (*AccessSvc_iter)->getString("NAME");
       std::string key = name;
       if ( (key.find("RPD") == std::string::npos) &&
 	   (key.find("BRAN") == std::string::npos) )

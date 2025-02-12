@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCGEOMETRYDB_H
 #define ZDCGEOMETRYDB_H
 
 #include <nlohmann/json.hpp>
-#include <iostream>
 #include "AsgMessaging/AsgMessaging.h"
 
 class IZdcGeometryDB  
