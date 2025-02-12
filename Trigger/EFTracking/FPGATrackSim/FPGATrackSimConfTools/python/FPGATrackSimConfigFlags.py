@@ -1,5 +1,6 @@
 #Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 import AthenaCommon.Constants
+from AthenaConfiguration.Enums import FlagEnum
 
 def createFPGATrackSimConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -293,15 +294,34 @@ def createGenScanFPGATrackSimConfigFlags():
 
 
     return cf
-    
+
+class graphTool(FlagEnum):
+    ModuleMap = 'ModuleMap'
+
+class moduleMapType(FlagEnum):
+    doublet = 'doublet'
+
+class moduleMapFunc(FlagEnum):
+    minmax = 'minmax'
+
+class roadMakerTool(FlagEnum):
+    ConnectedComponents = 'ConnectedComponents'
+
 def createGNNFPGATrackSimConfigFlags():
     cf = createBasicFPGATrackSimConfigFlags()
 
     cf.name = 'GNN'
+    cf.addFlag("graphTool", graphTool.ModuleMap, type=graphTool)
+    cf.addFlag("moduleMapType", moduleMapType.doublet, type=moduleMapType)
+    cf.addFlag("moduleMapFunc", moduleMapFunc.minmax, type=moduleMapFunc)
+    cf.addFlag("moduleMapTol",0.0000000001) # 1e-10
+    cf.addFlag("moduleMapPath",'')
+    cf.addFlag("GNNModelPath",'') 
+    cf.addFlag("roadMakerTool", roadMakerTool.ConnectedComponents, type=roadMakerTool)
+    cf.addFlag("edgeScoreCut",0.8)
+    cf.addFlag("doGNNRootOutput",False)
     
     return cf
-
-
 
 #####################################################################
 #####################################################################

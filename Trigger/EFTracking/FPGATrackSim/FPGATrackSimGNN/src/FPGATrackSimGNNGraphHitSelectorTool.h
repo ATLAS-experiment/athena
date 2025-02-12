@@ -14,16 +14,10 @@
  * So we will use this code to provide the proper object creation useful for the remainder of our GNN pattern recognition pipeline.
  */
 
-#include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimGNNHit.h"
-
-#include "TMath.h"
-
-#include <string>
-#include <vector>
 
 class FPGATrackSimGNNGraphHitSelectorTool : public AthAlgTool
 {

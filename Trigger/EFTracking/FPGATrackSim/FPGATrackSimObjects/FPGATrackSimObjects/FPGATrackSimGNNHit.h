@@ -36,14 +36,12 @@ public:
     void setY(float v) { m_y = v; }
     void setZ(float v) { m_z = v; }
     void setR(float v) { m_r = v; }
-    void setR2(float v) { m_r2 = v; }
     void setPhi(float v) { m_phi = v; }
     void setEta(float v) { m_eta = v; }
     float getX() const { return m_x; }
     float getY() const { return m_y; }
     float getZ() const { return m_z; }
     float getR() const { return m_r; }
-    float getR2() const { return m_r2; }
     float getPhi() const { return m_phi; }
     float getEta() const { return m_eta; }
 
@@ -87,7 +85,6 @@ protected:
     float m_y = 0;
     float m_z = 0;
     float m_r = 0;
-    float m_r2 = 0;
     float m_phi = 0;
     float m_eta = 0;
 

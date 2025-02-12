@@ -6,6 +6,7 @@ RDO_EVT=500 # used for map/bank generation
 # instructions on how to change version of files can be found in https://twiki.cern.ch/twiki/bin/view/Atlas/EFTrackingSoftware
 MAP_9L_VERSION="v0.22"
 MAP_5L_VERSION="v0.12"
+MAP_9L_GNN_VERSION="v0.10"
 
 BANK_9L_VERSION="v0.20"
 BANK_5L_VERSION="v0.11"
@@ -13,6 +14,7 @@ BANK_5L_VERSION="v0.11"
 export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
 MAPS_9L="maps_9L/OtherFPGAPipelines/${MAP_9L_VERSION}/"
 MAPS_5L="maps_5L/InsideOut/${MAP_5L_VERSION}/"
+MAPS_9L_GNN="maps_9L/GNN/${MAP_9L_GNN_VERSION}/"
 
 BANKS_9L="banks_9L/${BANK_9L_VERSION}/"
 BANKS_5L="banks_5L/${BANK_5L_VERSION}/"
@@ -23,6 +25,9 @@ ONNX_INPUT_FAKE="${BANKS_9L}ClassificationHT_v5.onnx"
 ONNX_INPUT_PARAM="${BANKS_9L}ParamEstimationHT_v5.onnx"
 ONNX_INPUT_HIT="${BANKS_9L}Ath_Extrap_v51_6_superBig_0_outsideIN.onnx"
 ONNX_INPUT_VOL="${BANKS_9L}HT_detector_v6_3.onnx"
+
+GNN_MODULE_MAP="GNN/v0.10/FPGATrackSim_DoubletModuleMap_v1.root" # New training will be done later
+GNN_ONNX_MODEL="GNN/v0.10/edge_classifier-InteractionGNN2-v1.onnx" # New training will be done later
 
 # set default values
 RUN_CKF=True

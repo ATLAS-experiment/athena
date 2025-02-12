@@ -250,13 +250,66 @@ def FPGATrackSimRoadUnionToolGNNCfg(flags):
     result = ComponentAccumulator()
     RF = CompFactory.FPGATrackSimRoadUnionTool()
 
-    GNNGraphHitSelectorTool = CompFactory.FPGATrackSimGNNGraphHitSelectorTool()
-
     patternRecoTool = CompFactory.FPGATrackSimGNNPatternRecoTool()
-    patternRecoTool.GNNGraphHitSelector = GNNGraphHitSelectorTool
+    patternRecoTool.GNNGraphHitSelector = CompFactory.FPGATrackSimGNNGraphHitSelectorTool()
+    patternRecoTool.GNNGraphConstruction = result.popToolsAndMerge(FPGATrackSimGNNGraphConstructionToolCfg(flags))
+    patternRecoTool.GNNEdgeClassifier = result.popToolsAndMerge(FPGATrackSimGNNEdgeClassifierToolCfg(flags))
+    patternRecoTool.GNNRoadMaker = result.popToolsAndMerge(FPGATrackSimGNNRoadMakerToolCfg(flags))
+    patternRecoTool.GNNRootOutput = result.popToolsAndMerge(FPGATrackSimGNNRootOutputToolCfg(flags))
+    patternRecoTool.doGNNRootOutput = flags.Trigger.FPGATrackSim.GNN.doGNNRootOutput
     
     RF.tools = [patternRecoTool]
     result.addPublicTool(RF, primary=True)
+
+    return result
+
+def FPGATrackSimGNNGraphConstructionToolCfg(flags):
+    result = ComponentAccumulator()
+
+    GNNGraphConstructionTool = CompFactory.FPGATrackSimGNNGraphConstructionTool()
+    GNNGraphConstructionTool.graphTool = flags.Trigger.FPGATrackSim.GNN.graphTool.value
+    GNNGraphConstructionTool.moduleMapType=flags.Trigger.FPGATrackSim.GNN.moduleMapType.value
+    GNNGraphConstructionTool.moduleMapFunc=flags.Trigger.FPGATrackSim.GNN.moduleMapFunc.value
+    GNNGraphConstructionTool.moduleMapTol=flags.Trigger.FPGATrackSim.GNN.moduleMapTol
+    GNNGraphConstructionTool.moduleMapPath=PathResolver.FindCalibFile(flags.Trigger.FPGATrackSim.GNN.moduleMapPath)
+
+    result.setPrivateTools(GNNGraphConstructionTool)
+
+    return result
+
+def FPGATrackSimGNNEdgeClassifierToolCfg(flags):
+    result = ComponentAccumulator()
+
+    from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
+    from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
+
+    GNNEdgeClassifierTool = CompFactory.FPGATrackSimGNNEdgeClassifierTool()
+    GNNEdgeClassifierTool.GNNInferenceTool = result.popToolsAndMerge(OnnxRuntimeInferenceToolCfg(
+       flags, flags.Trigger.FPGATrackSim.GNN.GNNModelPath, OnnxRuntimeType.CPU))
+
+    result.setPrivateTools(GNNEdgeClassifierTool)
+
+    return result
+
+def FPGATrackSimGNNRoadMakerToolCfg(flags):
+    result = ComponentAccumulator()
+
+    GNNRoadMakerTool = CompFactory.FPGATrackSimGNNRoadMakerTool()
+    GNNRoadMakerTool.roadMakerTool = flags.Trigger.FPGATrackSim.GNN.roadMakerTool.value
+    GNNRoadMakerTool.edgeScoreCut = flags.Trigger.FPGATrackSim.GNN.edgeScoreCut
+    GNNRoadMakerTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+
+    result.setPrivateTools(GNNRoadMakerTool)
+
+    return result
+    
+def FPGATrackSimGNNRootOutputToolCfg(flags):
+    result = ComponentAccumulator()
+
+    GNNRootOutputTool = CompFactory.FPGATrackSimGNNRootOutputTool()
+
+    result.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimGNNOUTPUT DATAFILE='GNNRootOutput.root', OPT='RECREATE'"]))
+    result.setPrivateTools(GNNRootOutputTool)
 
     return result
 
@@ -554,9 +607,6 @@ if __name__ == "__main__":
 
        if (flags.Trigger.FPGATrackSim.Hough.genScan):
            acc.addService(CompFactory.THistSvc(Output = ["GENSCAN DATAFILE='genscan.root', OPT='RECREATE'"]))
-
-       if (flags.Trigger.FPGATrackSim.Hough.GNN):
-           acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimGNNOUTPUT DATAFILE='GNNRootOutput.root', OPT='RECREATE'"]))
        
        if not flags.Trigger.FPGATrackSim.wrapperFileName:
            from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
