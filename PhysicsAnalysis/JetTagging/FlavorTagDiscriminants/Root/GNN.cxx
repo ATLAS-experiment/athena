@@ -12,6 +12,7 @@
 #include "FlavorTagDiscriminants/TracksLoader.h"
 #include "FlavorTagDiscriminants/FlowElementsLoader.h"
 #include "FlavorTagDiscriminants/HitsLoader.h"
+#include "FlavorTagDiscriminants/ElectronsLoader.h"
 
 #include "xAODBTagging/BTagging.h"
 #include "xAODJet/JetContainer.h"
@@ -76,6 +77,11 @@ namespace FlavorTagDiscriminants {
       case HIT:
         m_constituentsLoaders.push_back(std::make_shared<HitsLoader>(config, options));
         break;
+      case ELECTRON:
+        m_constituentsLoaders.push_back(std::make_shared<ElectronsLoader>(config, options));
+        break;
+      default:
+        throw std::runtime_error("Unknown constituent type");
       }
     }
 
