@@ -1,20 +1,24 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDC_MODULEBASE_H
 #define ZDC_MODULEBASE_H
 
-#include "ZdcIdentifier/ZdcID.h"
-#include "GeoModelKernel/GeoFullPhysVol.h"
-#include "GeoModelKernel/GeoDefinitions.h"
-#include "GeoModelInterfaces/StoredMaterialManager.h"
-#include "ZdcIdentifier/ZdcID.h"
+#include "GeoModelKernel/GeoDefinitions.h" // GeoTrf::Transform3D typedef
+
+#include <string>
+
+class GeoFullPhysVol;
+class ZdcID;
+class StoredMaterialManager;
+
+
 
 class ZDC_ModuleBase{
   public:
     ZDC_ModuleBase(){m_side = 0; m_module = -1;}
-    ZDC_ModuleBase(std::string name, int side, int module)
+    ZDC_ModuleBase(const std::string & name, int side, int module)
       : m_side( side ),
       m_module( module ),
       m_name( name ),
@@ -40,10 +44,10 @@ class ZDC_ModuleBase{
 
   protected:
 
-    int m_side;
-    int m_module;
+    int m_side{};
+    int m_module{};
     std::string m_name;
-    GeoTrf::Transform3D m_trf;
+    GeoTrf::Transform3D m_trf{};
 
 };
 
