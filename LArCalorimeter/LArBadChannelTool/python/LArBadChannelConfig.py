@@ -23,7 +23,8 @@ def LArBadChannelCfg(configFlags, tag=None, isSC=False):
         # TODO: move this in a better location
         result.merge(addFolders(configFlags, "/LAR/BadChannels/BadChannels", "LAR_OFL", className="CondAttrListCollection", tag="LARBadChannelsBadChannels-HECAQ3Missing", db="OFLP200"))
     elif configFlags.Input.isMC:
-        result.merge(addFolders(configFlags,"/LAR/BadChannels/BadChannels","LAR_OFL",tag=tag,
+       folder = "/LAR/BadChannels/BadChannelsSC" if isSC else "/LAR/BadChannels/BadChannels"
+       result.merge(addFolders(configFlags,folder,"LAR_OFL",tag=tag,
                                 className="CondAttrListCollection"))
     else:
        if not isSC:
