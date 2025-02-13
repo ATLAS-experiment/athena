@@ -11,7 +11,8 @@
 
 
 geo_db="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R4-MUONTEST.db"
-geo_tag="ATLAS-P2-RUN4-03-00-00"
+geo_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN4)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 validNTuple="MuonSimHitNtuple.root"
 
 export ATHENA_PROC_NUMBER=8
@@ -21,7 +22,7 @@ Sim_tf.py \
       --multithreaded True \
       --geometrySQLite True \
       --geometrySQLiteFullPath "${geo_db}" \
-      --conditionsTag 'default:OFLCOND-MC21-SDR-RUN4-02' \
+      --conditionsTag "default:${conditions}" \
       --simulator 'FullG4MT_QS' \
       --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
       --preExec "all:flags.Scheduler.CheckDependencies = True;flags.Scheduler.ShowDataDeps = True;flags.Scheduler.ShowDataFlow = True;flags.Scheduler.ShowControlFlow = True;" \

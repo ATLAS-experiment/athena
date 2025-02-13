@@ -21,9 +21,11 @@ HITS_File="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/mc
 RDO_BKG_File="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-03-00-00/RUN4_presampling.mu60.withSuperCell.25events.RDO.pool.root"
 OverlayOutFile="RUN4_ttbar.mu60.overlay.RDO.pool.root"
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 Overlay_tf.py \
 --CA \
---conditionsTag OFLCOND-MC21-SDR-RUN4-02 \
+--conditionsTag ${conditions} \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --geometryVersion ATLAS-P2-RUN4-03-00-00 \
 --inputHITSFile ${HITS_File} \

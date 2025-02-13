@@ -13,8 +13,10 @@ HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/m
 HighPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8481_s4149_s4150/*"
 LowPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8481_s4149_s4150/*"
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 Reco_tf.py \
-  --conditionsTag OFLCOND-MC21-SDR-RUN4-02 \
+  --conditionsTag ${conditions} \
   --geometryVersion ATLAS-P2-RUN4-03-00-00 \
   --digiSteeringConf "StandardSignalOnlyTruth" \
   --preInclude "all:Campaigns.PhaseIIPileUp200" \

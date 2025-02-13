@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Steering script for CampaignsARTTests with mu=1 inTimeTruth configs
 
@@ -9,7 +9,7 @@ number_of_events=$1
 
 #Option for sim/digi/reco
 default_geometry="ATLAS-P2-RUN4-03-00-00"
-default_condition="OFLCOND-MC21-SDR-RUN4-02"
+default_condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 #Post-processing for ID/ITk and FTag
 ftag_merge_DQA="${Athena_DIR}/src/PhysicsAnalysis/JetTagging/JetTagValidation/JetTagDQA/scripts/"

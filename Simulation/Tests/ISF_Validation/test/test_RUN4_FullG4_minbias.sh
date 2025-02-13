@@ -13,16 +13,18 @@ Input="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EVNT/mc2
 Output="test_minbias.HITS.pool.root"
 OutputFilter="test_minbias.HITS_FLT.pool.root"
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN4)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 # RUN4 setup
-# ATLAS-P2-RUN4-03-00-00 and OFLCOND-MC21-SDR-RUN4-02
 Sim_tf.py \
 --multithreaded \
 --CA \
---conditionsTag 'default:OFLCOND-MC21-SDR-RUN4-02' \
+--conditionsTag "default:${conditions}" \
 --simulator 'FullG4MT' \
 --postInclude 'default:PyJobTransforms.UseFrontier' \
 --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
---geometryVersion 'default:ATLAS-P2-RUN4-03-00-00' \
+--geometryVersion "default:${geometry}" \
 --inputEVNTFile "$Input" \
 --outputHITSFile "$Output" \
 --maxEvents 10 \

@@ -13,6 +13,8 @@
 # art-output: log.*
 # art-output: dcube
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 echo "ArtProcess: $ArtProcess"
 
 case $ArtProcess in
@@ -66,7 +68,7 @@ case $ArtProcess in
 	echo "Unsetting ATHENA_NUM_PROC=${ATHENA_NUM_PROC}"
 	unset  ATHENA_NUM_PROC
 
-	Reco_tf.py --CA --inputRDOFile=$x --outputAODFile=Nightly_AOD.pool.root --maxEvents=200 --autoConfiguration="everything" --conditionsTag="OFLCOND-MC21-SDR-RUN4-02" --preInclude egammaConfig.ConfigurationHelpers.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent
+	Reco_tf.py --CA --inputRDOFile=$x --outputAODFile=Nightly_AOD.pool.root --maxEvents=200 --autoConfiguration="everything" --conditionsTag="${conditions}" --preInclude egammaConfig.ConfigurationHelpers.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent
 
 	echo  "art-result: $? reconstruction"
 

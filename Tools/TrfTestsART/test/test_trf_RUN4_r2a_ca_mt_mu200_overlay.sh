@@ -12,8 +12,10 @@ fi
 HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8481_s4149/HITS.33605501._000106.pool.root.1"
 RDOFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-03-00-00/RUN4_presampling.mu200.withSuperCell.50events.RDO.pool.root"
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 Reco_tf.py \
-  --conditionsTag OFLCOND-MC21-SDR-RUN4-02 \
+  --conditionsTag "${conditions}" \
   --geometryVersion ATLAS-P2-RUN4-03-00-00 \
   --steering "doOverlay" "doRAWtoALL" \
   --preInclude "all:Campaigns.PhaseIIPileUp200" \
