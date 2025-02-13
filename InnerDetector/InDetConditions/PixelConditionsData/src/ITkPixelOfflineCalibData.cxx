@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,21 +16,19 @@ namespace ITk
 
   std::vector<float> PixelOfflineCalibData::getConstants() const {
 
-    std::map< const Identifier, std::vector<double> > constMap = m_clusterErrorData->getConstMap();
-
-    int entry_size = 9; // pixel Id + period_phi + period_sinheta + delta_x_slope + delta_x_offset + delta_err_x + delta_y_slope + delta_y_offset +  delta_err_y
-    int data_size = entry_size*constMap.size();
+    const std::vector< std::array<float, ITk::PixelClusterErrorData::kNParam> > &constMap = m_clusterErrorData->getConstMap();
 
     std::vector<float> constants;
-    constants.reserve(data_size);
+    constants.reserve( (ITk::PixelClusterErrorData::kNParam+1) * constMap.size() );
 
-    for(auto& x : constMap){
+    unsigned int id_hash=0;
+    --id_hash;
+    for(const std::array<float, ITk::PixelClusterErrorData::kNParam>& values : constMap){
+      ++id_hash;
+      long long pixelId = m_clusterErrorData->getIdentifier(id_hash).get_compact();
 
-      long long pixelId(x.first.get_compact());
-      std::vector<double> value = x.second;
-
-      constants.push_back(pixelId);
-      for(auto& y : value) constants.push_back(y);
+      constants.push_back(pixelId); // @TODO not necessariy  lossless to convert an IdentifierHash into a float
+      for(const auto& y : values) constants.push_back(y);
 
     }
 
@@ -66,7 +64,7 @@ namespace ITk
       double delta_y_offset = constants[i*entry_size + 7];
       double delta_err_y = constants[i*entry_size + 8];
 
-      m_clusterErrorData->setDeltaError(&pixelId, period_phi, period_sinheta,
+      m_clusterErrorData->setDeltaError(m_clusterErrorData->getIdentifierHash(pixelId), period_phi, period_sinheta,
 					delta_x_slope, delta_x_offset, delta_err_x,
 					delta_y_slope, delta_y_offset, delta_err_y);
 
