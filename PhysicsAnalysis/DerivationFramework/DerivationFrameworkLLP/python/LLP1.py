@@ -401,7 +401,8 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                  MuonLocation                = MergedMuonContainer,
                                  do_PVvetoCut                = False,
                                  DoTwoTrSoftBtag             = True,
-                                 TwoTrVrtMinDistFromPVCut    = 0.5))
+                                 TwoTrVrtMinDistFromPVCut    = 0.5,
+                                 associatePtCut              = 500.))
     LLP1VrtSecInclusiveSuffixes.append(BoostedMuonsSuffix)
 
     # bad jet cleaning
