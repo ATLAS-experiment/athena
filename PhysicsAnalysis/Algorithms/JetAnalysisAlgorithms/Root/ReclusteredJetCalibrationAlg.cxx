@@ -51,7 +51,7 @@ namespace CP
 
         xAOD::JetFourMom_t calibP4;
         calibP4.SetPxPyPzE(0,0,0,0);
-        for (auto element_link: element_links){
+        for (const auto& element_link: element_links){
           if (! element_link.isValid() ) {
             ATH_MSG_WARNING("Subjet element link invalid !!!!");
             continue;

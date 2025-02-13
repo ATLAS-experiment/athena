@@ -82,7 +82,7 @@ auto Lexer::nextSymbol() -> Symbol {
   }
 
   ++m_iterator;
-  return Symbol{type, t};
+  return Symbol{type, std::move(t)};
 }
 
 }  // namespace DetailSelectionExprParser
