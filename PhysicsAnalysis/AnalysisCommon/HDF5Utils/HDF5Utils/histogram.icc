@@ -201,7 +201,7 @@ namespace H5Utils::hist {
       H5::DSetCreatPropList ax_props;
       ax_props.copy(props);
       ax_props.setChunk(axdims.size(), axdims.data());
-      auto ax_type = hdf5_t<float>;
+      const auto& ax_type = hdf5_t<float>;
       auto ax_ds = axgroup.createDataSet(
         axis.name,
         ax_type,

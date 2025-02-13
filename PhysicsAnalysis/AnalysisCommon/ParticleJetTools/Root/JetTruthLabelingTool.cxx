@@ -235,7 +235,7 @@ int JetTruthLabelingTool::getTruthJetLabelDR( DecorHandles& dh,
   float dR_H = 9999;
   float dR_Top = 9999;
 
-  for (auto tlv_truth : tlv_truthParts) {
+  for (const auto& tlv_truth : tlv_truthParts) {
     float dR = tlv_truth.first.DeltaR(jet.p4());
     if( dR < m_dRTruthPart ) {
 
