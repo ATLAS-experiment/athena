@@ -73,7 +73,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   /// Efficiency plots
   if( m_trkAnaDefSvc->plotEfficiencies() ) {
     m_plots_eff_vsTest = std::make_unique< EfficiencyPlots >(
-        this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->testTag() );
+        this, "Tracks/Efficiencies/Purities", m_anaTag, m_trkAnaDefSvc->testTag() );
     m_plots_eff_vsRef = std::make_unique< EfficiencyPlots >(
         this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->referenceTag(),
         true, m_trkAnaDefSvc->hasFullPileupTruth() );
@@ -86,7 +86,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   /// Technical efficiency plots
   if( m_trkAnaDefSvc->plotTechnicalEfficiencies()) {
     m_plots_tech_eff_vsTest = std::make_unique< EfficiencyPlots >(
-        this, "Tracks/Efficiencies/Technical", m_anaTag, m_trkAnaDefSvc->testTag());
+        this, "Tracks/Efficiencies/Technical/Purities", m_anaTag, m_trkAnaDefSvc->testTag());
     m_plots_tech_eff_vsRef = std::make_unique< EfficiencyPlots >(
         this, "Tracks/Efficiencies/Technical", m_anaTag, m_trkAnaDefSvc->referenceTag(),
         true, m_trkAnaDefSvc->hasFullPileupTruth() );
