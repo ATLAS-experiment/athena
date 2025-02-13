@@ -331,7 +331,7 @@ def new_process(process='generate p p > t t~\noutput -f', plugin=None, keepJpegs
     in_config.close()
     for o in needed_options:
         if o not in option_paths:
-            mglog.warning('Path for option '+o+' not found in original config')
+            mglog.info('Path for option '+o+' not found in original config')
 
     mglog.info('Modifying config paths to avoid use of afs:')
     mglog.info(option_paths)
@@ -1403,7 +1403,7 @@ def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveP
                 elif '>' not in newline[ newline.find('#'): ]:
                     newline=newline
                 else:
-                    mglog.warning('Found bad LHE line with an XML mark in a comment: "'+newline.strip()+'"')
+                    mglog.info('Found bad LHE line with an XML mark in a comment: "'+newline.strip()+'"')
                     newline=newline[:newline.find('#')]+'#'+ (newline[newline.find('#'):].replace('>','-'))
                 # check for weightnames that should exist, simplify nominal weight names
                 if initrwgt is False:
@@ -2153,7 +2153,7 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
             continue
         if settings_lower[asetting] is None:
             continue
-        mglog.warning('Option '+asetting+' was not in the default run_card.  Adding by hand a setting to '+str(settings_lower[asetting]) )
+        mglog.info('Option '+asetting+' was not in the default run_card (normal for hidden options).  Adding by hand a setting to '+str(settings_lower[asetting]) )
         newCard.write( ' '+str(settings_lower[asetting])+'   = '+str(asetting)+'\n')
     # close files
     oldCard.close()
@@ -2388,14 +2388,33 @@ def run_card_consistency_check(isNLO=False,process_dir='.'):
 
     # consistency check of 4/5 flavour shceme settings
     FS_updates={}
+    proton_5flav = False
+    jet_5flav = False
     with open(process_dir+'/Cards/proc_card_mg5.dat', 'r') as file:
         content = file.readlines()
-        for line in content:
-            if line.startswith("define p") or line.startswith("define j"):
-                if "b" in line and "b~" in line:
-                    FS_updates['asrwgtflavor'] = 5
-                else:
-                    FS_updates['asrwgtflavor'] = 4
+        for rawline in content:
+            line = rawline.split('#')[0]
+            if line.startswith("define p"):
+                if 'b' in line.split() and 'b~' in line.split():
+                    proton_5flav = True
+                if 'j' in line.split() and jet_5flav:
+                    proton_5flav = True
+            if line.startswith("define j"):
+                if 'b' in line.split() and 'b~' in line.split():
+                    jet_5flav = True
+                if 'p' in line.split() and proton_5flav:
+                    jet_5flav = True
+    if proton_5flav or jet_5flav:
+        FS_updates['asrwgtflavor'] = 5
+        if not proton_5flav:
+            mglog.warning('Found 5-flavour jets but 4-flavour proton. This is inconsistent - please pick one.')
+            mglog.warning('Will proceed assuming 5-flavour scheme.')
+        if not jet_5flav:
+            mglog.warning('Found 5-flavour protons but 4-flavour jets. This is inconsistent - please pick one.')
+            mglog.warning('Will proceed assuming 5-flavour scheme.')
+    else:
+        FS_updates['asrwgtflavor'] = 4
+
     if len(FS_updates)==0:
         mglog.warning(f'Could not identify 4- or 5-flavor scheme from process card {process_dir}/Cards/proc_card_mg5.dat')
 
