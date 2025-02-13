@@ -514,11 +514,6 @@ if __name__ == "__main__":
     
 
     flags = initConfigFlags()
-
-    
-    
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
-    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
     
     ############################################
     # Flags used in the prototrack chain

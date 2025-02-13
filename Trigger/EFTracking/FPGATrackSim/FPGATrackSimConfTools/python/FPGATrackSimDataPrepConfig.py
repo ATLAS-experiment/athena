@@ -445,9 +445,6 @@ def runDataPrepChain():
     from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
     OnlyTrackingPreInclude(flags)
     
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
-    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
-    
     ############################################
 
     # ensure that the offline xAOD/ACTS SP and cluster containers are available for DataPrep and FastTrack
