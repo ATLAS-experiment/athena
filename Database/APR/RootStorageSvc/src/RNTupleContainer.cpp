@@ -251,11 +251,7 @@ DbStatus RNTupleContainer::checkAccess(DbDatabase& dbH,
    if ( dbH.isValid() )    {
       IDbDatabase* idb = dbH.info();
       auto rootDb = dynamic_cast<RootDatabase*>(idb);
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
       if (rootDb && rootDb->file()->Get<ROOT::RNTuple>(nam.c_str())) {
-#else
-      if (rootDb && rootDb->file()->Get<ROOT::Experimental::RNTuple>(nam.c_str())) {
-#endif
          return Success;
       }
    }
