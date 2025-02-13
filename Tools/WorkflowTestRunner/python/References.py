@@ -22,13 +22,13 @@ references_map = {
     "d1920": "v7",
     # Overlay
     "d1726": "v13",
-    "d1759": "v19",
+    "d1759": "v20",
     "d1912": "v8",
     # Reco
     "q442": "v71",
     "q449": "v115",
     "q452": "v31",
-    "q454": "v45",
+    "q454": "v46",
     # Derivations
     "data_PHYS_Run2": "v41",
     "data_PHYSLITE_Run2": "v24",
