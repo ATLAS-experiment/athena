@@ -26,6 +26,12 @@ def GainDecoratorCfg(flags, **kwargs):
 
 def EgammaCoreCellRecoveryCfg(flags, **kwargs):
     acc = ComponentAccumulator()
+    # needed for reading cells, do not rely on other config to do that
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+    acc.merge(LArGMCfg(flags))
+    from TileGeoModel.TileGMConfig import TileGMCfg
+    acc.merge(TileGMCfg(flags))
+    #
     acc.setPrivateTools(
         CompFactory.DerivationFramework.EGammaClusterCoreCellRecovery(**kwargs)
     )

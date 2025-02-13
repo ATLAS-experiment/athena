@@ -15,13 +15,14 @@ def IsolationSteeringDerivCfg(flags, name = 'IsolationSteeringDeriv', inType = '
 
     acc = ComponentAccumulator()
 
-    # Prepare densities
-    from IsolationAlgs.IsoDensityConfig import (
-        NFlowInputAlgCfg, DensityForIsoAlgCfg)
-    acc.merge(NFlowInputAlgCfg(flags,InputType = inType))
     suff = 'CSSK' if inType.find('CSSK') >= 0 else ''
-    acc.merge(DensityForIsoAlgCfg(flags,name='CentralDensityFor'+suff+'NFlowIso'))
-    acc.merge(DensityForIsoAlgCfg(flags,name='ForwardDensityFor'+suff+'NFlowIso'))
+    from IsolationAlgs.IsoDensityConfig import NFlowInputAlgCfg
+    acc.merge(NFlowInputAlgCfg(flags,InputType = inType))
+    # Prepare densities (not needed in HI, because no pu subtraction)
+    if not flags.HeavyIon.Egamma.doSubtractedClusters:
+        from IsolationAlgs.IsoDensityConfig import DensityForIsoAlgCfg
+        acc.merge(DensityForIsoAlgCfg(flags,name='CentralDensityFor'+suff+'NFlowIso'))
+        acc.merge(DensityForIsoAlgCfg(flags,name='ForwardDensityFor'+suff+'NFlowIso'))
 
     # Prepare CaloIsolationTool
     kwargs = dict()

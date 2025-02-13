@@ -12,7 +12,8 @@ def createEGammaDFConfigFlags():
     # slim event info or save all variables
     egdcf.addFlag("Derivation.Egamma.doEventInfoSlimming", False)
     # run EgammaClussterCoreCellRecovery tool (cells removed by timing cut) or  not
-    egdcf.addFlag("Derivation.Egamma.addMissingCellInfo", True)
+    egdcf.addFlag("Derivation.Egamma.addMissingCellInfo",
+                      lambda prevFlags: not prevFlags.Reco.EnableHI)
     # run ElectronChargeIDSelector tool or not
     egdcf.addFlag("Derivation.Egamma.addECIDS", True)
     # add improved prompt lepton tagger inputs/output
