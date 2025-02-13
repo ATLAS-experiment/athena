@@ -24,6 +24,11 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
 
+#include <memory>
+#include <vector>
+#include <map>
+#include <set>
+
 class FPGATrackSimGNNRoadMakerTool : public AthAlgTool
 {
     public:

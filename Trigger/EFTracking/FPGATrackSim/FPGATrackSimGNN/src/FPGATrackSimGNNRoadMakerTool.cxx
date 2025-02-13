@@ -118,21 +118,21 @@ void FPGATrackSimGNNRoadMakerTool::addRoad(const std::vector<std::shared_ptr<con
             auto &hit1 = hits[hitID];
             std::shared_ptr<FPGATrackSimHit> hitCopy1 = std::make_shared<FPGATrackSimHit>(*hit1);
             pmap->map(*hitCopy1);
-            mapped_road_hits.push_back(hitCopy1);
             hitLayers |= 1 << hitCopy1->getLayer();
-            
+            mapped_road_hits.push_back(std::move(hitCopy1));
+            //
             auto &hit2 = hits[hitID+1];
             std::shared_ptr<FPGATrackSimHit> hitCopy2 = std::make_shared<FPGATrackSimHit>(*hit2);
             pmap->map(*hitCopy2);
-            mapped_road_hits.push_back(hitCopy2);
             hitLayers |= 1 << hitCopy2->getLayer();
+            mapped_road_hits.push_back(std::move(hitCopy2));
         }
         else {
             auto &hit = hits[hitID];
             std::shared_ptr<FPGATrackSimHit> hitCopy = std::make_shared<FPGATrackSimHit>(*hit);
             pmap->map(*hitCopy);
-            mapped_road_hits.push_back(hitCopy);
             hitLayers |= 1 << hitCopy->getLayer();
+            mapped_road_hits.push_back(std::move(hitCopy));
         }
     }
     
@@ -142,7 +142,7 @@ void FPGATrackSimGNNRoadMakerTool::addRoad(const std::vector<std::shared_ptr<con
     sorted_hits.resize(m_nLayers);
     r.setRoadID(m_roads.size() - 1);
     r.setHitLayers(hitLayers);
-    r.setHits(std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>(sorted_hits));
+    r.setHits(std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>(std::move(sorted_hits)));
     r.setSubRegion(0);
 }
 
