@@ -94,6 +94,28 @@ namespace {
     return config;
   }
 
+  ConstituentsInputConfig get_electron_input_config(
+    const std::string& name,
+    const std::vector<std::string>& input_variables,
+    const TypeRegexes& type_regexes,
+    const SelRegexes& select_regexes
+    ) {
+    ConstituentsInputConfig config;
+    config.name = name;
+    config.order = ConstituentsSortOrder::PT_DESCENDING;
+    config.selection = str::match_first(select_regexes, name,
+                                  "electron selection matching");
+    for (const auto& varname: input_variables) {
+      InputVariableConfig input;
+      input.name = varname;
+      input.type = str::match_first(type_regexes, input.name,
+                                "electron type matching");
+      input.flip_sign = false;
+      config.inputs.push_back(input);
+    }
+    return config;
+  }
+
 namespace FlavorTagDiscriminants {
     //
     // Create a configuration for the constituents loaders
@@ -104,6 +126,16 @@ namespace FlavorTagDiscriminants {
       FlipTagConfig flip_config
     ){
       ConstituentsInputConfig config;
+      TypeRegexes electron_type_regexes {
+          // default electron variables
+          {"(deltaEta1|deltaPhiRescaled2|"
+               "ftag_energyOverP|Rhad|Rhad1|"
+               "Eratio|weta2|Rphi|Reta|wtots1|f1|f3|pt|eta|phi)"_r, ConstituentsEDMType::FLOAT},
+          // custom variables
+          {"(ftag_.*|ptfrac|ptrel|dr)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          // variables extracted from the corresponding track
+          {"(numberOf.*|d0.*|abs_eta|qOverP|eProbabilityHT)"_r, ConstituentsEDMType::CUSTOM_GETTER}
+      };
       TypeRegexes hits_type_regexes {
           // hits variables
           // ConstituentsEDMType picked correspond to the first matching regex
@@ -153,6 +185,11 @@ namespace FlavorTagDiscriminants {
           {".*_r22default_.*"_r, ConstituentsSelection::R22_DEFAULT},
           {".*_r22loose_.*"_r, ConstituentsSelection::R22_LOOSE},
       };
+
+      // For now we have only one selection for electrons
+      SelRegexes electron_select_regexes {
+        {".*_r22default.*"_r, ConstituentsSelection::R22_DEFAULT}
+      };
       
       if (name.find("tracks") != std::string::npos){
         std::regex flip_sequences;
@@ -183,9 +220,17 @@ namespace FlavorTagDiscriminants {
         config.type = ConstituentsType::HIT;
         config.output_name = "hits";
       }
+      else if (name.find("electrons") != std::string::npos){
+        config = get_electron_input_config(
+          name, input_variables,
+          electron_type_regexes,
+          electron_select_regexes);
+        config.type = ConstituentsType::ELECTRON;
+        config.output_name = "electrons";
+      }
       else{
         throw std::runtime_error(
-          "Unknown constituent type: " + name + ". Only tracks and flows are supported."
+          "Unknown constituent type: " + name + ". Only tracks, flows, hits and electrons are supported."
           );
       }
       return config;

@@ -49,6 +49,7 @@ set(FTDSource
   Root/TracksLoader.cxx
   Root/FlowElementsLoader.cxx
   Root/HitsLoader.cxx
+  Root/ElectronsLoader.cxx
   Root/CustomGetterUtils.cxx
   Root/StringUtils.cxx
 )

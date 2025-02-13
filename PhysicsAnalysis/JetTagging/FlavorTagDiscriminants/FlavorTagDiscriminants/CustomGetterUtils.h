@@ -63,6 +63,7 @@ namespace FlavorTagDiscriminants {
      * - xAOD::FlowElement
      * - xAOD::TrackParticle
      * - xAOD::TrackMeasurementValidation
+     * - xAOD::Electron
     */
     template <typename T>
     class SeqGetter {

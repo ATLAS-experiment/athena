@@ -48,7 +48,8 @@ namespace FlavorTagDiscriminants {
     enum class ConstituentsType {
         FLOW_ELEMENT,
         TRACK,
-        HIT
+        HIT,
+        ELECTRON
     };
 
     struct InputVariableConfig {

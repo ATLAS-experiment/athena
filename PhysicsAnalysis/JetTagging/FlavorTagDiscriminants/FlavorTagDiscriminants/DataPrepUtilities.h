@@ -51,6 +51,7 @@ namespace FlavorTagDiscriminants {
     TrackLinkType track_link_type;
     float default_output_value;
     std::string invalid_ip_key;
+    std::string electron_link_name;
   };
 
 
