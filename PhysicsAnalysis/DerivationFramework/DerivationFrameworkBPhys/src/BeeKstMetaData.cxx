@@ -127,8 +127,8 @@ namespace DerivationFramework {
      be used with k-th isoTrackMinPt. 
      */
     recordPropertyVS ( "isoTrackWorkingPoints" , { "Loose", "NoCut" } );
-    recordPropertyVD ( "isoTrackMinPts"        , {   500.0,    500.0 } );
-    recordPropertyS  ( "isoTTVAWorkingPoint"   ,    "Loose"            );
+    recordPropertyVD ( "isoTrackMinPts"        , {   500.0,   500.0 } );
+    recordPropertyS  ( "isoTTVAWorkingPoint"   ,    "Loose"           );
 
     /* 
     isoTargetLegTypes -> Calculate isolation for:
@@ -162,9 +162,9 @@ namespace DerivationFramework {
         ( 1 << 3 ) | ( 1 << 4 ) | ( 1 << 5 ) |\
         ( 1 << 6 ), 
         // 127: All Tracks, NO PV Association!!!
-        1 << 23, 
+        // 1 << 23, 
         // 8388608: Associated w/ Refitted PV associated w/ Candidate
-        1 << 24, 
+        // 1 << 24, 
         // 16777216: Associated w/ PV associated w/ Candidate
         // w/ minNumTracks = 0 => Equivalent to 1?
         1 << 27,
