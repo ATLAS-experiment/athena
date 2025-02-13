@@ -20,9 +20,6 @@ class JetParticleOriginVertexAssociation : public JetParticleAssociation {
         JetParticleOriginVertexAssociation(const std::string& name);
 
         virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
-            match(SG::ReadDecorHandleKey<xAOD::IParticleContainer>, const xAOD::JetContainer&, const xAOD::IParticleContainer&) const override;
-
-        virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
             match(const xAOD::JetContainer&, const xAOD::IParticleContainer&) const override;
 
         inline double coneSize(double pt) const {

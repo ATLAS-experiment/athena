@@ -20,7 +20,7 @@ StatusCode JetParticleAssociation::initialize() {
     m_decKey = m_jetContainerName + "." + m_decKey.key();
     ATH_CHECK(m_decKey.initialize());
     ATH_CHECK(m_particleKey.initialize());
-    ATH_CHECK(m_trk_origin_vtx.initialize());
+    //ATH_CHECK(m_trk_origin_vtx.initialize());
     
     ATH_MSG_DEBUG("Minimum pt threshold: " << m_ptMinimum);
     if (m_ptMinimum > 0.0) {
@@ -61,12 +61,14 @@ StatusCode JetParticleAssociation::decorate(const xAOD::JetContainer& jets) cons
     
     // Mario: maybe this is hard-coded and not the best solution
     // the second statement of asking it to be InDetTrackParticles is beacuse this is the container that has the variable m_trk_origin_vtx
+    /*
     if ((m_jetContainerName == "AntiKt4EMPFlowByVertexJets") && (m_particleKey.key()=="InDetTrackParticles")){
       matches = match(m_trk_origin_vtx, *viewJets.asDataVector(), *parts);
     }else{
       matches = match(*viewJets.asDataVector(), *parts);
     }
-
+    */
+    matches = match(*viewJets.asDataVector(), *parts);
     
     ATH_MSG_DEBUG("About to decorate jets with" << m_decKey);
 

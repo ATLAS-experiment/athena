@@ -21,9 +21,6 @@ class JetParticleCenterOfMassAssociation : public JetParticleAssociation {
         virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
             match(const xAOD::JetContainer&, const xAOD::IParticleContainer&) const override;
 
-        virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
-            match(SG::ReadDecorHandleKey<xAOD::IParticleContainer>, const xAOD::JetContainer&, const xAOD::IParticleContainer&) const override;
-
         inline double getAngleSize(const double& par_R) const{ 
             double result = acos(1-par_R*0.5);
             return result;

@@ -33,9 +33,6 @@ class JetParticleAssociation : public asg::AsgTool,
         // obvs to be provided by the deriving class
         virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
             match(const xAOD::JetContainer&, const xAOD::IParticleContainer&) const = 0;
-        // Mario: adding this overload because we have an extra argument
-        virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
-            match(SG::ReadDecorHandleKey<xAOD::IParticleContainer>, const xAOD::JetContainer&, const xAOD::IParticleContainer&) const = 0;
         
     private:
 
@@ -47,7 +44,7 @@ class JetParticleAssociation : public asg::AsgTool,
         SG::WriteDecorHandleKey<xAOD::JetContainer> m_decKey{this, "OutputDecoration", "", "Output decoration name"};
         SG::WriteDecorHandleKey<xAOD::JetContainer> m_passPtKey{this, "PassPtFlag", "", "Name for decoration indicating we passed pt threshold"};
         //Mario adding the track-vertex association
-        SG::ReadDecorHandleKey<xAOD::IParticleContainer> m_trk_origin_vtx { this, "btagIp_TrkOriginVtx", "InDetTrackParticles.btagIp_TrkOriginVtx", "Decoration for vertex matching to track" }; 
+        //SG::ReadDecorHandleKey<xAOD::IParticleContainer> m_trk_origin_vtx { this, "btagIp_TrkOriginVtx", "InDetTrackParticles.btagIp_TrkOriginVtx", "Decoration for vertex matching to track" }; 
 };
 
 #endif

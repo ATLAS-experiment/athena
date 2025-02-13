@@ -20,11 +20,6 @@ JetParticleShrinkingConeAssociation::JetParticleShrinkingConeAssociation(const s
         return;
     }
 
-const vector<vector<ElementLink<IParticleContainer> > >*
-JetParticleShrinkingConeAssociation::match(SG::ReadDecorHandleKey<xAOD::IParticleContainer>, const JetContainer& jets, const IParticleContainer& parts) const {
-  std::cerr << "testing .\n";
-  return {};
-}
 
 const vector<vector<ElementLink<IParticleContainer> > >*
 JetParticleShrinkingConeAssociation::match(const xAOD::JetContainer& jets, const xAOD::IParticleContainer& parts) const {
