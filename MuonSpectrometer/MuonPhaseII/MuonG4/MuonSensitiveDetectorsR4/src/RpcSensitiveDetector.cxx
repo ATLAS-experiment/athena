@@ -21,9 +21,6 @@ using namespace MuonGMR4;
 using namespace CxxUtils;
 using namespace ActsTrk;
 
-namespace {
-   constexpr double tolerance = 10. * Gaudi::Units::micrometer;
-}
 // construction/destruction
 namespace MuonG4R4 {
 

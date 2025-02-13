@@ -1,4 +1,3 @@
-
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
@@ -20,9 +19,6 @@
 
 using namespace ActsTrk;
 
-namespace {
-   constexpr double tolerance = 10. * Gaudi::Units::micrometer;
-}
 // construction/destruction
 namespace MuonG4R4 {
 
