@@ -3,9 +3,7 @@
 # art-type: grid
 # art-include: main/Athena
 # art-input-nfiles: 2
-# art-output: *.txt
-# art-output: *.root
-# art-output: *.xml
+# art-output: TVinput_*.root
 
 
 run () {
@@ -23,12 +21,12 @@ run () {
 
 LABEL="F100_ttbar_wholeDetector"
 run "${LABEL}" \
-    FPGATrackSimDataPrepOnRDO.sh --ttbar --events 3
-mkdir -p "${LABEL}"
-mv dataprep.root "${LABEL}"/
+    FPGATrackSimDataPrepOnRDO.sh -o "${LABEL}.root" --ttbar --events 3
+ls -ltr
+mv dataprep.root "TVinput_${LABEL}.root"
 
 LABEL="F100_singleMu_region0"
 run "${LABEL}" \
-    FPGATrackSimDataPrepOnRDO.sh --single-muon --events 10
-mkdir -p "${LABEL}"
-mv dataprep.root "${LABEL}"/
+    FPGATrackSimDataPrepOnRDO.sh -o "${LABEL}.root" --single-muon --events 10
+ls -ltr
+mv dataprep.root "TVinput_${LABEL}.root"

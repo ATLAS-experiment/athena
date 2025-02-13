@@ -48,15 +48,12 @@ run () {
 
 
 run "${LABEL} pipeline" \
-    FPGATrackSimDataPrepOnRDO.sh -o $INPUT_AOD_FILE -t
+    FPGATrackSimDataPrepOnRDO.sh -o $INPUT_AOD_FILE -t -n -1
 
 run "IDTPM" \
     runIDTPM.py --inputFileNames=$INPUT_AOD_FILE \
                 --outputFilePrefix="IDTPM.${PREFIX}" \
-                --writeAOD_IDTPM \
-                --trkAnaCfgFile=$IDTPM_CONFIG \
-                --plotsDefFileList="InDetTrackPerfMon/PlotsDefFileList_default.txt" \
-                --plotsCommonValuesFile="InDetTrackPerfMon/PlotsDefCommonValues.json"
+                --trkAnaCfgFile=$IDTPM_CONFIG
 
 if [ -z $ArtJobType ]; then
     echo "Not in ART environment. Stopping here..."
