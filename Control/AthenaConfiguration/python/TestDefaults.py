@@ -77,7 +77,7 @@ class defaultGeometryTags:
     RUN2 = "ATLAS-R2-2016-01-00-01"
     RUN2_BEST_KNOWLEDGE = "ATLAS-R2-2016-01-02-01"
     RUN3 = "ATLAS-R3S-2021-03-02-00"
-    RUN4 = "ATLAS-P2-RUN4-03-00-00"
+    RUN4 = "ATLAS-P2-RUN4-04-00-00"
 
     @staticmethod
     def autoconfigure(flags):
