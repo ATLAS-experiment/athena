@@ -47,6 +47,19 @@ import AthenaCommon.AtlasUnixStandardJob
 
 from PyUtils.Helpers import ROOT6Setup
 ROOT6Setup(batch=not opts.interactive)
+# Make sure that batch mode gets set properly.
+# ROOT6Setup will set things up so that whenever we do an `import ROOT',
+# then gROOT.SetBatch will be called properly.
+# However, if someone instead writes `from ROOT import gSystem'
+# (or anything other than gROOT), then the ROOT python update thread
+# will be started before ROOT6Setup calls SetBatch.
+# (This was then problematic for some MP jobs which used python
+# algorithms.)
+# So include the import here explictly to ensure that batch mode gets set.
+# The following call to SetBatch is strictly redundant, but included
+# for clarity.
+import ROOT
+ROOT.gROOT.SetBatch(not opts.interactive)
 
 
 ## now import the top-level module which eases interactive work and/or
