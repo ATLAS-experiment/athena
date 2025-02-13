@@ -15,6 +15,8 @@
 #define TEVENT POOL::TEvent
 #endif
 
+#include "PATInterfaces/SystematicSet.h"
+#include "PATInterfaces/SystematicVariation.h"
 #include "TFile.h"
 
 ANA_MSG_HEADER(testBTagJson)
@@ -23,8 +25,8 @@ using namespace testBTagJson;
 
 int main() {
 
-  std::string TaggerName = "GN2XWithMassv00";
-  std::string OperatingPoint = "FixedCutBEff_70";
+  std::string TaggerName = "GN2Xv01";
+  std::string OperatingPoint = "FlatMassQCDEff_0p25";
   std::string JetCollection = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets";
   std::string JsonConfigFile = "/afs/cern.ch/work/b/bdong/CDIMagic/csv_to_json_xbb/Xbb_lookup_table.json";
 
@@ -90,35 +92,17 @@ int main() {
 
       float sf = 1.;
 
-      if (tool->getScaleFactor(*jet, sf) != CP::CorrectionCode::Ok) {
-          ANA_MSG_ERROR("Failed to get scale factor for jet");
-          continue;
-      } else {
-        ANA_MSG_INFO(" nominal SF: " << sf << " =========");
-      }
-
       // Loop over each systematic variation
       for( const auto& var : sysSet) {
         CP::SystematicSet set;
         set.insert(var);
-        if( tool->applySystematicVariation(set) != StatusCode::SUCCESS ) {
-          ANA_MSG_ERROR("Failed to apply systematic variation");
-          return 1;
-        }
 
-        if (tool->getScaleFactor(*jet, sf) != CP::CorrectionCode::Ok) {
+        if (tool->getScaleFactor(*jet, sf, set) != CP::CorrectionCode::Ok) {
           ANA_MSG_ERROR("Failed to get scale factor for jet");
         } else {
           ANA_MSG_INFO("Applied systematic: " << var.name());
           ANA_MSG_INFO("                   SF: " << sf );
         }
-      }
-
-      // don't forget to switch back off the systematic variation
-      CP::SystematicSet emptySet;
-      if( tool->applySystematicVariation(emptySet) != StatusCode::SUCCESS ) {
-        ANA_MSG_ERROR("Failed to diasable systematic setting!");
-        return 1;
       }
     }
   }

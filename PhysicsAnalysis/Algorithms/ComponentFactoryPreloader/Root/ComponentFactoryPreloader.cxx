@@ -94,6 +94,8 @@
 #include <FTagAnalysisAlgorithms/BTaggingEfficiencyAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingInformationDecoratorAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingScoresAlg.h>
+#include <FTagAnalysisAlgorithms/XbbEfficiencyAlg.h>
+#include <FTagAnalysisAlgorithms/XbbInformationDecoratorAlg.h>
 #include <GammaORTools/VGammaORTool.h>
 #include <GoodRunsLists/GRLSelectorAlg.h>
 #include <GoodRunsLists/GoodRunsListSelectionTool.h>

@@ -28,28 +28,29 @@ StatusCode BTaggingSelectionJsonTool::initialize() {
   m_json_config = json::parse(jsonFile);
   jsonFile.close();
 
-  if (m_taggerName=="" || !m_json_config.contains(m_taggerName)){
+  if (m_taggerName.empty() || !m_json_config.contains(m_taggerName)){
     ATH_MSG_ERROR( " Tagger " + m_taggerName + " not found in JSON file: " + m_json_config_path );
     return StatusCode::FAILURE;
   }
 
-  if (m_jetAuthor=="" || !m_json_config[m_taggerName].contains(m_jetAuthor)){
+  if (m_jetAuthor.empty() || !m_json_config[m_taggerName].contains(m_jetAuthor)){
     ATH_MSG_ERROR( "Tagger: " +m_taggerName+ " and Jet Collection: " +m_jetAuthor+ " not found in JSON file: " +m_json_config_path );
     return StatusCode::FAILURE;
   }
 
-  if (m_OP=="" || !m_json_config[m_taggerName][m_jetAuthor].contains(m_OP)){
+  if (m_OP.empty() || !m_json_config[m_taggerName][m_jetAuthor].contains(m_OP)){
     ATH_MSG_ERROR( "OP " +m_OP+ " not available for " +m_taggerName+ " tagger.");
     return StatusCode::FAILURE;
   }
 
-  m_target = m_json_config[m_taggerName][m_jetAuthor]["meta"]["TaggingTarget"];
+  const auto& meta = m_json_config[m_taggerName][m_jetAuthor]["meta"];
+  m_target = meta["TaggingTarget"];
 
   // pre-load fraction values
   m_fractionAccessors.clear();
-  for (const auto& outclass : m_json_config[m_taggerName][m_jetAuthor]["meta"]["categories"]) {
+  for (const auto& outclass : meta["categories"]) {
     std::string outclassStr = std::string(outclass);
-    float fraction = m_json_config[m_taggerName][m_jetAuthor]["meta"]["fraction_" + outclassStr].get<float>();
+    float fraction = meta["fraction_" + outclassStr].get<float>();
     SG::AuxElement::ConstAccessor<float> accessor(m_taggerName + "_p" + outclassStr);
     bool isTarget = (outclassStr == m_target);
     m_fractionAccessors.emplace_back(fraction, accessor, isTarget);
