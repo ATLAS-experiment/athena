@@ -219,6 +219,7 @@ def getTauIDVars(name: str) -> list[str]:
     return [f'{name}_{sfx}' for sfx in ['Score', 'ScoreSigTrans', 'VeryLoose', 'Loose', 'Medium', 'Tight']]
 
 TauJet_vars = []
+TauJet_vars += getTauIDVars('GNTau')
 TauJet_vars_str = '.'.join(TauJet_vars)
 
 TauTrack_vars = ['pt', 'eta', 'phi', 'flagSet', 'trackLinks', 'd0TJVA', 'd0SigTJVA', 'z0sinthetaTJVA', 'z0sinthetaSigTJVA']

@@ -47,10 +47,16 @@ public:
     StatusCode get_clusters(const xAOD::TauJet &tau,
                             std::vector<xAOD::CaloVertexedTopoCluster> &out) const;
 
+    enum Discriminant {
+        NegLogPJet = 0,
+        PTau = 1
+    };
+
 private:
     std::string m_output_varname;
     std::string m_output_ptau;
     std::string m_output_pjet;
+    unsigned int m_output_discriminant;
 
     std::string m_weightfile_inclusive;
     std::string m_weightfile_0p;

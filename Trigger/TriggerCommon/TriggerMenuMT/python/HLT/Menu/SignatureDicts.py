@@ -627,7 +627,7 @@ TauChainParts = {
                         # Standard reconstruction triggers
                         # 2-step FTF (Core + Iso) + PT
                         # Split in different sequences to avoid running unnecesary TauIDs
-                        'tracktwoMVA', # DeepSet and MesonCuts triggers
+                        'tracktwoMVA', # GNTau, DeepSet and MesonCuts triggers
                         'tracktwoLLP', # RNNLLP triggers
 
                         # LRT reconstruction triggers
@@ -639,6 +639,9 @@ TauChainParts = {
     'selection'     : [
                         'idperf', # No selection
                         'perf', # NTrk selection
+
+                        # GNTau ID WPs:
+                        'verylooseGNTau', 'looseGNTau', 'mediumGNTau', 'tightGNTau',
 
                         # RNN/DeepSet ID WPs (for tracktwoMVA/LLP/LRT reco with DeepSet/RNNLLP TauIDs):
                         'looseRNN', 'mediumRNN', 'tightRNN',
@@ -661,7 +664,7 @@ TauChainParts_Default = {
     'L1threshold'   : '',
     'chainPartName' : '',
     'threshold'     : '',
-    'reconstruction': '',
+    'reconstruction': 'tracktwoMVA',
     'jet'           : 'lc',
     'preselection'  : '',
     'selection'     : '',

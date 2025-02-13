@@ -19,6 +19,7 @@
 #include "LArElecCalib/ILArShape.h" 
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
+#include "LArRecConditions/LArBadChannelCont.h"
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
 //Event classes
@@ -53,6 +54,9 @@ class LArRawChannelBuilderSCAlg : public AthReentrantAlgorithm {
 
 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMapSC","SG Key of LArOnOffIdMapping object"};
+
+  /// Bad Channel masking for Super-Cells
+  SG::ReadCondHandleKey<LArBadChannelCont> m_bcContKey{this, "LArBadChannelKey", "LArBadChannelSC", "Key of the LArBadChannelCont SC" };
   
   //Other jobOptions:
   Gaudi::Property<float> m_eCutFortQ{this,"ECutFortQ",256.0,"Time and Quality will be computed only for channels with E above this value"};

@@ -3,17 +3,21 @@ testChains = {
 
 #if !defined VTXANALYSIS && !defined LRT
 
-    "HLT_mu24_idperf_L1MU14FCH:HLT_IDTrack_Muon_FTF:HLT_Roi_L2SAMuon",
-    "HLT_mu24_idperf_L1MU14FCH:HLT_IDTrack_Muon_IDTrig:HLT_Roi_L2SAMuon",
-    "HLT_mu26_ivarperf_L1MU14FCH:HLT_IDTrack_MuonIso_FTF:HLT_Roi_MuonIso:post:d0=4",
-    "HLT_mu26_ivarperf_L1MU14FCH:HLT_IDTrack_MuonIso_IDTrig:HLT_Roi_MuonIso:post:d0=4",
+    "HLT_mu24_idperf_L1MU14FCH:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
+    "HLT_mu24_idperf_L1MU14FCH:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
+    "HLT_mu26_ivarperf_L1MU14FCH:key=HLT_IDTrack_MuonIso_FTF:roi=HLT_Roi_MuonIso:post:d0=4",
+    "HLT_mu26_ivarperf_L1MU14FCH:key=HLT_IDTrack_MuonIso_IDTrig:roi=HLT_Roi_MuonIso:post:d0=4",
+
+    "HLT_mu6_idperf_L1MU5VF:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
+    "HLT_mu6_idperf_L1MU5VF:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
+    "HLT_mu6_ivarmedium_L1MU5VF:key=HLT_IDTrack_MuonIso_FTF:roi=HLT_Roi_MuonIso:post:d0=4",
 
     "HLT_mu14_mu14_idtp_idZmumu_L12MU8F:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=0:post:extra=mu0_tag",
     "HLT_mu14_mu14_idtp_idZmumu_L12MU8F:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=1:post:extra=mu0_probe",
     "HLT_mu14_mu14_idtp_idZmumu_L12MU8F:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:te=0:post:extra=mu1_tag",
     "HLT_mu14_mu14_idtp_idZmumu_L12MU8F:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:te=1:post:extra=mu1_probe",
-    "HLT_mu24_idperf_L1MU14FCH:HLT_IDTrack_Muon_FTF:HLT_Roi_L2SAMuon",
-    "HLT_mu24_idperf_L1MU14FCH:HLT_IDTrack_Muon_IDTrig:HLT_Roi_L2SAMuon",
+    "HLT_mu24_idperf_L1MU14FCH:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
+    "HLT_mu24_idperf_L1MU14FCH:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
 
     "HLT_e26_idperf_loose_L1eEM26M:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",
     "HLT_e26_idperf_loose_L1eEM26M:key=HLT_IDTrack_Electron_IDTrig",
@@ -21,8 +25,13 @@ testChains = {
     "HLT_e28_idperf_loose_L1eEM28M:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",
     "HLT_e28_idperf_loose_L1eEM28M:key=HLT_IDTrack_Electron_IDTrig",
 
-    "HLT_e26_idperf_loose_L1eEM26M:HLT_IDTrack_Electron_GSF",
+    "HLT_e5_idperf_tight_L1eEM5:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",
+    "HLT_e5_idperf_tight_L1eEM5:key=HLT_IDTrack_Electron_GSF",
+    "HLT_e5_idperf_tight_L1eEM5:key=HLT_IDTrack_Electron_IDTrig",
+    "HLT_e5_idperf_tight_nogsf_L1eEM5:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",
+
     "HLT_e26_idperf_loose_L1eEM26M:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",
+    "HLT_e26_idperf_loose_L1eEM26M:key=HLT_IDTrack_Electron_GSF",
     "HLT_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1eEM26M:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron:te=0:post:extra=el_tag",
     "HLT_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1eEM26M:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron:te=1:post:extra=el_probe",
     "HLT_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1eEM26M:key=HLT_IDTrack_Electron_IDTrig:te=0:post:extra=el1_tag",
@@ -31,36 +40,36 @@ testChains = {
     "HLT_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1eEM26M:key=HLT_IDTrack_Electron_GSF:te=1:post:extra=el2_probe",
     "HLT_e28_idperf_loose_L1eEM28M:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",
 
-    "HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:HLT_IDTrack_TauCore_FTF:HLT_Roi_TauCore",
-    "HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:HLT_IDTrack_TauIso_FTF:HLT_Roi_TauIso",
-    "HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:HLT_IDTrack_Tau_IDTrig:HLT_Roi_TauIso",
+    "HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:key=HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore",
+    "HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:key=HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso",
+    "HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso",
 
-    "HLT_j20_roiftf_preselj20_L1RD0_FILLED:HLT_IDTrack_JetSuper_FTF:HLT_Roi_JetSuper",
-    "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50:HLT_IDTrack_Bjet_FTF:HLT_Roi_Bjet",
-    "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50:HLT_IDTrack_Bjet_IDTrig:HLT_Roi_Bjet",
-    "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50:HLT_IDTrack_FS_FTF:HLT_FSRoI:HLT_IDVertex_FS",
-    "HLT_j80_0eta290_020jvt_boffperf_pf_ftf_L1jJ90:HLT_IDTrack_FS_FTF_HLT_FSRoI_HLT_IDVertex_FS",
-    "HLT_j80_0eta290_020jvt_boffperf_pf_ftf_L1jJ90:HLT_IDTrack_JetSuper_FTF:HLT_Roi_JetSuper",
+    "HLT_j20_roiftf_preselj20_L1RD0_FILLED:HLT:key=IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper",
+    "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50:key=HLT_IDTrack_Bjet_FTF:roi=HLT_Roi_Bjet",
+    "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50:key=HLT_IDTrack_Bjet_IDTrig:roi=HLT_Roi_Bjet",
+    "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
+    "HLT_j80_0eta290_020jvt_boffperf_pf_ftf_L1jJ90:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
+    "HLT_j80_0eta290_020jvt_boffperf_pf_ftf_L1jJ90:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper",
 
-    "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50:HLT_IDTrack_FS_FTF:HLT_FSRoI:HLT_IDVertex_FS",
-    "HLT_j45_pf_ftf_preselj20_L1jJ40:HLT_IDTrack_FS_FTF:HLT_FSRoI:HLT_IDVertex_FS",
-    "HLT_j80_0eta290_020jvt_boffperf_pf_ftf_L1jJ90:HLT_IDTrack_FS_FTF_HLT_FSRoI_HLT_IDVertex_FS",
+    "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
+    "HLT_j45_pf_ftf_preselj20_L1jJ40:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
+    "HLT_j80_0eta290_020jvt_boffperf_pf_ftf_L1jJ90:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
 
-    "HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L14jJ50",
-    "HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1jJ30_VjTE200",
-    "HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1jJ40",
-    "HLT_j0_ftf_beamspotVtx_L1jJ30_VjTE200",
+    "HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L14jJ50:key=HLT_IDTrack_FTF_Beamspot",
+    "HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1jJ30_VjTE200:key=HLT_IDTrack_Beamspot",
+    "HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1jJ40:key=HLT_IDTrack_FTF_Beamspot",
+    "HLT_j0_ftf_beamspotVtx_L1jJ30_VjTE200:key=HLT_IDTrack_FTF_FS",
 
-    "HLT_mb_sptrk_L1RD0_FILLED:HLT_IDTrack_MinBias_IDTrig",
+    "HLT_mb_sptrk_L1RD0_FILLED:key=HLT_IDTrack_MinBias_IDTrig",
 
-    "HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_A_C_VjTE10:HLT_IDTrack_MinBiasPixel_IDTrig",
+    "HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_A_C_VjTE10:key=HLT_IDTrack_MinBiasPixel_IDTrig",
 
-    "HLT_mu4_cosmic_L1MU3V_EMPTY:HLT_IDTrack_Cosmic_IDTrig",
+    "HLT_mu4_cosmic_L1MU3V_EMPTY:key=HLT_IDTrack_Cosmic_IDTrig",
 
-    "HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V:HLT_IDTrack_Bmumux_FTF",
-    "HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V:HLT_IDTrack_Bmumux_IDTrig",
-    "HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:HLT_IDTrack_Bmumux_FTF",
-    "HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:HLT_IDTrack_Bmumux_IDTrig",
+    "HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V:key=HLT_IDTrack_Bmumux_FTF",
+    "HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V:key=HLT_IDTrack_Bmumux_IDTrig",
+    "HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:key=HLT_IDTrack_Bmumux_FTF",
+    "HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:key=HLT_IDTrack_Bmumux_IDTrig",
 
   
 
@@ -68,41 +77,41 @@ testChains = {
 
 #ifdef LRT
 
-    "HLT_mu20_LRT_idperf_L1MU14FCH:HLT_IDTrack_MuonLRT_FTF:HLT_Roi_L2SAMuon_LRT",
-    "HLT_mu20_LRT_idperf_L1MU14FCH:HLT_IDTrack_MuonLRT_IDTrig:HLT_Roi_L2SAMuon_LRT",
-    "HLT_mu24_idperf_L1MU14FCH:HLT_IDTrack_Muon_FTF:HLT_Roi_L2SAMuon",
-    "HLT_mu24_idperf_L1MU14FCH:HLT_IDTrack_Muon_IDTrig:HLT_Roi_L2SAMuon",
+    "HLT_mu20_LRT_idperf_L1MU14FCH:key=HLT_IDTrack_MuonLRT_FTF:roi=HLT_Roi_L2SAMuon_LRT",
+    "HLT_mu20_LRT_idperf_L1MU14FCH:key=HLT_IDTrack_MuonLRT_IDTrig:roi=HLT_Roi_L2SAMuon_LRT",
+    "HLT_mu24_idperf_L1MU14FCH:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
+    "HLT_mu24_idperf_L1MU14FCH:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
 
-    "HLT_fslrt0_L1jJ160:HLT_IDTrack_FSLRT_FTF:HLT_FSRoI",
-    "HLT_fslrt0_L1jJ160:HLT_IDTrack_FSLRT_IDTrig:HLT_FSRoI",
-    "HLT_fslrt0_L1jJ160:HLT_IDTrack_FS_FTF:HLT_FSRoI",
+    "HLT_fslrt0_L1jJ160:key=HLT_IDTrack_FSLRT_FTF:roi=HLT_FSRoI",
+    "HLT_fslrt0_L1jJ160:key=HLT_IDTrack_FSLRT_IDTrig:roi=HLT_FSRoI",
+    "HLT_fslrt0_L1jJ160:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI",
 
-    "HLT_e20_idperf_loose_lrtloose_L1eEM18L:HLT_IDTrack_ElecLRT_FTF:HLT_Roi_FastElectron_LRT",
-    "HLT_e20_idperf_loose_lrtloose_L1eEM18L:HLT_IDTrack_ElecLRT_IDTrig:HLT_Roi_FastElectron_LRT",
-    "HLT_e26_lhtight_ivarloose_e30_lhloose_nopix_lrtmedium_probe_L1eEM26M:HLT_IDTrack_ElecLRT_FTF:HLT_Roi_FastElectron_LRT:1",
-    "HLT_e26_lhtight_ivarloose_e30_lhloose_nopix_lrtmedium_probe_L1eEM26M:HLT_IDTrack_ElecLRT_IDTrig:HLT_Roi_FastElectron_LRT:1",
-    "HLT_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM26M:HLT_IDTrack_ElecLRT_FTF:HLT_Roi_FastElectron_LRT:1",
-    "HLT_e30_idperf_loose_lrtloose_L1eEM26M:HLT_IDTrack_ElecLRT_FTF:HLT_Roi_FastElectron_LRT",
-    "HLT_e30_idperf_loose_lrtloose_L1eEM26M:HLT_IDTrack_ElecLRT_IDTrig:HLT_Roi_FastElectron_LRT",
-    "HLT_e30_lhloose_nopix_lrtmedium_probe_g25_medium_L1eEM24L:HLT_IDTrack_ElecLRT_FTF:HLT_Roi_FastElectron_LRT:0",
-    "HLT_e30_lhloose_nopix_lrtmedium_probe_g25_medium_L1eEM24L:HLT_IDTrack_ElecLRT_IDTrig:HLT_Roi_FastElectron_LRT:0",
-    "HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L:HLT_IDTrack_ElecLRT_FTF:HLT_Roi_FastElectron_LRT:0",
-    "HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L:HLT_IDTrack_ElecLRT_IDTrig:HLT_Roi_FastElectron_LRT:0",
+    "HLT_e20_idperf_loose_lrtloose_L1eEM18L:key=HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_LRT",
+    "HLT_e20_idperf_loose_lrtloose_L1eEM18L:key=HLT_IDTrack_ElecLRT_IDTrig:roi=HLT_Roi_FastElectron_LRT",
+    "HLT_e26_lhtight_ivarloose_e30_lhloose_nopix_lrtmedium_probe_L1eEM26M:key=HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_LRT:1",
+    "HLT_e26_lhtight_ivarloose_e30_lhloose_nopix_lrtmedium_probe_L1eEM26M:key=HLT_IDTrack_ElecLRT_IDTrig:roi=HLT_Roi_FastElectron_LRT:1",
+    "HLT_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM26M:key=HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_LRT:1",
+    "HLT_e30_idperf_loose_lrtloose_L1eEM26M:key=HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_LRT",
+    "HLT_e30_idperf_loose_lrtloose_L1eEM26M:key=HLT_IDTrack_ElecLRT_IDTrig:roi=HLT_Roi_FastElectron_LRT",
+    "HLT_e30_lhloose_nopix_lrtmedium_probe_g25_medium_L1eEM24L:key=HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_LRT:0",
+    "HLT_e30_lhloose_nopix_lrtmedium_probe_g25_medium_L1eEM24L:key=HLT_IDTrack_ElecLRT_IDTrig:roi=HLT_Roi_FastElectron_LRT:0",
+    "HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L:key=HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_LRT:0",
+    "HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L:key=HLT_IDTrack_ElecLRT_IDTrig:roi=HLT_Roi_FastElectron_LRT:0",
 
-    "HLT_tau25_idperf_trackLRT_L1cTAU20M:HLT_IDTrack_TauLRT_FTF:HLT_Roi_TauLRT",
-    "HLT_tau25_idperf_trackLRT_L1cTAU20M:HLT_IDTrack_TauLRT_IDTrig:HLT_Roi_TauLRT",
-    "HLT_tau25_idperf_tracktwoLLP_L1cTAU20M:HLT_IDTrack_TauCore_FTF:HLT_Roi_TauCore",
-    "HLT_tau25_idperf_tracktwoLLP_L1cTAU20M:HLT_IDTrack_TauIso_FTF:HLT_Roi_TauIso",
-    "HLT_tau25_idperf_tracktwoLLP_L1cTAU20M:HLT_IDTrack_Tau_IDTrig:HLT_Roi_TauIso",
+    "HLT_tau25_idperf_trackLRT_L1cTAU20M:key=HLT_IDTrack_TauLRT_FTF:roi=HLT_Roi_TauLRT",
+    "HLT_tau25_idperf_trackLRT_L1cTAU20M:key=HLT_IDTrack_TauLRT_IDTrig:roi=HLT_Roi_TauLRT",
+    "HLT_tau25_idperf_tracktwoLLP_L1cTAU20M:key=HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore",
+    "HLT_tau25_idperf_tracktwoLLP_L1cTAU20M:key=HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso",
+    "HLT_tau25_idperf_tracktwoLLP_L1cTAU20M:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso",
 
 
   
 #else
 
-    "HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:HLT_IDTrack_Tau_IDTrig:HLT_Roi_TauIso:HLT_IDVertex_Tau/HLT_IDVertex_Tau",
+    "HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso:HLT_IDVertex_Tau/HLT_IDVertex_Tau",
 
-    "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50:HLT_IDTrack_FS_FTF:HLT_FSRoI:HLT_IDVertex_FS/HLT_IDVertex_FS:post:rvtx=HLT_IDVertex_FS",
-    "HLT_j45_pf_ftf_preselj20_L1jJ40:HLT_IDTrack_FS_FTF:HLT_FSRoI:HLT_IDVertex_FS/HLT_IDVertex_FS:post:rvtx=HLT_IDVertex_FS",
+    "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS/HLT_IDVertex_FS:post:rvtx=HLT_IDVertex_FS",
+    "HLT_j45_pf_ftf_preselj20_L1jJ40:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS/HLT_IDVertex_FS:post:rvtx=HLT_IDVertex_FS",
 
 
   
