@@ -12,11 +12,11 @@
 #ifndef IBTAGGINGEFFICIENCYJSONTOOL_H
 #define IBTAGGINGEFFICIENCYJSONTOOL_H
 
-#include "PATInterfaces/ISystematicsTool.h"
+#include "PATInterfaces/IReentrantSystematicsTool.h"
 #include <PATInterfaces/CorrectionCode.h>
 #include "xAODJet/Jet.h"
 
-class IBTaggingEfficiencyJsonTool : virtual public CP::ISystematicsTool {
+class IBTaggingEfficiencyJsonTool : virtual public CP::IReentrantSystematicsTool {
 
   // declare the interface that the class provides
   ASG_TOOL_INTERFACE( IBTaggingEfficiencyJsonTool )
@@ -24,7 +24,7 @@ class IBTaggingEfficiencyJsonTool : virtual public CP::ISystematicsTool {
   public:
   virtual ~IBTaggingEfficiencyJsonTool() {};
 
-  virtual CP::CorrectionCode getScaleFactor(const xAOD::Jet& jet, float& sf) const = 0;
+  virtual CP::CorrectionCode getScaleFactor(const xAOD::Jet& jet, float& sf, const CP::SystematicSet& sys) const = 0;
 
 }; // class IBTaggingEfficiencyJsonTool
 

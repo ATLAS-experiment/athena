@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
 #include "xAODBTaggingEfficiency/BTaggingEfficiencyJsonTool.h"
@@ -47,10 +47,11 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
     return StatusCode::FAILURE;
   }
 
-  m_truthlabel = m_json_config[m_taggerName][m_jetAuthor]["meta"]["TruthLabel"];
+  const auto& meta = m_json_config[m_taggerName][m_jetAuthor]["meta"];
+  m_truthlabel = meta["TruthLabel"];
 
   // map truth labels to categories
-  for (auto& el : m_json_config[m_taggerName][m_jetAuthor]["meta"]["labelMapping"].items()) {
+  for (auto& el : meta["labelMapping"].items()) {
     std::string label = el.key();
     for (const auto& num : el.value()) {
       int key = num; 
@@ -60,8 +61,8 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
 
   // preload pt bins, systematics and SFs for each category
   auto& json_config_OP = m_json_config[m_taggerName][m_jetAuthor][m_OP];
-  for (auto& label : m_labelMap) {
-    std::string labelString = label.second;
+  for (auto& label : meta["labelMapping"].items()) {
+    std::string labelString = label.key();;
 
     for (const auto& pt : json_config_OP[labelString]["pt"]) {
       m_ptMap[labelString].push_back(BTaggingToolUtil::getExtendedFloat(pt));
@@ -72,24 +73,27 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
       m_sysMap[labelString][systematicName] = values.get<std::vector<float>>();
     }
   }
-
+  
   m_currentSys = nullptr;
   m_sysCache.initialize(affectingSystematics(),
-                   [this](const CP::SystematicSet& systConfig, sysData& sys) 
+                   [this](const CP::SystematicSet& systConfig, sysData& sys)
                    {return calcSystematicVariation(systConfig, sys);});
-  ANA_CHECK (applySystematicVariation (CP::SystematicSet()));
+  if (m_sysCache.get(CP::SystematicSet(), m_currentSys) != StatusCode::SUCCESS) {
+    ATH_MSG_ERROR("Failed to initialize systematic cache");
+    return StatusCode::FAILURE;
+  }
 
   m_initialised = true;
   return StatusCode::SUCCESS;
 }
 
-CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& jet, float& sf ) const 
+CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& jet, float& sf, const CP::SystematicSet& sys ) const 
 {
   if (! m_initialised) {
     throw std::runtime_error("BTaggingEfficiencyJsonTool has not been initialised.");
   }
 
-  sf = 1.0;
+  sf = 0.0;
 
   SG::AuxElement::ConstAccessor<int> truthLabelAccessor( m_truthlabel );
   int truthLabel = truthLabelAccessor( jet );
@@ -98,7 +102,7 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& 
   if (it != m_labelMap.end()) {
     labelString = it->second;
   } else {
-    ATH_MSG_WARNING("No calibration on jet with truthLabel: " << truthLabel << ". Returning scale factor of 1.");
+    ATH_MSG_WARNING("No calibration on jet with truthLabel: " << truthLabel << ". Returning scale factor of 0.");
     return CP::CorrectionCode::OutOfValidityRange;
   }
 
@@ -112,15 +116,16 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& 
   }
 
   const auto& SFs = m_sfMap.at(labelString);
-  if (bin_index < SFs.size()) {
-    sf = SFs[bin_index];
-  } else {
-    ATH_MSG_WARNING("No calibration for jet with pt: " << jet.pt()/1000. << ". Returning scale factor of 1.");
+  if (bin_index >= SFs.size()) {
+    ATH_MSG_WARNING("No calibration for jet with pt: " << jet.pt()/1000. << ". Returning scale factor of 0.");
     return CP::CorrectionCode::OutOfValidityRange;
   }
-
-  if (m_currentSys->xbb_syst != 0) {
-    sf = sf + m_currentSys->xbb_syst * getSFSys(labelString, bin_index);
+  
+  sf = SFs[bin_index];
+  
+  sysData tempSys;
+  if (calcSystematicVariation(sys, tempSys) == StatusCode::SUCCESS && tempSys.xbb_syst != 0) {
+    sf += tempSys.xbb_syst * getSFSys(labelString, bin_index);
   }
 
   return CP::CorrectionCode::Ok;
@@ -145,28 +150,17 @@ StatusCode BTaggingEfficiencyJsonTool::calcSystematicVariation(const CP::Systema
   return StatusCode::SUCCESS;
 }
 
-bool BTaggingEfficiencyJsonTool::isAffectedBySystematic( const CP::SystematicVariation& systematic ) const
-{
-  CP::SystematicSet sys = affectingSystematics();
-  return sys.find( systematic) != sys.end();
-}
-
 CP::SystematicSet BTaggingEfficiencyJsonTool::affectingSystematics() const
 {
   CP::SystematicSet affectingSystematics;
   affectingSystematics.insert(CP::SystematicVariation("BTagging_Xbb_SYST", 1));
   affectingSystematics.insert(CP::SystematicVariation("BTagging_Xbb_SYST", -1));
-
+  
   return affectingSystematics;
 }
 
 CP::SystematicSet BTaggingEfficiencyJsonTool::recommendedSystematics() const
 {
     return affectingSystematics();
-}
-
-StatusCode BTaggingEfficiencyJsonTool::applySystematicVariation ( const CP::SystematicSet& sysSet )
-{
-  return m_sysCache.get(sysSet, m_currentSys);
 }
 
