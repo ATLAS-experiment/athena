@@ -271,44 +271,6 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
     )
     acc.addEventAlgo(algOR)
 
-    # Do the cleaning
-    from JetSelectorTools.JetSelectorToolsConfig import (
-        EventCleaningToolCfg,
-        JetCleaningToolCfg,
-    )
-
-    workingPoints = ["Loose"]
-    prefix = "DFCommonJets_"
-
-    for wp in workingPoints:
-        cleaningLevel = wp + "Bad"
-        # LLP WPs have a slightly different name format
-        if "LLP" in wp:
-            cleaningLevel = wp.replace("LLP", "BadLLP")
-
-        jetCleaningTool = acc.popToolsAndMerge(
-            JetCleaningToolCfg(
-                flags,
-                "JetCleaningTool_" + cleaningLevel,
-                "AntiKt4EMTopoJets",
-                cleaningLevel,
-                False,
-            )
-        )
-        acc.addPublicTool(jetCleaningTool)
-
-        ecTool = acc.popToolsAndMerge(
-            EventCleaningToolCfg(flags, "EventCleaningTool_" + wp, cleaningLevel)
-        )
-        ecTool.JetCleanPrefix = prefix
-        ecTool.JetContainer = "AntiKt4EMTopoJets"
-        ecTool.JetCleaningTool = jetCleaningTool
-        acc.addPublicTool(ecTool)
-
-        # Alg to calculate event-level and jet-level cleaning variables
-        # Only store event-level flags for Loose* WPs
-        # NO eventCleanAlg criteria in HI data (see pp config for details)
-
     # EGAM11 augmentations
     augmentationTools = []
 
@@ -606,10 +568,8 @@ def EGAM11Cfg(flags):
     # the XXXCPContent.py files also bring in some extra variables
     # for other collections
     EGAM11SlimmingHelper.SmartCollections = [
-        "Electrons",
         "Photons",
         "Muons",
-        "TauJets",
         "PrimaryVertices",
         "InDetTrackParticles"
     ]
@@ -638,12 +598,6 @@ def EGAM11Cfg(flags):
     # track jets
     EGAM11SlimmingHelper.ExtraVariables += [
         "AntiKt4PV0TrackJets.pt.eta.phi.e.m.btaggingLink.constituentLinks"
-    ]
-
-    # energy density
-    EGAM11SlimmingHelper.ExtraVariables += [
-        "TopoClusterIsoCentralEventShape.Density",
-        "TopoClusterIsoForwardEventShape.Density",
     ]
 
     # photons: detailed shower shape variables
