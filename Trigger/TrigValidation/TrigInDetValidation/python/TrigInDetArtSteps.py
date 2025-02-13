@@ -80,8 +80,8 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_mu24_idperf_L1MU14FCH',"
                 chains += "'HLT_mu26_ivarperf_L1MU14FCH',"
 
+                chains += "'HLT_mu4_mu4_idperf_1invmAB5_L12MU3VF',"
                 chains += "'HLT_mu6_idperf_L1MU5VF',"
-                chains += "'HLT_mu6_ivarmedium_L1MU5VF',"
 
                 flags += "'Muon',"
             if (i=='muonTnP') :
