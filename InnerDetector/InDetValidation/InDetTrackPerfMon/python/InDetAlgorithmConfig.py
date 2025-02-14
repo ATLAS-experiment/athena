@@ -28,8 +28,12 @@ def TruthHitDecoratorAlgCfg( flags, name="InDetPhysValTruthDecoratorAlg", **kwar
         kwargs.setdefault( "PixelClusterContainerName", "ITkPixelClusters" )
         kwargs.setdefault( "SCTClusterContainerName",   "ITkStripClusters" )
 
-    kwargs.setdefault( 'TruthParticleIndexDecoration', '' ) # FIXME - tech effs
-    #                   'origTruthIndex' if flags.PhysVal.IDPVM.doTechnicalEfficiency else '' )
+    doTechEff = False
+    for trkAnaName in flags.PhysVal.IDTPM.trkAnaNames:
+        if getattr( flags.PhysVal.IDTPM, trkAnaName+".plotTechnicalEfficiencies" ):
+            doTechEff = True
+            break
+    kwargs.setdefault( 'TruthParticleIndexDecoration', 'origTruthIndex' if doTechEff else '' )
 
     ## To be eventually migrated to IDTPM if need be
     acc.addEventAlgo( CompFactory.InDetPhysValTruthDecoratorAlg( name, **kwargs ) )
