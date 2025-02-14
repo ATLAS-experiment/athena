@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_DATAPREPARATION_STRIP_CLUSTERING_TOOL_H
@@ -84,6 +84,8 @@ private:
 			   const InDetDD::SiDetectorElement* element,
 			   xAOD::StripCluster& container) const;
 
+    const InDet::SiDetectorElementStatus *getStripDetElStatus(const EventContext& ctx) const;
+
     StringProperty m_timeBinStr{this, "timeBins", ""};
 
     ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool {this, "LorentzAngleTool", "",
@@ -107,9 +109,6 @@ private:
       "SiDetectorElementCollection key for strip"};
 
     int m_timeBinBits[3]{-1, -1, -1};
-
-
-    
 
 };
 
