@@ -303,16 +303,10 @@ namespace ActsTrk
        detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, ctx};
     ATH_CHECK(detectorElementToGeometryIdMap.isValid());
 
-    detail::DuplicateSeedDetector duplicateSeedDetector(total_seeds, m_skipDuplicateSeeds);
-    for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
-    {
-      duplicateSeedDetector.addSeeds(icontainer, *seedContainers[icontainer]);
-    }
-
     detail::TrackFindingMeasurements measurements(uncalibratedMeasurementContainers.size() /* number of measurement containers*/);
-    std::optional<detail::SharedHitCounter> sharedHits;
-    if (m_countSharedHits || m_trackStatePrinter.isSet())
-      sharedHits.emplace(uncalibratedMeasurementContainers.size());
+    std::size_t measurementIndexContainersSize = (m_skipDuplicateSeeds || m_countSharedHits || m_trackStatePrinter.isSet()) ? uncalibratedMeasurementContainers.size() : 0ul;
+    detail::MeasurementIndex measurementIndex(measurementIndexContainersSize);
+    detail::SharedHitCounter sharedHits;
     const Acts::TrackingGeometry *
        acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
     ATH_CHECK(acts_tracking_geometry != nullptr);
@@ -322,13 +316,19 @@ namespace ActsTrk
       measurements.addMeasurements(icontainer,
                                    *uncalibratedMeasurementContainers[icontainer],
                                    **detectorElementToGeometryIdMap);
-      if (sharedHits.has_value())
-        sharedHits->addMeasurements(*uncalibratedMeasurementContainers[icontainer]);
+      if (measurementIndexContainersSize > 0ul)
+        measurementIndex.addMeasurements(*uncalibratedMeasurementContainers[icontainer]);
     }
-    ATH_MSG_DEBUG("measurement index size = " << sharedHits->measurementIndexer().size());
+    ATH_MSG_DEBUG("measurement index size = " << measurementIndex.size());
 
     if (m_trackStatePrinter.isSet()) {
       m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, **detectorElementToGeometryIdMap, measurements.measurementOffsets());
+    }
+
+    detail::DuplicateSeedDetector duplicateSeedDetector(total_seeds, m_skipDuplicateSeeds);
+    for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
+    {
+      duplicateSeedDetector.addSeeds(icontainer, *seedContainers[icontainer], measurementIndex);
     }
 
     // ================================================== //
@@ -359,6 +359,7 @@ namespace ActsTrk
                            *acts_tracking_geometry,
                            **detectorElementToGeometryIdMap,
                            measurements,
+                           measurementIndex,
                            sharedHits,
                            duplicateSeedDetector,
                            *seedContainers.at(icontainer),
@@ -400,7 +401,8 @@ namespace ActsTrk
                               const Acts::TrackingGeometry &trackingGeometry,
                               const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
                               const detail::TrackFindingMeasurements &measurements,
-                              std::optional<detail::SharedHitCounter> &sharedHits,
+                              const detail::MeasurementIndex &measurementIndex,
+                              detail::SharedHitCounter &sharedHits,
                               detail::DuplicateSeedDetector &duplicateSeedDetector,
                               const ActsTrk::SeedContainer &seeds,
                               const InDetDD::SiDetectorElementCollection& detElements,
@@ -514,7 +516,7 @@ namespace ActsTrk
       }
 
       if (m_trackStatePrinter.isSet()) {
-        m_trackStatePrinter->printTrackState(tgContext, trackState, sharedHits->measurementIndexer(), true);
+        m_trackStatePrinter->printTrackState(tgContext, trackState, measurementIndex, true);
       }
 
       if (!m_doBranchStopper)
@@ -600,7 +602,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("Invoke track finding with " << seeds.size() << ' ' << seedType << " seeds.");
 
     std::size_t nPrinted = 0;
-    auto printSeed = [&](std::size_t iseed, const Acts::BoundTrackParameters &seedParameters, bool isKF = false)
+    auto printSeed = [&](unsigned int iseed, const Acts::BoundTrackParameters &seedParameters, bool isKF = false)
     {
       if (!m_trackStatePrinter.isSet())
         return;
@@ -608,11 +610,11 @@ namespace ActsTrk
       {
         ATH_MSG_INFO("CKF results for " << seeds.size() << ' ' << seedType << " seeds:");
       }
-      m_trackStatePrinter->printSeed(tgContext, *seeds[iseed], seedParameters, sharedHits->measurementIndexer(), iseed, isKF);
+      m_trackStatePrinter->printSeed(tgContext, *seeds[iseed], seedParameters, measurementIndex, iseed, isKF);
     };
 
     // Loop over the track finding results for all initial parameters
-    for (std::size_t iseed = 0; iseed < seeds.size(); ++iseed)
+    for (unsigned int iseed = 0; iseed < seeds.size(); ++iseed)
     {
       category_i = typeIndex * (m_statEtaBins.size() + 1);
       tracksContainerTemp.clear();
@@ -777,7 +779,7 @@ namespace ActsTrk
 
           // Fill the track infos into the duplicate seed detector
           if (m_skipDuplicateSeeds) {
-            storeSeedInfo(tracksContainerTemp, track, duplicateSeedDetector);
+            storeSeedInfo(tracksContainerTemp, track, duplicateSeedDetector, measurementIndex);
           }
 
           // copy selected track into output tracksContainer
@@ -785,7 +787,7 @@ namespace ActsTrk
           destProxy.copyFrom(track, true);  // make sure we copy track states!
 
           if (m_countSharedHits) {
-            auto [nShared, nBadTrackMeasurements] = sharedHits->computeSharedHits(destProxy, tracksContainer);
+            auto [nShared, nBadTrackMeasurements] = sharedHits.computeSharedHits(destProxy, tracksContainer, measurementIndex);
             if (nBadTrackMeasurements > 0)
               ATH_MSG_ERROR("computeSharedHits: " << nBadTrackMeasurements << " track measurements not found in input for " << seedType << " seed " << iseed << " track");
             ATH_MSG_DEBUG("found " << destProxy.nSharedHits() << " shared hits in " << seedType << " seed " << iseed << " track");
@@ -795,13 +797,13 @@ namespace ActsTrk
           ++event_stat[category_i][kNSelectedTracks];
 
           if (m_trackStatePrinter.isSet()) {
-            m_trackStatePrinter->printTrack(tgContext, tracksContainer, destProxy, sharedHits->measurementIndexer());
+            m_trackStatePrinter->printTrack(tgContext, tracksContainer, destProxy, measurementIndex);
           }
 
         } else {
           ATH_MSG_DEBUG("Track " << ntracks << " from " << seedType << " seed " << iseed << " failed track selection");
           if (m_trackStatePrinter.isSet()) {
-            m_trackStatePrinter->printTrack(tgContext, tracksContainerTemp, track, sharedHits->measurementIndexer(), true);
+            m_trackStatePrinter->printTrack(tgContext, tracksContainerTemp, track, measurementIndex, true);
           }
         }
       };
@@ -907,14 +909,15 @@ namespace ActsTrk
   void 
   TrackFindingAlg::storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,
                                  const detail::RecoTrackContainerProxy &track,
-                                 detail::DuplicateSeedDetector &duplicateSeedDetector) const {
+                                 detail::DuplicateSeedDetector &duplicateSeedDetector,
+                                 const detail::MeasurementIndex &measurementIndex) const {
 
       const auto lastMeasurementIndex = track.tipIndex();
       duplicateSeedDetector.newTrajectory();
 
       tracksContainer.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
-          [&duplicateSeedDetector](const detail::RecoTrackStateContainer::ConstTrackStateProxy &state) -> void
+          [&duplicateSeedDetector,&measurementIndex](const detail::RecoTrackStateContainer::ConstTrackStateProxy &state) -> void
           {
             // Check there is a source link
             if (not state.hasUncalibratedSourceLink())
@@ -922,7 +925,7 @@ namespace ActsTrk
 
             // Fill the duplicate selector
             auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-            duplicateSeedDetector.addMeasurement(sl);
+            duplicateSeedDetector.addMeasurement(sl, measurementIndex);
           }); // end visitBackwards
   }
 

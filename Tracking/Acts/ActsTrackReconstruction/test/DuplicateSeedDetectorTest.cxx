@@ -11,6 +11,7 @@
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "xAODInDetMeasurement/SpacePointAuxContainer.h"
 #include "ActsEvent/Seed.h"
+#include "src/detail/MeasurementIndex.h"
 #include "src/detail/DuplicateSeedDetector.h"
 #include <vector>
 #include <ranges>
@@ -105,6 +106,10 @@ int main() {
   assert( pixelSeeds.size() == nPixelSpacePoints/3ul );
   assert( stripSeeds.size() == nStripSpacePoints/3ul );
 
+  ActsTrk::detail::MeasurementIndex measurementIndex(2ul);
+  measurementIndex.addMeasurements(pixelClusters);
+  measurementIndex.addMeasurements(stripClusters);
+
   std::cout << "----------------------------------------------" << std::endl;
   std::size_t nTotalSeeds = pixelSeeds.size() + stripSeeds.size();
   std::cout << "Starting checks on DuplicateSeedDetector running on " << nTotalSeeds << " seeds" << std::endl;
@@ -119,8 +124,6 @@ int main() {
   assert( duplicateSeedDetector.numSeeds() == 0ul );
   assert( duplicateSeedDetector.nextSeeds() == 0ul );
   assert( duplicateSeedDetector.foundSeeds() == 0ul );
-  std::cout << "Checking seedIndexes()" << std::endl;
-  assert( duplicateSeedDetector.seedIndexes().empty() );
   std::cout << "Checking seedOffsets()" << std::endl;
   assert( duplicateSeedDetector.seedOffsets().empty() );
   std::cout << "Chacking UsedMeasurements()" << std::endl;
@@ -133,9 +136,9 @@ int main() {
   std::cout << "----------------------------------------------" << std::endl;
   std::cout << "Filling ..." << std::endl;
   std::cout << "- Adding Pixel Seed Container" << std::endl;
-  duplicateSeedDetector.addSeeds( 0ul, pixelSeeds );
+  duplicateSeedDetector.addSeeds( 0ul, pixelSeeds, measurementIndex );
   std::cout << "- Adding Strip Seed Container" << std::endl;
-  duplicateSeedDetector.addSeeds( 1ul, stripSeeds );
+  duplicateSeedDetector.addSeeds( 1ul, stripSeeds, measurementIndex );
 
   std::cout << "----------------------------------------------" << std::endl;
   std::cout << "Checks post-fill ..." << std::endl;
@@ -143,8 +146,6 @@ int main() {
   assert( duplicateSeedDetector.numSeeds() == nTotalSeeds );
   assert( duplicateSeedDetector.nextSeeds() == 0ul );
   assert( duplicateSeedDetector.foundSeeds() == 0ul );
-  std::cout << "Checking seedIndexes()" << std::endl;
-  assert( duplicateSeedDetector.seedIndexes().size() == nPixelClusters + nStripClusters );
   std::cout << "Checking seedOffsets()" << std::endl;
   assert( duplicateSeedDetector.seedOffsets().size() == 2ul );
   assert( duplicateSeedDetector.seedOffsets()[0] == 0ul );
@@ -168,12 +169,12 @@ int main() {
   std::cout << "----------------------------------------------" << std::endl;
   std::cout << "Start with adding measurements" << std::endl;
   std::cout << "Adding existing measurement ... " << std::endl;
-  duplicateSeedDetector.addMeasurement( pixelClusters.front() );
+  duplicateSeedDetector.addMeasurement( pixelClusters.front(), measurementIndex );
   std::cout << "- found seeds is now " << duplicateSeedDetector.foundSeeds() << std::endl;
   assert( duplicateSeedDetector.foundSeeds() == 1ul );
   std::cout << "Adding non existing measurement ..." << std::endl;
   xAOD::PixelCluster nonExistentCluster;
-  duplicateSeedDetector.addMeasurement( &nonExistentCluster );
+  duplicateSeedDetector.addMeasurement( &nonExistentCluster, measurementIndex );
   std::cout << "- found seeds is now " << duplicateSeedDetector.foundSeeds() << std::endl;
   assert( duplicateSeedDetector.foundSeeds() == 1ul );
 

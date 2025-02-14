@@ -211,7 +211,8 @@ namespace ActsTrk
                const Acts::TrackingGeometry &trackingGeometry,
                const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
                const detail::TrackFindingMeasurements &measurements,
-               std::optional<detail::SharedHitCounter> &sharedHits,
+               const detail::MeasurementIndex &measurementIndex,
+               detail::SharedHitCounter &sharedHits,
                detail::DuplicateSeedDetector &duplicateSeedDetector,
                const ActsTrk::SeedContainer &seeds,
                const InDetDD::SiDetectorElementCollection& detElements,
@@ -223,7 +224,8 @@ namespace ActsTrk
     // Create tracks from one seed's CKF result, appending to tracksContainer
     void storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,
                        const detail::RecoTrackContainerProxy &track,
-                       detail::DuplicateSeedDetector &duplicateSeedDetector) const;
+                       detail::DuplicateSeedDetector &duplicateSeedDetector,
+                       const detail::MeasurementIndex &measurementIndex) const;
 
     // Access Acts::CombinatorialKalmanFilter etc using "pointer to implementation"
     // so we don't have to instantiate the heavily templated classes in the header.

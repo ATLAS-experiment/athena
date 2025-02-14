@@ -21,23 +21,17 @@ namespace ActsTrk::detail {
   // Helper class to keep track of measurement indices, used for shared hits and debug printing
   class SharedHitCounter {
   public:
-    inline SharedHitCounter(std::size_t nMeasurementContainerMax);
+    SharedHitCounter() = default;
     SharedHitCounter(const SharedHitCounter &) = default;
     SharedHitCounter &operator=(const SharedHitCounter &) = default;
     SharedHitCounter(SharedHitCounter &&) noexcept = default;
     SharedHitCounter &operator=(SharedHitCounter &&) noexcept = default;
     ~SharedHitCounter() = default;
 
-    inline void addMeasurements(const xAOD::UncalibratedMeasurementContainer &clusterContainer);
-
     template <Acts::TrackContainerFrontend track_container_t>
-    inline std::pair<std::size_t, std::size_t> computeSharedHits(typename track_container_t::TrackProxy &track, track_container_t &tracks);
-
-    inline MeasurementIndex& measurementIndexer();
-    inline const MeasurementIndex& measurementIndexer() const;
+    inline std::pair<std::size_t, std::size_t> computeSharedHits(typename track_container_t::TrackProxy &track, track_container_t &tracks, const MeasurementIndex& measurementIndex);
 
   private:
-    MeasurementIndex m_measurementIndex;
     struct TrackStateIndex {
       std::size_t trackIndex;
       std::size_t stateIndex;

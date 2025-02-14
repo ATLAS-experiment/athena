@@ -2,34 +2,92 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "src/detail/MeasurementIndex.h"
+
 namespace ActsTrk::detail {
 
-  inline bool DuplicateSeedDetector::isEnabled() const
-  { return not m_disabled; };
+  inline bool DuplicateSeedDetector::isEnabled() const {
+    return !m_disabled;
+  };
 
-  inline const std::unordered_multimap<const xAOD::UncalibratedMeasurement *, std::size_t>&
-  DuplicateSeedDetector::seedIndexes() const
-  { return m_seedIndexes; }
-  
-  inline const std::vector<std::size_t>& DuplicateSeedDetector::nUsedMeasurements() const
-  { return m_nUsedMeasurements; }
-  
-  inline const std::vector<std::size_t>& DuplicateSeedDetector::nSeedMeasurements() const
-  { return m_nSeedMeasurements; }
-  
-  inline const std::vector<bool>& DuplicateSeedDetector::isDuplicateSeeds() const
-  { return m_isDuplicateSeeds; }
-  
-  inline const std::vector<std::size_t>& DuplicateSeedDetector::seedOffsets() const
-  { return m_seedOffsets; }
-  
-  inline std::size_t DuplicateSeedDetector::numSeeds() const
-  { return m_numSeeds; }
-  
-  inline std::size_t DuplicateSeedDetector::nextSeeds() const
-  { return m_nextSeeds; }
-  
-  inline std::size_t DuplicateSeedDetector::foundSeeds() const
-  { return m_foundSeeds; }
-  
-}
+  inline const std::vector<std::size_t>& DuplicateSeedDetector::nUsedMeasurements() const {
+    return m_nUsedMeasurements;
+  }
+
+  inline const std::vector<std::size_t>& DuplicateSeedDetector::nSeedMeasurements() const {
+    return m_nSeedMeasurements;
+  }
+
+  inline const std::vector<bool>& DuplicateSeedDetector::isDuplicateSeeds() const {
+    return m_isDuplicateSeeds;
+  }
+
+  inline auto DuplicateSeedDetector::seedOffsets() const -> const std::vector<index_t>& {
+    return m_seedOffsets;
+  }
+
+  inline auto DuplicateSeedDetector::numSeeds() const -> index_t {
+    return m_numSeeds;
+  }
+
+  inline auto DuplicateSeedDetector::nextSeeds() const -> index_t {
+    return m_nextSeeds;
+  }
+
+  inline std::size_t DuplicateSeedDetector::foundSeeds() const {
+    return m_foundSeeds;
+  }
+
+  inline void DuplicateSeedDetector::newTrajectory() {
+    if (m_disabled || m_foundSeeds == 0 || m_nextSeeds == m_nUsedMeasurements.size())
+      return;
+
+    auto beg = m_nUsedMeasurements.begin();
+    if (m_nextSeeds < m_nUsedMeasurements.size()) {
+      std::advance(beg, m_nextSeeds);
+    }
+
+    std::fill(beg, m_nUsedMeasurements.end(), 0ul);
+  }
+
+  inline void DuplicateSeedDetector::addMeasurement(const ActsTrk::ATLASUncalibSourceLink &sl, const MeasurementIndex& measurementIndex) {
+    if (m_disabled || m_nextSeeds == m_nUsedMeasurements.size())
+      return;
+
+    std::size_t hitIndex = measurementIndex.index(ActsTrk::getUncalibratedMeasurement(sl));
+    if (!(hitIndex < m_seedIndex.size()))
+      return;
+
+    for (index_t iseed : m_seedIndex[hitIndex]) {
+      assert(iseed < m_nUsedMeasurements.size());
+
+      if (iseed < m_nextSeeds || m_isDuplicateSeeds[iseed])
+        continue;
+
+      if (++m_nUsedMeasurements[iseed] >= m_nSeedMeasurements[iseed]) {
+        assert(m_nUsedMeasurements[iseed] == m_nSeedMeasurements[iseed]);  // shouldn't ever find more
+        m_isDuplicateSeeds[iseed] = true;
+      }
+      ++m_foundSeeds;
+    }
+  }
+
+  // For complete removal of duplicate seeds, assumes isDuplicate(iseed) is called for monotonically increasing iseed.
+  inline bool DuplicateSeedDetector::isDuplicate(std::size_t typeIndex, index_t iseed) {
+    if (m_disabled)
+      return false;
+
+    if (typeIndex < m_seedOffsets.size()) {
+      iseed += m_seedOffsets[typeIndex];
+    }
+
+    assert(iseed < m_isDuplicateSeeds.size());
+    // If iseed not increasing, we will miss some duplicate seeds, but won't exclude needed seeds.
+    if (iseed >= m_nextSeeds) {
+      m_nextSeeds = iseed + 1;
+    }
+
+    return m_isDuplicateSeeds[iseed];
+  }
+
+}  // namespace ActsTrk::detail
