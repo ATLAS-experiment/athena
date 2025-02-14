@@ -154,7 +154,7 @@ def FPGATrackSimSecondStageAlgCfg(inputFlags):
 
     FPGATrackSimMapping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     theFPGATrackSimSecondStageAlg.FPGATrackSimMapping = FPGATrackSimMapping
-
+    theFPGATrackSimSecondStageAlg.passLowestChi2TrackOnly = flags.Trigger.FPGATrackSim.ActiveConfig.passLowestChi2TrackOnly
     # If tracking is set to False, don't configure the bank service
     if theFPGATrackSimSecondStageAlg.tracking:
         result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.FPGATrackSimBankSvcCfg(flags))

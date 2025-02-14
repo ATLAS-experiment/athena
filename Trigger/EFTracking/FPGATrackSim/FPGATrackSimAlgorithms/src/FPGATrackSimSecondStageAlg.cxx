@@ -253,26 +253,70 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         if (m_doNNTrack) {
             ATH_MSG_DEBUG("Performing NN tracking");
             ATH_CHECK(m_NNTrackTool->getTracks(roads, tracks));
-        }
-        else {
-            ATH_CHECK(m_trackFitterTool->getTracks(roads, tracks));
-            float bestchi2 = 1.e15;
-            for (const FPGATrackSimTrack& track : tracks) {
-                float chi2 = track.getChi2ndof();
-                if (chi2 < bestchi2) bestchi2 = chi2;
-                auto mon_chi2 = Monitored::Scalar<float>("chi2_2nd_all", chi2);
-                Monitored::Group(m_monTool, mon_chi2);
+        } else {
+            ATH_MSG_DEBUG("Performing Linear tracking");
+
+            if (m_passLowestChi2TrackOnly) { // Pass only the lowest chi2 track per road
+                std::vector<FPGATrackSimTrack> filteredTracks;
+
+                for (const auto& road : roads) {
+                    // Collect tracks for the current road
+                    std::vector<FPGATrackSimTrack> tracksForCurrentRoad;
+                    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roadVec = {road};
+                    ATH_CHECK(m_trackFitterTool->getTracks(roadVec, tracksForCurrentRoad));
+
+                    // Find and keep the best track (lowest chi2) for this road
+                    if (!tracksForCurrentRoad.empty()) {
+                        auto bestTrackIter = std::min_element(
+                            tracksForCurrentRoad.begin(), tracksForCurrentRoad.end(),
+                            [](const FPGATrackSimTrack& a, const FPGATrackSimTrack& b) {
+                                return a.getChi2ndof() < b.getChi2ndof();
+                            });
+
+                        if (bestTrackIter != tracksForCurrentRoad.end() && bestTrackIter->getChi2ndof() < 1.e15) {
+                            filteredTracks.push_back(*bestTrackIter);
+
+                            // Monitor chi2 of the best track
+                            auto mon_chi2 = Monitored::Scalar<float>("chi2_2nd_all", bestTrackIter->getChi2ndof());
+                            Monitored::Group(m_monTool, mon_chi2);
+                        }
+                    }
+                }
+
+                // Update tracks with filtered tracks
+                tracks = std::move(filteredTracks);
+
+                // Monitor the best chi2 across all roads
+                if (!tracks.empty()) {
+                    float bestChi2Overall = std::min_element(
+                        tracks.begin(), tracks.end(),
+                        [](const FPGATrackSimTrack& a, const FPGATrackSimTrack& b) {
+                            return a.getChi2ndof() < b.getChi2ndof();
+                        })->getChi2ndof();
+
+                    auto mon_best_chi2 = Monitored::Scalar<float>("best_chi2_2nd", bestChi2Overall);
+                    Monitored::Group(m_monTool, mon_best_chi2);
+                }
+            } else { // Pass all tracks with chi2 < 1e15
+                ATH_CHECK(m_trackFitterTool->getTracks(roads, tracks));
+                float bestchi2 = 1.e15;
+                for (const FPGATrackSimTrack& track : tracks) {
+                    float chi2 = track.getChi2ndof();
+                    if (chi2 < bestchi2) bestchi2 = chi2;
+                    auto mon_chi2 = Monitored::Scalar<float>("chi2_2nd_all", chi2);
+                    Monitored::Group(m_monTool, mon_chi2);
+                }
+                auto mon_best_chi2 = Monitored::Scalar<float>("best_chi2_2nd", bestchi2);
+                Monitored::Group(m_monTool, mon_best_chi2);
             }
-            auto mon_best_chi2 = Monitored::Scalar<float>("best_chi2_2nd",bestchi2);
-            Monitored::Group(m_monTool,mon_best_chi2);
         }
-    }
-    else { // we are not doing tracking so get the number of combinations for monitoring
+    } else {
+        // No tracking; collect dummy tracks for monitoring
         int ntrackDummy = 0;
-        for (const std::shared_ptr<const FPGATrackSimRoad>& road : roads) {
+        for (const auto& road : roads) {
             ntrackDummy += road->getNHitCombos();
         }
-        tracks.resize(ntrackDummy); // just filled with dummy tracks for monitoring
+        tracks.resize(ntrackDummy); // Dummy tracks for monitoring
     }
     auto mon_ntracks = Monitored::Scalar<unsigned>("ntrack_2nd", tracks.size());
     Monitored::Group(m_monTool,mon_ntracks);
