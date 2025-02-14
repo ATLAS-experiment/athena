@@ -16,12 +16,14 @@ FixHepMC::FixHepMC(const std::string& name, ISvcLocator* pSvcLocator)
   , m_loopKilled(0)
   , m_pdg0Killed(0)
   , m_decayCleaned(0)
+  , m_unstablePurged(0)
   , m_totalSeen(0)
   , m_replacedPIDs(0)
 {
   declareProperty("KillLoops", m_killLoops = true, "Remove particles in loops?");
   declareProperty("KillPDG0", m_killPDG0 = true, "Remove particles with PDG ID 0?");
   declareProperty("CleanDecays", m_cleanDecays = true, "Clean decay chains from non-propagating particles?");
+  declareProperty("PurgeUnstableWithoutEndVtx", m_purgeUnstableWithoutEndVtx = false, "Remove unstable particles without decay vertex?");
   declareProperty("PIDmap", m_pidmap = std::map<int,int>(), "Map of PDG IDs to replace");
 }
 #ifndef HEPMC3
@@ -265,15 +267,38 @@ StatusCode FixHepMC::execute() {
       if (bad_particle) toremove.push_back(ip);
     }
 
-    // Escape here if there's nothing more to do, otherwise do the cleaning
-    if (toremove.empty()) continue;
-    ATH_MSG_DEBUG("Cleaning event record of " << toremove.size() << " bad particles");
     // Properties before cleaning
     const int num_particles_orig = evt->particles().size();
-    for (auto part: toremove) evt->remove_particle(part);
+
+    // Do the cleaning
+    if (!toremove.empty()) {
+      ATH_MSG_DEBUG("Cleaning event record of " << toremove.size() << " bad particles");
+      for (auto part: toremove) evt->remove_particle(part);
+    }
+
+    if(m_purgeUnstableWithoutEndVtx) {
+      int purged=0;
+      do {
+        purged=0;
+        const std::vector <HepMC::GenParticlePtr> allParticles=evt->particles();
+        for(auto p : allParticles) {
+          HepMC::ConstGenVertexPtr end_v=p->end_vertex();
+          if(p->status() == 2 && !end_v) {
+            evt->remove_particle(p);
+            ++purged;
+            ++m_unstablePurged;
+          } 
+        }
+      }
+      while (purged>0);
+    }
+
     const int num_particles_filt = evt->particles().size();
-     // Write out the change in the number of particles
-    ATH_MSG_INFO("Particles filtered: " << num_particles_orig << " -> " << num_particles_filt);
+
+    if(num_particles_orig!=num_particles_filt) {
+      // Write out the change in the number of particles
+      ATH_MSG_INFO("Particles filtered: " << num_particles_orig << " -> " << num_particles_filt);
+    }
  #else
 
     // Add a unit entry to the event weight vector if it's currently empty
@@ -431,10 +456,6 @@ StatusCode FixHepMC::execute() {
       if (bad_particle) toremove.push_back(*ip);
     }
 
-    // Escape here if there's nothing more to do, otherwise do the cleaning
-    if (toremove.empty()) continue;
-    ATH_MSG_DEBUG("Cleaning event record of " << toremove.size() << " bad particles");
-
     // Properties before cleaning
     const int num_particles_orig = evt->particles_size();
     int num_orphan_vtxs_orig = 0;
@@ -445,35 +466,56 @@ StatusCode FixHepMC::execute() {
       if ((*v)->particles_in_size()==0) num_noparent_vtxs_orig++;
       if ((*v)->particles_out_size()==0) num_nochild_vtxs_orig++;
     }
-    // Clean!
-    int signal_vertex_bc = evt->signal_process_vertex() ? evt->signal_process_vertex()->barcode() : 0;
-    //This is the only place where reduce is used.
-    reduce(evt , toremove);
-    if (evt->barcode_to_vertex (signal_vertex_bc) == nullptr) {
-      evt->set_signal_process_vertex (nullptr);
+
+    // Do the cleaning
+    if (!toremove.empty()) {
+      ATH_MSG_DEBUG("Cleaning event record of " << toremove.size() << " bad particles");
+      // Clean!
+      int signal_vertex_bc = evt->signal_process_vertex() ? evt->signal_process_vertex()->barcode() : 0;
+      //This is the only place where reduce is used.
+      reduce(evt , toremove);
+      if (evt->barcode_to_vertex (signal_vertex_bc) == nullptr) {
+        evt->set_signal_process_vertex (nullptr);
+      }
+    }
+
+    if(m_purgeUnstableWithoutEndVtx) {
+      int purged=0;
+      do {
+        for (HepMC::GenParticle* p : *evt) {
+          HepMC::ConstGenVertexPtr end_v = p->end_vertex();
+          if (p->status() == 2 && !end_v) {
+            delete p->production_vertex()->remove_particle(p);
+            ++purged;
+            ++m_unstablePurged;
+          }
+        }
+      }
+      while (purged>0);
     }
 
     // Properties after cleaning
     const int num_particles_filt = evt->particles_size();
-    int num_orphan_vtxs_filt = 0;
-    int num_noparent_vtxs_filt = 0;
-    int num_nochild_vtxs_filt = 0;
-    for (auto v = evt->vertices_begin(); v != evt->vertices_end(); ++v) {
-      if ((*v)->particles_in_size()==0&&(*v)->particles_out_size()==0) num_orphan_vtxs_filt++;
-      if ((*v)->particles_in_size()==0) num_noparent_vtxs_filt++;
-      if ((*v)->particles_out_size()==0) num_nochild_vtxs_filt++;
+    if(num_particles_orig!=num_particles_filt) {
+      int num_orphan_vtxs_filt = 0;
+      int num_noparent_vtxs_filt = 0;
+      int num_nochild_vtxs_filt = 0;
+      for (auto v = evt->vertices_begin(); v != evt->vertices_end(); ++v) {
+        if ((*v)->particles_in_size()==0&&(*v)->particles_out_size()==0) num_orphan_vtxs_filt++;
+        if ((*v)->particles_in_size()==0) num_noparent_vtxs_filt++;
+        if ((*v)->particles_out_size()==0) num_nochild_vtxs_filt++;
+      }
+
+      // Write out the change in the number of particles
+      ATH_MSG_INFO("Particles filtered: " << num_particles_orig << " -> " << num_particles_filt);
+      // Warn if the numbers of "strange" vertices have changed
+      if (num_orphan_vtxs_filt != num_orphan_vtxs_orig)
+        ATH_MSG_WARNING("Change in orphaned vertices: " << num_orphan_vtxs_orig << " -> " << num_orphan_vtxs_filt);
+      if (num_noparent_vtxs_filt != num_noparent_vtxs_orig)
+        ATH_MSG_WARNING("Change in no-parent vertices: " << num_noparent_vtxs_orig << " -> " << num_noparent_vtxs_filt);
+      if (num_nochild_vtxs_filt != num_nochild_vtxs_orig)
+        ATH_MSG_WARNING("Change in no-parent vertices: " << num_nochild_vtxs_orig << " -> " << num_nochild_vtxs_filt);
     }
-
-    // Write out the change in the number of particles
-    ATH_MSG_INFO("Particles filtered: " << num_particles_orig << " -> " << num_particles_filt);
-    // Warn if the numbers of "strange" vertices have changed
-    if (num_orphan_vtxs_filt != num_orphan_vtxs_orig)
-      ATH_MSG_WARNING("Change in orphaned vertices: " << num_orphan_vtxs_orig << " -> " << num_orphan_vtxs_filt);
-    if (num_noparent_vtxs_filt != num_noparent_vtxs_orig)
-      ATH_MSG_WARNING("Change in no-parent vertices: " << num_noparent_vtxs_orig << " -> " << num_noparent_vtxs_filt);
-    if (num_nochild_vtxs_filt != num_nochild_vtxs_orig)
-      ATH_MSG_WARNING("Change in no-parent vertices: " << num_nochild_vtxs_orig << " -> " << num_nochild_vtxs_filt);
-
 #endif
   }
   return StatusCode::SUCCESS;
@@ -484,6 +526,7 @@ StatusCode FixHepMC::finalize() {
   if (m_killLoops  ) ATH_MSG_INFO( "Removed " <<   m_loopKilled << " of " << m_totalSeen << " particles because of loops." );
   if (m_killPDG0   ) ATH_MSG_INFO( "Removed " <<   m_pdg0Killed << " of " << m_totalSeen << " particles because of PDG ID 0." );
   if (m_cleanDecays) ATH_MSG_INFO( "Removed " << m_decayCleaned << " of " << m_totalSeen << " particles while cleaning decay chains." );
+  if(m_purgeUnstableWithoutEndVtx) ATH_MSG_INFO( "Removed " << m_unstablePurged << " of " << m_totalSeen << " unstable particles because they had no decay vertex." );
   if (!m_pidmap.empty()) ATH_MSG_INFO( "Replaced " << m_replacedPIDs << "PIDs of particles." );
   return StatusCode::SUCCESS;
 }
