@@ -821,12 +821,15 @@ def LLP1Cfg(flags):
                                         "MET_Core_AntiKt4EMTopo",
                                         "METAssoc_AntiKt4EMPFlow",
                                         "MET_Core_AntiKt4EMPFlow",
+                                        "InDetLowPtRoITrackParticles",
                                         "PixelClusters",
                                         "PixelMSOSs",
                                         "DisappearingPixelMSOSs",
+                                        "LowPtRoIPixelMSOSs",
                                         "SCT_Clusters",
                                         "SCT_MSOSs",
                                         "DisappearingSCT_MSOSs",
+                                        "LowPtRoISCT_MSOSs",
                                         ]
 
 
