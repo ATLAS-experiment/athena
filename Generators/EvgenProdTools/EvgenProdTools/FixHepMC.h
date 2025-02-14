@@ -51,6 +51,7 @@ private:
   bool m_killLoops;   // Kill loops?
   bool m_killPDG0;    // Kill PDG0 particles?
   bool m_cleanDecays; // Clean decays?
+  bool m_purgeUnstableWithoutEndVtx; // Remove unstable particles without decay vertex?
   //@}
 
   /// @name Cleaned-particle counters
@@ -58,6 +59,7 @@ private:
   long m_loopKilled;
   long m_pdg0Killed;
   long m_decayCleaned;
+  long m_unstablePurged;
   long m_totalSeen;
   long m_replacedPIDs;
   //@}
