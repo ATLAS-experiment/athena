@@ -64,30 +64,42 @@ bool AsgDeadHVCellRemovalTool::accept( const xAOD::Egamma* eg ) const{
       (runnumber>=299144 && runnumber<300279)){
     
     if (   eta_calo > - 1.825 
-	   && eta_calo < -1.5  
-	   && phi_calo > -1.104921 
-	   && phi_calo < -0.956748){
+        && eta_calo < -1.5  
+        && phi_calo > -1.104921 
+        && phi_calo < -0.956748){
       return false;
     }
   } 
   
   if ((runnumber>=298967 && runnumber<299144 ) || 
-      (runnumber>=300279 && runnumber< 305291)){
+      (runnumber>=300279 && runnumber<305291 )){
     
-    if (eta_calo > - 1.825 
-	&& eta_calo < -1.5  
-	&& phi_calo > -1.104921 
-	&& phi_calo < -0.956748){
+    if (    eta_calo > - 1.825 
+         && eta_calo < -1.5  
+         && phi_calo > -1.104921 
+         && phi_calo < -0.956748){
       return false;
     }
     
-    if (eta_calo> - 1.825 
-	&& eta_calo < -1.5  
-	&& phi_calo > 1.054922 
-	&& phi_calo < 1.203097){
+    if (    eta_calo> - 1.825 
+         && eta_calo < -1.5  
+         && phi_calo > 1.054922 
+         && phi_calo < 1.203097){
       return false;
     }
   }
+
+  // Remove e/y in region of FEB EMECC1_05R_M1 with dead OTx for part of data24
+  // FEB region + ring of 2 cells around it
+  if (runnumber>=482374 && runnumber<491041){
+    if (    eta_calo > -2.050 
+         && eta_calo < -1.750  
+         && phi_calo > 1.914 
+         && phi_calo < 2.405){
+      return false;
+    }
+  }
+  
   
   return true ;
 }
