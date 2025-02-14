@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuPatPrimitives/MuPatCandidateBase.h"
@@ -88,7 +88,12 @@ namespace Muon {
 
     bool MuPatCandidateBase::hasMomentum() const { return m_hasMomentum; }
 
-    void MuPatCandidateBase::addToTrash(std::unique_ptr<const Trk::MeasurementBase> meas) {m_garbage.push_back(std::move(meas));}
+    const Trk::MeasurementBase*
+    MuPatCandidateBase::addToTrash(std::unique_ptr<const Trk::MeasurementBase> meas)
+    {
+      m_garbage.push_back(std::move(meas));
+      return m_garbage.back().get();
+    }
     void MuPatCandidateBase::addToTrash(const std::vector<std::shared_ptr<const Trk::MeasurementBase>>& measurements) {
         if (m_garbage.capacity() < measurements.size() + m_garbage.size()){
             m_garbage.reserve(measurements.size() + m_garbage.size());
