@@ -24,6 +24,6 @@ atlas_add_test( CaloCondBlobBase_test
   SOURCES
   test/CaloCondBlobBase_test.cxx src/CaloCondBlobBase.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} CaloCondBlobObjs
-  POST_EXEC_SCRIPT nopost.sh
+  LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} CaloCondBlobObjs CxxUtils
+  POST_EXEC_SCRIPT noerror.sh
 )
