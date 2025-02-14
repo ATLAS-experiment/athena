@@ -2097,10 +2097,6 @@ class ItemDef:
             MenuItem('L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ30').setLogic( d.cTAU30M & d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ30ab_0DR28_eTAU30ab_eTAU20ab & physcond)
             
             
-            # ATR-26902
-            MenuItem('L1_2cTAU20M_4DR28-eTAU30eTAU20-jJ55').setLogic ( d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ55ab_4DR28_eTAU30ab_eTAU20ab   & physcond)
-            MenuItem('L1_2cTAU20M_4DR32-eTAU30eTAU20-jJ55').setLogic ( d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ55ab_4DR32_eTAU30ab_eTAU20ab   & physcond)
-            MenuItem('L1_2cTAU20M_10DR32-eTAU30eTAU20-jJ55').setLogic( d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ55ab_10DR32_eTAU30ab_eTAU20ab  & physcond)
             MenuItem('L1_4jJ30p0ETA24_0DETA24-eTAU30eTAU12').setLogic         ( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_eTAU30s2_eTAU12s2      & physcond)
             MenuItem('L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU20').setLogic ( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_4DPHI99_eTAU30ab_eTAU20ab  & physcond)
             MenuItem('L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU12').setLogic ( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_4DPHI99_eTAU30ab_eTAU12ab  & physcond)
