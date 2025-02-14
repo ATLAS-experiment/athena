@@ -181,37 +181,40 @@ def getChunkSize(flags) -> int:
         chunk_size = flags.MP.ChunkSize
         msg.info('Chunk size set to %i', chunk_size)
     else:
-        md = GetFileMD(flags.Input.Files)
-        #Don't use auto flush for shared reader
-        if flags.MP.UseSharedReader:
-            msg.info('Shared Reader in use, chunk_size set to default (%i)', chunk_size)
-        #Use auto flush only if file is compressed with LZMA, else use default chunk_size
-        elif flags.MP.ChunkSize == -1:
-            if md.get('file_comp_alg',-1) == 2:
-                chunk_size = md.get('auto_flush',-1)
-                msg.info('Chunk size set to auto flush (%i)', chunk_size)
-            else:
-                msg.info('LZMA algorithm not in use, chunk_size set to default (%i)', chunk_size)
-        #Use auto flush only if file is compressed with LZMA or ZLIB, else use default chunk_size
-        elif flags.MP.ChunkSize == -2:
-            if md.get('file_comp_alg',-1) in [1,2]:
-                chunk_size = md.get('auto_flush',-1)
-                msg.info('Chunk size set to auto flush (%i)', chunk_size)
-            else:
-                msg.info('LZMA nor ZLIB in use, chunk_size set to default (%i)', chunk_size)
-        #Use auto flush only if file is compressed with LZMA, ZLIB or LZ4, else use default chunk_size
-        elif flags.MP.ChunkSize == -3:
-            if md.get('file_comp_alg',-1) in [1,2,4]:
-                chunk_size = md.get('auto_flush',-1)
-                msg.info('Chunk size set to auto flush (%i)', chunk_size)
-            else:
-                msg.info('LZMA, ZLIB nor LZ4 in use, chunk_size set to (%i)', chunk_size)
-        #Use auto flush value for chunk_size, regardless of compression algorithm
-        elif flags.MP.ChunkSize <= -4:
-            chunk_size = md.get('auto_flush',-1)
-            msg.info('Chunk size set to auto flush (%i)', chunk_size)
+        if '_ATHENA_GENERIC_INPUTFILE_NAME_' in flags.Input.Files:
+            msg.info('Running an input-less job. Setting Chunk Size to 1')
         else:
-            msg.warning('Invalid ChunkSize, Chunk Size set to default (%i)', chunk_size)
+            md = GetFileMD(flags.Input.Files)
+            #Don't use auto flush for shared reader
+            if flags.MP.UseSharedReader:
+                msg.info('Shared Reader in use, chunk_size set to default (%i)', chunk_size)
+            #Use auto flush only if file is compressed with LZMA, else use default chunk_size
+            elif flags.MP.ChunkSize == -1:
+                if md.get('file_comp_alg',-1) == 2:
+                    chunk_size = md.get('auto_flush',-1)
+                    msg.info('Chunk size set to auto flush (%i)', chunk_size)
+                else:
+                    msg.info('LZMA algorithm not in use, chunk_size set to default (%i)', chunk_size)
+            #Use auto flush only if file is compressed with LZMA or ZLIB, else use default chunk_size
+            elif flags.MP.ChunkSize == -2:
+                if md.get('file_comp_alg',-1) in [1,2]:
+                    chunk_size = md.get('auto_flush',-1)
+                    msg.info('Chunk size set to auto flush (%i)', chunk_size)
+                else:
+                    msg.info('LZMA nor ZLIB in use, chunk_size set to default (%i)', chunk_size)
+            #Use auto flush only if file is compressed with LZMA, ZLIB or LZ4, else use default chunk_size
+            elif flags.MP.ChunkSize == -3:
+                if md.get('file_comp_alg',-1) in [1,2,4]:
+                    chunk_size = md.get('auto_flush',-1)
+                    msg.info('Chunk size set to auto flush (%i)', chunk_size)
+                else:
+                    msg.info('LZMA, ZLIB nor LZ4 in use, chunk_size set to (%i)', chunk_size)
+            #Use auto flush value for chunk_size, regardless of compression algorithm
+            elif flags.MP.ChunkSize <= -4:
+                chunk_size = md.get('auto_flush',-1)
+                msg.info('Chunk size set to auto flush (%i)', chunk_size)
+            else:
+                msg.warning('Invalid ChunkSize, Chunk Size set to default (%i)', chunk_size)
 
     return chunk_size
 
