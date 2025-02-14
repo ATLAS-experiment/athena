@@ -8,12 +8,15 @@
 #include "AthenaKernel/CLASS_DEF.h"
 
 #include "Identifier/Identifier.h"
+#include "Identifier/IdentifierHash.h"
 #include "InDetIdentifier/PixelID.h"
 
 #include <string>
 #include <vector>
-#include <cassert>
+#include <array>
+#include <utility> //std::pair
 #include <span>
+
 
 namespace ITk
 {
@@ -34,7 +37,7 @@ class PixelClusterErrorData
        kNParam
     };
 
-    PixelClusterErrorData() { Initialize(); }
+    PixelClusterErrorData() { initialize(); }
     ~PixelClusterErrorData() {};
 
     /** Methods to access the calibration data */
@@ -75,7 +78,7 @@ class PixelClusterErrorData
     const std::vector< std::array<float, kNParam> > &getConstMap() const { return m_constmap; }
 
   private:
-     void Initialize();
+     void initialize();
      // map to store all ITk Analogue Clustering constants and errors
      std::vector< std::array<float, kNParam> > m_constmap;
 

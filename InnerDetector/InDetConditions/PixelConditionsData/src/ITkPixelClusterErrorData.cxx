@@ -6,25 +6,23 @@
 
 #include "GaudiKernel/ISvcLocator.h"
 
-#include "Identifier/IdentifierHash.h"
 #include "StoreGate/StoreGateSvc.h"
 
 #include <fstream>
-#include <string>
 #include <stdexcept>
 
 
 namespace ITk
 {
 
-void PixelClusterErrorData::Initialize()
+void PixelClusterErrorData::initialize()
 {
   SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
   if(!detStore){
     throw std::runtime_error("Could not retrieve DetectorStore");
   }
   StatusCode sc = detStore->retrieve(m_pixelID, "PixelID");
-  if(sc.isFailure()){
+  if(sc.isFailure() or (m_pixelID == nullptr)){
     throw std::runtime_error("Could not retrieve PixelID");
   }
   m_constmap.resize(m_pixelID->wafer_hash_max(),std::array<float,kNParam>{});
@@ -69,19 +67,13 @@ void PixelClusterErrorData::setDeltaError(IdentifierHash idHash,
 // save all constants to file
 void PixelClusterErrorData::print(const std::string& file) const
 {
-
   std::ofstream outfile(file.c_str());
-
-  unsigned int id_hash=0;
-  --id_hash;
-  for(const std::array<float, kNParam> &values : m_constmap){
-     ++id_hash;
-     outfile << id_hash;
+  for(unsigned int id_hash=0; const std::array<float, kNParam> &values : m_constmap){
+     outfile << id_hash++;
      for (double a_val : values ) {
         outfile << " " << a_val;
      }
   }
-
   outfile.close();
 }
 
