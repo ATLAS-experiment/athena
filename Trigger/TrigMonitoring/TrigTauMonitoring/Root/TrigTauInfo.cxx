@@ -73,7 +73,7 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
                 
                 // HLT Tau sequence
                 auto itr = find_if(leg.begin(), leg.end(), [tau_type_rgx](const std::string& s) { return std::regex_match(s, tau_type_rgx); });
-                std::string type = itr != leg.end() ? *itr : "";
+                std::string type = itr != leg.end() ? *itr : "tracktwoMVA"; // Default to the tracktwoMVA sequence
 
                 // HLT Tau ID
                 itr = find_if(leg.begin(), leg.end(), [tau_ID_rgx](const std::string& s) { return std::regex_match(s, tau_ID_rgx); });

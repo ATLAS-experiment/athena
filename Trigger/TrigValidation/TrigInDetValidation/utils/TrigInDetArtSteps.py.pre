@@ -68,55 +68,57 @@ class TrigInDetReco(ExecStep):
         flags = ''
         for i in self.slices:
             if (i=='muonLRT') :
-muonLRTChains
+#muonLRTChains
                 flags += "'Muon',"
             if (i=='FSLRT') :
-FSLRTChains
+#FSLRTChains
                 flags  += "'UnconventionalTracking',"
             if (i=='muon') :
-muonChains
+#muonChains
+#muonLowptChains
                 flags += "'Muon',"
             if (i=='muonTnP') :
-muonTnPChains
+#muonTnPChains
                 flags += "'Muon',"
             if (i=='electronLRT') :
-electronLRTChains
+#electronLRTChains
                 flags += "'Egamma',"
             if (i=='electron') :
-electronChains
+#electronChains
+#electronLowptChains
                 flags += "'Egamma',"
             if (i=='electronTnP') :
-electronTnPChains
+#electronTnPChains
                 flags += "'Egamma',"
             if (i=='tau') :
-tauChains
+#tauChains
                 flags += "'Tau',"
             if (i=='tauLRT') :
-tauLRTChains
+#tauLRTChains
                 flags += "'Tau',"
             if (i=='bjet') :
-bjetChains
+#bjetChains
                 flags  += "'Bjet',"
             if ( i=='fsjet' or i=='fs' or i=='jet' ) :
-fsjetChains
+#fsjetChains
                 flags  += "'Jet',"
             if (i=='beamspot') :
-beamspotChains
+#beamspotChains
                 flags  += "'Beamspot',"
             if (i=='minbias') :
-minbiasChains   
+#minbiasChains
                 flags  += "'MinBias',"		
                 self.preexec_trig += "flags.Trigger.triggerMenuSetup='PhysicsP1_pp_lowMu_run3_v1';"
             if (i=='minbiaspix') :
-minbiaspixChains
+#minbiaspixChains
                 flags  += "'MinBias',"
                 self.preexec_trig += "flags.Trigger.triggerMenuSetup='PhysicsP1_HI_run3_v1';"
             if (i=='cosmic') :
-cosmicChains
+#cosmicChains
                 flags  +=  "'Muon','Cosmic',"
                 self.preexec_trig+= "flags.Trigger.triggerMenuSetup='Cosmic_run3_v1';"
             if (i=='bphys') :
-bphysChains
+#bphysChains
                 flags += "'Muon','Bphysics',"
         if ( flags=='' ) : 
             print( "ERROR: no chains configured" )

@@ -11,6 +11,9 @@ def LArSuperCellBuilderAlgCfg(flags, **kwargs):
     acc.merge(LArOnOffIdMappingSCCfg(flags))
     kwargs.setdefault("CablingKey", 'LArOnOffIdMapSC')
 
+    from LArBadChannelTool.LArBadChannelConfig import  LArBadChannelCfg
+    acc.merge(LArBadChannelCfg(flags, isSC=True))
+
     from LArRecUtils.LArADC2MeVSCCondAlgConfig import LArADC2MeVSCCondAlgCfg
     acc.merge(LArADC2MeVSCCondAlgCfg(flags))
     kwargs.setdefault("ADC2MeVKey", 'LArADC2MeVSC')

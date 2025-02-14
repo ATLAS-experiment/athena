@@ -31,7 +31,7 @@ flags.Input.Files = [] # so that when no files given we can detect that
 
 
 flags.Exec.OutputLevel = Constants.WARNING # by default make everything output at WARNING level
-flags.Exec.InfoMessageComponents = ["AthenaEventLoopMgr","THistSvc","PerfMonMTSvc","ApplicationMgr"] # Re-enable some info messaging though
+flags.Exec.InfoMessageComponents = ["AthenaEventLoopMgr","THistSvc","PerfMonMTSvc","ApplicationMgr","AvalancheSchedulerSvc"] # Re-enable some info messaging though
 flags.Exec.PrintAlgsSequence = True # print the alg sequence at the start of the job (helpful to see what is scheduled)
 # flags.Exec.FPE = -2 # disable FPE auditing ... set to 0 to re-enable
 
@@ -118,10 +118,14 @@ if args.runNumber is not None:
   log.info(" ".join(("Found",str(len(flags.Input.Files)),"files")))
 
 standalone = False
-# require at least 1 input file if running offline
+# require at least 1 input file if running offline, unless running config-generating mode ....
 if not partition.isValid() and len(flags.Input.Files)==0:
-  log.fatal("Running in offline mode but no input files provided")
-  exit(1)
+  if flags.Exec.MaxEvents==0:
+    # this test file is used for generating the han config file
+    flags.Input.Files = ["/eos/atlas/atlascerngroupdisk/det-l1calo/OfflineSoftware/TestFiles/data24_13p6TeV/data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0821._SFO-20._0001.data"]
+  else:
+    log.fatal("Running in offline mode but no input files provided")
+    exit(1)
 elif partition.isValid():
   log.info("Running Online with Partition:",partition.name())
   standalone = (partition.name()!="ATLAS")
@@ -343,7 +347,6 @@ if flags.DQ.doMonitoring:
       cfg.merge(JetEfficiencyMonitoringConfig(flags))
 
   if flags.Trigger.L1.doTopo:
-    pass
     from L1TopoOnlineMonitoring.L1TopoOnlineMonitoringConfig import Phase1TopoMonitoringCfg
     cfg.merge(Phase1TopoMonitoringCfg(flags))
 
@@ -385,7 +388,9 @@ cfg.merge( PerfMonMTSvcCfg(flags) )
 from AthenaConfiguration.Utils import setupLoggingLevels
 setupLoggingLevels(flags,cfg)
 
-if cfg.getService("AthenaEventLoopMgr"): cfg.getService("AthenaEventLoopMgr").IntervalInSeconds = 30
+if any([s.name=="AthenaEventLoopMgr" for s in cfg.getServices()]): cfg.getService("AthenaEventLoopMgr").IntervalInSeconds = 30
+if any([s.name=="AvalancheSchedulerSvc" for s in cfg.getServices()]):
+  cfg.getService("AvalancheSchedulerSvc").ShowDataDependencies=True
 
 if type(args.dbOverrides)==list:
   from IOVDbSvc.IOVDbSvcConfig import addOverride
@@ -512,7 +517,7 @@ if cfg.getService("DetectorStore").Dump:
 if flags.Exec.MaxEvents==0:
   # create a han config file if running in config-only mode
   # command used to generate official config:
-  #   athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py --filesInput /eos/atlas/atlascerngroupdisk/det-l1calo/OfflineSoftware/TestFiles/data24_13p6TeV/data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0821._SFO-20._0001.data --evtMax 0 -- DQ.useTrigger=True
+  #   athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py --evtMax 0
   from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
   L1CaloMonitorCfgHelper.printHanConfig()
   cfg._wasMerged = True # prevents spurious error message showing up about cfg that wasn't used

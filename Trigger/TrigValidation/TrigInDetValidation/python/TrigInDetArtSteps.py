@@ -80,6 +80,9 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_mu24_idperf_L1MU14FCH',"
                 chains += "'HLT_mu26_ivarperf_L1MU14FCH',"
 
+                chains += "'HLT_mu6_idperf_L1MU5VF',"
+                chains += "'HLT_mu6_ivarmedium_L1MU5VF',"
+
                 flags += "'Muon',"
             if (i=='muonTnP') :
                 chains += "'HLT_mu14_mu14_idtp_idZmumu_L12MU8F',"
@@ -99,6 +102,9 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_e26_idperf_loose_L1eEM26M',"
                 chains += "'HLT_e26_idperf_tight_L1eEM26M',"
                 chains += "'HLT_e28_idperf_loose_L1eEM28M',"
+
+                chains += "'HLT_e5_idperf_tight_L1eEM5',"
+                chains += "'HLT_e5_idperf_tight_nogsf_L1eEM5',"
 
                 flags += "'Egamma',"
             if (i=='electronTnP') :
@@ -138,7 +144,7 @@ class TrigInDetReco(ExecStep):
                 flags  += "'Beamspot',"
             if (i=='minbias') :
                 chains += "'HLT_mb_sptrk_L1RD0_FILLED',"
-   
+
                 flags  += "'MinBias',"		
                 self.preexec_trig += "flags.Trigger.triggerMenuSetup='PhysicsP1_pp_lowMu_run3_v1';"
             if (i=='minbiaspix') :

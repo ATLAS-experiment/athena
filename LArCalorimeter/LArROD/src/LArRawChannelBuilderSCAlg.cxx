@@ -21,6 +21,7 @@ StatusCode LArRawChannelBuilderSCAlg::initialize() {
   ATH_CHECK(m_ofcKey.initialize());	 
   ATH_CHECK(m_shapeKey.initialize());
   ATH_CHECK(m_cablingKey.initialize() );
+  ATH_CHECK( m_bcContKey.initialize(SG::AllowEmpty) );
  
   ATH_CHECK(detStore()->retrieve(m_onlineId,"LArOnline_SuperCellID"));
   ATH_CHECK(m_caloSuperCellMgrKey.initialize());  
@@ -65,6 +66,12 @@ StatusCode LArRawChannelBuilderSCAlg::execute(const EventContext& ctx) const {
 
   SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloSuperCellMgrHandle{m_caloSuperCellMgrKey,ctx};
   const CaloSuperCellDetDescrManager* caloMgr = *caloSuperCellMgrHandle;
+
+  const LArBadChannelCont* badchannel(nullptr);
+  if( !m_bcContKey.empty() ){
+     SG::ReadCondHandle<LArBadChannelCont> larBadChan{ m_bcContKey, ctx };
+     badchannel = *larBadChan;
+  }
 
   //Loop over digits:
   for (const LArDigit* digit : *inputContainer) {
@@ -213,6 +220,14 @@ StatusCode LArRawChannelBuilderSCAlg::execute(const EventContext& ctx) const {
     if(et>10e3 && tau>-8 && tau<16) prov |= LArProv::SCTIMEPASS; //0x200;
     else if(et<=10e3 && std::fabs(tau)<8) prov |= LArProv::SCTIMEPASS; //0x200; 
     if ( passBCIDmax ) prov |= LArProv::SCPASSBCIDMAX; //0x40;
+    // set some provenance to indicate bad channel
+    if(badchannel) {
+       LArBadChannel bc = badchannel->offlineStatus(offId);
+       if ( !bc.good() && bc.statusBad(LArBadChannel::LArBadChannelSCEnum::maskedOSUMBit) ){
+         prov |= 0x80;
+       }
+    }
+
     ss->setProvenance(prov);
     
     ss->setQuality(iquaShort);
