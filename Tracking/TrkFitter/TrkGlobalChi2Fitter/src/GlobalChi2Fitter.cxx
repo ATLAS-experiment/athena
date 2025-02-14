@@ -5220,7 +5220,6 @@ namespace Trk {
     int nmeas = (int) res.size();
     Amg::VectorX & error = trajectory.errors();
     ParamDefsAccessor paraccessor;
-    bool scatwasupdated = false;
 
     GXFTrackState *state_maxbrempull = nullptr;
     int bremno_maxbrempull = 0;
@@ -5428,9 +5427,6 @@ namespace Trk {
 
       chi2 += res[measno] * (1. / (error[measno] * error[measno])) * res[measno];
 
-    }
-    if (!doderiv && (scatwasupdated)) {
-      lu_m = a;
     }
 
     double oldchi2 = trajectory.chi2();
