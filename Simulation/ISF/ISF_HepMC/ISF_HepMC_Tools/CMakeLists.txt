@@ -11,7 +11,7 @@ find_package( GTest )
 atlas_add_component( ISF_HepMC_Tools
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${CLHEP_INLCUDE_DIRS}
+                     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CLHEP_LIBRARIES}  AtlasHepMCLib GaudiKernel AtlasDetDescr AthenaBaseComps TruthUtils ISF_Event ISF_HepMC_Interfaces ISF_InterfacesLib PathResolver )
 
 # Tests
@@ -33,7 +33,7 @@ set_target_properties( ISF_HepMC_Tools_GenParticleInteractingFilter_test PROPERT
 # Tests
 atlas_add_test( GenParticleLifetimeFilter_test
                 SOURCES test/GenParticleLifetimeFilter_test.cxx src/GenParticleLifetimeFilter.cxx
-                INCLUDE_DIRS ${CLHEP_INLCUDE_DIRS} ${GTEST_INCLUDE_DIRS}
+                INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GTEST_LIBRARIES} AtlasHepMCLib AthenaBaseComps GoogleTestTools ISF_HepMC_Interfaces
                 POST_EXEC_SCRIPT nopost.sh )
 
