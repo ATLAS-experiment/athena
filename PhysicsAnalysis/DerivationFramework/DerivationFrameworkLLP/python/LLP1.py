@@ -14,7 +14,9 @@ from AthenaConfiguration.Enums import LHCPeriod, MetadataCategory
 MergedElectronContainer = "StdWithLRTElectrons"
 MergedMuonContainer = "StdWithLRTMuons"
 MergedTrackCollection = "InDetWithLRTTrackParticles"
+MergedGSFTrackCollection = "InDetWithLRTGSFTrackParticles"
 LLP1VrtSecInclusiveSuffixes = []
+LLP1NewVSISuffixes = []
 
 # Main algorithm config
 def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
@@ -28,6 +30,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     # LRT track merge
     from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
     acc.merge(InDetLRTMergeCfg(flags))
+    acc.merge(InDetLRTMergeCfg(flags, name="GSFTrackMergerAlg", InputTrackParticleLocations = ["GSFTrackParticles", "LRTGSFTrackParticles"], OutputTrackParticleLocation = MergedGSFTrackCollection, OutputTrackParticleLocationCopy = MergedGSFTrackCollection))
 
     # LRT muons merge
     from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
@@ -405,6 +408,26 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                  associatePtCut              = 500.))
     LLP1VrtSecInclusiveSuffixes.append(BoostedMuonsSuffix)
 
+    # NewVSI: LepTrack variation
+    from NewVrtSecInclusiveTool.NewVrtSecInclusiveAlgConfig import NewVrtSecInclusiveAlgLLPCfg
+    from NewVrtSecInclusiveTool.NewVrtSecInclusiveConfig import DVFinderToolCfg
+    IDAndGSFSuffix = "_IDAndGSF_LepTrack"
+
+    NVSILepTrack_Tool = acc.popToolsAndMerge(DVFinderToolCfg(flags,FillHist=False,AugmentingVersionString=IDAndGSFSuffix,MaxZVrt=1000.,AntiPileupSigRCut=2.))                                
+    acc.merge(NewVrtSecInclusiveAlgLLPCfg(flags, 
+                                       algname = "NVSI"+IDAndGSFSuffix,
+                                       AugmentingVersionString = IDAndGSFSuffix,
+                                       ElectronContainer = MergedElectronContainer,
+                                       MuonContainer = MergedMuonContainer,
+                                       TrackParticleContainer = MergedTrackCollection,
+                                       GSFTrackParticleContainer = MergedGSFTrackCollection,
+                                       BVertexContainerName = "NewVrtSecInclusive_SecondaryVertices"+IDAndGSFSuffix,
+                                       AddIDTracks = True,
+                                       AddGSFTracks = True,
+                                       RemoveNonLepVertices = True,
+                                       BVertexTool = NVSILepTrack_Tool))
+    LLP1NewVSISuffixes.append(IDAndGSFSuffix)
+    
     # bad jet cleaning
     jet_clean_prefix="DFCommonJets_"
     jet_clean_container="AntiKt4EMTopoJets"
@@ -438,6 +461,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     acc.addSequence(CompFactory.AthSequencer('EventCleanSeq', Sequential=True))
     acc.addEventAlgo(LLP1EventCleanAlg, 'EventCleanSeq')
 
+
     from DerivationFrameworkLLP.LLPToolsConfig import AugmentationToolLeadingJetsCfg
     augmentationToolLeadingJets = acc.getPrimaryAndMerge(AugmentationToolLeadingJetsCfg(flags))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name, AugmentationTools = [augmentationToolLeadingJets]))
@@ -454,7 +478,13 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         StreamName              = kwargs['StreamName'],
         SelectionString         = "InDetTrackParticles.pt>10*GeV",
         InDetTrackParticlesKey  = "InDetTrackParticles"))
-
+    # Keep all GSF LRT Tracks 
+    LLP1LRTGSFTrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
+        flags,
+        name                    = "LLP1LRTGSFTrackParticleThinningTool",
+        StreamName              = kwargs['StreamName'],
+        SelectionString         = "LRTGSFTrackParticles.pt>0*GeV",
+        InDetTrackParticlesKey  = "LRTGSFTrackParticles"))
     # Pixel tracklets need to have greater than 5 GeV of pT
     LLP1DTTrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         flags,
@@ -470,7 +500,14 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         StreamName              = kwargs['StreamName'],
         SGKey                   = "Electrons",
         InDetTrackParticlesKey  = "InDetTrackParticles"))
-
+    # Include inner detector tracks associated with LRT electrons
+    LLP1LRTElectronTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
+        flags,
+        name                    = "LLP1LRTElectronTPThinningTool",
+        StreamName              = kwargs['StreamName'],
+        SGKey                   = "LRTElectrons",
+        InDetTrackParticlesKey  = "InDetLargeD0TrackParticles",
+        GSFTrackParticlesKey    = "LRTGSFTrackParticles")) 
     # Include inner detector tracks associated with muons
     LLP1MuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
         flags,
@@ -553,14 +590,17 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                                name                    = "LLP1VSITPThinningTool",
                                                                                StreamName              = kwargs['StreamName'],
                                                                                InDetTrackParticlesKey  = "InDetTrackParticles",
-                                                                               AugVerStrings = LLP1VrtSecInclusiveSuffixes))
+                                                                               AugVerStrings = LLP1VrtSecInclusiveSuffixes + LLP1NewVSISuffixes))
     LLP1LRTVSITPThinningTool = acc.getPrimaryAndMerge(VSITrackParticleThinningCfg(flags,
                                                                                   name                    = "LLP1LRTVSITPThinningTool",
                                                                                   StreamName              = kwargs['StreamName'],
                                                                                   InDetTrackParticlesKey  = "InDetLargeD0TrackParticles",
-                                                                                  AugVerStrings = LLP1VrtSecInclusiveSuffixes))
-
-
+                                                                                  AugVerStrings = LLP1VrtSecInclusiveSuffixes + LLP1NewVSISuffixes))
+    LLP1GSFVSITPThinningTool = acc.getPrimaryAndMerge(VSITrackParticleThinningCfg(flags,
+                                                                               name                    = "LLP1GSFVSITPThinningTool",
+                                                                               StreamName              = kwargs['StreamName'],
+                                                                               InDetTrackParticlesKey  = "GSFTrackParticles",
+                                                                               AugVerStrings = [IDAndGSFSuffix]))
 
     # ID Tracks associated with jets
     from DerivationFrameworkLLP.LLPToolsConfig import JetTrackParticleThinningCfg, JetLargeD0TrackParticleThinningCfg
@@ -626,6 +666,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     thinningTools = [LLP1TrackParticleThinningTool,
                      LLP1DTTrackParticleThinningTool,
                      LLP1ElectronTPThinningTool,
+                     LLP1LRTElectronTPThinningTool,
                      LLP1MuonTPThinningTool,
                      LLP1LRTMuonTPThinningTool,
                      LLP1TauJetsThinningTool,
@@ -636,10 +677,12 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                      LLP1DiTauLowPtTPThinningTool,
                      LLP1VSITPThinningTool,
                      LLP1LRTVSITPThinningTool,
+                     LLP1GSFVSITPThinningTool,
                      LLP1JetTPThinningTool,
                      LLP1FatJetTPThinningTool,
                      LLP1PixeldEdxTrackParticleThinningTool,
-                     LLP1CCThinningTool
+                     LLP1CCThinningTool,
+                     LLP1LRTGSFTrackParticleThinningTool
                      ]
 
     if flags.Tracking.doLargeD0:
@@ -848,6 +891,10 @@ def LLP1Cfg(flags):
         StaticContent += ["xAOD::VertexContainer#VrtSecInclusive_SecondaryVertices" + wp]
         StaticContent += ["xAOD::VertexAuxContainer#VrtSecInclusive_SecondaryVertices" + wp + "Aux."]
 
+    for wp in LLP1NewVSISuffixes:
+        StaticContent += ["xAOD::VertexContainer#NewVrtSecInclusive_SecondaryVertices" + wp]
+        StaticContent += ["xAOD::VertexAuxContainer#NewVrtSecInclusive_SecondaryVertices" + wp + "Aux." + excludedVertexAuxData]
+
     LLP1SlimmingHelper.ExtraVariables += ["AntiKt10TruthTrimmedPtFrac5SmallR20Jets.Tau1_wta.Tau2_wta.Tau3_wta.D2.GhostBHadronsFinalCount",
                                           "Electrons.LHValue.DFCommonElectronsLHVeryLooseNoPixResult.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
                                           "LRTElectrons.LHValue.DFCommonElectronsLHVeryLooseNoPixResult.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
@@ -892,7 +939,7 @@ def LLP1Cfg(flags):
         "errz0_wrtSV", "chi2_toSV"
     ]
 
-    for suffix in LLP1VrtSecInclusiveSuffixes:
+    for suffix in LLP1VrtSecInclusiveSuffixes + LLP1NewVSISuffixes:
         LLP1SlimmingHelper.ExtraVariables += [ "InDetTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
         LLP1SlimmingHelper.ExtraVariables += [ "InDetLargeD0TrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
         LLP1SlimmingHelper.ExtraVariables += [ "GSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
@@ -902,6 +949,7 @@ def LLP1Cfg(flags):
     LLP1SlimmingHelper.AppendToDictionary["EMOriginTopoClusters"]='xAOD::CaloClusterContainer'
     LLP1SlimmingHelper.AppendToDictionary["EMOriginTopoClustersAux"]='xAOD::ShallowAuxContainer'
     LLP1SlimmingHelper.ExtraVariables.append('EMOriginTopoClusters.e_sampl.calM.calE.calEta.calPhi.CENTER_MAG.SECOND_TIME')
+
     
     # Truth containers
     if flags.Input.isMC:
