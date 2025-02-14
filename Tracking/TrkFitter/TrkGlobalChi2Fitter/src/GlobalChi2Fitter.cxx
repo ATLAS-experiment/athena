@@ -63,6 +63,7 @@
 #include "TrkEventPrimitives/unique_clone.h"
 #include "CxxUtils/inline_hints.h"
 
+#include "FourMomUtils/xAODP4Helpers.h"
 #include "LayerSort.h"
 #include "TrkVolumes/VolumeBounds.h"
 #include "cmath"
@@ -145,27 +146,12 @@ namespace {
     }
   }
 
-
-
   bool trackParametersClose(const Trk::TrackParameters & a, const Trk::TrackParameters & b, double e) {
     return (
       std::abs(a.parameters()[0] - b.parameters()[0]) < e &&
       std::abs(a.parameters()[1] - b.parameters()[1]) < e &&
       std::abs(a.parameters()[2] - b.parameters()[2]) < e
     );
-  }
-
-  //coerce the phi coordinate to the range -pi -> pi
-  void
-  coercePhiCoordinateRange(double & phi){
-    const auto absPhi{std::abs(phi)};
-    constexpr double twoPi{2.*M_PI};
-    if (std::abs(phi - twoPi) < absPhi) {
-      phi -= twoPi;
-    }
-    if (std::abs(phi + twoPi) < absPhi) {
-      phi += twoPi;
-    }
   }
 
 // We compile this package with optimization, even in debug builds; otherwise,
@@ -905,11 +891,7 @@ namespace Trk {
     newqoverpid = idscatpar->parameters()[Trk::qOverP];
 
     Amg::Vector3D calosegment = lastscatpar->position() - firstscatpar->position();
-    muonscatphi = calosegment.phi() - muonscatpar->parameters()[Trk::phi];
-
-    if (std::abs(std::abs(muonscatphi) - 2 * M_PI) < std::abs(muonscatphi)) {
-      muonscatphi += (muonscatphi < 0 ? 2 * M_PI : -2 * M_PI);
-    }
+    muonscatphi = xAOD::P4Helpers::deltaPhi(calosegment.phi(), muonscatpar->parameters()[Trk::phi]);
 
     muonscattheta = calosegment.theta() - muonscatpar->parameters()[Trk::theta];
     std::unique_ptr<const TrackParameters> startPar = unique_clone(cache.m_idmat ? lastidpar.get() : indettrack->perigeeParameters());
@@ -1035,24 +1017,11 @@ namespace Trk {
         discsurf = static_cast<const Trk::DiscSurface *>(&scat2->associatedSurface());
 
       if (cylsurf != nullptr) {
-        double length = 2 * M_PI * cylsurf->bounds().r();
-        if (std::abs(std::abs(dloc1) - length) < std::abs(dloc1)) {
-          if (dloc1 > 0) {
-            dloc1 -= length;
-          } else {
-            dloc1 += length;
-          }
-        }
+        dloc1 = -std::remainder(-dloc1, 2 * M_PI * cylsurf->bounds().r());
       }
 
       if (discsurf != nullptr) {
-        if (std::abs(std::abs(dloc2) - 2 * M_PI) < std::abs(dloc2)) {
-          if (dloc2 > 0) {
-            dloc2 -= 2 * M_PI;
-          } else {
-            dloc2 += 2 * M_PI;
-          }
-        }
+        dloc2 = -std::remainder(-dloc2, 2 * M_PI);
       }
 
       double dphi = jac4(0, 0) * dloc1 + jac4(0, 1) * dloc2;
@@ -1065,12 +1034,7 @@ namespace Trk {
       muonscatphi += dphi;
       muonscattheta += dtheta;
 
-      double idscatphi = idscatpar->parameters()[Trk::phi] - (scat2->parameters()[Trk::phi] + dphi);
-
-      if (std::abs(std::abs(idscatphi) - 2 * M_PI) < std::abs(idscatphi)) {
-        idscatphi += ((idscatphi < 0) ? 2 * M_PI : -2 * M_PI);
-      }
-
+      double idscatphi = xAOD::P4Helpers::deltaPhi(idscatpar->parameters()[Trk::phi], scat2->parameters()[Trk::phi] + dphi);
       double idscattheta = idscatpar->parameters()[Trk::theta] - (scat2->parameters()[Trk::theta] + dtheta);
 
       if (firstismuon) {
@@ -3114,9 +3078,7 @@ namespace Trk {
     }
 
     double phi1 = std::atan2(y - yc, x - xc);
-    double deltaphi = phi1 - phi0;
-
-    coercePhiCoordinateRange(deltaphi);
+    double deltaphi = xAOD::P4Helpers::deltaPhi(phi1, phi0);
 
     double delta_z = r * deltaphi / tantheta;
     double z = z0 + delta_z;
@@ -3128,8 +3090,7 @@ namespace Trk {
     }
 
     Amg::Vector3D normal(x, y, 0);
-    double phidir = parforextrap.parameters()[Trk::phi] + deltaphi;
-    coercePhiCoordinateRange(phidir);
+    double phidir = xAOD::P4Helpers::deltaPhi(parforextrap.parameters()[Trk::phi], -deltaphi);
 
     Amg::Vector3D trackdir(cos(phidir) * sintheta, std::sin(phidir) * sintheta, costheta);
 
@@ -5276,12 +5237,8 @@ namespace Trk {
 
           res[measno] = residuals[i];
 
-          if (i == 2 && std::abs(std::abs(res[measno]) - 2 * M_PI) < std::abs(res[measno])) {
-            if (res[measno] < 0) {
-              res[measno] += 2 * M_PI;
-            } else {
-              res[measno] -= 2 * M_PI;
-            }
+          if (i == 2) {
+            res[measno] = -std::remainder(-res[measno], 2 * M_PI);
           }
           measno++;
         }
@@ -8159,21 +8116,10 @@ namespace Trk {
 
       vecpluseps[paraccessor.pardef[i]] += eps[i];
       vecminuseps[paraccessor.pardef[i]] -= eps[i];
-      if (thiscylsurf && i == 0) {
-        if (vecpluseps[0] / previousSurface.bounds().r() > M_PI) {
-          vecpluseps[0] -= 2 * M_PI * previousSurface.bounds().r();
-        }
-        if (vecminuseps[0] / previousSurface.bounds().r() < -M_PI) {
-          vecminuseps[0] += 2 * M_PI * previousSurface.bounds().r();
-        }
-      }
-      if (thisdiscsurf && i == 1) {
-        if (vecpluseps[i] > M_PI) {
-          vecpluseps[i] -= 2 * M_PI;
-        }
-        if (vecminuseps[i] < -M_PI) {
-          vecminuseps[i] += 2 * M_PI;
-        }
+      if (i == 0 && thiscylsurf) {
+        vecminuseps[i] = -std::remainder(-vecminuseps[i], 2 * M_PI * previousSurface.bounds().r());
+      } else if (i == 1 && thisdiscsurf) {
+        vecpluseps[i] = -std::remainder(-vecpluseps[i], 2 * M_PI);
       }
       correctAngles(vecminuseps[Trk::phi], vecminuseps[Trk::theta]);
       correctAngles(vecpluseps[Trk::phi], vecpluseps[Trk::theta]);
@@ -8256,24 +8202,11 @@ namespace Trk {
       for (int j = 0; j < 5; j++) {
         double diff = newparpluseps->parameters()[paraccessor.pardef[j]] -
           newparminuseps->parameters()[paraccessor.pardef[j]];
-        if (cylsurf && j == 0) {
-          double length = 2 * M_PI * surf.bounds().r();
-          if (std::abs(std::abs(diff) - length) < std::abs(diff)) {
-            if (diff > 0) {
-              diff -= length;
-            } else {
-              diff += length;
-            }
-          }
-        }
-        if (discsurf && j == 1) {
-          if (std::abs(std::abs(diff) - 2 * M_PI) < std::abs(diff)) {
-            if (diff > 0) {
-              diff -= 2 * M_PI;
-            } else {
-              diff += 2 * M_PI;
-            }
-          }
+
+        if (j == 0 && cylsurf) {
+          diff = -std::remainder(-diff, 2 * M_PI * surf.bounds().r());
+        } else if (j == 1 && discsurf) {
+          diff = -std::remainder(-diff, 2 * M_PI);
         }
 
         (*jac) (j, i) = diff / (2 * eps[i]);
@@ -8302,12 +8235,9 @@ namespace Trk {
       theta = -theta;
       phi += M_PI;
     }
-    if (phi > M_PI) {
-      phi -= 2 * M_PI;
-    }
-    if (phi < -M_PI) {
-      phi += 2 * M_PI;
-    }
+
+    phi = -std::remainder(-phi, 2 * M_PI);
+
     return theta >= 0 && theta <= M_PI && phi >= -M_PI && phi <= M_PI;
   }
 
