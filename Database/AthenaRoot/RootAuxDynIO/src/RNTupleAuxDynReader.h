@@ -43,11 +43,7 @@ namespace RootAuxDynIO
          SG::auxid_t   auxid;
          std::string   attribName;
          std::string   fieldName;
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
          std::optional< RNTupleView<void> > view;
-#else
-         std::optional< RNTupleView<void, true> > view;
-#endif
       };
 
 
