@@ -147,13 +147,13 @@ namespace Muon {
         outFileRT<<"[\n";
         const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
         nlohmann::json rtDump{};
-        for (const auto& [counter, payload] : Acts::enumerate(rtRelMap)) {
+        for (const auto [counter, payload] : Acts::enumerate(rtRelMap)) {
             outFileRT<<whiteSpace(m_whiteSpace)<<"{\n";
             outFileRT<<whiteSpace(m_whiteSpace)<<" \"chambers\": [\n";
             const MdtRtRelation* rtRel = payload.first;
             const std::set<Identifier>& chambers = payload.second;
 
-            for (const auto& [chCounter, chambId] : Acts::enumerate(chambers)) {
+            for (const auto [chCounter, chambId] : Acts::enumerate(chambers)) {
                 outFileRT<<whiteSpace(2*m_whiteSpace)<<"{"
                          <<std::format("\"station\": \"{:}\", \"eta\": {:2d}, \"phi\": {:1d}, \"ml\": {:1d}",
                             idHelper.stationNameString(idHelper.stationName(chambId)), idHelper.stationEta(chambId), 
@@ -205,7 +205,7 @@ namespace Muon {
     std::string MdtCalibJsonDumpAlg::dump(const std::vector<double>& values) const{
         std::stringstream sstr{};
         sstr<<"[";
-        for (const auto& [count, v] : Acts::enumerate(values)) {
+        for (const auto [count, v] : Acts::enumerate(values)) {
             sstr<<dump(v);
             if (count + 1 != values.size())sstr<<", ";
         }
@@ -229,7 +229,7 @@ namespace Muon {
         }
         outFileT0<<"[\n";
         const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
-        for (const auto& [count, payload] : Acts::enumerate(t0Map)) {
+        for (const auto [count, payload] : Acts::enumerate(t0Map)) {
             outFileT0<<whiteSpace(m_whiteSpace)<<"{\n";
             const Identifier& detId = payload.first;
             const T0PerChamb& calibConstants = payload.second;
@@ -242,7 +242,7 @@ namespace Muon {
                      <<std::format("\"station\": \"{:}\", \"eta\": {:2d}, \"phi\": {:1d}, \"calibConstants\":[\n",
                                   idHelper.stationNameString(idHelper.stationName(detId)), 
                                   idHelper.stationEta(detId), idHelper.stationPhi(detId));
-            for (const auto& [calibCounter, calibPayload] : Acts::enumerate(calibConstants)) {
+            for (const auto [calibCounter, calibPayload] : Acts::enumerate(calibConstants)) {
                 outFileT0<<whiteSpace(2*m_whiteSpace)<<"{\"t0\": "<<dump(calibPayload.first->t0)<<", ";
                 outFileT0<<"\"adc\": "<<dump(calibPayload.first->adcCal)<<", ";
                 outFileT0<<"\"code\": "<<dump(calibPayload.first->statusCode)<<", ";
