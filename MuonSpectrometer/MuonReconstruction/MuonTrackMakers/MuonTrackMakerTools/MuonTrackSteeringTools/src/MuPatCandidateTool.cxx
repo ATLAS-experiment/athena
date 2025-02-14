@@ -153,8 +153,6 @@ namespace Muon {
                 fakePhiHits.push_back(meas);
                 continue;
             }
-            std::unique_ptr<Trk::MeasurementBase> newRot{};
-
 
             // skip ID hits
             if (!m_idHelperSvc->isMuon(id)) continue;
@@ -187,8 +185,9 @@ namespace Muon {
                             continue;
                         }
                         ATH_MSG_DEBUG(" recreating MdtDriftCircleOnTrack ");
-                        newRot = std::unique_ptr<MdtDriftCircleOnTrack>{m_mdtRotCreator->createRIO_OnTrack(*mdt->prepRawData(), mdt->globalPosition())};
-                        meas = newRot.get();
+                        meas = entry.addToTrash
+                          (std::unique_ptr<const MdtDriftCircleOnTrack>
+                           (m_mdtRotCreator->createRIO_OnTrack(*mdt->prepRawData(), mdt->globalPosition())));
                     }
                 }
 
@@ -225,8 +224,9 @@ namespace Muon {
                         continue;
                     }
                     ATH_MSG_DEBUG(" recreating CscClusterOnTrack ");
-                    newRot = std::unique_ptr<MuonClusterOnTrack>{m_cscRotCreator->createRIO_OnTrack(*csc->prepRawData(), csc->globalPosition())};
-                    meas = newRot.get();
+                    meas = entry.addToTrash
+                      (std::unique_ptr<const MuonClusterOnTrack>
+                       (m_cscRotCreator->createRIO_OnTrack(*csc->prepRawData(), csc->globalPosition())));
                 }  
                 
 
@@ -249,8 +249,6 @@ namespace Muon {
             } else {
                 etaHits.push_back(meas);
             }
-            // cppcheck-suppress nullPointerRedundantCheck; false positive
-            entry.addToTrash(std::move(newRot));
         }
 
         if (createComp) {
