@@ -64,8 +64,8 @@ namespace ActsTrk
     printSeed(const Acts::GeometryContext &tgContext,
               const ActsTrk::Seed &seed,
               const Acts::BoundTrackParameters &initialParameters,
-              detail::MeasurementIndex &measurementIndexer,
-              size_t iseed,
+              const detail::MeasurementIndex &measurementIndexer,
+              unsigned int iseed,
               bool isKF) const;
 
     template <typename track_container_t>
@@ -73,14 +73,14 @@ namespace ActsTrk
     printTrack(const Acts::GeometryContext &tgContext,
                const track_container_t &tracks,
                const typename track_container_t::TrackProxy &track,
-               detail::MeasurementIndex &measurementIndexer,
+               const detail::MeasurementIndex &measurementIndexer,
                bool rejected = false) const;
 
     template <typename track_state_proxy_t>
     bool
     printTrackState(const Acts::GeometryContext &tgContext,
                     const track_state_proxy_t &state,
-                    detail::MeasurementIndex &measurementIndexer,
+                    const detail::MeasurementIndex &measurementIndexer,
                     bool useFiltered = false,
                     bool newLine = true) const;
 

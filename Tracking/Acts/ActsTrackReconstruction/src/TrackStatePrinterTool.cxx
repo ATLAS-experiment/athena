@@ -450,8 +450,8 @@ namespace ActsTrk
   TrackStatePrinterTool::printSeed(const Acts::GeometryContext &tgContext,
 				   const ActsTrk::Seed &seed,
 				   const Acts::BoundTrackParameters &initialParameters,
-				   detail::MeasurementIndex &measurementIndexer,
-				   size_t iseed,
+				   const detail::MeasurementIndex &measurementIndexer,
+				   unsigned int iseed,
 				   bool isKF) const
   {
     if (!isKF)

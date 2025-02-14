@@ -25,7 +25,7 @@ namespace ActsTrk::detail {
     inline void addMeasurements(const xAOD::UncalibratedMeasurementContainer &clusterContainer);
     inline std::size_t nMeasurements() const;
 
-    inline std::size_t index(const xAOD::UncalibratedMeasurement &hit);
+    inline std::size_t index(const xAOD::UncalibratedMeasurement &hit) const;
     inline std::size_t size() const;
 
   private:
@@ -33,9 +33,12 @@ namespace ActsTrk::detail {
     std::vector<std::pair<ContainerPtr, std::size_t>> m_measurementContainerOffsets;
     std::size_t m_size{};
     std::size_t m_nMeasurements{};
-    ContainerPtr m_lastContainer{nullptr};
-    std::size_t m_lastContainerOffset{};
-    std::size_t m_lastContainerSize{};
+    // MeasurementIndex is only ever used as a local stack variable, so doesn't need to be thread safe.
+    // Is there a way to confirm this but still disable "non-thread-safe" warnings?
+    // We could make it non-const, but it is only needed for these cached values.
+    mutable ContainerPtr m_lastContainer ATLAS_THREAD_SAFE{nullptr};
+    mutable std::size_t m_lastContainerOffset ATLAS_THREAD_SAFE{};
+    mutable std::size_t m_lastContainerSize ATLAS_THREAD_SAFE{};
   };
 
 }  // namespace ActsTrk::detail

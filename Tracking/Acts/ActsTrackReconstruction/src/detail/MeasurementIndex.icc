@@ -35,7 +35,7 @@ inline void MeasurementIndex::addMeasurements(const xAOD::UncalibratedMeasuremen
   m_nMeasurements += clusterContainer.size();
 }
 
-inline std::size_t MeasurementIndex::index(const xAOD::UncalibratedMeasurement& hit) {
+inline std::size_t MeasurementIndex::index(const xAOD::UncalibratedMeasurement& hit) const {
   const auto* container = hit.container();
   if (container != m_lastContainer) {
     auto it =

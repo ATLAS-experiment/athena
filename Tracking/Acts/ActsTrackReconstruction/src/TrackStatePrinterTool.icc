@@ -31,7 +31,7 @@ namespace ActsTrk
   TrackStatePrinterTool::printTrack(const Acts::GeometryContext &tgContext,
 				    const track_container_t &tracks,
 				    const typename track_container_t::TrackProxy &track,
-				    detail::MeasurementIndex &measurementIndexer,
+				    const detail::MeasurementIndex &measurementIndexer,
 				    bool rejected) const
   {
     const auto lastMeasurementIndex = track.tipIndex();
@@ -89,7 +89,7 @@ namespace ActsTrk
   bool
   TrackStatePrinterTool::printTrackState(const Acts::GeometryContext &tgContext,
                                          const track_state_proxy_t &state,
-                                         detail::MeasurementIndex &measurementIndexer,
+                                         const detail::MeasurementIndex &measurementIndexer,
                                          bool useFiltered,
                                          bool newLine) const
   {

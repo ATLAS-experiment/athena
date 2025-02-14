@@ -8,33 +8,19 @@
 
 namespace ActsTrk::detail {
 
-inline SharedHitCounter::SharedHitCounter(std::size_t nMeasurementContainerMax)
-    : m_measurementIndex(nMeasurementContainerMax) {}
-
-inline MeasurementIndex& SharedHitCounter::measurementIndexer() {
-  return m_measurementIndex;
-}
-
-inline const MeasurementIndex& SharedHitCounter::measurementIndexer() const {
-  return m_measurementIndex;
-}
-
-inline void SharedHitCounter::addMeasurements(const xAOD::UncalibratedMeasurementContainer &clusterContainer) {
-  m_measurementIndex.addMeasurements(clusterContainer);
-}
-
 template <Acts::TrackContainerFrontend track_container_t>
-inline std::pair<std::size_t, std::size_t> SharedHitCounter::computeSharedHits(typename track_container_t::TrackProxy& track,
-                                                                               track_container_t& tracks) {
+inline std::pair<std::size_t, std::size_t> SharedHitCounter::computeSharedHits(typename track_container_t::TrackProxy &track,
+                                                                               track_container_t &tracks,
+                                                                               const MeasurementIndex &measurementIndex) {
   // Based on ActsExamples::TrackFindingAlgorithm::computeSharedHits().
   // Finds shared hits in the reconstructed track and updates SharedHitFlag in both tracks.
-  // Uses m_measurementIndex to convert hit to hitIndex, and then m_firstTrackStateOnTheHit[] to convert hitIndex -> TrackStateIndex
+  // Uses measurementIndex to convert hit to hitIndex, and then m_firstTrackStateOnTheHit[] to convert hitIndex -> TrackStateIndex
   // Returns stats: nShared and nBadTrackMeasurements
 
   constexpr TrackStateIndex noTrackState{std::numeric_limits<std::size_t>::max(), std::numeric_limits<std::size_t>::max()};
 
-  if (m_firstTrackStateOnTheHit.size() < m_measurementIndex.size())
-    m_firstTrackStateOnTheHit.resize(m_measurementIndex.size(), noTrackState);
+  if (m_firstTrackStateOnTheHit.size() < measurementIndex.size())
+    m_firstTrackStateOnTheHit.resize(measurementIndex.size(), noTrackState);
 
   std::size_t nShared = 0;
   std::size_t nBadTrackMeasurements = 0;
@@ -47,10 +33,10 @@ inline std::pair<std::size_t, std::size_t> SharedHitCounter::computeSharedHits(t
 
     auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
     const xAOD::UncalibratedMeasurement& hit = getUncalibratedMeasurement(sl);
-    std::size_t hitIndex = m_measurementIndex.index(hit);
-    if (!(hitIndex < m_measurementIndex.size())) {
+    std::size_t hitIndex = measurementIndex.index(hit);
+    if (!(hitIndex < measurementIndex.size())) {
       // Save ATH_MSG_ERROR() for the caller, since for simplicity and efficiency this class doesn't have access to AthMsgStream.
-      // std::cout << "ERROR hit index " << hitIndex << " past end of " << m_measurementIndex.size() << " hit indices\n";
+      // std::cout << "ERROR hit index " << hitIndex << " past end of " << measurementIndex.size() << " hit indices\n";
       ++nBadTrackMeasurements;
       continue;
     }
