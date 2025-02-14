@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ActsEvent_Decoration_h
 #define ActsEvent_Decoration_h
@@ -96,7 +96,7 @@ static Decoration decoration(std::string_view n, GetterType g, CopierType c,
 
 /**
 * @arg container - source container to look for decorations
-* @arg staticVaraibles - set of names of predefined variables for this container
+* @arg staticVariables - set of names of predefined variables for this container
 */
 std::vector<Decoration> restoreDecorations(
     const SG::IConstAuxStore* container,
