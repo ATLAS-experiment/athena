@@ -30,6 +30,7 @@ class JSSTaggerUtils :
       TH2D MakeJetImage(TString TagImage, const xAOD::Jet* jet, std::vector<xAOD::JetConstituent> constituents) const override;
       StatusCode GetImageScore(const xAOD::JetContainer& jets) const override;
       StatusCode GetConstScore(const xAOD::JetContainer& jets) const override;
+      StatusCode GetQGConstScore(const xAOD::JetContainer& jets) const override;
 
       // HighLevel tagger
       StatusCode GetHLScore(const xAOD::JetContainer& jets) const override;

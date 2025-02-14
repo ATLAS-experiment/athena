@@ -287,6 +287,7 @@ StatusCode JSSTaggerBase::getConfigReader() {
   }
   else if ( m_calibArea.find("eos") != std::string::npos) {
     configPath = PathResolverFindCalibFile((m_calibArea+"/"+m_configFile).c_str());
+    configPath = (m_calibArea+"/"+m_configFile).c_str();
   }
   else {
     configPath = PathResolverFindCalibFile(("BoostedJetTaggers/"+m_calibArea+"/"+m_configFile).c_str());
