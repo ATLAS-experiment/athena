@@ -32,7 +32,8 @@ StatusCode BoostedJetTaggerTool::decorate(const xAOD::JetContainer& jets) const
 {
   
   // decorate all the jets with the score
-  ATH_CHECK(m_MLTagger -> GetConstScore(jets));
-  
+  if ( m_decorationName.value().compare("QGTransformer") == 0 )
+    ATH_CHECK(m_MLTagger -> GetQGConstScore(jets));
+
   return StatusCode::SUCCESS;
 }

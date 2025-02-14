@@ -10,6 +10,29 @@ bool DescendingPtSorterConstituents(const xAOD::JetConstituent p1, const xAOD::J
   return CxxUtils::fpcompare::greater(p1.pt(), p2.pt());
 }
 
+float Clip(float in){
+  float out;
+  float low (1.e-36), high (1.e+30);
+
+  if(in < low) out = low;
+  else if(in > high) out = high;
+  else out = in;
+
+  return out;
+}
+
+int Sign(int in){
+
+  int out;
+
+  if(in<0) out = -1;
+  else if(in>0) out = 1;
+  else out = in;
+
+  return out;
+
+}
+
 JSSTaggerUtils::JSSTaggerUtils( const std::string& name ) :
   JSSTaggerBase( name )
 {
@@ -246,15 +269,16 @@ StatusCode JSSTaggerUtils::GetConstScore(const xAOD::JetContainer& jets) const {
         towers.push_back(dynamic_cast<const xAOD::CaloCluster *>(*link_itr));
       }
     }
-    std::sort( towers.begin(), towers.end(), DescendingPtSorterConstituents) ;
+    std::sort( towers.begin(), towers.end(), DescendingPtSorterConstituents);
 
     // use ML tool on constituents
-    std::vector<float> m, pT, eta, phi;
+    std::vector<float> m, pT, eta, phi, E;
     for(auto cnst : constituents){
       m.push_back( cnst -> m() );
       pT.push_back( cnst -> pt() );
       eta.push_back( cnst -> eta() );
       phi.push_back( cnst -> phi() );
+      E.push_back( cnst -> e() );
     }
     std::vector<std::vector<float>> constituents_packed = {m, pT, eta, phi};
 
@@ -264,6 +288,7 @@ StatusCode JSSTaggerUtils::GetConstScore(const xAOD::JetContainer& jets) const {
       pT.push_back( cnst -> pt() );
       eta.push_back( cnst -> eta() );
       phi.push_back( cnst -> phi() );
+      E.push_back( cnst -> e() );
     }
     std::vector<std::vector<float>> towers_packed = {m, pT, eta, phi};
 
@@ -274,8 +299,7 @@ StatusCode JSSTaggerUtils::GetConstScore(const xAOD::JetContainer& jets) const {
     };
 
     // evaluate the model
-    //if( constituents.size()>1 && towers.size()>0 )
-    if( constituents.size()>1 )
+    if( (constituents.size() + towers.size()) > 1 )
       score = m_MLBosonTagger -> retrieveConstituentsScore(inputs_packed);
 
     // save decorator
@@ -284,6 +308,147 @@ StatusCode JSSTaggerUtils::GetConstScore(const xAOD::JetContainer& jets) const {
     // and inputs as well
     decNConstituents(*jet) = constituents.size();
     decNTopoTowers(*jet) = towers.size();
+
+  }
+
+  return StatusCode::SUCCESS;
+
+}
+
+StatusCode JSSTaggerUtils::GetQGConstScore(const xAOD::JetContainer& jets) const {
+
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore(m_decConstScoreKey);
+
+  for(const xAOD::Jet *jet : jets){
+
+    // init value
+    float score (-99.);
+
+    // get constituents
+    std::vector<xAOD::JetConstituent> constituents = jet -> getConstituents().asSTLVector();
+    std::sort( constituents.begin(), constituents.end(), DescendingPtSorterConstituents) ;
+
+    // get towers
+    std::vector<const xAOD::CaloCluster*> towers;
+    SG::AuxElement::ConstAccessor<std::vector<ElementLink<DataVector<xAOD::IParticle>>>> towersAcc("GhostTower");
+    if (towersAcc.isAvailable(*jet)){
+      // Vector of towers linked to jets
+      std::vector<ElementLink<DataVector<xAOD::IParticle>>> towerLinks = towersAcc(*jet);
+      for (auto link_itr : towerLinks){
+        if (!link_itr.isValid()) continue;
+        towers.push_back(dynamic_cast<const xAOD::CaloCluster *>(*link_itr));
+      }
+    }
+    std::sort( towers.begin(), towers.end(), DescendingPtSorterConstituents) ;
+
+    // use ML tool on constituents
+    std::vector<float> m, pT, eta, phi, E, isTower, px, py, pz;
+    for(auto cnst : constituents){
+      m.push_back( cnst -> m() );
+      pT.push_back( cnst -> pt() );
+      eta.push_back( cnst -> eta() );
+      phi.push_back( cnst -> phi() );
+      E.push_back( cnst -> e() );
+      isTower.push_back(0.);
+      px.push_back( cnst -> pt() * std::cos(cnst -> phi()) );
+      py.push_back( cnst -> pt() * std::sin(cnst -> phi()) );
+      pz.push_back( cnst -> pt() * std::sinh(cnst -> eta()) );
+    }
+
+    for(auto cnst : towers){
+      m.push_back( cnst -> m() );
+      pT.push_back( cnst -> pt() );
+      eta.push_back( cnst -> eta() );
+      phi.push_back( cnst -> phi() );
+      E.push_back( cnst -> e() );
+      isTower.push_back(1.);
+      px.push_back( cnst -> pt() * std::cos(cnst -> phi()) );
+      py.push_back( cnst -> pt() * std::sin(cnst -> phi()) );
+      pz.push_back( cnst -> pt() * std::sinh(cnst -> eta()) );
+    }
+
+    // put together constituents + towers
+    std::vector<std::vector<float>> features_packed;
+
+    for(long unsigned int f=0; f<pT.size(); f++){
+      std::vector<float> features = { m.at(f), pT.at(f), eta.at(f), phi.at(f), E.at(f), isTower.at(f), px.at(f), py.at(f), pz.at(f) };
+      features_packed.push_back(features);
+    }
+
+    // sort them
+    std::sort(features_packed.begin(), features_packed.end(), [](const auto& i, const auto& j) { return i.at(1) > j.at(1); });
+
+    // global aux variables
+    float sum_features_px = std::accumulate(px.begin(), px.end(), 0);
+    float sum_features_py = std::accumulate(py.begin(), py.end(), 0);
+    float sum_features_pz = std::accumulate(pz.begin(), pz.end(), 0);
+
+    float sum_features_pT = sqrt( sum_features_px*sum_features_px + sum_features_py*sum_features_py);
+    float sum_features_eta = std::asinh( sum_features_pz / Clip(sum_features_pT) );
+    float sum_features_phi = std::atan2( sum_features_py, sum_features_px );
+
+    // build constituents and interaction variables
+    std::vector<std::vector<float>> const_vars;
+    std::vector<std::vector<std::vector<float>>> inter_vars;
+
+    for(auto const &feature_i : features_packed){
+
+      // calculate variables: constituents
+      float log_pT = log( Clip(feature_i.at(1) / sum_features_pT) );
+      float log_E = log( Clip(feature_i.at(4) / sum_features_pT) );
+      float eta = feature_i.at(2) - sum_features_eta;
+      float phi = feature_i.at(3) - sum_features_phi;
+      float DR = sqrt((feature_i.at(2) - sum_features_eta)*(feature_i.at(2) - sum_features_eta) + (feature_i.at(3) - sum_features_phi)*(feature_i.at(3) - sum_features_phi));
+      float log_m = log(Clip(feature_i.at(0)));
+      float type = feature_i.at(5);
+
+      std::vector<float> vars = {log_pT, log_E, eta, phi, DR, log_m, type};
+      const_vars.push_back(vars);
+
+      // calculate variables: interactions
+      std::vector<std::vector<float>> inter_vars_int;
+      for(auto const &feature_j : features_packed){
+
+        // preparing variables
+        float delta = sqrt((feature_i.at(2)-feature_j.at(2))*(feature_i.at(2)-feature_j.at(2)) + (feature_i.at(3)-feature_j.at(3))*(feature_i.at(3)-feature_j.at(3)));
+        float min = feature_i.at(1) != feature_j.at(1) ? std::min(feature_i.at(1), feature_j.at(1)): 0.;
+        float mass2 = (feature_i.at(4)/sum_features_pT + feature_j.at(4)/sum_features_pT) * (feature_i.at(4)/sum_features_pT + feature_j.at(4)/sum_features_pT);
+        mass2 -= (feature_i.at(6)/sum_features_pT + feature_j.at(6)/sum_features_pT) * (feature_i.at(6)/sum_features_pT + feature_j.at(6)/sum_features_pT);
+        mass2 -= (feature_i.at(7)/sum_features_pT + feature_j.at(7)/sum_features_pT) * (feature_i.at(7)/sum_features_pT + feature_j.at(7)/sum_features_pT);
+        mass2 -= (feature_i.at(8)/sum_features_pT + feature_j.at(8)/sum_features_pT) * (feature_i.at(8)/sum_features_pT + feature_j.at(8)/sum_features_pT);
+
+        // final values
+        float log_delta = log(Clip(delta));
+        float log_mindelta = log(Clip(min * delta  / sum_features_pT));
+        float min_over_pT = min / (feature_i.at(1) + feature_j.at(1));
+        float log_mass = log(Clip(mass2));
+
+        // set the diagonal to 0
+        if(feature_i==feature_j){
+          log_delta = 0;
+          log_mindelta = 0;
+          min_over_pT = 0;
+          log_mass = 0;
+        }
+
+        std::vector<float> vars = { log_delta,
+                                    log_mindelta,
+                                    min_over_pT,
+                                    log_mass
+                                  };
+        inter_vars_int.push_back(vars);
+
+      }
+
+      inter_vars.push_back(inter_vars_int);
+    }
+
+    // evaluate the model
+    if( (constituents.size() + towers.size()) > 1 ) 
+      score = m_MLBosonTagger -> retrieveConstituentsScore(const_vars, inter_vars);
+
+    // save decorator
+    decConstScore(*jet) = score;
 
   }
 
