@@ -26,6 +26,11 @@ if [ $# -eq 0 -o "x$1" == "x-a" ]; then
     
     for CHAIN in $(grep "$git:" comparitor.txt | awk '{print $2}' | sed ' s|:.*||' | sed 's|_HLT.*||' | sort -u ) ; do 
 
+	FOUND=1
+	( grep -q $CHAIN $Athena_DIR/src/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Menu/* ) || FOUND=0
+
+	[ $FOUND -eq 0 ] && echo "chain not found: $CHAIN" && continue
+	
 #	echo "  chains += \"'$CHAIN',\"\n"
 	CHAINS="$CHAINS                chains += \"'$CHAIN',\"\n"
     

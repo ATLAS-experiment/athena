@@ -85,7 +85,7 @@ def trigTauRecMergedPrecisionMVACfg(flags, name, tau_ids=None, input_rois='', in
     # (or isTau(...) flags in the case of the legacy RNN/DeepSet tracktwoMVA/LLP/LRT triggers
 
     # We first "remove" the "ids" that don't require any inference, and any duplicates
-    tau_ids = list(set(tau_ids if tau_ids else []) - {'perf', 'idperf', 'MesonCuts'})
+    tau_ids = sorted(list(set(tau_ids if tau_ids else []) - {'perf', 'idperf', 'MesonCuts'}))
 
     from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getTauIDScoreVariables
     id_score_monitoring = {}

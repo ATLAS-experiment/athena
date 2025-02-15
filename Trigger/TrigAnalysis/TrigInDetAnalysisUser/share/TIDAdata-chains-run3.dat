@@ -8,9 +8,10 @@ testChains = {
     "HLT_mu26_ivarperf_L1MU14FCH:key=HLT_IDTrack_MuonIso_FTF:roi=HLT_Roi_MuonIso:post:d0=4",
     "HLT_mu26_ivarperf_L1MU14FCH:key=HLT_IDTrack_MuonIso_IDTrig:roi=HLT_Roi_MuonIso:post:d0=4",
 
+    "HLT_mu4_mu4_idperf_1invmAB5_L12MU3VF:key=HLT_IDTrack_Muon_FTF:roi=HLT_L2SAMuon:te=1",
+    "HLT_mu4_mu4_idperf_1invmAB5_L12MU3VF:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_L2SAMuon:te=1",
     "HLT_mu6_idperf_L1MU5VF:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
     "HLT_mu6_idperf_L1MU5VF:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
-    "HLT_mu6_ivarmedium_L1MU5VF:key=HLT_IDTrack_MuonIso_FTF:roi=HLT_Roi_MuonIso:post:d0=4",
 
     "HLT_mu14_mu14_idtp_idZmumu_L12MU8F:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=0:post:extra=mu0_tag",
     "HLT_mu14_mu14_idtp_idZmumu_L12MU8F:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=1:post:extra=mu0_probe",
