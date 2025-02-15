@@ -659,7 +659,11 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::exec_
 	all_ok=false;
 	break;
       }
-      m_chronoStatSvc->chronoStop("AthenaMP_nextEvent"); 
+      m_chronoStatSvc->chronoStop("AthenaMP_nextEvent");
+      if(m_mpRunStop->stopScheduled()) {
+        ATH_MSG_INFO("Scheduled stop");
+        break;
+      }
     }
     fs.close();
   }

@@ -266,12 +266,19 @@ StatusCode CountHepMC::execute() {
 
   if (m_nPass == m_nCount) {
     ATH_MSG_INFO("Stopping the event processing...." << m_nPass << "/" << m_nCount);
-    SmartIF<IEventProcessor> apm(serviceLocator()->service("AthenaEventLoopMgr", /*createIf*/false));
-    if (apm) {
+    // Try the MP ELM first
+    SmartIF<IEventProcessor> apm(serviceLocator()->service("AthMpEvtLoopMgr", /*createIf*/false));
+    if(apm) {
       ATH_CHECK(apm->stopRun());
     }
     else {
-      ATH_MSG_WARNING("No EventLoop Manager found ");
+      apm = serviceLocator()->service("AthenaEventLoopMgr", /*createIf*/false);
+      if (apm) {
+        ATH_CHECK(apm->stopRun());
+      }
+      else {
+        ATH_MSG_WARNING("No EventLoop Manager found ");
+      }
     }
   }
 

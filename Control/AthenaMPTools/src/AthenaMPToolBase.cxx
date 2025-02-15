@@ -34,6 +34,7 @@ AthenaMPToolBase::AthenaMPToolBase(const std::string& type
 				   , const IInterface* parent)
   : AthAlgTool(type,name,parent)
   , m_nprocs(-1)
+  , m_maxEvt(-1)
   , m_subprocTopDir("")
   , m_subprocDirPrefix("")     // To be set in the derived classes
   , m_evtSelName("")

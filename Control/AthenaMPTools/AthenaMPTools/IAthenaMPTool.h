@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAMPTOOLS_IATHENAMPTOOL_H
@@ -12,6 +12,10 @@
 #include <memory>
 #include <vector>
 #include <map>
+
+namespace AthenaInterprocess {
+  class IMPRunStop;
+}
 
 namespace AthenaMP {
   struct WorkerOutput{
@@ -49,6 +53,8 @@ class IAthenaMPTool : virtual public IAlgTool
 
   virtual void useFdsRegistry(std::shared_ptr<AthenaInterprocess::FdsRegistry>) = 0;
   virtual void setRandString(const std::string& randStr) = 0;
+  virtual void setMaxEvt(int maxEvt) = 0;
+  virtual void setMPRunStop(const AthenaInterprocess::IMPRunStop* runStop) = 0;
 
   // Brute force: kill all children
   virtual void killChildren() = 0;
