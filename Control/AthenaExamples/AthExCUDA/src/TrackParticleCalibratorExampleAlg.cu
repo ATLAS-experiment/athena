@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -130,7 +130,7 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
               nTracks * sizeof(float));
 
   // Copy the input buffer to the device.
-  copy(inputHostBuffer, inputDeviceBuffer)->wait();
+  copy(inputHostBuffer, inputDeviceBuffer);
 
   // Construct output buffer(s).
   TrackParticleContainer::buffer outputDeviceBuffer(input->size(), deviceMR);
@@ -148,7 +148,7 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
   CUDA_ERROR_CHECK(cudaDeviceSynchronize());
 
   // Get the output back to the host.
-  copy(outputDeviceBuffer, outputHostBuffer)->wait();
+  copy(outputDeviceBuffer, outputHostBuffer);
 
   // Construct the output container.
   auto outputAux = std::make_unique<xAOD::AuxContainerBase>();
