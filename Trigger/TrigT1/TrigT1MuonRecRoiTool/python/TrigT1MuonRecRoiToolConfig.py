@@ -11,8 +11,6 @@ def RPCRecRoiToolCfg(flags, name="RPCRecRoiTool", useRun3Config=True):
 
     tool = CompFactory.getComp("LVL1::TrigT1RPCRecRoiTool")(name)
     tool.UseRun3Config = useRun3Config
-    tool.ReadKey = str(acc.getCondAlgo("RpcCablingCondAlg").WriteKey)
-    tool.DetectorManagerKey = str(acc.getCondAlgo("MuonDetectorCondAlg").WriteDetectorManagerKey)
     acc.setPrivateTools(tool)
 
     return acc
@@ -23,7 +21,6 @@ def TGCRecRoiToolCfg(flags, name="TGCRecRoiTool", useRun3Config=True):
 
     tool = CompFactory.getComp("LVL1::TrigT1TGCRecRoiTool")(name)
     tool.UseRun3Config = useRun3Config
-    tool.DetectorManagerKey = str(acc.getCondAlgo("MuonDetectorCondAlg").WriteDetectorManagerKey)
     acc.setPrivateTools(tool)
 
     return acc
