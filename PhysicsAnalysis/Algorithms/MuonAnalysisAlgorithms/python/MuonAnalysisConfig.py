@@ -16,7 +16,7 @@ class MuonCalibrationConfig (ConfigBlock):
     def __init__ (self, containerName='') :
         super (MuonCalibrationConfig, self).__init__ ()
         self.setBlockName('Muons')
-        self.addOption ('inputContainer', 'Muons', type=str, 
+        self.addOption ('inputContainer', '', type=str,
             info="select muon input container, by default set to Muons")
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
@@ -59,8 +59,10 @@ class MuonCalibrationConfig (ConfigBlock):
         else :
             raise ValueError ("invalid calibMode: \"" + self.calibMode + "\". Allowed values are correctData_CB, correctData_IDMS, notCorrectData_IDMS, notCorrectData_CB")
 
-        config.setSourceName (self.containerName,
-                              "AnalysisMuons" if config.isPhyslite() else self.inputContainer,
+        inputContainer = "AnalysisMuons" if config.isPhyslite() else "Muons"
+        if self.inputContainer:
+            inputContainer = self.inputContainer
+        config.setSourceName (self.containerName, inputContainer,
                               calibMode=calibMode)
 
         # Set up a shallow copy to decorate
@@ -501,20 +503,20 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
 
 
 class MuonLRTMergedConfig (ConfigBlock) :
-    def __init__ (self, inputMuons = 'Muons', inputLRTMuons = 'MuonsLRT', containerName = 'Muons_LRTMerged', postfix = '') :
+    def __init__ (self) :
         super (MuonLRTMergedConfig, self).__init__ ()
         self.addOption (
-            'inputMuons', inputMuons, type=str,
+            'inputMuons', 'Muons', type=str,
             noneAction='error',
             info="the name of the input muon container."
         )
         self.addOption (
-            'inputLRTMuons', inputLRTMuons, type=str,
+            'inputLRTMuons', 'MuonsLRT', type=str,
             noneAction='error',
             info="the name of the input LRT muon container."
         )
         self.addOption (
-            'containerName', containerName, type=str,
+            'containerName', 'Muons_LRTMerged', type=str,
             noneAction='error',
             info="the name of the output container after LRT merging."
         )

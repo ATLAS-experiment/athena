@@ -15,7 +15,7 @@ class TauCalibrationConfig (ConfigBlock):
         super (TauCalibrationConfig, self).__init__ ()
         self.setBlockName('Taus')
         self.containerName = containerName
-        self.addOption ('inputContainer', 'TauJets', type=str,
+        self.addOption ('inputContainer', '', type=str,
             info="select tau input container, by default set to TauJets")
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
@@ -37,10 +37,10 @@ class TauCalibrationConfig (ConfigBlock):
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
-        if config.isPhyslite() :
-            config.setSourceName (self.containerName, "AnalysisTauJets")
-        else :
-            config.setSourceName (self.containerName, self.inputContainer)
+        inputContainer = "AnalysisTauJets" if config.isPhyslite() else "TauJets"
+        if self.inputContainer:
+            inputContainer = self.inputContainer
+        config.setSourceName (self.containerName, inputContainer)
 
         # Set up the tau truth matching algorithm:
         if self.rerunTruthMatching and config.dataType() is not DataType.Data:
@@ -285,38 +285,30 @@ class TauWorkingPointConfig (ConfigBlock) :
 
 
 class EXPERIMENTAL_TauCombineMuonRemovalConfig (ConfigBlock) :
-    def __init__ (self, inputTaus = 'TauJets', inputTausMuRM = 'TauJets_MuonRM', outputTaus = 'TauJets_MuonRmCombined', postfix = '') :
+    def __init__ (self) :
         super (EXPERIMENTAL_TauCombineMuonRemovalConfig, self).__init__ ()
         self.addOption (
-            'inputTaus', inputTaus, type=str,
+            'inputTaus', 'TauJets', type=str,
             noneAction='error',
             info="the name of the input tau container."
         )
         self.addOption (
-            'inputTausMuRM', inputTausMuRM, type=str,
+            'inputTausMuRM', 'TauJets_MuonRM', type=str,
             noneAction='error',
             info="the name of the input tau container with muon removal applied."
         )
-        self.addOption ('postfix', postfix, type=str,
-            info="a postfix to apply to decorations and algorithm names. "
-            "Typically not needed here as selectionName is used internally."
-        )
         self.addOption (
-            'outputTaus', outputTaus, type=str,
+            'outputTaus', 'TauJets_MuonRmCombined', type=str,
             noneAction='error',
             info="the name of the output tau container."
         )
 
     def makeAlgs (self, config) :
 
-        postfix = self.postfix
-        if postfix != '' and postfix[0] != '_' :
-            postfix = '_' + postfix
-
         if config.isPhyslite() :
             raise(RuntimeError("Muon removal taus is not available in Physlite mode"))
 
-        alg = config.createAlgorithm( 'CP::TauCombineMuonRMTausAlg', 'TauCombineMuonRMTausAlg' + postfix )
+        alg = config.createAlgorithm( 'CP::TauCombineMuonRMTausAlg', 'TauCombineMuonRMTausAlg' + self.outputTaus )
         alg.taus = self.inputTaus
         alg.muonrm_taus = self.inputTausMuRM
         alg.combined_taus = self.outputTaus
