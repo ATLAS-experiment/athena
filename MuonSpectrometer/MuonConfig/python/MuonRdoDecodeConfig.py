@@ -67,6 +67,7 @@ def RpcRdoToPrepDataToolCfg(flags, name ="RpcRdoToRpcPrepData",RDOContainer = No
         cnv_args = {}
         if RDOContainer: cnv_args.setdefault("RpcRdoContainer", RDOContainer)
         result.merge(RpcRdoToRpcDigitCfg(flags,
+                                         name="RpcRdoDigitPatchAlg",
                                          RpcDigitContainer="CnvRpcDigits", **cnv_args))
         
         result.merge(NrpcDigitToNrpcRDOCfg(flags,RpcDigitContainer="CnvRpcDigits",

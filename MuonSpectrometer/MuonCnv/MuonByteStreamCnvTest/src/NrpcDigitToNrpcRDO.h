@@ -32,7 +32,7 @@ namespace Muon{
     
         SG::ReadCondHandleKey<RpcCablingMap> m_cablingKey{this, "CablingKey", "MuonNRPC_CablingMap", "Key of MuonNRPC_CablingMap"};
 
-        SG::ReadHandleKey<RpcDigitContainer> m_digitContainerKey{this, "InputObjectName", "RPC_DIGITS",
+        SG::ReadHandleKey<RpcDigitContainer> m_digitContainerKey{this, "RpcDigitContainer", "RPC_DIGITS",
                                                                  "ReadHandleKey for Input RpcDigitContainer"};
 
         SG::WriteHandleKey<xAOD::NRPCRDOContainer> m_NrpcContainerKey{this, "NrpcRdoKey", "NRPCRDO", "WriteHandleKey for Output AOD::NRPCRDOContainer"};
