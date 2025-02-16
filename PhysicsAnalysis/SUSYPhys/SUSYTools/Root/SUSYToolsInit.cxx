@@ -1330,7 +1330,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       }
 
       ATH_CHECK( m_photonEfficiencySFTool.setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map1.txt") );
-      ATH_CHECK( m_photonEfficiencySFTool.setProperty("ForceDataType", 1) ); // Set data type: 1 for FULLSIM, 3 for AF2
+      ATH_CHECK( m_photonEfficiencySFTool.setProperty("ForceDataType", isAtlfast()? (m_isRun3? 1: 3) : 1) ); // Set data type: 1 for FULLSIM, 3 for AtlFast. For Run3 pre-rec only FullSim SFs are available
       ATH_CHECK( m_photonEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_photonEfficiencySFTool.retrieve() );
     } else if (m_photonEfficiencySFTool.isUserConfigured()) ATH_CHECK( m_photonEfficiencySFTool.retrieve() );
