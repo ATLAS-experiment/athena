@@ -124,7 +124,7 @@ namespace asg {
 
       // If a transient store is available, try recording it there:
       if( m_ptds ) {
-         if( m_ptds->template record( std::move( pobj ), name ).isSuccess() ) {
+         if( m_ptds->record( std::move( pobj ), name ).isSuccess() ) {
             return StatusCode::SUCCESS;
          } else {
             return StatusCode::FAILURE;
@@ -132,7 +132,7 @@ namespace asg {
       }
 
       // If not, then let's try with the event store:
-      if( m_pevm->template record( std::move( pobj ), name ).isSuccess() ) {
+      if( m_pevm->record( std::move( pobj ), name ).isSuccess() ) {
          return StatusCode::SUCCESS;
       } else {
          return StatusCode::FAILURE;
