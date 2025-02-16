@@ -39,10 +39,9 @@ def createActsConfigFlags():
     actscf = AthConfigFlags()
     
     # General Flags
-    actscf.addFlag('Acts.EDM.PersistifyClusters', False)
+    actscf.addFlag('Acts.EDM.PersistifyClusters', lambda pcf: pcf.Acts.EDM.PersistifySpacePoints)
     actscf.addFlag('Acts.EDM.PersistifySpacePoints', False)
     actscf.addFlag('Acts.EDM.PersistifyTracks', False)
-    actscf.addFlag('Acts.EDM.PersistifyTrackParticles',False)
     actscf.addFlag('Acts.useCache', False)
     
     # Scheduling

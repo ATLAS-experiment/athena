@@ -21,6 +21,9 @@ class ITkPrimaryPassConfig(FlagEnum):
     FTF = 'ITkFTF'
     FastTracking = 'ITkFast'
     HeavyIon = 'ITkHeavyIon'
+    Acts = 'ITkActs'
+    ActsFast = 'ITkActsFast'
+    ActsHeavyIon = 'ITkActsHeavyIon'
     Default = 'ITkMain'
 
 class TrackFitterType(FlagEnum):
@@ -529,6 +532,12 @@ def createTrackingConfigFlags():
     def itkPrimaryPass(flags):
         if flags.Tracking.useITkFTF:
             return ITkPrimaryPassConfig.FTF
+        elif TrackingComponent.ActsChain in flags.Tracking.recoChain:
+            return ITkPrimaryPassConfig.Acts
+        elif TrackingComponent.ActsFastChain in flags.Tracking.recoChain:
+            return ITkPrimaryPassConfig.ActsFast
+        elif TrackingComponent.ActsHeavyIon in flags.Tracking.recoChain:
+            return ITkPrimaryPassConfig.ActsHeavyIon
         elif flags.Tracking.doITkFastTracking:
             return ITkPrimaryPassConfig.FastTracking
         elif flags.Reco.EnableHI:

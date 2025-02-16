@@ -6,7 +6,6 @@ from ActsConfig.ActsConfigFlags import SeedingStrategy
 from ActsConfig.ActsUtilities import extractChildKwargs
 from ActsInterop import UnitConstants
 from AthenaCommon.Utils.unixtools import find_datafile
-from AthenaCommon.Constants import WARNING
 
 def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwargs) -> ComponentAccumulator:
   acc = ComponentAccumulator()
@@ -381,19 +380,18 @@ def ActsMainSeedingCfg(flags,
             from ActsConfig.ActsAnalysisConfig import ActsStripSeedsToTrackParamsAlgCfg
             acc.merge(ActsStripSeedsToTrackParamsAlgCfg(flags,
                                                         **extractChildKwargs(prefix='StripSeedsToTrackParamsAlg.', **kwargs)))
-    
-    # Analysis extensions
+
     if flags.Acts.doAnalysis:
         if kwargs['processPixels']:
             from ActsConfig.ActsAnalysisConfig import ActsPixelSeedAnalysisAlgCfg, ActsPixelEstimatedTrackParamsAnalysisAlgCfg
             acc.merge(ActsPixelSeedAnalysisAlgCfg(flags, **extractChildKwargs(prefix='PixelSeedAnalysisAlg.', **kwargs)))
             acc.merge(ActsPixelEstimatedTrackParamsAnalysisAlgCfg(flags, **extractChildKwargs(prefix='PixelEstimatedTrackParamsAnalysisAlg.', **kwargs)))
-
+            
         if kwargs['processStrips']:
             from ActsConfig.ActsAnalysisConfig import ActsStripSeedAnalysisAlgCfg, ActsStripEstimatedTrackParamsAnalysisAlgCfg
             acc.merge(ActsStripSeedAnalysisAlgCfg(flags, **extractChildKwargs(prefix='StripSeedAnalysisAlg.', **kwargs)))
             acc.merge(ActsStripEstimatedTrackParamsAnalysisAlgCfg(flags, **extractChildKwargs(prefix='StripEstimatedTrackParamsAnalysisAlg.', **kwargs)))
-
+            
     return acc
 
 def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
@@ -433,9 +431,7 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
         kwargs.setdefault('PixelSeedingAlg.InputSpacePoints', pixelSpacePoints)
 
         # Setup the seed to track parameters algorithms either if we persistify them or we want to run the ActsMonitoring
-
         if flags.Tracking.ActiveConfig.storeTrackSeeds or flags.Acts.doAnalysis:
-
             kwargs.setdefault('PixelSeedsToTrackParamsAlg.name', f'{flags.Tracking.ActiveConfig.extension}PixelSeedsToTrackParamsAlg')
             kwargs.setdefault('PixelSeedsToTrackParamsAlg.extension', flags.Tracking.ActiveConfig.extension)
             kwargs.setdefault('PixelSeedsToTrackParamsAlg.InputSeedContainerKey', kwargs['PixelSeedingAlg.OutputSeeds'])
@@ -493,11 +489,16 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
 
 
     if flags.Tracking.ActiveConfig.storeTrackSeeds:
-        acc.merge(ActsStoreTrackSeedsCfg(flags,**kwargs))
+        acc.merge(ActsStoreTrackSeedsCfg(flags,
+                                         processPixels = processPixels,
+                                         processStrips = processStrips))
 
     return acc
 
 def ActsStoreTrackSeedsCfg(flags,
+                           *,
+                           processPixels: bool,
+                           processStrips: bool,
                            **kwargs: dict) -> ComponentAccumulator:
 
 
@@ -505,74 +506,86 @@ def ActsStoreTrackSeedsCfg(flags,
     
     seedKeyPixels = f'{flags.Tracking.ActiveConfig.extension}PixelSeeds'
     seedKeyStrips = f'{flags.Tracking.ActiveConfig.extension}StripSeeds'
+    paramsKeyPixels = f'{flags.Tracking.ActiveConfig.extension}PixelEstimatedTrackParams'
+    paramsKeyStrips = f'{flags.Tracking.ActiveConfig.extension}StripEstimatedTrackParams'
     trackKeyPixels = f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}PixelTracks'
     trackKeyStrips = f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}StripTracks'
     particleKeyPixels = f'SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}PixelTrackParticles'
     particleKeyStrips = f'SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}StripTrackParticles'
-    
 
-    acc.merge(ActsSeedToTrackCnvAlgPixelCfg(flags, 
-                                           name=f"{flags.Tracking.ActiveConfig.extension}PixelSeedToTrackCnvAlg",
-                                           SeedContainerKey=seedKeyPixels,
-                                           ACTSTracksLocation=trackKeyPixels))
+    if processPixels:
+        # Create track parameters from pixel seeds
+        from ActsConfig.ActsAnalysisConfig import ActsPixelSeedsToTrackParamsAlgCfg
+        acc.merge(ActsPixelSeedsToTrackParamsAlgCfg(flags,
+                                                    name = f'{flags.Tracking.ActiveConfig.extension}PixelSeedsToTrackParamsAlg',
+                                                    extension = flags.Tracking.ActiveConfig.extension,
+                                                    InputSeedContainerKey = seedKeyPixels,
+                                                    OutputTrackParamsCollectionKey = paramsKeyPixels))
 
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
-    acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, 
-                                                name=f"{flags.Tracking.ActiveConfig.extension}PixelTracksSeedToTrackParticleCnvAlg",
-                                                TrackParticlesOutKey=particleKeyPixels,
-                                                ACTSTracksLocation=[trackKeyPixels]))
 
-    
-    if not flags.Tracking.doITkFastTracking:
+        # Convert pixel seed to Acts track
+        acc.merge(ActsSeedToTrackCnvAlgPixelCfg(flags, 
+                                                name=f"{flags.Tracking.ActiveConfig.extension}PixelSeedToTrackCnvAlg",
+                                                EstimatedTrackParametersKey = paramsKeyPixels,
+                                                SeedContainerKey = seedKeyPixels,
+                                                ACTSTracksLocation = trackKeyPixels))
 
+        # Truth
+        if flags.Tracking.doTruth:
+            from ActsConfig.ActsTruthConfig import ActsTrackToTruthAssociationAlgCfg, ActsTrackFindingValidationAlgCfg
+            acc.merge(ActsTrackToTruthAssociationAlgCfg(flags,
+                                                        name = f"{trackKeyPixels}TrackToTruthAssociationAlg",
+                                                        ACTSTracksLocation = trackKeyPixels,
+                                                        AssociationMapOut = f"{trackKeyPixels}ToTruthParticleAssociation"))
+
+            acc.merge(ActsTrackFindingValidationAlgCfg(flags,
+                                                       name = f"{trackKeyPixels}TrackFindingValidationAlg",
+                                                       TrackToTruthAssociationMap = f"{trackKeyPixels}ToTruthParticleAssociation"))
+            
+        # Track Particle creation and persistification
+        # - input track collection: trackKeyPixels
+        # - output track particle collection: particleKeyPixels
+        from InDetConfig.ITkActsParticleCreationConfig import ITkActsTrackParticleCreationCfg
+        acc.merge(ITkActsTrackParticleCreationCfg(flags,
+                                                  TrackContainers = [trackKeyPixels],
+                                                  TrackParticleContainer = particleKeyPixels))
+
+                    
+    if processStrips:
+        # Create track parameters from strip seeds 
+        from ActsConfig.ActsAnalysisConfig import ActsStripSeedsToTrackParamsAlgCfg
+        acc.merge(ActsStripSeedsToTrackParamsAlgCfg(flags,
+                                                    name = f'{flags.Tracking.ActiveConfig.extension}StripSeedsToTrackParamsAlg',
+                                                    extension = flags.Tracking.ActiveConfig.extension,
+                                                    InputSeedContainerKey = seedKeyStrips,
+                                                    OutputTrackParamsCollectionKey = paramsKeyStrips))
+
+        # Convert strip seed to Acts track   
         acc.merge(ActsSeedToTrackCnvAlgStripCfg(flags, 
                                                 name=f"{flags.Tracking.ActiveConfig.extension}StripSeedToTrackCnvAlg",
-                                                SeedContainerKey=seedKeyStrips,
-                                                ACTSTracksLocation=trackKeyStrips))
-        
-        acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, 
-                                                    name=f"{flags.Tracking.ActiveConfig.extension}StripTracksSeedToTrackParticleCnvAlg",
-                                                    TrackParticlesOutKey=particleKeyStrips,
-                                                    ACTSTracksLocation=[trackKeyStrips]))
+                                                EstimatedTrackParametersKey = paramsKeyStrips,
+                                                SeedContainerKey = seedKeyStrips,
+                                                ACTSTracksLocation = trackKeyStrips))
 
-
-    # Schedule the seed tracks truth association and the seed track particles truth decoration
-
-    if flags.Tracking.doTruth:
-        from ActsConfig.ActsTruthConfig import ActsTrackToTruthAssociationAlgCfg
-        acc.merge(ActsTrackToTruthAssociationAlgCfg(flags,
-                                                    name=f"{trackKeyPixels}TrackToTruthAssociationAlg",
-                                                    ACTSTracksLocation=trackKeyPixels,
-                                                    AssociationMapOut=trackKeyPixels+"ToTruthParticleAssociation"))
-
-        from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
-        
-        # note: Schedule the algorithm with single truth map and always suppress stat dumps
-        acc.merge(ActsTrackParticleTruthDecorationAlgCfg(
-                     flags,
-                     name=f'{trackKeyPixels}TruthDecorationAlg',
-                     TrackToTruthAssociationMaps = [trackKeyPixels+"ToTruthParticleAssociation"],
-                     TrackParticleContainerName = particleKeyPixels,
-                     OutputLevel=WARNING,
-                     ComputeTrackRecoEfficiency=False
-                     ))
-        
-        # Only schedule the SSS if in default tracking
-
-        if not flags.Tracking.doITkFastTracking:
+        # Truth
+        if flags.Tracking.doTruth:
+            from ActsConfig.ActsTruthConfig import ActsTrackToTruthAssociationAlgCfg, ActsTrackFindingValidationAlgCfg
             acc.merge(ActsTrackToTruthAssociationAlgCfg(flags,
                                                         name=f"{trackKeyStrips}TrackToTruthAssociationAlg",
                                                         ACTSTracksLocation=trackKeyStrips,
                                                         AssociationMapOut=trackKeyStrips+"ToTruthParticleAssociation"))
 
-            acc.merge(ActsTrackParticleTruthDecorationAlgCfg(
-                     flags,
-                     name=f'{trackKeyStrips}TruthDecorationAlg',
-                     TrackToTruthAssociationMaps = [trackKeyStrips+"ToTruthParticleAssociation"],
-                     TrackParticleContainerName = particleKeyStrips,
-                     OutputLevel=WARNING,
-                     ComputeTrackRecoEfficiency=False
-                     ))
+            acc.merge(ActsTrackFindingValidationAlgCfg(flags,
+                                                       name = f"{trackKeyStrips}TrackFindingValidationAlg",
+                                                       TrackToTruthAssociationMap = f"{trackKeyStrips}ToTruthParticleAssociation"))
+
+        # Track Particle creation and persistification
+        # - input track collection: trackKeyStrips
+        # - output track particle collection: particleKeyStrips
+        from InDetConfig.ITkActsParticleCreationConfig import ITkActsTrackParticleCreationCfg
+        acc.merge(ITkActsTrackParticleCreationCfg(flags,
+                                                  TrackContainers = [trackKeyStrips],
+                                                  TrackParticleContainer = particleKeyStrips))
 
     return acc
 

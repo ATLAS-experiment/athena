@@ -23,7 +23,7 @@ Reco_tf.py \
        	     flags.Detector.EnableMuon=False; \
 	     flags.Acts.doLargeRadius=True; \
 	     flags.Acts.doLowPt=True;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsAloneWorkflowFlags" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \

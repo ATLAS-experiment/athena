@@ -487,6 +487,12 @@ def ITkExtendedPRDInfoCfg(flags):
 
 def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
     """Configures complete ITk tracking """
+
+    from TrkConfig.TrkConfigFlags import ITkPrimaryPassConfig
+    if flags.Tracking.ITkPrimaryPassConfig in [ITkPrimaryPassConfig.Acts, ITkPrimaryPassConfig.ActsFast, ITkPrimaryPassConfig.ActsHeavyIon]:
+        from InDetConfig.ITkActsTrackRecoConfig import ITkActsTrackRecoCfg
+        return ITkActsTrackRecoCfg(flags)
+
     result = ComponentAccumulator()
     
     if flags.Input.Format is Format.BS:

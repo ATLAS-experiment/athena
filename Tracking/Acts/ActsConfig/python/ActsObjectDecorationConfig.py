@@ -36,6 +36,16 @@ def ActsPixelClusterTruthDecorator(flags,
 
 
     acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterTruthDecorator(name,**kwargs))
+
+    # Persistification
+    if flags.Tracking.writeExtendedSi_PRDInfo:
+        toAOD = [
+            f'xAOD::TrackMeasurementValidationContainer#{kwargs["OutputClusterContainer"]}',
+            f'xAOD::TrackMeasurementValidationAuxContainer#{kwargs["OutputClusterContainer"]}Aux.'
+        ]        
+        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+        acc.merge(addToAOD(flags, toAOD))
+        
     return acc
 
 
@@ -47,6 +57,15 @@ def ActsStripClusterTruthDecorator(flags,
     kwargs.setdefault("AssociationMapOut","ITkStripClustersToTruthParticles")
     kwargs.setdefault("OutputClusterContainer","ITkStripClusters")
 
-
     acc.addEventAlgo(CompFactory.ActsTrk.StripClusterTruthDecorator(name,**kwargs))
+
+    # Persistification
+    if flags.Tracking.writeExtendedSi_PRDInfo:
+        toAOD = [
+            f'xAOD::TrackMeasurementValidationContainer#{kwargs["OutputClusterContainer"]}',
+            f'xAOD::TrackMeasurementValidationAuxContainer#{kwargs["OutputClusterContainer"]}Aux.'
+        ]        
+        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+        acc.merge(addToAOD(flags, toAOD))
+
     return acc

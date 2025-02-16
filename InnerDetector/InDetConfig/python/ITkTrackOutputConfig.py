@@ -67,10 +67,9 @@ def ITkTrackRecoOutputCfg(flags, extensions_list=None):
 
     # This should be activated only if both Legacy and Acts-based tracking
     # are executed at the same time during reconstruction
-    if flags.Acts.EDM.PersistifyTrackParticles:
-        toAOD += [
-            "xAOD::TrackParticleContainer#ActsInDetTrackParticles",
-            f"xAOD::TrackParticleAuxContainer#ActsInDetTrackParticlesAux.{excludedAuxData}"]
+    toAOD += [
+        "xAOD::TrackParticleContainer#ActsInDetTrackParticles",
+        f"xAOD::TrackParticleAuxContainer#ActsInDetTrackParticlesAux.{excludedAuxData}"]
 
     if flags.Tracking.writeExtendedSi_PRDInfo:
         toAOD += [

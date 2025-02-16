@@ -478,5 +478,27 @@ def ActsClusterizationCfg(flags,
             kwargs.setdefault('HgtdClusterAnalysisAlg.MonGroupName', f'{flags.Tracking.ActiveConfig.extension}ClusterAnalysisAlg')
 
     acc.merge(ActsMainClusterizationCfg(flags, RoIs=roisName, **kwargs))
+
+    # Persistification
+    if flags.Acts.EDM.PersistifyClusters and kwargs['runReconstruction']:
+        toAOD = []
+        if kwargs['processPixels']:
+            pixelClusterCollection = kwargs['PixelClusterizationAlg.ClustersKey']
+            toAOD += [f'xAOD::PixelClusterContainer#{pixelClusterCollection}',
+                      f'xAOD::PixelClusterAuxContainer#{pixelClusterCollection}Aux.']
+            
+        if kwargs['processStrips']:
+            stripClusterCollection = kwargs['StripClusterizationAlg.ClustersKey']
+            toAOD += [f"xAOD::StripClusterContainer#{stripClusterCollection}",
+                      f"xAOD::StripClusterAuxContainer#{stripClusterCollection}Aux."]
+            
+        if kwargs['processHGTD']:
+            hgtdClusterCollection = kwargs['HgtdClusterizationAlg.ClusterContainerName']
+            toAOD += [f"xAOD::HGTDClusterContainer#{hgtdClusterCollection}",
+                      f"xAOD::HGTDClusterAuxContainer#{hgtdClusterCollection}Aux."]
+            
+        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
+        acc.merge(addToAOD(flags, toAOD))
+        
     return acc
 

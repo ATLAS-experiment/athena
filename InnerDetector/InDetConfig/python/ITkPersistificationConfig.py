@@ -1,9 +1,8 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from InDetConfig.ITkActsHelpers import isPrimaryPass
 
-def isPrimaryPass(flags) -> bool:
-    return f"{flags.Tracking.ITkPrimaryPassConfig.value}Pass" not in flags.Tracking
 
 def ITkTrackSeedsFinalCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()

@@ -280,6 +280,9 @@ atlas_add_citest( EgammaESD
 # ACTS
 #################################################################################
 
+atlas_add_citest( ActsConfiguration
+   SCRIPT ActsConfiguration.sh )
+
 atlas_add_citest( ACTS_Propagation_ITk
    SCRIPT ActsITkTest.py )
 

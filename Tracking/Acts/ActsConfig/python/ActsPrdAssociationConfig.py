@@ -9,7 +9,8 @@ def ActsPrdAssociationAlgCfg(flags,
                              previousActsExtension: str = None,
                              **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    kwargs.setdefault('InputTrackCollection', f'{flags.Tracking.ActiveConfig.extension}ResolvedTracks')
+    acts_tracks = f"{flags.Tracking.ActiveConfig.extension}Tracks" if not flags.Acts.doAmbiguityResolution else f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks"
+    kwargs.setdefault('InputTrackCollection', acts_tracks)
     kwargs.setdefault('OutputPrdMap', f'{flags.Tracking.ActiveConfig.extension}PrdMap')
     if previousActsExtension is not None:
         kwargs.setdefault('InputPrdMap', f'{previousActsExtension}PrdMap')
