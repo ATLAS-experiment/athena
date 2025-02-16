@@ -15,25 +15,16 @@ namespace ITk
 {
 
   std::vector<float> PixelOfflineCalibData::getConstants() const {
-
     const std::vector< std::array<float, ITk::PixelClusterErrorData::kNParam> > &constMap = m_clusterErrorData->getConstMap();
-
     std::vector<float> constants;
     constants.reserve( (ITk::PixelClusterErrorData::kNParam+1) * constMap.size() );
-
-    unsigned int id_hash=0;
-    --id_hash;
-    for(const std::array<float, ITk::PixelClusterErrorData::kNParam>& values : constMap){
-      ++id_hash;
-      long long pixelId = m_clusterErrorData->getIdentifier(id_hash).get_compact();
-
+    //
+    for(unsigned int id_hash=0; const std::array<float, ITk::PixelClusterErrorData::kNParam>& values : constMap){
+      long long pixelId = m_clusterErrorData->getIdentifier(id_hash++).get_compact();
       constants.push_back(pixelId); // @TODO not necessariy  lossless to convert an IdentifierHash into a float
-      for(const auto& y : values) constants.push_back(y);
-
+      constants.insert(constants.end(), values.begin(),values.end());
     }
-
     return constants;
-
   }
 
   void PixelOfflineCalibData::dump() {
