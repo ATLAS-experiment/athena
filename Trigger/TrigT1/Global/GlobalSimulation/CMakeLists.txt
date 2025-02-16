@@ -25,7 +25,8 @@ atlas_add_component (GlobalSimulation
    AthenaBaseComps
    AthenaMonitoringKernelLib
    xAODTrigger
-   CaloEvent)
+   CaloEvent
+   PathResolver)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
@@ -37,7 +38,17 @@ atlas_add_test(ap_fixed
                INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                LINK_LIBRARIES ${GTEST_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils
 	       POST_EXEC_SCRIPT nopost.sh
-   )	       
+   )
+
+atlas_add_test(testEgamma1BDT_tv
+               SOURCES src/GlobalAlgs/TestEgamma1/all_tests.cxx
+	       src/GlobalAlgs/TestEgamma1/egamma1BDT_Test.cxx
+	       src/GlobalAlgs/Egamma1BDT/*.cpp
+               INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+               LINK_LIBRARIES ${GTEST_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils
+	       		      PathResolver
+	       POST_EXEC_SCRIPT nopost.sh
+   )
 
 atlas_add_test( testGlobalL1TopoSim
    SCRIPT python/GlobalL1TopoSimulation_ctest.py --evtMax 3
