@@ -9,11 +9,11 @@ EFmuon:	HLT_mu26_ivarperf_L1MU14FCH:key=HLT_IDTrack_MuonIso_IDTrig:roi=HLT_Roi_M
 
     
 L2muonLowpt:	HLT_mu6_idperf_L1MU5VF:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon
-L2muonLowpt:	HLT_mu6_ivarmedium_L1MU5VF:key=HLT_IDTrack_MuonIso_FTF:roi=HLT_Roi_MuonIso:post:d0=4
+L2muonLowpt:    HLT_mu4_mu4_idperf_1invmAB5_L12MU3VF:key=HLT_IDTrack_Muon_FTF:roi=HLT_L2SAMuon:te=1
 
 EFmuonLowpt:	HLT_mu6_idperf_L1MU5VF:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon
 EFmuonLowpt:	HLT_mu6_idperf_L1MU5VF:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon
-EFmuonLowpt:	HLT_mu6_ivarmedium_L1MU5VF:key=HLT_IDTrack_MuonIso_FTF:roi=HLT_Roi_MuonIso:post:d0=4
+EFmuonLowpt:	HLT_mu4_mu4_idperf_1invmAB5_L12MU3VF:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_L2SAMuon:te=1
     
 
 L2muonTnP:	HLT_mu24_idperf_L1MU14FCH:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon
