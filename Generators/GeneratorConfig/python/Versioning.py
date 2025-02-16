@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from os import getenv
 
 import re
@@ -20,6 +20,21 @@ def legacyReleaseData():
             item = {generator: version for generator, version in zip(generators, line[2:])}
             item['version'] = line[0]
             data[line[1]] = item
+    return data
+
+def legacyReleaseDataSampleOverrides():
+    from pathlib import Path
+    from PathResolver import PathResolver
+    filePath = Path(PathResolver.FindCalibFile("GeneratorConfig/Legacy_SampleOverrides.txt"))
+    data = {}
+    with filePath.open() as f:
+        f.readline() # skip header
+        for line in f:
+            line = line.strip()
+            if line[0] == "#":
+                continue
+            line = line.split(",")
+            data[int(line[0])] = line[1]
     return data
 
 def generatorsGetInitialVersionedDictionary(generators):
@@ -77,6 +92,12 @@ def GeneratorVersioningFixCfg(flags):
     tag = None
     if tags and tags[0].startswith("e"):
         tag = tags[0]
+
+    # Fix specific samples
+    releaseDataSampleOverridesDict = legacyReleaseDataSampleOverrides()
+    if flags.Input.MCChannelNumber and flags.Input.MCChannelNumber in releaseDataSampleOverridesDict:
+        log.warning(f"Overriding e-tag for sample {flags.Input.MCChannelNumber} to {releaseDataSampleOverridesDict[flags.Input.MCChannelNumber]}.")
+        tag = releaseDataSampleOverridesDict[flags.Input.MCChannelNumber]
 
     releaseDataDict = legacyReleaseData()
     if tag not in releaseDataDict:
