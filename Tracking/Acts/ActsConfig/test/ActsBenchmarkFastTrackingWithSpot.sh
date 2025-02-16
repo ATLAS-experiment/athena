@@ -20,7 +20,7 @@ ATHENA_CORE_NUMBER=${NTHREADS} Reco_tf.py \
     --conditionsTag "all:${conditions}" \
     --geometryVersion 'all:ATLAS-P2-RUN4-03-00-00' \
     --postInclude 'all:PyJobTransforms.UseFrontier' \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsAloneFastWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsFastWorkflowFlags" \
     --steering 'doRAWtoALL' \
     --preExec 'all:flags.Tracking.doITkFastTracking=True' \
     --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True;' \

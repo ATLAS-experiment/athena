@@ -446,7 +446,7 @@ def ActsPixelSeedAnalysisAlgCfg(flags,
 
     if flags.Tracking.doTruth:
         kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
-        kwargs.setdefault('ITkClustersTruth', 'PRD_MultiTruthITkPixel')
+        kwargs.setdefault('ITkClustersTruth', '') #PRD_MultiTruthITkPixel')
 
     return ActsBaseSeedAnalysisAlgCfg(flags,
                                       name,
@@ -465,7 +465,7 @@ def ActsStripSeedAnalysisAlgCfg(flags,
 
     if flags.Tracking.doTruth:
         kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
-        kwargs.setdefault('ITkClustersTruth', 'PRD_MultiTruthITkStrip')
+        kwargs.setdefault('ITkClustersTruth', '') #PRD_MultiTruthITkStrip')
 
     return ActsBaseSeedAnalysisAlgCfg(flags,
                                       name,

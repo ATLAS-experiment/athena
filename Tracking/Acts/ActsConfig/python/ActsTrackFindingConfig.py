@@ -254,7 +254,28 @@ def ActsTrackFindingCfg(flags,
         acc.merge(ActsTrackAnalysisAlgCfg(flags,
                                           name=f"{flags.Tracking.ActiveConfig.extension}TrackAnalysisAlg",
                                           TracksLocation=f"{flags.Tracking.ActiveConfig.extension}Tracks"))
-    
+
+    # Persistification
+    if flags.Acts.EDM.PersistifyTracks:
+        toAOD = []
+        prefix = f"{flags.Tracking.ActiveConfig.extension}"
+        toAOD += [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
+                  f"xAOD::TrackSummaryAuxContainer#{prefix}TrackSummaryAux.",
+                  f"xAOD::TrackStateContainer#{prefix}TrackStates",
+                  f"xAOD::TrackStateAuxContainer#{prefix}TrackStatesAux.-uncalibratedMeasurement",
+                  f"xAOD::TrackParametersContainer#{prefix}TrackParameters",
+                  f"xAOD::TrackParametersAuxContainer#{prefix}TrackParametersAux.",
+                  f"xAOD::TrackJacobianContainer#{prefix}TrackJacobians",
+                  f"xAOD::TrackJacobianAuxContainer#{prefix}TrackJacobiansAux.",
+                  f"xAOD::TrackMeasurementContainer#{prefix}TrackMeasurements",
+                  f"xAOD::TrackMeasurementAuxContainer#{prefix}TrackMeasurementsAux.",
+                  f"xAOD::TrackSurfaceContainer#{prefix}TrackStateSurfaces",
+                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackStateSurfacesAux.",
+                  f"xAOD::TrackSurfaceContainer#{prefix}TrackSurfaces",
+                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackSurfacesAux."]
+        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+        acc.merge(addToAOD(flags, toAOD))
+        
     return acc
 
 
@@ -345,6 +366,28 @@ def ActsAmbiguityResolutionCfg(flags,
         acc.merge(ActsTrackAnalysisAlgCfg(flags,
                                           name=f"{flags.Tracking.ActiveConfig.extension}ResolvedTrackAnalysisAlg",
                                           TracksLocation=f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks"))
+
+    # Persistification
+    if flags.Acts.EDM.PersistifyTracks:
+        toAOD = []
+        prefix = f"{flags.Tracking.ActiveConfig.extension}Resolved"
+        toAOD += [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
+                  f"xAOD::TrackSummaryAuxContainer#{prefix}TrackSummaryAux.",
+                  f"xAOD::TrackStateContainer#{prefix}TrackStates",
+                  f"xAOD::TrackStateAuxContainer#{prefix}TrackStatesAux.-uncalibratedMeasurement",
+                  f"xAOD::TrackParametersContainer#{prefix}TrackParameters",
+                  f"xAOD::TrackParametersAuxContainer#{prefix}TrackParametersAux.",
+                  f"xAOD::TrackJacobianContainer#{prefix}TrackJacobians",
+                  f"xAOD::TrackJacobianAuxContainer#{prefix}TrackJacobiansAux.",
+                  f"xAOD::TrackMeasurementContainer#{prefix}TrackMeasurements",
+                  f"xAOD::TrackMeasurementAuxContainer#{prefix}TrackMeasurementsAux.",
+                  f"xAOD::TrackSurfaceContainer#{prefix}TrackStateSurfaces",
+                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackStateSurfacesAux.",
+                  f"xAOD::TrackSurfaceContainer#{prefix}TrackSurfaces",
+                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackSurfacesAux."]        
+        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
+        acc.merge(addToAOD(flags, toAOD))
+
     return acc
 
 def ActsTrackToTrackParticleCnvAlgCfg(flags,

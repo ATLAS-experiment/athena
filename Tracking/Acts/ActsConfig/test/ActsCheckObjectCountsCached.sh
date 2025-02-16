@@ -18,7 +18,7 @@ Reco_tf.py \
 	     flags.Acts.doLargeRadius=True; \
 	     flags.Acts.doLowPt=True; \
 	     flags.Acts.useCache=True;" \
-  --preInclude "ActsConfig.ActsCIFlags.actsAloneWorkflowFlags" \
+  --preInclude "ActsConfig.ActsCIFlags.actsWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \

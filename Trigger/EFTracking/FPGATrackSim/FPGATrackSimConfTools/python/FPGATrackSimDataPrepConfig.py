@@ -340,8 +340,8 @@ def FPGATrackSimDataPrepConnectToFastTracking(flagsIn,FinalTracks="F100-",**kwar
     flags = flagsIn.clone()
     
     # configure FastTracking based on C-100 flags
-    from ActsConfig.ActsCIFlags import actsAloneFastWorkflowFlags
-    actsAloneFastWorkflowFlags(flags)
+    from ActsConfig.ActsCIFlags import actsFastWorkflowFlags
+    actsFastWorkflowFlags(flags)
     
     flags.Tracking.ActiveConfig.extension=FinalTracks 
     flags.lock()
