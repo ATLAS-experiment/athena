@@ -517,7 +517,7 @@ if __name__ == "__main__":
     
     ############################################
     # Flags used in the prototrack chain
-    FinalProtoTrackChainxAODTracksKey="xAODFPGAProtoTracks"
+    FinalProtoTrackChainxAODTracksKey="FPGA"
     flags.Detector.EnableCalo = False
 
     # ensure that the xAOD SP and cluster containers are available
@@ -540,7 +540,7 @@ if __name__ == "__main__":
     assert not flags.Trigger.FPGATrackSim.pipeline.startswith('F-5'),"ERROR You are trying to run an F-5* pipeline! This is not yet supported!"
 
     if (flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')):
-        print("You are trying to run an F-!* pipeline! I am going to run the Data Prep chain for you and nothing else!")
+        print("You are trying to run an F-100 pipeline! I am going to run the Data Prep chain for you and nothing else!")
         FPGATrackSimDataPrepConfig.runDataPrepChain()
     elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-2')):
         print("You are trying to run an F-2* pipeline! I am auto-configuring the 1D bitshift for you, including eta pattern filters and phi road filters")
@@ -561,7 +561,7 @@ if __name__ == "__main__":
     elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-6')):
         print("You are trying to run an F-6* pipeline! I am auto-configuring the Inside-Out for you. Whether you wanted to or not")
         flags.Trigger.FPGATrackSim.Hough.genScan=True
-        flags.Trigger.FPGATrackSim.spacePoints= flags.Trigger.FPGATrackSim.Hough.secondStage
+        flags.Trigger.FPGATrackSim.spacePoints = flags.Trigger.FPGATrackSim.Hough.secondStage
     elif (flags.Trigger.FPGATrackSim.pipeline != ""):
         raise AssertionError("ERROR You are trying to run the pipeline " + flags.Trigger.FPGATrackSim.pipeline + " which is not yet supported!")
 
@@ -632,9 +632,16 @@ if __name__ == "__main__":
    
        if flags.Trigger.FPGATrackSim.doEDMConversion:
            stage = "_2nd" if flags.Trigger.FPGATrackSim.Hough.secondStage else "_1st"
-           acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = f"FPGAConversionAlg{stage}", stage = f"{stage}", doActsTrk=True, doSP=flags.Trigger.FPGATrackSim.spacePoints))
+           convertTracks = flags.Trigger.FPGATrackSim.tracking
+           acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = f"FPGAConversionAlg{stage}",
+                                                                     stage = f"{stage}",
+                                                                     doActsTrk=True,
+                                                                     doSP=flags.Trigger.FPGATrackSim.spacePoints,
+                                                                     useRoads=not flags.Trigger.FPGATrackSim.tracking))
+           
            from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGATruthDecorationCfg, FPGAProtoTrackFitCfg
-           acc.merge(FPGAProtoTrackFitCfg(flags,stage=f"{stage}")) # Run ACTS KF
+           acc.merge(FPGAProtoTrackFitCfg(flags,stage=f"{stage}",
+                                          useRoads=not flags.Trigger.FPGATrackSim.tracking)) # Run ACTS KF
            acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage=f"{stage}")) # Run Truth Matching/Decoration chain
            if not flags.Trigger.FPGATrackSim.wrapperFileName and flags.Trigger.FPGATrackSim.runCKF:
                from FPGATrackSimConfTools.FPGATrackExtensionConfig import FPGATrackExtensionAlgCfg

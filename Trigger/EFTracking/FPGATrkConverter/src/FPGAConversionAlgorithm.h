@@ -73,6 +73,7 @@ protected: // was private
   Gaudi::Property<bool> m_doActsTrk {this, "doActsTrk", false, "Run Acts ProtoTrack finding"};
   Gaudi::Property<bool> m_doSP {this, "doSP", false, "Convert SPs"};
   Gaudi::Property<bool> m_doIndet {this, "doInDet", false, "Perform also to InDet convertion. This is obsolete and not needed anymore. By default disabled to save execution time"};
+  Gaudi::Property<bool> m_useRoads {this, "useRoads", false, "If set to truth it will generate prototracks based on FPGA roads instead of FPGA tracks"};
 
   private:
   typedef std::chrono::high_resolution_clock clock_type;

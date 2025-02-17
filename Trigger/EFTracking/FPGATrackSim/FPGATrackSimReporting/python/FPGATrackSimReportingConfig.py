@@ -24,7 +24,7 @@ def FPGATrackSimReportingCfg(flags,name='FPGATrackSimReportingAlg',stage="",**kw
     kwargs.setdefault('xAODSpacePointContainersFromFPGA',[f"xAODStripSpacePoints{stage}FromFPGA",f"xAODPixelSpacePoints{stage}FromFPGA"])
     kwargs.setdefault('FPGATrackSimTracks',f'FPGATracks{stage}')
     kwargs.setdefault('FPGATrackSimRoads',f'FPGARoads{stage}')
-    kwargs.setdefault('FPGATrackSimProtoTracks',[f"ActsProtoTracks{stage}FromFPGATrack"])
+    kwargs.setdefault('FPGATrackSimProtoTracks',[f"ActsProtoTracks{stage}FromFPGATrack",f"ActsProtoTracks{stage}FromFPGARoad"])
     kwargs.setdefault('FPGAActsTracks',["ACTSProtoTrackChainTestTracks","ExtendedFPGATracks"])
     
     reportinAlgorithm = CompFactory.FPGATrackSim.FPGATrackSimReportingAlg(name,**kwargs)

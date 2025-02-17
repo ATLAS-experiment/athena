@@ -16,7 +16,7 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
     ATH_CHECK(m_FPGAHitKey.initialize(m_doHits));
     ATH_CHECK(m_FPGARoadKey.initialize(m_doActsTrk));
     ATH_CHECK(m_FPGAHitInRoadsKey.initialize(m_doActsTrk));
-    ATH_CHECK(m_FPGATrackKey.initialize(m_doActsTrk));
+    ATH_CHECK(m_FPGATrackKey.initialize(m_doActsTrk && !m_useRoads));
     ATH_CHECK(m_xAODPixelClusterFromFPGAClusterKey.initialize(m_doClusters));
     ATH_CHECK(m_xAODStripClusterFromFPGAClusterKey.initialize(m_doClusters));
     ATH_CHECK(m_xAODPixelClusterFromFPGAHitKey.initialize(m_doHits));
@@ -86,31 +86,29 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
         m_totalClusterConversionTime += std::chrono::duration_cast<std::chrono::nanoseconds>(stopTime - startTime);
 
         if (m_doActsTrk) {
-          SG::ReadHandle<FPGATrackSimRoadCollection> FPGARoadsHandle (m_FPGARoadKey, ctx);
-          if (!FPGARoadsHandle.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimRoadCollection");
-            return StatusCode::FAILURE;
+          if (m_useRoads) {
+            SG::ReadHandle<FPGATrackSimRoadCollection> FPGARoadsHandle(m_FPGARoadKey, ctx);
+            if (!FPGARoadsHandle.isValid()) {
+              ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimRoadCollection");
+              return StatusCode::FAILURE;
+            }
+            SG::ReadHandle<FPGATrackSimHitContainer> FPGAHitsInRoadsHandle(m_FPGAHitInRoadsKey, ctx);
+            if (!FPGAHitsInRoadsHandle.isValid()) {
+              ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimItInRoadCollection");
+              return StatusCode::FAILURE;
+            }
+            const FPGATrackSimHitContainer* FPGAHitsInRoadsCont = FPGAHitsInRoadsHandle.cptr();
+            const FPGATrackSimRoadCollection* FPGARoadColl = FPGARoadsHandle.cptr();
+            ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx, *PixelContFromClusters, *SCTContFromClusters, *ProtoTracksFromRoads, *FPGAHitsInRoadsCont, *FPGARoadColl));
           }
-
-          const FPGATrackSimRoadCollection *FPGARoadColl = FPGARoadsHandle.cptr();
-
-          SG::ReadHandle<FPGATrackSimHitContainer> FPGAHitsInRoadsHandle (m_FPGAHitInRoadsKey, ctx);
-          if (!FPGAHitsInRoadsHandle.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimItInRoadCollection");
-            return StatusCode::FAILURE;
-          }
-          const FPGATrackSimHitContainer *FPGAHitsInRoadsCont = FPGAHitsInRoadsHandle.cptr();
-
-          SG::ReadHandle<FPGATrackSimTrackCollection> FPGATracksHandle (m_FPGATrackKey, ctx);
-          if (!FPGATracksHandle.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimTrackCollection");
-            return StatusCode::FAILURE;
-          }
-          const FPGATrackSimTrackCollection *FPGATrackColl = FPGATracksHandle.cptr();
-
-          if (PixelContFromClusters->size()+SCTContFromClusters->size() > 0) {
-            ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx,*PixelContFromClusters,*SCTContFromClusters,*ProtoTracksFromRoads, *FPGAHitsInRoadsCont, *FPGARoadColl ));
-            ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx,*PixelContFromClusters,*SCTContFromClusters,*ProtoTracksFromTracks, *FPGATrackColl ));
+          else{
+            SG::ReadHandle<FPGATrackSimTrackCollection> FPGATracksHandle(m_FPGATrackKey, ctx);
+            if (!FPGATracksHandle.isValid()) {
+              ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimTrackCollection");
+              return StatusCode::FAILURE;
+            }
+            const FPGATrackSimTrackCollection* FPGATrackColl = FPGATracksHandle.cptr();
+            ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx, *PixelContFromClusters, *SCTContFromClusters, *ProtoTracksFromTracks, *FPGATrackColl));
           }
         }
 
