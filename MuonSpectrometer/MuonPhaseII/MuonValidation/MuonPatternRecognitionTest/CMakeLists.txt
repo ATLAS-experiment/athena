@@ -24,7 +24,13 @@ atlas_add_test( HoughTransformTestR3
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
+atlas_add_test( HoughTransformTestR3_fromRDO
+                SCRIPT python -m MuonPatternRecognitionTest.MuonHoughTransformTesterConfig --nEvents 2  --noMonitorPlots --inputFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3Digits.pool.root
+                PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT nopost.sh)
 
+                
 atlas_add_test( HoughTransformTestR4
                 SCRIPT python -m MuonPatternRecognitionTest.MuonHoughTransformTesterConfig --noMonitorPlots --nEvents 2 --noMM --noSTGC --geoModelFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R4-MUONTEST.db --condTag OFLCOND-MC21-SDR-RUN4-01 --geoTag ATLAS-P2-RUN4-01-00-00 --inputFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R4SimHits.pool.root
                 PROPERTIES TIMEOUT 600
