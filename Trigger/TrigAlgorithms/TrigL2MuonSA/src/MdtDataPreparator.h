@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_MDTDATAPREPARATOR_H
@@ -7,25 +7,22 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 
 #include "MuonCnvToolInterfaces/IMuonRdoToPrepDataTool.h"
-#include "MuonCnvToolInterfaces/IMuonRawDataProviderTool.h"
 #include "IRegionSelector/IRegSelTool.h"
 #include "Identifier/IdentifierHash.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonCablingData/MuonMDT_CablingMap.h"
-#include "StoreGate/ReadCondHandleKey.h"
 #include "MuonPrepRawData/MuonPrepDataContainer.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 
-#include "TgcData.h"
 #include "MdtData.h"
 #include "MdtRegionDefiner.h"
 
 #include "RpcFitResult.h"
 #include "TgcFitResult.h"
+#include <unordered_set>
 
 namespace MuonGM{
      class MdtReadoutElement;
@@ -45,39 +42,38 @@ namespace TrigL2MuonSA {
 
   public:
 
-    MdtDataPreparator(const std::string& type,
-		      const std::string& name,
-		      const IInterface*  parent);
+    using AthAlgTool::AthAlgTool;
 
     virtual StatusCode initialize() override;
 
   public:
 
-    StatusCode prepareData(const TrigRoiDescriptor*          p_roids,
-			   const TrigL2MuonSA::RpcFitResult& rpcFitResult,
-			   TrigL2MuonSA::MuonRoad&           muonRoad,
-			   TrigL2MuonSA::MdtRegion&          mdtRegion,
-			   TrigL2MuonSA::MdtHits&            mdtHits_normal) const;
+    StatusCode prepareData(const TrigRoiDescriptor* p_roids,
+			    const TrigL2MuonSA::RpcFitResult& rpcFitResult,
+			    TrigL2MuonSA::MuonRoad&           muonRoad,
+			    TrigL2MuonSA::MdtRegion&          mdtRegion,
+			    TrigL2MuonSA::MdtHits&            mdtHits_normal) const;
 
-    StatusCode prepareData(const TrigRoiDescriptor*          p_roids,
-			   const TrigL2MuonSA::TgcFitResult& tgcFitResult,
-			   TrigL2MuonSA::MuonRoad&           muonRoad,
-			   TrigL2MuonSA::MdtRegion&          mdtRegion,
-			   TrigL2MuonSA::MdtHits&            mdtHits_normal) const;
+    StatusCode prepareData(const TrigRoiDescriptor* p_roids,
+			    const TrigL2MuonSA::TgcFitResult& tgcFitResult,
+			    TrigL2MuonSA::MuonRoad&           muonRoad,
+			    TrigL2MuonSA::MdtRegion&          mdtRegion,
+			    TrigL2MuonSA::MdtHits&            mdtHits_normal) const;
 
     void setRpcGeometry(bool use_rpc) {m_mdtRegionDefiner->setRpcGeometry(use_rpc);};
     void setRoIBasedDataAccess(bool use_RoIBasedDataAccess){m_use_RoIBasedDataAccess = use_RoIBasedDataAccess;};
 
   private:
 
-    StatusCode getMdtHits(const TrigRoiDescriptor* p_roids,
+    StatusCode getMdtHits(
+        const TrigRoiDescriptor* p_roids,
 			  TrigL2MuonSA::MuonRoad& muonRoad,
 			  TrigL2MuonSA::MdtHits& mdtHits_normal) const;
 
-    StatusCode collectMdtHitsFromPrepData(const std::vector<IdentifierHash>& v_idHash,
+    StatusCode collectMdtHitsFromPrepData(const EventContext& ctx,
+            const std::vector<IdentifierHash>& v_idHash,
 					  TrigL2MuonSA::MdtHits& mdtHits,
-					  const TrigL2MuonSA::MuonRoad& muonRoad,
-					  const MuonGM::MuonDetectorManager* muDetMgr) const;
+					  const TrigL2MuonSA::MuonRoad& muonRoad) const;
 
     void initDeadChannels(const MuonGM::MdtReadoutElement* mydetEl);
 
@@ -85,10 +81,9 @@ namespace TrigL2MuonSA {
 
     // Geometry Services
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-    IdentifierHash m_hash_id;
 
     // Region Selector
-    ToolHandle<IRegSelTool> m_regionSelector;
+    ToolHandle<IRegSelTool> m_regionSelector{this, "RegSel_MDT", "RegSelTool/RegSelTool_MDT"};
 
     // MdtRegionDefiner
     ToolHandle<MdtRegionDefiner> m_mdtRegionDefiner {
@@ -97,13 +92,12 @@ namespace TrigL2MuonSA {
     // handles to data access
     SG::ReadHandleKey<Muon::MdtPrepDataContainer> m_mdtPrepContainerKey{
 	this, "MDTPrepDataContainer","MDT_DriftCircles", "Name of the MDTContainer to read in"};
-    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muDetMgrKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of input MuonDetectorManager condition data"};
-
-    bool m_use_RoIBasedDataAccess = false;
-    bool m_BMGpresent;
-    int  m_BMGid;
-    std::map<Identifier, std::vector<Identifier> > m_DeadChannels;
-
+    
+    Gaudi::Property<bool> m_isPhase2{this, "isPhase2", false, "if the phase 2 geometry is setup"};
+    Gaudi::Property<bool> m_use_RoIBasedDataAccess{this, "use_RoIBasedDataAccess", false};
+    
+    int  m_BMGid{0};
+    std::unordered_set<Identifier> m_DeadChannels{};
   };
 
 } // namespace TrigL2MuonSA
