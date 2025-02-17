@@ -27,7 +27,6 @@ namespace NSWL1 {
     StripTdsOfflineTool::StripTdsOfflineTool( const std::string& type, const std::string& name, const IInterface* parent) :
       AthAlgTool(type,name,parent),
       m_incidentSvc("IncidentSvc",name),
-      m_detManager(nullptr),
       m_tree(nullptr)
     {
       declareInterface<NSWL1::IStripTdsTool>(this);
@@ -65,7 +64,7 @@ namespace NSWL1 {
         ATH_CHECK(this->book_branches());
       }
     }
-    ATH_CHECK(detStore()->retrieve(m_detManager));
+    ATH_CHECK(m_detManagerKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
     return StatusCode::SUCCESS;
   }
@@ -183,6 +182,7 @@ namespace NSWL1 {
 
 
     StatusCode StripTdsOfflineTool::fill_strip_cache( const std::vector<std::unique_ptr<PadTrigger>>& padTriggers, std::vector<std::unique_ptr<StripData>> &strip_cache) const {
+      SG::ReadCondHandle<MuonGM::MuonDetectorManager> detManager{m_detManagerKey, Gaudi::Hive::currentContext()};
       ATH_MSG_DEBUG( "fill_strip_cache: start filling the cache for STRIP hits" );
 
       if(m_isMC){
@@ -210,7 +210,7 @@ namespace NSWL1 {
         for (unsigned int item=0; item<coll->size(); item++) {
             const sTgcDigit* digit = coll->at(item);
             Identifier Id = digit->identify();
-            const MuonGM::sTgcReadoutElement* rdoEl = m_detManager->getsTgcReadoutElement(Id);
+            const MuonGM::sTgcReadoutElement* rdoEl = detManager->getsTgcReadoutElement(Id);
             int channel_type   = m_idHelperSvc->stgcIdHelper().channelType(Id);
             // process only Strip data
             if (channel_type!=1) continue;

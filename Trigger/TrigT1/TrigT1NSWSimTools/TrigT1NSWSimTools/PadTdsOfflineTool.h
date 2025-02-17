@@ -146,7 +146,7 @@ namespace NSWL1 {
         ServiceHandle<IIncidentSvc> m_incidentSvc{this, "IncidentSvc", "IncidentSvc"};  //!< Athena/Gaudi incident Service
         ServiceHandle<IAthRNGSvc>   m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};        //!< Random number generator engine to use
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-        const MuonGM::MuonDetectorManager* m_detManager;        //!< MuonDetectorManager
+        SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detManagerKey{this, "MuonManagerKey", "MuonDetectorManager"};
 
         // properties: container and service names
         Gaudi::Property<bool>         m_isMC          {this, "IsMC",            true,               "This is MC"};

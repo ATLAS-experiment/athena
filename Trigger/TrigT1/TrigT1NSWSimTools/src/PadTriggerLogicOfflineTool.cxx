@@ -7,6 +7,7 @@
 #include "TrigT1NSWSimTools/PadTriggerLogicOfflineTool.h"
 #include "MuonAGDDDescription/sTGCDetectorDescription.h"
 #include "MuonAGDDDescription/sTGCDetectorHelper.h"
+#include <mutex>
 
 namespace NSWL1 {
 //------------------------------------------------------------------------------
@@ -14,7 +15,6 @@ PadTriggerLogicOfflineTool::PadTriggerLogicOfflineTool(const std::string& type, 
     AthAlgTool(type,name,parent),
     m_etaBandsLargeSector(BandsInEtaLargeSector),
     m_etaBandsSmallSector(BandsInEtaSmallSector),
-    m_detManager(nullptr),
     m_tdrLogic()
   {
     declareInterface<NSWL1::IPadTriggerLogicTool>(this);
@@ -50,9 +50,8 @@ StatusCode PadTriggerLogicOfflineTool::initialize() {
     }
 
     // retrieve the MuonDetectormanager
-    ATH_CHECK( detStore()->retrieve( m_detManager ) );
+    ATH_CHECK(m_detManagerKey.initialize());
 
-    fillPhiTable();
     return StatusCode::SUCCESS;
 }
 //------------------------------------------------------------------------------
@@ -64,7 +63,8 @@ void PadTriggerLogicOfflineTool::handle(const Incident& inc) {
 }
 
 void PadTriggerLogicOfflineTool::fillGeometricInformation(PadOfflineData& pod) const {
-    const MuonGM::sTgcReadoutElement* rdoEl = m_detManager->getsTgcReadoutElement(pod.Identity());
+    SG::ReadCondHandle<MuonGM::MuonDetectorManager> detManager{m_detManagerKey, Gaudi::Hive::currentContext()};
+    const MuonGM::sTgcReadoutElement* rdoEl = detManager->getsTgcReadoutElement(pod.Identity());
     const Trk::PlaneSurface &surface = rdoEl->surface(pod.Identity());
     std::array<Amg::Vector2D, 4> local_pad_corners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
     //From MuonPadDesign... read pad local corners
@@ -138,6 +138,7 @@ std::vector<std::unique_ptr<PadTrigger>> PadTriggerLogicOfflineTool::build4of4Si
 StatusCode PadTriggerLogicOfflineTool::compute_pad_triggers(const std::vector<std::shared_ptr<PadData>>& pads,
                                                             std::vector<std::unique_ptr<PadTrigger>> &triggers) const
 {
+    if(!m_isInitialized) {fillPhiTable();}
     ATH_MSG_DEBUG(" <N> receiving "<<pads.size()<<" pad data");
     ATH_MSG_DEBUG("calling compute_pad_triggers() (pads.size() "<<pads.size()<<")");
     for(const auto& pad : pads){
@@ -259,7 +260,8 @@ NSWL1::PadTrigger PadTriggerLogicOfflineTool::convert(const SectorTriggerCandida
     //**************************************************************************************
     auto pad0=innertrg.pads().at(0);
     Identifier idt(pad0->id());
-    const Trk::PlaneSurface &surf = m_detManager->getsTgcReadoutElement(idt)->surface(idt);
+    SG::ReadCondHandle<MuonGM::MuonDetectorManager> detManager{m_detManagerKey, Gaudi::Hive::currentContext()};
+    const Trk::PlaneSurface &surf = detManager->getsTgcReadoutElement(idt)->surface(idt);
     Amg::Vector3D global_trgCoordinates(xcntr,ycntr,zcntr);
     Amg::Vector2D local_trgCoordinates;
     surf.globalToLocal(global_trgCoordinates,Amg::Vector3D(),local_trgCoordinates);
@@ -341,7 +343,7 @@ NSWL1::PadTrigger PadTriggerLogicOfflineTool::convert(const SectorTriggerCandida
         for(const auto &p : swt.pads()){
             const float padZ=p->m_cornerXyz[0][2];
             Identifier Id( p->id());
-            const Trk::PlaneSurface &padsurface = m_detManager->getsTgcReadoutElement(Id)->surface(Id);
+            const Trk::PlaneSurface &padsurface = detManager->getsTgcReadoutElement(Id)->surface(Id);
             float Phi=p->stationPhiAngle();
 
             //Find the radial boundaries of the band within the sector axis
@@ -404,12 +406,13 @@ NSWL1::PadTrigger PadTriggerLogicOfflineTool::convert(const SectorTriggerCandida
     //Assignment of  Phi Id using 6 bits slicing
     Identifier padIdentifier(pt.m_pads.at(0)->id() );
     IdentifierHash moduleHashId;
-    const IdContext ModuleContext = m_detManager->stgcIdHelper()->module_context();
+    const IdContext ModuleContext = detManager->stgcIdHelper()->module_context();
 
     //get the module Identifier using the pad's
-    m_detManager->stgcIdHelper()->get_hash( padIdentifier, moduleHashId, &ModuleContext );
+    detManager->stgcIdHelper()->get_hash( padIdentifier, moduleHashId, &ModuleContext );
     float stationPhiMin=0.0;
     float stationPhiMax=0.0;
+    if (!m_isInitialized){fillPhiTable();}
     std::map<IdentifierHash,std::pair<double,double>>::const_iterator itPhi = m_phiTable.find(moduleHashId);
     if (itPhi != m_phiTable.end()) {
       stationPhiMin=(*itPhi).second.first;
@@ -442,9 +445,14 @@ NSWL1::PadTrigger PadTriggerLogicOfflineTool::convert(const SectorTriggerCandida
 }
 
   // fill the map with the phi ranges
-  void PadTriggerLogicOfflineTool::fillPhiTable() {
-
-    const sTgcIdHelper* helper = m_detManager->stgcIdHelper();
+  void PadTriggerLogicOfflineTool::fillPhiTable() const {
+    
+    std::lock_guard guard{m_mutex};
+    if (m_isInitialized) {
+        return;
+    }
+    SG::ReadCondHandle<MuonGM::MuonDetectorManager> detManager{m_detManagerKey, Gaudi::Hive::currentContext()};
+    const sTgcIdHelper* helper = detManager->stgcIdHelper();
     
     std::vector<Identifier>::const_iterator  idfirst = helper->module_begin();
     std::vector<Identifier>::const_iterator  idlast =  helper->module_end();
@@ -458,7 +466,7 @@ NSWL1::PadTrigger PadTriggerLogicOfflineTool::convert(const SectorTriggerCandida
       
       helper->get_hash( Id, hashId, &ModuleContext );
       
-      const MuonGM::sTgcReadoutElement* module = m_detManager->getsTgcReadoutElement(Id);
+      const MuonGM::sTgcReadoutElement* module = detManager->getsTgcReadoutElement(Id);
       if (!module) continue;
       int multilayer = helper->multilayer(Id);
       
@@ -495,14 +503,14 @@ NSWL1::PadTrigger PadTriggerLogicOfflineTool::convert(const SectorTriggerCandida
 	if((sector_l=='L' && m_Zratio.first==0) || (sector_l=='S' && m_Zratio.second==0)) {
 	double ratio=1/pos.z();
 	Id=helper->multilayerID(Id,2);
-	const MuonGM::sTgcReadoutElement* module2 = m_detManager->getsTgcReadoutElement(Id);
+	const MuonGM::sTgcReadoutElement* module2 = detManager->getsTgcReadoutElement(Id);
 	Amg::Vector3D pos2 = module2->center();
 	ratio*=pos2.z();
 	if(sector_l=='L') m_Zratio.first=ratio;
 	else if(sector_l=='S') m_Zratio.second=ratio;
 	}
     }
-
+    m_isInitialized = true;
   }
 
 

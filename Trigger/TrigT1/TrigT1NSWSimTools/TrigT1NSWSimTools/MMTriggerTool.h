@@ -85,10 +85,13 @@ namespace NSWL1 {
     Gaudi::Property<float>        m_dThetaMax       {this, "DThetaMax",  0.015,          "Maximum dTheta [rad]"};
     Gaudi::Property<int>          m_dThetaBits      {this, "DThetaBits", 5,              "Number of dTheta bits"};
 
-    std::shared_ptr<MMT_Parameters> m_par_large;
-    std::shared_ptr<MMT_Parameters> m_par_small;
-    const MuonGM::MuonDetectorManager* m_detManager;        //!< MuonDetectorManager
-    const MmIdHelper*                  m_MmIdHelper;        //!< MM offline Id helper
+    mutable std::shared_ptr<MMT_Parameters> m_par_large ATLAS_THREAD_SAFE{nullptr};
+    mutable std::shared_ptr<MMT_Parameters> m_par_small ATLAS_THREAD_SAFE{nullptr};
+    mutable std::atomic<bool> m_isInitialized ATLAS_THREAD_SAFE{false};
+    mutable std::mutex m_mutex ATLAS_THREAD_SAFE{};
+    void fillPointers(const MuonGM::MuonDetectorManager* detManager) const;
+    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detManagerKey{this, "MuonManagerKey", "MuonDetectorManager"};
+    const MmIdHelper* m_MmIdHelper;        //!< MM offline Id helper
 
     //Histogram
     StatusCode book_branches();                       //!< book the branches

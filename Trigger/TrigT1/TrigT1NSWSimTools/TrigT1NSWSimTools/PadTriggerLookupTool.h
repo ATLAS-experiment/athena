@@ -60,7 +60,7 @@ namespace NSWL1 {
         StatusCode LookupSectorTriggers(const std::vector<std::shared_ptr<PadData>>& pads,int side, int sector, std::vector<std::unique_ptr<PadTrigger>> &triggers);
         std::vector<std::vector<std::shared_ptr<PadData>>> selectWedgePatterns(const std::vector<std::shared_ptr<PadData>> &pads,int side, int sector,int multiplet) const;
 
-        const MuonGM::MuonDetectorManager* m_detManager;
+        SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detManagerKey{this, "MuonManagerKey", "MuonDetectorManager"};
 
         std::vector<std::shared_ptr<PadOfflineData>> fetchSectorPads(bool isSmall,int side=1,int sector=1);//use sector number as coming ids
         std::vector<std::shared_ptr<PadOfflineData>> fetchSmallSectorPads(int side=1,int sector=1);

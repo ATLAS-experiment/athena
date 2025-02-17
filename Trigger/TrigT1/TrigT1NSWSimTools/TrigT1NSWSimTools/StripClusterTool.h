@@ -76,7 +76,7 @@ namespace NSWL1 {
 
     // needed Servives, Tools and Helpers
     ServiceHandle< IIncidentSvc > m_incidentSvc{this, "IncidentSvc", "IncidentSvc"};       //!< Athena/Gaudi incident Service
-    const MuonGM::MuonDetectorManager* m_detManager;        //!< MuonDetectorManager
+    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detManagerKey{this, "MuonManagerKey", "MuonDetectorManager"};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
     Gaudi::Property<bool>         m_isMC            {this, "IsMC",                  true,       "This is MC"};
