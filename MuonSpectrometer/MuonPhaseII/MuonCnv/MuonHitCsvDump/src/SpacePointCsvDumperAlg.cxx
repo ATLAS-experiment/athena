@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SpacePointCsvDumperAlg.h"
@@ -10,17 +10,14 @@
 #include <TString.h>
 
 namespace {
-    union bucketId{
+    union SectorId{
         int8_t fields[4];
         int hash;
     };
-
 }
 
 
 namespace MuonR4{
-SpacePointCsvDumperAlg::SpacePointCsvDumperAlg(const std::string& name, ISvcLocator* pSvcLocator):
- AthAlgorithm{name, pSvcLocator} {}
 
  StatusCode SpacePointCsvDumperAlg::initialize() {
    ATH_CHECK(m_readKey.initialize());
@@ -31,32 +28,42 @@ SpacePointCsvDumperAlg::SpacePointCsvDumperAlg(const std::string& name, ISvcLoca
  StatusCode SpacePointCsvDumperAlg::execute(){
 
    const EventContext& ctx{Gaudi::Hive::currentContext()};
-   
-
-
+ 
    constexpr std::string_view delim = ",";
    std::ofstream file{std::string(Form("event%09zu-",++m_event))+"SpacePoints.csv"};
    
+    /// Identifier to check whether the bucket is in the same sector
+    file<<"sectorId"<<delim;
+    // Bucket inside the sector layer    
     file<<"bucketId"<<delim;
+    /// Local position of the hit
     file<<"localPositionX"<<delim;
     file<<"localPositionY"<<delim;
     file<<"localPositionZ"<<delim;
+    /// Local sensor direction of the hit
+    file<<"locSensorDirX"<<delim;
+    file<<"locSensorDirY"<<delim;
+    file<<"locSensorDirZ"<<delim;
+    /// Normal vector on the sensor plane
+    file<<"locPlaneNormX"<<delim;
+    file<<"locPlaneNormY"<<delim;
+    file<<"locPlaneNormZ"<<delim;
+    /// Covariance entries of the uncalibrated space point
     file<<"covX"<<delim;
     file<<"covXY"<<delim;
     file<<"covYX"<<delim;
     file<<"covY"<<delim;
+    /// Drift radius
     file<<"driftR"<<delim;
-    file<<"stationName"<<delim;
-    file<<"stationEta"<<delim;
-    file<<"stationPhi"<<delim;
+    /// Properties of the space point Identifier
+    file<<"technology"<<delim;
     file<<"gasGap"<<delim;
     file<<"primaryCh"<<delim;
     file<<"secondaryCh"<<delim;
-    file<<"measuresEta"<<delim;
-    file<<"measuresPhi"<<delim<<std::endl;
+    file<<std::endl;
 
 
-   SG::ReadHandle<SpacePointContainer> readHandle{m_readKey, ctx};
+   SG::ReadHandle readHandle{m_readKey, ctx};
    ATH_CHECK(readHandle.isPresent());
 
    for(const SpacePointBucket* bucket : *readHandle) {
@@ -114,29 +121,33 @@ SpacePointCsvDumperAlg::SpacePointCsvDumperAlg(const std::string& name, ISvcLoca
                   ATH_MSG_WARNING("Dude you can't have CSCs in R4 "<<m_idHelperSvc->toString(measId));
             };
             
-            bucketId buckId{};
-            buckId.fields[0] = spacePoint->chamber()->stationName();
-            buckId.fields[1] = spacePoint->chamber()->stationEta();
-            buckId.fields[2] = spacePoint->chamber()->stationPhi();
-            buckId.fields[3] = bucket->bucketId();
-            
-            file<<buckId.hash<<delim;
+            SectorId secId{};
+            secId.fields[0] = static_cast<int>(spacePoint->msSector()->chamberIndex());
+            secId.fields[1] = spacePoint->msSector()->side();
+            secId.fields[2] = spacePoint->msSector()->sector();
+            file<<secId.hash<<delim;
+            file<<bucket->bucketId()<<delim;
             file<<spacePoint->positionInChamber().x()<<delim;
             file<<spacePoint->positionInChamber().y()<<delim;
             file<<spacePoint->positionInChamber().z()<<delim;
+            //
+            file<<spacePoint->directionInChamber().x()<<delim;
+            file<<spacePoint->directionInChamber().y()<<delim;
+            file<<spacePoint->directionInChamber().z()<<delim;
+            //
+            file<<spacePoint->planeNormal().x()<<delim;
+            file<<spacePoint->planeNormal().y()<<delim;
+            file<<spacePoint->planeNormal().z()<<delim;
+            //
             file<<spacePoint->covariance()(Amg::x, Amg::x)<<delim;
             file<<spacePoint->covariance()(Amg::x, Amg::y)<<delim;
             file<<spacePoint->covariance()(Amg::y, Amg::x)<<delim;
             file<<spacePoint->covariance()(Amg::y, Amg::y)<<delim;
             file<<spacePoint->driftRadius()<<delim;
-            file<<m_idHelperSvc->stationName(measId)<<delim;
-            file<<m_idHelperSvc->stationEta(measId)<<delim;
-            file<<m_idHelperSvc->stationPhi(measId)<<delim;
+            file<<static_cast<int>(techIdx)<<delim;
             file<<gasGap<<delim;
             file<<primaryCh<<delim;
             file<<secondCh<<delim;            
-            file<<spacePoint->measuresEta()<<delim;
-            file<<spacePoint->measuresPhi()<<delim;
             file<<std::endl;
        }
    }

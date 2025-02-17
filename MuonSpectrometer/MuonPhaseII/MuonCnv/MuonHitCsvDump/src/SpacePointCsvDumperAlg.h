@@ -1,7 +1,7 @@
 #ifndef MUONCSVDUMP_MuonStripCsvDumperAlg_H
 #define MUONCSVDUMP_MuonStripCsvDumperAlg_H
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <AthenaBaseComps/AthAlgorithm.h>
@@ -19,7 +19,7 @@ class SpacePointCsvDumperAlg: public AthAlgorithm {
 
    public:
 
-     SpacePointCsvDumperAlg(const std::string& name, ISvcLocator* pSvcLocator);
+     using AthAlgorithm::AthAlgorithm;
     ~SpacePointCsvDumperAlg() = default;
 
      StatusCode initialize() override;
