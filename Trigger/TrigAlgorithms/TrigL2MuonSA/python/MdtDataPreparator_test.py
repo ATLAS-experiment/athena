@@ -44,7 +44,7 @@ def testCfg (configFlags):
     result.merge (AtlasFieldCacheCondAlgCfg(configFlags, UseDCS = False))
 
     TrigL2MuonSA__MdtDataPreparator=CompFactory.TrigL2MuonSA.MdtDataPreparator
-    result.addPublicTool (TrigL2MuonSA__MdtDataPreparator ('TrigL2MuonSA::MdtDataPreparator', OutputLevel = 1)) # noqa: ATL900
+    result.addPublicTool (TrigL2MuonSA__MdtDataPreparator ('TrigL2MuonSA::MdtDataPreparator', OutputLevel = 1, isPhase2=configFlags.Muon.usePhaseIIGeoSetup)) # noqa: ATL900
     
     result.addEventAlgo (TestAlg ('TestAlg'))
     return result
