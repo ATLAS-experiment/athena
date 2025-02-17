@@ -29,6 +29,9 @@ set( ATLAS_FLAKE8 @ATLAS_FLAKE8@
 set( ATLAS_PYTHON_CHECKER @ATLAS_PYTHON_CHECKER@
    CACHE STRING "Python checker command to run during Python module compilation" )
 
+# CppCheck
+option( ATLAS_USE_CPPCHECK "Use CppCheck in the build" @ATLAS_USE_CPPCHECK@ )
+
 # Decide whether to enable LTO for AtlasGeant4 and its OBJECT libs
 set( ATLAS_GEANT4_USE_LTO @ATLAS_GEANT4_USE_LTO@ CACHE BOOL
    "Use link-time-optimization in building AtlasGeant4" )

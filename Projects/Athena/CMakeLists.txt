@@ -79,6 +79,9 @@ set( CxxUtilsSettings_DIR
    "${CMAKE_SOURCE_DIR}/../../Control/CxxUtils/cmake" )
 find_package( CxxUtilsSettings )
 
+# Enable CppCheck:
+option( ATLAS_USE_CPPCHECK "Use CppCheck in the build" ON )
+
 # Decide whether to enable LTO for AtlasGeant4 and its OBJECT libs
 include( CheckIPOSupported )
 check_ipo_supported( RESULT ATLAS_IPO_CHECK_RESULT )
