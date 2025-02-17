@@ -72,16 +72,17 @@ class PowhegBase(Configurable):
         self.executable = os.path.join(base_directory, version, executable_name, powheg_executable)
 
         ## Add to Python path "python" directory on POWHEG process directory
-        os.environ["PYTHONPATH"] += ":" + os.path.join(base_directory, version, executable_name, "python")
+        os.environ["PYTHONPATH"] = os.path.join(base_directory, version, executable_name, "python") + ":" + os.environ.get("PYTHONPATH", "")
 
         ## Add other locations of the libraries
-        os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "amplitudes", "obj-gnu")
-        os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "QCDLoop-1.95", "ff", "obj-gnu")
-        os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "Virtuals", "obj-gnu")
-        os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "obj-gfortran")
-        os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "obj-gfortran", "proclib")
-        os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "obj-gnu")
-        os.environ["LD_LIBRARY_PATH"] += ":" + os.path.join(base_directory, version, executable_name, "obj-gnu", "proclib")
+        os.environ["LD_LIBRARY_PATH"] = os.path.join(base_directory, version, executable_name, "amplitudes", "obj-gnu") + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+        os.environ["LD_LIBRARY_PATH"] = os.path.join(base_directory, version, executable_name, "QCDLoop-1.95", "ff", "obj-gnu") + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+        os.environ["LD_LIBRARY_PATH"] = os.path.join(base_directory, version, executable_name, "Virtuals", "obj-gnu") + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+        os.environ["LD_LIBRARY_PATH"] = os.path.join(base_directory, version, executable_name, "obj-gfortran") + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+        os.environ["LD_LIBRARY_PATH"] = os.path.join(base_directory, version, executable_name, "obj-gfortran", "proclib") + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+        os.environ["LD_LIBRARY_PATH"] = os.path.join(base_directory, version, executable_name, "obj-gnu") + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+        os.environ["LD_LIBRARY_PATH"] = os.path.join(base_directory, version, executable_name, "obj-gnu", "proclib") + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+
 
         ##OpenLoops
         directories = ['obj-gfortran', 'OpenLoops2', 'obj-gnu']
