@@ -311,7 +311,7 @@ std::unordered_map<std::string, ChainDetail> EnhancedBiasWeighter::parsePrescale
           // Later processing here does not expect any spaces, so remove them now. Pure comma separated list
           std::string lower = xml->GetNodeContent(sigDetailsNode);
           while (lower.find(" ") != std::string::npos) lower.replace( lower.find(" "), 1, "");
-          result[chainName].m_lowerName = lower;
+          result[chainName].m_lowerName = std::move(lower);
         } else if (detail == "evts_passed") {
           result[chainName].m_eventsPassed = std::stod( xml->GetNodeContent(sigDetailsNode) );
         } else if (detail == "evts_passed_weighted") {
