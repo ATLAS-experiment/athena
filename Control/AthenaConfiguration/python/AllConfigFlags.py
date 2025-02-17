@@ -342,9 +342,11 @@ def initConfigFlags():
         acf.addFlag("IOVDb.CleanerRingSize",lambda prevFlags : 0 if prevFlags.Trigger.doHLT else 2*max(1, prevFlags.Concurrency.NumConcurrentEvents), help='size of ring-buffer for conditions cleaner')
         acf.addFlag("IOVDb.SqliteInput","",help="Folders found in this file will be used instead of the production db")
         acf.addFlag("IOVDb.SqliteFolders",(),help="Folders listed here will be taken from the IOVDb.SqliteInput file instead of the production db. If empty, all folders found in the file are used.")
+
 #PoolSvc Flags:
     acf.addFlag("PoolSvc.MaxFilesOpen", lambda prevFlags : 2 if prevFlags.MP.UseSharedReader else 0, help='maximum number of open files')
     acf.addFlag('PoolSvc.DefaultContainerType', 'ROOTTREEINDEX', help='set the underlying POOL storage technology for the default container type')
+    acf.addFlag("PoolSvc.PersSvcPerInputType", False, help='enable separate persistency service for each input type')
 
 
     def __bfield():
