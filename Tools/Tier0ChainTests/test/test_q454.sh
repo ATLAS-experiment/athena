@@ -9,6 +9,8 @@
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 Reco_tf.py \
 --CA 'all:True' \
 --AMI=q454 \
@@ -17,7 +19,7 @@ Reco_tf.py \
 --multithreaded \
 --maxEvents=500 \
 --outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root --outputHISTFile=myHIST.root \
---conditionsTag 'all:OFLCOND-MC23-SDR-RUN3-06' \
+--conditionsTag "all:${conditions}" \
 --imf False
 
 rc1=$?

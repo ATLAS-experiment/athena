@@ -349,7 +349,8 @@ if __name__ == '__main__':
         from AthenaConfiguration.Enums import LHCPeriod
         flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2023-01' if flags.GeoModel.Run is LHCPeriod.Run3 else 'CONDBR2-HLTP-2018-04'
     else:
-        flags.IOVDb.GlobalTag = 'OFLCOND-MC23-SDR-RUN3-05'
+        from AthenaConfiguration.TestDefaults import defaultConditionsTags
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
     flags.Output.AODFileName = 'AOD.pool.root'
     flags.Exec.MaxEvents = args.nevents
     flags.Concurrency.NumThreads = 1
