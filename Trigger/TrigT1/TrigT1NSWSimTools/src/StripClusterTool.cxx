@@ -10,7 +10,6 @@ namespace NSWL1 {
 
   StripClusterTool::StripClusterTool( const std::string& type, const std::string& name, const IInterface* parent) :
     AthAlgTool(type,name,parent),
-    m_detManager(nullptr),
     m_tree(nullptr)
   {
     declareInterface<NSWL1::IStripClusterTool>(this);
@@ -49,7 +48,7 @@ namespace NSWL1 {
     }
 
     // retrieve the MuonDetectormanager
-    ATH_CHECK(detStore()->retrieve( m_detManager ));
+    ATH_CHECK(m_detManagerKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
     return StatusCode::SUCCESS;
   }
@@ -195,7 +194,7 @@ namespace NSWL1 {
   StatusCode StripClusterTool::fill_strip_validation_id(const EventContext& ctx,
 							std::vector<std::unique_ptr<StripClusterData>>& clusters,
                                                         std::vector<std::shared_ptr<std::vector<std::unique_ptr<StripData> >>  > &cluster_cache) const {
-
+    SG::ReadCondHandle<MuonGM::MuonDetectorManager> detManager{m_detManagerKey, ctx};
     ATH_MSG_DEBUG("Cluster cache received " << cluster_cache.size());
 
     bool first_strip=true;
@@ -236,7 +235,7 @@ namespace NSWL1 {
         if(m_isMC && first_strip) {
           first_strip=false;
           Identifier Id = strip_cl->Identity();
-          const MuonGM::sTgcReadoutElement* rdoEl = m_detManager->getsTgcReadoutElement(Id);
+          const MuonGM::sTgcReadoutElement* rdoEl = detManager->getsTgcReadoutElement(Id);
           auto it = sdo_container->find(Id);
           if(it == sdo_container->end()) continue;
           const MuonSimData strip_sdo = it->second;

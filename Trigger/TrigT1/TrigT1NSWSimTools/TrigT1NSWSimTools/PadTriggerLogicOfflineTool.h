@@ -92,11 +92,13 @@ namespace NSWL1 {
         const std::vector<float> m_etaBandsLargeSector;
         const std::vector<float> m_etaBandsSmallSector;
 
-        std::map<IdentifierHash, std::pair<double,double> > m_phiTable;
-	std::pair<double,double> m_Zratio;
+        mutable std::map<IdentifierHash, std::pair<double,double> > m_phiTable ATLAS_THREAD_SAFE{};
+	    mutable std::pair<double,double> m_Zratio ATLAS_THREAD_SAFE{};
+        mutable std::atomic<bool> m_isInitialized ATLAS_THREAD_SAFE{false};
+        mutable std::mutex m_mutex ATLAS_THREAD_SAFE{};
 
         ServiceHandle<IIncidentSvc> m_incidentSvc{this, "IncidentSvc", "IncidentSvc"};  //!< Athena/Gaudi incident Service
-        const MuonGM::MuonDetectorManager* m_detManager;        //!< MuonDetectorManager
+        SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detManagerKey{this, "MuonManagerKey", "MuonDetectorManager"};
 
         Gaudi::Property<float> m_PadEfficiency {this, "PadEfficiency",   1.0,   "Pad trigger efficiency"};
         Gaudi::Property<int>   m_phiIdBits     {this, "PhiIdBits",       6,     "Number of bit to compute Phi-Id of pad triggers"};
@@ -105,7 +107,7 @@ namespace NSWL1 {
 
         std::unique_ptr<PadTriggerValidationTree> m_validation_tree;
         void fillGeometricInformation(PadOfflineData&) const;
-        void fillPhiTable();
+        void fillPhiTable() const;
         L1TdrStgcTriggerLogic m_tdrLogic;
     };
 } // namespace NSWL1

@@ -30,8 +30,7 @@ namespace NSWL1 {
     
     //------------------------------------------------------------------------------
     PadTdsOfflineTool::PadTdsOfflineTool( const std::string& type, const std::string& name, const IInterface* parent) :
-        AthAlgTool(type,name,parent),
-        m_detManager(0)
+        AthAlgTool(type,name,parent)
     {
         declareInterface<NSWL1::IPadTdsTool>(this);
     }
@@ -77,7 +76,7 @@ namespace NSWL1 {
         }
 
         //  retrieve the MuonDetectormanager
-        ATH_CHECK( detStore()->retrieve( m_detManager ) );
+        ATH_CHECK(m_detManagerKey.initialize());
 
         // retrieve the Random Service
         ATH_CHECK( m_rndmSvc.retrieve() );
@@ -112,12 +111,13 @@ namespace NSWL1 {
     }
     //------------------------------------------------------------------------------
     StatusCode PadTdsOfflineTool::fill_pad_validation_id ATLAS_NOT_THREAD_SAFE (std::vector< std::vector<std::shared_ptr<PadData>> > &pad_cache) const {
+        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detManager{m_detManagerKey, Gaudi::Hive::currentContext()};
         float bin_offset = +0.; // used to center the bin on the value of the Pad Id
         for (const std::vector<std::shared_ptr<PadData>>& pad : pad_cache) {
             m_validation_tree->fill_num_pad_hits(pad.size());
             for (const std::shared_ptr<PadData> &pd : pad) {
                 Identifier Id( pd->id() );
-                const MuonGM::sTgcReadoutElement* rdoEl = m_detManager->getsTgcReadoutElement(Id);
+                const MuonGM::sTgcReadoutElement* rdoEl = detManager->getsTgcReadoutElement(Id);
                 const Trk::PlaneSurface &surface = rdoEl->surface(Id);
                 // gathers the readout element associated to this PAD + the PAD Local/Global psoition
                 Amg::Vector2D pad_lpos{Amg::Vector2D::Zero()};
@@ -221,6 +221,7 @@ namespace NSWL1 {
     }
     //------------------------------------------------------------------------------
     StatusCode PadTdsOfflineTool::fill_pad_cache(std::vector< std::vector<std::shared_ptr<PadData>> > &pad_cache) const {
+        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detManager{m_detManagerKey, Gaudi::Hive::currentContext()};
         SG::ReadHandle<sTgcDigitContainer> digit_container(m_sTgcDigitContainer);
         if(!digit_container.isValid()){
           ATH_MSG_ERROR("could not retrieve the sTGC Digit container: cannot return the STRIP hits");
@@ -249,7 +250,7 @@ namespace NSWL1 {
                             //PadOfflineData* pad = new PadOfflineData(Id, digit->time(), digit->bcTag(), m_sTgcIdHelper);
                             //S.I
                             //std::shared_ptr<PadOfflineData> pad(new PadOfflineData(Id, digit->time(), digit->bcTag(), m_sTgcIdHelper));
-                            auto pad=std::make_shared<PadOfflineData>(Id, digit->time(), digit->bcTag(), m_detManager);
+                            auto pad=std::make_shared<PadOfflineData>(Id, digit->time(), digit->bcTag(), *detManager);
                             //pad_hits.push_back(PadHits(Id, pad, cache_index(digit)));
                             pad_hits.emplace_back(Id, pad, cache_index(digit));//avoids extra copy
                             //S.I
@@ -266,8 +267,9 @@ namespace NSWL1 {
     }
     //------------------------------------------------------------------------------
     double PadTdsOfflineTool::computeTof(const sTgcDigit* digit) const {
+        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detManager{m_detManagerKey, Gaudi::Hive::currentContext()};
         Identifier Id = digit->identify();
-        const MuonGM::sTgcReadoutElement* rdoEl = m_detManager->getsTgcReadoutElement(Id);
+        const MuonGM::sTgcReadoutElement* rdoEl = detManager->getsTgcReadoutElement(Id);
         Amg::Vector2D pad_lpos;
         rdoEl->stripPosition(Id,pad_lpos);
         Amg::Vector3D pad_gpos;

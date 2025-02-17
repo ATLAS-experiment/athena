@@ -10,7 +10,6 @@ namespace NSWL1 {
 
   MMTriggerTool::MMTriggerTool( const std::string& type, const std::string& name, const IInterface* parent) :
     AthAlgTool(type,name,parent),
-    m_detManager(nullptr),
     m_MmIdHelper(nullptr),
     m_tree(nullptr)
   {
@@ -55,15 +54,25 @@ namespace NSWL1 {
     }
 
     //  retrieve the MuonDetectormanager
-    ATH_CHECK( detStore()->retrieve( m_detManager ) );
+    ATH_CHECK(m_detManagerKey.initialize());
 
     //  retrieve the Mm offline Id helper
     ATH_CHECK( detStore()->retrieve( m_MmIdHelper ) );
 
-    m_par_large = std::make_shared<MMT_Parameters>("xxuvuvxx",'L', m_detManager);
-    m_par_small = std::make_shared<MMT_Parameters>("xxuvuvxx",'S', m_detManager);
-
     return StatusCode::SUCCESS;
+  }
+
+  void MMTriggerTool::fillPointers(const MuonGM::MuonDetectorManager* detManager) const{
+
+    std::lock_guard guard{m_mutex};
+    if (m_isInitialized) {
+        return;
+    } 
+
+    m_par_large = std::make_shared<MMT_Parameters>("xxuvuvxx",'L', detManager);
+    m_par_small = std::make_shared<MMT_Parameters>("xxuvuvxx",'S', detManager);
+
+    m_isInitialized=true;
   }
 
   StatusCode MMTriggerTool::runTrigger(const EventContext& ctx, Muon::NSW_TrigRawDataContainer* rdo, const bool do_MMDiamonds) const {
@@ -76,11 +85,14 @@ namespace NSWL1 {
     // Load Variables From Containers into our Data Structures  //
     //                                                          //
     //////////////////////////////////////////////////////////////
+    SG::ReadCondHandle<MuonGM::MuonDetectorManager> detManagerHandle{m_detManagerKey, ctx};
+    const MuonGM::MuonDetectorManager* detManager = detManagerHandle.cptr();
 
+    if(!m_isInitialized) {fillPointers(detManager);}
     std::map<std::string, std::shared_ptr<MMT_Parameters> > pars;
     pars["MML"] = m_par_large;
     pars["MMS"] = m_par_small;
-    MMLoadVariables load = MMLoadVariables(m_detManager, m_MmIdHelper);
+    MMLoadVariables load = MMLoadVariables(detManager, m_MmIdHelper);
 
     std::map<std::pair<int, unsigned int>,std::vector<digitWrapper> > entries;
     std::map<std::pair<int, unsigned int>,std::vector<hitData_entry> > Hits_Data_Set_Time;
@@ -119,7 +131,7 @@ namespace NSWL1 {
       return StatusCode::SUCCESS;
     }
 
-    std::unique_ptr<MMT_Diamond> diamond = std::make_unique<MMT_Diamond>(m_detManager);
+    std::unique_ptr<MMT_Diamond> diamond = std::make_unique<MMT_Diamond>(detManager);
     if (do_MMDiamonds) {
       diamond->setTrapezoidalShape(m_trapShape);
       diamond->setXthreshold(m_diamXthreshold);
@@ -185,7 +197,7 @@ namespace NSWL1 {
              * Filling hits for each event: a new class, MMT_Hit, is called in
              * order to use both algorithms witghout interferences
              */
-            diamond->createRoads_fillHits(i-nskip, reco_it->second, m_detManager, pars[station], stationPhi);
+            diamond->createRoads_fillHits(i-nskip, reco_it->second, detManager, pars[station], stationPhi);
             if (m_doNtuple) {
               for(const auto &hit : reco_it->second) {
                 m_trigger_VMM->push_back(hit.VMM_chip);
