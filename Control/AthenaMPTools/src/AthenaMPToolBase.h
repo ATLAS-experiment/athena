@@ -14,6 +14,7 @@
 
 #include "AthenaInterprocess/ProcessGroup.h"
 #include "AthenaInterprocess/IMessageDecoder.h"
+#include "AthenaInterprocess/IMPRunStop.h"
 
 #include <filesystem>
 
@@ -41,6 +42,8 @@ class AthenaMPToolBase : public AthAlgTool
 
   virtual void useFdsRegistry(std::shared_ptr<AthenaInterprocess::FdsRegistry>) override;
   virtual void setRandString(const std::string& randStr) override;
+  virtual void setMaxEvt(int maxEvt) override {m_maxEvt=maxEvt;}
+  virtual void setMPRunStop(const AthenaInterprocess::IMPRunStop* runStop) override {m_mpRunStop=runStop;}
 
   virtual void killChildren() override;
 
@@ -81,11 +84,13 @@ class AthenaMPToolBase : public AthAlgTool
   IEvtSelector* evtSelector() { return m_evtSelector; }
 
   int         m_nprocs;           // Number of workers spawned by the master process
+  int         m_maxEvt;           // Maximum number of events assigned to the job
   std::string m_subprocTopDir;    // Top run directory for subprocesses
   std::string m_subprocDirPrefix; // For ex. "worker__"
   std::string m_evtSelName;       // Name of the event selector
 
   AthenaInterprocess::ProcessGroup* m_processGroup;
+  const AthenaInterprocess::IMPRunStop* m_mpRunStop{nullptr};
 
   ServiceHandle<IEventProcessor> m_evtProcessor;
   ServiceHandle<IAppMgrUI>       m_appMgr;

@@ -9,13 +9,15 @@
 #include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaInterprocess/FdsRegistry.h"
+#include "AthenaInterprocess/IMPRunStop.h"
 #include <memory>
 
 class IAthenaMPTool;
 class ISvcLocator;
 
 class ATLAS_NOT_THREAD_SAFE AthMpEvtLoopMgr : public extends<AthService,
-                                                             IEventProcessor>
+                                                             IEventProcessor,
+                                                             AthenaInterprocess::IMPRunStop>
 {
  public:
   AthMpEvtLoopMgr(const std::string& name, ISvcLocator* svcLocator);
@@ -30,6 +32,8 @@ class ATLAS_NOT_THREAD_SAFE AthMpEvtLoopMgr : public extends<AthService,
   virtual StatusCode stopRun() override;
 
   virtual EventContext createEventContext() override;
+
+  virtual bool stopScheduled() const override {return m_scheduledStop;};
 
  private:
   ServiceHandle<IEventProcessor> m_evtProcessor;
@@ -48,6 +52,7 @@ class ATLAS_NOT_THREAD_SAFE AthMpEvtLoopMgr : public extends<AthService,
   unsigned int                   m_eventPrintoutInterval;
   StringArrayProperty            m_execAtPreFork;
   pid_t                          m_masterPid;
+  bool                           m_scheduledStop{false};
 
   // vectors for collecting memory samples
   std::vector<unsigned long>     m_samplesRss;
