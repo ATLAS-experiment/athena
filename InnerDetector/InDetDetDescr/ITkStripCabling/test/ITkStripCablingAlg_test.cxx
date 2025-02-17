@@ -76,7 +76,7 @@ BOOST_FIXTURE_TEST_SUITE( ITkStripCablingAlgTest, TestFixture )
   //https://acode-browser.usatlas.bnl.gov/lxr/source/athena/InnerDetector/InDetDetDescr/InDetIdentifier/test/ITkStripID_test.cxx
   BOOST_AUTO_TEST_CASE(ExecuteOptions){
     {//This is just to setup the ITkStripID with a valid set of identifiers
-      ServiceHandle<StoreGateSvc> detStore("StoreGateSvc/DetectorStore", "ITkPixelCablingAlgTest");
+      ServiceHandle<StoreGateSvc> detStore("StoreGateSvc/DetectorStore", "ITkStripCablingAlgTest");
       BOOST_TEST(detStore.retrieve().isSuccess());
       IdDictParser parser;
       parser.register_external_entity("InnerDetector", itkDictFilename);
