@@ -165,6 +165,7 @@ def TrackTruthMatchCfg(flags):
     
     track_cols = ["MuonTracksR4", "MuonTracksFromHoughR4", "MuonSpectrometerTracks"]
     track_colstp = ["MuonSpectrometerTrackParticlesR4", "MuonSpectrometerTrackParticlesFromHoughR4", "MuonSpectrometerTrackParticles"]
+
     for trk in track_cols:
         result.merge(MuonDetailedTrackTruthMakerCfg(flags, name=f"MuonDetailedTruthTrkMaker{trk}",
                                                         TrackCollectionNames=[trk]))
