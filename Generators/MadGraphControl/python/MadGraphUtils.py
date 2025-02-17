@@ -1151,7 +1151,7 @@ def madspin_on_lhe(input_LHE,madspin_card,runArgs=None,keep_original=False):
     if runArgs is None:
         raise RuntimeError('Must provide runArgs to madspin_on_lhe')
 
-    outputDS = runArgs.outputTXTFile if hasattr(runArgs,'outputTXTFile') else 'tmp_LHE_events'
+    outputDS = runArgs.outputTXTFile if hasattr(runArgs,'outputTXTFile') else 'tmp_LHE_events.tar.gz'
 
     mglog.info('Moving file over to '+outputDS.split('.tar.gz')[0]+'.events')
     shutil.move(os.getcwd()+'/events.lhe',outputDS.split('.tar.gz')[0]+'.events')
@@ -1417,7 +1417,7 @@ def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveP
     if hasattr(runArgs,'outputTXTFile'):
         outputDS = runArgs.outputTXTFile
     else:
-        outputDS = 'tmp_LHE_events'
+        outputDS = 'tmp_LHE_events.tar.gz'
 
     mglog.info('Moving file over to '+outputDS.split('.tar.gz')[0]+'.events')
 
