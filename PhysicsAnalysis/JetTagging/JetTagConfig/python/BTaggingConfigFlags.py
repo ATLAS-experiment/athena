@@ -76,19 +76,45 @@ def runFlipTag(flags):
     return isRun3Derivation(flags)
 
 def getNNs(flags):
+    '''
+    Gets the paths of models to run via MultiFoldTagger.
+    '''
     # dummy for now
     caldir = 'BTagging/20231205/GN2v01/antikt4empflow'
     pf_nns = [f'{caldir}/network_fold{n}.onnx' for n in range(4)]
+
+    # We can save our results to the jet container, rather than the b-tagging container
+    # but this functionality is not yet setup for non multi-fold taggers. The easiest (/hackiest)
+    # solution is to pass all the GN3 paths below as seperate single-fold-multi-fold-taggers
+    # But this *should* be cleaned up at some point
+    # Note also, reco tests failing due to leptonID missing, so for now don't run taggers unless derivation
+    # https://gitlab.cern.ch/atlas/athena/-/merge_requests/77764#note_9063625
+    gn3_paths = [
+        "BTagging/20250213/GN3V00/antikt4empflow/network.onnx", # Only tracks
+        "BTagging/20250213/GN3PflowV00/antikt4empflow/network.onnx", # Tracks+PFlow
+        "BTagging/20250213/GN3MuonsV00/antikt4empflow/network.onnx", # Tracks+Muons
+        "BTagging/20250213/GN3PflowMuonsV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow
+    ] if isRun3Derivation(flags) else [   
+        "BTagging/20250213/GN3V00/antikt4empflow/network.onnx", # Only tracks
+        "BTagging/20250213/GN3PflowV00/antikt4empflow/network.onnx", # Tracks+PFlow
+     ]
+
     return {
         'AntiKt4EMPFlowJets': [
             {
                 'folds': pf_nns,
+                'hash': 'jetFoldHash',
+                'cone_association': True,
             },
+            *[{'folds' : [nn_path]} for nn_path in gn3_paths]
         ],
         'AntiKt4EMPFlowCustomVtxJets': [
             {
                 'folds': pf_nns,
+                'hash': 'jetFoldHash',
+                'cone_association': True
             },
+            *[{'folds' : [nn_path]} for nn_path in gn3_paths]
         ]
     }
 
@@ -151,5 +177,6 @@ def createBTaggingConfigFlags():
     #  - folds: list of NNs to run
     #  - remapping (optional): any variable remapping
     btagcf.addFlag("BTagging.NNs", getNNs)
+    
 
     return btagcf

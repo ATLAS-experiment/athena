@@ -57,7 +57,9 @@ def GetTaggerTrainingMap(inputFlags, jet_col):
             "BTagging/20230413/gn2xwithmassv00/antikt10ufo/network.onnx",
             "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx",
             "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx",
-            "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/MC20_bbJES_ak10csskufo_Sep24_calibFactors.onnx", # GN2X-based regression model
+            "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/MC20_bbJES_ak10csskufo_Sep24_calibFactors.onnx", # bJR10v00
+            "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20250212.onnx", # bJR10v00Ext
+            "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx" # bJR10v01
         ],
         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA": [
             "BTagging/20220314/dipsLoose/antikt4empflow/network.json",    # input to DL1dv01
@@ -384,10 +386,14 @@ def BTagAlgsCfg(
 
     # multifold models, at the moment this is only supported via inputFlags
     for networks in inputFlags.BTagging.NNs.get(jetcol, []):
-        assert len(networks['folds']) > 1
+        assert isinstance(networks['folds'], list) 
         dirnames = [Path(path).parent for path in networks['folds']]
         assert len(set(dirnames)) == 1, 'Different folds should be located in the same dir'
         dirname = str(dirnames[0])
+
+        # skip ghost association: not suppoted on the BTagging object
+        if not networks.get('cone_association'):
+            continue
 
         args = dict(
             flags=inputFlags,
@@ -397,6 +403,9 @@ def BTagAlgsCfg(
             remapping=networks.get('remapping', {}),
             JetCollection=jetcol,
         )
+        if foldHashName := networks.get('hash'):
+            args['foldHashName'] = foldHashName
+
 
         # disable GN2v01 if there are 0 tracks
         if '/GN2v01/' in dirname:
@@ -430,7 +439,7 @@ def _get_flip_config(nn_path):
         return ['FLIP_SIGN']
     if 'rnnip' in nn_path or 'dips' in nn_path:
         return ['NEGATIVE_IP_ONLY']
-    if 'gn1' in nn_path or 'gn2' in nn_path:
+    if 'gn1' in nn_path or 'gn2' in nn_path or 'gn3' in nn_path:
         return ['SIMPLE_FLIP']
     else:
         return []

@@ -209,8 +209,8 @@ namespace FlavorTagDiscriminants {
       }
 
       StringRegexes flip_converters {
-        {"(GN1[^_]*|GN2[^_]*)"_r, "$1" + flip_name},
-        {"(GN1[^_]*|GN2[^_]*)_(.*)"_r, "$1" + flip_name + "_$2"},
+        {"(GN1[^_]*|GN2[^_]*|GN3[^_]*)"_r, "$1" + flip_name},
+        {"(GN1[^_]*|GN2[^_]*|GN3[^_]*)_(.*)"_r, "$1" + flip_name + "_$2"},
         {"(IP[23]D)_(.*)"_r, "$1Neg_$2"},
         {"(rnnip|(?:dips|DIPS)[^_]*)_(.*)"_r, "$1flip_$2"},
         {"(JetFitter|SV1|JetFitterSecondaryVertex)_(.*)"_r, "$1Flip_$2"},
