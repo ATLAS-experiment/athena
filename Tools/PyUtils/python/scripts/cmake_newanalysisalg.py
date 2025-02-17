@@ -95,7 +95,8 @@ cfg.addEventAlgo(CompFactory.%(klass)s(),sequenceName="AthAlgSeq")
 
 
 # final cfg tweaks before launching:
-cfg.getService("AthenaEventLoopMgr").IntervalInSeconds = 5 # enable processing rate reporting every 5s
+if cfg.getAppProps()["EventLoop"]=="AthenaEventLoopMgr":
+    cfg.getService("AthenaEventLoopMgr").IntervalInSeconds = 5 # enable processing rate reporting every 5s
 # suppress logging from some core services that we usually don't care about hearing from
 cfg.getService("MessageSvc").setWarning += ["ClassIDSvc","PoolSvc","AthDictLoaderSvc","AthenaPoolAddressProviderSvc",
                                             "ProxyProviderSvc","DBReplicaSvc","MetaDataSvc","MetaDataStore","AthenaPoolCnvSvc",
@@ -104,8 +105,7 @@ cfg.getService("MessageSvc").setWarning += ["ClassIDSvc","PoolSvc","AthDictLoade
 
 # run the job
 if cfg.run().isFailure():
-    import sys
-    sys.exit(1)
+    exit(1)
 """
 
     alg_hdr_template = """\
