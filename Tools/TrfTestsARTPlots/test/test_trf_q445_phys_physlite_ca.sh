@@ -10,6 +10,7 @@
 # art-html: dcube_physlite
 
 export ATHENA_CORE_NUMBER=8
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
 Reco_tf.py \
   --CA \
   --AMI q445 \
@@ -19,7 +20,7 @@ Reco_tf.py \
   --outputAODFile myAOD.pool.root \
   --athenaopts "HITtoRDO:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RDOtoRDOTrigger:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "AODtoDAOD:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" \
   --preExec 'flags.Exec.FPE=10' \
-  --conditionsTag "OFLCOND-MC23-SDR-RUN3-05" \
+  --conditionsTag "${conditions}" \
   --runNumber=601229 \
   --DataRunNumber=410000 \
   --maxEvents 1000

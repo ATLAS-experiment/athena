@@ -10,11 +10,12 @@
 # art-html: dcube_physlite
 
 export ATHENA_CORE_NUMBER=8
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
 Reco_tf.py \
   --AMI q454 \
   --outputAODFile myAOD.pool.root \
   --preExec 'flags.Exec.FPE=10' \
-  --conditionsTag "OFLCOND-MC23-SDR-RUN3-05" \
+  --conditionsTag "${conditions}" \
   --runNumber=601229 \
   --DataRunNumber=450000 \
   --maxEvents 1000
