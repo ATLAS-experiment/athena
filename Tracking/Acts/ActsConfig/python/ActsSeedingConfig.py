@@ -363,6 +363,7 @@ def ActsMainSeedingCfg(flags,
 
     kwargs.setdefault('processPixels', flags.Detector.EnableITkPixel)
     kwargs.setdefault('processStrips', flags.Detector.EnableITkStrip)
+    kwargs.setdefault('estimateParameters', flags.Acts.doAnalysis)
 
     if kwargs['processPixels']:
         acc.merge(ActsPixelSeedingAlgCfg(flags, **extractChildKwargs(prefix='PixelSeedingAlg.', **kwargs)))
@@ -370,7 +371,7 @@ def ActsMainSeedingCfg(flags,
         acc.merge(ActsStripSeedingAlgCfg(flags, **extractChildKwargs(prefix='StripSeedingAlg.', **kwargs)))
 
     
-    if flags.Tracking.ActiveConfig.storeTrackSeeds or flags.Acts.doAnalysis:
+    if kwargs['estimateParameters']:
         if kwargs['processPixels']:
             from ActsConfig.ActsAnalysisConfig import ActsPixelSeedsToTrackParamsAlgCfg
             acc.merge(ActsPixelSeedsToTrackParamsAlgCfg(flags,
@@ -408,6 +409,7 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
 
     kwargs.setdefault('processPixels', processPixels)
     kwargs.setdefault('processStrips', processStrips)
+    kwargs.setdefault('estimateParameters', flags.Tracking.ActiveConfig.storeTrackSeeds or flags.Acts.doAnalysis)
 
     # TO-DO: refactor this seeding tool configuration
     if flags.Tracking.ActiveConfig.extension == "ActsHeavyIon" and processPixels:
