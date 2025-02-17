@@ -258,6 +258,9 @@ class ConfigFactory():
         from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronWorkingPointConfig
         self.addAlgConfigBlock(algName="WorkingPoint", alg=ElectronWorkingPointConfig,
             superBlocks="Electrons")
+        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronLRTMergedConfig
+        self.addAlgConfigBlock(algName="LRTMerging", alg=ElectronLRTMergedConfig,
+                               superBlocks="Electrons")
         from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronTriggerAnalysisSFBlock
         self.addAlgConfigBlock(algName="TriggerSF", alg=ElectronTriggerAnalysisSFBlock,
                                superBlocks="Electrons")

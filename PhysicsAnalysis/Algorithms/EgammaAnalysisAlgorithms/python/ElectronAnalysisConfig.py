@@ -21,6 +21,8 @@ class ElectronCalibrationConfig (ConfigBlock) :
     def __init__ (self, containerName='') :
         super (ElectronCalibrationConfig, self).__init__ ()
         self.setBlockName('Electrons')
+        self.addOption ('inputContainer', '', type=str,  
+            info="select electron input container, by default set to Electrons")
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
@@ -119,10 +121,10 @@ class ElectronCalibrationConfig (ConfigBlock) :
             log.warning("You are running ElectronCalibrationConfig forcing full sim config")
             log.warning(" This is only intended to be used for testing purposes")
 
-        if config.isPhyslite() :
-            config.setSourceName (self.containerName, "AnalysisElectrons")
-        else :
-            config.setSourceName (self.containerName, "Electrons")
+        inputContainer = "AnalysisElectrons" if config.isPhyslite() else "Electrons"
+        if self.inputContainer:
+            inputContainer = self.inputContainer
+        config.setSourceName (self.containerName, inputContainer)
 
         # Decorate calo cluster eta if required
         if self.decorateCaloClusterEta:
@@ -788,3 +790,35 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
                     alg.electrons = config.readName (self.containerName)
                     alg.preselection = config.getPreselection (self.containerName, "")
                     config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f"{deco}_{label}")
+
+
+class ElectronLRTMergedConfig (ConfigBlock) :
+    def __init__ (self) :  
+        super (ElectronLRTMergedConfig, self).__init__ ()
+        self.addOption (
+            'inputElectrons', 'Electrons', type=str,
+            noneAction='error',
+            info="the name of the input electron container."
+        )
+        self.addOption (
+            'inputLRTElectrons', 'LRTElectrons', type=str,
+            noneAction='error',
+            info="the name of the input LRT electron container."
+        )
+        self.addOption (
+            'containerName', 'Electrons_LRTMerged', type=str,
+            noneAction='error',
+            info="the name of the output container after LRT merging."
+        )
+
+
+    def makeAlgs (self, config) :
+
+        if config.isPhyslite() :
+            raise(RuntimeError("Electron LRT merging is not available in Physlite mode"))
+
+        alg = config.createAlgorithm( "CP::ElectronLRTMergingAlg", "ElectronLRTMergingAlg" + self.containerName )
+        alg.PromptElectronLocation = self.inputElectrons
+        alg.LRTElectronLocation = self.inputLRTElectrons
+        alg.OutputCollectionName = self.containerName
+        alg.CreateViewCollection = False
