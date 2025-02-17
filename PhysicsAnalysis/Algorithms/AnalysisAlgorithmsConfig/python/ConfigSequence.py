@@ -233,7 +233,7 @@ class ConfigSequence:
                 if opt['required']:
                     raise ValueError(f'{name} is required but not included in config')
                 # add default used to config
-                defaultVal = opt['defaultValue']
+                defaultVal = opt['value'] if opt['value'] else opt['defaultValue']
                 # do not overwright groupName unless set by user
                 if name != 'groupName':
                     options[name] = defaultVal
