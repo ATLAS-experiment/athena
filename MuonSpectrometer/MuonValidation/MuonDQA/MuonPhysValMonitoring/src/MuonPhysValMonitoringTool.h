@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // MuonPhysValMonitoringTool.cxx
@@ -13,25 +13,25 @@
 
 
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
-#include "GaudiKernel/ServiceHandle.h"
 #include "IsolationSelection/IIsolationSelectionTool.h"
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 #include "MuonCombinedToolInterfaces/IMuonPrintingTool.h"
 
 
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
 
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "xAODEventInfo/EventInfo.h"
-#include "xAODMuon/Muon.h" //typedef
-#include "xAODMuon/MuonSegment.h" //typedef
-#include "xAODMuon/SlowMuon.h" //typedef
-#include "xAODTrigMuon/L2CombinedMuon.h" //typedef
 
-#include "xAODTrigMuon/L2StandAloneMuon.h" //typedef
-#include "xAODTruth/TruthParticle.h" //typedef
-#include "xAODTruth/TruthParticleContainer.h" //typedef
+#include "xAODTrigger/MuonRoIContainer.h"
+#include "xAODMuon/MuonContainer.h"
+#include "xAODMuon/MuonSegmentContainer.h"
+#include "xAODMuon/SlowMuonContainer.h"
+#include "xAODTrigMuon/L2CombinedMuonContainer.h"
+#include "xAODTrigMuon/L2StandAloneMuonContainer.h"
+#include "xAODTruth/TruthParticleContainer.h" 
 
 #include "MuonSegmentValidationPlots.h" //needed for unique_ptr  access to deleter
 #include "MuonHistUtils/MuonSegmentPlots.h" //needed for unique_ptr  access to deleter
@@ -59,10 +59,9 @@ namespace MuonPhysValMonitoring {
         // Public methods:
         ///////////////////////////////////////////////////////////////////
     public:
-        // Copy constructor:
 
         /// Constructor with parameters:
-        MuonPhysValMonitoringTool(const std::string& type, const std::string& name, const IInterface* parent);
+        using ManagedMonitorToolBase::ManagedMonitorToolBase;
 
         /// Destructor:
         virtual ~MuonPhysValMonitoringTool() = default;
@@ -86,8 +85,6 @@ namespace MuonPhysValMonitoring {
         void handleMuonSegment(const xAOD::MuonSegment* muSeg, float weight = 1.0);
         void handleTruthMuonSegment(const xAOD::MuonSegment* truthMuSeg, const xAOD::TruthParticleContainer* muonTruthContainer,
                                     float weight = 1.0);
-
-        void handleMuonTrees(const xAOD::EventInfo* eventInfo, bool isData);
 
         void handleMuonL1Trigger(const xAOD::MuonRoI* TrigL1mu);
         void handleMuonL2Trigger(const xAOD::L2StandAloneMuon* L2SAMu);
@@ -115,24 +112,34 @@ namespace MuonPhysValMonitoring {
         TH1F* findHistogram(const std::vector<HistData>& hists, const std::string& hnameTag, const std::string& hdirTag,
                             const std::string& hNewName);
         void modifyHistogram(TH1* hist);
-
-        Gaudi::Property<std::string> m_tracksName{this, "TrackContainerName", "InDetTrackParticles"};
-        Gaudi::Property<std::string> m_fwdtracksName{this, "FwdTrackContainerName", ""};
-        Gaudi::Property<std::string> m_muonsName{this, "MuonContainerName", "Muons"};
-        Gaudi::Property<std::string> m_slowMuonsName{this, "SlowMuonContainerName", "SlowMuons"};
-        Gaudi::Property<std::string> m_muonsTruthName{this, "MuonTruthParticleContainerName", "MuonTruthParticles"};
-        Gaudi::Property<std::string> m_muonTracksName{this, "MuonTrackContainerName", "MuonSpectrometerTrackParticles"};
-        Gaudi::Property<std::string> m_muonExtrapolatedTracksName{this, "MuonExtrapolatedTrackContainerName",
-                                                                  "ExtrapolatedMuonTrackParticles"};
-        Gaudi::Property<std::string> m_muonMSOnlyExtrapolatedTracksName{this, "MuonOnlyExtrapolatedTrackContainerName",
+        using TrackContKey_t = SG::ReadHandleKey<xAOD::TrackParticleContainer>;
+        using MuonContKey_t = SG::ReadHandleKey<xAOD::MuonContainer>;
+        using SegmentContKey_t = SG::ReadHandleKey<xAOD::MuonSegmentContainer>;
+        using MuonROIContKey_t = SG::ReadHandleKey<xAOD::MuonRoIContainer>;
+        using L2SAContKey_t = SG::ReadHandleKey<xAOD::L2StandAloneMuonContainer>;
+        using L2CBContKey_t = SG::ReadHandleKey<xAOD::L2CombinedMuonContainer>;
+        using SlowContKey_t = SG::ReadHandleKey<xAOD::SlowMuonContainer>;
+        using TruthPartKey_t = SG::ReadHandleKey<xAOD::TruthParticleContainer>;
+        
+        TrackContKey_t m_tracksName{this, "TrackContainerName", "InDetTrackParticles"};
+        TrackContKey_t m_fwdtracksName{this, "FwdTrackContainerName", ""};
+        MuonContKey_t m_muonsName{this, "MuonContainerName", "Muons"};
+        SlowContKey_t m_slowMuonsName{this, "SlowMuonContainerName", "SlowMuons"};
+        TruthPartKey_t m_muonsTruthName{this, "MuonTruthParticleContainerName", "MuonTruthParticles"};
+        TrackContKey_t m_muonTracksName{this, "MuonTrackContainerName", "MuonSpectrometerTrackParticles"};
+        TrackContKey_t m_muonExtrapolatedTracksName{this, "MuonExtrapolatedTrackContainerName", "ExtrapolatedMuonTrackParticles"};
+        TrackContKey_t m_muonMSOnlyExtrapolatedTracksName{this, "MuonOnlyExtrapolatedTrackContainerName",
                                                                         "MSOnlyExtrapolatedMuonTrackParticles"};
-        Gaudi::Property<std::string> m_muonSegmentsName{this, "MuonSegmentContainerName", "MuonSegments"};
-        Gaudi::Property<std::string> m_muonSegmentsTruthName{this, "MuonTruthSegmentContainerName", "MuonTruthSegments"};
-        Gaudi::Property<std::string> m_muonL1TrigName{this, "L1TrigMuonContainerName", "LVL1MuonRoIs"};
-        Gaudi::Property<std::string> m_muonL2SAName{this, "L2SAMuonContainerName", "HLT_xAOD__L2StandAloneMuonContainer_MuonL2SAInfo"};
-        Gaudi::Property<std::string> m_muonL2CBName{this, "L2CBMuonContainerName", "HLT_xAOD__L2CombinedMuonContainer_MuonL2CBInfo"};
-        Gaudi::Property<std::string> m_muonEFCombTrigName{this, "EFCombTrigMuonContainerName", "HLT_xAOD__MuonContainer_MuonEFInfo"};
+        
+        SegmentContKey_t m_muonSegmentsName{this, "MuonSegmentContainerName", "MuonSegments"};
+        SegmentContKey_t m_muonSegmentsTruthName{this, "MuonTruthSegmentContainerName", "MuonTruthSegments"};
+        MuonROIContKey_t m_muonL1TrigName{this, "L1TrigMuonContainerName", "LVL1MuonRoIs"};
+        L2SAContKey_t m_muonL2SAName{this, "L2SAMuonContainerName", "HLT_xAOD__L2StandAloneMuonContainer_MuonL2SAInfo"};
+        L2CBContKey_t m_muonL2CBName{this, "L2CBMuonContainerName", "HLT_xAOD__L2CombinedMuonContainer_MuonL2CBInfo"};
+        MuonContKey_t m_muonEFCombTrigName{this, "EFCombTrigMuonContainerName", "HLT_xAOD__MuonContainer_MuonEFInfo"};
 
+        SG::ReadDecorHandleKeyArray<xAOD::IParticleContainer> m_decorDep{this, "DecorDependencies", {}};
+        
         Gaudi::Property<std::vector<int>> m_selectMuonWPs{
             this, "SelectMuonWorkingPoints", {xAOD::Muon::Loose, xAOD::Muon::Medium, xAOD::Muon::Tight}};
         Gaudi::Property<std::vector<unsigned int>> m_selectMuonAuthors{
@@ -153,7 +160,6 @@ namespace MuonPhysValMonitoring {
         Gaudi::Property<bool> m_doTrigMuonL1Validation{this, "DoTrigMuonL1Validation", false};
         Gaudi::Property<bool> m_doTrigMuonL2Validation{this, "DoTrigMuonL2Validation", false};
         Gaudi::Property<bool> m_doTrigMuonEFValidation{this, "DoTrigMuonEFValidation", false};
-        Gaudi::Property<bool> m_doMuonTree{this, "DoMuonTree", false};
         Gaudi::Property<bool> m_isData{this, "IsData", false};
 
         SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfo", "EventInfo", "event info"};
@@ -217,14 +223,12 @@ namespace MuonPhysValMonitoring {
         std::vector<const xAOD::Muon*> m_vRecoMuons_EffDen_MS;
         std::vector<const xAOD::Muon*> m_vRecoMuons_EffDen;
 
-        template <class T> const T* getContainer(const std::string& containerName);
+        template <class ContType> StatusCode retrieveContainer(const EventContext& ctx,
+                                                          const SG::ReadHandleKey<ContType>& key,
+                                                          const ContType* & container) const;
     };
 
-    template <class T> const T* MuonPhysValMonitoringTool::getContainer(const std::string& containerName) {
-        const T* ptr = evtStore()->retrieve<const T>(containerName);
-        if (!ptr) { ATH_MSG_WARNING("Container '" << containerName << "' could not be retrieved"); }
-        return ptr;
-    }
+    
 
 }  // namespace MuonPhysValMonitoring
 
