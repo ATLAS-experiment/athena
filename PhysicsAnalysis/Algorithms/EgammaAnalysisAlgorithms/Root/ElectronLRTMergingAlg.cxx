@@ -15,6 +15,7 @@
 #include "EgammaAnalysisAlgorithms/ElectronLRTMergingAlg.h"
 #include "xAODEgamma/ElectronAuxContainer.h"
 #include "AsgTools/AsgToolConfig.h"
+#include "xAODBase/IParticleHelpers.h"
 
 namespace CP
 {
@@ -109,6 +110,7 @@ namespace CP
             mergeElectron(*lrtCol, outputCol.get(), ElectronsToRemove);
         }
 
+        //write
         SG::WriteHandle<xAOD::ElectronContainer> h_write(m_outElectronLocation, ctx);
         if (m_createViewCollection)
         {
@@ -127,6 +129,7 @@ namespace CP
     ///////////////////////////////////////////////////////////////////
     // Merge electron collections and remove duplicates, for copy
     ///////////////////////////////////////////////////////////////////
+    
     void ElectronLRTMergingAlg::mergeElectron(const xAOD::ElectronContainer &electronCol,
                                               xAOD::ElectronContainer *outputCol,
                                               const std::set<const xAOD::Electron *> &ElectronsToRemove) const
@@ -150,8 +153,12 @@ namespace CP
                     ElementLink<xAOD::ElectronContainer> eLink;
                     eLink.toIndexedElement(electronCol, electron->index());
                     originalElectronLink(*newElectron) = eLink;
-
+                    setOriginalObjectLink(*electron, *newElectron);
+                    static const SG::AuxElement::Accessor<char> isLRT("isLRT");
+                    isLRT(*newElectron) = isLRT(*electron);
                     outputCol->push_back(std::move(newElectron));
+
+
                 }
             }
             ATH_MSG_DEBUG("Size of merged output electron collection " << outputCol->size());
