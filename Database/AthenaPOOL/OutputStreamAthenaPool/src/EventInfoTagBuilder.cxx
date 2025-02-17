@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventInfoTagBuilder.h"
 
 #include <StoreGate/ReadHandle.h>
 #include <StoreGate/WriteHandle.h>
+
 
 StatusCode EventInfoTagBuilder::initialize()
 {
@@ -26,11 +27,11 @@ StatusCode EventInfoTagBuilder::initialize()
 }
 
 
-StatusCode EventInfoTagBuilder::execute()
+StatusCode EventInfoTagBuilder::execute(const EventContext &ctx) const
 {
   ATH_MSG_DEBUG( "Executing " << name() );
 
-  SG::ReadHandle<xAOD::EventInfo> h_evt(m_evtKey);
+  SG::ReadHandle<xAOD::EventInfo> h_evt(m_evtKey, ctx);
   if (!h_evt.isValid()) {
     ATH_MSG_ERROR("Did not find xAOD::EventInfo");
     return StatusCode::FAILURE;
@@ -42,7 +43,7 @@ StatusCode EventInfoTagBuilder::execute()
 
   // Check whether to propagate
   if (m_propInput) {
-    SG::ReadHandle<AthenaAttributeList> h_att(m_inputAttList);
+    SG::ReadHandle<AthenaAttributeList> h_att(m_inputAttList, ctx);
     // Check if there is an input to propagate
     if (h_att.isValid()) {
       for (auto it = h_att->specification().begin();
@@ -65,7 +66,7 @@ StatusCode EventInfoTagBuilder::execute()
   } // propagate
 
   /** record attribute list to SG */
-  SG::WriteHandle<AthenaAttributeList> wh(m_attributeListName);
+  SG::WriteHandle<AthenaAttributeList> wh(m_attributeListName, ctx);
   ATH_CHECK( wh.record(std::move(attribList)) );
 
   ATH_MSG_DEBUG( "Finished " << name() );

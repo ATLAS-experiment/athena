@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTTAGALGS_EVENTINFOTAGBUILDER_H
@@ -26,7 +26,7 @@ inclusion in an event tag database.
 
 */
 
-#include <AthenaBaseComps/AthAlgorithm.h>
+#include <AthenaBaseComps/AthReentrantAlgorithm.h>
 #include <GaudiKernel/ToolHandle.h>
 #include <PersistentDataModel/AthenaAttributeList.h>
 #include <StoreGate/ReadHandleKey.h>
@@ -35,22 +35,20 @@ inclusion in an event tag database.
 
 #include "EventInfoAttListTool.h"
 
-class EventInfoTagBuilder : public AthAlgorithm
+class EventInfoTagBuilder : public AthReentrantAlgorithm
 {
 public:
 
   /// Standard constructor.
-  using AthAlgorithm::AthAlgorithm;
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   /// Destructor.
   ~EventInfoTagBuilder() = default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext &ctx) const override;
 
 private:
-
-  /// Global Event Tag Tool
   ToolHandle<EventInfoAttListTool> m_tool{this, "Tool", "EventInfoAttListTool/EventInfoAttListTool", "EventInfoAttListTool used"};
 
   SG::ReadHandleKey<xAOD::EventInfo> m_evtKey{this, "EventInfoKey", "EventInfo", "xAOD::EventInfo ReadHandleKey"};
