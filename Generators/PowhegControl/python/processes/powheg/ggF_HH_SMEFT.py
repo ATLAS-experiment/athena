@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 import os
-import glob
 from AthenaCommon import Logging
 from ..powheg_V2 import PowhegV2
 
@@ -190,25 +189,6 @@ class ggF_HH_SMEFT(PowhegV2):
             logger.error('Impossible to link the needed files locally')
             raise
 
-         # need to override lhapdf python path while the powheg process has been compiled in a different platform
-        py_path_save = os.environ["PYTHONPATH"]
-        base_path = os.environ["LHAPDF_INSTAL_PATH"]
-
-        # Search for the Python version in the lib folder
-        python_lib_path = glob.glob(os.path.join(base_path, "lib", "python*"))
-
-        # Ensure at least one matching path is found
-        if python_lib_path:
-            python_lib_path = python_lib_path[0]
-        else:
-            raise ValueError("No Python version found in lib folder")
-
-        # Build the temporary path
-        py_path_temp = python_lib_path + "/site-packages" + ":" + py_path_save
-
-        os.environ["PYTHONPATH"] = py_path_temp
-        logger.debug(f'Temporarily setting PYTHONPATH to:\n{py_path_temp}')
-
         # handling the parameters of this process
         # these parameters need to be parsed in a specific format
         usesmeft_str = str(list(self.parameters_by_keyword("usesmeft"))[0].value)
@@ -261,10 +241,6 @@ class ggF_HH_SMEFT(PowhegV2):
             except RuntimeError:
                 logger.error('Impossible to use creategrid.py to create the Virt_full_*.grid file')
                 raise
-
-        # setting PYTHONPATH back to its original value
-        os.environ["PYTHONPATH"] = py_path_save
-        logger.debug(f'Setting PYTHONPATH back to:\n{py_path_save}')
 
         logger.info('Although the produced Virt_full_*.grid file now exists in the local directory, Powheg will later try to find it in all directories contained in $PYTHONPATH. This will produce several "not found" info messages which can safely be ignored.')
 
