@@ -77,6 +77,7 @@ protected:
 class Atlas_RNG: public ATOOLS::External_RNG {
   CLHEP::HepRandomEngine* p_engine;
   std::string m_filename;
+  std::once_flag m_once_flag_atlas_rng;
 
 public:
   Atlas_RNG(CLHEP::HepRandomEngine*);
@@ -85,6 +86,7 @@ public:
   bool CanRestoreStatus() const { return true; }
   void SaveStatus();
   void RestoreStatus();
+  const std::string GenerateUID() const;
 
 };
 
