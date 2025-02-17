@@ -37,21 +37,18 @@ public:
   static const InterfaceID& interfaceID( ) { return IID_EventInfoAttListTool; };
 
   /** Overriding initialize, finalize and execute */
-  StatusCode initialize() override;
-  StatusCode finalize() override;
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
 
   // interface 
-  bool isValid();
-  const coral::AttributeListSpecification& getAttributeSpecification();
-  const AthenaAttributeList getAttributeList(const xAOD::EventInfo& einfo);
-
-  std::unique_ptr<AthenaAttributeList> getAttributeListPtr(const xAOD::EventInfo& einfo);
+  bool isValid() const;
+  const coral::AttributeListSpecification& getAttributeSpecification() const;
+  std::unique_ptr<AthenaAttributeList> getAttributeListPtr(const xAOD::EventInfo& einfo) const;
 
 protected:
 
   /** the various components to build their own fragments of tag */
-  StatusCode eventTag       (AthenaAttributeList& eventTagCol, 
-                             const xAOD::EventInfo& eventInfo);
+  StatusCode eventTag(AthenaAttributeList& eventTagCol, const xAOD::EventInfo& eventInfo) const;
 
   coral::AttributeListSpecification* m_attribListSpec{};
 

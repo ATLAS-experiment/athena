@@ -52,28 +52,12 @@ StatusCode  EventInfoAttListTool::initialize() {
 
 
 /* Build attribute list from EventInfo object */
-const AthenaAttributeList EventInfoAttListTool::getAttributeList(const xAOD::EventInfo& eventInfo) {
-
-  // Create attributeList with appropriate attributes
-  AthenaAttributeList eventTag( *m_attribListSpec );
-
-  StatusCode sc = this->eventTag (eventTag, eventInfo);
-  if (sc.isFailure()) {
-    ATH_MSG_WARNING("Unable to build Tag Fragments for the Event");
-  }
-
-  ATH_MSG_DEBUG("EventInfoAttListTool - getAttributeList() return success");
-
-  return eventTag;
-}
-
-
-/* Build attribute list from EventInfo object */
 std::unique_ptr<AthenaAttributeList>
-EventInfoAttListTool::getAttributeListPtr(const xAOD::EventInfo& eventInfo)
+EventInfoAttListTool::getAttributeListPtr(const xAOD::EventInfo& eventInfo) const
 {
   // Create attributeList with appropriate attributes
-  auto eventTag = std::make_unique<AthenaAttributeList> ( *m_attribListSpec );
+  const coral::AttributeListSpecification& specRef = *m_attribListSpec;
+  auto eventTag = std::make_unique<AthenaAttributeList> ( specRef );
 
   StatusCode sc = this->eventTag (*eventTag, eventInfo);
   if (sc.isFailure()) {
@@ -88,7 +72,7 @@ EventInfoAttListTool::getAttributeListPtr(const xAOD::EventInfo& eventInfo)
 
 /** build the tag associate to the event information */
 StatusCode EventInfoAttListTool::eventTag(AthenaAttributeList& eventTag, 
-                                          const xAOD::EventInfo& eventInfo) 
+                                          const xAOD::EventInfo& eventInfo) const
 {
   // Note: for any attribute added here, please confirm the corresponding EventInfo member being
   // retained in DAOD smart slimming:
