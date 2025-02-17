@@ -158,6 +158,7 @@ def FPGAConversionAlgCfg(inputFlags, name = 'FPGAConversionAlg', stage = '', **k
     kwargs.setdefault("doHits", True)
     kwargs.setdefault("doClusters", True)
     kwargs.setdefault("doActsTrk", False)
+    kwargs.setdefault("useRoads", False)
     kwargs.setdefault("ClusterConverter", result.popToolsAndMerge(FPGAClusterConverterCfg(flags)))
     kwargs.setdefault("ActsTrkConverter", result.popToolsAndMerge(FPGAActsTrkConverterCfg(flags)))
     
@@ -439,7 +440,7 @@ def runDataPrepChain():
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
 
-    FinalDataPrepTrackChainxAODTracksKeyPrefix="FPGADataPrep"
+    FinalDataPrepTrackChainxAODTracksKeyPrefix="FPGA"
     
     flags = initConfigFlags()
     from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
