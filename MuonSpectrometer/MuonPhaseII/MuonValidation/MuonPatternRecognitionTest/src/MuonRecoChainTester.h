@@ -13,6 +13,7 @@
 #include "MuonTesterTree/MuonTesterTreeDict.h"
 
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 
 namespace MuonValR4{
 
@@ -26,17 +27,6 @@ namespace MuonValR4{
             virtual StatusCode finalize() override;
 
   private:
-        /** @brief Finds the closest track to the truth particle in terms of dR
-         *  @param truthPart: Pointer to the reference truth particle
-         *  @param tracks: MS-track collection where the closest track shall be searched
-         *  @param decRecoMatch: Decorator to decorate the track particle index in the output tree
-         *                       to the truth particle
-         *  @param trkBranch: Track branch collection to save the track particle  */
-        void matchTrackToTruth(const xAOD::TruthParticle* truthPart,
-                               const xAOD::TrackParticleContainer& tracks,
-                               const SG::Decorator<int>& decRecoMatch,
-                               const std::shared_ptr<MuonVal::IParticleFourMomBranch>& trkBranch) const;
-        
         using StIdx = Muon::MuonStationIndex::StIndex;
         /** @brief Counts how many buckets are in a particular station
          *  @param spContainer: Space point collection
@@ -86,7 +76,9 @@ namespace MuonValR4{
         SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackKeyR4{this, "TrackKeyR4", "MuonSpectrometerTrackParticlesR4"};
 
         /** @brief Key to the truth particle collection */
-        SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthKey{this, "TruthKey", "TruthParticles"};
+        SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthKey{this, "TruthKey", "MuonTruthParticles"};
+        /** @brief Decoration dependency to the MS truth track links */
+        SG::ReadDecorHandleKeyArray<xAOD::TrackParticleContainer> m_trkTruthLinks{this, "TruthTrackLinks", {}};
         /** @brief Key to the space point container */
         SG::ReadHandleKey<MuonR4::SpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};
   

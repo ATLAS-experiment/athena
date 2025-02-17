@@ -7,7 +7,7 @@ if __name__=="__main__":
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
-    parser.set_defaults(outRootFile="HoughTransformTester.root")
+    parser.set_defaults(outRootFile="RecoChainTester.root")
     # parser.set_defaults(condTag="CONDBR2-BLKPA-2023-03")
     parser.set_defaults(inputFile=[
                                    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"
