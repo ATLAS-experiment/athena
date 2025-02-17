@@ -225,6 +225,7 @@ def MultifoldGNNCfg(
         useBTaggingObject=None,
         tag_requirements=set(),
         defaultOutputValues={},
+        foldHashName='jetFoldRankHash',
 ):
     common = commonpath(nnFilePaths)
     nn_name = '_'.join(PurePath(common).with_suffix('').parts)
@@ -280,7 +281,7 @@ def MultifoldGNNCfg(
             constituentContainer=TrackCollection,
             decorator=FTD.MultifoldGNNTool(
                 name=f'{algname}_tool',
-                foldHashName='jetFoldHash',
+                foldHashName=foldHashName,
                 nnFiles=nnFilePaths,
                 flipTagConfig=FlipConfig,
                 variableRemapping=remapping,

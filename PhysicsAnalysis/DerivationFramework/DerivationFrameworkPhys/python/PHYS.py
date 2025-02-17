@@ -147,13 +147,6 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
         for score in ["phbb", "phcc", "ptop", "pqcd"]:
             extraList.append(f"{tagger}_{score}")
     PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraList)]
-
-    # Large-Radius jet regression extra content
-    extraListReg = []
-    modelName = "bJR10v00"
-    for score in ["mass", "pt"]:
-        extraListReg.append(f"{modelName}_{score}")
-    PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraListReg)]
  
     # Truth extra content
     if flags.Input.isMC:

@@ -191,6 +191,17 @@ def BTaggingXbbContent(jetcol, ConfigFlags = None):
 
 def BTagginglessContent(jetcol, ConfigFlags=None):
     BTaggingRun3AuxVar = _getVars("GN2v01", extra_flavours=['tau'])
+
+    for gn3_dev in ['GN3V00', 'GN3PflowV00', 'GN3MuonsV00']:
+        BTaggingRun3AuxVar += _getVars(gn3_dev, extra_flavours=['tau',], flip_modes=['SimpleFlip']) 
+
+    BTaggingRun3AuxVar += _getVars(
+        "GN3PflowMuonsV00", 
+        extra_flavours=['tau', 'ud', 'g', 's', 'quark'],
+        flip_modes=['SimpleFlip']
+    )
+    BTaggingRun3AuxVar += ['GN3PflowMuonsV00_ptFromTruthDressedWZJet']
+    
     isRun4 = _isRun4(ConfigFlags)
     aux = BTaggingRun3AuxVar if not isRun4 else []
     btagcontent = _getVariableList(jetcol, aux)
