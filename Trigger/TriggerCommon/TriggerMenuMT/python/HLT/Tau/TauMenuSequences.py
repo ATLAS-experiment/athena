@@ -477,7 +477,7 @@ def tauPrecisionSequenceGenCfg(flags, seq_name, output_name=None, is_probe_leg=F
 
     from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getPrecisionSequenceTauIDs
 
-    return _tauPrecisionSeq(newflags, seq_name, tau_ids=getPrecisionSequenceTauIDs(seq_name), output_name=output_name, is_probe_leg=is_probe_leg)
+    return _tauPrecisionSeq(newflags, seq_name, tau_ids=getPrecisionSequenceTauIDs(flags, seq_name), output_name=output_name, is_probe_leg=is_probe_leg)
 
 
 @AccumulatorCache
@@ -487,4 +487,4 @@ def tauPrecisionLRTSequenceGenCfg(flags, seq_name, output_name=None, is_probe_le
 
     from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getPrecisionSequenceTauIDs
 
-    return _tauPrecisionSeq(newflags, seq_name, tau_ids=getPrecisionSequenceTauIDs(seq_name), output_name=output_name, is_probe_leg=is_probe_leg)
+    return _tauPrecisionSeq(newflags, seq_name, tau_ids=getPrecisionSequenceTauIDs(flags, seq_name), output_name=output_name, is_probe_leg=is_probe_leg)

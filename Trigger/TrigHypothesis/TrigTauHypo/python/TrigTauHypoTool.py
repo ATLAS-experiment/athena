@@ -81,7 +81,7 @@ def TrigTauPrecisionIDHypoToolFromDict(flags, chainDict):
 
         # Monitor all the included algorithms
         used_builtin_rnnscore = False
-        for tau_id in getPrecisionSequenceTauIDs(precision_seq_name):
+        for tau_id in getPrecisionSequenceTauIDs(flags, precision_seq_name):
             # Skip algs without inference scores
             if tau_id in ['MesonCuts']: continue
 
