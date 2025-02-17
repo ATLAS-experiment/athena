@@ -609,7 +609,7 @@ void FPGATrackSimGenScanMonitoring::pairSetFilterCheck(
     unsigned threshold) {
   m_pairsets->Fill(pairsets.size());
 
-  for (auto pairset : pairsets) {
+  for (const auto& pairset : pairsets) {
     // if over threshold add it to the output
     if (pairset.lyrCnt() >= threshold) {
       m_roadFilterFlow->Fill(3);

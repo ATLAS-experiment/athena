@@ -450,7 +450,7 @@ StatusCode FPGATrackSimDataFlowTool::printDataFlow(std::string const & key, int 
 
     // Replace all "<" by "$<$" in the key to make the type text for tex.
     // If there are other characters in the future, we can make a vector to store all of them.
-    std::string key_tex = str_key;
+    std::string key_tex = std::move(str_key);
     findAndReplaceAll(key_tex, "<", "$<$");
 
     m_dataFlowTeX << key_tex << " & " << str_stage << " & " << roundTo(mean,     m_nSigDigits)

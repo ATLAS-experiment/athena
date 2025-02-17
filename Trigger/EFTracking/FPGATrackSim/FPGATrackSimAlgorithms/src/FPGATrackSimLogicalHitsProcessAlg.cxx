@@ -503,7 +503,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::finalize()
 void FPGATrackSimLogicalHitsProcessAlg::printHitSubregions(std::vector<FPGATrackSimHit> const & hits)
 {
     ATH_MSG_WARNING("Hit regions:");
-    for (auto hit : hits)
+    for (const auto& hit : hits)
     {
         std::vector<uint32_t> regions = m_FPGATrackSimMapping->SubRegionMap()->getRegions(hit);
         std::stringstream ss;

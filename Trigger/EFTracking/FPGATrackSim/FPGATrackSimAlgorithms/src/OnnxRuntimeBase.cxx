@@ -8,14 +8,14 @@
 
 OnnxRuntimeBase::OnnxRuntimeBase(TString fileName)
 {
-    initialize(fileName);
+    initialize(std::move(fileName));
 }
 
 OnnxRuntimeBase::OnnxRuntimeBase() {}
 
 void OnnxRuntimeBase::initialize(TString fileName) 
 {
-  m_fileName = fileName;
+  m_fileName = std::move(fileName);
   //load the onnx model to memory using the path m_path_to_onnx
   m_env = std::make_unique< Ort::Env >(ORT_LOGGING_LEVEL_WARNING, "");
 
@@ -213,7 +213,7 @@ std::map<int, Eigen::MatrixXf> OnnxRuntimeBase::runONNXInferenceMultilayerOutput
       }
       batchMatrix.row(j) = vec;
     } // batch
-    outputTensorMap[i] = batchMatrix;
+    outputTensorMap[i] = std::move(batchMatrix);
   } // output layers
   return outputTensorMap;
 }

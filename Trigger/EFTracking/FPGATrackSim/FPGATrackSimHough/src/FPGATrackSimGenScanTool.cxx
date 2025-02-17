@@ -316,11 +316,11 @@ StatusCode FPGATrackSimGenScanTool::fillImage(const std::vector<std::shared_ptr<
           if (m_mod_to_lyr_map.size() != 0) {
             if (m_mod_to_lyr_map[idx].contains(hit->getIdentifier())) {
               s_hit.layer = m_mod_to_lyr_map[idx][hit->getIdentifier()];
-              m_image[idx].addHit(s_hit);
+              m_image[idx].addHit(std::move(s_hit));
             }
           } else {
             // add hit to the BinEntry for the bin
-            m_image[idx].addHit(s_hit);
+            m_image[idx].addHit(std::move(s_hit));
           }
           
         }
