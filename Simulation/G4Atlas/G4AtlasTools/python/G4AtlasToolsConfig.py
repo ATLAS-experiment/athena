@@ -304,20 +304,28 @@ def SimHitContainerListCfg(flags):
             from MuonG4SD.MuonG4SDConfig import SimHitContainerListCfg
             writtenContainers += SimHitContainerListCfg(flags)
     if flags.Detector.GeometryLAr:
-        if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('CALO', True)) or flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
             writtenContainers += [("LArHitContainer", "LArHitEMB_G4")]
             writtenContainers += [("LArHitContainer", "LArHitEMEC_G4")]
             writtenContainers += [("LArHitContainer", "LArHitFCAL_G4")]
             writtenContainers += [("LArHitContainer", "LArHitHEC_G4")]
+            if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+                writtenContainers += [("LArHitContainer" , "LArHitHEC_FastCaloSim")]
+                writtenContainers += [("LArHitContainer" , "LArHitFCAL_FastCaloSim")]
+                writtenContainers += [("LArHitContainer" , "LArHitEMEC_FastCaloSim")]
+                writtenContainers += [("LArHitContainer" , "LArHitEMB_FastCaloSim")]
         else:
             writtenContainers += [("LArHitContainer", "LArHitEMB")]
             writtenContainers += [("LArHitContainer", "LArHitEMEC")]
             writtenContainers += [("LArHitContainer", "LArHitFCAL")]
             writtenContainers += [("LArHitContainer", "LArHitHEC")]
     if flags.Detector.GeometryTile:
-        if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('CALO', True)) or flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
             writtenContainers += [("TileHitVector", "MBTSHits_G4")]
             writtenContainers += [("TileHitVector", "TileHitVec_G4")]
+            if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+                writtenContainers += [("TileHitVector" , "TileHitVec_FastCaloSim")]
+                writtenContainers += [("TileHitVector" , "MBTSHits_FastCaloSim")]
         else:
             writtenContainers += [("TileHitVector", "MBTSHits")]
             writtenContainers += [("TileHitVector", "TileHitVec")]
@@ -331,7 +339,7 @@ def SimHitContainerListCfg(flags):
     if flags.Detector.EnableSCT:
        writtenContainers += [("SiHitCollection", "SCT_Hits")]
     from SimulationConfig.SimEnums import CalibrationRun
-    if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile]:
+    if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile, CalibrationRun.LArTileZDC]:
         # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
         writtenContainers += [
             ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitActive_DEAD' ),
@@ -340,6 +348,17 @@ def SimHitContainerListCfg(flags):
         ]
 
     return writtenContainers
+
+
+def InputContainerListCfg(flags):
+    dependencies = []
+    from SimulationConfig.SimEnums import LArParameterization
+    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        dependencies+=[('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'),
+                       ('LArfSamplSym', 'ConditionStore+LArfSamplSym'),
+                       ('TileSamplingFraction', 'ConditionStore+TileSamplingFraction')]
+    return dependencies
+
 
 def SensitiveDetectorListCfg(flags):
     result = ComponentAccumulator()
