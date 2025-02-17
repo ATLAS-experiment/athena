@@ -7,15 +7,17 @@
 
 # Full chain with special flags
 # Deactivated G4Optimizations: MuonFieldOnlyInCalo, NRR, PRR, FrozenShowers
-# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-05
+
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
 
 Sim_tf.py \
     --CA \
     --simulator 'FullG4MT'  \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-05' \
+    --conditionsTag "default:${conditions}" \
     --postInclude 'all:PyJobTransforms.UseFrontier' 'EVNTtoHITS:ISF_FastCaloSimSD.ISF_FastCaloSimSDToolConfig.PostIncludeParametrizationInputSim_1mm' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV,ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfig.ISF_FastCaloSimParametrization_SimPreInclude' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
+    --geometryVersion "default:${geometry}" \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc15_13TeV.431004.ParticleGun_pid22_E65536_disj_eta_m25_m20_20_25_zv_0.evgen.EVNT.e6556.EVNT.13283012._000001.pool.root.1" \
     --outputHITSFile "Hits.CA.pool.root" \
     --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
@@ -33,8 +35,8 @@ then
         --inputHITSFile "Hits.CA.pool.root" \
         --outputRDOFile RDO.CA.pool.root \
         --outputESDFile ESD.CA.pool.root \
-        --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05" \
-        --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
+	--conditionsTag "default:${conditions}" \
+	--geometryVersion "default:${geometry}" \
         --preInclude 'all:Campaigns.MC23NoPileUp' \
         --preExec 'all:flags.LAr.ROD.NumberOfCollisions=20;flags.LAr.ROD.UseHighestGainAutoCorr=True;' 'HITtoRDO:flags.Digitization.DoCaloNoise=False' 'RAWtoALL:flags.Reco.EnableTrigger=False' \
         --postInclude 'all:PyJobTransforms.UseFrontier' 'HITtoRDO:ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfig.PostIncludeISF_FastCaloSimParametrizationDigi' 'RAWtoALL:ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfig.PostIncludeISF_FastCaloSimParametrizationReco' \

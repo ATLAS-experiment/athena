@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the electron/b-physics slice in Dev_pp_run3_v1 menu (input: mix of dielectron samples)
 # art-type: build
@@ -10,13 +10,16 @@
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
+conditions = defaultConditionsTags.RUN3_MC
+
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
 ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'bphysics_ee'
 ex.threads = 1
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
-            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05-03"',
+            'IOVDb.GlobalTag="' + conditions + '"',
             'Trigger.enabledSignatures=[\\\"Egamma\\\"]']
 
 test = Test.Test()

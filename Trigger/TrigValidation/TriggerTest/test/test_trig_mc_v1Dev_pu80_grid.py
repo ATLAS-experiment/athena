@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the Dev_pp_run3_v1 menu with pileup80 ttbar sample
 # art-type: grid
@@ -22,6 +22,9 @@
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
+conditions = defaultConditionsTags.RUN3_MC
+
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
 ex.job_options = 'TriggerJobOpts/runHLT.py'
@@ -29,7 +32,7 @@ ex.input = 'ttbar_pu80'
 ex.threads = 8
 ex.concurrent_events = 8
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
-            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05-03"']
+            'IOVDb.GlobalTag="' + conditions + '"']
 # the conditions override is needed because the RDO was produced with a single beamspot
 ex.args += ' --postExec \'from IOVDbSvc.IOVDbSvcConfig import addOverride; cfg.merge(addOverride(flags, "/Indet/Beampos", "IndetBeampos-RunDep-MC21-BestKnowledge-002"));\''
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -809,7 +809,8 @@ if __name__ == "__main__":
         '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonCombinedConfig/myESD_q445_unslimmedTracks.pool.root']
     # ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q221/21.0/v2/myESD.pool.root']
 
-    flags.IOVDb.GlobalTag = "OFLCOND-MC23-SDR-RUN3-05"
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
 
     flags.Muon.useTGCPriorNextBC = False
     # This fails due to "Hough data per sector vector not found"

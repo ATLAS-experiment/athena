@@ -6,12 +6,14 @@
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 export ATHENA_CORE_NUMBER=8
 Reco_tf.py --CA \
     --AMI q445 \
     --maxEvents 100 \
     --multithreaded="True" \
-    --conditionsTag "OFLCOND-MC23-SDR-RUN3-05" \
+    --conditionsTag "${conditions}" \
     --outputAODFile myAOD.MT.pool.root
 rc1=$?
 AODMerge_tf.py \

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: Test of transform RDO->RDO_TRIG->AOD with threads=1
 # art-type: build
@@ -16,6 +16,9 @@ preExec = ';'.join([
   'flags.Trigger.AODEDMSet=\'AODFULL\'',
 ])
 
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
+conditions = defaultConditionsTags.RUN3_MC
+
 rdo2aod = ExecStep.ExecStep()
 rdo2aod.type = 'Reco_tf'
 rdo2aod.input = 'ttbar'
@@ -24,7 +27,7 @@ rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
 rdo2aod.args += ' --CA "all:True"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
 rdo2aod.args += ' --preInclude "all:Campaigns.MC23e"'
-rdo2aod.args += ' --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05-03"'
+rdo2aod.args += ' --conditionsTag "default:' + conditions + '"'
 rdo2aod.timeout = 5400 # default = 3600 s
 
 test = Test.Test()
