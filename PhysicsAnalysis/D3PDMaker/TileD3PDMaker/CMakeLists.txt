@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileD3PDMaker )
@@ -11,7 +11,7 @@ atlas_add_component( TileD3PDMaker
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthenaBaseComps AtlasHepMCLib CaloEvent CaloGeoHelpers D3PDMakerUtils EventInfo GaudiKernel GeneratorObjects GeoModelInterfaces GeoModelUtilities GeoPrimitives ITrackToVertex Identifier RDBAccessSvcLib RecoToolInterfaces StoreGateLib TileEvent TileIdentifier TrkParameters TrkParametersIdentificationHelpers VxVertex xAODCaloEvent xAODEventInfo xAODMissingET xAODMuon xAODPrimitives xAODTracking xAODTrigger )
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthenaBaseComps AtlasHepMCLib CaloEvent CaloGeoHelpers D3PDMakerUtils GaudiKernel GeneratorObjects GeoModelInterfaces GeoModelUtilities GeoPrimitives ITrackToVertex Identifier RDBAccessSvcLib RecoToolInterfaces StoreGateLib TileEvent TileIdentifier TrkParameters TrkParametersIdentificationHelpers VxVertex xAODCaloEvent xAODEventInfo xAODMissingET xAODMuon xAODPrimitives xAODTracking xAODTrigger )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
