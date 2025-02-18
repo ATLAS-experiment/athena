@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #define APWeightSum_cxx
@@ -154,10 +154,10 @@ void APWeightSum::AddEvt(APEvtWeight* evt_weight, double ext_weight) {
   /* these are the simple weights: kMuon, kTau, kElectron and kJet: single object trigger, OR of all elements */
   if(evt_weight->GetType() <= APEvtWeight::kJet) {
     vector<APWeightEntry*> temp_vec_rel;
-    if(evt_weight->GetType() == APEvtWeight::kMuon) temp_vec_rel = temp_vec_mu;
-    else if(evt_weight->GetType() == APEvtWeight::kTau) temp_vec_rel = temp_vec_tau;
-    else if(evt_weight->GetType() == APEvtWeight::kElectron) temp_vec_rel = temp_vec_el;
-    else if(evt_weight->GetType() == APEvtWeight::kJet) temp_vec_rel = temp_vec_jet;
+    if(evt_weight->GetType() == APEvtWeight::kMuon) temp_vec_rel = std::move(temp_vec_mu);
+    else if(evt_weight->GetType() == APEvtWeight::kTau) temp_vec_rel = std::move(temp_vec_tau);
+    else if(evt_weight->GetType() == APEvtWeight::kElectron) temp_vec_rel = std::move(temp_vec_el);
+    else if(evt_weight->GetType() == APEvtWeight::kJet) temp_vec_rel = std::move(temp_vec_jet);
     
     for (unsigned int i = 0, I = temp_vec_rel.size(); i < I; ++i ) {
       vector<int> coord = temp_vec_rel[i]->GetCoords();
@@ -174,10 +174,10 @@ void APWeightSum::AddEvt(APEvtWeight* evt_weight, double ext_weight) {
   /* these are the DiMuon, DiTau, DiElectron and DiJet weights */
   else if (evt_weight->GetType() >= APEvtWeight::kDiMuon && evt_weight->GetType() <= APEvtWeight::kDiJet) {
     vector<APWeightEntry*> temp_vec_rel;
-    if(evt_weight->GetType() == APEvtWeight::kDiMuon) temp_vec_rel = temp_vec_dimu;
-    else if(evt_weight->GetType() == APEvtWeight::kDiTau) temp_vec_rel = temp_vec_ditau;
-    else if(evt_weight->GetType() == APEvtWeight::kDiElectron) temp_vec_rel = temp_vec_diel;
-    else if(evt_weight->GetType() == APEvtWeight::kDiJet) temp_vec_rel = temp_vec_dijet;
+    if(evt_weight->GetType() == APEvtWeight::kDiMuon) temp_vec_rel = std::move(temp_vec_dimu);
+    else if(evt_weight->GetType() == APEvtWeight::kDiTau) temp_vec_rel = std::move(temp_vec_ditau);
+    else if(evt_weight->GetType() == APEvtWeight::kDiElectron) temp_vec_rel = std::move(temp_vec_diel);
+    else if(evt_weight->GetType() == APEvtWeight::kDiJet) temp_vec_rel = std::move(temp_vec_dijet);
     
     bool isAsymTrig = false;
     vector<unsigned int> temp_vec_IDs;
