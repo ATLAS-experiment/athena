@@ -20,7 +20,7 @@ def TRT_CalDbToolCfg(flags, name="TRT_CalDbTool", **kwags):
     return acc
 
 
-def TRT_StrawStatusSummaryToolCfg(flags, name="TRT_StrawStatusSummaryTool", forceLegacyAccess=False, **kwargs):
+def TRT_StrawStatusSummaryToolCfg(flags, name="TRT_StrawStatusSummaryTool", **kwargs):
     """Return a ComponentAccumulator for TRT_StrawStatusSummaryTool"""
     acc = ComponentAccumulator()
 
@@ -34,10 +34,11 @@ def TRT_StrawStatusSummaryToolCfg(flags, name="TRT_StrawStatusSummaryTool", forc
         acc.merge(TRTStrawStatusCondAlgCfg(flags))
 
     
-    kwargs.setdefault("isGEANT4", flags.GeoModel.Align.LegacyConditionsAccess or forceLegacyAccess)
+    kwargs.setdefault("isGEANT4", flags.GeoModel.Align.LegacyConditionsAccess)
 
     acc.setPrivateTools(CompFactory.TRT_StrawStatusSummaryTool(name, **kwargs))
     return acc
+
 
 def TRT_StrawNeighbourSvcCfg(flags, name="TRT_StrawNeighbourSvc", **kwargs):
     acc = ComponentAccumulator()
