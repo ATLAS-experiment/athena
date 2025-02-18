@@ -16,7 +16,7 @@
 
 from PyJobTransforms.TransformUtils import executeFromFragment
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.Enums import BeamType, MetadataCategory
 from SimulationConfig.SimEnums import CavernBackground
 
 
@@ -134,23 +134,23 @@ def CommonSimulationCfg(flags, log):
         cfg.merge(DeadMaterialCalibrationHitMergerCfg(flags))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+
     if flags.Output.HITSFileName:
         from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
         cfg.merge( OutputStreamCfg(flags,"HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag=False, AcceptAlgs=AcceptAlgNames) )
+        cfg.merge(SetupMetaDataForStreamCfg(flags, "HITS", AcceptAlgs=AcceptAlgNames, createMetadata=[MetadataCategory.IOVMetaData]))
         if flags.Sim.ISF.ReSimulation:
             cfg.getEventAlgo(outputStreamName("HITS")).TakeItemsFromInput=False
 
     if flags.Output.EVNT_TRFileName:
         from SimuJobTransforms.SimOutputConfig import getStreamEVNT_TR_ItemList
         cfg.merge( OutputStreamCfg(flags,"EVNT_TR", ItemList=getStreamEVNT_TR_ItemList(flags), disableEventTag=True, AcceptAlgs=AcceptAlgNames) )
+        cfg.merge(SetupMetaDataForStreamCfg(flags, "EVNT_TR", AcceptAlgs=AcceptAlgNames, createMetadata=[MetadataCategory.IOVMetaData]))
 
     # Add MT-safe PerfMon
     if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
         from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
         cfg.merge(PerfMonMTSvcCfg(flags))
-
-    # Add in-file MetaData
-    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    cfg.merge(SetupMetaDataForStreamCfg(flags, "HITS", AcceptAlgs=AcceptAlgNames))
 
     return cfg

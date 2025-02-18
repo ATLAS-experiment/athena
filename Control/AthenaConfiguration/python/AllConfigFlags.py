@@ -242,6 +242,7 @@ def initConfigFlags():
     acf.addFlag('Output.HISTFileName', '', help='HIST output file name')
     
     acf.addFlag('Output.doWriteEVNT', lambda prevFlags: bool(prevFlags.Output.EVNTFileName), help='write EVNT file')
+    acf.addFlag('Output.doWriteEVNT_TR', lambda prevFlags: bool(prevFlags.Output.EVNT_TRFileName), help='write EVNT_TR file')
     acf.addFlag('Output.doWriteHITS', lambda prevFlags: bool(prevFlags.Output.HITSFileName), help='write HITS file')
     acf.addFlag('Output.doWriteRDO', lambda prevFlags: bool(prevFlags.Output.RDOFileName), help='write RDO file')
     acf.addFlag('Output.doWriteRDO_SGNL', lambda prevFlags: bool(prevFlags.Output.RDO_SGNLFileName), help='write RDO_SGNL file')
