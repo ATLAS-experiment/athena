@@ -104,10 +104,15 @@ getLinkedAuxId (const SG::AuxTypeRegistry& r,
 {
   SG::auxid_t linked_auxid = SG::null_auxid;
   if (SG::AuxTypeRegistry::classNameHasLink (attr_type)) {
-    using ROOT::Experimental::DescriptorId_t;
     using ROOT::Experimental::RFieldDescriptor;
     using ROOT::Experimental::RNTupleDescriptor;
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+    using ROOT::DescriptorId_t;
+    using ROOT::kInvalidDescriptorId;
+#else
+    using ROOT::Experimental::DescriptorId_t;
     using ROOT::Experimental::kInvalidDescriptorId;
+#endif
     std::string linked_attr = SG::AuxTypeRegistry::linkedName (attr_name);
     DescriptorId_t did = desc.FindFieldId (field_prefix + linked_attr);
     if (did != kInvalidDescriptorId) {
