@@ -3,6 +3,7 @@
 
 # For the exit code at the end
 import sys
+import re
 
 # For translating the run arguments into flags
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
@@ -39,10 +40,13 @@ def fromRunArgs(runArgs):
         flags.Input.Files = runArgs.inputEVNTFile
     else:
         log.error('Input EVNT file required for EVNTtoHEPMC')
-
     # Set the output file
     if hasattr(runArgs, 'outputHEPMCFile'):
-        my_output_HepMCFile = 'tmp_'+runArgs.outputHEPMCFile
+       if ('.tar' in runArgs.outputHEPMCFile):
+          index = re.search(".tar",runArgs.outputHEPMCFile).span()[0]
+          my_output_HepMCFile = runArgs.outputHEPMCFile[:index]
+       else:
+          log.error('Output should be a tar.gz file but it is '+runArgs.outputHEPMCFile)
     else:
         log.error('OutputHEPMCFile required for EVNTtoHEPMC')
 
@@ -90,7 +94,7 @@ def fromRunArgs(runArgs):
     # Compress the output file
     log.info('Compressing HEPMC output (may take a moment)')
     import tarfile
-    with tarfile.open(my_output_HepMCFile[4:],'w:gz') as out_tar:
+    with tarfile.open(runArgs.outputHEPMCFile,'w:gz') as out_tar:
         out_tar.add( my_output_HepMCFile )
 
     # And remove the uncompressed version
