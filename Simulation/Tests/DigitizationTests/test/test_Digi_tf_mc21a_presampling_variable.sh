@@ -31,7 +31,7 @@ Digi_tf.py \
     --CA \
     --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
     --PileUpPresampling True \
-    --conditionsTag default:OFLCOND-MC21-SDR-RUN3-10 \
+    --conditionsTag default:OFLCOND-MC23-SDR-RUN3-08 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --digiSteeringConf 'StandardSignalOnlyTruth' \
     --geometryVersion default:ATLAS-R3S-2021-03-00-00 \
