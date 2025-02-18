@@ -11,7 +11,7 @@ namespace MuonVal{
         VectorBranch<unsigned short>{parent.tree(), 
                                      std::format("{:}_{:}Link", parent.name(), altName.empty() ? linkColl->name() : altName)},
         m_linkColl{linkColl},
-        m_linkerFunc{linker} {}
+        m_linkerFunc{std::move(linker)} {}
 
     void LinkerBranch::operator+=(const xAOD::IParticle* p) {
         push_back(p);
@@ -51,7 +51,7 @@ namespace MuonVal{
                                      std::format("{:}_{:}Link", parent.name(), altName.empty() ? primColl->name() : altName)},
         m_parent{parent},
         m_linkColl{primColl},
-        m_linkerFunc{linker} {
+        m_linkerFunc{std::move(linker)} {
         setDefault(-1);
     }
 
