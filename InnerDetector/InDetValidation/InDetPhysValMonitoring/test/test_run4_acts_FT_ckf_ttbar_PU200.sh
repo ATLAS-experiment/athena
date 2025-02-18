@@ -71,7 +71,6 @@ run "IDPVM-ckf" \
     --outputFile idpvm.root \
     --doTightPrimary \
     --doHitLevelPlots \
-    --HSFlag All \
     --doExpertPlots \
     --OnlyTrackingPreInclude
 
