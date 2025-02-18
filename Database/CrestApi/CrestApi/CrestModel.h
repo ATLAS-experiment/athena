@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2019-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2019-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef CREST_DTOS_HPP
@@ -18,10 +18,10 @@ using json = nlohmann::json;
 class RespPage
 {
 public:
-    int size;
-    int64_t totalElements;
-    int totalPages;
-    int number;
+    int size{};
+    int64_t totalElements{};
+    int totalPages{};
+    int number{};
 
     json to_json() const;
     static RespPage from_json(const json &j);
@@ -55,7 +55,7 @@ class GlobalTagDto
 {
 public:
     std::string name;
-    int64_t validity;
+    int64_t validity{};
     std::string description;
     std::string release;
     std::optional<std::string> insertionTime;
@@ -63,8 +63,8 @@ public:
     std::string scenario;
     std::string workflow;
     std::string type;
-    int64_t snapshotTimeMilli;
-    int64_t insertionTimeMilli;
+    int64_t snapshotTimeMilli{};
+    int64_t insertionTimeMilli{};
 
     // Ctor
     GlobalTagDto(const char* _name, const char* _description, const char* _release, const char* _workflow);
@@ -102,8 +102,8 @@ public:
     std::string objectType;
     std::string synchronization;
     std::string description;
-    uint64_t lastValidatedTime;
-    uint64_t endOfValidity;
+    uint64_t lastValidatedTime{};
+    uint64_t endOfValidity{};
     std::optional<std::string> insertionTime;
     std::optional<std::string> modificationTime;
     // Ctor
@@ -268,7 +268,7 @@ class IovDto
 {
 public:
     std::string tagName;
-    uint64_t since;
+    uint64_t since{};
     std::optional<std::string> insertionTime;
     std::string payloadHash;
     // Ctor
@@ -302,7 +302,7 @@ class StoreDto
     std::optional<std::string> m_app_name;
     std::optional<std::string> m_app_version;
 public:
-    uint64_t since;
+    uint64_t since{};
     std::string hash;
     std::string data;
     std::optional<std::string> insertionTime;
@@ -334,7 +334,7 @@ public:
     const char* getFormat() const {return "StoreSetDto";}
     int64_t getSize() const{return resources.size();}
 
-    void push_back(StoreDto dto);
+    void push_back(const StoreDto & dto);
     void clear();
     json to_json() const;
 
@@ -350,7 +350,7 @@ public:
     std::string objectName;
     std::string compressionType;
     std::string checkSum;
-    int size;
+    int size{};
     std::optional<std::string> insertionTime;
 
     // Function to serialize the object to JSON

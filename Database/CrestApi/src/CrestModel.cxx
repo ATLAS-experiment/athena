@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2020-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2020-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <CrestApi/CrestModel.h>
@@ -106,7 +106,7 @@ json GlobalTagSetDto::to_json() const
     {
         jsonResources.push_back(((GlobalTagDto)resource).to_json());
     }
-    baseJson["resources"] = jsonResources;
+    baseJson["resources"] = std::move(jsonResources);
     return baseJson;
 }
 
@@ -217,7 +217,7 @@ json TagSetDto::to_json() const
     {
         jsonResources.push_back(((TagDto)resource).to_json());
     }
-    baseJson["resources"] = jsonResources;
+    baseJson["resources"] = std::move(jsonResources);
     return baseJson;
 }
 TagSetDto TagSetDto::from_json(const json &j)
@@ -258,7 +258,7 @@ json GlobalTagMapSetDto::to_json() const
     {
         jsonResources.push_back(((GlobalTagMapDto)resource).to_json());
     }
-    baseJson["resources"] = jsonResources;
+    baseJson["resources"] = std::move(jsonResources);
     return baseJson;
 }
 GlobalTagMapSetDto GlobalTagMapSetDto::from_json(const json &j)
@@ -299,11 +299,8 @@ ChannelSetDto ChannelSetDto::from_json(const json &j)
     ChannelSetDto chDto;
     for (unsigned int i = 0; i < j.size(); i++)
     {
-        for (auto &el : j[i].items())
-        {
-            chDto.add(el.key(), el.value());
-            break;
-        }
+        auto itemZero = j[i].begin();
+        chDto.add(itemZero.key(), itemZero.value());
     }
     return chDto;
 }
@@ -344,11 +341,9 @@ PayloadSpecDto PayloadSpecDto::from_json(const json &j)
     }	
     for (unsigned int i = 0; i < j.size(); i++)
     {
-        for (auto &el : j[i].items())
-        {
-            chDto.add(el.key(), el.value());
-            break;
-        }
+        const auto itemZero = j[i].begin();
+        chDto.add(itemZero.key(), itemZero.value());
+
     }
     return chDto;
 }
@@ -426,7 +421,7 @@ json TagMetaSetDto::to_json() const
     {
         jsonResources.push_back(((TagMetaDto)resource).to_json());
     }
-    baseJson["resources"] = jsonResources;
+    baseJson["resources"] = std::move(jsonResources);
     return baseJson;
 }
 TagMetaSetDto TagMetaSetDto::from_json(const json &j)
@@ -502,7 +497,7 @@ json IovSetDto::to_json() const
     {
         jsonResources.push_back(((IovDto)resource).to_json());
     }
-    baseJson["resources"] = jsonResources;
+    baseJson["resources"] = std::move(jsonResources);
     return baseJson;
 }
 
@@ -532,7 +527,6 @@ IovSetDto IovSetDto::from_fs_json(const json &j)
 {
     IovSetDto iovSet;
     iovSet.load_from_json(j);
-    // int n = j.size();
 
     for (auto it = j.begin(); it != j.end(); ++it)
     {
@@ -581,10 +575,10 @@ json StoreSetDto::to_json() const
     {
         jsonResources.push_back(((StoreDto)resource).to_json());
     }
-    baseJson["resources"] = jsonResources;
+    baseJson["resources"] = std::move(jsonResources);
     return baseJson;
 }
-void StoreSetDto::push_back(StoreDto dto)
+void StoreSetDto::push_back(const StoreDto & dto)
 {
     resources.push_back(dto);
 }
@@ -649,7 +643,7 @@ json PayloadSetDto::to_json() const
     {
         jsonResources.push_back(((PayloadDto)resource).to_json());
     }
-    baseJson["resources"] = jsonResources;
+    baseJson["resources"] = std::move(jsonResources);
     return baseJson;
 }
 
