@@ -14,7 +14,6 @@
 namespace pool {
 
   class CollectionColumn;
-  class CollectionIndex;
   
   /** 
    * @class CollectionDescription CollectionDescription.h CollectionBase/CollectionDescription.h
@@ -216,41 +215,6 @@ namespace pool {
                                    int maxSize = 0,
                                    bool sizeIsFixed = true );
 
-    /**
-     * Creates an index on a column of the collection description. Automatically generates a unique
-     * name for the index.
-     * 
-     * @param columnName Name of column for which index is created.
-     * @param isUnique Flag to indicate whether indexed column values must be unique.
-     */
-    virtual void createIndex( std::string indexName, const std::string& columnName, bool isUnique = false );
-
-    /**
-     * Creates an index on one or more columns of the collection description. Automatically generates a
-     * unique name for the index.
-     *
-     * @param columnNames Names of columns for which index is to be created.
-     * @param isUnique Flag to indicates whether combination of indexed column values must be unique.
-     */
-    virtual void createIndex( std::string indexName, const std::vector< std::string >& columnNames, bool isUnique = false );
-
-    /**
-     * Removes an index from the collection description, given the name of the column on
-     * which the index to be removed is applied.
-     *
-     * @param columnName Name of column on which index to be removed is applied.
-     */
-    virtual void dropIndex( const std::string& columnName );
-
-    /**
-     * Removes an index from a column of the collection description, given the names of the columns on
-     * which the index to be removed is applied.
-     *
-     * @param columnNames Names of columns on which index to be removed is applied.
-     */
-    virtual void dropIndex( const std::vector<std::string>& columnNames );
-
-
     /// Returns the name of the collection and the top level collection fragment.
     virtual const std::string& name() const;
 
@@ -337,35 +301,6 @@ namespace pool {
     /// Returns the Attribute column description objects.
     const std::vector< pool::CollectionColumn* >& attributeColumns() const { return m_attributeColumns; }
 
-    /**
-     * Returns the number of indices used by the collection.
-     */
-    virtual int numberOfIndices() const;
-
-    /**
-     * Returns a description object for an index of the collection, given the name of the column on which
-     * the index is applied.
-     *
-     * @param columnName Name of column on which index is applied.
-     */
-    virtual const ICollectionIndex& index( const std::string& columnName ) const;
-
-    /**
-     * Returns a description object for an index of the collection, given the names of the columns on 
-     * which the index is applied.
-     *
-     * @param columnNames Names of columns on which index is applied.
-     */
-    virtual const ICollectionIndex& index( const std::vector<std::string>& columnNames ) const;
-
-    /**
-     * Returns a description object for an index of the collection, given the ID number of 
-     * the index.
-     *
-     * @param indexId ID of index.
-     */
-    virtual const ICollectionIndex& index( int indexId ) const;
-
     // set column ID, return the ID
     virtual int		setColumnId( const std::string& columnName, int id, const std::string& methodName );
     
@@ -426,9 +361,6 @@ namespace pool {
 
     /// Map of Attribute CollectionColumn objects using column names as keys.
     ColumnByName        m_attributeColumnForColumnName;
-
-    /// Vector of CollectionIndex objects.
-    std::vector< CollectionIndex* > m_indices;
   };
 }
 
