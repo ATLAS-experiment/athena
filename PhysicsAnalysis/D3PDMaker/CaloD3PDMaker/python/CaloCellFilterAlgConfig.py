@@ -19,7 +19,7 @@ def CaloCellFilterAlgCfg( flags,
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     acc.merge (CaloNoiseCondAlgCfg (flags, noiseType))
 
-    caloCellFilter = CompFactory.D3PD.CaloCellFilterAlg \
+    caloCellFilter = CompFactory.CaloCellFilterAlg \
         (OutputCellsName,
          CaloNums = CaloNums,
          CaloSamplings = CaloSamplings,
