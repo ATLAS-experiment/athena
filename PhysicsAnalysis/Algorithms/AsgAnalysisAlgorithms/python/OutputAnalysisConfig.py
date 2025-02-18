@@ -126,9 +126,7 @@ class OutputAnalysisConfig (ConfigBlock):
             outputDict = config.getOutputVars (containerName)
             for outputName in outputDict :
                 outputConfig = copy.deepcopy (outputDict[outputName])
-                if containerName == 'EventInfo' :
-                    outputConfig.outputContainerName = outputConfig.origContainerName
-                elif outputConfig.outputContainerName != outputConfig.origContainerName :
+                if containerName != outputConfig.origContainerName :
                     outputConfig.outputContainerName = containerName + '_%SYS%'
                 else :
                     outputConfig.outputContainerName = config.readName (containerName)
