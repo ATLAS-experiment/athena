@@ -75,7 +75,7 @@ StatusCode JSSTaggerUtils::initialize(){
       // init tool
       std::string ModelPath = "";
       if ( m_calibArea.compare("Local") == 0 ) {
-        ModelPath = PathResolverFindCalibFile(("$WorkDir_DIR/data/BoostedJetTaggers/" + ConstTaggerFileName).c_str());
+        ModelPath = PathResolverFindCalibFile(ConstTaggerFileName.c_str());
       }
       else if ( m_calibArea.find("eos") != std::string::npos) {
         ModelPath = (ConstTaggerFileName);    
@@ -115,7 +115,7 @@ StatusCode JSSTaggerUtils::initialize(){
       // init tool
       std::string ModelPath = "";
       if ( m_calibArea.compare("Local") == 0 ) {
-        ModelPath = PathResolverFindCalibFile(("$WorkDir_DIR/data/BoostedJetTaggers/" + HLTaggerFileName).c_str());
+        ModelPath = PathResolverFindCalibFile(HLTaggerFileName.c_str());
       }
       else if ( m_calibArea.find("eos") != std::string::npos) {
         ModelPath = (HLTaggerFileName);    
