@@ -21,8 +21,8 @@ namespace Muon{
     }
     std::ostream& operator<<(std::ostream& ostr, const RpcCablingOnlineID& obj) {
         ostr << std::format("subDetector: {:3d} ",obj.subDetector);
-        ostr << std::format("tdcSector: {:2d} ", obj.tdcSector);
-        ostr << std::format("tdc: {:2d} ", obj.tdc);
+        ostr << std::format("boardSector: {:2d} ", obj.boardSector);
+        ostr << std::format("board: {:2d} ", obj.board);
         return ostr;
     }
     std::ostream& operator<<(std::ostream& ostr, const RpcCablingData& obj) {

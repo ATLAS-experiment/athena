@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonByteStreamCnvTest/NrpcDigitToNrpcRDO.h"
@@ -130,8 +130,8 @@ StatusCode NrpcDigitToNrpcRDO::execute(const EventContext& ctx) const {
             NrpcRdo->setBcid(the_bcid);
             NrpcRdo->setTime(rdo_time);
             NrpcRdo->setSubdetector(cabling_data.subDetector);
-            NrpcRdo->setTdcsector(cabling_data.tdcSector);
-            NrpcRdo->setTdc(cabling_data.tdc);
+            NrpcRdo->setBoardsector(cabling_data.boardSector);
+            NrpcRdo->setBoard(cabling_data.board);
             NrpcRdo->setChannel(cabling_data.channelId);
             NrpcRdo->setTimeoverthr(the_timeoverthr);
         }
