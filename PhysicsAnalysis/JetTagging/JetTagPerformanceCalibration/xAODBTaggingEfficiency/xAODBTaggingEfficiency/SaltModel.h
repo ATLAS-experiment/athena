@@ -2,8 +2,8 @@
 Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef XAODBTAGGINGEFFICIENCY_ONNXUTIL_H
-#define XAODBTAGGINGEFFICIENCY_ONNXUTIL_H
+#ifndef XAODBTAGGINGEFFICIENCY_SALTMODEL_H
+#define XAODBTAGGINGEFFICIENCY_SALTMODEL_H
 
 #include <onnxruntime_cxx_api.h>
 #include <string>
@@ -11,13 +11,13 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include <memory>
 
 
-class OnnxUtil final{
+class SaltModel final{
 
     public:
 
     // Constructor/destructor/init
-    OnnxUtil(const std::string& name);
-    ~OnnxUtil() = default;
+    SaltModel(const std::string& name);
+    ~SaltModel() = default;
 
     void initialize();
 
@@ -45,7 +45,7 @@ class OnnxUtil final{
     // num_wp=1 for fixed cut;
     int m_num_wp{};
 
-}; // Class OnnxUtil
+}; // Class SaltModel
 
 
-#endif //XAODBTAGGINGEFFICIENCY_ONNXUTIL_H
+#endif //XAODBTAGGINGEFFICIENCY_SALTMODEL_H

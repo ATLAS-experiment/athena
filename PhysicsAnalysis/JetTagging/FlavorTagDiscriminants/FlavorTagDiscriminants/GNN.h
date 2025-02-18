@@ -1,10 +1,10 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-  This class is used in conjunction with OnnxUtil to run inference on a GNN model.
-  Whereas OnnxUtil handles the interfacing with the ONNX runtime, this class handles
+  This class is used in conjunction with SaltModel to run inference on a GNN model.
+  Whereas SaltModel handles the interfacing with the ONNX runtime, this class handles
   the interfacing with the ATLAS EDM. It is responsible for collecting all the inputs
-  needed for inference, running inference (via OnnxUtil), and decorating the results
+  needed for inference, running inference (via SaltModel), and decorating the results
   back to ATLAS EDM.
 */
 
@@ -30,7 +30,7 @@
 namespace FlavorTagDiscriminants {
 
   struct GNNOptions;
-  class OnnxUtil;
+  class SaltModel;
   //
   // Tool to to flavor tag jet/btagging object
   // using GNN based taggers
@@ -60,10 +60,10 @@ namespace FlavorTagDiscriminants {
     virtual std::set<std::string> getAuxInputKeys() const;
     virtual std::set<std::string> getConstituentAuxInputKeys() const;
 
-    std::shared_ptr<const OnnxUtil> m_onnxUtil;
+    std::shared_ptr<const SaltModel> m_saltModel;
   private:
     // private constructor, delegate of the above public ones
-    GNN(std::shared_ptr<const OnnxUtil>, const GNNOptions& opts);
+    GNN(std::shared_ptr<const SaltModel>, const GNNOptions& opts);
     // type definitions for ONNX output decorators
     using TPC = xAOD::TrackParticleContainer;
     using TrackLinks = std::vector<ElementLink<TPC>>;
@@ -85,7 +85,7 @@ namespace FlavorTagDiscriminants {
 
     /* create all decorators */
     std::tuple<FTagDataDependencyNames, std::set<std::string>>
-    createDecorators(const OnnxUtil::OutputConfig& outConfig, const FTagOptions& options);
+    createDecorators(const SaltModel::OutputConfig& outConfig, const FTagOptions& options);
 
     SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;
     std::string m_input_node_name;

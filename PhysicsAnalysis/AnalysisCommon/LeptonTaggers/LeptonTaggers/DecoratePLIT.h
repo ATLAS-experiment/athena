@@ -12,7 +12,7 @@
 
 // Tools
 #include "PathResolver/PathResolver.h"
-#include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagDiscriminants/SaltModel.h"
 
 // Athena
 #include "AsgDataHandles/WriteDecorHandle.h"
@@ -39,8 +39,8 @@ namespace Prompt {
     virtual StatusCode execute (const EventContext&) const override;
 
   private:
-    std::shared_ptr<const FlavorTagDiscriminants::OnnxUtil> m_onnxUtil{};
-    std::shared_ptr<const FlavorTagDiscriminants::OnnxUtil> m_onnxUtil_endcap{};
+    std::shared_ptr<const FlavorTagDiscriminants::SaltModel> m_saltModel{};
+    std::shared_ptr<const FlavorTagDiscriminants::SaltModel> m_saltModel_endcap{};
 
     int m_num_lepton_features{};
     int m_num_track_features{};

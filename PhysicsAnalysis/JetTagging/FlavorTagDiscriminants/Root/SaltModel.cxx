@@ -3,7 +3,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
-#include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagDiscriminants/SaltModel.h"
 #include "CxxUtils/checker_macros.h"
 #include "lwtnn/parse_json.hh"
 
@@ -13,7 +13,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 namespace FlavorTagDiscriminants {
 
-  OnnxUtil::OnnxUtil(const std::string& path_to_onnx)
+  SaltModel::SaltModel(const std::string& path_to_onnx)
     //load the onnx model to memory using the path m_path_to_onnx
     : m_env (std::make_unique<Ort::Env>(ORT_LOGGING_LEVEL_FATAL, ""))
   {
@@ -41,13 +41,13 @@ namespace FlavorTagDiscriminants {
 
     // get the onnx model version
     if (m_metadata.contains("onnx_model_version")) { // metadata version is explicitly set
-      m_onnx_model_version = m_metadata["onnx_model_version"].get<OnnxModelVersion>();
-      if (m_onnx_model_version == OnnxModelVersion::UNKNOWN){
+      m_onnx_model_version = m_metadata["onnx_model_version"].get<SaltModelVersion>();
+      if (m_onnx_model_version == SaltModelVersion::UNKNOWN){
         throw std::runtime_error("Unknown Onnx model version!");
       }
     } else { // metadata version is not set, infer from the presence of "outputs" key
       if (m_metadata.contains("outputs")){
-        m_onnx_model_version = OnnxModelVersion::V0;
+        m_onnx_model_version = SaltModelVersion::V0;
       } else {
         throw std::runtime_error("Onnx model version not found in metadata");
       }
@@ -67,26 +67,26 @@ namespace FlavorTagDiscriminants {
       const auto name = std::string(m_session->GetOutputNameAllocated(i, allocator).get());
       const auto type = m_session->GetOutputTypeInfo(i).GetTensorTypeAndShapeInfo().GetElementType();
       const int rank = m_session->GetOutputTypeInfo(i).GetTensorTypeAndShapeInfo().GetShape().size();
-      if (m_onnx_model_version == OnnxModelVersion::V0) {
-        const OnnxOutput onnxOutput(name, type, m_model_name);
-        m_output_nodes.push_back(onnxOutput);
+      if (m_onnx_model_version == SaltModelVersion::V0) {
+        const SaltModelOutput saltModelOutput(name, type, m_model_name);
+        m_output_nodes.push_back(saltModelOutput);
       } else {
-        const OnnxOutput onnxOutput(name, type, rank);
-        m_output_nodes.push_back(onnxOutput);
+        const SaltModelOutput saltModelOutput(name, type, rank);
+        m_output_nodes.push_back(saltModelOutput);
       }
     }
   }
 
-  const nlohmann::json OnnxUtil::loadMetadata(const std::string& key) const {
+  const nlohmann::json SaltModel::loadMetadata(const std::string& key) const {
     Ort::AllocatorWithDefaultOptions allocator;
     Ort::ModelMetadata modelMetadata = m_session->GetModelMetadata();
     std::string metadataString(modelMetadata.LookupCustomMetadataMapAllocated(key.c_str(), allocator).get());
     return nlohmann::json::parse(metadataString);
   }
 
-  const std::string OnnxUtil::determineModelName() const {
+  const std::string SaltModel::determineModelName() const {
     Ort::AllocatorWithDefaultOptions allocator;
-    if (m_onnx_model_version == OnnxModelVersion::V0) {
+    if (m_onnx_model_version == SaltModelVersion::V0) {
       // get the model name directly from the metadata
       return std::string(m_metadata["outputs"].begin().key());
     } else {
@@ -104,14 +104,14 @@ namespace FlavorTagDiscriminants {
         }
       }
       if (model_names.size() != 1) {
-        throw std::runtime_error("OnnxUtil: model names are not consistent between outputs");
+        throw std::runtime_error("SaltModel: model names are not consistent between outputs");
       }
       return *model_names.begin();
     }
 
   }
 
-  const lwt::GraphConfig OnnxUtil::getLwtConfig() const {
+  const lwt::GraphConfig SaltModel::getLwtConfig() const {
     /* for the new metadata format (>V0), the outputs are inferred directly from
     the model graph, rather than being configured as json metadata.
     however we still need to add an empty "outputs" key to the config so that
@@ -119,7 +119,7 @@ namespace FlavorTagDiscriminants {
 
     // deep copy the metadata by round tripping through a string stream
     nlohmann::json metadataCopy = nlohmann::json::parse(m_metadata.dump());
-    if (getOnnxModelVersion() != OnnxModelVersion::V0){
+    if (getSaltModelVersion() != SaltModelVersion::V0){
       metadataCopy["outputs"] = nlohmann::json::object();
     }
     std::stringstream metadataStream;
@@ -127,24 +127,24 @@ namespace FlavorTagDiscriminants {
     return lwt::parse_json_graph(metadataStream);
   }
 
-  const nlohmann::json& OnnxUtil::getMetadata() const {
+  const nlohmann::json& SaltModel::getMetadata() const {
     return m_metadata;
   }
 
-  const OnnxUtil::OutputConfig& OnnxUtil::getOutputConfig() const {
+  const SaltModel::OutputConfig& SaltModel::getOutputConfig() const {
     return m_output_nodes;
   }
 
-  OnnxModelVersion OnnxUtil::getOnnxModelVersion() const {
+  SaltModelVersion SaltModel::getSaltModelVersion() const {
     return m_onnx_model_version;
   }
 
-  const std::string& OnnxUtil::getModelName() const {
+  const std::string& SaltModel::getModelName() const {
     return m_model_name;
   }
 
 
-  OnnxUtil::InferenceOutput OnnxUtil::runInference(
+  SaltModel::InferenceOutput SaltModel::runInference(
     std::map<std::string, Inputs>& gnn_inputs) const {
 
     std::vector<float> input_tensor_values;

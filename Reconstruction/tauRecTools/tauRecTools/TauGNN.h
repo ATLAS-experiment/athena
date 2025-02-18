@@ -10,7 +10,7 @@
 
 #include "AsgMessaging/AsgMessaging.h"
 
-#include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagDiscriminants/SaltModel.h"
 
 #include <memory>
 #include <string>
@@ -21,7 +21,7 @@ namespace TauGNNUtils {
 }
 
 /**
- * @brief Wrapper around ONNXUtil to compute the output score of a model
+ * @brief Wrapper around SaltModel to compute the output score of a model
  *
  *   Configures the network and computes the network outputs given the input
  *   objects. Retrieval of input variables is handled internally.
@@ -39,12 +39,12 @@ public:
         std::string output_node_tau;
         std::string output_node_jet;
     };
-    std::shared_ptr<const FlavorTagDiscriminants::OnnxUtil> m_onnxUtil;
+    std::shared_ptr<const FlavorTagDiscriminants::SaltModel> m_saltModel;
 public:
     TauGNN(const std::string &nnFile, const Config &config);
     ~TauGNN();
 
-    // Output the OnnxUtil tuple 
+    // Output the SaltModel tuple 
     std::tuple<
         std::map<std::string, float>,
         std::map<std::string, std::vector<char>>,
@@ -66,7 +66,7 @@ public:
     }
 
     //Make the output config transparent to external tools
-    FlavorTagDiscriminants::OnnxUtil::OutputConfig gnn_output_config;
+    FlavorTagDiscriminants::SaltModel::OutputConfig gnn_output_config;
 
 private:
     using Inputs = FlavorTagDiscriminants::Inputs;

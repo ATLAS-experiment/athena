@@ -4,8 +4,8 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 This class is used to store the configuration for a ONNX output node.
 */
 
-#ifndef OUTPUTNODE_H
-#define OUTPUTNODE_H
+#ifndef FLAVORTAGDISCRIMINANTS_SALTMODELOUTPUT_H
+#define FLAVORTAGDISCRIMINANTS_SALTMODELOUTPUT_H
 
 #include <onnxruntime_cxx_api.h>
 #include "nlohmann/json.hpp"
@@ -13,18 +13,18 @@ This class is used to store the configuration for a ONNX output node.
 
 namespace FlavorTagDiscriminants {
 
-class OnnxOutput {
+class SaltModelOutput {
 
   public:
     enum class OutputType {UNKNOWN, FLOAT, VECCHAR, VECFLOAT};
 
-    /* constructor for OnnxModelVersion::V1 and higher */
-    OnnxOutput(const std::string& name,
+    /* constructor for SaltModelVersion::V1 and higher */
+    SaltModelOutput(const std::string& name,
                ONNXTensorElementDataType type,
                int rank);
 
-    /* constructor for OnnxModelVersion::V0 */
-    OnnxOutput(const std::string& name,
+    /* constructor for SaltModelVersion::V0 */
+    SaltModelOutput(const std::string& name,
                ONNXTensorElementDataType type,
                const std::string& name_in_model);
 
@@ -36,8 +36,8 @@ class OnnxOutput {
     OutputType getOutputType(ONNXTensorElementDataType type, int rank) const;
     const std::string getName(const std::string& name, const std::string& model_name) const;
 
-}; // class OnnxOutput
+}; // class SaltModelOutput
 
 } // namespace FlavorTagDiscriminants
 
-#endif // OUTPUTNODE_H
+#endif // FLAVORTAGDISCRIMINANTS_SALTMODELOUTPUT_H
