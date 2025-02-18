@@ -24,7 +24,7 @@ def TRT_GeoModelCfg(flags):
         trtDetectorTool.DoKryptonMixture = False
 
     from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
-    acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags, forceLegacyAccess=True))  # FIXME: if we set the tool, things break for unknown reasons
+    acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
     geoModelSvc.DetectorTools += [ trtDetectorTool ]
     acc.merge(db)
     return acc
