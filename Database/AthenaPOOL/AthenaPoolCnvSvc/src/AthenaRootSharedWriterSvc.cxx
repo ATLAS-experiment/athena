@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaRootSharedWriterSvc.cxx
@@ -184,7 +184,7 @@ StatusCode AthenaRootSharedWriterSvc::initialize() {
          } else {
             streamPort = atoi(streamPortStringProp.value().substr(streamPortStringProp.value().find(':') + 1).c_str());
          }
-         m_rootServerSocket = new TServerSocket(streamPort, (streamPort == 0 ? false : true), 100);
+         m_rootServerSocket = new TServerSocket(streamPort, (streamPort == 0 ? false : true), 100, -1, ESocketBindOption::kInaddrLoopback);
          if (m_rootServerSocket == nullptr || !m_rootServerSocket->IsValid()) {
             ATH_MSG_FATAL("Could not create ROOT TServerSocket: " << streamPort);
             return StatusCode::FAILURE;
