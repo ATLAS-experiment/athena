@@ -408,7 +408,7 @@ class L1Config_eTAU:
         confObj["resolutionMeV"] = 100
         confObj["minIsoEt"] = 13.0 # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
         confObj["maxEt"] = 50 # Maximum Et for the RCore/BDT/RHad cuts, in units of GeV
-        confObj["algoVersion"] = int(do_eFex_BDT_Tau)
+        confObj["algoVersion"] = 2 if do_eFex_BDT_Tau else 0 # For BDT based selection, algoVersion 1 corresponds to the 2024 v16 BDT and algoVersion 2 corresponds to the 2025 v17 BDT.
 
         # Check that FW values are integers
         for wp in confObj["workingPoints"]:
