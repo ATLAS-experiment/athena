@@ -17,7 +17,7 @@ AtlasG4_tf.py \
     --skipEvents '0' \
     --randomSeed '10' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationSingleIoVCalibrationHits' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \

@@ -23,7 +23,7 @@ Reco_tf.py \
   --skipEvents 0 \
   --preInclude 'Campaigns.MC23a' \
   --postInclude 'PyJobTransforms.UseFrontier' \
-  --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01'  \
+  --conditionsTag 'OFLCOND-MC23-SDR-RUN3-08'  \
   --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
   --preExec="flags.Tracking.doBackTracking=False;" \
   --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \

@@ -13,7 +13,7 @@
 
 AtlasG4_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationNoIoV' \
     --DataRunNumber '284500' \
