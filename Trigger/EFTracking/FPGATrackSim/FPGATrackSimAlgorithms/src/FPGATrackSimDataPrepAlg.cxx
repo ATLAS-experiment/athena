@@ -75,6 +75,7 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
 
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
     m_logicEventHeader_precluster = m_writeOutputTool->addInputBranch(m_preClusterBranch.value(), true);
+    m_logicEventHeader_cluster = m_writeOutputTool->addInputBranch(m_clusterBranch.value(), true);
     m_logicEventHeader = m_writeOutputTool->addInputBranch(m_postClusterBranch.value(), true);
     
     ATH_MSG_DEBUG("initialize() Setting branch");
@@ -253,7 +254,8 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     // Reset data pointers
     m_eventHeader.reset();
     m_logicEventHeader->reset();
-    m_logicEventHeader_precluster->reset()
+    m_logicEventHeader_precluster->reset();
+    m_logicEventHeader_cluster->reset();
 
     TIME(m_tfin);
     
@@ -319,6 +321,7 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
     ATH_MSG_DEBUG("Running hits conversion");
     m_logicEventHeader->reset();
     m_logicEventHeader_precluster->reset();
+    m_logicEventHeader_cluster->reset();
     ATH_CHECK(m_hitMapTool->convert(1, m_eventHeader, *m_logicEventHeader));
 
     for (const FPGATrackSimHit& hit : m_hits_miss) FPGAHitUnmapped->push_back(hit);
@@ -345,6 +348,10 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
       if (m_doHitFiltering) ATH_CHECK(m_hitFilteringTool->DoRandomRemoval(*m_logicEventHeader, false));
       for (const FPGATrackSimCluster& cluster : m_clusters_original) FPGAClusters->push_back(cluster);      
     }
+
+
+    // At this stage, copy the logicEventHeader.
+    *m_logicEventHeader_cluster = *m_logicEventHeader;
     
     // Filter hits/clusters (untested for hits, ie with m_clustering = false)
     if (m_doHitFiltering)
