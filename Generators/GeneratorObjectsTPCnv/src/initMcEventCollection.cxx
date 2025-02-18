@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeneratorObjectsTPCnv/initMcEventCollection.h"
 
@@ -150,9 +150,12 @@ namespace Athena_test {
     }
 #else
     if (!ge.vertices_empty()) {
-      for (auto itvtx = ge.vertices_begin(); itvtx != ge.vertices_end();
-           ++itvtx) {
-        ge.remove_vertex(*itvtx);
+      HepMC::GenEvent::vertex_iterator itvtx = ge.vertices_begin();
+      while (itvtx != ge.vertices_end()) {
+        HepMC::GenVertexPtr pvtx = *itvtx;
+        ++itvtx;
+        ge.remove_vertex(pvtx);
+        delete pvtx;
       }
     }
 #endif
