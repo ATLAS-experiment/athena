@@ -61,6 +61,8 @@
 #include "IOVDbJsonStringFunctions.h"
 
 using namespace IOVDbNamespace;
+using namespace cool;
+using namespace Crest;
 
 namespace{
   const std::string fileSuffix{".json"};
@@ -962,11 +964,11 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
           crest_work_dir += "/crest_data";
           bool crest_rewrite = true;
 
-	  Crest::CrestFsClient crestFSClient = Crest::CrestFsClient(crest_rewrite, crest_work_dir);
+	  Crest::CrestApiFs crestFSClient = Crest::CrestApiFs(crest_rewrite, crest_work_dir);
 
           try{
 	    TagMetaDto dto = TagMetaDto();
-	    dto = dto.from_json(tag_meta);
+	    dto = dto.fromJson(tag_meta);
             crestFSClient.createTagMeta(dto);
 	    
             ATH_MSG_INFO("Tag meta info for " << m_crestTag << " saved to disk.");
@@ -1405,7 +1407,7 @@ std::vector<BasicFolder> IOVDbFolder::fetchCrestObjects(cool::ValidityKey since
       std::string crest_work_dir=std::filesystem::current_path();
       crest_work_dir += "/crest_data";
       bool crest_rewrite = true;
-      Crest::CrestFsClient crestFSClient = Crest::CrestFsClient(crest_rewrite, crest_work_dir);
+      Crest::CrestApiFs crestFSClient = Crest::CrestApiFs(crest_rewrite, crest_work_dir);
 
       nlohmann::json js =
       {
@@ -1418,7 +1420,7 @@ std::vector<BasicFolder> IOVDbFolder::fetchCrestObjects(cool::ValidityKey since
           {"timeType", "time"}};
 
       TagDto dto = TagDto();
-      dto = dto.from_json(js);
+      dto = dto.fromJson(js);
 
       try{
 	crestFSClient.createTag(dto);
@@ -1449,7 +1451,7 @@ std::vector<BasicFolder> IOVDbFolder::fetchCrestObjects(cool::ValidityKey since
         {"resources", jResources}
       };
 
-      StoreSetDto storeSetDto = StoreSetDto::from_json(jsStoreSet);
+      StoreSetDto storeSetDto = StoreSetDto::fromJson(jsStoreSet);
       
       try{
         crestFSClient.storeData(m_crestTag, storeSetDto, "JSON", "test", "test", "1", endtime);
