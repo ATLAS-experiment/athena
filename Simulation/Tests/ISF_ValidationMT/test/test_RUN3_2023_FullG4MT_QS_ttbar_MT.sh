@@ -21,7 +21,7 @@ InputEVNT='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21
 Sim_tf.py \
     --CA True \
     --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23cSimulationMultipleIoV' \

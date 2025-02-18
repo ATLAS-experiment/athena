@@ -19,7 +19,7 @@ AtlasG4_tf.py \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/ttbar_muplusjets-pythia6-7000.evgen.pool.root' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationSingleIoV' \
     --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-08' \
     --outputHITSFile 'hitsFull.ttbar.pool.root' \
     --maxEvents '10' \
     --skipEvents '0'
@@ -32,7 +32,7 @@ AtlasG4_tf.py \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/ttbar_muplusjets-pythia6-7000.evgen.pool.root' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationSingleIoV' \
     --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-08' \
     --outputHITSFile 'hitsHalf1.ttbar.pool.root' \
     --maxEvents '5' \
     --skipEvents '0'
@@ -45,7 +45,7 @@ AtlasG4_tf.py \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/ttbar_muplusjets-pythia6-7000.evgen.pool.root' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationSingleIoV' \
     --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-08' \
     --outputHITSFile 'hitsHalf2.ttbar.pool.root' \
     --maxEvents '5' \
     --skipEvents '5'

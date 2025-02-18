@@ -17,7 +17,7 @@
 export ATHENA_CORE_NUMBER=8
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-08
 Sim_tf.py \
     --CA \
     --multithreaded \
@@ -27,7 +27,7 @@ Sim_tf.py \
     --maxEvents '10' \
     --skipEvents '0' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoVCalibrationHits' \
     --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
     --postExec 'EVNTtoHITS:with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
