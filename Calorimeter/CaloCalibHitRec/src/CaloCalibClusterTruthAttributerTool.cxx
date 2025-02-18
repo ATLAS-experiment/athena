@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCalibHitRec/CaloCalibClusterTruthAttributerTool.h"
@@ -39,7 +39,7 @@ StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAO
     std::vector<const CaloCalibrationHit*> theseCalibrationHits = (*identifierToCaloHitMapIterator).second;
 
     for (const auto *thisCalibrationHit : theseCalibrationHits){
-      const int truthID = HepMC::uniqueID(thisCalibrationHit);
+      const int truthID = HepMC::barcode(thisCalibrationHit); // FIXME barcode-based until xAOD::TruthParticle supports id rather than barcode
       double thisCalHitTruthEnergy = thisCalibrationHit->energyEM() + thisCalibrationHit->energyNonEM();
       if (true == m_fullTruthEnergy) thisCalHitTruthEnergy += (thisCalibrationHit->energyEscaped() + thisCalibrationHit->energyInvisible());
 
