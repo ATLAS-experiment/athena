@@ -16,7 +16,7 @@ AtlasG4_tf.py \
     --skipEvents '0' \
     --randomSeed '10' \
     --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-08' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationSingleIoV' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --imf False

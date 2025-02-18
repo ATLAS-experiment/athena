@@ -6,6 +6,8 @@
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 export ATHENA_CORE_NUMBER=8
 conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
 Reco_tf.py \

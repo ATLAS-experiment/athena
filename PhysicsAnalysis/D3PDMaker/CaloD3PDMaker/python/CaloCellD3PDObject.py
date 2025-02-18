@@ -54,11 +54,11 @@ def hookForCaloCellFilterAlg(c, flags, acc, prefix, *args, **kw) :
 
         #print " in makeCellD3PDObject, subCalo, sgkey, cellSigmaCut = ", subCalo, sgkey, cellSigmaCut
 
-        from .CaloCellFilterAlgConfig import CaloCellFilterAlgCfg
-        filter = CaloCellFilterAlgCfg( flags, CaloNums=subCalo, OutputCellsName=sgkey, CellSigmaCut=cellSigmaCut  )
-
-        acc.addEventAlgo (filter)
-        
+        from CaloD3PDMaker.CaloCellFilterAlgConfig import CaloCellFilterAlgCfg
+        acc.merge (CaloCellFilterAlgCfg(flags,
+                                        CaloNums=subCalo,
+                                        OutputCellsName=sgkey,
+                                        CellSigmaCut=cellSigmaCut))
     return
 
 def hookForCaloNoiseCondAlg(c, flags, acc, prefix, *args, **kw):

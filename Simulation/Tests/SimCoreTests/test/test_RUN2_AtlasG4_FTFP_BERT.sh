@@ -13,7 +13,7 @@
 
 AtlasG4_tf.py \
     --CA \
-    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-08' \
     --physicsList 'FTFP_BERT' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationNoIoV' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \

@@ -11,13 +11,13 @@
 # art-output: Config*
 
 # RUN2 setup
-# ATLAS-R2-2016-01-00-01 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R2-2016-01-00-01 and OFLCOND-MC23-SDR-RUN3-08
 
 export ATHENA_CORE_NUMBER=8
 Sim_tf.py \
     --CA \
     --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' \
     --simulator 'ATLFAST3F_ACTSMT' \
     --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \

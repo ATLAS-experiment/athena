@@ -10,13 +10,13 @@
 # art-output: truth.root
 
 # MC16 setup
-# ATLAS-R2-2016-01-00-01 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R2-2016-01-00-01 and OFLCOND-MC23-SDR-RUN3-08
 
 unset ATHENA_CORE_NUMBER
 
 Sim_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' \
     --simulator 'ATLFAST3MT' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \

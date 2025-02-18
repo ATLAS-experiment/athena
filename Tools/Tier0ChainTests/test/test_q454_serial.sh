@@ -9,13 +9,15 @@
 # art-include: 24.0/Athena
 # art-memory: 16000 
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 Reco_tf.py \
 --AMI=q454 \
 --preExec "r2a:flags.DQ.Steering.HLT.doInDet=False; flags.Exec.FPE=500;" \
 --athenaopts "RDOtoRDOTrigger:--threads=1" \
 --maxEvents=100 \
 --outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root \
---conditionsTag 'all:OFLCOND-MC23-SDR-RUN3-06' \
+--conditionsTag "all:${conditions}" \
 --imf False
 
 rc1=$?

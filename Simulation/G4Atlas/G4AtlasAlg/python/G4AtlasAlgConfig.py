@@ -2,7 +2,7 @@
 from G4AtlasServices.G4AtlasServicesConfig import DetectorGeometrySvcCfg, PhysicsListSvcCfg
 from ISF_Services.ISF_ServicesConfig import TruthServiceCfg, InputConverterCfg
 from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
-from G4AtlasTools.G4AtlasToolsConfig import SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg, SimHitContainerListCfg, InputContainerListCfg
+from G4AtlasTools.G4AtlasToolsConfig import SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
 from G4AtlasServices.G4AtlasUserActionConfig import UserActionSvcCfg
 from SimulationConfig.SimulationMetadata import writeSimulationParametersMetadata, readSimulationParameters
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -31,8 +31,17 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
 
     ## Don't drop the GeoModel
     kwargs.setdefault("ReleaseGeoModel", flags.Sim.ReleaseGeoModel)
-    kwargs.setdefault("ExtraInputs", InputContainerListCfg(flags))
-    kwargs.setdefault("ExtraOutputs", SimHitContainerListCfg(flags))
+
+    from G4AtlasTools.G4AtlasToolsConfig import SimHitContainerListCfg, InputContainerListCfg
+    kwargs.setdefault("ExtraOutputs", SimHitContainerListCfg(flags) )
+    kwargs.setdefault("ExtraInputs" , InputContainerListCfg(flags))
+
+    from SimulationConfig.SimEnums import LArParameterization
+    # Configure fast simulation
+    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        # Set the path to the simplified calorimeter geometry for particle transport if provided
+        if flags.Sim.SimplifiedGeoPath:
+            kwargs.setdefault('SimplifiedGeoPath', flags.Sim.SimplifiedGeoPath)
 
     # Set the path to the simplified calorimeter geometry for particle transport if provided
     if flags.Sim.LArParameterization is LArParameterization.FastCaloSim and flags.Sim.SimplifiedGeoPath:
@@ -98,10 +107,6 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
 
     # Set commands for the G4AtlasAlg
     kwargs.setdefault("G4Commands", flags.Sim.G4Commands)
-    from SimulationConfig.SimEnums import CalibrationRun
-    if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile, CalibrationRun.LArTileZDC]:
-        # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
-        kwargs.setdefault("ExtraOutputs", [( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitActive_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitDeadMaterial_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitInactive_DEAD' )])
     result.addEventAlgo(CompFactory.G4AtlasAlg(name, **kwargs))
 
     return result

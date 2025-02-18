@@ -36,7 +36,7 @@ Digi_tf.py \
     --CA \
     --detectors Truth \
     --PileUpPresampling True \
-    --conditionsTag default:OFLCOND-MC23-SDR-RUN3-01 \
+    --conditionsTag default:OFLCOND-MC23-SDR-RUN3-08 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --digiSteeringConf 'StandardSignalOnlyTruth' \
     --geometryVersion default:ATLAS-R3S-2021-03-02-00 \
@@ -60,7 +60,7 @@ Digi_tf.py \
     --multiprocess --athenaMPEventsBeforeFork 0 \
     --detectors Truth \
     --PileUpPresampling True \
-    --conditionsTag default:OFLCOND-MC23-SDR-RUN3-01 \
+    --conditionsTag default:OFLCOND-MC23-SDR-RUN3-08 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --digiSteeringConf 'StandardSignalOnlyTruth' \
     --geometryVersion default:ATLAS-R3S-2021-03-02-00 \
@@ -86,7 +86,7 @@ Digi_tf.py \
     --multiprocess --athenaMPEventsBeforeFork 1 \
     --detectors Truth \
     --PileUpPresampling True \
-    --conditionsTag default:OFLCOND-MC23-SDR-RUN3-01 \
+    --conditionsTag default:OFLCOND-MC23-SDR-RUN3-08 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --digiSteeringConf 'StandardSignalOnlyTruth' \
     --geometryVersion default:ATLAS-R3S-2021-03-02-00 \

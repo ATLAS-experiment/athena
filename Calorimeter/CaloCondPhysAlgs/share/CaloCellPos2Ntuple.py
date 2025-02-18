@@ -1,5 +1,5 @@
 #!/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -48,8 +48,9 @@ if __name__=="__main__":
     
     flags.LAr.doHVCorr=False
     flags.Input.RunNumbers=[args.runnumber]
-    flags.IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05" if args.mc else "CONDBR2-BLKPA-2024-03"
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
+    flags.IOVDb.GlobalTag=(defaultConditionsTags.RUN3_MC if args.mc else
+                           defaultConditionsTags.RUN3_DATA)
     flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
 
     
