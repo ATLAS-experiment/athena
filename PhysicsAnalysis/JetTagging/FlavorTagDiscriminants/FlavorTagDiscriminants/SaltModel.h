@@ -7,15 +7,15 @@
   handles the interaction with the ATLAS EDM.
 */
 
-#ifndef ONNXUTIL_H
-#define ONNXUTIL_H
+#ifndef FLAVORTAGDISCRIMINANTS_SALTMODEL_H
+#define FLAVORTAGDISCRIMINANTS_SALTMODEL_H
 
 #include <onnxruntime_cxx_api.h>
 
 #include "nlohmann/json.hpp"
 #include "lwtnn/parse_json.hh"
 
-#include "FlavorTagDiscriminants/OnnxOutput.h"
+#include "FlavorTagDiscriminants/SaltModelOutput.h"
 
 #include <map> //also has std::pair
 #include <vector>
@@ -27,25 +27,25 @@ namespace FlavorTagDiscriminants {
   // the first element is the input data, the second is the shape
   using Inputs = std::pair<std::vector<float>, std::vector<int64_t>>;
 
-  enum class OnnxModelVersion{UNKNOWN, V0, V1, V2};
+  enum class SaltModelVersion{UNKNOWN, V0, V1, V2};
 
-  NLOHMANN_JSON_SERIALIZE_ENUM( OnnxModelVersion , {
-    { OnnxModelVersion::UNKNOWN, "" },
-    { OnnxModelVersion::V0, "v0" },
-    { OnnxModelVersion::V1, "v1" },
-    { OnnxModelVersion::V2, "v2" },
+  NLOHMANN_JSON_SERIALIZE_ENUM( SaltModelVersion , {
+    { SaltModelVersion::UNKNOWN, "" },
+    { SaltModelVersion::V0, "v0" },
+    { SaltModelVersion::V1, "v1" },
+    { SaltModelVersion::V2, "v2" },
   })
 
   //
   // Utility class that loads the onnx model from the given path
   // and runs inference based on the user given inputs
 
-  class OnnxUtil final{
+  class SaltModel final{
 
     public:
-      using OutputConfig = std::vector<OnnxOutput>;
+      using OutputConfig = std::vector<SaltModelOutput>;
 
-      OnnxUtil(const std::string& path_to_onnx);
+      SaltModel(const std::string& path_to_onnx);
 
       void initialize();
 
@@ -60,7 +60,7 @@ namespace FlavorTagDiscriminants {
       const lwt::GraphConfig getLwtConfig() const;
       const nlohmann::json& getMetadata() const;
       const OutputConfig& getOutputConfig() const;
-      OnnxModelVersion getOnnxModelVersion() const;
+      SaltModelVersion getSaltModelVersion() const;
       const std::string& getModelName() const;
 
     private:
@@ -79,8 +79,8 @@ namespace FlavorTagDiscriminants {
       std::vector<std::string> m_input_node_names;
       OutputConfig m_output_nodes;
 
-      OnnxModelVersion m_onnx_model_version = OnnxModelVersion::UNKNOWN;
+      SaltModelVersion m_onnx_model_version = SaltModelVersion::UNKNOWN;
 
-  }; // Class OnnxUtil
+  }; // Class SaltModel
 } // end of FlavorTagDiscriminants namespace
-#endif //ONNXUTIL_H
+#endif //FLAVORTAGDISCRIMINANTS_SALTMODEL_H

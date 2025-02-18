@@ -31,7 +31,7 @@
 #include "CalibrationDataInterface/CalibrationDataInterfaceROOT.h"
 
 // for the onnxtool
-#include "xAODBTaggingEfficiency/OnnxUtil.h"
+#include "xAODBTaggingEfficiency/SaltModel.h"
 
 
 class BTaggingEfficiencyTool: public asg::AsgTool,
@@ -317,7 +317,7 @@ private:
   //Analysis::CalibrationDataInterfaceROOT*  m_CDI = nullptr;
    std::shared_ptr<Analysis::CalibrationDataInterfaceROOT> m_CDI;
    /// pointer to the onnx tool
-  std::unique_ptr<OnnxUtil> m_onnxUtil;
+  std::unique_ptr<SaltModel> m_saltModel;
 
   /// @name core configuration properties (set at initalization time and not modified afterwards)
   /// @{

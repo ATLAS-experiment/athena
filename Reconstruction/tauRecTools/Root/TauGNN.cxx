@@ -3,7 +3,7 @@
 */
 
 #include "tauRecTools/TauGNN.h"
-#include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagDiscriminants/SaltModel.h"
 #include "lwtnn/parse_json.hh"
 #include "PathResolver/PathResolver.h"
 
@@ -14,7 +14,7 @@
 
 TauGNN::TauGNN(const std::string &nnFile, const Config &config):
     asg::AsgMessaging("TauGNN"),
-    m_onnxUtil(std::make_shared<FlavorTagDiscriminants::OnnxUtil>(nnFile)),
+    m_saltModel(std::make_shared<FlavorTagDiscriminants::SaltModel>(nnFile)),
     m_config{config}
   {
     //==================================================//
@@ -22,17 +22,17 @@ TauGNN::TauGNN(const std::string &nnFile, const Config &config):
     //==================================================//
 
     // get the configuration of the model outputs
-    FlavorTagDiscriminants::OnnxUtil::OutputConfig gnn_output_config = m_onnxUtil->getOutputConfig();
+    FlavorTagDiscriminants::SaltModel::OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
     
     //Let's see the output!
     for (const auto& out_node: gnn_output_config) {
-        if(out_node.type==FlavorTagDiscriminants::OnnxOutput::OutputType::FLOAT) ATH_MSG_INFO("Found output FLOAT node named:" << out_node.name);
-        if(out_node.type==FlavorTagDiscriminants::OnnxOutput::OutputType::VECCHAR) ATH_MSG_INFO("Found output VECCHAR node named:" << out_node.name);
-        if(out_node.type==FlavorTagDiscriminants::OnnxOutput::OutputType::VECFLOAT) ATH_MSG_INFO("Found output VECFLOAT node named:" << out_node.name);
+        if(out_node.type==FlavorTagDiscriminants::SaltModelOutput::OutputType::FLOAT) ATH_MSG_INFO("Found output FLOAT node named:" << out_node.name);
+        if(out_node.type==FlavorTagDiscriminants::SaltModelOutput::OutputType::VECCHAR) ATH_MSG_INFO("Found output VECCHAR node named:" << out_node.name);
+        if(out_node.type==FlavorTagDiscriminants::SaltModelOutput::OutputType::VECFLOAT) ATH_MSG_INFO("Found output VECFLOAT node named:" << out_node.name);
     }
 
     //Get model config (for inputs)
-    auto lwtnn_config = m_onnxUtil->getLwtConfig();
+    auto lwtnn_config = m_saltModel->getLwtConfig();
     
     //===================================================//
     // This part is ported from tauRecTools TauJetRNN.cxx//
@@ -159,7 +159,7 @@ TauGNN::compute(const xAOD::TauJet &tau,
 
     //RUN THE INFERENCE!!!
     ATH_MSG_DEBUG("Prepared inputs, running inference...");
-    auto [out_f, out_vc, out_vf] = m_onnxUtil->runInference(gnn_input);
+    auto [out_f, out_vc, out_vf] = m_saltModel->runInference(gnn_input);
     ATH_MSG_DEBUG("Finished compute!");
     return std::make_tuple(out_f, out_vc, out_vf);
 }
