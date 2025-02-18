@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcRdoToPrepDataToolMT.h"
@@ -1277,8 +1277,8 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processNrpcRdo(const EventContext& ctx,
         /// Convert from online to offline cabling
         RpcCablingData cabling_data{};
         cabling_data.subDetector = nrpcrdo->subdetector();
-        cabling_data.tdcSector = nrpcrdo->tdcsector();
-        cabling_data.tdc = nrpcrdo->tdc();
+        cabling_data.boardSector = nrpcrdo->boardsector();
+        cabling_data.board = nrpcrdo->board();
         cabling_data.channelId = nrpcrdo->channel();
         Identifier chanId{};
         if (!readCdo->getOfflineId(cabling_data, msgStream()) ||

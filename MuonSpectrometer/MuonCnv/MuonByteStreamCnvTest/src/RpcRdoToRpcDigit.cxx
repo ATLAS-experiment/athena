@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcRdoToRpcDigit.h"
@@ -138,15 +138,15 @@ StatusCode RpcRdoToRpcDigit::decodeNRpc(const EventContext& ctx, RpcDigitContain
     std::map<IdentifierHash, std::unique_ptr<RpcDigitCollection>> digit_map{};
     /// Loop over the container
     for (const xAOD::NRPCRDO* rdo : *rdoContainer) {
-        ATH_MSG_VERBOSE("Convert RDO tdcSector: "<< static_cast<int>(rdo->tdcsector())<<", tdc:"
-                <<static_cast<int>(rdo->tdc())<<" channel: "<<static_cast<int>(rdo->channel()) <<", time: "<<
+        ATH_MSG_VERBOSE("Convert RDO boardSector: "<< static_cast<int>(rdo->boardsector())<<", tdc:"
+                <<static_cast<int>(rdo->board())<<" channel: "<<static_cast<int>(rdo->channel()) <<", time: "<<
                 rdo->time()<<", ToT: "<<rdo->timeoverthr());
         
         /// Fill the cabling object
         Muon::RpcCablingData conv_obj{};
         conv_obj.subDetector = rdo->subdetector();
-        conv_obj.tdcSector = rdo->tdcsector();
-        conv_obj.tdc = rdo->tdc();
+        conv_obj.boardSector = rdo->boardsector();
+        conv_obj.board = rdo->board();
         conv_obj.channelId = rdo->channel();
         
         if (!cabling->getOfflineId(conv_obj, msgStream())) {

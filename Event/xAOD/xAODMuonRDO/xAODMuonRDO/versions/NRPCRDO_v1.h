@@ -29,9 +29,10 @@ namespace xAOD {
         /// Global identifier of the RPC detector region from the online side
         uint16_t subdetector() const;
         /// Identifier of the sector within the subdetector
-        uint16_t tdcsector() const;
+        uint16_t boardsector() const;
         /// Identifier of the readout card on the chamber
-        uint16_t tdc() const;
+        /// For BIS 7/8 this is a TDC, for NRPC in run4 is a DCT
+        uint16_t board() const;
         /// Fired channel on the read out card
         uint16_t channel() const;
         /// Measured time in which the signal was above the electronics threshold
@@ -45,10 +46,11 @@ namespace xAOD {
         void setTimeoverthr(float Timeoverthr);
         /// Set the sub detector
         void setSubdetector(uint16_t SubDet);
-        /// Set the sector of the tdc within the subdetector
-        void setTdcsector(uint16_t Tdcsector);
-        /// Set the number of the TDC channel
-        void setTdc(uint16_t Tdc);
+        /// Set the sector of the board within the subdetector
+        void setBoardsector(uint16_t Boardsector);
+        /// Set the number of the Board channel
+        /// For BIS 7/8 this is a TDC, for NRPC in run4 is a DCT
+        void setBoard(uint16_t Board);
         /// Set the fire channel number
         void setChannel(uint16_t Channel);
     };

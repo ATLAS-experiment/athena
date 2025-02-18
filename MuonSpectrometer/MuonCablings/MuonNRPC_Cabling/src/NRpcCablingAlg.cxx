@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NRpcCablingAlg.h"
@@ -112,8 +112,8 @@ StatusCode NRpcCablingAlg::parsePayload(RpcCablingMap& cabling_map,
         cabl_data.gasGap = cabl_payload["gasGap"];
         /// Online part
         cabl_data.subDetector = cabl_payload["subDetector"];
-        cabl_data.tdcSector = cabl_payload["tdcSector"];
-        cabl_data.tdc = cabl_payload["tdc"];
+        cabl_data.boardSector = cabl_payload["boardSector"];
+        cabl_data.board = cabl_payload["board"];
         cabl_data.firstStrip = cabl_payload["firstStrip"];
         unsigned int flatCable = cabl_payload["flatCableId"];
         if (!readoutCards[flatCable]) {
