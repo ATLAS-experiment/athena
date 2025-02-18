@@ -1,0 +1,8 @@
+<lcgdict>
+
+  <class name="xAOD::KLFitterResult" />
+  <class name="DataVector<xAOD::KLFitterResult>" />
+  <typedef name="xAOD::KLFitterResultContainer" />
+  <class name="xAOD::KLFitterResultAuxContainer" />
+
+</lcgdict>

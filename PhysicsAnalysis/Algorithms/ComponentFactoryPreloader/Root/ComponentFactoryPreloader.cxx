@@ -76,6 +76,7 @@
 #include <ElectronEfficiencyCorrection/AsgElectronEfficiencyCorrectionTool.h>
 #include <ElectronPhotonFourMomentumCorrection/EgammaCalibrationAndSmearingTool.h>
 #include <ElectronPhotonSelectorTools/AsgDeadHVCellRemovalTool.h>
+#include <KLFitterAnalysisAlgorithms/RunKLFitterAlg.h>
 #include <EventSelectionAlgorithms/ChargeSelectorAlg.h>
 #include <EventSelectionAlgorithms/DileptonInvariantMassSelectorAlg.h>
 #include <EventSelectionAlgorithms/DileptonInvariantMassWindowSelectorAlg.h>
@@ -322,6 +323,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::VertexSelectionAlg>("CP::VertexSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::VGammaORAlg>("CP::VGammaORAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::xAODWriterAlg>("CP::xAODWriterAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<EventReco::RunKLFitterAlg>("EventReco::RunKLFitterAlg"));
 
     ANA_CHECK (asg::registerToolFactory<AsgDeadHVCellRemovalTool> ("AsgDeadHVCellRemovalTool"));
     ANA_CHECK (asg::registerToolFactory<AsgElectronEfficiencyCorrectionTool> ("AsgElectronEfficiencyCorrectionTool"));
