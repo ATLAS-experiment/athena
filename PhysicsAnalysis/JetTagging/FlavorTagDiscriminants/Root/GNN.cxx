@@ -4,7 +4,7 @@
 
 #include "FlavorTagDiscriminants/GNN.h"
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
-#include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagDiscriminants/SaltModel.h"
 #include "FlavorTagDiscriminants/GNNOptions.h"
 #include "FlavorTagDiscriminants/StringUtils.h"
 
@@ -22,10 +22,10 @@
 namespace {
   const std::string jetLinkName = "jetLink";
 
-  auto getOnnxUtil(const std::string& nn_file) {
+  auto getSaltModel(const std::string& nn_file) {
     using namespace FlavorTagDiscriminants;
     std::string fullPathToOnnxFile = PathResolverFindCalibFile(nn_file);
-    return std::make_shared<const OnnxUtil>(fullPathToOnnxFile);
+    return std::make_shared<const SaltModel>(fullPathToOnnxFile);
   }
 
   template <typename T>
@@ -44,22 +44,22 @@ namespace {
 namespace FlavorTagDiscriminants {
 
   GNN::GNN(const std::string& nn_file, const GNNOptions& o):
-    GNN(getOnnxUtil(nn_file), o)
+    GNN(getSaltModel(nn_file), o)
   {
   }
 
   GNN::GNN(const GNN& old, const GNNOptions& o):
-    GNN(old.m_onnxUtil, o)
+    GNN(old.m_saltModel, o)
   {
   }
 
-  GNN::GNN(std::shared_ptr<const OnnxUtil> util, const GNNOptions& o):
-    m_onnxUtil(util),
+  GNN::GNN(std::shared_ptr<const SaltModel> util, const GNNOptions& o):
+    m_saltModel(util),
     m_jetLink(jetLinkName)
   {
 
     // Extract metadata from the ONNX file, primarily about the model's inputs.
-    auto lwt_config = m_onnxUtil->getLwtConfig();
+    auto lwt_config = m_saltModel->getLwtConfig();
 
     // Create configuration objects for data preprocessing.
     auto [inputs, constituents_configs, options] = dataprep::createGetterConfig(
@@ -91,7 +91,7 @@ namespace FlavorTagDiscriminants {
     m_dataDependencyNames = ds;
 
     // Retrieve the configuration for the model outputs.
-    OnnxUtil::OutputConfig gnn_output_config = m_onnxUtil->getOutputConfig();
+    SaltModel::OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
 
     // Create the output decorators.
     auto [dd, rd] = createDecorators(gnn_output_config, options);
@@ -154,7 +154,7 @@ namespace FlavorTagDiscriminants {
       dec(jet) = v;
     }
     // for some networks we need to set a lot of empty vectors as well
-    if (m_onnxUtil->getOnnxModelVersion() == OnnxModelVersion::V1) {
+    if (m_saltModel->getSaltModelVersion() == SaltModelVersion::V1) {
       // vector outputs, e.g. track predictions
       for (const auto& dec: m_decorators.jetVecChar) {
         dec.second(jet) = {};
@@ -186,7 +186,7 @@ namespace FlavorTagDiscriminants {
     }
     std::vector<int64_t> jet_feat_dim = {1, static_cast<int64_t>(jet_feat.size())};
     Inputs jet_info(jet_feat, jet_feat_dim);
-    if (m_onnxUtil->getOnnxModelVersion() == OnnxModelVersion::V2) {
+    if (m_saltModel->getSaltModelVersion() == SaltModelVersion::V2) {
       gnn_inputs.insert({"jets", jet_info});
     } else {
       gnn_inputs.insert({"jet_features", jet_info});
@@ -197,7 +197,7 @@ namespace FlavorTagDiscriminants {
     int64_t num_inputs = 0;
     for (const auto& loader : m_constituentsLoaders){
       auto [input_name, input_data, input_objects] = loader->getData(jet, btag);
-      if (m_onnxUtil->getOnnxModelVersion() != OnnxModelVersion::V2) {
+      if (m_saltModel->getSaltModelVersion() != SaltModelVersion::V2) {
         input_name.pop_back();
         input_name.append("_features");
       }
@@ -219,13 +219,13 @@ namespace FlavorTagDiscriminants {
       this->decorateWithDefaults(btag);
       return;
     }
-    auto [out_f, out_vc, out_vf] = m_onnxUtil->runInference(gnn_inputs);
+    auto [out_f, out_vc, out_vf] = m_saltModel->runInference(gnn_inputs);
 
     // decorate outputs
     // ----------------
 
     // with old metadata, doesn't support writing aux tasks
-    if (m_onnxUtil->getOnnxModelVersion() == OnnxModelVersion::V0) {
+    if (m_saltModel->getSaltModelVersion() == SaltModelVersion::V0) {
       for (const auto& dec: m_decorators.jetFloat) {
         if (out_vf.at(dec.first).size() != 1){
           throw std::logic_error("expected vectors of length 1 for float decorators");
@@ -234,7 +234,7 @@ namespace FlavorTagDiscriminants {
       }
     }
     // the new metadata format supports writing aux tasks
-    else if (m_onnxUtil->getOnnxModelVersion() == OnnxModelVersion::V1) {
+    else if (m_saltModel->getSaltModelVersion() == SaltModelVersion::V1) {
       // float outputs, e.g. jet probabilities
       for (const auto& dec: m_decorators.jetFloat) {
         dec.second(btag) = out_f.at(dec.first);
@@ -277,7 +277,7 @@ namespace FlavorTagDiscriminants {
   }
 
   std::tuple<FTagDataDependencyNames, std::set<std::string>>
-  GNN::createDecorators(const OnnxUtil::OutputConfig& outConfig, const FTagOptions& options) {
+  GNN::createDecorators(const SaltModel::OutputConfig& outConfig, const FTagOptions& options) {
     FTagDataDependencyNames deps;
     Decorators decs;
 
@@ -305,13 +305,13 @@ namespace FlavorTagDiscriminants {
 
       // Create decorators based on output type and target
       switch (outNode.type) {
-        case OnnxOutput::OutputType::FLOAT:
+        case SaltModelOutput::OutputType::FLOAT:
           m_decorators.jetFloat.emplace_back(outNode.name, Dec<float>(dec_name));
           break;
-        case OnnxOutput::OutputType::VECCHAR:
+        case SaltModelOutput::OutputType::VECCHAR:
           m_decorators.jetVecChar.emplace_back(outNode.name, Dec<std::vector<char>>(dec_name));
           break;
-        case OnnxOutput::OutputType::VECFLOAT:
+        case SaltModelOutput::OutputType::VECFLOAT:
           m_decorators.jetVecFloat.emplace_back(outNode.name, Dec<std::vector<float>>(dec_name));
           break;
         default:
@@ -321,7 +321,7 @@ namespace FlavorTagDiscriminants {
 
     // Create decorators for links to the input tracks
     if (!m_decorators.jetVecChar.empty() || !m_decorators.jetVecFloat.empty()) {
-      std::string name = m_onnxUtil->getModelName() + "_TrackLinks";
+      std::string name = m_saltModel->getModelName() + "_TrackLinks";
 
       // modify the deco name if we're using flip taggers
       if (options.flip != FlipTagConfig::STANDARD) {

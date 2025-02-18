@@ -2,19 +2,19 @@
 Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "xAODBTaggingEfficiency/OnnxUtil.h"
+#include "xAODBTaggingEfficiency/SaltModel.h"
 #include "CxxUtils/checker_macros.h"
 #include "PathResolver/PathResolver.h" //for PathResolverFindCalibFile
 
 #include <cstdint> //for int64_t
 
 // Constructor
-OnnxUtil::OnnxUtil(const std::string& name)
+SaltModel::SaltModel(const std::string& name)
   : m_path_to_onnx (name)
 {
 }
 
-void OnnxUtil::initialize(){
+void SaltModel::initialize(){
 
 	std::string fullPathToFile = PathResolverFindCalibFile(m_path_to_onnx);
 
@@ -61,7 +61,7 @@ void OnnxUtil::initialize(){
 
 
 // for fixed cut wp
-void OnnxUtil::runInference(
+void SaltModel::runInference(
     const std::vector<std::vector<float>> & node_feat,
     std::vector<float>& effAllJet) const {
 
@@ -105,7 +105,7 @@ void OnnxUtil::runInference(
 
 
 // for continuous wp
-void OnnxUtil::runInference(
+void SaltModel::runInference(
     const std::vector<std::vector<float>> & node_feat,
     std::vector<std::vector<float>> & effAllJetAllWp) const{
 

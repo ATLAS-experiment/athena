@@ -9,7 +9,7 @@
 #include "FlavorTagDiscriminants/FlipTagEnums.h"
 #include "FlavorTagDiscriminants/AssociationEnums.h"
 #include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
-#include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagDiscriminants/SaltModel.h"
 #include "FlavorTagDiscriminants/ConstituentsLoader.h"
 
 // EDM includes

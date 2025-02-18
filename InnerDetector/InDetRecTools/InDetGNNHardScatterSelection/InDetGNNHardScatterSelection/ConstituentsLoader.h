@@ -10,7 +10,7 @@
 #define INDET_CONSTITUENTS_LOADER_H
 
 // local includes
-#include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagDiscriminants/SaltModel.h"
 
 // EDM includes
 #include "xAODTracking/Vertex.h"

@@ -38,10 +38,10 @@ namespace Prompt {
     // Load and initialize the neural network model from the given file path.
     if(m_leptonsName == "Electrons") {
         std::string fullPathToOnnxFile = PathResolverFindCalibFile(m_configPath.value() + m_configFileVersion.value());
-        m_onnxUtil = std::make_shared<FlavorTagDiscriminants::OnnxUtil>(fullPathToOnnxFile);
+        m_saltModel = std::make_shared<FlavorTagDiscriminants::SaltModel>(fullPathToOnnxFile);
 
         std::string fullPathToOnnxFile_endcap = PathResolverFindCalibFile(m_configPath.value() + m_configFileVersion_endcap.value());
-        m_onnxUtil_endcap = std::make_shared<FlavorTagDiscriminants::OnnxUtil>(fullPathToOnnxFile_endcap);
+        m_saltModel_endcap = std::make_shared<FlavorTagDiscriminants::SaltModel>(fullPathToOnnxFile_endcap);
 
         m_num_lepton_features = 15;
         m_num_track_features = 19;
@@ -56,7 +56,7 @@ namespace Prompt {
         std::vector<int64_t> track_feat_dim = {1, m_num_track_features};
         FlavorTagDiscriminants::Inputs track_info(track_feat, track_feat_dim);
         gnn_input.insert({"track_features", track_info});
-        auto [out_f, out_vc, out_vf] = m_onnxUtil->runInference(gnn_input);
+        auto [out_f, out_vc, out_vf] = m_saltModel->runInference(gnn_input);
 
         std::vector<std::string> output_names;
         for (auto& singlefloat : out_f){
@@ -67,7 +67,7 @@ namespace Prompt {
     }
     else if (m_leptonsName == "Muons") {
         std::string fullPathToOnnxFile = PathResolverFindCalibFile(m_configPath.value() + m_configFileVersion.value());
-        m_onnxUtil = std::make_shared<FlavorTagDiscriminants::OnnxUtil>(fullPathToOnnxFile);
+        m_saltModel = std::make_shared<FlavorTagDiscriminants::SaltModel>(fullPathToOnnxFile);
 
         m_num_lepton_features = 10;
         m_num_track_features = 18;
@@ -82,7 +82,7 @@ namespace Prompt {
         std::vector<int64_t> track_feat_dim = {1, m_num_track_features};
         FlavorTagDiscriminants::Inputs track_info(track_feat, track_feat_dim);
         gnn_input.insert({"track_features", track_info});
-        auto [out_f, out_vc, out_vf] = m_onnxUtil->runInference(gnn_input);
+        auto [out_f, out_vc, out_vf] = m_saltModel->runInference(gnn_input);
 
         std::vector<std::string> output_names;
         for (auto& singlefloat : out_f){
@@ -361,7 +361,7 @@ namespace Prompt {
 
     // run inference
     // -------------
-    auto [out_f, out_vc, out_vf] = m_onnxUtil->runInference(gnn_input);
+    auto [out_f, out_vc, out_vf] = m_saltModel->runInference(gnn_input);
     if (msgLvl(MSG::VERBOSE)) {
       ATH_MSG_VERBOSE("runInference done.");
     
@@ -653,7 +653,7 @@ namespace Prompt {
     // run inference
     // -------------
     // use different model for endcap electrons
-    auto [out_f, out_vc, out_vf] = (std::abs(elec_eta) < 1.37) ? m_onnxUtil->runInference(gnn_input) : m_onnxUtil_endcap->runInference(gnn_input);
+    auto [out_f, out_vc, out_vf] = (std::abs(elec_eta) < 1.37) ? m_saltModel->runInference(gnn_input) : m_saltModel_endcap->runInference(gnn_input);
     if (msgLvl(MSG::VERBOSE)) {
       ATH_MSG_VERBOSE("runInference done.");
       

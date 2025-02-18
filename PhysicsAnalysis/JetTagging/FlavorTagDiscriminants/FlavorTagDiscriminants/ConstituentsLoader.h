@@ -12,7 +12,7 @@
 // local includes
 #include "FlavorTagDiscriminants/FlipTagEnums.h"
 #include "FlavorTagDiscriminants/AssociationEnums.h"
-#include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagDiscriminants/SaltModel.h"
 #include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
 #include "FlavorTagDiscriminants/StringUtils.h"
 
