@@ -29,7 +29,7 @@ Overlay_tf.py \
 --inputRDO_BKGFile ${RDO_BKG_File} \
 --outputRDOFile MC_plus_MC.MT.RDO.pool.root \
 --maxEvents 10 --skipEvents 10 --digiSeedOffset1 511 --digiSeedOffset2 727 \
---conditionsTag OFLCOND-MC21-SDR-RUN3-10  \
+--conditionsTag OFLCOND-MC23-SDR-RUN3-08  \
 --geometryVersion ATLAS-R3S-2021-03-00-00 \
 --preInclude 'all:Campaigns.MC21a' \
 --imf False
@@ -50,7 +50,7 @@ then
     --inputRDO_BKGFile ${RDO_BKG_File} \
     --outputRDOFile MC_plus_MC.ST.RDO.pool.root \
     --maxEvents 10 --skipEvents 10 --digiSeedOffset1 511 --digiSeedOffset2 727 \
-    --conditionsTag OFLCOND-MC21-SDR-RUN3-10  \
+    --conditionsTag OFLCOND-MC23-SDR-RUN3-08  \
     --geometryVersion ATLAS-R3S-2021-03-00-00 \
     --preInclude 'all:Campaigns.MC21a' \
     --imf False
