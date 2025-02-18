@@ -28,6 +28,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <mutex>
 #include <signal.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -379,19 +380,6 @@ using namespace ATOOLS;
 Atlas_RNG::Atlas_RNG(CLHEP::HepRandomEngine* engine) :
   External_RNG(), p_engine(engine), m_filename("Config.conf")
 {
-  const int nMax = 26;
-  char alphabet[nMax] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-                          'h', 'i', 'j', 'k', 'l', 'm', 'n',
-                          'o', 'p', 'q', 'r', 's', 't', 'u',
-                          'v', 'w', 'x', 'y', 'z' };
-                                                                                 
-  struct stat info;
-  if ( !stat("/dev/shm", &info)) {
-    m_filename = "/dev/shm/Config.conf.";
-    for (size_t i = 0; i < 6; ++i)
-      m_filename += alphabet[rand() % nMax];
-  }
-  std::cout << "RNG state being saved to: " << m_filename << std::endl;
 }
 
 Atlas_RNG::~Atlas_RNG() { std::remove(m_filename.c_str()); }
@@ -402,7 +390,31 @@ double Atlas_RNG::Get(){
 
 }
 
-void Atlas_RNG::SaveStatus() { p_engine->saveStatus(m_filename.c_str()); }
+const std::string Atlas_RNG::GenerateUID() const {
+  std::string result{""};
+  const int nMax = 26;
+  char alphabet[nMax] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+                          'h', 'i', 'j', 'k', 'l', 'm', 'n',
+                          'o', 'p', 'q', 'r', 's', 't', 'u',
+                          'v', 'w', 'x', 'y', 'z' };
+  for (size_t i = 0; i < 6; ++i) {
+    result += alphabet[rand() % nMax];
+  }
+  return result;
+}
+
+void Atlas_RNG::SaveStatus() {
+  // We set the file name first time the worker calls SaveStatus
+  std::call_once(m_once_flag_atlas_rng, [&](){
+      struct stat info;
+      if ( !stat("/dev/shm", &info)) {
+        m_filename = "/dev/shm/Config.conf.";
+      }
+      m_filename += GenerateUID();
+      std::cout << "RNG state being saved to: " << m_filename << std::endl;
+      });
+  p_engine->saveStatus(m_filename.c_str());
+}
 
 void Atlas_RNG::RestoreStatus() { p_engine->restoreStatus(m_filename.c_str()); }
 
