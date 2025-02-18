@@ -87,23 +87,32 @@ def PrdMultiTruthMakerCfg(flags):
         result.addEventAlgo(the_alg) 
     return result
 
-def TruthSegmentToTruthPartCfg(flags, name="MuonTruthSegmentToTruthAssocAlg", **kwargs):
+def TruthSegmentToTruthPartAssocCfg(flags, name="MuonTruthSegmentToTruthAssocAlg", **kwargs):
     result = ComponentAccumulator()
     hitDecors = []
-    if flags.Detector.GeometryMDT:
-        hitDecors+=["truthMdtHits"]
-    if flags.Detector.GeometryRPC:
-        hitDecors+=["truthRpcHits"]
-    if flags.Detector.GeometryTGC:
-        hitDecors+=["truthTgcHits"]
-    if flags.Detector.GeometryMM:
-        hitDecors+=["truthMMHits"]
-    if flags.Detector.GeometrysTGC:
-        hitDecors+=["truthStgcHits"]
+    if flags.Detector.GeometryMDT: hitDecors+=["truthMdtHits"]
+    if flags.Detector.GeometryRPC: hitDecors+=["truthRpcHits"]
+    if flags.Detector.GeometryTGC: hitDecors+=["truthTgcHits"]
+    if flags.Detector.GeometryMM: hitDecors+=["truthMMHits"]
+    if flags.Detector.GeometrysTGC: hitDecors+=["truthStgcHits"]
     kwargs.setdefault("SimHitIds", hitDecors)
     the_alg = CompFactory.MuonR4.TruthSegToTruthPartAssocAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
+
+def TrackToTruthPartAssocCfg(flags, **kwargs):
+    result = ComponentAccumulator()
+    hitDecors = []
+    if flags.Detector.GeometryMDT: hitDecors+=["truthMdtHits"]
+    if flags.Detector.GeometryRPC: hitDecors+=["truthRpcHits"]
+    if flags.Detector.GeometryTGC: hitDecors+=["truthTgcHits"]
+    if flags.Detector.GeometryMM: hitDecors+=["truthMMHits"]
+    if flags.Detector.GeometrysTGC: hitDecors+=["truthStgcHits"]
+    kwargs.setdefault("SimHitIds", hitDecors)
+    the_alg = CompFactory.MuonR4.TrackToTruthPartAssocAlg(**kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
 
 @AccumulatorCache
 def MuonTruthAlgsCfg(flags):
@@ -123,5 +132,5 @@ def MuonTruthAlgsCfg(flags):
     #### Disable for the moment because tracking geometry explodes for R4
     ### from MuonConfig.MuonTruthAlgsConfig import MuonTruthAddTrackRecordsAlgCfg
     ### result.merge(MuonTruthAddTrackRecordsAlgCfg(flags))
-    result.merge(TruthSegmentToTruthPartCfg(flags))
+    result.merge(TruthSegmentToTruthPartAssocCfg(flags))
     return result

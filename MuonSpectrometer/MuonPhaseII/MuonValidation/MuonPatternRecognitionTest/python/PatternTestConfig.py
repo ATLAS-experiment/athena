@@ -161,22 +161,11 @@ def TrackTruthMatchCfg(flags):
     result = ComponentAccumulator()
     if not flags.Input.isMC:
         return result
-    from MuonConfig.MuonTruthAlgsConfig import MuonDetailedTrackTruthMakerCfg
+    from MuonTruthAlgsR4.MuonTruthAlgsConfig import TrackToTruthPartAssocCfg
     
-    track_cols = ["MuonTracksR4", "MuonTracksFromHoughR4", "MuonSpectrometerTracks"]
     track_colstp = ["MuonSpectrometerTrackParticlesR4", "MuonSpectrometerTrackParticlesFromHoughR4", "MuonSpectrometerTrackParticles"]
 
-    for trk in track_cols:
-        result.merge(MuonDetailedTrackTruthMakerCfg(flags, name=f"MuonDetailedTruthTrkMaker{trk}",
-                                                        TrackCollectionNames=[trk]))
+    for trk in track_colstp:
+        result.merge(TrackToTruthPartAssocCfg(flags, name=f"TrackToTruth{trk}",  TrackCollection=trk))
 
-        from MuonConfig.MuonTruthAlgsConfig import MuonTruthAssociationAlgCfg
-        result.merge(MuonTruthAssociationAlgCfg(flags, TrackContainers=[]))
-        for i in range(len(track_cols)):
-            from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
-            result.merge(TrackTruthSelectorCfg(flags, tracks=track_cols[i]))
-
-            result.merge(TrackParticleTruthAlgCfg(flags, tracks=track_cols[i],
-                                                  TrackParticleName=track_colstp[i]))
     return result
-
