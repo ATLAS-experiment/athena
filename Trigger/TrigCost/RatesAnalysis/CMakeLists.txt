@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RatesAnalysis )
@@ -13,7 +13,7 @@ atlas_add_library( RatesAnalysisLib
                    PUBLIC_HEADERS RatesAnalysis
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel AthAnalysisBaseCompsLib AthenaBaseComps TrigDecisionToolLib EnhancedBiasWeighterLib
-                   PRIVATE_LINK_LIBRARIES EventInfo TrigConfData TrigConfL1Data xAODEgamma xAODEventInfo )
+                   PRIVATE_LINK_LIBRARIES TrigConfData TrigConfL1Data xAODEgamma xAODEventInfo )
 
 # Suppress spurious warnings seen in the LTO build originating 
 # in the boost parser code.

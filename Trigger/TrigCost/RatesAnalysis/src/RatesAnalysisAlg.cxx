@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // RatesAnalysis includes
 #include "RatesAnalysis/RatesAnalysisAlg.h"
-#include "EventInfo/EventStreamInfo.h"
 
 #include "xAODEventInfo/EventInfo.h"
 
