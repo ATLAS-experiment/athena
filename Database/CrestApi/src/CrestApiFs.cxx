@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2020-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2020-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <CrestApi/CrestApiFs.h>
@@ -537,14 +537,13 @@ namespace Crest
     }
 
     std::string workDir = m_root_folder + s_FS_GLOBALTAG_PATH;
-    std::string file_path = workDir;
-    file_path += '/';
-    file_path += name;
-    file_path += s_FS_MAP_FILE;
+    workDir += '/';
+    workDir += name;
+    workDir += s_FS_MAP_FILE;
 
     try
     {
-      std::string tag = getFileString(file_path);
+      std::string tag = getFileString(workDir);
       js = nlohmann::json::parse(tag);
     }
     catch (...)
@@ -611,8 +610,8 @@ namespace Crest
           "ERROR in CrestFsClient::selectIovs: wrong sort parameter." + sort);
     }
 
-    nlohmann::json sorted = sortIOVJson(js, ascending);
-    nlohmann::json ext = getPage(sorted, size, page);
+    nlohmann::json sorted = sortIOVJson(std::move(js), ascending);
+    nlohmann::json ext = getPage(std::move(sorted), size, page);
     dto = IovSetDto::from_fs_json(ext);
 
     return dto;
@@ -835,7 +834,7 @@ namespace Crest
     std::map<std::string, nlohmann::json>::iterator it = m_data.find(tag);
     if (it != m_data.end())
     {
-      std::string link = hashCode;
+      std::string link = std::move(hashCode);
       nlohmann::json iovs = it->second;
       nlohmann::json obj(nlohmann::json::value_t::object);
       obj["tagName"] = tag;
@@ -843,7 +842,7 @@ namespace Crest
       obj["insertionTime"] = getDateAndTime();
       obj["payloadHash"] = link;
       iovs.push_back(obj);
-      m_data[it->first] = iovs;
+      m_data[it->first] = std::move(iovs);
     }
   }
 
@@ -891,7 +890,7 @@ namespace Crest
     workDir += '/';
     workDir += hash;
 
-    std::string filePath = workDir;
+    std::string filePath = std::move(workDir);
     filePath += "/meta.json";
 
     std::string res = "";
@@ -1013,7 +1012,7 @@ namespace Crest
       {
         std::string par_val = elem[par];
         parlist.push_back(par_val);
-        m[par_val] = elem;
+        m[par_val] = std::move(elem);
       }
     }
 
@@ -1051,7 +1050,7 @@ namespace Crest
       {
         double par_val = elem[par];
         parlist.push_back(par_val);
-        m[par_val] = elem;
+        m[par_val] = std::move(elem);
       }
     }
 
