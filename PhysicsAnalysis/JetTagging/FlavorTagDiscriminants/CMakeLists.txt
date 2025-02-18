@@ -27,8 +27,8 @@ set(FTDSource
   Root/DL2HighLevel.cxx
   Root/DL2Tool.cxx
   Root/DataPrepUtilities.cxx
-  Root/OnnxUtil.cxx
-  Root/OnnxOutput.cxx
+  Root/SaltModel.cxx
+  Root/SaltModelOutput.cxx
   Root/GNN.cxx
   Root/GNNOptions.cxx
   Root/GNNTool.cxx

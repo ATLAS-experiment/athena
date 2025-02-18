@@ -1,10 +1,10 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-  This class is used in conjunction with OnnxUtil to run inference on a GNN model.
-  Whereas OnnxUtil handles the interfacing with the ONNX runtime, this class handles
+  This class is used in conjunction with SaltModel to run inference on a GNN model.
+  Whereas SaltModel handles the interfacing with the ONNX runtime, this class handles
   the interfacing with the ATLAS EDM. It is responsible for collecting all the inputs
-  needed for inference, running inference (via OnnxUtil), and decorating the results
+  needed for inference, running inference (via SaltModel), and decorating the results
   back to ATLAS EDM.
 */
 
@@ -14,7 +14,7 @@
 // Tool includes
 #include "InDetGNNHardScatterSelection/DataPrepUtilities.h"
 #include "InDetGNNHardScatterSelection/IParticlesLoader.h"
-#include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagDiscriminants/SaltModel.h"
 
 // EDM includes
 #include "xAODTracking/VertexFwd.h"
@@ -49,7 +49,7 @@ namespace InDetGNNHardScatterSelection {
 
     virtual void decorate(const xAOD::Vertex& verrtex) const;
 
-    std::shared_ptr<const FlavorTagDiscriminants::OnnxUtil> m_onnxUtil;
+    std::shared_ptr<const FlavorTagDiscriminants::SaltModel> m_saltModel;
   private:
     // type definitions for ONNX output decorators
     using TPC = xAOD::TrackParticleContainer;
@@ -66,7 +66,7 @@ namespace InDetGNNHardScatterSelection {
     };
 
     /* create all decorators */
-    std::set<std::string> createDecorators(const FlavorTagDiscriminants::OnnxUtil::OutputConfig& outConfig);
+    std::set<std::string> createDecorators(const FlavorTagDiscriminants::SaltModel::OutputConfig& outConfig);
     
     std::string m_input_node_name;
     std::vector<internal::VarFromVertex> m_varsFromVertex;
