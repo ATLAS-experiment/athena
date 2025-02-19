@@ -232,6 +232,7 @@ namespace InDet {
           updateRange(element, currentElement, slimit, min, max);
         }
 
+        // Loop on all clusters of the stereo element
         InDet::SCTinformation sctInfo;
         for (const auto *const cluster : *clusters[currentIndex]) {
 
@@ -239,9 +240,14 @@ namespace InDet {
           const Amg::Vector2D& locpos = cluster->localPosition();
           double lx1 = locpos.x();
 
+          // Loop on all clusters of the trigger element
           for(auto& sct : sctInfos) {
 
             double diff = lx1-sct.locX();
+
+            // In negative endcap, local z is opposite of positive endcap
+            // need to invert the difference for proper comparison
+            if( m_idHelper->barrel_ec(currentElement->identify())<0 ) diff = -diff;
 
             if(diff < min || diff > max) continue;
 
