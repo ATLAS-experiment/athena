@@ -14,11 +14,11 @@
 export ATHENA_CORE_NUMBER=8
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-08
 Sim_tf.py \
     --CA \
     --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' \
     --simulator 'FullG4MT_QS' \
     --postExec 'all:from IOVDbSvcConfig import addOverride;cfg.merge(addOverride(flags, "/Indet/Beampos", "IndetBeampos-RunDep-MC21-BestKnowledge-002"))' \
     --postInclude 'PyJobTransforms.UseFrontier' \

@@ -12,10 +12,10 @@
 # art-output: Config*
 
 # RUN3 setup
-# ATLAS-R2-2016-01-02-01 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R2-2016-01-02-01 and OFLCOND-MC23-SDR-RUN3-08
   Sim_tf.py \
       --CA \
-      --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+      --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' \
       --simulator 'FullG4MT' \
       --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
       --postInclude 'default:PyJobTransforms.UseFrontier' \

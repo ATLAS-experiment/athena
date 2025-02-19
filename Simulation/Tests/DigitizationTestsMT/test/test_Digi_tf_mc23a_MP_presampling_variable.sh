@@ -26,7 +26,7 @@ Digi_tf.py \
     --CA \
     --multiprocess \
     --PileUpPresampling True \
-    --conditionsTag default:OFLCOND-MC23-SDR-RUN3-01 \
+    --conditionsTag default:OFLCOND-MC23-SDR-RUN3-08 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --digiSteeringConf 'StandardSignalOnlyTruth' \
     --geometryVersion default:ATLAS-R3S-2021-03-02-00 \

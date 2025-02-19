@@ -13,11 +13,11 @@
 export ATHENA_CORE_NUMBER=8
 
 # RUN3 setup
-# ATLAS-R2-2016-01-02-01 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R2-2016-01-02-01 and OFLCOND-MC23-SDR-RUN3-08
 Sim_tf.py \
     --CA \
     --multiprocess \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' \
     --simulator 'ATLFAST3MT_QS' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationNoIoV' \

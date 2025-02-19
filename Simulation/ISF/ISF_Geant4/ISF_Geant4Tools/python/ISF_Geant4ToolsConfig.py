@@ -55,6 +55,10 @@ def Geant4ToolCfg(flags, name="ISF_Geant4Tool", **kwargs):
     # PhysicsListSvc
     kwargs.setdefault("PhysicsListSvc", acc.getPrimaryAndMerge(PhysicsListSvcCfg(flags)).name)
 
+    if flags.Sim.ISF.Simulator.isMT():
+        from G4AtlasTools.G4AtlasToolsConfig import SimHitContainerListCfg
+        kwargs.setdefault("ExtraOutputs", SimHitContainerListCfg(flags) )
+
     # Workaround to keep other simulation flavours working while we migrate everything to be AthenaMT-compatible.
     from SimulationConfig.SimEnums import SimulationFlavour
     if flags.Sim.ISF.Simulator in [SimulationFlavour.ATLFAST3F_ACTSMT, SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS, SimulationFlavour.PassBackG4MT, SimulationFlavour.ATLFAST3MT, SimulationFlavour.ATLFAST3MT_QS]:

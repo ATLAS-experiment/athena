@@ -26,6 +26,10 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 def generate_exec_steps(slice_name = None):
     name = slice_name or 'FullMenu'
+
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags
+    conditions = defaultConditionsTags.RUN3_MC
+    
     # athena
     ex = ExecStep.ExecStep(name)
     ex.type = 'athena'
@@ -34,7 +38,7 @@ def generate_exec_steps(slice_name = None):
     ex.threads = 1
     ex.max_events = 100
     ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
-                'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05-03"']
+                'IOVDb.GlobalTag="' + conditions + '"']
     if slice_name:
         ex.flags += [f'Trigger.enabledSignatures=[\\\"{slice_name}\\\"]']
     # rename histogram file

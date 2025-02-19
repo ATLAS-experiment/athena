@@ -15,7 +15,7 @@ AtlasG4_tf.py \
     --outputHITSFile 'test.HITS.pool.root' \
     --maxEvents '3' \
     --randomSeed '10' \
-    --geometryVersion 'ATLAS-R2-2015-03-01-00' \
+    --geometryVersion 'ATLAS-R2-2016-01-03-00' \
     --conditionsTag 'OFLCOND-RUN12-SDR-19' \
     --DataRunNumber '222525' \
     --runNumber '999999' \

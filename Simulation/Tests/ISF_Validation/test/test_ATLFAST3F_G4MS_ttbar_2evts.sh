@@ -6,11 +6,11 @@
 # art-include: main/Athena
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-08
 export TRF_ECHO=1
 Sim_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' \
     --simulator 'ATLFAST3F_G4MS' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \

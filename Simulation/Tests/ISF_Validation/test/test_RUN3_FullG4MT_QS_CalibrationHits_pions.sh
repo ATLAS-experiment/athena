@@ -12,7 +12,7 @@
 # art-output: Config*.pkl
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-08
 Sim_tf.py \
     --CA \
     --simulator 'FullG4MT_QS'  \
@@ -21,7 +21,7 @@ Sim_tf.py \
     --maxEvents '10' \
     --skipEvents '0' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoVCalibrationHits' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \

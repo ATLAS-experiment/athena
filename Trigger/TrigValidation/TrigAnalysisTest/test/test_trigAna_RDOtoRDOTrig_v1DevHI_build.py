@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: Test of the RDOtoRDOTrigger transform with threads=1
 # art-type: build
@@ -16,6 +16,9 @@ preExec = ';'.join([
   'flags.Trigger.L1.Menu.doHeavyIonTobThresholds=True',
 ])
 
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
+conditions = defaultConditionsTags.RUN3_MC
+
 ex = ExecStep.ExecStep()
 ex.type = 'Reco_tf'
 ex.input = 'pbpb'
@@ -24,7 +27,7 @@ ex.args = '--outputRDO_TRIGFile=RDO_TRIG.pool.root'
 ex.args += ' --CA "all:True"'
 ex.args += ' --preExec="all:{:s};"'.format(preExec)
 ex.args += ' --preInclude "all:Campaigns.MC23a"'
-ex.args += ' --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05-03"'
+ex.args += ' --conditionsTag "default:' + conditions + '"'
 
 test = Test.Test()
 test.art_type = 'build'
