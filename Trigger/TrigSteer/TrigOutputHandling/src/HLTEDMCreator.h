@@ -211,22 +211,16 @@ class HLTEDMCreator: public extends<AthAlgTool, IHLTOutputTool>  {
 #undef DEF_KEY
 #undef DEF_XAOD_KEY
 
-// special cases with different (ShalowAuxContainer )  (containers not in views)
+// special cases with different (ShallowAuxContainer )  (containers not in views)
 #define DEF_XAOD_KEY_SHALLOW(__TYPE) \
-  SG::ReadHandleKeyArray<xAOD::__TYPE> m_##__TYPE##ShallowCopy{ this, #__TYPE"ShallowCopy", {}, "Required collections of  wiht Aux of type ShallowAuxContainerxAOD::"#__TYPE}; \
-  SG::WriteHandleKeyArray<xAOD::__TYPE> m_##__TYPE##ShallowCopyOut
+  SG::ReadHandleKeyArray<xAOD::__TYPE> m_##__TYPE##ShallowCopy{ this, #__TYPE"ShallowCopy", {}, "Required collections with Aux of type ShallowAuxContainerxAOD::"#__TYPE}; \
+  SG::WriteHandleKeyArray<xAOD::__TYPE> m_##__TYPE##ShallowCopyOut{ this, #__TYPE"ShallowCopyOut", {}, "Output collections with Aux of type ShallowAuxContainerxAOD::"#__TYPE}
 
   DEF_XAOD_KEY_SHALLOW( JetContainer );
   DEF_XAOD_KEY_SHALLOW( CaloClusterContainer );
 
 
 #undef DEF_XAOD_KEY_SHALLOW
-
-
-
-//  SG::ReadHandleKeyArray<xAOD::CaloClusterContainer> m_CaloClusterContainerShallowCopy{ this, "CaloClusterContainerShallowCopy", {}, "Required collections of xAOD::CaloClusterContainer wiht Aux of type ShallowAuxContainer"};
-//  SG::WriteHandleKeyArray<xAOD::CaloClusterContainer> m_CaloClusterContainerShallowCopyOut;
-
 
   template<typename T>
   struct HandlesGroup {
