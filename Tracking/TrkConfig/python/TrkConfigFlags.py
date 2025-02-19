@@ -309,7 +309,11 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.TRTStandalone.minTRTPrecFrac", 0.15)
     icf.addFlag("Tracking.TRTStandalone.minTRT", 15)
 
-    icf.addFlag("Tracking.TRTStandalone.startAtOriginalPerigee", False)
+    # Disabled for data-taking up to 2024 included and MC campaigns up to MC23e included
+    icf.addFlag("Tracking.TRTStandalone.startAtOriginalPerigee",
+                lambda prevFlags: (
+                    (not prevFlags.Input.isMC and prevFlags.Input.DataYear>2024) or
+                    (prevFlags.Input.isMC and prevFlags.Input.RunNumbers[0]>=491000) ) )
 
     # Turn on InDetRecStatistics
     icf.addFlag("Tracking.doStats", False)
