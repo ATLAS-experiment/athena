@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
 
@@ -45,7 +45,7 @@ StatusCode CaloClustersCopier::execute(const EventContext& context) const
   // calculate energy in fcal
   double fcalEt = 0;
 
-  for (const auto& es : *esHandle) {
+  for (const xAOD::HIEventShape* es : *esHandle) {
     if (es->layer() == 21 || es->layer() == 22 || es->layer() == 23) { // Example: FCal layers
       fcalEt += es->et();
     }
