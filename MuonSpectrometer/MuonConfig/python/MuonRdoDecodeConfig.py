@@ -47,7 +47,10 @@ def MuonRdoToPrepDataAlgCfg(flags, name="MuonRdoToPrepDataAlg", **kwargs):
     # Make sure muon geometry is configured
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     result.merge(MuonGeoModelCfg(flags))
-    
+    if flags.Muon.usePhaseIIGeoSetup:
+        from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+        result.merge(ActsGeometryContextAlgCfg(flags))
+
     kwargs.setdefault("DoSeededDecoding", flags.Trigger.doHLT )
     the_alg = CompFactory.MuonRdoToPrepDataAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)

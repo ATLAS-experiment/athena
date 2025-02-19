@@ -108,6 +108,9 @@ def MuDataPrepViewDataVerifierCfg(flags):
       dataobjects += [( 'MdtCsmContainer' , 'StoreGateSvc+MDTCSM' ),
                       ( 'RpcPadContainer' , 'StoreGateSvc+RPCPAD' ),
                       ('TgcRdoContainer' , 'StoreGateSvc+TGCRDO' )]
+    if flags.Input.isMC and flags.Muon.usePhaseIIGeoSetup and \
+        len([x for x in flags.Input.TypedCollections if x.find("RpcPadContainer#") != -1]):
+      dataobjects +=[( 'xAOD::NRPCRDOContainer' , 'StoreGateSvc+CnvRpcRDOs')]
     if flags.Detector.GeometryCSC:
       dataobjects+=[( 'CscRawDataCollection_Cache' , 'StoreGateSvc+CscRdoCache' )]
       if flags.Input.isMC:
