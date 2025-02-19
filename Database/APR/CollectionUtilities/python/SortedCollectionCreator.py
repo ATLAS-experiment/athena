@@ -95,14 +95,24 @@ class SortedCollectionCreator:
       self.collDescription.setType("RootCollection")
       # create the output collection (file)
       dstColl = self.collSvc.create(self.collDescription)
+      import ROOT
+      #import coral
+      tokenList = ROOT.pool.TokenList()
+      tokenList.extend(self.tokenName)
+      attributeList = ROOT.coral.AttributeList()
+      for nam in self.attrNames:
+          attributeList.extend( nam, self.attrTypes[nam] )
+
+      row = ROOT.pool.CollectionRowBuffer()
+      row.setTokenList(tokenList)
+      row.setAttributeList(attributeList)
 
       for t in self.allRows:
-         row = dstColl.dataEditor().rowBuffer()
          row.tokenList()[0].fromString( t[0] )
          for idx,nam in enumerate(self.attrNames):
             type = self.attrTypes[nam]
             row.attributeList()[nam].setValue[type]( t[idx+1] )
-         dstColl.dataEditor().insertRow( row )
+         dstColl.insertRow( row )
       
       dstColl.commit()
       dstColl.close()

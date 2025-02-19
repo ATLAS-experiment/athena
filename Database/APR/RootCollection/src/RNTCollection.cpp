@@ -4,7 +4,6 @@
 
 #include "RNTCollection.h"
 #include "RNTCollectionQuery.h"
-#include "RNTCollectionSchemaEditor.h"
 #include "CollectionCommon.h"
 
 #include "PersistentDataModel/Token.h"
@@ -53,8 +52,7 @@ RNTCollection::RNTCollection(
      m_session( 0 ),
      m_open( false ),
      m_readOnly( mode == ICollection::READ ? true : false ),
-     m_poolOut( "RNTCollection"),
-     m_dataEditor( 0 )
+     m_poolOut( "RNTCollection")
 {
    RNTCollection::open();
 }
@@ -82,8 +80,7 @@ void  RNTCollection::delayedFileOpen( const std::string& method )
                                 "RNTCollection" );
       }
       m_poolOut << coral::Info << "File " << m_fileName << " opened in " << method <<  coral::MessageStream::endmsg;
- 
-      //m_schemaEditor->writeSchema();
+// (Write Schema)
    }
 }
 
@@ -98,6 +95,12 @@ std::unique_ptr< RNTupleReader > RNTCollection::getCollectionRNTuple()
       return reader;
    }
    return nullptr;
+}
+
+
+void RNTCollection::insertRow( const pool::CollectionRowBuffer& /*inputRowBuffer */)
+{
+   throw pool::Exception( "Cannot modify the data of a collection in RNTuple mode.", "RNTCollection::insertRow", "RNTCollection" );
 }
 
 
@@ -137,7 +140,7 @@ void RNTCollection::close()
          }
       }
       if( m_mode != ICollection::READ ) {
-         // m_schemaEditor->writeSchema();
+// (Write Schema)
          // m_tree->Print();
          // m_file->Write( "0", TObject::kOverwrite );
       }
@@ -159,8 +162,6 @@ void RNTCollection::cleanup()
       m_file = 0;
    }
    m_open = false;
-   //delete m_schemaEditor;   m_schemaEditor = 0;
-   //delete m_dataEditor;   m_dataEditor = 0;
 }       
        
      
@@ -322,8 +323,58 @@ void RNTCollection::open()  try
             string("RNTuple Collection not found in file ") + m_fileName,
             "RNTCollection::open", "RNTCollection");
       }
-      m_schemaEditor = make_unique<RNTCollectionSchemaEditor>(*this, m_description, *m_reader.get());
-      m_schemaEditor->readSchema();
+// Read Schema 
+      CollectionDescription desc( m_description.name(),
+                                  m_description.type(),
+                                  m_description.connection() );
+      // clear the description
+      m_description = desc;
+      bool      foundToken = false;
+   
+      const auto& rntdesc = m_reader->GetDescriptor();
+      for( const auto &f : rntdesc.GetTopLevelFields() ) {
+         const std::string field_name = f.GetFieldName();
+         // ignore the index column, it's not a user data
+         if( field_name == APRDefaults::IndexColName )
+            continue;
+         std::string field_type = f.GetTypeName();
+   
+         m_poolOut << coral::Debug << "  + field name: " << field_name <<  corENDL;
+         m_poolOut << coral::Debug << "    field type: " << field_type <<  corENDL;
+   
+         // MN: TODO : may need to fix coral::Attribute to recognize the "new" typenames
+         static const std::map< std::string, std::string > typenameConv = {
+            { "std::uint64_t", "unsigned long" },
+            { "std::uint32_t", "unsigned int" },
+            { "std::uint16_t", "unsigned short" },
+            { "std::int64_t", "long" },
+            { "std::int32_t", "int" },
+            { "std::int16_t", "short" } };
+         auto it = typenameConv.find( field_type );
+         if( it != typenameConv.end() ) {
+            m_poolOut << coral::Debug << "Replaced type  " << field_type << " with " << it->second << corENDL;
+            field_type = it->second;
+         }
+   
+         if( (field_name == "Token" || field_name ==  m_description.eventReferenceColumnName())
+             and foundToken ) {
+            throw pool::Exception( "can't reconstruct Description if more than one Token column",
+                                   "pool::RNTCollection::readSchema",
+                                   "RNTCollection" );
+         }
+         if( field_name ==  m_description.eventReferenceColumnName() ) {
+            foundToken = true;
+            // do nothing more
+         } else if( field_name == "Token" ) {
+            m_description.setEventReferenceColumnName( field_name );
+            foundToken = true;
+         } else {
+            m_description.insertColumn( field_name, field_type );
+         }
+      }
+      if( !foundToken ) {
+         m_description.setEventReferenceColumnName( "DummyRef" );
+      }
    }
 
    if (m_mode == ICollection::CREATE || m_mode == ICollection::CREATE_AND_OVERWRITE) {
@@ -339,11 +390,9 @@ void RNTCollection::open()  try
       m_poolOut << coral::Debug
                 << "Created Collection TTree. Collection file will be "
                 << m_fileName << coral::MessageStream::endmsg;
-      //m_schemaEditor = new RNTCollectionSchemaEditor(*this, m_description, m_tree);
-      //m_schemaEditor->createTreeBranches();
+// (Create Schema)
    }
 
-   //m_dataEditor = new RNTCollectionDataEditor(m_description, m_tree, m_poolOut);
    m_poolOut << coral::Info
              << "Root collection opened, size = " << m_reader->GetNEntries()
              << corENDL;
@@ -448,31 +497,10 @@ const pool::ICollectionDescription& RNTCollection::description() const
 }
 
      
-pool::ICollectionSchemaEditor& RNTCollection::schemaEditor()
-{
-   if ( m_mode == ICollection::READ )   {
-      std::string errorMsg = "Cannot modify the schema of a collection in READ open mode.";
-      throw pool::Exception( errorMsg,
-                             "RNTCollection::schemaEditor",
-                             "RNTCollection" );
-   } 
-   return *m_schemaEditor.get(); 
-}
-
-     
-pool::ICollectionDataEditor& RNTCollection::dataEditor()
-{
-   if( m_mode == ICollection::READ ) {
-      throw pool::Exception( "Cannot modify the data of a collection in READ open mode.", "RNTCollection::dataEditor", "RNTCollection" );
-   }
-   return *m_dataEditor;
-}
-
-     
 pool::ICollectionQuery* RNTCollection::newQuery()
 {
    if( !isOpen() ) {
-      throw pool::Exception( "Attempt to query a closed collection.", "RNTCollection::dataEditor", "RNTCollection" );
+      throw pool::Exception( "Attempt to query a closed collection.", "RNTCollection::newQuery", "RNTCollection" );
    }
    return new RNTCollectionQuery( m_description, m_reader.get() );
 }

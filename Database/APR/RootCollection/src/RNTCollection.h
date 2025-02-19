@@ -5,11 +5,9 @@
 #ifndef RNTCOLLECTION_H
 #define RNTCOLLECTION_H
 
-//#include "RNTCollectionDataEditor.h"
-//#include "RNTCollectionSchemaEditor.h"
-
 #include "CollectionBase/ICollection.h"
 #include "CollectionBase/CollectionDescription.h"
+#include "CollectionBase/CollectionRowBuffer.h"
 
 #include "FileCatalog/IFileCatalog.h"
 #include "CoralBase/MessageStream.h"
@@ -38,7 +36,6 @@ namespace pool {
       using RNTupleReader = ROOT::Experimental::RNTupleReader;
       class Attribute;
       class AttributeSpecification;
-      class RNTCollectionSchemaEditor;
   
       /**
          @brief Collection (and CollectionProxy) implementation based on RNTuple
@@ -93,6 +90,9 @@ namespace pool {
         /// Checks if the collection is open.
         virtual bool isOpen() const;
 
+        /// Adds a new row of data to the collection.
+        virtual void insertRow( const pool::CollectionRowBuffer& inputRowBuffer );
+
         /// Commits the last changes made to the collection
         virtual void commit( bool restartTransaction = false );
     
@@ -101,12 +101,6 @@ namespace pool {
     
         /// Returns an object used to describe the collection properties.
         virtual const ICollectionDescription& description() const;
-
-        /// Returns an object used to modify the collection schema.
-        virtual ICollectionSchemaEditor&      schemaEditor();
-
-        /// Returns an object used to add, update or delete rows of the collection.
-        virtual ICollectionDataEditor&        dataEditor();
 
         /// Returns an object used to query the collection.
         virtual ICollectionQuery*             newQuery();
@@ -141,9 +135,6 @@ namespace pool {
         
         std::unique_ptr<pool::IFileCatalog> m_fileCatalog;
         coral::MessageStream                m_poolOut;
-
-        std::unique_ptr<RNTCollectionSchemaEditor>   m_schemaEditor;
-        ICollectionDataEditor*            m_dataEditor;
 
         SmartIF<IFileMgr>                    m_fileMgr;
       };

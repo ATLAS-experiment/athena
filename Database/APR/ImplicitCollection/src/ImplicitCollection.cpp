@@ -180,6 +180,14 @@ namespace pool {
 
 
    void
+   ImplicitCollection::insertRow(const pool::CollectionRowBuffer& /*inputRowBuffer*/)
+   {
+      throw pool::Exception( "Cannot modify the data of a implicit collection.", "ImplicitCollection::insertRow", "ImplicitCollection" );
+   }
+
+
+
+   void
    ImplicitCollection::commit(bool)
    {
    }
@@ -213,23 +221,5 @@ namespace pool {
    ICollectionQuery* ImplicitCollection::newQuery()
    {
       return new ImplicitCollectionIterator( *m_container, m_description ); 
-   }
-
-   ICollectionSchemaEditor& ImplicitCollection::schemaEditor()
-   {
-      std::string errorMsg = "Cannot modify an ImplicitCollection.";
-      throw Exception( errorMsg,
-                       "ImplicitCollection::schemaEditor",
-                       "ImplicitCollection" );
-      // NOT REACHED
-   }
-
-   ICollectionDataEditor& ImplicitCollection::dataEditor()
-   {
-      std::string errorMsg = "Cannot modify an ImplicitCollection.";
-      throw Exception( errorMsg,
-                       "ImplicitCollection::dataEditor",
-                       "ImplicitCollection" );
-      // NOT REACHED
    }
 }

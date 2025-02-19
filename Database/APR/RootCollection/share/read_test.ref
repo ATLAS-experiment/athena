@@ -2,8 +2,6 @@ Read test starting...
 Creating CollectionService
 Creating Collection Description
 Creating Collection
-Renaming primary Token column
-Primary Token column is now RenamedEvRef
 Adding 30 elements to the collection.
 >>  writing uint64: 0  0   0
 >>  writing uint64: 1  1   1
