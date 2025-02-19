@@ -12,7 +12,6 @@
 lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
 dcubeXmlTechEff=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff.xml
-ref_idpvm_athena=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_run4_ttbar0PU_reco_r25.root
 n_events=1000
 
 # search in $DATAPATH for matching file
@@ -33,42 +32,72 @@ run () {
     rc=$?
     # Only report hard failures for comparison Acts-Trk since we know
     # they are different. We do not expect this test to succeed
-    [ "${name}" = "dcube-ckf-athena" ] && [ $rc -ne 255 ] && rc=0
+    [ "${name}" = "dcube-athena-acts" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
 }
 
-ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,Acts.+FindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,Acts.+FindingAlg.Acts.+ERROR.+failed.+to.+extrapolate.+track"
-
-# Run w/o ambi. resolution
-run "Reconstruction-ckf" \
-    Reco_tf.py --CA \
-    --steering doRAWtoALL \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
-    --preExec 'all:ConfigFlags.Tracking.doITkFastTracking=True' 'flags.Acts.doMonitoring=True; flags.Tracking.writeExtendedSi_PRDInfo=True; flags.Tracking.doStoreSiSPSeededTracks=True; flags.Tracking.ITkActsValidateTracksPass.storeSiSPSeededTracks=True;' \
-    --ignorePatterns "${ignore_pattern}" \
+# Run Athena
+run "Reconstruction-athena" \
+    Reco_tf.py \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
+    --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
+    	       flags.Tracking.doITkFastTracking=True;" \
     --inputRDOFile ${ArtInFile} \
-    --outputAODFile AOD.root \
+    --outputAODFile AOD.athena.root \
     --maxEvents ${n_events}
 
 reco_rc=$?
+if [ $reco_rc != 0 ]; then
+    exit $reco_rc
+fi
 
+run "IDPVM-athena" \
+    runIDPVM.py \
+    --filesInput AOD.athena.root \
+    --outputFile idpvm.athena.root \
+    --doTightPrimary \
+    --doHitLevelPlots \
+    --HSFlag All \
+    --doTechnicalEfficiency \
+    --doExpertPlots \
+    --OnlyTrackingPreInclude
+
+reco_rc=$?
+if [ $reco_rc != 0 ]; then
+    exit $reco_rc
+fi
+
+ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,Acts.+FindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,Acts.+FindingAlg.Acts.+ERROR.+failed.+to.+extrapolate.+track"
+
+# Run ACTS
+run "Reconstruction-acts" \
+    Reco_tf.py \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsFastWorkflowFlags" \
+    --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
+	       flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True;" \
+    --ignorePatterns "${ignore_pattern}" \
+    --inputRDOFile ${ArtInFile} \
+    --outputAODFile AOD.acts.root \
+    --maxEvents ${n_events}
+
+reco_rc=$?
 # don't stop right away on an ERROR message ($?=68)
 if [ $reco_rc != 0 -a $reco_rc != 68 ]; then
     exit $reco_rc
 fi
 
-run "IDPVM" \
+run "IDPVM-acts" \
     runIDPVM.py \
-    --filesInput AOD.root \
-    --outputFile idpvm.root \
+    --filesInput AOD.acts.root \
+    --outputFile idpvm.acts.root \
     --doTightPrimary \
     --doHitLevelPlots \
     --HSFlag All \
     --doTechnicalEfficiency \
     --doExpertPlots \
     --OnlyTrackingPreInclude \
-    --validateExtraTrackCollections "SiSPSeededTracksActsValidateTracksTrackParticles"
+    --validateExtraTrackCollections "SiSPSeededTracksActsFast"
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
@@ -79,19 +108,26 @@ echo "download latest result..."
 art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
 ls -la "$lastref_dir"
 
-run "dcube-ckf-last" \
+run "dcube-athena-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_ckf_shifter_last \
+    -p -x dcube_athena_shifter_last \
     -c ${dcubeXmlAbsPath} \
-    -r ${lastref_dir}/idpvm.root \
-    idpvm.root
+    -r ${lastref_dir}/idpvm.athena.root \
+    idpvm.athena.root
+
+run "dcube-acts-last" \
+    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+    -p -x dcube_acts_shifter_last \
+    -c ${dcubeXmlAbsPath} \
+    -r ${lastref_dir}/idpvm.acts.root \
+    idpvm.acts.root
 
 # Compare performance WRT legacy Athena
-run "dcube-ckf-athena" \
+run "dcube-athena-acts" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_ckf_athena \
+    -p -x dcube_athena_acts \
     -c ${dcubeXmlTechEffAbsPath} \
-    -r ${ref_idpvm_athena} \
+    -r idpvm.athena.root \
     -M "acts" \
     -R "athena" \
-    idpvm.root
+    idpvm.acts.root
