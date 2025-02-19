@@ -533,3 +533,29 @@ class MuonLRTMergedConfig (ConfigBlock) :
         alg.UseRun3WP = config.geometry() >= LHCPeriod.Run3 
         alg.CreateViewCollection = False
 
+class MuonContainerMergingConfig (ConfigBlock) :
+    def __init__ (self) :
+        super (MuonContainerMergingConfig, self).__init__ ()
+        self.addOption (
+            'inputMuonContainers', [], type=list,
+            noneAction='error',
+            info="List of container names to be merged of type xAOD::MuonContainer."
+        )
+        self.addOption (
+            'outputMuonLocation', 'MuonsMerged', type=str,
+            noneAction='error',
+            info="The name of the output container."
+        )
+        self.addOption (
+            'createViewCollection', True, type=bool,
+            info="Decided if output container is a view (default) or a deep copy."
+        )
+
+
+    def makeAlgs (self, config) :
+        algname = "MuonContainerMergingAlg"
+        algname = algname + self.outputMuonLocation
+        alg = config.createAlgorithm( "CP::MuonContainerMergingAlg", algname )
+        alg.InputMuonContainers = self.inputMuonContainers
+        alg.OutputMuonLocation = self.outputMuonLocation
+        alg.CreateViewCollection = self.createViewCollection
