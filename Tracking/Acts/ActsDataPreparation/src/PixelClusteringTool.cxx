@@ -87,12 +87,13 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
     int tot = cluster.tots.at(i);
     float charge = tot;
 
+
     if (calibData) {
       Identifier moduleID = pixelID.wafer_id(id);
       IdentifierHash moduleHash = pixelID.wafer_hash(moduleID);
-      charge = calibData->getCharge(m_pixelReadout->getDiodeType(id),
+      charge = calibData->getCharge(m_pixelReadout->getDiodeType(id, element),
 				    moduleHash,
-				    m_pixelReadout->getFE(id, moduleID),
+				    m_pixelReadout->getFE(id, moduleID, element),
 				    tot);
 
       // These numbers are taken from the Cluster Maker Tool
@@ -162,7 +163,8 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   InDet::SiWidth siWidth(Amg::Vector2D(rowWidth,colWidth), Amg::Vector2D(phiWidth,etaWidth));
 
   // ask for Lorentz correction, get global position
-  double shift = m_pixelLorentzAngleTool->getLorentzShift(element->identifyHash(), ctx);
+  IdentifierHash idHash = element->identifyHash();
+  double shift = m_pixelLorentzAngleTool->getLorentzShift(idHash, ctx);
   const Amg::Vector2D localPos = pos_acc;
   Amg::Vector2D locpos(localPos[Trk::locX]+shift, localPos[Trk::locY]);
   // find global position of element
@@ -193,8 +195,7 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   errorMatrix.fillSymmetric(1,1, width1 * width1 / 12.0);
 
   // Actually create the cluster (i.e. fill the values)
-  IdentifierHash idHash = element->identifyHash();
-
+  
   Eigen::Matrix<float,2,1> localPosition(locpos.x(), locpos.y());
   Eigen::Matrix<float,2,2> localCovariance = Eigen::Matrix<float,2,2>::Zero();
   localCovariance(0, 0) = errorMatrix(0, 0);
