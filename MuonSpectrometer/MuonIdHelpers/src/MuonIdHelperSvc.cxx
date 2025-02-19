@@ -393,7 +393,7 @@ namespace Muon {
         if (isMdt(id)) {
             return std::format("{:} ml {:1d}", toStringChamber(id), m_mdtIdHelper->multilayer(id));
         } else if (isRpc(id)) {
-            return std::format("{:} dbZ {:21} dbPhi {:1d}", toStringChamber(id), m_rpcIdHelper->doubletZ(id), m_rpcIdHelper->doubletPhi(id));
+            return std::format("{:} dbZ {:1d} dbPhi {:1d}", toStringChamber(id), m_rpcIdHelper->doubletZ(id), m_rpcIdHelper->doubletPhi(id));
         } else if (isTgc(id)) {
             return toStringChamber(id);
         } 
