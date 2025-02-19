@@ -82,9 +82,17 @@ namespace MuonR4{
                           <<" chamberId: "<<Muon::MuonStationIndex::chName(segment->chamberIndex())
                         <<", phi: "<<segment->sector()<<", nPrecHits: "<<segment->nPrecisionHits()
                         <<", nDoF: "<<segment->numberDoF()<<" sim hits: "<<simHits.size());
-            for (const xAOD::MuonSimHit* hit: simHits) {
-                ATH_MSG_VERBOSE(" --- associated sim hit: "<<m_idHelperSvc->toString(hit->identify())
-                            <<", "<<hit->genParticleLink());
+            if (msgLvl(MSG::VERBOSE)){
+                std::vector<const xAOD::MuonSimHit*> sortedHits{simHits.begin(), simHits.end()};
+                std::ranges::sort(sortedHits, [](const xAOD::MuonSimHit* a, const xAOD::MuonSimHit* b){
+                    return a->identify() < b->identify();
+                });
+                for (const xAOD::MuonSimHit* hit: sortedHits) {
+                    ATH_MSG_VERBOSE(" --- associated sim hit: "<<m_idHelperSvc->toString(hit->identify())
+                           <<", locPos: "<<Amg::toString(xAOD::toEigen(hit->localPosition()))
+                           <<", locDir: "<<Amg::toString(xAOD::toEigen(hit->localDirection())) 
+                           <<", "<<hit->genParticleLink());
+                }
             }
             /* now find the truth particle with all associated hits */
             const auto best_itr = std::ranges::max_element(truthPartWithIds, 

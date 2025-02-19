@@ -222,7 +222,7 @@ namespace MuonR4 {
             std::array<std::vector<MM_ElectronicsToolInput>, 8> v_stripDigitOutput{};
             DeadTimeMap deadTimes{};
 
-            for (const TimedHit &simHit : hitsToDigit) {
+            for (const TimedHit &simHit : viewer) {
                 // ignore radiation if you want
                 if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13) {
                     ATH_MSG_VERBOSE("Hit is not from a muon - skipping ");
@@ -257,9 +257,9 @@ namespace MuonR4 {
 
                 const HepMcParticleLink particleLink = simHit->genParticleLink();
                 // Print some information about the MicroMegas hit
-                ATH_MSG_VERBOSE("hitID  " << m_idHelperSvc->toString(hitId) << " Hit bunch time  " << bunchTime << " tof/G4 hit time " << globalHitTime
-                                          << " globalHitPosition " << Amg::toString(globalHitPosition) << " hit: r " << globalHitPosition.perp() << " z " << globalHitPosition.z()
-                                          << " mclink " << particleLink << "Kinetic energy " << hitKineticEnergy);
+                ATH_MSG_VERBOSE("hitID  " << m_idHelperSvc->toString(hitId) <<" ("<< simHit.get()<< ") Hit bunch time  " << bunchTime << " tof/G4 hit time " << globalHitTime
+                            << " globalHitPosition " << Amg::toString(globalHitPosition) << " hit: r " << globalHitPosition.perp() << " z " << globalHitPosition.z()
+                            << " mclink " << particleLink << "Kinetic energy " << hitKineticEnergy);
 
                 // Angles, Geometry, and Coordinates.
                 // This is not an incident angle yet. It's atan(z/x),
@@ -305,7 +305,7 @@ namespace MuonR4 {
                 const Amg::Vector3D hitAfterTimeShiftOnSurface = hitAfterTimeShift + lambda.value_or(0.) * locDir;
 
                 if (std::abs(hitAfterTimeShiftOnSurface.z()) > 0.1) {
-                    ATH_MSG_WARNING("Bad propagation to surface after time shift " << hitAfterTimeShiftOnSurface);
+                    ATH_MSG_WARNING("Bad propagation to surface after time shift " << Amg::toString(hitAfterTimeShiftOnSurface));
                 }
 
                 // Calculate the index for the global hit counter
@@ -372,7 +372,7 @@ namespace MuonR4 {
                 ATH_MSG_VERBOSE(__func__ << "() : " << __LINE__ << " Prepared strip for digitization: " << m_idHelperSvc->toString(clusId));
                 v_stripDigitOutput[hitGapInNsw].push_back(std::move(stripDigitOutput));
 
-                addSDO(simHit, sdoContainer);
+                addSDO(simHit, sdoContainer)->setIdentifier(clusId);
                 ++m_acceptedHits[hitGapInNsw];
             } // end of loop over hits
 
