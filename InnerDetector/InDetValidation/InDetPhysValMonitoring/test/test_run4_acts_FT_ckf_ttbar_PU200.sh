@@ -93,7 +93,6 @@ run "IDPVM-acts" \
     --outputFile idpvm.acts.root \
     --doTightPrimary \
     --doHitLevelPlots \
-    --HSFlag All \
     --doExpertPlots \
     --OnlyTrackingPreInclude
 
