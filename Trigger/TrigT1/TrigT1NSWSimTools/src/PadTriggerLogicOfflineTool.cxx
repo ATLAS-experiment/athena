@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
+#include "MuonIdHelpers/sTgcIdHelper.h"
 
 #include "TrigT1NSWSimTools/PadTriggerLogicOfflineTool.h"
-#include "MuonAGDDDescription/sTGCDetectorDescription.h"
-#include "MuonAGDDDescription/sTGCDetectorHelper.h"
 #include <mutex>
 
 namespace NSWL1 {
@@ -468,20 +467,15 @@ NSWL1::PadTrigger PadTriggerLogicOfflineTool::convert(const SectorTriggerCandida
       
       const MuonGM::sTgcReadoutElement* module = detManager->getsTgcReadoutElement(Id);
       if (!module) continue;
-      int multilayer = helper->multilayer(Id);
-      
-      char side     = module->getStationEta() < 0 ? 'C' : 'A'; 
       char sector_l = module->getStationName().substr(2,1)=="L" ? 'L' : 'S';
- 
-      sTGCDetectorHelper aHelper;
-      sTGCDetectorDescription* md = aHelper.Get_sTGCDetector( sector_l, std::abs(module->getStationEta()), module->getStationPhi(), multilayer, side );
       
       Amg::Vector3D pos = module->center();      
-      double swidth = md->sWidth();
-      double lwidth = md->lWidth(); 
-      double ycutout = md->yCutout(); 
-      double length = md->Length();
-      double moduleR = std::sqrt( pos.mag()*pos.mag() -  pos.z()*pos.z());
+      double swidth = module->getSsize();
+      double lwidth = module->getLongSsize(); 
+
+      double ycutout = module->getDesign(1, sTgcIdHelper::sTgcChannelTypes::Strip)->yCutout();
+      double length = module->getRsize();
+      double moduleR =  pos.perp();
       double dphi1 = std::atan( (0.5*lwidth)/(moduleR+0.5*length) );
       double dphi2 = std::atan( (0.5*swidth)/(moduleR-0.5*length) );
  

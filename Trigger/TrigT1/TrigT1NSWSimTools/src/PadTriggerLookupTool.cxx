@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/PadTriggerLookupTool.h"
@@ -12,8 +12,6 @@
 #include "TrigT1NSWSimTools/tdr_compat_enum.h"
 #include "TrigT1NSWSimTools/sTGCTriggerBandsInEta.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
-#include "MuonAGDDDescription/sTGCDetectorDescription.h"
-#include "MuonAGDDDescription/sTGCDetectorHelper.h"
 #include "PathResolver/PathResolver.h"
 
 #include <boost/geometry.hpp>

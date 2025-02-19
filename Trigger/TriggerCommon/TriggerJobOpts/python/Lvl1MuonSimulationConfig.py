@@ -226,7 +226,7 @@ def MuonRdo2DigitConfig(flags):
                 ('Muon::MM_RawDataContainer','MMRDO'),
                 ('Muon::STGC_RawDataContainer','sTGCRDO')
             ]
-        if flags.Muon.enableNRPC:
+        if flags.Muon.enableNRPC and ("NRPCRDO" in flags.Input.Collections):
             rdoInputs += [
                 ('xAOD::NRPCRDOContainer' , 'NRPCRDO'),
                 ('xAOD::NRPCRDOAuxContainer',  'NRPCRDOAux.')
