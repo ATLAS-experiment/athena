@@ -47,7 +47,7 @@ run () {
 }
 
 
-run "${LABEL} pipeline" \
+run "${PREFIX} pipeline" \
     FPGATrackSimDataPrepOnRDO.sh -o $INPUT_AOD_FILE -t -n -1
 
 run "IDTPM" \
@@ -61,13 +61,13 @@ if [ -z $ArtJobType ]; then
 else
     art.py download --user=artprod --dst=last_results "$ArtPackage" "$ArtJobName"
 
-    run "dcube-${LABEL}-latest" \
+    run "dcube-${PREFIX}-latest" \
         $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
             -p -x dcube_last \
             --plotopts=ratio \
             -c ${DCUBE_CONFIG} \
-            -M "${LABEL}" \
-            -R "${LABEL}-previous" \
+            -M "${PREFIX}" \
+            -R "${PREFIX}-previous" \
             -r ${lastref_dir}/IDTPM.${PREFIX}.HIST.root \
             IDTPM.${PREFIX}.HIST.root
 fi
