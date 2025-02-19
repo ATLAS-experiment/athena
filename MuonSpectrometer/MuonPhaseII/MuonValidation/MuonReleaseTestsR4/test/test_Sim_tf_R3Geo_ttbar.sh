@@ -22,7 +22,7 @@ Sim_tf.py \
       --multithreaded True \
       --geometrySQLite True \
       --geometrySQLiteFullPath "${geo_db}" \
-      --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-07' \
+      --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-09' \
       --simulator 'FullG4MT_QS' \
       --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
       --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \

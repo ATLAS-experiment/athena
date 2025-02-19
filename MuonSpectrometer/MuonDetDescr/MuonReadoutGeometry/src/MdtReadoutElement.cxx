@@ -465,7 +465,6 @@ namespace MuonGM {
         if (!ms->hasBLines() && !ms->hasMdtAsBuiltParams()) {
             return Amg::Transform3D::Identity();
         }
-
         const Amg::Vector3D fixedPoint = ms->getBlineFixedPointInAmdbLRS();
 
         // Chamber parameters
@@ -627,10 +626,14 @@ namespace MuonGM {
                        << " in the amdb-szt frame" );
 
         double s0mdt = locAMDBPos.x();  // always I think !
-        if (std::abs(fixedPoint.x()) > 0.01) s0mdt = locAMDBPos.x() - fixedPoint.x();
+        if (std::abs(fixedPoint.x()) > 0.01) {
+            s0mdt = locAMDBPos.x() - fixedPoint.x();
+        }
         double z0mdt = locAMDBPos.y();  
         // unless in the D section of this station there's a dy diff. from 0 for the innermost MDT multilayer (sometimes in the barrel)
-        if (std::abs(fixedPoint.y()) > 0.01) z0mdt = locAMDBPos.y() - fixedPoint.y();
+        if (std::abs(fixedPoint.y()) > 0.01) {
+            z0mdt = locAMDBPos.y() - fixedPoint.y();
+        }
         double t0mdt = locAMDBPos.z();
               // unless in the D section of this station there's a dz diff. from 0 for the innermost MDT multilayer (often in barrel)
         if (std::abs(fixedPoint.z()) > 0.01) t0mdt = locAMDBPos.z() - fixedPoint.z();

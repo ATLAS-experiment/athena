@@ -20,12 +20,12 @@ atlas_add_component( MuonPatternRecognitionTest
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_add_test( HoughTransformTestR3
-                SCRIPT python -m MuonPatternRecognitionTest.MuonHoughTransformTesterConfig --nEvents 2  --noMonitorPlots
+                SCRIPT python -m MuonPatternRecognitionTest.MuonHoughTransformTesterConfig --nEvents 2 --noMM --noSTGC --noMonitorPlots
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 atlas_add_test( HoughTransformTestR3_fromRDO
-                SCRIPT python -m MuonPatternRecognitionTest.MuonHoughTransformTesterConfig --nEvents 2  --noMonitorPlots --inputFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3Digits.pool.root
+                SCRIPT python -m MuonPatternRecognitionTest.MuonHoughTransformTesterConfig --nEvents 2 --noMM --noSTGC --noMonitorPlots --inputFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3Digits.pool.root
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
