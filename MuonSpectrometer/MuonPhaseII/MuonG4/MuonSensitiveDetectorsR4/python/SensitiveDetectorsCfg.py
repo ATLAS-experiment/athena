@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -81,7 +81,7 @@ def SetupSensitiveDetectorsCfg(flags):
 
     if flags.Detector.EnableMDT:
         tools += [result.popToolsAndMerge(MdtSensitiveDetectorToolCfg(flags))]
-    
+
     if flags.Detector.EnableRPC:
         tools += [result.popToolsAndMerge(RpcSensitiveDetectorToolCfg(flags))]
 
@@ -99,15 +99,31 @@ def SetupSensitiveDetectorsCfg(flags):
 def SimHitContainerListCfg(flags):
     simHitContainers = []
     if flags.Detector.EnableMDT:
-        simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawMdtSimHits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
+            simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawMdtSimHits_G4")]
+        else:
+            simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawMdtSimHits")]
     if flags.Detector.EnableMM:
-        simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawMmSimHits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
+            simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawMmSimHits_G4")]
+        else:
+            simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawMmSimHits")]
     if flags.Detector.EnableRPC:
-        simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawRpcSimHits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
+            simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawRpcSimHits_G4")]
+        else:
+            simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawRpcSimHits")]
     if flags.Detector.EnableTGC:
-        simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawTgcSimHits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
+            simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawTgcSimHits_G4")]
+        else:
+            simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawTgcSimHits")]
     if flags.Detector.EnablesTGC:
-        simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawStgcSimHits")]    
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
+            simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawStgcSimHits_G4")]
+        else:
+            simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawStgcSimHits")]
+
     return simHitContainers
 
 def MuonDependenciesCfg(flags):
@@ -143,4 +159,3 @@ def OutputSimContainersCfg(flags):
     outContainers +=[ f"xAOD::MuonSimHitAuxContainer#{cont}Aux." for cont in containerNames]
 
     return outContainers
-
