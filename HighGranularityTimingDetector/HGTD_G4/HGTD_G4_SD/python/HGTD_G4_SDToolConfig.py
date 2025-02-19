@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -9,7 +9,7 @@ def HgtdSensorSDCfg(flags, name="HgtdSensorSD", **kwargs):
     bare_collection_name = "HGTD_Hits"
     mergeable_collection_suffix = "_G4"
     merger_input_property = "HGTDHits"
-    region = "ID"
+    region = "ITk"
 
     acc, hits_collection_name = CollectionMergerCfg(flags,
                                                     bare_collection_name,
