@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //Implementation file for the data object class
@@ -31,7 +31,7 @@ void SCT_DCSStatCondData::fill(const CondAttrListCollection::ChanNum& chanNum, c
       // if this parameter (hv, chanstat etc) doesn't exist in the list add it to the param std::vector
       par.push_back(param); 
       //don't insert! not a new map entry, just update the std::vector 
-      (*m_bad_channels.find(chanNum)).second = par;
+      (*m_bad_channels.find(chanNum)).second = std::move(par);
     }
   } else { 
     // no entry yet for this chan num, so start fresh
