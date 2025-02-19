@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from HitIdentifier import RpcIdentifier
 from ROOT import TVector3, TVector2, TFile
@@ -74,7 +74,7 @@ class RpcSDO(RpcDigit):
                                                                                     globZ = self.globalPosition().Z(),
                                                                                     barcode = self.barcode())
    
-def readDigitTree(in_file, treeName = "NSWValTree"):
+def readDigitTree(in_file, treeName = "HitValidTree"):
 
     t_file = TFile.Open(in_file, "READ")
     if not t_file:
@@ -111,7 +111,7 @@ def readDigitTree(in_file, treeName = "NSWValTree"):
         if len (digits): allDigits[evt] = digits
     return allDigits
 
-def readSDOTree(in_file, treeName = "NSWValTree"):
+def readSDOTree(in_file, treeName = "HitValidTree"):
     allSDOS = {}    
     t_file = TFile.Open(in_file, "READ")
     if not t_file:

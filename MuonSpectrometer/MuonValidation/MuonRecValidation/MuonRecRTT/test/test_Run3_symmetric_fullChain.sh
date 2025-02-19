@@ -45,7 +45,7 @@ Sim_tf.py --CA True \
           --geometryVersion "${geo_version}" \
           --conditionsTag "${cond_tag}" \
           --preInclude "EVNTtoHITS:Campaigns.MC16Simulation" \
-          --postInclude "all:PyJobTransforms.UseFrontier" "MuonPRDTest.NSWPRDValAlgSim.NSWPRDValAlgSimCfg" \
+          --postInclude "all:PyJobTransforms.UseFrontier" "MuonPRDTest.HitValAlgSim.HitValAlgSimCfg" \
           --maxEvents 100 \
           --imf False \
           --outputHITSFile OUT_HITS.root
@@ -100,7 +100,7 @@ fi
 Digi_tf.py --CA True \
            --inputHITSFile OUT_HITS.root \
            --imf False \
-           --postInclude "MuonPRDTest.NSWPRDValAlgDigi.NSWPRDValAlgDigiCfg" \
+           --postInclude "MuonPRDTest.HitValAlgDigi.HitValAlgDigiCfg" \
            --postExec 'cfg.getCondAlgo("TileSamplingFractionCondAlg").G4Version = -1' \
            --geometryVersion "${geo_version}" \
            --conditionsTag "${cond_tag}" \
@@ -175,7 +175,7 @@ Reco_tf.py --CA True \
            --autoConfiguration everything \
            --imf False \
            --geometryVersion "${geo_version}" \
-           --postInclude MuonPRDTest.NSWPRDValAlgReco.NSWPRDValAlgRecoCfg \
+           --postInclude MuonPRDTest.HitValAlgReco.HitValAlgRecoCfg \
            --conditionsTag "${cond_tag}" \
            --preExec "all:flags.DQ.Steering.doHLTMon=False" \
            --outputESDFile OUT_ESD.root

@@ -1,7 +1,7 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include "MuonTPMetaDataAlg.h"
+#include "MetaDataAlg.h"
 
 #include <AthAnalysisBaseComps/AthAnalysisHelper.h>
 #include <EventInfo/EventStreamInfo.h>
@@ -23,10 +23,8 @@ namespace {
     
 }
 namespace MuonVal{
-MuonTPMetaDataAlg::MuonTPMetaDataAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthAnalysisAlgorithm(name, pSvcLocator) {
-}
 
-StatusCode MuonTPMetaDataAlg::initialize() {
+StatusCode MetaDataAlg::initialize() {
     ATH_MSG_INFO("Initializing " << name() << "...");
     ATH_CHECK(m_infoKey.initialize());
     m_MetaDataTree = std::make_unique<MuonTesterTree>("MetaDataTree", m_stream);
@@ -44,7 +42,7 @@ StatusCode MuonTPMetaDataAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonTPMetaDataAlg::finalize() {
+StatusCode MetaDataAlg::finalize() {
     if (m_sim_meta.empty() == m_run_meta.empty()) {
         ATH_MSG_FATAL("Found run and simulation meta data");
         return StatusCode::FAILURE;
@@ -60,7 +58,7 @@ StatusCode MuonTPMetaDataAlg::finalize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonTPMetaDataAlg::execute() {
+StatusCode MetaDataAlg::execute() {
     const EventContext& ctx = Gaudi::Hive::currentContext();
     ATH_MSG_DEBUG("Executing " << name() << "...");
     setFilterPassed(true);
@@ -125,7 +123,7 @@ StatusCode MuonTPMetaDataAlg::execute() {
 
     return StatusCode::SUCCESS;
 }
-const xAOD::CutBookkeeper* MuonTPMetaDataAlg::RetrieveCutBookKeeper(const std::string& Stream, const std::string& cbk_name) const {
+const xAOD::CutBookkeeper* MetaDataAlg::RetrieveCutBookKeeper(const std::string& Stream, const std::string& cbk_name) const {
     const xAOD::CutBookkeeper* all = nullptr;
     if (inputMetaStore()->contains<xAOD::CutBookkeeperContainer>("CutBookkeepers")) {
         const xAOD::CutBookkeeperContainer* bks = nullptr;
@@ -145,7 +143,7 @@ const xAOD::CutBookkeeper* MuonTPMetaDataAlg::RetrieveCutBookKeeper(const std::s
     if (!all) ATH_MSG_DEBUG("Failed to retrieve cut book keeper for Stream: "<<Stream<<" cbk_name: "<<cbk_name);
     return all;
 }
-StatusCode MuonTPMetaDataAlg::beginInputFile() {
+StatusCode MetaDataAlg::beginInputFile() {
     //
     // This method is called at the start of each input file, even if
     // the input file contains no events. Accumulate metadata information here
@@ -272,7 +270,7 @@ StatusCode MuonTPMetaDataAlg::beginInputFile() {
     }
     return StatusCode::SUCCESS;
 }
-StatusCode MuonTPMetaDataAlg::fillDataTree(){
+StatusCode MetaDataAlg::fillDataTree(){
 
     ScalarBranch<Long64_t>& tot_ev {m_MetaDataTree->newScalar<Long64_t>("TotalEvents")};
     ScalarBranch<Long64_t>& proc_ev {m_MetaDataTree->newScalar<Long64_t>("ProcessedEvents")};
@@ -293,7 +291,7 @@ StatusCode MuonTPMetaDataAlg::fillDataTree(){
     }    
     return StatusCode::SUCCESS;
 }
-StatusCode MuonTPMetaDataAlg::fillSimulationTree() {
+StatusCode MetaDataAlg::fillSimulationTree() {
     m_MetaDataTree->newScalar<bool>("isAF2", m_isAF2);
     ScalarBranch<Long64_t>& tot_ev {m_MetaDataTree->newScalar<Long64_t>("TotalEvents")};
     ScalarBranch<Long64_t>& proc_ev {m_MetaDataTree->newScalar<Long64_t>("ProcessedEvents")};

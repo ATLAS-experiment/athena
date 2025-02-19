@@ -1,17 +1,17 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # jobOptions to activate the dump of the NSWPRDValAlg nTuple
-# This file can be used with Reco_tf by specifying --postInclude MuonPRDTest.NSWPRDValAlgReco.NSWPRDValAlgRecoCfg
+# This file can be used with Reco_tf by specifying --postInclude MuonPRDTest.HitValAlgReco.HitValAlgRecoCfg
 # It dumps Truth, MuEntry and Hits, Digits, SDOs and RDOs for MM and sTGC
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def NSWPRDValAlgRecoCfg(flags, name = "NSWPRDValAlg", **kwargs):
+def HitValAlgRecoCfg(flags, name = "RecoValidAlg", **kwargs):
     result = ComponentAccumulator()
 
-    histSvc = CompFactory.THistSvc(Output=["NSWPRDValAlg DATAFILE='NSWPRDValAlg.reco.ntuple.root' OPT='RECREATE'"])
-    result.addService(histSvc) 
+    from MuonGeoModelTestR4.testGeoModel import setupHistSvcCfg
+    result.merge(setupHistSvcCfg(flags, outFile="NSWPRDValAlg.reco.ntuple.root", outStream="MUONHITVALIDSTREAM"))
 
     kwargs.setdefault("doTruth", True)
     kwargs.setdefault("doMuEntry", True)
@@ -55,7 +55,7 @@ def NSWPRDValAlgRecoCfg(flags, name = "NSWPRDValAlg", **kwargs):
     kwargs.setdefault("doCSCRDO", False)
     kwargs.setdefault("doCSCPRD", flags.Detector.EnableCSC)
 
-    NSWPRDValAlg = CompFactory.NSWPRDValAlg(name, **kwargs)
-    result.addEventAlgo(NSWPRDValAlg)
+    the_alg = CompFactory.MuonVal.HitValAlg(name, **kwargs)
+    result.addEventAlgo(the_alg)
 
     return result

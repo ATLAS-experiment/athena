@@ -25,7 +25,7 @@ Reco_tf.py --CA True \
            --autoConfiguration everything \
            --preExec "flags.Detector.GeometryMM = True;flags.Detector.EnableMM = True" \
            --imf False \
-           --postInclude MuonPRDTest.NSWPRDValAlgReco.NSWPRDValAlgRecoCfg \
+           --postInclude MuonPRDTest.HitValAlgReco.HitValAlgRecoCfg \
            --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-11' \
            --outputESDFile OUT_ESD.root
 exit_code=$?

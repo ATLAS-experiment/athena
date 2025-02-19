@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONPRDTEST_NSWPRDVALALG_H
@@ -7,31 +7,24 @@
 
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
 
-#include "EDM_object.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonTesterTree/MuonTesterTree.h"
 #include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 #include "MuonCSC_CnvTools/ICSC_RDO_Decoder.h"
 
-class NSWPRDValAlg : public AthHistogramAlgorithm {
+namespace MuonVal{
+class HitValAlg : public AthHistogramAlgorithm {
 public:
-    NSWPRDValAlg(const std::string& name, ISvcLocator* pSvcLocator);
+
+    using AthHistogramAlgorithm::AthHistogramAlgorithm;
 
     StatusCode initialize() override;
     StatusCode finalize() override;
     StatusCode execute() override;
     unsigned int cardinality() const override final { return 1; }
 
-    // Matching algorithm
-    StatusCode NSWMatchingAlg();  // First set up which object should be matched, given the input used to fill the NSW Ntuple
-    StatusCode NSWMatchingAlg(EDM_object data0,
-                              EDM_object data1);  // This part of the matching algortihm does the actual comparison given two EDM obects
-    StatusCode setDataAdress(
-        EDM_object& oData,
-        const TString& branch_name);  // This function couples the branch of the NSW validation Ntuple with the EDM object.
-
 private:    
-    MuonVal::MuonTesterTree m_tree{"NSWValTree", "NSWPRDValAlg"};
+    MuonVal::MuonTesterTree m_tree{"HitValidTree", "MUONHITVALIDSTREAM"};
 
     ServiceHandle<MuonTGC_CablingSvc> m_tgcCabling{this, "TGCCablingSvc", "MuonTGC_CablingSvc"};
 
@@ -110,8 +103,6 @@ private:
     Gaudi::Property<bool> m_doNSWMatching{this, "doNSWMatchingAlg", false};
     Gaudi::Property<bool> m_doNSWMatchingMuon{this, "doNSWMatchingMuonOnly", false};
     Gaudi::Property<uint> m_maxStripDiff{this, "setMaxStripDistance", 3};
-    // this property is temporarely added to be able to deactivate the "No match found!" warning when running on the grid
-    Gaudi::Property<bool> m_noMatchWarning{this, "suppressNoMatchWarning", false};
 };
-
+}
 #endif  // NSWPRDVALALG_H
