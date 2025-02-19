@@ -12,6 +12,7 @@
 #include <MuonAnalysisAlgorithms/MuonEfficiencyScaleFactorAlg.h>
 #include <MuonAnalysisAlgorithms/MuonIsolationAlg.h>
 #include <MuonAnalysisAlgorithms/MuonLRTMergingAlg.h>
+#include <MuonAnalysisAlgorithms/MuonContainerMergingAlg.h>
 #include <MuonAnalysisAlgorithms/MuonSelectionAlg.h>
 #include <MuonAnalysisAlgorithms/MuonTriggerEfficiencyScaleFactorAlg.h>
 

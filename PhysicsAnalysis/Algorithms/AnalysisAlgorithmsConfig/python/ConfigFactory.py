@@ -287,6 +287,9 @@ class ConfigFactory():
         from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonLRTMergedConfig
         self.addAlgConfigBlock(algName="LRTMerging", alg=MuonLRTMergedConfig,
                                superBlocks="Muons")
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonContainerMergingConfig
+        self.addAlgConfigBlock(algName="ContainerMerging", alg=MuonContainerMergingConfig,
+                               superBlocks="Muons")
 
         # tauJets
         from TauAnalysisAlgorithms.TauAnalysisConfig import TauCalibrationConfig

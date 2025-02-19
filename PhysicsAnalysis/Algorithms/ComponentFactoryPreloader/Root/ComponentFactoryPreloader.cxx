@@ -135,6 +135,7 @@
 #include <MuonAnalysisAlgorithms/MuonEfficiencyScaleFactorAlg.h>
 #include <MuonAnalysisAlgorithms/MuonIsolationAlg.h>
 #include <MuonAnalysisAlgorithms/MuonLRTMergingAlg.h>
+#include <MuonAnalysisAlgorithms/MuonContainerMergingAlg.h>
 #include <MuonAnalysisAlgorithms/MuonSelectionAlg.h>
 #include <MuonAnalysisAlgorithms/MuonTriggerEfficiencyScaleFactorAlg.h>
 #include <MuonEfficiencyCorrections/MuonEfficiencyScaleFactors.h>
@@ -280,6 +281,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::MuonEfficiencyScaleFactorAlg>("CP::MuonEfficiencyScaleFactorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::MuonIsolationAlg>("CP::MuonIsolationAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::MuonLRTMergingAlg>("CP::MuonLRTMergingAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::MuonContainerMergingAlg>("CP::MuonContainerMergingAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::MuonSelectionAlgV2>("CP::MuonSelectionAlgV2"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::MuonTriggerEfficiencyScaleFactorAlg>("CP::MuonTriggerEfficiencyScaleFactorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::NLargeRJetMassWindowSelectorAlg>("CP::NLargeRJetMassWindowSelectorAlg"));

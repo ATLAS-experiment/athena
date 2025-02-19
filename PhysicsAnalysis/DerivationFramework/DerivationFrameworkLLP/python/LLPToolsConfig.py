@@ -183,6 +183,19 @@ def LRTMuonMergerAlg(flags, name="LLP1_MuonLRTMergingAlg", **kwargs):
     acc.addEventAlgo(alg, primary=True)
     return acc
 
+def ZeroPixelHitMuonMergerAlgCfg(flags, name='LLP1_MuonZPHMergingAlg', **kwargs):
+    """Configure for merging ZeroPixelHitMuons with the LRTMerged muons for vertexing"""
+    
+    kwargs.setdefault('InputMuonContainers', ['Muons', 'MuonsLRT', 'ZeroPixelHitMuons'])
+    kwargs.setdefault('OutputMuonLocation', 'StdWithLRTMuons_wZPH')
+    kwargs.setdefault("CreateViewCollection", True)
+
+    acc = ComponentAccumulator()
+    alg = CompFactory.CP.MuonContainerMergingAlg(name, **kwargs)
+    acc.addEventAlgo(alg, primary=True)
+    return acc
+
+
 def LRTElectronMergerAlg(flags, name="LLP1_ElectronLRTMergingAlg", **kwargs):
     acc = ComponentAccumulator()
     alg = CompFactory.CP.ElectronLRTMergingAlg(name, **kwargs)
@@ -363,3 +376,10 @@ def LRTElectronLHSelectorsCfg(flags):
     ))
 
     return acc
+
+# RecoverZeroPixelHitMuons setup
+def RecoverZeroPixelHitMuonsCfg(flags):
+    acc = ComponentAccumulator()
+    acc.addEventAlgo(CompFactory.RecoverZeroPixelHitMuons(name="RecoverZeroPixelHitMuons"))
+    
+    return acc 

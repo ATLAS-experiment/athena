@@ -13,6 +13,7 @@ from AthenaConfiguration.Enums import LHCPeriod, MetadataCategory
 
 MergedElectronContainer = "StdWithLRTElectrons"
 MergedMuonContainer = "StdWithLRTMuons"
+MergedMuonContainer_wZPH = "StdWithLRTMuons_wZPH"
 MergedTrackCollection = "InDetWithLRTTrackParticles"
 MergedGSFTrackCollection = "InDetWithLRTGSFTrackParticles"
 LLP1VrtSecInclusiveSuffixes = []
@@ -305,6 +306,10 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     acc.merge(MuonsCommonCfg(flags,
                              suff="LRT"))
 
+    # Recover Zero Pixel Hit Muons
+    from DerivationFrameworkLLP.LLPToolsConfig import RecoverZeroPixelHitMuonsCfg
+    acc.merge(RecoverZeroPixelHitMuonsCfg(flags))
+    
     # flavor tagging
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
     acc.merge(FtagJetCollectionsCfg(flags, ['AntiKt4EMTopoJets']))
@@ -358,6 +363,12 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                      twoTrkVtxFormingD0Cut    = 1.0))
         LLP1VrtSecInclusiveSuffixes.append(TrackSystSuffixShortLifetime)
 
+    # LRT muons merge
+    from DerivationFrameworkLLP.LLPToolsConfig import ZeroPixelHitMuonMergerAlgCfg
+    acc.merge(ZeroPixelHitMuonMergerAlgCfg(flags,
+                                           InputMuonContainers  = [MergedMuonContainer, "ZeroPixelHitMuons"],
+                                           OutputMuonLocation   = MergedMuonContainer_wZPH))
+
 
     # leptons-only VSI
     LeptonsSuffix = "_Leptons"
@@ -401,7 +412,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                  doSelectTracksFromMuons     = True,
                                  doRemoveCaloTaggedMuons     = True,
                                  doSelectTracksFromElectrons = False,
-                                 MuonLocation                = MergedMuonContainer,
+                                 MuonLocation                = MergedMuonContainer_wZPH,
                                  do_PVvetoCut                = False,
                                  DoTwoTrSoftBtag             = True,
                                  TwoTrVrtMinDistFromPVCut    = 0.5,
@@ -800,8 +811,10 @@ def LLP1Cfg(flags):
     # algorithm for those but make it the same as the one in PHYS so that
     # they'll be merged when both formats are used together.
     acc.merge(IsoCloseByAlgsCfg(flags, isPhysLite = False, stream_name = 'StreamDAOD_LLP1'))
-    contNames = [ "LRTElectrons", "MuonsLRT" ]
+    contNames = [ "LRTElectrons", "MuonsLRT" ] 
     acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1", isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1'))
+    contNames = [ "ZeroPixelHitMuons" ]
+    acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1_ZeroPixelHitsMuons", isPhysLite = False, containerNames = contNames, stream_name = 'StreamDAOD_LLP1'))
 
     # ============================
     # Define contents of the format
@@ -962,10 +975,12 @@ def LLP1Cfg(flags):
                                               "Muons.TruthLink",
                                               "MuonsLRT.TruthLink",
                                               "Photons.TruthLink"]
+
         if flags.Derivation.LLP.saveFullTruth:
             LLP1SlimmingHelper.ExtraVariables += ['TruthParticles', 'TruthVertices']
         StaticContent += ["xAOD::JetContainer#AntiKt10TruthRCJets","xAOD::JetAuxContainer#AntiKt10TruthRCJetsAux.-PseudoJet"]
 
+        StaticContent += ["xAOD::MuonContainer#ZeroPixelHitMuons", "xAOD::MuonAuxContainer#ZeroPixelHitMuonsAux."]
 
     from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
         PhotonsCPDetailedContent,
@@ -1005,14 +1020,14 @@ def LLP1Cfg(flags):
                                               OutputContainerPrefix = "LRTTrigMatch_",
                                               TriggerList = LLP1TriggerListsHelper.Run2TriggerNamesNoTau,
                                               InputElectrons=MergedElectronContainer,
-                                              InputMuons=MergedMuonContainer
+                                              InputMuons=MergedMuonContainer_wZPH
                                               ))
         # And add the additional LLP trigger matching branches to the slimming helper 
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = LLP1SlimmingHelper,
                                                OutputContainerPrefix = "LRTTrigMatch_",
                                                TriggerList = LLP1TriggerListsHelper.Run2TriggerNamesNoTau,
                                                InputElectrons=MergedElectronContainer,
-                                               InputMuons=MergedMuonContainer
+                                               InputMuons=MergedMuonContainer_wZPH
                                                )
     # Run 3, or Run 2 with navigation conversion
     if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
