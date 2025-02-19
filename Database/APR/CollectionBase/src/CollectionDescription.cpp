@@ -43,8 +43,7 @@ CollectionDescription( const pool::ICollectionDescription& rhs )
 // Real copy constructor
 pool::CollectionDescription::
 CollectionDescription( const pool::CollectionDescription& rhs )
-      : ICollectionDescription(),
-	ICollectionSchemaEditor()
+      : ICollectionDescription()
 {
    CollectionDescription::copyFrom( rhs );
 }

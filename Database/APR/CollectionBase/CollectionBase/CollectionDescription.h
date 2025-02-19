@@ -6,7 +6,6 @@
 #define COLLECTIONBASE_COLLECTIONDESCRIPTION_H
 
 #include "CollectionBase/ICollectionDescription.h"
-#include "CollectionBase/ICollectionSchemaEditor.h"
 
 #include <map>
 
@@ -24,8 +23,7 @@ namespace pool {
    * schema editor of the collection should be used for any modifications to these properties 
    * after construction. 
    */
-  class CollectionDescription : virtual public ICollectionDescription,
-                                virtual public ICollectionSchemaEditor
+  class CollectionDescription : virtual public ICollectionDescription
   {
   public:
     /**
