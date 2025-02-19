@@ -30,7 +30,7 @@ Reco_tf.py \
            --CA 'True' \
            --AMI q442 \
            --preExec "all:flags.DQ.Steering.doHLTMon=False" \
-           --postInclude "MuonPRDTest.NSWPRDValAlgReco.NSWPRDValAlgRecoCfg" \
+           --postInclude "MuonPRDTest.HitValAlgReco.HitValAlgRecoCfg" \
            --postExec 'cfg.getEventAlgo("NSWPRDValAlg").doCSCSDO=False;cfg.getEventAlgo("NSWPRDValAlg").doMuEntry=False;cfg.getEventAlgo("NSWPRDValAlg").doMDTSDO=False;cfg.getEventAlgo("NSWPRDValAlg").doRPCSDO=False;cfg.getEventAlgo("NSWPRDValAlg").doTGCSDO=False;cfg.getEventAlgo("NSWPRDValAlg").doTruth=False' \
            --imf False \
            --outputESDFile OUT_ESD.root

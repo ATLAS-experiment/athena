@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # this script can be used to create DCube histograms from the output ntuples of NSWPRDValAlg
 
@@ -23,14 +23,14 @@ if __name__ == "__main__":
     if not inputFile:
         print ('ERROR: Failed to open file %s'%Options.inputFile)
         sys.exit(1)
-    inputTree = inputFile.Get("NSWValTree")
+    inputTree = inputFile.Get("HitValidTree")
     if not inputTree:
-        print ('ERROR: NSWValTree does not exist in file %s'%Options.inputFile)
+        print ('ERROR: HitValidTree does not exist in file %s'%Options.inputFile)
         sys.exit(1)
 
     nEntries = inputTree.GetEntries()
     if nEntries==0:
-        print ('ERROR: NSWValTree of file %s has 0 entries'%Options.inputFile)
+        print ('ERROR: HitValidTree of file %s has 0 entries'%Options.inputFile)
         sys.exit(1)
 
     outputFile = ROOT.TFile(Options.outputFile, "RECREATE")

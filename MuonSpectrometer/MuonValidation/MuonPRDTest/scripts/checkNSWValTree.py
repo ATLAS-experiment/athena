@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # this script can be used to check the output ntuples of NSWPRDValAlg
 
@@ -6,7 +6,7 @@ from __future__ import print_function
 import os, sys, ROOT, argparse
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog='checkNSWValTree', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(prog='checkHitValidTree', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-i', '--inputFile', help='choose input ROOT file', default='NSWPRDValAlg.digi.ntuple.root', type=str)
     parser.add_argument('--checkPRD', help='check also the RPDs (for reco validation only)', action='store_true', default=False)
     parser.add_argument('--checkHits', help='check also the Hits (Hits are skimmed out after Digitisation step!)', action='store_true', default=False)
@@ -24,14 +24,14 @@ if __name__ == "__main__":
     if not inputFile:
         print ('ERROR: Failed to open file %s'%Options.inputFile)
         sys.exit(1)
-    inputTree = inputFile.Get("NSWValTree")
+    inputTree = inputFile.Get("HitValidTree")
     if not inputTree:
-        print ('ERROR: NSWValTree does not exist in file %s'%Options.inputFile)
+        print ('ERROR: HitValidTree does not exist in file %s'%Options.inputFile)
         sys.exit(1)
 
     nEntries = inputTree.GetEntries()
     if nEntries==0:
-        print ('ERROR: NSWValTree of file %s has 0 entries'%Options.inputFile)
+        print ('ERROR: HitValidTree of file %s has 0 entries'%Options.inputFile)
         sys.exit(1)
 
     nHitsMM = 0
@@ -66,34 +66,34 @@ if __name__ == "__main__":
             nSDOSTGC     += inputTree.nSDO_sTGC
 
     if Options.checkHits and nHitsMM==0:
-        print ('ERROR: NSWValTree of file %s has 0 MM Hits'%Options.inputFile)
+        print ('ERROR: HitValidTree of file %s has 0 MM Hits'%Options.inputFile)
         sys.exit(1)
     elif Options.checkHits and  nHitsSTGC==0:
-        print ('ERROR: NSWValTree of file %s has 0 STGC Hits'%Options.inputFile)
+        print ('ERROR: HitValidTree of file %s has 0 STGC Hits'%Options.inputFile)
         sys.exit(1)
     elif Options.checkDigits and nDigitsMM==0:
-        print ('ERROR: NSWValTree of file %s has 0 MM Digits'%Options.inputFile)
+        print ('ERROR: HitValidTree of file %s has 0 MM Digits'%Options.inputFile)
         sys.exit(1)
     elif Options.checkDigits and nDigitsSTGC==0:
-        print ('ERROR: NSWValTree of file %s has 0 STGC Digits'%Options.inputFile)
+        print ('ERROR: HitValidTree of file %s has 0 STGC Digits'%Options.inputFile)
         sys.exit(1)
     elif Options.checkSDO and  nSDOMM==0:
-        print ('ERROR: NSWValTree of file %s has 0 MM SDOs'%Options.inputFile)
+        print ('ERROR: HitValidTree of file %s has 0 MM SDOs'%Options.inputFile)
         sys.exit(1)
     elif Options.checkSDO and  nSDOSTGC==0:
-        print ('ERROR: NSWValTree of file %s has 0 STGC SDOs'%Options.inputFile)
+        print ('ERROR: HitValidTree of file %s has 0 STGC SDOs'%Options.inputFile)
         sys.exit(1)
     elif nRDOMM==0:
-        print ('ERROR: NSWValTree of file %s has 0 MM RDOs'%Options.inputFile)
+        print ('ERROR: HitValidTree of file %s has 0 MM RDOs'%Options.inputFile)
         sys.exit(1)
     elif nRDOSTGC==0:
-        print ('ERROR: NSWValTree of file %s has 0 STGC RDOs'%Options.inputFile)
+        print ('ERROR: HitValidTree of file %s has 0 STGC RDOs'%Options.inputFile)
         sys.exit(1)
     elif Options.checkPRD and nPRDMM==0:
-        print ('ERROR: NSWValTree of file %s has 0 MM PRDs'%Options.inputFile)
+        print ('ERROR: HitValidTree of file %s has 0 MM PRDs'%Options.inputFile)
         sys.exit(1)
     elif Options.checkPRD and nPRDSTGC==0:
-        print ('ERROR: NSWValTree of file %s has 0 STGC PRDs'%Options.inputFile)
+        print ('ERROR: HitValidTree of file %s has 0 STGC PRDs'%Options.inputFile)
         sys.exit(1)
 
     print ('INFO: All fine with file %s'%Options.inputFile)

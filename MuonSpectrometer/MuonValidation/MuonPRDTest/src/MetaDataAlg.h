@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONPERFORMANCEALGS_MUONTPMETADATAALG_H
 #define MUONPERFORMANCEALGS_MUONTPMETADATAALG_H
@@ -12,10 +12,10 @@
 
 namespace MuonVal{
     
-class MuonTPMetaDataAlg : public  AthAnalysisAlgorithm {
+class MetaDataAlg : public  AthAnalysisAlgorithm {
 public:
-    MuonTPMetaDataAlg(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~MuonTPMetaDataAlg() = default;
+    using AthAnalysisAlgorithm::AthAnalysisAlgorithm;
+    virtual ~MetaDataAlg() = default;
 
     StatusCode initialize() override;
     StatusCode execute() override;

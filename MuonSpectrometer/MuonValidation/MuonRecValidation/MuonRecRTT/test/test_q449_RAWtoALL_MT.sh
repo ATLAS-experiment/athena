@@ -30,7 +30,7 @@ Reco_tf.py --CA True \
            --AMI q449 \
            --conditionsTag CONDBR2-BLKPA-2022-13 \
            --imf False \
-           --postInclude "MuonPRDTest.NSWPRDValAlgReco.NSWPRDValAlgRecoCfg" \
+           --postInclude "MuonPRDTest.HitValAlgReco.HitValAlgRecoCfg" \
            --postExec 'cfg.getEventAlgo("NSWPRDValAlg").doCSCSDO=False;cfg.getEventAlgo("NSWPRDValAlg").doMuEntry=False;cfg.getEventAlgo("NSWPRDValAlg").doMDTSDO=False;cfg.getEventAlgo("NSWPRDValAlg").doRPCSDO=False;cfg.getEventAlgo("NSWPRDValAlg").doTGCSDO=False;cfg.getEventAlgo("NSWPRDValAlg").doTruth=False' \
            --outputESDFile OUT_ESD.root
 exit_code=$?

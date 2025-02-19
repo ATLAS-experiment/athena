@@ -1,18 +1,18 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # jobOptions to activate the dump of the NSWPRDValAlg nTuple
-# This file can be used with Digi_tf by specifying --postInclude MuonPRDTest.NSWPRDValAlgDigi.NSWPRDValAlgDigiCfg
+# This file can be used with Digi_tf by specifying --postInclude MuonPRDTest.HitValAlgDigi.HitValAlgDigiCfg
 # It dumps Truth, MuEntry and Hits, Digits, SDOs and RDOs for MM and sTGC
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaCommon.Constants import DEBUG
 
-def NSWPRDValAlgDigiCfg(flags, name = "NSWPRDValAlg", **kwargs):
+
+def HitValAlgDigiCfg(flags, name = "NSWPRDValAlg", **kwargs):
     result = ComponentAccumulator()
 
-    histSvc = CompFactory.THistSvc(Output=["NSWPRDValAlg DATAFILE='NSWPRDValAlg.digi.ntuple.root' OPT='RECREATE'"])
-    result.addService(histSvc) 
+    from MuonGeoModelTestR4.testGeoModel import setupHistSvcCfg
+    result.merge(setupHistSvcCfg(flags, outFile="NSWPRDValAlg.digi.ntuple.root", outStream="MUONHITVALIDSTREAM"))
 
     kwargs.setdefault("doTruth", True)
     kwargs.setdefault("doMuEntry", True)
@@ -51,9 +51,8 @@ def NSWPRDValAlgDigiCfg(flags, name = "NSWPRDValAlg", **kwargs):
     if not  flags.Detector.EnableCSC:
         kwargs.setdefault("CscRDODecoder","")
     kwargs.setdefault("doCSCPRD", False)
-    kwargs.setdefault("OutputLevel", DEBUG)
 
-    NSWPRDValAlg = CompFactory.NSWPRDValAlg(name, **kwargs)
-    result.addEventAlgo(NSWPRDValAlg)
+    valAlg = CompFactory.MuonVal.HitValAlg(name, **kwargs)
+    result.addEventAlgo(valAlg)
 
     return result

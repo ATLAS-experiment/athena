@@ -37,7 +37,7 @@ cd Serial
 Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
            --AMI q443 \
            --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-12' 'RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02' \
-           --postInclude "RAWtoALL:MuonPRDTest.NSWPRDValAlgReco.NSWPRDValAlgRecoCfg" \
+           --postInclude "RAWtoALL:MuonPRDTest.HitValAlgReco.HitValAlgRecoCfg" \
            --imf False \
            --outputESDFile OUT_ESD.root
 exit_code=$?
