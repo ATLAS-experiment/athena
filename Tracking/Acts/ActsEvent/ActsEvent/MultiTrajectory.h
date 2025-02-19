@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ActsEvent_MultiTrajectory_h
 #define ActsEvent_MultiTrajectory_h
@@ -404,6 +404,8 @@ class MutableMultiTrajectory final
   std::vector<StoredSurface> m_surfaces;
   ActsGeometryContext m_geoContext;
 
+  xAOD::TrackStateContainer m_trackStatesIface;
+
   // adjust preallocated size to actually used
   void trim();
 };
@@ -501,6 +503,8 @@ class MultiTrajectory
   std::vector<std::optional<Acts::SourceLink>> m_uncalibratedSourceLinks;
 
   std::vector<StoredSurface> m_surfaces;
+
+  xAOD::TrackStateContainer m_trackStatesIface;
 };
 
 
