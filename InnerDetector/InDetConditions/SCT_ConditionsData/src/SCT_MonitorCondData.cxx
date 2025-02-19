@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //----------------------------------------------------------------------
@@ -31,7 +31,7 @@ bool SCT_MonitorCondData::find(const IdentifierHash& hash, std::string& defectLi
   std::size_t moduleIndex{static_cast<std::size_t>(hash/SCT_ConditionsData::SIDES_PER_MODULE)};
   std::string result{m_defectListArray[moduleIndex]};
   if (result.empty()) return false;
-  defectList = result;
+  defectList = std::move(result);
   return true;
 }
 

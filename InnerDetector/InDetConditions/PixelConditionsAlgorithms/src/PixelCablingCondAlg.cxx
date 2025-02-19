@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelCablingCondAlg.h"
@@ -208,7 +208,7 @@ StatusCode PixelCablingCondAlg::execute(const EventContext& ctx) const {
   }
 
   ATH_MSG_DEBUG("Size of ROD readoutspeed map: " << rodReadoutMap.size());
-  writeCdo->set_readout_map(rodReadoutMap);
+  writeCdo->set_readout_map(std::move(rodReadoutMap));
 
   if (writeHandle.record(std::move(writeCdo)).isFailure()) {
     ATH_MSG_FATAL("Could not record PixelCablingCondData " << writeHandle.key() << " with EventRange " << writeHandle.getRange() << " into Conditions Store");
