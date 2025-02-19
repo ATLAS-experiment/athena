@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.Enums import ProductionStep
 from Campaigns.Utils import Campaign
 
@@ -91,7 +91,7 @@ def MC23d(flags):
 
 def MC23HeavyIons2023NoPileUp(flags):
     """MC23 flags for the 2023 Heavy Ions run (without pile-up)"""
-    flags.Input.MCCampaign = Campaign.MC23a
+    flags.Input.MCCampaign = Campaign.MC23d
 
     flags.Beam.BunchSpacing = 50
     flags.Beam.NumberOfCollisions = 0.
@@ -116,7 +116,7 @@ def MC23HeavyIons2023NoPileUp(flags):
 
 def MC23HeavyIons2023(flags):
     """MC23 flags for the 2023 Heavy Ions run"""
-    flags.Input.MCCampaign = Campaign.MC23a
+    flags.Input.MCCampaign = Campaign.MC23d
 
     flags.Beam.NumberOfCollisions = 0.
     flags.Input.ConditionsRunNumber = 460000
@@ -174,6 +174,95 @@ def MC23e(flags):
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         # ensure better randomisation of high-pt minbias events
         flags.Digitization.PU.HighPtMinBiasInputColOffset = -1
+
+
+def MC23ppReferenceRun2024(flags): # FIXME This configuration is a placeholder
+    """MC23 flags for the 2024 5.36 TeV pp reference run"""
+    flags.Input.MCCampaign = Campaign.MC23e
+
+    flags.Beam.NumberOfCollisions = 0.
+    flags.Input.ConditionsRunNumber = 488000
+
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
+    LArConfigRun3NoPileUp(flags) # TO CHECK is this actually what we want c.f. LArConfigRun3PileUp
+
+    # radiation damage
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
+
+    # pile-up
+    flags.Digitization.PileUp = True
+    flags.Digitization.DoXingByXingPileUp = True
+    flags.Digitization.PU.BunchStructureConfig = "RunDependentSimData.BunchStructureHeavyIon2022"
+    flags.Digitization.PU.InitialBunchCrossing = 0
+    flags.Digitization.PU.FinalBunchCrossing = 0
+    flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
+
+    from HIRecConfig.HIModeFlags import HImode
+    HImode(flags) # TO CHECK is it an issue if this is set for RDOtoRDOTrigger?
+    flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
+
+    #all
+    flags.Trigger.AODEDMSet = 'AODFULL'
+    flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
+    flags.Trigger.L1.doAlfaCtpin = True
+
+
+def MC23HeavyIons2024NoPileUp(flags): # FIXME This configuration is a placeholder
+    """MC23 flags for the 2024 Heavy Ions run (without pile-up)"""
+    flags.Input.MCCampaign = Campaign.MC23e
+
+    flags.Beam.BunchSpacing = 50
+    flags.Beam.NumberOfCollisions = 0.
+    flags.Input.ConditionsRunNumber = 488600
+
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
+    LArConfigRun3NoPileUp(flags)
+
+    # radiation damage
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
+
+    from HIRecConfig.HIModeFlags import HImode
+    HImode(flags) # TO CHECK is it an issue if this is set for RDOtoRDOTrigger?
+    flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
+
+    #all
+    flags.Trigger.AODEDMSet = 'AODFULL'
+    flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
+    flags.Trigger.L1.doAlfaCtpin = True
+
+
+def MC23HeavyIons2024(flags): # FIXME This configuration is a placeholder
+    """MC23 flags for the 2024 Heavy Ions run"""
+    flags.Input.MCCampaign = Campaign.MC23e
+
+    flags.Beam.NumberOfCollisions = 0.
+    flags.Input.ConditionsRunNumber = 488600
+
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
+    LArConfigRun3NoPileUp(flags) # TO CHECK is this actually what we want c.f. LArConfigRun3PileUp
+
+    # radiation damage
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
+
+    # pile-up
+    flags.Digitization.PileUp = True
+    flags.Digitization.DoXingByXingPileUp = True
+    flags.Digitization.PU.BunchStructureConfig = "RunDependentSimData.BunchStructureHeavyIon2022"
+    flags.Digitization.PU.InitialBunchCrossing = 0
+    flags.Digitization.PU.FinalBunchCrossing = 0
+    flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
+
+    from HIRecConfig.HIModeFlags import HImode
+    HImode(flags) # TO CHECK is it an issue if this is set for RDOtoRDOTrigger?
+    flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
+
+    #all
+    flags.Trigger.AODEDMSet = 'AODFULL'
+    flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
+    flags.Trigger.L1.doAlfaCtpin = True
 
 
 def MC23aSingleBeamspot(flags):
@@ -366,8 +455,29 @@ def MC23SimulationLowMuRun(flags):
 def MC23Simulation2023HeavyIonRun(flags):
     """MC23 flags for simulation simulation of the 2023 Heavy Ion run"""
     MC23SimulationNoIoV(flags)
+    flags.Input.MCCampaign = Campaign.MC23d
 
     flags.Input.RunNumber = [460000]
+    flags.Input.OverrideRunNumber = True
+    flags.Input.LumiBlockNumbers = [1] # dummy value
+
+
+def MC23Simulation2024ppRefRun(flags):
+    """MC23 flags for simulation simulation of the 2024 5.36 TeV pp reference run"""
+    MC23SimulationNoIoV(flags)
+    flags.Input.MCCampaign = Campaign.MC23e
+
+    flags.Input.RunNumber = [488000]
+    flags.Input.OverrideRunNumber = True
+    flags.Input.LumiBlockNumbers = [1] # dummy value
+
+
+def MC23Simulation2024HeavyIonRun(flags):
+    """MC23 flags for simulation simulation of the 2024 Heavy Ion run"""
+    MC23SimulationNoIoV(flags)
+    flags.Input.MCCampaign = Campaign.MC23e
+
+    flags.Input.RunNumber = [488600]
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumbers = [1] # dummy value
 
