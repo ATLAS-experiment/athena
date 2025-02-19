@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -48,16 +48,34 @@ def SetupSensitiveDetectorsCfg(flags):
 def SimHitContainerListCfg(flags):
     simHitContainers = []
     if flags.Detector.EnableMDT:
-        simHitContainers+=[("MDTSimHitCollection", "MDT_Hits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
+            simHitContainers+=[("MDTSimHitCollection", "MDT_Hits_G4")]
+        else:
+            simHitContainers+=[("MDTSimHitCollection", "MDT_Hits")]
     if flags.Detector.EnableRPC:
-        simHitContainers+=[("RPCSimHitCollection", "RPC_Hits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
+            simHitContainers+=[("RPCSimHitCollection", "RPC_Hits_G4")]
+        else:
+            simHitContainers+=[("RPCSimHitCollection", "RPC_Hits")]
     if flags.Detector.EnableTGC:
-        simHitContainers+=[("TGCSimHitCollection", "TGC_Hits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
+            simHitContainers+=[("TGCSimHitCollection", "TGC_Hits_G4")]
+        else:
+            simHitContainers+=[("TGCSimHitCollection", "TGC_Hits")]
     if flags.Detector.EnableMM:
-        simHitContainers+=[("MMSimHitCollection", "MM_Hits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
+            simHitContainers+=[("MMSimHitCollection", "MM_Hits_G4")]
+        else:
+            simHitContainers+=[("MMSimHitCollection", "MM_Hits")]
     if flags.Detector.EnablesTGC:
-        simHitContainers+=[("sTGCSimHitCollection", "sTGC_Hits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
+            simHitContainers+=[("sTGCSimHitCollection", "sTGC_Hits_G4")]
+        else:
+            simHitContainers+=[("sTGCSimHitCollection", "sTGC_Hits")]
     if flags.Detector.EnableCSC:
-        simHitContainers+=[("CSCSimHitCollection", "CSC_Hits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
+            simHitContainers+=[("CSCSimHitCollection", "CSC_Hits_G4")]
+        else:
+            simHitContainers+=[("CSCSimHitCollection", "CSC_Hits")]
     return simHitContainers
 

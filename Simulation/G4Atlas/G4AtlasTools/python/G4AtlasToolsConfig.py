@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
@@ -330,14 +330,47 @@ def SimHitContainerListCfg(flags):
             writtenContainers += [("TileHitVector", "MBTSHits")]
             writtenContainers += [("TileHitVector", "TileHitVec")]
     if flags.Detector.GeometryTRT:
-         writtenContainers += [("TRTUncompressedHitCollection", "TRTUncompressedHits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ID', True)):
+            writtenContainers += [("TRTUncompressedHitCollection", "TRTUncompressedHits_G4")]
+        else:
+            writtenContainers += [("TRTUncompressedHitCollection", "TRTUncompressedHits")]
     if flags.Detector.EnableBCM:
-       writtenContainers += [("SiHitCollection", "BCMHits")]
-       writtenContainers += [("SiHitCollection", "BLMHits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ID', True)):
+            writtenContainers += [("SiHitCollection", "BCMHits_G4")]
+            writtenContainers += [("SiHitCollection", "BLMHits_G4")]
+    else:
+            writtenContainers += [("SiHitCollection", "BCMHits")]
+            writtenContainers += [("SiHitCollection", "BLMHits")]
     if flags.Detector.EnablePixel:
-       writtenContainers += [("SiHitCollection", "PixelHits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ID', True)):
+            writtenContainers += [("SiHitCollection", "PixelHits_G4")]
+        else:
+            writtenContainers += [("SiHitCollection", "PixelHits")]
     if flags.Detector.EnableSCT:
-       writtenContainers += [("SiHitCollection", "SCT_Hits")]
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ID', True)):
+           writtenContainers += [("SiHitCollection", "SCT_Hits_G4")]
+        else:
+            writtenContainers += [("SiHitCollection", "SCT_Hits")]
+    if flags.Detector.EnableITkPixel:
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ITk', True)):
+            writtenContainers += [("SiHitCollection", "ITkPixelHits_G4")]
+        else:
+            writtenContainers += [("SiHitCollection", "ITkPixelHits")]
+    if flags.Detector.EnableITkStrip:
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ITk', True)):
+           writtenContainers += [("SiHitCollection", "ITkStripHits_G4")]
+        else:
+            writtenContainers += [("SiHitCollection", "ITkStripHits")]
+    if flags.Detector.EnablePLR:
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ITk', True)):
+            writtenContainers += [("SiHitCollection", "PLR_Hits_G4")]
+        else:
+            writtenContainers += [("SiHitCollection", "PLR_Hits")]
+    if flags.Detector.EnableHGTD:
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ITk', True)):
+            writtenContainers += [("SiHitCollection", "HGTDHits_G4")]
+        else:
+            writtenContainers += [("SiHitCollection", "HGTDHits")]
     from SimulationConfig.SimEnums import CalibrationRun
     if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile, CalibrationRun.LArTileZDC]:
         # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
