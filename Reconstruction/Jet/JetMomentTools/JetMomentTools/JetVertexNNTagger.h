@@ -1,6 +1,6 @@
 // this file is -*- C++ -*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETVERTEXNNTAGGER_H
@@ -70,7 +70,7 @@ namespace JetPileupTag {
           std::vector<float> trkWidth;
           std::vector<float> sumPtTrk;
 
-          TrackMomentStruct(std::vector<int> n, std::vector<float> w, std::vector<float> s)
+          TrackMomentStruct(const std::vector<int>& n, const std::vector<float>& w, const std::vector<float>& s)
               : numTrk(n), trkWidth(w), sumPtTrk(s) {}
       };
 
