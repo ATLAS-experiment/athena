@@ -1,21 +1,18 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-// Silicon trackers includes
-#include "InDetRawData/PixelRDORawData.h"
-
 #include "Identifier/Identifier.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "EventContainers/IdentifiableContainerBase.h"
-#include "InDetIdentifier/PixelID.h"
 #include "InDetRawData/InDetRawDataCollection.h"
-#include "InDetReadoutGeometry/SiDetectorElement.h"
-#include "PixelReadoutGeometry/PixelModuleDesign.h"
-#include "InDetRawData/PixelRDORawData.h"
+#include "InDetRawData/SCT3_RawData.h"
+#include "InDetRawData/Pixel1RawData.h"
 
 #include "StoreGate/WriteHandle.h"
-#include <typeinfo>
 
+#include <vector>
+#include <memory>
+#include <mutex>
 
 namespace InDet{
 
@@ -26,7 +23,7 @@ namespace InDet{
      ATH_CHECK( m_origRdoContainerKey.initialize() );
      ATH_CHECK( detStore()->retrieve(m_idHelper, m_idHelperName.value()) );
 
-     return DefectsEmulatorBase::initialize();
+     return DefectsEmulatorBase::initializeBase(m_idHelper->wafer_hash_max());
   }
 
   template <class T_RDO_Container>
@@ -39,52 +36,86 @@ namespace InDet{
     ATH_CHECK( rdoOutContainer.record (std::make_unique<T_RDO_Container>(origRdoContainer->size(), EventContainers::Mode::OfflineFast)) );
 
     unsigned int n_rejected=0u;
+    unsigned int n_split_rdos=0u;
     unsigned int n_new=0;
+    T_ID_Adapter id_helper(m_idHelper);
+
+    std::vector<typename T_ModuleHelper::KEY_TYPE> sorted_keys;
     for(const InDetRawDataCollection<T_RDORawData>* collection : *origRdoContainer ) {
        const IdentifierHash idHash = collection->identifyHash();
+       T_ModuleHelper module_helper( emulatedDefects->getDetectorElement(idHash).design() );
        std::unique_ptr<InDetRawDataCollection<T_RDORawData> >
           clone = std::make_unique<InDetRawDataCollection<T_RDORawData> >(idHash);
        clone->setIdentifier(collection->identify());
-       T_ModuleHelper helper( emulatedDefects->m_detectorElements->at(idHash)->design() );
-       if (!helper) {
-          ATH_MSG_ERROR( "Not module design for " << idHash);
-          return StatusCode::FAILURE;
-       }
        unsigned int rejected_per_mod=0u;
-       for(const auto *const rdo : *collection) {
-          const Identifier rdoID = rdo->identify();
-
-          auto row_idx = m_idHelper->phi_index(rdoID);
-          auto col_idx = m_idHelper->eta_index(rdoID);
-
-          if (!emulatedDefects->isDefect( helper, idHash, row_idx, col_idx)) {
-             clone->push_back(std::make_unique<T_RDORawDataConcreteType>(dynamic_cast<const T_RDORawDataConcreteType &>(*rdo)
-                                                              ).release() );
+       if (!emulatedDefects->isModuleDefect(idHash)) {
+          clone->reserve( collection->size());
+          if (!module_helper) {
+             ATH_MSG_ERROR( "Not module design for " << idHash);
+             return StatusCode::FAILURE;
           }
-          else {
-             if (m_histogrammingEnabled) {
-                std::lock_guard<std::mutex> lock(m_histMutex);
-                TH2 *h2=findHist(helper.nSensorRows(), helper.nSensorColumns());
-                h2->Fill(col_idx, row_idx);
+          TH2 *h2_rejected_hits=nullptr;
+          if (m_histogrammingEnabled) {
+             std::lock_guard<std::mutex> lock(m_histMutex);
+             h2_rejected_hits = findHist(module_helper.nSensorRows(), module_helper.nSensorColumns());
+          }
+
+          sorted_keys.clear();
+          sorted_keys.reserve( collection->size());
+          for(const auto *const rdo : *collection) {
+             const Identifier rdoID = rdo->identify();
+
+             auto row_idx = id_helper.row_index(rdoID);
+             auto col_idx = id_helper.col_index(rdoID);
+
+             unsigned int n_new_hits = id_helper.cloneOrRejectHit( module_helper, *(emulatedDefects.cptr()), idHash, row_idx, col_idx, *rdo, *clone);
+             if (n_new_hits>0) {
+                n_split_rdos += (n_new_hits-1);
+                for (unsigned int hit_i=n_new_hits; hit_i>0; --hit_i) {
+                   auto new_hit = clone->at(clone->size()-hit_i);
+
+                   const Identifier rdoID = new_hit->identify();
+                   auto row_idx = id_helper.row_index(rdoID);
+                   auto col_idx = id_helper.col_index(rdoID);
+                   unsigned int key = module_helper.hardwareCoordinates(row_idx,col_idx);
+                   auto iter = std::lower_bound(sorted_keys.begin(), sorted_keys.end(), key);
+                   if (iter == sorted_keys.end()) {
+                      sorted_keys.push_back(key);
+                   }
+                   else {
+                      if (*iter != key) {
+                         sorted_keys.insert(iter, key);
+                      }
+                   }
+                }
              }
-             ++rejected_per_mod;
-          }
+             else {
+                if (m_histogrammingEnabled && h2_rejected_hits) {
+                   std::lock_guard<std::mutex> lock(m_histMutex);
+                   h2_rejected_hits->Fill(col_idx, row_idx);
+                }
+                ++rejected_per_mod;
+             }
 
+          }
+       }
+       else {
+          rejected_per_mod += collection->size();
        }
        if (m_histogrammingEnabled) {
           std::lock_guard<std::mutex> lock(m_histMutex);
-          m_moduleHist->SetBinContent(m_moduleHist->GetBin( idHash%100+1, idHash/100+1), rejected_per_mod );
+          unsigned int bin_i=m_moduleHist[kRejectedHits]->GetBin( idHash%100+1, idHash/100+1);
+          m_moduleHist[kRejectedHits]->SetBinContent(bin_i, rejected_per_mod );
        }
        n_rejected += rejected_per_mod;
        n_new += clone->size();
-       if (idHash>=emulatedDefects->m_detectorElements->size()) {
-          ATH_MSG_ERROR("Invalid ID hash " << idHash);
-       }
        rdoOutContainer->addCollection( clone.release(), idHash).ignore();
     }
     m_rejectedRDOs += n_rejected;
     m_totalRDOs += n_new;
-    ATH_MSG_DEBUG("rejected  " << m_rejectedRDOs << ", copied " << m_totalRDOs << " RDOs");
+    m_splitRDOs += n_split_rdos;
+    ATH_MSG_DEBUG("rejected  " << m_rejectedRDOs << ", copied " << m_totalRDOs << " RDOs"
+                 << " split hits: " << n_split_rdos);
 
     return StatusCode::SUCCESS;
   }

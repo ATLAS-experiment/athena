@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
   Emulating pixel defects by dropping elements from the RDO input container
 """
@@ -8,7 +8,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthenaCommon.Constants import INFO
-
 
 def PixelRDORemappingCfg(flags, InputKey="PixelRDOs") :
     acc = ComponentAccumulator()
@@ -37,9 +36,11 @@ def PixelDefectsEmulatorCondAlgCfg(flags,
                                    name: str = "PixelDefectsEmulatorCondAlg",
                                    **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    kwargs.setdefault("DefectProbability", 1e-4)
-    kwargs.setdefault("CoreColumnDefectProbability", 0.) # there are no core columns for run3 pixel modules
-    kwargs.setdefault("PixelDetEleCollKey", "PixelDetectorElementCollection")
+    kwargs.setdefault("ModulePatterns", [[-2,2,0,99,-99,99,-99,99,0,9999,0,0,0]]) # ranges: barrel/ec, all layers, all eta, all phi, all column counts,
+                                                                                  # all sides, don't auto-match connected rows
+    kwargs.setdefault("DefectProbabilities", [[0.,1e-3,0.,0.]])                   # probabilities: module, pixel, core-column, circuit
+    kwargs.setdefault("NDefectFractionsPerPattern",[[1.,-1, 1.]])                 # fractions for exactly 1..N core-column, circuit defects
+    kwargs.setdefault("DetEleCollKey", "PixelDetectorElementCollection")
     kwargs.setdefault("WriteKey", "PixelEmulatedDefects")
     kwargs.setdefault("HistogramGroupName","") # disable histogramming; enable: e.g. /PixelDefects/EmulatedDefects/
 
@@ -49,14 +50,12 @@ def PixelDefectsEmulatorCondAlgCfg(flags,
 def ITkPixelDefectsEmulatorCondAlgCfg(flags,
                                       name: str = "ITkPixelDefectsEmulatorCondAlg",
                                       **kwargs: dict) -> ComponentAccumulator:
-    kwargs.setdefault("DefectProbability", 1e-4)
+    kwargs.setdefault("ModulePatterns", [[-2,2,0,99,-99,99,-99,99,0,9999,0,0,0]]) # range-pairs+flag: barrel/ec, all layers, all eta, all phi, all column counts,
+                                                                                  # all sides, don't auto-match connected rows
+    kwargs.setdefault("DefectProbabilities", [[0.,1e-2, 1e-1,0.]])                # probabilities: module, pixel, core-column, circuit
+    kwargs.setdefault("NDefectFractionsPerPattern",[[1.,-1, 1.]])                 # fractions for exactly 1..N core-column, circuit defects
 
-    # 1-(1-prob_col_def )**n_col_groups
-    def probColGroupDefect(prob_col_group_defect_per_mod, n_col_groups) :
-        # prob of at least one defects per module : prob of not no defect per module
-        return 1. - pow( (1-prob_col_group_defect_per_mod), 1/(n_col_groups))
-    kwargs.setdefault("CoreColumnDefectProbability", probColGroupDefect(.1, 400/8.) ) # ~20 % prob / chip  for 400/8. core groups / chip
-    kwargs.setdefault("PixelDetEleCollKey", "ITkPixelDetectorElementCollection")
+    kwargs.setdefault("DetEleCollKey", "ITkPixelDetectorElementCollection")
     kwargs.setdefault("WriteKey", "ITkPixelEmulatedDefects")
 
     return PixelDefectsEmulatorCondAlgCfg(flags,name,**kwargs)
@@ -140,8 +139,8 @@ if __name__ == "__main__":
                                           RunConsistencyChecks=False,
                                           ObjDebugOutput=False))
 
-    acc.merge( ITkPixelDefectsEmulatorAlgCfg(flags,
-                                             OutputLevel=INFO))
+    from PixelDefectsEmulatorPostInclude import emulateITkPixelDefectsPoisson
+    emulateITkPixelDefectsPoisson(flags,acc)
 
     acc.printConfig(withDetails=True, summariseProps=True,printDefaults=True)
     sc = acc.run()
