@@ -141,5 +141,8 @@ RunToTimestampDict = {
     420000: 1655000000, # MC21/23a pp (2022 low mu "Minbias" run)
     425000: 1660000000, # MC21/23a 2022 Reserved
     450000: 1680000000, # MC23c/d 2023
-    460000: 1695700000 # MC23 for heavy-ions 2023
+    460000: 1695700000, # MC23 for 2023 heavy-ion run
+    470000: 1704000000, # MC23e/f 2024
+    488000: 1730070000, # MC23 for 2024 5.36 TeV pp reference run
+    488600: 1730804400  # MC23 for 2024 heavy ion run
 }
