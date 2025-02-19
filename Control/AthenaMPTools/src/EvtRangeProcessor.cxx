@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EvtRangeProcessor.h"
@@ -114,7 +114,7 @@ int EvtRangeProcessor::makePool(int, int nprocs, const std::string& topdir)
   if(mapAsyncFlag(AthenaMPToolBase::FUNC_BOOTSTRAP)) {
     return -1;
   }
-  ATH_MSG_INFO("Workers bootstraped"); 
+  ATH_MSG_INFO("Workers bootstrapped"); 
 
   // Populate the m_procStates map
   for(const AthenaInterprocess::Process& process : m_processGroup->getChildren()) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SharedEvtQueueProvider.h"
@@ -89,7 +89,7 @@ int SharedEvtQueueProvider::makePool(int maxevt, int nprocs, const std::string& 
   ATH_MSG_INFO( "Event Counter process created" );
   if(mapAsyncFlag(AthenaMPToolBase::FUNC_BOOTSTRAP))
     return -1;
-  ATH_MSG_INFO( "Event Counter bootstraped" ); 
+  ATH_MSG_INFO( "Event Counter bootstrapped" ); 
 
   return 1;
 }

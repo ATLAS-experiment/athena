@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SharedEvtQueueConsumer.h"
@@ -207,7 +207,7 @@ int SharedEvtQueueConsumer::makePool(int, int nprocs, const std::string& topdir)
   ATH_MSG_INFO("Created Pool of " << m_nprocs << " worker processes");
   if(mapAsyncFlag(AthenaMPToolBase::FUNC_BOOTSTRAP))
     return -1;
-  ATH_MSG_INFO("Workers bootstraped");
+  ATH_MSG_INFO("Workers bootstrapped");
 
   return m_nprocs;
 }

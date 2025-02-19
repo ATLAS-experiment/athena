@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SharedWriterTool.h"
@@ -97,7 +97,7 @@ int SharedWriterTool::makePool(int /*maxevt*/, int nprocs, const std::string& to
   ATH_MSG_INFO("Created shared writer process");
   if(mapAsyncFlag(AthenaMPToolBase::FUNC_BOOTSTRAP))
     return -1;
-  ATH_MSG_INFO("Shared writer process bootstraped");
+  ATH_MSG_INFO("Shared writer process bootstrapped");
   return 1;
 }
 
