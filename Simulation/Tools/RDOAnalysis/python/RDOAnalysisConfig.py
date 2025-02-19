@@ -229,6 +229,18 @@ def RDOAnalysisCfg(flags):
     if flags.Detector.EnableTRT:
         acc.merge(TRT_RDOAnalysisCfg(flags))
 
+    if flags.Detector.EnableLAr:
+        acc.merge(LArRDOAnalysisCfg(flags))
+    
+    if flags.Detector.EnableMDT:
+        acc.merge(MDT_RDOAnalysisCfg(flags))
+
+    if flags.Detector.EnableRPC:
+        acc.merge(RPC_RDOAnalysisCfg(flags))
+
+    if flags.Detector.EnableTGC:
+        acc.merge(TGC_RDOAnalysisCfg(flags))
+
     if flags.Detector.EnableITkPixel:
         acc.merge(ITkPixelRDOAnalysisCfg(flags))
 
