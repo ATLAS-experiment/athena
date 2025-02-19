@@ -29,7 +29,7 @@ Overlay_tf.py \
     --maxEvents ${events} \
     --digiSeedOffset1 511 \
     --digiSeedOffset2 727 \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-07'\
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-09'\
     --geometryVersion "default:${geo_tag}" \
     --preInclude 'all:Campaigns.MC23a' \
     --preExec "default:flags.Scheduler.CheckDependencies=True;flags.Scheduler.ShowDataDeps=True;flags.Scheduler.ShowDataFlow=True;flags.Scheduler.ShowControlFlow=True" \

@@ -63,7 +63,7 @@ echo ${neutrinoFiles}
         --multithreaded True \
         --geometrySQLite True \
 	      --geometrySQLiteFullPath "${geo_db}" \
-        --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-07'\
+        --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-09'\
         --digiSeedOffset1 170 \
         --digiSeedOffset2 170 \
         --digiSteeringConf 'StandardSignalOnlyTruth' \

@@ -14,7 +14,7 @@
 
 
 #ifndef SIMULATIONBASE
-#     include <MuonAlignmentDataR4/MdtAlignmentStore.h>
+#   include <MuonAlignmentDataR4/MdtAlignmentStore.h>
 #   include "Acts/Surfaces/TrapezoidBounds.hpp"
 #   include "Acts/Surfaces/LineBounds.hpp"
 #   include "Acts/Surfaces/Surface.hpp"
@@ -284,7 +284,7 @@ Amg::Vector3D MdtReadoutElement::wireEndpointAsBuilt(const MdtAsBuiltPar&  param
 
    
    if ((ret - wireEnd).mag() > 3. * Gaudi::Units::mm) {
-         ATH_MSG_WARNING( "Large as-built correction for chamber " << idHelperSvc()->toString(measurementId(tubeHash))
+      ATH_MSG_WARNING("Large as-built correction for chamber " << idHelperSvc()->toString(measurementId(tubeHash))
                         << ", side "<< (side == tubeSide_t::POS ? "positive" : "negative") 
                         << ", endpoint "<<Amg::toString(wireEnd)<<", return: "<<Amg::toString(ret));
    }
@@ -327,28 +327,35 @@ Amg::Vector3D MdtReadoutElement::applyBlineCorrections(const BLinePar& bline,
    ATH_MSG_VERBOSE( "** In "<<__func__<<" - going to correct for B-line the position of Point at " << Amg::toString(localTubeEndPoint));
 
    double s0mdt = localTubeEndPoint.x();  // always I think !
-   if (std::abs(fixedPoint.x()) > 0.01) s0mdt = localTubeEndPoint.x() - fixedPoint.x();
+   if (std::abs(fixedPoint.x()) > 0.01) {
+      s0mdt = localTubeEndPoint.x() - fixedPoint.x();
+   }
    double z0mdt = localTubeEndPoint.y();  
    // unless in the D section of this station there's a dy diff. from 0 for the innermost MDT multilayer (sometimes
    // in the barrel)
    // unless in the D section of this station there's a dz diff. from 0 for the innermost MDT multilayer (often in barrel)
-   if (std::abs(fixedPoint.y()) > 0.01) z0mdt = localTubeEndPoint.y() - fixedPoint.y();
+   if (std::abs(fixedPoint.y()) > 0.01) {
+      z0mdt = localTubeEndPoint.y() - fixedPoint.y();
+   }
    double t0mdt = localTubeEndPoint.z();  
-   if (std::abs(fixedPoint.z()) > 0.01) t0mdt = localTubeEndPoint.z() - fixedPoint.z();
+   if (std::abs(fixedPoint.z()) > 0.01) {
+      t0mdt = localTubeEndPoint.z() - fixedPoint.z();
+   }
    if (z0mdt < 0 || t0mdt < 0) {
       ATH_MSG_WARNING(""<<__func__<<": correcting the local position of a point outside the mdt station (2 multilayers) volume -- RE "
                   << idHelperSvc()->toStringDetEl(identify()) << " local point: szt=" <<Amg::toString(localTubeEndPoint)
-                  << " fixedPoint " <<Amg::toString(fixedPoint) );
+                  << " fixedPoint " <<Amg::toString(fixedPoint)<<", z0mdt: "<<z0mdt<<", t0mdt"<<t0mdt);
    }
    ATH_MSG_VERBOSE( "** In "<<__func__<<" - correct for offset of B-line fixed point " << s0mdt << " " << z0mdt << " " << t0mdt);
 
-   const double width_actual = moduleWidthS() + (moduleWidthL() - moduleWidthS()) * (z0mdt / chamberHeight);
+   constexpr double amdbMargin  = 1.*Gaudi::Units::cm;
+   const double width_actual = moduleWidthS() - amdbMargin + (moduleWidthL() - moduleWidthS()) * (z0mdt / chamberHeight);
    const double s_rel = s0mdt / (width_actual / 2.);
    const double z_rel = (z0mdt - chamberHeight / 2.) / (chamberHeight / 2.);
    const double t_rel = (t0mdt - chamberThickness / 2.) / (chamberThickness / 2.);
 
-   ATH_MSG_VERBOSE( "** In "<<__func__<<" - width_actual, s_rel, z_rel, t_rel  " << width_actual << " " << s_rel << " "
-                                 << z_rel << " " << t_rel );
+   ATH_MSG_VERBOSE( "** In "<<__func__<<" - width_actual: "<<width_actual<<", s_rel: "<<s_rel<<", z_rel: "<<z_rel
+                  <<", t_rel:" << t_rel );
    double ds{0.},dz{0.},dt{0.};
    
    // sp, sn - cross plate sag out of plane
@@ -362,7 +369,7 @@ Amg::Vector3D MdtReadoutElement::applyBlineCorrections(const BLinePar& bline,
    if (bline.getParameter(Parameter::tw)) {
       dt -= bline.getParameter(Parameter::tw) * s_rel * z_rel;
       dz += bline.getParameter(Parameter::tw) * s_rel * t_rel * chamberThickness / chamberHeight;
-      ATH_MSG_VERBOSE( "** In "<<__func__<<": tw=" << bline.getParameter(Parameter::tw) << " dt, dz " << dt << " " << dz );
+      ATH_MSG_VERBOSE( "** In "<<__func__<<": tw=" << bline.getParameter(Parameter::tw) << " dt: "<<dt<<", dz: "<< dz );
    }
 
    constexpr double expansionScale = BLinePar::expansionScale;
@@ -390,12 +397,10 @@ Amg::Vector3D MdtReadoutElement::applyBlineCorrections(const BLinePar& bline,
       dz += localDz;
    }
 
-   ATH_MSG_VERBOSE( "posOnDefChamStraighWire: ds,z,t = " << ds << " " << dz << " " << dt );
+   ATH_MSG_VERBOSE( "posOnDefChamStraighWire: ds="<<ds<<",z="<<dz<<",t="<<dt);
    deformedPos[0] = localTubeEndPoint[0] + ds;
    deformedPos[1] = localTubeEndPoint[1] + dz;
    deformedPos[2] = localTubeEndPoint[2] + dt;
-
-        
    return deformedPos;
 }
 #endif
