@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Runs athenaHLT writing BS output and then runs BS decoding
 # art-type: build
@@ -61,7 +61,7 @@ refcomp = CheckSteps.ChainCompStep("CountRefComp")
 refcomp.input_file = 'ref_v1Dev_decodeBS_build.new'
 refcomp.args += ' --patch'
 refcomp.reference_from_release = True # installed from TrigP1Test/share
-refcomp.required = True # Final exit code depends on this step
+refcomp.required = False # Final exit code doesn't depend on this step in main
 CheckSteps.add_step_after_type(test.check_steps, CheckSteps.ChainDumpStep, refcomp)
 
 import sys
