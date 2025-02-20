@@ -1,15 +1,16 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// System include(s):
-#include <iostream>
 
 // EDM include(s):
 #include "AthContainers/AuxTypeRegistry.h"
 
 // Local include(s):
 #include "xAODCore/AuxCompression.h"
+
+// System include(s).
+#include <iostream>
 
 namespace xAOD {
 
@@ -102,7 +103,7 @@ namespace xAOD {
 
       // Check if all floats are to be compressed
       if( names.find("*") != names.end() ) {
-        auxids = fauxids;
+        auxids = std::move(fauxids);
       }
       // Here comes the parsing either + or - as in AuxSelection that we follow closely
       else if( add ) {
@@ -134,7 +135,7 @@ namespace xAOD {
       }
 
       // Finally fill the result map
-      result[ nmantissa ] = auxids;
+      result[ nmantissa ] = std::move(auxids);
 
     } // End of loop over internal map
 

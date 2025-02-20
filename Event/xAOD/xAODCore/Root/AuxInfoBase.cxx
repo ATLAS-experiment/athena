@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -342,7 +342,7 @@ namespace xAOD {
       if( m_store ) {
         ids.insert (m_store->getAuxIDs());
       }
-      m_auxids = ids;
+      m_auxids = std::move(ids);
       
       return true;
    }
