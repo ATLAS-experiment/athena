@@ -137,6 +137,7 @@ namespace ActsTrk
                 << std::setw(10) << "loc1"
                 << "  "
                 << std::setw(9) << "R" << ' '
+		<< std::setw(9) << "Pos Z" << ' '
                 << std::setw(9) << "phid" << ' '
                 << std::setw(9) << "eta";
       if (extra)
@@ -168,6 +169,7 @@ namespace ActsTrk
                 << std::setw(10) << "loc0" << ' '
                 << std::setw(10) << "loc1" << ' '
                 << std::setw(9) << "Pos R" << ' '
+		<< std::setw(9) << "Pos Z" << ' '
                 << std::setw(9) << "phid" << ' '
                 << std::setw(9) << "eta" << ' '
                 << std::setw(9) << "q*pT" << ' '
@@ -184,6 +186,7 @@ namespace ActsTrk
   {
     std::cout << std::fixed << ' '
               << std::setw(9) << std::setprecision(3) << p.head<2>().norm() << ' '
+	      << std::setw(9) << std::setprecision(3) << p[2] << ' '
               << std::setw(9) << std::setprecision(3) << std::atan2(p[1], p[0]) / Acts::UnitConstants::degree << ' '
               << std::setw(9) << std::setprecision(5) << std::atanh(p[2] / p.norm())
               << std::defaultfloat << std::setprecision(-1);
@@ -415,6 +418,7 @@ namespace ActsTrk
               << std::setw(10) << std::setprecision(4) << bound[Acts::eBoundLoc0] << ' '
               << std::setw(10) << std::setprecision(4) << bound[Acts::eBoundLoc1] << ' '
               << std::setw(9) << std::setprecision(3) << p.segment<2>(Acts::eFreePos0).norm() << ' '
+              << std::setw(9) << std::setprecision(3) << p[Acts::eFreePos2] << ' '
               << std::setw(9) << std::setprecision(3) << std::atan2(p[Acts::eFreePos1], p[Acts::eFreePos0]) / Acts::UnitConstants::degree << ' '
               << std::setw(9) << std::setprecision(5) << std::atanh(p[Acts::eFreePos2] / p.segment<3>(Acts::eFreePos0).norm()) << ' '
               << std::setw(9) << std::setprecision(3) << p.segment<2>(Acts::eFreeDir0).norm() / p[Acts::eFreeQOverP] << ' '
