@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #-----Python imports---#
 import os, sys, shutil, uuid
@@ -78,11 +78,12 @@ class MpEvtLoopMgr(AthMpEvtLoopMgr):
                     svcMgr.AthenaPoolCnvSvc.OutputStreamingTool = AthenaSharedMemoryTool("OutputStreamingTool", SharedMemoryName=f"OutputStream{unique_id}")
                 svcMgr.AthenaPoolCnvSvc.ParallelCompression=use_parallel_compression
 
-            from AthenaMPTools.AthenaMPToolsConf import SharedEvtQueueProvider
-            self.Tools += [ SharedEvtQueueProvider(UseSharedReader=use_shared_reader,
-                                                   IsPileup=pileup,
-                                                   EventsBeforeFork=events_before_fork,
-                                                   ChunkSize=chunk_size) ]
+            if strategy=='SharedQueue':
+                from AthenaMPTools.AthenaMPToolsConf import SharedEvtQueueProvider
+                self.Tools += [ SharedEvtQueueProvider(UseSharedReader=use_shared_reader,
+                                                       IsPileup=pileup,
+                                                       EventsBeforeFork=events_before_fork,
+                                                       ChunkSize=chunk_size) ]
 
             # In pure MP, self.nThreads may be set to None - we want the pure MP setup in that case
             if self.nThreads is not None and self.nThreads >= 1:
