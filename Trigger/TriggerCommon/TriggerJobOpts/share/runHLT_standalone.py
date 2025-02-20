@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 ################################################################################
 # TriggerJobOpts/runHLT_standalone.py
 #
@@ -160,6 +160,18 @@ flags.InDet.useDCS = False    # DCS is in general not available online
 flags.Detector.GeometryALFA = False
 flags.Detector.GeometryFwdRegion = False
 flags.Detector.GeometryLucid = False
+
+# Propagate LAr flags (Control/AthenaConfiguration/python/OldFlags2NewFlags.py)
+from LArConditionsCommon.LArCondFlags import larCondFlags
+from LArROD.LArRODFlags import larRODFlags
+flags.LAr.OFCShapeFolder = larCondFlags.OFCShapeFolder()
+flags.LAr.ROD.NumberOfCollisions = larRODFlags.NumberOfCollisions() if larRODFlags.doOFCPileupOptimization() else 0
+flags.LAr.ROD.nSamples = larRODFlags.nSamples()
+flags.LAr.ROD.FirstSample = larRODFlags.firstSample()
+flags.LAr.ROD.UseHighestGainAutoCorr = larRODFlags.useHighestGainAutoCorr()
+flags.LAr.ROD.DoOFCMixedOptimization = larRODFlags.doOFCMixedOptimization()
+flags.LAr.ROD.UseDelta = larRODFlags.UseDelta()
+flags.LAr.ROD.forceIter = larRODFlags.forceIter()
 
 # Increase scheduler checks and verbosity
 flags.Scheduler.CheckDependencies = True
