@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MmRdoToPrepDataToolMT.h"
-
 #include "MuonPrepRawData/MMPrepDataContainer.h"
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 #include "MuonReadoutGeometry/MuonStation.h"
@@ -96,7 +95,7 @@ StatusCode MmRdoToPrepDataToolMT::processCollection(const EventContext& ctx,
   }
 
   std::vector<MMPrepData> MMprds;
-  // convert the RDO collection to a PRD collection
+  // convert the RDO collection to a PRD collection  
   for (const MM_RawData* rdo : *rdoColl) {
     ATH_MSG_DEBUG("Adding a new MM PrepRawData");
 
@@ -193,7 +192,7 @@ StatusCode MmRdoToPrepDataToolMT::processCollection(const EventContext& ctx,
       prdColl->push_back(std::move(prdN));
     }
   }  // merge
-
+  
   if (xAODContainer) {
       // Lambda to fill xprd from prd
       std::vector<const MMPrepData*> sortMe{prdColl->begin(), prdColl->end()};
@@ -276,10 +275,12 @@ StatusCode MmRdoToPrepDataToolMT::decode(const EventContext& ctx,
   if (!mmPrepDataContainer) {
     return StatusCode::FAILURE;
   }
+  
+  SG::WriteHandle<xAOD::MMClusterContainer> outputContainer{};
   xAOD::MMClusterContainer* xAODContainer{nullptr};
   if (!m_xAODKey.empty()) {
-    SG::WriteHandle outputContainer{m_xAODKey, ctx};
-    ATH_CHECK(outputContainer.recordNonConst(std::make_unique<xAOD::MMClusterContainer>(),
+    outputContainer = SG::WriteHandle{m_xAODKey, ctx};
+    ATH_CHECK(outputContainer.record(std::make_unique<xAOD::MMClusterContainer>(),
                                              std::make_unique<xAOD::MMClusterAuxContainer>()));
     xAODContainer = outputContainer.ptr();
   }
