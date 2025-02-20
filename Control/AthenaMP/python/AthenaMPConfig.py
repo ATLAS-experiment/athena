@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags, GetFileMD
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -125,10 +125,12 @@ def AthenaMPCfg(flags):
                 from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
                 result.merge(AthenaPoolCnvSvcCfg(flags, OutputStreamingTool=outputStreamingTool))
 
-        queue_provider = CompFactory.SharedEvtQueueProvider(UseSharedReader=use_shared_reader,
-                                                            IsPileup=mpevtloop.IsPileup,
-                                                            EventsBeforeFork=mpevtloop.EventsBeforeFork,
-                                                            ChunkSize=chunk_size)
+        if flags.MP.Strategy == 'SharedQueue':
+            queue_provider = CompFactory.SharedEvtQueueProvider(UseSharedReader=use_shared_reader,
+                                                                IsPileup=mpevtloop.IsPileup,
+                                                                EventsBeforeFork=mpevtloop.EventsBeforeFork,
+                                                                ChunkSize=chunk_size)
+
         if flags.Concurrency.NumThreads > 0:
             if mpevtloop.IsPileup:
                 raise Exception('Running pileup digitization in mixed MP+MT currently not supported')

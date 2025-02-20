@@ -555,17 +555,6 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::exec_
     ATH_MSG_ERROR(m_eventOrdersFile << " already exists in the worker's run directory!");
     all_ok = false;
   }
-  
-  // For the round robin we need to know the maximum number of events for this job
-  if(m_isRoundRobin) {
-    evtnumAndChunk = 1;
-    while(evtnumAndChunk>0) {
-      if(!m_sharedEventQueue->try_receive_basic<long>(evtnumAndChunk)) {
-	usleep(1000);
-      }
-    }
-    evtnumAndChunk *= -1;
-  }
 
   System::ProcessTime time_start = System::getProcessTime();
   if(all_ok) {
@@ -575,7 +564,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::exec_
     while(true) {
       if(m_isRoundRobin) {
 	evtnum = m_nSkipEvents + m_nprocs*evtCounter + m_rankId; 
-	if(evtnum>=evtnumAndChunk+m_nSkipEvents) { 
+	if(m_maxEvt!=-1 && evtnum>=m_maxEvt+m_nSkipEvents) {
 	  break;
 	}
 	evtCounter++;
