@@ -13,8 +13,11 @@ project( WorkDir )
 # Force the compilation of CUDA code for only compute capability 5.2 for now.
 # To get rid of warnings from 11.0 about not supporting older compute
 # capabilities anymore.
-set( CMAKE_CUDA_ARCHITECTURES "52" CACHE STRING
+set( CMAKE_CUDA_ARCHITECTURES "all-major" CACHE STRING
    "CUDA architectures to build code for" )
+
+set( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Wno-deprecated-gpu-targets" CACHE STRING
+   "CUDA switch off deprecated architecture compilation warning" )
 
 # Enable the CI tests in the CITest package in case the user wants to
 # run them locally:
