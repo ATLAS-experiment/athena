@@ -51,6 +51,49 @@ if [ $# -eq 0 -o "x$1" == "x-a" ]; then
   
 fi
 
+if [ $# -eq 0 -o "x$1" == "x-b" ]; then
+
+  cp Chains.py.pre   pre.py
+  cp pre.py pre.py.bak
+
+    
+  for gitc in $(grep "^\#.*Chains" pre.py ) ; do 
+
+    echo $gitc
+
+    git=$(echo $gitc | sed 's|#||' | sed 's|Chains||')
+    
+    CHAINS=
+
+    grep "$git:" comparitor.txt
+
+    echo
+    
+    for CHAIN in $(grep "$git:" comparitor.txt | awk '{print $2}' | sed ' s|:.*||' | sed 's|_HLT.*||' | sort -u ) ; do 
+
+	FOUND=1
+	# ( grep -q $CHAIN $Athena_DIR/src/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Menu/* ) || FOUND=0
+
+	# [ $FOUND -eq 0 ] && echo "chain not found: $CHAIN" && continue
+	
+#	echo "  chains += \"'$CHAIN',\"\n"
+	CHAINS="$CHAINS                '$CHAIN',\n"
+    
+    done	
+
+    printf  "$CHAINS"
+
+    cat pre.py | sed "s|\($gitc\)|$CHAINS|" > pre2.py
+    mv pre2.py pre.py
+
+    echo " --------------------------------------------------"
+    echo
+
+  done
+
+  cp pre.py $TestArea/Trigger/TrigValidation/TrigInDetValidation/python/Chains.py 
+fi
+
 
 if [ $# -eq 0 -o "x$1" == "x-d" ]; then
 
@@ -78,7 +121,8 @@ if [ $# -eq 0 -o "x$1" == "x-d" ]; then
 	    if ( echo $sigs | grep -q LRT ); then
 		LRTCompChains="$LRTCompChains    \"$CHAIN\",\n"
 	    elif ( echo $sigs | grep -q vtx ); then
-		VertexCompChains="$VertexCompChains    \"$CHAIN\",\n"
+		VTXCHAIN=$(echo "$CHAIN" | sed 's|/HLT_IDVertex[^:]*||g' )
+		VertexCompChains="$VertexCompChains    \"$VTXCHAIN\",\n"
 	    else
 		CompChains="$CompChains    \"$CHAIN\",\n"
 	    fi
