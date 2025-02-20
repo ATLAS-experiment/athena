@@ -11,6 +11,14 @@ def MuonPhiHoughTransformAlgCfg(flags, name = "MuonPhiHoughTransformAlg", **kwar
     result.addEventAlgo(theAlg, primary=True)
     return result
 
+
+def MuonNSWPhiSeedFinderAlgCfg(flags, name = "MuonNswPhiSeedFinderAlg", **kwargs):
+    result = ComponentAccumulator()
+    theAlg = CompFactory.MuonR4.CombinatorialNSWSeedFinderAlg(name, **kwargs)
+    result.addEventAlgo(theAlg, primary=True)
+    return result
+    
+
 def MuonEtaHoughTransformAlgCfg(flags, name = "MuonEtaHoughTransformAlg", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("downWeightPrdMultiplicity", True)
@@ -37,6 +45,10 @@ def MuonPatternRecognitionCfg(flags):
     result = ComponentAccumulator()
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
     result.merge(ActsGeometryContextAlgCfg(flags))
-    result.merge(MuonEtaHoughTransformAlgCfg(flags))
-    result.merge(MuonPhiHoughTransformAlgCfg(flags))
+    if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
+        result.merge(MuonEtaHoughTransformAlgCfg(flags,name="MuonNswEtaHoughTransformAlg", EtaHoughMaxContainer = "MuonHoughNswMaxima", SpacePointContainer = "NswSpacePoints"))
+        result.merge(MuonNSWPhiSeedFinderAlgCfg(flags, name="MuonNswPhiSeedFinderAlg", CombinatorialPhiWriteKey = "MuonHoughNswSegmentSeeds", CombinatorialReadKey = "MuonHoughNswMaxima"))
+    if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
+        result.merge(MuonEtaHoughTransformAlgCfg(flags))
+        result.merge(MuonPhiHoughTransformAlgCfg(flags))
     return result
