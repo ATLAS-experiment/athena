@@ -123,6 +123,15 @@ SGInputLoader::execute()
       if( extraOutputDeps().count(*obj) ) {
         ATH_MSG_DEBUG(obj->key() << " is in ExtraOutputs and will not be loaded");
         continue;
+      } else if(std::string::size_type ppos = obj->key().find ('.'); ppos < obj->key().size()-1) {
+        // see if the object that the decoration is on is declared as extra output. Will assume the extra output
+        // will also provide such a decoration
+        DataObjID objcopy(*obj);
+        objcopy.updateKey(obj->key().substr (0, ppos));
+        if( extraOutputDeps().count(objcopy) ) {
+          ATH_MSG_DEBUG(obj->key() << "'s object/container is in ExtraOutputs and will not be loaded");
+          continue;
+        }
       }
       SG::VarHandleKey vhk(obj->clid(),obj->key(),Gaudi::DataHandle::Writer);
       if (StoreID::findStoreID(vhk.storeHandle().name()) == StoreID::EVENT_STORE) {
