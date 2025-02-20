@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -13,9 +13,9 @@
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 
 #include <GeoModelKernel/GeoLogVol.h>
-#include <GeoModelKernel/GeoVFullPhysVol.h>
-#include <GeoModelKernel/GeoVPhysVol.h>
+#include <GeoModelKernel/GeoDefinitions.h>
 #include <GeoModelHelpers/StringUtils.h>
+#include <GeoModelHelpers/TransformToStringConverter.h>
 
 #include <cmath>
 #include <ext/alloc_traits.h>
@@ -25,6 +25,7 @@
 #include <utility>
 
 #include "GeoModelKernel/GeoFullPhysVol.h"
+#include "GaudiKernel/SystemOfUnits.h"
 #include "Identifier/IdentifierHash.h"
 #include "MuonAGDDDescription/sTGCDetectorDescription.h"
 #include "MuonAGDDDescription/sTGCDetectorHelper.h"
@@ -716,12 +717,14 @@ namespace MuonGM {
     void sTgcReadoutElement::setDelta(const ALinePar& aline) {
         // amdb frame (s, z, t) = chamber frame (y, z, x)        
         if (aline) {
-            m_delta = aline.delta();                    
+            static const Amg::Transform3D permute{GeoTrf::GeoRotation{90.*Gaudi::Units::deg,90.*Gaudi::Units::deg, 0.}};
             // The origin of the rotation axes is at the center of the active area 
             // in the z (radial) direction. Account for this shift in the definition 
             // of m_delta so that it can be applied on chamber frame coordinates.
             m_ALinePar  = &aline;
-            m_delta     = Amg::getTranslateZ3D(m_offset)*m_delta*Amg::getTranslateZ3D(-m_offset);
+            m_delta     = Amg::getTranslateZ3D(m_offset)* permute*aline.delta()*
+                          permute.inverse()*Amg::getTranslateZ3D(-m_offset);
+            ATH_MSG_DEBUG(idHelperSvc()->toStringDetEl(identify())<<" setup new alignment: "<<GeoTrf::toString(m_delta));
             refreshCache();
         } else {
             clearALinePar();

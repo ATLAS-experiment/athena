@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -14,7 +14,7 @@
 #include <GeoModelKernel/GeoLogVol.h>
 #include <GeoModelKernel/GeoShape.h>
 #include <GeoModelKernel/GeoVFullPhysVol.h>
-#include <GeoModelKernel/GeoVPhysVol.h>
+#include <GeoModelKernel/GeoDefinitions.h>
 #include <cstdlib>
 
 #include <cmath>
@@ -25,6 +25,7 @@
 #include "GeoModelHelpers/getChildNodesWithTrf.h"
 #include "GeoModelHelpers/StringUtils.h"
 #include "GeoModelHelpers/GeoShapeUtils.h"
+#include "GeoModelHelpers/TransformToStringConverter.h"
 
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "GeoModelKernel/GeoShapeSubtraction.h"
@@ -335,7 +336,7 @@ namespace MuonGM {
         if (m_idHelper.stationEta(id) != getStationEta()) return false;
         if (m_idHelper.stationPhi(id) != getStationPhi()) return false;
 
-        if (m_idHelper.multilayerID(id) != m_ml) return false;
+        if (m_idHelper.multilayer(id) != m_ml) return false;
 
         int gasgap = m_idHelper.gasGap(id);
         if (gasgap < 1 || gasgap > m_nlayers) return false;
@@ -365,12 +366,14 @@ namespace MuonGM {
     void MMReadoutElement::setDelta(const ALinePar& aline) {
         // amdb frame (s, z, t) = chamber frame (y, z, x)
         if (aline) {
-            m_delta = aline.delta();
+            const Amg::Transform3D permute{GeoTrf::GeoRotation{90.*Gaudi::Units::deg,90.*Gaudi::Units::deg, 0.}};
             // The origin of the rotation axes is at the center of the active area 
             // in the z (radial) direction. Account for this shift in the definition 
             // of m_delta so that it can be applied on chamber frame coordinates.
             m_ALinePar  = &aline;
-            m_delta     = Amg::getTranslateZ3D(m_offset)*m_delta*Amg::getTranslateZ3D(-m_offset);
+            m_delta     = Amg::getTranslateZ3D(m_offset)* permute*aline.delta()*
+                          permute.inverse()*Amg::getTranslateZ3D(-m_offset);
+            ATH_MSG_DEBUG(idHelperSvc()->toStringDetEl(identify())<<" setup new alignment: "<<GeoTrf::toString(m_delta,true));
             refreshCache();
         } else {  
             clearALinePar();

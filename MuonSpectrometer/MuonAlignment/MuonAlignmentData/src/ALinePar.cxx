@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonAlignmentData/ALinePar.h"
@@ -32,21 +32,11 @@ void ALinePar::setParameters(float s, float z, float t, float rotS, float rotZ, 
     m_payload[static_cast<unsigned int>(Parameter::rotT)  ] = rotT;
 }
 
-HepGeom::Transform3D ALinePar::deltaTransform() const {  // does NOT account for AMDB origin being different from volume centre;
-    // for that you would need access to full station Position info...
-    // see MuonGeoModel/Station::getDeltaTransform() for details.
-    return HepGeom::TranslateY3D(getParameter(Parameter::transS)) * 
-           HepGeom::TranslateZ3D(getParameter(Parameter::transZ)) * 
-           HepGeom::TranslateX3D(getParameter(Parameter::transT)) * 
-           HepGeom::RotateY3D(getParameter(Parameter::rotS)) *
-           HepGeom::RotateZ3D(getParameter(Parameter::rotZ)) * 
-           HepGeom::RotateX3D(getParameter(Parameter::rotT));
-}
-Amg::Transform3D  ALinePar::delta () const{
-    return Amg::Translation3D(getParameter(Parameter::transS)*Amg::Vector3D::UnitY()) * 
-           Amg::Translation3D(getParameter(Parameter::transZ)*Amg::Vector3D::UnitZ()) * 
-           Amg::Translation3D(getParameter(Parameter::transT)*Amg::Vector3D::UnitX()) * 
-           Amg::getRotateY3D(getParameter(Parameter::rotS)) *
-           Amg::getRotateZ3D(getParameter(Parameter::rotZ)) * 
-           Amg::getRotateX3D(getParameter(Parameter::rotT));
+Amg::Transform3D ALinePar::delta() const {
+    return Amg::getTranslateX3D(getParameter(Parameter::transS)) * 
+           Amg::getTranslateY3D(getParameter(Parameter::transZ)) * 
+           Amg::getTranslateZ3D(getParameter(Parameter::transT)) * 
+           Amg::getRotateX3D(getParameter(Parameter::rotS)) *
+           Amg::getRotateY3D(getParameter(Parameter::rotZ)) *
+           Amg::getRotateZ3D(getParameter(Parameter::rotT));
 }
