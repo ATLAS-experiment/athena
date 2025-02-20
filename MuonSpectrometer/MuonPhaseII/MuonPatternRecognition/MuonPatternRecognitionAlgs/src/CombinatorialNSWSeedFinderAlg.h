@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MUONR4_MUONPATTERNRECOGNITIONALGS_CombinatorialNSWSedFinderALG__H
-#define MUONR4_MUONPATTERNRECOGNITIONALGS_CombinatorialNSWSeedFinderALG__H
+#ifndef MUONR4_MUONPATTERNRECOGNITIONALGS_COMBINATORIALNSWSEEDFINDERALG_H
+#define MUONR4_MUONPATTERNRECOGNITIONALGS_COMBINATORIALNSWSEEDFINDERALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
