@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -10,7 +10,6 @@
 
 #include <AthenaBaseComps/AthService.h>
 #include <PixelReadoutGeometry/IPixelReadoutManager.h>
-//#include <InDetReadoutGeometry/SiDetectorElement.h>
 
 class PixelID;
 
@@ -34,7 +33,7 @@ public:
   
   virtual PixelDiodeType getDiodeType(Identifier id) const override final;
   // Avoid detector element search if already available
-  PixelDiodeType getDiodeType(Identifier id, const SiDetectorElement* element) const;
+  virtual PixelDiodeType getDiodeType(Identifier id, const SiDetectorElement* element) const override;
   
   virtual Identifier getPixelIdfromHash(IdentifierHash offlineIdHash,
                                         uint32_t FE,
