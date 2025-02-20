@@ -1,7 +1,6 @@
 #include "../LArNonLinearity.h"
 #include "../LArCellBuilderFromLArRawChannelTool.h"
 #include "../LArCellEmMiscalib.h"
-#include "../LArCellRescaler.h"
 #include "../LArCellMaskingTool.h"
 #include "../LArCellNoiseMaskingTool.h"
 #include "../LArBadFebMaskingTool.h"
@@ -21,7 +20,6 @@ DECLARE_COMPONENT( LArNoisyROAlg )
 DECLARE_COMPONENT( LArNonLinearity )
 DECLARE_COMPONENT( LArCellBuilderFromLArRawChannelTool )
 DECLARE_COMPONENT( LArCellEmMiscalib )
-DECLARE_COMPONENT( LArCellRescaler )
 DECLARE_COMPONENT( LArCellMaskingTool )
 DECLARE_COMPONENT( LArCellNoiseMaskingTool )
 DECLARE_COMPONENT( LArBadFebMaskingTool )
