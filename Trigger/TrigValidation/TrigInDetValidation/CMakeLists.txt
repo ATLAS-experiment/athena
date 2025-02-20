@@ -12,7 +12,7 @@ atlas_install_joboptions( share/*.py)
 atlas_install_data( share/*.json )
 atlas_install_runtime( share/*.py TIDAbuild )
 
-atlas_install_scripts( scripts/TIDA*.py test/test*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-ignore=ATL902 )
+atlas_install_scripts( scripts/TIDA*.py test/test*.py bin/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-ignore=ATL902 )
 
 # Unit test for python test scripts:
 atlas_add_test( TrigValSteeringUT

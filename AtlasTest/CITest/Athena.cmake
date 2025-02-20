@@ -327,3 +327,7 @@ atlas_add_citest( Trigger_athenaHLT_v1Cosmic
 atlas_add_citest( TriggerConfigFlags
    SCRIPT python -m TriggerJobOpts.TriggerConfigFlags --verbose
    POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_citest (TrigInDetValidationMenu 
+               SCRIPT TrigInDetValidation_menu_test.py
+               POST_EXEC_SCRIPT nopost.sh )
