@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -20,8 +20,12 @@ StatusCode EndOfEventROIConfirmerAlg::initialize() {
 StatusCode EndOfEventROIConfirmerAlg::execute(const EventContext& context) const {
   ATH_MSG_DEBUG( "EndOfEventROIConfirmerAlg::execute()" );
 
+  SG::ReadHandleKey<TrigRoiDescriptorCollection> rhk("temp");
+  ATH_CHECK( rhk.initialize() );
+
   for (const auto& whk : m_writeHandleKeyArray_ROIs) {
-    SG::ReadHandle<TrigRoiDescriptorCollection> readHandle( whk.key() );
+    rhk = whk.key();  // update the key
+    auto readHandle = SG::makeHandle(rhk, context);
     if ( readHandle.isValid() ) {
       ATH_MSG_DEBUG( "The " << whk.key() << " already present - this chain must have run as part of the trigger in this event" );
     } else {
