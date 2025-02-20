@@ -3,50 +3,168 @@
 #include "HypoTestBenchAlg.h"
 #include "AlgoConstants.h"
 
+#include <fstream>
+
 namespace GlobalSim {
 
+  StatusCode
+  HypoTestBenchAlg::hexTOB2bitsetTOB(std::string s,
+				     std::bitset<72>& bit_tob) const{
+
+    auto bs = std::bitset<4>();
+
+    std::size_t ind{s.size()*4};
+
+    // ensure s is lower case
+    std::transform(s.begin(), s.end(), s.begin(),
+		   [](unsigned char c){return std::tolower(c);});
+
+    for(const char& c : s) {
+      bs = (c >= 'a') ? (c - 'a' + 10) : (c-'0');
+      for (int j = 3; j != -1; --j) {
+	bit_tob[--ind] = bs[j];
+      }
+      if (ind == 0) {break;}
+    }
+
+    return StatusCode::SUCCESS;
+  }
+  
   HypoTestBenchAlg::HypoTestBenchAlg(const std::string& name,
-			 ISvcLocator *pSvcLocator):
-    AthReentrantAlgorithm(name, pSvcLocator) {
+				     ISvcLocator *pSvcLocator):
+    AthAlgorithm(name, pSvcLocator) {
   }
 
   StatusCode HypoTestBenchAlg::initialize () {
     ATH_MSG_DEBUG("initialising");
     CHECK(m_hypothesisFIFO_WriteKey.initialize());
+
+    // initialisation is either from a file of test vectors
+    // or by filling in values by hand in this Algorithm
+
+    if (m_eEmFileName.empty()){
+      CHECK(init_manual());
+    } else {
+      CHECK(init_from_file());
+    }
+
+    ATH_MSG_INFO("Number of fifos " << m_fifos.size());
+    if (m_fifos.empty()) {
+      ATH_MSG_ERROR("No FIFOS created");
+      return StatusCode::FAILURE;
+    }
+	
     return StatusCode::SUCCESS;
   }
 
   
-  StatusCode HypoTestBenchAlg::execute (const EventContext& ctx) const {
+  StatusCode HypoTestBenchAlg::execute () {
     ATH_MSG_DEBUG("executing");
+
+    // Write out a FIFO, one per event. Running more events
+    // than FIFOs is an error.
+
+    if (m_fifo_ptr == m_fifos.size()) {
+      ATH_MSG_ERROR("Attempting to read from an exhausted FIFO vector");
+      return StatusCode::FAILURE;
+    }
+    
+    auto h_write =
+      SG::WriteHandle<GepAlgoHypothesisFIFO>(m_hypothesisFIFO_WriteKey);
+    
+    CHECK(h_write.record(std::move(m_fifos[m_fifo_ptr])));
+    ++m_fifo_ptr;
+    
+    return StatusCode::SUCCESS;
+  }
+
+  StatusCode
+  HypoTestBenchAlg::init_manual() {
+
+
+    // build a single  GepAlgoHypothesisFIFO  that contains five
+    // GepAlgoHypothesisPortsIn objects. The PortsIn objects contain
+    // data only for eEmTobs.
 
 
     auto fifo = std::make_unique<GepAlgoHypothesisFIFO>();
     for(int i = 0; i < 5; ++i) {
-      fifo->push_back(GepAlgoHypothesisPortsIn());
-      ATH_MSG_INFO("m_I_eEmTobs 0 " << *(fifo->back().m_I_eEmTobs));
+ 
+      auto ports_in = GepAlgoHypothesisPortsIn();
 
       // set bottom bits of I_eEmTob - this is Et
-      *(fifo->back().m_I_eEmTobs) = i;
-      ATH_MSG_INFO("m_I_eEmTobs 1 " << *(fifo->back().m_I_eEmTobs));
-
-      // set some eta values. The range in eEmTob os [-100, 100]
-      // corresponding to am eta range of [-2.5, 2.5]               
+      *(ports_in.m_I_eEmTobs) = i;
+    
       std::bitset<AlgoConstants::eFexEtaBitWidth> bit_eta = 80+10*i;
       for (std::size_t i = 0; i != AlgoConstants::eFexEtaBitWidth; ++i){
 	if (bit_eta.test(i)) {
-	  (fifo->back().m_I_eEmTobs)->set(32+i);
+	  (ports_in.m_I_eEmTobs)->set(32+i);
 	}
       }
-      ATH_MSG_INFO("m_I_eEmTobs 2 " << *(fifo->back().m_I_eEmTobs));
-	  
-	
+
+      fifo->push_back(ports_in);
     }
-    auto h_write =
-      SG::WriteHandle<GepAlgoHypothesisFIFO>(m_hypothesisFIFO_WriteKey,
-					     ctx);
-    
-    CHECK(h_write.record(std::move(fifo)));
+
+    m_fifos.push_back(std::move(fifo));
+		      
     return StatusCode::SUCCESS;
   }
+
+  
+      
+  std::string trim(std::string s){
+    const char* t = " \t\n\r\f\v";
+    
+    // trim from right
+    auto l_rtrim =  [&t](std::string& s){
+      s.erase(s.find_last_not_of(t) + 1);
+      return s;
+    };
+   
+    // trim from left
+    auto l_ltrim = [&t] (std::string& s){
+      s.erase(0, s.find_first_not_of(t));
+      return s;
+    };
+    
+    auto rs = l_rtrim(s);
+    return l_ltrim(rs);
+  }
+
+  StatusCode
+  HypoTestBenchAlg::init_from_file() {
+
+
+    std::ifstream tob_stream(m_eEmFileName);
+    if(!tob_stream) {
+      std::stringstream ss;
+      ATH_MSG_FATAL("Failure to open tob file " << m_eEmFileName);
+      return StatusCode::FAILURE;
+    }
+
+    auto padded_line = std::string();
+    auto fifo = std::make_unique<GepAlgoHypothesisFIFO>();
+    
+    while (std::getline(tob_stream, padded_line)) {
+      auto line = trim(padded_line);
+      auto ports_in = GepAlgoHypothesisPortsIn();
+      CHECK(hexTOB2bitsetTOB(line, *(ports_in.m_I_eEmTobs)));
+
+      fifo->push_back(ports_in);
+      
+      // the end of the fifo data is signaled by having the top bit
+      // set on an input tob
+
+      auto top_ind = (ports_in.m_I_eEmTobs)->size()-1;
+      if ((ports_in.m_I_eEmTobs)->test(top_ind)) {
+	m_fifos.push_back(std::move(fifo));
+	fifo = std::make_unique<GepAlgoHypothesisFIFO>();
+      }
+
+    }
+    
+    return StatusCode::SUCCESS;
+  }
+
+  
 }

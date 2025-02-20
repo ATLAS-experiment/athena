@@ -7,23 +7,30 @@
 
 /*
  * Create and write out a FIFO (vector) of eEMTObs to the event store/
- * This simulates the action of the APP FIFOs, which feed TOBs
+ * This simulates the action of the APP FIFOs, which feed TOBs to the
+ * APU Algorithhms
  *
  */
  
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthAlgorithm.h"
 
 #include "GepAlgoHypothesisPortsIn.h"
 
+#include <string>
+#include <memory>
+#include <bitset>
+
+
 namespace GlobalSim {
   
-  class HypoTestBenchAlg : public AthReentrantAlgorithm {
+  class HypoTestBenchAlg : public AthAlgorithm {
   public:
+
      
     HypoTestBenchAlg(const std::string& name, ISvcLocator *pSvcLocator);
     
     virtual StatusCode initialize () override;
-    virtual StatusCode execute (const EventContext& ctx) const override;
+    virtual StatusCode execute () override;
 
   private:
 
@@ -34,6 +41,23 @@ namespace GlobalSim {
 	"hypoFIFO",
 	"key to write out Fifo containing ports data"};
 
+    Gaudi::Property<std::string>
+    m_eEmFileName{this,
+      "eEmFileName",
+      {},
+      "name of file with APP FIFO data"};
+
+    // One elenement of the following vector is written out each event.
+    std::vector<std::unique_ptr<GepAlgoHypothesisFIFO>>  m_fifos;
+    std::size_t m_fifo_ptr{0};
+
+    // m_fifo fillers, called from init()
+    StatusCode init_manual();
+    StatusCode init_from_file();
+
+    StatusCode
+    hexTOB2bitsetTOB(std::string, std::bitset<72>&) const;
+    
   };
 }
 #endif
