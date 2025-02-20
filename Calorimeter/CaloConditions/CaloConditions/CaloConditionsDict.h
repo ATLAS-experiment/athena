@@ -6,7 +6,6 @@
 #define CALOCONDITIONSDICT_H
 
 #include "CaloConditions/ToolConstants.h"
-#include "CaloConditions/CaloCellFactor.h"
 #include "CaloConditions/CaloCellPositionShift.h"
 #include "CaloConditions/CaloHadWeight.h"
 #include "CaloConditions/CaloEMFrac.h"
