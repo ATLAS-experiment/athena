@@ -47,7 +47,7 @@ StatusCode TauClusterFinder::execute(xAOD::TauJet& tau) const {
     
     // Clusters with negative energy will be thinned, and the elementlinks to these
     // clusters will not be valid. 
-    if (m_skipNegativeEnergy && cluster->rawE() <= 0.) continue;
+    if (cluster->rawE() <= 0.) continue;
 
     ElementLink<xAOD::IParticleContainer> linkToCluster;
     linkToCluster.toContainedElement(
