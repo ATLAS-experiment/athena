@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -7,20 +7,20 @@
 #define LArRINJ2NTUPLE_H
 
 #include "LArCalibTools/LArCond2NtupleBase.h"
+#include "LArRawConditions/LArRinjComplete.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
 
 class LArRinj2Ntuple : public LArCond2NtupleBase
 {
  public:
   LArRinj2Ntuple(const std::string & name, ISvcLocator * pSvcLocator);
-  ~LArRinj2Ntuple();
 
   //standard algorithm methods
-  virtual StatusCode stop();
-  StatusCode finalize(){return StatusCode::SUCCESS;}
- private:
+  virtual StatusCode stop() override;
 
-  std::string m_contKey;
+ private:
+  SG::ReadCondHandleKey<LArRinjComplete> m_contKey{this, "ContainerKey", {}};
 };
 
 #endif

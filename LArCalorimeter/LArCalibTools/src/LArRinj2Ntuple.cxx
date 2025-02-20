@@ -1,31 +1,26 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArRinj2Ntuple.h"
-#include "LArRawConditions/LArRinjComplete.h"
-
 #include "LArIdentifier/LArOnlineID.h"
 
 
 LArRinj2Ntuple::LArRinj2Ntuple(const std::string& name, ISvcLocator* pSvcLocator): 
-  LArCond2NtupleBase(name, pSvcLocator) { 
-  declareProperty("ContainerKey",m_contKey);
+  LArCond2NtupleBase(name, pSvcLocator) {
   m_ntTitle="Rinj";
   m_ntpath="/NTUPLES/FILE1/RINJ";
 
 }
 
-LArRinj2Ntuple::~LArRinj2Ntuple() 
-= default;
-
 StatusCode LArRinj2Ntuple::stop() {
   const ILArRinj* LArRinj = nullptr;
-  StatusCode sc;
-  sc=m_detStore->retrieve(LArRinj,m_contKey);
+  StatusCode sc=m_detStore->retrieve(LArRinj, m_contKey.key());
   if (sc!=StatusCode::SUCCESS) {
      ATH_MSG_ERROR( "Unable to retrieve ILArRinj with key " 
                << m_contKey << " from DetectorStore try ConditionsStore" );
+
+     ATH_CHECK( m_contKey.initialize() );
      SG::ReadCondHandle<LArRinjComplete> rinjHdl{m_contKey};
      LArRinj = *rinjHdl;
      if(!LArRinj) {
