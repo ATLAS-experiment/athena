@@ -90,7 +90,7 @@ def getIDTracks(flags, name='', muonIDreuse=False, precision=False):
 
 def MuDataPrepViewDataVerifierCfg(flags):
     result = ComponentAccumulator()
-    dataobjects=[( 'RpcPrepDataCollection_Cache' , 'StoreGateSvc+RpcPrdCache' ),
+    dataObjects=[( 'RpcPrepDataCollection_Cache' , 'StoreGateSvc+RpcPrdCache' ),
                  ( 'TgcRdo_Cache' , 'StoreGateSvc+TgcRdoCache' ),
                  ( 'MdtCsm_Cache' , 'StoreGateSvc+MdtCsmRdoCache' ),
                  ( 'RpcPad_Cache' , 'StoreGateSvc+RpcRdoCache' ),
@@ -105,25 +105,26 @@ def MuDataPrepViewDataVerifierCfg(flags):
                  ( 'TgcCoinDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCoinCache )
                ]
     if flags.Input.isMC:
-      dataobjects += [( 'MdtCsmContainer' , 'StoreGateSvc+MDTCSM' ),
+      dataObjects += [( 'MdtCsmContainer' , 'StoreGateSvc+MDTCSM' ),
                       ( 'RpcPadContainer' , 'StoreGateSvc+RPCPAD' ),
                       ('TgcRdoContainer' , 'StoreGateSvc+TGCRDO' )]
-    if flags.Input.isMC and flags.Muon.usePhaseIIGeoSetup and \
-        len([x for x in flags.Input.TypedCollections if x.find("RpcPadContainer#") != -1]):
-      dataobjects +=[( 'xAOD::NRPCRDOContainer' , 'StoreGateSvc+CnvRpcRDOs')]
     if flags.Detector.GeometryCSC:
-      dataobjects+=[( 'CscRawDataCollection_Cache' , 'StoreGateSvc+CscRdoCache' )]
+      dataObjects+=[( 'CscRawDataCollection_Cache' , 'StoreGateSvc+CscRdoCache' )]
       if flags.Input.isMC:
-        dataobjects += [( 'CscRawDataContainer' , 'StoreGateSvc+CSCRDO' ),
+        dataObjects += [( 'CscRawDataContainer' , 'StoreGateSvc+CSCRDO' ),
                         ( 'CscRawDataCollection_Cache' , 'StoreGateSvc+CscRdoCache' )]
     if flags.Detector.GeometrysTGC and flags.Detector.GeometryMM and flags.Input.isMC:
-      dataobjects += [( 'Muon::STGC_RawDataContainer' , 'StoreGateSvc+sTGCRDO' ),
+      dataObjects += [( 'Muon::STGC_RawDataContainer' , 'StoreGateSvc+sTGCRDO' ),
                       ( 'Muon::MM_RawDataContainer' , 'StoreGateSvc+MMRDO' )]
     if flags.Detector.GeometrysTGC and flags.Detector.GeometryMM:
-      dataobjects += [( 'MMPrepDataCollection_Cache'  , 'StoreGateSvc+' + MuonPrdCacheNames.MmCache)]
-      dataobjects += [( 'sTgcPrepDataCollection_Cache'  , 'StoreGateSvc+' + MuonPrdCacheNames.sTgcCache)]
+      dataObjects += [( 'MMPrepDataCollection_Cache'  , 'StoreGateSvc+' + MuonPrdCacheNames.MmCache)]
+      dataObjects += [( 'sTgcPrepDataCollection_Cache'  , 'StoreGateSvc+' + MuonPrdCacheNames.sTgcCache)]
+    
+    if flags.Muon.usePhaseIIGeoSetup:
+      dataObjects += [( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' )]
+      
     alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuDataPrep",
-                                                 DataObjects = dataobjects)
+                                                 DataObjects = dataObjects)
     result.addEventAlgo(alg)
     return result
 
@@ -206,7 +207,10 @@ def muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads):
     dataObjects += [( 'xAOD::MuonRoIContainer' , 'StoreGateSvc+LVL1MuonRoIs' )]
   else:
     dataObjects += [( 'DataVector< LVL1::RecMuonRoI >' , 'StoreGateSvc+HLT_RecMURoIs' )]
-
+  
+  if flags.Muon.usePhaseIIGeoSetup:
+      dataObjects += [( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' )]
+      
   #For L2 multi-track SA mode
   if extraLoads:
     dataObjects += extraLoads
@@ -310,11 +314,11 @@ def muCombRecoSequenceCfg( flags, RoIs, name, l2mtmode=False, l2CBname="" ):
 
 def EFMuSADataPrepViewDataVerifierCfg(flags, RoIs, roiName):
   result=ComponentAccumulator()
-  dataobjects=[( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
+  dataObjects=[( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
                ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
 
   alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuEFSA_"+roiName,
-                                               DataObjects = dataobjects)
+                                               DataObjects = dataObjects)
   result.addEventAlgo(alg)
   return result
 

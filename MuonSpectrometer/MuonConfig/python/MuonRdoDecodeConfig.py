@@ -58,7 +58,7 @@ def MuonRdoToPrepDataAlgCfg(flags, name="MuonRdoToPrepDataAlg", **kwargs):
 ## This configuration function sets up everything for decoding RPC RDO to PRD conversion
 #
 # The function returns a ComponentAccumulator and the data-converting algorithm, which should be added to the right sequence by the user
-def RpcRdoToPrepDataToolCfg(flags, name ="RpcRdoToRpcPrepData",RDOContainer = None, **kwargs):
+def RpcRdoToPrepDataToolCfg(flags, suffix ="", RDOContainer = None, **kwargs):
     result = ComponentAccumulator()
     #### Check whether the input collection contains an old legacy pad container. 
     #### Introduce the digit conversion bypass to convert them into the new RDO format
@@ -69,14 +69,17 @@ def RpcRdoToPrepDataToolCfg(flags, name ="RpcRdoToRpcPrepData",RDOContainer = No
        
         cnv_args = {}
         if RDOContainer: cnv_args.setdefault("RpcRdoContainer", RDOContainer)
-        result.merge(RpcRdoToRpcDigitCfg(flags,
-                                         name="RpcRdoDigitPatchAlg",
-                                         RpcDigitContainer="CnvRpcDigits", **cnv_args))
         
-        result.merge(NrpcDigitToNrpcRDOCfg(flags,RpcDigitContainer="CnvRpcDigits",
-                                                 NrpcRdoKey="CnvRpcRDOs"))
-    
-        kwargs.setdefault("RdoCollection", "CnvRpcRDOs")
+        result.merge(RpcRdoToRpcDigitCfg(flags,
+                                         name="RpcRdoDigitPatchAlg" + suffix,
+                                         RpcDigitContainer="CnvRpcDigits",
+                                         **cnv_args))
+        
+        result.merge(NrpcDigitToNrpcRDOCfg(flags,
+                                           name="RpcBackConverterAlg" + suffix,
+                                           RpcDigitContainer="CnvRpcDigits",
+                                           NrpcRdoKey="CnvRpcRDOs"))
+        kwargs.setdefault("RpcRdoContainer", "CnvRpcRDOs")
     ####
     ####
     if RDOContainer: 
@@ -89,7 +92,7 @@ def RpcRdoToPrepDataToolCfg(flags, name ="RpcRdoToRpcPrepData",RDOContainer = No
         kwargs.setdefault("decode2DStrips", flags.GeoModel.Run >= LHCPeriod.Run4)
         if not kwargs["decode2DStrips"]:
             kwargs.setdefault("OutputContainer", "xRpcMeasurements")
-        the_tool = CompFactory.MuonR4.RpcRdoToRpcPrepDataTool(name, **kwargs)
+        the_tool = CompFactory.MuonR4.RpcRdoToRpcPrepDataTool(name="RpcPrepDataProviderTool", **kwargs)
         result.setPrivateTools(the_tool)
     else:
         # We need the RPC cabling to be setup
@@ -131,7 +134,7 @@ def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", RDOContainer = None, **kw
     
     # Conditions not needed for online
     # Get the RDO -> PRD tool
-    kwargs.setdefault("DecodingTool", acc.popToolsAndMerge(RpcRdoToPrepDataToolCfg(flags)))
+    kwargs.setdefault("DecodingTool", acc.popToolsAndMerge(RpcRdoToPrepDataToolCfg(flags, suffix=name[name.find("_") :] if name.find("_") != -1 else "", RDOContainer=RDOContainer)))
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_RPC_Cfg
     kwargs.setdefault("RegSelector", acc.popToolsAndMerge(regSelTool_RPC_Cfg(flags)))
@@ -139,6 +142,9 @@ def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", RDOContainer = None, **kw
     
     # Add the RDO -> PRD alorithm
     acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
+    if flags.Muon.usePhaseIIGeoSetup:
+        from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xRpcToRpcPrepDataCnvAlgCfg
+        acc.merge(xRpcToRpcPrepDataCnvAlgCfg(flags, name="xAODRpcToPrepDataCnvAlg{suffix}".format(suffix =name[name.find("_") :] if name.find("_") != -1 else "")))
     return acc
 
 
