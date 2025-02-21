@@ -220,7 +220,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::initialize() {
 }
 
 //----------------------------------------------------------------------------------//
-std::vector<std::vector<std::vector<int>>> TRTMonitoringRun3RAW_Alg::initScaleVectors() const {
+std::vector<std::vector<std::vector<int>>> TRTMonitoringRun3RAW_Alg::initScaleVectors(const EventContext& ctx) const {
 //----------------------------------------------------------------------------------//
 // if (m_flagforscale == 0 ) return 0;
     std::vector<std::vector<std::vector<int>>> scale_hHitWMap;
@@ -248,7 +248,7 @@ std::vector<std::vector<std::vector<int>>> TRTMonitoringRun3RAW_Alg::initScaleVe
             for (int j = 0; j < 32; j++ ) {
                 Identifier Dummy_Identifier;
                 Dummy_Identifier = m_pTRTHelper->straw_id(side, j, lN, sLN, sN);
-                bool isArgonStraw = (Straw_Gastype( m_sumTool->getStatusHT(Dummy_Identifier, Gaudi::Hive::currentContext()) ) == GasType::Ar);
+                bool isArgonStraw = (Straw_Gastype( m_sumTool->getStatusHT(Dummy_Identifier, ctx) ) == GasType::Ar);
 
                 if (isArgonStraw)
                     countAr += 1.0;
@@ -729,9 +729,10 @@ struct straw_shifter_struct {
 
 //Fill the TRT RDO Histograms
 //----------------------------------------------------------------------------------//
-StatusCode TRTMonitoringRun3RAW_Alg::fillTRTRDOs(const TRT_RDO_Container& rdoContainer,
-                                            const xAOD::EventInfo& eventInfo,
-                                            const InDetTimeCollection* trtBCIDCollection) const {
+StatusCode TRTMonitoringRun3RAW_Alg::fillTRTRDOs(const EventContext& ctx,
+                                                 const TRT_RDO_Container& rdoContainer,
+                                                 const xAOD::EventInfo& eventInfo,
+                                                 const InDetTimeCollection* trtBCIDCollection) const {
 //----------------------------------------------------------------------------------//
     ATH_MSG_DEBUG("Filling TRT RDO Histograms");
 
@@ -863,7 +864,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTRDOs(const TRT_RDO_Container& rdoCon
     // Test out the TRT_StrawStatusSummarySvc.
     if (!m_sumTool.name().empty() && m_doExpert) {
         ATH_MSG_VERBOSE("Trying " << m_sumTool << " isGood");
-        ATH_MSG_VERBOSE("TRT_StrawStatusTool reports status = " << m_sumTool->getStatus(TRT_Identifier, Gaudi::Hive::currentContext()));
+        ATH_MSG_VERBOSE("TRT_StrawStatusTool reports status = " << m_sumTool->getStatus(TRT_Identifier, ctx));
     }
 
     // ibe = 0 (Barrel), ibe = 1 (Endcap)
@@ -884,7 +885,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTRDOs(const TRT_RDO_Container& rdoCon
     std::map<int,std::map<int, std::vector<straw_struct_prob>>> straw_map_prob;
     std::map<int,std::map<int, std::vector<chip_struct_prob>>> chip_map_prob;
 
-    std::vector<std::vector<std::vector<int>>> scale_hHitWMap = initScaleVectors();
+    std::vector<std::vector<std::vector<int>>> scale_hHitWMap = initScaleVectors(ctx);
 
     for (; RDO_CollectionBegin != RDO_CollectionEnd; ++RDO_CollectionBegin) {
         const InDetRawDataCollection<TRT_RDORawData> *TRT_Collection(*RDO_CollectionBegin);
@@ -902,7 +903,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTRDOs(const TRT_RDO_Container& rdoCon
             bool is_anybininVgate_high = (hitinvaliditygate != 0);
             TRT_Identifier = (*p_rdo)->identify();
 
-            if (m_doMaskStraws && m_sumTool->get_status(TRT_Identifier, Gaudi::Hive::currentContext())) continue;
+            if (m_doMaskStraws && m_sumTool->get_status(TRT_Identifier, ctx)) continue;
 
             int barrel_ec = m_pTRTHelper->barrel_ec(TRT_Identifier);
             //ToDo: Check TRT_LoLumRawData object
@@ -930,7 +931,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTRDOs(const TRT_RDO_Container& rdoCon
             // To get proper straw numbering
             TRT_Identifier = p_lolum->identify();
             //inline function checks m_ArgonXenonSplitter
-            const bool isArgonStraw = (Straw_Gastype( m_sumTool->getStatusHT(TRT_Identifier,Gaudi::Hive::currentContext()) ) == GasType::Ar);
+            const bool isArgonStraw = (Straw_Gastype( m_sumTool->getStatusHT(TRT_Identifier, ctx) ) == GasType::Ar);
             int phi_module     = m_pTRTHelper->phi_module(TRT_Identifier);
             int layer_or_wheel = m_pTRTHelper->layer_or_wheel(TRT_Identifier);
             int straw_layer    = m_pTRTHelper->straw_layer(TRT_Identifier);
@@ -1714,7 +1715,8 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTRDOs(const TRT_RDO_Container& rdoCon
 
 // Fill the TRT Efficiency Histograms
 //----------------------------------------------------------------------------------//
-StatusCode TRTMonitoringRun3RAW_Alg::fillTRTEfficiency(const TrackCollection& combTrackCollection) const {
+StatusCode TRTMonitoringRun3RAW_Alg::fillTRTEfficiency(const EventContext& ctx,
+                                                       const TrackCollection& combTrackCollection) const {
 //----------------------------------------------------------------------------------//
     ATH_MSG_VERBOSE("Filling TRT Efficiency Histograms");
 
@@ -1790,7 +1792,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTEfficiency(const TrackCollection& co
             continue;
         }
 
-        const std::unique_ptr<const Trk::TrackSummary> summary(m_TrackSummaryTool->summary(Gaudi::Hive::currentContext(),*(*track)));
+        const std::unique_ptr<const Trk::TrackSummary> summary(m_TrackSummaryTool->summary(ctx,*(*track)));
         int n_trt_hits = summary->get(Trk::numberOfTRTHits);
         int n_sct_hits = summary->get(Trk::numberOfSCTHits);
         int n_pixel_hits = summary->get(Trk::numberOfPixelHits);
@@ -1835,7 +1837,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTEfficiency(const TrackCollection& co
             int phi_module      = m_pTRTHelper->phi_module(id);
             int straw_layer     = m_pTRTHelper->straw_layer(id);
             int straw           = m_pTRTHelper->straw(id);
-            const bool isArgonStraw = (Straw_Gastype( m_sumTool->getStatusHT(id, Gaudi::Hive::currentContext()) ) == GasType::Ar);
+            const bool isArgonStraw = (Straw_Gastype( m_sumTool->getStatusHT(id, ctx) ) == GasType::Ar);
             // Assume always Xe if m_ArgonXenonSplitter is not enabled, otherwise check the straw status (good is Xe, non-good is Ar)
             int ibe   = abs(barrel_ec) - 1;     // ibe   = 0 (Barrel), ibe   = 1 (Endcap)
             int iside = barrel_ec > 0 ? 0 : 1;  // iside = 0 (Side A), iside = 1 (Side C)
@@ -1947,7 +1949,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTEfficiency(const TrackCollection& co
                     int phi_module = m_pTRTHelper->phi_module(id);
                     int straw_layer = m_pTRTHelper->straw_layer(id);
                     int straw = m_pTRTHelper->straw(id);
-                    const bool isArgonStraw = Straw_Gastype( m_sumTool->getStatusHT(id, Gaudi::Hive::currentContext()) ) == GasType::Ar;
+                    const bool isArgonStraw = Straw_Gastype( m_sumTool->getStatusHT(id, ctx) ) == GasType::Ar;
                     // Assume always Xe if m_ArgonXenonSplitter is not enabled, otherwise check the straw status (good is Xe, non-good is Ar)
                     int ibe = abs(barrel_ec) - 1;      // ibe   = 0 (Barrel), ibe   = 1 (Endcap)
                     int iside = barrel_ec > 0 ? 0 : 1; // iside = 0 (Side A), iside = 1 (Side C)
@@ -2052,7 +2054,8 @@ struct straw_edge_struct {
 
 // Fill TRT Hits histograms
 //----------------------------------------------------------------------------------//
-StatusCode TRTMonitoringRun3RAW_Alg::fillTRTHits(const TrackCollection& trackCollection) const {
+StatusCode TRTMonitoringRun3RAW_Alg::fillTRTHits(const EventContext& ctx,
+                                                 const TrackCollection& trackCollection) const {
 //----------------------------------------------------------------------------------//
     ATH_MSG_VERBOSE("Filling TRT Tracks Histos");
 
@@ -2130,7 +2133,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTHits(const TrackCollection& trackCol
     }
 
     for (; p_trk != trackCollection.end(); ++p_trk) {
-        const std::unique_ptr<const Trk::TrackSummary> summary(m_TrackSummaryTool->summary(Gaudi::Hive::currentContext(),*(*p_trk)));
+        const std::unique_ptr<const Trk::TrackSummary> summary(m_TrackSummaryTool->summary(ctx,*(*p_trk)));
         int nTRTHits = summary->get(Trk::numberOfTRTHits);
 
         if (nTRTHits < m_minTRThits) continue;
@@ -2316,7 +2319,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTHits(const TrackCollection& trackCol
 
             Identifier surfaceID;
             surfaceID = trtCircle->identify();
-            const bool isArgonStraw = ( Straw_Gastype( m_sumTool->getStatusHT(surfaceID, Gaudi::Hive::currentContext()) ) == GasType::Ar );
+            const bool isArgonStraw = ( Straw_Gastype( m_sumTool->getStatusHT(surfaceID, ctx) ) == GasType::Ar );
             // Assume always Xe if m_ArgonXenonSplitter is not enabled, otherwise check the straw status (good is Xe, non-good is Ar)
             float temp_locr = aTrackParam->parameters()[Trk::driftRadius];
             int iphi_module = -9999;
@@ -2761,7 +2764,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillHistograms( const EventContext& ctx ) c
                              " in store");
             }
 
-            ATH_CHECK( fillTRTRDOs(*rdoContainer, *xAODEventInfo, trtBCIDCollection.ptr()) );
+            ATH_CHECK( fillTRTRDOs(ctx, *rdoContainer, *xAODEventInfo, trtBCIDCollection.ptr()) );
         }
     } else passEventBurst = true;
 
@@ -2771,7 +2774,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillHistograms( const EventContext& ctx ) c
                           " in store");
             return StatusCode::FAILURE;
         }
-        ATH_CHECK( fillTRTEfficiency(*combTrackCollection) );
+        ATH_CHECK( fillTRTEfficiency(ctx, *combTrackCollection) );
     }
 
     if (m_doHitsMon) {
@@ -2781,7 +2784,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillHistograms( const EventContext& ctx ) c
             return StatusCode::FAILURE;
         }
         if (passEventBurst) {
-            ATH_CHECK( fillTRTHits(*trackCollection) );
+            ATH_CHECK( fillTRTHits(ctx, *trackCollection) );
         }
     }
 

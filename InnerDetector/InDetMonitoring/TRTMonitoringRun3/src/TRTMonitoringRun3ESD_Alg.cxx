@@ -411,10 +411,11 @@ bool TRTMonitoringRun3ESD_Alg::checkEventBurst(const TRT_RDO_Container& rdoConta
 
 // Fill the TRT Track level histograms
 //----------------------------------------------------------------------------------//
-StatusCode TRTMonitoringRun3ESD_Alg::fillTRTTracks(const xAOD::TrackParticleContainer& trackCollection,
-                                              const xAOD::TrigDecision* trigDecision,
-                                              const ComTime* comTimeObject,
-                                              const xAOD::EventInfo& eventInfo) const {
+StatusCode TRTMonitoringRun3ESD_Alg::fillTRTTracks(const EventContext& ctx,
+                                                   const xAOD::TrackParticleContainer& trackCollection,
+                                                   const xAOD::TrigDecision* trigDecision,
+                                                   const ComTime* comTimeObject,
+                                                   const xAOD::EventInfo& eventInfo) const {
 //----------------------------------------------------------------------------------//
     ATH_MSG_VERBOSE("Filling TRT Tracks Histos");
 
@@ -725,7 +726,7 @@ for (; p_trk != trackCollection.end(); ++p_trk) {
             Identifier surfaceID;
             const Trk::MeasurementBase *mesb = (*TSOSItBegin)->measurementOnTrack();
             surfaceID = trtCircle->identify();
-            const bool isArgonStraw = ( Straw_Gastype( m_sumTool->getStatusHT(surfaceID, Gaudi::Hive::currentContext()) ) == GasType::Ar );
+            const bool isArgonStraw = ( Straw_Gastype( m_sumTool->getStatusHT(surfaceID, ctx) ) == GasType::Ar );
             // Assume always Xe if m_ArgonXenonSplitter is not enabled, otherwise check the straw status (good is Xe, non-good is Ar)
             float temp_locr = aTrackParam->parameters()[Trk::driftRadius];
             TRTCond::RtRelation const *rtr = m_TRTCalDbTool->getRtRelation(surfaceID);
@@ -1503,7 +1504,7 @@ StatusCode TRTMonitoringRun3ESD_Alg::fillHistograms( const EventContext& ctx ) c
               comTimeObject = tmp_comTimeObject.cptr();
            }
         }
-        ATH_CHECK( fillTRTTracks(*trackCollection, trigDecision, comTimeObject, *xAODEventInfo) );
+        ATH_CHECK( fillTRTTracks(ctx, *trackCollection, trigDecision, comTimeObject, *xAODEventInfo) );
     }
 
     if (!m_doTracksMon) {
