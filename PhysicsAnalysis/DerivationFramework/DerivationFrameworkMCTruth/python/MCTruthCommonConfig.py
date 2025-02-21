@@ -63,12 +63,12 @@ def AddTruthJetsCfg(flags):
     acc = ComponentAccumulator()
 
     from JetRecConfig.StandardSmallRJets import AntiKt4Truth,AntiKt4TruthWZ,AntiKt4TruthDressedWZ,AntiKtVRTruthCharged
-    from JetRecConfig.StandardLargeRJets import AntiKt10TruthTrimmed,AntiKt10TruthSoftDrop
+    from JetRecConfig.StandardLargeRJets import AntiKt10TruthSoftDrop
     from JetRecConfig.JetRecConfig import JetRecCfg
 
 
     jetList = [AntiKt4Truth,AntiKt4TruthWZ,AntiKt4TruthDressedWZ,AntiKtVRTruthCharged,
-               AntiKt10TruthTrimmed,AntiKt10TruthSoftDrop]
+               AntiKt10TruthSoftDrop]
 
     for jd in jetList:
         acc.merge(JetRecCfg(flags,jd))
