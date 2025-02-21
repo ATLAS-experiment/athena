@@ -201,21 +201,29 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             config_file = self.uncertToolConfigPath
         else:
             if config.geometry() is LHCPeriod.Run2:
-                config_file = "rel22/Summer2023_PreRec/" + config_file
+                if config.dataType() is DataType.FastSim:
+                    config_file = "rel22/Fall2024_PreRec/" + config_file
+                else:
+                    config_file = "rel22/Summer2023_PreRec/" + config_file
             else:
-                config_file = "rel22/Summer2024_PreRec/" + config_file
+                if config.dataType() is DataType.FastSim:
+                    config_file = "rel22/Winter2025_AF3_PreRec/" + config_file
+                else:
+                    config_file = "rel22/Winter2025_PreRec/" + config_file
 
         # MC type:
         mc_type = None
         if self.uncertToolMCType is not None:
             mc_type = self.uncertToolMCType
         else:
-            if config.dataType() is DataType.FastSim and config.geometry() is LHCPeriod.Run2:
-                # not supported for Run 3 yet!
-                mc_type = "AF3"
-            else:
-                if config.geometry() is LHCPeriod.Run2:
+            if config.geometry() is LHCPeriod.Run2:
+                if config.dataType() is DataType.FastSim:
+                    mc_type = "AF3"
+                else:
                     mc_type = "MC20"
+            else:
+                if config.dataType() is DataType.FastSim:
+                    mc_type = "MC23AF3"
                 else:
                     mc_type = "MC23"
 
