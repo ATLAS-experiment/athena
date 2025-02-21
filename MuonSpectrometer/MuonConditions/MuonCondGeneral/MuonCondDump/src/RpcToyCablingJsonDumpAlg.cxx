@@ -34,9 +34,9 @@ namespace Muon {
 
         /// Subdetector identifiers (0x65 for chambers on the posivie side and 0x66 for chambers on the other side
         constexpr int subDetA{0x65}, subDetB{0x66};
-        constexpr unsigned nStripsPerTdc = RpcFlatCableTranslator::readStrips;
+        constexpr unsigned nStripsPerBoard = RpcFlatCableTranslator::readStrips;
        
-        unsigned int tdcSecA{0}, tdcSecC{0};
+        unsigned int boardSecA{0}, boardSecC{0};
 
         nlohmann::json chamberJSON{}, flatCableJSON{};
         std::vector<std::unique_ptr<RpcFlatCableTranslator>> flatTranslators{};
@@ -69,8 +69,8 @@ namespace Muon {
         constexpr int16_t stripSideBit = RpcCablingData::stripSideBit;
         for (const MuonGMR4::RpcReadoutElement *reEle : reEles) {
             const unsigned int subDet = reEle->stationEta() > 0 ? subDetA : subDetB;
-            const unsigned int tdcSec = reEle->stationEta() > 0 ? (++tdcSecA) : (++tdcSecC);
-            unsigned int tdc{1};
+            const unsigned int boardSec = reEle->stationEta() > 0 ? (++boardSecA) : (++boardSecC);
+            unsigned int board{1};
             for (unsigned int gasGap = 1; gasGap <= reEle->nGasGaps(); ++gasGap) {
                 for (int doubletPhi = reEle->doubletPhi(); doubletPhi <= reEle->doubletPhiMax(); ++doubletPhi) {
                     for (bool measPhi : {false, true}) {
@@ -78,8 +78,8 @@ namespace Muon {
                         if (!reEle->nStrips(layHash))
                             continue;
                         const unsigned int nStrips = reEle->nStrips(layHash);
-                        const unsigned int nTdcChips = (nStrips % nStripsPerTdc > 0) +
-                                                       (nStrips - (nStrips % nStripsPerTdc)) / nStripsPerTdc;
+                        const unsigned int nBoardChips = (nStrips % nStripsPerBoard > 0) +
+                                                       (nStrips - (nStrips % nStripsPerBoard)) / nStripsPerBoard;
 
                         for (bool side : {false, true}) {
                             bool run4_BIS = ((reEle->stationName() == m_BIS_stIdx) && (std::abs(reEle->stationEta()) < 7));
@@ -88,9 +88,9 @@ namespace Muon {
                                 continue;
                             }
                             unsigned int measPhiSide = (side * stripSideBit) | (measPhi * measPhiBit);
-                            for (unsigned int chip = 0; chip < nTdcChips; ++chip) {
-                                const unsigned firstStrip = (RpcFlatCableTranslator::firstStrip + nStripsPerTdc * chip);
-                                const unsigned coveredStrips = std::min(nStripsPerTdc, nStrips - (firstStrip - RpcFlatCableTranslator::firstStrip));
+                            for (unsigned int chip = 0; chip < nBoardChips; ++chip) {
+                                const unsigned firstStrip = (RpcFlatCableTranslator::firstStrip + nStripsPerBoard * chip);
+                                const unsigned coveredStrips = std::min(nStripsPerBoard, nStrips - (firstStrip - RpcFlatCableTranslator::firstStrip));
                                 nlohmann::json cablingChannel{};
                                 cablingChannel["station"] = m_idHelperSvc->stationNameString(reEle->identify());
                                 cablingChannel["eta"] = reEle->stationEta();
@@ -102,13 +102,13 @@ namespace Muon {
                                 cablingChannel["measPhi"] = measPhiSide;
 
                                 cablingChannel["subDetector"] = subDet;
-                                cablingChannel["tdcSector"] = tdcSec;
+                                cablingChannel["boardSector"] = boardSec;
                                 cablingChannel["firstStrip"] = firstStrip;
-                                cablingChannel["tdc"] = (++tdc);
+                                cablingChannel["board"] = (++board);
                                 cablingChannel["flatCableId"] = connectFlatCable(coveredStrips);
                                 ATH_MSG_VERBOSE("Install new cabling "<<m_idHelperSvc->toString(reEle->measurementId(layHash))
-                                            <<"nStrips: "<<nStrips<<", stripsPerTdc"
-                                    <<nStripsPerTdc<<", nChips: "<<nTdcChips<<", covered: "<<coveredStrips);
+                                            <<"nStrips: "<<nStrips<<", stripsPerBoard "
+                                    <<nStripsPerBoard<<", nChips: "<<nBoardChips<<", covered: "<<coveredStrips);
                                 chamberJSON.push_back(cablingChannel);
                             }
                         }

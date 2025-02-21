@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonCablingData/RpcCablingMap.h"
 #include "MuonCablingData/RpcFlatCableTranslator.h"
@@ -150,7 +150,7 @@ namespace Muon {
         }
 
         int sub = entry.subDetector;
-        int rod = entry.tdcSector;
+        int rod = entry.boardSector;
 
         int32_t hardId = (sub << 16) | rod;
 
@@ -185,7 +185,7 @@ namespace Muon {
                         << ": Failed to generate a hash for " << chamber.gasGapID << endmsg;
                     return false;
                 }
-                uint32_t hardId = (card.subDetector << 16) | card.tdcSector;
+                uint32_t hardId = (card.subDetector << 16) | card.boardSector;
                 m_chambROBs[hash] = hardId;
                 std::vector<IdentifierHash>& robHashes = m_ROBHashes[hardId];
                 if (std::ranges::find(robHashes, hash) == robHashes.end()){

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NrpcDigitToNrpcRDO.h"
@@ -103,8 +103,8 @@ StatusCode NrpcDigitToNrpcRDO::execute(const EventContext& ctx) const {
                 NrpcRdo->setBcid(the_bcid);
                 NrpcRdo->setTime(rdo_time);
                 NrpcRdo->setSubdetector(translateCache.subDetector);
-                NrpcRdo->setTdcsector(translateCache.tdcSector);
-                NrpcRdo->setTdc(translateCache.tdc);
+                NrpcRdo->setBoardsector(translateCache.boardSector);
+                NrpcRdo->setBoard(translateCache.board);
                 NrpcRdo->setChannel(translateCache.channelId);
                 NrpcRdo->setTimeoverthr(the_timeoverthr);
            }

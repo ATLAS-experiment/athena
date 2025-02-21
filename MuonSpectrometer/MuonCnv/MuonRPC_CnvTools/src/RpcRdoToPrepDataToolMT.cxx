@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcRdoToPrepDataToolMT.h"
@@ -1132,8 +1132,8 @@ StatusCode RpcRdoToPrepDataToolMT::processNrpcRdo(const EventContext& ctx,
     /// Convert from online to offline cabling
     RpcCablingData translateCache{};
     translateCache.subDetector = nrpcrdo->subdetector();
-    translateCache.tdcSector = nrpcrdo->tdcsector();
-    translateCache.tdc = nrpcrdo->tdc();
+    translateCache.boardSector = nrpcrdo->boardsector();
+    translateCache.board = nrpcrdo->board();
     translateCache.channelId = nrpcrdo->channel();
     Identifier chanId{};
     if (!readCdo->getOfflineId(translateCache, msgStream()) ||

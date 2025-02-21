@@ -55,7 +55,7 @@ for sector in range(1, 9):
                     "gasGap": gasGap + 1,
                     ### Online part
                     "subDetector": sub_detector,
-                    "tdcSector" : sector*2+16, # sector A2 -> 0x0012, sector A4 -> 0x0014, ..., sector A12 -> 0x001c, ...,           
+                    "boardSector" : sector*2+16, # sector A2 -> 0x0012, sector A4 -> 0x0014, ..., sector A12 -> 0x001c, ...,           
                     "flatCableId" : 0,
                 }
                 ### TDC 
@@ -67,7 +67,7 @@ for sector in range(1, 9):
                         cabling_data["firstTdcChan"] = 0
                         cabling_data["lastTdcChan"] = 31  # Standard: 32 channels per TDC
                         """
-                        cabling_data["tdc"] = gasGap
+                        cabling_data["board"] = gasGap
                     elif doubZ == 2: ## BIS8
                         cabling_data["firstStrip"] = 1  # MN: Problem: should firstStrip be -15, to start with strip 1 in channel 17?
                         """                        
@@ -75,7 +75,7 @@ for sector in range(1, 9):
                         cabling_data["firstTdcChan"] = 16
                         cabling_data["lastTdcChan"] = 31  # Last 16 TDC channels
                         """
-                        cabling_data["tdc"] = gasGap + 9
+                        cabling_data["board"] = gasGap + 9
                         cabling_data["flatCableId"] = 1
                     idTranslateDict.append(deepcopy(cabling_data))
 
@@ -87,7 +87,7 @@ for sector in range(1, 9):
                         cabling_data["firstTdcChan"] = 1
                         cabling_data["lastTdcChan"] = 32  # Standard: 32 channels per TDC
                         """
-                        cabling_data["tdc"] = gasGap + 3
+                        cabling_data["board"] = gasGap + 3
                     elif doubZ == 2: ## BIS8
                         cabling_data["firstStrip"] = 1
                         """
@@ -95,7 +95,7 @@ for sector in range(1, 9):
                         cabling_data["firstTdcChan"] = 0
                         cabling_data["lastTdcChan"] = 31  # Standard: 32 channels per TDC
                         """
-                        cabling_data["tdc"] = gasGap + 12
+                        cabling_data["board"] = gasGap + 12
                     idTranslateDict.append(deepcopy(cabling_data))
                     if doubZ == 1: ## BIS7
                         cabling_data["firstStrip"] = 33
@@ -104,7 +104,7 @@ for sector in range(1, 9):
                         cabling_data["firstTdcChan"] = 0
                         cabling_data["lastTdcChan"] = 31  # Standard: 32 channels per TDC
                         """
-                        cabling_data["tdc"] = gasGap + 6
+                        cabling_data["board"] = gasGap + 6
                     elif doubZ == 2: ## BIS8
                         cabling_data["firstStrip"] = 33
                         """
@@ -112,7 +112,7 @@ for sector in range(1, 9):
                         cabling_data["firstTdcChan"] = 0
                         cabling_data["lastTdcChan"] = 31  # Standard: 32 channels per TDC
                         """
-                        cabling_data["tdc"] = gasGap + 15
+                        cabling_data["board"] = gasGap + 15
 
                     idTranslateDict.append(deepcopy(cabling_data))
 
@@ -127,7 +127,7 @@ for sector in range(1, 9):
                         cabling_data["firstTdcChan"] = 0
                         cabling_data["lastTdcChan"] = 7  # First 8 channels of the TDC used for BIS8 eta strips
                         """
-                        cabling_data["tdc"] = gasGap + 9
+                        cabling_data["board"] = gasGap + 9
                         cabling_data["flatCableId"] = 2
                         idTranslateDict.append(deepcopy(cabling_data))
 

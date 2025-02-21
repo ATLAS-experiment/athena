@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCABLINGDATA_RPCCABLINGDATA_H
 #define MUONCABLINGDATA_RPCCABLINGDATA_H
@@ -79,9 +79,9 @@ namespace Muon{
         /** @brief  Identifier of the subdetector region in the readout BA / BC etc. */
         int16_t& subDetector{m_cache.cache[0]};
         /** @brief Unique Identifier of the Rpc chamber from an online perspective  */
-        int16_t& tdcSector{m_cache.cache[1]};
+        int16_t& boardSector{m_cache.cache[1]};
         /** @brief Unique identifier of the tdc chip */
-        int16_t& tdc{m_cache.cache[2]};
+        int16_t& board{m_cache.cache[2]};
     private:
         union {
             int64_t hash{0};
@@ -96,7 +96,7 @@ namespace Muon{
         RpcCablingData() = default;
         /** @brief Offline strip number */
         uint8_t strip{0};
-        /** @brief Online tdc channel number */
+        /** @brief Online board channel number */
         uint8_t channelId{0};
         /** @brief No sorting operator */
         bool operator<(const RpcCablingData&) const = delete;
