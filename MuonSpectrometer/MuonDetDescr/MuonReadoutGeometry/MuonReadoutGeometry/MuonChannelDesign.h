@@ -334,18 +334,6 @@ namespace MuonGM {
                 pos[0] = locX;
                 pos[1] = 0.;
 
-            } else {
-
-                /// Default case for phi wires
-                double dY   = 0.5 * (m_maxYSize - m_minYSize);
-                double locY = firstPos() + (st-1)*inputPitch;
-                double locX{0.};
-
-                if (std::abs(locY) > 0.5*m_minYSize) {
-                    locX = 0.5 * m_xSize *(1. - (0.5*m_maxYSize - std::abs(locY)) / dY);
-                }
-                pos[0] = locY;
-                pos[1] = locX;
             }
 
         } else if (detType == DetType::MM) {
