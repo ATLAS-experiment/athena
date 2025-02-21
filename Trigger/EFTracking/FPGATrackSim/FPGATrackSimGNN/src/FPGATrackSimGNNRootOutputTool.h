@@ -76,6 +76,7 @@ class FPGATrackSimGNNRootOutputTool : public AthAlgTool
         std::vector<bool> m_hit_isStrip{};
         std::vector<int> m_hit_hitType{};
         std::vector<HepMcParticleLink::barcode_type> m_hit_uniqueID{};
+        std::vector<long> m_hit_eventIndex{};
         std::vector<float> m_hit_cluster_x{};
         std::vector<float> m_hit_cluster_y{};
         std::vector<float> m_hit_cluster_z{};

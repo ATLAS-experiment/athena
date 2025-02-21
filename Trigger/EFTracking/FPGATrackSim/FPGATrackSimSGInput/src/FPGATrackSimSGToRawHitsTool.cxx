@@ -690,6 +690,7 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
       if (bestParent) {
         clusterEquiv.setEventIndex(bestTruthLink->eventIndex());
         clusterEquiv.setBarcode(bestTruthLink->barcode()); // FIXME barcode-based
+        clusterEquiv.setUniqueID(bestTruthLink->id());
       }
       else {
         clusterEquiv.setEventIndex(std::numeric_limits<long>::max());
@@ -795,7 +796,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
         isPrimary = false;
       }
 
-      HepMcParticleLink truthLink2(uid, ievt, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+      HepMcParticleLink truthLink2(uid, ievt, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID);
       
       FPGATrackSimTruthTrack tmpSGTrack;
       tmpSGTrack.setVtxX(track_truth_x0);

@@ -34,6 +34,7 @@ StatusCode FPGATrackSimGNNRootOutputTool::bookTree()
   m_hit_tree->Branch("hit_isStrip",&m_hit_isStrip);
   m_hit_tree->Branch("hit_hitType",&m_hit_hitType);
   m_hit_tree->Branch("hit_uniqueID",&m_hit_uniqueID);
+  m_hit_tree->Branch("hit_eventIndex",&m_hit_eventIndex);
   m_hit_tree->Branch("hit_cluster_x",&m_hit_cluster_x);
   m_hit_tree->Branch("hit_cluster_y",&m_hit_cluster_y);
   m_hit_tree->Branch("hit_cluster_z",&m_hit_cluster_z);
@@ -109,6 +110,7 @@ StatusCode FPGATrackSimGNNRootOutputTool::fillTree(const std::vector<std::shared
     m_hit_isStrip.push_back(hit->isStrip());
     m_hit_hitType.push_back(static_cast<int>(hit->getHitType()));
     m_hit_uniqueID.push_back(hit->getUniqueID());
+    m_hit_eventIndex.push_back(hit->getEventIndex());
     m_hit_cluster_x.push_back(hit->getOriginalHit().getX());
     m_hit_cluster_y.push_back(hit->getOriginalHit().getY());
     m_hit_cluster_z.push_back(hit->getOriginalHit().getZ());
@@ -201,6 +203,7 @@ void FPGATrackSimGNNRootOutputTool::resetVectors()
   m_hit_isStrip.clear();
   m_hit_hitType.clear();
   m_hit_uniqueID.clear();
+  m_hit_eventIndex.clear();
   m_hit_cluster_x.clear();
   m_hit_cluster_y.clear();
   m_hit_cluster_z.clear();
