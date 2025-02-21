@@ -46,7 +46,7 @@ namespace MuonR4{
 
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
-            SG::ReadHandleKey<xAOD::NRPCRDOContainer> m_rdoKey{this, "RdoCollection", "NRPCRDO"};
+            SG::ReadHandleKey<xAOD::NRPCRDOContainer> m_rdoKey{this, "RpcRdoContainer", "NRPCRDO"};
 
             SG::ReadCondHandleKey<Muon::RpcCablingMap> m_cablingKey{this, "CablingKey", "MuonNRPC_CablingMap",
                                                                     "Key of MuonNRPC_CablingMap"};
