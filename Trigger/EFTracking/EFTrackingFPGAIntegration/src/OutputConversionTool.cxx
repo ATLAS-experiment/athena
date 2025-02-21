@@ -5,6 +5,7 @@
 
 #include "OutputConversionTool.h"
 #include "FPGADataFormatUtilities.h"
+#include "EFTrackingDataFormats.h"
 
 StatusCode OutputConversionTool::initialize()
 {
@@ -12,14 +13,23 @@ StatusCode OutputConversionTool::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &bytestream, OutputConversion::FSM blockType) const
+StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &bytestream,
+                                                  EFTrackingDataFormats::Metadata *metadata,
+                                                  EFTrackingDataFormats::PixelClusterAuxInput *pcAux,
+                                                  EFTrackingDataFormats::StripClusterAuxInput *scAux,
+                                                  OutputConversion::FSM blockType) const
 {
+    using namespace FPGADataFormatUtilities;
     // define the FSM
     OutputConversion::FSM state = OutputConversion::FSM::EventHeader;
 
     std::vector<uint64_t> header_words;
     std::vector<uint64_t> footer_words;
     std::vector<uint64_t> ghits_words;
+    std::vector<uint64_t> pixel_edm_words;
+    std::vector<uint64_t> strip_edm_words;
+
+    unsigned int counter = 0;
 
     // Loop the bytestream
     for (const auto &word : bytestream)
@@ -29,7 +39,7 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
         {
         case OutputConversion::FSM::EventHeader:
         {
-            if (FPGADataFormatUtilities::get_bitfields_EVT_HDR_w1(word).flag != FPGADataFormatUtilities::EVT_HDR_FLAG && header_words.empty())
+            if (get_bitfields_EVT_HDR_w1(word).flag != EVT_HDR_FLAG && header_words.empty())
             {
                 ATH_MSG_ERROR("The first word is not the event hearder! Something is wrong");
                 state = OutputConversion::FSM::Error;
@@ -39,25 +49,46 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
             header_words.push_back(word);
             if (header_words.size() == 3)
             {
-                FPGADataFormatUtilities::EVT_HDR_w1 header_w1 = FPGADataFormatUtilities::get_bitfields_EVT_HDR_w1(header_words[0]);
-                FPGADataFormatUtilities::EVT_HDR_w2 header_w2 = FPGADataFormatUtilities::get_bitfields_EVT_HDR_w2(header_words[1]);
-                FPGADataFormatUtilities::EVT_HDR_w3 header_w3 = FPGADataFormatUtilities::get_bitfields_EVT_HDR_w3(header_words[2]);
+                EVT_HDR_w1 header_w1 = get_bitfields_EVT_HDR_w1(header_words[0]);
+                EVT_HDR_w2 header_w2 = get_bitfields_EVT_HDR_w2(header_words[1]);
+                EVT_HDR_w3 header_w3 = get_bitfields_EVT_HDR_w3(header_words[2]);
 
-                // The block after the event header must be a module header
-                // but it's set to unknown because the logic of determing the block
-                // is grouped with the event footer and the last cluster/ghit
-                state = OutputConversion::FSM::Unknown;
+                // The data format has be evloing. The logic here can change dramatically
+                // The block after the event header can be one of the following: Slice, Module, Road, Track, cluster EDM
+                // For now, we only consider the cluster EDM
+                switch (blockType)
+                {
+                case OutputConversion::FSM::PixelEDM:
+                {
+                    state = OutputConversion::FSM::PixelEDM;
+                    break;
+                }
+                case OutputConversion::FSM::StripEDM:
+                {
+                    state = OutputConversion::FSM::StripEDM;
+                    break;
+                }
+                default:
+                {
+                    ATH_MSG_ERROR("The blockType is not recognized! Something is wrong");
+                    state = OutputConversion::FSM::Error;
+                    break;
+                }
+                }
 
                 // print all bit fileds of the the event header
-                ATH_MSG_DEBUG("Event Header: ");
-                ATH_MSG_DEBUG("\tflag: 0x" << std::hex << header_w1.flag << std::dec);
-                ATH_MSG_DEBUG("\tl0id: " << header_w1.l0id);
-                ATH_MSG_DEBUG("\tbcid: " << header_w1.bcid);
-                ATH_MSG_DEBUG("\tspare: " << header_w1.spare);
-                ATH_MSG_DEBUG("\trunnumber: " << header_w2.runnumber);
-                ATH_MSG_DEBUG("\ttime: " << header_w2.time);
-                ATH_MSG_DEBUG("\tstatus: " << header_w3.status);
-                ATH_MSG_DEBUG("\tcrc: " << header_w3.crc);
+                if (msgLvl(MSG::DEBUG))
+                {
+                    ATH_MSG_DEBUG("Event Header: ");
+                    ATH_MSG_DEBUG("\tflag: 0x" << std::hex << header_w1.flag << std::dec);
+                    ATH_MSG_DEBUG("\tl0id: " << header_w1.l0id);
+                    ATH_MSG_DEBUG("\tbcid: " << header_w1.bcid);
+                    ATH_MSG_DEBUG("\tspare: " << header_w1.spare);
+                    ATH_MSG_DEBUG("\trunnumber: " << header_w2.runnumber);
+                    ATH_MSG_DEBUG("\ttime: " << header_w2.time);
+                    ATH_MSG_DEBUG("\tstatus: " << header_w3.status);
+                    ATH_MSG_DEBUG("\tcrc: " << header_w3.crc);
+                }
                 break;
             }
             break;
@@ -65,83 +96,27 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
         case OutputConversion::FSM::Unknown:
         {
             // Determine if this is a module header or event footer
-            if (FPGADataFormatUtilities::get_bitfields_M_HDR_w1(word).flag == FPGADataFormatUtilities::M_HDR_FLAG)
+            if (get_bitfields_M_HDR_w1(word).flag == M_HDR_FLAG)
             {
-                auto module = FPGADataFormatUtilities::get_bitfields_M_HDR_w1(word);
+                auto module = get_bitfields_M_HDR_w1(word);
                 // decode the module header
                 // print all bit fileds of the the module header
-                ATH_MSG_DEBUG("Module Header: ");
-                ATH_MSG_DEBUG("\tflag: 0x" << std::hex << module.flag << std::dec);
-                ATH_MSG_DEBUG("\tmodid: " << module.modid);
-                ATH_MSG_DEBUG("\tspare: " << module.spare);
+                if (msgLvl(MSG::DEBUG))
+                {
+                    ATH_MSG_DEBUG("Module Header: ");
+                    ATH_MSG_DEBUG("\tflag: 0x" << std::hex << module.flag << std::dec);
+                    ATH_MSG_DEBUG("\tmodid: " << module.modid);
+                    ATH_MSG_DEBUG("\tmodhash: " << module.modhash);
+                    ATH_MSG_DEBUG("\tspare: " << module.spare);
+                }
 
-                // The following block is determined by the blockType
-                // It should be one of: PixelClusters, StripClusters, PixelL2G, StripL2G, GlobalHits
+                // The following block is determined by the actual content
+                // Right now only the spacepoints are considered. This will likely change in future iteration.
                 switch (blockType)
                 {
-                case OutputConversion::FSM::PixelClusters:
-                {
-                    state = OutputConversion::FSM::PixelClusters;
-                    auto pixel_module = FPGADataFormatUtilities::get_bitfields_PIXEL_MODULE(module.modid);
-
-                    ATH_MSG_DEBUG("Pixel Module: ");
-                    ATH_MSG_DEBUG("\tlayer: " << pixel_module.layer);
-                    ATH_MSG_DEBUG("\tphi: " << pixel_module.phi);
-                    ATH_MSG_DEBUG("\teta: " << pixel_module.eta);
-
-                    break;
-                }
-                case OutputConversion::FSM::StripClusters:
-                {
-                    state = OutputConversion::FSM::StripClusters;
-                    auto strip_module = FPGADataFormatUtilities::get_bitfields_STRIP_MODULE(module.modid);
-
-                    ATH_MSG_DEBUG("Strip Module: ");
-                    ATH_MSG_DEBUG("\tlayer: " << strip_module.layer);
-                    ATH_MSG_DEBUG("\tphi: " << strip_module.phi);
-                    ATH_MSG_DEBUG("\teta: " << strip_module.eta);
-                    ATH_MSG_DEBUG("\tside: " << strip_module.side);
-
-                    break;
-                }
-                case OutputConversion::FSM::PixelL2G:
-                {
-                    // The actual dataformat is the same as the GlobalHits
-                    state = OutputConversion::FSM::GlobalHits;
-                    auto pixel_module = FPGADataFormatUtilities::get_bitfields_PIXEL_MODULE(module.modid);
-
-                    ATH_MSG_DEBUG("Pixel Module: ");
-                    ATH_MSG_DEBUG("\tlayer: " << pixel_module.layer);
-                    ATH_MSG_DEBUG("\tphi: " << pixel_module.phi);
-                    ATH_MSG_DEBUG("\teta: " << pixel_module.eta);
-
-                    break;
-                }
-                case OutputConversion::FSM::StripL2G:
-                {
-                    // The actual dataformat is the same as the GlobalHits
-                    state = OutputConversion::FSM::GlobalHits;
-                    auto strip_module = FPGADataFormatUtilities::get_bitfields_STRIP_MODULE(module.modid);
-
-                    ATH_MSG_DEBUG("Strip Module: ");
-                    ATH_MSG_DEBUG("\tlayer: " << strip_module.layer);
-                    ATH_MSG_DEBUG("\tphi: " << strip_module.phi);
-                    ATH_MSG_DEBUG("\teta: " << strip_module.eta);
-                    ATH_MSG_DEBUG("\tside: " << strip_module.side);
-
-                    break;
-                }
                 case OutputConversion::FSM::GlobalHits:
                 {
                     state = OutputConversion::FSM::GlobalHits;
-                    auto strip_module = FPGADataFormatUtilities::get_bitfields_STRIP_MODULE(module.modid);
-
-                    ATH_MSG_DEBUG("Strip Module: ");
-                    ATH_MSG_DEBUG("\tlayer: " << strip_module.layer);
-                    ATH_MSG_DEBUG("\tphi: " << strip_module.phi);
-                    ATH_MSG_DEBUG("\teta: " << strip_module.eta);
-                    ATH_MSG_DEBUG("\tside: " << strip_module.side);
-
                     break;
                 }
                 default:
@@ -152,7 +127,7 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
                 }
                 }
             }
-            else if (FPGADataFormatUtilities::get_bitfields_EVT_FTR_w1(word).flag == FPGADataFormatUtilities::EVT_FTR_FLAG)
+            else if (get_bitfields_EVT_FTR_w1(word).flag == EVT_FTR_FLAG)
             {
                 state = OutputConversion::FSM::EventFooter;
                 footer_words.push_back(word);
@@ -166,104 +141,15 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
             }
             break;
         }
-        case OutputConversion::FSM::PixelClusters:
-        {
-            // decode the clusters
-            auto cluster = FPGADataFormatUtilities::get_bitfields_PIXEL_CLUSTER(word);
-            ATH_MSG_DEBUG("Cluster: ");
-            ATH_MSG_DEBUG("\tlast: " << cluster.last);
-            ATH_MSG_DEBUG("\tcol_size: " << cluster.col_size);
-            ATH_MSG_DEBUG("\tcol: " << cluster.col);
-            ATH_MSG_DEBUG("\trow_size: " << cluster.row_size);
-            ATH_MSG_DEBUG("\trow: " << cluster.row);
-            ATH_MSG_DEBUG("\tclusterid: " << cluster.clusterid);
-            ATH_MSG_DEBUG("\tspare: " << cluster.spare);
-
-            // Determine if this is the last cluster
-            if (cluster.last == 1)
-            {
-                state = OutputConversion::FSM::Unknown;
-                break;
-            }
-            break;
-        }
-        case OutputConversion::FSM::StripClusters:
-        {
-            // First we need to determine if this 64 bit word contain the lower 32 bits of the cluster
-            if (FPGADataFormatUtilities::get_dataformat_STRIP_CLUSTER_low32(word) == 0)
-            {
-                // We only need to consider the upper 32 bits
-                auto upper = FPGADataFormatUtilities::get_dataformat_STRIP_CLUSTER_up32(word);
-                ATH_MSG_DEBUG("Cluster upper 32 bits: " << std::hex << upper << std::dec);
-
-                auto cluster = FPGADataFormatUtilities::get_bitfields_STRIP_CLUSTER(upper);
-                ATH_MSG_DEBUG("Cluster: ");
-                ATH_MSG_DEBUG("\tlast: " << cluster.last);
-                ATH_MSG_DEBUG("\trow: " << cluster.row);
-                ATH_MSG_DEBUG("\tnstrips: " << cluster.nstrips);
-                ATH_MSG_DEBUG("\tstrip_index: " << cluster.strip_index);
-                ATH_MSG_DEBUG("\tclusterid: " << cluster.clusterid);
-                ATH_MSG_DEBUG("\tspare: " << cluster.spare);
-
-                // Determine if this is the last cluster
-                if (cluster.last == 1)
-                {
-                    state = OutputConversion::FSM::Unknown;
-                    break;
-                }
-                break;
-            }
-            else
-            {
-                // We need to consider both the upper and lower 32 bits
-                auto cluster_low = FPGADataFormatUtilities::get_bitfields_STRIP_CLUSTER(FPGADataFormatUtilities::get_dataformat_STRIP_CLUSTER_low32(word));
-                auto cluster_up = FPGADataFormatUtilities::get_bitfields_STRIP_CLUSTER(FPGADataFormatUtilities::get_dataformat_STRIP_CLUSTER_up32(word));
-
-                ATH_MSG_DEBUG("Cluster upper 32 bits: ");
-                ATH_MSG_DEBUG("\tlast: " << cluster_up.last);
-                ATH_MSG_DEBUG("\trow: " << cluster_up.row);
-                ATH_MSG_DEBUG("\tnstrips: " << cluster_up.nstrips);
-                ATH_MSG_DEBUG("\tstrip_index: " << cluster_up.strip_index);
-                ATH_MSG_DEBUG("\tclusterid: " << cluster_up.clusterid);
-                ATH_MSG_DEBUG("\tspare: " << cluster_up.spare);
-
-                ATH_MSG_DEBUG("Cluster lower 32 bits: ");
-                ATH_MSG_DEBUG("\tlast: " << cluster_low.last);
-                ATH_MSG_DEBUG("\trow: " << cluster_low.row);
-                ATH_MSG_DEBUG("\tnstrips: " << cluster_low.nstrips);
-                ATH_MSG_DEBUG("\tstrip_index: " << cluster_low.strip_index);
-                ATH_MSG_DEBUG("\tclusterid: " << cluster_low.clusterid);
-                ATH_MSG_DEBUG("\tspare: " << cluster_low.spare);
-
-                // Determine if this is the last cluster
-                if (cluster_low.last == 1)
-                {
-                    state = OutputConversion::FSM::Unknown;
-                    break;
-                }
-                break;
-            }
-        }
         case OutputConversion::FSM::GlobalHits:
         {
             ghits_words.push_back(word);
             if (ghits_words.size() == 2)
             {
-                auto GHit_w1 = FPGADataFormatUtilities::get_bitfields_GHITZ_w1(ghits_words[0]);
-                auto GHit_w2 = FPGADataFormatUtilities::get_bitfields_GHITZ_w2(ghits_words[1]);
+                // Global hits will be decoded in future iterations
 
-                // print all bit fileds of the the global hit
-                ATH_MSG_DEBUG("Global Hit: ");
-                ATH_MSG_DEBUG("\tlast: " << GHit_w1.last);
-                ATH_MSG_DEBUG("\tlyr: " << GHit_w1.lyr);
-                ATH_MSG_DEBUG("\trad: " << std::hex << GHit_w1.rad << std::dec);
-                ATH_MSG_DEBUG("\tphi: " << std::hex << GHit_w1.phi << std::dec);
-                ATH_MSG_DEBUG("\tz: " << std::hex << GHit_w1.z << std::dec);
-                ATH_MSG_DEBUG("\trow: " << GHit_w1.row);
-                ATH_MSG_DEBUG("\tspare: " << GHit_w1.spare);
-                ATH_MSG_DEBUG("\tcluster1: " << GHit_w2.cluster1);
-                ATH_MSG_DEBUG("\tcluster2: " << GHit_w2.cluster2);
-                ATH_MSG_DEBUG("\tspare: " << GHit_w2.spare);
+                auto GHit_w1 = get_bitfields_GHITZ_w1(ghits_words[0]);
+                // auto GHit_w2 = get_bitfields_GHITZ_w2(ghits_words[1]);
 
                 // clear the ghits_words
                 ghits_words.clear();
@@ -278,15 +164,180 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
             }
             break;
         }
+        case OutputConversion::FSM::PixelEDM:
+        {
+            pixel_edm_words.push_back(word);
+            // Read in 7 consecutive words
+            if (pixel_edm_words.size() == 7)
+            {
+                // decode the pixel EDM
+                // For pixel EDM aux, we need
+                // id, idHash, localPosition, localCovariance, rdoList
+                // channelsInPhi, channelsInEta, width in Eta
+                // omegaX, omegaY, global position
+                // totalToT
+                pcAux->idHash.push_back(get_bitfields_EDM_PIXELCLUSTER_w1(pixel_edm_words[0]).id_hash);
+                pcAux->id.push_back(get_bitfields_EDM_PIXELCLUSTER_w1(pixel_edm_words[0]).identfier);
+                pcAux->localPosition.push_back(to_real_EDM_PIXELCLUSTER_w4_localposition_x(get_bitfields_EDM_PIXELCLUSTER_w4(pixel_edm_words[3]).localposition_x));
+                pcAux->localPosition.push_back(to_real_EDM_PIXELCLUSTER_w4_localposition_y(get_bitfields_EDM_PIXELCLUSTER_w4(pixel_edm_words[3]).localposition_y));
+                pcAux->channelsInPhi.push_back(get_bitfields_EDM_PIXELCLUSTER_w4(pixel_edm_words[3]).channels_in_phi);
+                pcAux->channelsInEta.push_back(get_bitfields_EDM_PIXELCLUSTER_w4(pixel_edm_words[3]).channels_in_eta);
+                pcAux->widthInEta.push_back(to_real_EDM_PIXELCLUSTER_w4_width_in_eta(get_bitfields_EDM_PIXELCLUSTER_w4(pixel_edm_words[3]).width_in_eta));
+                pcAux->localCovariance.push_back(to_real_EDM_PIXELCLUSTER_w5_localcovariance_xx(get_bitfields_EDM_PIXELCLUSTER_w5(pixel_edm_words[4]).localcovariance_xx));
+                pcAux->localCovariance.push_back(to_real_EDM_PIXELCLUSTER_w5_localcovariance_yy(get_bitfields_EDM_PIXELCLUSTER_w5(pixel_edm_words[4]).localcovariance_yy));
+                pcAux->omegaX.push_back(to_real_EDM_PIXELCLUSTER_w5_omega_x(get_bitfields_EDM_PIXELCLUSTER_w5(pixel_edm_words[4]).omega_x));
+                pcAux->omegaY.push_back(to_real_EDM_PIXELCLUSTER_w5_omega_y(get_bitfields_EDM_PIXELCLUSTER_w5(pixel_edm_words[4]).omega_y));
+                pcAux->globalPosition.push_back(to_real_EDM_PIXELCLUSTER_w6_globalposition_x(get_bitfields_EDM_PIXELCLUSTER_w6(pixel_edm_words[5]).globalposition_x));
+                pcAux->globalPosition.push_back(to_real_EDM_PIXELCLUSTER_w6_globalposition_y(get_bitfields_EDM_PIXELCLUSTER_w6(pixel_edm_words[5]).globalposition_y));
+                pcAux->globalPosition.push_back(to_real_EDM_PIXELCLUSTER_w7_globalposition_z(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).globalposition_z));
+                pcAux->totalToT.push_back(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).total_tot);
+
+                // check if the rdo list word is empty, there are only 4 words in the pixel EDM
+                auto rdo_w1 = get_bitfields_EDM_PIXELCLUSTER_w2(pixel_edm_words[1]).rdo_list_w1;
+                auto rdo_w2 = get_bitfields_EDM_PIXELCLUSTER_w2(pixel_edm_words[1]).rdo_list_w2;
+                auto rdo_w3 = get_bitfields_EDM_PIXELCLUSTER_w3(pixel_edm_words[2]).rdo_list_w3;
+                auto rdo_w4 = get_bitfields_EDM_PIXELCLUSTER_w3(pixel_edm_words[2]).rdo_list_w4;
+
+                unsigned short current_rdo_size = 0;
+                if (rdo_w1 != 0)
+                {
+                    pcAux->rdoList.push_back(rdo_w1);
+                    current_rdo_size++;
+                }
+                if (rdo_w2 != 0)
+                {
+                    pcAux->rdoList.push_back(rdo_w2);
+                    current_rdo_size++;
+                }
+                if (rdo_w3 != 0)
+                {
+                    pcAux->rdoList.push_back(rdo_w3);
+                    current_rdo_size++;
+                }
+                if (rdo_w4 != 0)
+                {
+                    pcAux->rdoList.push_back(rdo_w4);
+                    current_rdo_size++;
+                }
+
+                metadata->pcRdoIndex[counter] = current_rdo_size;
+                counter++;
+
+                // Determine if this is the last cluster
+                if (get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).lastword == 1)
+                {
+                    metadata->pcRdoIndexSize = counter;
+                    metadata->numOfPixelClusters = counter;
+                    state = OutputConversion::FSM::EventFooter;
+                }
+                pixel_edm_words.clear();
+
+                // print all bit fileds of the the pixel EDM
+                if (msgLvl(MSG::DEBUG))
+                {
+                    ATH_MSG_DEBUG("Pixel EDM: ");
+                    ATH_MSG_DEBUG("\tid: " << pcAux->id.back());
+                    ATH_MSG_DEBUG("\tidHash: " << pcAux->idHash.back());
+                    ATH_MSG_DEBUG("\tlocalPosition_x: " << pcAux->localPosition.at(pcAux->localPosition.size() - 2));
+                    ATH_MSG_DEBUG("\tlocalPosition_y: " << pcAux->localPosition.back());
+                    ATH_MSG_DEBUG("\tlocalCovariance_xx: " << pcAux->localCovariance.at(pcAux->localCovariance.size() - 2));
+                    ATH_MSG_DEBUG("\tlocalCovariance_yy: " << pcAux->localCovariance.back());
+                    ATH_MSG_DEBUG("\tglobalPosition_x: " << pcAux->globalPosition.at(pcAux->globalPosition.size() - 3));
+                    ATH_MSG_DEBUG("\tglobalPosition_y: " << pcAux->globalPosition.at(pcAux->globalPosition.size() - 2));
+                    ATH_MSG_DEBUG("\tglobalPosition_z: " << pcAux->globalPosition.back());
+                    ATH_MSG_DEBUG("\tchannelsInPhi: " << pcAux->channelsInPhi.back());
+                    ATH_MSG_DEBUG("\tchannelsInEta: " << pcAux->channelsInEta.back());
+                    ATH_MSG_DEBUG("\twidthInEta: " << pcAux->widthInEta.back());
+                    ATH_MSG_DEBUG("\tomegaX: " << pcAux->omegaX.back());
+                    ATH_MSG_DEBUG("\tomegaY: " << pcAux->omegaY.back());
+                    ATH_MSG_DEBUG("\ttotalToT: " << pcAux->totalToT.back());
+                }
+                break;
+            }
+
+            break;
+        }
+        case OutputConversion::FSM::StripEDM:
+        {
+            strip_edm_words.push_back(word);
+            // Read in 6 consecutive words
+            if (strip_edm_words.size() == 6)
+            {
+                scAux->idHash.push_back(get_bitfields_EDM_STRIPCLUSTER_w1(strip_edm_words[0]).id_hash);
+                scAux->id.push_back(get_bitfields_EDM_STRIPCLUSTER_w1(strip_edm_words[0]).identifier);
+                scAux->localPosition.push_back(to_real_EDM_STRIPCLUSTER_w4_localposition_x(get_bitfields_EDM_STRIPCLUSTER_w4(strip_edm_words[3]).localposition_x));
+                scAux->localCovariance.push_back(to_real_EDM_STRIPCLUSTER_w4_localcovariance_xx(get_bitfields_EDM_STRIPCLUSTER_w4(strip_edm_words[3]).localcovariance_xx));
+                scAux->globalPosition.push_back(to_real_EDM_STRIPCLUSTER_w5_globalposition_x(get_bitfields_EDM_STRIPCLUSTER_w5(strip_edm_words[4]).globalposition_x));
+                scAux->globalPosition.push_back(to_real_EDM_STRIPCLUSTER_w5_globalposition_y(get_bitfields_EDM_STRIPCLUSTER_w5(strip_edm_words[4]).globalposition_y));
+                scAux->globalPosition.push_back(to_real_EDM_STRIPCLUSTER_w6_globalposition_z(get_bitfields_EDM_STRIPCLUSTER_w6(strip_edm_words[5]).globalposition_z));
+                scAux->channelsInPhi.push_back(get_bitfields_EDM_STRIPCLUSTER_w5(strip_edm_words[4]).channels_in_phi);
+                // check if the rdo list word is empty, there are only 4 words in the strip EDM
+                auto rdo_w1 = get_bitfields_EDM_STRIPCLUSTER_w2(strip_edm_words[1]).rdo_list_w1;
+                auto rdo_w2 = get_bitfields_EDM_STRIPCLUSTER_w2(strip_edm_words[1]).rdo_list_w2;
+                auto rdo_w3 = get_bitfields_EDM_STRIPCLUSTER_w3(strip_edm_words[2]).rdo_list_w3;
+                auto rdo_w4 = get_bitfields_EDM_STRIPCLUSTER_w3(strip_edm_words[2]).rdo_list_w4;
+
+                unsigned short current_rdo_size = 0;
+                if (rdo_w1 != 0)
+                {
+                    scAux->rdoList.push_back(rdo_w1);
+                    current_rdo_size++;
+                }
+                if (rdo_w2 != 0)
+                {
+                    scAux->rdoList.push_back(rdo_w2);
+                    current_rdo_size++;
+                }
+                if (rdo_w3 != 0)
+                {
+                    scAux->rdoList.push_back(rdo_w3);
+                    current_rdo_size++;
+                }
+                if (rdo_w4 != 0)
+                {
+                    scAux->rdoList.push_back(rdo_w4);
+                    current_rdo_size++;
+                }
+
+                metadata->scRdoIndex[counter] = current_rdo_size;
+                counter++;
+
+                // Determine if this is the last cluster
+                if (get_bitfields_EDM_STRIPCLUSTER_w6(strip_edm_words[5]).lastword == 1)
+                {
+                    metadata->scRdoIndexSize = counter;
+                    metadata->numOfStripClusters = counter;
+                    state = OutputConversion::FSM::EventFooter;
+                }
+                strip_edm_words.clear();
+
+                // print all bit fileds of the the strip EDM
+                if (msgLvl(MSG::DEBUG))
+                {
+                    ATH_MSG_DEBUG("Strip EDM: ");
+                    ATH_MSG_DEBUG("\tidHash: " << scAux->idHash.back());
+                    ATH_MSG_DEBUG("\tid: " << scAux->id.back());
+                    ATH_MSG_DEBUG("\tlocalPosition_x: " << scAux->localPosition.back());
+                    ATH_MSG_DEBUG("\tlocalCovariance_xx: " << scAux->localCovariance.back());
+                    ATH_MSG_DEBUG("\tglobalPosition_x: " << scAux->globalPosition.at(scAux->globalPosition.size() - 3));
+                    ATH_MSG_DEBUG("\tglobalPosition_y: " << scAux->globalPosition.at(scAux->globalPosition.size() - 2));
+                    ATH_MSG_DEBUG("\tglobalPosition_z: " << scAux->globalPosition.back());
+                    ATH_MSG_DEBUG("\tchannelsInPhi: " << scAux->channelsInPhi.back());
+                    ATH_MSG_DEBUG("\trdoList: ");
+                }
+                break;
+            }
+            break;
+        }
         case OutputConversion::FSM::EventFooter:
         {
             footer_words.push_back(word);
             if (footer_words.size() == 3)
             {
                 // decode the event footer
-                FPGADataFormatUtilities::EVT_FTR_w1 footer_w1 = FPGADataFormatUtilities::get_bitfields_EVT_FTR_w1(footer_words[0]);
-                FPGADataFormatUtilities::EVT_FTR_w2 footer_w2 = FPGADataFormatUtilities::get_bitfields_EVT_FTR_w2(footer_words[1]);
-                FPGADataFormatUtilities::EVT_FTR_w3 footer_w3 = FPGADataFormatUtilities::get_bitfields_EVT_FTR_w3(footer_words[2]);
+                EVT_FTR_w1 footer_w1 = get_bitfields_EVT_FTR_w1(footer_words[0]);
+                EVT_FTR_w2 footer_w2 = get_bitfields_EVT_FTR_w2(footer_words[1]);
+                EVT_FTR_w3 footer_w3 = get_bitfields_EVT_FTR_w3(footer_words[2]);
 
                 // print all bit fileds of the the event footer
                 ATH_MSG_DEBUG("Event Footer: ");
@@ -300,6 +351,7 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
                 // clear header and footer words
                 header_words.clear();
                 footer_words.clear();
+                counter = 0;
 
                 // reset the state to EventHeader
                 // Caveat: this enables continue decoding the next event if TV contains multiple events
@@ -318,35 +370,29 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
             break;
         }
     }
+
     return StatusCode::SUCCESS;
 }
 
-StatusCode OutputConversionTool::decodePixelClusters(const std::vector<uint64_t> &bytestream) const
+StatusCode OutputConversionTool::decodePixelEDM(const std::vector<uint64_t> &bytestream,
+                                                EFTrackingDataFormats::Metadata *metadata,
+                                                EFTrackingDataFormats::PixelClusterAuxInput &pcAux) const
 {
-    ATH_MSG_DEBUG("Decoding pixel clusters");
-    return decodeFPGAoutput(bytestream, OutputConversion::FSM::PixelClusters);
+    ATH_MSG_DEBUG("Decoding pixel EDM");
+    return decodeFPGAoutput(bytestream, metadata, &pcAux, nullptr, OutputConversion::FSM::PixelEDM);
 }
 
-StatusCode OutputConversionTool::decodeStripClusters(const std::vector<uint64_t> &bytestream) const
+StatusCode OutputConversionTool::decodeStripEDM(const std::vector<uint64_t> &bytestream,
+                                                EFTrackingDataFormats::Metadata *metadata,
+                                                EFTrackingDataFormats::StripClusterAuxInput &scAux) const
 {
-    ATH_MSG_DEBUG("Decoding strip clusters");
-    return decodeFPGAoutput(bytestream, OutputConversion::FSM::StripClusters);
+    ATH_MSG_DEBUG("Decoding strip EDM");
+    return decodeFPGAoutput(bytestream, metadata, nullptr, &scAux, OutputConversion::FSM::StripEDM);
 }
 
-StatusCode OutputConversionTool::decodePixelL2G(const std::vector<uint64_t> &bytestream) const
-{
-    ATH_MSG_DEBUG("Decoding pixel L2G");
-    return decodeFPGAoutput(bytestream, OutputConversion::FSM::PixelL2G);
-}
-
-StatusCode OutputConversionTool::decodeStripL2G(const std::vector<uint64_t> &bytestream) const
-{
-    ATH_MSG_DEBUG("Decoding strip L2G");
-    return decodeFPGAoutput(bytestream, OutputConversion::FSM::StripL2G);
-}
-
-StatusCode OutputConversionTool::decodeSpacePoints(const std::vector<uint64_t> &bytestream) const
+StatusCode OutputConversionTool::decodeSpacePoints(const std::vector<uint64_t> &bytestream,
+                                                   EFTrackingDataFormats::Metadata *metadata) const
 {
     ATH_MSG_DEBUG("Decoding space points");
-    return decodeFPGAoutput(bytestream, OutputConversion::FSM::GlobalHits);
+    return decodeFPGAoutput(bytestream, metadata, nullptr, nullptr, OutputConversion::FSM::GlobalHits);
 }

@@ -277,7 +277,8 @@ StatusCode FPGADataFormatTool::fillFooter(std::vector<uint64_t> &encodedData) co
 
 StatusCode FPGADataFormatTool::fillModuleHeader(const InDetDD::SiDetectorElement* sielement, std::vector<uint64_t> &encodedData) const
 {
-  auto mod_w1 = FPGADataFormatUtilities::fill_M_HDR_w1 (FPGADataFormatUtilities::M_HDR_FLAG, sielement->identify().get_identifier32().get_compact(), 0);
+  auto mod_w1 = FPGADataFormatUtilities::fill_M_HDR_w1 (FPGADataFormatUtilities::M_HDR_FLAG, sielement->identify().get_identifier32().get_compact(), 
+                                                        sielement->identifyHash().value(), 0);
   encodedData.push_back(FPGADataFormatUtilities::get_dataformat_M_HDR_w1(mod_w1));
 
   return StatusCode::SUCCESS;

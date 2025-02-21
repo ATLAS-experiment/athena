@@ -23,11 +23,9 @@ namespace OutputConversion
         Unknown,
         EventHeader,
         EventFooter,
-        PixelClusters,
-        StripClusters,
         GlobalHits,
-        PixelL2G,
-        StripL2G,
+        PixelEDM,
+        StripEDM,
         Error
     };
 }
@@ -39,17 +37,25 @@ public:
     StatusCode initialize() override;
 
     // User-level functions to decode the clusters/L2G/SpacePoints
-    StatusCode decodePixelClusters(const std::vector<uint64_t> &bytestream) const;
-    StatusCode decodeStripClusters(const std::vector<uint64_t> &bytestream) const;
-    StatusCode decodePixelL2G(const std::vector<uint64_t> &bytestream) const;
-    StatusCode decodeStripL2G(const std::vector<uint64_t> &bytestream) const;
-    StatusCode decodeSpacePoints(const std::vector<uint64_t> &bytestream) const;
+    StatusCode decodePixelEDM(const std::vector<uint64_t> &bytestream,
+                              EFTrackingDataFormats::Metadata *metadata,
+                              EFTrackingDataFormats::PixelClusterAuxInput &pcAux) const;
+
+    StatusCode decodeStripEDM(const std::vector<uint64_t> &bytestream,
+                              EFTrackingDataFormats::Metadata *metadata,
+                              EFTrackingDataFormats::StripClusterAuxInput &scAux) const;
+
+    StatusCode decodeSpacePoints(const std::vector<uint64_t> &bytestream, EFTrackingDataFormats::Metadata *metadata) const;
 
     /**
      * @brief Decode the FPGA output based on the type. user shouldn't call this function directly
      * They should call the following user-level functions
      */
-    StatusCode decodeFPGAoutput(const std::vector<uint64_t> &bytestream, OutputConversion::FSM blockType) const;
+    StatusCode decodeFPGAoutput(const std::vector<uint64_t> &bytestream,
+                                EFTrackingDataFormats::Metadata *metadata,
+                                EFTrackingDataFormats::PixelClusterAuxInput *pcAux = nullptr,
+                                EFTrackingDataFormats::StripClusterAuxInput *scAux = nullptr,
+                                OutputConversion::FSM blockType = OutputConversion::FSM::Unknown) const;
 };
 
 #endif // EFTRACKING_FPGA_INTEGRATION__OUTPUT_CONVERSION_TOOL_H
