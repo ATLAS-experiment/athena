@@ -108,7 +108,7 @@ namespace Muon {
         Gaudi::Property<double> m_nTrigHitsdR{this, "nTrigHitsdR", 0.6*Gaudi::Units::radian, "max delta R between vertex and trigger chamber (RPC or TGC) hit"};
         // minimal good vertex criteria
         Gaudi::Property<int> m_MinMDTHits{this, "MinMDTHits", 250, "minimal number of MDT hits"};
-        Gaudi::Property<int> m_MinTrigHits{this, "MinMDTHits", 200, "minimal number of trigger chamber (RPC+TGC) hits"};
+        Gaudi::Property<int> m_MinTrigHits{this, "MinTrigHits", 200, "minimal number of trigger chamber (RPC+TGC) hits"};
         Gaudi::Property<double> m_MaxLxyEndcap{this, "MaxLxyEndcap", 10000*Gaudi::Units::millimeter, "maximal transverse distance for endcap vertex in mm"};
         Gaudi::Property<double> m_MinZEndcap{this, "MinZEndcap", 8000*Gaudi::Units::millimeter, "minimal longitudinal distance for endcap vertex in mm"};
         Gaudi::Property<double> m_MaxZEndcap{this, "MaxZEndcap", 14000*Gaudi::Units::millimeter, "maximal longitudinal distance for endcap vertex in mm"};
