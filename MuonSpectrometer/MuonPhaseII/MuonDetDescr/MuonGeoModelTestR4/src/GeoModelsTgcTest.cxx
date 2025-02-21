@@ -120,7 +120,6 @@ StatusCode GeoModelsTgcTest::execute() {
       const sTgcIdHelper& id_helper{m_idHelperSvc->stgcIdHelper()};
       for (unsigned int layer = 1; layer <= reElement->numLayers(); ++layer) {
         for (int chType = sTgcIdHelper::sTgcChannelTypes::Pad; chType <= sTgcIdHelper::sTgcChannelTypes::Wire; ++chType) {
-            unsigned int numChannel = 0;
             bool isValidLay{false};
             const Identifier layID = id_helper.channelID(reElement->identify(),
                                                         reElement->multilayer(),
@@ -128,19 +127,8 @@ StatusCode GeoModelsTgcTest::execute() {
             if (!isValidLay) {
                 continue;
             }
-            switch(chType) {
-                case sTgcIdHelper::sTgcChannelTypes::Pad:
-                    numChannel = reElement->numPads(layID);
-                break;
+            const unsigned int numChannel = reElement->numChannels(layID);
 
-                case sTgcIdHelper::sTgcChannelTypes::Strip:
-                    numChannel = reElement->numStrips(layID);
-                break;
-                
-                case sTgcIdHelper::sTgcChannelTypes::Wire:
-                    numChannel = reElement->numWireGroups(layer);
-                break;
-            }
             for (unsigned int channel = 1; channel < numChannel ; ++channel) {
                 bool isValidCh{false};
                 const Identifier chID = id_helper.channelID(reElement->identify(),
@@ -221,25 +209,26 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                 continue;
             }
             /// Gas Gap dimensions
-            m_sGapLength = reElement->sGapLength(layID);
-            m_lGapLength = reElement->lGapLength(layID);
-            m_sPadLength = reElement->sPadLength(layID);
-            m_lPadLength = reElement->lPadLength(layID);
-            m_gapHeight = reElement->gapHeight(layID);
-            m_yCutout = reElement->yCutout(layID);
+            
+            m_sGapLength = 2.*reElement->stripDesign(layID).shortHalfHeight();
+            m_lGapLength = 2.*reElement->stripDesign(layID).longHalfHeight();
+            m_sPadLength = 2.*reElement->padDesign(layID).shortHalfHeight();
+            m_lPadLength = 2.*reElement->padDesign(layID).longHalfHeight();
+            m_gapHeight =2.*reElement->stripDesign(layID).halfWidth();
+            m_yCutout = reElement->stripDesign(layID).yCutout();
 
             switch (chType) {
                 case sTgcIdHelper::sTgcChannelTypes::Pad:
-                    m_numPads.push_back(reElement->numPads(layID));
+                    m_numPads.push_back(reElement->numChannels(layID));
                     m_numPadEta.push_back(reElement->numPadEta(layID));
                     m_numPadPhi.push_back(reElement->numPadPhi(layID));
-                    m_firstPadHeight.push_back(reElement->firstPadHeight(layID));
+                    // m_firstPadHeight.push_back(reElement->firstPadHeight(layID));
                     m_padHeight.push_back(reElement->padHeight(layID));
                     m_padPhiShift.push_back(reElement->padPhiShift(layID));
-                    m_firstPadPhiDiv.push_back(reElement->firstPadPhiDiv(layID));
+                    // m_firstPadPhiDiv.push_back(reElement->firstPadPhiDiv(layID));
                     m_anglePadPhi = reElement->anglePadPhi(layID);
                     m_beamlineRadius = reElement->beamlineRadius(layID);
-                    for (unsigned int pad = 1; pad <= reElement->numPads(layID); ++pad) {
+                    for (unsigned int pad = 1; pad <= reElement->numChannels(layID); ++pad) {
                         bool isValidPad{false};
                         const Identifier padID = id_helper.channelID(reElement->identify(), 
                                                                    reElement->multilayer(),
@@ -292,15 +281,16 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                     }
                     break;
 
-                case sTgcIdHelper::sTgcChannelTypes::Strip:
-                    m_numStrips = reElement->numStrips(layID);
-                    m_stripPitch = reElement->stripPitch(layID);
-                    m_stripWidth = reElement->stripWidth(layID); 
-                    for (unsigned int strip = 1; strip <= reElement->numStrips(layID); ++strip) {
+                case sTgcIdHelper::sTgcChannelTypes::Strip:{
+                    const StripDesign& design{reElement->stripDesign(layID)};
+                    m_numStrips = design.numStrips();
+                    m_stripPitch = design.stripPitch();
+                    m_stripWidth = design.stripWidth(); 
+                    for (unsigned int strip = 1; strip <= reElement->numChannels(layID); ++strip) {
                         bool isValidStrip{false};
                         const Identifier stripID = id_helper.channelID(reElement->identify(), 
-                                                                   reElement->multilayer(),
-                                                                    layer, chType, strip, isValidStrip);
+                                                                       reElement->multilayer(),
+                                                                       layer, chType, strip, isValidStrip);
                         if (!isValidStrip) {
                             ATH_MSG_WARNING("Invalid Identifier detected for readout element "
                                         <<m_idHelperSvc->toStringDetEl(reElement->identify())
@@ -321,16 +311,16 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
 
                     }
                     break;
-                  
-                case sTgcIdHelper::sTgcChannelTypes::Wire:
-                    m_wireGroupWidth = reElement->wireGroupWidth(layer);
-                    numWireGroup = reElement->numWireGroups(layer);                    
-                    m_wirePitch = reElement->wirePitch(layID);
-                    m_wireWidth = reElement->wireWidth(layID);
-                    m_numWires.push_back(reElement->numWires(layer));
-                    m_firstWireGroupWidth.push_back(reElement->firstWireGroupWidth(layer));
+                } case sTgcIdHelper::sTgcChannelTypes::Wire: {
+                    const WireGroupDesign& design{reElement->wireDesign(layID)};
+                    m_wireGroupWidth = design.numWiresInGroup(2);
+                    numWireGroup = design.numStrips();                    
+                    m_wirePitch = design.stripPitch();
+                    m_wireWidth = design.stripWidth();
+                    m_numWires.push_back(design.nAllWires());
+                    m_firstWireGroupWidth.push_back(design.numWiresInGroup(1));
                     m_numWireGroups.push_back(numWireGroup);
-                    m_wireCutout.push_back(reElement->wireCutout(layer)); 
+                    m_wireCutout.push_back(design.wireCutout()); 
                     std::cout << "The number of wire groups are:" << numWireGroup << std::endl;
                     for (unsigned int wireGroup = 1; wireGroup <= numWireGroup; ++wireGroup) {
                         bool isValidWire{false};
@@ -355,6 +345,7 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                         m_wireGroupRotGasGap.push_back(layer);
                     }
                     break;
+                }
             }
         }
    }

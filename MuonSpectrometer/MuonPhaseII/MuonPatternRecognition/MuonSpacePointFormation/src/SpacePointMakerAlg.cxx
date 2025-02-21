@@ -129,8 +129,8 @@ template <>
             return false;
         }
         const MuonGMR4::sTgcReadoutElement* re = etaHits[0]->readoutElement();
-        return ((1.*etaHits.size()) / (1.*re->numStrips(etaHits[0]->gasGap()))) < m_maxOccStgcEta &&
-               ((1.*phiHits.size()) / (1.*re->numWireGroups(phiHits[0]->gasGap()))) < m_maxOccStgcPhi;
+        return ((1.*etaHits.size()) / (1.*re->numChannels(etaHits[0]->measurementHash()))) < m_maxOccStgcEta &&
+               ((1.*phiHits.size()) / (1.*re->numChannels(phiHits[0]->measurementHash()))) < m_maxOccStgcPhi;
     }
 
 template <class ContType>

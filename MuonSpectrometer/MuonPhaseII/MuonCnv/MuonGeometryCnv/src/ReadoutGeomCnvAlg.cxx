@@ -536,6 +536,7 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx, Constr
 
     for (const MuonGMR4::sTgcReadoutElement* copyMe : sTgcReadOuts) {
         const Identifier reId = copyMe->identify();
+        ATH_MSG_DEBUG("Translate readout element "<<m_idHelperSvc->toStringDetEl(reId)<<".");
         GeoIntrusivePtr<GeoVFullPhysVol> physVol{cloneNswWedge(gctx, copyMe, cacheObj)};
 
         auto newRE = std::make_unique<MuonGM::sTgcReadoutElement>(physVol, 
@@ -552,10 +553,12 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx, Constr
             using channelType = MuonGMR4::sTgcReadoutElement::ReadoutChannelType;
             using ChannelDesign =  MuonGM::MuonChannelDesign;
             const IdentifierHash layerHash = MuonGMR4::sTgcReadoutElement::createHash(layer,channelType::Strip,0);
-            newRE->m_Xlg[layer -1] =  Amg::getTranslate3D(copyMe->globalToLocalTrans(gctx) *
-                                                          copyMe->center(gctx, layerHash));
-
-            const MuonGMR4::StripDesign& copyEtaDesign{copyMe->stripDesign(layerHash)}; 
+            
+            const MuonGMR4::StripLayer& stripLayer{copyMe->stripLayer(layerHash)};
+            newRE->m_Xlg[layer -1] =  stripLayer.toOrigin() * Amg::getRotateY3D(90. * Gaudi::Units::deg) * Amg::getTranslateX3D( layer%2 ? - 0.01 : 0.01 ); 
+           
+            const MuonGMR4::StripDesign& copyEtaDesign{stripLayer.design()}; 
+            ATH_MSG_VERBOSE("Layer: "<<layer<<" "<<copyEtaDesign);
             /// Initialize the eta design
             ChannelDesign& etaDesign{newRE->m_etaDesign[layer-1]};
             etaDesign.type =  ChannelDesign::ChannelType::etaStrip;
@@ -573,7 +576,8 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx, Constr
             etaDesign.inputPitch  = copyEtaDesign.stripPitch();
             etaDesign.inputWidth  = copyEtaDesign.stripWidth();
             etaDesign.nch = copyEtaDesign.numStrips();
-            etaDesign.setFirstPos(copyEtaDesign.firstStripPos().x());
+            ATH_MSG_VERBOSE(m_idHelperSvc->toStringDetEl(copyMe->identify())<<", layer: "<<layer<<", eta-design: "<< copyEtaDesign);
+            etaDesign.setFirstPos(copyEtaDesign.firstStripPos().x() + 0.5*copyEtaDesign.stripPitch());
             /// Initialize the phi design
 
             const MuonGMR4::WireGroupDesign& copyPhiDesign{copyMe->wireDesign(layerHash)};
@@ -593,7 +597,8 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx, Constr
             }
             phiDesign.inputPitch  = copyPhiDesign.stripPitch();
             phiDesign.inputWidth  = copyPhiDesign.stripWidth();
-            phiDesign.setFirstPos(copyPhiDesign.firstStripPos().x()); // Position of 1st wire, accounts for staggering
+            ATH_MSG_VERBOSE(m_idHelperSvc->toStringDetEl(copyMe->identify())<<", layer: "<<layer<<", phi-design: "<< copyPhiDesign);
+            phiDesign.setFirstPos(copyPhiDesign.firstStripPos().x()-0.5*copyPhiDesign.stripPitch()); // Position of 1st wire, accounts for staggering
             phiDesign.firstPitch = copyPhiDesign.numWiresInGroup(1);  // Number of Wires in 1st group, group staggering
             phiDesign.groupWidth  = copyPhiDesign.numWiresInGroup(2);                // Number of Wires normal group
             phiDesign.nGroups = copyPhiDesign.numStrips();                           // Number of Wire Groups
@@ -776,7 +781,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
         
         const Amg::Transform3D& refTrf{refEle.localToGlobalTrans(gctx, gapId)};
         const Amg::Transform3D& testTrf{testEle.transform(gapId)};
-        if (!Amg::doesNotDeform(refTrf.inverse()*testTrf)) {
+        if (!Amg::isIdentity(refTrf.inverse()*testTrf)) {
             ATH_MSG_FATAL("The layer "<<m_idHelperSvc->toStringGasGap(gapId)<<" does not transform equally"
                          <<GeoTrf::toString(refTrf, true) <<" vs. "<<GeoTrf::toString(testTrf, true));
             return StatusCode::FAILURE;
@@ -888,7 +893,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                     
                     const Amg::Transform3D& refTrans{refEle.localToGlobalTrans(gctx, stripId)};
                     const Amg::Transform3D& testTrans{testEle.transform(stripId)};
-                    if (strip == 1 && !Amg::doesNotDeform(refTrans.inverse()*testTrans)) {
+                    if (strip == 1 && !Amg::isIdentity(refTrans.inverse()*testTrans)) {
                         ATH_MSG_ERROR("Transformation for "<<m_idHelperSvc->toString(stripId)<<" - "<<refEle.identHash()<<std::endl
                             <<" *** ref:  "<<GeoTrf::toString(refTrans)<<std::endl
                             <<" *** test: "<<GeoTrf::toString(testTrans)<<std::endl
@@ -999,7 +1004,6 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
 StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                                              const MuonGMR4::sTgcReadoutElement& refEle,
                                              const MuonGM::sTgcReadoutElement& testEle) const {
-    
     if (!m_checkGeo) {
         return StatusCode::SUCCESS;
     }
@@ -1010,33 +1014,22 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                 <<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true));
     const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
     for (unsigned int gasGap = 1; gasGap <= refEle.numLayers(); ++gasGap) {
-        for (int chType = sTgcIdHelper::sTgcChannelTypes::Pad; chType <= sTgcIdHelper::sTgcChannelTypes::Wire; ++chType) {
-            unsigned int numChannel = 0;
+        for (int chType : {sTgcIdHelper::sTgcChannelTypes::Strip , sTgcIdHelper::sTgcChannelTypes::Wire}) {
             const Identifier layID = idHelper.channelID(refEle.identify(),
                                                     refEle.multilayer(),
                                                     gasGap, chType, 1);
-            switch(chType) {
-                case sTgcIdHelper::sTgcChannelTypes::Pad:
-                    numChannel = refEle.numPads(layID);
-                break;
-
-                case sTgcIdHelper::sTgcChannelTypes::Strip:
-                    numChannel = refEle.numStrips(layID);
-                break;
-                
-                case sTgcIdHelper::sTgcChannelTypes::Wire:
-                    numChannel = refEle.numWireGroups(gasGap);
-                break;
-            }
-            for (unsigned int channel = 1; channel < numChannel ; ++channel) {
+            const unsigned int numChannel = refEle.numChannels(layID);
+            constexpr unsigned firstCh = 2;
+            for (unsigned int channel = firstCh; channel < numChannel ; ++channel) {
                 const Identifier chID = idHelper.channelID(refEle.identify(),
-                                                                refEle.multilayer(),
-                                                                gasGap, chType, channel);
+                                                           refEle.multilayer(),
+                                                           gasGap, chType, channel);
             
                 const Amg::Transform3D& refTrans{refEle.localToGlobalTrans(gctx, chID)};
                 const Amg::Transform3D& testTrans{testEle.transform(chID)};
-                if (channel == 1 && Amg::doesNotDeform(refTrans.inverse()*testTrans)) {
-                    ATH_MSG_ERROR("Transformation for "<<m_idHelperSvc->toString(chID)<<std::endl
+                if (channel == firstCh && (!Amg::doesNotDeform(testTrans.inverse()*refTrans)
+                                        || (testTrans.inverse()*refTrans).translation().perp() > std::numeric_limits<float>::epsilon() ) ) {
+                    ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - Transformation for "<<m_idHelperSvc->toString(chID)<<std::endl
                         <<" *** ref:  "<<GeoTrf::toString(refTrans, true)<<std::endl
                         <<" *** test: "<<GeoTrf::toString(testTrans, true));
                         return StatusCode::FAILURE;
@@ -1061,26 +1054,46 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                     if ((refChannelPos - testChannelPos).mag() > 10. * Gaudi::Units::micrometer){
                         ATH_MSG_ERROR("Mismatch in channel positions "<<m_idHelperSvc->toString(chID)
                                 <<" ref: "<<Amg::toString(refChannelPos)<<" test: "<<Amg::toString(testChannelPos)
-                                <<" local coordinates -- ref: "<<Amg::toString(testEle.absTransform().inverse()*refChannelPos)
-                                <<" test: "<<Amg::toString(testEle.absTransform().inverse()*testChannelPos));
+                                <<" local coordinates -- ref: "<<Amg::toString(testTrans.inverse()*refChannelPos)
+                                <<" test: "<<Amg::toString(testTrans.inverse()*testChannelPos));
                         return StatusCode::FAILURE;
                     }
                     ATH_MSG_VERBOSE("Agreement between new and old geometry for channel "<<m_idHelperSvc->toString(chID)
                                     <<" channel position "<<Amg::toString(refChannelPos));
                 }
-                else {
+                else if (chType == sTgcIdHelper::sTgcChannelTypes::Strip){
                     const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, chID);
                     Amg::Vector3D testChannelPos(Amg::Vector3D::Zero()); 
                     testEle.stripGlobalPosition(chID, testChannelPos);
                     if ((refChannelPos - testChannelPos).mag() > 10. * Gaudi::Units::micrometer){
                         ATH_MSG_ERROR("Mismatch in channel positions "<<m_idHelperSvc->toString(chID)
                                 <<" ref: "<<Amg::toString(refChannelPos)<<" test: "<<Amg::toString(testChannelPos)
-                                <<" local coordinates -- ref: "<<Amg::toString(testEle.absTransform().inverse()*refChannelPos)
-                                <<" test: "<<Amg::toString(testEle.absTransform().inverse()*testChannelPos));
+                                <<" local coordinates -- ref: "<<Amg::toString(testTrans.inverse()*refChannelPos)
+                                <<" test: "<<Amg::toString(testTrans.inverse()*testChannelPos));
                         return StatusCode::FAILURE;
                     }
                     ATH_MSG_VERBOSE("Agreement between new and old geometry for channel "<<m_idHelperSvc->toString(chID)
                                     <<" channel position "<<Amg::toString(refChannelPos));
+                }
+                else { // wire
+                    const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, chID);
+                    Amg::Vector3D testChannelPos(Amg::Vector3D::Zero()); 
+                    testEle.stripGlobalPosition(chID, testChannelPos);
+                    Amg::Vector3D localRefPos {testTrans.inverse()*refChannelPos};
+                    Amg::Vector3D localTestPos{testTrans.inverse()*testChannelPos};
+                    if(std::abs(localRefPos.x() -localTestPos.x()) > 1.* Gaudi::Units::micrometer 
+                    || std::abs(localRefPos.z() -localTestPos.z()) > 15.* Gaudi::Units::micrometer){
+                        ATH_MSG_ERROR("Mismatch in wire positions "<<m_idHelperSvc->toString(chID)
+                            <<" ref: "<<Amg::toString(refChannelPos)<<" test: "<<Amg::toString(testChannelPos)
+                            <<" local coordinates -- ref: "<<Amg::toString(testTrans.inverse()*refChannelPos)
+                            <<" test: "<<Amg::toString(testTrans.inverse()*testChannelPos)
+                            <<"FINGER: "<<std::abs(localRefPos.x() -localTestPos.x())
+                            <<", "<<std::abs(localRefPos.z() -localTestPos.z()));
+                        return StatusCode::FAILURE;  
+                    }
+
+
+
                 }
             }
         }

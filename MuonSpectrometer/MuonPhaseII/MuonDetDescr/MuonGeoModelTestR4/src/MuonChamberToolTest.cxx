@@ -290,19 +290,8 @@ namespace MuonGMR4 {
            
             for(unsigned int nch = 1; nch <= stgc.nChTypes(); ++nch){                
                 IdentifierHash gasGapHash = sTgcReadoutElement::createHash(gasGap, nch, 0, 0);
-                unsigned int nStrips = stgc.numStrips(stgc.measurementId(gasGapHash));
+                const unsigned int nStrips = stgc.numChannels(gasGapHash);
                 sTgcReadoutElement::ReadoutChannelType channelType = static_cast<sTgcReadoutElement::ReadoutChannelType>(nch);
-                switch (channelType){
-                case sTgcReadoutElement::ReadoutChannelType::Pad:
-                    nStrips = stgc.numPads(stgc.measurementId(gasGapHash));                  
-                    break;
-                case sTgcReadoutElement::ReadoutChannelType::Wire:
-                    nStrips = stgc.numWires(gasGap);                                       
-                    break;                
-                default: 
-                                  
-                    break;
-                }
                 
                 for(unsigned int strip = 1; strip <= nStrips; ++strip){
                     const Identifier stripId = idHelper.channelID(stgc.identify(), stgc.multilayer(), gasGap, nch, strip);
