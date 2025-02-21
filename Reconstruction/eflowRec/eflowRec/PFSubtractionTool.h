@@ -118,7 +118,7 @@ private:
   Gaudi::Property<bool> m_useTruthForChargedShowerSubtraction{this, "useTruthForChargedShowerSubtraction", false, "Toggle whether we use truth information for the charged shower subtraction or not"};
 
   /**Toggle whether we fully remove a cell with a truth deposit or reweight it based on truth contribution */
-  Gaudi::Property<bool> m_useFullCellTruthSubtraction{this,"useFullCellTruthSubtraction",false,"Toggle whether we fully remove a cell with a truth deposit or reweight it based on truth contribution"};
+  Gaudi::Property<bool> m_useFullCellTruthSubtraction{this,"useFullCellTruthSubtraction",true,"Toggle whether we fully remove a cell with a truth deposit or reweight it based on truth contribution"};
 
   ToolHandle<PFSimulateTruthShowerTool> m_theTruthShowerSimulator{this, "PFSimulateTruthShowerTool", "", "The truth shower simulator"};
 
