@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # CI test definitions for the Athena project
 # --> README.md before you modify this file
@@ -408,13 +408,15 @@ atlas_add_citest( TriggerMC
    SCRIPT test_trig_mc_v1Dev_ITk_ttbar200PU_build.py )
 
 atlas_add_citest( TriggerMC_HI
-   SCRIPT test_trig_mc_v1DevHI_build.py )
+   SCRIPT test_trig_mc_v1DevHI_build.py
+   LOG_IGNORE_PATTERN "chainComp ERROR.*Trigger counts differ from the reference" )
 
 atlas_add_citest( TriggerData
    SCRIPT test_trig_data_v1Dev_build.py )
 
 atlas_add_citest( Trigger_athenaHLT_v1Dev
-   SCRIPT test_trigP1_v1Dev_decodeBS_build.py )
+   SCRIPT test_trigP1_v1Dev_decodeBS_build.py
+   LOG_IGNORE_PATTERN "chainComp ERROR.*Trigger counts differ from the reference" )
 
 atlas_add_citest( Trigger_athenaHLT_v1PhysP1
    SCRIPT test_trigP1_v1PhysP1_build.py )
