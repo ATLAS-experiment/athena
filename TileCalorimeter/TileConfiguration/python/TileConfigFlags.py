@@ -71,7 +71,7 @@ def createTileConfigFlags():
      tcf.addFlag('Tile.RawChannelContainer', _getRawChannelContainer)
      tcf.addFlag('Tile.useDCS', _useDCS)
      tcf.addFlag('Tile.doTimingHistogramsForGain', -1) # Production of Tile timing histograms per channel (< 0: switched off)
-     tcf.addFlag('Tile.doTimingHistogramsForCell', {}) # Production of Tile timing histograms per selected cells ({}: switched off)
+     tcf.addFlag('Tile.doTimingHistogramsForCell', {'LBA14':['A4','B6','D1'],'LBA22':['A4','B6','D1'],'EBA22':['A13','B12','D5']}) # Production of Tile timing histograms per selected cells ({}: switched off)
      tcf.addFlag('Tile.useOnlineChannelStatus', True) # Use online DB with channel/adc status
 
      return tcf

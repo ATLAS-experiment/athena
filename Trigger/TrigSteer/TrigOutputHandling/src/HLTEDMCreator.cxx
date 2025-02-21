@@ -10,6 +10,59 @@
 #include "StoreGate/WriteDecorHandle.h"
 #include "TrigOutputHandling/TriggerEDMAuxAccessors.h"
 
+#include "xAODTrigger/TrigCompositeAuxContainer.h"
+#include "xAODTrigEgamma/TrigElectronAuxContainer.h"
+#include "xAODTrigEgamma/TrigPhotonAuxContainer.h"
+#include "xAODEgamma/ElectronAuxContainer.h"
+#include "xAODEgamma/PhotonAuxContainer.h"
+#include "xAODTrigCalo/TrigEMClusterAuxContainer.h"
+#include "xAODTrigCalo/TrigCaloClusterAuxContainer.h"
+
+#include "xAODTrigRinger/TrigRingerRingsAuxContainer.h"
+
+#include "xAODTracking/TrackParticleAuxContainer.h"
+#include "xAODTrigMissingET/TrigMissingETAuxContainer.h"
+
+#include "xAODTrigMuon/L2StandAloneMuonAuxContainer.h"
+#include "xAODTrigMuon/L2CombinedMuonAuxContainer.h"
+#include "xAODTrigMuon/L2IsoMuonAuxContainer.h"
+#include "xAODMuon/MuonAuxContainer.h"
+#include "xAODTau/TauJetAuxContainer.h"
+#include "xAODTau/TauTrackAuxContainer.h"
+#include "xAODJet/JetAuxContainer.h"
+#include "xAODTracking/VertexAuxContainer.h"
+#include "xAODTrigBphys/TrigBphysAuxContainer.h"
+#include "xAODBTagging/BTaggingAuxContainer.h"
+#include "xAODBTagging/BTagVertexAuxContainer.h"
+
+#include "xAODTrigCalo/CaloClusterTrigAuxContainer.h"
+
+#include "xAODTrigMinBias/TrigT2MbtsBitsAuxContainer.h"
+
+#include "xAODHIEvent/HIEventShapeAuxContainer.h"
+
+#include "xAODTrigRinger/TrigRNNOutputAuxContainer.h"
+
+#include "xAODForward/AFPSiHitsClusterAuxContainer.h"
+#include "xAODForward/AFPTrackAuxContainer.h"
+#include "xAODForward/AFPToFTrackAuxContainer.h"
+#include "xAODForward/AFPProtonAuxContainer.h"
+#include "xAODForward/AFPVertexAuxContainer.h"
+
+#include "xAODTrigger/eFexEMRoIAuxContainer.h"
+#include "xAODTrigger/eFexTauRoIAuxContainer.h"
+#include "xAODTrigger/jFexTauRoIAuxContainer.h"
+#include "xAODTrigger/jFexFwdElRoIAuxContainer.h"
+#include "xAODTrigger/jFexSRJetRoIAuxContainer.h"
+#include "xAODTrigger/jFexLRJetRoIAuxContainer.h"
+#include "xAODTrigger/jFexMETRoIAuxContainer.h"
+#include "xAODTrigger/jFexSumETRoIAuxContainer.h"
+#include "xAODTrigger/gFexJetRoIAuxContainer.h"
+#include "xAODTrigger/gFexGlobalRoIAuxContainer.h"
+#include "xAODTrigger/MuonRoIAuxContainer.h"
+
+#include "xAODCore/ShallowAuxContainer.h"
+
 HLTEDMCreator::HLTEDMCreator( const std::string& type, 
             const std::string& name,
             const IInterface* parent )

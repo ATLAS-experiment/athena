@@ -42,8 +42,10 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.doTRTPhase", lambda prevFlags:
                 prevFlags.Beam.Type is BeamType.Cosmics and
                 prevFlags.Detector.EnableTRT)
-    # Disabled for data-taking up to 2024 included
-    icf.addFlag("InDet.doTRTArToTCorr", True)
+    # Disabled for data-taking up to 2024 included and MC campaigns up to MC23e included
+    icf.addFlag("InDet.doTRTArToTCorr", lambda prevFlags: (
+        (not prevFlags.Input.isMC and prevFlags.Input.DataYear>2024) or
+        (prevFlags.Input.isMC and prevFlags.Input.RunNumbers[0]>=491000) ) )
 
     # Save cluster information to Derivation
     icf.addFlag("InDet.DRAWZSelection", False)
