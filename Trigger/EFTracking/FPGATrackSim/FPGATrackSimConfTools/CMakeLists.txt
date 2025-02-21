@@ -1,4 +1,4 @@
-	# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+	# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( FPGATrackSimConfTools )
@@ -61,7 +61,7 @@ atlas_add_test( FPGATrackSim_F100_test
 atlas_add_test( FPGATrackSim_F600_test
                 PRIVATE_WORKING_DIRECTORY 
                 SCRIPT FPGATrackSim_F600.sh -t -n 1 -s 8
-                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*"
+                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:2.*"
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 600 )
 
@@ -82,6 +82,6 @@ atlas_add_test( FPGATrackSim_F210_test # TODO: Figure out why we get this many e
 atlas_add_test( FPGATrackSim_F410_test
                 SCRIPT FPGATrackSim_F410.sh -t -n 1 -s 8
                 PRIVATE_WORKING_DIRECTORY
-                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:3.*|*.Found error reading file at line:.*" # ACTS (C)KF related errors
+                LOG_IGNORE_PATTERN ".*ERROR Propagation reached the step count limit.*|.*ERROR Propagation failed: PropagatorError:2.*|*.Found error reading file at line:.*" # ACTS (C)KF related errors
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 600 )
