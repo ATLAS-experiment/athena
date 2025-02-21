@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 // PixelDigitization includes
@@ -606,8 +606,8 @@ double EfieldInterpolator::estimateEfield(std::vector<double> vvol, const std::v
   }
   // if possible to reach voltage of interest without any extrapolation in previous step, prefer this
   if (isInterpolation(vvolWoEp, aimVol) && vvolWoEp.size() > 1) {
-    vvol = vvolWoEp;
-    evol = evolWoEp;
+    vvol = std::move(vvolWoEp);
+    evol = std::move(evolWoEp);
   } else {
     ATH_MSG_WARNING("E field created on extrapolation. Please check if reasonable!");
   }
