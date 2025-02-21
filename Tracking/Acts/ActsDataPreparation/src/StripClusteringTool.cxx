@@ -4,7 +4,6 @@
 
 #include "StripClusteringTool.h"
 
-#include <algorithm>
 
 #include <Acts/Clusterization/Clusterization.hpp>
 
@@ -12,6 +11,10 @@
 #include <SCT_ReadoutGeometry/SCT_ModuleSideDesign.h>
 #include <SCT_ReadoutGeometry/StripStereoAnnulusDesign.h>
 #include <TrkSurfaces/Surface.h>
+
+#include <algorithm>
+#include <stdexcept>
+
 
 namespace ActsTrk {
 
@@ -78,6 +81,23 @@ StatusCode StripClusteringTool::decodeTimeBins()
     return StatusCode::SUCCESS;
 }
 
+const InDet::SiDetectorElementStatus *
+StripClusteringTool::getStripDetElStatus(const EventContext& ctx) const
+{
+  if (m_stripDetElStatus.empty()) {
+    return nullptr;
+  }
+
+  SG::ReadHandle<InDet::SiDetectorElementStatus> status = SG::makeHandle(m_stripDetElStatus, ctx);
+  if (!status.isValid()) {
+    std::stringstream msg;
+    msg << "Failed to get " << m_stripDetElStatus.key() << " from StoreGate in " << name();
+    throw std::runtime_error(msg.str());
+  }
+
+  return status.cptr();
+}
+
 StatusCode
 StripClusteringTool::clusterize(const RawDataCollection& RDOs,
 				const IDHelper& stripID,
@@ -86,41 +106,34 @@ StripClusteringTool::clusterize(const RawDataCollection& RDOs,
 {
     IdentifierHash idHash = RDOs.identifyHash();
 
-    SG::ReadHandle<InDet::SiDetectorElementStatus> status;
-    if (!m_stripDetElStatus.empty()) {
-	status = SG::makeHandle(m_stripDetElStatus, ctx);
-	if (!status.isValid()) {
-	    ATH_MSG_FATAL("Invalid SiDetectorelementStatus");
-	    return StatusCode::FAILURE;
-	}
-    }
+    const InDet::SiDetectorElementStatus *stripDetElStatus = getStripDetElStatus(ctx);
 
     bool goodModule = true;
     if (m_checkBadModules.value()) {
-	if (!m_stripDetElStatus.empty()) {
-	    goodModule = status->isGood(idHash);
-	} else {
-	    goodModule = m_summaryTool->isGood(idHash, ctx);
-	}
+        if (!m_stripDetElStatus.empty()) {
+            goodModule = stripDetElStatus->isGood(idHash);
+        } else {
+            goodModule = m_summaryTool->isGood(idHash, ctx);
+        }
     }
     VALIDATE_STATUS_ARRAY(
 	m_checkBadModules.value() && !m_stripDetElStatus.empty(),
-	status->isGood(idHash), m_summaryTool->isGood(idHash));
+	stripDetElStatus->isGood(idHash), m_summaryTool->isGood(idHash));
       
     if (!goodModule) {
-	ATH_MSG_DEBUG("Strip module failed status check");
-	return StatusCode::SUCCESS;
+      ATH_MSG_DEBUG("Strip module failed status check");
+      return StatusCode::SUCCESS;
     }
       
     // If more than a certain number of RDOs set module to bad
     // in this case we skip clusterization
     if (m_maxFiredStrips != 0u) {
-	unsigned int nFiredStrips = 0u;
-	for (const SCT_RDORawData* rdo : RDOs) {
-	    nFiredStrips += rdo->getGroupSize();
-	}
-	if (nFiredStrips > m_maxFiredStrips)
-	    return StatusCode::SUCCESS;
+	    unsigned int nFiredStrips = 0u;
+      for (const SCT_RDORawData* rdo : RDOs) {
+        nFiredStrips += rdo->getGroupSize();
+      }
+	    if (nFiredStrips > m_maxFiredStrips)
+	      return StatusCode::SUCCESS;
     }
 
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> stripDetEleHandle(
@@ -134,9 +147,6 @@ StripClusteringTool::clusterize(const RawDataCollection& RDOs,
 
     const InDetDD::SiDetectorElement* element =
 	stripDetEle->getDetectorElement(idHash);
-
-    const InDet::SiDetectorElementStatus *stripDetElStatus =
-	m_stripDetElStatus.empty() ? nullptr : status.cptr();
 
     std::optional<std::pair<CellCollection,bool>> unpckd
 	= unpackRDOs(RDOs, stripID, stripDetElStatus);
