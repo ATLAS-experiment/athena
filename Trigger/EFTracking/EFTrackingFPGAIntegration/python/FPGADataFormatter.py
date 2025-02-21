@@ -31,6 +31,20 @@ def FPGAOutputConversionToolCfg(flags, name = 'FPGAOutputConversionTool', **kwar
 
     return acc
 
+def xAODContainerMakerCfg(flags, name = 'xAODContainerMaker', **kwarg):
+    
+    acc = ComponentAccumulator()
+    
+    kwarg.setdefault('name', name)
+    kwarg.setdefault('OutputStripName', 'FPGAStripClusters')
+    kwarg.setdefault('OutputPixelName', 'FPGAPixelClusters')    
+    # Spacepoints below will be further refined when the full pass-through kernel is ready
+    kwarg.setdefault('OutputStripSpacePointName', 'PlaceHolderStripSpacePoints') 
+    kwarg.setdefault('OutputPixelSpacePointName', 'PlaceHolderPixelSpacePoints')
+    
+    acc.setPrivateTools(CompFactory.xAODContainerMaker(**kwarg))
+    return acc
+
 def FPGAFormatterPrepCfg(flags, name = "FPGAFormatterPrep", **kwarg):
 
     acc = ComponentAccumulator()
@@ -38,16 +52,16 @@ def FPGAFormatterPrepCfg(flags, name = "FPGAFormatterPrep", **kwarg):
     tool = acc.popToolsAndMerge(FPGADataFormatToolCfg(flags))
     tvTool = acc.popToolsAndMerge(FPGATestVectorToolCfg(flags))
     outputTool = acc.popToolsAndMerge(FPGAOutputConversionToolCfg(flags))
+    containerMakerTool = acc.popToolsAndMerge(xAODContainerMakerCfg(flags))
     
     kwarg.setdefault('name', name)
     kwarg.setdefault('FPGADataFormatTool', tool)
     kwarg.setdefault('TestVectorTool', tvTool)
     kwarg.setdefault('OutputConversionTool', outputTool)
+    kwarg.setdefault('xAODContainerMaker', containerMakerTool)
     
-    kwarg.setdefault('PixelClusterRefTV', '')
-    kwarg.setdefault('StripClusterRefTV', '')
-    kwarg.setdefault('PixelL2GRefTV', '')
-    kwarg.setdefault('StripL2GRefTV', '')
+    kwarg.setdefault('PixelEDMRefTV', '')
+    kwarg.setdefault('StripEDMRefTV', '')
     kwarg.setdefault('SpacePointRefTV', '')
 
     acc.addEventAlgo(CompFactory.FPGADataFormatAlg(**kwarg))
