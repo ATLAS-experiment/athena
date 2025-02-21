@@ -22,7 +22,7 @@ operator<< (std::ostream& os,
   
   
   os << '\n';
-  os << "O_Multiplicity " << out.m_O_Multiplicity << '\n';
+  os << "O_Multiplicity " << *(out.m_O_Multiplicity) << '\n';
   
   return os;
 

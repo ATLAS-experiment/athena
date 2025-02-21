@@ -21,13 +21,15 @@ namespace GlobalSim {
 
     using GenTobPtr = std::shared_ptr<GenericTob>;
     using BSPtrNumTotalCountWidth =
-      std::shared_ptr<std::bitset<AlgoConstants::NumTotalCountWidth>>;
+      std::shared_ptr<std::bitset<AlgoConstants::eEmNumTotalCountWidth>>;
 
-    std::vector<GenTobPtr> m_O_eEmGenTob {AlgoConstants::NumTotalTobWidth,
+    // Output GenericTobs. VHDL variable is an array od eEMGenericTobs
+    std::vector<GenTobPtr> m_O_eEmGenTob {AlgoConstants::eEmNumTotalTobWidth,
 					  GenTobPtr()};
 
+    // Output counts. VHDL variable is a bit array
     BSPtrNumTotalCountWidth
-    m_O_Multiplicity{std::make_shared<std::bitset<AlgoConstants::NumTotalCountWidth>>()};
+    m_O_Multiplicity{std::make_shared<std::bitset<AlgoConstants::eEmNumTotalCountWidth>>()};
   
   };
 

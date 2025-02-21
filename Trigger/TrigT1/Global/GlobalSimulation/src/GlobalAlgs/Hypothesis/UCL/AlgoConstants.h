@@ -36,14 +36,14 @@ namespace GlobalSim {
  
 
     // No Sort still to be added (adds another 144 elements) FIXME
-    constexpr static std::size_t NumTotalTobWidth{
+    constexpr static std::size_t eEmNumTotalTobWidth{
       std::accumulate(std::begin(eEmSortOutWidth),
 		      std::end(eEmSortOutWidth),
 		      0U)};
 
 
-    // indices to place sorted tobs in output array fiuynbd by scompile
-    // time sum of width values.
+    // indices to place sorted tobs in output array found by compile
+    // time summing of width values.
     constexpr static std::array<std::size_t, eEmNumSort> eEmSortOutStart =
       []{
 	std::array<std::size_t, eEmNumSort> a{};
@@ -54,8 +54,44 @@ namespace GlobalSim {
 	return a;
       }();
 
-    constexpr static std::size_t NumTotalCountWidth{52}; // 4*3 + 2*20
+    constexpr static std::size_t eEmNumCount{24};
+    constexpr static std::array<unsigned, eEmNumCount> eEmCountOutWidth {
+      3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+    };
 
+    // calculate the total width from the individual widths
+    constexpr static std::size_t eEmNumTotalCountWidth{
+      std::accumulate(std::begin(eEmCountOutWidth),
+		      std::end(eEmCountOutWidth),
+		      0U)};
+
+    // calculate the start position in the output bits for each count
+    constexpr static std::array<std::size_t, eEmNumCount> eEmCountOutStart =
+      []{
+	std::array<std::size_t, eEmNumCount> a{};
+	std::partial_sum(std::cbegin(eEmCountOutWidth),
+			 std::cend(eEmCountOutWidth)-1,
+			 a.begin()+1,
+			 std::plus<std::size_t>());
+	return a;
+      }();
+
+
+    // [2^n-1..]  where n are the elements of eEmCountOutWidth
+    constexpr static std::array<std::size_t, eEmNumCount> max_counts = [] {
+      std::array<std::size_t, eEmNumCount> a{};
+      for (std::size_t ind =0; ind != eEmCountOutWidth.size(); ++ind) {
+	std::size_t result = 1;
+	for(unsigned i = 1; i <= eEmCountOutWidth[ind]; ++i) {
+	  result *= 2;
+	}
+	
+	a[ind] = result-1;
+      }
+      return a;
+    }();
+    
+    
   };
 
 }
