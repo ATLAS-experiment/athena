@@ -21,8 +21,7 @@ set( CMAKE_CUDA_STANDARD 20 CACHE STRING "CUDA C++ standard to use" )
 set( CMAKE_CUDA_ARCHITECTURES "all-major" CACHE STRING
    "CUDA architectures to build code for" )
 
-set( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Wno-deprecated-gpu-targets" CACHE STRING
-   "CUDA switch off deprecated architecture compilation warning" )
+set( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Wno-deprecated-gpu-targets" )
 
 # Turn on HIP as a compiler, if it's available.
 check_language( HIP )
