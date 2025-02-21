@@ -1,13 +1,16 @@
 #!/bin/bash
 
-# grep -A 5 "if (i"  Trigger/TrigValidation/TrigInDetValidation/python/TrigInDetArtSteps.py
+[ "x$TestArea" == "x" ] && echo "release not set up" && exit 1
+    
+cd $TestArea/Trigger/TrigValidation/TrigInDetValidation/utils
 
-CompChains=
-VertexCompChains=
-LRTCompChains=
 
-if [ $# -eq 0 -o "x$1" == "x-a" ]; then
 
+# disable this fragment
+
+if [ 1 -eq 0 -o "x$1" == "x-a" ]; then
+
+    
   cp TrigInDetArtSteps.py.pre   pre.py
   cp pre.py pre.py.bak
 
@@ -47,7 +50,6 @@ if [ $# -eq 0 -o "x$1" == "x-a" ]; then
   done
 
   cp pre.py $TestArea/Trigger/TrigValidation/TrigInDetValidation/python/TrigInDetArtSteps.py 
-
   
 fi
 
@@ -97,6 +99,11 @@ fi
 
 if [ $# -eq 0 -o "x$1" == "x-d" ]; then
 
+  CompChains=
+  VertexCompChains=
+  LRTCompChains=
+
+    
   # create the dat file
 
   cp chains.save chains.dat
