@@ -162,7 +162,8 @@ namespace FlavorTagDiscriminants {
           {"(phi|theta|qOverP)Uncertainty"_r, ConstituentsEDMType::CUSTOM_GETTER},
           {"(leptonID|muon_quality)"_r, ConstituentsEDMType::CHAR},
           {"(pT_wrtJet|pZ_wrtJet|EFrac_wrtJet).*"_r, ConstituentsEDMType::CUSTOM_GETTER},
-          {"muon_(qOverPratio|momentumBalanceSignificance|scatteringNeighbourSignificance)"_r, ConstituentsEDMType::FLOAT}
+          {"muon_(qOverPratio|momentumBalanceSignificance|scatteringNeighbourSignificance)"_r, ConstituentsEDMType::FLOAT},
+          {"lifetimeSigned.*"_r, ConstituentsEDMType::CUSTOM_GETTER}
       };
       // We have a number of special naming conventions to sort and
       // filter tracks. The track nodes should be named according to
