@@ -98,17 +98,17 @@ namespace InDet
 
   const InDet::SiDetectorElementStatus* PixelRDOTool::getPixelDetElStatus(const EventContext& ctx) const
   {
-    SG::ReadHandle<InDet::SiDetectorElementStatus> pixelDetElStatus;
-    if (!m_pixelDetElStatus.empty()) {
-	pixelDetElStatus = SG::ReadHandle<InDet::SiDetectorElementStatus>(m_pixelDetElStatus, ctx);
-      if (!pixelDetElStatus.isValid()) {
-	std::stringstream msg;
-	msg << "Failed to get " << m_pixelDetElStatus.key() << " from StoreGate in " << name();
-	throw std::runtime_error(msg.str());
-      }
-      return pixelDetElStatus.cptr();
+    if (m_pixelDetElStatus.empty()) {
+      return nullptr;
     }
-    return nullptr;
+
+    SG::ReadHandle<InDet::SiDetectorElementStatus> status = SG::makeHandle<InDet::SiDetectorElementStatus>(m_pixelDetElStatus, ctx);
+    if (!status.isValid()) {
+      std::stringstream msg;
+      msg << "Failed to get " << m_pixelDetElStatus.key() << " from StoreGate in " << name();
+      throw std::runtime_error(msg.str());
+    }
+    return status.cptr();
   }
 
 
