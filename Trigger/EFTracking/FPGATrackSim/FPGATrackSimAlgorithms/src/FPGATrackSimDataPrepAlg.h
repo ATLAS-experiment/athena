@@ -110,6 +110,13 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         // internal counters
         double m_evt = 0; // number of events passing event selection, independent of truth
 
+        unsigned long m_nPixClusters = 0; // number of clusters for pix, total
+        unsigned m_nMaxPixClusters = 0; // max number of pixel clusters in an event
+        unsigned long m_nStripClusters = 0; // number of clusters for strip, total
+        unsigned m_nMaxStripClusters = 0; // max number of strip clusters in an event
+        unsigned m_nMaxClusters = 0; // max number of total clusters in an event  
+
+  
         StatusCode readInputs(bool & done);
         StatusCode processInputs(SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped,
                                  SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters,

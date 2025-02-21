@@ -346,9 +346,18 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
       
       // I think I also want to pass m_clusters to random removal (but won't work currently)
       if (m_doHitFiltering) ATH_CHECK(m_hitFilteringTool->DoRandomRemoval(*m_logicEventHeader, false));
-      for (const FPGATrackSimCluster& cluster : m_clusters_original) FPGAClusters->push_back(cluster);      
+      unsigned npix(0), nstrip(0);
+      for (const FPGATrackSimCluster& cluster : m_clusters_original) {
+	FPGAClusters->push_back(cluster);
+	if (cluster.getClusterEquiv().isPixel()) npix++;
+	else nstrip++;
+      }
+      m_nPixClusters += npix;
+      m_nStripClusters += nstrip;
+      if (npix > m_nMaxPixClusters) m_nMaxPixClusters = npix;
+      if (nstrip > m_nMaxStripClusters) m_nMaxStripClusters = nstrip;
+      if (m_clusters_original.size() > m_nMaxClusters) m_nMaxClusters = m_clusters_original.size();
     }
-
 
     // At this stage, copy the logicEventHeader.
     *m_logicEventHeader_cluster = *m_logicEventHeader;
@@ -392,7 +401,13 @@ StatusCode FPGATrackSimDataPrepAlg::finalize()
     );
 #endif
 
-    // TODO print out some data prep alg related stats here.s
-    
+    ATH_MSG_INFO("PRINTING FPGATRACKSIM SIMPLE DATAPREP STATS");
+    ATH_MSG_INFO("========================================================================================");
+    ATH_MSG_INFO("Number of pixel clusters/event = " << m_nPixClusters/m_evt);
+    ATH_MSG_INFO("Number of strip clusters/event = " << m_nStripClusters/m_evt);    
+    ATH_MSG_INFO("Max number of pixel clusters in an event = " << m_nMaxPixClusters);
+    ATH_MSG_INFO("Max number of strip clusters in an event = " << m_nMaxStripClusters);
+    ATH_MSG_INFO("Max number of clusters in an event = " << m_nMaxClusters);
+        
     return StatusCode::SUCCESS;
 }

@@ -1,3 +1,4 @@
+
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSim_SECONDSTAGEALG_H
@@ -115,6 +116,11 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         long m_nTracksChi2Found = 0; // total number of those events with at least one track passing chi2
         long m_nTracksChi2OLRFound = 0; // total number of those events with at least one track passing chi2 and OLR
 
+        unsigned long m_maxNRoadsFound = 0; // max number of roads in an event
+        unsigned long m_maxNTracksTot = 0; // max number of tracks in an event
+        unsigned long m_maxNTracksChi2Tot = 0; // max number of tracks passing chi2 in an event
+        unsigned long m_maxNTracksChi2OLRTot = 0; // max number of tracks passing chi2 and OLR in an events
+  
         // TODO: what functions should we have here?
         StatusCode writeOutputData(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_2nd,
                                    std::vector<FPGATrackSimTrack> const & tracks_2nd,
