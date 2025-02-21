@@ -360,23 +360,29 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         auto truthd0= Monitored::Scalar<float>("d0",truthtracks.front().getD0());
         auto truthz0= Monitored::Scalar<float>("z0",truthtracks.front().getZ0());
         if (roads.size() > 0) m_nRoadsFound++;
-        bool passchi2 = false;
-        bool passchi2OLR = false;
+	if (roads.size() > m_maxNRoadsFound) m_maxNRoadsFound = roads.size();
+		
+	unsigned npasschi2(0);
+	unsigned npasschi2OLR(0);
+
         if (tracks.size() > 0) {
             m_nTracksFound++;
+	    if (tracks.size() > m_maxNTracksTot) m_maxNTracksTot = tracks.size();
             for (const auto& track : tracks) {
                 if (track.getChi2ndof() < m_trackScoreCut) {
-                    passchi2 = true;
+		    npasschi2++;
                     if (track.passedOR()) {
-                        passchi2OLR = true;
-                        break;
+		      npasschi2OLR++;
                     }
                 }
             }
         }
-        if (passchi2) m_nTracksChi2Found++;
-        if (passchi2OLR) m_nTracksChi2OLRFound++;
-        auto passtrackchi2 = Monitored::Scalar<bool>("eff_track_chi2_2nd",passchi2);
+	if (npasschi2 > m_maxNTracksChi2Tot) m_maxNTracksChi2Tot = npasschi2;
+	if (npasschi2OLR > m_maxNTracksChi2OLRTot) m_maxNTracksChi2OLRTot = npasschi2OLR;
+        if (npasschi2 > 0) m_nTracksChi2Found++;
+        if (npasschi2OLR > 0) m_nTracksChi2OLRFound++;
+
+        auto passtrackchi2 = Monitored::Scalar<bool>("eff_track_chi2_2nd",(npasschi2 > 0));
         Monitored::Group(m_monTool,passroad,passtrack,truthpT_zoom,truthpT,trutheta,truthphi,truthd0,truthz0,passtrackchi2);
     }
 
@@ -461,6 +467,11 @@ StatusCode FPGATrackSimSecondStageAlg::finalize()
     ATH_MSG_INFO("Number of 2nd stage tracks passing chi2/event = " << m_nTracksChi2Tot/(float)m_evt);
     ATH_MSG_INFO("Number of 2nd stage tracks passing chi2 and OLR/event = " << m_nTracksChi2OLRTot/(float)m_evt);
     ATH_MSG_INFO("========================================================================================");
-
+    
+    ATH_MSG_INFO("Max number of 2nd stage roads in an event = " << m_maxNRoadsFound);
+    ATH_MSG_INFO("Max number of 2nd stage track combinations in an event = " << m_maxNTracksTot);
+    ATH_MSG_INFO("Max number of 2nd stage tracks passing chi2 in an event = " << m_maxNTracksChi2Tot);
+    ATH_MSG_INFO("Max number of 2nd stage tracks passing chi2 and OLR in an event = " << m_maxNTracksChi2OLRTot);
+    ATH_MSG_INFO("========================================================================================");    
     return StatusCode::SUCCESS;
 }
