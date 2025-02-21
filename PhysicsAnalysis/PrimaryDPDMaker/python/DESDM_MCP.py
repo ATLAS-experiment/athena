@@ -247,6 +247,10 @@ def DESDMCPOutputCfg(flags, **kwargs):
                       "xAOD::L2IsoMuonContainer#HLT_xAOD__L2IsoMuonContainer_MuonL2ISInfo",
                       "xAOD::L2IsoMuonAuxContainer#HLT_xAOD__L2IsoMuonContainer_MuonL2ISInfoAux.",
                       ]
+    
+    if flags.Muon.DESDM_MCP.doAlignmentFormat:
+        container_items.append("xAOD::L2CombinedMuonContainer#HLT_MuonL2CBInfo")
+        container_items.append("xAOD::L2CombinedMuonAuxContainer#HLT_MuonL2CBInfoAux.")
 
     if flags.Input.isMC:
         container_items +=["xAOD::TruthParticleContainer#MuonTruthParticles",
