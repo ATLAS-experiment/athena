@@ -47,8 +47,8 @@ namespace MuonR4{
             /* cabling data conversion */
             Muon::RpcCablingData cabling{};
             cabling.subDetector = rdo->subdetector();
-            cabling.tdcSector = rdo->tdcsector();
-            cabling.tdc = rdo->tdc();
+            cabling.boardSector = rdo->boardsector();
+            cabling.board = rdo->board();
             cabling.channelId = rdo->channel();
 
 

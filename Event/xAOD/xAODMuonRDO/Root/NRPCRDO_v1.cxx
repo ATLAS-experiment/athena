@@ -29,8 +29,8 @@ namespace xAOD{
 IMPLEMENT_SETTER_GETTER( uint32_t, bcid, setBcid)
 IMPLEMENT_SETTER_GETTER( float, time, setTime)
 IMPLEMENT_SETTER_GETTER( uint16_t, subdetector, setSubdetector)
-IMPLEMENT_SETTER_GETTER( uint16_t, tdcsector, setTdcsector)
-IMPLEMENT_SETTER_GETTER( uint16_t, tdc, setTdc)
+IMPLEMENT_SETTER_GETTER( uint16_t, boardsector, setBoardsector)
+IMPLEMENT_SETTER_GETTER( uint16_t, board, setBoard)
 IMPLEMENT_SETTER_GETTER( uint16_t, channel, setChannel)
 IMPLEMENT_SETTER_GETTER( float, timeoverthr, setTimeoverthr)
 }

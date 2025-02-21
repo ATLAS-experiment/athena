@@ -122,14 +122,14 @@ StatusCode NRPC_RawDataProviderTool::fillCollections(const OFFLINE_FRAGMENTS_NAM
     uint32_t sourceId = robFrag.source_id();
     uint32_t rod_sourceId = robFrag.rod_source_id();
 
-    // Unpack sub-detector and tdc sector from sourceId
+    // Unpack sub-detector and board sector from sourceId
     uint16_t subDetector = sourceId >> 16;
-    uint16_t tdcSector = (sourceId & 0x00ffff);
+    uint16_t boardSector = (sourceId & 0x00ffff);
 
     ATH_MSG_VERBOSE("ROD version: " << MSG::hex << version << MSG::dec << "  ROB source ID: " << MSG::hex << sourceId << MSG::dec
                                     << "  ROD source ID: " << MSG::hex << rod_sourceId << MSG::dec << "  Subdetector: " << MSG::hex
-                                    << subDetector << MSG::dec << "  tdcSector: " << std::hex 
-                                    << tdcSector << std::dec );
+                                    << subDetector << MSG::dec << "  boardSector: " << std::hex 
+                                    << boardSector << std::dec );
 
 
 
@@ -144,9 +144,9 @@ StatusCode NRPC_RawDataProviderTool::fillCollections(const OFFLINE_FRAGMENTS_NAM
     unsigned int idata=0;
     while (idata<data_size) {
         if (data[idata]==6 && data[idata+4]==0xa0 && data[idata+5]==0) {
-            ATH_MSG_DEBUG("NRPC: Empty tdc " << std::hex << data[idata+4] << std::dec << " for " << std::hex << data[idata+1] << std::dec );
+            ATH_MSG_DEBUG("NRPC: Empty board " << std::hex << data[idata+4] << std::dec << " for " << std::hex << data[idata+1] << std::dec );
         } else if (data[idata]<6) {
-            WARNING_WITH_LINE("NRPC: Corrupted: Number of words from tdc " << std::hex << data[idata+4] << std::dec << " is <6 :" << data[idata] );
+            WARNING_WITH_LINE("NRPC: Corrupted: Number of words from board " << std::hex << data[idata+4] << std::dec << " is <6 :" << data[idata] );
             break;
         } else if ( (data[idata+data[idata]-2] & 0x000000ff) != 0xa0) {
             WARNING_WITH_LINE("NRPC: Missing expected trailer a0" );
@@ -162,7 +162,7 @@ StatusCode NRPC_RawDataProviderTool::fillCollections(const OFFLINE_FRAGMENTS_NAM
             
             // Decode data
             for (unsigned int i=0; i<data[idata]-6; i++) {
-                uint16_t tdc = (data[idata+4+i] & 0x000000ff) ;
+                uint16_t board = (data[idata+4+i] & 0x000000ff) ;
                 uint16_t chan = (data[idata+4+i] & 0x0000ff00) >> 8 ;
                 float tot = ((data[idata+4+i] & 0x007f0000) >> 16)*0.4 ;
                 float time = ((data[idata+4+i] & 0x0f000000) >> 24)*1.6 ;
@@ -182,8 +182,8 @@ StatusCode NRPC_RawDataProviderTool::fillCollections(const OFFLINE_FRAGMENTS_NAM
                 NrpcRdo->setBcid(bcid);
                 NrpcRdo->setTime(time);
                 NrpcRdo->setSubdetector(subDetector);
-                NrpcRdo->setTdcsector(tdcSector);
-                NrpcRdo->setTdc(tdc);
+                NrpcRdo->setBoardsector(boardSector);
+                NrpcRdo->setBoard(board);
                 NrpcRdo->setChannel(chan);
                 NrpcRdo->setTimeoverthr(tot);
             }

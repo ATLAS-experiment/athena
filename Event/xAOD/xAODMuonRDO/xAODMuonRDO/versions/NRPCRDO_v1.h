@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMUONRDO_VERSION_NRPCRDO_V1_H
@@ -29,9 +29,9 @@ namespace xAOD {
         /// Global identifier of the RPC detector region from the online side
         uint16_t subdetector() const;
         /// Identifier of the sector within the subdetector
-        uint16_t tdcsector() const;
+        uint16_t boardsector() const;
         /// Identifier of the readout card on the chamber
-        uint16_t tdc() const;
+        uint16_t board() const;
         /// Fired channel on the read out card
         uint16_t channel() const;
         /// Measured time in which the signal was above the electronics threshold
@@ -45,10 +45,10 @@ namespace xAOD {
         void setTimeoverthr(float Timeoverthr);
         /// Set the sub detector
         void setSubdetector(uint16_t SubDet);
-        /// Set the sector of the tdc within the subdetector
-        void setTdcsector(uint16_t Tdcsector);
+        /// Set the sector of the board within the subdetector
+        void setBoardsector(uint16_t Boardsector);
         /// Set the number of the TDC channel
-        void setTdc(uint16_t Tdc);
+        void setBoard(uint16_t Board);
         /// Set the fire channel number
         void setChannel(uint16_t Channel);
     };

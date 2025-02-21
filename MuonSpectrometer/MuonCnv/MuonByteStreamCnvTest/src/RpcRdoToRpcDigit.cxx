@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcRdoToRpcDigit.h"
@@ -117,15 +117,15 @@ namespace Muon {
 
         /// Loop over the container
         for (const xAOD::NRPCRDO* rdo : *rdoContainer) {
-            ATH_MSG_VERBOSE("Convert RDO tdcSector: "<< static_cast<int>(rdo->tdcsector())<<", tdc:"
-                    <<static_cast<int>(rdo->tdc())<<" channel: "<<static_cast<int>(rdo->channel()) <<", time: "
+            ATH_MSG_VERBOSE("Convert RDO boardSector: "<< static_cast<int>(rdo->boardsector())<<", board:"
+                    <<static_cast<int>(rdo->board())<<" channel: "<<static_cast<int>(rdo->channel()) <<", time: "
                     <<rdo->time()<<", ToT: "<<rdo->timeoverthr());
         
             /// Fill the cabling object
             RpcCablingData convObj{};
             convObj.subDetector = rdo->subdetector();
-            convObj.tdcSector = rdo->tdcsector();
-            convObj.tdc = rdo->tdc();
+            convObj.boardSector = rdo->boardsector();
+            convObj.board = rdo->board();
             convObj.channelId = rdo->channel();
         
             if (!cabling->getOfflineId(convObj, msgStream())) {
