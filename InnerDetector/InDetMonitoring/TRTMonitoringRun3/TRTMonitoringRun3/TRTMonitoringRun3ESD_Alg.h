@@ -68,10 +68,11 @@ private:
 
     const AtlasDetectorID * m_idHelper;
 
-    StatusCode fillTRTTracks(const xAOD::TrackParticleContainer& trackCollection,
-                         const xAOD::TrigDecision* trigDecision,
-                         const ComTime* comTimeObject,
-                         const xAOD::EventInfo& eventInfo) const;
+    StatusCode fillTRTTracks(const EventContext& ctx,
+                             const xAOD::TrackParticleContainer& trackCollection,
+                             const xAOD::TrigDecision* trigDecision,
+                             const ComTime* comTimeObject,
+                             const xAOD::EventInfo& eventInfo) const;
     StatusCode fillTRTHighThreshold(const xAOD::TrackParticleContainer& trackCollection,
                                 const xAOD::EventInfo& eventInfo, const EventContext& ctx) const;
     int strawLayerNumber(int strawLayerNumber, int LayerNumber) const;

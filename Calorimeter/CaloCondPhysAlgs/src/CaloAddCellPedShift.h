@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloAddCellPedShift.h
@@ -9,16 +9,10 @@
 #define CALOCONDPHYSALGS_CALOADDCELLPEDSHIFT_H
 
 #include <string>
-
-// Gaudi includes
-
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "CaloIdentifier/CaloIdManager.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloIdentifier/CaloCell_ID.h"
-#include "StoreGate/DataHandle.h"  
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "CaloCondBlobObjs/ICaloCoolIdTool.h"
 #include "LArIdentifier/LArOnlineID.h"
 #include "LArCabling/LArOnOffIdMapping.h"
@@ -32,65 +26,57 @@ class CaloCondBlobFlt;
 class CondAttrListCollection;
 
 
-class ATLAS_NOT_THREAD_SAFE /* CallBacks*/CaloAddCellPedShift : public AthAlgorithm {
+class ATLAS_NOT_THREAD_SAFE CaloAddCellPedShift : public AthAlgorithm {
 
-  public:
-    //Gaudi style constructor and execution methods
-    /** Standard Athena-Algorithm Constructor */
-    CaloAddCellPedShift(const std::string& name, ISvcLocator* pSvcLocator);
-    /** Default Destructor */
-    ~CaloAddCellPedShift();
+ public:
+
+  using AthAlgorithm::AthAlgorithm;
+
     
-    /** standard Athena-Algorithm method */
-    virtual StatusCode          initialize() override;
-    /** standard Athena-Algorithm method */
-    virtual StatusCode          execute() override;
-    /** standard Athena-Algorithm method */
-    virtual StatusCode          finalize() override;
-    /** standard Athena-Algorithm method */
-    virtual StatusCode          stop() override;
+  /** standard Athena-Algorithm method */
+  virtual StatusCode          initialize() override;
+  /** standard Athena-Algorithm method */
+  virtual StatusCode          execute() override;
+  /** standard Athena-Algorithm method */
+  virtual StatusCode          finalize() override;
+  /** standard Athena-Algorithm method */
+  virtual StatusCode          stop() override;
     
-  private:
+ private:
 
   //---------------------------------------------------
   // Member variables
   //---------------------------------------------------
-  std::string m_fname;
-  std::string m_folderName;
-
-  ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
-
-  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
-  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager","CaloDetDescrManager","SG Key for CaloDetDescrManager in the Condition Store" };
-  const CaloCell_ID*       m_calo_id;
-  const LArOnlineID*      m_onlineID;
-
-  virtual StatusCode updateMap(IOVSVC_CALLBACK_ARGS);
-  //=== blob storage
-  const DataHandle<CondAttrListCollection> m_noiseAttrListColl;
-  std::map<unsigned int, const CaloCondBlobFlt*> m_noiseBlobMap;
-
-  ToolHandle<ICaloCoolIdTool> m_caloCoolIdTool;
-
-  int m_iCool;
-  int m_SubHash;
-  int m_Hash;
-  int m_OffId;
-  float m_eta;
-  float m_phi;
-  int m_layer;
-  int m_Gain;
-  int   m_bec;
-  int   m_posneg;
-  int   m_FT;
-  int   m_slot;
-  int   m_channel;
-  float m_ped1;
-  float m_ped1corr;
-  float m_ped2;
-
-  TTree* m_tree;
+    Gaudi::Property<std::string> m_fname{this,"inputFile",""};
   
 
+    ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
+    
+    SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
+    SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager","CaloDetDescrManager","SG Key for CaloDetDescrManager in the Condition Store" };
+    SG::ReadCondHandleKey<CondAttrListCollection> m_pedKey{this,"FolderName","/CALO/Pedestal/CellPedestal"};
+  
+    const CaloCell_ID*       m_calo_id=nullptr;
+    const LArOnlineID*      m_onlineID=nullptr;
+
+    ToolHandle<ICaloCoolIdTool> m_caloCoolIdTool{this,"CaloCoolIdTool","CaloCoolIdTool"};
+
+    int m_iCool=0;
+    int m_SubHash=0;
+    int m_Hash=0;
+    int m_OffId=0;
+    float m_eta=0;
+    float m_phi=0;
+    int m_layer=0;
+    int m_Gain=0;
+    int   m_bec=0;
+    int   m_posneg=0;
+    int   m_FT=0;
+    int   m_slot=0;
+    int   m_channel=0;
+    float m_ped1=0;
+    float m_ped1corr=0;
+    float m_ped2=0;
+    TTree* m_tree=nullptr;
 };
 #endif

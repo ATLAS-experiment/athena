@@ -22,7 +22,11 @@ def TRTMonitoringRun3RAW_AlgConfig(flags):
     from InDetConfig.TRT_TrackHoleSearchConfig import TRTTrackHoleSearchToolCfg
     algTRTMonitoringRun3RAW.trt_hole_search= rv.popToolsAndMerge(
         TRTTrackHoleSearchToolCfg(flags))
-
+    
+    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
+        TRT_StrawStatusSummaryToolCfg)
+    algTRTMonitoringRun3RAW.InDetTRTStrawStatusSummaryTool = (
+        rv.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))
 
     maxLumiBlockSummary  = 3000
     maxLumiBlockShift    = 3000
