@@ -510,8 +510,8 @@ namespace Rec{
             vChrgTot(*tmpVertex) =curVrt.vertexCharge;
             tmpVertex->setVertexType(xAOD::VxType::SecVtx);
             finalVertices.push_back(tmpVertex);
-            for (int j=0; j<nth; j++) {
-              m_chi2_toSV(*xAODwrk->listSelTracks[j]) = curVrt.chi2PerTrk[j] > FLT_MAX ? FLT_MAX : curVrt.chi2PerTrk[j];
+            for (int ind=0; ind<nth; ind++) {
+              m_chi2_toSV(*xAODwrk->listSelTracks[curVrt.selTrk[ind]]) = curVrt.chi2PerTrk[ind] > FLT_MAX ? FLT_MAX : curVrt.chi2PerTrk[ind];
             }
           }
     }
