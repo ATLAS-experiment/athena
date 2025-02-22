@@ -9,6 +9,7 @@
 #include <MuonReadoutGeometryR4/WireGroupDesign.h>
 #include <MuonReadoutGeometryR4/PadDesign.h>
 #include <MuonReadoutGeometryR4/StripLayer.h>
+#include <bit>
 
 
 namespace Acts{
@@ -241,7 +242,7 @@ class sTgcReadoutElement : public MuonReadoutElement {
         double m_gasGapPitch{-1.};
 
         /// Auxillary variables to translate the Identifier to a measurement hash and back
-        const unsigned int m_hashShiftChType{2*CxxUtils::count_ones(static_cast<unsigned int>(numLayers()))};
+        const unsigned int m_hashShiftChType = 2*std::popcount(static_cast<unsigned int>(numLayers()));
 };
 
 std::ostream& operator<<(std::ostream& ostr, const MuonGMR4::sTgcReadoutElement::parameterBook& pars);
