@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
@@ -86,7 +86,10 @@ int main() {
     }
     /// Finally the case when both lines are crossing
     const double crossLines = Amg::lineDistance<3>(extPoint+ 525. * dirInXY, dirInXY, extPoint, extDir);
-    if (std::abs(crossLines) > tolerance) {
+    // Use a larger tolerance here.  This is the result of the sqrt of the
+    // difference of numbers O(1e5), so even with double precision, we can't
+    // expect much better than this.
+    if (std::abs(crossLines) > 1e-5) {
         std::cerr<<__FILE__<<":"<<__LINE__<<" - Expect crossing lines but they are by "<<crossLines<< " apart."<<std::endl;
         retCode = EXIT_FAILURE;
     }
