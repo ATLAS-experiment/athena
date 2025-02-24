@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -39,6 +39,7 @@ if __name__=="__main__":
     flags.Detector.GeometryMuon=False
     flags.Detector.GeometryTRT=False
     flags.IOVDb.GlobalTag="CONDBR2-BLKPA-2023-03"
+    flags.GeoModel.AtlasVersion="ATLAS-R3S-2021-03-02-00"
     
     flags.fillFromArgs()
     flags.lock()
