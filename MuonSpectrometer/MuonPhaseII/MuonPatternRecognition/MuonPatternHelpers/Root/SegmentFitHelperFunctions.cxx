@@ -37,6 +37,8 @@ namespace MuonR4 {
                     break;
                 case xAOD::UncalibMeasType::RpcStripType:
                 case xAOD::UncalibMeasType::TgcStripType:
+                case xAOD::UncalibMeasType::MMClusterType:
+                case xAOD::UncalibMeasType::sTgcStripType:
                     chi2 = chiSqTermStrip(posInChamber, dirInChamber, measurement, msg);
                     break;
                 default:
@@ -106,6 +108,7 @@ namespace MuonR4 {
                 case xAOD::UncalibMeasType::RpcStripType:
                 case xAOD::UncalibMeasType::TgcStripType:
                 case xAOD::UncalibMeasType::MMClusterType:
+                case xAOD::UncalibMeasType::sTgcStripType:
                     chi2 = chiSqTermStrip(segPos, segDir, timeOffset, arrivalTime, hit, msg);
                     break; 
                 case xAOD::UncalibMeasType::Other:
