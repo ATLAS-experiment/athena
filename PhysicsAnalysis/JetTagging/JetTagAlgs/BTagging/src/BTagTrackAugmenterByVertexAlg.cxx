@@ -228,7 +228,7 @@ namespace Analysis {
     return StatusCode::SUCCESS;
   }
 
-  const xAOD::Vertex* BTagTrackAugmenterAlg::getPrimaryVertex( const xAOD::VertexContainer& vertexCollection ) const {
+  const xAOD::Vertex* BTagTrackAugmenterByVertexAlg::getPrimaryVertex( const xAOD::VertexContainer& vertexCollection ) const {
     if ( vertexCollection.empty() ) {
       ATH_MSG_DEBUG( "Input vertex collection has size 0!" );
       return nullptr;

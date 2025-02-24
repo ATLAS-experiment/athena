@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg
-from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
+from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg, BTagTrackAugmenterByVertexAlgCfg
 from BTagging.BTagConfig import _get_flip_config
 from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
 from FlavorTagInference.FlavorTagNNConfig import MultifoldGNNCfg
@@ -46,12 +46,21 @@ def JetBTagginglessAlgCfg(
             )
         )
     else:
-        acc.merge(BTagTrackAugmenterAlgCfg(
-            cfgFlags,
-            TrackCollection='InDetTrackParticles',
-            PrimaryVertexCollectionName=pv_col,
-            prefix=trackAugmenterPrefix,
-        ))
+        if JetCollection=="AntiKt4EMPFlowByVertexJets":
+            acc.merge(BTagTrackAugmenterByVertexAlgCfg(
+                cfgFlags,
+                TrackCollection='InDetTrackParticles',
+                PrimaryVertexCollectionName=pv_col,
+                prefix=trackAugmenterPrefix,
+            ))
+        else:
+            acc.merge(BTagTrackAugmenterAlgCfg(
+                cfgFlags,
+                TrackCollection='InDetTrackParticles',
+                PrimaryVertexCollectionName=pv_col,
+                prefix=trackAugmenterPrefix,
+            ))
+
 
     acc.merge(JetParticleAssociationAlgCfg(
         cfgFlags,
