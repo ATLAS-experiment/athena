@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PixelCalibAlgs )
@@ -51,6 +51,12 @@ atlas_add_test( PixelMapping_test
    LINK_LIBRARIES ${Boost_LIBRARIES} PathResolver PixelCalibAlgsLib
    POST_EXEC_SCRIPT "nopost.sh"
 )
+
+atlas_add_test( HitMapCalibLoop_test
+   SCRIPT share/HitMapBuilderCalibLoop_test.sh
+   POST_EXEC_SCRIPT noerror.sh 
+   PROPERTIES_TIMEOUT 300 )
+
 
 atlas_install_runtime ( share/HashVSdcsID.dat share/table_Run2.txt share/PixelMapping_Run2.dat )
 atlas_install_data (ChargeCalibration/common/mapping.csv)
