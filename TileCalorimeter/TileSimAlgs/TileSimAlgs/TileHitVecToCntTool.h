@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //**************************************************************************
@@ -41,14 +41,15 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "CommissionEvent/CosTrigTime.h"
+#include "AthContainers/OwnershipPolicy.h"
 // Pile up
 #include "PileUpTools/PileUpMergeSvc.h"
-
-#include "AthenaKernel/ITriggerTime.h"
 
 // Gaudi includes
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include <memory>
 
 // Avoid pushing dependencies into clients- just fwd declare the following:
 
@@ -92,19 +93,32 @@ public:
                                       SubEventIterator bSubEvents,
                                       SubEventIterator eSubEvents) override final;
   virtual StatusCode processAllSubEvents(const EventContext& ctx) override final;
+  virtual StatusCode processAllSubEvents(const EventContext& ctx) const;
   StatusCode finalize() override final;
 
 private:
   StatusCode createContainers();
-  void processHitVectorForOverlay(const TileHitVector* inputHits, int& nHit, double& eHitTot);
-  void processHitVectorForPileUp(const TileHitVector* inputHits, double SubEvtTimOffset, int& nHit, double& eHitTot, bool isSignal = false);
-  void processHitVectorWithoutPileUp(const TileHitVector* inputHits, int& nHit, double& eHitTot, TileHitNonConstContainer* hitCont, CLHEP::HepRandomEngine * engine);
+  void processHitVectorForOverlay(const TileHitVector* inputHits, std::unique_ptr<TileHitNonConstContainer>& hits, int& nHit, double& eHitTot) const;
+  void processHitVectorForPileUp(const TileHitVector* inputHits, double SubEvtTimOffset, std::vector<std::unique_ptr<TileHit>>& allHits,
+                                 std::vector<std::unique_ptr<TileHit>>& allHits_DigiHSTruth, int& nHit, double& eHitTot, bool isSignal = false) const;
+  void processHitVectorWithoutPileUp(const TileHitVector* inputHits, int& nHit, double& eHitTot, TileHitNonConstContainer* hitCont, CLHEP::HepRandomEngine * engine) const;
   // Method to apply photostatistics effect
-  double applyPhotoStatistics(double energy, Identifier pmt_id, CLHEP::HepRandomEngine* engine, const TileSamplingFraction* samplingFraction, int drawerIdx);
-  void findAndMergeE1(TileHitCollection* coll, int frag_id, TileHitNonConstContainer* hitCont);
-  void findAndMergeMBTS(TileHitCollection* coll, int frag_id, TileHitNonConstContainer* hitCont);
-  void findAndMergeMultipleHitsInChannel(std::unique_ptr<TileHitNonConstContainer>& hitCont);
-  void mergeExtraHitToChannelHit(TileHit* extraHit, TileHit* channelHit);
+  double applyPhotoStatistics(double energy, Identifier pmt_id, CLHEP::HepRandomEngine* engine, const TileSamplingFraction* samplingFraction, int drawerIdx) const;
+  void findAndMergeE1(TileHitCollection* coll, int frag_id, TileHitNonConstContainer* hitCont) const;
+  void findAndMergeMBTS(TileHitCollection* coll, int frag_id, TileHitNonConstContainer* hitCont) const;
+  void findAndMergeMultipleHitsInChannel(std::unique_ptr<TileHitNonConstContainer>& hitCont) const;
+  void mergeExtraHitToChannelHit(TileHit* extraHit, TileHit* channelHit) const;
+  void putAllHitsInContainer(std::vector<std::unique_ptr<TileHit>>& allHits,
+                              std::vector<std::unique_ptr<TileHit>>& allHits_DigiHSTruth,
+                              std::unique_ptr<TileHitNonConstContainer>& hits,
+                              std::unique_ptr<TileHitNonConstContainer>& hits_DigiHSTruth,
+                              SG::OwnershipPolicy ownPolicy) const;
+  StatusCode commitContainers(const EventContext& ctx,
+                              std::unique_ptr<TileHitNonConstContainer>& hits,
+                              std::unique_ptr<TileHitNonConstContainer>& hits_DigiHSTruth,
+                              SG::OwnershipPolicy ownPolicy) const;
+  void prepareAllHits(std::vector<std::unique_ptr<TileHit>>& allHits) const;
+
 
   Gaudi::Property<bool> m_onlyUseContainerName{this, "OnlyUseContainerName", true, "Don't use the ReadHandleKey directly. Just extract the container name from it."};
   StringArrayProperty m_inputKeys{this, "TileHitVectors", {"TileHitVec"},
@@ -152,9 +166,7 @@ private:
       "usePhotoStatistics", true, "Simulate photo statistics effect (default=true)"};
   Gaudi::Property<bool> m_mergeMultipleHitsInChannel{this, "MergeMultipleHitsInChannel", true,
       "Find and merge multiple hits for the same channel in container (default=true)"};
-  PublicToolHandle<ITriggerTime> m_triggerTimeTool{this, "TriggerTimeTool", "",
-      "Name of trigger time tool (default='')"}; //!< tool to take the time from
-
+  SG::ReadHandleKey<CosTrigTime> m_triggerTimeKey{this,"CosTimeKey", "", "To take the trigger time from"};
   ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "PileUpMergeSvc", "PileUpMergeSvc", ""};
 
   const TileID* m_tileID{nullptr};              //!< Pointer to TileID helper
@@ -165,8 +177,8 @@ private:
   /// Random Stream Name
   Gaudi::Property<std::string> m_randomStreamName{this, "RandomStreamName", "Tile_HitVecToCnt", ""};
 
-  std::vector<TileHit*> m_allHits;           //!< vector for all TileHits
-  std::vector<TileHit*> m_allHits_DigiHSTruth;           //!< vector for all TileHits
+  std::vector<std::unique_ptr<TileHit>> m_allHits;           //!< vector for all TileHits
+  std::vector<std::unique_ptr<TileHit>> m_allHits_DigiHSTruth;           //!< vector for all TileHits
   std::unique_ptr<TileHitNonConstContainer> m_hits{};          //!< pointer to hits container
   std::unique_ptr<TileHitNonConstContainer> m_hits_DigiHSTruth{};   //!< pointer to hits container
 
