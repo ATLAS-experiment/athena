@@ -2,17 +2,17 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "BTagging/BTagTrackAugmenterAlg.h"
+#include "BTagging/BTagTrackAugmenterByVertexAlg.h"
 
 #include "TrkSurfaces/PerigeeSurface.h"
 
 
 namespace Analysis {
 
-  BTagTrackAugmenterAlg::BTagTrackAugmenterAlg( const std::string& name, ISvcLocator* loc )
+  BTagTrackAugmenterByVertexAlg::BTagTrackAugmenterByVertexAlg( const std::string& name, ISvcLocator* loc )
     : AthReentrantAlgorithm(name, loc) {}
 
-  StatusCode BTagTrackAugmenterAlg::initialize() {
+  StatusCode BTagTrackAugmenterByVertexAlg::initialize() {
     ATH_MSG_INFO( "Inizializing " << name() << "... " );
 
     if ( m_track_to_vx.retrieve().isFailure() ) {
@@ -43,6 +43,8 @@ namespace Analysis {
     m_dec_track_mom = m_TrackContainerKey.key() + "." + m_prefix.value() + m_dec_track_mom.key();
 
     m_dec_invalid = m_TrackContainerKey.key() + "." + m_prefix.value() + m_dec_invalid.key();
+    m_trk_origin_vtx = m_TrackContainerKey.key() + "." + m_prefix.value() + m_trk_origin_vtx.key();
+    m_trk_origin_vtx_idx = m_TrackContainerKey.key() + "." + m_prefix.value() + m_trk_origin_vtx_idx.key();
 
     // Initialize decorators
     ATH_MSG_DEBUG( "Inizializing decorators:"  );
@@ -53,6 +55,9 @@ namespace Analysis {
     ATH_MSG_DEBUG( "    ** " << m_dec_track_pos );
     ATH_MSG_DEBUG( "    ** " << m_dec_track_mom );
     ATH_MSG_DEBUG( "    ** " << m_dec_invalid  );
+    ATH_MSG_DEBUG( "    ** " << m_trk_origin_vtx  );
+    ATH_MSG_DEBUG( "    ** " << m_trk_origin_vtx_idx  );
+    
 
     CHECK( m_dec_d0.initialize() );
     CHECK( m_dec_z0.initialize() );
@@ -61,11 +66,13 @@ namespace Analysis {
     CHECK( m_dec_track_pos.initialize() );
     CHECK( m_dec_track_mom.initialize() );
     CHECK( m_dec_invalid.initialize() );
+    CHECK( m_trk_origin_vtx.initialize() );
+    CHECK( m_trk_origin_vtx_idx.initialize() );
 
     return StatusCode::SUCCESS;
   }
 
-  StatusCode BTagTrackAugmenterAlg::execute(const EventContext& ctx) const {
+  StatusCode BTagTrackAugmenterByVertexAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG( "Executing " << name() << "... " );
   
     // ========================================================================================================================== 
@@ -76,12 +83,14 @@ namespace Analysis {
     CHECK( vertexContainerHandle.isValid() );
     const xAOD::VertexContainer *verteces = vertexContainerHandle.get();
 
-    const xAOD::Vertex* primary = getPrimaryVertex( *verteces );
-    if ( primary == nullptr ) {
+    /*
+    const xAOD::Vertex* primaryVtx = getPrimaryVertex( *verteces );
+    if ( primaryVtx == nullptr ) {
       ATH_MSG_FATAL("No primary vertex found");
       return StatusCode::FAILURE;
     }
-
+    */
+    
     SG::ReadHandle< xAOD::TrackParticleContainer > trackContainerHandle = SG::makeHandle< xAOD::TrackParticleContainer >( m_TrackContainerKey,ctx);
     CHECK( trackContainerHandle.isValid() );
     const xAOD::TrackParticleContainer* tracks = trackContainerHandle.get();
@@ -103,38 +112,88 @@ namespace Analysis {
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> decor_invalid(
         m_dec_invalid, ctx);
 
+    // Mario: add decoration for origin vertex link
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, ElementLink<xAOD::VertexContainer>> decor_TrkOriginVtx(m_trk_origin_vtx, ctx);
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, int> decor_TrkOriginVtx_idx(m_trk_origin_vtx_idx, ctx);
     // ==========================================================================================================================
     //    ** Computation
     // ==========================================================================================================================
 
-    Trk::PerigeeSurface primary_surface( primary->position() );
+    //Trk::PerigeeSurface primary_surface( primaryVtx->position() );
 
     // now decorate the tracks
     for (const xAOD::TrackParticle *track: *tracks) {
-      std::unique_ptr< const Trk::ImpactParametersAndSigma > ip( m_track_to_vx->estimate( track, primary ) );
-      if ( ip ) {
-        decor_d0(*track) = ip->IPd0;
-        decor_z0(*track) = ip->IPz0SinTheta;
-        decor_d0_sigma(*track) = ip->sigmad0;
-        decor_z0_sigma(*track) = ip->sigmaz0SinTheta;
-        ATH_MSG_DEBUG( " d0= " << ip->IPd0 <<
-           " z0SinTheta= " << ip->IPz0SinTheta <<
-           " sigmad0= " << ip->sigmad0 <<
-           " sigmaz0SinTheta= " << ip->sigmaz0SinTheta );
-      } else {
-        ATH_MSG_WARNING( "failed to estimate track impact parameter, using dummy values" );
-        decor_d0(*track) = NAN;
-        decor_z0(*track) = NAN;
-        decor_d0_sigma(*track) = NAN;
-        decor_z0_sigma(*track) = NAN;
-      }
+      
+        auto minDz =100.;
+        const xAOD::Vertex* primary = nullptr; // calling it primary for now so I dont have to change anything
+        ElementLink<xAOD::VertexContainer> vertexLink;
+        int vtx_i=0; //counter for the vertex index 
+        int save_vtx_idx =0;  //index of vertex to save
+        for (const xAOD::Vertex *vertex: *verteces) {
+            std::unique_ptr< const Trk::ImpactParametersAndSigma > ipMin( m_track_to_vx->estimate( track, vertex) );
+            if ( ipMin ){
+                if ( std::fabs(ipMin->IPz0SinTheta) < minDz && std::fabs(ipMin->IPz0SinTheta) < 3){
+                minDz = std::fabs(ipMin->IPz0SinTheta);
+                primary = vertex;
+                save_vtx_idx = vtx_i;
+                vertexLink = ElementLink<xAOD::VertexContainer>(*verteces, vtx_i);
+                }
+            }
+            vtx_i++;
+        }
+        Trk::PerigeeSurface primary_surface;
+        std::unique_ptr< const Trk::ImpactParametersAndSigma > ip;
+        std::unique_ptr< const Trk::TrackParameters > extrap_pars;
+
+        if (primary){
+            ip = std::unique_ptr< const Trk::ImpactParametersAndSigma >( m_track_to_vx->estimate( track, primary) );
+            primary_surface = Trk::PerigeeSurface( primary->position() );
+            extrap_pars = std::unique_ptr< const Trk::TrackParameters >( m_extrapolator->extrapolate(ctx,
+                                                                                                track->perigeeParameters(),
+                                                                                                primary_surface ) );
+            
+            if ( ip ) {
+        
+                decor_TrkOriginVtx(*track) = vertexLink;
+                decor_TrkOriginVtx_idx(*track) = save_vtx_idx;
+                decor_d0(*track) = ip->IPd0;
+                decor_z0(*track) = ip->IPz0SinTheta;
+                decor_d0_sigma(*track) = ip->sigmad0;
+                decor_z0_sigma(*track) = ip->sigmaz0SinTheta;
+                ATH_MSG_DEBUG( " d0= " << ip->IPd0 <<
+                " z0SinTheta= " << ip->IPz0SinTheta <<
+                " sigmad0= " << ip->sigmad0 <<
+                " sigmaz0SinTheta= " << ip->sigmaz0SinTheta << 
+                " TrkOriginVtx= " << primary );
+            } else {
+        
+                ATH_MSG_WARNING( "failed to estimate track impact parameter, using dummy values" );
+                decor_d0(*track) = NAN;
+                decor_z0(*track) = -1e4;
+                decor_d0_sigma(*track) = NAN;
+                decor_z0_sigma(*track) = NAN;
+                decor_TrkOriginVtx(*track) = vertexLink;
+                decor_TrkOriginVtx_idx(*track) = -10;
+
+            }
+        }else{
+            
+            ATH_MSG_WARNING( "failed to find origin vertex" );
+            decor_d0(*track) = NAN;
+            decor_z0(*track) = NAN;
+            decor_d0_sigma(*track) = NAN;
+            decor_z0_sigma(*track) = NAN;
+            decor_TrkOriginVtx(*track) = vertexLink;
+            decor_TrkOriginVtx_idx(*track) = -10;
+
+        }
+
+
 
       // some other parameters we have go get directly from the
       // extrapolator. This is more or less copied from:
       // https://goo.gl/iWLv5T
-      std::unique_ptr< const Trk::TrackParameters > extrap_pars( m_extrapolator->extrapolate(ctx, 
-                                                                                             track->perigeeParameters(), 
-                                                                                             primary_surface ) );
+      
       if ( extrap_pars ) {
         const Amg::Vector3D& track_pos = extrap_pars->position();
         const Amg::Vector3D& vertex_pos = primary->position();

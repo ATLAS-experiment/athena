@@ -2,8 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef BTAGGING_TRACK_AUGMENTER_ALG_HH
-#define BTAGGING_TRACK_AUGMENTER_ALG_HH
+#ifndef BTAGGING_TRACK_AUGMENTER_BY_VERTEX_ALG_HH
+#define BTAGGING_TRACK_AUGMENTER_BY_VERTEX_ALG_HH
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -16,9 +16,9 @@
 namespace Analysis {
 
 
-  class BTagTrackAugmenterAlg: public AthReentrantAlgorithm {
+  class BTagTrackAugmenterByVertexAlg: public AthReentrantAlgorithm {
   public:
-    BTagTrackAugmenterAlg(const std::string& name,
+    BTagTrackAugmenterByVertexAlg(const std::string& name,
                           ISvcLocator* pSvcLocator );
 
     StatusCode initialize() override final;
@@ -47,6 +47,9 @@ namespace Analysis {
 
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_track_pos {this, "trackDisplacement","trackDisplacement","trackDisplacement of tracks" };
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_track_mom {this, "trackMomentum","trackMomentum","trackMomentum of tracks" };
+
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_trk_origin_vtx {this, "TrkOriginVertex", "TrkOriginVtx", "origin vertex of track"}; 
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_trk_origin_vtx_idx {this, "TrkOriginVertex_idx", "TrkOriginVtx_idx", "origin vertex of track index"};
 
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_invalid {
       this, "invalidIp", "invalidIp", "flag for invalid impact parameter"
