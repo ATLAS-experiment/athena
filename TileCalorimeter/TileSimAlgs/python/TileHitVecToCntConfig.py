@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured private Tile hit vector to container tool"""
 
@@ -81,10 +81,10 @@ def TileHitVecToCntToolCfg(flags, **kwargs):
         kwargs.setdefault('PileUp', flags.Digitization.PileUp)
 
     if flags.Beam.Type is BeamType.Cosmics:
-        CosmicTriggerTimeTool=CompFactory.CosmicTriggerTimeTool
-        kwargs.setdefault('TriggerTimeTool', CosmicTriggerTimeTool())
         kwargs.setdefault('HitTimeFlag', 2)
         kwargs.setdefault('UseTriggerTime', True)
+        kwargs.setdefault('CosTimeKey', 'CosTrigTime')
+        acc.addEventAlgo(CompFactory.CosTriggerTimeAlg())
 
     if flags.Digitization.PileUp:
         intervals = []
