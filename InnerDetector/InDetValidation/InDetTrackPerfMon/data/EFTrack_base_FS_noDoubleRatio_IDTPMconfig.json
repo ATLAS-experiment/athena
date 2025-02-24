@@ -1,0 +1,11 @@
+{
+    "TrkAnaEF" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "plotDuplicateRates"  : true
+    }
+}

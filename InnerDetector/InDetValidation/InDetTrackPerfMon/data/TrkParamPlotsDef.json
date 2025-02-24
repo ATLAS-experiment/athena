@@ -72,7 +72,7 @@
     },
     "$TRKTAG_chi2OverNdof" : {
         "type" : "TH1F",
-        "xAxis" : { "title" : "$TRKTYPE #chi^i{2}/nDoF", "nBins" : "100", "low" : "0", "high" : "5" },
+        "xAxis" : { "title" : "$TRKTYPE #chi^{2}/nDoF", "nBins" : "100", "low" : "0", "high" : "5" },
         "yAxis" : { "title" : "Entries" }
     },
     "$TRKTAG_author" : {
