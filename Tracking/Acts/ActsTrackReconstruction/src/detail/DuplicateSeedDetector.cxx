@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/detail/DuplicateSeedDetector.h"
@@ -13,10 +13,10 @@ namespace ActsTrk::detail {
       : m_disabled(!enabled),
         m_nUsedMeasurements(enabled ? numSeeds : 0ul, 0ul),
         m_nSeedMeasurements(enabled ? numSeeds : 0ul, 0ul),
-        m_isDuplicateSeeds(enabled ? numSeeds : 0ul, false) {
+        m_isDuplicateSeed(enabled ? numSeeds : 0ul, false) {
     if (m_disabled)
       return;
-    m_seedOffsets.reserve(2ul);
+    m_seedOffset.reserve(2ul);
   }
 
   void DuplicateSeedDetector::addSeeds(std::size_t typeIndex,
@@ -24,9 +24,9 @@ namespace ActsTrk::detail {
                                        const MeasurementIndex& measurementIndex) {
     if (m_disabled)
       return;
-    if (!(typeIndex < m_seedOffsets.size()))
-      m_seedOffsets.resize(typeIndex + 1);
-    m_seedOffsets[typeIndex] = m_numSeeds;
+    if (!(typeIndex < m_seedOffset.size()))
+      m_seedOffset.resize(typeIndex + 1);
+    m_seedOffset[typeIndex] = m_numSeeds;
     m_seedIndex.resize(measurementIndex.size());  // will resize for each seed container, but always with the same space
 
     for (const ActsTrk::Seed *seed : seeds) {
