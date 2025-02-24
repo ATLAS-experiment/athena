@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloAddCellPedShift.h"
@@ -14,57 +14,17 @@
 #include "CaloCondBlobObjs/CaloCondUtils.h"
 
 
-
-//Constructor
-CaloAddCellPedShift::CaloAddCellPedShift(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name,pSvcLocator),
-  m_calo_id(nullptr),
-  m_onlineID(nullptr),
-  m_caloCoolIdTool("CaloCoolIdTool"),
-  m_iCool(0),
-  m_SubHash(0),
-  m_Hash(0),
-  m_OffId(0),
-  m_eta(0),
-  m_phi(0),
-  m_layer(0),
-  m_Gain(0),
-  m_bec(0),
-  m_posneg(0),
-  m_FT(0),
-  m_slot(0),
-  m_channel(0),
-  m_ped1(0),
-  m_ped1corr(0),
-  m_ped2(0),
-  m_tree(nullptr)
-
-{
-   declareProperty("inputFile",m_fname);
-   declareProperty("FolderName",m_folderName="/CALO/Pedestal/CellPedestal");
-}
-
-//__________________________________________________________________________
-CaloAddCellPedShift::~CaloAddCellPedShift()
-{
-  ATH_MSG_DEBUG( "CaloAddCellPedShift destructor called"  );
-}
 //__________________________________________________________________________
 StatusCode CaloAddCellPedShift::initialize()
 {
   ATH_MSG_DEBUG ("CaloAddCellPedShift initialize()" );
 
-  const CaloIdManager* mgr = nullptr;
-  ATH_CHECK( detStore()->retrieve( mgr ) );
-  m_calo_id      = mgr->getCaloCell_ID();
-
-  ATH_CHECK( detStore()->regFcn(&CaloAddCellPedShift::updateMap, this, m_noiseAttrListColl, m_folderName) );
-  ATH_MSG_INFO ( " registered a callback for " << m_folderName << " folder " );
-
   ATH_CHECK( m_caloCoolIdTool.retrieve() );
   ATH_CHECK( m_cablingKey.initialize() );
   ATH_CHECK( m_caloMgrKey.initialize() );
+  ATH_CHECK( m_pedKey.initialize() );
   ATH_CHECK( detStore()->retrieve(m_onlineID,"LArOnlineID") );
+  ATH_CHECK( detStore()->retrieve(m_calo_id,"CaloCell_ID") );
   ATH_CHECK( m_thistSvc.retrieve() );
 
   m_tree = new TTree("mytree","Calo Ped ntuple");
@@ -91,42 +51,6 @@ StatusCode CaloAddCellPedShift::initialize()
   return StatusCode::SUCCESS; 
 }
 
-// ===============================================================================
-
-StatusCode CaloAddCellPedShift::updateMap(IOVSVC_CALLBACK_ARGS_K(keys) )
-{
-  msg() << MSG::INFO << " in updateMap ";
-  std::list<std::string>::const_iterator itr;
-  for (itr=keys.begin(); itr!=keys.end(); ++itr) {
-    msg() << *itr << " ";
-  }
-  msg() << endmsg;
-
-  //=== loop over collection (all cool channels)
-  CondAttrListCollection::const_iterator iColl = m_noiseAttrListColl->begin();
-  CondAttrListCollection::const_iterator last  = m_noiseAttrListColl->end();
-  for (; iColl != last; ++iColl) {
-
-    //=== COOL channel number is system id
-    unsigned int sysId = static_cast<unsigned int>(iColl->first);
-
-    //=== delete old CaloCondBlobFlt (which does not own the blob)
-    std::map<unsigned int, const CaloCondBlobFlt*>::iterator iOld = m_noiseBlobMap.find(sysId);
-    if(iOld != m_noiseBlobMap.end()){
-      delete iOld->second;
-    }
-
-    //=== Get new CaloCondBlobFlt instance, interpreting current BLOB
-    const coral::Blob& blob = (iColl->second)["CaloCondBlob16M"].data<coral::Blob>();
-    const CaloCondBlobFlt* flt = CaloCondBlobFlt::getInstance(blob);
-
-    //=== store new pointer in map
-    m_noiseBlobMap[sysId] = flt;
-
-  }//end iColl
-
-  return StatusCode::SUCCESS;
-}
 
 //__________________________________________________________________________
 StatusCode CaloAddCellPedShift::execute()
@@ -150,25 +74,47 @@ StatusCode CaloAddCellPedShift::stop()
      return StatusCode::FAILURE;
   }
 
-  FILE* finput = fopen(m_fname.c_str(),"r");
-  ATH_MSG_INFO ( " opened file " << m_fname );
-  int bec;
-  int pos_neg;
-  int FT;
-  int slot;
-  int channel;
-  float pedShift;
-  while( fscanf(finput,"%d %d %d %d %d %f",&bec,&pos_neg,&FT,&slot,&channel,&pedShift) != EOF  ) {
-    ATH_MSG_INFO ( " read linbe " << bec << " " << pos_neg << " " << FT << " " << slot << " " << channel << " " << pedShift );
-    HWIdentifier hwid = m_onlineID->channel_Id(bec,pos_neg,FT,slot,channel);
-    Identifier id     = cabling->cnvToIdentifier( hwid);
-    IdentifierHash idHash = m_calo_id->calo_cell_hash(id);
-    int ii = (int) (idHash);
-    pedShiftValue[ii] = pedShift;
-  }
-  fclose(finput);
-  ATH_MSG_INFO ( " end of reading file" );
 
+  SG::ReadCondHandle<CondAttrListCollection> pedHdl{m_pedKey};
+  const CondAttrListCollection* attrListColl=*pedHdl;
+  if (!attrListColl) {
+    ATH_MSG_ERROR("Failed to retrieve CaloPedestal obj with key" << m_pedKey.key());
+    return StatusCode::FAILURE;
+  }
+
+  std::map<unsigned int, const CaloCondBlobFlt*> pedBlobMap;
+  for (auto iColl=pedHdl->begin();iColl!=pedHdl->end();++iColl) {
+    //=== COOL channel number is system id
+    unsigned int sysId = static_cast<unsigned int>(iColl->first);
+    //=== Get new CaloCondBlobFlt instance, interpreting current BLOB
+    const coral::Blob& blob = (iColl->second)["CaloCondBlob16M"].data<coral::Blob>();
+    const CaloCondBlobFlt* flt = CaloCondBlobFlt::getInstance(blob);
+    //=== store new pointer in map
+    pedBlobMap[sysId] = flt;
+  }//end iColl
+  
+  
+
+  if (!m_fname.empty()) {
+    FILE* finput = fopen(m_fname.value().c_str(),"r");
+    ATH_MSG_INFO ( " opened file " << m_fname );
+    int bec;
+    int pos_neg;
+    int FT;
+    int slot;
+    int channel;
+    float pedShift;
+    while( fscanf(finput,"%d %d %d %d %d %f",&bec,&pos_neg,&FT,&slot,&channel,&pedShift) != EOF  ) {
+      ATH_MSG_INFO ( " read linbe " << bec << " " << pos_neg << " " << FT << " " << slot << " " << channel << " " << pedShift );
+      HWIdentifier hwid = m_onlineID->channel_Id(bec,pos_neg,FT,slot,channel);
+      Identifier id     = cabling->cnvToIdentifier( hwid);
+      IdentifierHash idHash = m_calo_id->calo_cell_hash(id);
+      int ii = (int) (idHash);
+      pedShiftValue[ii] = pedShift;
+    }
+    fclose(finput);
+    ATH_MSG_INFO ( " end of reading file" );
+  }
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
   ATH_CHECK(caloMgrHandle.isValid());
   const CaloDetDescrManager* calodetdescrmgr = *caloMgrHandle;
@@ -233,7 +179,7 @@ StatusCode CaloAddCellPedShift::stop()
           unsigned int dbGain = CaloCondUtils::getDbCaloGain(gain);
           unsigned int subHash2;
           unsigned int iCool = m_caloCoolIdTool->getCoolChannelId(idHash,subHash2);
-          const CaloCondBlobFlt* const flt = m_noiseBlobMap.find(iCool)->second;
+          const CaloCondBlobFlt* const flt = pedBlobMap.find(iCool)->second;
           float ped1_old= flt->getData(subHash2,dbGain,0);
           float ped2= flt->getData(subHash2,dbGain,1);
 

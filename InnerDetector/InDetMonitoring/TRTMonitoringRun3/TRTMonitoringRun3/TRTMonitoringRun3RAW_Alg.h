@@ -99,16 +99,19 @@ private:
     float m_minP;
     float m_min_pT;
     
-    StatusCode fillTRTRDOs(const TRT_RDO_Container& rdoContainer,
+    StatusCode fillTRTRDOs(const EventContext& ctx,
+                           const TRT_RDO_Container& rdoContainer,
 	                       const xAOD::EventInfo& eventInfo,
 	                       const InDetTimeCollection* trtBCIDCollection) const;
-    StatusCode fillTRTEfficiency(const TrackCollection& combTrackCollection) const;
-    StatusCode fillTRTHits(const TrackCollection& trackCollection) const;       
+    StatusCode fillTRTEfficiency(const EventContext& ctx,
+                                 const TrackCollection& combTrackCollection) const;
+    StatusCode fillTRTHits(const EventContext& ctx,
+                           const TrackCollection& trackCollection) const;       
     
     int chipToBoard(int chip) const;
     int chipToBoard_EndCap(int chip) const;
     StatusCode checkTRTReadoutIntegrity(const xAOD::EventInfo& eventInfo) const;
-    std::vector<std::vector<std::vector<int>>>  initScaleVectors() const;
+    std::vector<std::vector<std::vector<int>>>  initScaleVectors(const EventContext& ctx) const;
     bool checkEventBurst(const TRT_RDO_Container& rdoContainer) const;
     int strawNumberEndCap(int strawNumber, int strawLayerNumber, int LayerNumber, int phi_stack, int side) const;
     int strawNumber(int strawNumber, int strawlayerNumber, int LayerNumber) const;

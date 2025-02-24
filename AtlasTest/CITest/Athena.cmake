@@ -430,4 +430,3 @@ atlas_add_citest( TriggerConfigFlags
 
 atlas_add_citest( EFTracking_FPGATrackSim_workflow
   SCRIPT test_FPGATrackSimWorkflow.sh )
-

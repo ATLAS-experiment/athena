@@ -26,7 +26,7 @@ vtx_pos_panel = {
   "y_eff",         "Efficiency y",                "xaxis:lin:auto",      "Offline vertex y [mm]",             "yaxis:auto:lin:80:102",       "Vertex finding efficiency" ,
   "zed_eff",       "Efficiency z",                "xaxis:lin:-175:175",  "Offline vertex z [mm]",             "yaxis:auto:lin:80:102",       "Vertex finding efficiency" ,
 
-  "y",            "Vertex z position",   "xaxis:lin:auto",             "Offline vertex ODy [mm]",     "yaxis:log:auto",          "Entries",
+  "y",            "Vertex z position",   "xaxis:lin:auto",             "Offline vertex y [mm]",     "yaxis:log:auto",          "Entries",
   "x",            "Vertex z position",   "xaxis:lin:auto",             "Offline vertex x [mm]",       "yaxis:log:auto",         "Entries",
   "zed",          "Vertex z position",   "xaxis:lin:auto:-175:175",    "Offline vertex z [mm]",       "yaxis:log:auto",           "Entries" 
 
@@ -40,7 +40,7 @@ vtx_beam_panel = {
   "x_rec",        "Vertex z position",   "xaxis:lin:auto",      "Trigger vertex x [mm]",        "yaxis:log:auto",         "Entries",
   "x_res",        "Vertex z position",   "xaxis:lin:-0.1:0.1",  "#Delta x [mm]",                "yaxis:log:auto",         "Entries",
 
-  "y",            "Vertex z position",   "xaxis:lin:auto",      "Offline vertex ODy [mm]",     "yaxis:log:auto",          "Entries",
+  "y",            "Vertex z position",   "xaxis:lin:auto",      "Offline vertex y [mm]",     "yaxis:log:auto",          "Entries",
   "y_rec",        "Vertex z position",   "xaxis:lin:auto",      "Trigger vertex y [mm]",       "yaxis:log:auto",          "Entries",
   "y_res",        "Vertex z position",   "xaxis:lin:-0.1:0.1",   "#Delta y [mm]",              "yaxis:log:auto",          "Entries",
 
