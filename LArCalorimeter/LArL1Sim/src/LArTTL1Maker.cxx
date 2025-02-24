@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // +======================================================================+
@@ -63,7 +63,10 @@ LArTTL1Maker::LArTTL1Maker(const std::string& name, ISvcLocator* pSvcLocator) :
   , m_fSamplKey("LArfSamplSym")
   , m_EmTTL1ContainerName{"LArTTL1EM"}
   , m_HadTTL1ContainerName{"LArTTL1HAD"}
-  , m_xxxHitContainerName{{std::string("LArHitEMB"),std::string("LArHitEMEC"), std::string("LArHitHEC"),std::string("LArHitFCAL")}}
+  , m_xxxHitContainerName{SG::ReadHandleKey<LArHitContainer>("LArHitEMB"),
+                          SG::ReadHandleKey<LArHitContainer>("LArHitEMEC"),
+                          SG::ReadHandleKey<LArHitContainer>("LArHitHEC"),
+                          SG::ReadHandleKey<LArHitContainer>("LArHitFCAL")}
 
 // + -------------------------------------------------------------------- +
 // + Author ........: F. Ledroit                                          +
