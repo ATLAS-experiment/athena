@@ -49,7 +49,7 @@ namespace MuonPhysValMonitoring {
         container = nullptr;
         if (key.empty()) {
             ATH_MSG_DEBUG("No key of type "<<typeid(ContType).name()<<" has been parsed");
-            return StatusCode::FAILURE;
+            return StatusCode::SUCCESS;
         }
         SG::ReadHandle readHandle{key,ctx};
         if (!readHandle.isPresent()) {
