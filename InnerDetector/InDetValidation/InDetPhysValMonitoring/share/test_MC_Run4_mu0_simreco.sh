@@ -11,7 +11,7 @@ maxEvents=$3
 lastref_dir=last_results
 dcubeXml=dcube_ART_IDPVMPlots_ITk.xml
 
-geometry=ATLAS-P2-RUN4-04-00-00
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN4)")
 condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 # search in $DATAPATH for matching file
