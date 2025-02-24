@@ -105,7 +105,7 @@ def tauMonitoringPrecision(flags, name: str = 'Precision', RoI_name: str = 'tauI
     monTool.defineHistogram('track_errors', path='EXPERT', type='TH1F', title=name+' TauJet Tracking Errors; Error; Entries', xbins=2, xmin=-0.5, xmax=1.5, xlabels=labels)
 
     for tau_id in tau_ids:
-        if tau_id in ['DeepSet', 'RNNLLP']: xbins, xmax = 40, 1
+        if tau_id in ['DeepSet', 'RNNLLP', 'GNTau']: xbins, xmax = 40, 1
         else: xbins, xmax = 100, 5
 
         monTool.defineHistogram(f'{tau_id}_TauJetScore_0p', path='EXPERT', type='TH1F', title=f'{name} 0-prong TauJet {tau_id} Tau ID score; Score; Entries', xbins=xbins, xmin=0, xmax=xmax)
