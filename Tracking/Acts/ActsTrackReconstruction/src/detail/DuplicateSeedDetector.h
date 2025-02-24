@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_DUPLICATESEEDDETECTOR_H
@@ -35,28 +35,20 @@ namespace ActsTrk::detail {
     inline void newTrajectory();
     inline void addMeasurement(const ActsTrk::ATLASUncalibSourceLink &sl, const MeasurementIndex &measurementIndex);
 
-    // For complete removal of duplicate seeds, assumes isDuplicate(iseed) is called for monotonically increasing iseed.
+    // For complete removal of duplicate seeds, assumes isDuplicate(iseed) is called for monotonically increasing typeIndex,iseed.
     inline bool isDuplicate(std::size_t typeIndex, index_t iseed);
 
-    // Getters
-    inline bool isEnabled() const;
-    inline const std::vector<std::size_t> &nUsedMeasurements() const;
-    inline const std::vector<std::size_t> &nSeedMeasurements() const;
-    inline const std::vector<bool> &isDuplicateSeeds() const;
-    inline const std::vector<index_t> &seedOffsets() const;
-    inline index_t numSeeds() const;
-    inline index_t nextSeeds() const;
-    inline std::size_t foundSeeds() const;
-
   private:
+    friend struct DuplicateSeedDetectorTest;  // allow unit test access to internals
+
     bool m_disabled{false};
     std::vector<boost::container::small_vector<index_t, 4>> m_seedIndex;  // m_seedIndex[measurementIndex][usedBySeedNumber]
     std::vector<std::size_t> m_nUsedMeasurements;
     std::vector<std::size_t> m_nSeedMeasurements;
-    std::vector<bool> m_isDuplicateSeeds;
-    std::vector<index_t> m_seedOffsets;
-    index_t m_numSeeds{0u};        // count of number of seeds so-far added with addSeeds()
-    index_t m_nextSeeds{0u};       // index of next seed expected with isDuplicate()
+    std::vector<bool> m_isDuplicateSeed;
+    std::vector<index_t> m_seedOffset;
+    index_t m_numSeeds{0u};         // count of number of seeds so-far added with addSeeds()
+    index_t m_nextSeed{0u};         // index of next seed expected with isDuplicate()
     std::size_t m_foundSeeds{0ul};  // count of found seeds for this/last trajectory
   };
 
