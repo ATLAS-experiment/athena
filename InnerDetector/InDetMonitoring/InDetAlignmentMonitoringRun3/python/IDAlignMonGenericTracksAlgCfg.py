@@ -31,6 +31,7 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     m_EtaModulesMinPix = [-10.5, -6.5, -6.5, -6.5]
     m_EtaModulesMaxPix = [9.5, 6.5, 6.5, 6.5]
     m_PhiModules = [14, 22, 38, 52]
+    m_PhiModulesSCT = [32, 40, 48, 56]
     m_PhiModulesPerRing = 48
     m_EtaModulesSCTEC = 3
     m_PhiModulesSCTEC = 52
@@ -287,7 +288,7 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
         title = ('Number of hits vs Module Eta-Phi-ID SCT Barrel layer %s side 0; Mod Eta; Mod Phi; SCT hits ' % layer) 
         name = 'm_modEta,m_modPhi;measurements_vs_Eta_Phi_sct_b' + layer + '_s0'
         tool.defineHistogram(name, title = title, type = 'TH2F', xbins = m_EtaModulesSCT, xmin = m_EtaModulesMinSCT, xmax = m_EtaModulesMaxSCT,
-                                                   ybins = m_PhiModules[int(layer)], ymin = -0.5, ymax = m_PhiModules[int(layer)] - 0.5)
+                                                   ybins = m_PhiModulesSCT[int(layer)], ymin = -0.5, ymax = m_PhiModulesSCT[int(layer)] - 0.5)
 
     sctBhitmeasArray = helper.addArray([len(layersSCTB)], alg, 'measurements_vs_Eta_Phi_sct_b_s1', topPath = pathtrack)
     for postfix, tool in sctBhitmeasArray.Tools.items():
@@ -295,7 +296,7 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
         title = ('Number of hits vs Module Eta-Phi-ID SCT Barrel layer %s side 1; Mod Eta; Mod Phi; SCT hits ' % layer) 
         name = 'm_modEta,m_modPhi;measurements_vs_Eta_Phi_sct_b' + layer + '_s1'
         tool.defineHistogram(name, title = title, type = 'TH2F', xbins = m_EtaModulesSCT, xmin = m_EtaModulesMinSCT, xmax = m_EtaModulesMaxSCT,
-                                                   ybins = m_PhiModules[int(layer)], ymin = -0.5, ymax = m_PhiModules[int(layer)] - 0.5)
+                                                   ybins = m_PhiModulesSCT[int(layer)], ymin = -0.5, ymax = m_PhiModulesSCT[int(layer)] - 0.5)
 
     layersSCTEC = ['0', '1', '2', '3', '4', '5', '6', '7', '8']
     sctECAs0hitmeasArray = helper.addArray([len(layersSCTEC)], alg, 'measurements_vs_Eta_Phi_sct_eca_s0', topPath = pathtrack)
@@ -331,5 +332,6 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
                                                    ybins = m_PhiModulesSCTEC, ymin = -0.5, ymax = m_PhiModulesSCTEC - 0.5)
     
     # end histograms
+    #
 
 
