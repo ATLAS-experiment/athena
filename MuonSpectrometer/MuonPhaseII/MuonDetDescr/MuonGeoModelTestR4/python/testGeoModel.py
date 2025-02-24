@@ -1,16 +1,21 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
 
 def SetupArgParser():
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
     parser.add_argument("--threads", type=int, help="number of threads", default=1)
-    parser.add_argument("--geoTag", default="ATLAS-R3S-2021-03-02-00", help="Geometry tag to use", choices=["ATLAS-R3S-2021-03-02-00",
-                                                                                                            "ATLAS-P2-RUN4-01-00-00"])
-    parser.add_argument("--condTag", default="OFLCOND-MC23-SDR-RUN3-02", help="Conditions tag to use",
-                                                                         choices= ["OFLCOND-MC23-SDR-RUN3-02"])
+    parser.add_argument("--geoTag", default=defaultGeometryTags.RUN3,
+                        help="Geometry tag to use",
+                        choices=[defaultGeometryTags.RUN3,
+                                 defaultGeometryTags.RUN4])
+    parser.add_argument("--condTag", default=defaultConditionsTags.RUN3_MC,
+                        help="Conditions tag to use",
+                        choices= [defaultConditionsTags.RUN3_MC,
+                                  defaultConditionsTags.RUN4_MC])
     parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"], 
                         help="Input file to run on ", nargs="+")
     parser.add_argument("--geoModelFile", default ="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/muonsOnlyR4WMDT.db", help="GeoModel SqLite file containing the muon geometry.")

@@ -1,7 +1,7 @@
-
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
 
 def SetupArgParser():
     from argparse import ArgumentParser
@@ -13,13 +13,16 @@ def SetupArgParser():
                         #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"
                         ], 
                         help="Input file to run on ", nargs="+")
-    parser.add_argument("--geoTag", default="ATLAS-R2-2016-01-02-01", help="Geometry tag to use", choices=["ATLAS-R2-2016-01-02-01",
-                                                                                     "ATLAS-R3S-2021-03-02-00"])
-    parser.add_argument("--condTag", default="CONDBR2-BLKPA-RUN2-11", help="Conditions tag to use",
-                                                                         choices=["OFLCOND-MC16-SDR-RUN2-11",
-                                                                                  "OFLCOND-MC23-SDR-RUN3-02",
-                                                                                  "CONDBR2-BLKPA-2023-02",
-                                                                                  "CONDBR2-BLKPA-RUN2-11"])
+    parser.add_argument("--geoTag", default=defaultGeometryTags.RUN2_BEST_KNOWLEDGE,
+                        help="Geometry tag to use",
+                        choices=[defaultGeometryTags.RUN2_BEST_KNOWLEDGE,
+                                 defaultGeometryTags.RUN3])
+    parser.add_argument("--condTag", default=defaultConditionsTags.RUN2_DATA,
+                        help="Conditions tag to use",
+                        choices=[defaultConditionsTags.RUN2_MC,
+                                 defaultConditionsTags.RUN3_MC,
+                                 defaultConditionsTags.RUN3_DATA,
+                                 defaultConditionsTags.RUN2_DATA])
     parser.add_argument("--chambers", default=["all"
     ], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
     parser.add_argument("--outRootFile", default="GeoModelDump.root", help="Output ROOT file to dump the geomerty")
