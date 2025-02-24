@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
@@ -7,6 +7,7 @@
 
 #include "JetMonitoring/JetMonitoringAlg.h"
 #include "FourMomUtils/xAODP4Helpers.h"
+#include "CxxUtils/minmax_transformed_element.h"
 
 JetHistoResponseAndEff::JetHistoResponseAndEff( const std::string& type,  const std::string & name ,const IInterface* parent):
   AthAlgTool( type, name, parent ),
@@ -45,24 +46,23 @@ StatusCode JetHistoResponseAndEff::processJetContainer(const JetMonitoringAlg& p
   Monitored::Scalar<bool> passDr3("passDr3");  
 
   
-  // use a list to be a bit more efficient.
-  std::list<const xAOD::Jet*> listJets(jets.begin(), jets.end());
+  std::vector<const xAOD::Jet*> listJets(jets.begin(), jets.end());
 
   for ( const xAOD::Jet* refjet : *refJets ){
-    double dr2min = 500000;
-
     if (listJets.empty() ) break;
-    // find the min match
-    std::list<const xAOD::Jet*>::iterator it=listJets.begin();
-    std::list<const xAOD::Jet*>::iterator itmin=it;
-    for( ; it != listJets.end(); ++it) {
-      double dr2 = xAOD::P4Helpers::deltaR2(*(*it),*refjet);
-      if(dr2 < dr2min) { dr2min = dr2; itmin = it ;}
-    }
+    auto dr2 = [&] (const xAOD::Jet* j)
+      { return xAOD::P4Helpers::deltaR2(*j, *refjet); };
+    auto [dr2min, itmin] = CxxUtils::min_transformed_element (listJets, dr2);
 
     // calculate efficiency and response from matched jet
     const xAOD::Jet* matched = *itmin;
-    listJets.erase(itmin);
+
+    // Move the matched entry to the end of the vector and pop it off.
+    auto itend = listJets.end()-1;
+    if (itmin != itend) {
+      std::iter_swap (itmin, itend);
+    }
+    listJets.pop_back();
     
     double dr = sqrt(dr2min);
     refPt = refjet->pt() * m_energyScale;
