@@ -47,10 +47,12 @@ class FastCaloSim: public G4VFastSimulationModel
               const Gaudi::Property<bool>& doPhotons,
               const Gaudi::Property<bool>& doElectrons,
               const Gaudi::Property<bool>& doHadrons,
-              const Gaudi::Property<float>& EtaLow,
-              const Gaudi::Property<float>& EtaHigh,
-              const Gaudi::Property<float>& EkinLow,
-              const Gaudi::Property<float>& EkinHigh,
+              const Gaudi::Property<float>& AbsEtaMin,
+              const Gaudi::Property<float>& AbsEtaMax,
+              const Gaudi::Property<float>& EkinMinPhotons,
+              const Gaudi::Property<float>& EkinMaxPhotons,
+              const Gaudi::Property<float>& EkinMinElectrons,
+              const Gaudi::Property<float>& EkinMaxElectrons,
               const Gaudi::Property<bool>& doEMECFCS,
               const Gaudi::Property<bool>& doPunchThrough,
               FastCaloSimTool * FastCaloSimTool);
@@ -101,8 +103,10 @@ class FastCaloSim: public G4VFastSimulationModel
   Gaudi::Property<bool> m_doHadrons;
   Gaudi::Property<float> m_AbsEtaMin;
   Gaudi::Property<float> m_AbsEtaMax;
-  Gaudi::Property<float> m_EkinMin;
-  Gaudi::Property<float> m_EkinMax;
+  Gaudi::Property<float> m_EkinMinPhotons;
+  Gaudi::Property<float> m_EkinMaxPhotons;
+  Gaudi::Property<float> m_EkinMinElectrons;
+  Gaudi::Property<float> m_EkinMaxElectrons;
   Gaudi::Property<float> m_doEMECFCS;
 
   //For PunchThrough

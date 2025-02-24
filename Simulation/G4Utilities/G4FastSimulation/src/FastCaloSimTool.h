@@ -70,8 +70,10 @@ protected:
   Gaudi::Property<bool>  m_doHadrons{this, "doHadrons", true, "Flag to enable FCS simulation for pions and other hadrons"};
   Gaudi::Property<float> m_AbsEtaMin{this, "AbsEtaMin", 0, "Abs(Eta) lower bound for FastCaloSim"};
   Gaudi::Property<float> m_AbsEtaMax{this, "AbsEtaMax", 10, "Abs(Eta) upper bound for FastCaloSim"};
-  Gaudi::Property<float> m_EkinMin{this, "EkinMin", 0, "Kinetic energy lower bound for FastCaloSim"};
-  Gaudi::Property<float> m_EkinMax{this, "EkinMax", std::numeric_limits<float>::max(), "Kinetic energy upper bound for FastCaloSim"};
+  Gaudi::Property<float> m_EkinMinPhotons{this, "EkinMinPhotons", 0, "Kinetic photon energy lower bound for FastCaloSim"};
+  Gaudi::Property<float> m_EkinMaxPhotons{this, "EkinMaxPhotons", std::numeric_limits<float>::max(), "Kinetic photon energy upper bound for FastCaloSim"};
+  Gaudi::Property<float> m_EkinMinElectrons{this, "EkinMinElectrons", 0, "Kinetic electron energy lower bound for FastCaloSim"};
+  Gaudi::Property<float> m_EkinMaxElectrons{this, "EkinMaxElectrons", std::numeric_limits<float>::max(), "Kinetic electron energy upper bound for FastCaloSim"};
   Gaudi::Property<bool>  m_doEMECFCS{this, "doEMECFCS", false, "Run FCS in EMEC region while G4 in the rest region"};
   Gaudi::Property<bool>  m_doPunchThrough{this, "doPunchThrough", true, "Run punchthrough simulation for particle entering Calo-MS boundary"};
 };
