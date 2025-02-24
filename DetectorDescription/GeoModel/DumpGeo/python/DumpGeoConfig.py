@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #----------------------------------------------------------------
 # Author: Riccardo Maria BIANCHI <riccardo.maria.bianchi@cern.ch>
@@ -154,7 +154,7 @@ if __name__=="__main__":
     if (flags.Input.Files == [] or 
         flags.Input.Files == ['_ATHENA_GENERIC_INPUTFILE_NAME_']):
         from Campaigns.Utils import Campaign
-        from AthenaConfiguration.TestDefaults import defaultGeometryTags
+        from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
 
         dumpgeo_empty_input = True
         # NB Must set e.g. ConfigFlags.Input.Runparse_args() Number and
@@ -164,13 +164,13 @@ if __name__=="__main__":
         # If you don't have it, it (and/or other Cfg routines) complains and crashes. 
         # See also: 
         # https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/InnerDetector/InDetConditions/SCT_ConditionsAlgorithms/python/SCT_DCSConditionsTestAlgConfig.py#0023
-        flags.Input.ProjectName = "mc20_13TeV"
+        flags.Input.ProjectName = "mc23_13p6TeV"
         flags.Input.RunNumbers = [330000]  
         flags.Input.TimeStamps = [1]  
         flags.Input.TypedCollections = []
 
         # set default CondDB and Geometry version
-        flags.IOVDb.GlobalTag = "OFLCOND-MC23-SDR-RUN3-02"
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
         flags.Input.isMC = True
         flags.Input.MCCampaign = Campaign.Unknown
         flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
