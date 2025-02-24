@@ -151,10 +151,13 @@ protected:
     class HitPair; // pair of StoredHit with methods to make variables to cut on
     struct HitPairSet; // group of HitPair with methods to make variables to cut on
 
-    // Compute which bins are consistent with the (pT, eta, pho, d0, z0)
-    // ranges given by the region definition defined by the eventselection
-    // service
+    // Which bins are consistent with the (pT, eta, pho, d0, z0)
+    // ranges computed from region definition defined in the eventselection
+    // service or set by the layer map
+    void initValidBins();
     void computeValidBins();
+    void setValidBin(std::vector<unsigned> idx);// reuse setting all the different idx types
+    void printValidBin();// dump an output to log for x-checks
 
     // Put hits in all track parameter bins they could be a part of (binning is defined
     // by m_binning object)

@@ -194,6 +194,7 @@ StatusCode FPGATrackSimGenScanMonitoring::bookTree() {
   m_bin_module_tree->Branch("r", &m_tree_r);
   m_bin_module_tree->Branch("z", &m_tree_z);
   m_bin_module_tree->Branch("id", &m_tree_id);
+  m_bin_module_tree->Branch("hash", &m_tree_hash);
   m_bin_module_tree->Branch("layer", &m_tree_layer);
   m_bin_module_tree->Branch("side", &m_tree_side);
   m_bin_module_tree->Branch("etamod",  &m_tree_etamod);
@@ -209,6 +210,7 @@ void FPGATrackSimGenScanMonitoring::ClearTreeVectors()
   m_tree_r.clear();
   m_tree_z.clear();
   m_tree_id.clear();
+  m_tree_hash.clear();
   m_tree_layer.clear();
   m_tree_side.clear();
   m_tree_etamod.clear();
@@ -297,6 +299,7 @@ void FPGATrackSimGenScanMonitoring::fillBinLevelOutput(const FPGATrackSimGenScan
       m_tree_r.push_back(hit.hitptr->getR());
       m_tree_z.push_back(hit.hitptr->getZ());
       m_tree_id.push_back(hit.hitptr->getIdentifier());
+      m_tree_hash.push_back(hit.hitptr->getIdentifierHash());
       m_tree_layer.push_back(hit.hitptr->getLayerDisk());
       m_tree_side.push_back(hit.hitptr->getSide());
       m_tree_etamod.push_back(hit.hitptr->getEtaModule());

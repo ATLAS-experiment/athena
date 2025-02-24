@@ -253,15 +253,8 @@ public:
         for (auto &f : m_map) { f.second << "\n"; }
       }
 
-      template<typename T> void writeVar(const std::string& var, T val) {
-        auto emplace_result =
-            m_map.try_emplace(var, m_setname + "_" + var + "_const.txt", std::ios_base::out);
-            if (!emplace_result.second) {
-              emplace_result.first->second << ",\n";
-            }
-            emplace_result.first->second << val;
-        }
-
+      template<typename T> void writeVar(const std::string& var, T val);
+    
       private:
       std::string m_setname;
       std::map<std::string, std::fstream> m_map;
@@ -674,19 +667,27 @@ public:
       if (!bin.data())
         continue;
 
-  
-      streams.writeVar("r_in", m_keylyrtool.R1());
-      streams.writeVar("r_out", m_keylyrtool.R2());
-      streams.writeVar("z_in", binCenter(0, bin.idx()[0]));
-      streams.writeVar("z_out", binCenter(1, bin.idx()[1]));
+      streams.writeVar("z_bin", bin.idx());
+    
+      FPGATrackSimGenScanBinningBase::IdxSet idx;
+      setIdxSubVec(idx, scanPars(), bin.idx());
 
       double r_in = m_keylyrtool.R1();
       double r_out = m_keylyrtool.R2();
-      double w_in = (binHighEdge(0, bin.idx()[0]) - binLowEdge(0, bin.idx()[0])) / 2.0;
-      double w_out =
-          (binHighEdge(1, bin.idx()[1]) - binLowEdge(1, bin.idx()[1])) / 2.0;
+      double z_in = binCenter(0, idx[0]);
+      double z_out = binCenter(1, idx[1]);
+      double dz_dr = (z_out - z_in)/(r_out-r_in);
+      double w_in = (binHighEdge(0, idx[0]) - binLowEdge(0, idx[0])) / 2.0;
+      double w_out = (binHighEdge(1, idx[1]) - binLowEdge(1, idx[1])) / 2.0;
       double dw_dr = (w_out - w_in)/(r_out-r_in);
+
       
+      streams.writeVar("r_in", m_keylyrtool.R1());
+      streams.writeVar("r_out", m_keylyrtool.R2());
+
+      streams.writeVar("z_in", z_in);
+      streams.writeVar("dz_dr", dz_dr);
+
       streams.writeVar("w_in", w_in);
       streams.writeVar("dw_dr", dw_dr);
       
@@ -707,6 +708,8 @@ public:
       if (!bin.data())
         continue;
 
+      streams.writeVar("phi_bin", bin.idx());
+
       FPGATrackSimGenScanBinningBase::IdxSet idx;
       setIdxSubVec(idx, slicePars(), bin.idx());
 
@@ -717,8 +720,8 @@ public:
       streams.writeVar("y", rotated_coords.y);
       streams.writeVar("x1p", rotated_coords.xy1p.first);
       streams.writeVar("y1p", rotated_coords.xy1p.second);
-      streams.writeVar("sinb", rotated_coords.rotang.first);
-      streams.writeVar("cosb", rotated_coords.rotang.second);
+      streams.writeVar("cosb", rotated_coords.rotang.first);
+      streams.writeVar("sinb", rotated_coords.rotang.second);
 
       double x_m = binCenter(4,idx[4]);
       streams.writeVar("x_m", x_m);
@@ -726,11 +729,12 @@ public:
 
       double r_in = m_keylyrtool.R1();
       double r_out = m_keylyrtool.R2();
-      double w_in = (binHighEdge(2,idx[2])-binCenter(2,idx[2]))/2.0;
-      double w_out = (binHighEdge(3,idx[3])-binLowEdge(3,idx[3]))/2.0;
+      double w_in =
+          r_in * ((binHighEdge(2, idx[2]) - binLowEdge(2, idx[2])) / 2.0);
+      double w_out = r_out*((binHighEdge(3,idx[3])-binLowEdge(3,idx[3]))/2.0);
       double w_x = (binHighEdge(4,idx[4])-binLowEdge(4,idx[4]))/2.0;
 
-      double dw_dr = (r_out*w_out - r_in*w_in)/(r_out-r_in);
+      double dw_dr = (w_out - w_in)/(r_out-r_in);
             
       streams.writeVar("w_x", 4.0 * w_x / (rotated_coords.y * rotated_coords.y));
       streams.writeVar("w_in", w_in);
