@@ -13,6 +13,7 @@
 #include "GepAlgoHypothesisPortsIn.h"
 #include "eEmSortSelectCountContainerPortsOut.h"
 #include "AlgoDataTypes.h"
+#include "AlgoConstants.h"
 
 #include "../../../IGlobalSimAlgTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -65,18 +66,18 @@ namespace GlobalSim {
 
     // FIXME the following should be properties
 
-    // Cut values for Select part of Algorithm
-    std::size_t m_nSelect{3};
-    std::vector<int> m_EtMin{0, 1, 2};
-    std::vector<int> m_REtaMin{0, 0, 0};
-    std::vector<int> m_RHadMin{0, 0, 0};
-    std::vector<int> m_WsTotMin{0, 0, 0};
+    // Select cuts: values set in init()
+    // outer vector: NumSelect entries. Inner vector: N_eta entries
+    std::vector<int> m_EtMin;
+    std::vector<int> m_REtaMin;
+    std::vector<int> m_RHadMin;
+    std::vector<int> m_WsTotMin;
 
-    // Cut values for Count part of Algorithm
-    std::size_t m_nEtaRegions{3};
-    std::vector<int> m_etaReg_EtaMin{0, 10, 20};
-    std::vector<int> m_etaReg_EtaMax{100, 100, 100};
-    std::vector<unsigned int> m_etaReg_EtMin{0, 1, 2};
+    // Count cuts. Each count has three eta regions
+    // The outer vector is of length 3: one entry per eta region
+    std::vector<std::vector<unsigned int>> m_count_EtMin;
+    std::vector<std::vector<int>> m_count_EtaMin;
+    std::vector<std::vector<int>> m_count_EtaMax;
 
     StatusCode
     make_selectedTobs(const std::vector<eEmTobPtr>&,
@@ -84,7 +85,15 @@ namespace GlobalSim {
 
     std::vector<std::size_t>
     count_tobs(const std::vector<std::vector<GenTobPtr>>&) const;
-	  
+
+    constexpr static std::size_t s_NumCnt{24};
+    constexpr static std::size_t s_NumEtaRanges{3};
+
+
+    // Each count category uses one of many selected GenTob vevtors.
+    // s_CntSelN chooses which of these to use.
+    constexpr static std::array<std::size_t, s_NumCnt> s_CntSelN{
+      0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
   };
 }
