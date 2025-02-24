@@ -64,9 +64,109 @@ class TrigInDetReco(ExecStep):
 
 
     def configure(self, test):
-        from TrigInDetValidation.Chains import Chains
-        tc = Chains()
-        self.preexec_trig += tc.get_compiled_flag_str(self.slices)
+        chains = '['
+        flags = ''
+        for i in self.slices:
+            if (i=='muonLRT') :
+                chains += "'HLT_mu20_LRT_idperf_L1MU14FCH',"
+                chains += "'HLT_mu24_idperf_L1MU14FCH',"
+
+                flags += "'Muon',"
+            if (i=='FSLRT') :
+                chains += "'HLT_fslrt0_L1jJ160',"
+
+                flags  += "'UnconventionalTracking',"
+            if (i=='muon') :
+                chains += "'HLT_mu24_idperf_L1MU14FCH',"
+                chains += "'HLT_mu26_ivarperf_L1MU14FCH',"
+
+                chains += "'HLT_mu4_mu4_idperf_1invmAB5_L12MU3VF',"
+                chains += "'HLT_mu6_idperf_L1MU5VF',"
+
+                flags += "'Muon',"
+            if (i=='muonTnP') :
+                chains += "'HLT_mu14_mu14_idtp_idZmumu_L12MU8F',"
+                chains += "'HLT_mu24_idperf_L1MU14FCH',"
+
+                flags += "'Muon',"
+            if (i=='electronLRT') :
+                chains += "'HLT_e20_idperf_loose_lrtloose_L1eEM18L',"
+                chains += "'HLT_e26_lhtight_ivarloose_e30_lhloose_nopix_lrtmedium_probe_L1eEM26M',"
+                chains += "'HLT_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM26M',"
+                chains += "'HLT_e30_idperf_loose_lrtloose_L1eEM26M',"
+                chains += "'HLT_e30_lhloose_nopix_lrtmedium_probe_g25_medium_L1eEM24L',"
+                chains += "'HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L',"
+
+                flags += "'Egamma',"
+            if (i=='electron') :
+                chains += "'HLT_e26_idperf_loose_L1eEM26M',"
+                chains += "'HLT_e26_idperf_tight_L1eEM26M',"
+                chains += "'HLT_e28_idperf_loose_L1eEM28M',"
+
+                chains += "'HLT_e5_idperf_tight_L1eEM5',"
+                chains += "'HLT_e5_idperf_tight_nogsf_L1eEM5',"
+
+                flags += "'Egamma',"
+            if (i=='electronTnP') :
+                chains += "'HLT_e26_idperf_loose_L1eEM26M',"
+                chains += "'HLT_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1eEM26M',"
+                chains += "'HLT_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1eEM26M',"
+                chains += "'HLT_e28_idperf_loose_L1eEM28M',"
+
+                flags += "'Egamma',"
+            if (i=='tau') :
+                chains += "'HLT_tau25_idperf_tracktwoMVA_L1cTAU20M',"
+
+                flags += "'Tau',"
+            if (i=='tauLRT') :
+                chains += "'HLT_tau25_idperf_trackLRT_L1cTAU20M',"
+                chains += "'HLT_tau25_idperf_tracktwoLLP_L1cTAU20M',"
+
+                flags += "'Tau',"
+            if (i=='bjet') :
+                chains += "'HLT_j20_roiftf_preselj20_L1RD0_FILLED',"
+                chains += "'HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50',"
+                chains += "'HLT_j80_0eta290_020jvt_boffperf_pf_ftf_L1jJ90',"
+
+                flags  += "'Bjet',"
+            if ( i=='fsjet' or i=='fs' or i=='jet' ) :
+                chains += "'HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50',"
+                chains += "'HLT_j45_pf_ftf_preselj20_L1jJ40',"
+                chains += "'HLT_j80_0eta290_020jvt_boffperf_pf_ftf_L1jJ90',"
+
+                flags  += "'Jet',"
+            if (i=='beamspot') :
+                chains += "'HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L14jJ50',"
+                chains += "'HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1jJ30_VjTE200',"
+                chains += "'HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1jJ40',"
+                chains += "'HLT_j0_ftf_beamspotVtx_L1jJ30_VjTE200',"
+
+                flags  += "'Beamspot',"
+            if (i=='minbias') :
+                chains += "'HLT_mb_sptrk_L1RD0_FILLED',"
+
+                flags  += "'MinBias',"		
+                self.preexec_trig += "flags.Trigger.triggerMenuSetup='PhysicsP1_pp_lowMu_run3_v1';"
+            if (i=='minbiaspix') :
+                chains += "'HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_A_C_VjTE10',"
+
+                flags  += "'MinBias',"
+                self.preexec_trig += "flags.Trigger.triggerMenuSetup='PhysicsP1_HI_run3_v1';"
+            if (i=='cosmic') :
+                chains += "'HLT_mu4_cosmic_L1MU3V_EMPTY',"
+
+                flags  +=  "'Muon','Cosmic',"
+                self.preexec_trig+= "flags.Trigger.triggerMenuSetup='Cosmic_run3_v1';"
+            if (i=='bphys') :
+                chains += "'HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V',"
+                chains += "'HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF',"
+
+                flags += "'Muon','Bphysics',"
+        if ( flags=='' ) : 
+            print( "ERROR: no chains configured" )
+
+        chains += ']'
+        self.preexec_trig += "flags.Trigger.enabledSignatures=[" + flags + "];flags.Trigger.selectChains="+chains
 
         AVERSION = ""
         ### # temporary hack until we get to the bottom of why the tests are really failing
@@ -223,7 +323,7 @@ class TrigInDetRdictStep(Step):
         self.auto_report_result = True
         self.required = True
         self.executable = 'TIDArdict'
-        self.timeout = 5*3600
+        self.timeout = 15*60
         self.config = config
 
     def configure(self, test):

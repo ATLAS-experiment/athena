@@ -430,7 +430,3 @@ atlas_add_citest( TriggerConfigFlags
 
 atlas_add_citest( EFTracking_FPGATrackSim_workflow
   SCRIPT test_FPGATrackSimWorkflow.sh )
-
-atlas_add_citest (TrigInDetValidationMenu 
-               SCRIPT TrigInDetValidation_menu_test.py
-               POST_EXEC_SCRIPT nopost.sh )

@@ -102,7 +102,7 @@ L2tau:		HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:key=HLT_IDTrack_TauIso_FTF:roi=HL
 EFtau:		HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:key=HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso 
 EFtau:		HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso
     
-EFtauvtx:       HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso:HLT_IDVertex_Tau/HLT_IDVertex_Tau:post:rvtx=HLT_IDVertex_Tau
+EFtauvtx:       HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso:HLT_IDVertex_Tau/HLT_IDVertex_Tau
 
 
     

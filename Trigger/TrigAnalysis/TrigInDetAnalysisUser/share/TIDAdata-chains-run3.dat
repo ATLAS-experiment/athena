@@ -109,10 +109,10 @@ testChains = {
   
 #else
 
-    "HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso:HLT_IDVertex_Tau:post:rvtx=HLT_IDVertex_Tau",
+    "HLT_tau25_idperf_tracktwoMVA_L1cTAU20M:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso:HLT_IDVertex_Tau/HLT_IDVertex_Tau",
 
-    "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS:post:rvtx=HLT_IDVertex_FS",
-    "HLT_j45_pf_ftf_preselj20_L1jJ40:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS:post:rvtx=HLT_IDVertex_FS",
+    "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS/HLT_IDVertex_FS:post:rvtx=HLT_IDVertex_FS",
+    "HLT_j45_pf_ftf_preselj20_L1jJ40:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS/HLT_IDVertex_FS:post:rvtx=HLT_IDVertex_FS",
 
 
   
