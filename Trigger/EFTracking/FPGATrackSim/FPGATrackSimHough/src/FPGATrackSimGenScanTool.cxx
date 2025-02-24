@@ -143,9 +143,15 @@ StatusCode FPGATrackSimGenScanTool::initialize()
 
   // Compute which bins correspond to track parameters that are in the region
   // i.e. the pT, eta, phi, z0 and d0 bounds
-  computeValidBins();
-
-  if (m_lyrmapFile.size()!=0) { readLayerMap(m_lyrmapFile); }
+  // list of valid bins is extracted from the layer map if its loaded
+  initValidBins();
+  if (m_lyrmapFile.size()==0)
+  {
+    computeValidBins();
+  } else {
+    readLayerMap(m_lyrmapFile);
+  }
+  printValidBin(); // also dumps firmware constants
   
   // register histograms
   ATH_CHECK(m_monitoring->registerHistograms(m_nLayers, m_binning.get(), m_rin, m_rout));
@@ -281,7 +287,7 @@ StatusCode FPGATrackSimGenScanTool::fillImage(const std::vector<std::shared_ptr<
         m_monitoring->sliceCheck(slicebin.idx());
         continue;
       }
-
+    
       m_monitoring->incrementInputPerSlice(slicebin.idx());
 
       // iterate over scan bins
@@ -314,9 +320,9 @@ StatusCode FPGATrackSimGenScanTool::fillImage(const std::vector<std::shared_ptr<
 
           // replace the hit layer with the layer map and only add if its in the map
           if (m_mod_to_lyr_map.size() != 0) {
-            if (m_mod_to_lyr_map[idx].contains(hit->getIdentifier())) {
-              s_hit.layer = m_mod_to_lyr_map[idx][hit->getIdentifier()];
-              m_image[idx].addHit(std::move(s_hit));
+            if (m_mod_to_lyr_map[idx].contains(hit->getIdentifierHash())) {
+              s_hit.layer = m_mod_to_lyr_map[idx][hit->getIdentifierHash()];
+              m_image[idx].addHit(s_hit);
             }
           } else {
             // add hit to the BinEntry for the bin
@@ -844,17 +850,27 @@ double FPGATrackSimGenScanTool::HitPairSet::PhiOutExtrapCurved(const HitPair &pa
   return pair.PhiOutExtrap(r_out) + 0.5 * PhiCurvature(pair) * (r_out - r) * (r_out - r);
 }
 
+void FPGATrackSimGenScanTool::setValidBin(std::vector<unsigned> idx) {
+  m_validBin[idx] = true;
+  m_validSlice[m_binning->sliceIdx(idx)] = true;
+  m_validScan[m_binning->scanIdx(idx)] = true;
+  m_validSliceAndScan[m_binning->sliceAndScanIdx(idx)] = true;
+}
+
+void FPGATrackSimGenScanTool::initValidBins() {
+  m_validBin.setsize(m_binning->m_parBins,false);
+  m_validSlice.setsize(m_binning->sliceBins(),false);
+  m_validScan.setsize(m_binning->scanBins(),false);
+  m_validSliceAndScan.setsize(m_binning->sliceAndScanBins(),false);
+}
+
 
 
 // Compute which bins correspond to track parameters that are in the region
 // i.e. the pT, eta, phi, z0 and d0 bounds
 void FPGATrackSimGenScanTool::computeValidBins() {
   // determine which bins are valid
-  m_validBin.setsize(m_binning->m_parBins,false);
-  m_validSlice.setsize(m_binning->sliceBins(),false);
-  m_validScan.setsize(m_binning->scanBins(),false);
-  m_validSliceAndScan.setsize(m_binning->sliceAndScanBins(),false);
-
+  
   FPGATrackSimTrackPars min_padded;
   FPGATrackSimTrackPars max_padded;
   FPGATrackSimTrackPars padding;
@@ -898,10 +914,7 @@ void FPGATrackSimGenScanTool::computeValidBins() {
     }
     if (inRange)
     {
-      bin.data() = true;
-      m_validSlice[m_binning->sliceIdx(bin.idx())] = true;
-      m_validScan[m_binning->scanIdx(bin.idx())] = true;
-      m_validSliceAndScan[m_binning->sliceAndScanIdx(bin.idx())] = true;
+      setValidBin(bin.idx()); 
     }
 
     if (bin.data() == false)
@@ -910,25 +923,6 @@ void FPGATrackSimGenScanTool::computeValidBins() {
       << " minvals: " << minvals << " maxvals: " << maxvals );
     }
   }
-
-  // count valid bins
-  int validBins = 0;
-  for (FPGATrackSimGenScanArray<int>::Iterator bin : m_validBin) { if(bin.data()) validBins++;}
-
-  int validSlices = 0;
-  for (FPGATrackSimGenScanArray<int>::Iterator bin : m_validSlice) { if(bin.data()) validSlices++;}
-
-  int validScans = 0;
-  for (FPGATrackSimGenScanArray<int>::Iterator bin : m_validScan) { if(bin.data()) validScans++;}
-
-  // Dump FW constants
-  m_binning->writeScanConsts(m_validScan);
-  m_binning->writeSliceConsts(m_validSlice);
-
-  
-  ATH_MSG_INFO("Valid Bins: " << validBins
-                              << " valid slices: " << validSlices
-                              << " valid scans: " << validScans);
 }
 
 
@@ -958,18 +952,36 @@ void FPGATrackSimGenScanTool::readLayerMap(const std::string& filename) {
       for (auto &mod : m_lyr_to_mod_map[bin][lyr]) {
         m_mod_to_lyr_map[bin][mod]=lyr;
       }
+      // set valid bins
+      setValidBin(bin);     
     }
+  }
+}
+
+void FPGATrackSimGenScanTool::printValidBin() {
+  // count valid bins
+  int validBins = 0;
+  for (FPGATrackSimGenScanArray<int>::Iterator bin : m_validBin) {
+    if (bin.data())
+      validBins++;
   }
 
-  // check that all valid bins have layer maps and
-  for (auto &bin : m_validBin) {
-    if (!bin.data())
-      continue;
-    for (auto &lyr : m_pairingLayers) {
-      if (m_lyr_to_mod_map[bin.idx()][lyr].size() == 0) {
-        ATH_MSG_WARNING("Missing layer map for bin="
-                        << bin.idx() << " layer=" << lyr);
-      }
-    }
+  int validSlices = 0;
+  for (FPGATrackSimGenScanArray<int>::Iterator bin : m_validSlice) {
+    if (bin.data())
+      validSlices++;
   }
+
+  int validScans = 0;
+  for (FPGATrackSimGenScanArray<int>::Iterator bin : m_validScan) {
+    if (bin.data())
+      validScans++;
+  }
+
+  // Dump FW constants
+  m_binning->writeScanConsts(m_validScan);
+  m_binning->writeSliceConsts(m_validSlice);
+
+  ATH_MSG_INFO("Valid Bins: " << validBins << " valid slices: " << validSlices
+                              << " valid scans: " << validScans);
 }

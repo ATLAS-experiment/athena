@@ -170,7 +170,26 @@ std::pair<unsigned, unsigned> FPGATrackSimGenScanBinningBase::idxsetToRowParBinR
 double FPGATrackSimGenScanBinningBase::sliceVar([[maybe_unused]] FPGATrackSimHit const *hit) const { return 0.0; };
 double FPGATrackSimGenScanBinningBase::sliceVarExpected([[maybe_unused]] const ParSet &pars, [[maybe_unused]] FPGATrackSimHit const *hit) const {return 0.0; };
 double FPGATrackSimGenScanBinningBase::rowPar([[maybe_unused]] const ParSet &pars, [[maybe_unused]] FPGATrackSimHit const *hit) const {return 0.0; };
-    
+
+// FW constants writer
+std::ostream &operator<<(std::ostream &os, const std::vector<unsigned>& idx) {
+  bool first = true;
+  for (auto &val : idx) {
+    if (!first)
+      os << ",";
+    os << val;
+    first = false;
+  }
+  return os;
+}
+template <typename T> void FPGATrackSimGenScanBinningBase::StreamManager::writeVar(const string &var, T val) {
+  auto emplace_result = m_map.try_emplace(
+      var, m_setname + "_" + var + "_const.txt", std::ios_base::out);
+  if (!emplace_result.second) {
+    emplace_result.first->second << ",\n";
+  }
+  emplace_result.first->second << val;
+}
 
 //--------------------------------------------------------------------------------------------------
 //

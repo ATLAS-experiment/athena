@@ -283,6 +283,7 @@ class TH2D;
     std::vector<float> m_tree_r;
     std::vector<float> m_tree_z;
     std::vector<int> m_tree_id;
+    std::vector<int> m_tree_hash;
     std::vector<int> m_tree_layer;
     std::vector<int> m_tree_side;
     std::vector<int> m_tree_etamod;
