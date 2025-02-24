@@ -5,10 +5,10 @@
             "title" : "Summary",
             "labels" : [
                 "N_{Events}",
-                "N_{$TESTTYPEs}^{All}",
+                "N_{$TESTTYPEs}^{$TESTALL}",
                 "N_{$TESTTYPEs}^{Selected}",
                 "N_{$TESTTYPEs}^{Matched}",
-                "N_{$REFTYPEs}^{All}",
+                "N_{$REFTYPEs}^{$REFALL}",
                 "N_{$REFTYPEs}^{Selected}",
                 "N_{$REFTYPEs}^{Matched}"
             ]
@@ -22,11 +22,11 @@
             "labels" : [
                 "N_{Events}^{Triggered}",
                 "N_{RoIs}",
-                "N_{$TESTTYPEs}^{All}",
+                "N_{$TESTTYPEs}^{$TESTALL}",
                 "N_{$TESTTYPEs}^{Selected}",
                 "N_{$TESTTYPEs}^{Selected in RoI}",
                 "N_{$TESTTYPEs}^{Matched}",
-                "N_{$REFTYPEs}^{All}",
+                "N_{$REFTYPEs}^{$REFALL}",
                 "N_{$REFTYPEs}^{Selected}",
                 "N_{$REFTYPEs}^{Selected in RoI}",
                 "N_{$REFTYPEs}^{Matched}"

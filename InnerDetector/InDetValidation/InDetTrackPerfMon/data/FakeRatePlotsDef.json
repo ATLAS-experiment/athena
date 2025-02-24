@@ -1,4 +1,9 @@
 {
+    "fakerate_vs_$TRKTAG_inclusive" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "Inclusive", "nBins" : "1", "low" : "0.0", "high" : "2.0" },
+        "yAxis" : { "title" : "Fake rate" }
+    },
     "fakerate_vs_$TRKTAG_pt" : {
         "type" : "TEfficiency",
         "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "50.0" },
