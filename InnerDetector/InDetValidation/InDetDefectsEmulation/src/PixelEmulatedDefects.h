@@ -1,7 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-  */
-/* Dear emacs, this is -*-c++-*- */
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef INDET_PIXELEMULATEDDEFECTS_H
 #define INDET_PIXELEMULATEDDEFECTS_H
 
@@ -16,8 +15,8 @@ namespace InDet {
    {};
 }
 #include "AthenaKernel/CLASS_DEF.h"
-CLASS_DEF( InDet::PixelEmulatedDefects, 16782614, 1)
-
+CLASS_DEF( InDet::PixelEmulatedDefects, 16782614, 1);
+#include "AthenaKernel/CondCont.h"
 CONDCONT_MIXED_DEF( InDet::PixelEmulatedDefects, 61574136);
 
 #endif

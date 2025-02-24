@@ -3,99 +3,62 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 #ifndef INDET_PIXELDEFECTSEMULATORCONDALG_H
 #define INDET_PIXELDEFECTSEMULATORCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 
-#include "StoreGate/WriteHandleKey.h"
-#include "StoreGate/ReadCondHandleKey.h"
-
-#include "GaudiKernel/ServiceHandle.h"
-
-#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "PixelEmulatedDefects.h"
-#include "AthenaKernel/IAthRNGSvc.h"
-#include "GaudiKernel/ITHistSvc.h"
-
-#include "TH2.h"
+#include "PixelModuleHelper.h"
+#include "PixelReadoutGeometry/PixelModuleDesign.h"
+#include "DefectsEmulatorCondAlgImpl.h"
 
 namespace InDet {
+
+   class PixelDefectsEmulatorCondAlg;
+   namespace detail {
+      template <>
+      struct DetectorEmulatorCondAlgTraits<PixelDefectsEmulatorCondAlg> {
+         using T_ID = PixelID;
+         using T_ModuleHelper = PixelModuleHelper;
+         using T_EmulatedDefects = InDet::PixelEmulatedDefects;
+         using T_DetectorElementCollection = InDetDD::SiDetectorElementCollection;
+         using T_ModuleDesign = InDetDD::PixelModuleDesign;
+      };
+   }
+
    /** Conditions algorithms for emulating ITK pixel defects.
-    * The algorithm mask random pixels and core columns (group of 8 consecutive columns of a chip) as
-    * defect. This data can be used to reject hits associated to these pixels or core columns.
+    * The algorithm mask random pixels, core columns (group of 8 or 4 consecutive columns of a chip), 
+    * circuits or modules as defect. This data can be used to reject RDOs overlapping with these defects.
     */
-   class PixelDefectsEmulatorCondAlg : public AthReentrantAlgorithm
+   class PixelDefectsEmulatorCondAlg : public DefectsEmulatorCondAlgImpl<PixelDefectsEmulatorCondAlg>
    {
    public:
-      PixelDefectsEmulatorCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
-      virtual ~PixelDefectsEmulatorCondAlg() override = default;
+      friend class DefectsEmulatorCondAlgImpl<PixelDefectsEmulatorCondAlg>;
+
+      using DefectsEmulatorCondAlgImpl<PixelDefectsEmulatorCondAlg>::DefectsEmulatorCondAlgImpl;
 
       virtual StatusCode initialize() override final;
-      virtual StatusCode execute(const EventContext& ctx) const override final;
-      virtual StatusCode finalize() override final;
 
-   private:
-      StatusCode initializeProbabilities();
+   protected:
 
-      ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};
-      SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey
-         {this, "PixelDetEleCollKey", "ITkPixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};
-      Gaudi::Property<float> m_pixelDefectProbability
-         {this,"DefectProbability", 1e-4};
+      /** The name of the PixelID identifier utility.
+       */
+      static std::string IDName() { return std::string("PixelID"); }
 
-      Gaudi::Property<std::vector<unsigned int> > m_matrixColumns
-         {this, "MatrixColumns", {} , "Associated defintion is for a matrix with this number of sensor columns."};
-
-      Gaudi::Property<std::vector<float> > m_probabilityModuleHasCoreColumnDefects
-         {this, "ProbabilityOfModuleWithCoreColumnDefects", {}, "Probability of a module to have core column defects." };
-
-      Gaudi::Property<std::vector<float> > m_pixelColGroupdDefectProbability
-         {this, "CoreColumnDefectProbability", {},
-          "Probability of a certain core column defect for modules with core colmn defects."
-          "First probability for a certain matrix type means exactly 1 defect core column "
-          "and so forth until extactly n defect core columns. Probabilities should add up to 1." };
-
-      std::vector<unsigned int>        m_matrixTypeNColumns;
-      std::vector<std::vector<float> > m_perMatrixTypeFractions;
-
-      SG::WriteCondHandleKey<InDet::PixelEmulatedDefects> m_writeKey
-         {this, "WriteKey", "", "Key of output PixelDefectsEmulator data"};
-
-      // Properties to add a checker board like pattern to the defects
-      // for debugging
-      Gaudi::Property<bool> m_oddRowToggle
-         {this, "OddRowToggle",  false};
-      Gaudi::Property<bool> m_oddColToggle
-         {this, "OddColToggle",  false};
-      Gaudi::Property<bool> m_checkerBoardToggle
-         {this, "CheckerBoardDefects",  false};
-      Gaudi::Property<unsigned int> m_maxAttempts
-         {this, "MaxRandomPositionAttempts",  10};
-
-      ServiceHandle<ITHistSvc> m_histSvc{this,"HistSvc","THistSvc"};
-      Gaudi::Property<std::string> m_histogramGroupName
-         {this,"HistogramGroupName","", "Histogram group name or empty to disable histogramming"};
-
-      const PixelID* m_idHelper = nullptr;
-      std::string m_rngName;
-
-      // calls during execute must be protected by m_histMutex
-      TH2 *findHist(unsigned int n_rows, unsigned int n_cols) const;
-      mutable std::mutex m_histMutex ;
-      // during execute the following may only be accessed when m_histMutex is locked
-      mutable std::vector<unsigned int>  m_dimPerHist ATLAS_THREAD_SAFE;
-
-      mutable std::vector< TH2 *>        m_hist ATLAS_THREAD_SAFE;
-      mutable std::vector< TH1 *>        m_histNCoreColumnDefects ATLAS_THREAD_SAFE;
-      mutable TH2 *                      m_moduleDefectsHist ATLAS_THREAD_SAFE = nullptr;
-      mutable TH2 *                      m_moduleCoreColDefectsHist ATLAS_THREAD_SAFE = nullptr;
-      mutable TH2 *                      m_matrixHist ATLAS_THREAD_SAFE = nullptr;
-
-      mutable std::atomic<unsigned int>  m_modulesWithoutDefectParameters {};
-
-      bool m_histogrammingEnabled = false;
+      /** Get the map which defines which modules are connected to the same physical sensor.
+       * For pixel each physical sensor is connected to exactly one module, so an empty
+       * map is returned.
+       */
+      static std::unordered_multimap<unsigned int, unsigned int> getModuleConnectionMap([[maybe_unused]] const InDetDD::SiDetectorElementCollection &det_ele) {
+         return std::unordered_multimap<unsigned int, unsigned int> ();
+      }
+      /** Provide alternative method to mark modules as defect.
+       * For pixel there is no alternative method. So, no module is marked as defect by this method.
+       */
+      static bool isModuleDefect([[maybe_unused]]const EventContext &ctx, [[maybe_unused]]unsigned int id_hash) {
+         return false;
+      }
    };
 }
 #endif

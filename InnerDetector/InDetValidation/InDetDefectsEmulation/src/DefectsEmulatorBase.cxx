@@ -1,42 +1,62 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-// Silicon trackers includes
 #include "DefectsEmulatorBase.h"
 #include "TH2.h"
 #include <sstream>
-
+#include "HistUtil.h"
 
 namespace InDet{
-  using namespace InDet;
+
+  const std::array<std::string_view,DefectsEmulatorBase::kNHistTypes> DefectsEmulatorBase::s_histNames{
+     "rejected"
+  };
+  const std::array<std::string_view,DefectsEmulatorBase::kNHistTypes> DefectsEmulatorBase::s_histTitles{
+     "Rejected"
+  };
+
   DefectsEmulatorBase::DefectsEmulatorBase(const std::string &name, ISvcLocator *pSvcLocator)
      : AthReentrantAlgorithm(name, pSvcLocator)
   {}
 
-  StatusCode DefectsEmulatorBase::initialize(){
+  StatusCode DefectsEmulatorBase::initializeBase(unsigned int wafer_hash_max){
      if (!m_histSvc.name().empty() && !m_histogramGroupName.value().empty()) {
         ATH_CHECK( m_histSvc.retrieve() );
-        // allow histogramming for at most 6 different pixel module types
-        // histgram for additional module types will end up in the last histogram
+        // reserve space for histograms for 6 different sensor types
         constexpr unsigned int n_different_pixel_matrices_max=6;
         m_dimPerHist.reserve(n_different_pixel_matrices_max);
-        m_hist.reserve(n_different_pixel_matrices_max);
+        for (unsigned int hist_type_i=0; hist_type_i<kNHistTypes; ++hist_type_i) {
+           m_hist[hist_type_i].reserve(n_different_pixel_matrices_max);
+        }
 
-        m_moduleHist = new TH2F("rejected_hits_per_module","Rejected hits per module",
-                                100, -0.5, 100-0.5,
-                                100, -0.5, 100-0.5
-                                );
-        m_moduleHist->GetXaxis()->SetTitle("ID hash % 100");
-        m_moduleHist->GetYaxis()->SetTitle("ID hash / 100");
-        if ( m_histSvc->regHist(m_histogramGroupName.value() + m_moduleHist->GetName(),m_moduleHist).isFailure() ) {
-           return StatusCode::FAILURE;
+        // create per id-hash histograms
+        unsigned int max_y_axis = (((wafer_hash_max+99)/100+9)/10)*10;
+        for (unsigned int hist_type_i=0; hist_type_i<kNHistTypes; ++hist_type_i) {
+           {
+              HistUtil::StringCat hist_name;
+              hist_name << s_histNames.at(hist_type_i) << "_hits_per_module";
+              HistUtil::StringCat hist_title;
+              hist_title << s_histTitles.at(hist_type_i) << " hits per module";
+
+              HistUtil::ProtectHistogramCreation protect;
+              m_moduleHist.at(hist_type_i) = new TH2F(hist_name.str().c_str(), hist_title.str().c_str(),
+                                                      100, -0.5, 100-0.5,
+                                                      max_y_axis, -0.5, max_y_axis-0.5
+                                                      );
+           }
+           m_moduleHist[hist_type_i]->GetXaxis()->SetTitle("ID hash % 100");
+           m_moduleHist[hist_type_i]->GetYaxis()->SetTitle("ID hash / 100");
+           if ( m_histSvc->regHist(m_histogramGroupName.value() + m_moduleHist[hist_type_i]->GetName(),m_moduleHist[hist_type_i]).isFailure() ) {
+              return StatusCode::FAILURE;
+           }
         }
         m_histogrammingEnabled=true;
      }
      return StatusCode::SUCCESS;
   }
   StatusCode DefectsEmulatorBase::finalize(){
-     ATH_MSG_INFO( "Total number of rejected RDOs " << m_rejectedRDOs << ", kept " << m_totalRDOs);
+     ATH_MSG_INFO( "Total number of rejected RDOs " << m_rejectedRDOs << ", kept " << m_totalRDOs
+                   << (m_splitRDOs>0 ?  (", split " + std::to_string(m_splitRDOs) ) : ""));
      return StatusCode::SUCCESS;
   }
 
@@ -49,29 +69,36 @@ namespace InDet{
               return nullptr;
            }
            else {
-              return m_hist.back();
+              return m_hist[kRejectedHits].back();
            }
         }
         else {
-           std::stringstream name;
-           name << "rejected_hits_" << n_rows << "_" << n_cols;
-           std::stringstream title;
-           title << "Rejected hits for " << n_rows << "(rows) #times " << n_cols << " (columns)";
-           m_hist.push_back(new TH2F(name.str().c_str(), title.str().c_str(),
-                                     n_cols, -0.5, n_cols-0.5,
-                                     n_rows, -0.5, n_rows-0.5
-                                     ));
-           m_hist.back()->GetXaxis()->SetTitle("offline column");
-           m_hist.back()->GetYaxis()->SetTitle("offline row");
-           if ( m_histSvc->regHist(m_histogramGroupName.value() + name.str(),m_hist.back()).isFailure() ) {
-              throw std::runtime_error("Failed to register histogram.");
+           // if no "sensor" with this dimensions has been registered yet, create histograms
+           // and register it.
+           for (unsigned int hist_type_i=0; hist_type_i<kNHistTypes; ++hist_type_i) {
+              HistUtil::StringCat name;
+              name << s_histNames.at(hist_type_i) << "_hits_" << n_rows << "_" << n_cols;
+              HistUtil::StringCat title;
+              title << s_histTitles.at(hist_type_i) << "hits for " << n_rows << "(rows) #times " << n_cols << " (columns)";
+              {
+                 HistUtil::ProtectHistogramCreation protect;
+                 m_hist.at(hist_type_i).push_back(new TH2F(name.str().c_str(), title.str().c_str(),
+                                           n_cols, -0.5, n_cols-0.5,
+                                           n_rows, -0.5, n_rows-0.5
+                                           ));
+              }
+              m_hist[hist_type_i].back()->GetXaxis()->SetTitle("offline column");
+              m_hist[hist_type_i].back()->GetYaxis()->SetTitle("offline row");
+              if ( m_histSvc->regHist(m_histogramGroupName.value() + name.str(),m_hist[hist_type_i].back()).isFailure() ) {
+                 throw std::runtime_error("Failed to register histogram.");
+              }
            }
            m_dimPerHist.push_back(key);
-           return m_hist.back();
+           return m_hist[kRejectedHits].back();
         }
      }
      else {
-        return m_hist.at(iter-m_dimPerHist.begin());
+        return m_hist[kRejectedHits].at(iter-m_dimPerHist.begin());
      }
   }
 

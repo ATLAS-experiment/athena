@@ -8,50 +8,38 @@
 #include <cassert>
 #include <array>
 #include <stdexcept>
+#include "ModuleKeyHelper.h"
 
 namespace InDet {
-
-   namespace MaskUtils {
-      template<unsigned int bit, unsigned int end>
-      static consteval unsigned int createMask() {
-         // assert(bit<end);
-         // assert(end<31u);
-         if constexpr(bit>31u) {
-               return 0u;
-            }
-         else if constexpr(bit>=end) {
-               return 0u;
-            }
-         else {
-            return (1u<<bit) | createMask<bit+1u,end>();
-         }
-      }
-   }
-
    /** Helper class to convert between offline column, row and hardware chip, column, row coordinates.
     */
-   class PixelModuleHelper {
+   class PixelModuleHelper : public ModuleKeyHelper<unsigned int, // key type
+                                                    12,  // bits for rows
+                                                    12,  // bits for columns
+                                                    4,   // bits for chip
+                                                    4,   // bits for flags
+                                                    3    // number of masks: single-pixel, core-column, circuit
+                                                    > {
    public:
-
-      // hierarchy chosen such that the row has the least impact on sorting order
-      // such that core column addresses of two adjacent core columns  enclose all pixel addresses (column, row) of the
-      // first core column of this pair.
-      static constexpr unsigned int COLGROUP_DEFECT_BIT_MASK = (1u<<31);
-      static constexpr unsigned int CHIP_MASK = MaskUtils::createMask<24,28>(); // 16 chips max
-      static constexpr unsigned int COL_MASK  = MaskUtils::createMask<12,24>(); // 4096 cols max
-      static constexpr unsigned int ROW_MASK  = MaskUtils::createMask<0,12>();  // 4096 rows max
-      static constexpr unsigned int CHIP_SHIFT = 24;
-      static constexpr unsigned int COL_SHIFT  = 12;
-      static constexpr unsigned int ROW_SHIFT  = 0;
 
       static constexpr std::array<unsigned short,2> N_COLS_PER_GROUP {
          8,  //8 columns per group for square pixels
          4}; //4 columns per group for rectangular pixels
-      static constexpr std::array<unsigned int,2> COL_MASK_FOR_GROUP {
-         MaskUtils::createMask<12,3+12>(),  //8 columns per group for square pixels
-         MaskUtils::createMask<12,2+12>()}; //4 columns per group for rectangular pixels
+
+      // mask with every bit set for all chips, columns, rows, but the mask index bits.
+      static constexpr unsigned int getPixelMask()     { return MaskUtils::createMask<0,ROW_BITS+COL_BITS+CHIP_BITS>(); }
+      // mask with row and lowest 3 column bits set to zero i.e. 8 adjacent columns
+      static constexpr unsigned int getColGroup8Mask() { return MaskUtils::createMask<ROW_BITS+3,ROW_BITS+COL_BITS+CHIP_BITS>(); }
+      // mask with row and lowest 2 column bits set to zero i.e. 4 adjacent columns
+      static constexpr unsigned int getColGroup4Mask() { return MaskUtils::createMask<ROW_BITS+2,ROW_BITS+COL_BITS+CHIP_BITS>(); }
+      // mask with row and column bits set to zero.
+      static constexpr unsigned int getChipMask()      { return MaskUtils::createMask<ROW_BITS+COL_BITS,ROW_BITS+COL_BITS+CHIP_BITS>(); }
+
 
       PixelModuleHelper(const InDetDD::SiDetectorDesign &design)
+         : ModuleKeyHelper( std::array<unsigned int,MASKS_SIZE>{ PixelModuleHelper::getPixelMask(),
+                                                                 PixelModuleHelper::getColGroup8Mask(),
+                                                                 PixelModuleHelper::getChipMask()} )
       {
          const InDetDD::PixelModuleDesign *pixelModuleDesign = dynamic_cast<const InDetDD::PixelModuleDesign *>(&design);
          if (pixelModuleDesign) {
@@ -81,8 +69,9 @@ namespace InDet {
          }
          m_rectangularPixels = (m_columns==200);
          }
-         m_columnGroupLeadPixelMask = (~COL_MASK_FOR_GROUP[m_rectangularPixels]) & (~ROW_MASK) ;
-         m_columnGroupRowColumnMask = CHIP_MASK|(COL_MASK & (~COL_MASK_FOR_GROUP[m_rectangularPixels] ));
+         if (m_rectangularPixels) {
+            m_masks[1]= PixelModuleHelper::getColGroup4Mask();
+         }
       }
       operator bool () const { return m_columns>0; }
 
@@ -92,9 +81,6 @@ namespace InDet {
       unsigned int rowsPerCircuit() const { return m_rowsPerCircuit; }
       unsigned int circuitsPerColumn() const { return m_circuitsPerColumn; }
       unsigned int circuitsPerRow() const { return m_circuitsPerRow; }
-      bool swapOfflineRowsColumns() const { return m_swapOfflineRowsColumns; }
-      bool rectangularPixels() const { return m_rectangularPixels; }
-      unsigned int columnGroupRowColumnMask() const { return m_columnGroupRowColumnMask; }
 
       /** compute "hardware" coordinates from offline coordinates.
        * @param row offline row aka. phi index
@@ -121,91 +107,53 @@ namespace InDet {
             chip += column/columnsPerCircuit();
             column = column%columnsPerCircuit();
          }
-         assert( (chip   & (CHIP_MASK >> CHIP_SHIFT)) == chip);
-         assert( (column & (COL_MASK  >> COL_SHIFT))  == column);
-         assert( (row    & (ROW_MASK  >> ROW_SHIFT))  == row);
-
-         return (chip << CHIP_SHIFT)  | (column << COL_SHIFT) | (row << ROW_SHIFT);
+         return makeKey(0u, chip, column, row);
       }
 
-      /** Create a "column group" defect for the given offline coordinates.
-       * @param row offline row aka. phi index of a pixel of the column group
-       * @param column offline column aka. eta index of a pixel of the column group
-       * @return packed triplet chip, column, row of the first pixel in the column group and column group flag set
-       * Creates packed hardware coordinates for column group aka. ITk pixel core column
-       * which is the coordinate of the first pixel of that group and sets the column group
-       * flag.
+      /** Return total number of pixels per module.
        */
-      unsigned int columnGroupDefect(unsigned int row, unsigned int column) const {
-         return (hardwareCoordinates(row,column) & m_columnGroupLeadPixelMask) | COLGROUP_DEFECT_BIT_MASK;
+      unsigned int nCells() const {
+         return nSensorColumns() * nSensorRows();
       }
-
-      unsigned int nPixels() const {
-         return m_columns * m_rows;
-      }
+      /** Return the number of offline columns
+       */
       unsigned int nSensorColumns() const {
          return m_sensorColumns;
       }
+      /** Return the number of offline rows
+       */
       unsigned int nSensorRows() const {
          return m_sensorRows;
       }
-      unsigned int nColumnGroups() const {
-         return columns() * circuitsPerRow() / (m_rectangularPixels ? 4 : 8);
-      }
-
-      static constexpr unsigned int getChip(unsigned int hardware_coordinates) {
-         return (hardware_coordinates & CHIP_MASK) >> CHIP_SHIFT;
-      }
-      static constexpr unsigned int getRow(unsigned int hardware_coordinates) {
-         return (hardware_coordinates & ROW_MASK) >> ROW_SHIFT;
-      }
-      static constexpr unsigned int getColumn(unsigned int hardware_coordinates) {
-         return (hardware_coordinates & COL_MASK) >> COL_SHIFT;
-      }
-
-      /** Test whether the column group flag is set in the packed hardware coordinate tripplet
+      /** return the maximum number of unique mask (or group) defects per module.
        */
-      static constexpr bool isColumnGroupDefect(unsigned int key) {
-         return key & COLGROUP_DEFECT_BIT_MASK;
+      unsigned int nElements(unsigned int mask_i) const {
+         switch (mask_i) {
+         case 1:
+            return nSensorColumns() * circuitsPerRow() / (m_rectangularPixels ? 4 : 8);
+         case 2:
+            return circuitsPerColumn() * circuitsPerRow();
+         default:
+            assert( mask_i==0);
+            return nCells();
+         }
       }
 
-      /** Test whether the two packed hardware coorindates refer to the same column group.
+      /** Test whether the given packed hardware coordinates match the given defect
+       * @param key_ref the packed "coordinates" of the defect
+       * @param key_test the packed coordinates of a pixel.
        */
-      static constexpr bool inSameColumnGroup(unsigned int key_ref, unsigned int key_test, unsigned int mask_out_rows_and_cols_per_group) {
-         return     (key_ref  & mask_out_rows_and_cols_per_group)
-            ==  (key_test & mask_out_rows_and_cols_per_group);
+      bool isMatchingDefect( unsigned int key_ref, unsigned int key_test) const {
+         return isOverlapping(key_ref, key_test);
       }
 
-      /** Test whether the given packed hardware coordinates refer to the same pixel
-       */
-      constexpr static bool isSameDefect( unsigned int key_ref, unsigned int key_test) {
-         return (key_ref & (CHIP_MASK | ROW_MASK | COL_MASK)) == key_test;
-      }
-
-      /** Convenience function to test whether the given packed hardware coordinates refer to overlapping defects.
-       * @param key_ref packed hardware coordinates referring either to a single pixel defect or a column group defect
-       * @param key_test packed hardware coordinates referring to a single pixel defect
-       * @return true if the defects overlap
-       * If key_ref refers to a single pixel defect and key_test refers to a column group defect
-       * the defects are only considered as overlapping if the pixel addressed by the two coordinates
-       * are identical, not if key_ref only is contained in the column group addressed by key_test.
-       * If key_ref and key test both could address exclusively a column group defect use :
-       * <verb>
-       * isSameDefect(key_ref, key_test)
-       *   || ( (isColumnGroupDefect(key_ref)|| isColumnGroupDefect(key_test)) && inSameColumnGroup(key_ref, key_test, helper.columnGroupRowColumnMask()));
-       * </verb>
-       * instead.
-       */
-      constexpr static bool isSameDefectWithGroups( unsigned int key_ref, unsigned int key_test, unsigned int mask_out_rows_and_cols_per_group) {
-         return isSameDefect(key_ref, key_test) || (isColumnGroupDefect(key_ref) && inSameColumnGroup(key_ref, key_test, mask_out_rows_and_cols_per_group));
-      }
-
-      /** Convenience function to return oflline column and row ranges matching the defect-area of the given key
-       * @param key packed hardware coordinates addressing a single pixel or a column group defect
-       * @return offline start column, end column, start row, end row, where the end is meant not to be inclusive i.e. [start, end)
+      /** Function to return offline column and row ranges matching the defect-area of the given key (used for histogramming)
+       * @param key packed hardware coordinates addressing a single pixel, a column group or circuit defect
+       * @return offline start column, end column, start row, end row, where the end is meant to be exclusive i.e. [start, end)
        */
       std::array<unsigned int,4> offlineRange(unsigned int key) const {
-         if (isColumnGroupDefect(key)) {
+         unsigned int mask_index = getMaskIdx(key);
+         if (mask_index !=0) {
             if (getRow(key) !=0) {
                throw std::runtime_error("invalid key");
             };
@@ -214,7 +162,7 @@ namespace InDet {
             unsigned int row=getRow(key);
             unsigned int row_end=row + rowsPerCircuit()-1;
             unsigned int column=getColumn(key);
-            unsigned int column_end= column + N_COLS_PER_GROUP[m_rectangularPixels]-1;
+            unsigned int column_end= column + (mask_index == 1 ? N_COLS_PER_GROUP[m_rectangularPixels]-1 : columnsPerCircuit());
 
             unsigned int chip_row = chip / circuitsPerRow();
             unsigned int chip_column = chip % circuitsPerRow();
@@ -263,8 +211,8 @@ namespace InDet {
       }
 
    private:
-      unsigned int m_columnGroupLeadPixelMask = 0;
-      unsigned int m_columnGroupRowColumnMask = 0;
+      bool swapOfflineRowsColumns() const { return m_swapOfflineRowsColumns; }
+
       unsigned short m_sensorRows=0;
       unsigned short m_sensorColumns=0;
       unsigned short m_rows = 0;

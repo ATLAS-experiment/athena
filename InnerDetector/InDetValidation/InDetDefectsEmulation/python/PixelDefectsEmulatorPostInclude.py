@@ -1,31 +1,37 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # can be added as a post include to a Reco_tf
-#   --postInclude "PixelDefectsEmulatorPostInclude.emulateITkPixelDefects"
+#   --postInclude "PixelDefectsEmulatorPostInclude.emulateITkPixelDefectsPoisson"
 # or
 #  --postExec "from InDetDefectsEmulation.PixelDefectsEmulatorPostInclude import emulateITkPixelDefects;
-#              emulateITkPixelDefects(flags,cfg,DefectProbability=1e-3,CoreColumnDefectProbability=0.01);"
+#              emulateITkPixelDefectsPoisson(flags,cfg,front_end_cc_defect_prob=.1,pixel_defect_prob=1e-2);"
 import math
+from InDetDefectsEmulation.StripDefectsEmulatorConfig import (moduleDefect,
+                                                              combineModuleDefects
+                                                              )
 
 def emulateITkPixelDefects(flags,
                            cfg,
-                           DefectProbability: float=1e-3,
-                           MatrixColumns: list=[800,384,200],
-                           ProbabilityOfModuleWithCoreColumnDefects: list=[.05,.05,.05],
-                           CoreColumnDefectProbability: list=[1.,-1, 1.,-1, 1.,-1],
+                           ModulePatterns=[[-2,2,0,99,-99,99,-99,99,0,9999,0,1,0]],
+                           DefectProbabilities=[[0.,1e-2,1e-1,0.]],
+                           NDefectFractionsPerPattern=[[1.,-1, 1.]],
+                           FillHistogramsPerPattern=False,
+                           FillEtaPhiHistogramsPerPattern=False,
                            MaxRandomPositionAttempts: int=10,
                            HistogramGroupName: str="ITkPixelDefects",
                            HistogramFileName: str="itk_pixel_defects_opt1.root") :
     """
-    MatrixColumns : list which contains the number of columns of the pixel modules for which probabilities are given
-    ProbabilityOfModuleWithCoreColumnDefects: list of probabilities of a module of the coresponding pixel module to have
-                                              at least one core column defect
-    CoreColumnDefectProbability: list which contains a series of conditional defect probabilities per pixel module, where the last number
-                                 of the series must be -1. (end-marker). The numbers mean the conditional probabilities of a module to have
-                                 exactly 1, 2, 3 ... n core column defects under the condition that the module has at least one core column
-                                 defect. Thses numbers should add up to one.
-    The default argeument will configure exactly 1 core column defect per pixel module, for about 5% of the pixel modules which have
-    800 (quad), 384 (ring triplet module), 200 (barrel tripplet module) offline columns.
+    Schedule conditions algorithm for emulated ITk pixel defects, and algorithms to drop RDOs overlapping with the emulated defects.
+    ModulePattern: criteria to match modules, which are lists of n-tuples where every two numbers of each n-tuple define a range
+                   to match parts of module identifiers (barrel/ec, layer/disk, eta., phi, columns, side) plus a flag (last
+                   element of each n-tuple), which is unused for pixel.
+    DefectProbabilities: list of n-tuples per criterion containing 4 probabilities: module, pixel to be defect, a module
+                         to have at least one core column defect, circuit defect.
+    NDefectFractionsPerPattern: Fractions of exactly n-group defects (core-column, circuit) under condition that there is at least one
+                                such group defect. There must be one n-tuple with fractions per criterion, and each fraction
+                                n-tuple must contain for each group defect probability a non empty set of fractions of exactly 1, ... n defects.
+                                Fractions for different group defects are separated by -1. There should be two sequences of
+                                positive fractions separated by -1.
     """
 
     from InDetDefectsEmulation.PixelDefectsEmulatorConfig import (
@@ -40,16 +46,16 @@ def emulateITkPixelDefects(flags,
     if HistogramGroupName is not None :
         cfg.merge( DefectsHistSvcCfg(flags, HistogramGroup=HistogramGroupName, FileName=HistogramFileName))
 
-
     # schedule custom defects generating conditions alg
     cfg.merge( ITkPixelDefectsEmulatorCondAlgCfg(flags,
                                                  # to enable histogramming:
                                                  HistogramGroupName=f"/{HistogramGroupName}/EmulatedDefects/" if HistogramGroupName is not None else "",
-                                                 MatrixColumns=MatrixColumns,
-                                                 ProbabilityOfModuleWithCoreColumnDefects=ProbabilityOfModuleWithCoreColumnDefects,
-                                                 CoreColumnDefectProbability=CoreColumnDefectProbability,
-                                                 DefectProbability=DefectProbability,
+                                                 ModulePatterns = ModulePatterns,
+                                                 DefectProbabilities = DefectProbabilities,
+                                                 NDefectFractionsPerPattern = NDefectFractionsPerPattern,
                                                  MaxRandomPositionAttempts=MaxRandomPositionAttempts,
+                                                 FillHistogramsPerPattern=FillHistogramsPerPattern,
+                                                 FillEtaPhiHistogramsPerPattern=FillEtaPhiHistogramsPerPattern,
                                                  CheckerBoardDefects=False,
                                                  OddColToggle=False,
                                                  OddRowToggle=False,
@@ -62,15 +68,21 @@ def emulateITkPixelDefects(flags,
                                              EmulatedDefectsKey="ITkPixelEmulatedDefects",
                                              # to enable histogramming:
                                              HistogramGroupName=f"/{HistogramGroupName}/RejectedRDOs/" if HistogramGroupName is not None else "",
-                                             # (prefix "/PixelDefects/" is assumed by THistSvc config)
                                              OutputLevel=INFO))
 
 
 def emulatePixelDefects(flags,
                         cfg,
-                        DefectProbability: float=1e-4,
+                        ModulePatterns=None,
+                        DefectProbabilities=None,
+                        NDefectFractionsPerPattern=None,
+                        FillHistogramsPerPattern=False,
+                        FillEtaPhiHistogramsPerPattern=False,
                         HistogramGroupName: str="PixelDefects",
                         HistogramFileName: str="pixel_defects.root") :
+    """
+    Schedule algorithms to emulate run3 pixel defects, and algorithm to drop RDOs which overlap with these defects
+    """
     from InDetDefectsEmulation.PixelDefectsEmulatorConfig import (
         PixelDefectsEmulatorCondAlgCfg,
         PixelDefectsEmulatorAlgCfg,
@@ -83,14 +95,31 @@ def emulatePixelDefects(flags,
     if HistogramGroupName is not None :
         cfg.merge( DefectsHistSvcCfg(flags, HistogramGroup=HistogramGroupName, FileName=HistogramFileName))
 
+    if ModulePatterns is None and DefectProbabilities is None and NDefectFractionsPerPattern is None:
+        a_module_pattern_list, a_prob_list,fractions = combineModuleDefects([
+                                         moduleDefect(bec=[-2,-2],layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all modules
+                                                      columns_or_strips=[0,9999], # sensors with all kind of numbers of columns
+                                                      side_range=[0,0],     # there is only a single side
+                                                      all_rows=False,       # there is no connection between modules
+                                                      probability=[1e-2,    # probability of a module to be defect
+                                                                   1e-2,    # probability of a pixel to be defect
+                                                                   0.,      # probability of a module to have at least one core-column defect
+                                                                   0.       # probability of a module to have at least one defect circuit
+                                                                   ])
+                                                                   ])
+        ModulePatterns =  a_module_pattern_list
+        DefectProbabilities =  a_prob_list
+        NDefectFractionsPerPattern = fractions
+
     # schedule custom defects generating conditions alg
     cfg.merge( PixelDefectsEmulatorCondAlgCfg(flags,
+                                              ModulePatterns = ModulePatterns,
+                                              DefectProbabilities = DefectProbabilities,
+                                              NDefectFractionsPerPattern = NDefectFractionsPerPattern,
+                                              FillHistogramsPerPattern=FillHistogramsPerPattern,
+                                              FillEtaPhiHistogramsPerPattern=FillEtaPhiHistogramsPerPattern,
                                               # to enable histogramming:
                                               HistogramGroupName=f"/{HistogramGroupName}/EmulatedDefects/" if HistogramGroupName is not None else "",
-                                              MatrixColumns=[],  # no core column defects for run3 pixel
-                                              ProbabilityOfModuleWithCoreColumnDefects=[],
-                                              CoreColumnDefectProbability=[],
-                                              DefectProbability=DefectProbability,
                                               WriteKey="PixelEmulatedDefects", # the default should match the key below
                                               ))
 
@@ -104,104 +133,127 @@ def emulatePixelDefects(flags,
                                              OutputLevel=INFO))
 
 
-
-def poissonDefects(prob_per_frontend=0.05) :
-    MatrixColumns=[]
-    ProbabilityOfModuleWithCoreColumnDefects=[]
-    CoreColumnDefectProbability=[]
-
+def poissonFractions(cc_defect_prob=1e-1) :
+    """
+    Create fractions for exactly 1..6 defects, under the condition that
+    the probability for at least one such defects is cc_defect_prob, and
+    assuming that the fractions are Poisson distributed.
+    """
     def PoissonProb(expected, n) :
         return math.pow(expected,n)*math.exp(-expected)/math.gamma(n+1)
+    def norm(fractions) :
+        Norm = 1./sum (fractions)
+        return [Norm*elm for elm in fractions ]
+    expectation=-math.log(1-cc_defect_prob)
+    return norm([ PoissonProb(expectation,i) for i in range(1,6) ])
 
-    # 768x800:
-    MatrixColumns+=[800]
-    # no defect for quad : 1-(1-prob)^4
-    prob_per_quad = 1-math.pow(1-prob_per_frontend,4)
-    ProbabilityOfModuleWithCoreColumnDefects+=[prob_per_quad]
-    expectation=-math.log(1-prob_per_quad)
-    poisson_prob=[ PoissonProb(expectation,i) for i in range(1,6) ]
-    Norm=1./sum(poisson_prob)
-    CoreColumnDefectProbability+=[p*Norm for p in poisson_prob]+[-1.]
+def quadProb(circuit_prob) :
+    """
+    Compute the defect probability for a quad module from the probabilities
+    of a single chip module, assuming that the defect is a "feature" of the
+    chip.
+    """
+    return 1-math.pow(1-circuit_prob,4) # not (no defect core column on none of the sensors)
 
-    # 400x384
-    # 25% of these modules have exactly 1 core column defect
-    MatrixColumns+=[384]
-    ProbabilityOfModuleWithCoreColumnDefects+=[prob_per_frontend]
-    expectation=-math.log(1-prob_per_frontend)
-    poisson_prob=[ PoissonProb(expectation,i) for i in range(1,6) ]
-    Norm=1./sum(poisson_prob)
-    CoreColumnDefectProbability+=[p*Norm for p in poisson_prob]+[-1.]
+def fractionsForExactlyNCoreColumnDefects(ExactlyNCoreColumnDefects=1) :
+    """
+    Create fraction n-tuple, containing zero except for the element corresponding
+    to exactly n defects, which is set to 1.
+    """
+    return [ 0. if idx != ExactlyNCoreColumnDefects else 1. for idx in range(1,ExactlyNCoreColumnDefects+1) ]
 
-    # 768x200
-    MatrixColumns+=[200]
-    # 25% of these modules have exactly 2 core column defect
-    ProbabilityOfModuleWithCoreColumnDefects+=[prob_per_frontend]
-    CoreColumnDefectProbability+=[p*Norm for p in poisson_prob]+[-1.]
-
-    return [MatrixColumns,ProbabilityOfModuleWithCoreColumnDefects,CoreColumnDefectProbability]
-
-
-def exactlyOneCoreColumnDefect(prob=.05) :
-    MatrixColumns=[]
-    ProbabilityOfModuleWithCoreColumnDefects=[]
-    CoreColumnDefectProbability=[]
-
-    # 768x800:
-    MatrixColumns+=[800]
-    ProbabilityOfModuleWithCoreColumnDefects+=[prob]
-    CoreColumnDefectProbability+=[1.,-1]
-
-    # 400x384
-    # 25% of these modules have exactly 1 core column defect
-    MatrixColumns+=[384]
-    ProbabilityOfModuleWithCoreColumnDefects+=[prob]
-    CoreColumnDefectProbability+=[1.,-1]
-
-    # 768x200
-    MatrixColumns+=[200]
-    # 25% of these modules have exactly 2 core column defect
-    ProbabilityOfModuleWithCoreColumnDefects+=[prob]
-    CoreColumnDefectProbability+=[1.,-1.]
-    return [MatrixColumns,ProbabilityOfModuleWithCoreColumnDefects,CoreColumnDefectProbability]
-
-
+def makeITkDefectsParams( quad_cc_defect_prob, quad_fractions, circuit_cc_defect_prob, circuit_fractions, pixel_defect_prob=1e-2) :
+    """
+    Create different defects for quads and single chip modules, where the corresponding modules are selected by
+    the number of offline columns
+    """
+    return combineModuleDefects([
+            moduleDefect(bec=[-2,2],layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all modules
+                         columns_or_strips=[800,800], # but only quads
+                         side_range=[0,0],     # there is only a single side
+                         all_rows=False,       # there is no connection between modules
+                         probability=[0.,      # probability of a module to be defect
+                                      pixel_defect_prob,    # probability of a pixel to be defect
+                                      quad_cc_defect_prob, # probability of a module to have at least one core-column defect
+                                      0.       # probability of a module to have at least one defect circuit
+                                      ],
+                         fractionsOfNDefects=[quad_fractions,[1.]] # dummy fractions for circuit defects
+                         ),
+            moduleDefect(bec=[-2,2],layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all modules
+                         columns_or_strips=[384,384], # but only ring triplet modules
+                         side_range=[0,0],     # there is only a single side
+                         all_rows=False,       # there is no connection between modules
+                         probability=[0.,      # probability of a module to be defect
+                                      pixel_defect_prob,    # probability of a pixel to be defect
+                                      circuit_cc_defect_prob,    # probability of a module to have at least one core-column defect
+                                      0.       # probability of a module to have at least one defect circuit
+                                      ],
+                         fractionsOfNDefects=[circuit_fractions,[1.]] # dummy fractions for circuit defects
+                         ),
+            moduleDefect(bec=[-2,2],layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all modules
+                         columns_or_strips=[200,200], # but only barrel triplet modules
+                         side_range=[0,0],     # there is only a single side
+                         all_rows=False,       # there is no connection between modules
+                         probability=[0.,      # probability of a module to be defect
+                                      pixel_defect_prob,    # probability of a pixel to be defect
+                                      circuit_cc_defect_prob,    # probability of a module to have at least one core-column defect
+                                      0.       # probability of a module to have at least one defect circuit
+                                    ],
+                         fractionsOfNDefects=[circuit_fractions,[1.]] # dummy fractions for circuit defects
+                         )
+        ])
 
 
 def emulateITkPixelDefectsOneCC(flags,
-                                 cfg,
-                                 module_prob=0.05) :
+                                cfg,
+                                front_end_cc_defect_prob=0.1,
+                                pixel_defect_prob=1e-2,
+                                n_cc_defects=1,
+                                HistogramFileName="itk_pixel_defects_1cc10.root") :
     """
-    Create exaactly one core column defect per module where the probability is given
-    by module_prob.
+    Create exactly one core column defect per module where the probability is given
+    by module_prob, and create single pixel defects according to pixel_defect_prob
     """
-    MatrixColumns, ProbabilityOfModuleWithCoreColumnDefects, CoreColumnDefectProbability = exactlyOneCoreColumnDefect(module_prob)
+    fractions=fractionsForExactlyNCoreColumnDefects(n_cc_defects)
+    ModulePatterns, DefectProbabilities, NDefectFractionsPerPattern = makeITkDefectsParams(
+        quadProb(front_end_cc_defect_prob),
+        fractions,    # same fractions for quads and other modules
+        front_end_cc_defect_prob,
+        fractions,
+        pixel_defect_prob
+        )
 
     return emulateITkPixelDefects(flags,
-                                 cfg,
-                                 DefectProbability=1e-3,
-                                 MatrixColumns=MatrixColumns,
-                                 ProbabilityOfModuleWithCoreColumnDefects=ProbabilityOfModuleWithCoreColumnDefects,
-                                 CoreColumnDefectProbability=CoreColumnDefectProbability,
-                                 MaxRandomPositionAttempts=10,
-                                 HistogramGroupName="ITkPixelDefects",
-                                 HistogramFileName="itk_pixel_defects_1cc05.root")
+                                  cfg,
+                                  ModulePatterns=ModulePatterns,
+                                  DefectProbabilities=DefectProbabilities,
+                                  NDefectFractionsPerPattern=NDefectFractionsPerPattern,
+                                  FillHistogramsPerPattern=True,
+                                  FillEtaPhiHistogramsPerPattern=True,
+                                  HistogramFileName=HistogramFileName)
 
 
 def emulateITkPixelDefectsPoisson(flags,
                                   cfg,
-                                  front_end_defect_prob=0.05) :
+                                  front_end_cc_defect_prob=0.1,
+                                  pixel_defect_prob=1e-2,
+                                  HistogramFileName="itk_pixel_defects_poisson10.root") :
     """
-    Create Poisson distributed  core column defects per module where the probability for a core column defect
-    is given by front_end_defect_prob for single chip modules and larger for quads.
+    Create Poisson distributed  core column defects per module where the probability for at least one
+    core column defect is given by front_end_cc_defect_prob for single chip modules and larger for
+    quads, respectively. Single pixel defects are controlled by pixel_defect_prob
     """
-    MatrixColumns, ProbabilityOfModuleWithCoreColumnDefects, CoreColumnDefectProbability = poissonDefects(front_end_defect_prob)
+    quad_prob=quadProb(front_end_cc_defect_prob)
+    ModulePatterns, DefectProbabilities, NDefectFractionsPerPattern = makeITkDefectsParams(
+        quad_prob,
+        poissonFractions(quad_prob),
+        front_end_cc_defect_prob,
+        poissonFractions(front_end_cc_defect_prob),
+        pixel_defect_prob)
 
     return emulateITkPixelDefects(flags,
                                   cfg,
-                                  DefectProbability=1e-3,
-                                  MatrixColumns=MatrixColumns,
-                                  ProbabilityOfModuleWithCoreColumnDefects=ProbabilityOfModuleWithCoreColumnDefects,
-                                  CoreColumnDefectProbability=CoreColumnDefectProbability,
-                                  MaxRandomPositionAttempts=10,
-                                  HistogramGroupName="ITkPixelDefects",
-                                  HistogramFileName="itk_pixel_defects_poisson05.root")
+                                  ModulePatterns=ModulePatterns,
+                                  DefectProbabilities=DefectProbabilities,
+                                  NDefectFractionsPerPattern=NDefectFractionsPerPattern,
+                                  HistogramFileName=HistogramFileName)

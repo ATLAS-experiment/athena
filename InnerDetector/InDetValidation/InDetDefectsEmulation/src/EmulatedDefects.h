@@ -1,7 +1,6 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
-  */
-/* Dear emacs, this is -*-c++-*- */
+*/
 #ifndef INDET_EMULATEDDEFECTS_H
 #define INDET_EMULATEDDEFECTS_H
 
@@ -9,9 +8,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace InDetDD {
-   class SiDetectorElementCollection;
-}
+#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
 namespace InDet {
    /** Data structure do mark e.g. pixel  defects for a list of modules.
@@ -24,17 +21,33 @@ namespace InDet {
     * If the elements are in a different order the results will be undefined.
     */
    template <class T_ModuleHelper>
-   class EmulatedDefects : public std::vector<std::vector<unsigned int> >
+   class EmulatedDefects : public std::vector<std::vector< typename T_ModuleHelper::KEY_TYPE> >
    {
    public:
       static constexpr unsigned int MASK_FOR_COMPARISON = T_ModuleHelper::CHIP_MASK | T_ModuleHelper::ROW_MASK | T_ModuleHelper::COL_MASK;
+      static constexpr bool s_needMasking = T_ModuleHelper::N_MASKS>0;
+      using KEY_TYPE = typename T_ModuleHelper::KEY_TYPE;
+
+      EmulatedDefects(const InDetDD::SiDetectorElementCollection &detector_elements)
+         : m_detectorElements(&detector_elements)
+      {
+         resize( m_detectorElements->size() );
+      }
+
+
       /** Special greater operator which ignores the column group flag in the comparison
        */
       class greater {
       public:
-         /*static (c++23) */ bool operator()(unsigned int key_a, unsigned int key_b) {
-            return (key_a & MASK_FOR_COMPARISON)
-                 > (key_b & MASK_FOR_COMPARISON);
+         /*static (c++23) */ bool operator()(KEY_TYPE key_a, KEY_TYPE key_b) {
+            if constexpr(s_needMasking) {
+               return (key_a & MASK_FOR_COMPARISON)
+                    > (key_b & MASK_FOR_COMPARISON);
+            }
+            else {
+               return key_a
+                    > key_b;
+            }
          }
       };
       /** Convenience method to find the preceding defect.
@@ -43,8 +56,9 @@ namespace InDet {
        * @return pair of the iterator of the preceding element and the end iterator
        * If there is no preceding defect then both returned iterators will be the end iterator
        */
-      static std::pair< std::vector<unsigned int>::iterator, std::vector<unsigned int>::iterator> lower_bound(std::vector<unsigned int> &module_defects,
-                                                                                                              unsigned int key) {
+      static std::pair< typename std::vector<KEY_TYPE>::iterator,
+                        typename std::vector<KEY_TYPE>::iterator> lower_bound(std::vector<KEY_TYPE> &module_defects,
+                                                                              KEY_TYPE key) {
          return std::make_pair(  std::lower_bound( module_defects.begin(),module_defects.end(), key, greater()),
                                  module_defects.end());
       }
@@ -56,22 +70,23 @@ namespace InDet {
        * If there is no preceding defect then both returned iterators will be the end iterator. Will
        * throw a range_error if the ID hash is invalid.
        */
-      std::pair< std::vector<unsigned int>::const_iterator, std::vector<unsigned int>::const_iterator> lower_bound(unsigned int id_hash, unsigned int key) const {
-         const std::vector<unsigned int> &module_defects = this->at(id_hash);
+      std::pair< typename std::vector<KEY_TYPE>::const_iterator,
+                 typename std::vector<KEY_TYPE>::const_iterator> lower_bound(unsigned int id_hash, KEY_TYPE key) const {
+         const std::vector<KEY_TYPE> &module_defects = this->at(id_hash);
          return std::make_pair(  std::lower_bound( module_defects.begin(),module_defects.end(), key, greater()),
                                  module_defects.end());
       }
 
-      /** Test whether a pixel on a certain module is marked as defect.
+      /** Test whether a pixel or strip on a certain module is marked as defect.
        * @param helper utility matching this defect data to check whether a defect overlaps with pixel coordinates.
        * @param id_hash a valid ID hash
        * @param key packed hardware coordinates of the pixel to be tested.
        * @return true if this data structure contains a defect for this module which overlaps with the given pixel coordinates.
        * Will throw a range_error if the ID hash is invalid.
        */
-      bool isDefect(const T_ModuleHelper &helper, unsigned int id_hash, unsigned int key) const {
+      bool isDefect(const T_ModuleHelper &helper, unsigned int id_hash, KEY_TYPE key) const {
          auto [defect_iter, end_iter] =lower_bound(id_hash, key);
-         return (defect_iter != end_iter && helper.isSameDefectWithGroups( *defect_iter, key,helper.columnGroupRowColumnMask()) );
+         return (defect_iter != end_iter && helper.isMatchingDefect( *defect_iter, key) );
       }
 
       /** Test whether a pixel on a certain module is marked as defect.
@@ -83,11 +98,37 @@ namespace InDet {
        * Will throw a range_error if the ID hash is invalid.
        */
       bool isDefect(const T_ModuleHelper &helper, unsigned int id_hash, unsigned int row_idx_aka_phi, unsigned int col_idx_aka_eta) const {
-         unsigned int key = helper.hardwareCoordinates(row_idx_aka_phi, col_idx_aka_eta);
-         return isDefect(helper, id_hash, key);
+         return isDefect(helper, id_hash, helper.hardwareCoordinates(row_idx_aka_phi, col_idx_aka_eta) );
       }
 
-      const InDetDD::SiDetectorElementCollection *m_detectorElements = nullptr; // pointer to the detector element collection these defects are for
+      /** Return true if the module defined by the given ID hash is defect.
+       * Will throw a range_error if ID hash is invalid.
+       */
+      bool isModuleDefect(unsigned int id_hash) const {
+         return m_moduleIsDefect.at(id_hash);
+      }
+
+      /** Mark the specified module as defect.
+       */
+      void setModuleDefect(unsigned int id_hash) {
+         m_moduleIsDefect.at(id_hash)=true;
+      }
+
+      /** Return the detector element for the given ID hash.
+       * will throw a range_error if the ID hash is invalid.
+       */
+      const InDetDD::SiDetectorElement &getDetectorElement(unsigned int id_hash) const {
+         return *(m_detectorElements->at(id_hash));
+      }
+   protected:
+      /** Resize data structures for this number of modules.
+       */
+      void resize( std::size_t n_modules) {
+         std::vector<std::vector< typename T_ModuleHelper::KEY_TYPE> >::resize(n_modules);
+         m_moduleIsDefect.resize(n_modules,false);
+      }
+      std::vector<bool> m_moduleIsDefect;
+      const InDetDD::SiDetectorElementCollection *m_detectorElements; // pointer to the detector element collection these defects are for
    };
 }
 

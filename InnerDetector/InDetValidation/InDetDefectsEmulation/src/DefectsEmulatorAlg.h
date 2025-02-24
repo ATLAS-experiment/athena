@@ -24,9 +24,19 @@ template <class T_RDO_Container>
 class DefectsEmulatorAlg : public DefectsEmulatorBase {
 public:
   using T_ID_Helper =   DefectsEmulatorTraits<T_RDO_Container>::ID_Helper;
+  /** Adapter to support different types of RDO collections, and ID helpers.
+   * Must have the following traits:
+   * - The adapter is constructable from the ID_Helper
+   * - provides methods row_index and column_index to compute the row and column
+   *   index from an Identifier
+   * - provides a method cloneOrRejectHit which returns the number of newly added hits
+   *   and takes as arguments: a module helper and matching emulated  defects conditions
+   *   data, a module id hash, a row and column index, the input RDO, and the collection
+   *   to which the "cloned" RDOs are added.
+   */
+  using T_ID_Adapter = DefectsEmulatorTraits<T_RDO_Container>::IDAdapter;
   using T_DefectsData = DefectsEmulatorTraits<T_RDO_Container>::DefectsData;
   using T_RDORawData =  DefectsEmulatorTraits<T_RDO_Container>::RDORawData;
-  using T_RDORawDataConcreteType = DefectsEmulatorTraits<T_RDO_Container>::RDORawDataConcreteType;
   using T_ModuleHelper = DefectsEmulatorTraits<T_RDO_Container>::ModuleHelper;
 
   using DefectsEmulatorBase::DefectsEmulatorBase;
@@ -45,7 +55,7 @@ private:
    Gaudi::Property<std::string> m_idHelperName
       {this, "IDHelper",""};
 
-   const T_ID_Helper* m_idHelper = nullptr;
+   T_ID_Helper m_idHelper{};
 };
 
 }
