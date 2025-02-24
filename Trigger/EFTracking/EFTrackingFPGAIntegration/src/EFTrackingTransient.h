@@ -3,22 +3,22 @@
 */
 
 /**
- * @file src/EFTrackingDataformats.h
+ * @file src/EFTrackingTransient.h
  * @author zhaoyuan.cui@cern.ch
  * @author yuan-tang.chou@cern.ch
  * @date Apr. 22, 2024
- * @brief Temporary data format design for the EF tracking FPGA integration
+ * @brief Temporary data struct design for the EF tracking FPGA integration
  * development
  */
 
-#ifndef EFTRACKING_FPGA_INTEGRATION_EFTRACKING_DATA_FORMATS_H
-#define EFTRACKING_FPGA_INTEGRATION_EFTRACKING_DATA_FORMATS_H
+#ifndef EFTRACKING_FPGA_INTEGRATION_EFTRACKING_TRANSIENT_H
+#define EFTRACKING_FPGA_INTEGRATION_EFTRACKING_TRANSIENT_H
 
 #include <vector>
 
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
-namespace EFTrackingDataFormats {
+namespace EFTrackingTransient {
 // The struct of the StripCluster and PixelCluster are not aligned at the moment
 // They might be aligned in the future for efficient device memory usage
 
@@ -241,6 +241,6 @@ struct SpacePointAuxInput {
   std::vector<int> measurementIndexes;
 };
 
-}  // namespace EFTrackingDataFormats
+}  // namespace EFTrackingDataTransient
 
-#endif  // EFTRACKING_FPGA_INTEGRATION_EFTRACKING_DATA_FORMATS_H
+#endif  // EFTRACKING_FPGA_INTEGRATION_EFTRACKING_TRANSIENT_H

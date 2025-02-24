@@ -29,8 +29,8 @@ StatusCode xAODContainerMaker::initialize() {
 }
 
 StatusCode xAODContainerMaker::makeStripClusterContainer(
-    const EFTrackingDataFormats::StripClusterAuxInput &scAux,
-    const EFTrackingDataFormats::Metadata *metadata,
+    const EFTrackingTransient::StripClusterAuxInput &scAux,
+    const EFTrackingTransient::Metadata *metadata,
     const EventContext &ctx) const {
   ATH_MSG_DEBUG("Making xAOD::StripClusterContainer");
 
@@ -80,8 +80,8 @@ StatusCode xAODContainerMaker::makeStripClusterContainer(
 }
 
 StatusCode xAODContainerMaker::makePixelClusterContainer(
-    const EFTrackingDataFormats::PixelClusterAuxInput &pxAux,
-    const EFTrackingDataFormats::Metadata *metadata,
+    const EFTrackingTransient::PixelClusterAuxInput &pxAux,
+    const EFTrackingTransient::Metadata *metadata,
     const EventContext &ctx) const {
   ATH_MSG_DEBUG("Making xAOD::PixelClusterContainer");
 
@@ -96,8 +96,6 @@ StatusCode xAODContainerMaker::makePixelClusterContainer(
   ATH_MSG_DEBUG("Container '" << m_pixelClustersKey << "' initialised");
 
   int rdoIndex_counter = 0;
-  int totListIndex_counter = 0;
-  int chargeListIndex_counter = 0;
 
   for (unsigned int i = 0; i < metadata->numOfPixelClusters; i++) {
     // Puch back numClusters of PixelCluster
@@ -121,47 +119,26 @@ StatusCode xAODContainerMaker::makePixelClusterContainer(
       RDOs.push_back(Identifier(pxAux.rdoList.at(rdoIndex_counter + j)));
     }
 
-    std::vector<int> vec_totList;
-    vec_totList.reserve(metadata->pcTotIndex[i]);
-    for (unsigned int j = 0; j < metadata->pcTotIndex[i]; ++j) {
-      vec_totList.push_back(pxAux.totList.at(totListIndex_counter + j));
-    }
-
-    std::vector<float> vec_chargeList;
-    vec_chargeList.reserve(metadata->pcChargeIndex[i]);
-    for (unsigned int k = 0; k < metadata->pcChargeIndex[i]; ++k) {
-      vec_chargeList.push_back(pxAux.totList.at(chargeListIndex_counter + k));
-    }
-
     rdoIndex_counter += metadata->pcRdoIndex[i];
-    totListIndex_counter += metadata->pcTotIndex[i];
-    chargeListIndex_counter += metadata->pcChargeIndex[i];
 
     pixelCl->setMeasurement<2>(pxAux.idHash.at(i), localPosition,
                                localCovariance);
     pixelCl->setIdentifier(pxAux.id.at(i));
     pixelCl->setRDOlist(RDOs);
     pixelCl->globalPosition() = globalPosition;
-    pixelCl->setToTlist(vec_totList);
     pixelCl->setTotalToT(pxAux.totalToT.at(i));
-    pixelCl->setChargelist(vec_chargeList);
-    pixelCl->setTotalCharge(pxAux.totalCharge.at(i));
-    pixelCl->setLVL1A(pxAux.lvl1a.at(i));
     pixelCl->setChannelsInPhiEta(pxAux.channelsInPhi.at(i),
                                  pxAux.channelsInEta.at(i));
     pixelCl->setWidthInEta(pxAux.widthInEta.at(i));
     pixelCl->setOmegas(pxAux.omegaX.at(i), pxAux.omegaY.at(i));
-    pixelCl->setIsSplit(pxAux.isSplit.at(i));
-    pixelCl->setSplitProbabilities(pxAux.splitProbability1.at(i),
-                                   pxAux.splitProbability2.at(i));
   }
   return StatusCode::SUCCESS;
 }
 
 StatusCode xAODContainerMaker::makePixelSpacePointContainer(
-    const EFTrackingDataFormats::SpacePointAuxInput &psAux,
+    const EFTrackingTransient::SpacePointAuxInput &psAux,
     const xAOD::PixelClusterContainer &pcluster,
-    const EFTrackingDataFormats::Metadata *metadata,
+    const EFTrackingTransient::Metadata *metadata,
     const EventContext &ctx) const {
   ATH_MSG_DEBUG("Making xAOD::SpacePointContainer from FTrackingDataFormats::SpacePointAuxInput");
 
@@ -198,9 +175,9 @@ StatusCode xAODContainerMaker::makePixelSpacePointContainer(
 }
 
 StatusCode xAODContainerMaker::makeStripSpacePointContainer(
-    const EFTrackingDataFormats::SpacePointAuxInput &sspAux,
+    const EFTrackingTransient::SpacePointAuxInput &sspAux,
     const xAOD::StripClusterContainer& scluster,
-    const EFTrackingDataFormats::Metadata *metadata,
+    const EFTrackingTransient::Metadata *metadata,
     const EventContext &ctx) const {
   ATH_MSG_DEBUG("Making xAOD::SpacePointContainer  from FTrackingDataFormats::SpacePointAuxInput");
 

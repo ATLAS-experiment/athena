@@ -5,7 +5,6 @@
 #ifndef EFTRACKING_FPGA_INTEGRATION_FPGADATAFORMATTOOL_H
 #define EFTRACKING_FPGA_INTEGRATION_FPGADATAFORMATTOOL_H
 
-#include "EFTrackingDataFormats.h"
 #include "EFTrackingFPGAIntegration/IEFTrackingFPGADataFormatTool.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"

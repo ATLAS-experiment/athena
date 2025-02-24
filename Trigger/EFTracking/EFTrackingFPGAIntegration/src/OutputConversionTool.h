@@ -13,7 +13,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "EFTrackingFPGAIntegration/IEFTrackingFPGAIntegrationTool.h"
-#include "EFTrackingDataFormats.h"
+#include "EFTrackingTransient.h"
 
 namespace OutputConversion
 {
@@ -38,23 +38,23 @@ public:
 
     // User-level functions to decode the clusters/L2G/SpacePoints
     StatusCode decodePixelEDM(const std::vector<uint64_t> &bytestream,
-                              EFTrackingDataFormats::Metadata *metadata,
-                              EFTrackingDataFormats::PixelClusterAuxInput &pcAux) const;
+                              EFTrackingTransient::Metadata *metadata,
+                              EFTrackingTransient::PixelClusterAuxInput &pcAux) const;
 
     StatusCode decodeStripEDM(const std::vector<uint64_t> &bytestream,
-                              EFTrackingDataFormats::Metadata *metadata,
-                              EFTrackingDataFormats::StripClusterAuxInput &scAux) const;
+                              EFTrackingTransient::Metadata *metadata,
+                              EFTrackingTransient::StripClusterAuxInput &scAux) const;
 
-    StatusCode decodeSpacePoints(const std::vector<uint64_t> &bytestream, EFTrackingDataFormats::Metadata *metadata) const;
+    StatusCode decodeSpacePoints(const std::vector<uint64_t> &bytestream, EFTrackingTransient::Metadata *metadata) const;
 
     /**
      * @brief Decode the FPGA output based on the type. user shouldn't call this function directly
      * They should call the following user-level functions
      */
     StatusCode decodeFPGAoutput(const std::vector<uint64_t> &bytestream,
-                                EFTrackingDataFormats::Metadata *metadata,
-                                EFTrackingDataFormats::PixelClusterAuxInput *pcAux = nullptr,
-                                EFTrackingDataFormats::StripClusterAuxInput *scAux = nullptr,
+                                EFTrackingTransient::Metadata *metadata,
+                                EFTrackingTransient::PixelClusterAuxInput *pcAux = nullptr,
+                                EFTrackingTransient::StripClusterAuxInput *scAux = nullptr,
                                 OutputConversion::FSM blockType = OutputConversion::FSM::Unknown) const;
 };
 
