@@ -1,13 +1,14 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Steering script for IDPVM ART jobs with Run 2 Data Reco config
 
 inputBS=$1
 dcubeRef=$2
-conditions="CONDBR2-BLKPA-RUN2-11"
-geotag="ATLAS-R2-2016-01-00-01"
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_DATA)")
+geotag=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometr
+yTags; print(defaultGeometryTags.RUN2)")
 
 script=test_data_reco.sh
 
