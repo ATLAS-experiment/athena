@@ -26,7 +26,7 @@ rdo=physval.RDO.root
 aod=physval.AOD.root
 idtide=physval.DAOD_TIDE.root
 
-conditionsTag=OFLCOND-MC23-SDR-RUN3-07
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
 
 # Digi for MC23d HITS inputs
 run Digi_tf.py \

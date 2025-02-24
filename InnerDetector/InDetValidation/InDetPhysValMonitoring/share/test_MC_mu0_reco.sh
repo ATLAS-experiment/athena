@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Steering script for IDPVM ART jobs with MC Reco mu=0 config
 
@@ -79,10 +79,12 @@ case $ArtProcess in
     unset  ATHENA_NUM_PROC
     unset  ATHENA_PROC_NUMBER
 
+    conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
     Reco_tf.py \
       --inputRDOFile $x \
       --outputAODFile   physval.AOD.root \
-      --conditionsTag   'default:OFLCOND-MC23-SDR-RUN3-07' \
+      --conditionsTag   "default:${conditions}" \
       --steering        doRAWtoALL \
       --checkEventCount False \
       --ignoreErrors    True \
