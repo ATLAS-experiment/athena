@@ -75,6 +75,7 @@ if __name__=="__main__":
     flags.Concurrency.NumThreads = 1
     # Use a dummy input file for the EventInfo
     flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675668._000016.pool.root.1"]
+    flags.Output.AODFileName = "ConversionAOD.pool.root"
 
     # Disable calo for this test
     flags.Detector.EnableCalo = False
@@ -108,6 +109,27 @@ if __name__=="__main__":
     kwarg["OutputLevel"] = DEBUG
 
     acc = FPGAFormatterPrepCfg(flags, **kwarg)
+    
+    # Prepare output
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    from AthenaConfiguration.Enums import MetadataCategory
+    top_acc.merge(SetupMetaDataForStreamCfg(flags,"AOD", 
+                                        createMetadata=[
+                                        MetadataCategory.ByteStreamMetaData,
+                                        MetadataCategory.LumiBlockMetaData,
+                                        MetadataCategory.TruthMetaData,
+                                        MetadataCategory.IOVMetaData,],))
+
+    from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+    OutputItemList = [
+                    "xAOD::StripClusterContainer#FPGAStripClusters",
+                    "xAOD::StripClusterAuxContainer#FPGAStripClustersAux.",
+                    "xAOD::PixelClusterContainer#FPGAPixelClusters",
+                    "xAOD::PixelClusterAuxContainer#FPGAPixelClustersAux.",
+                    ]
+   
+    top_acc.merge(addToAOD(flags, OutputItemList))
+    
     top_acc.merge(acc)
 
     top_acc.run(1)

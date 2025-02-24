@@ -5,7 +5,6 @@
 
 #include "OutputConversionTool.h"
 #include "FPGADataFormatUtilities.h"
-#include "EFTrackingDataFormats.h"
 
 StatusCode OutputConversionTool::initialize()
 {
@@ -14,9 +13,9 @@ StatusCode OutputConversionTool::initialize()
 }
 
 StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &bytestream,
-                                                  EFTrackingDataFormats::Metadata *metadata,
-                                                  EFTrackingDataFormats::PixelClusterAuxInput *pcAux,
-                                                  EFTrackingDataFormats::StripClusterAuxInput *scAux,
+                                                  EFTrackingTransient::Metadata *metadata,
+                                                  EFTrackingTransient::PixelClusterAuxInput *pcAux,
+                                                  EFTrackingTransient::StripClusterAuxInput *scAux,
                                                   OutputConversion::FSM blockType) const
 {
     using namespace FPGADataFormatUtilities;
@@ -375,23 +374,23 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
 }
 
 StatusCode OutputConversionTool::decodePixelEDM(const std::vector<uint64_t> &bytestream,
-                                                EFTrackingDataFormats::Metadata *metadata,
-                                                EFTrackingDataFormats::PixelClusterAuxInput &pcAux) const
+                                                EFTrackingTransient::Metadata *metadata,
+                                                EFTrackingTransient::PixelClusterAuxInput &pcAux) const
 {
     ATH_MSG_DEBUG("Decoding pixel EDM");
     return decodeFPGAoutput(bytestream, metadata, &pcAux, nullptr, OutputConversion::FSM::PixelEDM);
 }
 
 StatusCode OutputConversionTool::decodeStripEDM(const std::vector<uint64_t> &bytestream,
-                                                EFTrackingDataFormats::Metadata *metadata,
-                                                EFTrackingDataFormats::StripClusterAuxInput &scAux) const
+                                                EFTrackingTransient::Metadata *metadata,
+                                                EFTrackingTransient::StripClusterAuxInput &scAux) const
 {
     ATH_MSG_DEBUG("Decoding strip EDM");
     return decodeFPGAoutput(bytestream, metadata, nullptr, &scAux, OutputConversion::FSM::StripEDM);
 }
 
 StatusCode OutputConversionTool::decodeSpacePoints(const std::vector<uint64_t> &bytestream,
-                                                   EFTrackingDataFormats::Metadata *metadata) const
+                                                   EFTrackingTransient::Metadata *metadata) const
 {
     ATH_MSG_DEBUG("Decoding space points");
     return decodeFPGAoutput(bytestream, metadata, nullptr, nullptr, OutputConversion::FSM::GlobalHits);

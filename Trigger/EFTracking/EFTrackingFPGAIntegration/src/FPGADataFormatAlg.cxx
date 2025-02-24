@@ -50,10 +50,10 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
   }
 
   // To make the xAOD, we need the aux data
-  std::unique_ptr<EFTrackingDataFormats::Metadata> metadata =
-      std::make_unique<EFTrackingDataFormats::Metadata>();
-  EFTrackingDataFormats::StripClusterAuxInput scAux;
-  EFTrackingDataFormats::PixelClusterAuxInput pcAux;
+  std::unique_ptr<EFTrackingTransient::Metadata> metadata =
+      std::make_unique<EFTrackingTransient::Metadata>();
+  EFTrackingTransient::StripClusterAuxInput scAux;
+  EFTrackingTransient::PixelClusterAuxInput pcAux;
 
   // Starting from here validate the conversion tool
   // First read in the test vector
@@ -166,8 +166,8 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
   }
 
   // Make the xAOD
-  // ATH_CHECK(m_xAODContainerMaker->makePixelClusterContainer(pcAux, metadata.get(), ctx));
-  // ATH_CHECK(m_xAODContainerMaker->makeStripClusterContainer(scAux, metadata.get(), ctx));
+  ATH_CHECK(m_xAODContainerMaker->makePixelClusterContainer(pcAux, metadata.get(), ctx));
+  ATH_CHECK(m_xAODContainerMaker->makeStripClusterContainer(scAux, metadata.get(), ctx));
 
   return StatusCode::SUCCESS;
 }

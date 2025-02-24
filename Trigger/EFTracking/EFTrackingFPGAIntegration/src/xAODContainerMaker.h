@@ -14,7 +14,7 @@
 #define EFTRACKING_FPGA_INTEGRATION__XAOD_CONTAINER_MAKER_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "EFTrackingDataFormats.h"
+#include "EFTrackingTransient.h"
 #include "EFTrackingFPGAIntegration/IEFTrackingFPGAIntegrationTool.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
@@ -34,8 +34,8 @@ public:
      * objects one by one
      */
     StatusCode makeStripClusterContainer(
-        const EFTrackingDataFormats::StripClusterAuxInput &scAux,
-        const EFTrackingDataFormats::Metadata *metadata,
+        const EFTrackingTransient::StripClusterAuxInput &scAux,
+        const EFTrackingTransient::Metadata *metadata,
         const EventContext &ctx) const;
 
     /**
@@ -43,8 +43,8 @@ public:
      * objects one by one
      */
     StatusCode makePixelClusterContainer(
-        const EFTrackingDataFormats::PixelClusterAuxInput &pxAux,
-        const EFTrackingDataFormats::Metadata *metadata,
+        const EFTrackingTransient::PixelClusterAuxInput &pxAux,
+        const EFTrackingTransient::Metadata *metadata,
         const EventContext &ctx) const;
 
     /**
@@ -52,9 +52,9 @@ public:
      * Pixel SpacePoint objects one by one
      */
     StatusCode makePixelSpacePointContainer(
-        const EFTrackingDataFormats::SpacePointAuxInput &psAux,
+        const EFTrackingTransient::SpacePointAuxInput &psAux,
         const xAOD::PixelClusterContainer& pcluster,
-        const EFTrackingDataFormats::Metadata *metadata,
+        const EFTrackingTransient::Metadata *metadata,
         const EventContext &ctx) const;
 
     /**
@@ -62,9 +62,9 @@ public:
      * Strip SpacePoint objects one by one
      */
     StatusCode makeStripSpacePointContainer(
-        const EFTrackingDataFormats::SpacePointAuxInput &sspAux,
+        const EFTrackingTransient::SpacePointAuxInput &sspAux,
         const xAOD::StripClusterContainer& scluster,
-        const EFTrackingDataFormats::Metadata *metadata,
+        const EFTrackingTransient::Metadata *metadata,
         const EventContext &ctx) const;
 
 private:
