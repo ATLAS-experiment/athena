@@ -91,6 +91,9 @@ if __name__ == '__main__':
 
     hypoTestBench_alg = CompFactory.GlobalSim.HypoTestBenchAlg(
         "testBenchAlg")
+
+    hypoTestBench_alg.eEmFileName = \
+        "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/GlobalSimTest/Data_eEmTobs.dat"
     
     acc.addEventAlgo(hypoTestBench_alg)
     from AthenaCommon.Constants import DEBUG
