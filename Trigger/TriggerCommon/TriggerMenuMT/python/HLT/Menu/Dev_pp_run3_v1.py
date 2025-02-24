@@ -592,10 +592,10 @@ def getDevSignatures():
 
         # Single tau support chains
         ChainProp(name='HLT_tau20_mediumGNTau_L1eTAU12', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),
-        ChainProp(name='HLT_tau20_mediumGNTau_L1cTAU20M', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_tau20_mediumGNTau_L1cTAU20M', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:online','tauMon:t0']),
         ChainProp(name='HLT_tau25_mediumGNTau_L1eTAU20', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),
         ChainProp(name='HLT_tau25_mediumGNTau_L1eTAU20M', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),
-        ChainProp(name='HLT_tau25_mediumGNTau_L1cTAU20M', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_tau25_mediumGNTau_L1cTAU20M', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:online','tauMon:t0']),
         ChainProp(name='HLT_tau30_mediumGNTau_L1cTAU30M', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),
         ChainProp(name='HLT_tau35_mediumGNTau_L1cTAU30M', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),
         ChainProp(name='HLT_tau40_mediumGNTau_L1cTAU35M', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),
