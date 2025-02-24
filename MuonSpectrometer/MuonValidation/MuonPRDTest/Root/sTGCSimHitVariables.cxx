@@ -141,7 +141,7 @@ namespace MuonPRDTest {
                 if( stripNumber == -1 ){
                     ATH_MSG_WARNING("sTGC validation: failed to obtain strip number " << idHelperSvc()->stgcIdHelper().print_to_string(offId) );
                     ATH_MSG_WARNING(" pos " << posOnSurf << " z " << rSurface_pos.z() );
-                    //stripNumber = 1;
+                    stripNumber = 1;
                 }
                 Identifier oldId = offId;
                 offId = idHelperSvc()->stgcIdHelper().channelID(offId, idHelperSvc()->stgcIdHelper().multilayer(offId), idHelperSvc()->stgcIdHelper().gasGap(offId),1,stripNumber);
