@@ -56,12 +56,9 @@ IdDictField::get_label(size_t index) const {
 
 ExpandedIdentifier::element_type
 IdDictField::get_label_value(const std::string& name) const {
-  ExpandedIdentifier::element_type value = 0;
-  try{
-    value = std::stoi(name);
-    return value;
-  } catch (std::invalid_argument& e) {
-    for (const auto* label:m_labels) {
+  ExpandedIdentifier::element_type value{0};
+  if (std::ranges::find_if(name,[](const char c){ return !std::isdigit(c); }) != name.end()) {
+    for (const auto* label: m_labels) {
       if (label == nullptr) continue;
       if (label->m_valued) value = label->m_value;
       if (label->m_name == name) {
@@ -70,7 +67,13 @@ IdDictField::get_label_value(const std::string& name) const {
       value++;
     }
   }
-  std::cerr << "Warning : label " << name << " not found" << std::endl;
+  try{
+    value = std::stoi(name);
+    return value;
+  } catch (const std::invalid_argument& e) {
+    std::cerr << "Warning : label " << name << " not found: "<<e.what() << std::endl;
+  }
+ 
   return(0);
 }
 
