@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.AutoConfigFlags import getDefaultDetectors
@@ -168,6 +168,8 @@ def _parseDetectorsList(flags, detectors):
     def compatibility_layer(detector):
         if detector == 'pixel':
             return 'Pixel'
+        if detector == 'Micromegas':
+            return 'MM'
         return detector
 
     # first check if we have groups
