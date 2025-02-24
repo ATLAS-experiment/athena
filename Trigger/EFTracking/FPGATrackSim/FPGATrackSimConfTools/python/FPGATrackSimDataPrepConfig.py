@@ -5,6 +5,37 @@ from AthenaCommon.Logging import AthenaLogger
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from math import pi
 
+def getRegionNumber(nPiOver16Min, minAbsEta, isPositiveEta, verbosePrint=True):
+        binSizePhi = pi/16
+        binSizeEta = 0.2
+        region = nPiOver16Min
+        if (nPiOver16Min >= 32 or nPiOver16Min < 0):
+            print("You are asking for nPiOver16 = ",nPiOver16Min," but we only have 32 phi bins! Returning -1")
+            return -1
+        if (minAbsEta > 3.8 or minAbsEta < 0):
+            print("You are asking for minAbsEta = ",minAbsEta," but we only have 20 abs eta bins! Returning -1")
+            return -1
+        if not (isPositiveEta == 0 or isPositiveEta == 1):
+            print("You are asking for isPositiveEta = ",isPositiveEta, " but this should only be 0 or 1! Returning -1")
+            return -1
+
+        etanum = round(minAbsEta / binSizeEta)
+        mineta = binSizeEta*etanum
+        maxeta = binSizeEta*(etanum+1)
+        if (not isPositiveEta):
+            mineta = -binSizeEta*(etanum+1)
+            maxeta = -binSizeEta*etanum
+
+        region = region | ((isPositiveEta & 0x1) << 5) ### 1 is positive side, 0 negative eta
+        region = region | (etanum << 6)
+        if (verbosePrint):
+            print("I am returning the region number for minphi =",nPiOver16Min, "*pi/16, which is equal to",binSizePhi*nPiOver16Min)
+            print("   and maxphi =",nPiOver16Min+1, "*pi/16, which is equal to",binSizePhi*(nPiOver16Min+1))
+            print("   and mineta =",mineta, "and max eta =", maxeta)
+
+        return region
+
+
 def getBaseName(flags):
     if (flags.Trigger.FPGATrackSim.oldRegionDefs):
         if (not (flags.Trigger.FPGATrackSim.baseName == '')):
