@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSDETECTORELEMENT_H
@@ -65,9 +65,12 @@ public:
 
   /// Identifier
   Identifier identify() const override final;
+   
   /// Detector type
   DetectorType detectorType() const override final;
 
+  /// Identifier hash
+  IdentifierHash identifyHash() const { return m_idHash; }
 
   virtual unsigned int storeAlignedTransforms(const ActsTrk::DetectorAlignStore& alignStore) const override;
   
@@ -100,8 +103,8 @@ public:
 
   Amg::Transform3D transform(const ActsTrk::DetectorAlignStore* store) const;
 private:
+  IdentifierHash m_idHash {};
   DetectorType m_type{DetectorType::UnDefined};
-
   ActsTrk::TransformCacheDetEle<ActsDetectorElement> m_trfCache{0, this};
   /// Detector element as variant
   const GeoVDetectorElement *m_detElement{nullptr};
