@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGBPHYSMONITORING_TRIGBPHYSMONITORALGORITHM_H
@@ -24,13 +24,11 @@ public:
 
   
 private:
-  SG::ReadHandleKeyArray<xAOD::TrigBphysContainer> m_TrigBphysContainerKeys;
+  SG::ReadHandleKeyArray<xAOD::TrigBphysContainer> m_TrigBphysContainerKeys{this, "ContainerNames", {}};
   
   SG::ReadHandleKey<xAOD::MuonContainer> m_offlineMuonCollectionKey{this, "offlineMuonCollectionKey", "Muons"};
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_offlineIDTrackCollectionKey{this, "offlineIDTrackCollectionKey", "InDetTrackParticles"};
   SG::ReadHandleKey<xAOD::VertexContainer> m_offlinePvCollectionKey {this,"offlinePvCollectionKey","PrimaryVertices"};
-  
-  Gaudi::Property<std::vector<std::string>> m_ContainerNames{this, "ContainerNames", {}};
   
   Gaudi::Property<std::vector<std::string>> m_ChainNames_MuMu{this, "ChainNames_MuMu", {}};
   Gaudi::Property<std::vector<std::string>> m_ChainNames_MuMuX{this, "ChainNames_MuMuX", {}};
