@@ -47,7 +47,7 @@ class TriggerTower {
 public:
 
 /** Constructors */
-    TriggerTower();  
+    TriggerTower() = default;  
     
     TriggerTower( double phi, double eta, unsigned int key);
     
@@ -62,8 +62,7 @@ public:
 		  const std::vector<int>& had_digits_bcid,
                   const std::vector<int>& had_bcid, 
 		  int had_error, int had_peak, int had_adc_peak);
-/** Destructor */
-    virtual ~TriggerTower();
+
 
 /** Methods to fill towers with digits, calibrated ET vectors and status flags*/
     void addEM(const std::vector<int>& digits, const std::vector<int>& et, 
@@ -123,23 +122,23 @@ public:
   
 /** Internal data */  
     private:
-    std::vector <int> m_em_energy;
-    std::vector <int> m_had_energy;
-    std::vector <int> m_em_adc;
-    std::vector <int> m_had_adc;   
-    std::vector <int> m_em_BCID;
-    std::vector <int> m_had_BCID;
-    std::vector <int> m_em_extBCID;
-    std::vector <int> m_had_extBCID;
-    double m_phi;
-    double m_eta;
-    unsigned int m_key;
-    int m_em_error;
-    int m_had_error;
-    int m_em_peak;
-    int m_em_adc_peak;
-    int m_had_peak;
-    int m_had_adc_peak;
+    std::vector <int> m_em_energy{0};
+    std::vector <int> m_had_energy{0};
+    std::vector <int> m_em_adc{0};
+    std::vector <int> m_had_adc{0};   
+    std::vector <int> m_em_BCID{0};
+    std::vector <int> m_had_BCID{0};
+    std::vector <int> m_em_extBCID{0};
+    std::vector <int> m_had_extBCID{0};
+    double m_phi{};
+    double m_eta{};
+    unsigned int m_key{};
+    int m_em_error{};
+    int m_had_error{};
+    int m_em_peak{};
+    int m_em_adc_peak{};
+    int m_had_peak{};
+    int m_had_adc_peak{};
     
     static const int m_saturation = 255;
   

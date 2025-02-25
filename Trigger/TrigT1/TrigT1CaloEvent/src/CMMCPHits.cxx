@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           CMMCPHits.cpp  -  description
@@ -19,29 +19,10 @@
 
 namespace LVL1 {
 
-CMMCPHits::CMMCPHits():
-  m_crate(0),
-  m_dataID(0),
-  m_peak(0),
-  m_hits0(1),
-  m_hits1(1),
-  m_error0(1),
-  m_error1(1)
-{
-}
-
-CMMCPHits::~CMMCPHits(){
-}
-
 /** constructs a CMMCPHits object, specifying crate, data ID. */
 CMMCPHits::CMMCPHits(int crate, int dataID):
   m_crate(crate),
-  m_dataID(dataID),
-  m_peak(0),
-  m_hits0(1),
-  m_hits1(1),
-  m_error0(1),
-  m_error1(1)
+  m_dataID(dataID)
 {
 }
 

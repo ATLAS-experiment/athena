@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,29 +13,11 @@
 
 namespace LVL1 {
 
-CMXJetHits::CMXJetHits():
-  m_crate(0),
-  m_source(0),
-  m_peak(0),
-  m_hits0(1),
-  m_hits1(1),
-  m_error0(1),
-  m_error1(1)
-{
-}
-
-CMXJetHits::~CMXJetHits(){
-}
 
 /** constructs a CMXJetHits object, specifying crate, cmx, source. */
 CMXJetHits::CMXJetHits(int crate, int source):
   m_crate(crate),
-  m_source(source),
-  m_peak(0),
-  m_hits0(1),
-  m_hits1(1),
-  m_error0(1),
-  m_error1(1)
+  m_source(source)
 {
 }
 

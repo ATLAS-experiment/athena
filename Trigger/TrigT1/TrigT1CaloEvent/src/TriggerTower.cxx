@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           TriggerTower.cpp  -  description
@@ -13,46 +13,11 @@
 
 namespace LVL1 {
 
-// default constructor for persistency
-LVL1::TriggerTower::TriggerTower::TriggerTower():
-	m_em_energy(1),
-        m_had_energy(1),
-	m_em_adc(1),
-        m_had_adc(1),
-	m_em_BCID(1),
-	m_had_BCID(1),
-	m_em_extBCID(1),
-	m_had_extBCID(1),
-	m_phi(0.0),
-	m_eta(0.0),
-        m_key(0),
-	m_em_error(0),
-	m_had_error(0),
-	m_em_peak(0),
-	m_em_adc_peak(0),
-	m_had_peak(0),
-	m_had_adc_peak(0)
- {
- }
 /** constructs a trigger tower and sets the key. */
 LVL1::TriggerTower::TriggerTower::TriggerTower(double phi, double eta, unsigned int key):
-	m_em_energy(1),
-        m_had_energy(1),
-	m_em_adc(1),
-        m_had_adc(1),
-	m_em_BCID(1),
-	m_had_BCID(1),
-	m_em_extBCID(1),
-	m_had_extBCID(1),
 	m_phi(phi),
 	m_eta(eta),
-        m_key(key),
-	m_em_error(0),
-	m_had_error(0),
-	m_em_peak(0),
-	m_em_adc_peak(0),
-	m_had_peak(0),
-	m_had_adc_peak(0)
+  m_key(key)
 {
 }
 /** constructs a trigger tower and sets everything */
@@ -86,9 +51,6 @@ LVL1::TriggerTower::TriggerTower::TriggerTower
 	m_had_peak(had_peak),
 	m_had_adc_peak(had_adc_peak)
 {
-}
-
-TriggerTower::~TriggerTower(){
 }
 
 // return em layer ET for the central bunch-crossing
