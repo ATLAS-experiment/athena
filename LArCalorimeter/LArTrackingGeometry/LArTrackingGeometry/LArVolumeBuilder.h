@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -64,14 +64,15 @@ public:
   virtual StatusCode finalize() override final;
 
   /** TrackingVolumeBuilder interface method - returns vector of Volumes */
-  virtual std::vector<Trk::TrackingVolume*>* trackingVolumes(const CaloDetDescrManager& caloDDM)
+  virtual std::vector<Trk::TrackingVolume*>* trackingVolumes(const CaloDetDescrManager& caloDDM
+							     , const GeoAlignmentStore* geoAlign)
     const override final;
 
 private:
   // ------------- private methods -----------------------------------------
   static void printCheckResult(MsgStream& log, const Trk::TrackingVolume* vol);
 
-  void printInfo(const GeoPVConstLink& pv, int gen = -1) const;
+  void printInfo(const GeoPVConstLink& pv, const GeoAlignmentStore* gas, int gen = -1) const;
   void printChildren(const GeoPVConstLink& pv,
                      int gen,
                      int igen,

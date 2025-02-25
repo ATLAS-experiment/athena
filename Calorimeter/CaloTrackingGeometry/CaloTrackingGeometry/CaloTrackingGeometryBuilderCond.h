@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,6 +12,7 @@
 #include "CaloTrackingGeometry/CaloTrackingGeometryBuilderImpl.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "TrkDetDescrInterfaces/IGeometryBuilderCond.h"
+#include "GeoModelUtilities/GeoAlignmentStore.h"
 
 /** @class CaloTrackingGeometryBuilderCond
 
@@ -53,6 +54,8 @@ class CaloTrackingGeometryBuilderCond final
  private:
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{
       this, "CaloDetDescrManager", "CaloDetDescrManager"};
+    SG::ReadCondHandleKey<GeoAlignmentStore>  m_readKeyGeoAlign {
+      this, "LArAlignmentStore", "LArAlignmentStore", "SG key of the GeoAlignmentStore for LAr" };
 };
 
 }  // namespace Calo
