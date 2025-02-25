@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # ====================================================================
 # IDTR2.py
@@ -24,7 +24,6 @@ def IDTR2Cfg(flags):
     acc.merge(VrtSecInclusiveCfg(
         flags,
         name="VrtSecInclusive",
-        AugmentingVersionString="",
         FillIntermediateVertices=False,
         TrackLocation="InDetWithLRTTrackParticles"))
 
@@ -32,7 +31,7 @@ def IDTR2Cfg(flags):
     from NewVrtSecInclusiveTool.NewVrtSecInclusiveConfig import (
         MaterialSVFinderToolCfg, DVFinderToolCfg)
     MaterialSVFinderTool = acc.popToolsAndMerge(
-        MaterialSVFinderToolCfg(flags))
+        MaterialSVFinderToolCfg(flags, AugmentingVersionString="_Material"))
     acc.addEventAlgo(CompFactory.Rec.NewVrtSecInclusiveAlg(
         name="NewVrtSecInclusive_Material",
         TrackParticleContainer="InDetWithLRTTrackParticles",
@@ -40,7 +39,8 @@ def IDTR2Cfg(flags):
         BVertexContainerName="NewVrtSecInclusive_SecondaryVertices_Material",
         BVertexTool=MaterialSVFinderTool))
 
-    DVFinderTool = acc.popToolsAndMerge(DVFinderToolCfg(flags))
+    DVFinderTool = acc.popToolsAndMerge(
+        DVFinderToolCfg(flags, AugmentingVersionString="_DV"))
     acc.addEventAlgo(CompFactory.Rec.NewVrtSecInclusiveAlg(
         name="NewVrtSecInclusive_DV",
         TrackParticleContainer="InDetWithLRTTrackParticles",
