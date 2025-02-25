@@ -180,7 +180,11 @@ StatusCode PhysValTau::fillHistograms()
       } else if(trueTau->isElectron()) {
 	ATH_MSG_DEBUG("Tau is matched to an electron");
         m_oTauValidationPlots->m_oElMatchedParamPlots.fill(*tau, weight);
-        m_oTauValidationPlots->m_oElMatchedEVetoPlots.fill(*tau, weight);  
+        m_oTauValidationPlots->m_oElMatchedEVetoPlots.fill(*tau, weight);
+        if ( nominal ) {
+           m_oTauValidationPlots->m_oElMatchedParamPlotsNom.fill(*tau, weight);
+           m_oTauValidationPlots->m_oElMatchedEVetoPlotsNom.fill(*tau, weight);
+        }
       } else if( std::abs(trueTau->pdgId()) < 7 || trueTau->pdgId() == 21){
         ATH_MSG_DEBUG("Tau is matched to a jet");
         m_oTauValidationPlots->m_oFakeGeneralTauAllProngsPlots.fill(*tau, weight);
