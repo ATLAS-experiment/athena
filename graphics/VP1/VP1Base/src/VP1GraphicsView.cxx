@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -969,7 +969,7 @@ void VP1GraphicsView::saveImage()
     filename += ".png";
 
   pm.save(filename);
-  m_d->currentsaveimagefile = filename;
+  m_d->currentsaveimagefile = std::move(filename);
 }
 
 // //____________________________________________________________________
@@ -1079,7 +1079,7 @@ void VP1GraphicsView::Imp::createNewHelptextImage(const QRect& imrect)
   QPalette pal = view->viewport()->palette();
   pal.setBrush(QPalette::Text, g);
 
-  ctx.palette = pal;
+  ctx.palette = std::move(pal);
   ctx.clip = QRect(0, 0, textRect.width(), textRect.height());
   helptext.documentLayout()->draw(&painter, ctx);
 

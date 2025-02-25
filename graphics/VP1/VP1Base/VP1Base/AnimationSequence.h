@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1BASE_ANIMATIONSEQUENCE_H
@@ -32,12 +32,12 @@ class AnimationSequence {
       : time(t), clipVolPercent(c), variableSpeed(vs), forceCircular(fc), reg(r),dir(d),upvec(u){}
     Frame(QByteArray cs, const double& t,bool vs,bool fc, double c)
       : time(t), clipVolPercent(c), variableSpeed(vs), forceCircular(fc),
-	camState(cs), reg(VERTEX),dir(SbVec3f(0,0,0)),upvec(SbVec3f(0,0,0)){}
+	camState(std::move(cs)), reg(VERTEX),dir(SbVec3f(0,0,0)),upvec(SbVec3f(0,0,0)){}
 
-    double  time;   // time
-    double  clipVolPercent; // Percentage of ATLAS Vol used as clipping volume.
-    bool variableSpeed;
-    bool forceCircular;
+    double  time{};   // time
+    double  clipVolPercent{}; // Percentage of ATLAS Vol used as clipping volume.
+    bool variableSpeed{};
+    bool forceCircular{};
 
     //If camstate is not empty, (reg,dir,upvec) defines the frame. Otherwise those three are ignored.
     QByteArray camState;

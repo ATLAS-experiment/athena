@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -225,7 +225,7 @@ void VP1Deserialise::restore(PhiSectionWidget* phi)
   QByteArray ba(restoreByteArray());
   if (phi&&ba != QByteArray()) {
     m_d->block(phi);
-    phi->setState(ba);
+    phi->setState(std::move(ba));
     m_d->unblock();
   }
 }
