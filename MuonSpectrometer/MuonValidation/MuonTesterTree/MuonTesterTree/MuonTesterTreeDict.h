@@ -10,6 +10,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include <MuonTesterTree/EventIDBranch.h>
 #include <MuonTesterTree/EventInfoBranch.h>
 #include <MuonTesterTree/FourVectorBranch.h>
+#include <MuonTesterTree/GenericDecorBranch.h>
 #include <MuonTesterTree/IMuonTesterBranch.h>
 #include <MuonTesterTree/IParticleFourMomBranch.h>
 #include <MuonTesterTree/IdentifierBranch.h>

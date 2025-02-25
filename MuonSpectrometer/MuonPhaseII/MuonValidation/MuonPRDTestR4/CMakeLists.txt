@@ -15,7 +15,7 @@ atlas_add_library( MuonPRDTestR4Lib
 atlas_add_component( MuonPRDTestR4
                      src/components/*.cxx src/*.cxx
                      LINK_LIBRARIES AthenaKernel StoreGateLib MuonTesterTreeLib MuonPRDTestLib
-                                    xAODMuonSimHit xAODMuonPrepData MuonPRDTestR4Lib)
+                                    xAODMuonSimHit xAODMuonPrepData MuonPRDTestR4Lib MuonTruthHelpers)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

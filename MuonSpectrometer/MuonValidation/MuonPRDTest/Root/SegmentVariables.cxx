@@ -15,7 +15,7 @@ namespace MuonPRDTest {
             m_name{outName}{}
 
    bool SegmentVariables::fill(const EventContext& ctx) {
-        SG::ReadHandle<xAOD::MuonSegmentContainer> readHandle{m_key, ctx};
+        SG::ReadHandle readHandle{m_key, ctx};
         if(!readHandle.isPresent()) {
             ATH_MSG_FATAL("Failed to retrieve "<<m_key.fullKey());
             return false;
@@ -35,13 +35,17 @@ namespace MuonPRDTest {
         m_filterMode = true;
         return fill(segment);
     }
+    bool SegmentVariables::addVariable(std::shared_ptr<IAuxElementDecorationBranch> br) {
+        m_addBranches.push_back(br);
+        return parent().addBranch(br);
+    }
     unsigned int SegmentVariables::fill(const xAOD::MuonSegment& segment){ 
        auto insert_itr = m_idxLookUp.insert(std::make_pair(&segment, m_idxLookUp.size()));
        if (!insert_itr.second) {
             return insert_itr.first->second;
        }
-       m_pos.push_back(segment.x(), segment.y(), segment.z());
-       m_dir.push_back(segment.px(), segment.py(), segment.pz());
+       m_pos.push_back(segment.position());
+       m_dir.push_back(segment.direction());
        m_etaIdx += segment.etaIndex();
        m_sector += segment.sector();
        m_chamberIdx +=segment.chamberIndex();
@@ -51,6 +55,9 @@ namespace MuonPRDTest {
         m_nPrecHits += segment.nPrecisionHits();
         m_nTrigEtaLayers += segment.nTrigEtaLayers();
         m_nTrigPhiLayers += segment.nPhiLayers();
+        for(const auto& br : m_addBranches){
+            br->push_back(segment);
+        }
  
         return insert_itr.first->second;
     } 

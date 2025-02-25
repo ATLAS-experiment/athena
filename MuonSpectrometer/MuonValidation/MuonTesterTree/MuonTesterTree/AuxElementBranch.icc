@@ -23,7 +23,7 @@ template <class T> void AuxElementBranch<T>::push_back(const SG::AuxElement& p) 
     else if (hasDefault()) {
         VectorBranch<T>::push_back(getDefault());
     } else {
-        throw std::runtime_error("Decoration is not available to fill " + name());
+        THROW_EXCEPTION("Decoration is not available to fill " + name());
     }
 }
 template <class T>
