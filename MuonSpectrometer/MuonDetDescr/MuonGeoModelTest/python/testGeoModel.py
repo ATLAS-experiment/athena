@@ -1,7 +1,7 @@
-
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
 
 def SetupArgParser():
     from argparse import ArgumentParser
@@ -9,21 +9,23 @@ def SetupArgParser():
     parser = ArgumentParser()
     parser.add_argument("--threads", type=int, help="number of threads", default=1)
     parser.add_argument("--inputFile", "-i", default=[
-                        #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data17_13TeV.00330470.physics_Main.daq.RAW._lb0310._SFO-1._0001.data"
-                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"
+                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data17_13TeV.00330470.physics_Main.daq.RAW._lb0310._SFO-1._0001.data"
+                        #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"
                         ], 
                         help="Input file to run on ", nargs="+")
-    parser.add_argument("--geoTag", default="ATLAS-R3S-2021-03-02-00", help="Geometry tag to use", choices=["ATLAS-R2-2016-01-02-01",
-                                                                                     "ATLAS-R3S-2021-03-02-00"])
-    parser.add_argument("--condTag", default="OFLCOND-MC23-SDR-RUN3-09", help="Conditions tag to use",
-                                                                         choices=["OFLCOND-MC16-SDR-RUN2-11",
-                                                                                  "OFLCOND-MC23-SDR-RUN3-09",
-                                                                                  "CONDBR2-BLKPA-2024-03",
-                                                                                  "CONDBR2-BLKPA-RUN2-11"])
+    parser.add_argument("--geoTag", default=defaultGeometryTags.RUN2_BEST_KNOWLEDGE,
+                        help="Geometry tag to use",
+                        choices=[defaultGeometryTags.RUN2_BEST_KNOWLEDGE,
+                                 defaultGeometryTags.RUN3])
+    parser.add_argument("--condTag", default=defaultConditionsTags.RUN2_DATA,
+                        help="Conditions tag to use",
+                        choices=[defaultConditionsTags.RUN2_MC,
+                                 defaultConditionsTags.RUN3_MC,
+                                 defaultConditionsTags.RUN3_DATA,
+                                 defaultConditionsTags.RUN2_DATA])
     parser.add_argument("--chambers", default=["all"
     ], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
-    parser.add_argument("--excludedChambers", default=[], nargs="+", help="Chambers to exclude. If string contains 'none', all chambers will be checked. Note: adding a chamber to --excludedChambers will overwrite it being in --chambers.")
-    parser.add_argument("--outRootFile", default="LegacyGeoModelDump.root", help="Output ROOT file to dump the geomerty")
+    parser.add_argument("--outRootFile", default="GeoModelDump.root", help="Output ROOT file to dump the geomerty")
     parser.add_argument("--noMdt", help="Disable the Mdts from the geometry", action='store_true', default = False)
     parser.add_argument("--noRpc", help="Disable the Rpcs from the geometry", action='store_true', default = False)
     parser.add_argument("--noTgc", help="Disable the Tgcs from the geometry", action='store_true', default = False)
@@ -32,12 +34,16 @@ def SetupArgParser():
     
     return parser
 
+def setupHistSvc(flags, out_file="MdtGeoDump.root"):
+    result = ComponentAccumulator()
+    if len(out_file) == 0: return result
+    histSvc = CompFactory.THistSvc(Output=["GEOMODELTESTER DATAFILE='{out_file}', OPT='RECREATE'".format(out_file = out_file)])
+    result.addService(histSvc, primary=True)
+    return result
 
 def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", **kwargs):
     result = ComponentAccumulator()
     if not flags.Detector.GeometryMDT: return result
-    from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
-    result.merge(MDTCablingConfigCfg(flags))
     the_alg = CompFactory.MuonGM.GeoModelMdtTest(name, **kwargs)
     result.addEventAlgo(the_alg)
     return result
@@ -91,29 +97,23 @@ if __name__=="__main__":
     flags.lock()
     from MuonCondTest.MdtCablingTester import setupServicesCfg
     cfg = setupServicesCfg(flags)
-    from MuonGeoModelTestR4.testGeoModel import setupHistSvcCfg
-    cfg.merge(setupHistSvcCfg(flags, outFile = args.outRootFile))
+    cfg.merge(setupHistSvc(flags, out_file = args.outRootFile))
     
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
-    chambToExclude = args.excludedChambers
     if not args.noMdt:
-        cfg.merge(GeoModelMdtTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"],
-                                            ExcludeStations = [ch for ch in chambToExclude if ch[0] == "B" or ch[0] == "E"]))
+        cfg.merge(GeoModelMdtTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"], 
+                                            dumpSurfaces = False ))
     if not args.noRpc:
-        cfg.merge(GeoModelRpcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B"],
-                                      ExcludeStations = [ch for ch in chambToExclude if ch[0] == "B"]))
+        cfg.merge(GeoModelRpcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B"]))
     if not args.noTgc:
         cfg.merge(GeoModelTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "T"],
-                                            ExcludeStations = [ch for ch in chambToExclude if ch[0] == "T"],
                                             ReadoutXML="TgcStripStructure.xml"))
 
     if not args.noMM:
-        cfg.merge(GeoModelMmTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "M"],
-                                    ExcludeStations = [ch for ch in chambToExclude if ch[0] == "M"]))    
+        cfg.merge(GeoModelMmTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "M"]))    
     
     if not args.noSTGC:
-        cfg.merge(GeoModelsTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "S"],
-                                         ExcludeStations = [ch for ch in chambToExclude if ch[0] == "S"]))
+        cfg.merge(GeoModelsTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "S"]))
    
     cfg.merge(GeoModelCscTestCfg(flags))
     

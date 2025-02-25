@@ -496,7 +496,7 @@ class TrigTauMonAlgBuilder:
     mon_group = self.helper.addGroup(mon_alg, mon_group_name, mon_group_path)
  
     for tau_id, (score, score_sig_trans) in variables.items():
-      if tau_id in ['RNN', 'DeepSet', 'RNNLLP']: xbins, xmax = 20, 1
+      if tau_id in ['RNN', 'DeepSet', 'RNNLLP', 'GNTau']: xbins, xmax = 20, 1
       else: xbins, xmax = 100, 5
 
       mon_group.defineHistogram(f'{tau_id}_TauIDScore', title=f'{type_str} {tau_id} TauID score; TauID score; Events', xbins=xbins, xmin=0, xmax=xmax, opt='kAlwaysCreate')

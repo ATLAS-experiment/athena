@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //                           CMMEtSums.h  -  description
@@ -18,7 +18,6 @@
   #include "AthenaKernel/CLASS_DEF.h"
 
 
-  #include <iostream>
   #ifndef  TRIGGERSPACE
   #include "TrigT1Interfaces/Coordinate.h"
   #else
@@ -37,7 +36,7 @@
                    MISSING_ET_MAP, SUM_ET_MAP, MISSING_ET_SIG_MAP, MAXID };
 
     /** Constructors */
-    CMMEtSums();
+    CMMEtSums() = default;
     CMMEtSums(int crate, int dataID);
     CMMEtSums(int crate, int dataID,
               const std::vector<unsigned int>& Et, 
@@ -48,7 +47,6 @@
 	      const std::vector<int>& EyError,
 	      int peak);
   
-    virtual ~CMMEtSums();
 
     /** In multi-slice readout must specify which slide is triggered BC */
     void setPeak(int peak);
@@ -81,15 +79,15 @@
       
   /** Internal data */
     private:
-    int m_crate;
-    int m_dataID;
-    int m_peak;
-    std::vector <unsigned int> m_Et;
-    std::vector <unsigned int> m_Ex;
-    std::vector <unsigned int> m_Ey;
-    std::vector <int> m_EtError;
-    std::vector <int> m_ExError;
-    std::vector <int> m_EyError;
+    int m_crate{};
+    int m_dataID{};
+    int m_peak{};
+    std::vector <unsigned int> m_Et{0};
+    std::vector <unsigned int> m_Ex{0};
+    std::vector <unsigned int> m_Ey{0};
+    std::vector <int> m_EtError{0};
+    std::vector <int> m_ExError{0};
+    std::vector <int> m_EyError{0};
     
     };
   } // end of namespace

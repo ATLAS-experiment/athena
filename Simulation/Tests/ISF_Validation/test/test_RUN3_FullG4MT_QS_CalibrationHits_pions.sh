@@ -12,7 +12,9 @@
 # art-output: Config*.pkl
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-08
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 Sim_tf.py \
     --CA \
     --simulator 'FullG4MT_QS'  \
@@ -20,8 +22,8 @@ Sim_tf.py \
     --outputHITSFile 'test.HITS.pool.root' \
     --maxEvents '10' \
     --skipEvents '0' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoVCalibrationHits' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \

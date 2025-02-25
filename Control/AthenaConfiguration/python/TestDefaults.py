@@ -101,6 +101,7 @@ class defaultConditionsTags:
     RUN2_MC = "OFLCOND-MC16-SDR-RUN2-12"
     RUN3_DATA = "CONDBR2-BLKPA-2024-04"  # TODO: switch to proper global tag once available
     RUN3_DATA22 = "CONDBR2-BLKPA-2022-15"
+    RUN3_DATA23 = "CONDBR2-BLKPA-2023-05"
     RUN3_MC = "OFLCOND-MC23-SDR-RUN3-08"
     RUN4_MC = "OFLCOND-MC21-SDR-RUN4-03"
 

@@ -24,6 +24,7 @@ artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeXml_lrt=IDPVMPlots_lrt.xml                                                                                                                                                
 dcubeRef_lrt=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_ttbarPU40_reco.root
 
+
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml_lrt -print -quit 2>/dev/null)
 # Don't run if dcube config not found
@@ -32,13 +33,16 @@ if [ -z "$dcubeXmlAbsPath" ]; then
     exit 1
 fi
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
+
 # Reco step based on test InDetPhysValMonitoring ART setup from Josh Moss.
 run Reco_tf.py \
   --CA \
   --runNumber="801271" \
   --AMITag="r14519" \
   --autoConfiguration="everything" \
-  --conditionsTag   'default:OFLCOND-MC23-SDR-RUN3-07' \
+  --conditionsTag "default:${conditions}" \
   --inputRDOFile     ${ArtInFile} \
   --outputAODFile   physval.AOD.root \
   --steering        doRAWtoALL \

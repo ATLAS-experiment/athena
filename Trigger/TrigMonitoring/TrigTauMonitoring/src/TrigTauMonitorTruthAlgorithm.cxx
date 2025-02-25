@@ -4,8 +4,6 @@
 
 #include "TruthUtils/HepMCHelpers.h"
 #include "TrigTauMonitorTruthAlgorithm.h"
-#include "AthContainers/ConstAccessor.h"
-#include "AthContainers/Decorator.h"
 
 TrigTauMonitorTruthAlgorithm::TrigTauMonitorTruthAlgorithm(const std::string& name, ISvcLocator* pSvcLocator)
     : TrigTauMonitorBaseAlgorithm(name, pSvcLocator)
@@ -33,10 +31,10 @@ std::pair<std::vector<std::shared_ptr<xAOD::TruthParticle>>, std::vector<std::sh
         return {true_taus_1p, true_taus_3p};
     }
 
-    static const SG::AuxElement::ConstAccessor<double> acc_ptvis("pt_vis");
-    static const SG::AuxElement::ConstAccessor<double> acc_etavis("eta_vis");
-    static const SG::AuxElement::ConstAccessor<int> acc_ntracks("nTracks");
-    static const SG::AuxElement::ConstAccessor<char> acc_isleptonic("IsLeptonicTau");
+    static const SG::ConstAccessor<double> acc_ptvis("pt_vis");
+    static const SG::ConstAccessor<double> acc_etavis("eta_vis");
+    static const SG::ConstAccessor<int> acc_ntracks("nTracks");
+    static const SG::ConstAccessor<char> acc_isleptonic("IsLeptonicTau");
 
     // Fill truth tau containers
     for(const auto xTruthParticle : *truth_cont) {
@@ -70,16 +68,17 @@ std::pair<std::vector<std::shared_ptr<xAOD::TruthParticle>>, std::vector<std::sh
 }
 
 
-StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<xAOD::TruthParticle>& xTruthTau) const
+StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<xAOD::TruthParticle> xTruthTau) const
 {
     if(!xTruthTau->hasDecayVtx()) return StatusCode::FAILURE;
-    static const SG::AuxElement::Accessor<double> acc_ptvis("pt_vis");
-    static const SG::AuxElement::Accessor<double> acc_etavis("eta_vis");
-    static const SG::AuxElement::Accessor<double> acc_phivis("phi_vis");
-    static const SG::AuxElement::Accessor<double> acc_mvis("mvis");
-    static const SG::AuxElement::Accessor<int> acc_childChargeSum("childChargeSum");
-    static const SG::AuxElement::Accessor<int> acc_ntracks("nTracks");
-    static const SG::AuxElement::Accessor<char> acc_isleptonic("IsLeptonicTau");
+
+    static const SG::Accessor<double> acc_ptvis("pt_vis");
+    static const SG::Accessor<double> acc_etavis("eta_vis");
+    static const SG::Accessor<double> acc_phivis("phi_vis");
+    static const SG::Accessor<double> acc_mvis("mvis");
+    static const SG::Accessor<int> acc_childChargeSum("childChargeSum");
+    static const SG::Accessor<int> acc_ntracks("nTracks");
+    static const SG::Accessor<char> acc_isleptonic("IsLeptonicTau");
 
     acc_isleptonic(*xTruthTau) = false;
         
@@ -98,12 +97,12 @@ StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<x
             const xAOD::TruthParticle* child = decayvtx->outgoingParticle(iChild);
             if(child) {
                 if(MC::isSMNeutrino(child)) continue;
-                if(!MC::isPhysical(child)) continue;
+                if(child->status() == 3) continue;
                 ATH_MSG_DEBUG("Child " << child->pdgId() << ", status " << child->status() << ", charge " << child->charge());
-                if(MC::isSMLepton(child)) acc_isleptonic(*xTruthTau) = true; // Just selects charged SM Leptons as we have already skipped SM neutrinos
+                if(MC::isSMLepton(child)) xTruthTau->auxdecor<char>("IsLeptonicTau") = true; // Just selects charged SM Leptons as we have already skipped SM neutrinos
                 VisSumTLV += child->p4();
-                acc_childChargeSum(*xTruthTau) += child->charge();
-                acc_ntracks(*xTruthTau) += std::abs(child->charge());
+                xTruthTau->auxdecor<int>("childChargeSum") += child->charge();
+                xTruthTau->auxdecor<int>("nTracks") += std::abs(child->charge());
             }
         }
     }
@@ -112,8 +111,8 @@ StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<x
     acc_phivis(*xTruthTau) = VisSumTLV.Phi();
     acc_mvis(*xTruthTau) = VisSumTLV.M();
 
-    if(acc_childChargeSum(*xTruthTau) != xTruthTau->charge() || acc_ntracks(*xTruthTau)%2 == 0) { 
-        ATH_MSG_WARNING("Strange tau: charge " << acc_childChargeSum(*xTruthTau) << " and " << acc_ntracks(*xTruthTau)  << " tracks");
+    if(xTruthTau->auxdecor<int>("childChargeSum") != xTruthTau->charge() || xTruthTau->auxdecor<int>("nTracks")%2 == 0) { 
+        ATH_MSG_WARNING("Strange tau: charge " << xTruthTau->auxdecor<int>("childChargeSum") << " and " << xTruthTau->auxdecor<int>("nTracks")  << " tracks");
         const std::size_t nChildren = decayvtx->nOutgoingParticles();
         for(std::size_t iChild = 0; iChild != nChildren; ++iChild) {
         const xAOD::TruthParticle * child = decayvtx->outgoingParticle(iChild);
@@ -173,9 +172,9 @@ void TrigTauMonitorTruthAlgorithm::fillTruthEfficiency(const std::vector<const x
 
     bool hlt_fires = m_trigDecTool->isPassed(trigger, TrigDefs::Physics | TrigDefs::allowResurrectedDecision);
 
-    static const SG::AuxElement::ConstAccessor<double> acc_ptvis("pt_vis");
-    static const SG::AuxElement::ConstAccessor<double> acc_etavis("eta_vis");
-    static const SG::AuxElement::ConstAccessor<double> acc_phivis("phi_vis");
+    static const SG::ConstAccessor<double> acc_ptvis("pt_vis");
+    static const SG::ConstAccessor<double> acc_etavis("eta_vis");
+    static const SG::ConstAccessor<double> acc_phivis("phi_vis");
 
     for(const std::shared_ptr<xAOD::TruthParticle>& true_tau : true_taus) {
         pt_vis = acc_ptvis(*true_tau)/Gaudi::Units::GeV;
@@ -214,16 +213,12 @@ void TrigTauMonitorTruthAlgorithm::fillTruthVars(const std::vector<const xAOD::T
 
     float matchedRatio = -999, matchedptvis = -999, matchedetavis = 999, matchedphivis = 999, matchedmvis = -999;
 
-    static const SG::AuxElement::ConstAccessor<double> acc_ptvis("pt_vis");
-    static const SG::AuxElement::ConstAccessor<double> acc_etavis("eta_vis");
-    static const SG::AuxElement::ConstAccessor<double> acc_phivis("phi_vis");
-    static const SG::AuxElement::ConstAccessor<double> acc_mvis("mvis");
+    static const SG::ConstAccessor<double> acc_ptvis("pt_vis");
+    static const SG::ConstAccessor<double> acc_etavis("eta_vis");
+    static const SG::ConstAccessor<double> acc_phivis("phi_vis");
+    static const SG::ConstAccessor<double> acc_mvis("mvis");
 
     // Visible-Truth Tau matching to HLT Tau
-    static const SG::ConstAccessor<double> pt_visAcc("pt_vis");
-    static const SG::ConstAccessor<double> eta_visAcc("eta_vis");
-    static const SG::ConstAccessor<double> phi_visAcc("phi_vis");
-    static const SG::ConstAccessor<double> mvisAcc("mvis");
     for(auto& HLTTau : ef_taus) {
         for(const std::shared_ptr<xAOD::TruthParticle>& true_tau : true_taus) {
 	    if(matchTruthObjects(true_tau.get(), {HLTTau}, 0.2)) {

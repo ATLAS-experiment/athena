@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
  //***************************************************************************
@@ -38,8 +38,7 @@ class CPMTower {
 public:
 
 /** Constructors */
-    CPMTower();  
-    
+    CPMTower();
     CPMTower(double phi, double eta);
     
     CPMTower(double phi, double eta,
@@ -48,10 +47,7 @@ public:
              const std::vector<int>& had_et,
              const std::vector<int>& had_error,
              int peak);
-    
-/** Destructor */
-    virtual ~CPMTower();
-
+ 
 /** Methods to fill towers with digits, calibrated ET vectors and status flags*/
     void fill(const std::vector<int>& em_et,
               const std::vector<int>& em_error,
@@ -93,13 +89,13 @@ public:
   
 /** Internal data */  
     private:
-    std::vector <int> m_em_energy;
-    std::vector <int> m_had_energy;
-    std::vector <int> m_em_error;
-    std::vector <int> m_had_error;
-    double m_phi;
-    double m_eta;
-    int m_peak;
+    std::vector <int> m_em_energy{0};
+    std::vector <int> m_had_energy{0};
+    std::vector <int> m_em_error{0};
+    std::vector <int> m_had_error{0};
+    double m_phi{};
+    double m_eta{};
+    int m_peak{};
   
     };
 

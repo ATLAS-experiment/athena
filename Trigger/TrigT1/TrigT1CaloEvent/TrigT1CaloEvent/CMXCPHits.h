@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
   
@@ -9,7 +9,6 @@
   #include "AthenaKernel/CLASS_DEF.h"
 
 
-  #include <iostream>
   #ifndef  TRIGGERSPACE
   #include "TrigT1Interfaces/Coordinate.h"
   #else
@@ -29,7 +28,7 @@
 		   MAXSOURCE };
 
     /** Constructors */
-    CMXCPHits();
+    CMXCPHits() = default;
     CMXCPHits(int crate, int cmx, int source);
     CMXCPHits(int crate, int cmx, int source,
               const std::vector<unsigned int>& hits0,
@@ -38,7 +37,6 @@
 	      const std::vector<int>& error1,
 	      int peak);
   
-    virtual ~CMXCPHits();
 
     /** For multi-slice readout, need to indicate position of triggered BC */
     void setPeak(int peak);
@@ -66,14 +64,14 @@
       
   /** Internal data */
     private:
-    int m_crate;
-    int m_cmx;                                       // <<== Do we need firmware as well?
-    int m_source;
-    int m_peak;
-    std::vector<unsigned int> m_hits0;
-    std::vector<unsigned int> m_hits1;
-    std::vector<int> m_error0;
-    std::vector<int> m_error1;
+    int m_crate{};
+    int m_cmx{};                                       // <<== Do we need firmware as well?
+    int m_source{};
+    int m_peak{};
+    std::vector<unsigned int> m_hits0{0};
+    std::vector<unsigned int> m_hits1{0};
+    std::vector<int> m_error0{0};
+    std::vector<int> m_error1{0};
     
     };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //                           CMMJetHits.h  -  description
@@ -15,7 +15,6 @@
   #include "AthenaKernel/CLASS_DEF.h"
 
 
-  #include <iostream>
   #ifndef  TRIGGERSPACE
   #include "TrigT1Interfaces/Coordinate.h"
   #else
@@ -37,14 +36,12 @@
 		   ET_MAP, MAXID };
 
     /** Constructors */
-    CMMJetHits();
+    CMMJetHits() = default;
     CMMJetHits(int crate, int dataID);
     CMMJetHits(int crate, int dataID,
                const std::vector<unsigned int>& hits,
 	       const std::vector<int>& errors, int peak);
 
-    /** Destructor */
-    virtual ~CMMJetHits();
 
     /** In multi-slice readout, need to specify which slice corresponds to the
         triggered bunch-crossing */
@@ -65,11 +62,11 @@
       
   /** Internal data */
     private:
-    int m_crate;
-    int m_dataID;
-    int m_peak;
-    std::vector<unsigned int> m_hits;
-    std::vector<int> m_errors;
+    int m_crate{};
+    int m_dataID{};
+    int m_peak{};
+    std::vector<unsigned int> m_hits{0};
+    std::vector<int> m_errors{0};
     
     };
   } // end of namespace

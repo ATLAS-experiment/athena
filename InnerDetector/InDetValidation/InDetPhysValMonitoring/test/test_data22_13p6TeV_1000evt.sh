@@ -21,8 +21,8 @@ dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physva
 
 script=test_data_reco.sh
 
-conditions="CONDBR2-BLKPA-2022-15"
-geotag="ATLAS-R3S-2021-03-02-00"
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA22)")
+geotag=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
 
 echo "Executing script ${script}"
 echo " "

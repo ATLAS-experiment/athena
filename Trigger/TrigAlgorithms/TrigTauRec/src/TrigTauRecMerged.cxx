@@ -69,7 +69,7 @@ StatusCode TrigTauRecMerged::initialize()
     for(const auto& [key, p] : m_monitoredIdScores) {
         m_monitoredIdAccessors.emplace(
             key,
-            std::make_pair(SG::AuxElement::ConstAccessor<float>(p.first), SG::AuxElement::ConstAccessor<float>(p.second))
+            std::make_pair(SG::ConstAccessor<float>(p.first), SG::ConstAccessor<float>(p.second))
         );
     }
 

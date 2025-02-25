@@ -184,7 +184,7 @@ def TRT_KrPhysicsRegionToolCfg(flags, name='TRT_KrPhysicsRegionTool', **kwargs):
 
 def CALOPhysicsRegionToolCfg(flags, name='CALOPhysicsRegionTool', **kwargs):
     kwargs.setdefault("RegionName", 'CALO')
-    volumeList = ['CALO::CALO', 'LArMgr::LAr::Endcap::Cryostat::Cylinder::Mixed','LArMgr::LAr::Barrel::Cryostat::MotherVolume','LArMgr::ModeratorTube']
+    volumeList = ['CALO::CALO', 'LArMgr::LAr::Endcap::Cryostat::Cylinder::Mixed','LArMgr::LAr::Barrel::Cryostat::MotherVolume','LArMgr::ModeratorTube','LArMgr::LAr::Endcap::Cryostat::MotherVolume']
     kwargs.setdefault("VolumeList",  volumeList)
     return RegionCreatorCfg(flags, name, **kwargs)
 
