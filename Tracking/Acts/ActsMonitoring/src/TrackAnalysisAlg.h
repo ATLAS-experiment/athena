@@ -8,6 +8,8 @@
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "ActsEvent/TrackContainer.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "InDetIdentifier/PixelID.h"
+#include "InDetIdentifier/SCT_ID.h"
 
 namespace ActsTrk {
 
@@ -26,6 +28,9 @@ namespace ActsTrk {
 
     Gaudi::Property< std::string > m_monGroupName
       {this, "MonGroupName", "ActsSeedAnalysisAlg"};
+
+    const PixelID *m_pixelID {};
+    const SCT_ID *m_stripID {};
   };
 
 }
