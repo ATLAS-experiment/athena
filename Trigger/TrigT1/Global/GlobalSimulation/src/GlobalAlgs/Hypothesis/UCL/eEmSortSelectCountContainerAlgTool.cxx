@@ -17,6 +17,7 @@
 #include <algorithm>
 
 namespace GlobalSim {
+  
 
   std::vector<eEmTobPtr>
   make_eEmTobs(const GlobalSim::GepAlgoHypothesisFIFO& fifo);
@@ -35,10 +36,11 @@ namespace GlobalSim {
 
     // Cut values for Select part of Algorithm. Not yet provided in VHDL
 
-    m_EtMin = std::vector(AlgoConstants::NumSelect, 0);
-    m_REtaMin = std::vector(AlgoConstants::NumSelect, 0);
-    m_RHadMin = std::vector(AlgoConstants::NumSelect, 0);
-    m_WsTotMin = std::vector(AlgoConstants::NumSelect, 0);
+    
+    m_EtMin = std::vector(s_NumSelect, 0);
+    m_REtaMin = std::vector(s_NumSelect, 0);
+    m_RHadMin = std::vector(s_NumSelect, 0);
+    m_WsTotMin = std::vector(s_NumSelect, 0);
 
     // Cut values for the Count part of Algorithm.
     // All values set to EM5 for now
@@ -116,11 +118,12 @@ namespace GlobalSim {
     auto ports_out = std::make_unique<eEmSortSelectCountContainerPortsOut>();
 
     //sort selected tobs, and copy to output port
-    for (std::size_t i = 0; i != AlgoConstants::eEmNumSort; ++i) {
+
+    for (std::size_t i = 0; i != s_eEmNumSort; ++i) {
 
       auto& sel =  selected_genericTobs[i];
-      auto divider = std::begin(sel) +
-	std::min(sel.size(), AlgoConstants::eEmSortOutWidth[i]);
+      auto divider = std::begin(sel) + std::min(sel.size(),
+						s_eEmSortOutWidth[i]);
 
 
       std::partial_sort(std::begin(sel),
@@ -130,7 +133,7 @@ namespace GlobalSim {
 
       auto& outputTobs = ports_out->m_O_eEmGenTob;
       auto start_iter =
-	std::begin(outputTobs) + AlgoConstants::eEmSortOutStart[i];
+	std::begin(outputTobs) + s_eEmSortOutStart[i];
 
       std::copy(std::begin(sel),
 		divider,
@@ -154,10 +157,11 @@ namespace GlobalSim {
     // limit the count values
     std::vector<std::pair<std::size_t, unsigned>> bounded_counts;
     bounded_counts.reserve(ntobs.size());
+
     for(std::size_t i = 0; i != ntobs.size(); ++i) {
       bounded_counts.push_back({
-	  std::min(ntobs[i], AlgoConstants::max_counts[i]),
-	  AlgoConstants::eEmCountOutWidth[i]});
+	  std::min(ntobs[i], s_max_counts[i]),
+	  s_eEmCountOutWidth[i]});
     };
 
     // convert each limited count value to 0, 1 (type: short)
@@ -189,10 +193,11 @@ namespace GlobalSim {
     }
 
     // sanity check
-    if (int_bits.size() != AlgoConstants::eEmNumTotalCountWidth or
+ 
+    if (int_bits.size() != s_eEmNumTotalCountWidth or
 	int_bits.size() != (ports_out->m_O_Multiplicity)->size()) {
       ATH_MSG_ERROR("incorrect number of count bits. Expected "
-		    << AlgoConstants::eEmNumTotalCountWidth
+		    << s_eEmNumTotalCountWidth
 		    << " obtained " << int_bits.size()
 		    << " number bits in output ports "
 		    << (ports_out->m_O_Multiplicity)->size());
@@ -306,9 +311,9 @@ namespace GlobalSim {
   eEmSortSelectCountContainerAlgTool::make_selectedTobs(const std::vector<eEmTobPtr>& eEmTobs,
 							std::vector<std::vector<eEmTobPtr>>& selectedTobs) const {
   
-    selectedTobs.reserve(AlgoConstants::NumSelect);
+    selectedTobs.reserve(s_NumSelect);
     
-    for(std::size_t i = 0; i != AlgoConstants::NumSelect; ++i) {
+    for(std::size_t i = 0; i != s_NumSelect; ++i) {
       auto selector = [etMin = m_EtMin[i],
 		       rEtaMin= m_REtaMin[i],
 		       rHadMin = m_RHadMin[i],

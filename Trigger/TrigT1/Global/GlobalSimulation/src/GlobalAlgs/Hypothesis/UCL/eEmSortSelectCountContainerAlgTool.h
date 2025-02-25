@@ -74,7 +74,10 @@ namespace GlobalSim {
     std::vector<int> m_WsTotMin;
 
     // Count cuts. Each count has three eta regions
-    // The outer vector is of length 3: one entry per eta region
+    // The outer vector will be initialised  to have  length
+    // s_NumCnt: one entry per set of count cuts. The inner vector
+    // will be initialised to have length 3, one cut for eacn of the
+    // three eta regions.
     std::vector<std::vector<unsigned int>> m_count_EtMin;
     std::vector<std::vector<int>> m_count_EtaMin;
     std::vector<std::vector<int>> m_count_EtaMax;
@@ -94,6 +97,30 @@ namespace GlobalSim {
     // s_CntSelN chooses which of these to use.
     constexpr static std::array<std::size_t, s_NumCnt> s_CntSelN{
       0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+    constexpr static auto& s_NumSelect =
+      eEmSortSelectCountContainerPortsOut::NumSelect;
+
+    constexpr static auto& s_eEmNumSort =
+      eEmSortSelectCountContainerPortsOut::eEmNumSort;
+
+    constexpr static auto& s_eEmSortOutWidth =
+      eEmSortSelectCountContainerPortsOut::eEmSortOutWidth;
+
+    
+    constexpr static auto& s_eEmSortOutStart =
+      eEmSortSelectCountContainerPortsOut::eEmSortOutStart;
+
+    constexpr static auto& s_max_counts =
+      eEmSortSelectCountContainerPortsOut::max_counts;
+
+    constexpr static auto& s_eEmCountOutWidth =
+      eEmSortSelectCountContainerPortsOut::eEmCountOutWidth;
+
+    
+    constexpr static auto& s_eEmNumTotalCountWidth =
+      eEmSortSelectCountContainerPortsOut::eEmNumTotalCountWidth;
+
 
   };
 }
