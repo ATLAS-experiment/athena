@@ -482,9 +482,9 @@ class EEtaMPhiSampler(MomSampler):
         """
         eta = self.eta()
         theta = 2 * math.atan(math.exp(-eta))
-        e = self.energy()
+        e = max(self.mass(), self.energy())
         m = self.mass()
-        p = math.sqrt( e**2 - m**2 )
+        p = math.sqrt( max(0.0, e**2 - m**2) )
         pz = p * math.cos(theta)
         pt = p * math.sin(theta)
         phi = self.phi()
@@ -546,7 +546,7 @@ class ERapMPhiSampler(MomSampler):
         -> pz = sqrt(pt^2 + m^2) sinh(y)
         -> sqrt(pt^2 + m^2) = E / cosh(y)
         """
-        e = self.energy()
+        e = max(self.mass(),self.energy())
         y = self.rap()
         sqrt_pt2_m2 = e / math.cosh(y)
         pz = sqrt_pt2_m2 * math.sinh(y)
@@ -608,9 +608,9 @@ class EThetaMPhiSampler(MomSampler):
         pz = p cos(theta)
         pt = p sin(theta)
         """
-        e = self.energy()
+        e = max(self.energy(),self.mass())
         m = self.mass()
-        p = math.sqrt( e**2 - m**2 )
+        p = math.sqrt( max(0.0,e**2 - m**2) )
         theta = self.theta()
         pz = p * math.cos(theta)
         pt = p * math.sin(theta)
