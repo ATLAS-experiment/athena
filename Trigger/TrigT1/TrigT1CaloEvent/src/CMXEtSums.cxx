@@ -13,33 +13,12 @@
 
 namespace LVL1 {
 
-CMXEtSums::CMXEtSums():
-  m_crate(0),
-  m_source(0),
-  m_peak(0),
-  m_Et(1),
-  m_Ex(1),
-  m_Ey(1),
-  m_EtError(1),
-  m_ExError(1),
-  m_EyError(1)
-{
-}
 
-CMXEtSums::~CMXEtSums(){
-}
 
 /** constructs a CMXEtSums object, specifying crate, and data ID. */
 CMXEtSums::CMXEtSums(int crate, int source):
   m_crate(crate),
-  m_source(source),
-  m_peak(0),
-  m_Et(1),
-  m_Ex(1),
-  m_Ey(1),
-  m_EtError(1),
-  m_ExError(1),
-  m_EyError(1)
+  m_source(source)
 {
 }
 

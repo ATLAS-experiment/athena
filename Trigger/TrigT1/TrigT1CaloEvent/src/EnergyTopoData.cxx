@@ -6,11 +6,6 @@
 
 namespace LVL1 {
 
-// Default constructor
-EnergyTopoData::EnergyTopoData() : m_word0(0), m_word1(0), m_word2(0)
-{
-}
-
 // Construct from pre-calculated data words
 EnergyTopoData::EnergyTopoData(unsigned int word0, unsigned int word1, unsigned int word2) :
   m_word0(word0),
