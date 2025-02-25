@@ -57,12 +57,6 @@ clustermods      = ("ECPSFrac","ClusterMoments",)
 truthmods        = ("PartonTruthLabel","JetDeltaRLabel:5000", "JetGhostLabel")
 pflowmods        = ()
 
-### ToDo: 
-### add it to the modifiers of the AntiKt4EMPFlow
-### the model is still under validation given a computation issue
-jettaggerscore = ("qgtransformer",)
-
-
 # ********************************************************
 # Standard track jet definition
 # ********************************************************
@@ -89,7 +83,7 @@ AntiKt4PV0Track = JetDefinition("AntiKt", 0.4, cst.PV0Track,
 
 AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+truthmods+standardmods+jettaggerscore+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
+                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
                                lock = True
 )
 
