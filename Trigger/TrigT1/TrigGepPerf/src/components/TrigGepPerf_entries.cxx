@@ -28,3 +28,12 @@ DECLARE_COMPONENT(EMB1CellsFromCaloCells)
 
 #include "../EMB1CellsFromCaloClusters.h"
 DECLARE_COMPONENT(EMB1CellsFromCaloClusters)
+
+#include "../GepTopoTowerAlg.h"
+DECLARE_COMPONENT(GepTopoTowerAlg)
+
+#include "../GepCellTowerAlg.h"
+DECLARE_COMPONENT(GepCellTowerAlg)
+
+#include "../GepTCTowerAlg.h"
+DECLARE_COMPONENT(GepTCTowerAlg)
