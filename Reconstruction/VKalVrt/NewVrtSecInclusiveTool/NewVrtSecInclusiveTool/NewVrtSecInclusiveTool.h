@@ -195,7 +195,7 @@ namespace Rec {
       ToolHandle<Trk::TrkVKalVrtFitter>  m_fitSvc{this, "VertexFitterTool", "Trk::TrkVKalVrtFitter/VertexFitterTool", "Name of the Vertex Fitter tool"};
       ToolHandle< Reco::ITrackToVertex >  m_trackToVertexTool{this, "TrackToVertexTool", "Reco::TrackToVertex/TrackToVertex", "Name of the TrackToVertex tool"};
 
-      Gaudi::Property<std::string> m_augString {this, "AugmentingVersionString", "", "Augmentation version string"};
+      Gaudi::Property<std::string> m_augString {this, "AugmentingVersionString", "_NVSI", "Augmentation version string"};
 
       double m_massPi {};
       double m_massP {};

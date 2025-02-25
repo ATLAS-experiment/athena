@@ -189,7 +189,6 @@ def DVFinderToolCfg(flags, name="DVFinderTool", **myargs):
     myargs.setdefault("MinZVrt"        , 0.)
     myargs.setdefault("TwoTrkVtxFormingD0Cut", 1.0) # 2-track forming cut
     myargs.setdefault("do2TrkIBLChecks", False)   # Do not explicitly require IBL/BL hits
-    myargs.setdefault("AugmentingVersionString" , "")
 
     DVFinder = CompFactory.Rec.NewVrtSecInclusiveTool(name,**myargs)
     acc.setPrivateTools(DVFinder)

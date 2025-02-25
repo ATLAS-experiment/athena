@@ -1,11 +1,10 @@
 """Define method to configure VrtSecInclusive algorithm
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-import AthenaCommon.Constants as Lvl
 
 def VrtSecInclusiveCfg(flags, name="VrtSecInclusive", **kwargs):
 
@@ -43,34 +42,17 @@ def VrtSecInclusiveCfg(flags, name="VrtSecInclusive", **kwargs):
     acc.addPublicTool(TrackToVertexIPEstimatorTool)
     kwargs.setdefault("TrackToVertexIPEstimatorTool" , TrackToVertexIPEstimatorTool)
 
-    kwargs.setdefault("AugmentingVersionString"                , "")
-    kwargs.setdefault("TrackLocation"                          , "InDetTrackParticles")
-    kwargs.setdefault("OutputLevel"                            , Lvl.INFO)
-    kwargs.setdefault("do_PVvetoCut"                           , True)
     kwargs.setdefault("do_d0Cut"                               , False)
     kwargs.setdefault("do_z0Cut"                               , False)
-    kwargs.setdefault("do_d0errCut"                            , False)
-    kwargs.setdefault("do_z0errCut"                            , False)
-    kwargs.setdefault("do_d0signifCut"                         , False)
-    kwargs.setdefault("do_z0signifCut"                         , False)
     kwargs.setdefault("doTRTPixCut"                            , True)
-    kwargs.setdefault("DoSAloneTRT"                            , False)
-    kwargs.setdefault("ImpactWrtBL"                            , True)
-    kwargs.setdefault("DoPVcompatibility"                      , True)
-    kwargs.setdefault("DoTightPVcompatibility"                 , False)
-    kwargs.setdefault("RemoveFake2TrkVrt"                      , True)
     kwargs.setdefault("CheckHitPatternStrategy"                , 'ExtrapolationAssist') # Either 'Classical', 'Extrapolation' or 'ExtrapolationAssist'
     kwargs.setdefault("doReassembleVertices"                   , True)
     kwargs.setdefault("doMergeByShuffling"                     , True)
     kwargs.setdefault("doMergeFinalVerticesDistance"           , True)
     kwargs.setdefault("doAssociateNonSelectedTracks"           , True)
-    kwargs.setdefault("doFinalImproveChi2"                     , False)
     kwargs.setdefault("DoTruth"                                , flags.Input.isMC)
     kwargs.setdefault("FillHist"                               , True)
-    kwargs.setdefault("FillNtuple"                             , False)
     kwargs.setdefault("TruthParticleFilter"                    , "Higgs")
-    kwargs.setdefault("FillIntermediateVertices"               , False)
-    kwargs.setdefault("CutPixelHits"                           , 0)
     kwargs.setdefault("CutSctHits"                             , 2)
     kwargs.setdefault("TrkA0ErrCut"                            , 200000)
     kwargs.setdefault("TrkZErrCut"                             , 200000)
@@ -79,7 +61,6 @@ def VrtSecInclusiveCfg(flags, name="VrtSecInclusive", **kwargs):
     kwargs.setdefault("zTrkPVDstMinCut"                        , 0.0)    # track z0 min: default is 0.0, just for clarification
     kwargs.setdefault("zTrkPVDstMaxCut"                        , 1500.0) # track z0 max: default is 1000.0
     kwargs.setdefault("twoTrkVtxFormingD0Cut"                  , 2.0)
-    kwargs.setdefault("TrkPtCut"                               , 1000)
     kwargs.setdefault("SelVrtChi2Cut"                          , 5.)
     kwargs.setdefault("CutSharedHits"                          , 2)
     kwargs.setdefault("TrkChi2Cut"                             , 50)
@@ -88,14 +69,6 @@ def VrtSecInclusiveCfg(flags, name="VrtSecInclusive", **kwargs):
     kwargs.setdefault("mergeByShufflingAllowance"              , 10.)
     kwargs.setdefault("associatePtCut"                         , 1000.)
     kwargs.setdefault("associateMinDistanceToPV"               , 2.)
-    kwargs.setdefault("associateMaxD0Signif"                   , 5.)
-    kwargs.setdefault("associateMaxZ0Signif"                   , 5.)
-    kwargs.setdefault("VertexMergeFinalDistCut"                , 1.)
-    kwargs.setdefault("VertexMergeFinalDistScaling"            , 0.)
-    kwargs.setdefault("improveChi2ProbThreshold"               , 0.0001)
-    kwargs.setdefault("doRemoveNonLeptonVertices"              , False)
-    kwargs.setdefault("doAugmentDVimpactParametersToMuons"     , False)
-    kwargs.setdefault("doAugmentDVimpactParametersToElectrons" , False)
 
     acc.addEventAlgo(CompFactory.VKalVrtAthena.VrtSecInclusive(name, **kwargs))
     return acc

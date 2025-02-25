@@ -693,7 +693,7 @@ namespace VKalVrtAthena {
     declareProperty("PrimVrtLocation",                 m_jp.PrimVrtLocation                 = "PrimaryVertices"             );
     declareProperty("McParticleContainer",             m_jp.truthParticleContainerName      = "TruthParticles"              );
     declareProperty("MCEventContainer",                m_jp.mcEventContainerName            = "TruthEvents"                 );
-    declareProperty("AugmentingVersionString",         m_jp.augVerString                    = ""                            );
+    declareProperty("AugmentingVersionString",         m_jp.augVerString                    = "_VSI"                            );
     declareProperty("TruthParticleFilter",             m_jp.truthParticleFilter             = "Rhadron"                     ); // Either "", "Kshort", "Rhadron", "HNL", "HadInt", "Bhadron"
 
     declareProperty("All2trkVerticesContainerName",    m_jp.all2trksVerticesContainerName   = "All2TrksVertices"            );
