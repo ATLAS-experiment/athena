@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <dqm_core/AlgorithmConfig.h>
@@ -176,10 +176,10 @@ dqm_algorithms::LastBinThresholdAction<Exceed, Action>::execute(const std::strin
     }
   }
 
-  if (!action.empty() && nBinsOverThreshold >= nBinsForAction) {
+  if (!action.empty() && nBinsOverThreshold >= nBinsForAction && nBinsOverThreshold!=0) {
     double averageBinContent = binsOverThresholdContent / nBinsOverThreshold;
-    std::string histogramName(histogram->GetName());
-    m_doAction(histogramName, action, lastBinOverThresholdContent, averageBinContent);
+    const std::string & hname = histogram->GetName();
+    m_doAction(hname, action, lastBinOverThresholdContent, averageBinContent);
   }
 
   return result;

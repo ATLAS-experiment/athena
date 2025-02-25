@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "dqm_algorithms/AFP_LBsOutOfRange.h"
@@ -80,7 +80,7 @@ dqm_algorithms::AFP_LBsOutOfRange::fetchIOVs( uint32_t run, uint32_t channel ) {
                 if ( lbStartTime < runStartTime ) runStartTime = lbStartTime;
                 if ( lbEndTime > runEndTime ) runEndTime = lbEndTime;
             }
-            if ( lbs.empty() ) throw afp::CantReadCool( ERS_HERE, databaseName, folderName );
+            if ( lbs.empty() ) throw afp::CantReadCool( ERS_HERE, std::move(databaseName), std::move(folderName) );
         }
         // Get IOVs where the station was in physics position,
         // merge the neighbouring ones,

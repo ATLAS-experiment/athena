@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "dqm_algorithms/MUCTPISLAnyHit.h"
@@ -49,11 +49,11 @@ MUCTPISLAnyHit::execute( const std::string& name, const TObject& object, const d
 {
   using namespace std;
 
-  const TH2 *hist;
+  const TH2 *hist{};
   
   //ensure that input histo is 2D
   if( object.IsA()->InheritsFrom( "TH2" ) ) {
-    hist = dynamic_cast<const TH2 *>(&object);
+    hist = static_cast<const TH2 *>(&object);
     if (hist->GetDimension() != 2 ){
       throw dqm_core::BadConfig( ERS_HERE, name, "dimension != 2 " );
     }
@@ -94,7 +94,7 @@ MUCTPISLAnyHit::execute( const std::string& name, const TObject& object, const d
   tags["howmanybad"] = howmanybad;
 
   //set the result tags
-  result->tags_ = tags;
+  result->tags_ = std::move(tags);
 
   // Return the result
   return result;

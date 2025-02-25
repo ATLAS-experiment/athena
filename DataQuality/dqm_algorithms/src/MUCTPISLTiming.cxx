@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "dqm_algorithms/MUCTPISLTiming.h"
@@ -103,7 +103,7 @@ MUCTPISLTiming::execute( const std::string& name, const TObject& object, const d
   tags["howmanybad"] = howmanybad;
 
   //set the result tags
-  result->tags_ = tags;
+  result->tags_ = std::move(tags);
 
   //If more than 2SL have bad timing, make it red
   if(howmanybad>2)
