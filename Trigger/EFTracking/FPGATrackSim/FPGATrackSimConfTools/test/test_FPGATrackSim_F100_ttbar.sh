@@ -48,7 +48,7 @@ run () {
 
 
 run "${PREFIX} pipeline" \
-    FPGATrackSimDataPrepOnRDO.sh -o $INPUT_AOD_FILE -t -n -1
+    FPGATrackSimDataPrepOnRDO.sh -o $INPUT_AOD_FILE -t -n -1 --noDataOutput
 
 run "IDTPM" \
     runIDTPM.py --inputFileNames=$INPUT_AOD_FILE \

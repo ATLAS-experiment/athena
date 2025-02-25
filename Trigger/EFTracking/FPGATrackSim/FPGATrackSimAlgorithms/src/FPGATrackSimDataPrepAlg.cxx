@@ -249,7 +249,8 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     Monitored::Group(m_monTool, mon_nhits, mon_nhits_unmapped);
 
     // Write the output and reset
-    ATH_CHECK(m_writeOutputTool->writeData());
+    if (m_writeOutputData)
+        ATH_CHECK(m_writeOutputTool->writeData());
 
     // Reset data pointers
     m_eventHeader.reset();

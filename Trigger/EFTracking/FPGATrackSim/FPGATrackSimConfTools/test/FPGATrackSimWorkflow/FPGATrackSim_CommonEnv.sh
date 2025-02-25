@@ -35,6 +35,7 @@ RDO_EVT_ANALYSIS=-1
 SKIP_EVENTS=0
 RDO_ANALYSIS=$RDO_SINGLE_MUON
 SAMPLE_TYPE='singleMuons'
+WRITE_UPSTREAM_OUTPUT_DATA=True
 
 # arg parser
 while [[ $# -gt 0 ]]; do
@@ -51,6 +52,7 @@ while [[ $# -gt 0 ]]; do
             shift ;;
         -n|--events) RDO_EVT_ANALYSIS="$2"; shift 2 ;;
         -s|--skip-events) SKIP_EVENTS="$2"; shift 2 ;;
+        -q|--noDataOutput) WRITE_UPSTREAM_OUTPUT_DATA=False; shift ;;
         --) shift; break ;;
         *) echo "Unknown option: $1"; return 1 ;;
     esac
@@ -63,3 +65,4 @@ echo "  SAMPLE_TYPE = $SAMPLE_TYPE"
 echo "  RDO_EVT_ANALYSIS = $RDO_EVT_ANALYSIS"
 echo "  SKIP_EVENTS = $SKIP_EVENTS"
 echo "  RUN_CKF = $RUN_CKF"
+echo "  WRITE_OUTPUT_DATA = $WRITE_UPSTREAM_OUTPUT_DATA"
