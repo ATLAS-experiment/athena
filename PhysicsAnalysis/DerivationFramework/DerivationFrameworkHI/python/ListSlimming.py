@@ -677,3 +677,14 @@ def HION14ExtraContentAllTruth():
     variables += HION14ContentTruthParticles()
 
     return variables
+
+#################################################################################
+#HIONHPOD
+
+def HIONHPODSmartCollections():
+    variables  = []
+    variables += ["Electrons"]
+    variables += ["Photons"]
+    variables += ["Muons"]
+
+    return variables
