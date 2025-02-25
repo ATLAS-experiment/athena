@@ -11,7 +11,7 @@ def actsWorkflowFlags(flags) -> None:
 def actsFastWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""
     flags.Reco.EnableHGTDExtension = False
-    flags.Acts.doAmbiguityResolution = False
+    flags.Acts.doAmbiguityResolution = True
     flags.Tracking.doITkFastTracking = True
     flags.Tracking.recoChain = [TrackingComponent.ActsFastChain]
 
