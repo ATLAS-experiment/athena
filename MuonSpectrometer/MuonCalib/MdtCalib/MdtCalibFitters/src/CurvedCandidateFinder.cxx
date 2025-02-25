@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibFitters/CurvedCandidateFinder.h"
@@ -107,7 +107,6 @@ const std::vector<CurvedLine> &CurvedCandidateFinder::getCandidates(const double
                     Amg::Vector3D delta(tangent.positionVector() - hit[l]->localPosition());
                     Amg::Vector3D aux_dir(delta + (delta.dot(tangent.directionVector().unit()) * tangent.directionVector().unit()));
                     aux_dir = hit[l]->driftRadius() * aux_dir.unit();
-                    Amg::Vector3D mem(points[l]);
                     points[l][1] = (hit[l]->localPosition().y() + aux_dir.y());
                     points[l][2] = (hit[l]->localPosition().z() + aux_dir.z());
                 }
