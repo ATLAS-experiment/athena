@@ -15,6 +15,8 @@
 #include "TestVectorTool.h"
 #include "OutputConversionTool.h"
 #include "xAODContainerMaker.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/IChronoSvc.h"
 
 // STL include
 #include <string>
@@ -58,6 +60,9 @@ class FPGADataFormatAlg : public AthReentrantAlgorithm
 
     // Tool for making xAOD containers
     ToolHandle<xAODContainerMaker> m_xAODContainerMaker{this, "xAODContainerMaker", "xAODContainerMaker", "tool for making xAOD containers"};
+
+    // Chrono service
+    ServiceHandle<IChronoStatSvc> m_chronoSvc{"ChronoStatSvc", name()};
 };
 
 #endif // EFTRACKING_FPGA_INTEGRATION_INTEGRATION_BASE_H

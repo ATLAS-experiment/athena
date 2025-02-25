@@ -3,6 +3,7 @@
    */
 
 #include "FPGADataFormatAlg.h"
+#include "AthenaKernel/Chrono.h"
 #include <fstream>
 
 StatusCode FPGADataFormatAlg::initialize()
@@ -14,6 +15,8 @@ StatusCode FPGADataFormatAlg::initialize()
   ATH_CHECK(m_testVectorTool.retrieve());
   ATH_CHECK(m_outputConversionTool.retrieve());
   ATH_CHECK(m_xAODContainerMaker.retrieve());
+
+  ATH_CHECK(m_chronoSvc.retrieve());
 
   return StatusCode::SUCCESS;
 }
@@ -38,7 +41,10 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
 
   outputData.clear();
 
-  ATH_CHECK(m_FPGADataFormatTool->convertStripHitsToFPGADataFormat(*stripRDOHandle, outputData, ctx));
+  {
+    Athena::Chrono chrono("ConvertStripHitsToFPGADataFormat", m_chronoSvc.get());
+    ATH_CHECK(m_FPGADataFormatTool->convertStripHitsToFPGADataFormat(*stripRDOHandle, outputData, ctx));
+  }
 
   // Report the output
   ATH_MSG_DEBUG("ITK Strip encoded data");
@@ -67,7 +73,10 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
   else
   {
     ATH_CHECK(m_testVectorTool->prepareTV(m_pixelEDMRefTVPath, pixelEDMTV.refTV));
-    ATH_CHECK(m_outputConversionTool->decodePixelEDM(pixelEDMTV.refTV, metadata.get(), pcAux));
+    {
+      Athena::Chrono chrono("DecodePixelEDM", m_chronoSvc.get());
+      ATH_CHECK(m_outputConversionTool->decodePixelEDM(pixelEDMTV.refTV, metadata.get(), pcAux));
+    }
   }
 
   EFTrackingFPGAIntegration::TVHolder stripEDMTV("StripEDM");
@@ -78,7 +87,10 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
   else
   {
     ATH_CHECK(m_testVectorTool->prepareTV(m_stripEDMRefTVPath, stripEDMTV.refTV));
-    ATH_CHECK(m_outputConversionTool->decodeStripEDM(stripEDMTV.refTV, metadata.get(), scAux));
+    {
+      Athena::Chrono chrono("DecodeStripEDM", m_chronoSvc.get());
+      ATH_CHECK(m_outputConversionTool->decodeStripEDM(stripEDMTV.refTV, metadata.get(), scAux));
+    }
   }
 
   EFTrackingFPGAIntegration::TVHolder spacePointTV("SpacePoint");
@@ -89,7 +101,11 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
   else
   {
     ATH_CHECK(m_testVectorTool->prepareTV(m_spacePointRefTVPath, spacePointTV.refTV));
-    ATH_CHECK(m_outputConversionTool->decodeSpacePoints(spacePointTV.refTV, metadata.get()));
+
+    {
+      Athena::Chrono chrono("DecodeSpacePoints", m_chronoSvc.get());
+      ATH_CHECK(m_outputConversionTool->decodeSpacePoints(spacePointTV.refTV, metadata.get()));
+    }
   }
 
   // Print event summary
@@ -166,8 +182,15 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
   }
 
   // Make the xAOD
-  ATH_CHECK(m_xAODContainerMaker->makePixelClusterContainer(pcAux, metadata.get(), ctx));
-  ATH_CHECK(m_xAODContainerMaker->makeStripClusterContainer(scAux, metadata.get(), ctx));
+  {
+    Athena::Chrono chrono("MakePixelContainers", m_chronoSvc.get());
+    ATH_CHECK(m_xAODContainerMaker->makePixelClusterContainer(pcAux, metadata.get(), ctx));
+  }
+
+  {
+    Athena::Chrono chrono("MakeStripContainers", m_chronoSvc.get());
+    ATH_CHECK(m_xAODContainerMaker->makeStripClusterContainer(scAux, metadata.get(), ctx));
+  }
 
   return StatusCode::SUCCESS;
 }
