@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -14,7 +14,6 @@
 #include <random>
 #include <thread>
 #include <sstream>
-#include <algorithm>
 
 // Local implementation-specific helper methods
 namespace {
@@ -134,10 +133,9 @@ StatusCode MTCalibPebHypoTool::initialize() {
   if (m_doCrunch) ATH_CHECK(m_cpuCrunchSvc.retrieve());
 
   // Copy keys from map<string,uint> to WriteHandleKeyArray
-  std::transform(m_createRandomData.begin(),
-                 m_createRandomData.end(),
-                 std::back_inserter(m_randomDataWHK),
-                 [](const auto& p){return p.first;});
+  for (const auto& [name, number] : m_createRandomData) {
+    m_randomDataWHK.push_back(name);
+  }
   ATH_CHECK(m_randomDataWHK.initialize());
 
   // Parse and print the ROB request dictionary
