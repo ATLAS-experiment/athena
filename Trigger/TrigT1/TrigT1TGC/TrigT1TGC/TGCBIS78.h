@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGC_BIS78_H
@@ -26,7 +26,8 @@ class TGCBIS78 : public AthMessaging {
   bool operator == (const TGCBIS78& right) const = delete;
   bool operator != (const TGCBIS78& right) const = delete;
 
-  StatusCode retrieve(SG::ReadHandleKey<Muon::RpcBis78_TrigRawDataContainer> key);
+  StatusCode retrieve(const SG::ReadHandleKey<Muon::RpcBis78_TrigRawDataContainer>& key,
+                      const EventContext& ctx);
 
   std::shared_ptr<const BIS78TrigOut> getOutput(int TGC_TriggerSector) const;
 
@@ -37,7 +38,7 @@ class TGCBIS78 : public AthMessaging {
   void  eraseOutput();
 
  private:
-  static constexpr unsigned int kNPadBoards = 8;
+  static constexpr int kNPadBoards = 8;
 
  protected:
   std::shared_ptr<BIS78TrigOut> m_buffer[kNPadBoards];//buffer[BIS78 Trigger Processor]
