@@ -86,6 +86,8 @@ class TauValidationPlots:public PlotBase {
       Tau::Migration m_oMigrationPlots;		
 
       // Plots with the "nominal" tau selection
+      Tau::ParamPlots m_oElMatchedParamPlotsNom;
+      Tau::EVetoPlots m_oElMatchedEVetoPlotsNom;
       Tau::GeneralTauPlots m_oFakeGeneralNom;
       Tau::Had1ProngPlots m_oFakeHad1ProngNom;
       Tau::Had3ProngPlots m_oFakeHad3ProngNom;

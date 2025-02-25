@@ -10,8 +10,8 @@ TauValidationPlots::TauValidationPlots(PlotBase* pParent, const std::string& sDi
   m_oGeneralTauAllProngsPlots(this, "NoCuts/Matched/", sTauJetContainerName),
   m_oHad1ProngPlots(this, "NoCuts/Matched/Tau1P/", sTauJetContainerName),             // tau1P plots : variables for tau ID
   m_oHad3ProngPlots(this, "NoCuts/Matched/Tau3P/", sTauJetContainerName),             // tau3P plots : variables for tau ID
-  m_oElMatchedParamPlots(this, "Electron/", sTauJetContainerName),     // electron veto variables for electrons matching tau candidates	  
-  m_oElMatchedEVetoPlots(this, "Electron/", sTauJetContainerName),     // electron veto variables for electrons matching tau candidates
+  m_oElMatchedParamPlots(this, "NoCuts/Elec/", sTauJetContainerName),     // electron veto variables for electrons matching tau candidates	  
+  m_oElMatchedEVetoPlots(this, "NoCuts/Elec/", sTauJetContainerName),     // electron veto variables for electrons matching tau candidates
   m_oFakeGeneralTauAllProngsPlots(this,"NoCuts/Fake/", sTauJetContainerName),  // general tau all fake prongs plots
   m_oFakeHad1ProngPlots(this,"NoCuts/Fake/Jet1P/", sTauJetContainerName), 		     // tau1P fake plots : variables for tau ID
   m_oFakeHad3ProngPlots(this,"NoCuts/Fake/Jet3P/", sTauJetContainerName),  	       // tau3P fake plots : variables for tau ID
@@ -36,6 +36,9 @@ TauValidationPlots::TauValidationPlots(PlotBase* pParent, const std::string& sDi
   m_oMigrationPlots(this,"NoCuts/Matched/Migration/", sTauJetContainerName),             // Migration Matrix
   
   // Plots with the "nominal" tau selection
+  m_oElMatchedParamPlotsNom(this, "Nominal/Elec/", sTauJetContainerName),     // electron veto variables for electrons matching tau candidates and passing nominal selection        
+  m_oElMatchedEVetoPlotsNom(this, "Nominal/Elec/", sTauJetContainerName),     // electron veto variables for electrons matching tau candidates and passing nominal selection
+
   m_oFakeGeneralNom(this,"Nominal/Fake/", sTauJetContainerName),
   m_oFakeHad1ProngNom(this,"Nominal/Fake/Jet1P/", sTauJetContainerName),
   m_oFakeHad3ProngNom(this,"Nominal/Fake/Jet3P/", sTauJetContainerName),
