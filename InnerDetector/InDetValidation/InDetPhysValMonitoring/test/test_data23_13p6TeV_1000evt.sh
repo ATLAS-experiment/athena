@@ -22,7 +22,8 @@ dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physva
 script=test_data_reco.sh
 
 conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA23)")
+geotag=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
 
 echo "Executing script ${script}"
 echo " "
-"$script" ${inputBS} ${dcubeRef} ${conditions}
+"$script" ${inputBS} ${dcubeRef} ${conditions} ${geotag}
