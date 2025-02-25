@@ -66,7 +66,7 @@ private:
 
     ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool"};
     Gaudi::Property<std::map<std::string, std::pair<std::string, std::string>>> m_monitoredIdScores {this, "MonitoredIDScores", {}, "Pairs of the TauID score and signal-transformed scores for each TauID algorithm to be monitored"};
-    std::map<std::string, std::pair<SG::AuxElement::ConstAccessor<float>, SG::AuxElement::ConstAccessor<float>>> m_monitoredIdAccessors;
+    std::map<std::string, std::pair<SG::ConstAccessor<float>, SG::ConstAccessor<float>>> m_monitoredIdAccessors;
 };
 
 #endif

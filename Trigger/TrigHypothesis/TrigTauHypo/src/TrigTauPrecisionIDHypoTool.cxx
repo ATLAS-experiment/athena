@@ -76,7 +76,7 @@ StatusCode TrigTauPrecisionIDHypoTool::initialize()
             continue;
         }
 
-        m_monitoredIdAccessors.emplace(key, std::make_pair(SG::AuxElement::ConstAccessor<float>(p.first), SG::AuxElement::ConstAccessor<float>(p.second)));
+        m_monitoredIdAccessors.emplace(key, std::make_pair(SG::ConstAccessor<float>(p.first), SG::ConstAccessor<float>(p.second)));
     }
 
     return StatusCode::SUCCESS;
@@ -206,10 +206,10 @@ bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInf
             }
 
         } else if(m_idMethod == IDMethod::Decorator) { // Decorated scores (e.g. for GNTau)
-            const static SG::AuxElement::ConstAccessor<char> tauid_veryloose(m_idWPNames[0]);
-            const static SG::AuxElement::ConstAccessor<char> tauid_loose(m_idWPNames[1]);
-            const static SG::AuxElement::ConstAccessor<char> tauid_medium(m_idWPNames[2]);
-            const static SG::AuxElement::ConstAccessor<char> tauid_tight(m_idWPNames[3]);
+            const static SG::ConstAccessor<char> tauid_veryloose(m_idWPNames[0]);
+            const static SG::ConstAccessor<char> tauid_loose(m_idWPNames[1]);
+            const static SG::ConstAccessor<char> tauid_medium(m_idWPNames[2]);
+            const static SG::ConstAccessor<char> tauid_tight(m_idWPNames[3]);
 
             if(!tauid_veryloose.isAvailable(*Tau) || !tauid_loose.isAvailable(*Tau) || !tauid_medium.isAvailable(*Tau) || !tauid_tight.isAvailable(*Tau))
             ATH_MSG_WARNING("The TauID WP variables for the current configuration are missing! Make sure the correct inferences are included in the chain reconstruction sequence!");
