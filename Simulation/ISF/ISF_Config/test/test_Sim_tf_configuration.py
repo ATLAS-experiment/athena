@@ -11,6 +11,8 @@ class TestATLFAST3(unittest.TestCase):
     def setUpClass(cls):
         os.environ["TRF_ECHO"] = "1"
         config_picklefilename = 'ATLFAST3_config.pkl'
+        from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
+        
         command = [
             'Sim_tf.py',
             '--CA', 'False',
@@ -18,8 +20,8 @@ class TestATLFAST3(unittest.TestCase):
             '--athenaopts', '"--config-only={}"'.format(config_picklefilename),
             '--postInclude', 'PyJobTransforms/UseFrontier.py',
             '--preInclude', 'Campaigns/MC23aSimulationMultipleIoV.py',
-            '--conditionsTag', 'default:OFLCOND-MC23-SDR-RUN3-08',
-            '--geometryVersion', 'default:ATLAS-R3S-2021-03-02-00',
+            '--conditionsTag', '"default:{}"'.format(defaultConditionsTags.RUN3_MC),
+            '--geometryVersion', '"default:{}"'.format(defaultGeometryTags.RUN3),
             '--inputEVNTFile', '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc12_valid.110401.PowhegPythia_P2012_ttbar_nonallhad.evgen.EVNT.e3099.01517252._000001.pool.root.1',
             '--outputHITSFile', 'Hits.pool.root',
             '--maxEvents', '2',
