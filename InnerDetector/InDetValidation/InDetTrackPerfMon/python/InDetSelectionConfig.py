@@ -105,9 +105,9 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
     if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSctSharedHits!=-9999.: 
         kwargs_InDetTrackSelectionTool.setdefault( "maxNSctSharedHits", flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSctSharedHits )
     if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSctHoles!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "maxNSctHoles", flags.PhysVal.IDTPM.currentTrkAna.offlMaxChiSq )
+        kwargs_InDetTrackSelectionTool.setdefault( "maxNSctHoles", flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSctHoles )
     if flags.PhysVal.IDTPM.currentTrkAna.offlMaxChiSq!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "maxChiSq", flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsEta )
+        kwargs_InDetTrackSelectionTool.setdefault( "maxChiSq", flags.PhysVal.IDTPM.currentTrkAna.offlMaxChiSq )
     if flags.PhysVal.IDTPM.currentTrkAna.offlMaxChiSqperNdf!=-9999.: 
         kwargs_InDetTrackSelectionTool.setdefault( "maxChiSqperNdf", flags.PhysVal.IDTPM.currentTrkAna.offlMaxChiSqperNdf )
     if flags.PhysVal.IDTPM.currentTrkAna.offlMinProb!=-9999.: 
