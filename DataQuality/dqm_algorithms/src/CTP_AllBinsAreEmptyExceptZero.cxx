@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "dqm_algorithms/CTP_AllBinsAreEmptyExceptZero.h"
@@ -49,7 +49,7 @@ CTP_AllBinsAreEmptyExceptZero::execute( const std::string& name, const TObject& 
 {
   using namespace std;
 
-  const TH1 *hist;
+  const TH1 *hist{};
 
   if(object.IsA()->InheritsFrom( "TH1" )) {
     hist = static_cast<const TH1*>( &object );
@@ -91,7 +91,7 @@ CTP_AllBinsAreEmptyExceptZero::execute( const std::string& name, const TObject& 
   tags["# Bad bins"] = badBins;
 
   //set the result tags
-  result->tags_ = tags;
+  result->tags_ = std::move(tags);
 
   // Return the result
   return result;
