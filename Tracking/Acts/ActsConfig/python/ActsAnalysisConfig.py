@@ -19,6 +19,18 @@ def ActsTrackAnalysisAlgCfg(flags,
 
     monitoringGroup.defineHistogram('Ntracks', title='Number of Tracks;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=500, xmin=0, xmax=20000)
+    monitoringGroup.defineHistogram('NsharedPerTrack', title='Number of shared hits per track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=50, xmin=0, xmax=50)
+
+    monitoringGroup.defineHistogram('NsharedPerLayer_pixelBarrel', title='Number of shared hits per layer - Pixel Barrel;Layer;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=5, xmin=0, xmax=5)    
+    monitoringGroup.defineHistogram('NsharedPerLayer_pixelEndCap', title='Number of shared hits per layer - Pixel EndCap;Layer;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=9, xmin=0, xmax=9)
+    monitoringGroup.defineHistogram('NsharedPerLayer_stripBarrel', title='Number of shared hits per layer - Strip Barrel;Layer;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=4, xmin=0, xmax=4)
+    monitoringGroup.defineHistogram('NsharedPerLayer_stripEndCap', title='Number of shared hits per layer - Strip EndCap;Layer;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=6, xmin=0, xmax=6)
+    
     import math
     monitoringGroup.defineHistogram('theta', title='Track polar angle;#theta;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=128, xmin=0, xmax=math.pi)
