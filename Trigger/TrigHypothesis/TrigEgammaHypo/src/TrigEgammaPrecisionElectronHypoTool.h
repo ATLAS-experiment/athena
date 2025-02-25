@@ -42,6 +42,8 @@ class TrigEgammaPrecisionElectronHypoTool : public extends<AthAlgTool, ITrigEgam
   Gaudi::Property< bool >               m_acceptAll { this, "AcceptAll", false , "accept all." };
   Gaudi::Property< bool >               m_doNoPid { this, "DoNoPid", false , "No Pid/Isolation applied" };
   ToolHandle< GenericMonitoringTool >   m_monTool { this, "MonTool", "", "Monitoring tool" };
+  /*Isolation validation flag*/
+  Gaudi::Property<bool> m_isoValidation{ this, "IsoValidation", false};
 
 
   int findCutIndex( float eta ) const;
