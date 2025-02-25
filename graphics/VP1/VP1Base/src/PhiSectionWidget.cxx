@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Base/PhiSectionWidget.h"
@@ -135,7 +135,7 @@ PhiSectionWidget::PhiSectionWidget(QWidget * parent,IVP1System * sys)
 			 << 12 << 16 << 24 << 32 << 36 << 48 << 64;
   m_d->allowedNSectors << 12; // default number of sectors, at start
   setNumberOfSectors(12,true);
-  setAllowedNumberOfSectors(defaultAllowedNSectors,true);
+  setAllowedNumberOfSectors(std::move(defaultAllowedNSectors),true);
 }
 
 //____________________________________________________________________
@@ -351,7 +351,7 @@ void PhiSectionWidget::launchContextMenu(QPoint p)
   }
   if (selAct==m_d->popup_pasteAction) {
     QByteArray data = clipboard->mimeData()->data("vp1/enabledphisectors");
-    setState(data);
+    setState(std::move(data));
     return;
   }
   if (selAct==m_d->popup_enableAllAction) {
@@ -469,7 +469,7 @@ void PhiSectionWidget::dropEvent(QDropEvent *event)
 {
   QByteArray data = event->mimeData()->data("vp1/enabledphisectors");
   event->acceptProposedAction();
-  setState(data);
+  setState(std::move(data));
 }
 
 //____________________________________________________________________
@@ -767,7 +767,7 @@ void PhiSectionWidget::setState(QByteArray ba)
   if (restored_sectorstatus.count()!=m_d->sectorstatus.count())
     setNumberOfSectors(restored_sectorstatus.count(),true);
   if (restored_sectorstatus.count()==m_d->sectorstatus.count()) {
-    m_d->sectorstatus = restored_sectorstatus;
+    m_d->sectorstatus = std::move(restored_sectorstatus);
   } else {
     bool allon, alloff;
     QList<VP1Interval> r = m_d->enabledPhiRangesNoCache(restored_sectorstatus,allon, alloff);
@@ -860,7 +860,7 @@ void PhiSectionWidget::setAllowedNumberOfSectors(QList<int> allowedNSectors, boo
   if (m_d->allowedNSectors==allowedNSectors) {
     return;
   }
-  m_d->allowedNSectors=allowedNSectors;
+  m_d->allowedNSectors=std::move(allowedNSectors);
   if (m_d->popup_menu) {
     m_d->addMenuEntriesForSetNPhi();
   }
