@@ -25,8 +25,8 @@ StatusCode TrigTauMonitorSingleAlgorithm::initialize()
             m_monitoredHLTIdAccessors[seq_name].emplace(
                 key, 
                 std::make_pair(
-                    SG::AuxElement::ConstAccessor<float>(p.first),
-                    SG::AuxElement::ConstAccessor<float>(p.second)
+                    SG::ConstAccessor<float>(p.first),
+                    SG::ConstAccessor<float>(p.second)
                 )
             );
         }
@@ -41,8 +41,8 @@ StatusCode TrigTauMonitorSingleAlgorithm::initialize()
         m_monitoredOfflineIdAccessors.emplace(
             key, 
             std::make_pair(
-                SG::AuxElement::ConstAccessor<float>(p.first),
-                SG::AuxElement::ConstAccessor<float>(p.second)
+                SG::ConstAccessor<float>(p.first),
+                SG::ConstAccessor<float>(p.second)
             )
         );
     }
@@ -288,7 +288,7 @@ void TrigTauMonitorSingleAlgorithm::fillIDTrack(const std::string& trigger, cons
 
     for(const auto *tau : tau_vec) {
         // Don't call ->allTracks() unless the element links are valid
-        static const SG::AuxElement::ConstAccessor< std::vector<ElementLink<xAOD::TauTrackContainer>> > tauTrackAcc("tauTrackLinks");
+        static const SG::ConstAccessor< std::vector<ElementLink<xAOD::TauTrackContainer>> > tauTrackAcc("tauTrackLinks");
         bool linksValid = true;
         for(const ElementLink<xAOD::TauTrackContainer>& trackEL : tauTrackAcc(*tau)) {
             if(!trackEL.isValid()) {

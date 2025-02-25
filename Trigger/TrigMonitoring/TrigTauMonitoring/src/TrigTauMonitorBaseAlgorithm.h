@@ -95,10 +95,10 @@ protected:
     template <typename T1 = xAOD::IParticle, typename T2 = xAOD::IParticle>
     inline bool matchTruthObjects(const T1* true_tau, const std::vector<const T2*>& tau_vec, float threshold) const
     {
-      static const SG::AuxElement::ConstAccessor<double> acc_ptvis("pt_vis");
-      static const SG::AuxElement::ConstAccessor<double> acc_etavis("eta_vis");
-      static const SG::AuxElement::ConstAccessor<double> acc_phivis("phi_vis");
-      static const SG::AuxElement::ConstAccessor<double> acc_mvis("mvis");
+      static const SG::ConstAccessor<double> acc_ptvis("pt_vis");
+      static const SG::ConstAccessor<double> acc_etavis("eta_vis");
+      static const SG::ConstAccessor<double> acc_phivis("phi_vis");
+      static const SG::ConstAccessor<double> acc_mvis("mvis");
       TLorentzVector true_tau_p4;
       true_tau_p4.SetPtEtaPhiM(acc_ptvis(*true_tau), acc_etavis(*true_tau), acc_phivis(*true_tau), acc_mvis(*true_tau));
 
