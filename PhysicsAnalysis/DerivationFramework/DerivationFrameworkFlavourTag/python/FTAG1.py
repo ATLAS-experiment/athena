@@ -36,8 +36,8 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
         acc.merge(V0ToolCfg(flags, augmentationTools=augmentationTools, tool_name_prefix=nametag, container_name_prefix="FTAG"))
 
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
-    #acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets", "AntiKt4EMPFlowByVertexJets"]))
-    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]))
+    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowByVertexJets"], ByVertex=True))
+    #acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]))
 
     # thinning tools
     thinningTools = []
@@ -85,7 +85,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
                                            "BTagging_AntiKt4UFOCSSK",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                            "AntiKt4EMPFlowJets_FTAG",
-                                           "AntiKt4EMPFlowByVertex_FTAG",
+                                           "AntiKt4EMPFlowByVertexJets_FTAG",
                                           ]
 
     if flags.GeoModel.Run >= LHCPeriod.Run4:
@@ -198,8 +198,8 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     #acc.merge(FtagJetCollectionsCfg(flags,["AntiKt4EMPFlowByVertexJets"]))
     #from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
     #acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowByVertexJets"]))
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
-    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowByVertexJets"]))
+    #from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
+    #acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowByVertexJets"]))
     # Output stream    
     FTAG1ItemList = FTAG1SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_"+name_tag, ItemList=FTAG1ItemList, AcceptAlgs=[name_tag+"Kernel"]))

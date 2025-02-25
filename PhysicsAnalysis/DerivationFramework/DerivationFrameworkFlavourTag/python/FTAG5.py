@@ -4,7 +4,7 @@
 # This defines DAOD_FTAG5, an unskimmed DAOD format for Run 3.
 # It contains the variables and objects needed for the large majority 
 # of physics analyses in ATLAS.
-# It requires the flag FTAG1 in Derivation_tf.py   
+# It requires the flag FTAG5 in Derivation_tf.py   
 #====================================================================
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -21,8 +21,8 @@ from DerivationFrameworkFlavourTag.FtagBaseContent import (
 
 
 # Main algorithm config
-def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
-    """Configure the derivation framework driving algorithm (kernel) for FTAG1"""
+def FTAG5KernelCfg(flags, name='FTAG5Kernel', **kwargs):
+    """Configure the derivation framework driving algorithm (kernel) for FTAG5"""
     acc = ComponentAccumulator()
 
     # Common augmentations
@@ -36,7 +36,7 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
         acc.merge(V0ToolCfg(flags, augmentationTools=augmentationTools, tool_name_prefix=nametag, container_name_prefix="FTAG"))
 
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
-    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets", "AntiKt4EMPFlowByVertexJets"]))
+    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowByVertexJets"], ByVertex=True))
     #acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]))
 
     # thinning tools
@@ -47,12 +47,12 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
     acc.addEventAlgo(DerivationKernel(name, AugmentationTools = augmentationTools, ThinningTools = thinningTools))      
 
     # Extra jet content:
-    acc.merge(FTAG1ExtraContentCfg(flags))
+    acc.merge(FTAG5ExtraContentCfg(flags))
 
     return acc
 
 
-def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_AllVariables=None, trigger_option=''):
+def FTAG5CoreCfg(flags, name_tag='FTAG5', extra_SmartCollections=None, extra_AllVariables=None, trigger_option=''):
 
     if extra_SmartCollections is None: extra_SmartCollections = []
     if extra_AllVariables is None: extra_AllVariables = []
@@ -67,7 +67,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    FTAG1SlimmingHelper = SlimmingHelper(name_tag+"SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
+    FTAG5SlimmingHelper = SlimmingHelper(name_tag+"SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     # Many of these are added to AllVariables below as well. We add
     # these items in both places in case some of the smart collections
@@ -76,20 +76,20 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     
     from DerivationFrameworkFlavourTag import FtagBaseContent
 
-    FTAG1SlimmingHelper.SmartCollections = []
-    FtagBaseContent.add_baseline_slimming_smartcollections(FTAG1SlimmingHelper)
+    FTAG5SlimmingHelper.SmartCollections = []
+    FtagBaseContent.add_baseline_slimming_smartcollections(FTAG5SlimmingHelper)
 
-    addCommonAugmentation(flags, acc, FTAG1SlimmingHelper)
+    addCommonAugmentation(flags, acc, FTAG5SlimmingHelper)
 
-    FTAG1SlimmingHelper.SmartCollections += [
+    FTAG5SlimmingHelper.SmartCollections += [
                                            "BTagging_AntiKt4UFOCSSK",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                            "AntiKt4EMPFlowJets_FTAG",
-                                           "AntiKt4EMPFlowByVertex_FTAG",
+                                           "AntiKt4EMPFlowByVertexJets_FTAG",
                                           ]
 
     if flags.GeoModel.Run >= LHCPeriod.Run4:
-        FTAG1SlimmingHelper.SmartCollections += [
+        FTAG5SlimmingHelper.SmartCollections += [
                                                 "AntiKt4EMTopoJets",
                                                 "BTagging_AntiKt4EMTopo",
                                                 "MET_Baseline_AntiKt4EMTopo",
@@ -97,13 +97,13 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
 
     if len(extra_SmartCollections)>0:
         for a_container in extra_SmartCollections:
-            if a_container not in FTAG1SlimmingHelper.SmartCollections:
-                FTAG1SlimmingHelper.SmartCollections.append(a_container)
+            if a_container not in FTAG5SlimmingHelper.SmartCollections:
+                FTAG5SlimmingHelper.SmartCollections.append(a_container)
 
-    FTAG1SlimmingHelper.AllVariables = []
-    FtagBaseContent.add_baseline_slimming_allvariables(FTAG1SlimmingHelper)
+    FTAG5SlimmingHelper.AllVariables = []
+    FtagBaseContent.add_baseline_slimming_allvariables(FTAG5SlimmingHelper)
 
-    FTAG1SlimmingHelper.AllVariables += [
+    FTAG5SlimmingHelper.AllVariables += [
             "InDetLargeD0TrackParticles",
             "AntiKt4EMPFlowJets",
             "AntiKt4UFOCSSKJets",
@@ -119,7 +119,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     ]
     
     if flags.GeoModel.Run >= LHCPeriod.Run4:
-        FTAG1SlimmingHelper.AllVariables += [
+        FTAG5SlimmingHelper.AllVariables += [
             "AntiKt4EMTopoJets",
             "BTagging_AntiKt4EMTopo",
             "BTagging_AntiKt4EMTopoJFVtx",
@@ -130,27 +130,27 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
 
     if len(extra_AllVariables)>0:
         for a_container in extra_AllVariables:
-            if a_container not in FTAG1SlimmingHelper.AllVariables:
-                FTAG1SlimmingHelper.AllVariables.append(a_container)
+            if a_container not in FTAG5SlimmingHelper.AllVariables:
+                FTAG5SlimmingHelper.AllVariables.append(a_container)
 
     if flags.BTagging.Pseudotrack:
-        FTAG1SlimmingHelper.AllVariables += [ "InDetPseudoTrackParticles" ]
+        FTAG5SlimmingHelper.AllVariables += [ "InDetPseudoTrackParticles" ]
 
     if flags.BTagging.Trackless:
-        FTAG1SlimmingHelper.AllVariables += [
+        FTAG5SlimmingHelper.AllVariables += [
                 "JetAssociatedPixelClusters",
                 "JetAssociatedSCTClusters",
                 ]
 
     # Add additional e/gamma variables
-    FTAG1SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
+    FTAG5SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
 
     # update AppendToDictionary
-    extra_AppendToDictionary = {} #only add those items specifically for FTAG1 here!
-    FtagBaseContent.update_AppendToDictionary_in_SlimmingHelper(FTAG1SlimmingHelper, flags, extra_AppendToDictionary)
+    extra_AppendToDictionary = {} #only add those items specifically for FTAG5 here!
+    FtagBaseContent.update_AppendToDictionary_in_SlimmingHelper(FTAG5SlimmingHelper, flags, extra_AppendToDictionary)
 
     # Static content
-    StaticContent = [] #only add extra static content for FTAG1 here!
+    StaticContent = [] #only add extra static content for FTAG5 here!
     if flags.BTagging.AddV0Finder:
         FTAGV0ContainerName = "FTAGRecoV0Candidates"
         FTAGKshortContainerName = "FTAGRecoKshortCandidates"
@@ -173,41 +173,42 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % cascades]
 
 
-    FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG1SlimmingHelper, flags, StaticContent)
+    FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG5SlimmingHelper, flags, StaticContent)
 
 
     # Add truth containers
     if flags.Input.isMC:
-        FtagBaseContent.add_truth_to_SlimmingHelper(FTAG1SlimmingHelper)
+        FtagBaseContent.add_truth_to_SlimmingHelper(FTAG5SlimmingHelper)
         if flags.Trigger.EDMVersion == 3:
             # Add truth labels to Run 3 trigger jets
             from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
             acc.merge(HLTJetFTagDecorationCfg(flags))
 
     # Add ExtraVariables
-    FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG1SlimmingHelper, flags)
+    FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG5SlimmingHelper, flags)
    
     # Trigger content
-    FtagBaseContent.trigger_setup(FTAG1SlimmingHelper, trigger_option)
+    FtagBaseContent.trigger_setup(FTAG5SlimmingHelper, trigger_option)
 
     jetOutputList = ["AntiKt4UFOCSSKJets", "AntiKt4EMPFlowByVertexJets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
-    addJetsToSlimmingTool(FTAG1SlimmingHelper, jetOutputList, FTAG1SlimmingHelper.SmartCollections)
+    addJetsToSlimmingTool(FTAG5SlimmingHelper, jetOutputList, FTAG5SlimmingHelper.SmartCollections)
     
     # Flavour tagging (Mario)
     #from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
     #acc.merge(FtagJetCollectionsCfg(flags,["AntiKt4EMPFlowByVertexJets"]))
     #from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
     #acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowByVertexJets"]))
-
+    #from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
+    #acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowByVertexJets"]))
     # Output stream    
-    FTAG1ItemList = FTAG1SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(flags, "DAOD_"+name_tag, ItemList=FTAG1ItemList, AcceptAlgs=[name_tag+"Kernel"]))
+    FTAG5ItemList = FTAG5SlimmingHelper.GetItemList()
+    acc.merge(OutputStreamCfg(flags, "DAOD_"+name_tag, ItemList=FTAG5ItemList, AcceptAlgs=[name_tag+"Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_"+name_tag, AcceptAlgs=[name_tag+"Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
 
-def FTAG1Cfg(flags):
+def FTAG5Cfg(flags):
 
     acc = ComponentAccumulator()
 
@@ -216,20 +217,20 @@ def FTAG1Cfg(flags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    FTAG1TriggerListsHelper = TriggerListsHelper(flags)
+    FTAG5TriggerListsHelper = TriggerListsHelper(flags)
    
     # name_tag has to be consistent between KernelCfg and CoreCfg
-    FTAG1_name_tag = 'FTAG1'
+    FTAG5_name_tag = 'FTAG5'
 
     # Common augmentations
-    acc.merge(FTAG1KernelCfg(flags, name=FTAG1_name_tag + "Kernel", StreamName = 'StreamDAOD_'+FTAG1_name_tag, TriggerListsHelper = FTAG1TriggerListsHelper))
-    # Content of FTAG1 
-    acc.merge(FTAG1CoreCfg(flags, FTAG1_name_tag))
+    acc.merge(FTAG5KernelCfg(flags, name=FTAG5_name_tag + "Kernel", StreamName = 'StreamDAOD_'+FTAG5_name_tag, TriggerListsHelper = FTAG5TriggerListsHelper))
+    # Content of FTAG5 
+    acc.merge(FTAG5CoreCfg(flags, FTAG5_name_tag))
 
     return acc
 
 
-def V0ToolCfg(flags, augmentationTools=None, tool_name_prefix="FTAG1", container_name_prefix="FTAG"):
+def V0ToolCfg(flags, augmentationTools=None, tool_name_prefix="FTAG5", container_name_prefix="FTAG"):
     
     acc = ComponentAccumulator()
     
@@ -377,7 +378,7 @@ def V0ToolCfg(flags, augmentationTools=None, tool_name_prefix="FTAG1", container
     augmentationTools += _augmentationTools
     return acc
 
-def FTAG1ExtraContentCfg(flags):
+def FTAG5ExtraContentCfg(flags):
     acc = ComponentAccumulator()
 
     from JetRecConfig.JetRecConfig import JetRecCfg

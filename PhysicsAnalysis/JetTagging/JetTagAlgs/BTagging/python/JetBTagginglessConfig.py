@@ -35,7 +35,6 @@ def JetBTagginglessAlgCfg(
 
 
     acc = ComponentAccumulator()
-
     if fast:
         acc.merge(
             _fastCfg(
@@ -46,13 +45,14 @@ def JetBTagginglessAlgCfg(
             )
         )
     else:
-        if JetCollection=="AntiKt4EMPFlowByVertexJets":
+        if ByVertex: #JetCollection=="AntiKt4EMPFlowByVertexJets":
             acc.merge(BTagTrackAugmenterByVertexAlgCfg(
                 cfgFlags,
                 TrackCollection='InDetTrackParticles',
                 PrimaryVertexCollectionName=pv_col,
                 prefix=trackAugmenterPrefix,
             ))
+            
         else:
             acc.merge(BTagTrackAugmenterAlgCfg(
                 cfgFlags,
@@ -60,7 +60,7 @@ def JetBTagginglessAlgCfg(
                 PrimaryVertexCollectionName=pv_col,
                 prefix=trackAugmenterPrefix,
             ))
-
+            
 
     acc.merge(JetParticleAssociationAlgCfg(
         cfgFlags,
@@ -113,7 +113,6 @@ def JetBTagginglessAlgCfg(
 
         if '/GN2v01/' in dirname:
             args['tag_requirements'] = {'nonzeroTracks'}
-
         acc.merge(MultifoldGNNCfg(**args))
 
         # add flip taggers
