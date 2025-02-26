@@ -90,5 +90,5 @@ if __name__ == "__main__":
                                                            outputCsvPath = outputCsvPath,
                                                            outputDataStream = sgKey))
 
-    acc.run(1)
+    acc.run(2)
 
