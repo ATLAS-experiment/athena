@@ -55,7 +55,7 @@ void test1()
   assert (k1.mode() == Gaudi::DataHandle::Reader);
   assert (k1.storeHandle().name() == "StoreGateSvc");
   assert (k1.storeHandle().isSet());
-  assert (k1.hashedKey() == 0);
+  assert (k1.hashedKey() == pool.stringToKey ("aab", 1234));
 
   assert (k1.assign ("FeeSvc+aac").isSuccess());
   assert (k1.clid() == 1234);
@@ -63,7 +63,7 @@ void test1()
   assert (k1.mode() == Gaudi::DataHandle::Reader);
   assert (k1.storeHandle().name() == "FeeSvc");
   assert (!k1.storeHandle().isSet());
-  assert (k1.hashedKey() == 0);
+  assert (k1.hashedKey() == 0);  // because store was changed after initialize
 
   assert (k1.assign ("ConditionStore+Feedir/aac").isSuccess());
   assert (k1.clid() == 1234);
