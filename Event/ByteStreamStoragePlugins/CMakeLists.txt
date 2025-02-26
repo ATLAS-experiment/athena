@@ -6,7 +6,7 @@ atlas_subdir( ByteStreamStoragePlugins )
 # External dependencies:
 find_package( Boost )
 find_package( Xrootd COMPONENTS Posix PosixPreload )
-find_package( tdaq-common COMPONENTS ers )
+find_package( tdaq-common COMPONENTS ers EventStorage )
 find_package( Davix )
 
 # Make sure that libraries are linked correctly:
