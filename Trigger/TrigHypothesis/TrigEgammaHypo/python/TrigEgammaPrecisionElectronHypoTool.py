@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -44,7 +44,7 @@ def createTrigEgammaPrecisionElectronHypoAlg(flags, name, sequenceOut):
     monTool.defineHistogram('TIME_DNN_exec', type='TH1F', path='EXPERT', title="Precision Electron Hypo DNN Algtime; time [ us ] ; Nruns", xbins=20, xmin=0.0, xmax=2000)
 
     thePrecisionElectronHypo.MonTool=monTool
-    #acc.addEventAlgo(thePrecisionElectronHypo)
+    
     return thePrecisionElectronHypo, acc
 
 def TrigEgammaPrecisionElectronHypoAlgCfg(flags, name, inputElectronCollection ):
@@ -97,9 +97,9 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
   # isolation cuts:w
   __isolationCut = {
         None: None,
-        'ivarloose': 0.1,
+        'ivarloose': 0.15,
         'ivarmedium': 0.065,
-        'ivartight': 0.05
+        'ivartight': 0.06
         }
 
   # LRT d0 cuts
@@ -140,6 +140,7 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
     tool.d0Cut          = -1
     tool.AcceptAll      = False
     tool.DoNoPid	= False
+    tool.IsoValidation = False
     self.__tool         = tool    
 
     self.__log.debug( 'Electron_Chain     :%s', self.__name )
@@ -214,6 +215,7 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
     if not self.isoInfo() in self.__isolationCut:
       self.__log.fatal(f"Bad Iso selection name: {self.isoInfo()}")
     if flags.Trigger.egamma.isoValidation:
+      self.tool().IsoValidation = flags.Trigger.egamma.isoValidation
       valIsoCut = {None: None,'ivarloose': 0.15,'ivarmedium': 0.065,'ivartight': 0.06}
       self.tool().RelPtConeCut = valIsoCut[self.isoInfo()]
     else:
@@ -271,8 +273,11 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
     monTool.defineHistogram('EtaBin', type='TH1I', path='EXPERT', title="PrecisionElectron Hypo entries per Eta bin;Eta bin no.", xbins=11, xmin=-0.5, xmax=10.5)
     monTool.defineHistogram('LikelihoodRatio', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo LH", xbins=100, xmin=-5, xmax=5)
     monTool.defineHistogram('mu', type='TH1F', path='EXPERT', title="Average interaction per crossing", xbins=100, xmin=0, xmax=100)
-    monTool.defineHistogram('relptvarcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo; ptvarcone20/pt;", xbins=50, xmin=0, xmax=0.5)
+    monTool.defineHistogram('relptvarcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo; ptvarcone20/pt;", xbins=50, xmin=0, xmax=2)
+    monTool.defineHistogram('relptvarcone30',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo; ptvarcone30/pt;", xbins=50, xmin=0, xmax=2)
     monTool.defineHistogram('ptvarcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo ptvarcone20; ptvarcone20;", xbins=50, xmin=0, xmax=5.0)
+    monTool.defineHistogram('ptvarcone30',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo ptvarcone30; ptvarcone30;", xbins=50, xmin=0, xmax=5.0)
+
 
     cuts=['Input','#Delta #eta EF-L1', '#Delta #phi EF-L1','eta','E_{T}^{EM}','LH','Isolation']
     monTool.defineHistogram('CutCounter', type='TH1I', path='EXPERT', title="PrecisionElectron Hypo Cut Counter;Cut Counter", xbins=7, xmin=0, xmax=7, opt="kCumulative",xlabels=cuts)
@@ -280,8 +285,10 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
 
 
     if flags.Trigger.doValidationMonitoring:
+      monTool.defineHistogram('relptcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo; ptcone20/pt;", xbins=50, xmin=0, xmax=2) 
+      monTool.defineHistogram('relptcone30',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo; ptcone30/pt;", xbins=50, xmin=0, xmax=2)
       monTool.defineHistogram('ptcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo ptcone20; ptcone20;", xbins=50, xmin=0, xmax=5.0)
-      monTool.defineHistogram('relptcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo; ptcone20/pt;", xbins=50, xmin=0, xmax=1)      
+      monTool.defineHistogram('ptcone30',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo ptcone30; ptcone30;", xbins=50, xmin=0, xmax=5.0)
       monTool.defineHistogram('trk_d0', type="TH1F", path='EXPERT', title="PrecisionElectron Hypo Track d0; d0 [mm]", xbins=100, xmin=-1, xmax=1)
 
     self.tool().MonTool = monTool

@@ -73,6 +73,7 @@ namespace LVL1 {
 
     // Enable dead material corrections
     Gaudi::Property<bool> m_dmCorr  {this, "dmCorr", false, "Enable dead material correctionst"};
+    Gaudi::Property<int> m_algoVersion  {this, "algoVersion", 0, "AlgoVersion, part of the L1Menu spec"};
 
     // Key for input towers
     SG::ReadHandleKey<LVL1::eTowerContainer> m_eTowerContainerKey {this, "MyETowers", "eTowerContainer", "Input container for eTowers"};

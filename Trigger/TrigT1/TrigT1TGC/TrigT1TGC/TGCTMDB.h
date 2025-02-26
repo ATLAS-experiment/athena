@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT1TGC_TGCTMDB_H
@@ -25,7 +25,7 @@ class TGCTMDB : public AthMessaging {
   int operator == (const TGCTMDB& right) const = delete;
   int operator != (const TGCTMDB& right) const = delete;
 
-  StatusCode retrieve(SG::ReadHandleKey<TileMuonReceiverContainer> key);
+  StatusCode retrieve(const SG::ReadHandleKey<TileMuonReceiverContainer>& key, const EventContext& ctx);
 
   std::shared_ptr<const TGCTMDBOut> getOutput(const TGCSide side, unsigned int moduleID) const;
   std::shared_ptr<const TGCTMDBOut> getOutput(const TGCSide side, int sectorID, unsigned int mod) const;

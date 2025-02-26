@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGC_NSW_H
@@ -27,7 +27,7 @@ class TGCNSW : public AthMessaging {
   bool operator == (const TGCNSW& right) const = delete;
   bool operator != (const TGCNSW& right) const = delete;
 
-  StatusCode retrieve(SG::ReadHandleKey<Muon::NSW_TrigRawDataContainer> key);
+  StatusCode retrieve(const SG::ReadHandleKey<Muon::NSW_TrigRawDataContainer>& key, const EventContext& ctx);
   std::shared_ptr<const NSWTrigOut> getOutput(LVL1TGCTrigger::TGCRegionType region ,int side, int TGC_TriggerSector) const;
 
  private:
