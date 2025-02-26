@@ -64,8 +64,8 @@ namespace InDetDD{
     PixelDiodeType PixelReadoutManager::getDiodeType(Identifier diodeId,
 						     const SiDetectorElement* element) const {
 
-      // Can be removed?
-      const Identifier wafer_id = m_idHelper->wafer_id(diodeId);
+      const Identifier wafer_id = element->identify();
+            
       const PixelModuleDesign *p_design = static_cast<const PixelModuleDesign *>(&element->design());
       if (p_design->getReadoutTechnology() != PixelReadoutTechnology::RD53) {
         ATH_MSG_ERROR("Non-RD53 readout technologies not supported!");

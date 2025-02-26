@@ -7,8 +7,11 @@
 #include <cstddef> //for size_t
 #include <cstdint> //for uint32_t
 #include <string>
+#include <string_view>
 #include <stdexcept>
 #include <typeinfo>
+#include <format> // For std::format (C++20)
+
 
 namespace InDetDD{
 
@@ -45,10 +48,9 @@ namespace InDetDD{
   ///Convert an enum class to size_t for use as an array index
   template <typename T>
   constexpr std::size_t
-  enum2uint(T n, const std::string & callingFunctionName=""){
+  enum2uint(T n, std::string_view callingFunctionName = ""){
     if (n==T::NONE){
-      std::string m= callingFunctionName+std::string(" InDetDD::enum2uint: 'NONE' type is out of range for ")+typeid(T).name();
-      throw ( std::out_of_range(m.data()));
+      throw std::out_of_range(std::format("{} InDetDD::enum2uint: 'NONE' type is out of range for {}", callingFunctionName, typeid(T).name()));
     }
     return static_cast<size_t>(n);
   }

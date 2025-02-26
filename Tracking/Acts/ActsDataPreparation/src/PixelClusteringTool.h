@@ -79,6 +79,8 @@ private:
 			 const PixelClusteringTool::Cluster &cluster,
 			 const PixelID& pixelID,
 			 const InDetDD::SiDetectorElement* element,
+			 const PixelChargeCalibCondData *calibData,
+			 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
 			 xAOD::PixelCluster& container) const;
 
 private:  
