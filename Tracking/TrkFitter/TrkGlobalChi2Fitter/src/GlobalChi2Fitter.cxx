@@ -5455,8 +5455,7 @@ namespace Trk {
   }
 
   void GlobalChi2Fitter::fillDerivatives(
-    GXFTrajectory & trajectory,
-    bool onlybrem
+    GXFTrajectory & trajectory
   ) const {
     ATH_MSG_DEBUG("fillDerivatives");
 
@@ -5478,13 +5477,6 @@ namespace Trk {
     ParamDefsAccessor paraccessor;
 
     for (std::unique_ptr<GXFTrackState> & state : states) {
-      if (
-        onlybrem &&
-        ((state->materialEffects() == nullptr) || state->materialEffects()->sigmaDeltaE() <= 0)
-      ) {
-        continue;
-      }
-
       TrackState::MeasurementType hittype = state->measurementType();
       const MeasurementBase *measbase = state->measurement();
       const auto [scatmin, scatmax] = std::minmax(scatno, nscatupstream);
@@ -5523,13 +5515,11 @@ namespace Trk {
           for (int j = scatmin; j < scatmax; j++) {
             int index = nperparams + ((trajectory.prefit() != 1) ? 2 * j : j);
             double thisderiv = 0;
-            double sign = 1;
-            //
 
             if (i == 0 && sinstereo != 0) {
-              thisderiv = sign * (derivatives(0, index) * cosstereo + sinstereo * derivatives(1, index));
+              thisderiv = derivatives(0, index) * cosstereo + sinstereo * derivatives(1, index);
             } else {
-              thisderiv = sign * derivatives(i, index);
+              thisderiv = derivatives(i, index);
             }
 
             weightderiv(measno, index) = thisderiv / error[measno];
@@ -5538,9 +5528,9 @@ namespace Trk {
               index++;
 
               if (i == 0 && sinstereo != 0) {
-                thisderiv = sign * (derivatives(0, index) * cosstereo + sinstereo * derivatives(1, index));
+                thisderiv = derivatives(0, index) * cosstereo + sinstereo * derivatives(1, index);
               } else {
-                thisderiv = sign * derivatives(i, index);
+                thisderiv = derivatives(i, index);
               }
 
               weightderiv(measno, index) = thisderiv / error[measno];
@@ -5668,7 +5658,7 @@ namespace Trk {
 
     if (doderiv) {
       calculateDerivatives(trajectory);
-      fillDerivatives(trajectory, !doderiv);
+      fillDerivatives(trajectory);
     }
 
     if (cache.m_firstmeasurement.empty()) {
