@@ -134,8 +134,7 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
     // 3. Perform track fitting:
     //    - Initial conformal mapping
     //    - First chi2 fit without outlier removal
-    //    - Second chi2 fit with perigee parameters
-    //    - Final fit with outlier removal
+    //    - Second chi2 fit with improved initial estimate of track parameters and with outlier removal
     // 4. Apply quality cuts (pT, eta)
     // 5. Compute track summary
     // 6. Store track if it passes all criteria
@@ -165,7 +164,7 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
 }
 
 
-bool InDet::SiSPGNNTrackMaker::prefitCheck(int nPix, int nStrip, int nClusters, int nSpacePoints) const {
+bool InDet::SiSPGNNTrackMaker::prefitCheck(unsigned int nPix, unsigned int nStrip, unsigned int nClusters, unsigned int nSpacePoints) const {
   return nPix >= m_minPixelClusters && nStrip >= m_minStripClusters && nClusters >= m_minClusters && nSpacePoints >= 3;
 }
 
@@ -501,7 +500,7 @@ std::tuple<bool, int, std::unique_ptr<Trk::Track>> InDet::SiSPGNNTrackMaker::doF
 
     if (track == nullptr || track->perigeeParameters() == nullptr) {
       ATH_MSG_DEBUG("Track " << trackCounter
-                             << " fails the third chi2 fit, skipping");
+                             << " fails the chi2 fit, skipping");
       return std::make_tuple(false, 999, nullptr);
     }
 
@@ -541,9 +540,21 @@ std::unique_ptr<Trk::Track> InDet::SiSPGNNTrackMaker::fitTrack (
 
     Trk::ParticleHypothesis matEffects = Trk::pion;
     // first fit the track with local parameters and without outlier removal.
-    std::unique_ptr<Trk::Track> track =
-        m_trackFitter->fit(ctx, clusters, initial_params, false, matEffects);
-    
+    bool keepOnTrying = true;
+    std::unique_ptr<Trk::Track> track;
+    while (keepOnTrying) {
+      track = m_trackFitter->fit(ctx, clusters, initial_params, false, matEffects);
+      // any need to recover a failed fit ?
+      if (track == nullptr || track->perigeeParameters() == nullptr) {
+        clusters.pop_back();
+        if (clusters.size()<m_minClusters || !m_doRecoverFailedFits) {
+          keepOnTrying = false;
+        }
+      } else {
+        keepOnTrying = false;
+      }
+    }
+
     if (track == nullptr || track->perigeeParameters() == nullptr) {
       ATH_MSG_DEBUG("Track " << trackCounter
                              << " fails the first chi2 fit, skipping");
@@ -557,22 +568,31 @@ std::unique_ptr<Trk::Track> InDet::SiSPGNNTrackMaker::fitTrack (
       return nullptr;
     }
 
-    // fit the track again with perigee parameters and without outlier
-    // removal.
-    track = m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(),
-                                false, matEffects);
-
-    // track = m_trackFitter->fit(ctx, *track, false, matEffects);
-    if (track == nullptr || track->perigeeParameters() == nullptr) {
-      ATH_MSG_DEBUG("Track " << trackCounter
-                             << " fails the second chi2 fit, skipping");
-      return track;
-    }
     // finally fit with outlier removal
-    // track = m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(), true,
-    //                            matEffects);
+    Trk::Perigee origPerigee = *track->perigeeParameters();
+    keepOnTrying = true;
+    while (keepOnTrying) {
+      track = m_trackFitter->fit(ctx, clusters, origPerigee, true, matEffects);
+      // any need to recover a failed or bad fit ?
+      bool doRefit=false;
+      if (track == nullptr || track->trackSummary() == nullptr || track->outliersOnTrack()->size()>=3) {
+        doRefit=true;
+      } 
+      if (doRefit && m_doRecoverFailedFits) {
+        clusters.pop_back();
+        if (clusters.size()<m_minClusters) {
+          keepOnTrying=false;
+        }
+      } else {
+        keepOnTrying=false;
+      }
+    }
 
-    return m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(), true, matEffects);
+    if (!track) ATH_MSG_DEBUG("Track " << trackCounter
+			      << " fails the second chi2 fit, skipping");
+
+    return track;
+
   }
 
 ///////////////////////////////////////////////////////////////////
