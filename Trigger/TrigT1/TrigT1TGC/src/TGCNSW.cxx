@@ -1,10 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "TrigT1TGC/TGCNSW.h"
 #include "TrigT1TGC/NSWTrigOut.h"
+
+#include "AthenaBaseComps/AthCheckMacros.h"
+
 
 namespace LVL1TGC {
 
@@ -12,26 +15,22 @@ TGCNSW::TGCNSW()
 : AthMessaging("LVL1TGC::TGCNSW") {
   for (int side=0; side < 2; side++) {
     for (int TP=0; TP < NumberOfNSWTriggerProcesser; TP++) {
-      std::vector<int> vecTP;
-      vecTP.push_back(TP);
-      m_buffer[side][TP].reset(new NSWTrigOut(side, vecTP)); 
+      m_buffer[side][TP] = std::make_shared<NSWTrigOut>(side, std::vector<int>{TP});
     }
   }
 }
 
-StatusCode TGCNSW::retrieve(SG::ReadHandleKey<Muon::NSW_TrigRawDataContainer> key) {
+StatusCode TGCNSW::retrieve(const SG::ReadHandleKey<Muon::NSW_TrigRawDataContainer>& key,
+                            const EventContext& ctx) {
     ATH_MSG_DEBUG("retrieve");
     this->eraseOutput();
 
     //The following part will be available when NSW Trigger Output is available.
 
-    SG::ReadHandle<Muon::NSW_TrigRawDataContainer> readNSW_TrigRawDataContainer(key);
-    if(!readNSW_TrigRawDataContainer.isValid()){
-      ATH_MSG_ERROR("Cannot retrieve NSW TrigRawData Container.");
-      return StatusCode::FAILURE;
-    }
-    const Muon::NSW_TrigRawDataContainer* nsw_TrigRawDataContainer = readNSW_TrigRawDataContainer.cptr();
-    for(const Muon::NSW_TrigRawData* nsw_sector : *nsw_TrigRawDataContainer){
+    SG::ReadHandle<Muon::NSW_TrigRawDataContainer> readNSW_TrigRawDataContainer(key, ctx);
+    ATH_CHECK( readNSW_TrigRawDataContainer.isValid() );
+
+    for(const Muon::NSW_TrigRawData* nsw_sector : *readNSW_TrigRawDataContainer){
       for(const Muon::NSW_TrigRawDataSegment* nsw_trk : *nsw_sector){
         int nsw_sideId = (nsw_sector->sectorSide()=='A')?0:1;
         this->setOutput(nsw_sideId,        // side
@@ -60,9 +59,7 @@ TGCNSW::getOutput(LVL1TGCTrigger::TGCRegionType region ,int side,int TGC_Trigger
     return true;
   };
     
-  std::shared_ptr<NSWTrigOut> trigNSW_output;
-  trigNSW_output.reset(new NSWTrigOut());
-  trigNSW_output->clear();
+  auto trigNSW_output = std::make_shared<NSWTrigOut>();
   if ( (side<0)||(side>1) ) return 0;
   if (region == LVL1TGCTrigger::TGCRegionType::ENDCAP) {
     if ( TGC_TriggerSector<0 || TGC_TriggerSector>47 ) return 0;

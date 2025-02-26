@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # File: InDetAlignConfig/scripts/runIDAlign.py
 # Author: David Brunner (david.brunner@cern.ch), Thomas Strebler (thomas.strebler@cern.ch)
@@ -40,11 +40,6 @@ from InDetAlignConfig.IDAlignFlags import createInDetAlignFlags
 
 flags = initConfigFlags()
 flags.addFlagsCategory("InDet.Align", createInDetAlignFlags, prefix=True)
-if kwargs["accumulate"] and not kwargs["solve"]:        
-    flags = flags.cloneAndReplace(
-        "Tracking.ActiveConfig",
-        f"Tracking.{flags.Tracking.PrimaryPassConfig.value}Pass")
-
 flags.lock()
 
 from RecJobTransforms.RecoSteering import RecoSteering

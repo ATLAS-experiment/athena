@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGEGAMMAHYPO_TRIGPRECISIONELECTRONHYPOALG_PRECISION_H
 #define TRIGEGAMMAHYPO_TRIGPRECISIONELECTRONHYPOALG_PRECISION_H 1
@@ -50,7 +50,6 @@ class TrigEgammaPrecisionElectronHypoAlg : public ::HypoBase {
     Gaudi::Property<std::vector<std::string>> m_dnnNames {this, "DNNNames", {}, "DNN pid names."};
     /*Luminosity info*/
     SG::ReadDecorHandleKey<xAOD::EventInfo> m_avgMuKey { this, "averageInteractionsPerCrossingKey", "EventInfo.averageInteractionsPerCrossing", "Decoration for Average Interaction Per Crossing" };
-
     ToolHandle< GenericMonitoringTool >   m_monTool { this, "MonTool", "", "Monitoring tool" };
 
 
