@@ -232,14 +232,38 @@ def RDOAnalysisCfg(flags):
     if flags.Detector.EnableLAr:
         acc.merge(LArRDOAnalysisCfg(flags))
     
+    
+    
     if flags.Detector.EnableMDT:
+        if "MDTCSM" in flags.Input.Collections:
+            from MuonConfig.MuonByteStreamCnvTestConfig import MdtRdoToMdtDigitCfg
+            acc.merge(MdtRdoToMdtDigitCfg(flags))
         acc.merge(MDT_RDOAnalysisCfg(flags))
 
     if flags.Detector.EnableRPC:
+        if "RPCPAD" in flags.Input.Collections:
+            from MuonConfig.MuonByteStreamCnvTestConfig import RpcRdoToRpcDigitCfg
+            acc.merge(RpcRdoToRpcDigitCfg(flags))
         acc.merge(RPC_RDOAnalysisCfg(flags))
 
     if flags.Detector.EnableTGC:
+        if "TGCRDO" in flags.Input.Collections:
+            from MuonConfig.MuonByteStreamCnvTestConfig import TgcRdoToTgcDigitCfg
+            acc.merge(TgcRdoToTgcDigitCfg(flags))
         acc.merge(TGC_RDOAnalysisCfg(flags))
+
+    if flags.Detector.EnablesTGC:
+        if "sTGCRDO" in flags.Input.Collections:
+            from MuonConfig.MuonByteStreamCnvTestConfig import STGC_RdoToDigitCfg
+            acc.merge(STGC_RdoToDigitCfg(flags))
+    if flags.Detector.EnableMM:
+        if "MMRDO" in flags.Input.Collections:
+            from MuonConfig.MuonByteStreamCnvTestConfig import MM_RdoToDigitCfg
+            acc.merge(MM_RdoToDigitCfg(flags))
+
+    if flags.Detector.EnableMuon:
+        from MuonPRDTest.MuonPRDTestCfg import AddHitValAlgCfg
+        acc.merge(AddHitValAlgCfg(flags, name = "MuonHitValAlg", outFile=flags.Output.HISTFileName, doSDOs = True, doDigits=True))
 
     if flags.Detector.EnableITkPixel:
         acc.merge(ITkPixelRDOAnalysisCfg(flags))
@@ -401,3 +425,61 @@ def TGC_RDOAnalysisCfg(flags, name="TGC_RDOAnalysis", **kwargs):
     result.merge(RDOAnalysisOutputCfg(flags))
 
     return result
+
+
+def SetupArgParser():
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument("--threads", type=int, help="number of threads", default=1)
+    parser.add_argument("--inputFile", "-i", default=[
+                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/main/d1759/v5/myRDO.pool.root"
+                        ], 
+                        help="Input file to run on ", nargs="+")
+    parser.add_argument("--geoTag", default="ATLAS-R3S-2021-03-02-00", help="Geometry tag to use", choices=["ATLAS-R2-2016-01-02-01",
+                                                                                     "ATLAS-R3S-2021-03-02-00"])
+    parser.add_argument("--condTag", default="OFLCOND-MC23-SDR-RUN3-09", help="Conditions tag to use",
+                                                                         choices=["OFLCOND-MC16-SDR-RUN2-11",
+                                                                                  "OFLCOND-MC23-SDR-RUN3-09"])
+
+    parser.add_argument("--outFile", default="RDOAnalysis.root", help="Output ROOT file to dump the geomerty")
+    parser.add_argument("--nEvents", help="Number of events to run", type = int ,default = 1)
+    parser.add_argument("--skipEvents", help="Number of events to skip", type = int, default = 0)
+    parser.add_argument("--geoModelFile", default ="", help="GeoModel SqLite file containing the muon geometry.")
+ 
+   
+
+    return parser
+
+if __name__ == "__main__":
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    args = SetupArgParser().parse_args()
+    flags = initConfigFlags()
+    flags.Concurrency.NumThreads = args.threads
+    flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
+    flags.Input.Files = args.inputFile 
+    flags.GeoModel.AtlasVersion = args.geoTag
+    flags.IOVDb.GlobalTag = args.condTag
+    flags.Scheduler.ShowDataDeps = True 
+    flags.Scheduler.ShowDataFlow = True
+    flags.Exec.FPE= 500
+    flags.Exec.MaxEvents = args.nEvents
+    flags.Exec.SkipEvents = args.skipEvents
+    flags.Output.HISTFileName = args.outFile
+    if len (args.geoModelFile) > 0:
+        flags.GeoModel.SQLiteDB = True
+        flags.GeoModel.SQLiteDBFullPath = args.geoModelFile
+
+    flags.lock()
+
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    cfg = MainServicesCfg(flags)
+    ### Setup the file reading
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    cfg.merge(PoolReadCfg(flags))
+
+    cfg.merge(RDOAnalysisCfg(flags))
+
+    cfg.printConfig(withDetails=True, summariseProps=True)
+    if not cfg.run().isSuccess(): exit(1)
+
