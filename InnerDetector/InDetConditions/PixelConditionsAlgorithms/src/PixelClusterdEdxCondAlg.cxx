@@ -70,7 +70,7 @@ StatusCode PixelClusterdEdxCondAlg::execute(const EventContext& ctx) const {
       nlohmann::json channeldata=jsondata["0"]; // get "data" column, table-inside-table
       ATH_MSG_INFO("Rebecca -- channel data: " << channeldata);
       int testData = -999;
-      testData = channeldata;
+      //testData = channeldata;
       writeCdo->setVar(testData); //Gives error that testData is null
    }
   }
