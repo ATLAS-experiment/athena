@@ -23,7 +23,14 @@ public:
     StatusCode execute() override;
     unsigned int cardinality() const override final { return 1; }
 
-private:    
+private:
+    
+    StatusCode setupSimHits();
+    StatusCode setupSDOs();
+    StatusCode setupDigits();
+    StatusCode setupRDOs();
+    StatusCode setupPRDs();
+    
     MuonVal::MuonTesterTree m_tree{"HitValidTree", "MUONHITVALIDSTREAM"};
 
     ServiceHandle<MuonTGC_CablingSvc> m_tgcCabling{this, "TGCCablingSvc", "MuonTGC_CablingSvc"};
@@ -34,34 +41,45 @@ private:
     Gaudi::Property<bool> m_isData{this, "isData", false};        // if false use MuonDetectorManager from detector store everywhere
     Gaudi::Property<bool> m_doTruth{this, "doTruth", false};      // switch on the output of the MC truth
     Gaudi::Property<bool> m_doMuEntry{this, "doMuEntry", false};  // switch on the output of the Muon Entry Layer
-    Gaudi::Property<bool> m_doSTGCHit{this, "doSTGCHit", false};  // switch on the output of the Small TGC simulated hits
-    Gaudi::Property<bool> m_doSTGCFastDigit{this, "doSTGCFastDigit", false};  // switch on the output of the Small TGC fast digitization
-    Gaudi::Property<bool> m_doSTGCDigit{this, "doSTGCDigit", false};          // swicth on the output of the Small TGC digit
-    Gaudi::Property<bool> m_doSTGCRDO{this, "doSTGCRDO", false};              // switch on the output of the Small TGC RDO
-    Gaudi::Property<bool> m_doSTGCPRD{this, "doSTGCPRD", false};              // swicth on the output of the Small TGC prepdata
+  
+    Gaudi::Property<bool> m_doSimHits{this, "doSimHits", false}; /// Switch to toggle the dumping of sim hits in general
+    Gaudi::Property<bool> m_doSDO{this, "doSDOs", false};        /// Switch to toggle the dumping of SDOs in general
+    Gaudi::Property<bool> m_doDigits{this, "doDigits", false};   /// Switch to toggle the dumping of Digits in general
+    Gaudi::Property<bool> m_doRDOs{this, "doRDOs", false};       /// Switch to toggle the dumping of RDOs in general
+    Gaudi::Property<bool> m_doPRDs{this, "doPRDs", false};       /// Switch to toggle the dumping of PRDs in general
+    
+    Gaudi::Property<bool> m_doSTGCHit{this, "doSTGCHit", false};     // switch on the output of the Small TGC simulated hits
+    Gaudi::Property<bool> m_doSTGCSDO{this, "doSTGCSDO", false};     // switch on the output of the sTGC SDO
+    Gaudi::Property<bool> m_doSTGCDigit{this, "doSTGCDigit", false}; // swicth on the output of the Small TGC digit
+    Gaudi::Property<bool> m_doSTGCRDO{this, "doSTGCRDO", false};     // switch on the output of the Small TGC RDO
+    Gaudi::Property<bool> m_doSTGCPRD{this, "doSTGCPRD", false};     // swicth on the output of the Small TGC prepdata
+
     Gaudi::Property<bool> m_doMMHit{this, "doMMHit", false};                  // switch on the output of the MicroMegas simulated hits
-    Gaudi::Property<bool> m_doMMFastDigit{this, "doMMFastDigit", false};      // switch on the output of the MicroMegas fast digitization
+    Gaudi::Property<bool> m_doMMSDO{this, "doMMSDO", false};                  // switch on the output of the MicroMegas SDO
     Gaudi::Property<bool> m_doMMDigit{this, "doMMDigit", false};              // switch on the output of the MicroMegas digitization
     Gaudi::Property<bool> m_doMMRDO{this, "doMMRDO", false};                  // switch on the output of the MicroMegas RDO
     Gaudi::Property<bool> m_doMMPRD{this, "doMMPRD", false};                  // switch on the output of the MicroMegas prepdata
+
     Gaudi::Property<bool> m_doCSCHit{this, "doCSCHit", false};                // switch on the output of the CSC simulated hits
     Gaudi::Property<bool> m_doCSCSDO{this, "doCSCSDO", false};                // switch on the output of the CSC SDO
     Gaudi::Property<bool> m_doCSCDigit{this, "doCSCDigit", false};            // switch on the output of the CSC digitization
     Gaudi::Property<bool> m_doCSCRDO{this, "doCSCRDO", false};                // switch on the output of the CSC RDO
     Gaudi::Property<bool> m_doCSCPRD{this, "doCSCPRD", false};                // switch on the output of the CSC prepdata
+
     Gaudi::Property<bool> m_doMDTHit{this, "doMDTHit", false};                // switch on the output of the MDT simulated hits
     Gaudi::Property<bool> m_doMDTSDO{this, "doMDTSDO", false};                // switch on the output of the MDT SDO
     Gaudi::Property<bool> m_doMDTDigit{this, "doMDTDigit", false};            // switch on the output of the MDT digitization
+
     Gaudi::Property<bool> m_doRPCHit{this, "doRPCHit", false};                // switch on the output of the RPC simulated hits
     Gaudi::Property<bool> m_doRPCSDO{this, "doRPCSDO", false};                // switch on the output of the RPC SDO
     Gaudi::Property<bool> m_doRPCDigit{this, "doRPCDigit", false};            // switch on the output of the RPC digitization
+
     Gaudi::Property<bool> m_doTGCHit{this, "doTGCHit", false};                // switch on the output of the TGC simulated hits
     Gaudi::Property<bool> m_doTGCSDO{this, "doTGCSDO", false};                // switch on the output of the TGC SDO
     Gaudi::Property<bool> m_doTGCDigit{this, "doTGCDigit", false};            // switch on the output of the TGC digitization
     Gaudi::Property<bool> m_doTGCRDO{this, "doTGCRDO", false};                // switch on the output of the TGC RDO
     Gaudi::Property<bool> m_doTGCPRD{this, "doTGCPRD", false};                // switch on the output of the TGC prepdata
-    Gaudi::Property<bool> m_doMMSDO{this, "doMMSDO", false};                  // switch on the output of the MicroMegas SDO
-    Gaudi::Property<bool> m_doSTGCSDO{this, "doSTGCSDO", false};              // switch on the output of the sTGC SDO
+
 
     Gaudi::Property<std::string> m_Truth_ContainerName{this, "Truth_ContainerName", "TruthEvent"};
     Gaudi::Property<std::string> m_MuEntry_ContainerName{this, "MuonEntryLayer_ContainerName", "MuonEntryLayer"};
