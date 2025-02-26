@@ -15,6 +15,9 @@ events=50
 RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/RDO_BKG/mc23_13p6TeV.900149.PG_single_nu_Pt50.merge.RDO.e8514_e8528_s4153_d1907_d1908/100events.RDO.pool.root"
 RDO_PU_File="PU_TRK.RDO.pool.root"
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 Reco_tf.py \
   --CA \
   --inputRDOFile ${RDO_BKG_File} \
@@ -23,8 +26,8 @@ Reco_tf.py \
   --skipEvents 0 \
   --preInclude 'Campaigns.MC23a' \
   --postInclude 'PyJobTransforms.UseFrontier' \
-  --conditionsTag 'OFLCOND-MC23-SDR-RUN3-08'  \
-  --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
+  --conditionsTag "default:${conditions}" \
+  --geometryVersion "default:${geometry}" \
   --preExec="flags.Tracking.doBackTracking=False;" \
   --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
   --athenaopts "all:--threads=1" \

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           EnergyTopoData.h  -  description
@@ -31,10 +31,9 @@ namespace LVL1 {
   /// constructor
   EnergyTopoData(unsigned int word0, unsigned int word1, unsigned int word2);
     
-  EnergyTopoData() ;
+  EnergyTopoData() = default;
 
-  /// destructor
-  ~EnergyTopoData(){};
+ 
   
   /** add data. Ex/Ey values should be in 15 bit twos-complement format */
   void addEx(unsigned int Ex, unsigned int overflow, int type);
@@ -65,9 +64,9 @@ namespace LVL1 {
   unsigned int EtOverflow(SumTypes type = LVL1::EnergyTopoData::Normal) const; 
   
 private:
-  unsigned int m_word0;
-  unsigned int m_word1;
-  unsigned int m_word2;
+  unsigned int m_word0{};
+  unsigned int m_word1{};
+  unsigned int m_word2{};
   
   int decodeTC(unsigned int word) const;
 

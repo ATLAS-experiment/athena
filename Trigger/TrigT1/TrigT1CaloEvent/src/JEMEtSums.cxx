@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           JEMEtSums.cpp  -  description
@@ -19,27 +19,11 @@
 
 namespace LVL1 {
 
-JEMEtSums::JEMEtSums():
-  m_crate(0),
-  m_module(0),
-  m_peak(0),
-  m_Et(1),
-  m_Ex(1),
-  m_Ey(1)
-{
-}
-
-JEMEtSums::~JEMEtSums(){
-}
 
 /** constructs a JEMEtSums object, specifying crate & module. */
 LVL1::JEMEtSums::JEMEtSums::JEMEtSums(int crate, int module):
   m_crate(crate),
-  m_module(module),
-  m_peak(0),
-  m_Et(1),
-  m_Ex(1),
-  m_Ey(1)
+  m_module(module)
 {
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           CMMEtSums.cpp  -  description
@@ -19,33 +19,12 @@
 
 namespace LVL1 {
 
-CMMEtSums::CMMEtSums():
-  m_crate(0),
-  m_dataID(0),
-  m_peak(0),
-  m_Et(1),
-  m_Ex(1),
-  m_Ey(1),
-  m_EtError(1),
-  m_ExError(1),
-  m_EyError(1)
-{
-}
 
-CMMEtSums::~CMMEtSums(){
-}
 
 /** constructs a CMMEtSums object, specifying crate, and data ID. */
 CMMEtSums::CMMEtSums(int crate, int dataID):
   m_crate(crate),
-  m_dataID(dataID),
-  m_peak(0),
-  m_Et(1),
-  m_Ex(1),
-  m_Ey(1),
-  m_EtError(1),
-  m_ExError(1),
-  m_EyError(1)
+  m_dataID(dataID)
 {
 }
 

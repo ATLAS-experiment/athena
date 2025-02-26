@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           JetElement.cpp  -  description
@@ -20,18 +20,7 @@
 
 namespace LVL1 {
 
-JetElement::JetElement():
-  m_phi(0.0),
-  m_eta(0.0),
-  m_key(0),
-  m_peak(0),
-  m_emEnergy(1),
-  m_hadEnergy(1),
-  m_em_error(1),
-  m_had_error(1),
-  m_link_error(1)
-{	
-}
+
 
 /** constructs a jet element with one timeslice */
 JetElement::JetElement(double phi, double eta,
@@ -67,9 +56,6 @@ JetElement::JetElement(double phi, double eta,
   m_had_error(hadError),
   m_link_error(linkError)
 {
-}
-
-JetElement::~JetElement(){
 }
 
 

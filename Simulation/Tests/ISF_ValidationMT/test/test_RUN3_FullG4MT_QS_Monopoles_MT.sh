@@ -18,6 +18,10 @@
 
 export ATHENA_PROC_NUMBER=8
 export ATHENA_CORE_NUMBER=8
+
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 Sim_tf.py \
     --CA \
     --inputEVNTFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc21_13p6TeV.950542.MGPy8EG_DYSpinHalfMonopoles_1gD_1500GeV_valid.merge.EVNT.e8467_e8455.29631249._000005.pool.root.1" \
@@ -26,8 +30,8 @@ Sim_tf.py \
     --preInclude "EVNTtoHITS:Campaigns.MC23eSimulationMultipleIoV,G4DebuggingTools.DebugMonopole" \
     --skipEvents="0" \
     --randomSeed="41" \
-    --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-04" \
-    --geometryVersion="default:ATLAS-R3S-2021-03-02-00" \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --runNumber="950542" \
     --AMITag="s3890" \
     --jobNumber="41" \

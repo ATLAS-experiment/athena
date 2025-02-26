@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
   
@@ -9,7 +9,6 @@
   #include "AthenaKernel/CLASS_DEF.h"
 
 
-  #include <iostream>
   #ifndef  TRIGGERSPACE
   #include "TrigT1Interfaces/Coordinate.h"
   #else
@@ -25,7 +24,7 @@
     public:
 
     /** Constructors */
-    CMXJetTob();
+    CMXJetTob() = default;
     CMXJetTob(int crate, int jem, int frame, int loc);
     CMXJetTob(int crate, int jem, int frame, int loc,
               const std::vector<int>& energyLarge,
@@ -34,7 +33,7 @@
 	      const std::vector<unsigned int>& presenceMap,
 	      int peak);
   
-    virtual ~CMXJetTob();
+  
 
     /** For multi-slice readout, need to indicate position of triggered BC */
     void setPeak(int peak);
@@ -63,15 +62,15 @@
       
   /** Internal data */
     private:
-    int m_crate;
-    int m_jem;
-    int m_frame;
-    int m_location;
-    int m_peak;
-    std::vector<int> m_energyLarge;
-    std::vector<int> m_energySmall;
-    std::vector<int> m_error;
-    std::vector<unsigned int> m_presenceMap;
+    int m_crate{};
+    int m_jem{};
+    int m_frame{};
+    int m_location{};
+    int m_peak{};
+    std::vector<int> m_energyLarge{0};
+    std::vector<int> m_energySmall{0};
+    std::vector<int> m_error{0};
+    std::vector<unsigned int> m_presenceMap{0};
     
     };
 

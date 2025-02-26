@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           CPMHits.cpp  -  description
@@ -19,25 +19,12 @@
 
 namespace LVL1 {
 
-CPMHits::CPMHits():
-  m_crate(0),
-  m_module(0),
-  m_peak(0),
-  m_Hits0(1),
-  m_Hits1(1)
-{
-}
 
-CPMHits::~CPMHits(){
-}
 
 /** constructs a CPMHits object, specifying crate & module. */
 LVL1::CPMHits::CPMHits::CPMHits(int crate, int module):
   m_crate(crate),
-  m_module(module),
-  m_peak(0),
-  m_Hits0(1),
-  m_Hits1(1)
+  m_module(module)
 {
 }
 

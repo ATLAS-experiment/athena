@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,31 +13,11 @@
 
 namespace LVL1 {
 
-CMXCPHits::CMXCPHits():
-  m_crate(0),
-  m_cmx(0),
-  m_source(0),
-  m_peak(0),
-  m_hits0(1),
-  m_hits1(1),
-  m_error0(1),
-  m_error1(1)
-{
-}
-
-CMXCPHits::~CMXCPHits(){
-}
-
 /** constructs a CMXCPHits object, specifying crate, cmx, source. */
 CMXCPHits::CMXCPHits(int crate, int cmx, int source):
   m_crate(crate),
   m_cmx(cmx),
-  m_source(source),
-  m_peak(0),
-  m_hits0(1),
-  m_hits1(1),
-  m_error0(1),
-  m_error1(1)
+  m_source(source)
 {
 }
 

@@ -17,7 +17,7 @@
 
 
 #include <vector>
-#include <iostream>
+#include <map>
 #ifndef  TRIGGERSPACE
 #include "TrigT1Interfaces/Coordinate.h"
 #else
@@ -44,7 +44,7 @@ namespace LVL1 {
     public:
      
     /** Default constructor */ 
-    JetElement();
+    JetElement() = default;
     /** Single slice constructor (some simulation tasks, legacy really) */
     JetElement(double phi, double eta, int emEnergy, int hadEnergy,
                unsigned int key, int emError, int hadError, int linkError);
@@ -55,9 +55,7 @@ namespace LVL1 {
 	       const std::vector<int>& hadError,
 	       const std::vector<int>& linkError, int peak);
   
-    /** Destructor */
-    virtual ~JetElement();
-
+ 
     /** Add ET to triggered time slice */
     void addEnergy(int emEnergy, int hadEnergy);
     /* Add ET values to specified slice */
@@ -101,15 +99,15 @@ namespace LVL1 {
   
     /** Internal data */
     private:
-    double m_phi;
-    double m_eta;
-    unsigned int m_key;
-    int    m_peak;
-    std::vector<int> m_emEnergy;
-    std::vector<int> m_hadEnergy;
-    std::vector<int> m_em_error;
-    std::vector<int> m_had_error;
-    std::vector<int> m_link_error;
+    double m_phi{};
+    double m_eta{};
+    unsigned int m_key{};
+    int    m_peak{};
+    std::vector<int> m_emEnergy{0};
+    std::vector<int> m_hadEnergy{0};
+    std::vector<int> m_em_error{0};
+    std::vector<int> m_had_error{0};
+    std::vector<int> m_link_error{0};
   
     static const int m_saturationThreshold = 1023;
     static const int m_layerSaturationThreshold = 511;

@@ -33,10 +33,10 @@ std::pair<std::vector<std::shared_ptr<xAOD::TruthParticle>>, std::vector<std::sh
         return {true_taus_1p, true_taus_3p};
     }
 
-    static const SG::AuxElement::ConstAccessor<double> acc_ptvis("pt_vis");
-    static const SG::AuxElement::ConstAccessor<double> acc_etavis("eta_vis");
-    static const SG::AuxElement::ConstAccessor<int> acc_ntracks("nTracks");
-    static const SG::AuxElement::ConstAccessor<char> acc_isleptonic("IsLeptonicTau");
+    static const SG::ConstAccessor<double> acc_ptvis("pt_vis");
+    static const SG::ConstAccessor<double> acc_etavis("eta_vis");
+    static const SG::ConstAccessor<int> acc_ntracks("nTracks");
+    static const SG::ConstAccessor<char> acc_isleptonic("IsLeptonicTau");
 
     // Fill truth tau containers
     for(const auto xTruthParticle : *truth_cont) {
@@ -73,13 +73,13 @@ std::pair<std::vector<std::shared_ptr<xAOD::TruthParticle>>, std::vector<std::sh
 StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<xAOD::TruthParticle>& xTruthTau) const
 {
     if(!xTruthTau->hasDecayVtx()) return StatusCode::FAILURE;
-    static const SG::AuxElement::Accessor<double> acc_ptvis("pt_vis");
-    static const SG::AuxElement::Accessor<double> acc_etavis("eta_vis");
-    static const SG::AuxElement::Accessor<double> acc_phivis("phi_vis");
-    static const SG::AuxElement::Accessor<double> acc_mvis("mvis");
-    static const SG::AuxElement::Accessor<int> acc_childChargeSum("childChargeSum");
-    static const SG::AuxElement::Accessor<int> acc_ntracks("nTracks");
-    static const SG::AuxElement::Accessor<char> acc_isleptonic("IsLeptonicTau");
+    static const SG::Accessor<double> acc_ptvis("pt_vis");
+    static const SG::Accessor<double> acc_etavis("eta_vis");
+    static const SG::Accessor<double> acc_phivis("phi_vis");
+    static const SG::Accessor<double> acc_mvis("mvis");
+    static const SG::Accessor<int> acc_childChargeSum("childChargeSum");
+    static const SG::Accessor<int> acc_ntracks("nTracks");
+    static const SG::Accessor<char> acc_isleptonic("IsLeptonicTau");
 
     acc_isleptonic(*xTruthTau) = false;
         

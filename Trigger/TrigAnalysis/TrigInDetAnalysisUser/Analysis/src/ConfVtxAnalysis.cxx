@@ -108,7 +108,12 @@ void ConfVtxAnalysis::initialise() {
   m_hy      = new TH1F( "y",     ";vtx y [mm]",          800, -1,    1   );
   m_hr      = new TH1F( "r",     ";vtx r [mm]",           40, vrbins );
   //  hntrax  = new TH1F( "ntrax", ";number of tracks", 201,   -0.5, 200.5 );
-  m_hmu     = new TH1F( "mu",    ";<mu>",         81, -0.5, 80.5   );
+  // AAAAARGH !! the mu values *all* lie on half integer values
+  // which means that you *can't* ever have "0" or "1" interactions, you can
+  // only ever have -0.5 or 0.5, or 1.5, which at low pile-up is completely
+  // ludicrous, leave the old code here as a reminder 
+  //  m_hmu     = new TH1F( "mu",    ";<mu>",         81, -0.5, 80.5   );
+  m_hmu     = new TH1F( "mu",    ";<mu>",         80, 0, 80   );
   m_hlb     = new TH1F( "lb",    ";lumi block",  301, -0.5, 3009.5   );
 
   m_hnvtx_rec  = new TH1F( "nvtx_rec",  ";number of vertices",  101, -0.5, 100.5 );

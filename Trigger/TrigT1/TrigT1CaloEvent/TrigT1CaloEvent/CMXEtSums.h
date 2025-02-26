@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
  
 //*                                                                         *
@@ -12,7 +12,6 @@
   #include "AthenaKernel/CLASS_DEF.h"
 
 
-  #include <iostream>
   #ifndef  TRIGGERSPACE
   #include "TrigT1Interfaces/Coordinate.h"
   #else
@@ -35,7 +34,7 @@
                    MISSING_ET_SIG_STANDARD, MAX_SOURCE };
 
     /** Constructors */
-    CMXEtSums();
+    CMXEtSums() = default;
     CMXEtSums(int crate, int source);
     CMXEtSums(int crate, int source,
               const std::vector<unsigned int>& Et, 
@@ -46,7 +45,6 @@
 	      const std::vector<int>& EyError,
 	      int peak);
   
-    virtual ~CMXEtSums();
 
     /** In multi-slice readout must specify which slice is triggered BC */
     void setPeak(int peak);
@@ -79,15 +77,15 @@
       
   /** Internal data */
     private:
-    int m_crate;
-    int m_source;
-    int m_peak;
-    std::vector <unsigned int> m_Et;
-    std::vector <unsigned int> m_Ex;
-    std::vector <unsigned int> m_Ey;
-    std::vector <int> m_EtError;
-    std::vector <int> m_ExError;
-    std::vector <int> m_EyError;
+    int m_crate{};
+    int m_source{};
+    int m_peak{};
+    std::vector <unsigned int> m_Et{0};
+    std::vector <unsigned int> m_Ex{0};
+    std::vector <unsigned int> m_Ey{0};
+    std::vector <int> m_EtError{0};
+    std::vector <int> m_ExError{0};
+    std::vector <int> m_EyError{0};
     
     };
 

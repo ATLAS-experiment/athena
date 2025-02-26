@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CALO_CMMROI_H
 #define TRIGT1CALO_CMMROI_H
@@ -22,7 +22,7 @@ class CMMRoI {
 
  public:
 
-   CMMRoI();
+   CMMRoI() = default;
    CMMRoI(uint32_t jetEtRoiWord,   uint32_t energyRoiWord0,
           uint32_t energyRoiWord1, uint32_t energyRoiWord2);
    CMMRoI(int jetEtHits, int sumEtHits, int missingEtHits,
@@ -30,7 +30,6 @@ class CMMRoI {
           int jetEtError, int sumEtError, int missingEtError,
           int missingEtSigError, int exError, int eyError, int etError);
 
-   ~CMMRoI();
 
    /// Return Jet-ET hits
    int jetEtHits()         const;
@@ -105,10 +104,10 @@ class CMMRoI {
    int overflow(uint32_t roiWord) const;
 
    //  RoI words
-   uint32_t m_jetEtRoiWord;
-   uint32_t m_energyRoiWord0;
-   uint32_t m_energyRoiWord1;
-   uint32_t m_energyRoiWord2;
+   uint32_t m_jetEtRoiWord{};
+   uint32_t m_energyRoiWord0{};
+   uint32_t m_energyRoiWord1{};
+   uint32_t m_energyRoiWord2{};
 
 };
 

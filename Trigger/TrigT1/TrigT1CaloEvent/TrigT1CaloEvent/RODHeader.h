@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CALO_RODHEADER_H
 #define TRIGT1CALO_RODHEADER_H
@@ -18,13 +18,12 @@ class RODHeader {
 
  public:
 
-   RODHeader();
+   RODHeader() = default;
    RODHeader(uint32_t version, uint32_t sourceId, uint32_t run,
              uint32_t lvl1Id,  uint32_t bcId,     uint32_t trigType, 
 	     uint32_t detType, const std::vector<uint32_t>& statusWords,
 	     uint32_t nData);
 
-   ~RODHeader();
    
    // Header data
    int version()        const;
@@ -69,15 +68,15 @@ class RODHeader {
 
  private:
 
-   uint32_t m_version;
-   uint32_t m_sourceId;
-   uint32_t m_run;
-   uint32_t m_lvl1Id;
-   uint32_t m_bcId;
-   uint32_t m_trigType;
-   uint32_t m_detType;
-   std::vector<uint32_t> m_statusWords;
-   uint32_t m_payloadSize;
+   uint32_t m_version{};
+   uint32_t m_sourceId{};
+   uint32_t m_run{};
+   uint32_t m_lvl1Id{};
+   uint32_t m_bcId{};
+   uint32_t m_trigType{};
+   uint32_t m_detType{};
+   std::vector<uint32_t> m_statusWords{0};
+   uint32_t m_payloadSize{};
 
 };
 
