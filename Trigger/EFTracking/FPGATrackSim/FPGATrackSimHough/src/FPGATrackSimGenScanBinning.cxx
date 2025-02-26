@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimGenScanBinning.cxx
@@ -182,7 +182,7 @@ std::ostream &operator<<(std::ostream &os, const std::vector<unsigned>& idx) {
   }
   return os;
 }
-template <typename T> void FPGATrackSimGenScanBinningBase::StreamManager::writeVar(const string &var, T val) {
+template <typename T> void FPGATrackSimGenScanBinningBase::StreamManager::writeVar(const std::string &var, T val) {
   auto emplace_result = m_map.try_emplace(
       var, m_setname + "_" + var + "_const.txt", std::ios_base::out);
   if (!emplace_result.second) {
