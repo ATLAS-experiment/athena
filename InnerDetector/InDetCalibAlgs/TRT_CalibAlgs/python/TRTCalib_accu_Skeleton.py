@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import sys, os, glob, subprocess, tarfile
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
@@ -53,15 +53,6 @@ def fromRunArgs(runArgs):
     
     # To respect --athenaopts 
     flags.fillFromArgs()
-    
-    # Reason why we need to clone and replace: https://gitlab.cern.ch/atlas/athena/-/merge_requests/68616#note_7614858
-    flags = flags.cloneAndReplace(
-        "Tracking.ActiveConfig",
-        f"Tracking.{flags.Tracking.PrimaryPassConfig.value}Pass",
-        # Keep original flags as some of the subsequent passes use
-        # lambda functions relying on them
-        keepOriginal=True)      
-
     flags.lock()
     flags.dump()
     
