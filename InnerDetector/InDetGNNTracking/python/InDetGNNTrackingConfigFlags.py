@@ -35,8 +35,11 @@ def createGNNTrackingConfigFlags():
     import AthenaCommon.SystemOfUnits as Units
     icf.addFlag("Tracking.GNN.pTmin", 400. * Units.MeV)
 
-    # This option applies eta dependent track selection to the output tracks
+    # this option applies eta dependent track selection to the output tracks
     icf.addFlag("Tracking.GNN.doRecoTrackCuts", True)
+
+    # this option turns on the recovery attempts for failed track fits
+    icf.addFlag("Tracking.GNN.doRecoverFailedFits", True)
 
     # this option turns on the ambiguity resolution, False by default
     icf.addFlag("Tracking.GNN.doAmbiResolution", False)
