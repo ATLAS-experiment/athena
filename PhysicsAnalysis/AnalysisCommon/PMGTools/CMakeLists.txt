@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PMGTools )
@@ -12,7 +12,7 @@ if( XAOD_STANDALONE )
 # ... for AthAnalysisBase (Athena calls this POOLRootAccess)
 else()
    set( xaod_access_lib POOLRootAccessLib )
-   set( extra_private_libs AthAnalysisBaseCompsLib EventInfo )
+   set( extra_private_libs AthAnalysisBaseCompsLib )
 endif()
 
 # External(s) used by the package:
