@@ -10,16 +10,17 @@
 # art-include: main/AthSimulation
 
 # MC16 setup
-# ATLAS-R2-2016-01-00-01 and OFLCOND-MC16-SDR-14
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN2)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_MC)")
 
 export TRF_ECHO=1
 Sim_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC16-SDR-14' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
-    --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
     --outputHITSFile "HITS.FullG4.pool.root" \
     --maxEvents 2 \
@@ -30,10 +31,10 @@ echo  "art-result: $rc1 simulation FullG4"
 
 AtlasG4_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC16-SDR-14' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'sim:Campaigns.MC23SimulationSingleIoV' \
-    --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
     --outputHITSFile "HITS.AtlasG4.pool.root" \
     --maxEvents 2 \
