@@ -1,12 +1,10 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
 #ifndef XAOD_STANDALONE
   #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
-  #include "EventInfo/EventInfo.h"
-  #include "EventInfo/EventType.h"
 #endif
 
 // Local include(s):
