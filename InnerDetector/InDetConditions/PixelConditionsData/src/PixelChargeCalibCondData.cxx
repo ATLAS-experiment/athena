@@ -188,6 +188,35 @@ PixelChargeCalibCondData::getToT(InDetDD::PixelDiodeType type, unsigned int modu
   return tot;
 }
 
+
+float 
+PixelChargeCalibCondData::getCharge(InDetDD::PixelDiodeType type,
+				    const CalibrationStrategy calibStrategy,
+				    unsigned int moduleHash,
+				    unsigned int FE,
+				    float ToT) const{
+
+  if (calibStrategy == CalibrationStrategy::LUTFEI4) {
+    return getChargeLUTFEI4(moduleHash, FE, ToT);
+  }
+  
+  if (type == InDetDD::PixelDiodeType::NONE) return 0.f;
+  const LegacyFitParameters & legacy = getLegacyFitParameters(type, moduleHash, FE);
+  float charge = legacy.Q(ToT);
+  // Protection for small charge
+  const auto & thresholds = getThresholds(type,moduleHash,FE);
+  const auto  analogueThreshold = thresholds.value;
+  if (charge<analogueThreshold && calibStrategy==CalibrationStrategy::RUN3PIX) { charge=analogueThreshold; }
+  // Protection for large charge
+  float exth = 1e5f;    // the calibration function is analytically connected at threshold exth.
+  if (charge>exth && calibStrategy==CalibrationStrategy::RUN3PIX) {
+    const LinearFitParameters & lin  = getLinearFitParameters(type, moduleHash, FE);
+    if (float charge1 = lin.Q(ToT); charge1 != 0.f) return charge1;
+  }
+  return charge;
+}
+
+
 float 
 PixelChargeCalibCondData::getCharge(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE, float ToT) const{
   if (getCalibrationStrategy(moduleHash) == CalibrationStrategy::LUTFEI4) {
