@@ -5,6 +5,8 @@
 #ifndef EFTRACKING_DATA_STREAM_LOADER_ALGORITHM
 #define EFTRACKING_DATA_STREAM_LOADER_ALGORITHM
 
+#include <mutex>
+
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "TestVectorTool.h"
@@ -38,6 +40,12 @@ class EFTrackingDataStreamLoaderAlgorithm : public AthReentrantAlgorithm
     "TestVectorTool", 
     "Tool to prepare test vector"
   };  
+
+  // Hack to track progress through the test vector across multiple calls to 
+  // execute. The performance impact is not important as this algorithm is only 
+  // used in small tests.
+  mutable std::size_t m_eventNumber ATLAS_THREAD_SAFE {0};
+  mutable std::mutex m_mutex ATLAS_THREAD_SAFE;
 
  public:
   EFTrackingDataStreamLoaderAlgorithm(const std::string& name, ISvcLocator* pSvcLocator);
