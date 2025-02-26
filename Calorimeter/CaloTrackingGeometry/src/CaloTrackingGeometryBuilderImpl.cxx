@@ -93,8 +93,9 @@ StatusCode Calo::CaloTrackingGeometryBuilderImpl::initialize() {
 }
 
 std::unique_ptr<Trk::TrackingGeometry>
-Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
-    Trk::TrackingVolume* innerVol, const CaloDetDescrManager* caloDDM) const {
+Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolume* innerVol
+							      , const CaloDetDescrManager* caloDDM
+							      , const GeoAlignmentStore* geoAlign) const {
 
   ATH_MSG_VERBOSE("Starting to build CaloTrackingGeometry ...");
 
@@ -293,7 +294,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
   // get the Tracking Volumes from the LAr Builder
   //
   const std::vector<Trk::TrackingVolume*>* lArVolumes =
-      m_lArVolumeBuilder->trackingVolumes(*caloDDM);
+    m_lArVolumeBuilder->trackingVolumes(*caloDDM,geoAlign);
 
   ATH_MSG_INFO(lArVolumes->size()
                << " volumes retrieved from " << m_lArVolumeBuilder.name());
@@ -323,7 +324,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
   // ===========================================================================================
   // get the Tracking Volumes from the Tile Builder
   std::vector<Trk::TrackingVolume*>* tileVolumes =
-      m_tileVolumeBuilder->trackingVolumes(*caloDDM);
+    m_tileVolumeBuilder->trackingVolumes(*caloDDM,geoAlign);
 
   ATH_MSG_INFO(tileVolumes->size()
                << " volumes retrieved from " << m_tileVolumeBuilder.name());

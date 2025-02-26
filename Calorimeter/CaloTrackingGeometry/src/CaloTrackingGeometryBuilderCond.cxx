@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -23,6 +23,7 @@ Calo::CaloTrackingGeometryBuilderCond::CaloTrackingGeometryBuilderCond(
 StatusCode Calo::CaloTrackingGeometryBuilderCond::initialize() {
 
   ATH_CHECK(m_caloMgrKey.initialize());
+  ATH_CHECK(m_readKeyGeoAlign.initialize());
   return Calo::CaloTrackingGeometryBuilderImpl::initialize();
 }
 
@@ -33,7 +34,10 @@ Calo::CaloTrackingGeometryBuilderCond::trackingGeometry(
 
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
   const CaloDetDescrManager* caloDDM = *caloMgrHandle;
+  SG::ReadCondHandle<GeoAlignmentStore> readHandleGeoAlign{m_readKeyGeoAlign, ctx};
+  const GeoAlignmentStore* geoAlign = *readHandleGeoAlign;
   return Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(innerVol,
-                                                                       caloDDM);
+                                                                       caloDDM,
+								       geoAlign);
 }
 

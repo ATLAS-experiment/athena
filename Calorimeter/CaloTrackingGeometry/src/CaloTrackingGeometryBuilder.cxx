@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -54,6 +54,7 @@ std::unique_ptr<Trk::TrackingGeometry> Calo::CaloTrackingGeometryBuilder::tracki
     return trackingGeometry;
   }
   return Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(innerVol,
-                                                                       caloDDM);
+                                                                       caloDDM,
+								       nullptr);
 }
 

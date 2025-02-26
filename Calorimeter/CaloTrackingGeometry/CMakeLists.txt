@@ -6,7 +6,7 @@ atlas_subdir( CaloTrackingGeometry )
 atlas_add_library( CaloTrackingGeometryLib
                    INTERFACE
                    PUBLIC_HEADERS CaloTrackingGeometry
-                   LINK_LIBRARIES AthenaBaseComps CaloDetDescrLib CaloDetDescrUtils CaloGeoHelpers CaloIdentifier CxxUtils GaudiKernel GeoPrimitives SubDetectorEnvelopesLib TrkDetDescrInterfaces TrkDetDescrUtils )
+                   LINK_LIBRARIES AthenaBaseComps CaloDetDescrLib CaloDetDescrUtils CaloGeoHelpers CaloIdentifier CxxUtils GaudiKernel GeoPrimitives SubDetectorEnvelopesLib TrkDetDescrInterfaces TrkDetDescrUtils GeoModelUtilities)
 
 # Component(s) in the package:
 atlas_add_component( CaloTrackingGeometry

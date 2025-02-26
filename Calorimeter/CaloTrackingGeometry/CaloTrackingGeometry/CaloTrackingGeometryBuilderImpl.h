@@ -57,8 +57,9 @@ class CaloTrackingGeometryBuilderImpl : public AthAlgTool {
   virtual StatusCode initialize() override;
 
   /** TrackingGeometry Interface method */
-  std::unique_ptr<Trk::TrackingGeometry> createTrackingGeometry(
-      Trk::TrackingVolume* innerVol, const CaloDetDescrManager* caloDDM) const;
+  std::unique_ptr<Trk::TrackingGeometry> createTrackingGeometry(Trk::TrackingVolume* innerVol
+								, const CaloDetDescrManager* caloDDM
+								, const GeoAlignmentStore* geoAlign) const;
 
   /** The unique signature */
   Trk::GeometrySignature signature() const {

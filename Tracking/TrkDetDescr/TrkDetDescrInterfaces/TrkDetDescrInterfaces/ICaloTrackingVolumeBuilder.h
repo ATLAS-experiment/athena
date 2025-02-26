@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,6 +13,7 @@
 #include "GaudiKernel/IAlgTool.h"
 
 class CaloDetDescrManager;
+class GeoAlignmentStore;
 namespace Trk {
 
 class TrackingVolume;
@@ -35,7 +36,8 @@ public:
 
   /** TrackingVolumeBuilder interface method - returns vector of Volumes */
   virtual std::vector<TrackingVolume*>* trackingVolumes(
-    const CaloDetDescrManager& caloDDM) const = 0;
+    const CaloDetDescrManager& caloDDM
+    , const GeoAlignmentStore* geoAlign) const = 0;
 };
 
 } // end of namespace
