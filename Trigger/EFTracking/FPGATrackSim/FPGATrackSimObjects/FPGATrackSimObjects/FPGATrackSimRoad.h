@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef TRIGFPGATrackSimOBJECTS_FPGATrackSimROAD_H
 #define TRIGFPGATrackSimOBJECTS_FPGATrackSimROAD_H
@@ -18,6 +18,7 @@
 #include <unordered_set>
 #include <ostream>
 #include <memory>
+#include <bit>
 
 #include "TObject.h"
 
@@ -104,8 +105,8 @@ public:
     // Utility
 
     size_t getNLayers() const { return m_hits_trans.size(); }
-    size_t getNHitLayers() const { return __builtin_popcount(m_hit_layers); }
-    size_t getNWCLayers() const { return __builtin_popcount(m_wildcard_layers); }
+    size_t getNHitLayers() const { return std::popcount(m_hit_layers); }
+    size_t getNWCLayers() const { return std::popcount(m_wildcard_layers); }
 
     size_t getNHits() const;
     std::vector<size_t> getNHits_layer() const;
