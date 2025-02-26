@@ -23,9 +23,9 @@ StatusCode PassThroughTool::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode PassThroughTool::runPassThrough(EFTrackingDataFormats::StripClusterAuxInput &scAux,
-                                           EFTrackingDataFormats::PixelClusterAuxInput &pxAux,
-                                           EFTrackingDataFormats::Metadata *metadata,
+StatusCode PassThroughTool::runPassThrough(EFTrackingTransient::StripClusterAuxInput &scAux,
+                                           EFTrackingTransient::PixelClusterAuxInput &pxAux,
+                                           EFTrackingTransient::Metadata *metadata,
                                            const EventContext &ctx) const
 {
     // Retrieve the strip and pixel cluster container from the event store
@@ -57,9 +57,9 @@ StatusCode PassThroughTool::runPassThrough(EFTrackingDataFormats::StripClusterAu
 
     // Prepare the input data for the kernel
     // This is to "remake" the cluster but in a kernel compatible format using
-    // the struct defined in EFTrackingDataFormats.h
-    std::vector<EFTrackingDataFormats::StripCluster> ef_stripClusters; // Strip clusters as kernel input argument
-    std::vector<EFTrackingDataFormats::PixelCluster> ef_pixelClusters; // Pixel clusters as kernel input argument
+    // the struct defined in EFTrackingTransient.h
+    std::vector<EFTrackingTransient::StripCluster> ef_stripClusters; // Strip clusters as kernel input argument
+    std::vector<EFTrackingTransient::PixelCluster> ef_pixelClusters; // Pixel clusters as kernel input argument
 
     ATH_CHECK(getInputClusterData(inputStripClusters.get(), ef_stripClusters, inputStripClusters->size()));
     ATH_CHECK(getInputClusterData(inputPixelClusters.get(), ef_pixelClusters, inputPixelClusters->size()));
@@ -124,7 +124,7 @@ StatusCode PassThroughTool::runPassThrough(EFTrackingDataFormats::StripClusterAu
         std::vector<unsigned long long> scRdoList((static_cast<unsigned long>(MAX_CLUSTER_NUM)) * 5000);
         std::vector<int> scChannelsInPhi(static_cast<unsigned long>(MAX_CLUSTER_NUM));
 
-        EFTrackingDataFormats::StripClusterOutput ef_scOutput;
+        EFTrackingTransient::StripClusterOutput ef_scOutput;
 
         ef_scOutput.scLocalPosition = scLocalPosition.data();
         ef_scOutput.scLocalCovariance = scLocalCovariance.data();
@@ -156,7 +156,7 @@ StatusCode PassThroughTool::runPassThrough(EFTrackingDataFormats::StripClusterAu
         std::vector<float> pcSplitProbability2(static_cast<unsigned long>(MAX_CLUSTER_NUM));
         std::vector<int> pcLvl1a(static_cast<unsigned long>(MAX_CLUSTER_NUM));
 
-        EFTrackingDataFormats::PixelClusterOutput ef_pcOutput;
+        EFTrackingTransient::PixelClusterOutput ef_pcOutput;
 
         ef_pcOutput.pcLocalPosition = pcLocalPosition.data();
         ef_pcOutput.pcLocalCovariance = pcLocalCovariance.data();
@@ -322,7 +322,7 @@ StatusCode PassThroughTool::runPassThrough(EFTrackingDataFormats::StripClusterAu
 
 StatusCode PassThroughTool::getInputClusterData(
     const xAOD::StripClusterContainer *sc,
-    std::vector<EFTrackingDataFormats::StripCluster> &ef_sc,
+    std::vector<EFTrackingTransient::StripCluster> &ef_sc,
     unsigned long N) const
 {
     if (N > sc->size())
@@ -335,7 +335,7 @@ StatusCode PassThroughTool::getInputClusterData(
     ATH_MSG_DEBUG("Making vector of strip clusters...");
     for (unsigned long i = 0; i < N; i++)
     {
-        EFTrackingDataFormats::StripCluster cache;
+        EFTrackingTransient::StripCluster cache;
         // Get the data from the input xAOD::StripClusterContainer and set it to the
         // cache
         cache.localPosition = sc->at(i)->localPosition<1>()(0, 0);
@@ -363,7 +363,7 @@ StatusCode PassThroughTool::getInputClusterData(
 
 StatusCode PassThroughTool::getInputClusterData(
     const xAOD::PixelClusterContainer *pc,
-    std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc,
+    std::vector<EFTrackingTransient::PixelCluster> &ef_pc,
     unsigned long N) const
 {
     if (N > pc->size())
@@ -376,7 +376,7 @@ StatusCode PassThroughTool::getInputClusterData(
     ATH_MSG_DEBUG("Making vector of pixel clusters...");
     for (unsigned long i = 0; i < N; i++)
     {
-        EFTrackingDataFormats::PixelCluster cache;
+        EFTrackingTransient::PixelCluster cache;
         // Get the data from the input xAOD::PixelClusterContainer and set it to the
         // cache
         cache.id = pc->at(i)->identifier();
@@ -431,7 +431,7 @@ StatusCode PassThroughTool::getInputClusterData(
 
 StatusCode PassThroughTool::getInputSpacePointData(
     const xAOD::SpacePointContainer *sp,
-    std::vector<EFTrackingDataFormats::SpacePoint> &ef_sp,
+    std::vector<EFTrackingTransient::SpacePoint> &ef_sp,
     std::vector<std::vector<const xAOD::UncalibratedMeasurement *>> &sp_meas,
     unsigned long N, bool isStrip) const
 {
@@ -445,7 +445,7 @@ StatusCode PassThroughTool::getInputSpacePointData(
     ATH_MSG_DEBUG("Making vector of space point...");
     for (unsigned long i = 0; i < N; i++)
     {
-        EFTrackingDataFormats::SpacePoint cache;
+        EFTrackingTransient::SpacePoint cache;
         // Get the data from the input xAOD::SpacePointContainer and set it to the
         // cache
         cache.idHash[0] = sp->at(i)->elementIdList()[0];
@@ -497,19 +497,19 @@ StatusCode PassThroughTool::getInputSpacePointData(
 // Full pass-throuh kernel, sw ver.
 // Including pixel/strip clusters and spcepoints
 StatusCode PassThroughTool::passThroughSW(
-    const std::vector<EFTrackingDataFormats::StripCluster> &inputSC,
-    EFTrackingDataFormats::StripClusterOutput &ef_scOutput,
+    const std::vector<EFTrackingTransient::StripCluster> &inputSC,
+    EFTrackingTransient::StripClusterOutput &ef_scOutput,
     // PixelCluster
-    const std::vector<EFTrackingDataFormats::PixelCluster> &inputPC,
-    EFTrackingDataFormats::PixelClusterOutput &ef_pcOutput,
+    const std::vector<EFTrackingTransient::PixelCluster> &inputPC,
+    EFTrackingTransient::PixelClusterOutput &ef_pcOutput,
     // StripSpacePoint
-    const std::vector<EFTrackingDataFormats::SpacePoint> &inputSSP,
-    EFTrackingDataFormats::SpacePointOutput &ef_sspOutput,
+    const std::vector<EFTrackingTransient::SpacePoint> &inputSSP,
+    EFTrackingTransient::SpacePointOutput &ef_sspOutput,
     // PixelSpacePoint
-    const std::vector<EFTrackingDataFormats::SpacePoint> &inputPSP,
-    EFTrackingDataFormats::SpacePointOutput &ef_pspOutput,
+    const std::vector<EFTrackingTransient::SpacePoint> &inputPSP,
+    EFTrackingTransient::SpacePointOutput &ef_pspOutput,
     // Metadata
-    EFTrackingDataFormats::Metadata *metadata) const
+    EFTrackingTransient::Metadata *metadata) const
 {
     // return input
     int rdoIndex_counter = 0;
@@ -667,13 +667,13 @@ StatusCode PassThroughTool::passThroughSW(
 
 // Cluster-only ver of sw pass-through
 StatusCode PassThroughTool::passThroughSW_clusterOnly(
-    const std::vector<EFTrackingDataFormats::StripCluster> &inputSC,
-    EFTrackingDataFormats::StripClusterOutput &ef_scOutput,
+    const std::vector<EFTrackingTransient::StripCluster> &inputSC,
+    EFTrackingTransient::StripClusterOutput &ef_scOutput,
     // PixelCluster
-    const std::vector<EFTrackingDataFormats::PixelCluster> &inputPC,
-    EFTrackingDataFormats::PixelClusterOutput &ef_pcOutput,
+    const std::vector<EFTrackingTransient::PixelCluster> &inputPC,
+    EFTrackingTransient::PixelClusterOutput &ef_pcOutput,
     // Metadata
-    EFTrackingDataFormats::Metadata *metadata)
+    EFTrackingTransient::Metadata *metadata)
     const
 {
     int rdoIndex_counter = 0;

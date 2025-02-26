@@ -14,7 +14,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "EFTrackingFPGAIntegration/IEFTrackingFPGAIntegrationTool.h"
-#include "EFTrackingDataFormats.h"
+#include "EFTrackingTransient.h"
 
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
@@ -29,44 +29,44 @@ public:
 
     /**
      * @brief Call this function at the DataPreparationPipeline to run the pass-through kernels
-     * 
+     *
      */
-    StatusCode runPassThrough(EFTrackingDataFormats::StripClusterAuxInput &scAux,
-                              EFTrackingDataFormats::PixelClusterAuxInput &pxAux,
-                              EFTrackingDataFormats::Metadata *metadata,
+    StatusCode runPassThrough(EFTrackingTransient::StripClusterAuxInput &scAux,
+                              EFTrackingTransient::PixelClusterAuxInput &pxAux,
+                              EFTrackingTransient::Metadata *metadata,
                               const EventContext &ctx) const;
 
     /**
      * @brief Convert the strip cluster from xAOD container to simple std::vector
-     * of EFTrackingDataFormats::StripCluster.
+     * of EFTrackingTransient::StripCluster.
      *
      * This is needed for the kernel input.
      */
     StatusCode getInputClusterData(
         const xAOD::StripClusterContainer *sc,
-        std::vector<EFTrackingDataFormats::StripCluster> &ef_sc,
+        std::vector<EFTrackingTransient::StripCluster> &ef_sc,
         unsigned long N) const;
 
     /**
      * @brief Convert the pixel cluster from xAOD container to simple std::vector
-     * of EFTrackingDataFormats::PixelCluster.
+     * of EFTrackingTransient::PixelCluster.
      *
      * This is needed for the kernel input.
      */
     StatusCode getInputClusterData(
         const xAOD::PixelClusterContainer *pc,
-        std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc,
+        std::vector<EFTrackingTransient::PixelCluster> &ef_pc,
         unsigned long N) const;
 
     /**
      * @brief Convert the space point from xAOD container to simple std::vector
-     * of EFTrackingDataFormats::SpacePoint.
+     * of EFTrackingTransient::SpacePoint.
      *
      * This is needed for the kernel input.
      */
     StatusCode getInputSpacePointData(
         const xAOD::SpacePointContainer *sp,
-        std::vector<EFTrackingDataFormats::SpacePoint> &ef_sp,
+        std::vector<EFTrackingTransient::SpacePoint> &ef_sp,
         std::vector<std::vector<const xAOD::UncalibratedMeasurement *>> &sp_meas,
         unsigned long N, bool isStrip) const;
 
@@ -74,24 +74,24 @@ public:
      * @brief Software version of the pass-through kernel. The purse of this function
      * is to mimic the FPGA output at software level.
      *
-     * It takes the EFTrackingDataFormats::StripCluster
-     * EFTrackingDataFormats::PixelCluster, and EFTrackingDataFormat::SpacePoints
+     * It takes the EFTrackingTransient::StripCluster
+     * EFTrackingTransient::PixelCluster, and EFTrackingDataFormat::SpacePoints
      * as input arguments and mimic the transfer kernel by giving array output.
      */
     StatusCode passThroughSW(
-        const std::vector<EFTrackingDataFormats::StripCluster> &inputSC,
-        EFTrackingDataFormats::StripClusterOutput &ef_scOutput,
+        const std::vector<EFTrackingTransient::StripCluster> &inputSC,
+        EFTrackingTransient::StripClusterOutput &ef_scOutput,
         // PixelCluster
-        const std::vector<EFTrackingDataFormats::PixelCluster> &inputPC,
-        EFTrackingDataFormats::PixelClusterOutput &ef_pcOutput,
+        const std::vector<EFTrackingTransient::PixelCluster> &inputPC,
+        EFTrackingTransient::PixelClusterOutput &ef_pcOutput,
         // Strip SpacePoint
-        const std::vector<EFTrackingDataFormats::SpacePoint> &inputSSP,
-        EFTrackingDataFormats::SpacePointOutput &ef_sspOutput,
+        const std::vector<EFTrackingTransient::SpacePoint> &inputSSP,
+        EFTrackingTransient::SpacePointOutput &ef_sspOutput,
         // Pixel SpacePoint
-        const std::vector<EFTrackingDataFormats::SpacePoint> &inputPSP,
-        EFTrackingDataFormats::SpacePointOutput &ef_pspOutput,
+        const std::vector<EFTrackingTransient::SpacePoint> &inputPSP,
+        EFTrackingTransient::SpacePointOutput &ef_pspOutput,
         // Metadata
-        EFTrackingDataFormats::Metadata *metadata)
+        EFTrackingTransient::Metadata *metadata)
         const;
 
     /**
@@ -99,13 +99,13 @@ public:
      * This is used for cluter level studies
      */
     StatusCode passThroughSW_clusterOnly(
-        const std::vector<EFTrackingDataFormats::StripCluster> &inputSC,
-        EFTrackingDataFormats::StripClusterOutput &ef_scOutput,
+        const std::vector<EFTrackingTransient::StripCluster> &inputSC,
+        EFTrackingTransient::StripClusterOutput &ef_scOutput,
         // PixelCluster
-        const std::vector<EFTrackingDataFormats::PixelCluster> &inputPC,
-        EFTrackingDataFormats::PixelClusterOutput &ef_pcOutput,
+        const std::vector<EFTrackingTransient::PixelCluster> &inputPC,
+        EFTrackingTransient::PixelClusterOutput &ef_pcOutput,
         // Metadata
-        EFTrackingDataFormats::Metadata *metadata)
+        EFTrackingTransient::Metadata *metadata)
         const;
 
     /**

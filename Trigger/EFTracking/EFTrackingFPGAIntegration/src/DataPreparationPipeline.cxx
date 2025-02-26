@@ -67,10 +67,10 @@ StatusCode DataPreparationPipeline::execute(const EventContext &ctx) const
 {
   if (m_usePassThrough)
   {
-    EFTrackingDataFormats::StripClusterAuxInput scAux;
-    EFTrackingDataFormats::PixelClusterAuxInput pxAux;
-    std::unique_ptr<EFTrackingDataFormats::Metadata> metadata =
-        std::make_unique<EFTrackingDataFormats::Metadata>();
+    EFTrackingTransient::StripClusterAuxInput scAux;
+    EFTrackingTransient::PixelClusterAuxInput pxAux;
+    std::unique_ptr<EFTrackingTransient::Metadata> metadata =
+        std::make_unique<EFTrackingTransient::Metadata>();
 
     ATH_CHECK(m_passThroughTool->runPassThrough(scAux, pxAux, metadata.get(), ctx));
     ATH_CHECK(m_xAODContainerMaker->makeStripClusterContainer(scAux, metadata.get(), ctx));

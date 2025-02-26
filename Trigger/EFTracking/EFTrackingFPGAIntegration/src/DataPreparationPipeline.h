@@ -14,7 +14,7 @@
 #define EFTRACKING_FPGA_INTEGRATION_DATAPREPARATIONPIPELINE_H
 
 // EFTracking include
-#include "EFTrackingDataFormats.h"
+#include "EFTrackingTransient.h"
 #include "IntegrationBase.h"
 #include "xAODContainerMaker.h"
 #include "PassThroughTool.h"
@@ -73,7 +73,7 @@ private:
                                                       "Path to pixel cluster test vector"}; //!< Pixel cluster test vector
     Gaudi::Property<std::string> m_pixelClusterRefTVPath{this, "PixelClusterRefTV", "",
                                                          "Path to pixel cluster reference test vector"}; //!< Pixel cluster reference test vector
-                                                         
+
     Gaudi::Property<std::string> m_spacepointTVPath{this, "SpacepointTV", "",
                                                     "Path to spacepoint test vector"}; //!< Spacepoint test vector
     Gaudi::Property<std::string> m_spacepointRefTVPath{this, "SpacepointRefTV", "",
