@@ -1,8 +1,9 @@
 #!/bin/bash
-# art-description: Test running the F600 (InsideOut) pipeline
+# art-description: Test running the F600 pipeline (no Tracking) on singleMu events in region0 (<μ>=200)
 # art-type: grid
 # art-include: main/Athena
-# art-input-nfiles: 2
+# art-input: mc21_14TeV:mc21_14TeV.900171.PG_singlemu_InvPtFlat1_etaFlat01_03_phiFlat03_05.recon.RDO.e8488_s4345_r15700
+# art-input-nfiles: 50
 # art-output: *.txt
 # art-output: *.root
 # art-output: *.xml
@@ -11,7 +12,9 @@
 
 
 set -e
-
+echo "$ArtInFile"
+fileList="${ArtInFile// /,}"
+echo $fileList
 PREFIX="F600"
 lastref_dir=last_results
 INPUT_AOD_FILE="xAOD_${PREFIX}.root"
@@ -46,11 +49,11 @@ run () {
 }
 
 run "${PREFIX} pipeline" \
-    source FPGATrackSim_CommonEnv.sh --ttbar -n -1 -s 2 -q
+    source FPGATrackSim_CommonEnv.sh -t -n 1 -q -i $fileList
     python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
         --evtMax=${RDO_EVT_ANALYSIS} \
         --skipEvents=${SKIP_EVENTS} \
-        --filesInput=${RDO_ANALYSIS} \
+        --filesInput="${RDO_ANALYSIS}" \
         Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
         Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
         Trigger.FPGATrackSim.runCKF=$RUN_CKF \

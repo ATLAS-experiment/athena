@@ -592,16 +592,16 @@ if __name__ == "__main__":
        flags.dump()
        flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
        acc=MainServicesCfg(flags)
-   
-       acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
-   
-       if (flags.Trigger.FPGATrackSim.Hough.houghRootoutput):
-           acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
-   
-       acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
+       if flags.Trigger.FPGATrackSim.Hough.writeOutputData:
+        acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
 
-       if (flags.Trigger.FPGATrackSim.Hough.genScan):
-           acc.addService(CompFactory.THistSvc(Output = ["GENSCAN DATAFILE='genscan.root', OPT='RECREATE'"]))
+        if (flags.Trigger.FPGATrackSim.Hough.houghRootoutput):
+            acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
+   
+        acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
+
+        if (flags.Trigger.FPGATrackSim.Hough.genScan):
+               acc.addService(CompFactory.THistSvc(Output = ["GENSCAN DATAFILE='genscan.root', OPT='RECREATE'"]))
        
        if not flags.Trigger.FPGATrackSim.wrapperFileName:
            from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
