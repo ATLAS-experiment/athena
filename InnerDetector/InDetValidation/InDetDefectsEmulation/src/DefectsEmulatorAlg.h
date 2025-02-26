@@ -38,12 +38,19 @@ public:
   using T_DefectsData = DefectsEmulatorTraits<T_RDO_Container>::DefectsData;
   using T_RDORawData =  DefectsEmulatorTraits<T_RDO_Container>::RDORawData;
   using T_ModuleHelper = DefectsEmulatorTraits<T_RDO_Container>::ModuleHelper;
+  using T_ModuleDesign = DefectsEmulatorTraits<T_RDO_Container>::ModuleDesign;
+
+  static constexpr ActsTrk::DetectorType DETECTOR_TYPE = DefectsEmulatorTraits<T_RDO_Container>::DETECTOR_TYPE;
 
   using DefectsEmulatorBase::DefectsEmulatorBase;
   DefectsEmulatorAlg &operator=(const DefectsEmulatorAlg&) = delete;
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;
+
+protected:
+  virtual bool setModuleData(const ActsDetectorElement &acts_detector_element,
+                             ModuleIdentifierMatchUtil::ModuleData_t &module_data) const override;
 
 private:
    SG::ReadCondHandleKey<T_DefectsData> m_emulatedDefects

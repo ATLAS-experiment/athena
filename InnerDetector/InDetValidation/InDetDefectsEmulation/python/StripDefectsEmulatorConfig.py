@@ -24,10 +24,13 @@ def moduleDefect(bec=[-2,2],
                  eta_range=[-99,99],
                  phi_range=[-99,99],
                  columns_or_strips=[0,2000],
+                 column_or_strip_length=[0,1000000],
                  side_range=[0,1],
                  all_rows=True,
                  probability=[1e-2],
-                 fractionsOfNDefects=[]) :
+                 fractionsOfNDefects=[],
+                 noiseProbability=None,
+                 noiseShape=[]) :
     '''
     Convenience function to create parameters for strip or pixel defects emulation conditions data
     bec: range to select the bec identifier part (range is inclusive)
@@ -35,6 +38,7 @@ def moduleDefect(bec=[-2,2],
     eta_range: range to select the eta index identifier part (range is inclusive)
     phi_range: range to select the phi index identifier part (range is inclusive)
     columns_or_strips: match only modules with number of columns or strips in this range (range is inclusive)
+    column_or_strip_length: match the strip lengths in microns (range is inclusive)
     side_range: to select both sides of a sensor [0,1], to select either side [0,0,1,1]
     all_rows: to select individal modules (0), or all modules associated to the same physical sensor (1)
     probabilities: module-defect, strip/pixel defect (for pixel additionally group defect probabilities:
@@ -49,6 +53,7 @@ def moduleDefect(bec=[-2,2],
     assert len(phi_range)%2==0 and len(phi_range) >= 2 and ordered_pairs(phi_range)
     assert len(side_range)%2==0 and len(side_range) >= 2 and ordered_pairs(side_range)
     assert len(columns_or_strips)%2==0 and len(columns_or_strips) >= 2 and ordered_pairs(columns_or_strips)
+    assert len(column_or_strip_length)%2==0 and len(column_or_strip_length) >= 2 and ordered_pairs(column_or_strip_length)
     assert len(fractionsOfNDefects)==0 or len(fractionsOfNDefects)+2==len(probability)
     length=[ l for l in set([len(bec),len(layer),len(eta_range),len(phi_range),len(side_range),len(columns_or_strips)]) ]
     # every range must contain a multiple of the number of elements of every other range
@@ -59,18 +64,31 @@ def moduleDefect(bec=[-2,2],
     module_pattern=[]
     prob=[]
     fractions=[]
+    noiseProbList=[]
+    noiseShapeList=[]
+    if noiseProbability is not None and noiseProbability>0. :
+        # ensure that the the noise shape integral is 1.
+        shape_sum = sum(noiseShape)
+        noiseShape = [ elm/shape_sum for elm in noiseShape ]
+    else :
+        noiseProbability=None
+
     for i in range(0,max(length),2) :
         module_pattern+=[ [bec[i%len(bec)], bec[(i+1)%len(bec)],
                            layer[i%len(layer)], layer[(i+1)%len(layer)],
                            eta_range[i%len(eta_range)], eta_range[(i+1)%len(eta_range)],
                            phi_range[i%len(phi_range)], phi_range[(i+1)%len(phi_range)],
                            columns_or_strips[i%len(columns_or_strips)], columns_or_strips[(i+1)%len(columns_or_strips)],
+                           column_or_strip_length[i%len(column_or_strip_length)], column_or_strip_length[(i+1)%len(column_or_strip_length)],
                            side_range[i%len(side_range)], side_range[(i+1)%len(side_range)],
                            1 if all_rows else 0] ]
         prob += [ probability ]
         fractions += [ [fraction  for per_pattern in fractionsOfNDefects for fraction in per_pattern + [-1] ] ]
+        if noiseProbability is not None:
+            noiseProbList+=[noiseProbability]
+            noiseShapeList+=[noiseShape]
 
-    return module_pattern, prob, fractions
+    return module_pattern, prob, fractions, noiseProbList, noiseShapeList
 
 def combineModuleDefects( defects ) :
     '''
@@ -78,7 +96,8 @@ def combineModuleDefects( defects ) :
     set the ModulePatterns, DefectProbabilities, and NDefectFractionsPerPattern properties of the
     pixel or strip DefectsEmulatorCondAlg.
     '''
-    return [ elm for sublist in defects for elm in sublist[0] ],[ elm for sublist in defects for elm in sublist[1] ],[ elm for sublist in defects for elm in sublist[2] ]
+    print('DEBUG combineModuleDefects', defects)
+    return [ elm for sublist in defects for elm in sublist[0] ],[ elm for sublist in defects for elm in sublist[1] ],[ elm for sublist in defects for elm in sublist[2] ], [ elm for sublist in defects for elm in sublist[3] ], [ elm for sublist in defects for elm in sublist[4] ]
 
 def StripRDORemappingCfg(flags, InputKey="StripRDOs") :
     """

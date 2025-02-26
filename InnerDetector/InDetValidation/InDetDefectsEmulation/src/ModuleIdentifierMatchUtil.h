@@ -4,6 +4,8 @@
 #ifndef INDET_MODULEIDENTIFIERMATCHUTIL_H
 #define INDET_MODULEIDENTIFIERMATCHUTIL_H
 
+#include "Identifier/Identifier.h"
+
 namespace InDet {
 
    namespace ModuleIdentifierMatchUtil {
@@ -23,6 +25,28 @@ namespace InDet {
          }
       }
 
+      // helper templates to detect whether a type has the method columns or cells
+      template <typename T_ModuleDesign>
+      concept HasColumns = requires(T_ModuleDesign design) { design.columns(); };
+      template <typename T_ModuleDesign>
+      concept HasCells = requires(T_ModuleDesign design) { design.cells(); };
+
+      template <typename T_ModuleDesign>
+      concept ModuleDesignConcept = HasColumns<T_ModuleDesign> || HasCells<T_ModuleDesign>;
+
+      // Get a unique module type identifier which is either based on the number of
+      // columns (for pixel) or number of cells (or strips; for strips)
+      template <ModuleDesignConcept T_ModuleDesign>
+      int getColumnsOrCells(const T_ModuleDesign &moduleDesign) {
+         if constexpr(HasColumns<T_ModuleDesign>) {
+            return moduleDesign.columns();
+         }
+         else {
+            return moduleDesign.cells();
+         }
+      }
+
+
       /** The identifier parts used for identifier matching
        * kAllRows denotes the element which contains a flag (0, 1), to specify
        * whether a pattern should match all modules which are connected to the same side
@@ -34,9 +58,10 @@ namespace InDet {
          kEtaRange=4,
          kPhiRange=6,
          kColumnStripRange=8,
-         kSideRange=10,
-         kAllRows=12,
-         kNParts=13
+         kLength=10,
+         kSideRange=12,
+         kAllRows=14,
+         kNParts=15
       };
 
       using ModuleData_t = std::array< int, ModuleIdentifierMatchUtil::kAllRows/2 >;
@@ -100,16 +125,17 @@ namespace InDet {
        * @param module_data the array which will be filled with the identifier parts
        * Fill an array with identifier parts which can be used to match module identifiers.
        */
-      template <class T_ID>
+      template <class T_ID, class T_ModuleDesign>
       inline void setModuleData(const T_ID &id_helper,
                                 const Identifier &identifier,
-                                unsigned int n_columns_or_strips,
+                                const T_ModuleDesign &module_design,
                                 ModuleData_t &module_data) {
          setModuleData(kBarrelEndcapSelectRange, id_helper.barrel_ec(identifier), module_data);
          setModuleData(kLayerRange, id_helper.layer_disk(identifier), module_data);
          setModuleData(kEtaRange, id_helper.eta_module(identifier), module_data);
          setModuleData(kPhiRange, id_helper.phi_module(identifier), module_data);
-         setModuleData(kColumnStripRange, n_columns_or_strips, module_data);
+         setModuleData(kColumnStripRange, getColumnsOrCells(module_design), module_data);
+         setModuleData(kLength, static_cast<int>(module_design.length()*1e3), module_data);
          setModuleData(kSideRange, detail::getZeroOrSide(id_helper,identifier),module_data);
       }
 

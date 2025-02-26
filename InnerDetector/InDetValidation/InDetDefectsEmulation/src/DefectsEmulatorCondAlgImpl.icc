@@ -18,27 +18,6 @@
 
 namespace {
 
-   // helper templates to detect whether a type has the method columns or cells
-   template <typename T_ModuleDesign>
-   concept HasColumns = requires(T_ModuleDesign design) { design.columns(); };
-   template <typename T_ModuleDesign>
-   concept HasCells = requires(T_ModuleDesign design) { design.cells(); };
-
-   template <typename T_ModuleDesign>
-   concept ModuleDesignConcept = HasColumns<T_ModuleDesign> || HasCells<T_ModuleDesign>;
-
-   // Get a unique module type identifier which is either based on the number of
-   // columns (for pixel) or number of cells (or strips; for strips)
-   template <ModuleDesignConcept T_ModuleDesign>
-   int getColumnsOrCells(const T_ModuleDesign &moduleDesign) {
-      if constexpr(HasColumns<T_ModuleDesign>) {
-         return moduleDesign.columns();
-      }
-      else {
-         return moduleDesign.cells();
-      }
-   }
-
    template <typename T_ID>
    concept IdentifierHelperWithOtherSideConecpt = requires(T_ID id_helper) { id_helper.get_other_side(); };
 
@@ -170,7 +149,7 @@ namespace InDet{
           const T_ModuleDesign &moduleDesign = dynamic_cast<const T_ModuleDesign &>(det_ele->design());
           ModuleIdentifierMatchUtil::setModuleData(*m_idHelper,
                                                    det_ele->identify(),
-                                                   getColumnsOrCells(moduleDesign),
+                                                   moduleDesign,
                                                    module_data);
           ModuleIdentifierMatchUtil::moduleMatches(m_modulePattern.value(), module_data, module_pattern_idx);
           if (module_pattern_idx.empty()) {
