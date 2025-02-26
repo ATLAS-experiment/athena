@@ -29,13 +29,21 @@ using HitVec = SpacePointPerLayerSorter::HitVec;
 using HitLayVec = SpacePointPerLayerSorter::HitLayVec;
 using HitLaySpan = std::span<const HitVec,std::dynamic_extent>;
 
+enum class HitWindow{
+  tooLow = 0,
+
+  inside,
+
+  tooHigh
+};
+
 class CombinatorialNSWSeedFinderAlg : public AthReentrantAlgorithm {
   
     public:
         using AthReentrantAlgorithm::AthReentrantAlgorithm;
         virtual ~CombinatorialNSWSeedFinderAlg() = default;
         virtual StatusCode initialize() override;
-        virtual StatusCode execute(const EventContext& ctx) const override;
+        virtual StatusCode execute(const EventContext& ctx) const override;    
 
     private:
 
@@ -61,28 +69,29 @@ class CombinatorialNSWSeedFinderAlg : public AthReentrantAlgorithm {
         // access to the Muon Detector Manager
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 
-        std::unique_ptr<SegmentSeed> buildSegmentSeed(HitVec& hits, const AmgSymMatrix(2)& bMatrix, const HoughMaximum& max, const ActsGeometryContext& gctx, 
-                                                      const HitLayVec& combinatoricLayers) const;
+        std::unique_ptr<SegmentSeed> buildSegmentSeed(HitVec& hits, const AmgSymMatrix(2)& bMatrix, const HoughMaximum& max, 
+                                                      const HitLayVec& extensionLayers) const;
 
         //extend the seed with compatilbe hits using extrapolation to the layers
-        void extendHits(const Amg::Vector3D& startPos, 
+        HitVec extendHits(const Amg::Vector3D& startPos, 
                         const Amg::Vector3D& direction, 
-                        const HitLayVec& stripHitsLayers, HitVec& combinatoricHits, const ActsGeometryContext& gctx) const;
+                        const HitLayVec& stripHitsLayers) const;
 
         //build and return seeds from the same eta maximum
         std::vector<std::unique_ptr<SegmentSeed>> findSeedsFromMaximum(const HoughMaximum& max, const ActsGeometryContext& gctx) const;
 
-        void findCombinatoricHits(const HitLayVec& combinatoricLayers, HitLayVec& combinatoricHitsVec) const;
-
-        //use beam spot constraint
-        BooleanProperty m_beamSpotConstraint{this, "m_beamSpotConstraint", false};
-
+        HitLayVec findCombinatoricHits(const Amg::Vector3D& beamSpot,
+                                       const HitLayVec& combinatoricLayers) const;
+        
+        HitWindow findHitInWindow(const Amg::Vector3D& startPos, 
+                                  const SpacePoint* testHit, 
+                                  const Amg::Vector3D& dirEstUp,
+                                  const Amg::Vector3D& dirEstDn) const;
     
         //the window in theta to search for hits in the seed extension
-        DoubleProperty m_windowTheta {this, "m_windowTheta", 5.};
-
-        DoubleProperty m_minPull{this, "m_minPull", 1000.};
-
+        DoubleProperty m_windowTheta {this, "m_windowTheta", 0.5 * Gaudi::Units::deg};
+        
+        //apply a cut threshold in the pulls during the hit extension
         DoubleProperty m_minPullThreshold{this, "m_minPullThreshold", 5.};
         
         /// Pattern visualization tool
