@@ -261,6 +261,7 @@ def FPGATrackSimEventSelectionCfg(flags):
     eventSelector.maxz0 = flags.Trigger.FPGATrackSim.z0max    
     eventSelector.minqOverPt = flags.Trigger.FPGATrackSim.qOverPtmin
     eventSelector.maxqOverPt = flags.Trigger.FPGATrackSim.qOverPtmax
+
     result.addService(eventSelector, create=True, primary=True)
     return result
 

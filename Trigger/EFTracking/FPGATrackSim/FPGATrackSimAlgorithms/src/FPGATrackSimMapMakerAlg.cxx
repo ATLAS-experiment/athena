@@ -43,19 +43,15 @@ StatusCode FPGATrackSimMapMakerAlg::initialize()
 
     // We need to select this before calling parseKeyString() in case the user
     // has specified a plane (logical layer) as the keystring.
-    if (m_doSpacePoints) {
-        ATH_MSG_INFO("Using Space Point Configuration");
-        m_planes = &m_planes_sp;
-    } else if (m_insideout) {
-        ATH_MSG_INFO("Using Inside-Out Configuration");
-        m_planes = &m_planes_insideout;
-    } else {
-        ATH_MSG_INFO("Using Default Configuration");
-        m_planes = &m_planes_default;
-    }
+    // If running with the new regions. Don't use the hardcoded layer assignments. Use either a generic one
+    // or one passed in via a flag.
+    ATH_MSG_INFO("Using Python configuration for regions. All pixel layers -> first stage, all strip layers -> second stage");
+    m_planes = &(m_overridePlanes.value());
+    m_planes2 = &(m_overridePlanes2.value());
 
     parseKeyString();
     ATH_CHECK(m_hitInputTool.retrieve());
+    ATH_CHECK(m_evtSel.retrieve());
 
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
     ATH_MSG_DEBUG("initialize() Finished");
@@ -103,6 +99,13 @@ StatusCode FPGATrackSimMapMakerAlg::readInputs(bool & done)
     {
         ATH_MSG_INFO("Cannot read more events from file, returning");
         return StatusCode::SUCCESS; // end of loop over events
+    }
+
+    // Ask the event selection service if this event really falls within the region.
+    if (!m_evtSel->selectEvent(&m_eventHeader))
+    {
+        ATH_MSG_DEBUG("Event skipped by: " << m_evtSel->name());
+        return StatusCode::SUCCESS;
     }
 
     FPGATrackSimEventInfo eventinfo = m_eventHeader.event();
@@ -193,7 +196,7 @@ StatusCode FPGATrackSimMapMakerAlg::writePmapAndRmap(std::vector<FPGATrackSimHit
     ATH_MSG_INFO("Creating pmap: " << pmap_path);
     m_pmap.open(pmap_path, std::ofstream::out);
  
-    m_pmap << m_geoTag.value() << "\n" << m_planes->at(reg).size() << " logical_s1\n" << m_planes2[reg].size() << " logical_s2\n";
+    m_pmap << m_geoTag.value() << "\n" << m_planes->size() << " logical_s1\n" << m_planes2->size() << " logical_s2\n";
     m_pmap << m_pbmax+1 << " pixel barrel \n" << m_pemax[0]+1 << " pixel endcap+ \n" << m_pemax[1]+1 << " pixel endcap- \n";
     m_pmap << m_sbmax+1 << " SCT barrel \n" << m_semax[0]+1 << " SCT endcap+\n" << m_semax[1]+1 << " SCT endcap-\n";
     m_pmap << "! silicon endCap physDisk physLayer ['stereo' stripSide <strip only>] 'plane1' logiLayer1 'plane2' logiLayer2\n";
@@ -201,33 +204,33 @@ StatusCode FPGATrackSimMapMakerAlg::writePmapAndRmap(std::vector<FPGATrackSimHit
 
     int p1,p2;
     for (int lyr = 0; lyr <= m_pbmax; lyr++) { // Pixel Barrel
-        p1 = findPlane(m_planes->at(reg), "pb" + std::to_string(lyr));
-        p2 = findPlane(m_planes2[reg], "pb" + std::to_string(lyr));
+        p1 = findPlane(m_planes, "pb" + std::to_string(lyr));
+        p2 = findPlane(m_planes2, "pb" + std::to_string(lyr));
         m_pmap << "pixel 0    -1    " << lyr << " plane1 " << p1 << "    plane2 " << p2 << "\n";
     }
     for (int lyr = 0; lyr <= m_pemax[0]; lyr++) { // Pixel Postive Endap
-        p1 = findPlane(m_planes->at(reg), "pe" + std::to_string(lyr) + "+");
-        p2 = findPlane(m_planes2[reg], "pe" + std::to_string(lyr) + "+");
+        p1 = findPlane(m_planes, "pe" + std::to_string(lyr) + "+");
+        p2 = findPlane(m_planes2, "pe" + std::to_string(lyr) + "+");
         m_pmap << "pixel 1    " << lyr << "    " << lyr << " plane1 " << p1 << "    plane2 " << p2 << "\n";
     }
     for (int lyr = 0; lyr <= m_pemax[1]; lyr++) { // Pixel Negative Endcap
-        p1 = findPlane(m_planes->at(reg), "pe" + std::to_string(lyr) + "-");
-        p2 = findPlane(m_planes2[reg], "pe" + std::to_string(lyr) + "-");
+        p1 = findPlane(m_planes, "pe" + std::to_string(lyr) + "-");
+        p2 = findPlane(m_planes2, "pe" + std::to_string(lyr) + "-");
         m_pmap << "pixel 2    " << lyr << "    " << lyr << " plane1 " << p1 << "    plane2 " << p2 << "\n";
     }
     for (int lyr = 0; lyr <= m_sbmax; lyr++) { // Strip Barrel
-        p1 = findPlane(m_planes->at(reg), "sb" + std::to_string(lyr));
-        p2 = findPlane(m_planes2[reg], "sb" + std::to_string(lyr));
+        p1 = findPlane(m_planes, "sb" + std::to_string(lyr));
+        p2 = findPlane(m_planes2, "sb" + std::to_string(lyr));
         m_pmap << "SCT 0    -1    " << lyr << " stereo " <<  lyr % 2 << " plane1 "  << p1 << "    plane2 " << p2 << "\n";
     }
     for (int lyr = 0; lyr <= m_semax[0]; lyr++) { // Strip Positive Endcap
-        p1 = findPlane(m_planes->at(reg), "se" + std::to_string(lyr) + "+");
-        p2 = findPlane(m_planes2[reg], "se" + std::to_string(lyr) + "+");
+        p1 = findPlane(m_planes, "se" + std::to_string(lyr) + "+");
+        p2 = findPlane(m_planes2, "se" + std::to_string(lyr) + "+");
         m_pmap << "SCT 1    "  << lyr/2 << "    " << lyr << " stereo " <<  lyr % 2 << " plane1 " << p1 << "    plane2 " << p2 << "\n";
     }
     for (int lyr = 0; lyr <= m_semax[1]; lyr++) { // Strip Negative Endcap
-        p1 = findPlane(m_planes->at(reg), "se" + std::to_string(lyr) + "-");
-        p2 = findPlane(m_planes2[reg], "se" + std::to_string(lyr) + "-");
+        p1 = findPlane(m_planes, "se" + std::to_string(lyr) + "-");
+        p2 = findPlane(m_planes2, "se" + std::to_string(lyr) + "-");
         m_pmap << "SCT 2    "  << lyr/2 << "    " << lyr << " stereo " <<  lyr % 2 << " plane1 " << p1 << "    plane2 " << p2 << "\n";
     }
 
@@ -524,13 +527,13 @@ StatusCode FPGATrackSimMapMakerAlg::writeEtaPatterns()
     for (auto& pair: m_track2modules) {
         for (auto& m: pair.second)
         {
-            if (m->det == SiliconTech::pixel && m->bec == DetectorZone::barrel) m->plane = findPlane(m_planes->at(m_region), "pb" + std::to_string(m->lyr));
-            if (m->det == SiliconTech::pixel && m->bec == DetectorZone::posEndcap) m->plane = findPlane(m_planes->at(m_region), "pe" + std::to_string(m->lyr) + "+");
-            if (m->det == SiliconTech::pixel && m->bec == DetectorZone::negEndcap) m->plane = findPlane(m_planes->at(m_region), "pe" + std::to_string(m->lyr) + "-");
+            if (m->det == SiliconTech::pixel && m->bec == DetectorZone::barrel) m->plane = findPlane(m_planes, "pb" + std::to_string(m->lyr));
+            if (m->det == SiliconTech::pixel && m->bec == DetectorZone::posEndcap) m->plane = findPlane(m_planes, "pe" + std::to_string(m->lyr) + "+");
+            if (m->det == SiliconTech::pixel && m->bec == DetectorZone::negEndcap) m->plane = findPlane(m_planes, "pe" + std::to_string(m->lyr) + "-");
 
-            if (m->det == SiliconTech::strip && m->bec == DetectorZone::barrel) m->plane = findPlane(m_planes->at(m_region), "sb" + std::to_string(m->lyr));
-            if (m->det == SiliconTech::strip && m->bec == DetectorZone::posEndcap) m->plane = findPlane(m_planes->at(m_region), "se" + std::to_string(m->lyr) + "+");
-            if (m->det == SiliconTech::strip && m->bec == DetectorZone::negEndcap) m->plane = findPlane(m_planes->at(m_region), "se" + std::to_string(m->lyr) + "-");
+            if (m->det == SiliconTech::strip && m->bec == DetectorZone::barrel) m->plane = findPlane(m_planes, "sb" + std::to_string(m->lyr));
+            if (m->det == SiliconTech::strip && m->bec == DetectorZone::posEndcap) m->plane = findPlane(m_planes, "se" + std::to_string(m->lyr) + "+");
+            if (m->det == SiliconTech::strip && m->bec == DetectorZone::negEndcap) m->plane = findPlane(m_planes, "se" + std::to_string(m->lyr) + "-");
         }
     }
 
@@ -538,7 +541,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeEtaPatterns()
     {
         std::stringstream track_etapatts;
         unsigned planesDone = 0;
-        for (unsigned p = 0; p < (m_planes->at(m_region)).size(); p++)
+        for (unsigned p = 0; p < (m_planes)->size(); p++)
         {
             for (const Module* m : m_track2modules[trk]) {
                 if (m->plane == static_cast<int>(p))
@@ -549,7 +552,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeEtaPatterns()
                 }
             }
         }
-        if (planesDone == (m_planes->at(m_region)).size())
+        if (planesDone == (m_planes)->size())
             m_etapat << track_etapatts.str() << "\n";
 
     }
@@ -560,7 +563,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeEtaPatterns()
 StatusCode FPGATrackSimMapMakerAlg::writeRadiiFile(std::vector<FPGATrackSimHit> const & allHits)
 {
     // calculate mean radii.
-  m_radii.resize(m_nSlices.value(), std::vector<std::vector<float>>(m_planes2.at(m_region).size(),std::vector<float>(0)));
+  m_radii.resize(m_nSlices.value(), std::vector<std::vector<float>>(m_planes2->size(),std::vector<float>(0)));
     for (const auto& hit: allHits)
     {
         SiliconTech det = hit.getDetType();
@@ -568,12 +571,12 @@ StatusCode FPGATrackSimMapMakerAlg::writeRadiiFile(std::vector<FPGATrackSimHit> 
         int lyr = hit.getPhysLayer();
         int slice = m_track2slice[hit.getEventIndex()];
         int plane = -1;
-        if (det == SiliconTech::pixel && bec == DetectorZone::barrel) plane = findPlane(m_planes2.at(m_region), "pb" + std::to_string(lyr));
-        if (det == SiliconTech::pixel && bec == DetectorZone::posEndcap) plane = findPlane(m_planes2.at(m_region), "pe" + std::to_string(lyr) + "+");
-        if (det == SiliconTech::pixel && bec == DetectorZone::negEndcap) plane = findPlane(m_planes2.at(m_region), "pe" + std::to_string(lyr) + "-");
-        if (det == SiliconTech::strip && bec == DetectorZone::barrel) plane = findPlane(m_planes2.at(m_region), "sb" + std::to_string(lyr));
-        if (det == SiliconTech::strip && bec == DetectorZone::posEndcap) plane = findPlane(m_planes2.at(m_region), "se" + std::to_string(lyr) + "+");
-        if (det == SiliconTech::strip && bec == DetectorZone::negEndcap) plane = findPlane(m_planes2.at(m_region), "se" + std::to_string(lyr) + "-");
+        if (det == SiliconTech::pixel && bec == DetectorZone::barrel) plane = findPlane(m_planes2, "pb" + std::to_string(lyr));
+        if (det == SiliconTech::pixel && bec == DetectorZone::posEndcap) plane = findPlane(m_planes2, "pe" + std::to_string(lyr) + "+");
+        if (det == SiliconTech::pixel && bec == DetectorZone::negEndcap) plane = findPlane(m_planes2, "pe" + std::to_string(lyr) + "-");
+        if (det == SiliconTech::strip && bec == DetectorZone::barrel) plane = findPlane(m_planes2, "sb" + std::to_string(lyr));
+        if (det == SiliconTech::strip && bec == DetectorZone::posEndcap) plane = findPlane(m_planes2, "se" + std::to_string(lyr) + "+");
+        if (det == SiliconTech::strip && bec == DetectorZone::negEndcap) plane = findPlane(m_planes2, "se" + std::to_string(lyr) + "-");
 
         if (plane != -1) {
             m_radii[slice][plane].push_back(hit.getR());
@@ -586,7 +589,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeRadiiFile(std::vector<FPGATrackSimHit> 
     m_radfile.open(radii_path, std::ofstream::out);
     for (int s = 0; s < m_nSlices.value(); s++){
         m_radfile << std::to_string(s) << " ";
-        for (unsigned p = 0; p < (m_planes2.at(m_region)).size(); p++){
+        for (unsigned p = 0; p < (m_planes2)->size(); p++){
             if (m_radii[s][p].size() != 0){
                 // "If left to type inference, op operates on values of the same type as
                 // init which can result in unwanted casting of the iterator elements."
@@ -603,7 +606,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeRadiiFile(std::vector<FPGATrackSimHit> 
 
     // Calculate global mean radii by reversing the order of the above two loops.
     m_radfile << -1 << " ";
-    for (unsigned p = 0; p < (m_planes2.at(m_region)).size(); p++) {
+    for (unsigned p = 0; p < (m_planes2)->size(); p++) {
         float avg = 0;
         int count = 0;
         for (int s = 0; s < m_nSlices.value(); s++) {
@@ -629,7 +632,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeRadiiFile(std::vector<FPGATrackSimHit> 
 StatusCode FPGATrackSimMapMakerAlg::writeMedianZFile(std::vector<FPGATrackSimHit> const & allHits)
 {
     // calculate median z. We do this globally and slice-by-slice.
-  m_z.resize(m_nSlices.value(), std::vector<std::vector<float>>((m_planes2.at(m_region)).size(),std::vector<float>(0)));
+  m_z.resize(m_nSlices.value(), std::vector<std::vector<float>>((m_planes2)->size(),std::vector<float>(0)));
     for (const auto& hit: allHits)
     {
         SiliconTech det = hit.getDetType();
@@ -637,12 +640,12 @@ StatusCode FPGATrackSimMapMakerAlg::writeMedianZFile(std::vector<FPGATrackSimHit
         int lyr = hit.getPhysLayer();
         int slice = m_track2slice[hit.getEventIndex()];
         int plane = -1;
-        if (det == SiliconTech::pixel && bec == DetectorZone::barrel) plane = findPlane(m_planes2.at(m_region), "pb" + std::to_string(lyr));
-        if (det == SiliconTech::pixel && bec == DetectorZone::posEndcap) plane = findPlane(m_planes2.at(m_region), "pe" + std::to_string(lyr) + "+");
-        if (det == SiliconTech::pixel && bec == DetectorZone::negEndcap) plane = findPlane(m_planes2.at(m_region), "pe" + std::to_string(lyr) + "-");
-        if (det == SiliconTech::strip && bec == DetectorZone::barrel) plane = findPlane(m_planes2.at(m_region), "sb" + std::to_string(lyr));
-        if (det == SiliconTech::strip && bec == DetectorZone::posEndcap) plane = findPlane(m_planes2.at(m_region), "se" + std::to_string(lyr) + "+");
-        if (det == SiliconTech::strip && bec == DetectorZone::negEndcap) plane = findPlane(m_planes2.at(m_region), "se" + std::to_string(lyr) + "-");
+        if (det == SiliconTech::pixel && bec == DetectorZone::barrel) plane = findPlane(m_planes2, "pb" + std::to_string(lyr));
+        if (det == SiliconTech::pixel && bec == DetectorZone::posEndcap) plane = findPlane(m_planes2, "pe" + std::to_string(lyr) + "+");
+        if (det == SiliconTech::pixel && bec == DetectorZone::negEndcap) plane = findPlane(m_planes2, "pe" + std::to_string(lyr) + "-");
+        if (det == SiliconTech::strip && bec == DetectorZone::barrel) plane = findPlane(m_planes2, "sb" + std::to_string(lyr));
+        if (det == SiliconTech::strip && bec == DetectorZone::posEndcap) plane = findPlane(m_planes2, "se" + std::to_string(lyr) + "+");
+        if (det == SiliconTech::strip && bec == DetectorZone::negEndcap) plane = findPlane(m_planes2, "se" + std::to_string(lyr) + "-");
 
         if (plane != -1) {
             m_z[slice][plane].push_back(hit.getZ());
@@ -655,7 +658,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeMedianZFile(std::vector<FPGATrackSimHit
     m_zedfile.open(zed_path, std::ofstream::out);
     for (int s = 0; s < m_nSlices.value(); s++){
         m_zedfile << std::to_string(s) << " ";
-        for (unsigned p = 0; p < (m_planes2.at(m_region)).size(); p++){
+        for (unsigned p = 0; p < (m_planes2)->size(); p++){
             if (m_z[s][p].size() != 0){
                 float minZ = *std::min_element(m_z[s][p].begin(), m_z[s][p].end());
                 float maxZ = *std::max_element(m_z[s][p].begin(), m_z[s][p].end());
@@ -671,7 +674,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeMedianZFile(std::vector<FPGATrackSimHit
 
     // Now do this globally. Note: should this be meanZ instead of medianZ in the forward region?
     m_zedfile << -1 << " ";
-    for (unsigned p = 0; p < (m_planes2.at(m_region)).size(); p++) {
+    for (unsigned p = 0; p < (m_planes2)->size(); p++) {
         float minZ = 0;
         float maxZ = 0;
         bool doneInitial = false;
@@ -768,10 +771,10 @@ bool FPGATrackSimMapMakerAlg::isOnKeyLayer(int keynum, SiliconTech t_det, Detect
     return false;
 }
 
-int FPGATrackSimMapMakerAlg::findPlane(const std::vector<std::vector<std::string>>& planes, const std::string& test) // find what plane a layer is assigned to.
+int FPGATrackSimMapMakerAlg::findPlane(const std::vector<std::vector<std::string>>* planes, const std::string& test) // find what plane a layer is assigned to.
 {
     int pcounter = 0;
-    for (auto& plane : planes) {
+    for (auto& plane : *planes) {
         for (auto& layer : plane) {
             if (test == layer) return pcounter;
         }
@@ -824,8 +827,9 @@ void FPGATrackSimMapMakerAlg::parseKeyString()
             m_keylayer["det"].insert(static_cast<int>(m_det2tech[det]));
             m_keylayer["bec"].insert(static_cast<int>(m_bec2zone[bec]));
             m_keylayer["lyr"].insert(std::stoi(lyr));
+            ATH_MSG_INFO("Using key layer: " << m_keystring.value());
         } catch (...){
-            ATH_MSG_ERROR("Invalid KeyString: '" << m_keystring << "'." << "Accepted formats are 'strip,posEndcap,2', 'pixel,barrel,3', or 'plane 0'");
+            ATH_MSG_ERROR("Invalid KeyString: '" << m_keystring.value() << "'." << "Accepted formats are 'strip,posEndcap,2', 'pixel,barrel,3', or 'plane 0'");
         }
     }
     else // keylayer format is 'plane 0'
@@ -834,7 +838,7 @@ void FPGATrackSimMapMakerAlg::parseKeyString()
         try {
             s.erase(0, s.find(delimiter) + delimiter.length());
             std::string plane = s.substr(0, s.find(delimiter));
-            std::vector<std::string> s = (m_planes->at(m_region))[std::stoi(plane)];
+            std::vector<std::string> s = (m_planes)->at(std::stoi(plane));
             for (unsigned i = 0; i < s.size(); i++){
                 std::string reg = s[i].substr(0, 2);
                 std::vector<std::string> zone = abrevs[reg];
@@ -847,8 +851,9 @@ void FPGATrackSimMapMakerAlg::parseKeyString()
                 m_keylayer["bec"].insert(static_cast<int>(m_bec2zone[zone[1]]));
                 m_keylayer["lyr"].insert(std::stoi(lyr));
             }
+            ATH_MSG_INFO("Using key layer (in plane X format) " << m_keystring.value());
         } catch (...){
-            ATH_MSG_ERROR("Invalid KeyString: '" << m_keystring << "'." << "Accepted formats are 'strip,posEndcap,2', 'pixel,barrel,3', or 'plane 0'");
+            ATH_MSG_ERROR("Invalid KeyString: '" << m_keystring.value() << "'." << "Accepted formats are 'strip,posEndcap,2', 'pixel,barrel,3', or 'plane 0'");
         }
     }
 
@@ -869,8 +874,9 @@ void FPGATrackSimMapMakerAlg::parseKeyString()
                 m_keylayer2["det"].insert(static_cast<int>(m_det2tech[det]));
                 m_keylayer2["bec"].insert(static_cast<int>(m_bec2zone[bec]));
                 m_keylayer2["lyr"].insert(std::stoi(lyr));
+                ATH_MSG_INFO("Using key layer (2D): " << m_keystring2.value());
             } catch (...){
-                ATH_MSG_ERROR("Invalid KeyString2: '" << m_keystring2 << "'." << "Accepted formats are 'strip,posEndcap,2', 'pixel,barrel,3', or 'plane 0'");
+                ATH_MSG_ERROR("Invalid KeyString2: '" << m_keystring2.value() << "'." << "Accepted formats are 'strip,posEndcap,2', 'pixel,barrel,3', or 'plane 0'");
             }
         }
         else // keylayer format is 'plane 0'
@@ -879,7 +885,7 @@ void FPGATrackSimMapMakerAlg::parseKeyString()
             try {
                 s.erase(0, s.find(delimiter) + delimiter.length());
                 std::string plane = s.substr(0, s.find(delimiter));
-                std::vector<std::string> s = (m_planes->at(m_region))[std::stoi(plane)];
+                std::vector<std::string> s = (m_planes)->at(std::stoi(plane));
                 for (unsigned i = 0; i < s.size(); i++){
                     std::string reg = s[i].substr(0, 2);
                     std::vector<std::string> zone = abrevs[reg];
@@ -892,8 +898,9 @@ void FPGATrackSimMapMakerAlg::parseKeyString()
                     m_keylayer2["bec"].insert(static_cast<int>(m_bec2zone[zone[1]]));
                     m_keylayer2["lyr"].insert(std::stoi(lyr));
                 }
+                ATH_MSG_INFO("Using key layer (2D) (in plane X format): " << m_keystring2.value());
             } catch (...){
-                ATH_MSG_ERROR("Invalid KeyString2: '" << m_keystring2 << "'." << "Accepted formats are 'strip,posEndcap,2', 'pixel,barrel,3', or 'plane 0'");
+                ATH_MSG_ERROR("Invalid KeyString2: '" << m_keystring2.value() << "'." << "Accepted formats are 'strip,posEndcap,2', 'pixel,barrel,3', or 'plane 0'");
             }
         }
     }
