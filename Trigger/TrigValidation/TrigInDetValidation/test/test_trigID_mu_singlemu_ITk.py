@@ -37,7 +37,7 @@ GridFiles = True
 # by default, all MC tests override the global conditions tag and force defaultConditionsTags.RUN3_MC, which is not suitable for Run4
 conditionsOverride = 'Run4'
 
-preexec_trig = "flags.Tracking.doTruth=False;flags.Trigger.enableL1CaloPhase1=False;"
+preexec_trig = "flags.Tracking.doTruth=False;"
 
 Jobs = [ ( "Truth",       " TIDAdata-run4.dat                    -o data-hists.root -p 13",   "Test_bin.dat" ),
          ( "Offline",     " TIDAdata-run4-offline.dat -r Offline -o data-hists-offline.root", "Test_bin.dat" ) ]

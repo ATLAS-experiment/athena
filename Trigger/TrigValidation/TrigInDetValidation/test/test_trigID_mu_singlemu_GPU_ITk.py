@@ -37,7 +37,7 @@ Input   = 'Single_mu_Run4'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 useCA_Reco = True
 
-preexec_trig = "flags.Tracking.doTruth=False;flags.Trigger.enableL1CaloPhase1=False;flags.Trigger.InDetTracking.doGPU=True;"
+preexec_trig = "flags.Tracking.doTruth=False;flags.Trigger.InDetTracking.doGPU=True;"
 
 Jobs = [ ( "Truth",       " TIDAdata-run4.dat                    -o data-hists.root -p 13",   "Test_bin.dat" ),
          ( "Offline",     " TIDAdata-run4-offline.dat -r Offline -o data-hists-offline.root", "Test_bin.dat" ) ]
