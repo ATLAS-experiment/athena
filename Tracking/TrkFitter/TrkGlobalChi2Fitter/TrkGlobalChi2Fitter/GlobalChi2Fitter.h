@@ -621,8 +621,7 @@ namespace Trk {
     ) const;
 
     void fillDerivatives(
-      GXFTrajectory & traj,
-      bool onlybrem = false
+      GXFTrajectory & traj
     ) const;
 
     FitterStatusCode runIteration(
