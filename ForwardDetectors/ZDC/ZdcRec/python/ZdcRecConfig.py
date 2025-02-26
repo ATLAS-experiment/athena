@@ -131,9 +131,10 @@ def ZdcRecOutputCfg(flags):
     acc.merge(addToESD(flags,ZDC_ItemList))
     acc.merge(addToAOD(flags,ZDC_ItemList))
 
-    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    acc.merge(SetupMetaDataForStreamCfg(flags,streamName="AOD"))
-    
+    # In case running standalone (i.e. not within RecoSteering)
+    if flags.Output.doWriteAOD:
+        from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+        acc.merge(SetupMetaDataForStreamCfg(flags,streamName="AOD"))
 
     return acc
 
