@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GEOMODELSVC_GEOMODELTOOL_H
-#define GEOMODELSVC_GEOMODELTOOL_H
+#ifndef GEOMODELUTILITIES_GEOMODELTOOL_H
+#define GEOMODELUTILITIES_GEOMODELTOOL_H
 
 #ifndef BUILDVP1LIGHT
 
@@ -13,27 +13,21 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CxxUtils/checker_macros.h"
 
-
 class GeoModelTool : public extends<AthAlgTool, IGeoModelTool> {
 
 public:
+  using base_class::base_class;
+  virtual ~GeoModelTool() = default;
 
-    // Standard Constructor
-    GeoModelTool( const std::string& type, const std::string& name, const IInterface* parent );
+  virtual GeoVDetectorManager* manager() {return m_detector;}
+  virtual const GeoVDetectorManager* manager() const {return m_detector;}
 
-    // Standard Destructor
-    virtual ~GeoModelTool() = default;
-
-    virtual GeoVDetectorManager* manager();
-    virtual const GeoVDetectorManager* manager() const;
-
-    virtual StatusCode clear() override;
-    virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override;
-    virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override;
+  virtual StatusCode clear() override {return StatusCode::SUCCESS;}
+  virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override {return StatusCode::FAILURE;}
+  virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override {return StatusCode::SUCCESS;}
 
 protected:
-
-    GeoVDetectorManager*   m_detector;                  // The corresponding
+  GeoVDetectorManager*   m_detector{nullptr};
 };
 
 #endif  // BUILDVP1LIGHT

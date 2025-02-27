@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArReadoutGeometry/FCAL_ChannelMap.h"
@@ -239,22 +239,6 @@ StatusCode LArDetectorToolNV::clear()
   }
 
   return StatusCode::SUCCESS;
-}
-
-StatusCode LArDetectorToolNV::registerCallback ATLAS_NOT_THREAD_SAFE ()
-{
-  // Return FAILURE if no callbacks have been registered
-  if(!m_applyAlignments) {
-    ATH_MSG_DEBUG("LAr alignments switched OFF");
-    return StatusCode::FAILURE;
-  }
-
-  const DataHandle<DetCondKeyTrans> dckt;
-  StatusCode sc = detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool *>(this), dckt, LAR_ALIGN);
-  ATH_MSG_DEBUG( (sc.isSuccess() ? "Successfully registered" : "Registration failed for")
-		 << " callback on DetCondKeyTrans with folder " << LAR_ALIGN);
-
-  return sc;
 }
 
 StatusCode LArDetectorToolNV::align(IOVSVC_CALLBACK_ARGS)
