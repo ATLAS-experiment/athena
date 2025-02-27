@@ -109,6 +109,22 @@ private:
   Gaudi::Property<std::vector<size_t>> m_endcapMaterialBins{this, "EndcapMaterialBins", {5, 20}};
   Gaudi::Property<std::vector<std::string>> m_buildSubdetectors{this, "BuildSubDetectors", {"Pixel", "SCT", "TRT", "Calo", "HGTD"}};
 
+  /// the specifications for building additional
+  /// passive cylinders in the barrel region:
+  /// for each cylinder you want to specify
+  /// radius, half length in z and thickness
+  Gaudi::Property<std::vector<float>> m_passiveITkInnerPixelBarrelLayerRadii{this, "PassiveITkInnerPixelBarrelLayerRadii", {}};
+  Gaudi::Property<std::vector<float>> m_passiveITkInnerPixelBarrelLayerHalflengthZ{this, "PassiveITkInnerPixelBarrelLayerHalflengthZ", {}};
+  Gaudi::Property<std::vector<float>> m_passiveITkInnerPixelBarrelLayerThickness{this, "PassiveITkInnerPixelBarrelLayerThickness", {}};
+
+  Gaudi::Property<std::vector<float>> m_passiveITkOuterPixelBarrelLayerRadii{this, "PassiveITkOuterPixelBarrelLayerRadii", {}};
+  Gaudi::Property<std::vector<float>> m_passiveITkOuterPixelBarrelLayerHalflengthZ{this, "PassiveITkOuterPixelBarrelLayerHalflengthZ", {}};
+  Gaudi::Property<std::vector<float>> m_passiveITkOuterPixelBarrelLayerThickness{this, "PassiveITkOuterPixelBarrelLayerThickness", {}};
+
+  Gaudi::Property<std::vector<float>> m_passiveITkStripBarrelLayerRadii{this, "PassiveITkStripBarrelLayerRadii", {}};
+  Gaudi::Property<std::vector<float>> m_passiveITkStripBarrelLayerHalflengthZ{this, "PassiveITkStripBarrelLayerHalflengthZ", {}};
+  Gaudi::Property<std::vector<float>> m_passiveITkStripBarrelLayerThickness{this, "PassiveITkStripBarrelLayerThickness", {}};
+
   BooleanProperty m_runConsistencyChecks{this, "RunConsistencyChecks", 
     false, "Run extra consistency checks w.r.t to Trk::. This is SLOW!"};
 
