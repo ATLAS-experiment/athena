@@ -47,12 +47,14 @@ Electrons:
 Photons:
   - containerName: AnaPhotons
     recomputeIsEM: False
-    forceFullSimConfig: True
+    forceFullSimConfigForP4: True
+    forceFullSimConfigForIso: True
     recalibratePhyslite: False
     decorateTruth: true
     WorkingPoint:
       - selectionName: tight
-        forceFullSimConfig: True
+        forceFullSimConfigForID: True
+        forceFullSimConfigForIso: True
         qualityWP: Tight
         isolationWP: FixedCutTight
         recomputeIsEM: False
