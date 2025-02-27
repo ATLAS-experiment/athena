@@ -76,6 +76,10 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
             ATH_MSG_ERROR("Found a proto-track with no measurements");
             continue; // TODO: once resolved, instead of simply discarding these cases, return StatusCode::FAILURE
           }
+          else if(points.size()<4){
+            ATH_MSG_DEBUG("Skipping proto-track with " << points.size() << " measurements.");
+            continue;
+          }
           else {
             ATH_MSG_INFO("\tMade a proto-track with " << points.size() << " clusters");
 
@@ -148,6 +152,10 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
           ATH_MSG_ERROR("Found a proto-track with no measurements");
           continue; // TODO: once resolved, instead of simply discarding these cases, return StatusCode::FAILURE
         }
+        else if (points.size() < 4){
+          ATH_MSG_DEBUG("Skipping proto-track with " << points.size() << " measurements.");
+          continue;
+        }
         else {
           ATH_MSG_INFO("\tMade a proto-track with " << points.size() << " clusters");
 
@@ -177,7 +185,7 @@ std::unique_ptr<Acts::BoundTrackParameters> FPGAActsTrkConverter::makeParams (co
   double phi=road.getX();
   double eta=0.2;
   double theta=2*std::atan(std::exp(-eta));
-  double qop=road.getY()/GeVToMeV; //
+  double qop = (std::abs(road.getY()) > 1E-9) ? road.getY()/GeVToMeV : 1E-12;
   double t=0.; //?
   ATH_MSG_DEBUG("\tphi=" <<phi << " eta=" << eta << " qop=" << qop);
 
