@@ -1,6 +1,8 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
+
+
 def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
     # Main Job Option for ACTS Track Reconstruction with ITk
     print("Scheduling the ACTS Job Option for ITk Track Reconstruction")
@@ -71,6 +73,12 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
                                           vxCandidatesOutputName = primaryVertices))
         
     # Post-Processing
+    print('Starting Post-Processing')
+    for currentFlags in scheduledTrackingPasses:
+        # Particle persistification for tracking pass
+        from InDetConfig.ITkActsParticleCreationConfig import ITkActsTrackParticlePersistificationCfg
+        acc.merge(ITkActsTrackParticlePersistificationCfg(currentFlags))
+
     ## ACTS Specific write PRDInfo
     if flags.Tracking.writeExtendedSi_PRDInfo:
         # Add the truth origin to the truth particles
