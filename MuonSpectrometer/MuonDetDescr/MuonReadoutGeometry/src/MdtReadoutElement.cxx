@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -53,7 +53,6 @@
 namespace {
     // the tube number of a tube in a tubeLayer in encoded in the GeoSerialIdentifier (modulo maxNTubesPerLayer)
     constexpr unsigned int const maxNTubesPerLayer = MdtIdHelper::maxNTubesPerLayer;
-    constexpr double linearDensity = 378.954;
 }  // namespace
 
 namespace MuonGM {
