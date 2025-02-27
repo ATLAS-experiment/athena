@@ -4,7 +4,7 @@
 # art-description: art job for el_singlee_100_ITk
 # art-type: grid
 # art-include: main/Athena
-# art-input: mc21_14TeV.900497.PG_single_epm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697
+# art-input: mc21_14TeV.900497.PG_single_epm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128
 # art-input-nfiles: 20
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
