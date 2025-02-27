@@ -288,6 +288,20 @@ namespace CP {
 
             }
         }
+        else {
+            // Missing primary vertex - need to copy the uncorrected iso values
+            for (const xAOD::IParticle* particle : cache.prim_parts) {
+                ATH_MSG_DEBUG("Copy isolation values of particle with pt: " << particle->pt() * MeVtoGeV << " GeV"
+                                                                            << " eta: " << particle->eta()
+                                                                            << " phi: " << particle->phi());
+                if (copyIsoValuesForPartsNotSelected(particle) == CorrectionCode::Error) {
+                    ATH_MSG_ERROR("Failed to copy the isolation of particle with pt: " << particle->pt() * MeVtoGeV << " GeV"
+                                                                                    << " eta: " << particle->eta()
+                                                                                    << " phi: " << particle->phi());
+                    return CorrectionCode::Error;
+                }
+            }
+        }
         // Only need to copy the uncorrected iso values
         for (const xAOD::IParticle* particle : cache.not_sel_parts) {
             ATH_MSG_DEBUG("Copy isolation values of particle with pt: " << particle->pt() * MeVtoGeV << " GeV"
@@ -393,6 +407,7 @@ namespace CP {
     CorrectionCode IsolationCloseByCorrectionTool::getCloseByCorrection(std::vector<float>& corrections, const xAOD::IParticle& par,
                                                                         const std::vector<IsolationType>& types,
                                                                         const xAOD::IParticleContainer& closePar) const {
+
         if (!m_isInitialised) {
             ATH_MSG_ERROR("The IsolationCloseByCorrectionTool was not initialised!!!");
             return CorrectionCode::Error;
@@ -918,8 +933,12 @@ namespace CP {
             return nullptr;
         }
         for (const xAOD::Vertex* V : *Verticies) {
-            if (V->vertexType() == xAOD::VxType::VertexType::PriVtx) return V;
+            if (V->vertexType() == xAOD::VxType::VertexType::PriVtx) {
+                ATH_MSG_VERBOSE("retrieveIDBestPrimaryVertex: vertex found ");
+                return V;
+            }
         }
+        ATH_MSG_VERBOSE("retrieveIDBestPrimaryVertex: no vertex found ");
         return nullptr;
     }
 
