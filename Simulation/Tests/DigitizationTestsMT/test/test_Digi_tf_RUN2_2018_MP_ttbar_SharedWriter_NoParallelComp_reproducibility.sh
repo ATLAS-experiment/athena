@@ -23,13 +23,15 @@ InputHitsFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests
 HighPtMinbiasHitsFiles="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/mc16_13TeV.361239.Pythia8EvtGen_A3NNPDF23LO_minbias_inelastic_high.merge.HITS.e4981_s3087_s3089/*"
 LowPtMinbiasHitsFiles="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/mc16_13TeV.361238.Pythia8EvtGen_A3NNPDF23LO_minbias_inelastic_low.merge.HITS.e4981_s3087_s3089/*"
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN2)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_MC)")
 
 Digi_tf.py \
     --CA \
     --inputHITSFile ${InputHitsFile} \
-    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-12 \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
-    --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
     --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
     --jobNumber 38 \
@@ -52,9 +54,9 @@ Digi_tf.py \
     --sharedWriter 'True' \
     --parallelCompression 'False' \
     --inputHITSFile ${InputHitsFile} \
-    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-12 \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
-    --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
     --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
     --jobNumber 38 \
@@ -79,9 +81,9 @@ Digi_tf.py \
     --sharedWriter 'True' \
     --parallelCompression 'False' \
     --inputHITSFile ${InputHitsFile} \
-    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-12 \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
-    --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
     --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
     --jobNumber 38 \
