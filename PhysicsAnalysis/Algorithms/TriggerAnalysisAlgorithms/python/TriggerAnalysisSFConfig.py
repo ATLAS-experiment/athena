@@ -32,6 +32,29 @@ def get_year_data(dictionary: dict, year: int | str) -> list:
     return dictionary.get(int(year), dictionary.get(str(year), []))
 
 
+def get_input_years(config: ConfigAccumulator) -> list[int]:
+    """
+    Utility function to get the list of years that the input corresponds to
+    """
+    years = []
+    if config.campaign() is Campaign.MC20a:
+        years = [2015, 2016]
+    elif is_data_from(config, 2015):
+        years = [2015]
+    elif is_data_from(config, 2016):
+        years = [2016]
+    elif config.campaign() is Campaign.MC20d or is_data_from(config, 2017):
+        years = [2017]
+    elif config.campaign() is Campaign.MC20e or is_data_from(config, 2018):
+        years = [2018]
+    elif config.campaign() in [Campaign.MC21a, Campaign.MC23a] or is_data_from(config, 2022):
+        years = [2022]
+    elif config.campaign() in [Campaign.MC23c, Campaign.MC23d] or is_data_from(config, 2023):
+        years = [2023]
+
+    return years
+
+
 class TriggerAnalysisSFBlock(ConfigBlock):
     """the ConfigBlock for trigger analysis"""
     def __init__(self):
@@ -195,14 +218,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         config: ConfigAccumulator,
         matchingTool,
     ) -> None:
-        years = []
-        if config.campaign() is Campaign.MC20a:     years = [2015, 2016]
-        elif is_data_from(config, 2015):   years = [2015]
-        elif is_data_from(config, 2016):   years = [2016]
-        elif config.campaign() is Campaign.MC20d or is_data_from(config, 2017):   years = [2017]
-        elif config.campaign() is Campaign.MC20e or is_data_from(config, 2018):   years = [2018]
-        elif config.campaign() in [Campaign.MC21a, Campaign.MC23a] or is_data_from(config, 2022): years = [2022]
-        elif config.campaign() in [Campaign.MC23c, Campaign.MC23d] or is_data_from(config, 2023): years = [2023]
+        years = get_input_years(config)
 
         triggerMatchingChains = set()
         triggerMatchingChainsDummy = set()
