@@ -224,8 +224,10 @@ PixelClusteringTool::clusterize(const RawDataCollection& RDOs,
 
     // Retrieve the detector element
     const InDetDD::SiDetectorElement* element = m_pixelRDOTool->checkCollection(RDOs, ctx);
-    if (element == nullptr)
-	return StatusCode::FAILURE;
+    if (element == nullptr) {
+       // the RDO tool will return nullptr if the module is flagged bad, which is not a failure.
+       return StatusCode::SUCCESS;
+    }
 
     // Retrieve the calibration data
     const PixelChargeCalibCondData *calibData = nullptr;
