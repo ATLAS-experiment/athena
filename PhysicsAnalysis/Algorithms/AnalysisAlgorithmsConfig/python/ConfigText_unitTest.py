@@ -122,7 +122,8 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
 
     # Photons
     config.addBlock ('Photons', containerName='AnaPhotons')
-    config.setOptions (forceFullSimConfig=True)
+    config.setOptions (forceFullSimConfigForP4=True)
+    config.setOptions (forceFullSimConfigForIso=True)
     config.setOptions (recomputeIsEM=False)
     config.setOptions (recalibratePhyslite=False)
     config.setOptions (decorateTruth=True)
@@ -130,7 +131,8 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.addBlock ('Photons.WorkingPoint')
     config.setOptions (containerName='AnaPhotons')
     config.setOptions (selectionName='tight')
-    config.setOptions (forceFullSimConfig=True)
+    config.setOptions (forceFullSimConfigForID=True)
+    config.setOptions (forceFullSimConfigForIso=True)
     config.setOptions (qualityWP='Tight')
     config.setOptions (isolationWP='FixedCutTight')
     config.setOptions (recomputeIsEM=False)

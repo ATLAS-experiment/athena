@@ -185,13 +185,15 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq += config.makeConfig ('Photons',
         containerName='AnaPhotons' )
     configSeq.setOptionValue ('.decorateTruth', True)
-    configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
+    configSeq.setOptionValue ('.forceFullSimConfigForP4', forceEGammaFullSimConfig)
+    configSeq.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.recomputeIsEM', False)
     configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += config.makeConfig ('Photons.WorkingPoint',
         containerName='AnaPhotons',
         selectionName='tight')
-    configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
+    configSeq.setOptionValue ('.forceFullSimConfigForID', forceEGammaFullSimConfig)
+    configSeq.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.qualityWP', 'Tight')
     configSeq.setOptionValue ('.isolationWP', 'FixedCutTight')
     configSeq.setOptionValue ('.recomputeIsEM', False)
