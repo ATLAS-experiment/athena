@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,6 +11,7 @@
 #include "GaudiKernel/ITHistSvc.h"
 #include "StoreGate/ReadHandleKey.h"
 
+#include "TileConditions/TileCablingSvc.h"
 #include "TileEvent/TileRawChannelContainer.h"
 #include "TileEvent/TileContainer.h"
 #include "TileEvent/TileDigitsContainer.h"
@@ -33,15 +34,23 @@ public:
   virtual StatusCode finalize() override final;
 
 private:
-  SG::ReadHandleKey<TileRawChannelContainer> m_inputRawChKey;
-  SG::ReadHandleKey<TileRawChannelContainer> m_inputMuRcvRawChKey;
-  SG::ReadHandleKey<TileMuonReceiverContainer> m_inputMuRcvKey;
-  SG::ReadHandleKey<TileTTL1Container> m_inputMBTS_TTL1Key;
-  SG::ReadHandleKey<TileTTL1Container> m_inputTileTTL1Key;
-  SG::ReadHandleKey<TileL2Container> m_inputL2Key;
-  SG::ReadHandleKey<TileDigitsContainer> m_inputDigitsFltKey;
-  SG::ReadHandleKey<TileDigitsContainer> m_inputDigitsMuRcvKey;
+  SG::ReadHandleKey<TileRawChannelContainer> m_inputRawChKey{this, "InputRawChKey", "TileRawChannelCnt"};
+  SG::ReadHandleKey<TileRawChannelContainer> m_inputMuRcvRawChKey{this, "InputMuRcvRawChKey", "MuRcvRawChCnt"};
+  SG::ReadHandleKey<TileMuonReceiverContainer> m_inputMuRcvKey{this, "InputMuRcvKey", "TileMuRcvCnt"};
+  SG::ReadHandleKey<TileTTL1Container> m_inputMBTS_TTL1Key{this, "InputMBTS_TTL1Key", "TileTTL1MBTS"};
+  SG::ReadHandleKey<TileTTL1Container> m_inputTileTTL1Key{this, "InputTileTTL1Key", "TileTTL1Cnt"};
+  SG::ReadHandleKey<TileL2Container> m_inputL2Key{this, "InputL2Key", "TileL2Cnt"};
+  SG::ReadHandleKey<TileDigitsContainer> m_inputDigitsFltKey{this, "InputDigitsFltKey", "TileDigitsFlt"};
+  SG::ReadHandleKey<TileDigitsContainer> m_inputDigitsMuRcvKey{this, "InputDigitsMuRcvKey", "MuRcvDigitsCnt"};
   BooleanProperty m_presampling{this, "PreSampling", false};
+
+  /**
+    * @brief Name of Tile cabling service
+    */
+  ServiceHandle<TileCablingSvc> m_cablingSvc{ this,
+      "TileCablingSvc", "TileCablingSvc", "The Tile cabling service" };
+
+
   // TileRawChannel
   // AMP, TIME, QUAL REALLY VECTORS - CHECK SIZE/OUTPUT
   std::vector<unsigned long long>* m_adcID;
@@ -54,11 +63,7 @@ private:
   std::vector<float>* m_rawTime;
   std::vector<float>* m_rawQual;
   std::vector<float>* m_rawPed;
-  std::vector<unsigned long long>* m_adcID_mu;
-  std::vector<unsigned long long>* m_pmtID_mu;
-  std::vector<unsigned long long>* m_cellID_mu;
-  std::vector<unsigned long long>* m_ttID_mu;
-  std::vector<unsigned long long>* m_mtID_mu;
+  std::vector<unsigned long long>* m_adcHWID_mu;
   std::vector<int>* m_fragID_mu;
   std::vector<float>* m_rawAmp_mu;
   std::vector<float>* m_rawTime_mu;
@@ -99,7 +104,7 @@ private:
   TH1* m_h_rawTime;
   TH1* m_h_rawQual;
   TH1* m_h_rawPed;
-  TH1* m_h_adcID_mu;
+  TH1* m_h_adcHWID_mu;
   TH1* m_h_rawAmp_mu;
   TH1* m_h_rawTime_mu;
   TH1* m_h_rawQual_mu;

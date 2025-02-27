@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # *** IMPORTANT ***
 # Menu parameter ordering must match that in the L1Topo
@@ -1784,7 +1784,7 @@ class TopoAlgoDef:
               "MinET2" : 0, # eTaus
               "MinET3" : 0, # muons
               "MinET4" : 0, # jXE
-              "AnomalyScoreThresh" : [3875, 3875], #corresponds to Tight and Loose WPs
+              "AnomalyScoreThresh" : [1000000, 1000000], #corresponds to Tight and Loose WPs
         }
         class d:
             pass

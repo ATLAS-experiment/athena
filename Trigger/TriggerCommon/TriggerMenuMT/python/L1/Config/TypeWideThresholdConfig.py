@@ -362,11 +362,12 @@ class L1Config_eTAU:
     rCore_fw_tight = 32
 
     # BDT eTAU score cuts
-    # 12 bits (0 - 4095), BDT > 4 * threshold -> pass
-    # CAREFUL!! THE THRESHOLDS HERE ARE MULTIPLIED BY 4 IN THE eFEX FIRMWARE!
-    BDT_fw_loose = 221
-    BDT_fw_medium = 224
-    BDT_fw_tight = 225
+    # 8 bits (0 - 255)
+    # The actual BDT score is larger (11 bits for 2025), so it's bit-shifted by the remaining bits (3 for 2025) in the eFEX firmware
+    # For 2025: BDT > 2^3 * threshold -> pass
+    BDT_fw_loose = 168
+    BDT_fw_medium = 175
+    BDT_fw_tight = 182
 
     # RHad isolation cuts
     # 8 bits (0 - 255), rHad > threshold -> pass
@@ -404,9 +405,9 @@ class L1Config_eTAU:
                    ("rHad", eFEXfwToFloatConversion(self.rHad_fw_tight, self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_tight), 
                  ]),
         ]
-        confObj["ptMinToTopo"] = 0.6 if do_HI_tob_thresholds else 5 # PLACEHOLDER
+        confObj["ptMinToTopo"] = 0.6 if do_HI_tob_thresholds else 5
         confObj["resolutionMeV"] = 100
-        confObj["minIsoEt"] = 13.0 # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
+        confObj["minIsoEt"] = 12 # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
         confObj["maxEt"] = 50 # Maximum Et for the RCore/BDT/RHad cuts, in units of GeV
         confObj["algoVersion"] = 2 if do_eFex_BDT_Tau else 0 # For BDT based selection, algoVersion 1 corresponds to the 2024 v16 BDT and algoVersion 2 corresponds to the 2025 v17 BDT.
 
@@ -415,15 +416,13 @@ class L1Config_eTAU:
             for ssthr in confObj["workingPoints"][wp]:
                 for ssthr_i in ssthr:
                     if "_fw" in ssthr_i:
-                         if not isinstance(ssthr[ssthr_i], int):
-                              raise RuntimeError("Threshold %s in eTAU configuration is not an integer!", ssthr_i )
-                         elif ssthr[ssthr_i] < 0:
-                            raise RuntimeError("Threshold %s in eTAU configuration is negative!", ssthr_i )
+                         if not isinstance(ssthr[ssthr_i], int) or ssthr[ssthr_i] < 0 or ssthr[ssthr_i] > 255:
+                              raise RuntimeError(f'Threshold {ssthr_i} in eTAU configuration must be an 8-bit integer (between 0 and 255)!')
                          
         # Check that T >= M >= L [ATR-27796]
-        for var in ["rCore_fw","rHad_fw"]:
-            validate_ordering(var,"Loose","Medium",confObj["workingPoints"])
-            validate_ordering(var,"Medium","Tight",confObj["workingPoints"])
+        for var in ["rCore_fw", "rHad_fw"]:
+            validate_ordering(var, "Loose", "Medium", confObj["workingPoints"])
+            validate_ordering(var, "Medium", "Tight", confObj["workingPoints"])
 
         return confObj
 
@@ -474,25 +473,25 @@ class L1Config_cTAU:
     #cTAU12M (Medium12)
     isolation_fw_medium12: int = 400
     isolation_jTAUCoreScale_fw_medium12: int = 0
-    eTAU_rCoreMin_WP_fw_medium12: eTAUWP = eTAUWP.NoSelection
+    eTAU_rCoreMin_WP_fw_medium12: eTAUWP = eTAUWP.Loose
     eTAU_rHadMin_WP_fw_medium12: eTAUWP = eTAUWP.NoSelection
 
     #cTAU20M (Medium20)
-    isolation_fw_medium20: int = 600 + 550
-    isolation_jTAUCoreScale_fw_medium20: int = 550
-    eTAU_rCoreMin_WP_fw_medium20: eTAUWP = eTAUWP.NoSelection
+    isolation_fw_medium20: int = 620 + 520
+    isolation_jTAUCoreScale_fw_medium20: int = 520
+    eTAU_rCoreMin_WP_fw_medium20: eTAUWP = eTAUWP.Loose
     eTAU_rHadMin_WP_fw_medium20: eTAUWP = eTAUWP.NoSelection
 
     #cTAU30M (Medium30)
     isolation_fw_medium30: int = 600 + 550
     isolation_jTAUCoreScale_fw_medium30: int = 550
-    eTAU_rCoreMin_WP_fw_medium30: eTAUWP = eTAUWP.NoSelection
+    eTAU_rCoreMin_WP_fw_medium30: eTAUWP = eTAUWP.Medium
     eTAU_rHadMin_WP_fw_medium30: eTAUWP = eTAUWP.NoSelection
 
     #cTAU35M (Medium35)
-    isolation_fw_medium35: int = 600 + 550
-    isolation_jTAUCoreScale_fw_medium35: int = 550
-    eTAU_rCoreMin_WP_fw_medium35: eTAUWP = eTAUWP.NoSelection
+    isolation_fw_medium35: int = 550 + 500
+    isolation_jTAUCoreScale_fw_medium35: int = 500
+    eTAU_rCoreMin_WP_fw_medium35: eTAUWP = eTAUWP.Medium
     eTAU_rHadMin_WP_fw_medium35: eTAUWP = eTAUWP.NoSelection
 
     def __post_init__(self):

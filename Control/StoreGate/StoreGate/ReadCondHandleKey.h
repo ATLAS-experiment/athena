@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_READCONDHANDLEKEY_H
@@ -22,7 +22,7 @@ namespace SG {
     
     friend class ReadCondHandle<T>;
         
-    ReadCondHandleKey (const std::string& key, const std::string& dbKey="") :
+    explicit ReadCondHandleKey (const std::string& key, const std::string& dbKey="") :
       CondHandleKey<T>(key, dbKey, Gaudi::DataHandle::Reader)
     {}    
 
@@ -49,6 +49,20 @@ namespace SG {
     auto p = owner->declareProperty(std::move(name), *this, std::move(doc));
     p->template setOwnerType<OWNER>();
   }
+
+
+  /**
+   * @brief Change the key of the object to which we're referring.
+   * @param sgkey The StoreGate key for the object.
+   *
+   * The provided key may actually start with the name of the store,
+   * separated by a "+":  "MyStore+Obj".  If no "+" is present,
+   * the store is not changed.
+   */
+    inline ReadCondHandleKey& operator= (const std::string& sgkey) {
+      VarHandleKey::operator= (sgkey);
+      return *this;
+    }
 
 };
 
