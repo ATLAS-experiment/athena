@@ -20,7 +20,7 @@ def ActsTrackAnalysisAlgCfg(flags,
     monitoringGroup.defineHistogram('Ntracks', title='Number of Tracks;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=500, xmin=0, xmax=20000)
     monitoringGroup.defineHistogram('NsharedPerTrack', title='Number of shared hits per track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
-                                    xbins=50, xmin=0, xmax=50)
+                                    xbins=35, xmin=0, xmax=35)
 
     monitoringGroup.defineHistogram('NsharedPerLayer_pixelBarrel', title='Number of shared hits per layer - Pixel Barrel;Layer;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=5, xmin=0, xmax=5)    
@@ -32,13 +32,15 @@ def ActsTrackAnalysisAlgCfg(flags,
                                     xbins=6, xmin=0, xmax=6)
     
     import math
-    monitoringGroup.defineHistogram('theta', title='Track polar angle;#theta;Entries', type='TH1I', path=kwargs['MonGroupName'],
+    monitoringGroup.defineHistogram('theta', title='Track polar angle;#theta;Entries', type='TH1F', path=kwargs['MonGroupName'],
                                     xbins=128, xmin=0, xmax=math.pi)
-    monitoringGroup.defineHistogram('phi', title='Track azimuthal angle;#phi;Entries', type='TH1I', path=kwargs['MonGroupName'],
+    monitoringGroup.defineHistogram('eta', title='Track eta;#eta;Entries', type='TH1F', path=kwargs['MonGroupName'],
+                                    xbins=128, xmin=-4, xmax=4)
+    monitoringGroup.defineHistogram('phi', title='Track azimuthal angle;#phi;Entries', type='TH1F', path=kwargs['MonGroupName'],
                                     xbins=128, xmin=-math.pi, xmax=math.pi)
-    monitoringGroup.defineHistogram('qoverp', title='track inverse momentum;q/p [1/GeV];Entries', type='TH1I', path=kwargs['MonGroupName'],
+    monitoringGroup.defineHistogram('qoverp', title='track inverse momentum;q/p [1/GeV];Entries', type='TH1F', path=kwargs['MonGroupName'],
                                     xbins=200, xmin=-1.2, xmax=1.2)
-    monitoringGroup.defineHistogram('chi2OverNdof', title='fit chi2 / ndof;#chi^{2}/nDoF;Entries', type='TH1I', path=kwargs['MonGroupName'],
+    monitoringGroup.defineHistogram('chi2OverNdof', title='fit chi2 / ndof;#chi^{2}/nDoF;Entries', type='TH1F', path=kwargs['MonGroupName'],
                                     xbins=100, xmin=0, xmax=20)
     monitoringGroup.defineHistogram('nStates', title='Number of states / track;# states;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=60, xmin=0, xmax=60)
@@ -51,6 +53,13 @@ def ActsTrackAnalysisAlgCfg(flags,
     monitoringGroup.defineHistogram('surfaceType', title='type of reference surface;type;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=35, xmin=0, xmax=35)
 
+
+    monitoringGroup.defineHistogram('eta,nMeasurements', title='Track eta;#eta;Entries', type='TH2F', path=kwargs['MonGroupName'],
+                                    xbins=128, xmin=-4, xmax=4,
+                                    ybins=35, ymin=0, ymax=35)
+    monitoringGroup.defineHistogram('eta,NsharedPerTrack', title='Track eta;#eta;Entries', type='TH2F', path=kwargs['MonGroupName'],
+                                    xbins=128, xmin=-4, xmax=4,
+                                    ybins=35, ymin=0, ymax=35)
 
     acc.merge(helper.result())
     return acc
