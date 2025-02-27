@@ -1,16 +1,23 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "TileRDOAnalysis.h"
+#include "AthenaBaseComps/AthCheckMacros.h"
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "Identifier/HWIdentifier.h"
 #include "StoreGate/ReadHandle.h"
 
+#include "TileEvent/TileDigits.h"
+#include "TileEvent/TileMuonReceiverObj.h"
+#include "TileEvent/TileRawChannel.h"
 #include "TileEvent/TileRawChannelCollection.h"
 #include "TileEvent/TileDigitsCollection.h"
 
 #include "TTree.h"
 #include "TString.h"
+#include "TileEvent/TileTTL1.h"
 
 #include <algorithm>
 #include <math.h>
@@ -19,14 +26,6 @@
 
 TileRDOAnalysis::TileRDOAnalysis(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_inputRawChKey("TileRawChannelCnt")
-  , m_inputMuRcvRawChKey("TileRawChannelCnt")
-  , m_inputMuRcvKey("TileMuRcvCnt")
-  , m_inputMBTS_TTL1Key("TileTTL1MBTS")
-  , m_inputTileTTL1Key("TileTTL1Cnt")
-  , m_inputL2Key("TileL2Cnt")
-  , m_inputDigitsFltKey("TileDigitsFlt")
-  , m_inputDigitsMuRcvKey("MuRcvDigitsCnt")
   , m_adcID(0)
   , m_pmtID(0)
   , m_cellID(0)
@@ -37,11 +36,7 @@ TileRDOAnalysis::TileRDOAnalysis(const std::string& name, ISvcLocator* pSvcLocat
   , m_rawTime(0)
   , m_rawQual(0)
   , m_rawPed(0)
-  , m_adcID_mu(0)
-  , m_pmtID_mu(0)
-  , m_cellID_mu(0)
-  , m_ttID_mu(0)
-  , m_mtID_mu(0)
+  , m_adcHWID_mu(0)
   , m_fragID_mu(0)
   , m_rawAmp_mu(0)
   , m_rawTime_mu(0)
@@ -77,7 +72,7 @@ TileRDOAnalysis::TileRDOAnalysis(const std::string& name, ISvcLocator* pSvcLocat
   , m_h_rawTime(0)
   , m_h_rawQual(0)
   , m_h_rawPed(0)
-  , m_h_adcID_mu(0)
+  , m_h_adcHWID_mu(0)
   , m_h_rawAmp_mu(0)
   , m_h_rawTime_mu(0)
   , m_h_rawQual_mu(0)
@@ -110,14 +105,6 @@ TileRDOAnalysis::TileRDOAnalysis(const std::string& name, ISvcLocator* pSvcLocat
   , m_path("/TileRDOAnalysis/")
   , m_thistSvc("THistSvc", name)
 {
-  declareProperty("InputRawChKey", m_inputRawChKey);
-  declareProperty("InputMuRcvRawChKey", m_inputMuRcvRawChKey);
-  declareProperty("InputMuRcvKey", m_inputMuRcvKey);
-  declareProperty("InputMBTS_TTL1Key", m_inputMBTS_TTL1Key);
-  declareProperty("InputTileTTL1Key", m_inputTileTTL1Key);
-  declareProperty("InputL2Key", m_inputL2Key);
-  declareProperty("InputDigitsFltKey", m_inputDigitsFltKey);
-  declareProperty("InputDigitsMuRcvKey", m_inputDigitsMuRcvKey);
   declareProperty("NtupleFileName", m_ntupleFileName);
   declareProperty("NtupleDirectoryName", m_ntupleDirName);
   declareProperty("NtupleTreeName", m_ntupleTreeName);
@@ -139,6 +126,8 @@ StatusCode TileRDOAnalysis::initialize() {
   ATH_CHECK( m_inputDigitsFltKey.initialize() );
   ATH_CHECK( m_inputDigitsMuRcvKey.initialize() );
 
+  ATH_CHECK(m_cablingSvc.retrieve());
+
   // Grab Ntuple and histogramming service for tree
   ATH_CHECK(m_thistSvc.retrieve());
 
@@ -156,11 +145,7 @@ StatusCode TileRDOAnalysis::initialize() {
     m_tree->Branch("rawTime", &m_rawTime);
     m_tree->Branch("rawQual", &m_rawQual);
     m_tree->Branch("rawPed", &m_rawPed);
-    m_tree->Branch("adcID_mu", &m_adcID_mu);
-    m_tree->Branch("pmtID_mu", &m_pmtID_mu);
-    m_tree->Branch("cellID_mu", &m_cellID_mu);
-    m_tree->Branch("ttID_mu", &m_ttID_mu);
-    m_tree->Branch("mtID_mu", &m_mtID_mu);
+    m_tree->Branch("adcHWID_mu", &m_adcHWID_mu);
     m_tree->Branch("fragID_mu", &m_fragID_mu);
     m_tree->Branch("rawAmp_mu", &m_rawAmp_mu);
     m_tree->Branch("rawTime_mu", &m_rawTime_mu);
@@ -216,9 +201,9 @@ StatusCode TileRDOAnalysis::initialize() {
   m_h_rawPed->StatOverflows();
   ATH_CHECK(m_thistSvc->regHist(m_path + m_h_rawPed->GetName(), m_h_rawPed));
 
-  m_h_adcID_mu = new TH1F("h_adcID_mu", "MuRcv adc ID", 100, 0, 9.25e18);
-  m_h_adcID_mu->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_adcID_mu->GetName(), m_h_adcID_mu));
+  m_h_adcHWID_mu = new TH1F("h_adcHWID_mu", "MuRcv adc HW ID", 100, 0, 9.25e18);
+  m_h_adcHWID_mu->StatOverflows();
+  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_adcHWID_mu->GetName(), m_h_adcHWID_mu));
 
   m_h_rawAmp_mu = new TH1F("h_rawAmp_mu", "MuRcv raw amplitude", 100, -1000, 11000);
   m_h_rawAmp_mu->StatOverflows();
@@ -334,11 +319,7 @@ StatusCode TileRDOAnalysis::execute() {
   m_rawTime->clear();
   m_rawQual->clear();
   m_rawPed->clear();
-  m_adcID_mu->clear();
-  m_pmtID_mu->clear();
-  m_cellID_mu->clear();
-  m_ttID_mu->clear();
-  m_mtID_mu->clear();
+  m_adcHWID_mu->clear();
   m_fragID_mu->clear();
   m_rawAmp_mu->clear();
   m_rawTime_mu->clear();
@@ -371,24 +352,24 @@ StatusCode TileRDOAnalysis::execute() {
 
   // Tile Raw Channels
   // Raw info (pulse height, time, quality) for in-time beam crossing in Tile
-  if (!m_presampling)
-    {
-      SG::ReadHandle<TileRawChannelContainer> p_rawCont(m_inputRawChKey);
-      if (p_rawCont.isValid()) {
+  if (!m_presampling) {
+
+      if (!m_inputRawChKey.empty()) {
+        SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_inputRawChKey);
+        ATH_CHECK(rawChannelContainer.isValid());
         // loop over tile raw channels container
-        TileRawChannelContainer::const_iterator rawCont_itr(p_rawCont->begin());
-        const TileRawChannelContainer::const_iterator rawCont_end(p_rawCont->end());
-        for ( ; rawCont_itr != rawCont_end; ++rawCont_itr ) {
-          const TileRawDataCollection<TileRawChannel>* p_rawColl(*rawCont_itr);
-          TileRawDataCollection<TileRawChannel>::const_iterator raw_itr(p_rawColl->begin());
-          const TileRawDataCollection<TileRawChannel>::const_iterator raw_end(p_rawColl->end());
-          for ( ; raw_itr != raw_end; ++raw_itr ) {
-            const Identifier adcID((*raw_itr)->adc_ID());
-            const Identifier pmtID((*raw_itr)->pmt_ID());
-            const Identifier cellID((*raw_itr)->cell_ID());
-            const Identifier ttID((*raw_itr)->tt_ID());
-            const Identifier mtID((*raw_itr)->mt_ID());
-            const int fragID((*raw_itr)->frag_ID());
+
+        for (const TileRawChannelCollection* rawChannelCollection : *rawChannelContainer) {
+          for (const TileRawChannel* rawChannel : *rawChannelCollection) {
+
+            const Identifier adcID(rawChannel->adc_ID());
+            if (!adcID.is_valid()) continue;
+
+            const Identifier pmtID(rawChannel->pmt_ID());
+            const Identifier cellID(rawChannel->cell_ID());
+            const Identifier ttID(rawChannel->tt_ID());
+            const Identifier mtID(rawChannel->mt_ID());
+            const int fragID(rawChannel->frag_ID());
 
             const unsigned long long adcID_int = adcID.get_compact();
             const unsigned long long pmtID_int = pmtID.get_compact();
@@ -405,112 +386,93 @@ StatusCode TileRDOAnalysis::execute() {
 
             m_h_adcID->Fill(adcID_int);
 
-            for (int ix = 0; ix != (*raw_itr)->size(); ++ix) {
-              m_rawAmp->push_back((*raw_itr)->amplitude(ix)); // [ADC counts]
-              m_h_rawAmp->Fill((*raw_itr)->amplitude(ix));
-              m_rawQual->push_back((*raw_itr)->quality(ix)); // sampling distr.
-              m_h_rawQual->Fill((*raw_itr)->quality(ix));
+            for (int ix = 0; ix != rawChannel->size(); ++ix) {
+              m_rawAmp->push_back(rawChannel->amplitude(ix)); // [ADC counts]
+              m_h_rawAmp->Fill(rawChannel->amplitude(ix));
             }
-            for (int jx = 0; jx != (*raw_itr)->sizeTime(); ++jx) {
-              m_rawTime->push_back((*raw_itr)->time(jx)); // rel to triggering bunch
-              m_h_rawTime->Fill((*raw_itr)->time(jx));
+            for (int jx = 0; jx != rawChannel->sizeTime(); ++jx) {
+              m_rawTime->push_back(rawChannel->time(jx)); // rel to triggering bunch
+              m_h_rawTime->Fill(rawChannel->time(jx));
             }
-            // // cannot find member 'sizeQuality()' --- using old header?
-            // for (int kx = 0; kx != (*raw_itr)->sizeQuality(); ++kx) {
-            //   m_rawQual->push_back((*raw_itr)->quality(kx)); // sampling distr.
-            //   m_h_rawQual->Fill((*raw_itr)->quality(kx));
-            // }
-            m_rawPed->push_back((*raw_itr)->pedestal()); // reconstructed
-            m_h_rawPed->Fill((*raw_itr)->pedestal());
+            for (int kx = 0; kx != rawChannel->sizeQuality(); ++kx) {
+              m_rawQual->push_back(rawChannel->quality(kx)); // sampling distr.
+              m_h_rawQual->Fill(rawChannel->quality(kx));
+            }
+            m_rawPed->push_back(rawChannel->pedestal()); // reconstructed
+            m_h_rawPed->Fill(rawChannel->pedestal());
           }
         }
       }
 
       // Muon Receiver Raw Channels
-      SG::ReadHandle<TileRawChannelContainer> p_mu_rawCont(m_inputMuRcvRawChKey);
-      if (p_mu_rawCont.isValid()) {
+
+      if (!m_inputMuRcvRawChKey.empty()) {
+        SG::ReadHandle<TileRawChannelContainer> muRawChannelContainer(m_inputMuRcvRawChKey);
+        ATH_CHECK(muRawChannelContainer.isValid());
         // loop over muon receiver raw channels container
-        TileRawChannelContainer::const_iterator muRawCont_itr(p_mu_rawCont->begin());
-        const TileRawChannelContainer::const_iterator muRawCont_end(p_mu_rawCont->end());
-        for ( ; muRawCont_itr != muRawCont_end; ++muRawCont_itr ) {
-          const TileRawDataCollection<TileRawChannel>* p_mu_rawColl(*muRawCont_itr);
-          TileRawDataCollection<TileRawChannel>::const_iterator muRaw_itr(p_mu_rawColl->begin());
-          const TileRawDataCollection<TileRawChannel>::const_iterator muRaw_end(p_mu_rawColl->end());
-          for ( ; muRaw_itr != muRaw_end; ++muRaw_itr ) {
-            const Identifier adcID_mu((*muRaw_itr)->adc_ID());
-            const Identifier pmtID_mu((*muRaw_itr)->pmt_ID());
-            const Identifier cellID_mu((*muRaw_itr)->cell_ID());
-            const Identifier ttID_mu((*muRaw_itr)->tt_ID());
-            const Identifier mtID_mu((*muRaw_itr)->mt_ID());
-            const int fragID_mu((*muRaw_itr)->frag_ID());
+        for (const TileRawChannelCollection* muRawChannelCollection : *muRawChannelContainer) {
+          for (const TileRawChannel* muRawChannel : *muRawChannelCollection) {
 
-            const unsigned long long adcID_mu_int = adcID_mu.get_compact();
-            const unsigned long long pmtID_mu_int = pmtID_mu.get_compact();
-            const unsigned long long cellID_mu_int = cellID_mu.get_compact();
-            const unsigned long long ttID_mu_int = ttID_mu.get_compact();
-            const unsigned long long mtID_mu_int = mtID_mu.get_compact();
+            const HWIdentifier adcHWID_mu(muRawChannel->adc_HWID());
 
-            m_adcID_mu->push_back(adcID_mu_int);
-            m_pmtID_mu->push_back(pmtID_mu_int);
-            m_cellID_mu->push_back(cellID_mu_int);
-            m_ttID_mu->push_back(ttID_mu_int);
-            m_mtID_mu->push_back(mtID_mu_int);
+            const unsigned long long adcHWID_mu_int = adcHWID_mu.get_compact();
+
+            m_h_adcHWID_mu->Fill(adcHWID_mu_int);
+            m_adcHWID_mu->push_back(adcHWID_mu_int);
+
+            const int fragID_mu(muRawChannel->frag_ID());
             m_fragID_mu->push_back(fragID_mu);
 
-            m_h_adcID_mu->Fill(adcID_mu_int);
-
-            for (int lx = 0; lx != (*muRaw_itr)->size(); ++lx){
-              m_rawAmp_mu->push_back((*muRaw_itr)->amplitude(lx));
-              m_h_rawAmp_mu->Fill((*muRaw_itr)->amplitude(lx));
-              m_rawQual_mu->push_back((*muRaw_itr)->quality(lx));
-              m_h_rawQual_mu->Fill((*muRaw_itr)->quality(lx));
+            for (int lx = 0; lx != muRawChannel->size(); ++lx){
+              m_rawAmp_mu->push_back(muRawChannel->amplitude(lx));
+              m_h_rawAmp_mu->Fill(muRawChannel->amplitude(lx));
             }
-            for (int mx = 0; mx != (*muRaw_itr)->sizeTime(); ++mx) {
-              m_rawTime_mu->push_back((*muRaw_itr)->time(mx));
-              m_h_rawTime_mu->Fill((*muRaw_itr)->time(mx));
+            for (int mx = 0; mx != muRawChannel->sizeTime(); ++mx) {
+              m_rawTime_mu->push_back(muRawChannel->time(mx));
+              m_h_rawTime_mu->Fill(muRawChannel->time(mx));
             }
-            // // cannot find member 'sizeQuality()' --- using old header?
-            // for (int nx = 0; nx != (*muRaw_itr)->sizeQuality(); ++nx) {
-            //   m_rawQual_mu->push_back((*muRaw_itr)->quality(nx));
-            //   m_h_rawQual_mu->Fill((*muRaw_itr)->quality(nx));
-            // }
-            m_rawPed_mu->push_back((*muRaw_itr)->pedestal());
-            m_h_rawPed_mu->Fill((*muRaw_itr)->pedestal());
+            for (int nx = 0; nx != muRawChannel->sizeQuality(); ++nx) {
+              m_rawQual_mu->push_back(muRawChannel->quality(nx));
+              m_h_rawQual_mu->Fill(muRawChannel->quality(nx));
+            }
+            m_rawPed_mu->push_back(muRawChannel->pedestal());
+            m_h_rawPed_mu->Fill(muRawChannel->pedestal());
           }
         }
       }
 
 
       // Tile Container - TileMuonReceiverContainer
-      SG::ReadHandle<TileMuonReceiverContainer> p_muRcv_cont(m_inputMuRcvKey);
-      if (p_muRcv_cont.isValid()) {
+
+      if (!m_inputMuRcvKey.empty()) {
+        SG::ReadHandle<TileMuonReceiverContainer> muRcvContainer(m_inputMuRcvKey);
+        ATH_CHECK(muRcvContainer.isValid());
         // loop over muon receiver container
-        TileMuonReceiverContainer::const_iterator muRcv_itr(p_muRcv_cont->begin());
-        const TileMuonReceiverContainer::const_iterator muRcv_end(p_muRcv_cont->end());
-        for ( ; muRcv_itr != muRcv_end; ++muRcv_itr ) {
-          const int muRcvID((*muRcv_itr)->GetID());
-          const std::vector<bool>& dec_vec = (*muRcv_itr)->GetDecision();
-          const std::vector<float>& thresh_vec = (*muRcv_itr)->GetThresholds();
-          const std::vector<float>& ene_vec = (*muRcv_itr)->GetEne();
-          const std::vector<float>& time_vec = (*muRcv_itr)->GetTime();
+
+        for (const TileMuonReceiverObj* muRcv : *muRcvContainer) {
+          const int muRcvID(muRcv->GetID());
+          const std::vector<bool>& dec_vec = muRcv->GetDecision();
+          const std::vector<float>& thresh_vec = muRcv->GetThresholds();
+          const std::vector<float>& ene_vec = muRcv->GetEne();
+          const std::vector<float>& time_vec = muRcv->GetTime();
 
           m_muRcvID->push_back(muRcvID);
 
-          for (std::vector<bool>::size_type i = 0; i != dec_vec.size(); ++i) {
-            m_muRcv_dec->push_back(dec_vec.at(i));
-            m_h_muRcv_dec->Fill(dec_vec.at(i));
+          for (bool dec : dec_vec) {
+            m_muRcv_dec->push_back(dec);
+            m_h_muRcv_dec->Fill(dec);
           }
-          for (std::vector<float>::size_type j = 0; j != thresh_vec.size(); ++j) {
-            m_muRcv_thresh->push_back(thresh_vec.at(j));
-            m_h_muRcv_thresh->Fill(thresh_vec.at(j));
+          for (float thresh : thresh_vec) {
+            m_muRcv_thresh->push_back(thresh);
+            m_h_muRcv_thresh->Fill(thresh);
           }
-          for (std::vector<float>::size_type k = 0; k != ene_vec.size(); ++k) {
-            m_muRcv_energy->push_back(ene_vec.at(k));
-            m_h_muRcv_energy->Fill(ene_vec.at(k));
+          for (float ene : ene_vec) {
+            m_muRcv_energy->push_back(ene);
+            m_h_muRcv_energy->Fill(ene);
           }
-          for (std::vector<float>::size_type l = 0; l != time_vec.size(); ++l) {
-            m_muRcv_time->push_back(time_vec.at(l));
-            m_h_muRcv_time->Fill(time_vec.at(l));
+          for (float time : time_vec) {
+            m_muRcv_time->push_back(time);
+            m_h_muRcv_time->Fill(time);
           }
 
           m_h_muRcvID->Fill(muRcvID);
@@ -520,42 +482,43 @@ StatusCode TileRDOAnalysis::execute() {
 
       // Tile Container - TileTTL1Container
       // Raw Tile L1 Trigger Towers
-      SG::ReadHandle<TileTTL1Container> p_ttl1MBTS_cont(m_inputMBTS_TTL1Key);
-      if (p_ttl1MBTS_cont.isValid()) {
+
+      if (!m_inputMBTS_TTL1Key.empty()) {
+        SG::ReadHandle<TileTTL1Container> ttl1MBTSContainer(m_inputMBTS_TTL1Key);
+        ATH_CHECK(ttl1MBTSContainer.isValid());
         // loop over TTL1 MBTS container
-        TileTTL1Container::const_iterator ttl1MBTS_itr(p_ttl1MBTS_cont->begin());
-        const TileTTL1Container::const_iterator ttl1MBTS_end(p_ttl1MBTS_cont->end());
-        for ( ; ttl1MBTS_itr != ttl1MBTS_end; ++ttl1MBTS_itr ) {
-          const Identifier ttl1MBTS_ID((*ttl1MBTS_itr)->identify());
-          const std::vector<double> ttl1MBTS_digits((*ttl1MBTS_itr)->samples());
+
+        for (const TileTTL1* ttl1MBTS : *ttl1MBTSContainer) {
+          const Identifier ttl1MBTS_ID(ttl1MBTS->identify());
+          const std::vector<double> ttl1MBTS_digits(ttl1MBTS->samples());
 
           const unsigned long long ttl1MBTS_ID_int = ttl1MBTS_ID.get_compact();
           m_ttl1MBTS_ID->push_back(ttl1MBTS_ID_int); // identifier
           m_ttl1MBTS_digits->push_back(ttl1MBTS_digits); // hardware sum of Tile channels; read out in N time slices
 
-          for (std::vector<double>::size_type iy = 0; iy != ttl1MBTS_digits.size(); ++iy) {
-
-            m_h_ttl1MBTS_digits->Fill(ttl1MBTS_digits.at(iy));
+          for (double sample : ttl1MBTS_digits) {
+            m_h_ttl1MBTS_digits->Fill(sample);
           }
 
           m_h_ttl1MBTS_ID->Fill(ttl1MBTS_ID_int);
         }
       }
-      SG::ReadHandle<TileTTL1Container> p_ttl1Cont(m_inputTileTTL1Key);
-      if (p_ttl1Cont.isValid()) {
+
+      if (!m_inputTileTTL1Key.empty()) {
+        SG::ReadHandle<TileTTL1Container> ttl1Container(m_inputTileTTL1Key);
+        ATH_CHECK(ttl1Container.isValid());
         // loop over TTL1 container
-        TileTTL1Container::const_iterator ttl1_itr(p_ttl1Cont->begin());
-        const TileTTL1Container::const_iterator ttl1_end(p_ttl1Cont->end());
-        for ( ; ttl1_itr != ttl1_end; ++ttl1_itr ) {
-          const Identifier ttl1ID((*ttl1_itr)->identify());
-          const std::vector<double> ttl1_digits((*ttl1_itr)->samples());
+        for (const TileTTL1* tile_TTL1 : *ttl1Container) {
+
+          const Identifier ttl1ID(tile_TTL1->identify());
+          const std::vector<double> ttl1_digits(tile_TTL1->samples());
 
           const unsigned long long ttl1ID_int = ttl1ID.get_compact();
           m_ttl1_ID->push_back(ttl1ID_int);
           m_ttl1_digits->push_back(ttl1_digits);
 
-          for (std::vector<double>::size_type jy = 0; jy != ttl1_digits.size(); ++jy) {
-            m_h_ttl1_digits->Fill(ttl1_digits.at(jy));
+          for (double sample : ttl1_digits) {
+            m_h_ttl1_digits->Fill(sample);
           }
 
           m_h_ttl1_ID->Fill(ttl1ID_int);
@@ -573,26 +536,26 @@ StatusCode TileRDOAnalysis::execute() {
       std::vector<unsigned int> qual_vec;
       std::vector<float> sumE_vec;
 
-      SG::ReadHandle<TileL2Container> p_L2Cont(m_inputL2Key);
-      if (p_L2Cont.isValid()) {
+
+      if (!m_inputL2Key.empty()) {
+        SG::ReadHandle<TileL2Container> l2Container(m_inputL2Key);
+        ATH_CHECK(l2Container.isValid());
         // loop over L2 container
-        TileL2Container::const_iterator L2_itr(p_L2Cont->begin());
-        const TileL2Container::const_iterator L2_end(p_L2Cont->end());
-        for ( ; L2_itr != L2_end; ++L2_itr ) {
+        for (const TileL2* tile_L2 : *l2Container) {
           // drawer ID
-          const int L2ID((*L2_itr)->identify());
+          const int L2ID(tile_L2->identify());
           // packed muon info (32-bit words)
-          for (unsigned int ii = 0; ii != (*L2_itr)->Ndata(); ii++) {
-            val_vec.push_back((*L2_itr)->val(ii));
+          for (unsigned int ii = 0; ii != tile_L2->Ndata(); ii++) {
+            val_vec.push_back(tile_L2->val(ii));
             m_h_L2val->Fill(val_vec.at(ii));
           }
           // muon info - energy deposited in TileCal layers, eta, quality flag
-          for (unsigned int jj = 0; jj != (*L2_itr)->NMuons(); jj++) {
-            eta_vec.push_back((*L2_itr)->eta(jj));
-            enemu0_vec.push_back((*L2_itr)->enemu0(jj));
-            enemu1_vec.push_back((*L2_itr)->enemu1(jj));
-            enemu2_vec.push_back((*L2_itr)->enemu2(jj));
-            qual_vec.push_back((*L2_itr)->qual(jj));
+          for (unsigned int jj = 0; jj != tile_L2->NMuons(); jj++) {
+            eta_vec.push_back(tile_L2->eta(jj));
+            enemu0_vec.push_back(tile_L2->enemu0(jj));
+            enemu1_vec.push_back(tile_L2->enemu1(jj));
+            enemu2_vec.push_back(tile_L2->enemu2(jj));
+            qual_vec.push_back(tile_L2->qual(jj));
 
             m_h_L2eta->Fill(eta_vec.at(jj));
             m_h_L2energyA->Fill(enemu0_vec.at(jj));
@@ -601,10 +564,10 @@ StatusCode TileRDOAnalysis::execute() {
             m_h_L2qual->Fill(qual_vec.at(jj));
           }
           // drawer phi
-          const float l2phi((*L2_itr)->phi(0));
+          const float l2phi(tile_L2->phi(0));
           // vector sumE = [sumEt, sumEz, sumE] per TileCal superdrawer
-          for (unsigned int kk = 0; kk != (*L2_itr)->NsumE(); kk++) {
-            sumE_vec.push_back((*L2_itr)->sumE(kk));
+          for (unsigned int kk = 0; kk != tile_L2->NsumE(); kk++) {
+            sumE_vec.push_back(tile_L2->sumE(kk));
             m_h_L2sumE->Fill(sumE_vec.at(kk));
           }
 
@@ -633,54 +596,48 @@ StatusCode TileRDOAnalysis::execute() {
     }
 
   // TileDigitsContainer - TileDigitsFlt
-  SG::ReadHandle<TileDigitsContainer> p_digiCont(m_inputDigitsFltKey);
-  if (p_digiCont.isValid()) {
+
+  if (!m_inputDigitsFltKey.empty()) {
+    SG::ReadHandle<TileDigitsContainer> digitsContainer(m_inputDigitsFltKey);
+    ATH_CHECK(digitsContainer.isValid());
     // loop over tile digits container
-    TileDigitsContainer::const_iterator digiCont_itr(p_digiCont->begin());
-    const TileDigitsContainer::const_iterator digiCont_end(p_digiCont->end());
-    for ( ; digiCont_itr != digiCont_end; ++digiCont_itr ) {
-      uint32_t fragSize((*digiCont_itr)->getFragSize());
-      uint32_t fragBCID((*digiCont_itr)->getFragBCID());
+    for (const TileDigitsCollection* digitsCollection : *digitsContainer) {
+
+      uint32_t fragSize(digitsCollection->getFragSize());
+      uint32_t fragBCID(digitsCollection->getFragBCID());
 
       m_fragSize->push_back(fragSize);
       m_fragBCID->push_back(fragBCID);
 
-      const TileRawDataCollection<TileDigits>* p_digiColl(*digiCont_itr);
-      TileRawDataCollection<TileDigits>::const_iterator digi_itr(p_digiColl->begin());
-      const TileRawDataCollection<TileDigits>::const_iterator digi_end(p_digiColl->end());
-      for ( ; digi_itr != digi_end; ++digi_itr ) {
-        const std::vector<double> digits((*digi_itr)->get_digits());
+      for (const TileDigits* tileDigits : *digitsCollection) {
+        const std::vector<double> digits(tileDigits->get_digits());
         m_digits->push_back(digits);
 
-        for (std::vector<double>::size_type iz = 0; iz != digits.size(); ++iz) {
-          m_h_digits->Fill(digits.at(iz));
+        for (const double sample : digits) {
+          m_h_digits->Fill(sample);
         }
       }
     }
   }
 
   // TileDigitsContainer - MuRcvDigitsCnt
-  SG::ReadHandle<TileDigitsContainer> p_mu_digiCont(m_inputDigitsMuRcvKey);
-  if (p_mu_digiCont.isValid()) {
+
+  if (!m_inputDigitsMuRcvKey.empty()) {
+    SG::ReadHandle<TileDigitsContainer> muRcvDigitsContainer(m_inputDigitsMuRcvKey);
+    ATH_CHECK(muRcvDigitsContainer.isValid());
     // loop over tile digits container
-    TileDigitsContainer::const_iterator muDigiCont_itr(p_mu_digiCont->begin());
-    const TileDigitsContainer::const_iterator muDigiCont_end(p_mu_digiCont->end());
-    for ( ; muDigiCont_itr != muDigiCont_end; ++muDigiCont_itr ) {
-      const uint32_t muFragSize((*muDigiCont_itr)->getFragSize());
-      const uint32_t muFragBCID((*muDigiCont_itr)->getFragBCID());
+    for (const TileDigitsCollection* muRcvDigitsCollection : *muRcvDigitsContainer) {
+      const uint32_t muFragSize(muRcvDigitsCollection->getFragSize());
+      const uint32_t muFragBCID(muRcvDigitsCollection->getFragBCID());
 
       m_muFragSize->push_back(muFragSize);
       m_muFragBCID->push_back(muFragBCID);
 
-      const TileRawDataCollection<TileDigits>* p_mu_digiColl(*muDigiCont_itr);
-      DataVector<TileDigits>::const_iterator muDigi_itr(p_mu_digiColl->begin());
-      const DataVector<TileDigits>::const_iterator muDigi_end(p_mu_digiColl->end());
-      for ( ; muDigi_itr != muDigi_end; ++muDigi_itr ) {
-        const std::vector<double> muDigits((*muDigi_itr)->get_digits());
+      for (const TileDigits* muRcvDigits : *muRcvDigitsCollection) {
+        const std::vector<double> muDigits(muRcvDigits->get_digits());
         m_muDigits->push_back(muDigits);
-
-        for (std::vector<double>::size_type jz = 0; jz != muDigits.size(); ++jz) {
-          m_h_muDigits->Fill(muDigits.at(jz));
+        for (const double sample : muDigits) {
+          m_h_muDigits->Fill(sample);
         }
       }
     }

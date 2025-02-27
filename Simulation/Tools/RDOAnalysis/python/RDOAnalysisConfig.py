@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -231,7 +231,10 @@ def RDOAnalysisCfg(flags):
 
     if flags.Detector.EnableLAr:
         acc.merge(LArRDOAnalysisCfg(flags))
-    
+
+    if flags.Detector.EnableTile:
+        acc.merge(TileRDOAnalysisCfg(flags))
+
     if flags.Detector.EnableMDT:
         acc.merge(MDT_RDOAnalysisCfg(flags))
 
@@ -304,13 +307,16 @@ def TileRDOAnalysisCfg(flags, name="TileRDOAnalysis", **kwargs):
         kwargs.setdefault("InputTileTTL1Key", '') # Not in presampled RDO files
         kwargs.setdefault("InputL2Key", '') # Not in presampled RDO files
     kwargs.setdefault("InputRawChKey", 'TileRawChannelCnt')
-    kwargs.setdefault("InputMuRcvRawChKey", 'TileRawChannelCnt')
+    kwargs.setdefault("InputMuRcvRawChKey", 'MuRcvRawChCnt')
     kwargs.setdefault("InputMuRcvKey", 'TileMuRcvCnt')
     kwargs.setdefault("InputMBTS_TTL1Key", 'TileTTL1MBTS')
     kwargs.setdefault("InputTileTTL1Key", 'TileTTL1Cnt')
     kwargs.setdefault("InputL2Key", 'TileL2Cnt')
     kwargs.setdefault("InputDigitsMuRcvKey", f'{prefix}MuRcvDigitsCnt')
-    kwargs.setdefault("InputDigitsFltKey", f"{prefix}TileDigitsCnt")
+    if f"{prefix}TileDigitsCnt" in flags.Input.Collections:
+        kwargs.setdefault("InputDigitsFltKey", f"{prefix}TileDigitsCnt")
+    else:
+        kwargs.setdefault("InputDigitsFltKey", "TileDigitsFlt")
 
     result.addEventAlgo(CompFactory.TileRDOAnalysis(name, **kwargs))
 
