@@ -56,3 +56,27 @@ def ITkActsTrackParticleCreationCfg(flags,
     acc.merge(addToAOD(flags, toAOD))
     
     return acc
+
+
+def ITkActsTrackParticlePersistificationCfg(flags) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    # Particle creation and persistification
+    # Tracks from CKF and SiSPSeededTracks{extension}TrackParticles
+    if flags.Tracking.ActiveConfig.storeSiSPSeededTracks:
+        # Naming convention for track particles: SiSPSeededTracks{extension}TrackParticles
+        acc.merge(ITkActsTrackParticleCreationCfg(flags,
+                                                  TrackContainers = [f"{flags.Tracking.ActiveConfig.extension}Tracks"],
+                                                  TrackParticleContainer = f'SiSPSeededTracks{flags.Tracking.ActiveConfig.extension}TrackParticles'))
+
+    # Track from CKF or ambiguity resolution if we want separate containers
+    # In case no ambiguity resolution is scheduled, the CKF tracks will be used instead of those from the ambiguity resolution
+    if flags.Tracking.ActiveConfig.storeSeparateContainer:
+        # If we do not want the track collection to be merged with another collection
+        # then we immediately create the track particles from it
+        # Naming convention for track particles: InDet{extension}TrackParticles
+        acts_tracks = f"{flags.Tracking.ActiveConfig.extension}Tracks" if not flags.Acts.doAmbiguityResolution else f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks"
+        acc.merge(ITkActsTrackParticleCreationCfg(flags,
+                                                  TrackContainers = [acts_tracks],
+                                                  TrackParticleContainer = f'InDet{flags.Tracking.ActiveConfig.extension}TrackParticles'))
+
+    return acc
