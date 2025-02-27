@@ -24,6 +24,10 @@ def InDetPriVxFinderCfg(flags,
     kwargs.setdefault("doVertexSorting", True)
 
     if flags.Tracking.perigeeExpression == "Vertex":
+        associationMapName = "PRDtoTrackMapMerge_CombinedInDetTracks"
+        if flags.Detector.GeometryITk:
+            associationMapName = "PRDtoTrackMapMerge_CombinedITkTracks"
+        
         from xAODTrackingCnv.xAODTrackingCnvConfig import (
             BeamLineTrackParticleCnvAlgCfg)
         from InDetConfig.TrackRecoConfig import (
@@ -32,7 +36,7 @@ def InDetPriVxFinderCfg(flags,
             flags,
             ClusterSplitProbabilityName = \
             ClusterSplitProbabilityContainerName(flags),
-            AssociationMapName = "PRDtoTrackMapMerge_CombinedInDetTracks",
+            AssociationMapName = associationMapName,
             xAODTrackParticlesFromTracksContainerName = \
             "InDetTrackParticlesTemporary"))
         kwargs["TracksName"]="InDetTrackParticlesTemporary"
@@ -91,6 +95,10 @@ def primaryVertexFindingCfg(flags,
                               **kwargs)
 
     if flags.Tracking.perigeeExpression == "Vertex":
+        associationMapName = "PRDtoTrackMapMerge_CombinedInDetTracks"
+        if flags.Detector.GeometryITk:
+            associationMapName = "PRDtoTrackMapMerge_CombinedITkTracks"
+            
         from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgCfg
         from InDetConfig.TrackRecoConfig import (
             ClusterSplitProbabilityContainerName)
@@ -98,7 +106,7 @@ def primaryVertexFindingCfg(flags,
             flags,
             ClusterSplitProbabilityName=ClusterSplitProbabilityContainerName(
                 flags),
-            AssociationMapName="PRDtoTrackMapMerge_CombinedInDetTracks"))
+            AssociationMapName=associationMapName))
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
 

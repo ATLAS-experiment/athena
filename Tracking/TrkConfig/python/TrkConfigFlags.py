@@ -136,7 +136,10 @@ def createTrackingConfigFlags():
     # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
     icf.addFlag("Tracking.perigeeExpression", lambda prevFlags:
                 "Vertex" if (prevFlags.Tracking.PrimaryPassConfig in [
-                             PrimaryPassConfig.HeavyIon, PrimaryPassConfig.VtxLumiHeavyIon])
+                             PrimaryPassConfig.HeavyIon, PrimaryPassConfig.VtxLumiHeavyIon] or
+                             prevFlags.Tracking.ITkPrimaryPassConfig in [
+                                 ITkPrimaryPassConfig.HeavyIon]
+                )
                 else "BeamLine")
 
     # to make eta overlap space points in endcap (aligned with search eta neighbour in strip endcaps)

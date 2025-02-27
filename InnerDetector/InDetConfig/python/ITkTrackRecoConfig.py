@@ -382,23 +382,24 @@ def ITkTrackFinalCfg(flags,
     splitProbName = ITkClusterSplitProbabilityContainerName(flags)
 
     # This creates track particles
-    from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
-    result.merge(ITkTrackParticleCnvAlgCfg(
-        flags,
-        ClusterSplitProbabilityName=(
-            "" if skipClusterMerge else
-            splitProbName),
-        AssociationMapName=(
-            "" if skipClusterMerge else
-            f"PRDtoTrackMapMerge_{TrackContainer}"),
-        isActsAmbi = 'ActsValidateResolvedTracks' in splitProbName or \
-        'ActsValidateAmbiguityResolution' in splitProbName or \
-        'ActsValidateScoreBasedAmbiguityResolution' in splitProbName or \
-        'ActsConversion' in splitProbName or \
-        'ActsLargeRadius' in splitProbName or \
-        'ActsLowPt' in splitProbName or \
-        ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
-
+    if flags.Tracking.perigeeExpression == "BeamLine":
+        from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
+        result.merge(ITkTrackParticleCnvAlgCfg(
+            flags,
+            ClusterSplitProbabilityName=(
+                "" if skipClusterMerge else
+                splitProbName),
+            AssociationMapName=(
+                "" if skipClusterMerge else
+                f"PRDtoTrackMapMerge_{TrackContainer}"),
+            isActsAmbi = 'ActsValidateResolvedTracks' in splitProbName or \
+            'ActsValidateAmbiguityResolution' in splitProbName or \
+            'ActsValidateScoreBasedAmbiguityResolution' in splitProbName or \
+            'ActsConversion' in splitProbName or \
+            'ActsLargeRadius' in splitProbName or \
+            'ActsLowPt' in splitProbName or \
+            ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
+        
     return result
 
 

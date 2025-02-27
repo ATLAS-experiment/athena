@@ -295,7 +295,9 @@ def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
     kwargs.setdefault("ConvertTrackParticles", False)
     kwargs.setdefault("TrackContainerName", "CombinedITkTracks")
     kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "InDetTrackParticles")
-
+    if flags.Tracking.perigeeExpression == "Vertex":
+        kwargs.setdefault('PrimaryVerticesName', 'PrimaryVertices')
+    
     if "TrackParticleCreator" not in kwargs:
         from TrkConfig.TrkParticleCreatorConfig import ITkTrackParticleCreatorToolCfg
         kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(
