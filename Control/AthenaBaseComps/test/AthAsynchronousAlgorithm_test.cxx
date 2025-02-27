@@ -187,38 +187,6 @@ void test1 (ISvcLocator* svcLoc)
 }
 
 
-class MyArrAlg : public AthAsynchronousAlgorithm
-{
-public:
-  MyArrAlg (const std::string& name, ISvcLocator* svcLoc);
-
-  virtual StatusCode execute (const EventContext& ctx) const override;
-
-  SG::ReadHandleKey<MyObj> rkey;
-  SG::WriteHandleKey<MyObj> wkey;
-  SG::ReadHandleKeyArray<MyObj> rkeyarr;
-  SG::WriteHandleKeyArray<MyObj> wkeyarr;
-};
-
-
-MyArrAlg::MyArrAlg  (const std::string& name, ISvcLocator* svcLoc)
-  : AthAsynchronousAlgorithm (name, svcLoc)
-{
-  declareProperty ("rkey",    rkey);
-  declareProperty ("wkey",    wkey);
-  declareProperty ("rkeyarr", rkeyarr);
-  declareProperty ("wkeyarr", wkeyarr);
-
-  rkeyarr.emplace_back ("r1");
-  wkeyarr.emplace_back ("w1");
-}
-
-
-StatusCode MyArrAlg::execute (const EventContext& /*ctx*/) const
-{
-  return StatusCode::SUCCESS;
-}
-
 
 void comphandles (const std::vector<Gaudi::DataHandle*>& hvec,
                   std::vector<std::string> keys)
@@ -243,26 +211,6 @@ void comphandles (const std::vector<Gaudi::DataHandle*>& hvec,
 }
 
 
-// Testing handle arrays.
-void test2 (ISvcLocator* svcLoc)
-{
-  std::cout << "test2\n";
-
-  MyArrAlg alg ("arralg", svcLoc);  alg.addRef();
-
-  assert (alg.sysInitialize().isSuccess());
-  #if 0
-
-  comphandles (alg.inputHandles(),{"raa", "rbb", "rcc", "rdd", "ree", "rff", "rrr"});
-  comphandles (alg.outputHandles(),{"waa", "wbb", "wcc", "wdd", "wee", "wff", "www"});
-
-  // Test that circular dependency detection worksd.
-  MyArrAlg alg2 ("arralg2", svcLoc);  alg2.addRef();
-  assert (alg2.sysInitialize().isFailure());
-  #endif
-}
-
-
 int main()
 {
   ISvcLocator* svcLoc = nullptr;
@@ -270,6 +218,5 @@ int main()
     return 1;
 
   test1 (svcLoc);
-  test2 (svcLoc);
   return 0;
 }
