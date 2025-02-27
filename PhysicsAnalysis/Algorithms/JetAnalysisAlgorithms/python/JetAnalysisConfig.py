@@ -25,6 +25,8 @@ class PreJetAnalysisConfig (ConfigBlock) :
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
             "the correct config blocks to call for small- or large-R jets.")
+        self.addOption('outputTruthLabelIDs', False, type=bool,
+            info='Enable or disable HadronConeExclTruthLabelID and PartonTruthLabelID decorations')
         # TODO: add info string
         self.addOption ('runOriginalObjectLink', False, type=bool,
             info="")
@@ -92,6 +94,10 @@ class PreJetAnalysisConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True, enabled=False)
+
+        if self.outputTruthLabelIDs:
+            config.addOutputVar (self.containerName, 'HadronConeExclTruthLabelID', 'HadronConeExclTruthLabelID', noSys=True)
+            config.addOutputVar (self.containerName, 'PartonTruthLabelID', 'PartonTruthLabelID', noSys=True)
 
 
 

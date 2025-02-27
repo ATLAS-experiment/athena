@@ -10,6 +10,8 @@ class ParticleLevelJetsBlock(ConfigBlock):
         super(ParticleLevelJetsBlock, self).__init__()
         self.addOption('containerName', 'AntiKt4TruthDressedWZJets', type=str,
                        info='the name of the input truth jets container')
+        self.addOption('outputTruthLabelIDs', False, type=bool,
+                       info='Enable or disable HadronConeExclTruthLabelID and PartonTruthLabelID decorations')
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
@@ -35,6 +37,13 @@ class ParticleLevelJetsBlock(ConfigBlock):
             ['GhostBHadronsFinalCount', 'nGhosts_bHadron'],
             ['GhostCHadronsFinalCount', 'nGhosts_cHadron'],
         ]
+        
+        if self.outputTruthLabelIDs:
+            outputVars += [
+                ['HadronConeExclTruthLabelID', 'HadronConeExclTruthLabelID'],
+                ['PartonTruthLabelID', 'PartonTruthLabelID'],
+            ]
+
         for decoration, branch in outputVars:
             config.addOutputVar (self.containerName, decoration, branch, noSys=True)
 
