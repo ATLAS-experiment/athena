@@ -5612,7 +5612,6 @@ namespace Trk {
     Amg::SymMatrixX & lu,
     bool &doderiv
   ) const {
-    int measno = 0;
     int nfitpars = trajectory.numberOfFitParameters();
     int nperpars = trajectory.numberOfPerigeeParameters();
     int scatpars = 2 * trajectory.numberOfScatterers();
@@ -5668,7 +5667,7 @@ namespace Trk {
         cache.m_firstmeasurement[i] = 0;
         cache.m_lastmeasurement[i] = nmeas - nbrem;
       }
-      measno = 0;
+      int measno = 0;
       int scatno = 0;
       int bremno = 0;
       for (int i = 0; i < (int) trajectory.trackStates().size(); i++) {
@@ -5715,19 +5714,15 @@ namespace Trk {
     }
 
     for (int k = 0; k < nfitpars; k++) {
-      int minmeas = 0;
-      int maxmeas = nmeas - nbrem;
-      maxmeas = cache.m_lastmeasurement[k];
-      minmeas = cache.m_firstmeasurement[k];
+      int minmeas = cache.m_firstmeasurement[k];
+      int maxmeas = cache.m_lastmeasurement[k];
 
-      for (measno = minmeas; measno < maxmeas; measno++) {
-        double tmp =
-          res[measno] * (1. / error[measno]) * weight_deriv(measno, k);
-        b[k] += tmp;
+      for (int measno = minmeas; measno < maxmeas; measno++) {
+        b[k] += res[measno] * (1. / error[measno]) * weight_deriv(measno, k);
       }
 
       if (k == 4 || k >= nperpars + scatpars) {
-        for (measno = nmeas - nbrem; measno < nmeas; measno++) {
+        for (int measno = nmeas - nbrem; measno < nmeas; measno++) {
           b[k] += res[measno] * (1. / error[measno]) * weight_deriv(measno, k);
         }
       }
@@ -5740,7 +5735,7 @@ namespace Trk {
             std::max(cache.m_firstmeasurement[k],
                      cache.m_firstmeasurement[l]);
           double tmp = 0;
-          for (measno = minmeas; measno < maxmeas; measno++) {
+          for (int measno = minmeas; measno < maxmeas; measno++) {
             tmp += weight_deriv(measno, k) * weight_deriv(measno, l);
           }
           a.fillSymmetric(l, k, tmp);
