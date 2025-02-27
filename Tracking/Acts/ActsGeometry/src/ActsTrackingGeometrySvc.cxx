@@ -122,6 +122,24 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
     ATH_CHECK(m_detStore->retrieve(p_beamPipeMgr, "BeamPipe"));
   }
 
+  // Consistency check on the size vectors for passive layers
+  if (m_passiveITkInnerPixelBarrelLayerRadii.size() != m_passiveITkInnerPixelBarrelLayerHalflengthZ.size() ||
+    m_passiveITkInnerPixelBarrelLayerHalflengthZ.size() != m_passiveITkInnerPixelBarrelLayerThickness.size()) {
+        ATH_MSG_FATAL("Consistency check for ITk inner pixel barrel passive layer construction failed. Please check your inputs! ");
+        return StatusCode::FAILURE;
+  }
+
+  if (m_passiveITkOuterPixelBarrelLayerRadii.size() != m_passiveITkOuterPixelBarrelLayerHalflengthZ.size() ||
+    m_passiveITkOuterPixelBarrelLayerHalflengthZ.size() != m_passiveITkOuterPixelBarrelLayerThickness.size()) {
+        ATH_MSG_FATAL("Consistency check for ITk outer pixel barrel passive layer construction failed. Please check your inputs! ");
+        return StatusCode::FAILURE;
+  }
+
+  if (m_passiveITkStripBarrelLayerRadii.size() != m_passiveITkStripBarrelLayerHalflengthZ.size() ||
+    m_passiveITkStripBarrelLayerHalflengthZ.size() != m_passiveITkStripBarrelLayerThickness.size()) {
+        ATH_MSG_FATAL("Consistency check for ITk strip barrel passive layer construction failed. Please check your inputs! ");
+        return StatusCode::FAILURE;
+  }
 
   ATH_MSG_DEBUG("Setting up ACTS geometry helpers");
 
@@ -218,6 +236,9 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
             cfg.mode = ActsLayerBuilder::Mode::ITkPixelInner;
             cfg.objDebugOutput = m_objDebugOutput;
             cfg.doEndcapLayerMerging = true;
+            cfg.passiveBarrelLayerRadii = m_passiveITkInnerPixelBarrelLayerRadii;
+            cfg.passiveBarrelLayerHalflengthZ = m_passiveITkInnerPixelBarrelLayerHalflengthZ;
+            cfg.passiveBarrelLayerThickness = m_passiveITkInnerPixelBarrelLayerThickness;
             auto lb = std::make_shared<ActsLayerBuilder>(
                 cfg, makeActsAthenaLogger(this, std::string("ITkPxInLb"), std::string("ActsTGSvc")));
 
@@ -242,6 +263,9 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
             cfg.mode = ActsLayerBuilder::Mode::ITkPixelOuter;
             cfg.objDebugOutput = m_objDebugOutput;
             cfg.doEndcapLayerMerging = false;
+            cfg.passiveBarrelLayerRadii = m_passiveITkOuterPixelBarrelLayerRadii;
+            cfg.passiveBarrelLayerHalflengthZ = m_passiveITkOuterPixelBarrelLayerHalflengthZ;
+            cfg.passiveBarrelLayerThickness = m_passiveITkOuterPixelBarrelLayerThickness;
             auto lb = std::make_shared<ActsLayerBuilder>(
                 cfg, makeActsAthenaLogger(this, std::string("ITkPxOtLb"), std::string("ActsTGSvc")));
 
@@ -270,6 +294,9 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
             auto cfg = makeLayerBuilderConfig(p_ITkStripManager);
             cfg.mode = ActsLayerBuilder::Mode::ITkStrip;
             cfg.objDebugOutput = m_objDebugOutput;
+            cfg.passiveBarrelLayerRadii = m_passiveITkStripBarrelLayerRadii;
+            cfg.passiveBarrelLayerHalflengthZ = m_passiveITkStripBarrelLayerHalflengthZ;
+            cfg.passiveBarrelLayerThickness = m_passiveITkStripBarrelLayerThickness;
             auto lb = std::make_shared<ActsLayerBuilder>(
                 cfg, makeActsAthenaLogger(this, std::string("ITkStripLB"), std::string("ActsTGSvc")));
 

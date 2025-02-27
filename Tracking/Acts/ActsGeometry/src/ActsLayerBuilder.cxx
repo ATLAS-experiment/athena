@@ -16,6 +16,7 @@
 #include "Acts/Geometry/ApproachDescriptor.hpp"
 #include "Acts/Geometry/GenericApproachDescriptor.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
+#include "Acts/Geometry/CylinderLayer.hpp"
 #include "Acts/Geometry/LayerCreator.hpp"
 #include "Acts/Geometry/ProtoLayer.hpp"
 #include "Acts/Material/ProtoSurfaceMaterial.hpp"
@@ -309,6 +310,28 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
     }
 
     layersOutput.push_back(layer);
+  }
+
+  // check if additional passive layers need to be constructed
+  std::size_t numPassiveLayers = m_cfg.passiveBarrelLayerRadii.size();
+  ACTS_DEBUG("Configured to build " << numPassiveLayers << " passive central layers.");
+  if (numPassiveLayers != 0u) {
+      for (std::size_t icl = 0; icl < numPassiveLayers; ++icl) {
+          ACTS_VERBOSE("- build layer " << icl
+                       << " with radius = " << m_cfg.passiveBarrelLayerRadii.at(icl)
+                       << " and halfZ = " << m_cfg.passiveBarrelLayerHalflengthZ.at(icl)
+                       << " and thickness = " << m_cfg.passiveBarrelLayerThickness.at(icl));
+
+          // create the boundary
+          auto cBounds = std::make_shared<const Acts::CylinderBounds>(
+              m_cfg.passiveBarrelLayerRadii.at(icl), m_cfg.passiveBarrelLayerHalflengthZ.at(icl));
+
+          // create the layer
+          std::shared_ptr<Acts::Layer> layer =
+              Acts::CylinderLayer::create(Transform3::Identity(), cBounds, nullptr, m_cfg.passiveBarrelLayerThickness.at(icl));
+
+          layersOutput.push_back(layer);
+      }
   }
 }
 
