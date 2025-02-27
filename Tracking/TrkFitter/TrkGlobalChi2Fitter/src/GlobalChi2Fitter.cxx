@@ -594,14 +594,14 @@ namespace Trk {
       return nullptr;
     }
 
+    if (muontrack->trackStateOnSurfaces()->empty()) {
+      return nullptr;
+    }
+
     Trk::TrackStates::const_iterator tsosit =
       firstismuon ?
-      muontrack->trackStateOnSurfaces()->end() :
+      muontrack->trackStateOnSurfaces()->end() - 1 :
       muontrack->trackStateOnSurfaces()->begin();
-
-    if (firstismuon) {
-     -- tsosit;
-    }
 
     const MeasurementBase *closestmuonmeas = nullptr;
     std::unique_ptr<const TrackParameters> tp_closestmuon = nullptr;
