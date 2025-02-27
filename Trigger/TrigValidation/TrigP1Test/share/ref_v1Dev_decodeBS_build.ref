@@ -11849,17 +11849,17 @@ HLT_tau25_looseGNTau_L1cTAU20M:
     3: 17
     4: 5
 HLT_tau25_looseRNN_trackLRT_L1cTAU20M:
-  eventCount: 8
+  eventCount: 9
   stepCounts:
     0: 12
     1: 12
     2: 12
-    3: 8
+    3: 9
   stepFeatures:
     0: 17
     1: 17
     2: 17
-    3: 9
+    3: 10
 HLT_tau25_looseRNN_tracktwoLLP_L1cTAU20M:
   eventCount: 8
   stepCounts:
