@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /*********************************
  * AnomDetVAE.cxx
@@ -17,6 +17,7 @@
 #include "L1TopoAlgorithms/AnomDetVAE.h"
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Decision.h"
+#include <VAENetwork.h>
 
 REGISTER_ALG_TCS(ADVAE_2A)
 
@@ -40,9 +41,9 @@ TCS::ADVAE_2A::ADVAE_2A(const std::string & name) : DecisionAlg(name)
    defineParameter("MinET2",0);
    defineParameter("MinET3",0);
    defineParameter("MinET4",0);
-   //The value used is AD threshold * 3 (since there are 3 gaussians) * 1024 (to make the decimal points available)
-   defineParameter("AnomalyScoreThresh", 3875, 0);
-   defineParameter("AnomalyScoreThresh", 3875, 1);
+   //The value used is sum of squares of the NN result vector elements, bit-shifted by 8 to get all decimal bits
+   defineParameter("AnomalyScoreThresh", 1000000, 0);
+   defineParameter("AnomalyScoreThresh", 1000000, 1);
 
    setNumberOutputBits(2);
 }
@@ -62,10 +63,10 @@ TCS::ADVAE_2A::initialize() {
    if(parameter("MaxTob3").value() > 0) p_NumberLeading3 = parameter("MaxTob3").value();
    if(parameter("MaxTob4").value() > 0) p_NumberLeading4 = parameter("MaxTob4").value();
 
-    p_minEt1 = parameter("MinET1").value();
-    p_minEt2 = parameter("MinET2").value();
-    p_minEt3 = parameter("MinET3").value();
-    p_minEt4 = parameter("MinET4").value();
+   p_minEt1 = parameter("MinET1").value();
+   p_minEt2 = parameter("MinET2").value();
+   p_minEt3 = parameter("MinET3").value();
+   p_minEt4 = parameter("MinET4").value();
 
    for(unsigned int i=0; i<numberOutputBits(); ++i) {
       p_AnomalyScoreThresh[i] = parameter("AnomalyScoreThresh", i).value();
@@ -78,8 +79,8 @@ TCS::ADVAE_2A::initialize() {
       std::string hname_accept = "hAnomalyScore_accept_bit"+std::to_string((int)i);
       std::string hname_reject = "hAnomalyScore_reject_bit"+std::to_string((int)i);
       // score
-      bookHist(m_histAccept, hname_accept, "ADScore", 500, 0, 5000);
-      bookHist(m_histReject, hname_reject, "ADScore", 500, 0, 5000);
+      bookHist(m_histAccept, hname_accept, "ADScore", 2000, 0, 2000000);
+      bookHist(m_histReject, hname_reject, "ADScore", 2000, 0, 2000000);
    }
 
    return StatusCode::SUCCESS;
@@ -108,14 +109,12 @@ TCS::ADVAE_2A::processBitCorrect( const std::vector<TCS::TOBArray const *> & inp
       std::vector<u_int> jet_pt(6,0), tau_pt(4,0), mu_pt(4,0), met_pt(1,0);
       std::vector<int>   jet_eta(6,0), tau_eta(4,0), mu_eta(4,0); //no met_eta
       std::vector<int>   jet_phi(6,0), tau_phi(4,0), mu_phi(4,0), met_phi(1,0);
-      
 
       for (u_int i = 0; i<(*jets).size() && i<6; ++i) {
          if ( parType_t( (*jets)[i].Et() ) <= p_minEt1 ) continue; //ET cut, leave NN inputs at default values (0)
          jet_pt[i] = (*jets)[i].Et();
          jet_eta[i] = (*jets)[i].eta();
          jet_phi[i] = (*jets)[i].phi();
-         
       }
       for (u_int i = 0; i < (*taus).size() && i<4; ++i) {
          if ( parType_t( (*taus)[i].Et() ) <= p_minEt2 ) continue; //ET cut, leave NN inputs at default values (0)
@@ -135,9 +134,7 @@ TCS::ADVAE_2A::processBitCorrect( const std::vector<TCS::TOBArray const *> & inp
          met_phi[i] = (*met)[i].phi();
       }
 
-      /// TODO:: Implement the anomaly score calculation based on the AD model when it is available in athena.
-      /*
-      Trig::ADScore AD_Score( jet_pt[0], jet_eta[0], jet_phi[0],
+      ADVAE2A::VAENetwork AD_Network( jet_pt[0], jet_eta[0], jet_phi[0],
                               jet_pt[1], jet_eta[1], jet_phi[1],
                               jet_pt[2], jet_eta[2], jet_phi[2],
                               jet_pt[3], jet_eta[3], jet_phi[3],
@@ -151,17 +148,13 @@ TCS::ADVAE_2A::processBitCorrect( const std::vector<TCS::TOBArray const *> & inp
                               mu_pt [1], mu_eta [1], mu_phi [1],
                               mu_pt [2], mu_eta [2], mu_phi [2],
                               mu_pt [3], mu_eta [3], mu_phi [3],
-                              (*met)[0].Et(), (*met)[0].phi() );
-      auto scoreVec = AD_Score.myScore();
-      */
-      std::vector<double> scoreVec(3,0);
-
-      TRG_MSG_DEBUG("The anomaly score is " << scoreVec[0] << ", " << scoreVec[1] << ", " << scoreVec[2] << std::endl);
-      parType_t score = parType_t ( (scoreVec[0]*scoreVec[0] + scoreVec[1]*scoreVec[1] + scoreVec[2]*scoreVec[2])*1024 );
+                              met_pt[0], met_phi[0] );
+      int64_t anomScoreInt64 = AD_Network.getAnomalyScoreInt64();
 
       for(u_int i=0; i<numberOutputBits(); ++i) {
          bool accept = false;
-         if ( score > p_AnomalyScoreThresh[i] ) {
+         int32_t threshold = int32_t ( p_AnomalyScoreThresh[i] );
+         if ( anomScoreInt64 > threshold ) {
             accept = true;
             decision.setBit(i, true);
             for ( u_int j = 0; j<6 && j<(*jets).size(); ++j ) output[i]->push_back((*jets)[j]);
@@ -171,12 +164,12 @@ TCS::ADVAE_2A::processBitCorrect( const std::vector<TCS::TOBArray const *> & inp
          }
 
          if(fillHistos() and accept) {
-            fillHist1D(m_histAccept[i],score);
+            fillHist1D(m_histAccept[i],anomScoreInt64);
          } else if(fillHistos() && !accept) {
-            fillHist1D(m_histReject[i],score);
+            fillHist1D(m_histReject[i],anomScoreInt64);
          }
 
-         TRG_MSG_DEBUG("Decision for bit" << i << ": " << (accept?"pass":"fail") << " anomaly score = " << score << std::endl);
+         TRG_MSG_DEBUG("Decision for bit" << i << ": " << (accept?"pass":"fail") << " anomaly score = " << anomScoreInt64 << std::endl);
       }
    } else {
       TCS_EXCEPTION("ADVAE_2A alg must have 4 inputs, but got " << input.size());
@@ -203,28 +196,35 @@ TCS::ADVAE_2A::process( const std::vector<TCS::TOBArray const *> & input,
       TRG_MSG_DEBUG("Number of mus are " << (*mus).size());
       TRG_MSG_DEBUG("Number of met are " << (*met).size());
 
-      std::vector<u_int> jet_pt(6,0), tau_pt(4,0), mu_pt(4,0);
-      std::vector<int>   jet_eta(6,0), tau_eta(4,0), mu_eta(4,0);
-      std::vector<int>   jet_phi(6,0), tau_phi(4,0), mu_phi(4,0);
+      std::vector<u_int> jet_pt(6,0), tau_pt(4,0), mu_pt(4,0), met_pt(1,0);
+      std::vector<int>   jet_eta(6,0), tau_eta(4,0), mu_eta(4,0); //no met_eta
+      std::vector<int>   jet_phi(6,0), tau_phi(4,0), mu_phi(4,0), met_phi(1,0);
 
       for (u_int i = 0; i<(*jets).size() && i<6; ++i) {
+         if ( parType_t( (*jets)[i].Et() ) <= p_minEt1 ) continue; //ET cut, leave NN inputs at default values (0)
          jet_pt[i] = (*jets)[i].Et();
          jet_eta[i] = (*jets)[i].eta();
          jet_phi[i] = (*jets)[i].phi();
       }
       for (u_int i = 0; i < (*taus).size() && i<4; ++i) {
+         if ( parType_t( (*taus)[i].Et() ) <= p_minEt2 ) continue; //ET cut, leave NN inputs at default values (0)
          tau_pt[i] = (*taus)[i].Et();
          tau_eta[i] = (*taus)[i].eta();
          tau_phi[i] = (*taus)[i].phi();
       }
       for (u_int i = 0; i < (*mus).size() && i<4; ++i) {
+         if ( parType_t( (*mus)[i].Et() ) <= p_minEt3 ) continue; //ET cut, leave NN inputs at default values (0)
          mu_pt[i] = (*mus)[i].Et();
          mu_eta[i] = (*mus)[i].eta();
          mu_phi[i] = (*mus)[i].phi();
       }
-      /// TODO:: Implement the anomaly score calculation based on the AD model when it is available in athena.
-      /*
-      Trig::ADScore AD_Score( jet_pt[0], jet_eta[0], jet_phi[0],
+      for (u_int i = 0; i < (*met).size() && i<1; ++i) {
+         if ( parType_t( (*met)[i].Et() ) <= p_minEt4 ) continue; //ET cut, leave NN inputs at default values (0)
+         met_pt[i] = (*met)[i].Et();
+         met_phi[i] = (*met)[i].phi();
+      }
+
+      ADVAE2A::VAENetwork AD_Network( jet_pt[0], jet_eta[0], jet_phi[0],
                               jet_pt[1], jet_eta[1], jet_phi[1],
                               jet_pt[2], jet_eta[2], jet_phi[2],
                               jet_pt[3], jet_eta[3], jet_phi[3],
@@ -238,17 +238,13 @@ TCS::ADVAE_2A::process( const std::vector<TCS::TOBArray const *> & input,
                               mu_pt [1], mu_eta [1], mu_phi [1],
                               mu_pt [2], mu_eta [2], mu_phi [2],
                               mu_pt [3], mu_eta [3], mu_phi [3],
-                              (*met)[0].Et(), (*met)[0].phi() );
-      auto scoreVec = AD_Score.myScore();
-      */
-      std::vector<double> scoreVec(3,0);
-
-      TRG_MSG_DEBUG("The anomaly score is " << scoreVec[0] << ", " << scoreVec[1] << ", " << scoreVec[2] << std::endl);
-      parType_t score = parType_t ( (scoreVec[0]*scoreVec[0] + scoreVec[1]*scoreVec[1] + scoreVec[2]*scoreVec[2])*1024 );
+                              met_pt[0], met_phi[0] );
+      int64_t anomScoreInt64 = AD_Network.getAnomalyScoreInt64();
 
       for(u_int i=0; i<numberOutputBits(); ++i) {
          bool accept = false;
-         if ( score > p_AnomalyScoreThresh[i] ) {
+         int32_t threshold = int32_t ( p_AnomalyScoreThresh[i] );
+         if ( anomScoreInt64 > threshold ) {
             accept = true;
             decision.setBit(i, true);
             for ( u_int j = 0; j<6 && j<(*jets).size(); ++j ) output[i]->push_back((*jets)[j]);
@@ -258,12 +254,12 @@ TCS::ADVAE_2A::process( const std::vector<TCS::TOBArray const *> & input,
          }
 
          if(fillHistos() and accept) {
-            fillHist1D(m_histAccept[i],score);
+            fillHist1D(m_histAccept[i],anomScoreInt64);
          } else if(fillHistos() && !accept) {
-            fillHist1D(m_histReject[i],score);
+            fillHist1D(m_histReject[i],anomScoreInt64);
          }
 
-         TRG_MSG_DEBUG("Decision for bit" << i << ": " << (accept?"pass":"fail") << " anomaly score = " << score << std::endl);
+         TRG_MSG_DEBUG("Decision for bit" << i << ": " << (accept?"pass":"fail") << " anomaly score = " << anomScoreInt64 << std::endl);
       }
    } else {
       TCS_EXCEPTION("ADVAE_2A alg must have 4 inputs, but got " << input.size());
