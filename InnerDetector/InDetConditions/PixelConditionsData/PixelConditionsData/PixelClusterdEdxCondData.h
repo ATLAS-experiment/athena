@@ -6,6 +6,8 @@
 
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CondCont.h"
+#include <vector>
+#include <tuple>
 
 /**
  * @file PixelConditionsData/PixeldEdxData.h
@@ -17,11 +19,11 @@ class PixelClusterdEdxCondData {
   public:
     PixelClusterdEdxCondData();
     virtual ~PixelClusterdEdxCondData();
-    int getVar() const;
-    void setVar(const int& value);
+    long double getVar(const std::tuple<int,int,int>& module_coordinates) const;
+    void setVar(const std::vector<std::tuple<std::tuple<int,int,int>,long double>>& value);
  
   private:
-    int m_var = 999; //Default for testing
+    std::vector<std::tuple<std::tuple<int,int,int>,long double>> m_var; //Default for testing
 };
 
 CLASS_DEF( PixelClusterdEdxCondData , 112527067 , 1 );

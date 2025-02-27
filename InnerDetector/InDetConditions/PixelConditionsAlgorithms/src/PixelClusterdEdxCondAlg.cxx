@@ -6,7 +6,8 @@
 #include "GaudiKernel/EventIDRange.h"
 
 #include <nlohmann/json.hpp>
-
+#include <vector>
+#include <tuple>
 
 PixelClusterdEdxCondAlg::PixelClusterdEdxCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
   ::AthReentrantAlgorithm(name, pSvcLocator)
@@ -62,16 +63,50 @@ StatusCode PixelClusterdEdxCondAlg::execute(const EventContext& ctx) const {
     CondAttrListCollection::const_iterator itr;
     for (itr = readCdo->begin(); itr != readCdo->end(); ++itr){//Loop over channels (only one in this case)
       const coral::AttributeList &atr = itr->second;
-      std::string data = *(static_cast<const std::string *>((atr["data_array"]).addressOfData())); // read everything from DB
-      ATH_MSG_INFO("Rebecca Payload from DB:" << data);
-      nlohmann::json jsondata = nlohmann::json::parse(data); //transform everything
-      ATH_MSG_INFO("Rebecca -- parsed DB data: " << jsondata);
-      //int nchannels=jsondata["nchannels"]; //Breaks here, null.
-      nlohmann::json channeldata=jsondata["0"]; // get "data" column, table-inside-table
-      ATH_MSG_INFO("Rebecca -- channel data: " << channeldata);
-      int testData = -999;
+      std::string dataString = *(static_cast<const std::string *>((atr["data_array"]).addressOfData())); // read everything from DB
+      // ATH_MSG_INFO("Rebecca Payload from DB:" << dataString);
+      nlohmann::json dataJson = nlohmann::json::parse(dataString); //transform everything
+      ATH_MSG_INFO("Rebecca -- parsed DB data: " << dataJson);
+      std::vector<int> bec_data = dataJson["bec"];
+      std::vector<int> layerID_data = dataJson["layerID"]; 
+      std::vector<std::vector<int>> etaM_data = dataJson["etaM"];
+      std::vector<std::vector<long double>> SF_data = dataJson["SF"];
+      //Data structure:
+      // // IBL: bec=0; layer=0; etaM=[-10,9] {Planars=[-6,5] & 3D=[6,9;-10,7]}; phiM=[0,13]
+      // B-layer: bec=0; layer=1; etaM=[-6,6]; phiM=[0,21]
+      // Layer-1: bec=0; layer=2; etaM=[-6,6]; phiM=[0,37]
+      // Layer-2: bec=0; layer=3; etaM=[-6,6]; phiM=[0,51]
+      // EC_C: bec=-2 & EC_A: bec=+2
+      //D1: layer=0; etaM=0; phiM=[0,47]
+      //D2: layer=1; etaM=0; phiM=[0,47]
+      //D3: layer=2; etaM=0; phiM=[0,47]
+      // Want to store like: [((bec,layerID,etaM),SF)),...] 
+      std::vector<std::tuple<std::tuple<int,int,int>,long double>> params;
+      for (size_t i = 0; i < bec_data.size(); ++i) { // Assumption of bec.size() == layerID.size()
+        for (size_t j = 0; j < etaM_data[i].size(); ++j) { //Similarly etaM[i].size() == SF.size()
+          std::tuple<int,int,int> sf_coordinates = std::make_tuple(bec_data[i],layerID_data[i],etaM_data[i][j]);
+          std::tuple<std::tuple<int,int,int>,long double> sf_coordinate_value = std::make_tuple(sf_coordinates, SF_data[i][j]); 
+          params.push_back(sf_coordinate_value);
+        }
+      }
+      std::cout << "Rebecca -- Here's the parameter vector" << std::endl;
+
+      // Iterate through the vector and print each element
+      for (const auto& outer_tuple : params) {
+        // Extract the inner tuple and the long double
+        auto inner_tuple = std::get<0>(outer_tuple);
+        long double value = std::get<1>(outer_tuple);
+
+        // Print the elements of the inner tuple
+        std::cout << "("
+                  << std::get<0>(inner_tuple) << ", "
+                  << std::get<1>(inner_tuple) << ", "
+                  << std::get<2>(inner_tuple) << ") "
+                  << "-> " << value << std::endl;
+      }
+      //int testData = -999;
       //testData = channeldata;
-      writeCdo->setVar(testData); //Gives error that testData is null
+      writeCdo->setVar(params); //Gives error that testData is null
    }
   }
 

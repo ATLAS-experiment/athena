@@ -3,17 +3,32 @@
 */
 
 #include "PixelConditionsData/PixelClusterdEdxCondData.h"
+#include <vector>
+#include <tuple>
+
 
 PixelClusterdEdxCondData::PixelClusterdEdxCondData() : m_var() {
   }
 
 PixelClusterdEdxCondData::~PixelClusterdEdxCondData() = default;
 
-int PixelClusterdEdxCondData::getVar() const {
-  return m_var;
+long double PixelClusterdEdxCondData::getVar(const std::tuple<int,int,int>& module_coordinates) const {
+  for (const auto& module_sf_pair : m_var) {
+    auto module_location = std::get<0>(module_sf_pair);
+    long double sf_value = std::get<1>(module_sf_pair);
+    if (module_location == module_coordinates) {
+      if (sf_value == -1.0) {
+        //ATH_MSG_WARNING("No scale factor for this module. Returning 1 so that no scaling is done.");
+        return 1.0;
+        }
+      return sf_value;
+      } 
+    }
+  //ATH_MSG_WARNING("No such module! Returning 1.");
+  return 1.0;
   }
 
-void PixelClusterdEdxCondData::setVar(const int& value){
+void PixelClusterdEdxCondData::setVar(const std::vector<std::tuple<std::tuple<int,int,int>,long double>>& value) {
   m_var = value;
   return;
   }
