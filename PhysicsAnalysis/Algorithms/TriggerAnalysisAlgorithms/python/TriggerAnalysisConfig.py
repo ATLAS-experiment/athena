@@ -28,14 +28,25 @@ class TriggerAnalysisBlock (ConfigBlock):
             info="a list of trigger chains (list of strings) to be used for "
             "trigger selection. Only set it if you need a different setup "
             "than for trigger SFs. The default is [] (empty list).")
+        self.addOption ('prescaleDecoration', 'prescale', type=str,
+            info="name (prefix) of decoration for trigger prescales.")
         self.addOption ('prescaleLumiCalcFiles', [], type=None,
             info="a list of lumical files (list of strings) to calculate "
-            "trigger prescales. The default is [] (empty list).")
+            "trigger prescales. The default is [] (empty list). Mutually "
+            "exclusive with prescaleLumiCalcFilesPerYear")
+        self.addOption ('prescaleLumiCalcFilesPerYear', {}, type=None,
+            info="a dicrionary with key (string) the year and value (list of "
+            "strings) the list of lumicalc files to calculate trigger prescales "
+            "for an individual data year. The default is {} (empty dictionary). "
+            "Mutually exclusive with prescaleLumiCalcFiles")
         self.addOption ('prescaleTriggersFormula', '', type=str,
             info="a formula used in (un)prescaling, producing overall prescale "
             "factor instead of prescale per trigger.")
         self.addOption ('prescaleMC', False, type=bool,
             info="prescale MC instead of unprescaling of data.")
+        self.addOption ('prescaleIncludeAllYears', False, type=bool,
+            info="if True, trigger prescales will include all configured years "
+            "from prescaleLumiCalcFilesPerYear in all jobs. The default is False.")
         self.addOption ('noFilter', False, type=bool,
             info="do not apply an event filter. The default is False, i.e. "
             "remove events not passing trigger selection and matching.")
@@ -82,6 +93,9 @@ class TriggerAnalysisBlock (ConfigBlock):
                 matchingTool.InputPrefix = "AnalysisTrigMatch_"
         return matchingTool
 
+    @staticmethod
+    def _get_lumicalc_triggers(lumicalc_files: list[str]) -> list[str]:
+        return [lumicalc.split(":")[-1] for lumicalc in lumicalc_files if ":" in lumicalc]
 
     def makeTriggerSelectionAlg(self, config, decisionTool):
 
@@ -99,20 +113,51 @@ class TriggerAnalysisBlock (ConfigBlock):
             config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, noSys=True)
 
         # Calculate trigger prescales
-        if ((config.dataType() is DataType.Data) != self.prescaleMC) and self.prescaleLumiCalcFiles:
+        if ((config.dataType() is DataType.Data) != self.prescaleMC) and (
+            self.prescaleLumiCalcFiles or self.prescaleLumiCalcFilesPerYear
+        ):
+
+            lumicalc_files = []
+            if self.prescaleLumiCalcFiles:
+                lumicalc_files = self.prescaleLumiCalcFiles
+            elif self.prescaleLumiCalcFilesPerYear:
+                from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import get_input_years, get_year_data
+
+                years = get_input_years(config)
+                for year in years:
+                    lumicalc_files.extend(get_year_data(self.prescaleLumiCalcFilesPerYear, year))
 
             alg = config.createAlgorithm( 'CP::TrigPrescalesAlg', 'TrigPrescalesAlg' )
             config.addPrivateTool( 'pileupReweightingTool', 'CP::PileupReweightingTool' )
-            alg.pileupReweightingTool.LumiCalcFiles = self.prescaleLumiCalcFiles
+            alg.pileupReweightingTool.LumiCalcFiles = lumicalc_files
             alg.pileupReweightingTool.TrigDecisionTool = '%s/%s' % \
                     ( decisionTool.getType(), decisionTool.getName() )
+            alg.prescaleMC = self.prescaleMC
+            alg.prescaleDecoration = self.prescaleDecoration
             if self.prescaleTriggersFormula != '':
                 alg.prescaleTriggersFormula = self.prescaleTriggersFormula
+                config.addOutputVar("EventInfo", alg.prescaleDecoration, alg.prescaleDecoration, noSys=True)
             else:
-                alg.triggers = [lumicalc.split(':')[-1] for lumicalc in self.prescaleLumiCalcFiles if ':' in lumicalc]
+                alg.triggers = self._get_lumicalc_triggers(lumicalc_files)
                 alg.triggersAll = self.triggerChainsForSelection
-            alg.prescaleMC = self.prescaleMC
-            alg.prescaleDecoration = 'prescale'
+
+                # Schedule trigger prescale output branches
+                triggers_output = set(alg.triggers)
+                if self.prescaleIncludeAllYears and self.prescaleLumiCalcFilesPerYear:
+                    all_lumicalc_files = [
+                        lumicalc
+                        for lumicalc_year in self.prescaleLumiCalcFilesPerYear.values()
+                        for lumicalc in lumicalc_year
+                    ]
+                    triggers_output.update(self._get_lumicalc_triggers(all_lumicalc_files))
+                for trigger in triggers_output:
+                    trigger = trigger.replace("-", "_")
+                    config.addOutputVar(
+                        "EventInfo",
+                        alg.prescaleDecoration + "_" + trigger,
+                        alg.prescaleDecoration + "_" + trigger,
+                        noSys=True,
+                    )
 
         return
 
@@ -122,6 +167,12 @@ class TriggerAnalysisBlock (ConfigBlock):
         if (self.multiTriggerChainsPerYear and self.triggerChainsPerYear and
             self.triggerChainsPerYear is not self.multiTriggerChainsPerYear.get('')):
             raise Exception('multiTriggerChainsPerYear and triggerChainsPerYear cannot be configured at the same time!')
+
+        if self.prescaleLumiCalcFiles and self.prescaleLumiCalcFilesPerYear:
+            raise Exception('prescaleLumiCalcFiles and prescaleLumiCalcFilesPerYear cannot be configured at the same time!')
+
+        if self.prescaleIncludeAllYears and not self.prescaleLumiCalcFilesPerYear:
+            raise Exception('prescaleIncludeAllYears requires prescaleLumiCalcFilesPerYear to be configured!')
 
         if self.triggerChainsPerYear and not self.multiTriggerChainsPerYear:
             self.multiTriggerChainsPerYear = {'': self.triggerChainsPerYear}
