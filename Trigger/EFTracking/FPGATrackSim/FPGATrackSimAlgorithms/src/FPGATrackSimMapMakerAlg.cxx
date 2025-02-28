@@ -23,7 +23,7 @@ FPGATrackSimMapMakerAlg::FPGATrackSimMapMakerAlg (const std::string& name, ISvcL
 StatusCode FPGATrackSimMapMakerAlg::initialize()
 {
 
-  m_monitorFile.reset (new TFile((m_outFileName.value() + ".root").c_str(), "RECREATE"));
+    m_monitorFile.reset (new TFile((m_outFileName.value() + "region" + std::to_string(m_region) + ".root").c_str(), "RECREATE"));
     std::stringstream ss(m_description);
     std::string line;
     ATH_MSG_INFO("Tag config:");
@@ -427,7 +427,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeSubrmap(std::vector<FPGATrackSimHit> co
     str_trim.replace(dot,1,"p");
     str_gtrim.replace(str_gtrim.find_last_of("."), 1, "p");
 
-    std::string subrmap_path = m_outFileName.value() + "region" + std::to_string(m_region) + "_" + key + "_" + key2 + "_trim" + str_trim + "_gtrim" + str_gtrim + "_NSlices-" + std::to_string(m_nSlices.value()) + ".rmap";
+    std::string subrmap_path = m_outFileName.value() + "region" + std::to_string(m_region) + ".subrmap";
 
     ATH_MSG_INFO("Creating subrmap: " << subrmap_path);
     m_subrmap.open(subrmap_path, std::ofstream::out);
@@ -518,7 +518,8 @@ StatusCode FPGATrackSimMapMakerAlg::writeEtaPatterns()
 
     std::string slicingType = "";
     if (m_key2) slicingType = "2D";
-    std::string etapat_path = m_outFileName.value() + "region" + std::to_string(m_region) + "_trim" + str_trim + + "_gtrim" + str_gtrim + "_NSlices-" + std::to_string(m_nSlices.value()) + slicingType + "_etapatterns.patt";
+
+    std::string etapat_path = m_outFileName.value() + "region" + std::to_string(m_region) + ".patt";
 
     ATH_MSG_INFO("Creating eta patterns file: " << etapat_path);
     m_etapat.open(etapat_path, std::ofstream::out);
@@ -584,7 +585,8 @@ StatusCode FPGATrackSimMapMakerAlg::writeRadiiFile(std::vector<FPGATrackSimHit> 
     }
 
     // print file
-    std::string radii_path = m_outFileName.value() + "region" + std::to_string(m_region) + "_NSlices-" + std::to_string(m_nSlices.value()) + "_MeanRadii.txt";
+    std::string radii_path = m_outFileName.value() + "region" + std::to_string(m_region) + "_radii.txt";
+
     ATH_MSG_INFO("Creating radii file: " << radii_path);
     m_radfile.open(radii_path, std::ofstream::out);
     for (int s = 0; s < m_nSlices.value(); s++){
@@ -653,7 +655,8 @@ StatusCode FPGATrackSimMapMakerAlg::writeMedianZFile(std::vector<FPGATrackSimHit
     }
 
     // print file
-    std::string zed_path = m_outFileName.value() + "region" + std::to_string(m_region) + "_NSlices-" + std::to_string(m_nSlices.value()) + "_MedianZ.txt";
+    std::string zed_path = m_outFileName.value() + "region" + std::to_string(m_region) + "_z.txt";
+
     ATH_MSG_INFO("Creating median z file: " << zed_path);
     m_zedfile.open(zed_path, std::ofstream::out);
     for (int s = 0; s < m_nSlices.value(); s++){
