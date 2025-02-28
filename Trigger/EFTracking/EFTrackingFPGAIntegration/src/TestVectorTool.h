@@ -14,6 +14,8 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "EFTrackingFPGAIntegration/IEFTrackingFPGAIntegrationTool.h"
+#include "xAODInDetMeasurement/PixelClusterContainer.h"
+#include "xAODInDetMeasurement/StripClusterContainer.h"
 
 #include <string>
 #include <vector>
@@ -35,8 +37,9 @@ namespace EFTrackingFPGAIntegration
 
 /**
  * @class Tool for test vector
- * 
- * This tool can be used to load TV from file (.bin/.txt) and compare two TVs. 
+ *
+ * This tool can be used to load test vector of FPGA integration.
+ * It can use tv file (txt/bin). It can also do in-situ conversion from xAOD cluster container to L2G EDM TV
  * This is particularly designed and used for FPGA integration development.
  */
 
@@ -52,7 +55,7 @@ public:
      * @param inputFile The input file name to be opened
      * @param testVector The vector of uint64_t to be filled
      */
-    StatusCode prepareTV(const std::string& inputFile, std::vector<uint64_t> &testVector) const;
+    StatusCode prepareTV(const std::string &inputFile, std::vector<uint64_t> &testVector) const;
 
     /**
      * @brief Compare two TV in the form of std::vector<uint64_t>
@@ -65,6 +68,21 @@ public:
      * @param tv_comp The vector to be compared to the refTV
      */
     StatusCode compare(const EFTrackingFPGAIntegration::TVHolder &tvHolder, const std::vector<uint64_t> &tv_comp) const;
+
+    /**
+     * @brief Encode xAOD pixel cluster to L2G EDM TV
+     * @param pixelClusters The xAOD::PixelClusterContainer object
+     * @param encodedData The encoded data in the form of std::vector<uint64_t>
+     */
+    StatusCode encodePixelL2G(const xAOD::PixelClusterContainer *pixelClusters, std::vector<uint64_t> &encodedData) const;
+
+    /**
+     * @brief Encode xAOD strip cluster to L2G EDM TV
+     * 
+     * @param stripClusters The xAOD::StripClusterContainer object
+     * @param encodedData The encoded data in the form of std::vector<uint64_t>
+     */
+    StatusCode encodeStripL2G(const xAOD::StripClusterContainer *stripClusters, std::vector<uint64_t> &encodedData) const;
 };
 
 #endif // EFTRACKING_FPGA_INTEGRATION__TEST_VECTOR_TOOL_H
