@@ -16,6 +16,8 @@ namespace GlobalSim {
     constexpr static std::size_t eFexDiscriminantBitWidth{2};
     constexpr static std::size_t eFexEtaBitWidth{8};
     constexpr static std::size_t eFexPhiBitWidth{6};
+
+    constexpr static std::size_t maxNTob{10};
   };
 
 }

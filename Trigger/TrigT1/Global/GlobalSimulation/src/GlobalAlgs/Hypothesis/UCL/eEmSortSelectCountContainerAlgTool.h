@@ -12,8 +12,6 @@
 
 #include "GepAlgoHypothesisPortsIn.h"
 #include "eEmSortSelectCountContainerPortsOut.h"
-#include "AlgoDataTypes.h"
-#include "AlgoConstants.h"
 
 #include "../../../IGlobalSimAlgTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
