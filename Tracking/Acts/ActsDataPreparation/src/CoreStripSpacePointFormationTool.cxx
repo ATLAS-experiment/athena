@@ -396,7 +396,11 @@ namespace ActsTrk
 	  const auto currentSlink = sourceLink_index.first;
 	  for (auto triggerSlink : triggerSlinks){
 
-            double diff = source_local_x - ActsTrk::localXFromSourceLink( triggerSlink );
+      double diff = source_local_x - ActsTrk::localXFromSourceLink( triggerSlink );
+      // In negative endcap, local z is opposite of positive endcap
+      // need to invert the difference for proper comparison
+      if( m_stripId->barrel_ec(currentElement->identify())<0 ) diff = -diff;
+
 	    if (diff < min || diff > max)
 	      continue;
 	    if (currentIndex == otherSideIndex){
