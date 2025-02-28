@@ -413,6 +413,8 @@ def ActsTrackToTrackParticleCnvAlgCfg(flags,
 
     kwargs.setdefault('SiDetectorElementCollections',det_elements)
     kwargs.setdefault('SiDetEleCollToMeasurementType',element_types)
+    kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression)
+    kwargs.setdefault('VertexContainerKey', 'PrimaryVertices')
     acc.addEventAlgo(
         CompFactory.ActsTrk.TrackToTrackParticleCnvAlg(name, **kwargs))
 

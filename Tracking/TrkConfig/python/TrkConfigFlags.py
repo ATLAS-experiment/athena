@@ -138,7 +138,7 @@ def createTrackingConfigFlags():
                 "Vertex" if (prevFlags.Tracking.PrimaryPassConfig in [
                              PrimaryPassConfig.HeavyIon, PrimaryPassConfig.VtxLumiHeavyIon] or
                              prevFlags.Tracking.ITkPrimaryPassConfig in [
-                                 ITkPrimaryPassConfig.HeavyIon]
+                                 ITkPrimaryPassConfig.HeavyIon, ITkPrimaryPassConfig.ActsHeavyIon]
                 )
                 else "BeamLine")
 
