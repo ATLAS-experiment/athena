@@ -5,7 +5,6 @@
 #ifndef GLOBALSIM_EEMSORTSELECTCOUNTCONTAINERPORTSOUT_H
 #define GLOBALSIM_EEMSORTSELECTCOUNTCONTAINERPORTSOUT_H
 
-// #include "AlgoConstants.h" FIXME
 #include "AlgoDataTypes.h"
 
 #include <ostream>
@@ -98,9 +97,8 @@ namespace GlobalSim {
     using BSPtrNumTotalCountWidth =
       std::shared_ptr<std::bitset<eEmNumTotalCountWidth>>;
 
-    // Output GenericTobs. VHDL variable is an array od eEMGenericTobs
-    std::vector<GenTobPtr> m_O_eEmGenTob {eEmNumTotalTobWidth,
-					  GenTobPtr()};
+    // Output GenericTobs. VHDL variable is an array of GenericTobs
+    std::array<GenTobPtr, eEmNumTotalTobWidth>  m_O_eEmGenTob;
 
     // Output counts. VHDL variable is a bit array
     BSPtrNumTotalCountWidth
