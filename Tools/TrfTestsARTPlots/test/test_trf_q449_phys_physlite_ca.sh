@@ -110,7 +110,7 @@ echo "============ done "
 # Run trf_getVariables.py to extract variables from DAOD_PHYSLITE.art.pool.root
 echo "============ trf_getVariables.py"
 get_files trf_getVariables.py
-source /cvmfs/sft.cern.ch/lcg/releases/LCG_106/uproot/5.3.7/`arch`-el9-gcc13-opt/uproot-env.sh
+source /cvmfs/sft.cern.ch/lcg/releases/LCG_107a/uproot/5.3.11/`arch`-el9-gcc13-opt/uproot-env.sh
 trf_getVariables.py --inputFile DAOD_PHYSLITE.art.pool.root
 rccsv=$?
 tar czf generated_csv_files.tar.gz generated_csv_files/
