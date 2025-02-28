@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthReentrantAlgorithm.cxx 
@@ -10,17 +10,22 @@
 /////////////////////////////////////////////////////////////////// 
 
 // AthenaBaseComps includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCommonReentrantAlgorithm.h"
 #include "AthAlgorithmDHUpdate.h"
 #include "GaudiKernel/ICondSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 
+// Gaudi includes
+#include "Gaudi/Algorithm.h"
+#include "Gaudi/AsynchronousAlgorithm.h"
+
 // Framework includes
 #include "GaudiKernel/ThreadLocalContext.h"
 
-AthReentrantAlgorithm::AthReentrantAlgorithm( const std::string& name, 
+template <class BaseAlg>
+AthCommonReentrantAlgorithm<BaseAlg>::AthCommonReentrantAlgorithm( const std::string& name, 
                                               ISvcLocator* pSvcLocator ) :
-  ::AthCommonDataStore<AthCommonMsg<Gaudi::Algorithm>>   ( name, pSvcLocator )
+  ::AthCommonDataStore<AthCommonMsg<BaseAlg>>   ( name, pSvcLocator )
 {
 
   // Set up to run AthAlgorithmDHUpdate in sysInitialize before
@@ -34,14 +39,16 @@ AthReentrantAlgorithm::AthReentrantAlgorithm( const std::string& name,
 
 // Destructor
 ///////////////
-AthReentrantAlgorithm::~AthReentrantAlgorithm()
+template <class BaseAlg>
+AthCommonReentrantAlgorithm<BaseAlg>::~AthCommonReentrantAlgorithm()
 { 
   ATH_MSG_DEBUG ("Calling destructor");
 }
 
 /** Specify if the algorithm is clonable
  */
-bool AthReentrantAlgorithm::isClonable() const
+template <class BaseAlg>
+bool AthCommonReentrantAlgorithm<BaseAlg>::isClonable() const
 {
   // Reentrant algorithms are clonable.
   return true;
@@ -52,7 +59,8 @@ bool AthReentrantAlgorithm::isClonable() const
  *
  * Override this to return 0 for reentrant algorithms.
  */
-unsigned int AthReentrantAlgorithm::cardinality() const
+template <class BaseAlg>
+unsigned int AthCommonReentrantAlgorithm<BaseAlg>::cardinality() const
 {
   return 0;
 }
@@ -64,9 +72,10 @@ unsigned int AthReentrantAlgorithm::cardinality() const
  * base class storing the event context in a member variable that can
  * cause crashes in MT jobs.
  */
-StatusCode AthReentrantAlgorithm::sysExecute (const EventContext& ctx)
+template <class BaseAlg>
+StatusCode AthCommonReentrantAlgorithm<BaseAlg>::sysExecute (const EventContext& ctx)
 {
-  return Gaudi::Algorithm::sysExecute (ctx);
+  return BaseAlg::sysExecute (ctx);
 }
 
 
@@ -76,14 +85,15 @@ StatusCode AthReentrantAlgorithm::sysExecute (const EventContext& ctx)
  * This list is extended to include symlinks implied by inheritance
  * relations.
  */
-const DataObjIDColl& AthReentrantAlgorithm::extraOutputDeps() const
+template <class BaseAlg>
+const DataObjIDColl& AthCommonReentrantAlgorithm<BaseAlg>::extraOutputDeps() const
 {
   // If we didn't find any symlinks to add, just return the collection
   // from the base class.  Otherwise, return the extended collection.
   if (!m_extendedExtraObjects.empty()) {
     return m_extendedExtraObjects;
   }
-  return Algorithm::extraOutputDeps();
+  return BaseAlg::extraOutputDeps();
 }
 
 
@@ -93,8 +103,9 @@ const DataObjIDColl& AthReentrantAlgorithm::extraOutputDeps() const
  * Scan through all outputHandles, and if they're WriteCondHandles,
  * register them with the CondSvc
  */
-StatusCode AthReentrantAlgorithm::sysInitialize() {
-  StatusCode sc=AthCommonDataStore<AthCommonMsg<Gaudi::Algorithm>>::sysInitialize();
+template <class BaseAlg>
+StatusCode AthCommonReentrantAlgorithm<BaseAlg>::sysInitialize() {
+  StatusCode sc=AthCommonDataStore<AthCommonMsg<BaseAlg>>::sysInitialize();
 
   if (sc.isFailure()) {
     return sc;
@@ -117,3 +128,8 @@ StatusCode AthReentrantAlgorithm::sysInitialize() {
   }
   return sc;  
 }
+
+/// instantiate for Gaudi::Algorithm
+template class AthCommonReentrantAlgorithm<Gaudi::Algorithm>;
+/// instantiate for Gaudi::AsynchronousAlgorithm
+template class AthCommonReentrantAlgorithm<Gaudi::AsynchronousAlgorithm>;

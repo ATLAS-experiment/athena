@@ -1,11 +1,12 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthReentrantAlgorithm.h 
 // Header file for class AthReentrantAlgorithm
+// Author: Beojan Stanislaus
 // Author: Charles Leggett
 /////////////////////////////////////////////////////////////////// 
 #ifndef ATHENABASECOMPS_ATHREENTRANTALGORITHM_H
@@ -13,13 +14,7 @@
 
 
 // STL includes
-#include <string>
-#include <type_traits>
-
-#include "AthenaBaseComps/AthCommonDataStore.h"
-#include "AthenaBaseComps/AthCommonMsg.h"
-#include "AthenaBaseComps/AthCheckMacros.h"
-#include "AthenaBaseComps/AthMemMacros.h"
+#include "AthenaBaseComps/AthCommonReentrantAlgorithm.h"
 
 
 #include "Gaudi/Algorithm.h"
@@ -76,82 +71,8 @@
  *  }
  @endcode
  */
-
-
-class AthReentrantAlgorithm
-  : public AthCommonDataStore<AthCommonMsg<Gaudi::Algorithm>>
-{ 
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
- public: 
-
-  /// Constructor with parameters:
-  AthReentrantAlgorithm(const std::string& name, ISvcLocator* pSvcLocator);
-
-  /// Destructor: 
-  virtual ~AthReentrantAlgorithm() override;
-
-  /** @brief Override sysInitialize
-   *
-   * Loop through all output handles, and if they're WriteCondHandles,
-   * automatically register them and this Algorithm with the CondSvc
-   */
-  virtual StatusCode sysInitialize() override;
-  
-
-  /** Specify if the algorithm is clonable
-   *
-   * Reentrant algorithms are clonable.
-   */
-  virtual bool isClonable() const override;
-
-
-  /** Cardinality (Maximum number of clones that can exist)
-   *  special value 0 means that algorithm is reentrant
-   *
-   * Override this to return 0 for reentrant algorithms.   */
-  virtual unsigned int cardinality() const override;
-
-
-  /**
-   * @brief Execute an algorithm.
-   *
-   * We override this in order to work around an issue with the Algorithm
-   * base class storing the event context in a member variable that can
-   * cause crashes in MT jobs.
-   */
-  virtual StatusCode sysExecute (const EventContext& ctx) override;
-
-  
-  /**
-   * @brief Return the list of extra output dependencies.
-   *
-   * This list is extended to include symlinks implied by inheritance
-   * relations.
-   */
-  virtual const DataObjIDColl& extraOutputDeps() const override;
-
-  virtual bool filterPassed(const EventContext& ctx) const {
-    return execState( ctx ).filterPassed();
-  }
-
-  virtual void setFilterPassed( bool state, const EventContext& ctx ) const {
-    execState( ctx ).setFilterPassed( state );
-  }
-
-
- private: 
-
-  /// Default constructor: 
-  AthReentrantAlgorithm(); //> not implemented
-  AthReentrantAlgorithm (const AthReentrantAlgorithm& ); //> not implemented
-  AthReentrantAlgorithm& operator= (const AthReentrantAlgorithm&); //> not implemented
-
-  /// Extra output dependency collection, extended by AthAlgorithmDHUpdate
-  /// to add symlinks.  Empty if no symlinks were found.
-  DataObjIDColl m_extendedExtraObjects;
-
-}; 
+class AthReentrantAlgorithm : public AthCommonReentrantAlgorithm<Gaudi::Algorithm>{
+    using AthCommonReentrantAlgorithm<Gaudi::Algorithm>::AthCommonReentrantAlgorithm;
+};
 
 #endif //> !ATHENABASECOMPS_ATHREENTRANTALGORITHM_H
