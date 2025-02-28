@@ -176,6 +176,10 @@ public:
 
   /// The container handle.
   ReadHandleKey<T> m_contHandleKey;
+
+private:
+
+  const VarHandleKey* m_contBaseKey = nullptr;
 };
 
 

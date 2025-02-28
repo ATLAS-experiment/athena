@@ -97,7 +97,8 @@ WriteDecorHandleKey<T>::WriteDecorHandleKey (OWNER* owner,
                                              const std::string& decorKey,
                                              const std::string& doc)
  : Base (makeContDecorKey (contKey, decorKey)),
-   m_contHandleKey (contKey.key()/*, StoreID::storeName(StoreID::EVENT_STORE)*/)
+   m_contHandleKey (contKey.key()/*, StoreID::storeName(StoreID::EVENT_STORE)*/),
+   m_contBaseKey (&contKey)
 {
   owner->declareProperty(name, *this, doc);
 }
@@ -116,6 +117,7 @@ WriteDecorHandleKey<T>&
 WriteDecorHandleKey<T>::operator= (const std::string& sgkey)
 {
   m_contHandleKey = contKeyFromKey (sgkey);
+  m_contBaseKey = nullptr;
   Base::operator= (sgkey);
   return *this;
 }
@@ -152,6 +154,13 @@ StatusCode WriteDecorHandleKey<T>::assign (const std::string& sgkey)
 template <class T>
 StatusCode WriteDecorHandleKey<T>::initialize (bool used /*= true*/)
 {
+  if (m_contBaseKey) {
+    std::string decor = this->key();
+    if (auto split = decor.rfind ('.'); split != std::string::npos)
+      decor = decor.substr (split+1);
+    operator = (makeContDecorKey (*m_contBaseKey, decor));
+  }
+
   // detail::registerWriteDecorHandleKey (this->owner(), m_contHandleKey.fullKey());
   if (m_contHandleKey.initialize (used).isFailure())
     return StatusCode::FAILURE;
