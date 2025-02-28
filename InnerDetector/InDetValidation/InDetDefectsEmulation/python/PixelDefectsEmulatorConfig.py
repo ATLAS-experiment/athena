@@ -101,6 +101,14 @@ def ITkPixelDefectsEmulatorAlgCfg(flags,
     acc.addEventAlgo(CompFactory.InDet.PixelDefectsEmulatorAlg(name,**kwargs))
     return acc
 
+def ITkPixelDefectsEmulatorToDetectorElementStatusCondAlgCfg(flags,
+                                                             name: str = "ITkPixelDefectsEmulatorToDetectorElementStatusCondAlgCfg",
+                                                             **kwargs: dict) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault("EmulatedDefectsKey","ITkPixelEmulatedDefects")
+    kwargs.setdefault("WriteKey","ITkPixelDetectorElementStatusFromEmulatedDefects")
+    acc.addCondAlgo(CompFactory.InDet.PixelEmulatedDefectsToDetectorElementStatusCondAlg(name,**kwargs))
+    return acc
 
 if __name__ == "__main__":
 
@@ -147,4 +155,4 @@ if __name__ == "__main__":
 
     if sc.isFailure():
         import sys
-        sys.exit(1)
+        sys.exit(1) 

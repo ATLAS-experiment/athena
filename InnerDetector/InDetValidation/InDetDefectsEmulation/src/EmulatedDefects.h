@@ -120,6 +120,11 @@ namespace InDet {
       const InDetDD::SiDetectorElement &getDetectorElement(unsigned int id_hash) const {
          return *(m_detectorElements->at(id_hash));
       }
+      /** Return the detector element collection.
+       */
+      const InDetDD::SiDetectorElementCollection &getDetectorElementCollection() const {
+         return *m_detectorElements;
+      }
    protected:
       /** Resize data structures for this number of modules.
        */

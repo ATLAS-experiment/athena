@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelDetectorElementStatusToolBase.h"
-#include "PixelDetectorElementStatus.h"
+#include "PixelReadoutGeometry/PixelDetectorElementStatus.h"
 
 PixelDetectorElementStatusToolBase::PixelDetectorElementStatusToolBase(const std::string& type, const std::string& name, const IInterface* parent)
   :base_class(type, name, parent)

@@ -14,7 +14,8 @@ def emulateITkStripDefects(flags,
                            FillHistogramsPerPattern: bool=True,
                            FillEtaPhiHistogramsPerPattern: bool=True,
                            HistogramGroupName: str="ITkStripDefects",
-                           HistogramFileName: str="itk_strip_defects.root") :
+                           HistogramFileName: str="itk_strip_defects.root",
+                           PropagateDefectsToStatus=True) :
     """
     Schedule algorithms to create ITk strip defect conditions data and to emulate
     defects by dropping ITk strip RDOs overlapping with such defects. ModuleDefectProb controls the number of
@@ -25,6 +26,7 @@ def emulateITkStripDefects(flags,
     from InDetDefectsEmulation.StripDefectsEmulatorConfig import (
         ITkStripDefectsEmulatorCondAlgCfg,
         ITkStripDefectsEmulatorAlgCfg,
+        ITkStripDefectsEmulatorToDetectorElementStatusCondAlgCfg,
         DefectsHistSvcCfg,
         moduleDefect,
         combineModuleDefects
@@ -82,3 +84,12 @@ def emulateITkStripDefects(flags,
                                              # to enable histogramming:
                                              HistogramGroupName=f"/{HistogramGroupName}/StripRejectedRDOs/" if HistogramGroupName is not None else "",
                                              OutputLevel=INFO))
+
+    if PropagateDefectsToStatus :
+        # propagate defects to detector element status
+        cfg.merge(ITkStripDefectsEmulatorToDetectorElementStatusCondAlgCfg(flags,
+                                                                           name="ITkStripDefectsEmulatorToDetectorElementStatusCondAlg",
+                                                                           EmulatedDefectsKey="ITkStripEmulatedDefects",
+                                                                           WriteKey="ITkStripDetectorElementStatusFromEmulatedDefects"))
+        strip_det_el_status_cond_alg=cfg.getCondAlgo("ITkStripDetectorElementStatusCondAlgNoByteStreamErrors")
+        strip_det_el_status_cond_alg.ConditionsSummaryTool.SCTDetElStatusCondDataBaseKey="ITkStripDetectorElementStatusFromEmulatedDefects"
