@@ -8,6 +8,7 @@
 #include <cstdint>
 
 // Provider of simple function for conversion of data into the FPGA dataformat
+// Using FPGA Dataformat doc v0.6
 namespace FPGADataFormatUtilities
 {
     consteval uint64_t SELECTBITS(uint8_t len, uint8_t startbit) {
