@@ -37,6 +37,7 @@ def emulateITkPixelDefects(flags,
     from InDetDefectsEmulation.PixelDefectsEmulatorConfig import (
         ITkPixelDefectsEmulatorCondAlgCfg,
         ITkPixelDefectsEmulatorAlgCfg,
+        ITkPixelDefectsEmulatorToDetectorElementStatusCondAlgCfg,
         DefectsHistSvcCfg
     )
     from AthenaCommon.Constants import INFO
@@ -70,6 +71,13 @@ def emulateITkPixelDefects(flags,
                                              HistogramGroupName=f"/{HistogramGroupName}/RejectedRDOs/" if HistogramGroupName is not None else "",
                                              OutputLevel=INFO))
 
+    # propagate defects to detector element status
+    cfg.merge(ITkPixelDefectsEmulatorToDetectorElementStatusCondAlgCfg(flags,
+                                                                       name="ITkPixelDefectsEmulatorToDetectorElementStatusCondAlg",
+                                                                       EmulatedDefectsKey="ITkPixelEmulatedDefects",
+                                                                       WriteKey="ITkPixelDetectorElementStatusFromEmulatedDefects"))
+    pixel_det_el_status_cond_alg=cfg.getCondAlgo("ITkPixelDetectorElementStatusCondAlgNoByteStreamErrors")
+    pixel_det_el_status_cond_alg.ConditionsSummaryTool.PixelDetElStatusCondDataBaseKey="ITkPixelDetectorElementStatusFromEmulatedDefects"
 
 def emulatePixelDefects(flags,
                         cfg,

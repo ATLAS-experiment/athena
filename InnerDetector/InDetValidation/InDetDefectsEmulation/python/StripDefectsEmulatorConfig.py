@@ -193,6 +193,15 @@ def ITkStripDefectsEmulatorAlgCfg(flags,
     acc.addEventAlgo(CompFactory.InDet.StripDefectsEmulatorAlg(name,**kwargs))
     return acc
 
+def ITkStripDefectsEmulatorToDetectorElementStatusCondAlgCfg(flags,
+                                                             name: str = "ITkStripDefectsEmulatorToDetectorElementStatusCondAlgCfg",
+                                                             **kwargs: dict) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault("EmulatedDefectsKey","ITkStripEmulatedDefects")
+    kwargs.setdefault("WriteKey","ITkStripDetectorElementStatusFromEmulatedDefects")
+    acc.addCondAlgo(CompFactory.InDet.StripEmulatedDefectsToDetectorElementStatusCondAlg(name,**kwargs))
+    return acc
+
 
 if __name__ == "__main__":
     #

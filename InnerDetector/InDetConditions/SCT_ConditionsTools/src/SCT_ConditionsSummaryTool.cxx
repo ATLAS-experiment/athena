@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -9,7 +9,7 @@
  **/
 
 #include "SCT_ConditionsSummaryTool.h"
-#include "SCT_DetectorElementStatus.h"
+#include "SCT_ReadoutGeometry/SCT_DetectorElementStatus.h"
 #include "SCT_ConditionsTools/ISCT_ConditionsTool.h"
 
 #include "GaudiKernel/EventContext.h"

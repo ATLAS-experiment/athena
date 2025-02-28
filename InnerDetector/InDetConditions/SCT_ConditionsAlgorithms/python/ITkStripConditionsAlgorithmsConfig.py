@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
@@ -74,7 +74,7 @@ def ITkStripDetectorElementCondAlgCfg(flags, name="ITkStripDetectorElementCondAl
     acc.addCondAlgo(CompFactory.SCT_DetectorElementCondAlg(name, **kwargs))
     return acc
 
-def ITkStripDetectorElementStatusCondAlgNoByteStreamErrorsCfg(flags, name = "ITkStripDetectorElementStatusCondAlgNoByteStreamErrorsCfg", **kwargs) :
+def ITkStripDetectorElementStatusCondAlgNoByteStreamErrorsCfg(flags, name = "ITkStripDetectorElementStatusCondAlgNoByteStreamErrors", **kwargs) :
     '''
     Condition alg to precompute the strip detector element status.
     This algorithm does not consider the byte stream errors which are event data.
