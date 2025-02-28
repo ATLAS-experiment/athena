@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -313,114 +313,6 @@ StatusCode PixelDetectorTool::clear()
     proxy->reset();
     m_manager = nullptr;
   }
-  return StatusCode::SUCCESS;
-}
-  
-StatusCode   
-PixelDetectorTool::registerCallback ATLAS_NOT_THREAD_SAFE ()
-{
-   // Thread unsafe DataHandle template and StoreGateSvc::regFcn method are used.
-  StatusCode sc = StatusCode::FAILURE;
-  if (m_alignable) {
-
-    if (m_useDynamicAlignFolders) {  
-      std::string folderName = "/Indet/AlignL1/ID";
-      if (detStore()->contains<CondAttrListCollection>(folderName)) {
-	ATH_MSG_DEBUG("Registering callback on global Container with folder " << folderName );
-	const DataHandle<CondAttrListCollection> calc;
-	StatusCode ibltmp = detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool*>(this), calc, folderName);
-	// We don't expect this to fail as we have already checked that the detstore contains the object.                           
-	if (ibltmp.isFailure()) {
-	  ATH_MSG_ERROR("Problem when register callback on global Container with folder " << folderName);
-	} else {
-	  sc =  StatusCode::SUCCESS;
-	}
-      } else {
-      ATH_MSG_WARNING("Unable to register callback on global Container with folder " << folderName);
-	//return StatusCode::FAILURE;
-      }
-
-      folderName = "/Indet/AlignL2/PIX";
-      if (detStore()->contains<CondAttrListCollection>(folderName)) {
-	ATH_MSG_DEBUG("Registering callback on global Container with folder " << folderName );
-	const DataHandle<CondAttrListCollection> calc;
-	StatusCode ibltmp = detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool*>(this), calc, folderName);
-	// We don't expect this to fail as we have already checked that the detstore contains the object.                           
-	if (ibltmp.isFailure()) {
-	  ATH_MSG_ERROR("Problem when register callback on global Container with folder " << folderName);
-	} else {
-	  sc =  StatusCode::SUCCESS;
-	}
-      } else {
-    ATH_MSG_WARNING("Unable to register callback on global Container with folder " << folderName);
-        //return StatusCode::FAILURE;
-      }
-
-      folderName = "/Indet/AlignL3";
-      if (detStore()->contains<AlignableTransformContainer>(folderName)) {
-	ATH_MSG_DEBUG("Registering callback on AlignableTransformContainer with folder " << folderName );
-	const DataHandle<AlignableTransformContainer> atc;
-	StatusCode sctmp = detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool *>(this), atc, folderName);
-	if(sctmp.isFailure()) {
-	  ATH_MSG_ERROR("Problem when register callback on AlignableTransformContainer with folder " << folderName);
-	} else {
-	  sc =  StatusCode::SUCCESS;
-	}
-      }
-      else {
-	ATH_MSG_WARNING("Unable to register callback on AlignableTransformContainer with folder " << folderName);
-	//return StatusCode::FAILURE;
-      }
-    }
-
-    
-    else {
-      std::string folderName = "/Indet/Align";
-      if (detStore()->contains<AlignableTransformContainer>(folderName)) {
-	ATH_MSG_DEBUG("Registering callback on AlignableTransformContainer with folder " << folderName );
-	const DataHandle<AlignableTransformContainer> atc;
-	StatusCode sctmp = detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool *>(this), atc, folderName);
-	if(sctmp.isFailure()) {
-	  ATH_MSG_ERROR("Problem when register callback on AlignableTransformContainer with folder " << folderName);
-	} else {
-	  sc =  StatusCode::SUCCESS;
-	}
-      }
-      else {
-	ATH_MSG_WARNING("Unable to register callback on AlignableTransformContainer with folder " 
-			<< folderName << ", Alignment disabled (only if no Run2 scheme is loaded)!" );
-	//return StatusCode::FAILURE; 
-      }
-    }
-    
-    if (m_tweakIBLDist) {
-      //IBLDist alignment should be made optional; Will not be available prior to period G in Run2
-      std::string ibl_folderName = "/Indet/IBLDist";
-      if (detStore()->contains<CondAttrListCollection>(ibl_folderName)) {
-	ATH_MSG_DEBUG("Registering callback on IBLDist with folder " << ibl_folderName );
-	const DataHandle<CondAttrListCollection> calc;
-	StatusCode ibltmp = detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool*>(this), calc, ibl_folderName);
-	// We don't expect this to fail as we have already checked that the detstore contains the object.
-	if (ibltmp.isFailure()) {
-	  ATH_MSG_ERROR("Problem when register callback on IBLDist with folder " << ibl_folderName);
-	} else {
-	  sc =  StatusCode::SUCCESS;
-	}
-      } else {
-	// We don't return false, as it might be possible that we run an old configuration without new DB;
-	// Return a clear warning msg for now.
-      ATH_MSG_WARNING("Unable to register callback on IBLDist with folder " << ibl_folderName);
-      ATH_MSG_WARNING("This should not happen that  no LB-IOV IBL-bowing DB is provided for this run ");
-      }
-    }// end of tweakIBLDist
-
-  } else {
-    ATH_MSG_INFO("Alignment disabled. No callback registered" );
-    // We return failure otherwise it will try and register
-    // a GeoModelSvc callback associated with this callback.
-  }
-  return sc;
-
   return StatusCode::SUCCESS;
 }
   
