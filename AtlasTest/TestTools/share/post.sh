@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 #/** @file post.sh
 # @brief sh script that checks the return code of an executable and compares
@@ -186,6 +186,10 @@ PP="$PP"'|INFO Found XML file:|INFO copying from'
 
 # Differences between Gaudi versions.
 PP="$PP"'|DEBUG input handles:|DEBUG output handles:|DEBUG Data Deps for|DEBUG Property update for OutputLevel :|-ExtraInputs |-ExtraOutputs |-Cardinality |-IsClonable |-NeededResources |-Timeline |Service base class initialized successfully'
+
+# Changes in EventLoopMgr printout (Gaudi!993)
+PP="$PP"'|WARNING No events will be processed from external input'
+PP="$PP"'|Unable to locate service "EventSelector"'
 
 # StoreGate INFO messages changed to VERBOSE
 PP="$PP"'|^(StoreGateSvc|[^ ]+Store) +(INFO|VERBOSE) (Stop|stop|Start)'
