@@ -272,29 +272,29 @@ public:
 // WriteDecorHandle<T, D> makeHandle (const WriteDecorHandleKey<T>& key);
 
 
-// /**
-//  * @brief Return a @c WriteDecorHandle referencing @c key for an explicit context.
-//  * @param key The key object holding the clid/key/store.
-//  * @param ctx The event context.
-//  *
-//  * This will raise an exception if the StoreGate key is blank,
-//  * or if the event store cannot be found.
-//  *
-//  * If the default event store has been requested, then the thread-specific
-//  * store from the event context will be used.
-//  *
-//  * The type of the decoration must be included as an explicit template parameter:
-//  *
-//  *@code
-//  *   auto handle = SG::makeHandle<float> (key, ctx);
-//  @endcode
-//  *
-//  * Note that @c D comes first in the argument list.  It's given explicitly,
-//  * while @c T is inferred from @c key.
-//  */
-// template <class D, class T>
-// WriteDecorHandle<T, D> makeHandle (const WriteDecorHandleKey<T>& key,
-//                                    const EventContext& ctx);
+/**
+ * @brief Return a @c WriteDecorHandle referencing @c key for an explicit context.
+ * @param key The key object holding the clid/key/store.
+ * @param ctx The event context.
+ *
+ * This will raise an exception if the StoreGate key is blank,
+ * or if the event store cannot be found.
+ *
+ * If the default event store has been requested, then the thread-specific
+ * store from the event context will be used.
+ *
+ * The type of the decoration must be included as an explicit template parameter:
+ *
+ *@code
+ *   auto handle = SG::makeHandle<float> (key, ctx);
+ @endcode
+ *
+ * Note that @c D comes first in the argument list.  It's given explicitly,
+ * while @c T is inferred from @c key.
+ */
+template <class D, class T>
+WriteDecorHandle<T, D> makeHandle (const WriteDecorHandleKey<T>& key,
+                                   const EventContext& ctx);
 
 
 /**

@@ -21,4 +21,9 @@ atlas_add_library( AsgDataHandlesLib
    PRIVATE_INCLUDE_DIRS
    LINK_LIBRARIES AthContainers AsgMessagingLib xAODRootAccessInterfaces AsgTools )
 
+   atlas_add_test( gt_AsgDataHandles
+      SOURCES test/gt_AsgDataHandles.cxx
+      LINK_LIBRARIES AsgDataHandlesLib AsgTestingLib xAODEgamma
+      POST_EXEC_SCRIPT nopost.sh )
+
 endif()
