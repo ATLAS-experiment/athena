@@ -13,6 +13,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
 // GeoModel
 #include "GeoPrimitives/GeoPrimitives.h"
 //
@@ -20,13 +21,14 @@
 // Trk
 #include "CaloTrackingGeometry/ICaloSurfaceBuilder.h"
 #include "TrkDetDescrInterfaces/ICaloTrackingVolumeBuilder.h"
+#include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
+#include "TrkDetDescrInterfaces/ITrackingVolumeCreator.h"
+
 // STL
 #include <vector>
 
 
 namespace Trk {
-class ITrackingVolumeHelper;
-class ITrackingVolumeCreator;
 class TrackingVolume;
 class Material;
 class Volume;
@@ -82,36 +84,41 @@ private:
                           Amg::Transform3D& trIn) const;
 
   // ------------- private members -----------------------------------------
-
-  std::string m_lArMgrLocation; //!< Location of the CaloDetDescrMgr
+  StringProperty m_lArMgrLocation{
+    this, "LArDetManagerLocation", "LArMgr", "Store Gate key for LAr Detector Manager"};
 
   //!< Helper Tool to create TrackingVolumes
-  ToolHandle<Trk::ITrackingVolumeHelper> m_lArTrackingVolumeHelper;
+  ToolHandle<Trk::ITrackingVolumeHelper> m_lArTrackingVolumeHelper{
+    this, "TrackingVolumeHelper", "Trk::TrackingVolumeHelper/LArTrackingVolumeHelper"};
   //!< helper for volume creation
-  ToolHandle<Trk::ITrackingVolumeCreator> m_trackingVolumeCreator;
+  ToolHandle<Trk::ITrackingVolumeCreator> m_trackingVolumeCreator{
+    this, "TrackingVolumeCreator", "Trk::CylinderVolumeCreator/TrackingVolumeCreator"};
 
-  double m_lArBarrelEnvelope; //!< envelope Cover of the Barrel
-  double m_lArEndcapEnvelope; //!< envelope Cover of the Endcap
+  //!< envelope Cover of the Barrel
+  DoubleProperty m_lArBarrelEnvelope{this, "BarrelEnvelopeCover", 25.*Gaudi::Units::mm};
+  //!< envelope Cover of the Endcap
+  DoubleProperty m_lArEndcapEnvelope{this, "EndcapEnvelopeCover", 25.*Gaudi::Units::mm};
 
-  bool m_useCaloSurfBuilder; //!< if true use DetDescr based layering, if false
-                             //!< use biequidistant layering
+  //!< if true use DetDescr based layering, if false use biequidistant layering
+  BooleanProperty m_useCaloSurfBuilder{this, "UseCaloSurfBuilder", true};
+
   //!< if m_useCaloSurfBuilder == true, number of layers
   //!< per dead material region or sampling
-  unsigned int m_lArLayersPerRegion;
+  UnsignedIntegerProperty m_lArLayersPerRegion{this, "LayersPerRegion", 1};
 
   //!< if true use DetDescr based layering,
   //!< if false use biequidistant layering
-  bool m_useCaloTrackingGeometryBounds;
+  BooleanProperty m_useCaloTrackingGeometryBounds{this, "UseCaloTrackingGeometryBounds", true};
 
   //!< tool required for DetDescr-based layering
-  ToolHandle<ICaloSurfaceBuilder> m_calosurf;
+  ToolHandle<ICaloSurfaceBuilder> m_calosurf{this, "CaloSurfaceBuilder", "CaloSurfaceBuilder"};
 
   //internal garbage collector (protected by lock)
   typedef std::set<const Trk::Material*> MaterialGarbage;
   mutable MaterialGarbage m_materialGarbage ATLAS_THREAD_SAFE;
 
   // material scaling ( temporary ? )
-  float m_scale_HECmaterial;
+  FloatProperty m_scale_HECmaterial{this, "ScaleFactor_HECmaterial", 1.1};
 };
 
 } // end of namespace

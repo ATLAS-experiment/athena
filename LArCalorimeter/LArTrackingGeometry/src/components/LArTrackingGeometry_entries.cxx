@@ -1,4 +1,4 @@
-#include "LArTrackingGeometry/LArVolumeBuilder.h"
+#include "../LArVolumeBuilder.h"
 
 using namespace LAr;
 
