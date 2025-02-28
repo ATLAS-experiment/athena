@@ -22,7 +22,8 @@ DerivationFramework::DESDM_EXOTHIP_SkimmingTool::DESDM_EXOTHIP_SkimmingTool(cons
 									    const std::string& skimtool,
 									    const IInterface* interface ) :
   
-  AthAlgTool(CPP_exothip, skimtool, interface)
+  AthAlgTool(CPP_exothip, skimtool, interface),
+  m_trigDec("Trig::TrigDecisionTool/TrigDecisionTool")
 
 {
   declareInterface<DerivationFramework::ISkimmingTool>(this);
