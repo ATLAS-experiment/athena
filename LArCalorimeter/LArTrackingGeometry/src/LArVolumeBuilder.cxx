@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////
 
 // Calo
-#include "LArTrackingGeometry/LArVolumeBuilder.h"
+#include "LArVolumeBuilder.h"
 // LAr
 #include "LArReadoutGeometry/LArDetectorManager.h"
 // CaloDepth
@@ -26,8 +26,6 @@
 #include "GeoModelUtilities/GeoVisitVolumes.h"
 #include "GeoModelUtilities/GeoAlignmentStore.h"
 // Trk
-#include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
-#include "TrkDetDescrInterfaces/ITrackingVolumeCreator.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkDetDescrUtils/GeometrySignature.h"
@@ -47,39 +45,12 @@
 #include "TrkSurfaces/DiscBounds.h"
 #include "TrkGeometrySurfaces/SlidingCylinderSurface.h"
 #include "TrkGeometrySurfaces/SlidingDiscSurface.h"
-#include "GaudiKernel/SystemOfUnits.h"
-
-using Gaudi::Units::mm;
 
 // constructor
 LAr::LArVolumeBuilder::LArVolumeBuilder(const std::string& t, const std::string& n, const IInterface* p) :
-  AthAlgTool(t,n,p),
-  m_lArMgrLocation("LArMgr"),
-  m_lArTrackingVolumeHelper("Trk::TrackingVolumeHelper/LArTrackingVolumeHelper"),
-  m_trackingVolumeCreator("Trk::CylinderVolumeCreator/TrackingVolumeCreator"),
-  m_lArBarrelEnvelope(25.*mm),
-  m_lArEndcapEnvelope(25.*mm),
-  m_useCaloSurfBuilder(true),
-  m_lArLayersPerRegion(1),
-  m_useCaloTrackingGeometryBounds(true),
-  m_calosurf("CaloSurfaceBuilder"),
-  m_scale_HECmaterial(1.1)
+  AthAlgTool(t,n,p)
 {
   declareInterface<Trk::ICaloTrackingVolumeBuilder>(this);
-  // declare the properties via Python
-  declareProperty("LArDetManagerLocation",             m_lArMgrLocation);
-  declareProperty("TrackingVolumeCreator",            m_trackingVolumeCreator);
-  declareProperty("TrackingVolumeHelper",              m_lArTrackingVolumeHelper);
-  // endcap
-  declareProperty("BarrelEnvelopeCover",               m_lArBarrelEnvelope);
-  declareProperty("EndcapEnvelopeCover",               m_lArEndcapEnvelope);
-
-  declareProperty("UseCaloSurfBuilder",                m_useCaloSurfBuilder);
-  declareProperty("LayersPerRegion",                   m_lArLayersPerRegion);
-  declareProperty("UseCaloTrackingGeometryBounds",     m_useCaloTrackingGeometryBounds);
-  declareProperty("CaloSurfaceBuilder",                m_calosurf);
-  declareProperty("ScaleFactor_HECmaterial",           m_scale_HECmaterial);
-
 }
 
 // destructor
@@ -91,29 +62,17 @@ LAr::LArVolumeBuilder::~ LArVolumeBuilder()
 // initialize
 StatusCode LAr::LArVolumeBuilder::initialize()
 {
-  
-  // Retrieve the tracking volume helper   -------------------------------------------------    
-  if (m_lArTrackingVolumeHelper.retrieve().isFailure())
-    {
-      ATH_MSG_FATAL( "Failed to retrieve tool " << m_lArTrackingVolumeHelper );
-      return StatusCode::FAILURE;
-    } else
-    ATH_MSG_DEBUG( "Retrieved tool " << m_lArTrackingVolumeHelper );
+  // Retrieve the tracking volume helper
+  ATH_CHECK(m_lArTrackingVolumeHelper.retrieve());
+  ATH_MSG_DEBUG( "Retrieved tool " << m_lArTrackingVolumeHelper );
 
   // Retrieve the volume creator
-  if (m_trackingVolumeCreator.retrieve().isFailure()){
-    ATH_MSG_FATAL( "Failed to retrieve tool " << m_trackingVolumeCreator );
-    return StatusCode::FAILURE;
-  } else
-    ATH_MSG_DEBUG( "Retrieved tool " << m_trackingVolumeCreator );
+  ATH_CHECK(m_trackingVolumeCreator.retrieve());
+  ATH_MSG_DEBUG( "Retrieved tool " << m_trackingVolumeCreator );
   
   if(m_useCaloSurfBuilder){
-    if(m_calosurf.retrieve().isFailure())
-      {
-        ATH_MSG_FATAL( "Failed to retrieve tool " << m_calosurf );
-        return StatusCode::FAILURE;
-      } else
-      ATH_MSG_DEBUG( "Retrieved tool " << m_calosurf );
+    ATH_CHECK(m_calosurf.retrieve());
+    ATH_MSG_DEBUG( "Retrieved tool " << m_calosurf );
   }
   
   ATH_MSG_DEBUG( name() << " initialize() successful" );
