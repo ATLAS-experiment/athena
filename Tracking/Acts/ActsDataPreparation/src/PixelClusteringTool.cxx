@@ -6,7 +6,6 @@
 
 #include <Acts/Clusterization/Clusterization.hpp>
 
-#include <PixelReadoutGeometry/PixelModuleDesign.h>
 #include <xAODInDetMeasurement/PixelCluster.h>
 #include <xAODInDetMeasurement/PixelClusterContainer.h>
 #include <xAODInDetMeasurement/PixelClusterAuxContainer.h>
@@ -48,15 +47,14 @@ PixelClusteringTool::PixelClusteringTool(
 
 StatusCode
 PixelClusteringTool::makeCluster(const EventContext& ctx,
-				 const PixelClusteringTool::Cluster &cluster,
+				 PixelClusteringTool::Cluster &cluster,
 				 const PixelID& pixelID,
 				 const InDetDD::SiDetectorElement* element,
+				 const InDetDD::PixelModuleDesign& design,
 				 const PixelChargeCalibCondData *calibData,
 				 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
 				 xAOD::PixelCluster& xaodcluster) const
 { 
-  const InDetDD::PixelModuleDesign& design = 
-	dynamic_cast<const InDetDD::PixelModuleDesign&>(element->design());
 
   InDetDD::SiLocalPosition pos_acc(0,0);
   int tot_acc = 0;
@@ -78,23 +76,32 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
 
   Identifier moduleID = element->identify();
   IdentifierHash moduleHash = element->identifyHash();
-  
+
+  // This could be moved outside the cluster loop
+  bool multiChip = design.numberOfCircuits() > 1 ? true : false;
+    
   for (size_t i = 0; i < cluster.ids.size(); i++) {
     Identifier id = cluster.ids.at(i);
-    hasGanged = hasGanged ||
-      m_pixelRDOTool->isGanged(id, element).has_value();
-    
+
+    //Single chip modules do not have ganged pixels in ITk
+    if (multiChip)  {
+      hasGanged = hasGanged ||
+	m_pixelRDOTool->isGanged(id, element).has_value();
+    }
+        
     int tot = cluster.tots.at(i);
     float charge = tot;
         
     if (calibData) {
 
-      // The calibration strategy is updated for each element
+      // The calibration strategy is updated for each element 
       // Retrieving the calibration only depends on FE and not per cell (can be further optimized)
+      // Single FE modules could have an optimized getCharge function where the calib constants are cached
+      int feValue = multiChip ? m_pixelReadout->getFE(id, moduleID, element) : 0;
       charge = calibData->getCharge(m_pixelReadout->getDiodeType(id,element),
 				    calibStrategy,
 				    moduleHash,
-				    m_pixelReadout->getFE(id, moduleID, element),
+				    feValue,
 				    tot);
 
       // These numbers are taken from the Cluster Maker Tool
@@ -199,9 +206,9 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   xaodcluster.setIdentifier( element->identifierOfPosition(locpos).get_compact() );
   xaodcluster.setRDOlist(cluster.ids);
   xaodcluster.globalPosition() = globalPos.cast<float>();
-  xaodcluster.setToTlist(cluster.tots);
+  xaodcluster.setToTlist(std::move(cluster.tots));
   xaodcluster.setTotalToT( xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(cluster.tots) );
-  xaodcluster.setChargelist(chargeList);
+  xaodcluster.setChargelist(std::move(chargeList));
   xaodcluster.setTotalCharge( xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(chargeList) );
   xaodcluster.setLVL1A(cluster.lvl1min);
   xaodcluster.setChannelsInPhiEta(siWidth.colRow()[0],
@@ -248,7 +255,11 @@ PixelClusteringTool::clusterize(const RawDataCollection& RDOs,
     // Get the calibration strategy for this module. 
     // Default to RD53 if the calibData is not available. That is fine because it won't be used anyway
     auto calibrationStrategy = calibData ? calibData->getCalibrationStrategy(element->identifyHash()) : PixelChargeCalibCondData::CalibrationStrategy::RD53;
-    
+
+    // Get the element design
+    const InDetDD::PixelModuleDesign& design = 
+     static_cast<const InDetDD::PixelModuleDesign&>(element->design());
+        
     ClusterCollection clusters =
       Acts::Ccl::createClusters<CellCollection, ClusterCollection, 2>
       (cells, Acts::Ccl::DefaultConnect<Cell, 2>(m_addCorners));
@@ -262,11 +273,13 @@ PixelClusteringTool::clusterize(const RawDataCollection& RDOs,
     container.insert(container.end(), toAddCollection.begin(), toAddCollection.end());
     
     for (std::size_t i(0); i<clusters.size(); ++i) {
-      const Cluster& cluster = clusters[i];
+      Cluster& cluster = clusters[i];
+      
       ATH_CHECK(makeCluster(ctx,
 			    cluster,
 			    pixelID,
 			    element,
+			    design,
 			    calibData,
 			    calibrationStrategy,
 			    *container[previousSizeContainer+i]));
