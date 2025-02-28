@@ -14,13 +14,15 @@ Events=25
 DigiOutFileName="mc20a_ttbar_no_minbias.RDO.pool.root"
 HSHitsFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.simul.HITS.e4993_s3091/HITS.10504490._000425.pool.root.1"
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN2)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_MC)")
 
 Digi_tf.py \
     --CA \
-    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-12 \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --digiSteeringConf 'StandardSignalOnlyTruth' \
-    --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --inputHITSFile ${HSHitsFile} \
     --jobNumber 1 \
     --maxEvents ${Events} \
