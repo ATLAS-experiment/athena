@@ -45,9 +45,7 @@ namespace DerivationFramework {
   private:
     std::string m_trnnoutContName;
 
-    ToolHandle<Trig::TrigDecisionTool> m_trigDec{this,
-                                                 "TrigDecisionTool",
-						 "Trig::TrigDecisionTool"};
+    ToolHandle<Trig::TrigDecisionTool> m_trigDec;
     mutable std::atomic<unsigned int> m_ntot = 0;
     mutable std::atomic<unsigned int> m_npass = 0;
 
