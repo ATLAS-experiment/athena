@@ -1250,12 +1250,8 @@ namespace Trk {
   ) const {
     ATH_MSG_DEBUG("--> entering GlobalChi2Fitter::backupCombinationStrategy");
 
-    bool firstismuon = false;
-    const Track *indettrack = &intrk1;
-    if(isMuonTrack(intrk1)) {
-      firstismuon = true;
-      indettrack = &intrk2;
-    }
+    const bool firstismuon = isMuonTrack(intrk1);
+    const Track *indettrack = firstismuon ? &intrk2 : &intrk1;
 
     Trk::TrackStates::const_iterator beginStates = intrk1.trackStateOnSurfaces()->begin();
     Trk::TrackStates::const_iterator itStates = beginStates;
@@ -1494,13 +1490,11 @@ namespace Trk {
           m_DetID->is_stgc(rot->identify())
         )
       ) {
-        bool measphi = true;
         Amg::Vector3D measdir = surf->transform().rotation().col(0);
         double dotprod1 = measdir.dot(Amg::Vector3D(0, 0, 1));
         double dotprod2 = measdir.dot(Amg::Vector3D(surf->center().x(), surf->center().y(), 0) / surf->center().perp());
-        if (std::abs(dotprod1) > .5 || std::abs(dotprod2) > .5) {
-          measphi = false;
-        }
+
+        bool measphi = std::abs(dotprod1) <= .5 && std::abs(dotprod2) <= .5;
         if (measphi) {
           nphi++;
           Amg::Vector3D thispos =
@@ -2652,11 +2646,7 @@ namespace Trk {
       tsos->type(TrackStateOnSurface::Measurement) ||
       tsos->type(TrackStateOnSurface::Outlier)
     ) {
-      bool isoutlier = false;
-
-      if (tsos->type(TrackStateOnSurface::Outlier) && !cache.m_reintoutl) {
-        isoutlier = true;
-      }
+      bool isoutlier = tsos->type(TrackStateOnSurface::Outlier) && !cache.m_reintoutl;
 
       makeProtoStateFromMeasurement(
         cache,
