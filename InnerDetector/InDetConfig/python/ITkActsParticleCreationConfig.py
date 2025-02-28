@@ -4,7 +4,9 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def ITkActsTrackParticleCreationCfg(flags,
                                     *,
                                     TrackContainers: list[str],
-                                    TrackParticleContainer: str) -> ComponentAccumulator:
+                                    TrackParticleContainer: str,
+                                    persistifyCollection: bool = True,
+                                    PerigeeExpression: str = None) -> ComponentAccumulator:
     # This function does the following:
     # - Creates track particles from a collection of track containers
     # - Attaches truth decoration to the track particles
@@ -18,6 +20,11 @@ def ITkActsTrackParticleCreationCfg(flags,
     for container in TrackContainers:
         assert isinstance(container, str)
 
+    # Set the perigee expression to be used for track particle creation
+    # This is used by Heavy Ion configuration
+    if PerigeeExpression is None:
+        PerigeeExpression = flags.Tracking.perigeeExpression
+
     print("Storing track and track particle containers:")
     print(f"- track collection(s): {TrackContainers}")
     print(f"- track particle collection: {TrackParticleContainer}")
@@ -30,7 +37,8 @@ def ITkActsTrackParticleCreationCfg(flags,
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags,
                                                 name = f"{prefix}TrackToTrackParticleCnvAlg",
                                                 ACTSTracksLocation = TrackContainers,
-                                                TrackParticlesOutKey = TrackParticleContainer))
+                                                TrackParticlesOutKey = TrackParticleContainer,
+                                                PerigeeExpression = PerigeeExpression))
     
     if flags.Tracking.doTruth :
         from AthenaCommon.Constants import WARNING, INFO
@@ -46,14 +54,18 @@ def ITkActsTrackParticleCreationCfg(flags,
                                                              ComputeTrackRecoEfficiency = False if len(TrackContainers)==1 else True))
 
     # Persistification
-    toAOD = []
-    trackparticles_shortlist = [] if flags.Acts.EDM.PersistifyTracks else ['-actsTrack']
-    trackparticles_variables = ".".join(trackparticles_shortlist)
-    toAOD += [f"xAOD::TrackParticleContainer#{TrackParticleContainer}",
-              f"xAOD::TrackParticleAuxContainer#{TrackParticleContainer}Aux." + trackparticles_variables]
+    # By default this is always happening, but in the case the perigee strategy is set
+    # to Vertex we need to create a temporary track particle collection wrt the BeamLine
+    # which does not need to be persistified
+    if persistifyCollection:
+        toAOD = []
+        trackparticles_shortlist = [] if flags.Acts.EDM.PersistifyTracks else ['-actsTrack']
+        trackparticles_variables = ".".join(trackparticles_shortlist)
+        toAOD += [f"xAOD::TrackParticleContainer#{TrackParticleContainer}",
+                  f"xAOD::TrackParticleAuxContainer#{TrackParticleContainer}Aux." + trackparticles_variables]
         
-    from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
-    acc.merge(addToAOD(flags, toAOD))
+        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
+        acc.merge(addToAOD(flags, toAOD))
     
     return acc
 
