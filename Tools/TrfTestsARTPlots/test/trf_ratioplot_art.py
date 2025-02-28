@@ -55,8 +55,8 @@ def createRatio(h1, h2, ratiotitle):
  
   return h3
  
-def createCanvasPads():
-  c = TCanvas("c", "canvas", 800, 800)
+def createCanvasPads(c):
+  c.cd()
   # Upper histogram plot is pad1
   pad1 = TPad("pad1", "pad1", 0, 0.3, 1, 1.0)
   pad1.SetBottomMargin(0)  # joins upper and lower plot
@@ -70,7 +70,7 @@ def createCanvasPads():
   pad2.SetGridx()
   pad2.Draw()
  
-  return c, pad1, pad2
+  return pad1, pad2
 
 def findallhistos(filename):
   allhistos = []
@@ -96,6 +96,8 @@ def ratioplot(filenameref, filenametest, allhistos, campaignname, ratiotitle):
   f1 = TFile.Open(filenameref,"r")
   f2 = TFile.Open(filenametest,"r")
 
+  c = TCanvas("c", "canvas", 800, 800)
+
   for histoname in allhistos:
     f1.cd()
     h1 = f1.Get(histoname)
@@ -106,8 +108,8 @@ def ratioplot(filenameref, filenametest, allhistos, campaignname, ratiotitle):
     h1 = createH1(h1)
     h2 = createH2(h2)
     h3 = createRatio(h1, h2, ratiotitle)
-    c, pad1, pad2 = createCanvasPads()
- 
+    pad1, pad2 = createCanvasPads(c)
+
     # draw everything
     pad1.cd()
     h1.Draw()
