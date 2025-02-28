@@ -118,7 +118,8 @@ def ITkPixelRDOToolCfg(flags, name="ITkPixelRDOTool", **kwargs):
 
     kwargs.setdefault("PixelDetEleCollKey", "ITkPixelDetectorElementCollection")
     kwargs.setdefault("CheckGanged", False)
-
+    kwargs.setdefault("isITk", True)
+    
     acc.setPrivateTools(CompFactory.InDet.PixelRDOTool(name, **kwargs))
     return acc
 

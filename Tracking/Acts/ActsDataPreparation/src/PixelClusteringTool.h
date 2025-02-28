@@ -15,6 +15,8 @@
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
+#include "PixelReadoutGeometry/PixelModuleDesign.h"
+
 
 namespace InDet {
 
@@ -75,10 +77,13 @@ public:
 
 private:
     // N.B. the cluster is added to the container
+    // and the tots and charges vectors will be moved to the xAOD object
+  
   StatusCode makeCluster(const EventContext& ctx,
-			 const PixelClusteringTool::Cluster &cluster,
+			 PixelClusteringTool::Cluster &cluster,
 			 const PixelID& pixelID,
 			 const InDetDD::SiDetectorElement* element,
+			 const InDetDD::PixelModuleDesign& design,
 			 const PixelChargeCalibCondData *calibData,
 			 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
 			 xAOD::PixelCluster& container) const;

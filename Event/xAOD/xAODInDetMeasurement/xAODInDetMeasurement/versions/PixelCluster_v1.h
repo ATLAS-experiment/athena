@@ -98,12 +98,14 @@ class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
 
     /// Sets the list of ToT of the channels building the cluster
     void setToTlist(const std::vector<int>& tots);
+    void setToTlist(std::vector<int>&& tots);
 
     /// Sets the total ToT
     void setTotalToT(int totalToT);
 
     /// Sets the list of charges of the channels building the cluster
     void setChargelist(const std::vector<float>& charges);
+    void setChargelist(std::vector<float>&& charges);
 
     /// Sets the total charge
     void setTotalCharge(float totalCharge);
