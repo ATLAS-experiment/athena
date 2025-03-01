@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_WRITECONDHANDLE_H
@@ -35,6 +35,10 @@ namespace SG {
     WriteCondHandle(const WriteCondHandleKey<T>& key);
     WriteCondHandle(const WriteCondHandleKey<T>& key, const EventContext& ctx);
     
+    WriteCondHandle(SG::WriteCondHandleKey<T>&& key) = delete; // Not allowed from a temporary.
+    WriteCondHandle(SG::WriteCondHandleKey<T>&& key, 
+                    const EventContext& ctx) = delete; // Not allowed from a temporary.
+
     ~WriteCondHandle() {};   
 
     const std::string& key() const { return m_hkey.key(); }

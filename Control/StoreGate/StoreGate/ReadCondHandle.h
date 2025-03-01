@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_READCONDHANDLE_H
@@ -53,6 +53,10 @@ namespace SG {
     ReadCondHandle(const SG::ReadCondHandleKey<T>& key);
     ReadCondHandle(const SG::ReadCondHandleKey<T>& key, 
                    const EventContext& ctx);
+
+    ReadCondHandle(SG::ReadCondHandleKey<T>&& key) = delete; // Not allowed from a temporary.
+    ReadCondHandle(SG::ReadCondHandleKey<T>&& key, 
+                   const EventContext& ctx) = delete; // Not allowed from a temporary.
     
     ~ReadCondHandle() {};
     

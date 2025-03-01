@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_READMETAHANDLE_H
@@ -37,6 +37,10 @@ namespace SG {
     ReadMetaHandle(const SG::ReadMetaHandleKey<T>& key
 		   , const EventContext& ctx);
     
+    ReadMetaHandle(SG::ReadMetaHandleKey<T>&& key) = delete; // Not allowed from a temporary.
+    ReadMetaHandle(SG::ReadMetaHandleKey<T>&& key, 
+                   const EventContext& ctx) = delete; // Not allowed from a temporary.
+
     ~ReadMetaHandle() {};
     
     const_pointer_type retrieve();

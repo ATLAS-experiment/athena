@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/WriteDecorHandle.h
@@ -138,6 +138,13 @@ public:
    */
   explicit WriteDecorHandle (const WriteDecorHandleKey<T>& key,
                              const EventContext& ctx);
+
+
+  // Disallow initialization from a temporary Key object.
+  explicit WriteDecorHandle (SG::WriteDecorHandleKey<T>&& key) = delete; // Not allowed from a temporary.
+  explicit WriteDecorHandle (SG::WriteDecorHandleKey<T>&& key, 
+                             const EventContext& ctx) = delete; // Not allowed from a temporary.
+
 
   /**
    * @brief Copy constructor.
