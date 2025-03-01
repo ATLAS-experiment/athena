@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // VarHandleBase.cxx 
@@ -132,11 +132,13 @@ namespace SG {
    * @param sgkey StoreGate key of the referenced object.
    * @param mode Mode of this handle (read/write/update).
    * @param storename Name of the referenced event store.
+   * @param ctx The event context to use, or nullptr.
    */
   VarHandleBase::VarHandleBase(CLID clid,
                                const std::string& sgkey,
                                Gaudi::DataHandle::Mode mode,
-                               const std::string& storename) :  
+                               const std::string& storename,
+                               const EventContext* ctx) :  
     IResetable(),
     m_ptr(NULL),
     m_proxy(NULL),
@@ -146,6 +148,10 @@ namespace SG {
     m_key (m_ownedKey.get())
   {
     m_ownedKey->setOwningHandle (this);
+
+    if (ctx && !setStoreFromHandle(ctx)) {
+      throw SG::ExcHandleInitError (clid, sgkey, storename);
+    }
   }
 
 
