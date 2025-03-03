@@ -16,9 +16,19 @@
 
 using CLHEP::micrometer;
 
-namespace ActsTrk {
+// Helper functions for use with ACTS clusterization
+// Put these in the InDet namespace so that ACTS can find them
+// via ADL.
+//
+namespace InDet {
+  static inline int getCellRow(const InDet::UnpackedPixelRDO& cell) { return cell.ROW; }
+  static inline int getCellColumn(const InDet::UnpackedPixelRDO& cell) { return cell.COL; }
+  static inline int& getCellLabel(InDet::UnpackedPixelRDO& cell) { return cell.NCL; }
+}
 
-void clusterAddCell(PixelClusteringTool::Cluster& cl,
+namespace ActsTrk {
+  
+static inline void clusterAddCell(PixelClusteringTool::Cluster& cl,
 		    const PixelClusteringTool::Cell& cell)
 {
   cl.ids.push_back(cell.ID);
@@ -263,6 +273,7 @@ PixelClusteringTool::clusterize(const RawDataCollection& RDOs,
     ClusterCollection clusters =
       Acts::Ccl::createClusters<CellCollection, ClusterCollection, 2>
       (cells, Acts::Ccl::DefaultConnect<Cell, 2>(m_addCorners));
+
 
     std::size_t previousSizeContainer = container.size();
     // Fast insertion trick

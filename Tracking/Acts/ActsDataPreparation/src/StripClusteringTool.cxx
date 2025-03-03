@@ -161,6 +161,7 @@ StripClusteringTool::clusterize(const RawDataCollection& RDOs,
     ClusterCollection clusters =
 	Acts::Ccl::createClusters<CellCollection, ClusterCollection, 1>(cells);
 
+    
     std::size_t previousSizeContainer = container.size();
     // Fast insertion trick
     std::vector<xAOD::StripCluster*> toAddCollection;
@@ -300,6 +301,8 @@ StripClusteringTool::unpackRDOs(const InDetRawDataCollection<StripRDORawData>& R
 				const EventContext& ctx) const
 {
     CellCollection cells;
+    // reserve memory. number evaluated on ttbar pu200
+    cells.reserve(60);
     bool badStripOnModule{false};
 
     for (const StripRDORawData * raw : RDOs) {
