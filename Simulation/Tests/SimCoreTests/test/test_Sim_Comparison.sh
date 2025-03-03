@@ -14,17 +14,20 @@ rc=$?
 status=$rc
 echo "art-result: $rc CAsim_script"
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN2)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_MC)")
+
 # Job Transform
 AtlasG4_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC16-SDR-14' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --physicsList 'FTFP_BERT_ATL' \
     --truthStrategy 'MC15aPlus' \
     --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preExec 'AtlasG4Tf:flags.Sim.TightMuonStepping=True;from SimulationConfig.SimEnums import CalibrationRun;flags.Sim.CalibrationRun=CalibrationRun.Off;from SimulationConfig.G4Optimizations import enableBeamPipeKill,enableFrozenShowersFCalOnly;enableBeamPipeKill(flags);enableFrozenShowersFCalOnly(flags)' \
     --DataRunNumber '284500' \
-    --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
     --outputHITSFile "test.HITS.pool.root" \
     --maxEvents 4 \

@@ -9,6 +9,9 @@
 # art-output: log.*
 # art-output: Config*.pkl
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 AtlasG4_tf.py \
     --CA \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/pi_E50_eta0-60.evgen.pool.root' \
@@ -16,8 +19,8 @@ AtlasG4_tf.py \
     --maxEvents '10' \
     --skipEvents '0' \
     --randomSeed '10' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationSingleIoVCalibrationHits' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
