@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+*   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "./GepTopoTowerAlg.h"
 #include "./Cluster.h"
@@ -39,17 +39,6 @@ StatusCode GepTopoTowerAlg::execute(const EventContext& context) const {
   CHECK(h_caloClusters.isValid());
   ATH_MSG_DEBUG("Read in " << h_caloClusters->size() << " clusters");
 
-  const auto inputTopoClusters = *h_caloClusters;
-
-/*  auto h_gepCellsMap = SG::makeHandle(m_gepCellsKey, context);
-  CHECK(h_gepCellsMap.isValid());
-  auto gepCellsMap = *h_gepCellsMap;
-  ATH_MSG_INFO("Read in " << gepCellsMap.size() << " GEP cells");
-
-  auto cellsPtr = gepCellsMap.getCellMap(); // Unique pointer to map
-  auto& cells = *cellsPtr; // Dereference to get std::map<unsigned int, Gep::GepCaloCell>
-*/
-
   auto h_caloCells = SG::makeHandle(m_caloCellsKey, context);
   CHECK(h_caloCells.isValid());
   auto cells = *h_caloCells;
@@ -61,14 +50,11 @@ StatusCode GepTopoTowerAlg::execute(const EventContext& context) const {
                                     std::make_unique<xAOD::CaloClusterAuxContainer>()));
 
   // Define tower array (98 eta bins x 64 phi bins)
-  Gep::Cluster tow[98][64];
+  static constexpr int nEta{98};
+  static constexpr int nPhi{64};
+  //avoid stack use of 605kb
+  auto tow = new Gep::Cluster[nEta][nPhi]();
 
-  // Initialize towers (erase previous data)
-  for (int i = 0; i < 98; ++i) {
-      for (int j = 0; j < 64; ++j) {
-          tow[i][j].erase();
-      }
-  }
 
   // Loop over clusters and their associated cells
   for (const auto& iClust : *h_caloClusters) {
@@ -84,7 +70,7 @@ StatusCode GepTopoTowerAlg::execute(const EventContext& context) const {
           int phi_index = static_cast<int>(std::floor(cell->phi() * 10)) + 32;
 
           // Ensure indices are within bounds
-          if (eta_index < 0 || eta_index >= 98 || phi_index < 0 || phi_index >= 64) continue;
+          if (eta_index < 0 || eta_index >= nEta || phi_index < 0 || phi_index >= nPhi) continue;
 
           // Accumulate cell data into the corresponding tower
           TLorentzVector cellVector;
@@ -96,28 +82,22 @@ StatusCode GepTopoTowerAlg::execute(const EventContext& context) const {
 
   // Collect non-empty towers into a vector
   std::vector<Gep::Cluster> customTowers;
-  for (int i = 0; i < 98; ++i) {
-      for (int j = 0; j < 64; ++j) {
+  for (int i = 0; i < nEta; ++i) {
+      for (int j = 0; j < nPhi; ++j) {
           if (tow[i][j].vec.Et() > 0) {
               customTowers.push_back(tow[i][j]);
           }
       }
   }  
+  delete[] tow;
 
   // Store the Gep clusters to a CaloClusters, and write out.
   h_outputCaloClusters->reserve(customTowers.size());
 
   for(const auto& gepclus: customTowers){
-
-    // make a unique_ptr, but keep hold of the bare pointer
-    auto caloCluster = std::make_unique<xAOD::CaloCluster>();
-    auto *ptr = caloCluster.get();
-
     // store the calCluster to fix up the Aux container:
-    h_outputCaloClusters->push_back(std::move(caloCluster));
-
-    // this invalidates the unque_ptr, but can use the bare ptr
-    // to update the calo cluster.
+    auto *ptr = h_outputCaloClusters->push_back(std::make_unique<xAOD::CaloCluster>());
+    // update the calo cluster.
     ptr->setE(gepclus.vec.E());
     ptr->setEta(gepclus.vec.Eta());
     ptr->setPhi(gepclus.vec.Phi());
