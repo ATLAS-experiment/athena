@@ -332,8 +332,41 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
       h.m_tuple->Fill();
     };
 
+    lockDecorations (inpTrk);
+
     return res;
  }
+
+
+  void NewVrtSecInclusiveTool::lockDecorations (const std::vector<const xAOD::TrackParticle*> & inpTrk) const
+  {
+    // We may have track from several containers.  Use this to keep track
+    // of which ones we've processed.  We only expect a few distinct ones,
+    // so just use a vector.
+    std::vector<const SG::AuxVectorData*> containers;
+    containers.reserve (16);
+
+    for (const xAOD::TrackParticle* t : inpTrk) {
+      const SG::AuxVectorData* c = t->container();
+      if (c && std::find (containers.begin(), containers.end(), c) == containers.end())
+      {
+        containers.push_back (c);
+        // Ok because we just made these decorations.
+        SG::AuxVectorData* c_nc ATLAS_THREAD_SAFE = const_cast<SG::AuxVectorData*> (c);
+        c_nc->lockDecoration (m_is_selected.auxid());
+        c_nc->lockDecoration (m_is_svtrk_final.auxid());
+        c_nc->lockDecoration (m_pt_wrtSV.auxid());
+        c_nc->lockDecoration (m_eta_wrtSV.auxid());
+        c_nc->lockDecoration (m_phi_wrtSV.auxid());
+        c_nc->lockDecoration (m_d0_wrtSV.auxid());
+        c_nc->lockDecoration (m_z0_wrtSV.auxid());
+        c_nc->lockDecoration (m_errP_wrtSV.auxid());
+        c_nc->lockDecoration (m_errd0_wrtSV.auxid());
+        c_nc->lockDecoration (m_errz0_wrtSV.auxid());
+        c_nc->lockDecoration (m_chi2_toSV.auxid());
+      }
+    }
+  }
 
 
   NewVrtSecInclusiveTool::Hists&

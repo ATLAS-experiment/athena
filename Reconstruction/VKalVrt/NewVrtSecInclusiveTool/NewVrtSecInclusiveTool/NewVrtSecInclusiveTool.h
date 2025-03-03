@@ -98,6 +98,7 @@ namespace Rec {
 //
 
     private:
+      void lockDecorations (const std::vector<const xAOD::TrackParticle*> & inpTrk) const;
 
       double m_w_1{};
       struct DevTuple;
