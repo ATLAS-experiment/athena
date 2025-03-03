@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonTesterTree/FourVectorBranch.h>
 
@@ -21,7 +21,20 @@ void PtEtaPhiEBranch::push_back(const TLorentzVector& vec) { push_back(vec.Pt(),
 void PtEtaPhiEBranch::operator+=(const TLorentzVector& vec) { push_back(vec); }
 void PtEtaPhiEBranch::set(const TLorentzVector& vec, size_t pos) { set(vec.Pt(), vec.Eta(), vec.Phi(), vec.E(), pos); }
 #ifndef XAOD_ANALYSIS
-void PtEtaPhiEBranch::push_back(const HepMC::FourVector& vec) { push_back(vec.perp(), vec.eta(), vec.phi(), vec.e()); }
+void PtEtaPhiEBranch::push_back(const HepMC::FourVector& vec)
+{
+  float eta = 0;
+  if (vec.perp()/std::abs(vec.pz()) < 1e-8) {
+    if (vec.pz() > 0)
+      eta = 1e72;
+    else
+      eta = -1e72;
+  }
+  else {
+    eta = vec.eta();
+  }
+  push_back(vec.perp(), eta, vec.phi(), vec.e());
+}
 void PtEtaPhiEBranch::set(const HepMC::FourVector& vec, size_t pos) { set(vec.perp(), vec.eta(), vec.phi(), vec.e(), pos); }
 void PtEtaPhiEBranch::operator+=(const HepMC::FourVector& vec) { push_back(vec); }
 #endif
