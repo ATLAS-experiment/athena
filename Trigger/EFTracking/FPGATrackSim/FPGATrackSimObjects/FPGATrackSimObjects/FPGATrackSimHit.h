@@ -178,6 +178,12 @@ public:
     void setStripChipIDForITk(int v){ m_stripChipinITKEDM = v;}
     void setStripHitMapForITk(int v){ m_stripHitMapinITKEDM = v;}
 
+    int getCluster1ID() const {return m_clusterIndex1ForFPGA;}
+    void setCluster1ID(int v) {m_clusterIndex1ForFPGA = v;}
+
+    int getCluster2ID() const {return m_clusterIndex2ForFPGA;}
+    void setCluster2ID(int v) {m_clusterIndex2ForFPGA = v;}
+
     ///////////////////////////////////////////////////////////////////////
     // Other Interface
 
@@ -261,15 +267,18 @@ protected:
 
 
     // For ITk EDM encoding
+    int m_clusterIndex1ForFPGA = -1; // Index1 to keep a track of all the clusters used in track in FPGA
+    int m_clusterIndex2ForFPGA = -1; // Index2 to keep a track of all the clusters used in track in FPGA
 
     bool m_isValidForITK = false; // Should this hit be used for ITk EDM testing
     int m_stripRowinITKEDM = -1; // Strip hit row ID in ITk EDM format
     int m_stripChipinITKEDM = -1; // Strip chip ID in ITk EDM format
     int m_stripHitMapinITKEDM = -1; // Strip hit map in ITk EDM format
 
+
     int m_roadID = 0;
 
-    ClassDefNV(FPGATrackSimHit, 10);
+    ClassDefNV(FPGATrackSimHit, 11);
 };
 
 // Container of <FPGATrackSimHit const *>
