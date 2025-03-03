@@ -688,10 +688,16 @@ def MvaTESVariableDecoratorCfg(flags):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'MvaTESVariableDecorator'
 
+    eventShapeCollection = flags.Tau.ActiveConfig.EventShapeCollection
+    if 'EMPFlow' in flags.Tau.ActiveConfig.SeedJetCollection:
+        eventShapeCollection = "Kt4EMPFlowEventShape"
+    elif 'EMTopo' in flags.Tau.ActiveConfig.SeedJetCollection:
+        eventShapeCollection ="Kt4EMTopoOriginEventShape"
+
     MvaTESVariableDecorator = CompFactory.getComp("MvaTESVariableDecorator")
     MvaTESVariableDecorator = MvaTESVariableDecorator(name = _name,
                                                       Key_vertexInputContainer = flags.Tau.ActiveConfig.VertexCollection,
-                                                      EventShapeKey = flags.Tau.ActiveConfig.EventShapeCollection,
+                                                      EventShapeKey = eventShapeCollection,
                                                       VertexCorrection = flags.Tau.doVertexCorrection)
     result.setPrivateTools(MvaTESVariableDecorator)
     return result
