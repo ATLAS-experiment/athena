@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CaloUtils/ToolWithConstants.icc
@@ -18,7 +18,7 @@ namespace CaloUtils {
  * @param name Name of the constant.
  * @param doc Documentation string.
  */
-template <class T>
+template <CxxUtils::FromArrayrep T>
 template <class OWNER>
 ToolConstant<T>::ToolConstant (OWNER* owner,
                                const std::string& name,
@@ -42,7 +42,7 @@ ToolConstant<T>::ToolConstant (OWNER* owner,
  * otherwise, if a char* is given for the third argument, it would
  * match the following signature instead of the previous one.)
  */
-template <class T>
+template <CxxUtils::FromArrayrep T>
 template <class OWNER>
 ToolConstant<T>::ToolConstant (OWNER* owner,
                                const std::string& name,
@@ -61,7 +61,7 @@ ToolConstant<T>::ToolConstant (OWNER* owner,
  * 
  * Only possible for arithmetic types, not @c Array<N>.
  */
-template <class T>
+template <CxxUtils::FromArrayrep T>
 template <class OWNER,
           typename U /*= T*/,
           typename /*= std::enable_if_t<std::is_arithmetic_v<U> >*/ >
@@ -82,7 +82,7 @@ ToolConstant<T>::ToolConstant (OWNER* owner,
  * @brief Retrieve the value of a constant.
  * @param c Context for accessing condtions (as returned from context()).
  */
-template <class T>
+template <CxxUtils::FromArrayrep T>
 T ToolConstant<T>::operator() (const Context& c) const
 {
   // If it's been set from JO, just return the value.
@@ -125,7 +125,7 @@ T ToolConstant<T>::operator() (const Context& c) const
  *
  * This variant may only be used if the constant was initialized via JO.
  */
-template <class T>
+template <CxxUtils::FromArrayrep T>
 inline
 T ToolConstant<T>::operator()() const
 {
@@ -139,7 +139,7 @@ T ToolConstant<T>::operator()() const
 /**
  * @brief Return the name of this constant.
  */
-template <class T>
+template <CxxUtils::FromArrayrep T>
 std::string ToolConstant<T>::name() const
 {
   return m_prop.name();
@@ -149,7 +149,7 @@ std::string ToolConstant<T>::name() const
 /**
  * @brief Was this constant set through job options?
  */
-template <class T>
+template <CxxUtils::FromArrayrep T>
 bool ToolConstant<T>::setFromJO() const
 {
   return m_prop.m_setFromJO;
@@ -162,7 +162,7 @@ bool ToolConstant<T>::setFromJO() const
  * @param doc Documentation string.
  * @param impl Internal implementation object.
  */
-template <class T>
+template <CxxUtils::FromArrayrep T>
 ToolConstant<T>::CProperty::CProperty (const std::string& name,
                                        const std::string& doc,
                                        ToolWithConstantsImpl& impl)
@@ -180,7 +180,7 @@ ToolConstant<T>::CProperty::CProperty (const std::string& name,
  * @param impl Internal implementation object.
  * @param deflt Default value.
  */
-template <class T>
+template <CxxUtils::FromArrayrep T>
 ToolConstant<T>::CProperty::CProperty (const std::string& name,
                                        const std::string& doc,
                                        ToolWithConstantsImpl& impl,
@@ -199,7 +199,7 @@ ToolConstant<T>::CProperty::CProperty (const std::string& name,
 /**
  * @brief Return the value of this property as a string.
  */
-template <class T>
+template <CxxUtils::FromArrayrep T>
 std::string ToolConstant<T>::CProperty::toString() const
 {
   // Do this in terms of toStream().
@@ -213,7 +213,7 @@ std::string ToolConstant<T>::CProperty::toString() const
  * @brief Print the value of this property to a stream.
  * @param out Stream to which to print.
  */
-template <class T>
+template <CxxUtils::FromArrayrep T>
 void ToolConstant<T>::CProperty::toStream( std::ostream& out ) const
 {
   out << static_cast<T> (*this);
@@ -224,7 +224,7 @@ void ToolConstant<T>::CProperty::toStream( std::ostream& out ) const
  * @brief Initialize this property's value from a string.
  * @param value String from which to initialize.
  */
-template <class T>
+template <CxxUtils::FromArrayrep T>
 StatusCode ToolConstant<T>::CProperty::fromString( const std::string& value )
 {
   // A given constant should not be set from JO more than once.
@@ -253,8 +253,7 @@ StatusCode ToolConstant<T>::CProperty::fromString( const std::string& value )
 /**
  * @brief Initialize method.  Derived classes must call this.
  */
-template <class BASE>
-  ATH_TWC_REQUIRES
+template <HasProperties BASE>
 StatusCode ToolWithConstants<BASE>::initialize()
 {
   ATH_CHECK( m_impl.initialize() );
@@ -268,8 +267,7 @@ StatusCode ToolWithConstants<BASE>::initialize()
  *
  * This can then be passed to @c Constant::operator().
  */
-template <class BASE>
-  ATH_TWC_REQUIRES
+template <HasProperties BASE>
 inline
 typename ToolWithConstants<BASE>::Context
 ToolWithConstants<BASE>::context (const EventContext& ctx) const
@@ -284,8 +282,7 @@ ToolWithConstants<BASE>::context (const EventContext& ctx) const
  * @param name Name to go in output
  * @param ctx Event context.
  */
-template <class BASE>
-  ATH_TWC_REQUIRES
+template <HasProperties BASE>
 void ToolWithConstants<BASE>::writeConstants (std::ostream& stream,
                                               const std::string& name,
                                               const EventContext& ctx) const
@@ -299,8 +296,7 @@ void ToolWithConstants<BASE>::writeConstants (std::ostream& stream,
  * @param[out] out Object to receive our constants.
  * @param ctx Event context.
  */
-template <class BASE>
-  ATH_TWC_REQUIRES
+template <HasProperties BASE>
 StatusCode
 ToolWithConstants<BASE>::mergeConstants (CaloRec::ToolConstants& out,
                                          const EventContext& ctx) const
@@ -326,8 +322,7 @@ ToolWithConstants<BASE>::mergeConstants (CaloRec::ToolConstants& out,
  * If you want a tool to have a version number, override this method.
  * Otherwise, it will default to a version number of 0.
  */
-template <class BASE>
-  ATH_TWC_REQUIRES
+template <HasProperties BASE>
 int ToolWithConstants<BASE>::toolVersion() const
 {
   return 0;
@@ -344,8 +339,7 @@ int ToolWithConstants<BASE>::toolVersion() const
  * tools with distinct C++ classes but which are yet similar enough
  * to combine together.
  */
-template <class BASE>
-  ATH_TWC_REQUIRES
+template <HasProperties BASE>
 const std::string& ToolWithConstants<BASE>::toolType() const
 {
   return this->type();
