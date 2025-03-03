@@ -46,7 +46,8 @@
 //STL includes
 #include <string>
 #include <vector>
-
+#include <iostream>
+#include <fstream>
 
 //fwd declaration
 class IInDetPhysValDecoratorTool;
@@ -167,7 +168,8 @@ private:
 
     ///histograms
     std::unique_ptr< InDetRttPlots > m_monPlots;
-
+    //probabilitytracker
+    float m_globalprob;
 
     /// Properties to fine-tune the tool behaviour
     BooleanProperty m_useTrackSelection {this, "useTrackSelection", false, "plot only tracks accepted by selection tool"};
@@ -189,6 +191,7 @@ private:
     StringProperty m_dirName {this, "DirName", "SquirrelPlots/", "Top level directory to write histograms into"}; 
     StringProperty m_folder {this, "SubFolder", "", "Subfolder to add for plots if desired. Used when working with multiple IDPVM tool instances."}; 
     StringProperty m_pileupSwitch {this, "PileupSwitch", "HardScatter", "Pileup truth strategy to use. May be \"All\", \"HardScatter\", or \"PileUp\""}; 
+    StringProperty m_setCSVName {this, "setCSVName", "", "convert AOD to a scv file"};
     FloatProperty m_lowProb{this,"LowProb",0.5,"Truth match prob. cutoff for efficiency (lower bound) and fake (upper bound) classification."}; 
     FloatProperty m_highProb{this,"HighProb",0.8,"Truth match prob. cutoff - currently unused"}; 
     Gaudi::Property<std::vector<double> > m_etaBins{this, "EtaBins", {}};
@@ -221,7 +224,7 @@ private:
     mutable CutFlow     m_truthCutFlow ATLAS_THREAD_SAFE; // Guarded by m_mutex
     std::vector<int> m_prospectsMatched;
     int m_truthCounter = 0;
-
+    std::ofstream m_datfile;
     std::vector<std::string> m_trackCutflowNames;
     std::vector<int> m_trackCutflow;
 

@@ -48,6 +48,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--JetAbsEtaMax", help='Maximum Eta value for jet selection', type=float, default=-1)
     IDPVMparser.add_argument("--JetPtMin", help='Minimum pt for jet selection in GeV', type=float, default=100)
     IDPVMparser.add_argument("--JetPtMax", help='Maximum pt for jet selection in GeV', type=float, default=5000)
+    IDPVMparser.add_argument("--setCSVName", help='Convert AOD to a SCV file for the track overlay ML training dataset', default="")
     return IDPVMparser.parse_args()
 
 # Parse the arguments
@@ -76,6 +77,8 @@ if MyArgs.doTracksInJets:
     flags.PhysVal.IDPVM.doValidateTracksInJets = True
 if MyArgs.doTracksInBJets:
     flags.PhysVal.IDPVM.doValidateTracksInBJets = True
+if MyArgs.setCSVName != "":
+    flags.PhysVal.IDPVM.setCSVName = MyArgs.setCSVName
 flags.PhysVal.IDPVM.doValidateLooseTracks = MyArgs.doLoose
 flags.PhysVal.IDPVM.doValidateTightPrimaryTracks = MyArgs.doTightPrimary
 flags.PhysVal.IDPVM.doValidateHILoose = MyArgs.doHILoose
