@@ -89,7 +89,19 @@ StatusCode L1TriggerResultMaker::execute(const EventContext& eventContext) const
     return StatusCode::SUCCESS;
   };
 
-  ATH_CHECK(retrieveAndLink(m_muRoIKey));
+  if (retrieveAndLink(m_muRoIKey) == StatusCode::FAILURE) {
+    // This is a canary-error which can indicate a failure to run the trigger in MT mode.
+    // This is (normally) the first place where the basic linear alg sequence does not conform with the required I/O requirements of the algs placed inside it.
+    // The MT scheduler is needed to correctly order the execution here (and for lots lots more when the HLT proper starts running)
+    ATH_MSG_ERROR("----------- CAUTION : POTENTIAL SERIAL ATHENA JOB DETECTED! -----------");
+    ATH_MSG_ERROR("Cannot retrieve muon ROIs. It could be that this trigger job is not running in Multithreaded Mode.");
+    ATH_MSG_ERROR("Trigger jobs MUST use the multithreaded scheduler, even if only then running with a single worker-thread.");
+    ATH_MSG_ERROR("Possible athena or athenaHLT solution: run with --threads=1 (or greater)");
+    ATH_MSG_ERROR("Possible transform solution: run with --athenaopts='--threads=1' (or greater)");
+    ATH_MSG_ERROR("Possible transform solution: do 'export ATHENA_CORE_NUMBER=1' (or greater) and then run the transform with --multithreaded (grid compatible)");
+    ATH_MSG_ERROR("----------- CAUTION : POTENTIAL SERIAL ATHENA JOB DETECTED! -----------");
+    return StatusCode::FAILURE;
+  }
   ATH_CHECK(retrieveAndLink(m_eFexEMRoIKey));
   ATH_CHECK(retrieveAndLink(m_eFexTauRoIKey));
   ATH_CHECK(retrieveAndLink(m_jFexFwdElRoIKey));
