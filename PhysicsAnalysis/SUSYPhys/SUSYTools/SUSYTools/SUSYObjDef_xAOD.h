@@ -664,6 +664,8 @@ namespace ST {
     double      m_muIsoHighPtThresh;
     bool        m_muHighPtExtraSmear;
     bool        m_muEffCorrForce1D;
+    std::string m_muTriggerSFCalibRelease;
+    std::string m_muTriggerSFCalibFilename;
     std::string m_BtagWP;
     std::string m_BtagTagger;
     double m_BtagMinPt;
