@@ -381,10 +381,10 @@ def IDTIDECfg(flags):
         })
     if flags.Detector.GeometryITk:
         IDTIDESlimmingHelper.AppendToDictionary.update({
-            "ITkPixelClusters": "xAOD::TrackMeasurementValidationContainer",
-            "ITkPixelClustersAux": "xAOD::TrackMeasurementValidationAuxContainer",
-            "ITkStripClusters": "xAOD::TrackMeasurementValidationContainer",
-            "ITkStripClustersAux": "xAOD::TrackMeasurementValidationAuxContainer"
+            "ITkPixelMeasurements": "xAOD::TrackMeasurementValidationContainer",
+            "ITkPixelMeasurementsAux": "xAOD::TrackMeasurementValidationAuxContainer",
+            "ITkStripMeasurements": "xAOD::TrackMeasurementValidationContainer",
+            "ITkStripMeasurementsAux": "xAOD::TrackMeasurementValidationAuxContainer"
         })
 
     SmartCollections += ["Muons", "Electrons", "Photons"]
@@ -406,7 +406,7 @@ def IDTIDECfg(flags):
     if flags.Detector.GeometryID:
         AllVariables += ["PixelClusters", "SCT_Clusters"]
     if flags.Detector.GeometryITk:
-        AllVariables += ["ITkPixelClusters", "ITkStripClusters"]
+        AllVariables += ["ITkPixelMeasurements", "ITkStripMeasurements"]
 
     IDTIDESlimmingHelper.AppendToDictionary.update({
         "Kt4EMPFlowEventShape": "xAOD::EventShape",
