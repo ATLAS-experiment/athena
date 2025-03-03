@@ -27,5 +27,5 @@ atlas_install_python_modules( python/*.py )
 # Test(s) in the package.
 atlas_add_test( LinearTransformAsync
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/AsyncCuda_test.sh
-   POST_EXEC_SCRIPT nopost.sh
+   POST_EXEC_SCRIPT "exit $ATLAS_CTEST_TESTSTATUS"
    PROPERTIES SKIP_RETURN_CODE 2 )
