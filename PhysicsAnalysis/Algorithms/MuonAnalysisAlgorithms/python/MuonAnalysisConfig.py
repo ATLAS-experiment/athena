@@ -255,6 +255,8 @@ class MuonWorkingPointConfig (ConfigBlock) :
         config.addSelection (self.containerName, self.selectionName,
                              alg.selectionDecoration,
                              preselection=self.addSelectionToPreselection)
+        if self.quality == 'HighPt':
+            config.addOutputVar (self.containerName, 'is_bad' + postfix, 'is_bad' + postfix)
 
         # Set up the isolation calculation algorithm:
         if self.isolation != 'NonIso' :
