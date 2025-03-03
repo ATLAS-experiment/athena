@@ -170,7 +170,7 @@ def main(args):
             with open(oFileName, "wb") as oFile:
                 for item in conf:
                     pickle.dump(item, oFile)
-    print("Wrote " + args.file[0] + " to " + oFileName)
+        print("Wrote " + args.file[0] + " to " + oFileName)
 
     if args.diff:
         if len(args.file) != 2:

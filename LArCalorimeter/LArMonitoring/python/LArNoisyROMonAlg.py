@@ -52,6 +52,9 @@ def LArNoisyROMonConfigCore(helper,algoinstance,flags,
     if inKey != "":
        larNoisyROMonAlg.inputKey=inKey 
 
+    if not flags.Common.isOnline:   
+       larNoisyROMonAlg.HVMapKey="LArHVIdMap" 
+
     # variable for testing on ESD
     try:
       LArNoisyROMonForceTrigger

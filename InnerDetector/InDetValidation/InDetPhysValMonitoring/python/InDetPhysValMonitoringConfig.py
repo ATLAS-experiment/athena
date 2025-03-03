@@ -138,6 +138,7 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
             GoodRunsListSelectionToolCfg(flags)))
 
     kwargs.setdefault("doIDTIDEPlots", flags.PhysVal.IDPVM.doIDTIDE)
+    kwargs.setdefault("setCSVName", flags.PhysVal.IDPVM.setCSVName)
 
     if flags.PhysVal.IDPVM.doValidateTracksInJets:
         kwargs.setdefault("JetContainerName", flags.PhysVal.IDPVM.jetCollection)

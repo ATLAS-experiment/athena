@@ -7,16 +7,19 @@
 # art-architecture:  '#x86_64-intel'
 # art-output: test.HITS.pool.root
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 AtlasG4_tf.py \
     --CA \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --detectors Bpipe ID Truth \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/minbias_Inelastic-pythia8-7000.evgen.pool.root' \
     --outputHITSFile 'test.HITS.pool.root' \
     --maxEvents '50' \
     --skipEvents '0' \
     --randomSeed '10' \
-    --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-08' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationSingleIoV' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --imf False
