@@ -117,28 +117,28 @@ StripClusteringTool::clusterize(const RawDataCollection& RDOs,
           goodModule = m_conditionsTool->isGood(idHash, ctx);
       }
     }
+
     VALIDATE_STATUS_ARRAY(
       m_checkBadModules.value() && !m_stripDetElStatus.empty(),
       stripDetElStatus->isGood(idHash), m_conditionsTool->isGood(idHash));
-      
+
     if (!goodModule) {
       ATH_MSG_DEBUG("Strip module failed status check");
       return StatusCode::SUCCESS;
     }
-      
+    
     // If more than a certain number of RDOs set module to bad
     // in this case we skip clusterization
     if (m_maxFiredStrips != 0u) {
-	    unsigned int nFiredStrips = 0u;
+      unsigned int nFiredStrips = 0u;
       for (const SCT_RDORawData* rdo : RDOs) {
         nFiredStrips += rdo->getGroupSize();
       }
-	    if (nFiredStrips > m_maxFiredStrips)
-	      return StatusCode::SUCCESS;
+      if (nFiredStrips > m_maxFiredStrips)
+	return StatusCode::SUCCESS;
     }
-
-    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> stripDetEleHandle(
-	m_stripDetEleCollKey, ctx);
+    
+    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> stripDetEleHandle(m_stripDetEleCollKey, ctx);
     ATH_CHECK( stripDetEleHandle.isValid() );
     const InDetDD::SiDetectorElementCollection* stripDetEle(*stripDetEleHandle);
     if (stripDetEle == nullptr) {
@@ -149,6 +149,14 @@ StripClusteringTool::clusterize(const RawDataCollection& RDOs,
     const InDetDD::SiDetectorElement* element =
 	stripDetEle->getDetectorElement(idHash);
 
+    const InDetDD::SiDetectorDesign& design = element->design();
+    // get the pitch, this will be the local covariance for the cluster
+    float pitch = element->isBarrel()
+      ? design.phiPitch()
+      : dynamic_cast<const InDetDD::StripStereoAnnulusDesign&>(element->design()).phiPitchPhi();
+    Eigen::Matrix<float,1,1> localCov(pitch * pitch * ONE_TWELFTH);
+
+    
     std::optional<std::pair<CellCollection,bool>> unpckd
 	= unpackRDOs(RDOs, stripID, stripDetElStatus, ctx);
     if (not unpckd.has_value()) {
@@ -171,17 +179,25 @@ StripClusteringTool::clusterize(const RawDataCollection& RDOs,
     container.insert(container.end(), toAddCollection.begin(), toAddCollection.end());
 
     double lorentzShift
-	= m_lorentzAngleTool->getLorentzShift(element->identifyHash(), ctx);
+	= m_lorentzAngleTool->getLorentzShift(idHash, ctx);
 
     for (std::size_t i(0); i<clusters.size(); ++i) {
       Cluster& cl = clusters[i];
 	// Bad strips on a module invalidates the hitsInThirdTimeBin word.
 	// Therefore set it to 0 if that's the case.
-	if (badStripOnModule) {
-	    cl.hitsInThirdTimeBin = 0;
-	}
+        // We are currently not using this, but keeping it here should we need it in the future
+	// if (badStripOnModule) {
+	//     cl.hitsInThirdTimeBin = 0;
+	// }
+
 	try {
-	    ATH_CHECK(makeCluster(cl, lorentzShift, stripID, element, *container[previousSizeContainer+i]));
+	  ATH_CHECK(makeCluster(cl,
+				lorentzShift,
+				localCov,
+				stripID,
+				element,
+				design,
+				*container[previousSizeContainer+i]));
 	} catch (const std::exception& e) {
 	    ATH_MSG_FATAL("Exception thrown while creating xAOD::StripCluster:"
 			  << e.what());
@@ -198,43 +214,37 @@ StripClusteringTool::clusterize(const RawDataCollection& RDOs,
 
 
 static
-std::tuple<
-    Eigen::Matrix<double,2,1>,
-    Eigen::Matrix<float,1,1>,
+std::pair<
     Eigen::Matrix<float,1,1>,
     Eigen::Matrix<float,3,1>>
 computePosition(const StripClusteringTool::Cluster& cluster,
 		double lorentzShift,
 		const IStripClusteringTool::IDHelper& stripID,
-		const InDetDD::SiDetectorElement* element)
+		const InDetDD::SiDetectorElement* element,
+		const InDetDD::SiDetectorDesign& design)
 {
-    size_t size = cluster.ids.size();
+    std::size_t size = cluster.ids.size();
     InDetDD::SiCellId frontId = stripID.strip(cluster.ids.front());
-    InDetDD::SiLocalPosition pos = element->design().localPositionOfCell(frontId);
+    InDetDD::SiLocalPosition pos = design.localPositionOfCell(frontId);
     if (size > 1) {
 	InDetDD::SiCellId backId = stripID.strip(cluster.ids.back());
 	InDetDD::SiLocalPosition backPos =
-	    element->design().localPositionOfCell(backId);
+	    design.localPositionOfCell(backId);
 	pos = 0.5 * (pos + backPos);
     }
 
-    pos = InDetDD::SiLocalPosition(pos.xEta(), pos.xPhi() + lorentzShift);
-    float pitch = element->design().phiPitch();
-
-    Eigen::Matrix<float,3,1> posG(
-	element->surface().localToGlobal(pos).cast<float>());
+    // update the xPhi position
+    pos.xPhi( pos.xPhi() + lorentzShift );
 
     if (!element->isBarrel()) {
-	const InDetDD::StripStereoAnnulusDesign& design =
+	const InDetDD::StripStereoAnnulusDesign& annulusDesign =
 	    dynamic_cast<const InDetDD::StripStereoAnnulusDesign&>
-	    (element->design());
-	pos = design.localPositionOfCellPC(element->cellIdOfPosition(pos));
-	pitch = design.phiPitchPhi();
+	    (design);
+	pos = annulusDesign.localPositionOfCellPC(element->cellIdOfPosition(pos));
     }
 
-    Eigen::Matrix<float,1,1> posM(pos.xPhi());
-    Eigen::Matrix<float,1,1> varM(pitch * pitch * ONE_TWELFTH); //Assume uniform distribution
-    return std::make_tuple(pos, posM, varM, posG);
+    return std::make_pair(Eigen::Matrix<float,1,1>(pos.xPhi()),
+			  Eigen::Matrix<float,3,1>(element->surface().localToGlobal(pos).cast<float>()));
 }
 
 
@@ -242,20 +252,20 @@ computePosition(const StripClusteringTool::Cluster& cluster,
 StatusCode
 StripClusteringTool::makeCluster(const Cluster &cluster,
 				 double lorentzShift,
+				 Eigen::Matrix<float,1,1>& localCov,
 				 const StripID& stripID,
 				 const InDetDD::SiDetectorElement* element,
+				 const InDetDD::SiDetectorDesign& design,
 				 xAOD::StripCluster& cl) const
 {
-
-    IdentifierHash idHash = element->identifyHash();
-    auto [pos, localPos, localCov, globalPos]
-	= computePosition(cluster, lorentzShift, stripID, element);
+    auto [localPos, globalPos]
+      = computePosition(cluster, lorentzShift, stripID, element, design);
 
     // For Strip Clusters the identifier is taken from the front rod list object
     // This is the same strategy used in Athena:
     // Since clusterId is arbitary (it only needs to be unique) just use ID of first strip
     // For strip Cluster it has been found that "identifierOfPosition" does not produces unique values
-    cl.setMeasurement<1>(idHash, localPos, localCov);
+    cl.setMeasurement<1>(element->identifyHash(), localPos, localCov);
     cl.setIdentifier( cluster.ids.front().get_compact() );
     cl.globalPosition() = globalPos;
     cl.setRDOlist(cluster.ids);
@@ -277,7 +287,7 @@ bool StripClusteringTool::passTiming(const std::bitset<3>& timePattern) const {
 
 
 bool StripClusteringTool::isBadStrip(const EventContext& ctx,
-					 const InDet::SiDetectorElementStatus *stripDetElStatus,
+				     const InDet::SiDetectorElementStatus *stripDetElStatus,
 				     const StripID& stripID,
 				     IdentifierHash waferHash,
 				     Identifier stripId) const
@@ -340,7 +350,7 @@ StripClusteringTool::unpackRDOs(const InDetRawDataCollection<StripRDORawData>& R
 	    }
 	}
     }
-    return std::make_pair(cells, badStripOnModule);
+    return std::make_pair(std::move(cells), badStripOnModule);
 }
 
 } // namespace ActsTrk

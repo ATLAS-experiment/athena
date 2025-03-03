@@ -84,8 +84,10 @@ private:
     // N.B. the cluster is added to the container
     StatusCode makeCluster(const StripClusteringTool::Cluster &cluster,
 			   double LorentzShift,
+			   Eigen::Matrix<float,1,1>& localCov,
 			   const StripID& stripID,
 			   const InDetDD::SiDetectorElement* element,
+			   const InDetDD::SiDetectorDesign& design,
 			   xAOD::StripCluster& container) const;
 
     const InDet::SiDetectorElementStatus *getStripDetElStatus(const EventContext& ctx) const;
