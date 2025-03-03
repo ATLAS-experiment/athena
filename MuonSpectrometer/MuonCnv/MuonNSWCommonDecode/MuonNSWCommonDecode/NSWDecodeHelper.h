@@ -10,7 +10,7 @@
 
 #include <sstream>
 #include <span>
-#include <CxxUtils/bitscan.h>
+#include <bit>
 #include <CxxUtils/ones.h>
 
 namespace Muon
@@ -145,7 +145,7 @@ namespace Muon
     /// @return  Set bit. -1 if no bit is set
     template <class T>
       constexpr int8_t max_bit(const T number) {
-      return CxxUtils::maxSetBit(static_cast<std::make_unsigned_t<T> >(number));
+      return std::bit_width(static_cast<std::make_unsigned_t<T> >(number)) - 1;
     }
     /// @brief Returns the most right hand bit which is set in a number
     /// @tparam T  Any built-in data type
@@ -155,7 +155,7 @@ namespace Muon
       constexpr int8_t min_bit(const T number) {
       if (number == 0) return -1;
       return
-        CxxUtils::count_trailing_zeros(static_cast<std::make_unsigned_t<T> >(number));
+        std::countr_zero(static_cast<std::make_unsigned_t<T> >(number));
     }
     template <class Out>
       constexpr Out fill_bitmask(const uint8_t first_bit,  const uint8_t num_bits) {

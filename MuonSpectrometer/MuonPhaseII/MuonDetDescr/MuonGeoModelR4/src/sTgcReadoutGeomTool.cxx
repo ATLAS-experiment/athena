@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTgcReadoutGeomTool.h"
@@ -14,7 +14,6 @@
 #include <GeoModelKernel/GeoTrd.h>
 #include <GeoModelKernel/GeoSimplePolygonBrep.h>
 #include <ActsGeoUtils/SurfaceBoundSet.h>
-#include<CxxUtils/bitscan.h>
 
 #include <GeoModelRead/ReadGeoModel.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
