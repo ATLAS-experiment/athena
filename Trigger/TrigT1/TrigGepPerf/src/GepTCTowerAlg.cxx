@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+*   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "./GepTCTowerAlg.h"
 #include "./Cluster.h"
@@ -36,8 +36,6 @@ StatusCode GepTCTowerAlg::execute(const EventContext& context) const {
   auto h_caloClusters = SG::makeHandle(m_caloClustersKey, context);
   CHECK(h_caloClusters.isValid());
   ATH_MSG_DEBUG("Read in " << h_caloClusters->size() << " clusters");
-
-  const auto inputTopoClusters = *h_caloClusters;
 
   std::vector<Gep::Cluster> customClusters;
 
