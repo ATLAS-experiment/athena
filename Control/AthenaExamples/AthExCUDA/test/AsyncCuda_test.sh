@@ -1,10 +1,10 @@
 #!/bin/sh
 # Copyright (C) 2025 CERN for the benefit of the ATLAS collaboration
-if ! (type nvidia-smi); then # Pass if NVidia driver not available
+if ! (type nvidia-smi > /dev/null 2>&1); then # Pass if NVidia driver not available
     echo "SKIPPING TEST -- NVidia driver not found"
     exit 2
 fi
-if ! (nvidia-smi -q -i 0); then # Pass if no GPU available
+if ! (nvidia-smi -q); then # Pass if no GPU available
     echo "SKIPPING TEST -- No GPU found"
     exit 2
 fi
