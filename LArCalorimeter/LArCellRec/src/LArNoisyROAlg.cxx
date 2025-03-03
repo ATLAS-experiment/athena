@@ -32,9 +32,9 @@ StatusCode LArNoisyROAlg::initialize() {
   ATH_CHECK(m_eventInfoDecorKey.initialize());
   ATH_CHECK(m_knownBadFEBsVecKey.initialize(!m_isMC) );
   ATH_CHECK(m_knownMNBFEBsVecKey.initialize(!m_isMC) );
-  ATH_CHECK(m_hvMapKey.initialize(!m_isMC));
+  ATH_CHECK(m_hvMapKey.initialize(!(m_isMC || m_hvMapKey.empty())));
   ATH_CHECK(m_caloDetDescrMgrKey.initialize(!m_isMC));
-  ATH_CHECK(m_hvCablingKey.initialize(!m_isMC));
+  ATH_CHECK(m_hvCablingKey.initialize(!( m_isMC || m_hvMapKey.empty())));
 
   return StatusCode::SUCCESS;
 }
@@ -83,12 +83,14 @@ StatusCode LArNoisyROAlg::execute (const EventContext& ctx) const
       } 
     }
 
-    SG::ReadCondHandle<LArHVNMap> hvMapHdl(m_hvMapKey, ctx);
-    if(!hvMapHdl.isValid()) {
-       ATH_MSG_WARNING( " Can not retrieve HVline nCells: " << m_hvMapKey.key());
-       ATH_MSG_WARNING( " Will not flag HV lines noise !");
-    } else {
-       hvmap = *hvMapHdl;
+    if(!m_hvMapKey.empty()) {
+       SG::ReadCondHandle<LArHVNMap> hvMapHdl(m_hvMapKey, ctx);
+       if(!hvMapHdl.isValid()) {
+          ATH_MSG_WARNING( " Can not retrieve HVline nCells: " << m_hvMapKey.key());
+          ATH_MSG_WARNING( " Will not flag HV lines noise !");
+       } else {
+          hvmap = *hvMapHdl;
+       }
     }
 
     SG::ReadCondHandle<CaloDetDescrManager> cddmHdl(m_caloDetDescrMgrKey, ctx);
@@ -99,12 +101,14 @@ StatusCode LArNoisyROAlg::execute (const EventContext& ctx) const
        cddm = *cddmHdl;
     }
 
-    SG::ReadCondHandle<LArHVIdMapping> hvidHdl(m_hvCablingKey, ctx);
-    if(!hvidHdl.isValid()) {
-       ATH_MSG_WARNING( " Can not retrieve LArHVIdMapping: " << m_hvCablingKey.key());
-       ATH_MSG_WARNING( " Will not flag HV lines noise !");
-    } else {
-       hvid = *hvidHdl;
+    if(!m_hvCablingKey.empty()){
+       SG::ReadCondHandle<LArHVIdMapping> hvidHdl(m_hvCablingKey, ctx);
+       if(!hvidHdl.isValid()) {
+          ATH_MSG_WARNING( " Can not retrieve LArHVIdMapping: " << m_hvCablingKey.key());
+          ATH_MSG_WARNING( " Will not flag HV lines noise !");
+       } else {
+          hvid = *hvidHdl;
+       }
     }
   }
 

@@ -15,8 +15,9 @@ def LArNoisyROSummaryCfg(configFlags, **kwargs):
    if not isMC:
       result.merge(LArKnownBadFebCfg(configFlags))
       result.merge(LArKnownMNBFebCfg(configFlags))
-      result.merge(LArHVCablingCfg(configFlags))
-      result.addEventAlgo(CompFactory.LArHVlineMapAlg(keyOutput="LArHVNcells"))
+      if not configFlags.Common.isOnline:
+         result.merge(LArHVCablingCfg(configFlags))
+         result.addEventAlgo(CompFactory.LArHVlineMapAlg(keyOutput="LArHVNcells"))
 
    # now configure the algorithm
    LArNoisyROAlg,LArNoisyROTool=CompFactory.getComps("LArNoisyROAlg","LArNoisyROTool")
@@ -31,11 +32,12 @@ def LArNoisyROSummaryCfg(configFlags, **kwargs):
                                     MNBTight_PsVetoCut=configFlags.LAr.NoisyRO.MNBTight_PsVetoCut,
                                     BadHVCut=configFlags.LAr.NoisyRO.BadHVCut,
                                     BadChanFracPerHVline=configFlags.LAr.NoisyRO.BadHVlineFrac,
-                                    DoHVflag=not isMC
+                                    DoHVflag=not (isMC or configFlags.Common.isOnline) 
                                     )
 
    theLArNoisyROAlg=LArNoisyROAlg(isMC=isMC,Tool=theLArNoisyROTool, **kwargs)
-   if not isMC:
+   if not isMC and not configFlags.Common.isOnline:
+      theLArNoisyROAlg.LArHVIdMapping="LArHVIdMap"
       theLArNoisyROAlg.HVMapKey="LArHVNcells"
    result.addEventAlgo(theLArNoisyROAlg)
    
