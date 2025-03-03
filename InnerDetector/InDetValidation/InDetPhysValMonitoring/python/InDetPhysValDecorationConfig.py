@@ -118,8 +118,8 @@ def InDetPhysValTruthDecoratorAlgCfg(
     kwargs.setdefault("Extrapolator", extrapolator)
 
     if flags.Detector.GeometryITk:
-        kwargs.setdefault("PixelClusterContainerName", "ITkPixelClusters")
-        kwargs.setdefault("SCTClusterContainerName", "ITkStripClusters")
+        kwargs.setdefault("PixelClusterContainerName", "ITkPixelMeasurements")
+        kwargs.setdefault("SCTClusterContainerName", "ITkStripMeasurements")
 
     kwargs.setdefault('TruthParticleIndexDecoration',
                       'origTruthIndex' if flags.PhysVal.IDPVM.doTechnicalEfficiency else '')

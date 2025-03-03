@@ -105,7 +105,7 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
     kwargs.setdefault("MC_Hits", "ITkPixelHits")
     kwargs.setdefault("PRD_MultiTruth", "PRD_MultiTruthITkPixel")
     kwargs.setdefault("InputTruthParticleLinks", "xAODTruthLinks")
-    kwargs.setdefault("OutputClusterContainer", "ITkPixelClusters")
+    kwargs.setdefault("OutputClusterContainer", "ITkPixelMeasurements")
 
     acc.addEventAlgo(CompFactory.PixelPrepDataToxAOD(name, **kwargs))
     return acc
@@ -149,7 +149,7 @@ def ITkStripPrepDataToxAODCfg(flags, name='ITkStripPrepDataToxAOD', **kwargs):
     kwargs.setdefault("PRD_MultiTruth", "PRD_MultiTruthITkStrip")
     kwargs.setdefault("InputTruthParticleLinks", "xAODTruthLinks")
     kwargs.setdefault("SctRdoContainer", "ITkStripRDOs")
-    kwargs.setdefault("SctxAodContainer", "ITkStripClusters")
+    kwargs.setdefault("SctxAodContainer", "ITkStripMeasurements")
     kwargs.setdefault("SctxAodOffset", "ITkStripClustersOffsets")
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
     kwargs.setdefault("UseTruthInfo", flags.Input.isMC)

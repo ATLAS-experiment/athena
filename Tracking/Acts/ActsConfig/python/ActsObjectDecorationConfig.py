@@ -32,7 +32,7 @@ def ActsPixelClusterTruthDecorator(flags,
     kwargs.setdefault("AssociationMapOut","ITkPixelClustersToTruthParticles")
 
     #Using the same name of the xAOD::SiCluster causes bunch of warnings
-    kwargs.setdefault("OutputClusterContainer","ITkPixelClusters")
+    kwargs.setdefault("OutputClusterContainer","ITkPixelMeasurements")
 
 
     acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterTruthDecorator(name,**kwargs))
@@ -55,7 +55,7 @@ def ActsStripClusterTruthDecorator(flags,
     acc = ComponentAccumulator()
     kwargs.setdefault("SiClusterContainer","ITkStripClusters")
     kwargs.setdefault("AssociationMapOut","ITkStripClustersToTruthParticles")
-    kwargs.setdefault("OutputClusterContainer","ITkStripClusters")
+    kwargs.setdefault("OutputClusterContainer","ITkStripMeasurements")
 
     acc.addEventAlgo(CompFactory.ActsTrk.StripClusterTruthDecorator(name,**kwargs))
 

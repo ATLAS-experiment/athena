@@ -42,7 +42,7 @@ activate_all_flags="flags.Acts.doITkConversion=True; \
 		    flags.Tracking.ITkActsConversionPass.storeSiSPSeededTracks=True; \
         	    flags.Tracking.ITkActsLowPtPass.storeSiSPSeededTracks=True; \
         	    flags.Acts.EDM.PersistifyTracks=True; \
-        	    flags.Acts.EDM.PersistifySpacePoints=False; \
+        	    flags.Acts.EDM.PersistifySpacePoints=True; \
 		    flags.Detector.EnableCalo=True; \
 		    flags.Tracking.writeExtendedSi_PRDInfo=True; \
 		    flags.Tracking.doTruth=True;"
@@ -52,10 +52,12 @@ activate_all_collections="\"InDet\" \
         \"InDetActsConversion\" \
         \"InDetActsLargeRadius\" \
         \"InDetActsLowPt\" \
+	\"SiSPSeedSegmentsActs\" \
         \"SiSPSeedSegmentsActsPixel\" \
         \"SiSPSeedSegmentsActsStrip\" \
         \"SiSPSeedSegmentsActsConversionStrip\" \
         \"SiSPSeedSegmentsActsLargeRadiusStrip\" \
+	\"SiSPSeedSegmentsActsLowPt\" \
         \"SiSPSeedSegmentsActsLowPtPixel\" \
         \"SiSPSeedSegmentsActsLowPtStrip\" \
         \"SiSPSeededTracksActs\" \
