@@ -44,14 +44,15 @@ def JetBTagginglessAlgCfg(
                 pfx=trackAugmenterPrefix,
             )
         )
-    else:
-        if ByVertex: #JetCollection=="AntiKt4EMPFlowByVertexJets":
+    else:      
+        if JetCollection=="AntiKt4EMPFlowByVertexJets":
             acc.merge(BTagTrackAugmenterByVertexAlgCfg(
                 cfgFlags,
                 TrackCollection='InDetTrackParticles',
                 PrimaryVertexCollectionName=pv_col,
                 prefix=trackAugmenterPrefix,
             ))
+          
             
         else:
             acc.merge(BTagTrackAugmenterAlgCfg(
@@ -85,7 +86,6 @@ def JetBTagginglessAlgCfg(
         dirnames = [Path(path).parent for path in networks['folds']]
         assert len(set(dirnames)) == 1, 'Different folds should be located in the same dir'
         dirname = str(dirnames[0])
-
         if 'Muon' in dirname:
             acc.merge(TrackLeptonDecorationCfg(cfgFlags))
 
@@ -100,6 +100,7 @@ def JetBTagginglessAlgCfg(
         if foldHashName := networks.get('hash'):
             args['foldHashName'] = foldHashName
 
+
         if networks.get('cone_association'):
             acc.merge(JetParticleAssociationAlgCfg(
                 cfgFlags,
@@ -107,6 +108,7 @@ def JetBTagginglessAlgCfg(
                 trackCollection,
                 JetTrackAssociator,
             ))
+     
         else:
             args['remapping'].setdefault(
                 'BTagTrackToJetAssociator', 'GhostTrack')
@@ -119,6 +121,7 @@ def JetBTagginglessAlgCfg(
         if cfgFlags.BTagging.RunFlipTaggers and networks.get('flip', True):
             for flip_config in _get_flip_config(dirname):
                 acc.merge(MultifoldGNNCfg(**args, FlipConfig=flip_config))
+             
 
     return acc
 

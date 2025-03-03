@@ -36,7 +36,7 @@ def BTagTrackAugmenterByVertexAlgCfg(
 
     acc = ComponentAccumulator()
     pfx_str = prefix or "btagIp_"
-    name = ('BTagTrackAugmenter').lower() + pfx_str + PrimaryVertexCollectionName + TrackCollection
+    name = ('BTagTrackAugmenterByVertex').lower() + pfx_str + PrimaryVertexCollectionName + TrackCollection
 
     # -- create the track augmenter algorithm
     acc.addEventAlgo(CompFactory.Analysis.BTagTrackAugmenterByVertexAlg(

@@ -40,19 +40,19 @@ namespace Analysis {
     // For the run-time update to work, the decoration key name properties must start with a period (".")
     Gaudi::Property< std::string > m_prefix{this,"prefix","btagIp_",""};
 
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_d0 {this, "d0", "d0", "d0 of tracks"};
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_z0 {this, "z0SinTheta", "z0SinTheta", "z0SinTheta of tracks"};
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_d0_sigma {this, "d0Uncertainty", "d0Uncertainty", "d0Uncertainty of tracks"};
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_z0_sigma {this, "z0SinThetaUncertainty", "z0SinThetaUncertainty", "z0SinThetaUncertainty of tracks"};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_d0 {this, "ByVertex_d0", "ByVertex_d0", "d0 of tracks"};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_z0 {this, "ByVertex_z0SinTheta", "ByVertex_z0SinTheta", "z0SinTheta of tracks"};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_d0_sigma {this, "ByVertex_d0Uncertainty", "ByVertex_d0Uncertainty", "d0Uncertainty of tracks"};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_z0_sigma {this, "ByVertex_z0SinThetaUncertainty", "ByVertex_z0SinThetaUncertainty", "z0SinThetaUncertainty of tracks"};
 
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_track_pos {this, "trackDisplacement","trackDisplacement","trackDisplacement of tracks" };
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_track_mom {this, "trackMomentum","trackMomentum","trackMomentum of tracks" };
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_track_pos {this, "ByVertex_trackDisplacement","ByVertex_trackDisplacement","trackDisplacement of tracks" };
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_track_mom {this, "ByVertex_trackMomentum","ByVertex_trackMomentum","trackMomentum of tracks" };
 
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_trk_origin_vtx {this, "TrkOriginVertex", "TrkOriginVtx", "origin vertex of track"}; 
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_trk_origin_vtx_idx {this, "TrkOriginVertex_idx", "TrkOriginVtx_idx", "origin vertex of track index"};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_trk_origin_vtx {this, "ByVertex_TrkOriginVertex", "ByVertex_TrkOriginVtx", "origin vertex of track"}; 
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_trk_origin_vtx_idx {this, "ByVertex_TrkOriginVertex_idx", "ByVertex_TrkOriginVtx_idx", "origin vertex of track index"};
 
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_invalid {
-      this, "invalidIp", "invalidIp", "flag for invalid impact parameter"
+      this, "ByVertex_invalidIp", "ByVertex_invalidIp", "flag for invalid impact parameter"
     };
   };
 
