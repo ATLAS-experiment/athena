@@ -18,33 +18,7 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 
 
-namespace InDet {
-
-// Helper functions for use with ACTS clusterization
-// Put these in the InDet namespace so that ACTS can find them
-// via ADL.
-//
-inline int getCellRow(const InDet::UnpackedPixelRDO& cell)
-{
-    return cell.ROW;
-}
-    
-inline int getCellColumn(const InDet::UnpackedPixelRDO& cell)
-{
-    return cell.COL;
-}
-
-inline int& getCellLabel(InDet::UnpackedPixelRDO& cell)
-{
-    return cell.NCL;
-}
-
-
-} // namespace InDet
-
-
 namespace ActsTrk {
-
 
 class PixelClusteringTool : public extends<AthAlgTool,IPixelClusteringTool> {
 public:
@@ -52,11 +26,13 @@ public:
     using Cell = InDet::UnpackedPixelRDO;
     using CellCollection = std::vector<Cell>;
 
-
-
-
     struct Cluster {
-	std::vector<Identifier> ids;
+        Cluster() {
+	  // reserve memory. Number evaluated on ttbar pu200
+	  ids.reserve(40);
+	  tots.reserve(40);
+	}
+        std::vector<Identifier> ids;
 	std::vector<int> tots;
 	int lvl1min = std::numeric_limits<int>::max();
     };
