@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "Had1ProngPlots.h"
+#include "HadProngPlots.h"
 #include "AthContainers/ConstAccessor.h"
 
 namespace Tau{
 
-Had1ProngPlots::Had1ProngPlots(PlotBase* pParent, const std::string& sDir,
+HadProngPlots::HadProngPlots(PlotBase* pParent, const std::string& sDir,
 			       const std::string& sTauJetContainerName):
    PlotBase(pParent, sDir),
    m_oGeneralTauPlots(this, "", sTauJetContainerName),
@@ -27,15 +27,16 @@ Had1ProngPlots::Had1ProngPlots(PlotBase* pParent, const std::string& sDir,
    m_HadRadius(nullptr),
    m_EMRadius(nullptr),
    m_IsoFrac(nullptr),
+   m_tauSflight(nullptr),
    m_sTauJetContainerName(sTauJetContainerName)
 {
 }
 	
-Had1ProngPlots::~Had1ProngPlots()
+HadProngPlots::~HadProngPlots()
 {
 }
 
-void Had1ProngPlots::initializePlots(){
+void HadProngPlots::initializePlots(){
 
    // m_oGeneralTauPlots.initialize();
    m_tauCoreFrac   = Book1D("CoreFrac",m_sTauJetContainerName + " Tau CoreFrac; CoreFrac; # Taus",40,0.,2.);
@@ -53,9 +54,10 @@ void Had1ProngPlots::initializePlots(){
    m_HadRadius = Book1D("HadRadius",m_sTauJetContainerName + " Had Radius; HadRadius; # Part",20,0,2.);
    m_EMRadius  = Book1D("EMRadius",m_sTauJetContainerName + " EM Radius; EMRadius; # Part",20,0,2.);
    m_IsoFrac   = Book1D("IsoFrac",m_sTauJetContainerName + " Iso Frac; Iso Frac; # Part",20,0,1.);
+   m_tauSflight    = Book1D("Sflight",m_sTauJetContainerName + " Tau flight sign. ; Sflight; # Taus",100,-10.,20.);
 }
 
-void Had1ProngPlots::fill(const xAOD::TauJet& tau, float weight) {
+void HadProngPlots::fill(const xAOD::TauJet& tau, float weight) {
   m_oGeneralTauPlots.fill(tau, weight);
 
   float avariable = 0.;
@@ -106,5 +108,8 @@ void Had1ProngPlots::fill(const xAOD::TauJet& tau, float weight) {
 
   test = tau.detail(xAOD::TauJetParameters::isolFrac, avariable);
   if (test) m_IsoFrac->Fill(avariable, weight);
+
+  test = tau.detail(xAOD::TauJetParameters::trFlightPathSig, avariable);
+  if(test) m_tauSflight->Fill(avariable, weight);
 }
 }

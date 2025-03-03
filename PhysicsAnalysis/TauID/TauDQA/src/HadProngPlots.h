@@ -1,38 +1,45 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TAUDQA_HAD3PRONGPLOTS_H
-#define TAUDQA_HAD3PRONGPLOTS_H
+#ifndef TAUDQA_HADPRONGPLOTS_H
+#define TAUDQA_HADPRONGPLOTS_H
 
 #include "GeneralTauPlots.h"
 #include "xAODTau/TauJet.h"
 
 namespace Tau{
 
-class Had3ProngPlots: public PlotBase {
+class HadProngPlots: public PlotBase {
   public:
-    Had3ProngPlots(PlotBase *pParent, const std::string& sDir, const std::string& sTauJetContainerName);
-    virtual ~Had3ProngPlots();
+    HadProngPlots(PlotBase *pParent, const std::string& sDir, const std::string& sTauJetContainerName);
+    virtual ~HadProngPlots();
 
     void fill(const xAOD::TauJet& tau, float weight);
 
     Tau::GeneralTauPlots m_oGeneralTauPlots;
+    TH1* m_tauNWideTracks;
     TH1* m_tauCoreFrac;
     TH1* m_tauEoverPTrk;
     TH1* m_tauTrkAvgDist;
-    TH1* m_tauDRMax;
-    TH1* m_tauSflight;
-    TH1* m_tauMtrks;
     TH1* m_tauIpSig;
+    TH1* m_tauDRMax;
+    TH1* m_tauMtrks;
+    TH1* m_SumPtTrkFrac;
     
     TH1* m_innerTrkAvgDist;
     TH1* m_ptRatioEflowApprox;
     TH1* m_mEflowApprox;
-    
+
     TH1* m_ChPiEMEOverCaloEME;
     TH1* m_EMPOverTrkSysP;
-    
+
+    TH1* m_HadRadius;
+    TH1* m_EMRadius;
+    TH1* m_IsoFrac;
+
+    TH1* m_tauSflight; 
+
   private:
     void initializePlots();
     std::string m_sTauJetContainerName;
