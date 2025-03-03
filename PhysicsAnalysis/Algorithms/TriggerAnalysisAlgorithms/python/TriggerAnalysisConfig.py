@@ -151,8 +151,7 @@ class TriggerAnalysisBlock (ConfigBlock):
             alg = config.createAlgorithm( 'CP::TrigPrescalesAlg', 'TrigPrescalesAlg' )
             config.addPrivateTool( 'pileupReweightingTool', 'CP::PileupReweightingTool' )
             alg.pileupReweightingTool.LumiCalcFiles = lumicalc_files
-            alg.pileupReweightingTool.TrigDecisionTool = '%s/%s' % \
-                    ( decisionTool.getType(), decisionTool.getName() )
+            alg.selectionDecoration = 'trigPassed'
             alg.prescaleMC = config.dataType() is not DataType.Data
             alg.prescaleDecoration = self.prescaleDecoration
             if self.prescaleTriggersFormula != '':
