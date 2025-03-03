@@ -5,8 +5,31 @@ echo "--------------------------------------------"
 echo "Running ACTS configuration tests"
 echo "--------------------------------------------"
 
+checkCollectionOnFile() {
+    local trackCollections=("$@")
+    checkxAOD.py AOD.pool.root >& collections.txt
+    echo " * checking AOD file content for collections:"
+    for var in "${trackCollections[@]}"; do
+	echo "   - checking collection: "${var//\"/}"TrackParticles"
+	grep -e " ${var//\"/}TrackParticles " collections.txt >& tmp.log
+	res=$?
+	if [ $res != 0 ]; then
+	    return ${res}
+	fi
+    done
+    return 0
+}
+
 checkIdpvmOnFile() {
     trackCollections="$@"
+    checkCollectionOnFile \
+	${trackCollections}
+    grep_rc=$?
+    if [ $grep_rc != 0 ]; then
+	echo "Collection missing in AOD file"
+	checkxAOD.py AOD.pool.root
+	return ${grep_rc}
+    fi
     echo " * running IDPVM on AOD file, checking the following collections: ${trackCollections}"
     runIDPVM.py \
 	--filesInput AOD.pool.root \
