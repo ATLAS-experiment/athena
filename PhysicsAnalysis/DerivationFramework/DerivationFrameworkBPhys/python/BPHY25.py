@@ -717,12 +717,200 @@ def BPHY25Cfg(flags):
         list_2V0B_obj[i].V0TrackSelectorTool      = v0trackselect
         list_2V0B_obj[i].Extrapolator             = extrapolator
 
+    BPHY25Rev_JpsiXi = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY25Rev_JpsiXi",
+        InputVtxContainerName      = "BPHY25_JpsiXi_CascadeMainVtx",
+        TrackIndices               = [ 0, 1 ],
+        UseMassConstraint          = True,
+        VertexMass                 = Jpsimass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 25.,
+        TrkVertexFitterTool	   = vkalvrt,
+        PVRefitter                 = pvrefitter,
+        V0Tools                    = V0Tools,
+        RefitPV                    = False,
+        PVContainerName            = "BPHY25_JpsiXi_RefPrimaryVertices",
+        OutputVtxContainerName     = "BPHY25_JpsiXi_JpsiVtx")
+
+    BPHY25Rev_JpsiOmg = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY25Rev_JpsiOmg",
+        InputVtxContainerName      = "BPHY25_JpsiOmg_CascadeMainVtx",
+        TrackIndices               = [ 0, 1 ],
+        UseMassConstraint          = True,
+        VertexMass                 = Jpsimass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 25.,
+        TrkVertexFitterTool	   = vkalvrt,
+        PVRefitter                 = pvrefitter,
+        V0Tools                    = V0Tools,
+        RefitPV                    = False,
+        PVContainerName            = "BPHY25_JpsiOmg_RefPrimaryVertices",
+        OutputVtxContainerName     = "BPHY25_JpsiOmg_JpsiVtx")
+
+    BPHY25Rev_BpmLd = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY25Rev_BpmLd",
+        InputVtxContainerName      = "BPHY25_BpmLd_CascadeVtx2",
+        TrackIndices               = [ 0, 1, 2 ],
+        SubVertexTrackIndices      = [ 1, 2 ],
+        UseMassConstraint          = True,
+        SubVertexMass              = Jpsimass,
+        MassInputParticles         = [Mumass, Mumass, Kmass],
+        Chi2Cut                    = 25.,
+        TrkVertexFitterTool	   = vkalvrt,
+        PVRefitter                 = pvrefitter,
+        V0Tools                    = V0Tools,
+        RefitPV                    = False,
+        PVContainerName            = "BPHY25_BpmLd_RefPrimaryVertices",
+        OutputVtxContainerName     = "BPHY25_BpmLd_BpmVtx")
+
+    BPHY25Rev_B0KpiLd = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY25Rev_B0KpiLd",
+        InputVtxContainerName      = "BPHY25_B0KpiLd_CascadeVtx2",
+        TrackIndices               = [ 0, 1, 2, 3 ],
+        SubVertexTrackIndices      = [ 1, 2 ],
+        UseMassConstraint          = True,
+        VertexMass                 = B0mass,
+        SubVertexMass              = Jpsimass,
+        MassInputParticles         = [Mumass, Mumass, Kmass, Pimass],
+        Chi2Cut                    = 25.,
+        TrkVertexFitterTool	   = vkalvrt,
+        PVRefitter                 = pvrefitter,
+        V0Tools                    = V0Tools,
+        RefitPV                    = False,
+        PVContainerName            = "BPHY25_B0KpiLd_RefPrimaryVertices",
+        OutputVtxContainerName     = "BPHY25_B0KpiLd_B0Vtx")
+
+    BPHY25Rev_B0piKLd = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY25Rev_B0piKLd",
+        InputVtxContainerName      = "BPHY25_B0piKLd_CascadeVtx2",
+        TrackIndices               = [ 0, 1, 2, 3 ],
+        SubVertexTrackIndices      = [ 1, 2 ],
+        UseMassConstraint          = True,
+        VertexMass                 = B0mass,
+        SubVertexMass              = Jpsimass,
+        MassInputParticles         = [Mumass, Mumass, Pimass, Kmass],
+        Chi2Cut                    = 25.,
+        TrkVertexFitterTool	   = vkalvrt,
+        PVRefitter                 = pvrefitter,
+        V0Tools                    = V0Tools,
+        RefitPV                    = False,
+        PVContainerName            = "BPHY25_B0piKLd_RefPrimaryVertices",
+        OutputVtxContainerName     = "BPHY25_B0piKLd_B0Vtx")
+
+    BPHY25Rev_Bpm3body = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY25Rev_Bpm3body",
+        InputVtxContainerName      = "BPHY25_Bpm3body_CascadeMainVtx",
+        TrackIndices               = [ 0, 1, 2 ],
+        SubVertexTrackIndices      = [ 1, 2 ],
+        UseMassConstraint          = True,
+        SubVertexMass              = Jpsimass,
+        MassInputParticles         = [Mumass, Mumass, Protonmass],
+        Chi2Cut                    = 25.,
+        TrkVertexFitterTool	   = vkalvrt,
+        PVRefitter                 = pvrefitter,
+        V0Tools                    = V0Tools,
+        RefitPV                    = False,
+        PVContainerName            = "BPHY25_Bpm3body_RefPrimaryVertices",
+        OutputVtxContainerName     = "BPHY25_Bpm3body_JpsiPVtx")
+
+    BPHY25Rev_Xibpm3body = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY25Rev_Xibpm3body",
+        InputVtxContainerName      = "BPHY25_Xibpm3body_CascadeMainVtx",
+        TrackIndices               = [ 0, 1, 2 ],
+        SubVertexTrackIndices      = [ 1, 2 ],
+        UseMassConstraint          = True,
+        SubVertexMass              = Jpsimass,
+        MassInputParticles         = [Mumass, Mumass, Pimass],
+        Chi2Cut                    = 25.,
+        TrkVertexFitterTool	   = vkalvrt,
+        PVRefitter                 = pvrefitter,
+        V0Tools                    = V0Tools,
+        RefitPV                    = False,
+        PVContainerName            = "BPHY25_Xibpm3body_RefPrimaryVertices",
+        OutputVtxContainerName     = "BPHY25_Xibpm3body_JpsiPiVtx")
+
+    BPHY25Rev_Xib03body = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY25Rev_Xib03body",
+        InputVtxContainerName      = "BPHY25_Xib03body_CascadeMainVtx",
+        TrackIndices               = [ 0, 1 ],
+        UseMassConstraint          = True,
+        VertexMass                 = Jpsimass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 25.,
+        TrkVertexFitterTool	   = vkalvrt,
+        PVRefitter                 = pvrefitter,
+        V0Tools                    = V0Tools,
+        RefitPV                    = False,
+        PVContainerName            = "BPHY25_Xib03body_RefPrimaryVertices",
+        OutputVtxContainerName     = "BPHY25_Xib03body_JpsiVtx")
+
+    BPHY25Rev_Lambdab03body = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY25Rev_Lambdab03body",
+        InputVtxContainerName      = "BPHY25_Lambdab03body_CascadeMainVtx",
+        TrackIndices               = [ 0, 1 ],
+        UseMassConstraint          = True,
+        VertexMass                 = Jpsimass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 25.,
+        TrkVertexFitterTool	   = vkalvrt,
+        PVRefitter                 = pvrefitter,
+        V0Tools                    = V0Tools,
+        RefitPV                    = False,
+        PVContainerName            = "BPHY25_Lambdab03body_RefPrimaryVertices",
+        OutputVtxContainerName     = "BPHY25_Lambdab03body_JpsiVtx")
+
+    BPHY25Rev_Jpsi2V0A = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY25Rev_Jpsi2V0A",
+        InputVtxContainerName      = "BPHY25_Jpsi2V0A_CascadeMainVtx",
+        TrackIndices               = [ 0, 1 ],
+        UseMassConstraint          = True,
+        VertexMass                 = Jpsimass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 25.,
+        TrkVertexFitterTool	   = vkalvrt,
+        PVRefitter                 = pvrefitter,
+        V0Tools                    = V0Tools,
+        RefitPV                    = False,
+        PVContainerName            = "BPHY25_Jpsi2V0A_RefPrimaryVertices",
+        OutputVtxContainerName     = "BPHY25_Jpsi2V0A_JpsiVtx")
+
+    BPHY25Rev_Jpsi2V0B1 = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY25Rev_Jpsi2V0B1",
+        InputVtxContainerName      = "BPHY25_Jpsi2V0B1_CascadeVtx3",
+        TrackIndices               = [ 0, 1 ],
+        UseMassConstraint          = True,
+        VertexMass                 = Jpsimass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 25.,
+        TrkVertexFitterTool	   = vkalvrt,
+        PVRefitter                 = pvrefitter,
+        V0Tools                    = V0Tools,
+        RefitPV                    = False,
+        PVContainerName            = "BPHY25_Jpsi2V0B1_RefPrimaryVertices",
+        OutputVtxContainerName     = "BPHY25_Jpsi2V0B1_JpsiVtx")
+
+    BPHY25Rev_Jpsi2V0B2 = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY25Rev_Jpsi2V0B2",
+        InputVtxContainerName      = "BPHY25_Jpsi2V0B2_CascadeVtx3",
+        TrackIndices               = [ 0, 1 ],
+        UseMassConstraint          = True,
+        VertexMass                 = Jpsimass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 25.,
+        TrkVertexFitterTool	   = vkalvrt,
+        PVRefitter                 = pvrefitter,
+        V0Tools                    = V0Tools,
+        RefitPV                    = False,
+        PVContainerName            = "BPHY25_Jpsi2V0B2_RefPrimaryVertices",
+        OutputVtxContainerName     = "BPHY25_Jpsi2V0B2_JpsiVtx")
+
     Collections        = [ ]
     RefPVContainers    = [ ]
     RefPVAuxContainers = [ ]
     passedCandidates   = [ ]
 
     list_obj = list_disV_obj + list_BpmLd_obj + list_B0Ld_obj + list_3bodyA_obj + list_3bodyB_obj + list_2V0A_obj + list_2V0B_obj
+    list_rev = [BPHY25Rev_JpsiXi, BPHY25Rev_JpsiOmg, BPHY25Rev_BpmLd, BPHY25Rev_B0KpiLd, BPHY25Rev_B0piKLd, BPHY25Rev_Bpm3body, BPHY25Rev_Xibpm3body, BPHY25Rev_Xib03body, BPHY25Rev_Lambdab03body, BPHY25Rev_Jpsi2V0A, BPHY25Rev_Jpsi2V0B1, BPHY25Rev_Jpsi2V0B2]
 
     for obj in list_obj:
         Collections += obj.CascadeVertexCollections
@@ -730,10 +918,13 @@ def BPHY25Cfg(flags):
         RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY25_" + obj.HypothesisName + "_RefPrimaryVerticesAux."]
         passedCandidates += ["BPHY25_" + obj.HypothesisName + "_CascadeMainVtx"]
 
+    for obj in list_rev:
+        Collections += [ obj.OutputVtxContainerName ]
+
     BPHY25_SelectEvent = CompFactory.DerivationFramework.AnyVertexSkimmingTool(name = "BPHY25_SelectEvent", VertexContainerNames = passedCandidates)
     acc.addPublicTool(BPHY25_SelectEvent)
 
-    augmentation_tools = [BPHY25_AugOriginalCounts, BPHY25_Reco_mumu, BPHY25FourTrackReco_B0, BPHY25ThreeTrackReco_Bpm, BPHY25Select_Jpsi] + list_obj
+    augmentation_tools = [BPHY25_AugOriginalCounts, BPHY25_Reco_mumu, BPHY25FourTrackReco_B0, BPHY25ThreeTrackReco_Bpm, BPHY25Select_Jpsi] + list_obj + list_rev
     for t in augmentation_tools : acc.addPublicTool(t)
 
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
