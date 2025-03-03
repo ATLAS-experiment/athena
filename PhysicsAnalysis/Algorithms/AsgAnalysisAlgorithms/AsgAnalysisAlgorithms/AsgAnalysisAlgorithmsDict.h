@@ -16,6 +16,7 @@
 #include <AsgAnalysisAlgorithms/AsgLeptonTrackDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgLeptonTrackSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgMaskSelectionTool.h>
+#include <AsgAnalysisAlgorithms/AsgObjectScaleFactorAlg.h>
 #include <AsgAnalysisAlgorithms/AsgOriginalObjectLinkAlg.h>
 #include <AsgAnalysisAlgorithms/AsgPriorityDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgPtEtaSelectionTool.h>
