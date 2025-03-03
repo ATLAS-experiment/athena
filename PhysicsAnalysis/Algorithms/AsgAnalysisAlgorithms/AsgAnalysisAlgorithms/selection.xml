@@ -7,6 +7,7 @@
    <class name="CP::AsgFlagSelectionTool" />
    <class name="CP::AsgLeptonTrackDecorationAlg" />
    <class name="CP::AsgLeptonTrackSelectionAlg" />
+   <class name="CP::AsgObjectScaleFactorAlg" />
    <class name="CP::AsgOriginalObjectLinkAlg" />
    <class name="CP::AsgPriorityDecorationAlg" />
    <class name="CP::AsgPtEtaSelectionTool" />
