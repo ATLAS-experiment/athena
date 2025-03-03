@@ -9,14 +9,17 @@
 # art-output: log.*
 # art-output: Config*.pkl
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 AtlasG4_tf.py \
     --CA \
     --preExec 'flags.Sim.GenerationConfiguration="ParticleGun.ParticleGunConfig.ParticleGun_SinglePionCfg"' \
     --outputHITSFile 'test.HITS.pool.root' \
     --maxEvents '150' \
     --randomSeed '10' \
-    --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-08' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationSingleIoV' \
     --runNumber '999999' \
     --postInclude 'PyJobTransforms.UseFrontier' \

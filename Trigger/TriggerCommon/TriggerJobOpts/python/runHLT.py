@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 CA module to configure the (standalone) HLT for athena and athenaHLT.
 There is a separate entry point for each application to tailor some
@@ -167,6 +167,9 @@ def athenaCfg(flags, parser=None):
    # Configure main services
    _allflags = flags.clone()   # copy including Concurrency flags
    _allflags.lock()
+   if _allflags.Concurrency.NumThreads == 0:
+      raise RuntimeError("Trigger jobs must be run in multi-threaded mode. Use --threads=1 (or greater).")
+
    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
    cfg = MainServicesCfg(_allflags)
    del _allflags

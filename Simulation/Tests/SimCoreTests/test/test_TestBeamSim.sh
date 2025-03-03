@@ -9,11 +9,13 @@
 # art-output: log.*
 # art-output: Config*.pkl
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 TestBeam_tf.py \
     --CA \
     --DataRunNumber '1' \
     --outputHITSFile 'test.HITS.pool.root' \
-    --conditionsTag 'OFLCOND-MC16-SDR-RUN2-12' \
+    --conditionsTag "default:${conditions}" \
     --maxEvents '10' \
     --Eta '0.35' \
     --testBeamConfig 'tbtile' \
