@@ -45,5 +45,6 @@ def createIDPVMConfigFlags():
     icf.addFlag('JetAbsEtaMax', lambda pcf: 2.5 if pcf.Detector.GeometryID else 4.0)
     icf.addFlag('JetPtMin', 100.*Units.GeV)
     icf.addFlag('JetPtMax', 5000.*Units.GeV)
+    icf.addFlag('setCSVName', "")
     return icf
 
