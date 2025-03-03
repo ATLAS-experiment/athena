@@ -113,8 +113,7 @@ void FPGATrackSimHit::makeSpacepoint(float x, float y, float z, float window, FP
     
     m_pairedDetZone = inner->getDetectorZone();
     m_pairedDetType = inner->getDetType();
-    m_pairedPhysLayer = inner->getPhysLayer();
-    
+    m_pairedPhysLayer = inner->getPhysLayer();    
 
     // Update the type.
     setHitType(HitType::spacepoint);
