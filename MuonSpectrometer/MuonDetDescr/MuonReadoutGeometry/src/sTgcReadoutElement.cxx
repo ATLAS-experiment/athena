@@ -84,7 +84,7 @@ namespace MuonGM {
       IRDBRecordset_ptr nswPars   = accessSvc->getRecordsetPtr("NSWPARS","","");
 
       PVConstLink parent = getMaterialGeom()->getParent();
-      unsigned int index=parent->indexOf(getMaterialGeom());
+      unsigned int index=parent->indexOf(getMaterialGeom()).value();
       std::string pVName=parent->getNameOfChildVol(index);
       float yCutoutCathode(0);
       if (nswPars->size()==0) {

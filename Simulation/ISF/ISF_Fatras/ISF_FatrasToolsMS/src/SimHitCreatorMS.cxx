@@ -535,8 +535,8 @@ void iFatras::SimHitCreatorMS::initDeadChannels(const MuonGM::MdtReadoutElement*
     for(int tube = 1; tube <= mydetEl->getNtubesperlayer(); tube++){
       bool tubefound = false;
       for(unsigned int kk=0; kk < cv->getNChildVols(); kk++) {
-        int tubegeo = cv->getIdOfChildVol(kk) % maxNTubesPerLayer;
-        int layergeo = ( cv->getIdOfChildVol(kk) - tubegeo ) / maxNTubesPerLayer;
+        int tubegeo = cv->getIdOfChildVol(kk).value() % maxNTubesPerLayer;
+        int layergeo = ( cv->getIdOfChildVol(kk).value() - tubegeo ) / maxNTubesPerLayer;
         if( tubegeo == tube && layergeo == layer ) {
           tubefound=true;
           break;

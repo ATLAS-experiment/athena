@@ -137,9 +137,9 @@ void VP1RawDataHandle_BCM_RDO::Imp::ensureInitModuleInfo()
 	  int bcmModLogCopyNumber(-1);
 	  if (pv.getVolume()->getLogVol()->getName()=="bcmModLog") {
 	    Amg::Transform3D tr_bcmmod = pv.getTransform();
-	    Query<int> Qint = pv.getId();
-	    if (Qint.isValid()) {
-	      bcmModLogCopyNumber = int(Qint);
+	    std::optional<int> Qint = pv.getId();
+	    if (Qint) {
+	      bcmModLogCopyNumber = *Qint;
 	      ModuleInfo * modInfo = new ModuleInfo(bcmModLogCopyNumber - 951);
 	      GeoVolumeCursor bv(pv.getVolume());
 	      while (!bv.atEnd()) {

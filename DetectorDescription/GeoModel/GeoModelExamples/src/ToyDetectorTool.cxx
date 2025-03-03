@@ -67,7 +67,7 @@ void ToyDetectorTool::printVolume(GeoPVConstLink volume, int level /*= 0*/)
     GeoPVConstLink physChild = cursor.getVolume();
     GeoTrf::Transform3D position = cursor.getTransform();
     for(int k{0};k<level;++k) std::cout << "... ";
-    std::cout << cursor.getName() << " " << (cursor.getId().isValid()?std::to_string(cursor.getId()).c_str():"N/A") 
+    std::cout << cursor.getName() << " " << (cursor.getId()?std::to_string(cursor.getId().value()).c_str():"N/A")
 	      << " Transform:" << "\n";
     for(int i{0};i<3;++i) {
       for(int j{0};j<4;++j) {

@@ -469,8 +469,8 @@ int VolumeHandle::copyNumber() const
   int i(0);//We need to check the childNumber since volumes in a replica have same volume link
   while (!av.atEnd()) {
     if (m_childNumber==i&&m_d->pV==av.getVolume()) {
-       Query<int> Qint = av.getId();
-       return Qint.isValid() ? int(Qint) : -1;//-1 for "Invalid"
+       std::optional<int> Qint = av.getId();
+       return Qint ? *Qint : -1;//-1 for "Invalid"
     }
     av.next();
     ++i;
