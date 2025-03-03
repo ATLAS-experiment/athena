@@ -9,8 +9,7 @@ def L0MuonRPCSimCfg(flags, name = "L0MuonRPCSim", **kwargs):
 
     result = ComponentAccumulator()
 
-    alg = CompFactory.L0Muon.L0MuonRPCSim(name = name,
-                                          **kwargs)
+    alg = CompFactory.L0Muon.RPCSimulation(name = name, **kwargs)
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monTool = GenericMonitoringTool(flags, 'MonTool')
@@ -27,36 +26,25 @@ def L0MuonRPCSimCfg(flags, name = "L0MuonRPCSim", **kwargs):
   
 
 if __name__ == "__main__":
-    
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
+    parser = SetupArgParser()
+    parser.set_defaults(inputFile= ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"])
+    parser.set_defaults(nEvents = 20)
+
+    args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaCommon.Constants import DEBUG
-    flags = initConfigFlags()    
-    flags.Input.Files = defaultTestFiles.AOD_RUN3_MC
-    flags.Exec.MaxEvents = 20
+    flags = initConfigFlags()
     flags.Common.MsgSuppression = False
-    flags.lock()
 
-    # create basic infrastructure
-    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(flags)        
- 
-    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    acc.merge(PoolReadCfg(flags))
+    flags, acc = setupGeoR4TestCfg(args, flags)
+    from AthenaCommon.Constants import DEBUG
 
+    from MuonConfig.MuonByteStreamCnvTestConfig import RpcRdoToRpcDigitCfg
+    acc.merge(RpcRdoToRpcDigitCfg(flags))
     # example simulation alg
-    simAlg = L0MuonRPCSimCfg(flags,
+    acc.merge(L0MuonRPCSimCfg(flags,
                              name = "L0MuonRPCSim",
-                             OutputLevel = DEBUG)
-    acc.merge(simAlg)
+                             OutputLevel = DEBUG))
 
-    # below is validation
-    acc.printConfig(withDetails=True, summariseProps=True)
-
-    # run the job
-    status = acc.run()
-
-    # report the execution status (0 ok, else error)
-    import sys
-    sys.exit(not status.isSuccess())
-
+    executeTest(acc)
+   

@@ -2,15 +2,12 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-from AthenaCommon.Logging import logging
-_log = logging.getLogger(__name__)
 
 def L0MuonTGCSimCfg(flags, name = "L0Muon.TGCSimulation", **kwargs):
 
     result = ComponentAccumulator()
 
-    alg = CompFactory.L0Muon.TGCSimulation(name = name,
-                                           **kwargs)
+    alg = CompFactory.L0Muon.TGCSimulation(name = name, **kwargs)
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monTool = GenericMonitoringTool(flags, 'MonTool')
@@ -27,52 +24,26 @@ def L0MuonTGCSimCfg(flags, name = "L0Muon.TGCSimulation", **kwargs):
 
 if __name__ == "__main__":
     
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
+    parser = SetupArgParser()
+    parser.set_defaults(inputFile= ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"])
+    parser.set_defaults(nEvents = 20)
+
+    args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaCommon.Constants import DEBUG
-    flags = initConfigFlags()    
-    flags.Input.Files = defaultTestFiles.RDO_RUN4
-    flags.Exec.MaxEvents = 10
+    flags = initConfigFlags()
     flags.Common.MsgSuppression = False
-    flags.lock()
 
-    # create basic infrastructure
-    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(flags)        
- 
-    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    acc.merge(PoolReadCfg(flags))
-
-    # Geometry and TGC Cabling map (basically called in TriggerJobOpts)
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    acc.merge(MuonGeoModelCfg(flags))
-    from MuonConfig.MuonCablingConfig import TGCCablingConfigCfg
-    acc.merge(TGCCablingConfigCfg(flags))
-    # RDO to Digit (basically called in TriggerJobOpts)
-    from AthenaConfiguration.Enums import Format
-    if flags.Input.Format is Format.POOL:
-        rdoInputs = [
-            ('TgcRdoContainer','TGCRDO')
-        ]
-        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, Load=rdoInputs))
+    flags, acc = setupGeoR4TestCfg(args, flags)
+    from AthenaCommon.Constants import DEBUG
 
     from MuonConfig.MuonByteStreamCnvTestConfig import TgcRdoToTgcDigitCfg
     acc.merge(TgcRdoToTgcDigitCfg(flags, TgcDigitContainer = "TGC_DIGITS", TgcRdoContainer = 'TGCRDO'))
 
 
     # example simulation alg
-    simAlg = L0MuonTGCSimCfg(flags,
-                             OutputLevel = DEBUG)
-    acc.merge(simAlg)
+    acc.merge(L0MuonTGCSimCfg(flags, OutputLevel = DEBUG))
 
-    # below is validation
-    acc.printConfig(withDetails=True, summariseProps=True)
 
-    # run the job
-    status = acc.run()
-
-    # report the execution status (0 ok, else error)
-    import sys
-    sys.exit(not status.isSuccess())
-
+    executeTest(acc)
+ 

@@ -1,8 +1,8 @@
 /*
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L0MUONRPCSIM_H
-#define L0MUONRPCSIM_H 
+#ifndef L0MuonS1RPC_RPCSIMULATION_H
+#define L0MuonS1RPC_RPCSIMULATION_H 
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -16,19 +16,15 @@
 
 namespace L0Muon {
 
-class L0MuonRPCSim: public ::AthReentrantAlgorithm { 
+class RPCSimulation: public ::AthReentrantAlgorithm { 
  public: 
-  L0MuonRPCSim(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~L0MuonRPCSim();
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  virtual ~RPCSimulation() = default;
 
   virtual StatusCode  initialize() override;
   virtual StatusCode  execute(const EventContext& ctx) const override;
-  virtual StatusCode  finalize() override;
 
  private:
-
-  /// RPC Digit container
-  SG::ReadHandleKey<RpcDigitContainer> m_keyRpcDigit{this,"InputDigit","RpcDigitContainer","Location of input RpcDigitContainer"};
   /// RPC Rdo
   SG::ReadHandleKey<xAOD::NRPCRDOContainer> m_keyRpcRdo{this,"NrpcRdoKey","NRPCRDO","Location of input RpcRDO"};
   /// Output RoIs
