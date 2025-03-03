@@ -874,6 +874,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       //ATH_CHECK( m_muonTriggerSFTool.setProperty("Isolation", m_muIso_WP)); This property has been depreacted long time ago
       ATH_CHECK( m_muonTriggerSFTool.setProperty("AllowZeroSF", true) );
       ATH_CHECK( m_muonTriggerSFTool.setProperty("OutputLevel", this->msg().level()) );
+      if(!m_muTriggerSFCalibRelease.empty() ) ATH_CHECK(  m_muonTriggerSFTool.setProperty("CalibrationRelease",m_muTriggerSFCalibRelease) );
+      if(!m_muTriggerSFCalibFilename.empty()) ATH_CHECK(  m_muonTriggerSFTool.setProperty("filename",          m_muTriggerSFCalibFilename) );
       ATH_CHECK( m_muonTriggerSFTool.retrieve() );
       m_muonTrigSFTools.push_back(m_muonTriggerSFTool.getHandle());
     } else if (m_muonTriggerSFTool.isUserConfigured()) {

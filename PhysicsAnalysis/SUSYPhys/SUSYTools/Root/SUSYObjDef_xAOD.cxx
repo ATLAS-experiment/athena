@@ -584,7 +584,9 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "MuonForceNoId", m_force_noMuId );
   declareProperty( "MuonTTVASF", m_doTTVAsf );
   declareProperty( "MuonCalibrationMode", m_muCalibrationMode);
-
+  //MUONS TRIGGER SCALE FACTOR
+  declareProperty( "MuonTriggerSFCalibRelease",   m_muTriggerSFCalibRelease  );
+  declareProperty( "MuonTriggerSFCalibFilename",  m_muTriggerSFCalibFilename );
   //PHOTONS
   declareProperty( "PhotonBaselinePt", m_photonBaselinePt);
   declareProperty( "PhotonPt", m_photonPt);
@@ -1503,6 +1505,9 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_murequirepassedHighPtCuts, "Muon.passedHighPt", rEnv, false);
   configFromFile(m_muHighPtExtraSmear, "Muon.HighPtExtraSmear", rEnv, false);
   configFromFile(m_muEffCorrForce1D, "Muon.EffCorrForce1D", rEnv, false);
+  //
+  configFromFile(m_muTriggerSFCalibRelease,   "Muon.TriggerSFCalibRelease" ,rEnv, "None");
+  configFromFile(m_muTriggerSFCalibFilename,  "Muon.TriggerSFCalibFilename",rEnv, "None");
   //
   configFromFile(m_muCosmicz0, "MuonCosmic.z0", rEnv, 1.);
   configFromFile(m_muCosmicd0, "MuonCosmic.d0", rEnv, 0.2);
