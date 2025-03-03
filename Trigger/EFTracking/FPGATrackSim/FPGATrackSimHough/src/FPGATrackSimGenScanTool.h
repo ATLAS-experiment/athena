@@ -67,6 +67,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <bit>
 
 class FPGATrackSimGenScanMonitoring;
 
@@ -214,7 +215,7 @@ protected:
         BinEntry() {}
         void reset();
         void addHit(StoredHit hit);
-        unsigned int lyrCnt() { return __builtin_popcount(lyrhit); };
+        unsigned int lyrCnt() { return std::popcount(lyrhit); };
         unsigned int hitCnt = 0;
         layer_bitmask_t lyrhit = 0;
         std::vector<StoredHit> hits{};
