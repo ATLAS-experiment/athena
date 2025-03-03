@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimEtaPatternFilterTool.cxx
@@ -20,6 +20,7 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
+#include <bit>
 
 
 
@@ -160,7 +161,7 @@ StatusCode FPGATrackSimEtaPatternFilterTool::filterRoads(std::vector<std::shared
         {
             for (auto & patt_bitmask : m_patternmap)
             {
-                unsigned nLayers = __builtin_popcount(patt_bitmask.second);
+                unsigned nLayers = std::popcount(patt_bitmask.second);
                 if (nLayers >= working_threshold)
                 {
                     // create subpattern from layers that actually have hits
