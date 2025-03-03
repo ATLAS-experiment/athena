@@ -7,9 +7,11 @@
 #include "../TestVectorTool.h"
 #include "../OutputConversionTool.h"
 #include "../xAODContainerMaker.h"
+#include "../FPGAOutputValidationAlg.h"
 
 DECLARE_COMPONENT(FPGADataFormatAlg)
 DECLARE_COMPONENT(FPGADataFormatTool)
 DECLARE_COMPONENT(TestVectorTool)
 DECLARE_COMPONENT(OutputConversionTool)
 DECLARE_COMPONENT(xAODContainerMaker)
+DECLARE_COMPONENT(FPGAOutputValidationAlg)
