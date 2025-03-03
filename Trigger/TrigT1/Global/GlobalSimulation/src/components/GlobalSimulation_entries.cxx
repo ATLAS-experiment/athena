@@ -24,6 +24,7 @@
 #include "../GlobalAlgs/Egamma1BDTAlgTool.h"
 
 #include "../GlobalAlgs/Hypothesis/UCL/eEmSortSelectCountContainerAlgTool.h"
+#include "../GlobalAlgs/Hypothesis/UCL/InvariantMassDeltaPhiInclusive2AlgTool.h"
 
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
@@ -49,3 +50,4 @@ DECLARE_COMPONENT(GlobalSim::ERatioAlgTool)
 DECLARE_COMPONENT(GlobalSim::Egamma1BDTAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::eEmSortSelectCountContainerAlgTool)
+DECLARE_COMPONENT(GlobalSim::InvariantMassDeltaPhiInclusive2AlgTool)
