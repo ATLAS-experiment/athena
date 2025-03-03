@@ -21,7 +21,6 @@
 
 // Local includes
 #include "TauValidationPlots.h"
-#include "RecoTypes.h"
 
 class PhysValTau
   : public ManagedMonitorToolBase

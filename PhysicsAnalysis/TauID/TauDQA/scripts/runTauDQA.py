@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from glob import glob
 
 def GetCustomAthArgs():
     from argparse import ArgumentParser
-    parser = ArgumentParser(description='Parser for JetTagDQA configuration')
+    parser = ArgumentParser(description='Parser for TauDQA configuration')
     parser.add_argument("--filesInput", required=True)
     parser.add_argument("--outputFile", help='Name of output file',default="M_output.root")
     return parser.parse_args()
