@@ -1,8 +1,31 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-def ListRemaps():
+def ListRemaps(cfg, streams=[]):
     #function to get all of the remapped names needed in PFRun3Config.py
     from SGComps.AddressRemappingConfig import InputRenameCfg
+    from OutputStreamAthenaPool.OutputStreamConfig import outputStreamName
+
+    if not isinstance (streams, list):
+        streams = [streams]
+
+    # Helper to rename a decoration.
+    # When we rename a decoration, we also need to ensure that it
+    # won't be written.
+    def renameDecor (typ, sgname, dname):
+        for sname in streams:
+            s = cfg.getEventAlgo (outputStreamName (sname))
+            for i in range(len(s.ItemList)):
+                item = s.ItemList[i]
+                if item.find ('#' + sgname + 'Aux.') > 0:
+                    if item[-1] != '.':
+                        item = item + '.'
+                    item = item + '-' + dname + '_renamed'
+                    s.ItemList[i] = item
+                    break
+
+        decorname = sgname + '.' + dname
+        return InputRenameCfg (typ, decorname, decorname + '_renamed')
+
     list_remaps=[        
         #Remap input containers, that we rebuild from the ESD
         #Remap the calibrated and origin corrected topoclusters
@@ -25,23 +48,23 @@ def ListRemaps():
 
         #Remap the decorations on other containers that pflow will recreate
         #EGamma
-        InputRenameCfg ('xAOD::ElectronContainer','Electrons.chargedFELinks','Electrons.chargedFELinks_renamed'),
-        InputRenameCfg ('xAOD::ElectronContainer','Electrons.neutralFELinks','Electrons.neutralFELinks_renamed'),
-        InputRenameCfg ('xAOD::PhotonContainer','Photons.chargedFELinks','Photons.chargedFELinks_renamed'),
-        InputRenameCfg ('xAOD::PhotonContainer','Photons.neutralFELinks','Photons.neutralFELinks_renamed'),
-        InputRenameCfg ('xAOD::ElectronContainer','Electrons.neutralpfoLinks','Electrons.neutralpfoLinks_renamed'),
-        InputRenameCfg ('xAOD::ElectronContainer','Electrons.chargedpfoLinks','Electrons.chargedpfoLinks_renamed'),
-        InputRenameCfg ('xAOD::PhotonContainer','Photons.neutralpfoLinks','Photons.neutralpfoLinks_renamed'),
-        InputRenameCfg ('xAOD::PhotonContainer','Photons.chargedpfoLinks','Photons.chargedpfoLinks_renamed'),
+        renameDecor ('xAOD::ElectronContainer','Electrons','chargedFELinks'),
+        renameDecor ('xAOD::ElectronContainer','Electrons','neutralFELinks'),
+        renameDecor ('xAOD::PhotonContainer','Photons','chargedFELinks'),
+        renameDecor ('xAOD::PhotonContainer','Photons','neutralFELinks'),
+        renameDecor ('xAOD::ElectronContainer','Electrons','neutralpfoLinks'),
+        renameDecor ('xAOD::ElectronContainer','Electrons','chargedpfoLinks'),
+        renameDecor ('xAOD::PhotonContainer','Photons','neutralpfoLinks'),
+        renameDecor ('xAOD::PhotonContainer','Photons','chargedpfoLinks'),
         #Muons
-        InputRenameCfg ('xAOD::MuonContainer','Muons.chargedFELinks','Muons.chargedFELinks_renamed'),
-        InputRenameCfg ('xAOD::MuonContainer','Muons.neutralFELinks','Muons.neutralFELinks_renamed'),
-        InputRenameCfg ('xAOD::MuonContainer','Muons.muon_efrac_matched_FE','Muons.muon_efrac_matched_FE_renamed'),
-        InputRenameCfg ('xAOD::MuonContainer','Muons.ClusterInfo_deltaR','Muons.ClusterInfo_deltaR_renamed'),  
-        InputRenameCfg ('xAOD::CaloClusterContainer','MuonClusterCollection.constituentClusterLinks','MuonClusterCollection.constituentClusterLinks_renamed'),      
+        renameDecor ('xAOD::MuonContainer','Muons','chargedFELinks'),
+        renameDecor ('xAOD::MuonContainer','Muons','neutralFELinks'),
+        renameDecor ('xAOD::MuonContainer','Muons','muon_efrac_matched_FE'),
+        renameDecor ('xAOD::MuonContainer','Muons','ClusterInfo_deltaR'),  
+        renameDecor ('xAOD::CaloClusterContainer','MuonClusterCollection','constituentClusterLinks'),
         #Taus
-        InputRenameCfg ('xAOD::TauJetContainer','TauJets.neutralFELinks','TauJets.neutralFELinks_renamed'),
-        InputRenameCfg ('xAOD::TauJetContainer','TauJets.chargedFELinks','TauJets.chargedFELinks_renamed'),        
+        renameDecor ('xAOD::TauJetContainer','TauJets','neutralFELinks'),
+        renameDecor ('xAOD::TauJetContainer','TauJets','chargedFELinks'),
     ]
     
     return list_remaps

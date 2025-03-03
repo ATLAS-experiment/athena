@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 if __name__=="__main__":
 
@@ -12,6 +12,7 @@ if __name__=="__main__":
     cfgFlags.Output.doWriteAOD=True
     cfgFlags.PF.doThinning=False
     cfgFlags.PF.EOverPMode=True
+    cfgFlags.fillFromArgs()
     cfgFlags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -24,7 +25,7 @@ if __name__=="__main__":
     
     from eflowRec.PFRun3Remaps import ListRemaps
 
-    list_remaps=ListRemaps()
+    list_remaps=ListRemaps(cfg, 'AOD')
     for mapping in list_remaps:
         cfg.merge(mapping)    
 
