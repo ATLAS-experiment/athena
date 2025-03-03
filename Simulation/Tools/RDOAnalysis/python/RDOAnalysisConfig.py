@@ -309,7 +309,10 @@ def TileRDOAnalysisCfg(flags, name="TileRDOAnalysis", **kwargs):
     kwargs.setdefault("InputRawChKey", 'TileRawChannelCnt')
     kwargs.setdefault("InputMuRcvRawChKey", 'MuRcvRawChCnt')
     kwargs.setdefault("InputMuRcvKey", 'TileMuRcvCnt')
-    kwargs.setdefault("InputMBTS_TTL1Key", 'TileTTL1MBTS')
+    if flags.Detector.EnableMBTS:
+        kwargs.setdefault("InputMBTS_TTL1Key", 'TileTTL1MBTS')
+    else:
+        kwargs.setdefault("InputMBTS_TTL1Key", "")
     kwargs.setdefault("InputTileTTL1Key", 'TileTTL1Cnt')
     kwargs.setdefault("InputL2Key", 'TileL2Cnt')
     kwargs.setdefault("InputDigitsMuRcvKey", f'{prefix}MuRcvDigitsCnt')
