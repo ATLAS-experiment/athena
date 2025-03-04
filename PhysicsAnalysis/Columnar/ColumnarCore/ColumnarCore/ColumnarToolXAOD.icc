@@ -1,0 +1,72 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+/// @author Nils Krumnack
+
+
+#include <AsgMessaging/StatusCode.h>
+#include <AsgTools/AsgTool.h>
+#include <ColumnarCore/ContainerId.h>
+#include <ColumnarCore/ObjectRange.h>
+
+namespace columnar
+{
+  template<> class ColumnarTool<ColumnarModeXAOD>
+  {
+    /// Common Public Members
+    /// =====================
+  public:
+
+    static constexpr bool singleEvent = true;
+
+    ColumnarTool ();
+    explicit ColumnarTool (ColumnarTool<ColumnarModeXAOD>* val_parent);
+    ColumnarTool (const ColumnarTool<ColumnarModeXAOD>&) = delete;
+    ColumnarTool& operator = (const ColumnarTool<ColumnarModeXAOD>&) = delete;
+    virtual ~ColumnarTool ();
+
+
+    /// @brief initialize the columns/column handles
+    ///
+    /// This should be called at the end of initialize after all data handles
+    /// have been declared.
+    StatusCode initializeColumns ();
+
+
+    /// @brief add the given sub-tool
+    void addSubtool (ColumnarTool<ColumnarModeXAOD>& /*subtool*/) {};
+
+
+    /// @brief call the tool for the given event range
+    virtual void callEvents (ObjectRange<ContainerId::eventContext,ColumnarModeXAOD> events) const;
+
+
+
+    /// Mode-Specific Public Members
+    /// ============================
+  public:
+
+    auto& eventStore () const noexcept {
+#ifdef XAOD_STANDALONE
+      return m_event;
+#else
+      return *m_evtStore;
+#endif
+    }
+
+
+
+    /// Private Members
+    /// ===============
+  private:
+
+#ifdef XAOD_STANDALONE
+  mutable asg::SgTEvent m_event;
+#else
+  using StoreGateSvc_t = ServiceHandle<StoreGateSvc>;
+  /// Pointer to StoreGate (event store by default)
+  StoreGateSvc_t m_evtStore {"StoreGateSvc/StoreGateSvc", "ColumnarToolXAOD"};
+#endif
+  };
+}

@@ -1,0 +1,87 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+/// @author Nils Krumnack
+
+
+namespace columnar
+{
+  // the xAOD specialization for native types
+  template<ContainerId CI,typename CT,ColumnAccessMode CAM>
+    requires (ColumnTypeTraits<CT,ColumnarModeXAOD>::isNativeType)
+  class AccessorTemplate<CI,CT,CAM,ColumnarModeXAOD> final
+  {
+    /// Common Public Members
+    /// =====================
+  public:
+
+    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
+    static_assert (!std::is_const_v<CT>, "CT must not be const");
+
+    using CM = ColumnarModeXAOD;
+    using ColumnType = typename ColumnAccessModeTraits<CAM>::template ColumnType<typename ColumnTypeTraits<CT,ColumnarModeXAOD>::ColumnType>;
+    using AccessorType = typename ColumnAccessModeTraits<CAM>::template XAODAccessor<typename ColumnTypeTraits<CT,ColumnarModeXAOD>::ColumnType>;
+
+    AccessorTemplate () = default;
+
+    AccessorTemplate (ColumnarTool<CM>& columnBase,
+                  const std::string& name, ColumnInfo&& info = {})
+      : m_accessor(name)
+    {
+      ColumnTypeTraits<CT,ColumnarModeXAOD>::updateColumnInfo (columnBase, info);
+      if (!info.replacesColumn.empty())
+        m_accessor = info.replacesColumn;
+    }
+
+    AccessorTemplate (AccessorTemplate&& that)
+    {
+      m_accessor = that.m_accessor;
+      that.m_accessor = std::string("UNDEFINED_ACCESSOR_") + typeid (typename ColumnTypeTraits<CT,CM>::ColumnType).name();
+    }
+
+    AccessorTemplate& operator = (AccessorTemplate&& that)
+    {
+      if (this != &that)
+      {
+        m_accessor = that.m_accessor;
+        that.m_accessor = std::string("UNDEFINED_ACCESSOR_") + typeid (typename ColumnTypeTraits<CT,CM>::ColumnType).name();
+      }
+      return *this;
+    }
+
+    AccessorTemplate (const AccessorTemplate&) = delete;
+    AccessorTemplate& operator = (const AccessorTemplate&) = delete;
+
+    [[nodiscard]] ColumnType& operator () (ObjectId<CI,CM> id) const noexcept
+    {
+      return m_accessor(id.getXAODObject());
+    }
+
+    [[nodiscard]] std::span<ColumnType> operator () (ObjectRange<CI,CM> range) const noexcept
+    {
+      if (range.getXAODObject().empty())
+        return std::span<ColumnType> ();
+      return std::span<ColumnType> (&m_accessor (*range.getXAODObject()[0]), range.getXAODObject().size());
+    }
+
+    [[nodiscard]] bool isAvailable (ObjectId<CI,CM> id) const noexcept
+    {
+      return m_accessor.isAvailable (id.getXAODObject());
+    }
+
+    [[nodiscard]] std::optional<ColumnType> getOptional (ObjectId<CI,CM> id) const
+    {
+      if (m_accessor.isAvailable (id.getXAODObject()))
+        return m_accessor (id.getXAODObject());
+      else
+        return std::nullopt;
+    }
+
+    /// Private Members
+    /// ===============
+  private:
+
+    AccessorType m_accessor {std::string("UNDEFINED_ACCESSOR_") + typeid (typename ColumnTypeTraits<CT,CM>::ColumnType).name()};
+  };
+}

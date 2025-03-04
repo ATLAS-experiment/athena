@@ -1,0 +1,80 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+/// @author Nils Krumnack
+
+
+#include <ColumnarCore/ColumnarTool.h>
+#include <ColumnarCore/ObjectId.h>
+#include <ColumnarCore/ObjectRange.h>
+#include <ColumnarCore/ContainerId.h>
+#include <cassert>
+
+namespace columnar
+{
+  template<ContainerId CI>
+  class AccessorTemplate<CI,ObjectColumn,ColumnAccessMode::input,ColumnarModeXAOD> final
+  {
+    /// Common Public Members
+    /// =====================
+  public:
+
+    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
+
+    using CM = ColumnarModeXAOD;
+
+    AccessorTemplate (ColumnarTool<CM>& columnBase,
+                      const std::string& name)
+      : m_columnBase (&columnBase), m_key (name)
+    {
+    }
+
+    ObjectRange<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> /*eventId*/) const
+      requires (ContainerIdTraits<CI>::perEventRange)
+    {
+      return ObjectRange<CI,CM> (retrieveObject ());
+    }
+
+    ObjectRange<CI,CM> operator() (ObjectRange<ContainerId::eventContext,CM> /*eventRange*/) const
+      requires (ContainerIdTraits<CI>::perEventRange)
+    {
+      return ObjectRange<CI,CM> (retrieveObject ());
+    }
+
+    ObjectId<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> /*eventId*/) const
+      requires (ContainerIdTraits<CI>::perEventId)
+    {
+      return ObjectId<CI,CM> (retrieveObject ());
+    }
+
+    ObjectRange<CI,CM> operator() (ObjectRange<ContainerId::eventContext,CM> /*eventRange*/) const
+      requires (ContainerIdTraits<CI>::perEventId)
+    {
+      return ObjectRange<CI,CM> (retrieveObject ());
+    }
+
+
+
+    /// Private Members
+    /// ===============
+  private:
+
+    ColumnarTool<CM> *m_columnBase = nullptr;
+    std::string m_key;
+
+    // retrieve the object from the event store.  there is probably
+    // something clever that could be done with `SG::ReadHandleKey`, but
+    // in practice all CP tools converted so far (25 Feb 25) do not
+    // actually retrieve objects in XAOD mode.  so for simplicity and to
+    // avoid some of the bookkeeping issues with "subtool" objects
+    // holding accessors, I use this "non-tracking" version.
+    auto& retrieveObject () const
+    {
+      typename ContainerIdTraits<CI>::xAODObjectRangeType *container = nullptr;
+      if (!m_columnBase->eventStore().retrieve (container, m_key).isSuccess())
+        throw std::runtime_error ("failed to retrieve " + m_key);
+      return *container;
+    }
+  };
+}
