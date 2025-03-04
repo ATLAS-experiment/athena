@@ -83,7 +83,9 @@ namespace GlobalSim {
     auto collector = std::make_unique<DataCollector>();
     collector->collect("eEmTobs in", eEmTobs);
     
-    // Select
+    // Select. In the VHDL, ech TOB is treated indiviually. Here
+    // we split the TOBs into vectors of selected TOBs, where
+    // each selection has a set of associated cuts.
     auto selected_eEmTobs = std::vector<std::vector<eEmTobPtr>>();
     CHECK(make_selectedTobs(eEmTobs, selected_eEmTobs));
 
@@ -117,13 +119,15 @@ namespace GlobalSim {
 
     auto ports_out = std::make_unique<eEmSortSelectCountContainerPortsOut>();
 
-    //sort selected tobs, and copy to output port
+    // sort selected tobs, and copy to the appropriate location in the
+    // output port
 
-    for (std::size_t i = 0; i != s_eEmNumSort; ++i) {
+    auto& outputTobs = ports_out->m_O_eEmGenTob;
+    for (std::size_t i = 0; i != s_NumSort; ++i) {
 
       auto& sel =  selected_genericTobs[i];
       auto divider = std::begin(sel) + std::min(sel.size(),
-						s_eEmSortOutWidth[i]);
+						s_SortOutWidth[i]);
 
 
       std::partial_sort(std::begin(sel),
@@ -131,9 +135,8 @@ namespace GlobalSim {
 			std::end(sel),
 			EtGreater);
 
-      auto& outputTobs = ports_out->m_O_eEmGenTob;
       auto start_iter =
-	std::begin(outputTobs) + s_eEmSortOutStart[i];
+	std::begin(outputTobs) + s_SortOutStart[i];
 
       std::copy(std::begin(sel),
 		divider,
@@ -143,7 +146,16 @@ namespace GlobalSim {
     collector->collect("Sorted generic tob containers",
 		       selected_genericTobs);
 
+
+    // write unsorted generic TOBs to the output port
+    std::size_t numToCopy = std::min(s_NumNoSort, eEmTobs.size());
     
+    std::transform(std::cbegin(eEmTobs),
+		   std::cbegin(eEmTobs)+s_NumNoSort-1,
+		   std::begin(outputTobs) + numToCopy,
+		   make_genericTob);
+		   
+		   
 
     // count the tobs according to various criteria.
     // limit the counts so that the number of output bits are not exeeded.
@@ -161,7 +173,7 @@ namespace GlobalSim {
     for(std::size_t i = 0; i != ntobs.size(); ++i) {
       bounded_counts.push_back({
 	  std::min(ntobs[i], s_max_counts[i]),
-	  s_eEmCountOutWidth[i]});
+	  s_CountOutWidth[i]});
     };
 
     // convert each limited count value to 0, 1 (type: short)
@@ -194,10 +206,10 @@ namespace GlobalSim {
 
     // sanity check
  
-    if (int_bits.size() != s_eEmNumTotalCountWidth or
+    if (int_bits.size() != s_NumTotalCountWidth or
 	int_bits.size() != (ports_out->m_O_Multiplicity)->size()) {
       ATH_MSG_ERROR("incorrect number of count bits. Expected "
-		    << s_eEmNumTotalCountWidth
+		    << s_NumTotalCountWidth
 		    << " obtained " << int_bits.size()
 		    << " number bits in output ports "
 		    << (ports_out->m_O_Multiplicity)->size());

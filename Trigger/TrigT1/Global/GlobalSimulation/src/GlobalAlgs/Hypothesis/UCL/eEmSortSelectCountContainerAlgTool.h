@@ -30,7 +30,7 @@ namespace GlobalSim {
     
     virtual ~eEmSortSelectCountContainerAlgTool() = default;
     
-    StatusCode initialize() override;
+    virtual StatusCode initialize() override;
 
     virtual StatusCode run(const EventContext& ctx) const override;
     
@@ -99,25 +99,30 @@ namespace GlobalSim {
     constexpr static auto& s_NumSelect =
       eEmSortSelectCountContainerPortsOut::NumSelect;
 
-    constexpr static auto& s_eEmNumSort =
-      eEmSortSelectCountContainerPortsOut::eEmNumSort;
-
-    constexpr static auto& s_eEmSortOutWidth =
-      eEmSortSelectCountContainerPortsOut::eEmSortOutWidth;
+    constexpr static auto& s_NumSort =
+      eEmSortSelectCountContainerPortsOut::NumSort;
 
     
-    constexpr static auto& s_eEmSortOutStart =
-      eEmSortSelectCountContainerPortsOut::eEmSortOutStart;
+    constexpr static auto& s_NumNoSort =
+      eEmSortSelectCountContainerPortsOut::NumNoSort;
+
+
+    constexpr static auto& s_SortOutWidth =
+      eEmSortSelectCountContainerPortsOut::SortOutWidth;
+
+    
+    constexpr static auto& s_SortOutStart =
+      eEmSortSelectCountContainerPortsOut::SortOutStart;
 
     constexpr static auto& s_max_counts =
       eEmSortSelectCountContainerPortsOut::max_counts;
 
-    constexpr static auto& s_eEmCountOutWidth =
-      eEmSortSelectCountContainerPortsOut::eEmCountOutWidth;
+    constexpr static auto& s_CountOutWidth =
+      eEmSortSelectCountContainerPortsOut::CountOutWidth;
 
     
-    constexpr static auto& s_eEmNumTotalCountWidth =
-      eEmSortSelectCountContainerPortsOut::eEmNumTotalCountWidth;
+    constexpr static auto& s_NumTotalCountWidth =
+      eEmSortSelectCountContainerPortsOut::NumTotalCountWidth;
 
 
   };
