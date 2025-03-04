@@ -267,6 +267,7 @@ bool TrigEgammaFastElectronHypoTool::decide_ringer ( const ITrigEgammaFastElectr
   }
   cutCounter++;
 
+  ATH_MSG_DEBUG("Ringer executed in FastElectron");
 
   bool pass = false;
   if( input.pidDecorator.count(m_pidName)){
