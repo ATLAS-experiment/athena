@@ -84,6 +84,9 @@ class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
     /// Sets the list of identifiers of the channels building the cluster
     void setRDOlist(const std::vector<Identifier>& rdolist);
 
+    /// Setter with std::move if the value_type is already available
+    void setRDOlist(std::vector<Identifier::value_type>&& rdolist);
+
     /// Sets the dimensions of the cluster in numbers of channels in phi (x) and
     /// eta (y) directions
     void setChannelsInPhiEta(int channelsInPhi, int channelsInEta);

@@ -32,7 +32,7 @@ public:
 	  ids.reserve(40);
 	  tots.reserve(40);
 	}
-        std::vector<Identifier> ids;
+        std::vector<Identifier::value_type> ids;
 	std::vector<int> tots;
 	int lvl1min = std::numeric_limits<int>::max();
     };

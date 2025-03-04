@@ -22,6 +22,13 @@ xAOD::VectorMap<3> xAOD::PixelCluster_v1::globalPosition() {
     return VectorMap<3>{values.data()};
 }
 
+
+void xAOD::PixelCluster_v1::setRDOlist(std::vector<Identifier::value_type>&& rdoList) {
+  rdoListAcc(*this) = std::move(rdoList);
+}
+
+
+//Custom setter for identifier inputs
 void xAOD::PixelCluster_v1::setRDOlist(const std::vector<Identifier>& rdoList) {
     std::vector<Identifier::value_type> rdos(rdoList.size());
     for (std::size_t i(0); i < rdos.size(); ++i) {
@@ -29,6 +36,8 @@ void xAOD::PixelCluster_v1::setRDOlist(const std::vector<Identifier>& rdoList) {
     }
     rdoListAcc(*this) = std::move(rdos);
 }
+
+
 
 const std::vector<Identifier> xAOD::PixelCluster_v1::rdoList() const {
     const std::vector<Identifier::value_type>& values = rdoListAcc(*this);
