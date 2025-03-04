@@ -1063,9 +1063,12 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                 }
                 else if (chType == sTgcIdHelper::sTgcChannelTypes::Strip){
                     const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, chID);
-                    Amg::Vector3D testChannelPos(Amg::Vector3D::Zero()); 
+                    Amg::Vector3D testChannelPos{Amg::Vector3D::Zero()}; 
                     testEle.stripGlobalPosition(chID, testChannelPos);
-                    if ((refChannelPos - testChannelPos).mag() > 10. * Gaudi::Units::micrometer){
+                    Amg::Vector3D localRefPos {testTrans.inverse()*refChannelPos};
+                    Amg::Vector3D localTestPos{testTrans.inverse()*testChannelPos};
+                    if(std::abs(localRefPos.x() -localTestPos.x()) > 1.* Gaudi::Units::micrometer 
+                    || std::abs(localRefPos.z() -localTestPos.z()) > 15.* Gaudi::Units::micrometer) {
                         ATH_MSG_ERROR("Mismatch in channel positions "<<m_idHelperSvc->toString(chID)
                                 <<" ref: "<<Amg::toString(refChannelPos)<<" test: "<<Amg::toString(testChannelPos)
                                 <<" local coordinates -- ref: "<<Amg::toString(testTrans.inverse()*refChannelPos)
@@ -1074,10 +1077,9 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                     }
                     ATH_MSG_VERBOSE("Agreement between new and old geometry for channel "<<m_idHelperSvc->toString(chID)
                                     <<" channel position "<<Amg::toString(refChannelPos));
-                }
-                else { // wire
+                } else { // wire
                     const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, chID);
-                    Amg::Vector3D testChannelPos(Amg::Vector3D::Zero()); 
+                    Amg::Vector3D testChannelPos{Amg::Vector3D::Zero()}; 
                     testEle.stripGlobalPosition(chID, testChannelPos);
                     Amg::Vector3D localRefPos {testTrans.inverse()*refChannelPos};
                     Amg::Vector3D localTestPos{testTrans.inverse()*testChannelPos};
@@ -1087,13 +1089,10 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                             <<" ref: "<<Amg::toString(refChannelPos)<<" test: "<<Amg::toString(testChannelPos)
                             <<" local coordinates -- ref: "<<Amg::toString(testTrans.inverse()*refChannelPos)
                             <<" test: "<<Amg::toString(testTrans.inverse()*testChannelPos)
-                            <<"FINGER: "<<std::abs(localRefPos.x() -localTestPos.x())
-                            <<", "<<std::abs(localRefPos.z() -localTestPos.z()));
+                            <<"delta X: "<<std::abs(localRefPos.x() -localTestPos.x())
+                            <<", delta Z: "<<std::abs(localRefPos.z() -localTestPos.z()));
                         return StatusCode::FAILURE;  
                     }
-
-
-
                 }
             }
         }
