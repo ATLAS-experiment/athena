@@ -429,8 +429,8 @@ def ITkActsExtendedPRDInfoCfg(flags):
     result = ComponentAccumulator()
 
     #Add the truth origin to the truth particles
-    from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPixelPrepDataToxAODCfg
-    result.merge(ITkActsPixelPrepDataToxAODCfg(flags))
+    from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
+    result.merge(ITkActsPrepDataToxAODCfg(flags))
 
     return result
 
@@ -489,8 +489,8 @@ def ITkExtendedPRDInfoCfg(flags):
 def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
     """Configures complete ITk tracking """
 
-    from TrkConfig.TrkConfigFlags import ITkPrimaryPassConfig
-    if flags.Tracking.ITkPrimaryPassConfig in [ITkPrimaryPassConfig.Acts, ITkPrimaryPassConfig.ActsFast, ITkPrimaryPassConfig.ActsHeavyIon]:
+    from InDetConfig.ITkActsHelpers import primaryPassUsesActs
+    if primaryPassUsesActs(flags):
         from InDetConfig.ITkActsTrackRecoConfig import ITkActsTrackRecoCfg
         return ITkActsTrackRecoCfg(flags)
 

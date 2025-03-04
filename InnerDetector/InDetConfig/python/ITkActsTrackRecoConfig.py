@@ -113,11 +113,11 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
     ## ACTS Specific write PRDInfo
     if flags.Tracking.writeExtendedSi_PRDInfo:
         # Add the truth origin to the truth particles
-        # Despite the name if the Cfg function, this handles:
+        # This handles:
         # - Pixel detector
         # - Strip detector
-        from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPixelPrepDataToxAODCfg
-        acc.merge(ITkActsPixelPrepDataToxAODCfg(flags))
+        from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
+        acc.merge(ITkActsPrepDataToxAODCfg(flags))
 
     acc.printConfig(withDetails = False, summariseProps = False)
     return acc
