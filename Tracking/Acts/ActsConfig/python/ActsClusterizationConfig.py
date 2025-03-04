@@ -310,7 +310,7 @@ def ActsMainClusterizationCfg(flags,
                                                        **extractChildKwargs(prefix='HgtdClusterPreparationAlg.', **kwargs)))
             
     # Analysis extensions
-    if flags.Acts.doAnalysis:
+    if flags.Acts.Clusters.doAnalysis:
         if kwargs['processPixels']:
             from ActsConfig.ActsAnalysisConfig import ActsPixelClusterAnalysisAlgCfg
             acc.merge(ActsPixelClusterAnalysisAlgCfg(flags, **extractChildKwargs(prefix='PixelClusterAnalysisAlg.', **kwargs)))
@@ -457,7 +457,7 @@ def ActsClusterizationCfg(flags,
                 kwargs.setdefault('HgtdClusterPreparationAlg.InputPrdMap', f'{previousActsExtension}PrdMap')
 
     # Analysis algo(s)
-    if flags.Acts.doAnalysis:
+    if flags.Acts.Clusters.doAnalysis:
         # Run analysis code on the resulting cluster collection produced by this tracking pass
         # This collection is the result of (3) if it ran, else the result of (2). We are sure at least one of them run
         if kwargs['processPixels']:
