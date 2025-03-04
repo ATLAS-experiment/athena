@@ -283,7 +283,7 @@ StatusCode JSSTaggerBase::getConfigReader() {
   std::string configPath;
 
   if ( m_calibArea.compare("Local") == 0 ) {
-    configPath = PathResolverFindCalibFile(m_configFile.c_str());
+    configPath = PathResolverFindCalibFile(m_configFile);
   }
   else if ( m_calibArea.find("eos") != std::string::npos) {
     configPath = PathResolverFindCalibFile((m_calibArea+"/"+m_configFile).c_str());
