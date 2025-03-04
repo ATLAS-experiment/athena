@@ -194,6 +194,8 @@ if iov:
     lumi=0
 
 folderTag = tag
+if folderTag.startswith("Tile") or folderTag.startswith("CALO") :
+    folderPath=""
 log.info("Initializing folder %s with tag %s", folderPath, folderTag)
 
 blobReader = TileCalibCrest.TileBlobReaderCrest(schema,folderPath, folderTag, run, lumi,

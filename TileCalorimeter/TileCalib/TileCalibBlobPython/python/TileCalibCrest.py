@@ -196,7 +196,7 @@ class TileBlobReaderCrest(TileCalibLogger):
             hash=iov['payload_hash']
             if dbg:
                 #self.log().info('Run,Lumi (%d,%d)' , runlumi)
-                self.log().info('IOV [%d,%d] - (%d,%d)' , (runS,lumiS,runU,lumiU))
+                self.log().info('IOV [%d,%d] - (%d,%d)' , runS,lumiS,runU,lumiU)
                 self.log().info('Insertion time %s' , iov['insertion_time'])
                 self.log().info('Hash %s' , hash)
             payload = self.__api_instance.get_payload(hash=hash).decode('utf-8')
