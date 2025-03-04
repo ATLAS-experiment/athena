@@ -242,6 +242,9 @@ if __name__ == "__main__":
                                           RunConsistencyChecks=False,
                                           ObjDebugOutput=False))
 
+    from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripDetectorElementStatusCondAlgNoByteStreamErrorsCfg
+    acc.merge(ITkStripDetectorElementStatusCondAlgNoByteStreamErrorsCfg(flags))
+
     # ITk strip defect configuration defined in post include
     from StripDefectsEmulatorPostInclude import emulateITkStripDefects
     emulateITkStripDefects(flags,acc)
