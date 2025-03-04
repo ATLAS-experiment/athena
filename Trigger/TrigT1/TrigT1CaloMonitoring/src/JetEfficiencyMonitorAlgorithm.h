@@ -34,14 +34,17 @@ private:
   Gaudi::Property<std::vector<std::string>> m_HLTrandom_reference_triggers{this,"HLTRandomReferenceTriggers",{},"the random refernce trigger"};
   Gaudi::Property<bool> m_passedb4Prescale{this,"PassedBeforePrescale",0,"boolean of if we want to measure the efficiency based on passed before prescale"};
 
-  Gaudi::Property<std::vector<std::string>> m_multiJet_LegacySmallRadiusTriggers{this,"multiJet_LegacySmallRadiusTriggers",{},"Vector of single jet L1 triggers"};
   Gaudi::Property<std::vector<std::string>> m_SmallRadiusJetTriggers_phase1{this,"SmallRadiusJetTriggers_phase1",{},"Vector of all Small radius triggers"};
   Gaudi::Property<std::vector<std::string>> m_LargeRadiusJetTriggers_phase1{this,"LargeRadiusJetTriggers_phase1",{},"Vector of all Large radius triggers"};
+ 
+  Gaudi::Property<std::vector<std::string>> m_SmallRadiusJetTriggers_gFEX{this,"SmallRadiusJetTriggers_gFEX",{},"Vector of all small radius gFEX triggers, whose trigger decision is emulated using gFEX TOB values"};
+  Gaudi::Property<std::vector<std::string>> m_LargeRadiusJetTriggers_gFEX{this,"LargeRadiusJetTriggers_gFEX",{},"Vector of all large radius gFEX triggers, whose trigger decision is emulated using gFEX TOB values"};
+
 
   
   // container keys including steering parameter and description
   SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{ this, "JetKey" , "AntiKt4EMPFlowJets", ""}; //offline jets
-  SG::ReadHandleKey<xAOD::JetContainer> m_LRjetKey{ this, "LRJetKey" , "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets", ""}; //offline LR jets  
+  SG::ReadHandleKey<xAOD::JetContainer> m_LRjetKey{ this, "LRJetKey" , "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets", ""}; //offline LR jets   
   SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gFexSRJetContainerKey{ this, "mygFexSRJetRoIContainer" , "L1_gFexSRJetRoI" , ""}; //gfex SR jets
   SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gFexLRJetContainerKey{ this, "mygFexLRJetRoIContainer" , "L1_gFexLRJetRoI" , ""}; //gfex LR jets
 };
