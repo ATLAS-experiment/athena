@@ -40,10 +40,6 @@ public:
     };
 
     struct Cluster {
-        Cluster() {
-	  // reserve memory. Number evaluated on ttbar pu200
-	  ids.reserve(20);
-	}
 	std::vector<Identifier> ids;
 	uint16_t hitsInThirdTimeBin{0};
     };

@@ -27,11 +27,6 @@ public:
     using CellCollection = std::vector<Cell>;
 
     struct Cluster {
-        Cluster() {
-	  // reserve memory. Number evaluated on ttbar pu200
-	  ids.reserve(40);
-	  tots.reserve(40);
-	}
         std::vector<Identifier::value_type> ids;
 	std::vector<int> tots;
 	int lvl1min = std::numeric_limits<int>::max();
