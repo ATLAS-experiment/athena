@@ -51,9 +51,9 @@ def defineInputsMenu():
                     for group in conn["algorithmGroups"]:
                         if group["fpga"]==0 and group["clock"]==1:
                             group["algorithms"] += [
-                                    TopoMenuDef( '2DISAMB_jJ50ab_DR_eTAU_eTAU',             outputbits = (10), outputlines = ['2DISAMB-jJ50ab-0DR28-eTAU30ab-eTAU20ab']),
-                                    TopoMenuDef( '2DISAMB_jJ40ab_DR_eTAU_eTAU',             outputbits = (11), outputlines = ['2DISAMB-jJ40ab-0DR28-eTAU30ab-eTAU20ab']),
-                                    TopoMenuDef( '2DISAMB_jJ30ab_DR_eTAU_eTAU',             outputbits = (12), outputlines = ['2DISAMB-jJ30ab-0DR28-eTAU30ab-eTAU20ab']),
+                                    TopoMenuDef( '2DISAMB_jJ50ab_DR_eTAU_eTAU',             outputbits = (12), outputlines = ['2DISAMB-jJ50ab-0DR28-eTAU30ab-eTAU20ab']),
+                                    TopoMenuDef( '2DISAMB_jJ40ab_DR_eTAU_eTAU',             outputbits = (13), outputlines = ['2DISAMB-jJ40ab-0DR28-eTAU30ab-eTAU20ab']),
+                                    TopoMenuDef( '2DISAMB_jJ30ab_DR_eTAU_eTAU',             outputbits = (14), outputlines = ['2DISAMB-jJ30ab-0DR28-eTAU30ab-eTAU20ab']),
                             ]
                         elif group['fpga']==1 and group['clock']==0:
                             group["algorithms"] += [
