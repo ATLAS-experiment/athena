@@ -13,6 +13,8 @@ import re
 from enum import Enum
 from collections import Counter
 
+from TriggerMenuMT.HLT.Menu.SignatureDicts import getListOfSignatureStrings
+
 from AthenaCommon.Logging import logging
 log = logging.getLogger( 'TriggerMenuConfigTest' )
 log.info("Importing %s", __name__)
@@ -66,9 +68,8 @@ class StructuredChainNames(MenuVerification):
     '''
 
     _SIGNATURE_TYPE_ORDER = {
-        TriggerLevel.HLT: [
-            "e", "g", "mu", "tau", "j", "xe",  "ht", "isotrk", "fslrt", "dedxtrk", "hitdvjet", "fsvsi", "distrk", "dispjet"
-        ],
+        TriggerLevel.HLT: getListOfSignatureStrings(),
+        # TODO: import list of signatures items from L1 code
         TriggerLevel.L1: [
             "EM", "MU", "TAU", "J", "XE", "HT"
         ],
@@ -123,10 +124,36 @@ class StructuredChainNames(MenuVerification):
         signature_types = "|".join(self._signature_type_order)
         sig_type_pattern = re.compile(
             r"_\d*[egj]?({})\d+s?".format(signature_types))
+
+# this is commented because needs to be discussed (it will be removed/changed in next dev)
+        # re to find the signature that has the probe leg
+        #sig_probe_pattern = re.compile(r"_\d*?({})\d+s?[\D]*?_probe".format(signature_types))
+
+        
         def items_in_order(part):
-            #part    = part.replace("leg","p") #if we leave the word leg, the findall(..) function will find a 'g' 
+            #part    = part.replace("leg","p") #if we leave the word leg, the findall(..) function will find a 'g'
             indices = [self._signature_type_order.index(x) for x in 
                        sig_type_pattern.findall(part)]
+
+# this is commented because needs to be discussed (it will be removed/changed in next dev)
+            # this finds the signatures with the probe leg 
+            # matches = sig_type_pattern.findall(part)
+            # matches_probe = sig_probe_pattern.findall(part)
+            # if len(matches_probe):
+            #     assert(len(matches_probe)==1)
+            #     probe_leg = matches_probe[0]
+            #     matches_after_probe = matches.copy()
+            #     # force the probe leg to be the last one
+            #     if probe_leg in matches_after_probe:
+            #         # Remove the element
+            #         matches_after_probe.remove(probe_leg)
+            #         # Append it to the end
+            #         matches_after_probe.append(probe_leg)
+            #         indices_after_probe = [self._signature_type_order.index(x) for x in matches_after_probe]
+            #         # copy the new indices
+            #         #indices = indices_after_probe.copy()
+                   
+            
             rr =  indices == sorted(indices)
             if not rr:
                 log.error("[StructuredChainNames::items_in_order] %s NOT SORTED!", indices)
@@ -134,7 +161,9 @@ class StructuredChainNames(MenuVerification):
             return rr
 
         def are_signatures_in_order(name_parts):
-            to_check = ["_".join(p for p in name_parts if "-" not in p)]
+            
+            to_check = ["".join(f"_{p}" for p in name_parts if "-" not in p)]
+            
             # Sections of topo item parts are checked for ordering independently.
             topo_parts = [p for p in name_parts if "-" in p]
             for topo in topo_parts:
@@ -155,6 +184,7 @@ class StructuredChainNames(MenuVerification):
         if not result:
             log.error("[StructuredChainNames::_matches_shared_conventions] chain deosn't match convention: parts[0] = %s, value = %s, parts[1:] = %s, signature_types = %s", 
                       parts[0], self._trigger_level.value, parts[1:], signature_types)
+            
         return result
 
 
