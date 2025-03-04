@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -105,7 +105,7 @@ GetDaughters() const
 
 const MiniConfigTreeNode*
 MiniConfigTreeNode::
-GetNode( std::string name_ ) const
+GetNode( const std::string & name_ ) const
 {
   if( m_daughters.size() == 0 ) {
     return this;
@@ -136,7 +136,7 @@ GetNode( std::string name_ ) const
 
 void
 MiniConfigTreeNode::
-SetAttribute( std::string attName, std::string attValue, bool isAttribKeyword )
+SetAttribute( const std::string & attName, const std::string & attValue, bool isAttribKeyword )
 {
     AttMap_t::value_type attMapVal( attName, AttMap_t::mapped_type(attValue, isAttribKeyword) );
   m_attributes.insert( attMapVal );
@@ -145,7 +145,7 @@ SetAttribute( std::string attName, std::string attValue, bool isAttribKeyword )
 
 std::string
 MiniConfigTreeNode::
-GetAttribute( std::string attName, bool calledFromDaughter ) const
+GetAttribute( const std::string & attName, bool calledFromDaughter ) const
 {
   AttIter_t i = m_attributes.find( attName );
   if( i == m_attributes.end() ) {
@@ -164,7 +164,7 @@ GetAttribute( std::string attName, bool calledFromDaughter ) const
 // not inherited ones
 std::string
 MiniConfigTreeNode::
-GetAttributeLocal( std::string attName ) const
+GetAttributeLocal( const std::string & attName ) const
 {
   AttIter_t i = m_attributes.find( attName );
   if( i == m_attributes.end() ) {
