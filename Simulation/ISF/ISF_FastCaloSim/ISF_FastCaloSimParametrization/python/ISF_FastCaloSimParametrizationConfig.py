@@ -4,8 +4,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-
-
+from IOVDbSvc.IOVDbSvcConfig import addFolders
 def ISF_HitAnalysisCfg(flags, name="ISF_HitAnalysis",
                        NTruthParticles=1, saveAllBranches=False,
                        doG4Hits=False, doClusterInfo=False,
@@ -50,6 +49,8 @@ def ISF_HitAnalysisCfg(flags, name="ISF_HitAnalysis",
 
     from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
     kwargs.setdefault('PartPropSvc', result.getPrimaryAndMerge(PartPropSvcCfg(flags)).name)
+
+    result.merge(addFolders(flags, ["/Simulation/Parameters", "/Digitization/Parameters"]))
 
     result.addEventAlgo(CompFactory.ISF_HitAnalysis(name,**kwargs))
     return result

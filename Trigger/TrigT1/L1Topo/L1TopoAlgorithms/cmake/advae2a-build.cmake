@@ -8,7 +8,7 @@ include( ExternalProject )
 
 # Declare where to get ADVAE2A from.
 set( ATLAS_ADVAE2A_SOURCE
-   "URL;http://cern.ch/atlas-software-dist-eos/externals/AnomDetVAE2A/l1topo2a-vae-0.4.0.tar.gz;https://gitlab.cern.ch/atlas-l1calo/l1topo/specialAlgorithms/anomaly-detection-vae/l1topo2a-vae/-/archive/0.4.0/l1topo2a-vae-0.4.0.tar.gz;URL_MD5;9c45f5f282102323e8b026f6e2dd6882"
+   "URL;http://cern.ch/atlas-software-dist-eos/externals/AnomDetVAE2A/l1topo2a-vae-0.4.1.tar.gz;https://gitlab.cern.ch/atlas-l1calo/l1topo/specialAlgorithms/anomaly-detection-vae/l1topo2a-vae/-/archive/0.4.1/l1topo2a-vae-0.4.1.tar.gz;URL_MD5;bbb2c8a14c189478b9f6ac35b129a8b2"
    CACHE STRING "Source for the ADVAE2A project" )
 set( ATLAS_ADVAE2A_PATCH ""
    CACHE STRING "Patch command for ADVAE2A" )

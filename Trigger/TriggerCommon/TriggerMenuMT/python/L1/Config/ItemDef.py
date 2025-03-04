@@ -2164,6 +2164,19 @@ class ItemDef:
             MenuItem('L1_BTAG-MU3VFjJ30_2jJ40p0ETA25').setLogic( d.TOPO_0DR04_MU3VFab_CjJ30ab & d.jJ400ETA25.x(2) & physcond)
             MenuItem('L1_BTAG-MU3VFjJ30_2jJ30p0ETA25_jJ40p0ETA25').setLogic( d.TOPO_0DR04_MU3VFab_CjJ30ab & d.jJ300ETA25.x(2) & d.jJ400ETA25 & physcond)
 
+            # ATR-30824
+            MenuItem('L1_BTAG-MU3VFjJ20').setLogic( d.TOPO_0DR04_MU3VFab_CjJ20ab & physcond)
+            MenuItem('L1_BTAG-MU3VFjJ20_2jJ30p0ETA25').setLogic( d.TOPO_0DR04_MU3VFab_CjJ20ab & d.jJ300ETA25.x(2) & physcond)
+            MenuItem('L1_BTAG-MU3VFjJ20_2jJ30p0ETA25_jJ50p0ETA25').setLogic( d.TOPO_0DR04_MU3VFab_CjJ20ab & d.jJ300ETA25.x(2) & d.jJ500ETA25 & physcond)
+            MenuItem('L1_BTAG-MU3VFjJ20_2jJ40p0ETA25').setLogic( d.TOPO_0DR04_MU3VFab_CjJ20ab & d.jJ400ETA25.x(2) & physcond)
+            MenuItem('L1_BTAG-MU3VFjJ20_2jJ40p0ETA25_jJ50p0ETA25').setLogic( d.TOPO_0DR04_MU3VFab_CjJ20ab & d.jJ400ETA25.x(2) & d.jJ500ETA25 & physcond)
+
+            MenuItem('L1_BTAG-MU5VFjJ20').setLogic( d.TOPO_0DR04_MU5VFab_CjJ20ab & physcond)
+            MenuItem('L1_BTAG-MU5VFjJ20_2jJ30p0ETA25').setLogic( d.TOPO_0DR04_MU5VFab_CjJ20ab & d.jJ300ETA25.x(2) & physcond)
+            MenuItem('L1_BTAG-MU5VFjJ20_2jJ30p0ETA25_jJ50p0ETA25').setLogic( d.TOPO_0DR04_MU5VFab_CjJ20ab & d.jJ300ETA25.x(2) & d.jJ500ETA25 & physcond)
+            MenuItem('L1_BTAG-MU5VFjJ20_2jJ40p0ETA25').setLogic( d.TOPO_0DR04_MU5VFab_CjJ20ab & d.jJ400ETA25.x(2) & physcond)
+            MenuItem('L1_BTAG-MU5VFjJ20_2jJ40p0ETA25_jJ50p0ETA25').setLogic( d.TOPO_0DR04_MU5VFab_CjJ20ab & d.jJ400ETA25.x(2) & d.jJ500ETA25 & physcond)
+
         except NameError as ex:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             fn,ln,_,_ = traceback.extract_tb(exc_traceback)[0]

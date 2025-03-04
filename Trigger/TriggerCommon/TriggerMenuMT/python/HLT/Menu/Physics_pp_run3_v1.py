@@ -1881,11 +1881,11 @@ def setupMenu():
         
         #---------- support 2m + 1g + ZRad triggers
         #ChainProp(name='HLT_2mu14_g20_tight_icaloloose_probe_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM18M'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
-        ChainProp(name='HLT_2mu14_g20_tight_probe_L1eEM18M_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM18M'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
-        ChainProp(name='HLT_2mu14_g22_tight_probe_L1eEM18M_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM18M'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
-        ChainProp(name='HLT_2mu14_g25_medium_probe_L1eEM24L_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM24L'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
-        ChainProp(name='HLT_2mu14_g35_medium_probe_L1eEM24L_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM24L'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
-        ChainProp(name='HLT_2mu14_g50_loose_probe_L1eEM24L_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM24L'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
+        ChainProp(name='HLT_g20_tight_probe_L1eEM18M_2mu14_L12MU8F', l1SeedThresholds=['PROBEeEM18M','MU8F'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
+        ChainProp(name='HLT_g22_tight_probe_L1eEM18M_2mu14_L12MU8F', l1SeedThresholds=['PROBEeEM18M','MU8F'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
+        ChainProp(name='HLT_g25_medium_probe_L1eEM24L_2mu14_L12MU8F', l1SeedThresholds=['PROBEeEM24L','MU8F'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
+        ChainProp(name='HLT_g35_medium_probe_L1eEM24L_2mu14_L12MU8F', l1SeedThresholds=['PROBEeEM24L', 'MU8F'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
+        ChainProp(name='HLT_g50_loose_probe_L1eEM24L_2mu14_L12MU8F', l1SeedThresholds=['PROBEeEM24L', 'MU8F'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
 
         #LLP
         ChainProp(name='HLT_g15_loose_L1eEM10L_2mu10_msonly_L12MU8F', l1SeedThresholds=['eEM10L','MU8F'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMuonGroup),
@@ -2642,7 +2642,7 @@ def setupMenu():
         ChainProp(name='HLT_j180_2dispjet50_2p_L1jJ160', groups=SingleJetGroup+SupportPhIGroup+['RATE:CPS_jJ160'], l1SeedThresholds=['FSNOSEED']*2, monGroups=['idMon:t0']),
 
         # [ATR-26377] To understand the muvtx rates as compared to Run 2
-        ChainProp(name='HLT_j30_mu3vtx_L12MU8F', l1SeedThresholds=['FSNOSEED','MU8F'], groups=PrimaryL1MuGroup+MultiMuonGroup),
+        ChainProp(name='HLT_mu3vtx_j30_L12MU8F', l1SeedThresholds=['MU8F', 'FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
 
         # muon+MET re-run chains: ATR-27220 / ATR-26456
         ChainProp(name='HLT_mu24_ivarmedium_xe0_cell_L1MU14FCH',  l1SeedThresholds=['MU14FCH', 'FSNOSEED'], stream=['Main'], groups=TagAndProbeGroup+METGroup+['RATE:CPS_MU14FCH']),
