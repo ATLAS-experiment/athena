@@ -31,7 +31,7 @@ namespace ActsTrk {
 static inline void clusterAddCell(PixelClusteringTool::Cluster& cl,
 		    const PixelClusteringTool::Cell& cell)
 {
-  cl.ids.push_back(cell.ID);
+  cl.ids.push_back(cell.ID.get_compact());
   cl.tots.push_back(cell.TOT);
   if (cell.LVL1 < cl.lvl1min)
     cl.lvl1min = cell.LVL1;
@@ -91,7 +91,9 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   bool multiChip = design.numberOfCircuits() > 1 ? true : false;
     
   for (size_t i = 0; i < cluster.ids.size(); i++) {
-    Identifier id = cluster.ids.at(i);
+    
+    //Construct the identifier class
+    Identifier id = Identifier(cluster.ids[i]);
 
     //Single chip modules do not have ganged pixels in ITk
     if (multiChip)  {
@@ -214,7 +216,7 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   
   xaodcluster.setMeasurement<2>(moduleHash, localPosition, localCovariance);
   xaodcluster.setIdentifier( element->identifierOfPosition(locpos).get_compact() );
-  xaodcluster.setRDOlist(cluster.ids);
+  xaodcluster.setRDOlist(std::move(cluster.ids));
   xaodcluster.globalPosition() = globalPos.cast<float>();
   xaodcluster.setToTlist(std::move(cluster.tots));
   xaodcluster.setTotalToT( xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(cluster.tots) );
