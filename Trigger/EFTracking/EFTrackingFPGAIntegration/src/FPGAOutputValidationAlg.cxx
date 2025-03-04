@@ -20,11 +20,8 @@ StatusCode FPGAOutputValidationAlg::initialize() {
 
   ATH_CHECK(m_tHistSvc.retrieve());
 
-  ATH_CHECK(m_pixelKeys.assign(m_pixelNames.value()));
-  ATH_CHECK(m_pixelKeys.initialize(!m_pixelNames.empty()));
-
-  ATH_CHECK(m_stripKeys.assign(m_stripNames.value()));
-  ATH_CHECK(m_stripKeys.initialize(!m_stripNames.empty()));
+  ATH_CHECK(m_pixelKeys.initialize(!m_pixelKeys.empty()));
+  ATH_CHECK(m_stripKeys.initialize(!m_stripKeys.empty()));
 
   // Todo: Get proper ranges/granularity
   for (SG::ReadHandleKey<xAOD::PixelClusterContainer>& key : m_pixelKeys) {
