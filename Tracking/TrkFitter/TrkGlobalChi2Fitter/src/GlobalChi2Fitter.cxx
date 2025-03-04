@@ -4919,10 +4919,9 @@ namespace Trk {
     }
 
     bool doderiv = true;
-    int it = 0;
     int tmpminiter = cache.m_miniter;
 
-    for (; it < m_maxit; ++it) {
+    for (int it = 0; it < m_maxit; ++it) {
       cache.m_lastiter = it;
 
       if (it >= m_maxit - 1) {
@@ -5467,11 +5466,12 @@ namespace Trk {
     ParamDefsAccessor paraccessor;
 
     for (std::unique_ptr<GXFTrackState> & state : states) {
-      TrackState::MeasurementType hittype = state->measurementType();
-      const MeasurementBase *measbase = state->measurement();
-      const auto [scatmin, scatmax] = std::minmax(scatno, nscatupstream);
-      const auto [bremmin, bremmax] = std::minmax(bremno, nbremupstream);
       if (state->getStateType(TrackStateOnSurface::Measurement)) {
+        TrackState::MeasurementType hittype = state->measurementType();
+        const MeasurementBase *measbase = state->measurement();
+        const auto [scatmin, scatmax] = std::minmax(scatno, nscatupstream);
+        const auto [bremmin, bremmax] = std::minmax(bremno, nbremupstream);
+
         Amg::MatrixX & derivatives = state->derivatives();
         double sinstereo = 0;
 
