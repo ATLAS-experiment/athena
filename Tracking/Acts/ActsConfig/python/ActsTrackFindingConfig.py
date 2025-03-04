@@ -249,7 +249,7 @@ def ActsTrackFindingCfg(flags,
                                          **kwargs))
 
     # Analysis extensions
-    if flags.Acts.doAnalysis:
+    if flags.Acts.Tracks.doAnalysis:
         from ActsConfig.ActsAnalysisConfig import ActsTrackAnalysisAlgCfg
         acc.merge(ActsTrackAnalysisAlgCfg(flags,
                                           name=f"{flags.Tracking.ActiveConfig.extension}TrackAnalysisAlg",
@@ -361,7 +361,7 @@ def ActsAmbiguityResolutionCfg(flags,
                                                     name=f"{flags.Tracking.ActiveConfig.extension}AmbiguityResolutionAlg",
                                                     **kwargs))
     # Analysis extensions
-    if flags.Acts.doAnalysis:
+    if flags.Acts.Tracks.doAnalysis:
         from ActsConfig.ActsAnalysisConfig import ActsTrackAnalysisAlgCfg
         acc.merge(ActsTrackAnalysisAlgCfg(flags,
                                           name=f"{flags.Tracking.ActiveConfig.extension}ResolvedTrackAnalysisAlg",
