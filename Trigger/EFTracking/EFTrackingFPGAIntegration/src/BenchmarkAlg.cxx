@@ -81,7 +81,7 @@ namespace EFTrackingFPGAIntegration
 
         // Create host side output vectors
         std::vector<uint64_t> pixelOutput(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0);
-        std::vector<uint64_t> stripOutput(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0);
+        std::vector<uint64_t> stripOutput(EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE, 0);
 
         // Read back the results
         {
@@ -311,30 +311,29 @@ namespace EFTrackingFPGAIntegration
 
         // Assuming maximum 50,000 clusters, should be further discussed!
         // The EDM from L2G has 7 64-bit words per cluster
-        unsigned int size = 50000 * 7;
 
-        m_inPixelBuff = cl::Buffer(m_context, CL_MEM_READ_ONLY, sizeof(uint64_t) * size, NULL, &err);
+        m_inPixelBuff = cl::Buffer(m_context, CL_MEM_READ_ONLY, EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err);
         if (err != CL_SUCCESS)
         {
             ATH_MSG_ERROR("Failed to allocate input buffer for pixel clustering. Error code: " << err);
             return StatusCode::FAILURE;
         }
 
-        m_inStripBuff = cl::Buffer(m_context, CL_MEM_READ_ONLY, sizeof(uint64_t) * size, NULL, &err);
+        m_inStripBuff = cl::Buffer(m_context, CL_MEM_READ_ONLY, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err);
         if (err != CL_SUCCESS)
         {
             ATH_MSG_ERROR("Failed to allocate input buffer for strip clustering. Error code: " << err);
             return StatusCode::FAILURE;
         }
 
-        m_outPixelBuff = cl::Buffer(m_context, CL_MEM_READ_WRITE, sizeof(uint64_t) * size, NULL, &err);
+        m_outPixelBuff = cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint64_t), NULL, &err);
         if (err != CL_SUCCESS)
         {
             ATH_MSG_ERROR("Failed to allocate output buffer for pixel clustering. Error code: " << err);
             return StatusCode::FAILURE;
         }
 
-        m_outStripBuff = cl::Buffer(m_context, CL_MEM_READ_WRITE, sizeof(uint64_t) * size, NULL, &err);
+        m_outStripBuff = cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint64_t), NULL, &err);
         if (err != CL_SUCCESS)
         {
             ATH_MSG_ERROR("Failed to allocate output buffer for strip clustering. Error code: " << err);
