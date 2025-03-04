@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiHanConfig_h
@@ -52,15 +52,15 @@ public:
   virtual ~HanConfig();
 
 
-  virtual void AssembleAndSave( std::string infileName, std::string outfileName,
-                                std::string connectionString="sqlite://;schema=/afs/cern.ch/user/a/atlasdqm/dqmdisk1/cherrypy-devel/RefDB.db;dbname=REFDB",
+  virtual void AssembleAndSave( const std::string & infileName, const std::string & outfileName,
+                                const std::string & connectionString="sqlite://;schema=/afs/cern.ch/user/a/atlasdqm/dqmdisk1/cherrypy-devel/RefDB.db;dbname=REFDB",
                                 long runNumber=2147483646, bool bulk=false);
 
   virtual void BuildMonitors( std::string configName, HanInputRootFile& input, HanOutput& output );
 #ifndef __CINT__
   virtual boost::shared_ptr<dqm_core::Region> BuildMonitorsNewRoot( std::string configName, HanInputRootFile& input, dqm_core::Output& output );
 #endif
-  virtual void BuildConfigOutput( std::string configName, TFile* inputFile, std::string path,
+  virtual void BuildConfigOutput( std::string configName, TFile* inputFile, const std::string & path,
                                   std::map<std::string,TSeqCollection*>* outputMap, TSeqCollection *outputList );
 
   virtual TObject* GetReference( std::string& groupName, std::string& name );
@@ -78,9 +78,9 @@ protected:
     RefVisitor( TFile* outfile_, HanConfig::DirMap_t& directories_, TMap* refsourcedata );
     virtual void Visit( const MiniConfigTreeNode* node );
   protected:
-    TFile* m_outfile;
+    TFile* m_outfile{};
     HanConfig::DirMap_t& m_directories;
-    TMap* m_refsourcedata;
+    TMap* m_refsourcedata{};
   };
 
   class RefWriter : public MiniConfigTreeNode::Writer {
@@ -89,7 +89,7 @@ protected:
     virtual void Write( MiniConfigTreeNode* node);
   protected:
     DatabaseConfig& m_databaseConfig;
-    const bool m_bulk;
+    const bool m_bulk{};
   };
 
   class AssessmentVisitorBase : public MiniConfigTreeNode::Visitor {
@@ -104,13 +104,13 @@ protected:
     void GetAlgorithmConfiguration( HanConfigAssessor* dqpar, const std::string& algID,
                                     const std::string& assessorName = "" );
 
-    HanConfigGroup* m_root;
+    HanConfigGroup* m_root{};
     const MiniConfig& m_algConfig;
     const MiniConfig& m_thrConfig;
     const MiniConfig& m_refConfig;
-    TFile* m_outfile;
+    TFile* m_outfile{};
     HanConfig::DirMap_t& m_directories;
-    TMap* m_refsourcedata;
+    TMap* m_refsourcedata{};
     // File cache
     std::map<std::string, std::shared_ptr<TFile> > m_filecache;
     // following is so we can skip repeated attempts to open nonexistent files
@@ -119,7 +119,7 @@ protected:
     // vector since we are going to iterate through them
     std::map<std::string, std::vector<std::string>> m_keycache;
     std::shared_ptr<TFile> GetROOTFile(std::string& fname);
-    void PopulateKeyCache(const std::string& fname, std::shared_ptr<TFile> file);
+    void PopulateKeyCache(const std::string& fname, std::shared_ptr<TFile> & file);
     void EnsureKeyCache(std::string& fname);
   };
 
@@ -158,8 +158,8 @@ protected:
     virtual boost::shared_ptr<dqm_core::Node>
       Visit( const HanConfigAssessor* node, boost::shared_ptr<dqm_core::Region> dqParent );
   protected:
-    TFile* m_file;
-    dqm_core::Output* m_output;
+    TFile* m_file{};
+    dqm_core::Output* m_output{};
   };
 #endif
 
@@ -168,7 +168,7 @@ protected:
     CompAlgVisitor( TFile* outfile_ , const MiniConfig& compAlgConfig_);
     virtual void Visit( const MiniConfigTreeNode* node );
   protected:
-    TFile* m_outfile;
+    TFile* m_outfile{};
     const MiniConfig& m_compAlgConfig;
   };
 
@@ -177,7 +177,7 @@ protected:
     MetadataVisitor( TFile* outfile_ , const MiniConfig& metadataConfig_);
     virtual void Visit( const MiniConfigTreeNode* node );
   protected:
-    TFile* m_outfile;
+    TFile* m_outfile{};
     const MiniConfig& m_metadataConfig;
   };
 
@@ -185,12 +185,12 @@ protected:
   bool Initialize( const std::string& configName );
 
 
-  TFile*             m_config;
+  TFile*             m_config{};
 #ifndef __CINT__
   boost::shared_ptr<dqm_core::Region>  m_dqRoot;
 #endif
-  HanConfigGroup*    m_top_level;
-  TSeqCollection*    m_metadata;
+  HanConfigGroup*    m_top_level{};
+  TSeqCollection*    m_metadata{};
 
 //Get rid of Root macros that confuse Doxygen
 ///\cond CLASSDEF
