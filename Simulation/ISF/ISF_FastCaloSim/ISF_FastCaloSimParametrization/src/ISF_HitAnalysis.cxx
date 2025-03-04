@@ -3,6 +3,7 @@
 */
 
 #include "ISF_FastCaloSimParametrization/ISF_HitAnalysis.h"
+#include <GaudiKernel/StatusCode.h>
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
 
@@ -82,48 +83,6 @@ ISF_HitAnalysis::ISF_HitAnalysis(const std::string& name, ISvcLocator* pSvcLocat
 ISF_HitAnalysis::~ISF_HitAnalysis()
 = default;
 
-StatusCode ISF_HitAnalysis::updateMetaData( IOVSVC_CALLBACK_ARGS_P( I, keys ) )
-{
- ATH_MSG_INFO( "Updating the Sim+Digi MetaData" );
-
- // Reset the internal settings:
- bool run_update = false;
-
- // Check what kind of keys we got. In principle the function should only
- // receive the "/Digitization/Parameters" and "/Simulation/Parameters" key.
- ATH_MSG_DEBUG("Update called with " <<I<< " folder " << keys.size() << " keys:");
- std::list< std::string >::const_iterator itr = keys.begin();
- std::list< std::string >::const_iterator end = keys.end();
- for( ; itr != end; ++itr )
- {
-  if( *itr == m_MC_DIGI_PARAM ) run_update = true;
-  if( *itr == m_MC_SIM_PARAM ) run_update = true;
- }
- // If that's not the key that we received after all, let's just return
- // silently...
- if( ! run_update ) return StatusCode::SUCCESS;
-
- const AthenaAttributeList* simParam;
- if( detStore()->retrieve( simParam, m_MC_SIM_PARAM ).isFailure() )
- {
-   ATH_MSG_WARNING("Retrieving MC SIM metadata failed");
- }
- else
- {
-  AthenaAttributeList::const_iterator attr_itr = simParam->begin();
-  AthenaAttributeList::const_iterator attr_end = simParam->end();
-  for( ; attr_itr != attr_end; ++attr_itr )
-  {
-   std::stringstream outstr;
-   attr_itr->toOutputStream(outstr);
-   ATH_MSG_INFO("MetaData: " << outstr.str());
-  }
- }
-
- return StatusCode::SUCCESS;
-}
-
-
 StatusCode ISF_HitAnalysis::initialize ATLAS_NOT_THREAD_SAFE ()
 {
   ATH_MSG_INFO( "Initializing ISF_HitAnalysis" );
@@ -168,32 +127,6 @@ StatusCode ISF_HitAnalysis::initialize ATLAS_NOT_THREAD_SAFE ()
   ATH_CHECK(m_calo_tb_coord.retrieve());
   ATH_MSG_INFO("retrieved " << m_calo_tb_coord);
 
-  if( detStore()->contains< AthenaAttributeList >( m_MC_DIGI_PARAM ) )
-    {
-      const DataHandle< AthenaAttributeList > aptr;
-      if( detStore()->regFcn( &ISF_HitAnalysis::updateMetaData, this, aptr,m_MC_DIGI_PARAM, true ).isFailure() )
-        {
-          ATH_MSG_ERROR( "Could not register callback for "<< m_MC_DIGI_PARAM );
-          return StatusCode::FAILURE;
-        }
-    }
-  else
-    {
-      ATH_MSG_WARNING( "MetaData not found for "<< m_MC_DIGI_PARAM );
-    }
-
-  if(detStore()->contains< AthenaAttributeList >( m_MC_SIM_PARAM ) )
-    {
-      const DataHandle< AthenaAttributeList > aptr;
-      if( detStore()->regFcn( &ISF_HitAnalysis::updateMetaData, this, aptr,m_MC_SIM_PARAM, true ).isFailure() )
-        {
-          ATH_MSG_ERROR( "Could not register callback for "<< m_MC_SIM_PARAM );
-          return StatusCode::FAILURE;
-        }
-    }
-  else {
-    ATH_MSG_WARNING( "MetaData not found for "<< m_MC_SIM_PARAM );
-  }
 
   // Get FastCaloSimCaloExtrapolation
   ATH_CHECK (m_FastCaloSimCaloExtrapolation.retrieve());
@@ -425,6 +358,35 @@ StatusCode ISF_HitAnalysis::finalize ATLAS_NOT_THREAD_SAFE ()
 {
 
  ATH_MSG_INFO( "doing finalize()" );
+
+
+ const AthenaAttributeList* simParam = nullptr;
+ if (detStore()->retrieve(simParam, m_MC_SIM_PARAM).isFailure()) {
+   ATH_MSG_ERROR("Could not retrieve Simulation parameters");
+   return StatusCode::FAILURE;
+ } else {
+   ATH_MSG_DEBUG("Retrieved Simulation parameters");
+   for (auto attrItr = simParam->begin(); attrItr != simParam->end();
+        ++attrItr) {
+     std::stringstream outstr;
+     attrItr->toOutputStream(outstr);
+     ATH_MSG_INFO("Simulation MetaData: " << outstr.str());
+   }
+ }
+
+ const AthenaAttributeList* digiParam = nullptr;
+ if (detStore()->retrieve(digiParam, m_MC_DIGI_PARAM).isFailure()) {
+   ATH_MSG_ERROR("Could not retrieve Digitization parameters");
+   return StatusCode::FAILURE;
+ } else {
+   ATH_MSG_DEBUG("Retrieved Digitization parameters");
+   for (auto attrItr = digiParam->begin(); attrItr != digiParam->end();
+        ++attrItr) {
+     std::stringstream outstr;
+     attrItr->toOutputStream(outstr);
+     ATH_MSG_INFO("Digitization MetaData: " << outstr.str());
+   }
+ }
  std::unique_ptr<TFile> dummyGeoFile = std::unique_ptr<TFile>(TFile::Open("dummyGeoFile.root", "RECREATE")); //This is added to suppress the error messages about memory-resident trees
  TTree* geo = new TTree( m_geoModel->atlasVersion().c_str() , m_geoModel->atlasVersion().c_str() );
  std::string fullNtupleName =  "/"+m_geoFileName+"/"+m_geoModel->atlasVersion();
