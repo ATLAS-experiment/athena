@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SCT_GeoModel/SCT_SupportCyl.h"
+#include "SCT_SupportCyl.h"
 
-#include "SCT_GeoModel/SCT_MaterialManager.h"
+#include "SCT_MaterialManager.h"
 
-#include "SCT_GeoModel/SCT_GeometryManager.h"
-#include "SCT_GeoModel/SCT_BarrelParameters.h"
+#include "SCT_GeometryManager.h"
+#include "SCT_BarrelParameters.h"
 
 #include "GeoModelKernel/GeoTube.h"
 #include "GeoModelKernel/GeoLogVol.h"

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
-#include "SCT_GeoModel/SCT_DetectorFactoryLite.h"
+#include "SCT_DetectorFactoryLite.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "DetDescrConditions/AlignableTransformContainer.h"
 
@@ -40,13 +40,13 @@
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 
-#include "SCT_GeoModel/SCT_Barrel.h"
-#include "SCT_GeoModel/SCT_DataBase.h"
-#include "SCT_GeoModel/SCT_Forward.h"
-#include "SCT_GeoModel/SCT_GeneralParameters.h"
-#include "SCT_GeoModel/SCT_GeoModelAthenaComps.h"
-#include "SCT_GeoModel/SCT_Identifier.h"
-#include "SCT_GeoModel/SCT_MaterialManager.h"
+#include "SCT_Barrel.h"
+#include "SCT_DataBase.h"
+#include "SCT_Forward.h"
+#include "SCT_GeneralParameters.h"
+#include "SCT_GeoModelAthenaComps.h"
+#include "SCT_Identifier.h"
+#include "SCT_MaterialManager.h"
 
 #include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
 

@@ -1,28 +1,28 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SCT_GeoModel/SCT_FwdWheel.h"
+#include "SCT_FwdWheel.h"
 
-#include "SCT_GeoModel/SCT_MaterialManager.h"
+#include "SCT_MaterialManager.h"
 
-#include "SCT_GeoModel/SCT_GeometryManager.h"
-#include "SCT_GeoModel/SCT_ForwardParameters.h"
-#include "SCT_GeoModel/SCT_GeneralParameters.h"
+#include "SCT_GeometryManager.h"
+#include "SCT_ForwardParameters.h"
+#include "SCT_GeneralParameters.h"
 
-#include "SCT_GeoModel/SCT_FwdModule.h"
-#include "SCT_GeoModel/SCT_FwdRing.h"
-#include "SCT_GeoModel/SCT_FwdDiscSupport.h"
-#include "SCT_GeoModel/SCT_FwdPatchPanel.h"
-#include "SCT_GeoModel/SCT_FwdPPConnector.h"
-#include "SCT_GeoModel/SCT_FwdPPCooling.h"
-#include "SCT_GeoModel/SCT_FwdFSI.h"
-#include "SCT_GeoModel/SCT_FwdDiscPowerTape.h"
-#include "SCT_GeoModel/SCT_FwdRingCooling.h"
-#include "SCT_GeoModel/SCT_FwdOptoHarness.h"
-#include "SCT_GeoModel/SCT_FwdDiscFixation.h"
+#include "SCT_FwdModule.h"
+#include "SCT_FwdRing.h"
+#include "SCT_FwdDiscSupport.h"
+#include "SCT_FwdPatchPanel.h"
+#include "SCT_FwdPPConnector.h"
+#include "SCT_FwdPPCooling.h"
+#include "SCT_FwdFSI.h"
+#include "SCT_FwdDiscPowerTape.h"
+#include "SCT_FwdRingCooling.h"
+#include "SCT_FwdOptoHarness.h"
+#include "SCT_FwdDiscFixation.h"
 
-#include "SCT_GeoModel/SCT_FSIHelper.h"
+#include "SCT_FSIHelper.h"
 
 #include "InDetGeoModelUtils/ExtraMaterial.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"

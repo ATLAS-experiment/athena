@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////
@@ -11,18 +11,18 @@
 //        January 23, 2004                   //
 ///////////////////////////////////////////////
 
-#include "SCT_GeoModel/SCT_FwdModule.h"
-#include "SCT_GeoModel/SCT_GeometryManager.h"
-#include "SCT_GeoModel/SCT_MaterialManager.h"
+#include "SCT_FwdModule.h"
+#include "SCT_GeometryManager.h"
+#include "SCT_MaterialManager.h"
 
-#include "SCT_GeoModel/SCT_ForwardModuleParameters.h"
-#include "SCT_GeoModel/SCT_GeneralParameters.h"
-#include "SCT_GeoModel/SCT_Identifier.h"
+#include "SCT_ForwardModuleParameters.h"
+#include "SCT_GeneralParameters.h"
+#include "SCT_Identifier.h"
 
-#include "SCT_GeoModel/SCT_FwdModuleConnector.h"
-#include "SCT_GeoModel/SCT_FwdSpine.h"
-#include "SCT_GeoModel/SCT_FwdSubSpine.h"
-#include "SCT_GeoModel/SCT_FwdHybrid.h"
+#include "SCT_FwdModuleConnector.h"
+#include "SCT_FwdSpine.h"
+#include "SCT_FwdSubSpine.h"
+#include "SCT_FwdHybrid.h"
 
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 

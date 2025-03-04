@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SCT_GeoModel/SCT_MaterialManager.h"
+#include "SCT_MaterialManager.h"
 #include "GeoModelKernel/GeoMaterial.h"
 #include "GeoModelKernel/GeoElement.h"
-#include "SCT_GeoModel/SCT_DataBase.h"
+#include "SCT_DataBase.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "GaudiKernel/SystemOfUnits.h"
 

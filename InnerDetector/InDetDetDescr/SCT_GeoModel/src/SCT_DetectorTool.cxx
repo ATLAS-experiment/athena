@@ -2,12 +2,12 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SCT_GeoModel/SCT_DetectorTool.h"
+#include "SCT_DetectorTool.h"
 
-#include "SCT_GeoModel/SCT_DetectorFactory.h"
-#include "SCT_GeoModel/SCT_DetectorFactoryLite.h" 
-#include "SCT_GeoModel/SCT_DataBase.h"
-#include "SCT_GeoModel/SCT_Options.h" 
+#include "SCT_DetectorFactory.h"
+#include "SCT_DetectorFactoryLite.h" 
+#include "SCT_DataBase.h"
+#include "SCT_Options.h" 
 
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h" 
 
