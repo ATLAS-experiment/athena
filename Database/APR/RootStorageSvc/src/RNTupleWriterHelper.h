@@ -23,7 +23,11 @@ using RFieldBase = ROOT::Experimental::RFieldBase;
 using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
 using RNTupleModel = ROOT::Experimental::RNTupleModel;
 using REntry = ROOT::Experimental::REntry;
-using RNTupleWriteOptions = ROOT::Experimental::RNTupleWriteOptions;
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+  using RNTupleWriteOptions = ROOT::RNTupleWriteOptions;
+#else
+  using RNTupleWriteOptions = ROOT::Experimental::RNTupleWriteOptions;
+#endif
 
 class RNTupleWriterHelper : public AthMessaging {
  public:
