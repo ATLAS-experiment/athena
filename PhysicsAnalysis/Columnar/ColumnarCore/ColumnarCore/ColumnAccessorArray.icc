@@ -1,0 +1,98 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+/// @author Nils Krumnack
+
+
+#include <ColumnarCore/ColumnAccessorDataArray.h>
+
+namespace columnar
+{
+  // the external mode specialization for native types
+  template<ContainerId CI,typename CT,ColumnAccessMode CAM>
+    requires (ColumnTypeTraits<CT,ColumnarModeArray>::isNativeType)
+  class AccessorTemplate<CI,CT,CAM,ColumnarModeArray> final
+  {
+    /// Common Public Members
+    /// =====================
+  public:
+
+    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
+    static_assert (!std::is_const_v<CT>, "CT must not be const");
+
+    using CM = ColumnarModeArray;
+    using ColumnType = typename ColumnAccessModeTraits<CAM>::template ColumnType<typename ColumnTypeTraits<CT,ColumnarModeArray>::ColumnType>;
+
+    AccessorTemplate () noexcept = default;
+
+    AccessorTemplate (ColumnarTool<CM>& columnBase,
+                  const std::string& name, ColumnInfo&& info = {})
+    {
+      ColumnTypeTraits<CT,ColumnarModeArray>::updateColumnInfo (columnBase, info);
+      info.offsetName = columnBase.objectName (CI);
+      m_accessorData = std::make_unique<ColumnAccessorDataArray> (&m_dataIndex, &m_accessorData, &typeid (typename ColumnTypeTraits<CT,CM>::ColumnType), CAM);
+      columnBase.addColumn (columnBase.objectName(CI) + "." + name, m_accessorData.get(), std::move (info));
+    }
+
+    AccessorTemplate (AccessorTemplate&& that)
+    {
+      moveAccessor (m_dataIndex, m_accessorData, that.m_dataIndex, that.m_accessorData);
+    }
+
+    AccessorTemplate& operator = (AccessorTemplate&& that)
+    {
+      if (this != &that)
+        moveAccessor (m_dataIndex, m_accessorData, that.m_dataIndex, that.m_accessorData);
+      return *this;
+    }
+
+    AccessorTemplate (const AccessorTemplate&) = delete;
+    AccessorTemplate& operator = (const AccessorTemplate&) = delete;
+
+    void reset (ColumnarTool<CM>& columnBase, const std::string& name, ColumnInfo&& info = {})
+    {
+      *this = AccessorTemplate (columnBase, name, std::move (info));
+    }
+
+    [[nodiscard]] ColumnType& operator () (ObjectId<CI,CM> id) const noexcept
+    {
+      auto *data = static_cast<ColumnType*>(id.getData()[m_dataIndex]);
+      return data[id.getIndex()];
+    }
+
+    [[nodiscard]] std::span<ColumnType> operator () (ObjectRange<CI,CM> range) const noexcept
+    {
+      auto *data = static_cast<ColumnType*>(range.getData()[m_dataIndex]);
+      return std::span<ColumnType> (data+range.beginIndex(), range.endIndex()-range.beginIndex());
+    }
+
+    [[nodiscard]] bool isAvailable (ObjectId<CI,CM> id) const noexcept
+    {
+      auto *data = static_cast<ColumnType*>(id.getData()[m_dataIndex]);
+      return data != nullptr;
+    }
+
+    [[nodiscard]] bool isAvailable (ObjectRange<CI,CM> range) const noexcept
+    {
+      auto *data = static_cast<ColumnType*>(range.getData()[m_dataIndex]);
+      return data != nullptr;
+    }
+
+    [[nodiscard]] std::optional<ColumnType> getOptional (ObjectId<CI,CM> id) const
+    {
+      auto *data = static_cast<ColumnType*>(id.getData()[m_dataIndex]);
+      if (data != nullptr)
+        return data[id.getIndex()];
+      else
+        return std::nullopt;
+    }
+
+    /// Private Members
+    /// ===============
+  private:
+
+    unsigned m_dataIndex = 0u;
+    std::unique_ptr<ColumnAccessorDataArray> m_accessorData;
+  };
+}

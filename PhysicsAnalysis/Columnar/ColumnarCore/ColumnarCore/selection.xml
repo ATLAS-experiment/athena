@@ -1,0 +1,10 @@
+<lcgdict>
+
+  <namespace name="col" />
+
+  <enum name="columnar::ContainerId" />
+
+  <class name="columnar::ColumnarTool<ColumnarModeXAOD>" />
+  <class name="columnar::ColumnarTool<ColumnarModeArray>" />
+
+</lcgdict>

@@ -74,6 +74,7 @@
 #+ PhysicsAnalysis/AnalysisCommon/ThinningUtils
 + PhysicsAnalysis/AnalysisCommon/TruthClassification
 #+ PhysicsAnalysis/BPhys/BPhysTools
++ PhysicsAnalysis/Columnar/.*
 + PhysicsAnalysis/D3PDTools/RootCoreUtils
 + PhysicsAnalysis/D3PDTools/SampleHandler
 + PhysicsAnalysis/D3PDTools/AnaAlgorithm

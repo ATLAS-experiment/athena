@@ -1,0 +1,302 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+/// @author Nils Krumnack
+
+
+#ifndef COLUMNAR_CORE_OBJECT_RANGE_H
+#define COLUMNAR_CORE_OBJECT_RANGE_H
+
+#include <ColumnarCore/ContainerId.h>
+#include <ColumnarCore/ObjectId.h>
+#include <exception>
+
+namespace columnar
+{
+  /// @brief a class representing a continuous sequence of objects (a.k.a. a container)
+  template<ContainerId CI,typename CM=ColumnarModeDefault> class ObjectRange;
+
+
+
+
+  template<ContainerId CI> class ObjectRangeIteratorXAODContainer;
+
+  template<ContainerId CI> class ObjectRange<CI,ColumnarModeXAOD> final
+  {
+    /// Common Public Members
+    /// =====================
+  public:
+
+    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
+
+    using xAODContainer = typename ContainerIdTraits<CI>::xAODObjectRangeType;
+    using CM = ColumnarModeXAOD;
+
+    ObjectRange (xAODContainer& val_container) noexcept
+      : m_container (&val_container)
+    {}
+
+    [[nodiscard]] xAODContainer& getXAODObject () const noexcept {
+      return *m_container;}
+
+    auto begin () const noexcept {
+      return ObjectRangeIteratorXAODContainer<CI> (m_container->begin());}
+    auto end () const noexcept {
+      return ObjectRangeIteratorXAODContainer<CI> (m_container->end());}
+
+    [[nodiscard]] bool empty () const noexcept {
+      return m_container->empty();}
+
+    [[nodiscard]] std::size_t size () const noexcept {
+      return m_container->size();}
+
+    [[nodiscard]] ObjectId<CI,CM> operator [] (std::size_t index) const noexcept {
+      return ObjectId<CI,CM> (*(*m_container)[index]);}
+
+    template<typename Acc,typename... Args>
+      requires std::invocable<Acc,ObjectRange<CI,ColumnarModeXAOD>,Args...>
+    [[nodiscard]] decltype(auto) operator() (Acc& acc, Args&&... args) const {
+      return acc (*this, std::forward<Args> (args)...);}
+
+
+
+    /// Private Members
+    /// ===============
+  private:
+
+    xAODContainer *m_container = nullptr;
+  };
+
+  template<ContainerId CI> class ObjectRangeIteratorXAODContainer final
+  {
+  public:
+
+    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
+
+    using CM = ColumnarModeXAOD;
+    using XAODIterator = decltype (std::declval<typename ContainerIdTraits<CI>::xAODObjectRangeType>().begin());
+
+    ObjectRangeIteratorXAODContainer (XAODIterator&& val_iterator) noexcept
+      : m_iterator (std::move (val_iterator)) {}
+
+    ObjectId<CI,CM> operator * () const noexcept {
+      return ObjectId<CI,CM> (**m_iterator);
+    }
+
+    ObjectRangeIteratorXAODContainer<CI>& operator ++ () noexcept {
+      ++ m_iterator; return *this;}
+
+    bool operator == (const ObjectRangeIteratorXAODContainer<CI>& that) const noexcept {
+      return m_iterator == that.m_iterator;}
+    bool operator != (const ObjectRangeIteratorXAODContainer<CI>& that) const noexcept {
+      return m_iterator != that.m_iterator;}
+
+  private:
+    XAODIterator m_iterator;
+  };
+
+
+
+  template<ContainerId CI> class ObjectRangeIteratorXAODSinglet;
+
+  // template specialization for EventInfo objects (and potentially other singlet objects)
+  template<ContainerId CI>
+      requires (std::is_same_v<typename ContainerIdTraits<CI>::xAODObjectRangeType,typename ContainerIdTraits<CI>::xAODObjectIdType>)
+  class ObjectRange<CI,ColumnarModeXAOD> final
+  {
+    /// Common Public Members
+    /// =====================
+  public:
+
+    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
+
+    using xAODContainer = typename ContainerIdTraits<CI>::xAODObjectRangeType;
+    using CM = ColumnarModeXAOD;
+
+    ObjectRange (xAODContainer& val_singlet) noexcept
+      : m_singlet (&val_singlet)
+    {}
+
+    [[nodiscard]] xAODContainer& getXAODObject () const noexcept {
+      return *m_singlet;}
+
+    auto begin () const noexcept {
+      return ObjectRangeIteratorXAODSinglet<CI> (m_singlet);}
+    auto end () const noexcept {
+      return ObjectRangeIteratorXAODSinglet<CI> (nullptr);}
+
+    [[nodiscard]] bool empty () const noexcept {
+      return false;}
+
+    [[nodiscard]] std::size_t size () const noexcept {
+      return 1;}
+
+    [[nodiscard]] ObjectId<CI,CM> operator [] (std::size_t /*index*/) const noexcept {
+      return ObjectId<CI,CM> (*m_singlet);
+    }
+
+    template<typename Acc,typename... Args>
+      requires std::invocable<Acc,ObjectRange<CI,ColumnarModeXAOD>,Args...>
+    [[nodiscard]] decltype(auto) operator() (Acc& acc, Args&&... args) const {
+      return acc (*this, std::forward<Args> (args)...);}
+
+
+
+    /// Private Members
+    /// ===============
+  private:
+
+    xAODContainer *m_singlet = nullptr;
+  };
+
+  template<ContainerId CI> class ObjectRangeIteratorXAODSinglet final
+  {
+  public:
+
+    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
+
+    using CM = ColumnarModeXAOD;
+    using XAODObjectType = typename ContainerIdTraits<CI>::xAODObjectIdType;
+
+    ObjectRangeIteratorXAODSinglet (XAODObjectType *val_object) noexcept
+      : m_object (val_object) {}
+
+    ObjectId<CI,CM> operator * () const noexcept {
+      return *m_object;}
+
+    ObjectRangeIteratorXAODSinglet<CI>& operator ++ () noexcept {
+      m_object = nullptr; return *this;}
+
+    bool operator == (const ObjectRangeIteratorXAODSinglet<CI>& that) const noexcept {
+      return m_object == that.m_object;}
+    bool operator != (const ObjectRangeIteratorXAODSinglet<CI>& that) const noexcept {
+      return m_object != that.m_object;}
+
+  private:
+    XAODObjectType *m_object = nullptr;
+  };
+
+
+
+
+  template<ContainerId CI> class ObjectRangeIteratorArray;
+
+  template<ContainerId CI> class ObjectRange<CI,ColumnarModeArray> final
+  {
+    /// Common Public Members
+    /// =====================
+  public:
+
+    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
+
+    using xAODContainer = typename ContainerIdTraits<CI>::xAODObjectRangeType;
+    using CM = ColumnarModeArray;
+
+    ObjectRangeIteratorArray<CI> begin () const noexcept {
+      return ObjectRangeIteratorArray<CI> (m_data, m_beginIndex);}
+    ObjectRangeIteratorArray<CI> end () const noexcept {
+      return ObjectRangeIteratorArray<CI> (m_data, m_endIndex);}
+
+    [[nodiscard]] std::size_t beginIndex () const noexcept {
+      return m_beginIndex;}
+    [[nodiscard]] std::size_t endIndex () const noexcept {
+      return m_endIndex;}
+
+    ObjectRange (const xAODContainer& /*val_container*/)
+    {
+      throw std::logic_error ("can't call xAOD function in columnar mode");
+    }
+
+    [[nodiscard]] bool empty () const noexcept {
+      return m_beginIndex == m_endIndex;}
+
+    [[nodiscard]] std::size_t size () const noexcept {
+      return m_endIndex - m_beginIndex;}
+
+    [[nodiscard]] xAODContainer& getXAODObject () const {
+      throw std::logic_error ("can't call xAOD function in columnar mode");}
+
+    [[nodiscard]] ObjectId<CI,CM> operator [] (std::size_t index) const noexcept {
+      return ObjectId<CI,CM> (m_data, index + m_beginIndex);
+    }
+
+    template<typename Acc,typename... Args>
+      requires std::invocable<Acc,ObjectRange<CI,ColumnarModeArray>,Args...>
+    [[nodiscard]] decltype(auto) operator() (Acc& acc, Args&&... args) const {
+      return acc (*this, std::forward<Args> (args)...);}
+
+
+
+    /// Mode-Specific Public Members
+    /// ============================
+  public:
+
+    explicit ObjectRange (void **val_data, std::size_t val_beginIndex,
+                          std::size_t val_endIndex) noexcept
+      : m_data (val_data), m_beginIndex (val_beginIndex), m_endIndex (val_endIndex)
+    {}
+
+    [[nodiscard]] void **getData () const noexcept {
+      return m_data;}
+
+
+
+    /// Private Members
+    /// ===============
+  private:
+
+    void **m_data = nullptr;
+    std::size_t m_beginIndex = 0u;
+    std::size_t m_endIndex = 0u;
+  };
+
+  /// @brief an iterator over objects in an @ref ObjectRange
+  ///
+  /// This is primarily to allow the use of range-for for ObjectRange
+
+  template<ContainerId CI> class ObjectRangeIteratorArray final
+  {
+  public:
+
+    using CM = ColumnarModeArray;
+
+    ObjectRangeIteratorArray (void **val_data, std::size_t val_index) noexcept
+      : m_data (val_data), m_index (val_index) {}
+
+    ObjectId<CI,CM> operator * () const noexcept {
+      return ObjectId<CI,CM> (m_data, m_index);
+    }
+
+    ObjectRangeIteratorArray<CI>& operator ++ () noexcept {
+      ++ m_index; return *this;}
+
+    bool operator == (const ObjectRangeIteratorArray<CI>& that) const noexcept {
+      return m_index == that.m_index;}
+    bool operator != (const ObjectRangeIteratorArray<CI>& that) const noexcept {
+      return m_index != that.m_index;}
+
+  private:
+    void **m_data = nullptr;
+    std::size_t m_index = 0u;
+  };
+
+  using EventInfoRange = ObjectRange<ContainerId::eventInfo>;
+  using EventContextRange = ObjectRange<ContainerId::eventContext>;
+  using JetRange = ObjectRange<ContainerId::jet>;
+  using MutableJetRange = ObjectRange<ContainerId::mutableJet>;
+  using EgammaRange = ObjectRange<ContainerId::egamma>;
+  using ElectronRange = ObjectRange<ContainerId::electron>;
+  using PhotonRange = ObjectRange<ContainerId::photon>;
+  using MuonRange = ObjectRange<ContainerId::muon>;
+  using ParticleRange = ObjectRange<ContainerId::particle>;
+  using Particle0Range = ObjectRange<ContainerId::particle0>;
+  using Particle1Range = ObjectRange<ContainerId::particle1>;
+  using MetRange = ObjectRange<ContainerId::met>;
+  using Met0Range = ObjectRange<ContainerId::met0>;
+  using Met1Range = ObjectRange<ContainerId::met1>;
+  using MutableMetRange = ObjectRange<ContainerId::mutableMet>;
+  using MetAssociationRange = ObjectRange<ContainerId::metAssociation>;
+}
+
+#endif
