@@ -79,7 +79,7 @@ StatusCode EFTrackingDataStreamLoaderAlgorithm::execute(const EventContext& ctx)
   std::vector<unsigned long> testVector{};
   ATH_CHECK(m_testVectorTool->prepareTV(m_inputCsvPath, testVector));
 
-  if (inputDataStream->size() > m_bufferSize) {
+  if (testVector.size() > m_bufferSize) {
     ATH_MSG_ERROR("Test vector larger than buffer size.");
 
     return StatusCode::FAILURE;
