@@ -34,17 +34,16 @@ public:
   virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override;
 
 private:
-  StringProperty m_detectorName{this, "DetectorName", "SCT"};
   BooleanProperty m_alignable{this, "Alignable", true};
   BooleanProperty m_useDynamicAlignFolders{this, "useDynamicAlignFolders", false};
-  bool m_cosmic;
-  
-  const InDetDD::SCT_DetectorManager* m_manager;
+  bool m_cosmic{false};
+
+  const InDetDD::SCT_DetectorManager* m_manager{nullptr};
   
   SCT_GeoModelAthenaComps m_athenaComps;
 
-  ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc;
-  ServiceHandle< IGeometryDBSvc > m_geometryDBSvc;
+  ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc{this,"GeoDbTagSvc","GeoDbTagSvc"};
+  ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc"};
 };
 
 #endif // SCT_GEOMODEL_SCT_DETECTORTOOL_H
