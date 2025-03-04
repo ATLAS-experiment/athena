@@ -167,11 +167,11 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('doMissingHitsChecks', False)
     cf.addFlag('idealCoordFitType', 2)
     cf.addFlag('doDeltaGPhis', False)
-    cf.addFlag('chi2cut', 5)
+    cf.addFlag('chi2cut', 9)
 
     # second stage fitting
     cf.addFlag('secondStage', False)
-    cf.addFlag('secondChi2Cut', 50)
+    cf.addFlag('secondChi2Cut', 36)
 
     # fast monitoring
     cf.addFlag('fastMon', False)
