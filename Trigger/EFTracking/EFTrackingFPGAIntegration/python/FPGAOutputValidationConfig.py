@@ -1,8 +1,6 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 def FPGAOutputValidationCfg(flags, **kwargs):
-    kwargs.setdefault("pixelNames", ["ITkPixelClusters"])
-
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
@@ -26,8 +24,8 @@ if __name__=="__main__":
     argumentParser = ArgumentParser()
     argumentParser.add_argument("--inputFiles", default = [], action = "append", required = True)
     argumentParser.add_argument("--outputFile", default = "FPGAOutputValidation.root")
-    argumentParser.add_argument("--pixelNames", default = [], action = "append")
-    argumentParser.add_argument("--stripNames", default = [], action = "append")
+    argumentParser.add_argument("--pixelKeys", default = [], action = "append")
+    argumentParser.add_argument("--stripKeys", default = [], action = "append")
     argumentParser.add_argument("--threads", default = 1)
 
     arguments = argumentParser.parse_args()
@@ -46,8 +44,8 @@ if __name__=="__main__":
     acc.merge(PoolReadCfg(flags))
 
     acc.merge(FPGAOutputValidationCfg(flags, **{
-        "pixelNames": arguments.pixelNames,
-        "stripNames": arguments.stripNames,
+        "pixelKeys": arguments.pixelKeys,
+        "stripKeys": arguments.stripKeys,
     }))
 
     acc.run(-1)

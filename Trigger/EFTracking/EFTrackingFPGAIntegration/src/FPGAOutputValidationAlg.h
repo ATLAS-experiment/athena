@@ -24,23 +24,9 @@ class FPGAOutputValidationAlg : public AthReentrantAlgorithm
     "Path to output root file containing histograms."
   };
 
-  StringArrayProperty m_pixelNames{
-    this,
-    "pixelNames", 
-    {}, 
-    "Pixel container names."
-  };
-
-  StringArrayProperty m_stripNames{
-    this,
-    "stripNames", 
-    {}, 
-    "Strip container names."
-  };
-
-  SG::ReadHandleKeyArray<xAOD::PixelClusterContainer> m_pixelKeys{};
-  SG::ReadHandleKeyArray<xAOD::StripClusterContainer> m_stripKeys{};
-
+  SG::ReadHandleKeyArray<xAOD::PixelClusterContainer> m_pixelKeys{this, "pixelKeys", {}};
+  SG::ReadHandleKeyArray<xAOD::StripClusterContainer> m_stripKeys{this, "stripKeys", {}};
+  
   // Hide histograms behind a shared lock for thread safe mutability
   mutable std::vector<LockedHandle<TH1>> m_pixelXSharedLocks ATLAS_THREAD_SAFE {};
   mutable std::vector<LockedHandle<TH1>> m_pixelYSharedLocks ATLAS_THREAD_SAFE {};
