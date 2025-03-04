@@ -107,11 +107,12 @@ namespace MuonGM {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" No parent station found for "<<m_idHelperSvc->toStringDetEl(identify()));
             throw std::runtime_error("Parent station is a nullptr");
         }
-        Query<unsigned int> c = par->indexOf(getMaterialGeom());
-        if (c.isValid()) {
-            m_indexOfREinMuonStation = (int)c;
-        } else
+	std::optional<unsigned int> c = par->indexOf(getMaterialGeom());
+        if (c) {
+	  m_indexOfREinMuonStation = (int)(*c);
+        } else {
             m_indexOfREinMuonStation = -999;
+	}
     }
 
     Amg::Transform3D MuonReadoutElement::toParentStation() const {

@@ -128,8 +128,8 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
           // Get its transform
           G4Transform3D theG4Position(Amg::EigenTransformToCLHEP(av.getTransform()));
 
-          Query<int> Qint =  av.getId();
-          if(Qint.isValid()) id = Qint;
+	  std::optional<int> Qint =  av.getId();
+          if(Qint) id = *Qint;
 
 	  bool isEther = theGeoPhysChild->getLogVol()->getMaterial()->getName().compare("special::Ether")==0;
 	  bool isHypUr = theGeoPhysChild->getLogVol()->getMaterial()->getName().compare("special::HyperUranium")==0;
@@ -137,7 +137,7 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
 	  if(isEther) {
 	    Geo2G4AssemblyVolume* assembly = BuildAssembly(theGeoPhysChild);
 	    
-	    if(Qint.isValid()) {
+	    if(Qint) {
 	      assembly->MakeImprint(theG4LogVolume,theG4Position,id);
 	    }
 	    else {
@@ -147,7 +147,7 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
           else if(isHypUr) {
 	    Geo2G4AssemblyVolume* assembly = BuildAssembly(theGeoPhysChild);
 	    
-	    if(Qint.isValid()) {
+	    if(Qint) {
 	      assembly->MakeImprint(theG4LogVolume,theG4Position,id,true);
 	    }
 	    else {
@@ -222,7 +222,7 @@ Geo2G4AssemblyVolume* ExtParameterisedVolumeBuilder::BuildAssembly(const PVConst
 	assemblyVolume->AddPlacedAssembly(theG4AssemblyChild,theG4Position);
       }
       else {
-	Query<int> Qint =  av.getId();
+	std::optional<int> Qint =  av.getId();
 
 	// Build the child
 	if(!(theG4LogChild = Build(theGeoPhysChild))) return nullptr;
@@ -231,7 +231,7 @@ Geo2G4AssemblyVolume* ExtParameterisedVolumeBuilder::BuildAssembly(const PVConst
 	G4Transform3D theG4Position(Amg::EigenTransformToCLHEP(av.getTransform()));
 	
 	int placedID = 0;
-	if(Qint.isValid()) placedID = Qint;
+	if(Qint) placedID = *Qint;
 	
 	std::string placedName = nameChild=="ANON" ? "" : nameChild;
 
