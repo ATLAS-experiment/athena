@@ -28,8 +28,8 @@ def FPGATrackSimWindowExtensionToolCfg(flags):
 
     # These MUST be of size equal to the full number of layers (13), though only the "new" layers
     # in the second stage are actually used.
-    FPGATrackSimWindowExtensionTool.zWindow =   [0, 0, 0, 0, 0, 20,20,30,30,40,40,50,50]
-    FPGATrackSimWindowExtensionTool.phiWindow = [0, 0, 0, 0, 0, 0.01, 0.01, 0.02, 0.02, 0.04, 0.04, 0.05, 0.05]
+    FPGATrackSimWindowExtensionTool.zWindow =   [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84., 84.]
+    FPGATrackSimWindowExtensionTool.phiWindow = [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045]
 
     # Other settings, shared with the first stage mostly. disable 2nd stage tracking for now.
     FPGATrackSimWindowExtensionTool.fieldCorrection =flags.Trigger.FPGATrackSim.ActiveConfig.fieldCorrection
