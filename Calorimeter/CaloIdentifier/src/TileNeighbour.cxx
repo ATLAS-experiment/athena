@@ -67,7 +67,7 @@ int TileNeighbour::initialize(const Tile_Base_ID* tileID, const std::string& fil
 
   // Find the full path to filename:
   std::string file = PathResolver::find_file (filename, "DATAPATH");
-  log << MSG::INFO << "Reading file  " << file << endmsg;
+  log << MSG::DEBUG << "Reading file  " << file << endmsg;
   std::ifstream fin;
   if (!file.empty()) {
     fin.open(file.c_str());

@@ -28,10 +28,6 @@ test_id(const CaloLVL1_ID& idh, Identifier id)
     if(idh.is_lar_fcal	(id)) std::cout << "is_lar_fcal" << std::endl;
     if(idh.is_lar_dm	(id)) std::cout << "is_lar_dm" << std::endl;
     if(idh.is_tile_dm	(id)) std::cout << "is_tile_dm" << std::endl;
-    if(idh.is_mdt	(id)) std::cout << "is_mdt" << std::endl;
-    if(idh.is_csc	(id)) std::cout << "is_csc" << std::endl;
-    if(idh.is_tgc	(id)) std::cout << "is_tgc" << std::endl;
-    if(idh.is_rpc	(id)) std::cout << "is_rpc" << std::endl;
 }
 
 static void
@@ -115,21 +111,6 @@ check_lvl1_id_decoding(IdDictMgr& idd)
     std::cout << "id                  " << lvl1_id.show_to_string(id) << std::endl;
     test_id(lvl1_id, id);
 
-    id = lvl1_id.mdt();
-    std::cout << "id                  " << lvl1_id.show_to_string(id) << std::endl;
-    test_id(lvl1_id, id);
-
-    id = lvl1_id.csc();
-    std::cout << "id                  " << lvl1_id.show_to_string(id) << std::endl;
-    test_id(lvl1_id, id);
-
-    id = lvl1_id.rpc();
-    std::cout << "id                  " << lvl1_id.show_to_string(id) << std::endl;
-    test_id(lvl1_id, id);
-
-    id = lvl1_id.tgc();
-    std::cout << "id                  " << lvl1_id.show_to_string(id) << std::endl;
-    test_id(lvl1_id, id);
 }
 
 static void

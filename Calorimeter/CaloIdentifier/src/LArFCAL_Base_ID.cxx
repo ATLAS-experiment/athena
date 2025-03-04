@@ -601,7 +601,7 @@ int         LArFCAL_Base_ID::init_neighbours_from_file(const std::string& filena
   log << MSG::DEBUG << "init_neighbours_from_file" << endmsg;
   // Find the full path to filename:
   std::string file = PathResolver::find_file (filename, "DATAPATH");
-  log << MSG::INFO << "Reading file " << file << endmsg;
+  log << MSG::DEBUG << "Reading file " << file << endmsg;
   std::ifstream fin;
   if (!file.empty()) {
     fin.open(file.c_str());
