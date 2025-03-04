@@ -43,14 +43,12 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
     return acc
 
 
-def ITkActsPixelPrepDataToxAODCfg(flags, name="ITkActsPixelPrepDataToxAOD", **kwargs):
-
+def ITkActsPrepDataToxAODCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # need to decorate truth particles and clusters with same unique identified
     # which is the origin truth particle index
-    if flags.Input.isMC:
-        
+    if flags.Input.isMC:        
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
 
         from ActsConfig.ActsObjectDecorationConfig import ActsPixelClusterTruthDecorator,ActsStripClusterTruthDecorator
@@ -220,6 +218,10 @@ def InDetPrepDataToxAODCfg(flags):
     return acc
 
 def ITkPrepDataToxAODCfg(flags):
+    from InDetConfig.ITkActsHelpers import primaryPassUsesActs
+    if primaryPassUsesActs(flags):
+        return ITkActsPrepDataToxAODCfg(flags)
+
     acc = ComponentAccumulator()
     extra_truth = flags.Tracking.doTIDE_AmbiTrackMonitoring
     if flags.Detector.EnableITkPixel:

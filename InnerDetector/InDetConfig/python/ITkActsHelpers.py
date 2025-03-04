@@ -3,6 +3,12 @@
 def isPrimaryPass(flags) -> bool:
     return f"{flags.Tracking.ITkPrimaryPassConfig.value}Pass" not in flags.Tracking
 
+def primaryPassUsesActs(flags) -> bool:
+    from TrkConfig.TrkConfigFlags import ITkPrimaryPassConfig
+    return flags.Tracking.ITkPrimaryPassConfig in [ITkPrimaryPassConfig.Acts, \
+                                                   ITkPrimaryPassConfig.ActsFast, \
+                                                   ITkPrimaryPassConfig.ActsHeavyIon]
+
 
 def extractTrackingPasses(flags) -> list:
     # Function for extracting the requested tracking passes that need to be scheduled
