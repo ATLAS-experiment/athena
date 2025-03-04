@@ -178,7 +178,7 @@ setup:
      - ``MuonOLR``
      - ``bool``
      - if ``MuonOLR == true``, removing tau overlapped with muon satisfying pt>2GeV and not calo-tagged
-     - should only be used for run 2 analysis
+     - Default is ``false`` 
 
 Currently implemented working points for ``CutJetIDWP`` are:
 
