@@ -32,7 +32,7 @@ class TrigEgammaFastElectronHypoToolConfig:
                              'lrtvxtight':20.0
                            }
 
-  def __init__(self, name, monGroups, cpart, tool=None):
+  def __init__(self, name, monGroups, cpart, flags, tool=None):
 
     self.__log = logging.getLogger('TrigEgammaFastElectronHypoTool')
     self.__name       = name
@@ -47,7 +47,7 @@ class TrigEgammaFastElectronHypoToolConfig:
     
     self.__tool = tool
     tool.AcceptAll            = False
-    tool.DoRinger             = False
+    tool.DoRinger             = flags.Trigger.egamma.enableFastElectronRinger
     tool.TrackPt              = 0.0
     tool.CaloTrackdETA        = 0.2
     tool.CaloTrackdPHI        = 990.
@@ -160,7 +160,7 @@ class TrigEgammaFastElectronHypoToolConfig:
 
 
 def _IncTool(flags, name, monGroups, cpart, tool=None):
-  config = TrigEgammaFastElectronHypoToolConfig(name,monGroups, cpart, tool=tool)
+  config = TrigEgammaFastElectronHypoToolConfig(name, monGroups, cpart, flags, tool=tool)
   config.compile(flags)
   return config.tool()
 
