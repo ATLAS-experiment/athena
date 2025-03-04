@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_GeoModel/SCT_DetectorTool.h"
@@ -197,66 +197,6 @@ SCT_DetectorTool::clear()
   return StatusCode::SUCCESS;
 }
 
-StatusCode 
-SCT_DetectorTool::registerCallback ATLAS_NOT_THREAD_SAFE () // Thread unsafe detStore()->regFcn (callback) is used.
-{
-  StatusCode sc{StatusCode::FAILURE};
-  if (m_alignable.value()) {
-    if (m_useDynamicAlignFolders.value()) {
-
-      if (detStore()->contains<CondAttrListCollection>(m_run2L1Folder.value())) {
-        ATH_MSG_DEBUG("Registering callback on global Container with folder " << m_run2L1Folder.value());
-        const DataHandle<CondAttrListCollection> calc;
-        ATH_CHECK(detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool*>(this), calc, m_run2L1Folder.value()));
-        sc = StatusCode::SUCCESS;
-      } else {
-        ATH_MSG_WARNING("Unable to register callback on global Container with folder " << m_run2L1Folder.value());
-        return StatusCode::FAILURE;
-      }
-
-      if (detStore()->contains<CondAttrListCollection>(m_run2L2Folder.value())) {
-        ATH_MSG_DEBUG("Registering callback on global Container with folder " << m_run2L2Folder.value());
-        const DataHandle<CondAttrListCollection> calc;
-        ATH_CHECK(detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool*>(this), calc, m_run2L2Folder.value()));
-        sc = StatusCode::SUCCESS;
-      } else {
-        ATH_MSG_WARNING("Unable to register callback on global Container with folder " << m_run2L2Folder.value());
-        return StatusCode::FAILURE;
-      }
-
-      if (detStore()->contains<AlignableTransformContainer>(m_run2L3Folder.value())) {
-        ATH_MSG_DEBUG("Registering callback on AlignableTransformContainer with folder " << m_run2L3Folder.value());
-        const DataHandle<AlignableTransformContainer> atc;
-        ATH_CHECK(detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool*>(this), atc, m_run2L3Folder.value()));
-        sc = StatusCode::SUCCESS;
-      } else {
-        ATH_MSG_WARNING("Unable to register callback on AlignableTransformContainer with folder " << m_run2L3Folder.value());
-        return StatusCode::FAILURE;
-      }
-      
-    } else {
-
-      if (detStore()->contains<AlignableTransformContainer>(m_run1Folder.value())) {
-        ATH_MSG_DEBUG("Registering callback on AlignableTransformContainer with folder " << m_run1Folder.value());
-        const DataHandle<AlignableTransformContainer> atc;
-        ATH_CHECK(detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool*>(this), atc, m_run1Folder.value()));
-        sc = StatusCode::SUCCESS;
-      } else {
-        ATH_MSG_WARNING("Unable to register callback on AlignableTransformContainer with folder "
-                        << m_run1Folder.value() << ", Alignment disabled (only if no Run2 scheme is loaded)!");
-        return StatusCode::FAILURE;
-      }
-    }
-
-  } else {
-    ATH_MSG_INFO("Alignment disabled. No callback registered");
-    // We return failure otherwise it will try and register
-    // a GeoModelSvc callback associated with this callback. 
-    return StatusCode::FAILURE;
-  }
-  return sc;
-}
-  
 StatusCode 
 SCT_DetectorTool::align(IOVSVC_CALLBACK_ARGS_P(I, keys))
 {

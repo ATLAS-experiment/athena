@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_GEOMODEL_SCT_DETECTORTOOL_H
@@ -30,9 +30,6 @@ public:
   virtual StatusCode create() override final;
   virtual StatusCode clear() override final;
 
-  // Register callback function on CondDB object
-  virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override final;
-
   // Callback function itself
   virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override;
 
@@ -48,11 +45,6 @@ private:
 
   ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc;
   ServiceHandle< IGeometryDBSvc > m_geometryDBSvc;
-
-  StringProperty m_run1Folder{this, "Run1Folder", "/Indet/Align"};
-  StringProperty m_run2L1Folder{this, "Run2L1Folder", "/Indet/AlignL1/ID"};
-  StringProperty m_run2L2Folder{this, "Run2L2Folder", "/Indet/AlignL2/SCT"};
-  StringProperty m_run2L3Folder{this, "Run2L3Folder", "/Indet/AlignL3"};
 };
 
 #endif // SCT_GEOMODEL_SCT_DETECTORTOOL_H
