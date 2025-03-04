@@ -1,18 +1,17 @@
 /*
- *   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TRIGL0GEPPERF_GEPTCTOWERALG_H
 #define TRIGL0GEPPERF_GEPTCTOWERALG_H 1
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-
-#include "CaloEvent/CaloCellContainer.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
-#include "xAODEventInfo/EventInfo.h"
-#include "GepCellMap.h"
+class EventContext;
 
-//typedef std::map<unsigned int,Gep::GepCaloCell> GepCellMap;
+
 
 class GepTCTowerAlg: public ::AthReentrantAlgorithm {
  public: 

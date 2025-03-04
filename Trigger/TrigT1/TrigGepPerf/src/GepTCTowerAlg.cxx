@@ -6,6 +6,7 @@
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
+#include "GaudiKernel/EventContext.h"
 
 GepTCTowerAlg::GepTCTowerAlg( const std::string& name, ISvcLocator* pSvcLocator ) : 
    AthReentrantAlgorithm( name, pSvcLocator ){
@@ -16,7 +17,7 @@ GepTCTowerAlg::~GepTCTowerAlg() {}
 
 
 StatusCode GepTCTowerAlg::initialize() {
-  ATH_MSG_INFO ("Initializing " << name() << "...");
+  ATH_MSG_DEBUG ("Initializing " << name() << "...");
   CHECK(m_caloClustersKey.initialize());
   CHECK(m_outputCaloClustersKey.initialize());
 
@@ -24,7 +25,7 @@ StatusCode GepTCTowerAlg::initialize() {
 }
 
 StatusCode GepTCTowerAlg::finalize() {
-  ATH_MSG_INFO ("Finalizing " << name() << "...");
+  ATH_MSG_DEBUG ("Finalizing " << name() << "...");
   return StatusCode::SUCCESS;
 }
 
@@ -53,14 +54,11 @@ StatusCode GepTCTowerAlg::execute(const EventContext& context) const {
                                     std::make_unique<xAOD::CaloClusterAuxContainer>()));
 
   // Define tower array (98 eta bins x 64 phi bins)
-  Gep::Cluster tow[98][64];
+  static constexpr int nEta{98};
+  static constexpr int nPhi{64};
+  //avoid stack use of 605kb
+  auto tow = new Gep::Cluster[nEta][nPhi]();
 
-  // Initialize towers (erase previous data)
-  for (int i = 0; i < 98; ++i) {
-      for (int j = 0; j < 64; ++j) {
-          tow[i][j].erase();
-      }
-  }  
 
   // Single loop over clusters to assign them to towers
   for (const auto& cluster : customClusters) {
@@ -69,7 +67,7 @@ StatusCode GepTCTowerAlg::execute(const EventContext& context) const {
       int phi_index = static_cast<int>(std::floor(cluster.vec.Phi() * 10)) + 32;
 
       // Ensure indices are within bounds
-      if (eta_index < 0 || eta_index >= 98 || phi_index < 0 || phi_index >= 64) continue;
+      if (eta_index < 0 || eta_index >= nEta || phi_index < 0 || phi_index >= nPhi) continue;
 
       // Accumulate cluster data into the corresponding tower
       tow[eta_index][phi_index].vec += cluster.vec;
@@ -77,28 +75,20 @@ StatusCode GepTCTowerAlg::execute(const EventContext& context) const {
 
   // Collect non-empty towers into a vector
   std::vector<Gep::Cluster> customTowers;
-  for (int i = 0; i < 98; ++i) {
-      for (int j = 0; j < 64; ++j) {
+  for (int i = 0; i < nEta; ++i) {
+      for (int j = 0; j < nPhi; ++j) {
           if (tow[i][j].vec.Et() > 0) {
               customTowers.push_back(tow[i][j]);
           }
       }
   }
-
+  delete[] tow;
   // Store the Gep clusters to a CaloClusters, and write out.
   h_outputCaloClusters->reserve(customTowers.size());
 
   for(const auto& gepclus: customTowers){
-
-    // make a unique_ptr, but keep hold of the bare pointer
-    auto caloCluster = std::make_unique<xAOD::CaloCluster>();
-    auto *ptr = caloCluster.get();
-
     // store the calCluster to fix up the Aux container:
-    h_outputCaloClusters->push_back(std::move(caloCluster));
-
-    // this invalidates the unque_ptr, but can use the bare ptr
-    // to update the calo cluster.
+    auto *ptr = h_outputCaloClusters->push_back(std::make_unique<xAOD::CaloCluster>());
     ptr->setE(gepclus.vec.E());
     ptr->setEta(gepclus.vec.Eta());
     ptr->setPhi(gepclus.vec.Phi());
