@@ -177,6 +177,24 @@ ATH_FLATTEN
     out(4, 4) = jac(4, 4);
   }
 
+  /*
+   * Analyse a 2x2 covariance matrix and find
+   * - the smaller eigenvalue
+   * - the stereo angle
+   * This assumes, that the covariance matrix is valid, i.e. symmetric.
+   * TODO: Find a source for the stereo angle calculation
+   */
+  std::pair<double, double> principalComponentAnalysis2x2(const Amg::MatrixX & mat) {
+    const double trace = mat(0, 0) + mat(1, 1);
+    const double diagonalProduct = mat(0, 0) * mat(1, 1);
+    const double mat01Sq = mat(0, 1) * mat(0, 1);
+    const double discriminant = std::sqrt(trace * trace - 4. * (diagonalProduct - mat01Sq));
+
+    const double eigenValueSmall = 0.5 * (trace - discriminant);
+    const double stereoAngle = 0.5 * std::asin(2 * mat(0, 1) / (-discriminant));
+
+    return std::make_pair(eigenValueSmall, stereoAngle);
+  }
 } //end of anonymous namespace
 
 namespace Trk {
@@ -2742,18 +2760,9 @@ namespace Trk {
         }
 
         if (rotated) {
-          const double traceCov = covmat(0, 0) + covmat(1, 1);
-          const double diagonalProduct = covmat(0, 0) * covmat(1, 1);
-          const double element01Sq = covmat(0, 1) * covmat(0, 1);
-          const double sqrtTerm = std::sqrt(
-              (traceCov) * (traceCov) - 4. * (diagonalProduct - element01Sq)
-            );
-
-          double v0 = 0.5 * (
-            traceCov - sqrtTerm
-          );
-          sinstereo = std::sin(0.5 * std::asin(2 * covmat(0, 1) / (-sqrtTerm)));
-          errors[0] = std::sqrt(v0);
+          const auto [covEigenValueSmall, covStereoAngle] = principalComponentAnalysis2x2(covmat);
+          errors[0] = std::sqrt(covEigenValueSmall);
+          sinstereo = std::sin(covStereoAngle);
         } else {
           errors[0] = std::sqrt(covmat(0, 0));
           if (hittype == TrackState::Pixel) {
@@ -6414,27 +6423,13 @@ namespace Trk {
 
         if (broadrot) {
           const Amg::MatrixX & covmat = broadrot->localCovariance();
-          newerror[0] = std::sqrt(covmat(0, 0));
 
           if (state_maxsipull->sinStereo() != 0) {
-            double v0 = 0.5 * (
-              covmat(0, 0) + covmat(1, 1) -
-              std::sqrt(
-                (covmat(0, 0) + covmat(1, 1)) * (covmat(0, 0) + covmat(1, 1)) -
-                4 * (covmat(0, 0) * covmat(1, 1) - covmat(0, 1) * covmat(0, 1))
-              )
-            );
-
-            double v1 = 0.5 * (
-              covmat(0, 0) + covmat(1, 1) +
-              std::sqrt(
-                (covmat(0, 0) + covmat(1, 1)) * (covmat(0, 0) + covmat(1, 1)) -
-                4 * (covmat(0, 0) * covmat(1, 1) - covmat(0, 1) * covmat(0, 1))
-              )
-            );
-
-            newsinstereo = std::sin(0.5 * std::asin(2 * covmat(0, 1) / (v0 - v1)));
-            newerror[0] = std::sqrt(v0);
+            const auto [covEigenValueSmall, covStereoAngle] = principalComponentAnalysis2x2(covmat);
+            newerror[0] = std::sqrt(covEigenValueSmall);
+            newsinstereo = std::sin(covStereoAngle);
+          } else {
+            newerror[0] = std::sqrt(covmat(0, 0));
           }
 
           double cosstereo = (newsinstereo == 0) ? 1. : std::sqrt(1 - newsinstereo * newsinstereo);
@@ -6451,8 +6446,7 @@ namespace Trk {
           if (newerror[0] == 0.0) {
             ATH_MSG_WARNING("Measurement error is zero or negative, treating as outlier");
             newpull1 = 9999.;
-          }
-          else {
+          } else {
             newpull1 = std::abs(newres1 / newerror[0]);
           }
 
