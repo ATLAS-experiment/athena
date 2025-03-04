@@ -173,10 +173,11 @@ StatusCode MetaDataAlg::beginInputFile() {
     }
     const xAOD::CutBookkeeper* all{nullptr};
     std::string cbk_stream{};
-    for (std::string trial: {"StreamAOD", "StreamESD", "unknownStream" }) {
-         all = RetrieveCutBookKeeper(trial);
-         cbk_stream = trial;
-        if (all) break;
+    using namespace std::literals;
+    for (const std::string & trial: {"StreamAOD"s, "StreamESD"s, "unknownStream"s }) {
+      all = RetrieveCutBookKeeper(trial);
+      cbk_stream = trial;
+      if (all) break;
     }
     const bool contains_keeper = all != nullptr;
     if (!contains_keeper) {
