@@ -296,12 +296,12 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx, Construc
         station->addMuonReadoutElementWithAlTransf(newElement.get(), nullptr, station->nMuonReadoutElements());
 
         /// Define the dimensions
-        newElement->setLongRsize(pars.halfLength);
-        newElement->setLongSsize(pars.halfWidth);
-        newElement->setLongZsize(pars.halfThickness);
-        newElement->setRsize(pars.halfLength);
-        newElement->setSsize(pars.halfWidth);
-        newElement->setZsize(pars.halfThickness);
+        newElement->setLongZsize(2.*pars.halfLength);
+        newElement->setLongSsize(2.*pars.halfWidth);
+        newElement->setLongRsize(2.*pars.halfThickness);
+        newElement->setZsize(2.*pars.halfLength);
+        newElement->setSsize(2.*pars.halfWidth);
+        newElement->setRsize(2.*pars.halfThickness);
 
         newElement->m_nlayers = copyMe->nGasGaps();
         newElement->m_phistripwidth = copyMe->stripPhiWidth();
