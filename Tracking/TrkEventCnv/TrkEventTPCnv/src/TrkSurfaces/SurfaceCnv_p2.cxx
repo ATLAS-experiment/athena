@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -90,4 +90,3 @@ template class SurfaceCnv_p2<Trk::DiscSurface>;
 template class SurfaceCnv_p2<Trk::PerigeeSurface>;
 template class SurfaceCnv_p2<Trk::PlaneSurface>;
 template class SurfaceCnv_p2<Trk::StraightLineSurface>;
-template class SurfaceCnv_p2<Trk::SaggedLineSurface>;
