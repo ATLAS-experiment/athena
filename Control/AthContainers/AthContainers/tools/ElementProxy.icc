@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/ElementProxy.icc
@@ -69,7 +69,9 @@ ElementProxy<DVL>& ElementProxy<DVL>::operator= (const ElementProxy& rhs)
  * the assignment.
  */
 template <class DVL>
-ATH_MEMBER_REQUIRES_DEF(!DVL::must_own, ElementProxy<DVL>&)
+template <bool>
+requires(!DVL::must_own)
+ElementProxy<DVL>&
 ElementProxy<DVL>::operator= (typename DVL::value_type rhs)
 {
   if (rhs != *m_proxied)

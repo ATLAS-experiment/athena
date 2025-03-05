@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/PackedLinkAccessor.h
@@ -23,7 +23,6 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/tools/ELProxy.h"
 #include "AthContainers/tools/AuxDataTraits.h"
-#include "CxxUtils/concepts.h"
 #include "CxxUtils/checker_macros.h"
 #include <string>
 #include <typeinfo>

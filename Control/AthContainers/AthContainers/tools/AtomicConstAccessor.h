@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/AtomicConstAccessor.h
@@ -104,8 +104,7 @@ public:
    * As this class can be used only read-only for basic types, return
    * the result by value.  That makes it easier to call from python.
    */
-  template <class ELT>
-  ATH_REQUIRES( IsConstAuxElement<ELT> )
+  template <IsConstAuxElement ELT>
   T operator() (const ELT& e) const;
 
 

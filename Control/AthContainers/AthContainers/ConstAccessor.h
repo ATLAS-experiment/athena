@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/ConstAccessor.h
@@ -101,8 +101,7 @@ public:
    * @brief Fetch the variable for one element, as a const reference.
    * @param e The element for which to fetch the variable.
    */
-  template <class ELT>
-  ATH_REQUIRES( IsConstAuxElement<ELT> )
+  template <IsConstAuxElement ELT>
   const_reference_type operator() (const ELT& e) const;
 
 
@@ -127,8 +126,7 @@ public:
    *
    * If this variable is not available, then return @c deflt instead.
    */
-  template <class ELT>
-  ATH_REQUIRES( IsConstAuxElement<ELT> )
+  template <IsConstAuxElement ELT>
   const_reference_type withDefault (const ELT& e, const T& deflt) const;
 
 
@@ -167,8 +165,7 @@ public:
    * @brief Test to see if this variable exists in the store.
    * @param e An element of the container in which to test the variable.
    */
-  template <class ELT>
-  ATH_REQUIRES( IsConstAuxElement<ELT> )
+  template <IsConstAuxElement ELT>
   bool isAvailable (const ELT& e) const;
 
 
