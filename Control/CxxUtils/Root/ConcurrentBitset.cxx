@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/src/ConcurrentBitset.cxx
@@ -10,6 +10,7 @@
 
 
 #include "CxxUtils/ConcurrentBitset.h"
+#include <bit>
 
 
 namespace CxxUtils {
@@ -183,34 +184,15 @@ void ConcurrentBitset::expandOol (bit_t new_nbits)
 // Implementation.
 
 
-// Use popcnt instruction if available.  This ugliness needed
-// because our default compilation options do not enable
-// use of this instruction.
-#if defined(__x86_64__) && HAVE_FUNCTION_MULTIVERSIONING
 /**
  * @brief Count the number of 1 bits in the set.
  */
-__attribute__ ((target ("popcnt")))
 ConcurrentBitset::bit_t
 ConcurrentBitset::Impl::count() const
 {
   bit_t n = 0;
   for (bit_t i=0; i<m_nblocks; i++) {
-    n += CxxUtils::count_ones (m_data[i]);
-  }
-  return n;
-}
-/**
- * @brief Count the number of 1 bits in the set.
- */
-__attribute__ ((target ("default")))
-#endif
-ConcurrentBitset::bit_t
-ConcurrentBitset::Impl::count() const
-{
-  bit_t n = 0;
-  for (bit_t i=0; i<m_nblocks; i++) {
-    n += CxxUtils::count_ones (m_data[i]);
+    n += std::popcount (m_data[i].load());
   }
   return n;
 }
