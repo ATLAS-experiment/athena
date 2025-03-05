@@ -812,7 +812,9 @@ def LLP1Cfg(flags):
     # they'll be merged when both formats are used together.
     acc.merge(IsoCloseByAlgsCfg(flags, isPhysLite = False, stream_name = 'StreamDAOD_LLP1'))
     contNames = [ "LRTElectrons", "MuonsLRT" ] 
-    acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1", isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1'))
+    acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1", isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1', hasLRT = True))
+    contNames = [ MergedMuonContainer, MergedElectronContainer, "Photons" ] 
+    acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1_LRTMerged", isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1', isoDecSuffix = "CloseByCorr_LRT", hasLRT = True))
     contNames = [ "ZeroPixelHitMuons" ]
     acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1_ZeroPixelHitsMuons", isPhysLite = False, containerNames = contNames, stream_name = 'StreamDAOD_LLP1'))
 
@@ -945,6 +947,13 @@ def LLP1Cfg(flags):
                                           "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
                                           "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
 
+    # Isolation close by correction content for the LRT included corrections
+    LLP1SlimmingHelper.ExtraVariables += ["Muons.topoetcone20_CloseByCorr_LRT.neflowisol20_CloseByCorr_LRT.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500_CloseByCorr_LRT.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000_CloseByCorr_LRT",
+                                          "MuonsLRT.topoetcone20_CloseByCorr_LRT.neflowisol20_CloseByCorr_LRT.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500_CloseByCorr_LRT.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000_CloseByCorr_LRT",
+                                          "Electrons.topoetcone20_CloseByCorr_LRT.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr_LRT.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr_LRT",
+                                          "LRTElectrons.topoetcone20_CloseByCorr_LRT.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr_LRT.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr_LRT",
+                                          "Photons.topoetcone20_CloseByCorr_LRT.topoetcone40_CloseByCorr_LRT.ptcone20_CloseByCorr_LRT"
+                                          ]
 
     VSITrackAuxVars = [
         "is_selected", "is_associated", "is_svtrk_final", "pt_wrtSV", "eta_wrtSV",
