@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -348,7 +348,7 @@ DerivationFramework::MaxCellDecorator::decorateObject(
 
   if (cluster) {
     if (!cluster->getCellLinks()) {
-      ATH_MSG_WARNING("CellLinks not found");
+      ATH_MSG_DEBUG("CellLinks not found");
       return result;
     }
 
