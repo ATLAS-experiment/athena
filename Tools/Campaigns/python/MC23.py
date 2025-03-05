@@ -193,7 +193,7 @@ def MC23ppReferenceRun2024(flags): # FIXME This configuration is a placeholder
     # pile-up
     flags.Digitization.PileUp = True
     flags.Digitization.DoXingByXingPileUp = True
-    flags.Digitization.PU.BunchStructureConfig = "RunDependentSimData.BunchStructureHeavyIon2022"
+    flags.Digitization.PU.BunchStructureConfig = "RunDependentSimData.BunchStructureHeavyIon2022" # New file being prepared ATLGBLCONDTAGS-182
     flags.Digitization.PU.InitialBunchCrossing = 0
     flags.Digitization.PU.FinalBunchCrossing = 0
     flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
@@ -250,7 +250,7 @@ def MC23HeavyIons2024(flags): # FIXME This configuration is a placeholder
     # pile-up
     flags.Digitization.PileUp = True
     flags.Digitization.DoXingByXingPileUp = True
-    flags.Digitization.PU.BunchStructureConfig = "RunDependentSimData.BunchStructureHeavyIon2022"
+    flags.Digitization.PU.BunchStructureConfig = "RunDependentSimData.BunchStructureHeavyIon2022" # New file being prepared ATLGBLCONDTAGS-182
     flags.Digitization.PU.InitialBunchCrossing = 0
     flags.Digitization.PU.FinalBunchCrossing = 0
     flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
@@ -457,7 +457,7 @@ def MC23Simulation2023HeavyIonRun(flags):
     MC23SimulationNoIoV(flags)
     flags.Input.MCCampaign = Campaign.MC23d
 
-    flags.Input.RunNumber = [460000]
+    flags.Input.RunNumbers = [460000]
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumbers = [1] # dummy value
 
@@ -467,7 +467,7 @@ def MC23Simulation2024ppRefRun(flags):
     MC23SimulationNoIoV(flags)
     flags.Input.MCCampaign = Campaign.MC23e
 
-    flags.Input.RunNumber = [488000]
+    flags.Input.RunNumbers = [488000]
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumbers = [1] # dummy value
 
@@ -477,7 +477,7 @@ def MC23Simulation2024HeavyIonRun(flags):
     MC23SimulationNoIoV(flags)
     flags.Input.MCCampaign = Campaign.MC23e
 
-    flags.Input.RunNumber = [488600]
+    flags.Input.RunNumbers = [488600]
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumbers = [1] # dummy value
 
@@ -487,7 +487,7 @@ def MC23dSimulationLowMuLowB(flags):
     MC23SimulationNoIoV(flags)
     flags.Input.MCCampaign = Campaign.MC23d
 
-    flags.Input.RunNumber = [465000]
+    flags.Input.RunNumbers = [465000]
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumber = [1] # dummy value
 
