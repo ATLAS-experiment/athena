@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/ConcurrentHashmapImpl.h
@@ -120,7 +120,7 @@ CHMIMPL::Table::Table (size_t capacity,
   : m_capacity (capacity),
     m_maxProbe (capacity / 4),
     m_mask (capacity-1),
-    m_maskBits (count_trailing_zeros (capacity)),
+    m_maskBits (std::countr_zero (capacity)),
     m_hasher (hasher),
     m_matcher (matcher),
     m_longestProbe (0)

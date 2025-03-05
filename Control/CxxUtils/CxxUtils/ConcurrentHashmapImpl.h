@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/ConcurrentHashmapImpl.h
@@ -15,7 +15,6 @@
 #define CXXUTILS_CONCURRENTHASHMAPIMPL_H
 
 
-#include "CxxUtils/bitscan.h"
 #include "CxxUtils/atomic_fetch_minmax.h"
 #include "CxxUtils/concepts.h"
 #include <functional>

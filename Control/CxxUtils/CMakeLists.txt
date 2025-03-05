@@ -80,18 +80,9 @@ atlas_add_test( MD5_test
    SOURCES test/MD5_test.cxx
    LINK_LIBRARIES CxxUtils )
 
-atlas_add_test( bitscan_test_portable
-   SOURCES test/bitscan_test.cxx
-   LINK_LIBRARIES CxxUtils )
-
 atlas_add_test( ut_cxxutils_floatcompression_test
    SOURCES test/ut_cxxutils_floatcompression_test.cxx
    LINK_LIBRARIES CxxUtils )
-
-if( TARGET CxxUtils_bitscan_test_portable )
-  target_compile_definitions(CxxUtils_bitscan_test_portable
-    PRIVATE "-DTEST_PORTABLE" )
-endif()
 
 if ( IS_DIRECTORY /usr/include/ck )
   set( CK_LIBRARIES ck )
@@ -162,7 +153,7 @@ foreach( test sincos_test ArrayScanner_test Arrayrep_test
       Array_test PackedArray_test pointer_list_test FloatPacker_test
       fpcompare_test StrFormat_test phihelper_test
       prefetch_test ClassName_test ones_test
-      exctrace1_test bitscan_test ConcurrentRangeMap_test
+      exctrace1_test ConcurrentRangeMap_test
       CachedValue_test CachedPointer_test CachedUniquePtr_test
       atomic_fetch_minmax_test
       MurmurHash2_test bitmask_test crc64_test Ring_test
