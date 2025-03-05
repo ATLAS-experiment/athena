@@ -7,6 +7,8 @@
 #include <optional>
 #include <vector>
 
+#include "FPGADataFormatUtilities.h"
+
 namespace {
 StatusCode getNthEvent(
   const int eventNumber,
@@ -14,6 +16,7 @@ StatusCode getNthEvent(
   std::vector<unsigned long>& eventTestVector
 ) {
   int eventCounter = 0;
+  std::size_t eventLength = 0;
   std::size_t wordIndex = 0;
 
   while (true) {
@@ -25,11 +28,27 @@ StatusCode getNthEvent(
       return StatusCode::FAILURE;
     }
 
-    if ((testVector[wordIndex] >> 56) == 0xCD) {
-      wordIndex += 2;
-      eventCounter++;
+    const unsigned long flag = testVector[wordIndex] >> 56;
+
+    if (flag == 0xCD) {
+      FPGADataFormatUtilities::EVT_FTR_w3 eventFooterWord3 = 
+        FPGADataFormatUtilities::get_bitfields_EVT_FTR_w3(testVector[wordIndex + 2]);
+
+      // The word_count is sometimes reported incorrectly as the total length, 
+      // including prior events. This will be fixed but for now don't treat this 
+      // as an error. It's still a valid cross check to avoid fake event 
+      // footers.
+      if ((eventFooterWord3.word_count == eventLength) || 
+          (eventFooterWord3.word_count == wordIndex)) {
+        eventCounter++;
+        eventLength = 0;
+        wordIndex += 3;
+
+        continue;
+      }
     }
 
+    eventLength++;
     wordIndex++;
   }
 
@@ -38,15 +57,28 @@ StatusCode getNthEvent(
       return StatusCode::FAILURE;
     }
 
-    if ((testVector[wordIndex] >> 56) == 0xCD) {
-      eventTestVector.push_back(testVector[wordIndex]);
-      eventTestVector.push_back(testVector[wordIndex + 1]);
-      eventTestVector.push_back(testVector[wordIndex + 2]);
+    const unsigned long flag = testVector[wordIndex] >> 56;
 
-      break;
+    if (flag == 0xCD) {
+      FPGADataFormatUtilities::EVT_FTR_w3 eventFooterWord3 = 
+        FPGADataFormatUtilities::get_bitfields_EVT_FTR_w3(testVector[wordIndex + 2]);
+
+      // The word_count is sometimes reported incorrectly as the total length, 
+      // including prior events. This will be fixed but for now don't treat this 
+      // as an error. It's still a valid cross check to avoid fake event 
+      // footers.
+      if ((eventFooterWord3.word_count == eventLength) || 
+          (eventFooterWord3.word_count == wordIndex)) {
+        eventTestVector.push_back(testVector[wordIndex]);
+        eventTestVector.push_back(testVector[wordIndex + 1]);
+        eventTestVector.push_back(testVector[wordIndex + 2]);
+
+        break;
+      }
     }
 
     eventTestVector.push_back(testVector[wordIndex]);
+    eventLength++;
     wordIndex++;
   }
 
