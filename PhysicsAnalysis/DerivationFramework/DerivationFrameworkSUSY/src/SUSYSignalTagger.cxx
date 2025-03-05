@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkSUSY/SUSYSignalTagger.h"
@@ -42,7 +42,7 @@ namespace DerivationFramework {
     int pdgId2(0);
     bool found = FindSusyHardProc( truthPC, pdgId1, pdgId2);
     if (!found) {
-      ATH_MSG_WARNING("could not identify SUSY process! ");
+      ATH_MSG_DEBUG("could not identify SUSY process! ");
       dec_procID(*eventInfo) = 0;
       dec_pdgId1(*eventInfo) = -99;
       dec_pdgId2(*eventInfo) = -99;
