@@ -26,9 +26,10 @@ def _run():
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     # input
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
     flags.Exec.MaxEvents = 20
-    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.Input.Files = defaultTestFiles.RDO_RUN3
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
     from AthenaConfiguration.Enums import ProductionStep
     flags.Common.ProductionStep = ProductionStep.Reconstruction
 
