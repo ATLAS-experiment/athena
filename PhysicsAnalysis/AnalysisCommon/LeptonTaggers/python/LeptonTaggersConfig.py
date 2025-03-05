@@ -292,7 +292,6 @@ def DecoratePLITCfg(
     kwargs.setdefault("LeptonContainerName", lepton_name)
     kwargs.setdefault("TracksContainerKey", "InDetTrackParticles")
     kwargs.setdefault("CaloClusterContainerKey", "egammaClusters")
-    kwargs.setdefault("ConfigFileVersion", '')
     kwargs.setdefault("TaggerName", Tagger_name)
 
     # check if Run3 (or beyond) configs should be used 
@@ -300,19 +299,22 @@ def DecoratePLITCfg(
 
     # path on calib area (found by path resolver
     # /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/
-    kwargs["ConfigPath"] = "IsolationSelection/PLIT/2025-02-24/"
+
+    # Note: Run3 config is not available yet, so we use the Run2 config for now
+
+    kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2025-02-24/")
     if lepton_name == 'Electrons':
         if isRun3:
-            kwargs["ConfigFileVersion"] = 'network_electrons_barrel_run3.onnx'
-            kwargs["ConfigFileVersion_endcap"] = 'network_electrons_endcap_run3.onnx'
+            kwargs.setdefault("ConfigFileVersion", 'network_electrons_barrel_run2.onnx')
+            kwargs.setdefault("ConfigFileVersion_endcap", 'network_electrons_endcap_run2.onnx')
         else:
-            kwargs["ConfigFileVersion"] = 'network_electrons_barrel_run2.onnx'  
-            kwargs["ConfigFileVersion_endcap"] = 'network_electrons_endcap_run2.onnx'                                       
+            kwargs.setdefault("ConfigFileVersion", 'network_electrons_barrel_run2.onnx')
+            kwargs.setdefault("ConfigFileVersion_endcap", 'network_electrons_endcap_run2.onnx')
     elif lepton_name == 'Muons':
         if isRun3:
-            kwargs["ConfigFileVersion"] = 'network_muons_run3.onnx'
+            kwargs.setdefault("ConfigFileVersion", 'network_muons_run2.onnx')
         else:
-            kwargs["ConfigFileVersion"] = 'network_muons_run2.onnx'
+            kwargs.setdefault("ConfigFileVersion", 'network_muons_run2.onnx')
     else:
         raise ValueError(f'Decorate{Tagger_name} - unknown lepton type: "{lepton_name}"')
 
