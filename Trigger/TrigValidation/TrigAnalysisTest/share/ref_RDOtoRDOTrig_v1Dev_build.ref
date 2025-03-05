@@ -4081,20 +4081,20 @@ HLT_e26_lhtight_L1eEM26M:
 HLT_e26_lhtight_L1eEM26T:
   eventCount: 3
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
-    3: 4
-    4: 4
-    5: 4
+    0: 5
+    1: 5
+    2: 5
+    3: 5
+    4: 5
+    5: 5
     6: 3
   stepFeatures:
-    0: 4
-    1: 4
-    2: 4
-    3: 4
-    4: 4
-    5: 4
+    0: 5
+    1: 5
+    2: 5
+    3: 5
+    4: 5
+    5: 5
     6: 3
 HLT_e26_lhtight_e14_etcut_L1eEM26M:
   eventCount: 3
@@ -4315,20 +4315,20 @@ HLT_e26_lhtight_ivarloose_L1eEM26M:
 HLT_e26_lhtight_ivarloose_L1eEM26T:
   eventCount: 3
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
-    3: 4
-    4: 4
-    5: 4
+    0: 5
+    1: 5
+    2: 5
+    3: 5
+    4: 5
+    5: 5
     6: 3
   stepFeatures:
-    0: 4
-    1: 4
-    2: 4
-    3: 4
-    4: 4
-    5: 4
+    0: 5
+    1: 5
+    2: 5
+    3: 5
+    4: 5
+    5: 5
     6: 3
 HLT_e26_lhtight_ivarloose_e12_lhloose_probe_L1eEM26M:
   eventCount: 0
@@ -24632,7 +24632,7 @@ HLT_noalg_L1eEM26L:
 HLT_noalg_L1eEM26M:
   eventCount: 8
 HLT_noalg_L1eEM26T:
-  eventCount: 7
+  eventCount: 8
 HLT_noalg_L1eEM5:
   eventCount: 20
 HLT_noalg_L1eEM9:
