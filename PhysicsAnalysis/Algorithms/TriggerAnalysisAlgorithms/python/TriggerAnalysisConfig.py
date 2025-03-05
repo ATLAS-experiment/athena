@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
@@ -28,6 +28,10 @@ class TriggerAnalysisBlock (ConfigBlock):
             info="a list of trigger chains (list of strings) to be used for "
             "trigger selection. Only set it if you need a different setup "
             "than for trigger SFs. The default is [] (empty list).")
+        self.addOption ('triggerChainsForDecoration', [], type=None,
+            info="a list of trigger chains (list of strings) to be used for "
+            "trigger decoration, if it needs to be different from the selection one. "
+            "The default is [] (empty list).")
         self.addOption ('prescaleDecoration', 'prescale', type=str,
             info="name (prefix) of decoration for trigger prescales.")
         self.addOption ('prescaleLumiCalcFiles', [], type=None,
@@ -111,6 +115,21 @@ class TriggerAnalysisBlock (ConfigBlock):
         for t in self.triggerChainsForSelection :
             t = t.replace(".", "p").replace("-", "_")
             config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, noSys=True)
+
+        # for decoration, make sure we only get the triggers not already in the selection list
+        triggerChainsForDeco = list(set(self.triggerChainsForDecoration) - set(self.triggerChainsForSelection))
+        if triggerChainsForDeco :
+            alg = config.createAlgorithm( 'CP::TrigEventSelectionAlg', 'TrigEventSelectionAlgDeco' )
+            alg.tool = '%s/%s' % \
+                ( decisionTool.getType(), decisionTool.getName() )
+            alg.triggers = triggerChainsForDeco
+            alg.selectionDecoration = 'trigPassed'
+            alg.noFilter = True
+            alg.noL1 = self.noL1
+
+            for t in triggerChainsForDeco :
+                t = t.replace(".", "p").replace("-", "_")
+                config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, noSys=True)
 
         # Calculate trigger prescales
         if ((config.dataType() is DataType.Data) != self.prescaleMC) and (
