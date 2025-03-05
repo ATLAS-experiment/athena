@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthAllocators/ArenaHeapSTLAllocator.h
@@ -43,7 +43,6 @@
 
 
 #include "AthAllocators/ArenaHeapAllocator.h"
-#include "CxxUtils/concepts.h"
 #include "CxxUtils/checker_macros.h"
 #include <string>
 #include <cstddef>
@@ -201,8 +200,9 @@ public:
 
   /// Convert a reference to an address.
   pointer address (reference x) const;
-  ATH_MEMBER_REQUIRES(!(std::is_same_v<reference,const_reference>),
-                      const_pointer)
+  template <bool = true>
+  requires (!std::same_as<reference,const_reference>)
+  const_pointer
   address (const_reference x) const { return &x; }
 
 
@@ -219,7 +219,9 @@ public:
    * @param n Number of objects to deallocate.  Must be 1.
    */
   void deallocate (pointer, size_type n);
-  ATH_MEMBER_REQUIRES(!(std::is_same_v<pointer,const_pointer>), void)
+  template <bool = true>
+  requires (!std::same_as<reference,const_reference>)
+  void
   deallocate (const_pointer p, size_type n) const
   {
     pointer p_nc ATLAS_THREAD_SAFE = const_cast<pointer>(p);
