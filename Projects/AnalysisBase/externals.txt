@@ -6,4 +6,4 @@
 # forbidden.
 
 # The version of atlas/atlasexternals to use:
-AnalysisBaseExternalsVersion = 2.1.16.5
+AnalysisBaseExternalsVersion = 2.1.16.7
