@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////
@@ -11,12 +11,12 @@
 //        January 23, 2004                   //
 ///////////////////////////////////////////////
 
-#include "SCT_GeoModel/SCT_FwdSpine.h"
+#include "SCT_FwdSpine.h"
 
-#include "SCT_GeoModel/SCT_MaterialManager.h"
+#include "SCT_MaterialManager.h"
 
-#include "SCT_GeoModel/SCT_GeometryManager.h"
-#include "SCT_GeoModel/SCT_ForwardModuleParameters.h"
+#include "SCT_GeometryManager.h"
+#include "SCT_ForwardModuleParameters.h"
 
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoLogVol.h"

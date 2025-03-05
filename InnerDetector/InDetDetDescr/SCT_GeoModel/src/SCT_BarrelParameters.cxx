@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SCT_GeoModel/SCT_BarrelParameters.h"
-#include "SCT_GeoModel/SCT_GeometryManager.h"
+#include "SCT_BarrelParameters.h"
+#include "SCT_GeometryManager.h"
 
-#include "SCT_GeoModel/SCT_DataBase.h"
+#include "SCT_DataBase.h"
 
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "GaudiKernel/SystemOfUnits.h"
