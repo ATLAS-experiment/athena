@@ -10,6 +10,7 @@
  */
 
 #include "GepAlgoHypothesisPortsIn.h"
+#include "InvariantMassDeltaPhiInclusive2ContainerPortsIn.h"
 #include "InvariantMassDeltaPhiInclusive2ContainerPortsOut.h"
 
 #include "../../../IGlobalSimAlgTool.h"
@@ -44,8 +45,8 @@ namespace GlobalSim {
 	"flag to enable dumps"};
 
 
-    SG::ReadHandleKey<GepAlgoHypothesisFIFO>
-    m_HypoFIFOReadKey {
+    SG::ReadHandleKey<InvariantMassDeltaPhiInclusive2ContainerPortsIn>
+    m_portsInReadKey {
       this,
       "HypoFIFOReadKey",
       "hypoFIFO",

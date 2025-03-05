@@ -26,7 +26,7 @@ namespace GlobalSim {
   
   StatusCode InvariantMassDeltaPhiInclusive2AlgTool::initialize() {
        
-    CHECK(m_HypoFIFOReadKey.initialize());
+    CHECK(m_portsInReadKey.initialize());
     CHECK(m_portsOutWriteKey.initialize());
 
 
@@ -45,7 +45,7 @@ namespace GlobalSim {
 
     std::stringstream ss;
     ss << "name: " << name() << '\n'
-       << " read key " <<m_HypoFIFOReadKey
+       << " read key " <<m_portsInReadKey
        << " write key " << m_portsOutWriteKey
        << '\n';
     
