@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SURFACE_CNV_P2_H
@@ -58,8 +58,18 @@ class PlaneSurfaceCnv_p2
    : public SurfaceCnv_p2< Trk::PlaneSurface> {};
 class StraightLineSurfaceCnv_p2
    : public SurfaceCnv_p2< Trk::StraightLineSurface> {};
+
+// Special case for SaggedLineSurface: the detector elements we get back
+// are now StraightLineSurface's.
 class SaggedLineSurfaceCnv_p2
-  : public SurfaceCnv_p2< Trk::SaggedLineSurface> {};
+  : public SurfaceCnv_p2< Trk::StraightLineSurface>
+{
+public:
+  virtual const std::type_info& transientTInfo() const override
+  { return typeid (Trk::SaggedLineSurface); }
+};
+
+
 
 
 #endif // SURFACE_CNV_p2_H
