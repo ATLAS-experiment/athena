@@ -17,6 +17,9 @@
   <class name="std::vector<std::pair<unsigned int, std::vector<int> > >" />
   <!-- pair<unsigned,vector<int> > and associated pair_base -->
   <class pattern="std::*pair*<unsigned int*std::vector<int*> >" />
+  <class name="LArTTL1_p1" />
+  <class name="std::vector<LArTTL1_p1>" />
+  <class name="LArTTL1Container_p1" id="b859a463-2ea4-4902-b46a-89e5fbc20132" />
 
   <exclusion>
     <!-- Exclude internal traits classes using pair that could be
