@@ -130,15 +130,25 @@ def getRawTriggerEDMList(flags, runVersion=-1):
     if runVersion == -1:
         runVersion = flags.Trigger.EDMVersion
 
-    if runVersion <= 2 or runVersion > 4:
+    if runVersion == 3:
+        edmListCopy = TriggerHLTListRun3.copy()
+    elif runVersion == 4:
+        edmListCopy  = TriggerHLTListRun3.copy()
+        log.debug("Removing duplicated item between TriggerHLTListRun3 and TriggerHLTListRun4.")
+        for i in range(len(edmListCopy)-1, -1, -1): # Back iterate by index, we might be removing as we go
+            for r4item in TriggerHLTListRun4:
+                if edmListCopy[i][0] == r4item[0]:
+                    del edmListCopy[i]
+                    log.debug(f"- Dupe: {r4item} is removed from TriggerHLTListRun3 to be updated by TriggerHLTListRun4")
+                    break
+        lenPreMerge = len(edmListCopy)
+        edmListCopy.extend(TriggerHLTListRun4)
+        lenPostMerge = len(edmListCopy)
+        log.info(f"Added TriggerHLTListRun4 to TriggerHLTListRun3. EDM entries {lenPreMerge} -> {lenPostMerge}")
+    else:
         errMsg="ERROR the getRawTriggerEDMList function supports runs 3 and 4."
         log.error(errMsg)
         raise RuntimeError(errMsg)
-
-    if runVersion == 3:
-        edmListCopy = TriggerHLTListRun3.copy()
-    else:
-        edmListCopy = TriggerHLTListRun4.copy()
 
     if flags and flags.Trigger.ExtraEDMList:
         log.info( "Adding extra collections to EDM %i: %s", runVersion, str(flags.Trigger.ExtraEDMList))
@@ -153,7 +163,6 @@ def getTriggerEDMList(flags, key, runVersion=-1):
     key can be" 'ESD', 'AODSLIM', 'AODFULL'
     runVersion can be: '-1 (Auto-configure)', '1 (Run1)', '2 (Run2)', '3' (Run 3), '4' (Run 4)
     """
-
     # We allow for this to be overriden as Run1 bytestream actually need to request the Run2 EDM due to it additionally undergoing a transient xAOD migration. 
     if runVersion == -1:
         runVersion = flags.Trigger.EDMVersion
@@ -166,17 +175,7 @@ def getTriggerEDMList(flags, key, runVersion=-1):
         return _getTriggerRun2EDMSlimList(key, edmList) if 'SLIM' in key else edmList
 
     elif runVersion >= 3:
-        RawEDMList = getRawTriggerEDMList(flags, 3)
-
-        # Run 4 will eventually use only its own distinct EDM, but for now we will append the Run 4 specific items to the Run 3 list.
-        if runVersion >= 4:
-            # Replace if existing
-            for i in range(len(RawEDMList)-1, -1, -1): # Back iterate by index, we might be removing as we go
-                for r4item in TriggerHLTListRun4:
-                    if RawEDMList[i][0] == r4item[0]:
-                        del RawEDMList[i]
-                        break
-            RawEDMList.extend(TriggerHLTListRun4)
+        RawEDMList = getRawTriggerEDMList(flags=flags, runVersion=runVersion)
 
         if key not in AllowedOutputFormats: # AllowedOutputFormats is the entire list of output formats including ESD         
             log.warning('Output format: %s is not in list of allowed formats, please check!', key)
@@ -235,7 +234,7 @@ def getTriggerEDMList(flags, key, runVersion=-1):
         else: # ESD
             Run3TrigEDM.update(_getRun3TrigEDMSlimList(key, RawEDMList))
 
-        log.debug('TriggerEDM for EDM set {} contains the following collections: {}'.format(key, Run3TrigEDM) )    
+        log.debug('TriggerEDM for EDM set {} contains the following collections: {}'.format(key, Run3TrigEDM) ) 
         return Run3TrigEDM
 
 
