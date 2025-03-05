@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/AuxElementConcepts.h
@@ -24,13 +24,9 @@
 
 #include "AthContainersInterfaces/IAuxElement.h"
 #include "AthContainers/AuxVectorData.h"
-#include "CxxUtils/concepts.h"
 
 
 namespace SG {
-
-
-#if HAVE_CONCEPTS
 
 
 /// Test if T is compatible with ConstAuxElement.
@@ -51,9 +47,6 @@ concept IsAuxElement =
     { elt } -> std::convertible_to<IAuxElement&>;
     { elt.container() } -> std::convertible_to<AuxVectorData*>;
   };
-
-
-#endif
 
 
 } // namespace SG

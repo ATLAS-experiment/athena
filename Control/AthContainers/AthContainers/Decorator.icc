@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/Decorator.icc
@@ -107,8 +107,7 @@ Decorator<T, ALLOC>::Decorator (const SG::auxid_t auxid,
  * or variables already marked as decorations.
  */
 template <class T, class ALLOC>
-template <class ELT>
-ATH_REQUIRES( IsConstAuxElement<ELT> )
+template <IsConstAuxElement ELT>
 inline
 typename Decorator<T, ALLOC>::reference_type
 Decorator<T, ALLOC>::operator() (const ELT& e) const
@@ -146,8 +145,7 @@ Decorator<T, ALLOC>::operator() (const AuxVectorData& container,
  * @param x The variable value to set.
  */
 template <class T, class ALLOC>
-template <class ELT>
-ATH_REQUIRES( IsConstAuxElement<ELT> )
+template <IsConstAuxElement ELT>
 inline
 void Decorator<T, ALLOC>::set (const ELT& e,
                                const element_type& x) const
@@ -227,8 +225,7 @@ Decorator<T, ALLOC>::getDecorationSpan (const AuxVectorData& container) const
  * @param e An element of the container in which to test the variable.
  */
 template <class T, class ALLOC>
-template <class ELT>
-ATH_REQUIRES( IsConstAuxElement<ELT> )
+template <IsConstAuxElement ELT>
 inline
 bool
 Decorator<T, ALLOC>::isAvailable (const ELT& e) const
@@ -241,8 +238,7 @@ Decorator<T, ALLOC>::isAvailable (const ELT& e) const
  * @param e An element of the container in which to test the variable.
  */
 template <class T, class ALLOC>
-template <class ELT>
-ATH_REQUIRES( IsConstAuxElement<ELT> )
+template <IsConstAuxElement ELT>
 inline
 bool
 Decorator<T, ALLOC>::isAvailableWritable (const ELT& e) const

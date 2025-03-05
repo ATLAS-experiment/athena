@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/AtomicDecorator.h
@@ -108,8 +108,7 @@ public:
    * that do not yet exist (in which case they will be marked as decorations)
    * or variables already marked as decorations.
    */
-  template <class ELT>
-  ATH_REQUIRES( IsConstAuxElement<ELT> )
+  template <IsConstAuxElement ELT>
   reference_type operator() (const ELT& e) const;
 
 
