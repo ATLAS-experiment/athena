@@ -355,54 +355,33 @@ def TauConfigTest(flags=None):
 
     if flags is None:
         from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
+       
         flags = initConfigFlags()
 
-        # Needs to be fixed to use latest ESDs, see ATLASRECTS-8112
-        #from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
-        #flags.Input.Files = defaultTestFiles.LATEST_ESD_MC
-        #flags.IOVDb.GlobalTag = defaultConditionsTags.LATEST_MC
+        flags.Input.Files = defaultTestFiles.RDO_RUN3
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
 
-        flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc21_13p6TeV/ESDFiles/mc21_13p6TeV.421450.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep_fct.recon.ESD.e8445_e8447_s3822_r13565/ESD.28877240._000046.pool.root.1"]
-        flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-10"
-
-        flags.Output.ESDFileName = "ESD.pool.root"
         flags.Output.AODFileName = "AOD.pool.root"
-        flags.Exec.MaxEvents = 10
+        flags.Exec.MaxEvents = 50
 
         flags.Scheduler.ShowDataDeps = True
         flags.Scheduler.ShowDataFlow = True
         flags.Scheduler.ShowControlFlow = True
 
-        #TODO Update once new jet flags are available
-        # from JetRec.JetRecFlags import jetFlags
-        # if not jetFlags.useTracks():
-        #     flags.Tau.doTJVA = False  # switch off TJVA
-
-        flags.fillFromArgs()
-
         flags.Concurrency.NumThreads = 1
         flags.Concurrency.NumConcurrentEvents = 1
 
+        from tauRec.ConfigurationHelpers import StandaloneTauRecoFlags
+        StandaloneTauRecoFlags(flags)
+
         flags.lock()
+   
+    from RecJobTransforms.RecoSteering import RecoSteering
+    cfg = RecoSteering(flags)
 
-    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(flags)
-
-    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(flags))
-
-    # this delcares to the scheduler that EventInfo object comes from the input
-    loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
-                  ( 'AthenaAttributeList' , 'StoreGateSvc+Input' ),
-                  ( 'CaloCellContainer' , 'StoreGateSvc+AllCalo' )]
-    cfg.addEventAlgo(CompFactory.SGInputLoader(Load=loadFromSG), sequenceName="AthAlgSeq")
-
-    cfg.merge(TauReconstructionCfg(flags))
-
-    from SGComps.AddressRemappingConfig import AddressRemappingCfg
-    rename_maps = [ '%s#%s->%s' % ("xAOD::TauJetContainer", "TauJets", "old_TauJets"),
-                    '%s#%s->%s' % ("xAOD::TauJetAuxContainer", "TauJetsAux.", "old_TauJetsAux.")]
-    cfg.merge( AddressRemappingCfg(rename_maps) )
+    from RecJobTransforms.RecoConfigFlags import printRecoFlags
+    printRecoFlags(flags)
 
     cfg.run()
 
