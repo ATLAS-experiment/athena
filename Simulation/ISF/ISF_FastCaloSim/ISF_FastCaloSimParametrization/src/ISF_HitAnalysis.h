@@ -72,7 +72,6 @@ public:
   virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE () override;
   virtual StatusCode finalize ATLAS_NOT_THREAD_SAFE () override;
   virtual StatusCode execute() override;
-  StatusCode updateMetaData(IOVSVC_CALLBACK_ARGS);
 
   const static int MAX_LAYER = 25;
 
@@ -80,8 +79,7 @@ private:
   // extrapolation through Calo
   std::vector<Trk::HitInfo>* caloHits(const HepMC::GenParticle& part ) const;
   void extrapolate(const HepMC::ConstGenParticlePtr&  part,std::vector<Trk::HitInfo>* hitVector);
-  void extrapolate_to_ID(const HepMC::ConstGenParticlePtr&  part,std::vector<Trk::HitInfo>* hitVector);
-
+  void extrapolate_to_ID(const HepMC::ConstGenParticlePtr&  part,std::vector<Trk::HitInfo>* hitVector);    
   // Configurable properties
   ServiceHandle<IGeoModelSvc> m_geoModel{this,
       "GeoModelSvc", "GeoModelSvc", "GeoModel service"};

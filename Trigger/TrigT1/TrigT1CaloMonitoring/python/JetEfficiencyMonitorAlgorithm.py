@@ -7,7 +7,9 @@ def JetEfficiencyMonitoringConfig(flags):
     # get the component factory - used for getting the algorithms
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
+    from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
     result = ComponentAccumulator()
+    l1menu = getL1MenuAccess(flags)
 
 
     from AthenaConfiguration.Enums import Format
@@ -78,10 +80,9 @@ def JetEfficiencyMonitoringConfig(flags):
 
     # add monitoring algorithm to group, with group name and main directory
     single_triggers = []
-    multijet_triggers = []
     LR_triggers = []
     
-    gfex_SR_triggers = ['L1_gJ20p0ETA25', 'L1_gJ50p0ETA25', 'L1_gJ100p0ETA25', 'L1_gJ400p0ETA25' ]
+    gfex_SR_triggers = ['L1_gJ20p0ETA25', 'L1_gJ50p0ETA25', 'L1_gJ100p0ETA25', 'L1_gJ400p0ETA25']
     gfex_LR_triggers = ['L1_gLJ80p0ETA25', 'L1_gLJ100p0ETA25', 'L1_gLJ140p0ETA25', 'L1_gLJ160p0ETA25']
 
     jfex_SR_triggers = ['L1_jJ30','L1_jJ40','L1_jJ50', 'L1_jJ60', 'L1_jJ80','L1_jJ90', 'L1_jJ125','L1_jJ140','L1_jJ160', 'L1_jJ180']
@@ -90,26 +91,39 @@ def JetEfficiencyMonitoringConfig(flags):
 
     all_SR_singletriggers = single_triggers + gfex_SR_triggers + jfex_SR_triggers
     all_LR_singletriggers = LR_triggers + gfex_LR_triggers + jfex_LR_triggers
-    
-    JetEfficiencyMonAlg.SmallRadiusJetTriggers_phase1 = all_SR_singletriggers
-    JetEfficiencyMonAlg.LargeRadiusJetTriggers_phase1 = all_LR_singletriggers
-    JetEfficiencyMonAlg.multiJet_LegacySmallRadiusTriggers = multijet_triggers
+
+    # if the trigger isnt included in the menu, then we dont actually want to fill anything into the histograms (it looks weird)
+    JetEfficiencyMonAlg.SmallRadiusJetTriggers_phase1 = [trigger for trigger in all_SR_singletriggers if trigger in l1menu]
+    JetEfficiencyMonAlg.LargeRadiusJetTriggers_phase1 = [trigger for trigger in all_LR_singletriggers if trigger in l1menu]
+    # if a trigger isnt in the menu, but its a gfex trigger so we can emulate the efficiemcy using the gFEX TOBs
+    JetEfficiencyMonAlg.SmallRadiusJetTriggers_gFEX = [trigger for trigger in gfex_SR_triggers if trigger not in l1menu]
+    JetEfficiencyMonAlg.LargeRadiusJetTriggers_gFEX = [trigger for trigger in gfex_LR_triggers if trigger not in l1menu]
+
+    # if there are no gFEX triggers in our list that aren't present in the menu, then we don't need to even look at them, so lets just not open them
+    if len(JetEfficiencyMonAlg.SmallRadiusJetTriggers_gFEX ) == 0: JetEfficiencyMonAlg.mygFexSRJetRoIContainer = "" 
+    if len(JetEfficiencyMonAlg.LargeRadiusJetTriggers_gFEX ) == 0: JetEfficiencyMonAlg.mygFexLRJetRoIContainer = "" 
+ 
 
     reference_paths = {"Muon" : muonRefPath, "RandomHLT": randomRefPath, "No": noRefPath,  "Bootstrap":  bsRefPath}
     references = ["Muon",  "No", "Bootstrap"] #"RandomHLT"
 
-
+    # if we want to make the eta efficiencies, can add in SReta and LReta
+    sr_props = ["SRpt"] #SReta
+    lr_props = ["LRpt"] #LReta
     trigger_group_list = {"gfex_SR_triggers" : gfex_SR_triggers,
                           "gfex_LR_triggers" : gfex_LR_triggers,
                           "jfex_SR_triggers" : jfex_SR_triggers,
                           "jfex_LR_triggers" : jfex_LR_triggers }
+    properties_per_trigger_group = {"gfex_SR_triggers" : sr_props, "jfex_SR_triggers" : sr_props,
+                                    "gfex_LR_triggers" : lr_props, "jfex_LR_triggers" : lr_props }
+    pathadd_per_trigger_group = {"gfex_SR_triggers" : "gFEX/", "jfex_SR_triggers" : "jFEX/",
+                                    "gfex_LR_triggers" : "gFEX/", "jfex_LR_triggers" : "jFEX/" }
     trigger_groups = list(trigger_group_list.keys())
 
     xlabel_for_prop = { "SRpt" :'pT [MeV]',  "SReta" : '#eta',  "LRpt" :'pT [MeV]',  "LReta" : '#eta'}
     nbins = {"SRpt": 220, "SReta" :32, "LRpt": 220, "LReta" :32}
     binmin = {"SRpt": -50, "SReta" :-3.3, "LRpt": -50, "LReta" :-3.3}
     binmax = {"SRpt": 1800*GeV, "SReta" :3.3, "LRpt": 1800*GeV, "LReta" :3.3}
-    properties = ["SRpt","LRpt"] 
 
     ######### turn off plotting distrubiton histograms so they dont show up on web dispaly 
     plotDistrubutions = False
@@ -142,10 +156,8 @@ def JetEfficiencyMonitoringConfig(flags):
     }
     
     ######### define all the histograms 
-    for tgroup in trigger_groups: #iterate through the trigger groups
+    for tgroup in trigger_groups: #iterate through the trigger groups (gFEX SR & LR, jFEX SR & LR)
         for t in trigger_group_list[tgroup]: #iterate through the triggers within subgroups 
-            if "g" in t: pathAdd = "gFEX/"
-            elif "j" in t: pathAdd = "jFEX/"
             #add algorithm that flags if the efficiency is not reaching 100% 
             # assemble thresholdConfig dict
             thresholdConfig = {"Plateau":plateau_dict.get(t,[0.99,0.95])}
@@ -155,15 +167,19 @@ def JetEfficiencyMonitoringConfig(flags):
                                     hanConfig={"libname":"libdqm_algorithms.so","name":"Simple_fermi_Fit_TEff", "xmax":xMaxConfig, "ImproveFit":1}, # this line is always the same
                                     thresholdConfig=thresholdConfig
                                 )
-            for p in properties: 
+            for p in properties_per_trigger_group[tgroup]: 
                 for r in references: #iteratate through the refernce trigger options
-                    eff_plot_title =  t+';'+xlabel_for_prop[p]+'; Efficiency '
+
+                    # if trigger not included in the menu, then lets modify the hist title to make that clear!
+                    if t in l1menu: eff_plot_title =  t+';'+xlabel_for_prop[p]+'; Efficiency '
+                    elif t not in l1menu and t in (gfex_SR_triggers + gfex_LR_triggers): eff_plot_title = t+' Emulated;'+xlabel_for_prop[p]+'; Efficiency '
+                    else: eff_plot_title =  t+' NOT in Menu;'+xlabel_for_prop[p]+'; Efficiency '
 
                     #Using the muon reference trigger selection, as our least biased trigger selection inside the web displkay. Others still exist in the HIST file for now
                     if r == "Muon" and p in ["SRpt", "LRpt"]:
-                        helper.defineHistogram(f"bool_{r}_{t}, val_{p};{p}_{t}", type='TEfficiency',  title=eff_plot_title, fillGroup=groupName, path=ExpertTrigPath + pathAdd+ reference_paths[r], xbins=nbins[p], xmin=binmin[p], xmax=binmax[p], hanConfig={"algorithm":"JetEfficiency_"+t})  
+                        helper.defineHistogram(f"bool_{r}_{t}, val_{p};{p}_{t}", type='TEfficiency',  title=eff_plot_title, fillGroup=groupName, path=ExpertTrigPath + pathadd_per_trigger_group[tgroup]+ reference_paths[r], xbins=nbins[p], xmin=binmin[p], xmax=binmax[p], hanConfig={"algorithm":"JetEfficiency_"+t}, opt='kAlwaysCreate')  
                     else:
-                        helper.defineHistogram(f"bool_{r}_{t}, val_{p};{p}_{t}", type='TEfficiency',  title=eff_plot_title, fillGroup=groupName, path=trigPath + pathAdd+ reference_paths[r], xbins=nbins[p], xmin=binmin[p], xmax=binmax[p])
+                        helper.defineHistogram(f"bool_{r}_{t}, val_{p};{p}_{t}", type='TEfficiency',  title=eff_plot_title, fillGroup=groupName, path=trigPath + pathadd_per_trigger_group[tgroup]+ reference_paths[r], xbins=nbins[p], xmin=binmin[p], xmax=binmax[p], opt='kAlwaysCreate')
 
     
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -39,12 +39,9 @@ StatusCode TrigTauPrecisionIDHypoTool::initialize()
     ATH_MSG_DEBUG(" - IDMethod: " << m_idMethod.value());
     ATH_MSG_DEBUG(" - IDWP: " << m_idWP.value());
     if(m_idMethod == IDMethod::Decorator) ATH_MSG_DEBUG("   - IDWPNames: " << m_idWPNames.value());
-    ATH_MSG_DEBUG(" - HighPtSelection: " << m_doHighPtSelection.value());
-    if(m_doHighPtSelection) {
-        ATH_MSG_DEBUG("   - HighPtSelectionTrkThr: " << m_highPtTrkThr.value());
-        ATH_MSG_DEBUG("   - HighPtSelectionLooseIDThr: " << m_highPtLooseIDThr.value());
-        ATH_MSG_DEBUG("   - HighPtSelectionJetThr: " << m_highPtJetThr.value());
-    }
+    ATH_MSG_DEBUG("   - HighPtSelectionTrkThr: " << m_highPtTrkThr.value());
+    ATH_MSG_DEBUG("   - HighPtSelectionLooseIDThr: " << m_highPtLooseIDThr.value());
+    ATH_MSG_DEBUG("   - HighPtSelectionJetThr: " << m_highPtJetThr.value());
 
     if((m_numTrackMin > m_numTrackMax) || (m_highPtLooseIDThr > m_highPtJetThr)) {
         ATH_MSG_ERROR("Invalid tool configuration!");
@@ -143,14 +140,14 @@ bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInf
         // Track counting ('perf' step)
         //---------------------------------------------------------
         int numTrack = 0, numIsoTrack = 0;
-        if(m_trackPtCut >= 0) {
+        if(m_trackPtCut > 0.) {
             // Raise the track pT threshold when counting tracks in the 'perf' step, to reduce sensitivity to pileup tracks
             // Overrides the default 1 GeV cut by the InDetTrackSelectorTool used during the TauJet construction
             for(const auto* track : Tau->tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedCharged)) {
-	            if(track->pt() > m_trackPtCut) numTrack++;
+	      if(track->pt() > m_trackPtCut) numTrack++;
             }
             for(const auto* track : Tau->tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedIsolation)) {
-	            if(track->pt() > m_trackPtCut) numIsoTrack++;
+	      if(track->pt() > m_trackPtCut) numIsoTrack++;
             }
         } else {
             // Use the default 1 GeV selection in the InDetTrackSelectorTool, executed during the TauJet construction
@@ -159,17 +156,20 @@ bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInf
         }
 
         ATH_MSG_DEBUG(" N Tracks: " << numTrack);
-        ATH_MSG_DEBUG(" N Wide Tracks: " << numIsoTrack);
+        ATH_MSG_DEBUG(" N Iso Tracks: " << numIsoTrack);
 
-        // Apply NTrackMin and NWideTrackMax cuts:
-        if(!m_acceptAll && !(m_doHighPtSelection && pT > m_highPtTrkThr)) {
-            if(!(numTrack >= m_numTrackMin)) continue;
-            if(!(numIsoTrack <= m_numIsoTrackMax)) continue;
-        }
-        // Apply NTrackMax cut:
-        if(!m_acceptAll && !(m_doHighPtSelection && pT > m_highPtJetThr)) {
-            if(!(numTrack <= m_numTrackMax)) continue;
-        }
+        // Apply track multiplicity cuts, except for idperf
+        if(!m_acceptAll) {
+	  // NTrackMin and NIsoTracksMax
+	  if(pT < m_highPtTrkThr) {
+	    if(numTrack < m_numTrackMin) continue;
+            if(numIsoTrack > m_numIsoTrackMax) continue;
+	  }
+	  // NTrackMax
+	  if(pT < m_highPtJetThr) {
+            if(numTrack > m_numTrackMax) continue;
+	  }
+	}
         // Note: we disabled the track selection for high pT taus
 
         passedCuts++;
@@ -183,14 +183,14 @@ bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInf
         int local_idWP = m_idWP;
         
         // Loosen/disable the ID WP cut for high pT taus
-        if(m_doHighPtSelection && pT > m_highPtLooseIDThr && m_idWP > IDWP::Loose) local_idWP = IDWP::Loose; // Set ID WP to Loose
-        if(m_doHighPtSelection && pT > m_highPtJetThr) local_idWP = IDWP::None; // Disable the ID WP cut
+        if(pT > m_highPtLooseIDThr && m_idWP > IDWP::Loose) local_idWP = IDWP::Loose; // Set ID WP to Loose
+        if(pT > m_highPtJetThr) local_idWP = IDWP::None; // Disable the ID WP cut
 
         ATH_MSG_DEBUG(" Local Tau ID WP: " << local_idWP);
 
         if(m_idMethod == IDMethod::RNN) { // RNN/DeepSet scores
             if(!Tau->hasDiscriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans)) {
-                ATH_MSG_WARNING(" RNNJetScoreSigTrans not available. Make sure the TauWPDecorator too lis run for the RNN Tau ID!");
+                ATH_MSG_WARNING(" RNNJetScoreSigTrans not available. Make sure the TauWPDecorator is run for the RNN Tau ID!");
             }
 
             if(!m_acceptAll && local_idWP != IDWP::None) {
@@ -232,10 +232,10 @@ bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInf
         // TauID Score monitoring
         for(const auto& [key, p] : m_monitoredIdAccessors) {
             if(!p.first.isAvailable(*Tau))
-            ATH_MSG_WARNING("TauID Score " << m_monitoredIdScores.value().at(key).first << " is not available. Make sure the correct inferences are included in the chain reconstruction sequence!");
+	      ATH_MSG_WARNING("TauID Score " << m_monitoredIdScores.value().at(key).first << " is not available. Make sure the correct inferences are included in the chain reconstruction sequence!");
 
             if(!p.second.isAvailable(*Tau))
-            ATH_MSG_WARNING("TauID ScoreSigTrans " << m_monitoredIdScores.value().at(key).second << " is not available. Make sure the correct inferences are included in the chain reconstruction sequence!");
+	      ATH_MSG_WARNING("TauID ScoreSigTrans " << m_monitoredIdScores.value().at(key).second << " is not available. Make sure the correct inferences are included in the chain reconstruction sequence!");
 
             ATH_MSG_DEBUG(" TauID \"" << key << "\" ScoreSigTrans: " << p.second(*Tau));
 
