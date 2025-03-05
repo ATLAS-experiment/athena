@@ -20,9 +20,13 @@ def GlobalSimulationAlgCfg(flags,
         'eEmSortSelectCountContainerAlgTool')
     hypoTool.enableDump = dump
     hypoTool.OutputLevel = OutputLevel
+
+    cmpTool = CompFactory.GlobalSim.eEmSortSelectCountContainerComparator(
+    "eEmSortSelectCountContainerCmp")
+    cmpTool.OutputLevel = OutputLevel
     
     alg = CompFactory.GlobalSim.GlobalSimulationAlg(name + 'Alg')
-    alg.globalsim_algs = [hypoTool]
+    alg.globalsim_algs = [hypoTool, cmpTool]
     alg.enableDumps = dump
 
     cfg.addEventAlgo(alg)
