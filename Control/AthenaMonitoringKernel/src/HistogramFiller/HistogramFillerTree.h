@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_HistogramFiller_HistogramFillerTree_h
@@ -22,7 +22,7 @@ namespace Monitored {
   class HistogramFillerTree : public HistogramFiller {
   public:
     HistogramFillerTree(const HistogramDef& definition, std::shared_ptr<IHistogramProvider> provider)
-      : HistogramFiller(definition, provider) {
+      : HistogramFiller(definition, std::move(provider)) {
         parseDefinition();
     }
 

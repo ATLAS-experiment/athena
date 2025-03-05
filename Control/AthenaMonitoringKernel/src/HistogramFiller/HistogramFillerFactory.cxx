@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -27,36 +27,36 @@ HistogramFiller* HistogramFillerFactory::create(const HistogramDef& def) {
   
   if (def.type.starts_with( "TH1")) {
     if (def.kCumulative) {
-      return new CumulativeHistogramFiller1D(def, histogramProvider);
+      return new CumulativeHistogramFiller1D(def, std::move(histogramProvider));
     } else if (def.kAddBinsDynamically || def.kRebinAxes) {
-      return new HistogramFillerRebinable1D(def, histogramProvider);
+      return new HistogramFillerRebinable1D(def, std::move(histogramProvider));
     } else if (def.kVec || def.kVecUO) {
-      return new VecHistogramFiller1D(def, histogramProvider);
+      return new VecHistogramFiller1D(def, std::move(histogramProvider));
     } else {
-      return new HistogramFiller1D(def, histogramProvider);
+      return new HistogramFiller1D(def, std::move(histogramProvider));
     }
   } else if (def.type.starts_with( "TH2")) {
     if (def.kAddBinsDynamically || def.kRebinAxes) {
-      return new HistogramFillerRebinable2D(def, histogramProvider);
+      return new HistogramFillerRebinable2D(def, std::move(histogramProvider));
     } else {
-      return new HistogramFiller2D(def, histogramProvider);
+      return new HistogramFiller2D(def, std::move(histogramProvider));
     }
   } else if (def.type == "TProfile") {
     if (def.kAddBinsDynamically || def.kRebinAxes) {
-      return new HistogramFillerProfileRebinable(def, histogramProvider);
+      return new HistogramFillerProfileRebinable(def, std::move(histogramProvider));
     } else {
-      return new HistogramFillerProfile(def, histogramProvider);
+      return new HistogramFillerProfile(def, std::move(histogramProvider));
     }
   } else if (def.type == "TProfile2D") {
     if (def.kAddBinsDynamically || def.kRebinAxes) {
-        return new HistogramFiller2DProfileRebinable(def, histogramProvider);
+        return new HistogramFiller2DProfileRebinable(def, std::move(histogramProvider));
     } else {
-        return new HistogramFiller2DProfile(def, histogramProvider);
+        return new HistogramFiller2DProfile(def, std::move(histogramProvider));
     }
   } else if (def.type == "TEfficiency") {
-    return new HistogramFillerEfficiency(def, histogramProvider);
+    return new HistogramFillerEfficiency(def, std::move(histogramProvider));
   } else if (def.type == "TTree") {
-    return new HistogramFillerTree(def, histogramProvider);
+    return new HistogramFillerTree(def, std::move(histogramProvider));
   }
   
   return nullptr;

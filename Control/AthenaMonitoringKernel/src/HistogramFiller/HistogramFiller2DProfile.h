@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */  
   
 #ifndef AthenaMonitoringKernel_HistogramFiller_HistogramFiller2DProfile_h
@@ -17,7 +17,7 @@ namespace Monitored {
   class HistogramFiller2DProfile : public HistogramFiller {
     public:
       HistogramFiller2DProfile(const HistogramDef& definition, std::shared_ptr<IHistogramProvider> provider)
-        : HistogramFiller(definition, provider) {}
+        : HistogramFiller(definition, std::move(provider)) {}
 
 
       virtual unsigned fill( const HistogramFiller::VariablesPack& vars ) const override {
@@ -28,7 +28,7 @@ namespace Monitored {
       // handling of the cutmask
       auto cutMaskValuePair = getCutMaskFunc(vars.cut);
       if (cutMaskValuePair.first == 0) { return 0; }
-      auto cutMaskAccessor = cutMaskValuePair.second;
+      const auto & cutMaskAccessor = cutMaskValuePair.second;
 
       if (vars.weight) {
         // Weighted fill
