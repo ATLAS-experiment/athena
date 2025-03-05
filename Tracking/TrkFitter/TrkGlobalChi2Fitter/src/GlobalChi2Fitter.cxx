@@ -5903,36 +5903,55 @@ namespace Trk {
 
   FitterStatusCode GlobalChi2Fitter::updateFitParameters(
     GXFTrajectory & trajectory,
-    Amg::VectorX & b,
+    const Amg::VectorX & b,
     const Amg::SymMatrixX & lu_m
   ) const {
     ATH_MSG_DEBUG("UpdateFitParameters");
 
+    /*
+     * Compute the parameter update from [llt] * deltaParameters = b.
+     * In case we cannot do a Cholesky decomposition, we do not update and
+     * use an early return.
+     * TODO: Investigate, if it is really Success, if we do not update.
+     */
+    Eigen::LLT<Eigen::MatrixXd> llt(lu_m);
+
+    if (llt.info() != Eigen::Success) {
+        return FitterStatusCode::Success;
+    }
+
+    const Amg::VectorX deltaParameters = llt.solve(b);
+
+    /*
+     * Collect the number of each parameter type for the offsets in the
+     * deltaParameters vector.
+     */
+    const int nscat = trajectory.numberOfScatterers();
+    const int nbrem = trajectory.numberOfBrems();
+    const int nperparams = trajectory.numberOfPerigeeParameters();
+
+    /*
+     * Update the perigee parameters.
+     * The parameters are not modified in place. In case the angles are pushed
+     * too far and cannot be corrected anymore, the parameters should not be
+     * updated and the fit should fail.
+     *
+     * NOTE: It is not clear if the fit should fail for fitter reasons or
+     * because the angle correction is not stable enough.
+     */
     const TrackParameters *refpar = trajectory.referenceParameters();
     double d0 = refpar->parameters()[Trk::d0];
     double z0 = refpar->parameters()[Trk::z0];
     double phi = refpar->parameters()[Trk::phi0];
     double theta = refpar->parameters()[Trk::theta];
     double qoverp = refpar->parameters()[Trk::qOverP];
-    int nscat = trajectory.numberOfScatterers();
-    int nbrem = trajectory.numberOfBrems();
-    int nperparams = trajectory.numberOfPerigeeParameters();
 
-    Eigen::LLT<Eigen::MatrixXd> llt(lu_m);
-    Amg::VectorX result;
-
-    if (llt.info() == Eigen::Success) {
-      result = llt.solve(b);
-    } else {
-      result = Eigen::VectorXd::Zero(b.size());
-    }
-
-    if (trajectory.numberOfPerigeeParameters() > 0) {
-      d0 += result[0];
-      z0 += result[1];
-      phi += result[2];
-      theta += result[3];
-      qoverp = (trajectory.m_straightline) ? 0 : .001 * result[4] + qoverp;
+    if (nperparams > 0) {
+      d0 += deltaParameters[0];
+      z0 += deltaParameters[1];
+      phi += deltaParameters[2];
+      theta += deltaParameters[3];
+      qoverp = (trajectory.m_straightline) ? 0 : .001 * deltaParameters[4] + qoverp;
     }
 
     if (!correctAngles(phi, theta)) {
@@ -5941,24 +5960,35 @@ namespace Trk {
       return FitterStatusCode::InvalidAngles;
     }
 
+    /*
+     * Update the scattering angles.
+     */
     std::vector < std::pair < double, double >>&scatangles = trajectory.scatteringAngles();
-    std::vector < double >&delta_ps = trajectory.brems();
-
     for (int i = 0; i < nscat; i++) {
-      scatangles[i].first += result[2 * i + nperparams];
-      scatangles[i].second += result[2 * i + nperparams + 1];
+      scatangles[i].first += deltaParameters[2 * i + nperparams];
+      scatangles[i].second += deltaParameters[2 * i + nperparams + 1];
     }
 
+    /*
+     * Update the brems.
+     */
+    std::vector < double >&delta_ps = trajectory.brems();
     for (int i = 0; i < nbrem; i++) {
-      delta_ps[i] += result[nperparams + 2 * nscat + i];
+      delta_ps[i] += deltaParameters[nperparams + 2 * nscat + i];
     }
 
+    /*
+     * Create new peregee parameters from the updated ones.
+     */
     std::unique_ptr<const TrackParameters> newper(
       trajectory.referenceParameters()->associatedSurface().createUniqueTrackParameters(
         d0, z0, phi, theta, qoverp, std::nullopt
       )
     );
 
+    /*
+     * Apply all changes.
+     */
     trajectory.setReferenceParameters(std::move(newper));
     trajectory.setScatteringAngles(scatangles);
     trajectory.setBrems(delta_ps);

@@ -635,9 +635,15 @@ namespace Trk {
       bool &
     ) const;
 
+    /**
+     * @brief Method to update peregee parameters, scattering angles, and brems.
+     *
+     * Tries to solve the system [A] * deltaParameters = b and then update in
+     * the trajectory all parameters used for the fit. Returns also a status.
+     */
     FitterStatusCode updateFitParameters(
       GXFTrajectory &,
-      Amg::VectorX &,
+      const Amg::VectorX &,
       const Amg::SymMatrixX &
     ) const;
 
