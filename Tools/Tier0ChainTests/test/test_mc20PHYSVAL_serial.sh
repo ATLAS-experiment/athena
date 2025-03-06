@@ -12,10 +12,9 @@
 set -e
 
 Derivation_tf.py \
---CA True \
 --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc20/AOD/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13145/1000events.AOD.27121237._002005.pool.root.1 \
 --outputDAODFile art.pool.root \
---format PHYSVAL \
+--formats PHYSVAL \
 --maxEvents -1
 
 echo "art-result: $? reco"
