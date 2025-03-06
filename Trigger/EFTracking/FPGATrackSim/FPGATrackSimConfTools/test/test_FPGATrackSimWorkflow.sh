@@ -10,7 +10,7 @@ set -e
 
 source FPGATrackSim_CommonEnv.sh
 
-echo "Running over " $RDO_EVT " events"
+echo "Running over ${RDO_EVT} events"
 
 # make wrapper file
 echo "... RDO to AOD with sim"
@@ -19,7 +19,7 @@ Reco_tf.py --CA \
     --preExec "flags.Trigger.FPGATrackSim.wrapperFileName='wrapper.root'" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
     --postInclude "FPGATrackSimSGInput.FPGATrackSimSGInputConfig.FPGATrackSimSGInputCfg" \
-    --inputRDOFile ${RDO_SINGLE_MUON} \
+    --inputRDOFile "${RDO_SINGLE_MUON}" \
     --outputAODFile AOD.pool.root \
     --maxEvents -1
 ls -l
@@ -28,10 +28,15 @@ echo "... RDO to AOD with sim, this part is done ..."
 # generate maps
 echo "... Maps Making"
 python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
---filesInput=wrapper.root \
-OutFileName="MyMaps_" \
-Trigger.FPGATrackSim.region=0 \
-GeoModel.AtlasVersion=${GEO_TAG}
+    --filesInput=wrapper.root \
+    OutFileName="MyMaps_" \
+    doInsideOut=True \
+    nSlices=1 \
+    Trigger.FPGATrackSim.region=0 \
+    Trigger.FPGATrackSim.spacePoints=False \
+    Trigger.FPGATrackSim.oldRegionDefs=True \
+    Trigger.FPGATrackSim.Hough.secondStage=False \
+    GeoModel.AtlasVersion="${GEO_TAG}"
 ls -l
 echo "... Maps Making, this part is done ..."
 
@@ -39,34 +44,40 @@ mkdir -p maps
 mv MyMaps_region0.rmap maps/eta0103phi0305.rmap
 mv MyMaps_region0.subrmap maps/eta0103phi0305.subrmap
 mv MyMaps_region0.pmap maps/eta0103phi0305.pmap
+mv MyMaps_region0.patt maps/eta0103phi0305.patt
 mv *_radii.txt maps/eta0103phi0305_radii.txt
 touch maps/moduleidmap
 
 echo "... Banks generation"
 python -m FPGATrackSimBankGen.FPGATrackSimBankGenConfig \
-    --filesInput=${RDO_SINGLE_MUON} \
+    --filesInput="${RDO_SINGLE_MUON}" \
     --evtMax=-1 \
+    Trigger.FPGATrackSim.Hough.genScan=True \
     Trigger.FPGATrackSim.mapsDir=maps
 ls -l
 echo "... Banks generation, this part is done ..."
 
 echo "... const generation on combined matrix file"
 python -m FPGATrackSimBankGen.FPGATrackSimBankConstGenConfig \
-    Trigger.FPGATrackSim.FPGATrackSimMatrixFileRegEx=${COMBINED_MATRIX} \
-    Trigger.FPGATrackSim.mapsDir=./maps/ \
+    Trigger.FPGATrackSim.FPGATrackSimMatrixFileRegEx="${COMBINED_MATRIX}" \
+    Trigger.FPGATrackSim.Hough.genScan=True \
+    Trigger.FPGATrackSim.mapsDir=maps \
     --evtMax=1
 ls -l
 echo "... const generation on combined matrix file, this part is done ..."
 
 mkdir -p banks 
-mv sectors* slices* corr* const.root combined_matrix.root banks
+mv sectors* slices* corr* const.root banks
+cp "${COMBINED_MATRIX}" banks
 
 echo "... analysis on wrapper"
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
-Trigger.FPGATrackSim.wrapperFileName="wrapper.root" \
-Trigger.FPGATrackSim.mapsDir=./maps \
-Trigger.FPGATrackSim.tracking=True \
-Trigger.FPGATrackSim.bankDir=./banks/
+    Trigger.FPGATrackSim.wrapperFileName="wrapper.root" \
+    Trigger.FPGATrackSim.mapsDir=./maps \
+    Trigger.FPGATrackSim.pipeline='F-600' \
+    Trigger.FPGATrackSim.tracking=True \
+    Trigger.FPGATrackSim.Hough.secondStage=False \
+    Trigger.FPGATrackSim.bankDir=./banks/
 ls -l
 echo "... analysis on wrapper, this part is done ..."
 
@@ -91,17 +102,18 @@ echo "... wrapper analysis output verification, this part is done ..."
 
 echo "... analysis on RDO"
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
---filesInput=${RDO_SINGLE_MUON} \
---evtMax=${RDO_EVT} \
-Trigger.FPGATrackSim.mapsDir=./maps \
-Trigger.FPGATrackSim.tracking=True \
-Trigger.FPGATrackSim.sampleType="${SAMPLE_TYPE}" \
-Trigger.FPGATrackSim.bankDir=./banks/ \
-Trigger.FPGATrackSim.doEDMConversion=True \
-Trigger.FPGATrackSim.writeToAOD=True \
-Output.AODFileName="FPGATrackSimCITestAOD.root"
-
-
+        --evtMax=${RDO_EVT} \
+        --filesInput=${RDO_SINGLE_MUON} \
+        Trigger.FPGATrackSim.mapsDir=./maps \
+        Trigger.FPGATrackSim.bankDir=./banks/ \
+        Trigger.FPGATrackSim.pipeline='F-600' \
+        Trigger.FPGATrackSim.tracking=True \
+        Trigger.FPGATrackSim.sampleType="${SAMPLE_TYPE}" \
+        Trigger.FPGATrackSim.doEDMConversion=True \
+        Trigger.FPGATrackSim.doOverlapRemoval=True \
+        Trigger.FPGATrackSim.Hough.secondStage=False \
+        Trigger.FPGATrackSim.writeToAOD=True \
+        Output.AODFileName="FPGATrackSimCITestAOD.root"
 ls -l
 echo "... analysis on RDO, this part is done ..."
  
@@ -133,4 +145,9 @@ echo "... verification of FPGATrackSim --> xAOD conversion"
 python3 checkConvertedClusters.py
 
 echo "...verification of FPGATrackSim --> xAOD conversion, this part is done ..."
+
+echo "Running F-100 for a few ttbar events"
+FPGATrackSim_F100.sh -t -n 2
+ls -ltr
+echo "done running F-100"
 echo "... all done ..."
