@@ -25,15 +25,14 @@ const vector<vector<ElementLink<IParticleContainer> > >*
 JetParticleOriginVertexAssociation::match(const JetContainer& jets, const IParticleContainer& parts) const {
 
     //Get the vertex associated to each track by reading the decoration
-    //<IParticleContainer, ElementLink<VertexContainer>> trkOrigin("InDetTrackParticles.btagIp_TrkOriginVtx");
-    const SG::AuxElement::ConstAccessor<ElementLink<VertexContainer>> trkOrigin("InDetTrackParticles.btagIp_ByVertex_TrkOriginVtx");
+    const SG::AuxElement::ConstAccessor<ElementLink<VertexContainer>> trkOrigin("btagIp_ByVertex_TrkOriginVtx");
     //Create the 2d output vector 
     vector<vector<ElementLink<IParticleContainer> > >* matchedparts =
         new std::vector<std::vector<ElementLink<IParticleContainer> > >(jets.size());
     
-    
     //loop through the tracks
     for (const IParticle* part: parts) {
+      
       // Retrieve the ElementLink to the vertex
       const ElementLink<VertexContainer>& vertexLink = trkOrigin(*part);
       // check if link is valid
