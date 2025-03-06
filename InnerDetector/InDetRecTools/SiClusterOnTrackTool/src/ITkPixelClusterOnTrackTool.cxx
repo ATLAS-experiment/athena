@@ -306,8 +306,8 @@ PixelClusterOnTrackTool::correctDefault
       erreta = (width.z() / ncol) * TOPHAT_SIGMA;
     }else if (m_errorStrategy == 2) {
       std::pair<double,double> delta_err = offlineITkCalibDataHandle->getClusterErrorData()->getDeltaError(idHash);
-      errphi = nrows != 1 ? delta_err.first : (width.phiR()/nrows)*TOPHAT_SIGMA;
-      erreta = ncol != 1 ? delta_err.second : (width.z()/ncol)*TOPHAT_SIGMA;
+      errphi = nrows != 1 ? delta_err.first : width.phiR()*TOPHAT_SIGMA;
+      erreta = ncol != 1 ? delta_err.second : width.z()*TOPHAT_SIGMA;
     }
 
     Amg::Vector2D locpos = Amg::Vector2D(localphi, localeta);
