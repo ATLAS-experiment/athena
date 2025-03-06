@@ -55,8 +55,6 @@ def IsoCloseByCorrSkimmingAlgCfg(flags, suff = "", name="IsoCloseByCorrSkimmingA
 def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], useSelTools = False, isoDecSuffix = "CloseByCorr", hasLRT = False, **kwargs):
 
     result = ComponentAccumulator()
-    # Check for LLP1 to use different selection decorators
-    isLLP1 = suff == "_LLP1"
 
     # Configure the CloseBy isolation correction alg - only need two WPs each for all iso variables
     elIsoWPs   = [ "Loose_VarRad", "TightTrackOnly_FixedRad" ]
@@ -89,7 +87,7 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite 
 
     # Define selectors for electron and photon - different for LLP1 as compared to PHYS and PHYSLITE
     kwargs.setdefault("PhotSelectionKey",  "Photons.DFCommonPhotonsIsEMLoose")
-    if isLLP1:
+    if hasLRT:
         kwargs.setdefault("ElecSelectionKey",  "Electrons.DFCommonElectronsLHVeryLooseNoPix")
     else:
         kwargs.setdefault("ElecSelectionKey",  "Electrons.DFCommonElectronsLHVeryLoose")
