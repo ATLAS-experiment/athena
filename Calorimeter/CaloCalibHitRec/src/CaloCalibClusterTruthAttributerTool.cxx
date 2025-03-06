@@ -23,7 +23,11 @@ StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAO
   std::map<unsigned int, double> truthIDTruePtMap;
 
   //Loop on calorimeter cells to sum up the truth energies of the truth particles.    
-  for (const auto *thisCaloCell : *theCellLinks){
+  CaloClusterCellLink::const_iterator firstCell = theCellLinks->begin();
+  CaloClusterCellLink::const_iterator lastCell   = theCellLinks->end();
+
+  for (; firstCell != lastCell; ++firstCell) {
+    const CaloCell* thisCaloCell = (*firstCell);
     
     if (!thisCaloCell){
       ATH_MSG_WARNING("Have invalid pointer to CaloCell");
@@ -32,6 +36,9 @@ StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAO
 
     //get the unique calorimeter cell identifier
     Identifier cellID = thisCaloCell->ID();
+
+    //get the weight of the cell
+    double cellWeight = firstCell.weight();
     
     //look up the calibration hit that corresponds to this calorimeter cell - we use find because not all calorimeter cells will have calibration hits
     std::map<Identifier,std::vector<const CaloCalibrationHit*> >::const_iterator identifierToCaloHitMapIterator = identifierToCaloHitMap.find(cellID);
@@ -42,6 +49,13 @@ StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAO
       const int truthID = HepMC::barcode(thisCalibrationHit); // FIXME barcode-based until xAOD::TruthParticle supports id rather than barcode
       double thisCalHitTruthEnergy = thisCalibrationHit->energyEM() + thisCalibrationHit->energyNonEM();
       if (true == m_fullTruthEnergy) thisCalHitTruthEnergy += (thisCalibrationHit->energyEscaped() + thisCalibrationHit->energyInvisible());
+
+      //This only makes sense to use for clusters that are NOT calibrated
+      //If the cluster is calibrated this weight includes a calibration factor
+      //which is not relevant for truth information.
+      //For uncalibrated clusters it can contain a gemetrical weight
+      //and also a weight due to pflow reweighting of a cell energy
+      if (m_useCellWeights) thisCalHitTruthEnergy *= cellWeight;
 
       auto iterator = truthIDTruePtMap.find(truthID);
       if (iterator != truthIDTruePtMap.end()) truthIDTruePtMap[truthID] += thisCalHitTruthEnergy;
