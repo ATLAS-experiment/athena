@@ -6,7 +6,7 @@
 #define GLOBALSIM_EEMSORTSELECTCOUNTCONTAINERPORTSIN_H
 
 #include "AlgoConstants.h"
-#include "AlgoDataTypes.h"
+#include "GenericTob.h"
 
 #include <ostream>
 #include <memory>

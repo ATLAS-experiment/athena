@@ -5,6 +5,7 @@
 
 #include "eEmSortSelectCountContainerAlgTool.h"
 #include "AlgoDataTypes.h"  // bitSetToInt()
+#include "GenericTob.h"  // bitSetToInt()
 #include "DataCollector.h"
 
 #include "../../../dump.h"
@@ -113,7 +114,7 @@ namespace GlobalSim {
 		       selected_genericTobs);
     // Sort
     auto EtGreater = [] (const GenTobPtr& l, const GenTobPtr& r) {
-      return l->m_Et > r->m_Et;
+      return l->Et() > r->Et();
     };
 
 
@@ -368,9 +369,9 @@ namespace GlobalSim {
 
 				  // loop over eta regions
 				  for(std::size_t j{0}; j != etMin_etaRegs.size(); ++j) {
-				    if (tob->m_Et > etMin_etaRegs[j] and
-					tob->m_Eta > etaMin_etaRegs[j] and
-					tob->m_Eta <= etaMax_etaRegs[j]) {return true;}
+				    if (tob->Et() > etMin_etaRegs[j] and
+					tob->Eta() > etaMin_etaRegs[j] and
+					tob->Eta() <= etaMax_etaRegs[j]) {return true;}
 				  }
 				  return false;
 				});
