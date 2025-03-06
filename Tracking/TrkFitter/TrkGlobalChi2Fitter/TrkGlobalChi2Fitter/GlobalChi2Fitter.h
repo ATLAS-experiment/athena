@@ -909,6 +909,35 @@ namespace Trk {
     ToolHandle<IBoundaryCheckTool> m_boundaryCheckTool {this, "BoundaryCheckTool", "", "Boundary checking tool for detector sensitivities" };
 
     void throwFailedToGetTrackingGeomtry() const;
+
+    /*
+     * @brief Check if the entrance to the calo is valid. If not, attempt to fix it.
+     *
+     * Ensure that the cache contains a valid tracking geometry that we can
+     * use. If it is not set yet, set it as InDet::Containers::InnerDetector.
+     *
+     * @param[in] ctx A context for creating the geometry.
+     * @param[in, out] cache The GX2F cache objects.
+     */
+    bool ensureValidEntranceCalo(
+      const EventContext& ctx,
+      Cache& cache
+    ) const;
+
+    /*
+     * @brief Check if the entrance to the Muon Spectrometer is valid. If not, attempt to fix it.
+     *
+     * Ensure that the cache contains a valid tracking geometry that we can
+     * use. If it is not set yet, set it as MuonSpectrometerEntrance.
+     *
+     * @param[in] ctx A context for creating the geometry.
+     * @param[in, out] cache The GX2F cache objects.
+     */
+    bool ensureValidEntranceMuonSpectrometer(
+      const EventContext& ctx,
+      Cache& cache
+    ) const;
+
     const TrackingGeometry* trackingGeometry(Cache& cache,
                                              const EventContext& ctx) const
     {

@@ -465,17 +465,9 @@ namespace Trk {
     int nfits = cache.m_fit_status[S_FITS];
     bool firstfitwasattempted = false;
 
-    if (cache.m_caloEntrance == nullptr) {
-       const TrackingGeometry *geometry = trackingGeometry(cache,ctx);
-
-      if (geometry != nullptr) {
-        cache.m_caloEntrance = geometry->trackingVolume("InDet::Containers::InnerDetector");
-      }
-
-      if (cache.m_caloEntrance == nullptr) {
-        ATH_MSG_ERROR("calo entrance not available");
-        return nullptr;
-      }
+    const bool caloEntranceIsValid = ensureValidEntranceCalo(ctx, cache);
+    if (!caloEntranceIsValid) {
+      return nullptr;
     }
 
     if (
@@ -650,19 +642,8 @@ namespace Trk {
     PropDirection propdir = firstismuon ? Trk::alongMomentum : oppositeMomentum;
     std::unique_ptr<const TrackParameters> tmppar;
 
-    if (cache.m_msEntrance == nullptr) {
-      const TrackingGeometry *geometry = trackingGeometry(cache,ctx);
-
-      if (geometry != nullptr) {
-        cache.m_msEntrance = geometry->trackingVolume("MuonSpectrometerEntrance");
-      }
-
-      if (cache.m_msEntrance == nullptr) {
-        ATH_MSG_ERROR("MS entrance not available");
-      }
-    }
-
-    if ((tp_closestmuon != nullptr) && (cache.m_msEntrance != nullptr)) {
+    const bool msEntranceIsValid = ensureValidEntranceMuonSpectrometer(ctx, cache);
+    if ((tp_closestmuon != nullptr) && msEntranceIsValid) {
       tmppar = m_extrapolator->extrapolateToVolume(
         ctx, *tp_closestmuon, *cache.m_msEntrance, propdir, nonInteracting);
     }
@@ -3500,19 +3481,9 @@ namespace Trk {
      * Ensure that the cache contains a valid tracking geometry that we can
      * use.
      */
-    if (cache.m_caloEntrance == nullptr) {
-      const TrackingGeometry *geometry = trackingGeometry(cache,ctx);
-
-      if (geometry != nullptr) {
-        cache.m_caloEntrance = geometry->trackingVolume("InDet::Containers::InnerDetector");
-      } else {
-        ATH_MSG_ERROR("Tracking Geometry not available");
-      }
-
-      if (cache.m_caloEntrance == nullptr) {
-        ATH_MSG_ERROR("calo entrance not available");
-        return;
-      }
+    const bool caloEntranceIsValid = ensureValidEntranceCalo(ctx, cache);
+    if (!caloEntranceIsValid) {
+      return;
     }
 
     /*
@@ -3867,19 +3838,8 @@ namespace Trk {
         std::unique_ptr<const TrackParameters> tmppar;
 
         if (firstmuonhit != nullptr) {
-          if (cache.m_caloEntrance == nullptr) {
-            const TrackingGeometry *geometry = trackingGeometry(cache,ctx);
-
-            if (geometry != nullptr) {
-              cache.m_caloEntrance = geometry->trackingVolume("InDet::Containers::InnerDetector");
-            } else {
-              ATH_MSG_ERROR("Tracking Geometry not available");
-            }
-          }
-
-          if (cache.m_caloEntrance == nullptr) {
-            ATH_MSG_ERROR("calo entrance not available");
-          } else {
+          const bool caloEntranceIsValid = ensureValidEntranceCalo(ctx, cache);
+          if (caloEntranceIsValid) {
             tmppar = m_extrapolator->extrapolateToVolume(ctx,
                                                          *startmatpar1,
                                                          *cache.m_caloEntrance,
@@ -3935,19 +3895,8 @@ namespace Trk {
         std::unique_ptr<const TrackParameters> tmppar;
         std::unique_ptr<Surface> calosurf;
         if (firstmuonhit != nullptr) {
-          if (cache.m_caloEntrance == nullptr) {
-            const TrackingGeometry *geometry = trackingGeometry(cache,ctx);
-
-            if (geometry != nullptr) {
-              cache.m_caloEntrance = geometry->trackingVolume("InDet::Containers::InnerDetector");
-            } else {
-              ATH_MSG_ERROR("Tracking Geometry not available");
-            }
-          }
-
-          if (cache.m_caloEntrance == nullptr) {
-            ATH_MSG_ERROR("calo entrance not available");
-          } else {
+          const bool caloEntranceIsValid = ensureValidEntranceCalo(ctx, cache);
+          if (caloEntranceIsValid) {
             tmppar = m_extrapolator->extrapolateToVolume(ctx,
                                                          *startmatpar2,
                                                          *cache.m_caloEntrance,
@@ -4176,53 +4125,44 @@ namespace Trk {
       std::unique_ptr<const Trk::TrackParameters> muonpar1;
 
       if (lastcalopar != nullptr) {
-        if (cache.m_msEntrance == nullptr) {
-          const TrackingGeometry *geometry = trackingGeometry(cache,ctx);
+        const bool msEntranceIsValid = ensureValidEntranceMuonSpectrometer(ctx, cache);
+        if (msEntranceIsValid) {
+          if (cache.m_msEntrance->inside(lastcalopar->position())) {
+            muonpar1 = m_extrapolator->extrapolateToVolume(ctx,
+                                                           *lastcalopar,
+                                                           *cache.m_msEntrance,
+                                                           Trk::alongMomentum,
+                                                           Trk::nonInteracting);
 
-          if (geometry != nullptr) {
-            cache.m_msEntrance = geometry->trackingVolume("MuonSpectrometerEntrance");
-          } else {
-            ATH_MSG_ERROR("Tracking Geometry not available");
-          }
-        }
+            if (muonpar1 != nullptr) {
+              Amg::Vector3D trackdir = muonpar1->momentum().unit();
+              Amg::Vector3D curvZcrossT = -(trackdir.cross(Amg::Vector3D(0, 0, 1)));
+              Amg::Vector3D curvU = curvZcrossT.unit();
+              Amg::Vector3D curvV = trackdir.cross(curvU);
+              Amg::RotationMatrix3D rot = Amg::RotationMatrix3D::Identity();
+              rot.col(0) = curvU;
+              rot.col(1) = curvV;
+              rot.col(2) = trackdir;
+              Amg::Transform3D trans;
+              trans.linear().matrix() << rot;
+              trans.translation() << muonpar1->position() - .1 * trackdir;
+              PlaneSurface curvlinsurf(trans);
 
-        if (cache.m_msEntrance == nullptr) {
-          ATH_MSG_ERROR("MS entrance not available");
-        } else if (cache.m_msEntrance->inside(lastcalopar->position())) {
-          muonpar1 = m_extrapolator->extrapolateToVolume(ctx,
-                                                         *lastcalopar,
-                                                         *cache.m_msEntrance,
-                                                         Trk::alongMomentum,
-                                                         Trk::nonInteracting);
+              std::unique_ptr<const TrackParameters> curvlinpar(m_extrapolator->extrapolateDirectly(
+                ctx,
+                *muonpar1,
+                curvlinsurf,
+                Trk::alongMomentum,
+                Trk::nonInteracting != 0u
+              ));
 
-          if (muonpar1 != nullptr) {
-            Amg::Vector3D trackdir = muonpar1->momentum().unit();
-            Amg::Vector3D curvZcrossT = -(trackdir.cross(Amg::Vector3D(0, 0, 1)));
-            Amg::Vector3D curvU = curvZcrossT.unit();
-            Amg::Vector3D curvV = trackdir.cross(curvU);
-            Amg::RotationMatrix3D rot = Amg::RotationMatrix3D::Identity();
-            rot.col(0) = curvU;
-            rot.col(1) = curvV;
-            rot.col(2) = trackdir;
-            Amg::Transform3D trans;
-            trans.linear().matrix() << rot;
-            trans.translation() << muonpar1->position() - .1 * trackdir;
-            PlaneSurface curvlinsurf(trans);
-
-            std::unique_ptr<const TrackParameters> curvlinpar(m_extrapolator->extrapolateDirectly(
-              ctx,
-              *muonpar1,
-              curvlinsurf,
-              Trk::alongMomentum,
-              Trk::nonInteracting != 0u
-            ));
-
-            if (curvlinpar != nullptr) {
-              muonpar1 = std::move(curvlinpar);
+              if (curvlinpar != nullptr) {
+                muonpar1 = std::move(curvlinpar);
+              }
             }
+          } else {
+            muonpar1 = std::unique_ptr<TrackParameters>(lastcalopar->clone());
           }
-        } else {
-          muonpar1 = std::unique_ptr<TrackParameters>(lastcalopar->clone());
         }
       } else {
         muonpar1 = std::unique_ptr<TrackParameters>(refpar->clone());
@@ -4337,55 +4277,45 @@ namespace Trk {
     if (firsthit == firstmuonhit && cache.m_extmat && (firstcalopar != nullptr)) {
       std::unique_ptr<const Trk::TrackParameters> muonpar1;
 
-      if (cache.m_msEntrance == nullptr) {
-        const TrackingGeometry *geometry = trackingGeometry(cache,ctx);
+      const bool msEntranceIsValid = ensureValidEntranceMuonSpectrometer(ctx, cache);
+      if (msEntranceIsValid) {
+        if (cache.m_msEntrance->inside(firstcalopar->position())) {
+          muonpar1 = m_extrapolator->extrapolateToVolume(ctx,
+                                                         *firstcalopar,
+                                                         *cache.m_msEntrance,
+                                                         Trk::oppositeMomentum,
+                                                         Trk::nonInteracting);
 
-        if (geometry != nullptr) {
-          cache.m_msEntrance = geometry->trackingVolume("MuonSpectrometerEntrance");
-        } else {
-          ATH_MSG_ERROR("Tracking Geometry not available");
-        }
-      }
+          if (muonpar1 != nullptr) {
+            Amg::Vector3D trackdir = muonpar1->momentum().unit();
+            Amg::Vector3D curvZcrossT = -(trackdir.cross(Amg::Vector3D(0, 0, 1)));
+            Amg::Vector3D curvU = curvZcrossT.unit();
+            Amg::Vector3D curvV = trackdir.cross(curvU);
+            Amg::RotationMatrix3D rot = Amg::RotationMatrix3D::Identity();
+            rot.col(0) = curvU;
+            rot.col(1) = curvV;
+            rot.col(2) = trackdir;
+            Amg::Transform3D trans;
+            trans.linear().matrix() << rot;
+            trans.translation() << muonpar1->position() - .1 * trackdir;
+            PlaneSurface curvlinsurf(trans);
 
-      if (cache.m_msEntrance == nullptr) {
-        ATH_MSG_ERROR("MS entrance not available");
-      } else if (cache.m_msEntrance->inside(firstcalopar->position())) {
-        muonpar1 = m_extrapolator->extrapolateToVolume(ctx,
-                                                       *firstcalopar,
-                                                       *cache.m_msEntrance,
-                                                       Trk::oppositeMomentum,
-                                                       Trk::nonInteracting);
+            std::unique_ptr<const TrackParameters> curvlinpar(m_extrapolator->extrapolateDirectly(
+              ctx,
+              *muonpar1,
+              curvlinsurf,
+              Trk::oppositeMomentum,
+              Trk::nonInteracting != 0u
+            ));
 
-        if (muonpar1 != nullptr) {
-          Amg::Vector3D trackdir = muonpar1->momentum().unit();
-          Amg::Vector3D curvZcrossT = -(trackdir.cross(Amg::Vector3D(0, 0, 1)));
-          Amg::Vector3D curvU = curvZcrossT.unit();
-          Amg::Vector3D curvV = trackdir.cross(curvU);
-          Amg::RotationMatrix3D rot = Amg::RotationMatrix3D::Identity();
-          rot.col(0) = curvU;
-          rot.col(1) = curvV;
-          rot.col(2) = trackdir;
-          Amg::Transform3D trans;
-          trans.linear().matrix() << rot;
-          trans.translation() << muonpar1->position() - .1 * trackdir;
-          PlaneSurface curvlinsurf(trans);
-
-          std::unique_ptr<const TrackParameters> curvlinpar(m_extrapolator->extrapolateDirectly(
-            ctx,
-            *muonpar1,
-            curvlinsurf,
-            Trk::oppositeMomentum,
-            Trk::nonInteracting != 0u
-          ));
-
-          if (curvlinpar != nullptr) {
-            muonpar1 = std::move(curvlinpar);
+            if (curvlinpar != nullptr) {
+              muonpar1 = std::move(curvlinpar);
+            }
           }
+        } else {
+          muonpar1 = std::unique_ptr<const TrackParameters>(firstcalopar->clone());
         }
-      } else {
-        muonpar1 = std::unique_ptr<const TrackParameters>(firstcalopar->clone());
       }
-
 
       DistanceSolution distsol;
 
@@ -8302,5 +8232,47 @@ namespace Trk {
      std::stringstream msg;
      msg << "Failed to get conditions data " << m_trackingGeometryReadKey.key() << ".";
      throw std::runtime_error(msg.str());
+  }
+
+  bool GlobalChi2Fitter::ensureValidEntranceCalo(const EventContext& ctx, Cache& cache) const {
+    if (cache.m_caloEntrance == nullptr) {
+      const TrackingGeometry *geometry = trackingGeometry(cache, ctx);
+
+      if (geometry != nullptr) {
+        cache.m_caloEntrance = geometry->trackingVolume("InDet::Containers::InnerDetector");
+      } else {
+        ATH_MSG_ERROR("Tracking Geometry not available");
+      }
+
+      /*
+       * Check, if we managed to find an entrance.
+       */
+      if (cache.m_caloEntrance == nullptr) {
+        ATH_MSG_ERROR("calo entrance not available");
+      }
+    }
+
+    return cache.m_caloEntrance != nullptr;
+  }
+
+  bool GlobalChi2Fitter::ensureValidEntranceMuonSpectrometer(const EventContext& ctx, Cache& cache) const {
+    if (cache.m_msEntrance == nullptr) {
+      const TrackingGeometry *geometry = trackingGeometry(cache, ctx);
+
+      if (geometry != nullptr) {
+        cache.m_msEntrance = geometry->trackingVolume("MuonSpectrometerEntrance");
+      } else {
+        ATH_MSG_ERROR("Tracking Geometry not available");
+      }
+
+      /*
+       * Check, if we managed to find an entrance.
+       */
+      if (cache.m_msEntrance == nullptr) {
+        ATH_MSG_ERROR("MS entrance not available");
+      }
+    }
+
+    return cache.m_msEntrance != nullptr;
   }
 }
