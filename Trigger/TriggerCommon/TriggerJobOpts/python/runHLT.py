@@ -33,7 +33,6 @@ def set_flags(flags):
    from AthenaConfiguration.Enums import BeamType
 
    flags.Trigger.doHLT = True    # needs to be set early as other flags depend on it
-   flags.Trigger.EDMVersion = 3  # Run-3 EDM
    flags.Beam.Type = BeamType.Collisions
    flags.InDet.useDCS = False    # DCS is in general not available online
    flags.Muon.MuonTrigger = True # Setup muon reconstruction for trigger
