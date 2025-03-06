@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.Enums import FlagEnum
 class Campaign(FlagEnum):
     Unknown = ''
@@ -13,7 +13,18 @@ class Campaign(FlagEnum):
     MC23c = 'mc23c'
     MC23d = 'mc23d'
     MC23e = 'mc23e'
+    MC23g = 'mc23g'
     PhaseII = 'phaseII'
+
+    def __lt__(self, other):
+        if not isinstance(other, Campaign):
+            return NotImplemented
+        return self.value < other.value
+
+    def __le__(self, other):
+        if not isinstance(other, Campaign):
+            return NotImplemented
+        return self.value <= other.value
 
 # Campaign run numbers (only latest campaigns that do not have metadata present)
 campaign_runs = {
@@ -39,7 +50,9 @@ def getMCCampaign(files):
         mc_campaign = campaign_runs.get(run_numbers[0], Campaign.Unknown)
 
     # MC-equivalent projects for data
-    if 'data24' in project_name:
+    if 'data25' in project_name:
+        return Campaign.MC23g
+    elif 'data24' in project_name:
         return Campaign.MC23e
     elif 'data23' in project_name:
         return Campaign.MC23c
