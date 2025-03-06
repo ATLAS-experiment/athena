@@ -105,6 +105,7 @@ from DerivationFrameworkFlavourTag.FTAG2 import FTAG2Cfg
 from DerivationFrameworkFlavourTag.FTAG3 import FTAG3Cfg
 from DerivationFrameworkFlavourTag.FTAG_XBB import FTAG_XBBCfg
 from DerivationFrameworkFlavourTag.FTAG4 import FTAG4Cfg
+from DerivationFrameworkFlavourTag.FTAG5 import FTAG5Cfg
 
 # Jet/Etmiss derivations
 # JETM1: dijet for MC calibrations, JER, MJB, eta-intercalibration
