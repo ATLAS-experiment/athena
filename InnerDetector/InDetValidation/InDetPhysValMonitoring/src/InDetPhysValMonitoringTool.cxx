@@ -558,7 +558,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
     if (accept) {
       ++nSelectedTruthTracks; // total number of truth which pass cuts per event
       bool isEfficient(false); // weight for the trackeff histos
-      m_globalprob = 0.0;
+      float matchingProbability{};
       m_monPlots->fill(*thisTruth, beamSpotWeight); // This is filling truth-only plots
       //
       //Loop over reco tracks to find the match
@@ -568,8 +568,8 @@ InDetPhysValMonitoringTool::fillHistograms() {
         const xAOD::TruthParticle* associatedTruth = getAsTruth.getTruth(thisTrack);
         if (associatedTruth && associatedTruth == thisTruth) {
           float prob = getMatchingProbability(*thisTrack);
-	  m_globalprob = prob;
           if (not std::isnan(prob) && prob > m_lowProb) {
+            matchingProbability = prob;
             isEfficient = true;
             matchedTrack = thisTrack;
             break;
@@ -581,7 +581,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
                 <<thisTruth->py()/ Gaudi::Units::GeV<<","<<thisTruth->pz()/ Gaudi::Units::GeV<<","
                 <<thisTruth->e()/ Gaudi::Units::GeV<<","<<thisTruth->pt()/ Gaudi::Units::GeV<<","
                 <<thisTruth->eta()<<","<<thisTruth->phi()<<","<<thisTruth->m()/ Gaudi::Units::GeV<<","
-                <<puEvents<<","<<nVertices<<","<<m_globalprob<<std::endl;
+                <<puEvents<<","<<nVertices<<","<<matchingProbability<<std::endl;
       }
       if (!thisTruth){ 
         ATH_MSG_ERROR("An error occurred: Truth particle for tracking efficiency calculation is a nullptr");

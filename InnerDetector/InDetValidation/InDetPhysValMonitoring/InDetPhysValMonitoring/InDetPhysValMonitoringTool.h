@@ -168,8 +168,6 @@ private:
 
     ///histograms
     std::unique_ptr< InDetRttPlots > m_monPlots;
-    //probabilitytracker
-    float m_globalprob;
 
     /// Properties to fine-tune the tool behaviour
     BooleanProperty m_useTrackSelection {this, "useTrackSelection", false, "plot only tracks accepted by selection tool"};
