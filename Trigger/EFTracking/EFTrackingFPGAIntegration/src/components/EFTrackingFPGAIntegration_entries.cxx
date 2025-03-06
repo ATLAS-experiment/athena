@@ -3,6 +3,7 @@
 #include "../DataPreparationPipeline.h"
 #include "../IntegrationBase.h"
 #include "../PixelClustering.h"
+#include "../FPGAStripClustering.h"
 #include "../Spacepoints.h"
 #include "../PassThroughTool.h"
 #include "../EFTrackingXrtAlgorithm.h"
@@ -12,6 +13,7 @@
 
 DECLARE_COMPONENT(IntegrationBase)
 DECLARE_COMPONENT(PixelClustering)
+DECLARE_COMPONENT(FPGAStripClustering)
 DECLARE_COMPONENT(Spacepoints)
 DECLARE_COMPONENT(DataPreparationPipeline)
 DECLARE_COMPONENT(PassThroughTool)
