@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODTauRetriever.h"
 
-#include "xAODTau/TauJetContainer.h" 
+#include "xAODTau/TauJetContainer.h"
 #include "xAODTau/TauxAODHelpers.h"
 
 #include "AthenaKernel/Units.h"
@@ -17,69 +17,49 @@ namespace JiveXML {
    * @param type   AlgTool type name
    * @param name   AlgTool instance name
    * @param parent AlgTools parent owning this tool
-   *
-   * code reference for xAOD:     jpt6Feb14
-   *  https://svnweb.cern.ch/trac/atlasgroups/browser/PAT/AODUpgrade/xAODReaderAlgs
-   *
-   * This is afirst 'skeleton' try for many xAOD retrievers to be done:
-   *  xAOD::Tau, xAOD::Vertex, xAOD::Photon, xAOD::CaloCluster, xAOD::Tau
-   *  xAOD::TrackParticle, xAOD::TauTau, xAOD::Muon
-   *
-   * Class references:
-   *     https://svnweb.cern.ch/trac/atlasoff/browser/Event/xAOD
    **/
   xAODTauRetriever::xAODTauRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent), m_typeName("TauJet"),
-    m_sgKey("TauJets")
-  {
-    //Only declare the interface
-    declareInterface<IDataRetriever>(this);
+    AthAlgTool(type,name,parent){}
 
-    //In xAOD: AntiKt6TopoEMTaus, AntiKt6LCTopoTaus,  AntiKt4TopoEMTaus, AntiKt4LCTopoTaus
-    declareProperty("StoreGateKey", m_sgKey, 
-        "Collection to be first in output, shown in Atlantis without switching");
-    declareProperty ( "TracksName",  m_tracksName = "InDetTrackParticles_xAOD" );
-  }
-  
   /**
    * For each Tau collections retrieve basic parameters.
    * @param FormatTool the tool that will create formated output from the DataMap
    */
   StatusCode xAODTauRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
-    
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "in retrieveAll()" << endmsg;
-    
-    SG::ConstIterator<xAOD::TauJetContainer> iterator, end;
-    const xAOD::TauJetContainer* Taus;
-    
-    //obtain the default collection first
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve " << dataTypeName() << " (" << m_sgKey << ")" << endmsg;
-    StatusCode sc = evtStore()->retrieve(Taus, m_sgKey);
-    if (sc.isFailure() ) {
-      if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKey << " not found in SG " << endmsg; 
-    }else{
-      DataMap data = getData(Taus);
-      if ( FormatTool->AddToEvent(dataTypeName(), m_sgKey+"_xAOD", &data).isFailure()){
-	if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKey << " not found in SG " << endmsg;
-      }else{
-         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << dataTypeName() << " (" << m_sgKey << ") Tau retrieved" << endmsg;
+
+    ATH_MSG_DEBUG("In retrieve()");
+
+    std::vector<std::string> keys = getKeys();
+
+    if(keys.empty()){
+      ATH_MSG_WARNING("No StoreGate keys found");
+      return StatusCode::SUCCESS;
+    }
+
+    // Loop through the keys and retrieve the corresponding data
+    for (const std::string& key : keys) {
+      SG::ReadHandle<xAOD::TauJetContainer> cont(key);
+      if (cont.isValid()) {
+	DataMap data = getData(&(*cont));
+	if (FormatTool->AddToEvent(dataTypeName(), key + "_xAOD", &data).isFailure()) {
+	  ATH_MSG_WARNING("Failed to retrieve Collection " << key);
+	} else {
+	  ATH_MSG_DEBUG(" (" << key << ") retrieved");
+	}
+      } else {
+	ATH_MSG_WARNING("Collection " << key << " not found in SG");
       }
     }
- 
-    //All collections retrieved okay
     return StatusCode::SUCCESS;
   }
-
-  // code reference:
-  //   Event/xAOD/xAODTau/trunk/xAODTau/versions/TauJet_v1.h
 
   /**
    * Retrieve basic parameters, mainly four-vectors, for each collection.
    * Also association with clusters and tracks (ElementLink).
    */
   const DataMap xAODTauRetriever::getData(const xAOD::TauJetContainer* tauCont) {
-    
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "in getData()" << endmsg;
+
+    ATH_MSG_DEBUG("in getData()");
 
     DataMap DataMap;
 
@@ -106,58 +86,53 @@ namespace JiveXML {
     int counter = 0;
 
     for (; tauItr != tauItrE; ++tauItr) {
+      ATH_MSG_DEBUG("  Tau #" << counter++ << " : eta = "  << (*tauItr)->eta() << ", phi = "
+		    << (*tauItr)->phi());
 
-    if (msgLvl(MSG::DEBUG)) {
-      msg(MSG::DEBUG) << "  Tau #" << counter++ << " : eta = "  << (*tauItr)->eta() << ", phi = " 
-          << (*tauItr)->phi() << endmsg;
-    }
+      phi.emplace_back(DataType((*tauItr)->phi()));
+      eta.emplace_back(DataType((*tauItr)->eta()));
+      pt.emplace_back(DataType((*tauItr)->pt()/GeV));
 
-      phi.push_back(DataType((*tauItr)->phi()));
-      eta.push_back(DataType((*tauItr)->eta()));
-      pt.push_back(DataType((*tauItr)->pt()/GeV));
+      isolFrac.emplace_back(DataType( 1. ));
+      logLhRatio.emplace_back(DataType( 1. ));
+      label.emplace_back(DataType( "xAOD_tauJet_withoutQuality" ));
+      charge.emplace_back(DataType( (*tauItr)->charge() ));
+      isTauString.emplace_back(DataType( "xAOD_tauJet_withoutQuality" ));
 
-      isolFrac.push_back(DataType( 1. ));
-      logLhRatio.push_back(DataType( 1. ));
-      label.push_back(DataType( "xAOD_tauJet_withoutQuality" ));
-      charge.push_back(DataType( (*tauItr)->charge() ));
-      isTauString.push_back(DataType( "xAOD_tauJet_withoutQuality" ));
-
-      mass.push_back(DataType((*tauItr)->m()/GeV));
-      energy.push_back( DataType((*tauItr)->e()/GeV ) );
+      mass.emplace_back(DataType((*tauItr)->m()/GeV));
+      energy.emplace_back( DataType((*tauItr)->e()/GeV ) );
 
       // track-vertex association code in xAOD from Nick Styles, Apr14:
       // InnerDetector/InDetRecAlgs/InDetPriVxFinder/InDetVxLinksToTrackParticles
 
       int trkCnt = 0;
-#ifndef XAODTAU_VERSIONS_TAUTRACK_V1_H      
+#ifndef XAODTAU_VERSIONS_TAUTRACK_V1_H
       const std::vector< ElementLink< xAOD::TrackParticleContainer > > tpLinks =  (*tauItr)->trackLinks();
 #else
       const std::vector< ElementLink< xAOD::TrackParticleContainer > > tpLinks =  xAOD::TauHelpers::trackParticleLinks(*tauItr);
 #endif
-      
+
       //iterating over the links
       unsigned int tp_size = tpLinks.size();
-      numTracks.push_back(DataType( tp_size )); // same as:  (*tauItr)->nTracks()
-      trackLinkCount.push_back(DataType( tp_size ));
+      numTracks.emplace_back(DataType( tp_size )); // same as:  (*tauItr)->nTracks()
+      trackLinkCount.emplace_back(DataType( tp_size ));
       if(tp_size){ // links exist
 	for(unsigned int tp = 0; tp<tp_size; ++tp)
-	  {     
+	  {
 	    ElementLink< xAOD::TrackParticleContainer >  tpl = tpLinks.at(tp);
 
-	    //checking a container name consitency         
+	    //checking a container name consitency
 	    //       if(tpl.key() == m_tracksName) // doesn't work. tpl.key is a number ?
 
-	    if (msgLvl(MSG::DEBUG)) {
-	      msg(MSG::DEBUG) << "  tau #" << counter << " track association index: " << tpl.index() 
-			      << ", collection : "  << tpl.key() 
-			      << ", Tracks : " << tp  << " out of " << tp_size << ", own count: " << trkCnt++ << endmsg;
-	    }
-	    tracks.push_back(DataType( tpl.index() ));
-	    sgKey.push_back( m_tracksName );
-	  } //links exist
-      }
+	    ATH_MSG_DEBUG("  tau #" << counter << " track association index: " << tpl.index()
+			  << ", collection : "  << tpl.key()
+			  << ", Tracks : " << tp  << " out of " << tp_size << ", own count: " << trkCnt++);
+	    tracks.emplace_back(DataType( tpl.index() ));
+	    sgKey.emplace_back( m_tracksName.value() );
+	  }
+      } //links exist
 
-    } // end TauIterator 
+    } // end TauIterator
 
     // four-vectors
     DataMap["phi"] = phi;
@@ -183,20 +158,54 @@ namespace JiveXML {
       DataMap[tag] = tracks;
       tag = "trackKey multiple=\"" +DataType(NTracksPerVertex).toString()+"\"";
       DataMap[tag] = sgKey;
-    } 
-
-//    DataMap["energy"] = energy;
-//    DataMap["mass"] = mass;
-
-    if (msgLvl(MSG::DEBUG)) {
-      msg(MSG::DEBUG) << dataTypeName() << " retrieved with " << phi.size() << " entries"<< endmsg;
     }
 
-    //All collections retrieved okay
+    //    DataMap["energy"] = energy;
+    //    DataMap["mass"] = mass;
+
+    ATH_MSG_DEBUG(dataTypeName() << " retrieved with " << phi.size() << " entries");
+
     return DataMap;
 
-  } // retrieve
+  }
 
-  //--------------------------------------------------------------------------
-  
+
+  const std::vector<std::string> xAODTauRetriever::getKeys() {
+
+    ATH_MSG_DEBUG("in getKeys()");
+
+    std::vector<std::string> keys = {};
+
+    // Remove m_priorityKey from m_otherKeys if it exists, we don't want to write it twice
+    auto it = std::find(m_otherKeys.begin(), m_otherKeys.end(), m_priorityKey);
+    if(it != m_otherKeys.end()){
+      m_otherKeys.erase(it);
+    }
+
+    // Add m_priorityKey as the first element if it is not ""
+    if(m_priorityKey!=""){
+      keys.push_back(m_priorityKey);
+    }
+
+    if(!m_otherKeys.empty()){
+      keys.insert(keys.end(), m_otherKeys.begin(), m_otherKeys.end());
+    }
+
+    // If all collections are requested, obtain all available keys from StoreGate
+    std::vector<std::string> allKeys;
+    if(m_doWriteAllCollections){
+      evtStore()->keys<xAOD::TauJetContainer>(allKeys);
+      // Add keys that are not the priority key and do not add containers with "HLT" in their name if requested
+      for(const std::string& key : allKeys){
+	// Don't include key if it's already in keys
+	auto it2 = std::find(keys.begin(), keys.end(), key);
+	if(it2 != keys.end())continue;
+	if(key.find("HLT") == std::string::npos || m_doWriteHLT){
+	  keys.emplace_back(key);
+	}
+      }
+    }
+    return keys;
+  }
+
 } // JiveXML namespace
