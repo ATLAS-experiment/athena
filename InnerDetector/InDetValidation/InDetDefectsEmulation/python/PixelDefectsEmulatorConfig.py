@@ -147,6 +147,9 @@ if __name__ == "__main__":
                                           RunConsistencyChecks=False,
                                           ObjDebugOutput=False))
 
+    from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusCondAlgNoByteStreamErrorsCfg
+    acc.merge(ITkPixelDetectorElementStatusCondAlgNoByteStreamErrorsCfg(flags))
+
     from PixelDefectsEmulatorPostInclude import emulateITkPixelDefectsPoisson
     emulateITkPixelDefectsPoisson(flags,acc)
 
