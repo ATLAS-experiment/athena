@@ -24,6 +24,7 @@ def findlib (addr, quiet = False):
     (lo,hi) = ll[0].split('-')
     lo = int(lo, 16)
     hi = int(hi, 16)
+    lib = None
     if lo <= addr < hi:
       if len(ll) >= 6 and ll[5] != '[heap]':
         lib = ll[5]
@@ -36,7 +37,7 @@ def findlib (addr, quiet = False):
         else:
           print (lib)
           gdb.execute ("shared " + os.path.basename (lib))
-  return
+  return lib
 
 
 class FindLib (gdb.Command):
