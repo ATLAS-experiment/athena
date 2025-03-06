@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODPhotonRetriever.h"
-
-#include "xAODEgamma/PhotonContainer.h" 
-
+#include "xAODEgamma/PhotonContainer.h"
 #include "AthenaKernel/Units.h"
+
 using Athena::Units::GeV;
 
 namespace JiveXML {
@@ -16,95 +15,39 @@ namespace JiveXML {
    * @param type   AlgTool type name
    * @param name   AlgTool instance name
    * @param parent AlgTools parent owning this tool
-   *
-   * code reference for xAOD:     jpt6Feb14
-   *  https://svnweb.cern.ch/trac/atlasgroups/browser/PAT/AODUpgrade/xAODReaderAlgs
-   *
-   * This is afirst 'skeleton' try for many xAOD retrievers to be done:
-   *  xAOD::Photon, xAOD::Vertex, xAOD::Photon, xAOD::CaloCluster, xAOD::Jet
-   *  xAOD::TrackParticle, xAOD::TauJet, xAOD::Muon
-   *
    **/
   xAODPhotonRetriever::xAODPhotonRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent), m_typeName("Photon"),
-    m_sgKey("Photons") // is xAOD name
+    AthAlgTool(type,name,parent){}
 
-  {
-    //Only declare the interface
-    declareInterface<IDataRetriever>(this);
-
-    declareProperty("StoreGateKey", m_sgKey, 
-        "Collection to be first in output, shown in Atlantis without switching");
-    declareProperty("OtherCollections" ,m_otherKeys,
-        "Other collections to be retrieved. If list left empty, all available retrieved");
-    declareProperty("DoWriteHLT"              , m_doWriteHLT = false, "Wether to write HLTAutoKey objects");
-  }
-  
   /**
-   * For each jet collections retrieve basic parameters.
+   * For each photon collection retrieve basic parameters.
    * @param FormatTool the tool that will create formated output from the DataMap
    */
   StatusCode xAODPhotonRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
-    
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "in retrieveAll()" << endmsg;
-    
-    SG::ConstIterator<xAOD::PhotonContainer> iterator, end;
-    const xAOD::PhotonContainer* photons;
-    
-    //obtain the default collection first
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve " << dataTypeName() << " (" << m_sgKey << ")" << endmsg;
-    StatusCode sc = evtStore()->retrieve(photons, m_sgKey);
-    if (sc.isFailure() ) {
-      if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKey << " not found in SG " << endmsg; 
-    }else{
-      DataMap data = getData(photons);
-      if ( FormatTool->AddToEvent(dataTypeName(), m_sgKey+"_xAOD", &data).isFailure()){ //suffix can be removed later
-	if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKey << " not found in SG " << endmsg;
-      }else{
-         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << dataTypeName() << " (" << m_sgKey << ") Photon retrieved" << endmsg;
-      }
-    }
- 
-    if ( m_otherKeys.empty() ) {
-      //obtain all other collections from StoreGate
-      if (( evtStore()->retrieve(iterator, end)).isFailure()){
-         if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << 
-	 "Unable to retrieve iterator for xAOD Muon collection" << endmsg;
-//        return false;
-      }
-      
-      for (; iterator!=end; ++iterator) {
-	  if (iterator.key()!=m_sgKey) {
-       	     if ((iterator.key().find("HLT",0) != std::string::npos) && (!m_doWriteHLT)){
-	          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Ignoring HLT-AutoKey collection " << iterator.key() << endmsg;
-	         continue;  }
-             if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all. Current collection: " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
-             DataMap data = getData(&(*iterator));
-             if ( FormatTool->AddToEvent(dataTypeName(), iterator.key()+"_xAOD", &data).isFailure()){
-	       if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << iterator.key() << " not found in SG " << endmsg;
-	    }else{
-	      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << " (" << iterator.key() << ") xAOD Photon retrieved" << endmsg;
-	    }
-          }
-      }
-    }else {
-      //obtain all collections with the given keys
-      std::vector<std::string>::const_iterator keyIter;
-      for ( keyIter=m_otherKeys.begin(); keyIter!=m_otherKeys.end(); ++keyIter ){
-	StatusCode sc = evtStore()->retrieve( photons, (*keyIter) );
-	if (!sc.isFailure()) {
-          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve selected " << dataTypeName() << " (" << (*keyIter) << ")" << endmsg;
-          DataMap data = getData(photons);
-          if ( FormatTool->AddToEvent(dataTypeName(), (*keyIter), &data).isFailure()){
-	    if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << (*keyIter) << " not found in SG " << endmsg;
-	  }else{
-	     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << " (" << (*keyIter) << ") retrieved" << endmsg;
-	  }
-	}
-      }
+
+    ATH_MSG_DEBUG("In retrieve()");
+
+    std::vector<std::string> keys = getKeys();
+
+    if(keys.empty()){
+      ATH_MSG_WARNING("No StoreGate keys found");
+      return StatusCode::SUCCESS;
     }
 
-    //All collections retrieved okay
+    // Loop through the keys and retrieve the corresponding data
+    for (const std::string& key : keys) {
+      SG::ReadHandle<xAOD::PhotonContainer> cont(key);
+      if (cont.isValid()) {
+	DataMap data = getData(&(*cont));
+	if (FormatTool->AddToEvent(dataTypeName(), key + "_xAOD", &data).isFailure()) {
+	  ATH_MSG_WARNING("Failed to retrieve Collection " << key);
+	} else {
+	  ATH_MSG_DEBUG(" (" << key << ") retrieved");
+	}
+      } else {
+	ATH_MSG_WARNING("Collection " << key << " not found in SG");
+      }
+    }
     return StatusCode::SUCCESS;
   }
 
@@ -114,8 +57,8 @@ namespace JiveXML {
    * Also association with clusters and tracks (ElementLink).
    */
   const DataMap xAODPhotonRetriever::getData(const xAOD::PhotonContainer* phCont) {
-    
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "in getData()" << endmsg;
+
+    ATH_MSG_DEBUG("in getData()");
 
     DataMap DataMap;
 
@@ -135,32 +78,29 @@ namespace JiveXML {
     int counter = 0;
 
     for (; phItr != phItrE; ++phItr) {
+      ATH_MSG_DEBUG("  Photon #" << counter++ << " : eta = "  << (*phItr)->eta() << ", phi = "
+		    << (*phItr)->phi());
 
-    if (msgLvl(MSG::DEBUG)) {
-      msg(MSG::DEBUG) << "  Photon #" << counter++ << " : eta = "  << (*phItr)->eta() << ", phi = " 
-          << (*phItr)->phi() << endmsg;
-    }
+      std::string photonAuthor = "";
+      std::string photonIsEMString = "none";
+      std::string photonLabel = "";
 
-    std::string photonAuthor = "";
-    std::string photonIsEMString = "none";
-    std::string photonLabel = "";
-
-      phi.push_back(DataType((*phItr)->phi()));
-      eta.push_back(DataType((*phItr)->eta()));
-      pt.push_back(DataType((*phItr)->pt()/GeV));
+      phi.emplace_back(DataType((*phItr)->phi()));
+      eta.emplace_back(DataType((*phItr)->eta()));
+      pt.emplace_back(DataType((*phItr)->pt()/GeV));
 
       bool passesTight(false);
       bool passesMedium(false);
       bool passesLoose(false);
       const bool tightSelectionExists = (*phItr)->passSelection(passesTight, "Tight");
-       msg(MSG::VERBOSE) << "tight exists " << tightSelectionExists 
-	 << " and passes? " << passesTight << endmsg;
+      ATH_MSG_VERBOSE("tight exists " << tightSelectionExists
+		      << " and passes? " << passesTight);
       const bool mediumSelectionExists = (*phItr)->passSelection(passesMedium, "Medium");
-       msg(MSG::VERBOSE) << "medium exists " << mediumSelectionExists 
-	 << " and passes? " << passesMedium << endmsg;
+      ATH_MSG_VERBOSE("medium exists " << mediumSelectionExists
+		      << " and passes? " << passesMedium);
       const bool looseSelectionExists = (*phItr)->passSelection(passesLoose, "Loose");
-       msg(MSG::VERBOSE) << "loose exists " << looseSelectionExists 
-	<< " and passes? " << passesLoose << endmsg;
+      ATH_MSG_VERBOSE("loose exists " << looseSelectionExists
+		      << " and passes? " << passesLoose);
 
       photonAuthor = "author"+DataType( (*phItr)->author() ).toString(); // for odd ones eg FWD
       photonLabel = photonAuthor;
@@ -169,25 +109,25 @@ namespace JiveXML {
       if (( (*phItr)->author()) == 2){ photonAuthor = "softe"; photonLabel += "_softe"; }
       if (( (*phItr)->author()) == 1){ photonAuthor = "egamma"; photonLabel += "_egamma"; }
 
-      if ( passesLoose ){  
-            photonLabel += "_Loose"; 
-            photonIsEMString = "Loose"; // assume that hierarchy is obeyed !
-      } 
-      if ( passesMedium ){ 
-            photonLabel += "_Medium"; 
-            photonIsEMString = "Medium"; // assume that hierarchy is obeyed !
-      }   
-      if ( passesTight ){ 
-            photonLabel += "_Tight"; 
-            photonIsEMString = "Tight"; // assume that hierarchy is obeyed !
-      }     
-      author.push_back( DataType( photonAuthor ) );
-      label.push_back( DataType( photonLabel ) );
-      isEMString.push_back( DataType( photonIsEMString ) );
+      if ( passesLoose ){
+	photonLabel += "_Loose";
+	photonIsEMString = "Loose"; // assume that hierarchy is obeyed !
+      }
+      if ( passesMedium ){
+	photonLabel += "_Medium";
+	photonIsEMString = "Medium"; // assume that hierarchy is obeyed !
+      }
+      if ( passesTight ){
+	photonLabel += "_Tight";
+	photonIsEMString = "Tight"; // assume that hierarchy is obeyed !
+      }
+      author.emplace_back( DataType( photonAuthor ) );
+      label.emplace_back( DataType( photonLabel ) );
+      isEMString.emplace_back( DataType( photonIsEMString ) );
 
-      mass.push_back(DataType((*phItr)->m()/GeV));
-      energy.push_back( DataType((*phItr)->e()/GeV ) );
-    } // end PhotonIterator 
+      mass.emplace_back(DataType((*phItr)->m()/GeV));
+      energy.emplace_back( DataType((*phItr)->e()/GeV ) );
+    } // end PhotonIterator
 
     // four-vectors
     DataMap["phi"] = phi;
@@ -199,15 +139,48 @@ namespace JiveXML {
     DataMap["label"] = label;
     DataMap["author"] = author;
 
-    if (msgLvl(MSG::DEBUG)) {
-      msg(MSG::DEBUG) << dataTypeName() << " retrieved with " << phi.size() << " entries"<< endmsg;
-    }
-
-    //All collections retrieved okay
+    ATH_MSG_DEBUG(dataTypeName() << " retrieved with " << phi.size() << " entries");
     return DataMap;
 
-  } // retrieve
+  }
 
-  //--------------------------------------------------------------------------
-  
+
+  const std::vector<std::string> xAODPhotonRetriever::getKeys() {
+
+    ATH_MSG_DEBUG("in getKeys()");
+
+    std::vector<std::string> keys = {};
+
+    // Remove m_priorityKey from m_otherKeys if it exists, we don't want to write it twice
+    auto it = std::find(m_otherKeys.begin(), m_otherKeys.end(), m_priorityKey);
+    if(it != m_otherKeys.end()){
+      m_otherKeys.erase(it);
+    }
+
+    // Add m_priorityKey as the first element if it is not ""
+    if(m_priorityKey!=""){
+      keys.push_back(m_priorityKey);
+    }
+
+    if(!m_otherKeys.empty()){
+      keys.insert(keys.end(), m_otherKeys.begin(), m_otherKeys.end());
+    }
+
+    // If all collections are requested, obtain all available keys from StoreGate
+    std::vector<std::string> allKeys;
+    if(m_doWriteAllCollections){
+      evtStore()->keys<xAOD::PhotonContainer>(allKeys);
+      // Add keys that are not the priority key and do not add containers with "HLT" in their name if requested
+      for(const std::string& key : allKeys){
+	// Don't include key if it's already in keys
+	auto it2 = std::find(keys.begin(), keys.end(), key);
+	if(it2 != keys.end())continue;
+	if(key.find("HLT") == std::string::npos || m_doWriteHLT){
+	  keys.emplace_back(key);
+	}
+      }
+    }
+    return keys;
+  }
+
 } // JiveXML namespace

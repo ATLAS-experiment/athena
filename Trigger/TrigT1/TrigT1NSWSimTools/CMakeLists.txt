@@ -20,6 +20,3 @@ atlas_add_library( TrigT1NSWSimToolsLib
 atlas_add_component( TrigT1NSWSimTools
                      src/components/*.cxx
                      LINK_LIBRARIES TrigT1NSWSimToolsLib )
-
-# Install files from the package:
-atlas_install_runtime( share/*.dat )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1NSW_NSWL1SIMULATION_H
@@ -18,7 +18,6 @@
 #include "TrigT1NSWSimTools/IStripSegmentTool.h"
 #include "TrigT1NSWSimTools/IMMTriggerTool.h"
 #include "TrigT1NSWSimTools/IPadTriggerLogicTool.h"
-#include "TrigT1NSWSimTools/IPadTriggerLookupTool.h"
 
 #include "MuonRDO/NSW_PadTriggerDataContainer.h"
 #include "MuonRDO/NSW_TrigRawDataContainer.h"
@@ -65,14 +64,12 @@ namespace NSWL1 {
   private:
     ToolHandle <IPadTdsTool>           m_pad_tds{this, "PadTdsTool", "NSWL1::PadTdsOfflineTool", "Tool simulating the functionalities of the sTGC PAD TDS"};
     ToolHandle <IPadTriggerLogicTool>  m_pad_trigger{this, "PadTriggerTool", "NSWL1::PadTriggerLogicOfflineTool", "Tool simulating the sTGC pad trigger logic"};
-    ToolHandle <IPadTriggerLookupTool> m_pad_trigger_lookup{this, "PadTriggerLookupTool", "NSWL1::PadTriggerLookupTool", "Tool to lookup sTGC pad trigger patterns per execute against the same LUT as in trigger FPGA"};
     ToolHandle <IStripTdsTool>         m_strip_tds{this, "StripTdsTool", "NSWL1::StripTdsOfflineTool", "Tool simulating the functionalities of the sTGC Strip TDS"};
     ToolHandle <IStripClusterTool>     m_strip_cluster{this, "StripClusterTool", "NSWL1::StripClusterTool", "Tool simulating the sTGC Strip Clustering"};
     ToolHandle <IStripSegmentTool>     m_strip_segment{this, "StripSegmentTool", "NSWL1::StripSegmentTool", "Tool simulating the sTGC Segment finding"};
     ToolHandle <IMMTriggerTool>        m_mmtrigger{this, "MMTriggerTool", "NSWL1::MMTriggerTool", "Tool simulating the MM Trigger"};
     ToolHandle <TriggerProcessorTool>  m_trigProcessor{this, "MMTriggerProcessorTool", "NSWL1::TriggerProcessorTool", "Tool simulating the TP"};
 
-    Gaudi::Property<bool> m_useLookup{this, "UseLookup", false, "Toggle Lookup mode on and off default is the otf(old) mode"};
     Gaudi::Property<bool> m_doNtuple{this, "DoNtuple", false,  "Create an ntuple for data analysis"};
     Gaudi::Property<bool> m_doMM{this, "DoMM", false, "Run data analysis for MM"};
     Gaudi::Property<bool> m_doMMDiamonds{this, "DoMMDiamonds", false, "Run data analysis for MM using Diamond Roads algorithm"};

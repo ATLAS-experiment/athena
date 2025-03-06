@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -8,8 +8,10 @@ def xAODElectronRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODElectronRetriever(
             name="xAODElectronRetriever",
-            StoreGateKey="Electrons",
-            OtherCollections=["Electrons"],
+            PriorityElectronCollection="Electrons",
+            OtherElectronCollections=[],
+            DoWriteAllCollections=False,
+            DoWriteHLT=False,
         )
     result.addPublicTool(the_tool, primary=True)
     return result
@@ -19,13 +21,15 @@ def xAODMissingETRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODMissingETRetriever(
             name="xAODMissingETRetriever",
-            FavouriteMETCollection="MET_Reference_AntiKt4EMPFlow",
+            PriorityMETCollection="MET_Reference_AntiKt4EMPFlow",
             OtherMETCollections=[
                 "MET_Reference_AntiKt4EMTopo",
                 "MET_Calo",
                 "MET_LocHadTopo",
                 "MET_Core_AntiKt4LCTopo",
             ],
+            DoWriteAllCollections=False,
+            DoWriteHLT=False,
         )
     result.addPublicTool(the_tool, primary=True)
     return result
@@ -34,7 +38,11 @@ def xAODMissingETRetrieverCfg(flags, **kwargs):
 def xAODMuonRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODMuonRetriever(
-            name="xAODMuonRetriever", StoreGateKey="Muons", OtherCollections=["Muons"]
+            name="xAODMuonRetriever",
+            PriorityMuonCollection="Muons",
+            OtherMuonCollections=[],
+            DoWriteAllCollections=False,
+            DoWriteHLT=False,
         )
     result.addPublicTool(the_tool, primary=True)
     return result
@@ -44,8 +52,10 @@ def xAODPhotonRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODPhotonRetriever(
             name="xAODPhotonRetriever",
-            StoreGateKey="Photons",
-            OtherCollections=["Photons"],
+            PriorityPhotonCollection="Photons",
+            OtherPhotonCollections=[],
+            DoWriteAllCollections=False,
+            DoWriteHLT=False,
         )
     result.addPublicTool(the_tool, primary=True)
     return result
@@ -55,7 +65,7 @@ def xAODJetRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODJetRetriever(
             name="xAODJetRetriever",
-            FavouriteJetCollection="AntiKt4EMPFlowJets",
+            PriorityJetCollection="AntiKt4EMPFlowJets",
             OtherJetCollections=[
                 "AntiKt4EMTopoJets",
                 "AntiKt4LCTopoJets",
@@ -69,7 +79,9 @@ def xAODJetRetrieverCfg(flags, **kwargs):
             CDIPaths=[
                 "xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root",
                 "xAODBTaggingEfficiency/13p6TeV/2023-02_MC23_CDI_GN2v01-noSF.root",
-            ]
+            ],
+            DoWriteAllCollections=False,
+            DoWriteHLT=False,
         )
     result.addPublicTool(the_tool, primary=True)
     return result
@@ -78,7 +90,11 @@ def xAODJetRetrieverCfg(flags, **kwargs):
 def xAODTauRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODTauRetriever(
-            name="xAODTauRetriever", StoreGateKey="TauJets"
+            name="xAODTauRetriever",
+            PriorityTauCollection="TauJets",
+            OtherTauCollections=[],
+            DoWriteAllCollections=False,
+            DoWriteHLT=False,
         )
     result.addPublicTool(the_tool, primary=True)
     return result
@@ -88,12 +104,14 @@ def xAODTrackParticleRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODTrackParticleRetriever(
             name="xAODTrackParticleRetriever",
-            StoreGateKey="InDetTrackParticles",
-            OtherTrackCollections=[
+            PriorityTrackParticleCollection="InDetTrackParticles",
+            OtherTrackParticleCollections=[
                 "InDetLargeD0TrackParticles",
                 "CombinedMuonTrackParticles",
                 "GSFTrackParticles",
             ],
+            DoWriteAllCollections=False,
+            DoWriteHLT=False,
         )
     result.addPublicTool(the_tool, primary=True)
     return result
@@ -104,7 +122,12 @@ def xAODVertexRetrieverCfg(flags, **kwargs):
     the_tool = CompFactory.JiveXML.xAODVertexRetriever(
             name="xAODVertexRetriever",
             PrimaryVertexCollection="PrimaryVertices",
-            SecondaryVertexCollection="BTagging_AntiKt2TrackSecVtx",
+            SecondaryVertexCollection="BTagging_AntiKt4EMPFlowSecVtx",
+            TracksName="InDetTrackParticles_xAOD",
+            OtherVertexCollections=["BTagging_AntiKt4EMTopoSecVtx"],
+            DoWriteAllCollections=False,
+            DoWriteHLT=False,
+            DoWriteV0=False,
         )
     result.addPublicTool(the_tool, primary=True)
     return result
@@ -114,15 +137,16 @@ def xAODCaloClusterRetrieverCfg(flags, **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.JiveXML.xAODCaloClusterRetriever(
             name="xAODCaloClusterRetriever",
-            FavouriteClusterCollection="egammaClusters",
+            PriorityClusterCollection="egammaClusters",
             OtherClusterCollections=["CaloCalTopoClusters"],
+            DoWriteAllCollections=False,
+            DoWriteHLT=False,
         )
     result.addPublicTool(the_tool, primary=True)
     return result
 
 
 def xAODRetrieversCfg(flags):
-    # Based on xAODJiveXML_DataTypes.py
     result = ComponentAccumulator()
     tools = []
     # It's not really necessary to configure these, since nothing depends on flags.
@@ -134,7 +158,7 @@ def xAODRetrieversCfg(flags):
     tools += [result.getPrimaryAndMerge(xAODJetRetrieverCfg(flags))]
     tools += [result.getPrimaryAndMerge(xAODTauRetrieverCfg(flags))]
     tools += [result.getPrimaryAndMerge(xAODTrackParticleRetrieverCfg(flags))]
-    tools += [result.getPrimaryAndMerge(xAODVertexRetrieverCfg(flags))]#
+    tools += [result.getPrimaryAndMerge(xAODVertexRetrieverCfg(flags))]
     tools += [result.getPrimaryAndMerge(xAODCaloClusterRetrieverCfg(flags))]
 
     return result, tools

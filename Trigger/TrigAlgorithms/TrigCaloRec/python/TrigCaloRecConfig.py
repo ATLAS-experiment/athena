@@ -214,7 +214,7 @@ def hltCaloDMCalib(flags, name = "TrigDMCalib" ):
 
 
 @AccumulatorCache
-def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS", cellsKey=None, doLC=False):
+def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS", cellsKey=None, doLC=False, suffix=''):
     acc = ComponentAccumulator()
     cellsFromName = 'CaloCellsFS' if "FS" in clustersKey else "CaloCells"
     cells = cellsFromName if cellsKey is None else cellsKey
@@ -282,11 +282,12 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS", ce
                                 'AVG_TILE_Q'
                                 ]
 
-    doMonCells = "FS" in name
+    clustermakername = name + suffix
+    doMonCells = "FS" in clustermakername
     
     alg = CompFactory.CaloClusterMaker(
-          name,
-          ClustersOutputName=clustersKey if "CaloMon" in name else recordable(clustersKey),
+          clustermakername,
+          ClustersOutputName=clustersKey if "CaloMon" in clustermakername else recordable(clustersKey),
           ClusterCellLinkOutputName = clustersKey+"_links",
           ClusterMakerTools = [ topoMaker, topoSplitter, topoMoments],
           ClusterCorrectionTools = listClusterCorrectionTools,
@@ -296,7 +297,7 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS", ce
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     acc.merge(CaloNoiseCondAlgCfg(flags))
     acc.addEventAlgo(alg, primary=True)
-    monitor = CompFactory.TrigCaloClusterMonitor(name + 'Monitoring',
+    monitor = CompFactory.TrigCaloClusterMonitor(name + 'Monitoring' + suffix,
                                                  CellsName = cells,
                                                  ClustersName = clustersKey,
                                                  MonitorCells = doMonCells,
@@ -366,8 +367,10 @@ def hltCaloTopoClusteringCfg(
     acc.merge(
         hltCaloCellMakerCfg(flags, namePrefix + "HLTCaloCellMaker"+nameSuffix, roisKey=roisKey, CellsName=CellsName, monitorCells=monitorCells, doTau = doTau)
     )
+
+    clustermakername_nosuffix = namePrefix + "HLTCaloClusterMaker"
     
-    clustermakername = namePrefix + "HLTCaloClusterMaker"+nameSuffix
+    clustermakername = clustermakername_nosuffix + nameSuffix
     
     # TODO - Don't use hasFlag here, use another concrete flag instead
     if flags.hasFlag("CaloRecGPU.GlobalFlags.UseCaloRecGPU") and flags.CaloRecGPU.GlobalFlags.UseCaloRecGPU and not doTau and "FS" in clustermakername:
@@ -391,7 +394,7 @@ def hltCaloTopoClusteringCfg(
                                      
       acc.merge(gpuhyb)
     else : 
-       calt=hltTopoClusterMakerCfg(flags, clustermakername, cellsKey=CellsName, clustersKey=clusters, doLC=doTau)
+       calt=hltTopoClusterMakerCfg(flags, clustermakername_nosuffix, cellsKey=CellsName, clustersKey=clusters, doLC=doTau, suffix = nameSuffix)
        acc.merge(calt)
     if doLCFS:
         acc.merge( hltCaloTopoClusterCalibratorCfg(

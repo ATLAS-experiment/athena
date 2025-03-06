@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
@@ -44,7 +44,18 @@ def TRTRetrieverCfg(flags, name="TRTRetriever", **kwargs):
 def TrackRetrieverCfg(flags, name="TrackRetriever", **kwargs):
     # Based on TrkJiveXML_DataTypes
     result = ComponentAccumulator()
-    # FIXME - this is copied from TrkJiveXML_DataTypes.py, but we can do better
+
+    from MuonConfig.MuonRecToolsConfig import MuonTrackSummaryHelperToolCfg
+    muonSummaryHelperTool=result.popToolsAndMerge(MuonTrackSummaryHelperToolCfg(flags))
+
+    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
+    InDetTrackSummaryTool=result.popToolsAndMerge(InDetTrackSummaryToolCfg(flags,MuonSummaryHelperTool=muonSummaryHelperTool))
+    kwargs.setdefault("TrackSummaryTool", InDetTrackSummaryTool)
+
+    from TrkConfig.TrkResidualPullCalculatorConfig import (ResidualPullCalculatorCfg)
+    ResidualPullCalculator=result.addPublicTool(result.popToolsAndMerge(ResidualPullCalculatorCfg(flags)))
+    kwargs.setdefault("ResidualPullCalculator", ResidualPullCalculator)
+
     kwargs.setdefault("PriorityTrackCollection", "Tracks")
     kwargs.setdefault(
         "OtherTrackCollections",

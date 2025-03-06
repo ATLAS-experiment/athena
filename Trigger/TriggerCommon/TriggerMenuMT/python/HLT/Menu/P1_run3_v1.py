@@ -310,7 +310,10 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_mistimemonj400_L1All', l1SeedThresholds=['FSNOSEED'], stream=['Mistimed'], groups=['PS:NoHLTRepro','RATE:Monitoring','BW:Other']),
         ChainProp(name='HLT_larsupercellmon_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=SupportGroup+['RATE:DISCARD','BW:DISCARD']),
         ChainProp(name='HLT_larsupercellmon_L1RD0_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=SupportGroup+['RATE:DISCARD','BW:DISCARD']),
-        ChainProp(name='HLT_larsupercellmon_L1RD0_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=SupportGroup+['RATE:DISCARD','BW:DISCARD'])
+        ChainProp(name='HLT_larsupercellmon_L1RD0_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=SupportGroup+['RATE:DISCARD','BW:DISCARD']),
+        ChainProp(name='HLT_caloclustermon_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=SupportGroup+['RATE:DISCARD','BW:DISCARD']),
+        ChainProp(name='HLT_caloclustermon_L1RD0_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=SupportGroup+['RATE:DISCARD','BW:DISCARD']),
+        ChainProp(name='HLT_caloclustermon_L1RD0_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=SupportGroup+['RATE:DISCARD','BW:DISCARD'])
     ]
 
     chainsP1['Beamspot'] = [
