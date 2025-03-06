@@ -12,7 +12,7 @@ from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 from AthenaConfiguration.Enums import LHCPeriod
 import ParticleJetTools.ParentDecoratorConfig as pdc
 
-PFLOW_JETS = 'AntiKt4EMPFlowJets' #'ByVertexJets'
+PFLOW_JETS = 'AntiKt4EMPFlowJets'
 
 def JetCollectionsBTaggingCfg(cfgFlags, jet_cols, pv_cols=None,
                              trackAugmenterPrefix=None, ByVertex=False):
