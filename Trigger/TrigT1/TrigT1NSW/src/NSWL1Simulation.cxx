@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -29,15 +29,9 @@ namespace NSWL1 {
       ATH_CHECK(tHistSvc->regTree(tdir_name,m_tree));
     }
 
-    // retrieving the private tools implementing the simulation
     if(m_dosTGC){
       if(m_doPad || m_doStrip) ATH_CHECK(m_pad_tds.retrieve());
-      //if(m_useLookup){
-      //  ATH_CHECK(m_pad_trigger_lookup.retrieve());
-      //}
-      //else{
         ATH_CHECK(m_pad_trigger.retrieve());
-      //}
       if(m_doStrip){
         ATH_CHECK(m_strip_tds.retrieve());
         ATH_CHECK(m_strip_cluster.retrieve());
@@ -65,12 +59,7 @@ namespace NSWL1 {
 
     if(m_dosTGC){
       if(m_doPad || m_doStrip) ATH_CHECK( m_pad_tds->gather_pad_data(pads) );
-    //  if(m_useLookup){
-    //    ATH_CHECK( m_pad_trigger_lookup->lookup_pad_triggers(pads, padTriggers) );
-    //  }
-    //  else{
         ATH_CHECK( m_pad_trigger->compute_pad_triggers(pads, padTriggers) );
-    //  }
       if(m_doStrip){
         ATH_CHECK( m_strip_tds->gather_strip_data(strips,padTriggers) );
         ATH_CHECK( m_strip_cluster->cluster_strip_data(ctx, strips, clusters) );
@@ -79,7 +68,6 @@ namespace NSWL1 {
       if(m_doPad) ATH_CHECK(PadTriggerAdapter::fillContainer(padTriggerContainer, padTriggers, ctx.eventID().event_number()));
     }
 
-    //retrive the MM Strip hit data
     if(m_doMM){
       ATH_CHECK( m_mmtrigger->runTrigger(ctx, MMTriggerContainer.get(), m_doMMDiamonds) );
     }
