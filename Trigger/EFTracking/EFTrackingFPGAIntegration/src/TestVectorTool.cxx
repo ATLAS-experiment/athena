@@ -106,7 +106,7 @@ StatusCode TestVectorTool::compare(const std::vector<uint64_t> &tv_1, const std:
 
     if (pass)
     {
-        ATH_MSG_INFO("The two test vectors are the same");
+        ATH_MSG_DEBUG("The two test vectors are the same");
     }
     else
     {
@@ -118,7 +118,7 @@ StatusCode TestVectorTool::compare(const std::vector<uint64_t> &tv_1, const std:
 
 StatusCode TestVectorTool::compare(const EFTrackingFPGAIntegration::TVHolder &tvHolder, const std::vector<uint64_t> &tv_comp) const
 {
-    ATH_MSG_INFO("Comparing the FPGA output to the reference vector for " << tvHolder.name);
+    ATH_MSG_DEBUG("Comparing the FPGA output to the reference vector for " << tvHolder.name);
 
     std::vector<uint64_t>::size_type size = -1;
 
@@ -146,7 +146,7 @@ StatusCode TestVectorTool::compare(const EFTrackingFPGAIntegration::TVHolder &tv
 
     if (pass)
     {
-        ATH_MSG_INFO(tvHolder.name << " FPGA output matches the reference vector");
+        ATH_MSG_DEBUG(tvHolder.name << " FPGA output matches the reference vector");
     }
     else
     {
@@ -158,7 +158,7 @@ StatusCode TestVectorTool::compare(const EFTrackingFPGAIntegration::TVHolder &tv
 
 StatusCode TestVectorTool::encodePixelL2G(const xAOD::PixelClusterContainer *pixelClusters, std::vector<uint64_t> &encodedData) const
 {
-    ATH_MSG_INFO("Encoding xAOD pixel clusters to L2G EDM TV");
+    ATH_MSG_DEBUG("Encoding xAOD pixel clusters to L2G EDM TV");
 
     // Fill the event header
     // Event header w1
@@ -251,7 +251,7 @@ StatusCode TestVectorTool::encodePixelL2G(const xAOD::PixelClusterContainer *pix
 
 StatusCode TestVectorTool::encodeStripL2G(const xAOD::StripClusterContainer *stripClusters, std::vector<uint64_t> &encodedData) const
 {
-    ATH_MSG_INFO("Encoding xAOD strip clusters to L2G EDM TV");
+    ATH_MSG_DEBUG("Encoding xAOD strip clusters to L2G EDM TV");
 
     // Fill the event header
     // Event header w1

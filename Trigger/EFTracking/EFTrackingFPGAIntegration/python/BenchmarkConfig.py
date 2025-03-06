@@ -2,60 +2,27 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaCommon.Constants import INFO
-
-def xAODContainerMakerCfg(flags, name = 'xAODContainerMaker', **kwarg):
-    
-    acc = ComponentAccumulator()
-    
-    kwarg.setdefault('name', name)
-    kwarg.setdefault('OutputStripName', 'FPGAStripClusters')
-    kwarg.setdefault('OutputPixelName', 'FPGAPixelClusters')    
-    # Spacepoints below will be further refined when the full pass-through kernel is ready
-    kwarg.setdefault('OutputStripSpacePointName', 'PlaceHolderStripSpacePoints') 
-    kwarg.setdefault('OutputPixelSpacePointName', 'PlaceHolderPixelSpacePoints')
-    
-    acc.setPrivateTools(CompFactory.xAODContainerMaker(**kwarg))
-    return acc
 
 def BenchmarkCfg(flags, name = 'BenckmarkAlg', **kwarg):
     acc = ComponentAccumulator()
 
     kwarg.setdefault('xclbin', '')
     kwarg.setdefault('kernelName', '')
-    kwarg.setdefault('PixelTestVectorKey', 'Pixel_EDM_TV')
-    kwarg.setdefault('StripTestVectorKey', 'Strip_EDM_TV')
+    kwarg.setdefault('InputPixelClusterKey', 'ITkPixelClusters')
+    kwarg.setdefault('InputStripClusterKey', 'ITkStripClusters')
     
+    from EFTrackingFPGAIntegration.DataPrepConfig import xAODContainerMakerCfg
     containerMakerTool = acc.popToolsAndMerge(xAODContainerMakerCfg(flags))
     kwarg.setdefault('xAODContainerMaker', containerMakerTool)
+    
+    from EFTrackingFPGAIntegration.FPGADataFormatter import FPGATestVectorToolCfg
+    testVectorTool = acc.popToolsAndMerge(FPGATestVectorToolCfg(flags))
+    kwarg.setdefault('TestVectorTool', testVectorTool)
 
     acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.BenchmarkAlg(**kwarg))
 
     return acc
 
-def PixelStreamLoaderCfg(flags, name = 'PixelStreamLoader', **kwarg):
-    acc = ComponentAccumulator()
-    
-    kwarg.setdefault('name', name)
-    kwarg.setdefault('bufferSize', 8192)
-    kwarg.setdefault('inputDataStream', 'Pixel_EDM_TV')
-    kwarg.setdefault('inputCsvPath', '')
-
-    acc.addEventAlgo(CompFactory.EFTrackingDataStreamLoaderAlgorithm(**kwarg))
-
-    return acc
-
-def StripStreamLoaderCfg(flags, name = 'StripStreamLoader', **kwarg):
-    acc = ComponentAccumulator()
-    
-    kwarg.setdefault('name', name)
-    kwarg.setdefault('bufferSize', 8192)
-    kwarg.setdefault('inputDataStream', 'Strip_EDM_TV')
-    kwarg.setdefault('inputCsvPath', '')
-
-    acc.addEventAlgo(CompFactory.EFTrackingDataStreamLoaderAlgorithm(**kwarg))
-
-    return acc
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -70,21 +37,20 @@ if __name__ == "__main__":
     flags.lock()
 
     kwarg = {}
-    kwarg["OutputLevel"] = INFO
     
     cfg = MainServicesCfg(flags)
     
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
 
-    acc = PixelStreamLoaderCfg(flags, **kwarg)
-    cfg.merge(acc)
-    
-    acc = StripStreamLoaderCfg(flags, **kwarg)
-    cfg.merge(acc)
-
     acc = BenchmarkCfg(flags, **kwarg)
     cfg.merge(acc)
+    
+    from EFTrackingFPGAIntegration.FPGAOutputValidationConfig import FPGAOutputValidationCfg
+    cfg.merge(FPGAOutputValidationCfg(flags, **{
+        "pixelKeys": ["FPGAPixelClusters", "ITkPixelClusters"],
+        "stripKeys": ["FPGAStripClusters", "ITkStripClusters"],
+    }))
     
     # Prepare output
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg

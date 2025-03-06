@@ -1844,7 +1844,9 @@ namespace FPGADataFormatUtilities
 	inline uint64_t get_dataformat_EDM_PIXELCLUSTER_w4 (const EDM_PIXELCLUSTER_w4& in) {
 		uint64_t temp = 0;
 		temp |= (static_cast<uint64_t>(in.localposition_x) << EDM_PIXELCLUSTER_W4_LOCALPOSITION_X_lsb);
-		temp |= (static_cast<uint64_t>(in.localposition_y) << EDM_PIXELCLUSTER_W4_LOCALPOSITION_Y_lsb);
+		// Manual hack until a solution on the auto-generation is found
+		const uint64_t local_Y_mask = 0x00000FFFFFFFFFFF;
+		temp |= ((static_cast<uint64_t>(in.localposition_y) << EDM_PIXELCLUSTER_W4_LOCALPOSITION_Y_lsb) & local_Y_mask);
 		temp |= (static_cast<uint64_t>(in.channels_in_phi) << EDM_PIXELCLUSTER_W4_CHANNELS_IN_PHI_lsb);
 		temp |= (static_cast<uint64_t>(in.channels_in_eta) << EDM_PIXELCLUSTER_W4_CHANNELS_IN_ETA_lsb);
 		temp |= (static_cast<uint64_t>(in.width_in_eta) << EDM_PIXELCLUSTER_W4_WIDTH_IN_ETA_lsb);

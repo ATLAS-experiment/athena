@@ -15,6 +15,7 @@
 // EFTracking include
 #include "IntegrationBase.h"
 #include "xAODContainerMaker.h"
+#include "TestVectorTool.h"
 
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IChronoSvc.h"
@@ -54,11 +55,14 @@ namespace EFTrackingFPGAIntegration
             "xAODContainerMaker",
             "Tool for creating xAOD containers"}; //!< Tool for creating xAOD containers
 
-        SG::ReadHandleKey<std::vector<unsigned long>> m_pixelClusterTVKey{
-            this, "PixelTestVectorKey", "", "Key to access encoded 64bit pixel cluster words "}; //!< Key to access encoded 64bit words 
+        ToolHandle<TestVectorTool> m_testVectorTool{
+            this, "TestVectorTool", "TestVectorTool", "Tool for preparing test vectors"}; //!< Tool for preparing test vectors
 
-        SG::ReadHandleKey<std::vector<unsigned long>> m_stripClusterTVKey{
-            this, "StripTestVectorKey", "", "Key to access encoded 64bit strip cluster words "}; //!< Key to access encoded 64bit words 
+        SG::ReadHandleKey<xAOD::PixelClusterContainer> m_inputPixelClusterKey{
+            this, "InputPixelClusterKey", "ITkPixelClusters", "Key to access input pixel clusters"}; //!< Key to access input pixel clusters
+
+        SG::ReadHandleKey<xAOD::StripClusterContainer> m_inputStripClusterKey{
+            this, "InputStripClusterKey", "ITkStripClusters", "Key to access input strip clusters"}; //!< Key to access input strip clusters
 
         Gaudi::Property<std::string> m_xclbin{
             this, "xclbin", "", "xclbin path and name"}; //!< Path and name of the xclbin file
