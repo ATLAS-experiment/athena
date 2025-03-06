@@ -1,8 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum,HIMode
 import AthenaCommon.SystemOfUnits as Units
+from Campaigns.Utils import Campaign
+
 
 class PrimaryPassConfig(FlagEnum):
     VtxLumi = 'VtxLumi'
@@ -315,8 +317,8 @@ def createTrackingConfigFlags():
     # Disabled for data-taking up to 2024 included and MC campaigns up to MC23e included
     icf.addFlag("Tracking.TRTStandalone.startAtOriginalPerigee",
                 lambda prevFlags: (
-                    (not prevFlags.Input.isMC and prevFlags.Input.DataYear>2024) or
-                    (prevFlags.Input.isMC and prevFlags.Input.RunNumbers[0]>=491000) ) )
+                    (not prevFlags.Input.isMC and prevFlags.Input.DataYear >= 2025) or
+                    (prevFlags.Input.isMC and prevFlags.Input.MCCampaign >= Campaign.MC23g)))
 
     # Turn on InDetRecStatistics
     icf.addFlag("Tracking.doStats", False)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODMissingETRetriever.h"
@@ -14,88 +14,39 @@ namespace JiveXML {
    * @param type   AlgTool type name
    * @param name   AlgTool instance name
    * @param parent AlgTools parent owning this tool
-   *
-   * code reference for xAOD:     jpt6Feb14
-   *  https://svnweb.cern.ch/trac/atlasgroups/browser/PAT/AODUpgrade/xAODReaderAlgs
-   *
-   * This is afirst 'skeleton' try for many xAOD retrievers to be done:
-   *  xAOD::MissingET, xAOD::Vertex, xAOD::MissingET, xAOD::CaloCluster, xAOD::Jet
-   *  xAOD::TrackParticle, xAOD::TauJet, xAOD::Muon
-   *
    **/
   xAODMissingETRetriever::xAODMissingETRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent), m_typeName("ETMis"){
+    AthAlgTool(type,name,parent){}
 
-    //Only declare the interface
-    declareInterface<IDataRetriever>(this);
-
-    declareProperty("FavouriteMETCollection" ,m_sgKeyFavourite = "MET_RefFinal" ,
-	"Collection to be first in output, shown in Atlantis without switching");
-    declareProperty("OtherMETCollections" ,m_otherKeys,
-	"Other collections to be retrieved. If list left empty, all available retrieved");
-  }
-  
   /**
-   * For each jet collections retrieve basic parameters.
+   * For each MET collection retrieve basic parameters.
    * @param FormatTool the tool that will create formated output from the DataMap
    */
   StatusCode xAODMissingETRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
-    
-    ATH_MSG_DEBUG( "in retrieveAll()" );
-    
-    SG::ConstIterator<xAOD::MissingETContainer> iterator, end;
-    const xAOD::MissingETContainer* MissingETs;
 
-    //obtain the default collection first
-    ATH_MSG_DEBUG( "Trying to retrieve " << dataTypeName() << " (" << m_sgKeyFavourite << ")" );
-    StatusCode sc = evtStore()->retrieve(MissingETs, m_sgKeyFavourite);
-    if (sc.isFailure() ) {
-      ATH_MSG_WARNING( "Collection " << m_sgKeyFavourite << " not found in SG " );
-    }else{
-      DataMap data = getData(MissingETs);
-      if ( FormatTool->AddToEvent(dataTypeName(), m_sgKeyFavourite+"_xAOD", &data).isFailure()){ //suffix can be removed later
-	ATH_MSG_WARNING( "Collection " << m_sgKeyFavourite << " not found in SG " );
-      }else{
-         ATH_MSG_DEBUG( dataTypeName() << " (" << m_sgKeyFavourite << ") MissingET retrieved" );
+    ATH_MSG_DEBUG( "in retrieve()" );
+
+    std::vector<std::string> keys = getKeys();
+
+    if(keys.empty()){
+      ATH_MSG_WARNING("No StoreGate keys found");
+      return StatusCode::SUCCESS;
+    }
+
+    // Loop through the keys and retrieve the corresponding data
+    for (const std::string& key : keys) {
+      SG::ReadHandle<xAOD::MissingETContainer> cont(key);
+      if (cont.isValid()) {
+	DataMap data = getData(&(*cont));
+	if (FormatTool->AddToEvent(dataTypeName(), key + "_xAOD", &data).isFailure()) {
+	  ATH_MSG_WARNING("Failed to retrieve Collection " << key);
+	} else {
+	  ATH_MSG_DEBUG(" (" << key << ") retrieved");
+	}
+      } else {
+	ATH_MSG_WARNING("Collection " << key << " not found in SG");
       }
     }
- 
-    if ( m_otherKeys.empty() ) {
-      //obtain all other collections from StoreGate
-      if (( evtStore()->retrieve(iterator, end)).isFailure()){
-         ATH_MSG_WARNING( "Unable to retrieve iterator for MET collection" );
-//        return false;
-      }
-      
-      for (; iterator!=end; ++iterator) {
-	  if (iterator.key()!=m_sgKeyFavourite) {
-             ATH_MSG_DEBUG( "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" );
-             DataMap data = getData(&(*iterator));
-             if ( FormatTool->AddToEvent(dataTypeName(), iterator.key()+"_xAOD", &data).isFailure()){
-	       ATH_MSG_WARNING( "Collection " << iterator.key() << " not found in SG " );
-	    }else{
-	      ATH_MSG_DEBUG( dataTypeName() << " (" << iterator.key() << ") xAOD_MET retrieved" );
-	    }
-	}
-      }
-    }else {
-      //obtain all collections with the given keys
-      std::vector<std::string>::const_iterator keyIter;
-      for ( keyIter=m_otherKeys.begin(); keyIter!=m_otherKeys.end(); ++keyIter ){
-        if ( !evtStore()->contains<xAOD::MissingETContainer>( (*keyIter) ) ){ continue; } // skip if not in SG
-	StatusCode sc = evtStore()->retrieve( MissingETs, (*keyIter) );
-	if (!sc.isFailure()) {
-          ATH_MSG_DEBUG( "Trying to retrieve selected " << dataTypeName() << " (" << (*keyIter) << ")" );
-          DataMap data = getData(MissingETs);
-          if ( FormatTool->AddToEvent(dataTypeName(), (*keyIter)+"_xAOD", &data).isFailure()){
-	    ATH_MSG_WARNING( "Collection " << (*keyIter) << " not found in SG " );
-	  }else{
-	     ATH_MSG_DEBUG( dataTypeName() << " (" << (*keyIter) << ") retrieved" );
-	  }
-	}
-      }
-    } 
-    //All collections retrieved okay
     return StatusCode::SUCCESS;
   }
 
@@ -105,7 +56,7 @@ namespace JiveXML {
    * Also association with clusters and tracks (ElementLink).
    */
   const DataMap xAODMissingETRetriever::getData(const xAOD::MissingETContainer* metCont) {
-    
+
     ATH_MSG_DEBUG( "in getData()" );
 
     DataMap DataMap;
@@ -125,22 +76,22 @@ namespace JiveXML {
     // out of the ~9 values within each MET container ('final')
 
     for (; metItr != metItrE; ++metItr) {
-	sumet = (*metItr)->sumet()/GeV;
-    	mpx = (*metItr)->mpx()/GeV;
-       	mpy = (*metItr)->mpy()/GeV;
- 
-        ATH_MSG_DEBUG( "  Components: MissingET [GeV] mpx= "  << mpx
-              << ", mpy= " << mpy
-              << ", sumet= " << sumet );
+      sumet = (*metItr)->sumet()/GeV;
+      mpx = (*metItr)->mpx()/GeV;
+      mpy = (*metItr)->mpy()/GeV;
 
-    } // end MissingETIterator 
+      ATH_MSG_DEBUG( "  Components: MissingET [GeV] mpx= "  << mpx
+		     << ", mpy= " << mpy
+		     << ", sumet= " << sumet );
 
-	   ATH_MSG_DEBUG( "  FINAL: MissingET [GeV] mpx= "  << mpx
-		<< ", mpy= " << mpy << ", sumet= " << sumet );
+    } // end MissingETIterator
 
-    etx.push_back(DataType( mpx ));
-    ety.push_back(DataType( mpy ));
-    et.push_back(DataType( sumet ));
+    ATH_MSG_DEBUG( "  FINAL: MissingET [GeV] mpx= "  << mpx
+		   << ", mpy= " << mpy << ", sumet= " << sumet );
+
+    etx.emplace_back(DataType( mpx ));
+    ety.emplace_back(DataType( mpy ));
+    et.emplace_back(DataType( sumet ));
 
     // four-vectors
     DataMap["et"] = et;
@@ -151,9 +102,43 @@ namespace JiveXML {
 
     //All collections retrieved okay
     return DataMap;
+  }
+  const std::vector<std::string> xAODMissingETRetriever::getKeys() {
 
-  } // retrieve
+    ATH_MSG_DEBUG("in getKeys()");
 
-  //--------------------------------------------------------------------------
-  
+    std::vector<std::string> keys = {};
+
+    // Remove m_priorityKey from m_otherKeys if it exists, we don't want to write it twice
+    auto it = std::find(m_otherKeys.begin(), m_otherKeys.end(), m_priorityKey);
+    if(it != m_otherKeys.end()){
+      m_otherKeys.erase(it);
+    }
+
+    // Add m_priorityKey as the first element if it is not ""
+    if(m_priorityKey!=""){
+      keys.push_back(m_priorityKey);
+    }
+
+    if(!m_otherKeys.empty()){
+      keys.insert(keys.end(), m_otherKeys.begin(), m_otherKeys.end());
+    }
+
+    // If all collections are requested, obtain all available keys from StoreGate
+    std::vector<std::string> allKeys;
+    if(m_doWriteAllCollections){
+      evtStore()->keys<xAOD::MissingETContainer>(allKeys);
+      // Add keys that are not the priority key and do not add containers with "HLT" in their name if requested
+      for(const std::string& key : allKeys){
+	// Don't include key if it's already in keys
+	auto it2 = std::find(keys.begin(), keys.end(), key);
+	if(it2 != keys.end())continue;
+	if(key.find("HLT") == std::string::npos || m_doWriteHLT){
+	  keys.emplace_back(key);
+	}
+      }
+    }
+    return keys;
+  }
+
 } // JiveXML namespace

@@ -592,8 +592,8 @@ InDetPhysValMonitoringTool::fillHistograms() {
         const xAOD::TruthParticle* associatedTruth = getAsTruth.getTruth(thisTrack);
         if (associatedTruth && associatedTruth == thisTruth) {
           float prob = getMatchingProbability(*thisTrack);
-          matchingProbability = prob;
           if (not std::isnan(prob) && prob > m_lowProb) {
+            matchingProbability = prob;
             isEfficient = true;
             matchedTrack = thisTrack;
             break;

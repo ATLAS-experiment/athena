@@ -90,7 +90,7 @@ def MuonBytestream2RdoConfig(flags):
         from MuonConfig.MuonBytestreamDecodeConfig import MmRDODDecoderCfg
         Muon_MM_RawDataProviderToolMT = CompFactory.Muon.MM_RawDataProviderToolMT
         MuonMmRawDataProviderTool = Muon_MM_RawDataProviderToolMT(name  = "MM_RawDataProviderToolMT"+postFix,
-                                                                  Decoder = acc.popToolsAndMerge(MmRDODDecoderCfg(flags, 
+                                                                  Decoder = acc.popToolsAndMerge(MmRDODDecoderCfg(flags,
                                                                                                  name="MM_RODDecoder"+postFix)),
                                                                   RdoLocation = "MMRDO_L1")
         Muon__MmRawDataProvider = CompFactory.Muon.MM_RawDataProvider
@@ -151,11 +151,11 @@ def MuonRdo2PrdConfig(flags):
                                      RDOContainer = "MDTCSM"+suffix ))
     ### RPC RDO data ###
     from MuonConfig.MuonRdoDecodeConfig import RpcRDODecodeCfg
-    acc.merge(RpcRDODecodeCfg(flags, name = "RpcRdoToRpcPrepData" + postFix, 
+    acc.merge(RpcRDODecodeCfg(flags, name = "RpcRdoToRpcPrepData" + postFix,
                                      RDOContainer = "RPCPAD"+suffix))
     ### TGC RDO data ###
     from MuonConfig.MuonRdoDecodeConfig import TgcRDODecodeCfg
-    acc.merge(TgcRDODecodeCfg(flags, name = "TgcRdoToPrepData" + postFix, 
+    acc.merge(TgcRDODecodeCfg(flags, name = "TgcRdoToPrepData" + postFix,
                                      RDOContainer = "TGCRDO"+suffix))
     return acc
 
@@ -198,7 +198,7 @@ def MuonRdoToMuonDigitToolCfg(flags, name="MuonRdoToMuonDigitTool", **kwargs ):
     #Set N BCs and central BC consistently with RPC readout settings
     rpcrdo_decode = CompFactory.Muon.RpcRDO_Decoder("RpcRDO_Decoder", BCZERO=flags.Trigger.L1MuonSim.RPCNBCZ)
     kwargs.setdefault("rpcRdoDecoderTool", rpcrdo_decode)
-    
+
     the_tool = CompFactory.MuonRdoToMuonDigitTool (name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
@@ -264,7 +264,6 @@ def NSWTriggerConfig(flags):
 
     PadTdsTool = CompFactory.NSWL1.PadTdsOfflineTool("NSWL1__PadTdsOfflineTool",DoNtuple=flags.Trigger.L1MuonSim.WritesTGCBranches, IsMC = flags.Input.isMC, sTGC_DigitContainerName="sTGC_DIGITS_L1")
     PadTriggerLogicTool = CompFactory.NSWL1.PadTriggerLogicOfflineTool("NSWL1__PadTriggerLogicOfflineTool",DoNtuple=flags.Trigger.L1MuonSim.WritesTGCBranches)
-    PadTriggerLookupTool = CompFactory.NSWL1.PadTriggerLookupTool("NSWL1__PadTriggerLookupTool")
     StripTdsTool = CompFactory.NSWL1.StripTdsOfflineTool("NSWL1__StripTdsOfflineTool",DoNtuple=flags.Trigger.L1MuonSim.WritesTGCBranches,IsMC=flags.Input.isMC,sTGC_DigitContainerName="sTGC_DIGITS_L1")
     StripClusterTool = CompFactory.NSWL1.StripClusterTool("NSWL1__StripClusterTool",DoNtuple=flags.Trigger.L1MuonSim.WritesTGCBranches,IsMC=flags.Input.isMC)
     StripSegmentTool = CompFactory.NSWL1.StripSegmentTool("NSWL1__StripSegmentTool",DoNtuple=flags.Trigger.L1MuonSim.WritesTGCBranches)
@@ -277,7 +276,6 @@ def NSWTriggerConfig(flags):
         stgcRegSel = acc.popToolsAndMerge(regSelTool_STGC_Cfg( flags ))  # noqa: F841 (adds a conditions algo as a side-effect)
 
     nswAlg = CompFactory.NSWL1.NSWL1Simulation("NSWL1Simulation",
-                                               UseLookup = False,
                                                DoNtuple = flags.Trigger.L1MuonSim.WriteNSWDebugNtuple,
                                                DoMM = flags.Trigger.L1MuonSim.doMMTrigger,
                                                DoMMDiamonds = flags.Trigger.L1MuonSim.doMMTrigger,
@@ -286,7 +284,6 @@ def NSWTriggerConfig(flags):
                                                DoStrip = flags.Trigger.L1MuonSim.doStripTrigger,
                                                PadTdsTool = PadTdsTool,
                                                PadTriggerTool = PadTriggerLogicTool,
-                                               PadTriggerLookupTool = PadTriggerLookupTool,
                                                StripTdsTool = StripTdsTool,
                                                StripClusterTool = StripClusterTool,
                                                StripSegmentTool = StripSegmentTool,
