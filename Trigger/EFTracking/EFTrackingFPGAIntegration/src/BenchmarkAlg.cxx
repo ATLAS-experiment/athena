@@ -41,10 +41,11 @@ namespace EFTrackingFPGAIntegration
             ATH_CHECK(setupKernelArgs());
         }
 
-        ATH_CHECK(m_pixelClusterTVKey.initialize());
-        ATH_CHECK(m_stripClusterTVKey.initialize());
+        ATH_CHECK(m_inputPixelClusterKey.initialize());
+        ATH_CHECK(m_inputStripClusterKey.initialize());
 
         ATH_CHECK(m_xaodContainerMaker.retrieve());
+        ATH_CHECK(m_testVectorTool.retrieve());
         return StatusCode::SUCCESS;
     }
 
@@ -52,25 +53,31 @@ namespace EFTrackingFPGAIntegration
     {
         ATH_MSG_DEBUG("Executing BenchmarkAlg");
 
-        // Load the TV in the current event from SG
-        SG::ReadHandle<std::vector<unsigned long>> pixleTV_stream(m_pixelClusterTVKey, ctx);
-        if (!pixleTV_stream.isValid())
+        // Load the ITk clusters from SG
+        SG::ReadHandle<xAOD::StripClusterContainer> scContainerHandle(m_inputStripClusterKey, ctx);
+        if (!scContainerHandle.isValid())
         {
-            ATH_MSG_ERROR("Failed to retrieve: " << m_pixelClusterTVKey);
+            ATH_MSG_ERROR("Failed to retrieve: " << m_inputStripClusterKey);
             return StatusCode::FAILURE;
         }
 
-        SG::ReadHandle<std::vector<unsigned long>> stripTV_stream(m_stripClusterTVKey, ctx);
-        if (!stripTV_stream.isValid())
+        SG::ReadHandle<xAOD::PixelClusterContainer> pcContainerHandle(m_inputPixelClusterKey, ctx);
+        if (!pcContainerHandle.isValid())
         {
-            ATH_MSG_ERROR("Failed to retrieve: " << m_stripClusterTVKey);
+            ATH_MSG_ERROR("Failed to retrieve: " << m_inputPixelClusterKey);
             return StatusCode::FAILURE;
         }
+
+        // Encode ITK clusters into byte stream
+        std::vector<uint64_t> encodedStripClusters;
+        std::vector<uint64_t> encodedPixelClusters;
+        ATH_CHECK(m_testVectorTool->encodeStripL2G(scContainerHandle.get(), encodedStripClusters));
+        ATH_CHECK(m_testVectorTool->encodePixelL2G(pcContainerHandle.get(), encodedPixelClusters));
 
         // Migrate the input test vectors to the accelerator
         cl::CommandQueue acc_queue(m_context, m_accelerator);
-        acc_queue.enqueueWriteBuffer(m_inPixelBuff, CL_TRUE, 0, sizeof(uint64_t) * pixleTV_stream->size(), pixleTV_stream->data(), NULL, NULL);
-        acc_queue.enqueueWriteBuffer(m_inStripBuff, CL_TRUE, 0, sizeof(uint64_t) * stripTV_stream->size(), stripTV_stream->data(), NULL, NULL);
+        acc_queue.enqueueWriteBuffer(m_inPixelBuff, CL_TRUE, 0, sizeof(uint64_t) * encodedPixelClusters.size(), encodedPixelClusters.data(), NULL, NULL);
+        acc_queue.enqueueWriteBuffer(m_inStripBuff, CL_TRUE, 0, sizeof(uint64_t) * encodedStripClusters.size(), encodedStripClusters.data(), NULL, NULL);
 
         // enqueue the kernel
         {
@@ -131,28 +138,28 @@ namespace EFTrackingFPGAIntegration
                 rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
                 if (rdo)
                 {
-                    scAux.rdoList.push_back(rdo);
+                    scAux.rdoList.push_back(rdo << 32);
                     rdoCounter++;
                 }
                 row = 3; // rdo w2
                 rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
                 if (rdo)
                 {
-                    scAux.rdoList.push_back(rdo);
+                    scAux.rdoList.push_back(rdo << 32);
                     rdoCounter++;
                 }
                 row = 4; // rdo w3
                 rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
                 if (rdo)
                 {
-                    scAux.rdoList.push_back(rdo);
+                    scAux.rdoList.push_back(rdo << 32);
                     rdoCounter++;
                 }
                 row = 5; // rdo w4
                 rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
                 if (rdo)
                 {
-                    scAux.rdoList.push_back(rdo);
+                    scAux.rdoList.push_back(rdo << 32);
                     rdoCounter++;
                 }
                 row = 6; // local x
@@ -205,7 +212,7 @@ namespace EFTrackingFPGAIntegration
                 rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
                 if (rdo)
                 {
-                    pcAux.rdoList.push_back(rdo);
+                    pcAux.rdoList.push_back(rdo << 32);
                     rdoCounter++;
                 }
 
@@ -213,7 +220,7 @@ namespace EFTrackingFPGAIntegration
                 rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
                 if (rdo)
                 {
-                    pcAux.rdoList.push_back(rdo);
+                    pcAux.rdoList.push_back(rdo << 32);
                     rdoCounter++;
                 }
 
@@ -221,7 +228,7 @@ namespace EFTrackingFPGAIntegration
                 rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
                 if (rdo)
                 {
-                    pcAux.rdoList.push_back(rdo);
+                    pcAux.rdoList.push_back(rdo << 32);
                     rdoCounter++;
                 }
 
@@ -229,7 +236,7 @@ namespace EFTrackingFPGAIntegration
                 rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
                 if (rdo)
                 {
-                    pcAux.rdoList.push_back(rdo);
+                    pcAux.rdoList.push_back(rdo << 32);
                     rdoCounter++;
                 }
 
