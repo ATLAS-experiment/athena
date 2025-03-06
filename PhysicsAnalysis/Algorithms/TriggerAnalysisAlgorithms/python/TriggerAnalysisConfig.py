@@ -47,7 +47,9 @@ class TriggerAnalysisBlock (ConfigBlock):
             info="a formula used in (un)prescaling, producing overall prescale "
             "factor instead of prescale per trigger.")
         self.addOption ('prescaleMC', False, type=bool,
-            info="prescale MC instead of unprescaling of data.")
+            info="ouput trigger prescales when running on MC. The default is False.")
+        self.addOption ('unprescaleData', False, type=bool,
+            info="ouput trigger prescales when running on Data. The default is False.")
         self.addOption ('prescaleIncludeAllYears', False, type=bool,
             info="if True, trigger prescales will include all configured years "
             "from prescaleLumiCalcFilesPerYear in all jobs. The default is False.")
@@ -132,8 +134,8 @@ class TriggerAnalysisBlock (ConfigBlock):
                 config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, noSys=True)
 
         # Calculate trigger prescales
-        if ((config.dataType() is DataType.Data) != self.prescaleMC) and (
-            self.prescaleLumiCalcFiles or self.prescaleLumiCalcFilesPerYear
+        if (self.prescaleLumiCalcFiles or self.prescaleLumiCalcFilesPerYear) and (
+            self.unprescaleData if config.dataType() is DataType.Data else self.prescaleMC
         ):
 
             lumicalc_files = []
@@ -151,7 +153,7 @@ class TriggerAnalysisBlock (ConfigBlock):
             alg.pileupReweightingTool.LumiCalcFiles = lumicalc_files
             alg.pileupReweightingTool.TrigDecisionTool = '%s/%s' % \
                     ( decisionTool.getType(), decisionTool.getName() )
-            alg.prescaleMC = self.prescaleMC
+            alg.prescaleMC = config.dataType() is not DataType.Data
             alg.prescaleDecoration = self.prescaleDecoration
             if self.prescaleTriggersFormula != '':
                 alg.prescaleTriggersFormula = self.prescaleTriggersFormula
@@ -192,6 +194,11 @@ class TriggerAnalysisBlock (ConfigBlock):
 
         if self.prescaleIncludeAllYears and not self.prescaleLumiCalcFilesPerYear:
             raise Exception('prescaleIncludeAllYears requires prescaleLumiCalcFilesPerYear to be configured!')
+
+        if (self.prescaleLumiCalcFiles or self.prescaleLumiCalcFilesPerYear) and not (
+            self.unprescaleData or self.prescaleMC
+        ):
+            raise Exception('Lumicalc files are provided but no trigger prescale output is configured! Specify output with "unprescaleData" and/or "prescaleMC".')
 
         if self.triggerChainsPerYear and not self.multiTriggerChainsPerYear:
             self.multiTriggerChainsPerYear = {'': self.triggerChainsPerYear}
