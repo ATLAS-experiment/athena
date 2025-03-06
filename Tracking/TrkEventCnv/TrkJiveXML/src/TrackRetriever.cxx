@@ -390,7 +390,7 @@ namespace JiveXML {
     return StatusCode::SUCCESS;
   }
 
-  const DataMap TrackRetriever::getData(const TrackCollection* trackCollection, const std::string collectionName) {
+  const DataMap TrackRetriever::getData(const TrackCollection* trackCollection, const std::string &collectionName) {
 
     ATH_MSG_DEBUG("in getData()");
     
