@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 def EventDisplaysOnlineCfg(flags, **kwargs):
     from EventDisplaysOnline.EventDisplaysOnlineHelpers import GetBFields, WaitForPartition, GetUniqueJobID, GetRunNumber

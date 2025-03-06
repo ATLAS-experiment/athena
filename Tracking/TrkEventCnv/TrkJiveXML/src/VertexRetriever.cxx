@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkJiveXML/VertexRetriever.h"
@@ -93,44 +93,39 @@ namespace JiveXML {
 //    const Trk::perigee* perigee = dynamic_cast<const Trk::perigee*>( trackPerigee );
 //    double m_d0 = perigee->parameters()[Trk::d0];
 
-    const Rec::TrackParticleContainer* tracks = nullptr ;
-    const TrackCollection* trktracks = nullptr ;
- 
-    size_t found;    
     std::string searchStr = "TrackParticle";
-    found=m_trackCollection.find(searchStr);
-
+    size_t found=m_trackCollection.find(searchStr);
+    
     m_perigeeVector.clear(); // need to clear, otherwise accumulates over events
     if (found!=std::string::npos){ // User selected a Rec::TrackParticle Collection
-      if (evtStore()->retrieve(tracks, m_trackCollection).isFailure()){
-        if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Unable to retrieve track collection"
-                                                  << m_trackCollection << " for association "<< endmsg;
+      SG::ReadHandle<Rec::TrackParticleContainer> tracks (m_trackCollection);
+      if (!tracks.isValid()){
+        ATH_MSG_WARNING("Unable to retrieve track collection" << m_trackCollection << " for association ");
       } else {
-         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Retrieved " << 
-	     m_trackCollection << endmsg;
+	ATH_MSG_DEBUG("Retrieved " << m_trackCollection);
 
-         Rec::TrackParticleContainer::const_iterator track;
-         for(track=tracks->begin();track!=tracks->end();++track) {
-	    const Trk::Perigee *perigee = (*track)->perigee();
-//          if(perigee == 0) continue; // not skip ! need to keep order for index !
-            m_perigeeVector.push_back( perigee ); // this perigee match works !
-         }
+	//xAOD::VertexContainer::const_iterator VertexItr = cont->begin();
+	//for ( ; VertexItr != cont->end(); ++VertexItr) {
+	for(const auto track : *tracks) {
+	  const Trk::Perigee *perigee = track->perigee();
+	  //if(perigee == 0) continue; // not skip ! need to keep order for index !
+	  m_perigeeVector.push_back( perigee ); // this perigee match works !
+	}
       }
-    }else{ // it's a Trk::Tracks collection
-         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " User selected a Trk::Track collection ! " << endmsg; 
-
-      if (evtStore()->retrieve(trktracks, m_trackCollection).isFailure()){
-        if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Unable to retrieve track collection"
-                                                  << m_trackCollection << " for association "<< endmsg;
+    }
+    
+    else{ // User selected a Trk::Track collection
+      ATH_MSG_DEBUG(" User selected a Trk::Track collection ! "); 
+      SG::ReadHandle<TrackCollection> tracks (m_trackCollection);
+      if (!tracks.isValid()){
+        ATH_MSG_WARNING("Unable to retrieve track collection" << m_trackCollection << " for association ");
       } else {
-        if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Retrieved " << 
-	    m_trackCollection << endmsg;
-        TrackCollection::const_iterator track;
-        for(track=trktracks->begin();track!=trktracks->end();++track) {
-          const Trk::Perigee* trackPerigee = (*track)->perigeeParameters();
+	ATH_MSG_DEBUG("Retrieved " << m_trackCollection);
+	for(const auto track : *tracks) {
+          const Trk::Perigee* trackPerigee = track->perigeeParameters();
           //const Trk::Perigee *perigee = dynamic_cast<const Trk::Perigee*>( trackPerigee );
-//          if(perigee == 0) continue; // not skip ! need to keep order for index !
-//          m_perigeeVector.push_back( perigee ); 
+	  //if(perigee == 0) continue; // not skip ! need to keep order for index !
+	  //m_perigeeVector.push_back( perigee ); 
           m_perigeeVector.push_back( trackPerigee ); 
         }
       }
@@ -147,6 +142,8 @@ namespace JiveXML {
    */
   StatusCode VertexRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool){
 
+    ATH_MSG_DEBUG("In retrieve()");
+    
     //Get an iterator over all vertex collections,
     //return if there are none
     SG::ConstIterator<VxContainer> vtxCollectionItr, vtxCollectionsEnd;
@@ -194,9 +191,8 @@ namespace JiveXML {
       //Get size of current container
       VxContainer::size_type NVtx = vtxCollectionItr->size();
 
-      //Be a bit verbose
-      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Reading vertex container " << vtxCollectionItr.key() 
-                                              << " with " << NVtx << " entries" << endmsg;
+      ATH_MSG_DEBUG("Reading vertex container " << vtxCollectionItr.key() 
+		    << " with " << NVtx << " entries");
       
       //Declare all the data vectors we want to retrieve and reserve space
       x.reserve(x.size()+NVtx);
@@ -211,8 +207,7 @@ namespace JiveXML {
 
       StatusCode sc = fillPerigeeList();
       if (!sc.isFailure()) {
-         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Perigee list filled with " << m_perigeeVector.size()
-                          << " entries " << endmsg;
+	ATH_MSG_DEBUG("Perigee list filled with " << m_perigeeVector.size() << " entries ");
       }    
 
       //Loop over vertices
@@ -244,10 +239,10 @@ namespace JiveXML {
         float this_z =  (*vertexItr)->recVertex().position().z()/10.;
         float R = std::hypot (this_x, this_y); // distance from beamline
 
-        if (msgLvl(MSG::DEBUG)){ msg(MSG::DEBUG) << " Collection: " << vtxCollectionItr.key() 
-            << ", this_chi2: " << this_chi2 << " - chi2: " << fitQuality.chiSquared() 
-//            << " ," << (*vertexItr)->recVertex().position().x()/10. << " ," << (*vertexItr)->recVertex().position().x()*CLHEP::cm 
-            << ", R: " << R << endmsg; }
+        ATH_MSG_DEBUG(" Collection: " << vtxCollectionItr.key() 
+		      << ", this_chi2: " << this_chi2 << " - chi2: " << fitQuality.chiSquared() 
+		      //<< " ," << (*vertexItr)->recVertex().position().x()/10. << " ," << (*vertexItr)->recVertex().position().x()*CLHEP::cm 
+		      << ", R: " << R); 
 
         chi2.emplace_back( this_chi2 );
         x.emplace_back( this_x );
@@ -257,7 +252,7 @@ namespace JiveXML {
         // from: Tracking/TrkEvent/TrkEventPrimitives/VertexType.h
 	const Trk::VertexType vtx_type = (*vertexItr)->vertexType();
         vertexType.emplace_back( vtx_type ); 
-	if (msgLvl(MSG::DEBUG)){ msg(MSG::DEBUG) << " collection " << vtxCollectionItr.key() << ": VertexType: " << vtx_type << endmsg; }
+	ATH_MSG_DEBUG(" collection " << vtxCollectionItr.key() << ": VertexType: " << vtx_type);
 
         //Store primary vertex candidate flag
     if ( &(*vtxCollectionItr) == primaryVtxCollection ){
@@ -293,7 +288,7 @@ namespace JiveXML {
 
     const std::vector<Trk::VxTrackAtVertex*>* trklist = (*vertexItr)->vxTrackAtVertex();
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Tracks at vertex: " << trklist->size() << endmsg;
+    ATH_MSG_DEBUG("Tracks at vertex: " << trklist->size());
 
     numTracks.emplace_back( trklist->size() );
     sgkey.emplace_back( m_trackCollection ); // sgkey in current scheme is _not_ a multiple !

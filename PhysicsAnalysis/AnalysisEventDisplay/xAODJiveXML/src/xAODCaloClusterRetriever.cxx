@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODCaloClusterRetriever.h"
-
 #include "CaloGeoHelpers/CaloSampling.h"
-
 #include "AthenaKernel/Units.h"
+
 using Athena::Units::GeV;
 
 namespace JiveXML {
@@ -18,86 +17,39 @@ namespace JiveXML {
    * @param parent AlgTools parent owning this tool
    **/
   xAODCaloClusterRetriever::xAODCaloClusterRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_typeName("Cluster"),
-    m_sgKeyFavourite("egammaClusters") // new SGKey in rel.20
-  {
+    AthAlgTool(type,name,parent)
+  {}
 
-    //Only declare the interface
-    declareInterface<IDataRetriever>(this);
-    
-    declareProperty("FavouriteClusterCollection" ,m_sgKeyFavourite,
-        "Collection to be first in output, shown in Atlantis without switching");
-    declareProperty("OtherClusterCollections" ,m_otherKeys,
-        "Other collections to be retrieved. If list left empty, all available retrieved");
-    declareProperty("DoWriteHLT", m_doWriteHLT = false,"Ignore HLTAutokey object by default."); // ignore HLTAutoKey objects
-  }
-   
   /**
-   * For each cluster collections retrieve basic parameters.
+   * For each cluster collection retrieve basic parameters.
    * 'Favourite' cluster collection first, then 'Other' collections.
    * @param FormatTool the tool that will create formated output from the DataMap
    */
   StatusCode xAODCaloClusterRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
-    
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "in retrieveAll()" << endmsg;
-    
-    SG::ConstIterator<xAOD::CaloClusterContainer> iterator, end;
-    const xAOD::CaloClusterContainer* ccc;
 
-    //obtain the default collection first
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve " << dataTypeName() << " (" << m_sgKeyFavourite << ")" << endmsg;
-    StatusCode sc = evtStore()->retrieve(ccc, m_sgKeyFavourite);
-    if (sc.isFailure() ) {
-      if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKeyFavourite << " not found in SG " << endmsg; 
-    }else{
-      DataMap data = getData(ccc);
-      if ( FormatTool->AddToEvent(dataTypeName(), m_sgKeyFavourite+"_xAOD", &data).isFailure()){
-	if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKeyFavourite << " not found in SG " << endmsg;
-      }else{
-         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << dataTypeName() << " (" << m_sgKeyFavourite << ") AODCaloCluster retrieved" << endmsg;
-      }
+    ATH_MSG_DEBUG("In retrieve()");
+
+    std::vector<std::string> keys = getKeys();
+
+    if(keys.empty()){
+      ATH_MSG_WARNING("No StoreGate keys found");
+      return StatusCode::SUCCESS;
     }
 
-    if ( m_otherKeys.empty() ) {
-      //obtain all other collections from StoreGate
-      if (( evtStore()->retrieve(iterator, end)).isFailure()){
-         if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << 
-	 "Unable to retrieve iterator for AODCaloCluster collection" << endmsg;
-//        return false;
-      }
-      
-      for (; iterator!=end; ++iterator) {
-       	     if ((iterator.key().find("HLT",0) != std::string::npos) && (!m_doWriteHLT)){
-	          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Ignoring HLT collection: " << iterator.key() << endmsg;
-	         continue;  }
-	  if (iterator.key()!=m_sgKeyFavourite) {
-             if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all. Current collection: " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
-             DataMap data = getData(&(*iterator));
-             if ( FormatTool->AddToEvent(dataTypeName(), iterator.key()+"_xAOD", &data).isFailure()){
-	       if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << iterator.key() << " not found in SG " << endmsg;
-	    }else{
-	      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << " (" << iterator.key() << ") AODCaloCluster retrieved" << endmsg;
-	    }
-          }
-      }
-    }else {
-      //obtain all collections with the given keys
-      std::vector<std::string>::const_iterator keyIter;
-      for ( keyIter=m_otherKeys.begin(); keyIter!=m_otherKeys.end(); ++keyIter ){
-	StatusCode sc = evtStore()->retrieve( ccc, (*keyIter) );
-	if (!sc.isFailure()) {
-          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve selected " << dataTypeName() << " (" << (*keyIter) << ")" << endmsg;
-          DataMap data = getData(ccc);
-          if ( FormatTool->AddToEvent(dataTypeName(), (*keyIter), &data).isFailure()){
-	    if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << (*keyIter) << " not found in SG " << endmsg;
-	  }else{
-	     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << " (" << (*keyIter) << ") retrieved" << endmsg;
-	  }
+    // Loop through the keys and retrieve the corresponding data
+    for (const std::string& key : keys) {
+      SG::ReadHandle<xAOD::CaloClusterContainer> cont(key);
+      if (cont.isValid()) {
+	DataMap data = getData(&(*cont));
+	if (FormatTool->AddToEvent(dataTypeName(), key + "_xAOD", &data).isFailure()) {
+	  ATH_MSG_WARNING("Failed to retrieve Collection " << key);
+	} else {
+	  ATH_MSG_DEBUG(" (" << key << ") retrieved");
 	}
+      } else {
+	ATH_MSG_WARNING("Collection " << key << " not found in SG");
       }
     }
-    //All collections retrieved okay
     return StatusCode::SUCCESS;
   }
 
@@ -109,8 +61,8 @@ namespace JiveXML {
    * @param FormatTool the tool that will create formated output from the DataMap
    */
   const DataMap xAODCaloClusterRetriever::getData(const xAOD::CaloClusterContainer* ccc) {
-    
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "retrieve()" << endmsg;
+
+    ATH_MSG_DEBUG("in getData()");
 
     DataMap DataMap;
 
@@ -126,72 +78,67 @@ namespace JiveXML {
     std::string label="";
     int id = 0;
     int s = 0;
-    float eInSample = 0.; 
-    float eInSampleFull = 0.; 
-    float emfrac = 0.; 
-    float rawemfrac = 0.; 
+    float eInSample = 0.;
+    float eInSampleFull = 0.;
+    float emfrac = 0.;
+    float rawemfrac = 0.;
 
-// cells n/a in AOD, but keep this for compatibility
-// with 'full' clusters in AtlantisJava
+    // cells n/a in AOD, but keep this for compatibility
+    // with 'full' clusters in AtlantisJava
     std::string tagCells;
     tagCells = "cells multiple=\"1.0\"";
 
     xAOD::CaloClusterContainer::const_iterator itr = ccc->begin();
     for (; itr != ccc->end(); ++itr) {
 
-// sum over samplings to get EMfraction: 
-//// works from AOD ! Info from Sven Menke 5Aug10
-// full sum:
+      // sum over samplings to get EMfraction:
+      //// works from AOD ! Info from Sven Menke 5Aug10
+      // full sum:
       for (s=0;s<CaloSampling::Unknown; s++){
 	eInSampleFull += (*itr)->eSample(CaloSampling::CaloSample(s));
       }
-// Now only EMB1-3, EME1-3 and FCAL1:
-	eInSample += (*itr)->eSample(CaloSampling::EMB1);
-	eInSample += (*itr)->eSample(CaloSampling::EMB2);
-	eInSample += (*itr)->eSample(CaloSampling::EMB3);
-	eInSample += (*itr)->eSample(CaloSampling::EME1);
-	eInSample += (*itr)->eSample(CaloSampling::EME2);
-	eInSample += (*itr)->eSample(CaloSampling::EME3);
-	eInSample += (*itr)->eSample(CaloSampling::FCAL1);
+      // Now only EMB1-3, EME1-3 and FCAL1:
+      eInSample += (*itr)->eSample(CaloSampling::EMB1);
+      eInSample += (*itr)->eSample(CaloSampling::EMB2);
+      eInSample += (*itr)->eSample(CaloSampling::EMB3);
+      eInSample += (*itr)->eSample(CaloSampling::EME1);
+      eInSample += (*itr)->eSample(CaloSampling::EME2);
+      eInSample += (*itr)->eSample(CaloSampling::EME3);
+      eInSample += (*itr)->eSample(CaloSampling::FCAL1);
 
       emfrac  = eInSample/eInSampleFull;
       rawemfrac = emfrac;
-// sanity cut: emfrac should be within [0,1]
+      // sanity cut: emfrac should be within [0,1]
       if ( emfrac > 1.0 ) emfrac = 1.;
       if ( emfrac < 0.0 ) emfrac = 0.;
-      emfracVec.push_back(  DataType(emfrac).toString() );
+      emfracVec.emplace_back(  DataType(emfrac).toString() );
 
       if ( DataType( eInSample ).toString() != "0." ){
-       label = "AllMeV_SumEMSampl=" + DataType( eInSample ).toString() +
-  	 "_SumAllSampl=" + DataType( eInSampleFull ).toString() +
-  	 "_calcEMFrac=" + DataType( rawemfrac ).toString()+
-  	 "_outEMFrac=" + DataType( emfrac ).toString();
+	label = "AllMeV_SumEMSampl=" + DataType( eInSample ).toString() +
+	  "_SumAllSampl=" + DataType( eInSampleFull ).toString() +
+	  "_calcEMFrac=" + DataType( rawemfrac ).toString()+
+	  "_outEMFrac=" + DataType( emfrac ).toString();
       }else{ label = "n_a"; }
       eInSample = 0.;
       eInSampleFull = 0.;
 
-      labelVec.push_back( label );
-      if (msgLvl(MSG::VERBOSE)) {
-	msg(MSG::VERBOSE) << "label is " << label << endmsg;
-      }
+      labelVec.emplace_back( label );
+      ATH_MSG_VERBOSE("label is " << label);
 
-// now the standard variables
-// getBasicEnergy n/a in xAOD !
+      // now the standard variables
+      // getBasicEnergy n/a in xAOD !
 
-      phi.push_back(DataType((*itr)->phi()));
-      eta.push_back(DataType((*itr)->eta()));
-      et.push_back(DataType((*itr)->et()/GeV));
-      numCells.push_back(DataType( "0" ));
-      cells.push_back(DataType( "0" ));
-      idVec.push_back(DataType( ++id ));
+      phi.emplace_back(DataType((*itr)->phi()));
+      eta.emplace_back(DataType((*itr)->eta()));
+      et.emplace_back(DataType((*itr)->et()/GeV));
+      numCells.emplace_back(DataType( "0" ));
+      cells.emplace_back(DataType( "0" ));
+      idVec.emplace_back(DataType( ++id ));
 
-      if (msgLvl(MSG::VERBOSE)) {
-        msg(MSG::VERBOSE) << dataTypeName() << " cluster #" << id  
-                          << " ,e=" <<  (*itr)->e()/GeV  << ", et=";
-        msg(MSG::VERBOSE) << (*itr)->et()/GeV << ", eta=" << (*itr)->eta() 
-		<< ", phi=" << (*itr)->phi() << endmsg;
-      }
-
+      ATH_MSG_VERBOSE( dataTypeName() << " cluster #" << id
+		       << " ,e=" <<  (*itr)->e()/GeV  << ", et="
+		       << (*itr)->et()/GeV << ", eta=" << (*itr)->eta()
+		       << ", phi=" << (*itr)->phi());
     }
     // Start with mandatory entries
     DataMap["phi"] = phi;
@@ -201,19 +148,49 @@ namespace JiveXML {
     DataMap["numCells"] = numCells;
     DataMap["id"] = idVec;
     DataMap["emfrac"] = emfracVec; // not in Atlantis yet ! Could be used in legoplot
-    DataMap["label"] = labelVec; // not in Atlantis yet ! 
+    DataMap["label"] = labelVec; // not in Atlantis yet !
 
-    //Be verbose
-    if (msgLvl(MSG::DEBUG)) {
-      msg(MSG::DEBUG) << dataTypeName() << " (AOD, no cells), collection: " << dataTypeName();
-      msg(MSG::DEBUG) << " retrieved with " << phi.size() << " entries"<< endmsg;
+    ATH_MSG_DEBUG(dataTypeName() << " (AOD, no cells), collection: " << dataTypeName()
+		  << " retrieved with " << phi.size() << " entries");
+    return DataMap;
+  }
+
+
+  const std::vector<std::string> xAODCaloClusterRetriever::getKeys() {
+
+    ATH_MSG_DEBUG("in getKeys()");
+
+    std::vector<std::string> keys = {};
+
+    // Remove m_priorityKey from m_otherKeys if it exists, we don't want to write it twice
+    auto it = std::find(m_otherKeys.begin(), m_otherKeys.end(), m_priorityKey);
+    if(it != m_otherKeys.end()){
+      m_otherKeys.erase(it);
     }
 
-    //All collections retrieved okay
-    return DataMap;
+    // Add m_priorityKey as the first element if it is not ""
+    if(m_priorityKey!=""){
+      keys.push_back(m_priorityKey);
+    }
 
-  } // retrieve
+    if(!m_otherKeys.empty()){
+      keys.insert(keys.end(), m_otherKeys.begin(), m_otherKeys.end());
+    }
 
-  //--------------------------------------------------------------------------
-  
+    // If all collections are requested, obtain all available keys from StoreGate
+    std::vector<std::string> allKeys;
+    if(m_doWriteAllCollections){
+      evtStore()->keys<xAOD::CaloClusterContainer>(allKeys);
+      // Add keys that are not the priority key and do not add containers with "HLT" in their name if requested
+      for(const std::string& key : allKeys){
+	// Don't include key if it's already in keys
+	auto it2 = std::find(keys.begin(), keys.end(), key);
+	if(it2 != keys.end())continue;
+	if(key.find("HLT") == std::string::npos || m_doWriteHLT){
+	  keys.emplace_back(key);
+	}
+      }
+    }
+    return keys;
+  }
 } // JiveXML namespace

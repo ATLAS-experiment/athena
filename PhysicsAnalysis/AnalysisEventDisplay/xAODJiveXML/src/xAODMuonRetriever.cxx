@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODMuonRetriever.h"
-
-#include "xAODMuon/MuonContainer.h" 
-
+#include "xAODMuon/MuonContainer.h"
 #include "AthenaKernel/Units.h"
+
 using Athena::Units::GeV;
 
 namespace JiveXML {
@@ -16,95 +15,39 @@ namespace JiveXML {
    * @param type   AlgTool type name
    * @param name   AlgTool instance name
    * @param parent AlgTools parent owning this tool
-   *
-   * code reference for xAOD:     jpt6Feb14
-   *  https://svnweb.cern.ch/trac/atlasgroups/browser/PAT/AODUpgrade/xAODReaderAlgs
-   *
-   * This is afirst 'skeleton' try for many xAOD retrievers to be done:
-   *  xAOD::Muon, xAOD::Vertex, xAOD::Photon, xAOD::CaloCluster, xAOD::Jet
-   *  xAOD::TrackParticle, xAOD::TauJet, xAOD::Muon
-   *
-   * class defs:
-   *    https://svnweb.cern.ch/trac/atlasoff/browser/Event/xAOD
-   *
    **/
   xAODMuonRetriever::xAODMuonRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent), m_typeName("Muon"),
-    m_sgKey("Muons") // is xAOD name
-  {
+    AthAlgTool(type,name,parent){}
 
-    //Only declare the interface
-    declareInterface<IDataRetriever>(this);
-
-    declareProperty("StoreGateKey", m_sgKey, 
-        "Collection to be first in output, shown in Atlantis without switching");
-    declareProperty("OtherCollections" ,m_otherKeys,
-        "Other collections to be retrieved. If list left empty, all available retrieved");
-  }
-  
   /**
-   * For each jet collections retrieve basic parameters.
+   * For each muon collections retrieve basic parameters.
    * @param FormatTool the tool that will create formated output from the DataMap
    */
   StatusCode xAODMuonRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
-    
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "in retrieveAll()" << endmsg;
-    
-    SG::ConstIterator<xAOD::MuonContainer> iterator, end;
-    const xAOD::MuonContainer* muons;
-    
-    //obtain the default collection first
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve " << dataTypeName() << " (" << m_sgKey << ")" << endmsg;
-    StatusCode sc = evtStore()->retrieve(muons, m_sgKey);
-    if (sc.isFailure() ) {
-      if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKey << " not found in SG " << endmsg; 
-    }else{
-      DataMap data = getData(muons);
-      if ( FormatTool->AddToEvent(dataTypeName(), m_sgKey+"_xAOD", &data).isFailure()){ //suffix can be removed later
-	if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKey << " not found in SG " << endmsg;
-      }else{
-         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << dataTypeName() << " (" << m_sgKey << ") Muon retrieved" << endmsg;
-      }
-    }
- 
 
-    if ( m_otherKeys.empty() ) {
-      //obtain all other collections from StoreGate
-      if (( evtStore()->retrieve(iterator, end)).isFailure()){
-         if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << 
-	 "Unable to retrieve iterator for xAOD Muon collection" << endmsg;
-//        return false;
-      }
-      
-      for (; iterator!=end; ++iterator) {
-	  if (iterator.key()!=m_sgKey) {
-             if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all. Current collection: " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
-             DataMap data = getData(&(*iterator));
-             if ( FormatTool->AddToEvent(dataTypeName(), iterator.key()+"_xAOD", &data).isFailure()){
-	       if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << iterator.key() << " not found in SG " << endmsg;
-	    }else{
-	      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << " (" << iterator.key() << ") xAOD Muon retrieved" << endmsg;
-	    }
-          }
-      }
-    }else {
-      //obtain all collections with the given keys
-      std::vector<std::string>::const_iterator keyIter;
-      for ( keyIter=m_otherKeys.begin(); keyIter!=m_otherKeys.end(); ++keyIter ){
-	StatusCode sc = evtStore()->retrieve( muons, (*keyIter) );
-	if (!sc.isFailure()) {
-          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve selected " << dataTypeName() << " (" << (*keyIter) << ")" << endmsg;
-          DataMap data = getData(muons);
-          if ( FormatTool->AddToEvent(dataTypeName(), (*keyIter), &data).isFailure()){
-	    if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << (*keyIter) << " not found in SG " << endmsg;
-	  }else{
-	     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << " (" << (*keyIter) << ") retrieved" << endmsg;
-	  }
+    ATH_MSG_DEBUG("In retrieve()");
+
+    std::vector<std::string> keys = getKeys();
+
+    if(keys.empty()){
+      ATH_MSG_WARNING("No StoreGate keys found");
+      return StatusCode::SUCCESS;
+    }
+
+    // Loop through the keys and retrieve the corresponding data
+    for (const std::string& key : keys) {
+      SG::ReadHandle<xAOD::MuonContainer> cont(key);
+      if (cont.isValid()) {
+	DataMap data = getData(&(*cont));
+	if (FormatTool->AddToEvent(dataTypeName(), key + "_xAOD", &data).isFailure()) {
+	  ATH_MSG_WARNING("Failed to retrieve Collection " << key);
+	} else {
+	  ATH_MSG_DEBUG(" (" << key << ") retrieved");
 	}
+      } else {
+	ATH_MSG_WARNING("Collection " << key << " not found in SG");
       }
     }
-
-    //All collections retrieved okay
     return StatusCode::SUCCESS;
   }
 
@@ -115,7 +58,7 @@ namespace JiveXML {
    */
   const DataMap xAODMuonRetriever::getData(const xAOD::MuonContainer* muCont) {
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "in getData()" << endmsg;
+    ATH_MSG_DEBUG("in getData()");
 
     DataMap DataMap;
 
@@ -134,22 +77,19 @@ namespace JiveXML {
 
     for (; muItr != muItrE; ++muItr) {
 
-    if (msgLvl(MSG::DEBUG)) {
-      msg(MSG::DEBUG) << "  Muon #" << counter++ << " : eta = "  << (*muItr)->eta() 
-		      << ", phi = "  << (*muItr)->phi() << ", pt = " <<  (*muItr)->pt() 
-		      << ", pdgId = " << -13.*(*muItr)->primaryTrackParticle()->charge() 
-		      <<  endmsg;
-    }
+      ATH_MSG_DEBUG("  Muon #" << counter++ << " : eta = "  << (*muItr)->eta()
+		    << ", phi = "  << (*muItr)->phi() << ", pt = " <<  (*muItr)->pt()
+		    << ", pdgId = " << -13.*(*muItr)->primaryTrackParticle()->charge());
 
-      phi.push_back(DataType((*muItr)->phi()));
-      eta.push_back(DataType((*muItr)->eta()));
-      pt.push_back(DataType((*muItr)->pt()/GeV));
+      phi.emplace_back(DataType((*muItr)->phi()));
+      eta.emplace_back(DataType((*muItr)->eta()));
+      pt.emplace_back(DataType((*muItr)->pt()/GeV));
 
-      mass.push_back(DataType((*muItr)->m()/GeV));
-      energy.push_back( DataType((*muItr)->e()/GeV ) );
-      chi2.push_back( 1.0 ); //placeholder
-      pdgId.push_back(DataType( -13.*(*muItr)->primaryTrackParticle()->charge() )); // pdgId not available anymore in xAOD
-    } // end MuonIterator 
+      mass.emplace_back(DataType((*muItr)->m()/GeV));
+      energy.emplace_back( DataType((*muItr)->e()/GeV ) );
+      chi2.emplace_back( 1.0 ); //placeholder
+      pdgId.emplace_back(DataType( -13.*(*muItr)->primaryTrackParticle()->charge() )); // pdgId not available anymore in xAOD
+    } // end MuonIterator
 
     // four-vectors
     DataMap["phi"] = phi;
@@ -160,15 +100,46 @@ namespace JiveXML {
     DataMap["chi2"] = chi2;
     DataMap["pdgId"] = pdgId;
 
-    if (msgLvl(MSG::DEBUG)) {
-      msg(MSG::DEBUG) << dataTypeName() << " retrieved with " << phi.size() << " entries"<< endmsg;
+    ATH_MSG_DEBUG(" retrieved with " << phi.size() << " entries");
+    return DataMap;
+  }
+
+
+  const std::vector<std::string> xAODMuonRetriever::getKeys() {
+
+    ATH_MSG_DEBUG("in getKeys()");
+
+    std::vector<std::string> keys = {};
+
+    // Remove m_priorityKey from m_otherKeys if it exists, we don't want to write it twice
+    auto it = std::find(m_otherKeys.begin(), m_otherKeys.end(), m_priorityKey);
+    if(it != m_otherKeys.end()){
+      m_otherKeys.erase(it);
     }
 
-    //All collections retrieved okay
-    return DataMap;
+    // Add m_priorityKey as the first element if it is not ""
+    if(m_priorityKey!=""){
+      keys.push_back(m_priorityKey);
+    }
 
-  } // retrieve
+    if(!m_otherKeys.empty()){
+      keys.insert(keys.end(), m_otherKeys.begin(), m_otherKeys.end());
+    }
 
-  //--------------------------------------------------------------------------
-  
+    // If all collections are requested, obtain all available keys from StoreGate
+    std::vector<std::string> allKeys;
+    if(m_doWriteAllCollections){
+      evtStore()->keys<xAOD::MuonContainer>(allKeys);
+      // Add keys that are not the priority key and do not add containers with "HLT" in their name if requested
+      for(const std::string& key : allKeys){
+	// Don't include key if it's already in keys
+	auto it2 = std::find(keys.begin(), keys.end(), key);
+	if(it2 != keys.end())continue;
+	if(key.find("HLT") == std::string::npos || m_doWriteHLT){
+	  keys.emplace_back(key);
+	}
+      }
+    }
+    return keys;
+  }
 } // JiveXML namespace
