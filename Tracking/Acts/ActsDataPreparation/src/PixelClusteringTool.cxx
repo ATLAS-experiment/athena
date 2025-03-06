@@ -218,10 +218,10 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   xaodcluster.setIdentifier( element->identifierOfPosition(locpos).get_compact() );
   xaodcluster.setRDOlist(std::move(cluster.ids));
   xaodcluster.globalPosition() = globalPos.cast<float>();
-  xaodcluster.setToTlist(std::move(cluster.tots));
   xaodcluster.setTotalToT( xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(cluster.tots) );
-  xaodcluster.setChargelist(std::move(chargeList));
+  xaodcluster.setToTlist(std::move(cluster.tots));
   xaodcluster.setTotalCharge( xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(chargeList) );
+  xaodcluster.setChargelist(std::move(chargeList));
   xaodcluster.setLVL1A(cluster.lvl1min);
   xaodcluster.setChannelsInPhiEta(siWidth.colRow()[0],
 				  siWidth.colRow()[1]);
