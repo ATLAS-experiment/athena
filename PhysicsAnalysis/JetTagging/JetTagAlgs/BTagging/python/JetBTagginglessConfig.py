@@ -45,7 +45,7 @@ def JetBTagginglessAlgCfg(
             )
         )
     else:      
-        if JetCollection=="AntiKt4EMPFlowByVertexJets":
+        if ByVertex:
             acc.merge(BTagTrackAugmenterByVertexAlgCfg(
                 cfgFlags,
                 TrackCollection='InDetTrackParticles',
