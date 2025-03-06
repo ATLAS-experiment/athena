@@ -121,7 +121,7 @@ def CaloClusterMonitorCfg(flags, suffix = ""):
    
    reco = InEventRecoCA('CaloClusterMonitoring' + suffix)
    
-   reco.merge( hltCaloTopoClusteringCfg(flags, namePrefix="CaloMon", nameSuffix="FS" + suffix, CellsName="CaloCellsFS" + suffix, monitorCells=True, clustersKey="HLT_MonitoringCaloClusters" + suffix) )
+   reco.merge( hltCaloTopoClusteringCfg(flags, namePrefix="CaloMon", nameSuffix="FS" + suffix, CellsName="CaloCellsFS" + suffix, monitorCells=False, clustersKey="HLT_MonitoringCaloClusters" + suffix) )
       
    selAcc = SelectionCA('CaloClusterMonitoringSequence' + suffix)
    
