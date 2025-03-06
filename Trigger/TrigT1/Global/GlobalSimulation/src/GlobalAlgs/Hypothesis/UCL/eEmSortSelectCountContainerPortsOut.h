@@ -5,7 +5,7 @@
 #ifndef GLOBALSIM_EEMSORTSELECTCOUNTCONTAINERPORTSOUT_H
 #define GLOBALSIM_EEMSORTSELECTCOUNTCONTAINERPORTSOUT_H
 
-#include "AlgoDataTypes.h"
+#include "GenericTob.h"
 
 #include <ostream>
 #include <memory>
@@ -32,10 +32,6 @@ namespace GlobalSim {
 
     constexpr static std::size_t NoSortOutWidth{144};
 
-
- 
-
-    // No Sort still to be added (adds another 144 elements) FIXME
     constexpr static std::size_t NumTotalTobWidth{
       std::accumulate(std::begin(SortOutWidth),
 		      std::end(SortOutWidth),

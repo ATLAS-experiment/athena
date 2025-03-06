@@ -6,7 +6,7 @@
 #define GLOBALSIM_INVARIANTMASSDELTAPHIINCLUSIVE2ContainerPORTSOUT_H
 
 #include "AlgoConstants.h"
-#include "AlgoDataTypes.h"
+#include "GenericTob.h"
 
 #include <ostream>
 #include <memory>
