@@ -488,6 +488,12 @@ AMITagHelper.SetAMITag(runArgs=runArgs)
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"beam_energy": str(int(runArgs.ecmEnergy*Units.GeV/2.0))})
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"beam_type": 'collisions'})
 
+## Propagete EventStreamInfo metadata
+from OutputStreamAthenaPool.OutputStreamAthenaPoolConf import CopyEventStreamInfo
+streamInfoTool = CopyEventStreamInfo( "StreamEVGEN_CopyEventStreamInfo" )
+ToolSvc += streamInfoTool
+svcMgr.MetaDataSvc.MetaDataTools += [ streamInfoTool ]
+
 ## Propagate energy argument to the generators
 # TODO: Standardise energy setting in the GenModule interface
 include("EvgenJobTransforms/Generate_ecmenergies.py")
