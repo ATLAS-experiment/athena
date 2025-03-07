@@ -23,23 +23,21 @@ StatusCode TrigMuonLateMuRoIHypoTool::initialize(){
 
 bool TrigMuonLateMuRoIHypoTool::decideOnRoIs(TrigMuonLateMuRoIHypoTool::MuonEFInfo& input) const{
 
-  bool result = false;
   //for pass through mode
   if(m_acceptAll) {
-    result = true;
     ATH_MSG_DEBUG("Accept property is set: taking all the events");
-    return result;
+    return true;
   }
 
   //  decision making
   //Get xAOD::MuonContainer from hypotool
   const  TrigRoiDescriptor* lateRoI = input.roi;
   if( !lateRoI ){
-    ATH_MSG_DEBUG("Retrieval of RoI descriptor");
-    return false;
+    ATH_MSG_DEBUG("Retrieval of RoI descriptor failed");
+    return false; // refuse
   }
   else ATH_MSG_DEBUG("found late muon roi");
-  return result;	
+  return true;	// accept
 }
   
 StatusCode TrigMuonLateMuRoIHypoTool::decide(std::vector<MuonEFInfo>& toolInput) const {
@@ -47,8 +45,8 @@ StatusCode TrigMuonLateMuRoIHypoTool::decide(std::vector<MuonEFInfo>& toolInput)
   for (auto& tool : toolInput){
     if(TrigCompositeUtils::passed(m_decisionId.numeric(), tool.previousDecisionIDs)){
       if(decideOnRoIs(tool)==true){
-	ATH_MSG_DEBUG("Passes selection");
-	TrigCompositeUtils::addDecisionID(m_decisionId, tool.decision);
+        ATH_MSG_DEBUG("Passes selection");
+        TrigCompositeUtils::addDecisionID(m_decisionId, tool.decision);
       }
       else ATH_MSG_DEBUG("Does not pass selection");
     }

@@ -16847,6 +16847,10 @@ HLT_mu10_l2mt_mu4_l2mt_bJpsimumu_L1MU12BOM:
   eventCount: 0
   stepFeatures:
     0: 2
+HLT_mu10_lateMu_L1LATE-MU8F_jJ90:
+  eventCount: 0
+HLT_mu10_lateMu_L1LATE-MU8F_jXE70:
+  eventCount: 0
 HLT_mu10_msonly_L1jMJJ-500-NFF:
   eventCount: 0
 HLT_mu10_msonly_iloosems_mu6noL1_msonly_nscan40_L1jMJJ-500-NFF:

@@ -513,25 +513,27 @@ def muEFInsideOutRecoSequenceCfg(flags, RoIs, name):
   if "Late" in name:
 
     #Need to run hough transform at start of late muon chain   
-    acc.merge(MuonLayerHoughAlgCfg(flags, "TrigMuonLayerHoughAlg"))
+    acc.merge(MuonLayerHoughAlgCfg(flags, "TrigMuonLayerHoughAlg_"+name,MuonPatternCombinationCollection="MuonLayerHoughCombis_"+name,
+                                   Key_MuonLayerHoughToolHoughDataPerSectorVec="HoughDataPerSectorVec_"+name))
+    
 
     # if NSW is excluded from reconstruction (during commissioning)
     if flags.Muon.runCommissioningChain:
-      acc.merge(MuonSegmentFinderAlgCfg(flags, name="TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW"))
+      acc.merge(MuonSegmentFinderAlgCfg(flags, name="TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",MuonLayerHoughCombisKey="MuonLayerHoughCombis_"+name))
       acc.merge(MuonSegmentFilterAlgCfg(flags, name="TrigMuonSegmentFilter_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",
                                                   FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations=())) 
     else:
-      acc.merge(MuonSegmentFinderAlgCfg(flags, "TrigMuonSegmentMaker_"+name))
+      acc.merge(MuonSegmentFinderAlgCfg(flags, "TrigMuonSegmentMaker_"+name,MuonLayerHoughCombisKey="MuonLayerHoughCombis_"+name))
 
 
     # need to run precisions tracking for late muons, since we don't run it anywhere else
     from TrigInDetConfig.TrigInDetConfig import trigInDetPrecisionTrackingCfg
     muLateFlags = getFlagsForActiveConfig(flags, "muonLate", log)
-    acc.merge(trigInDetPrecisionTrackingCfg(muLateFlags, rois= RoIs, signatureName="muonLate"))
+    acc.merge(trigInDetPrecisionTrackingCfg(muLateFlags, rois= RoIs, signatureName="muonLate", in_view=False))
     trackParticles = muLateFlags.Tracking.ActiveConfig.tracks_IDTrig
 
     #Make InDetCandidates
-    acc.merge(MuonCombinedInDetCandidateAlgCfg(flags, name="TrigMuonCombinedInDetCandidateAlg_"+name,TrackParticleLocation = [trackParticles],ForwardParticleLocation=trackParticles, InDetCandidateLocation="InDetCandidates_"+name))
+    acc.merge(MuonCombinedInDetCandidateAlgCfg(flags, name="TrigMuonCombinedInDetCandidateAlg_"+name,TrackParticleLocation=[trackParticles],ForwardParticleLocation=trackParticles,InDetCandidateLocation="InDetCandidates_"+name,ExtendBulk=True))
 
   else:
     # for non-latemu chains, the decoding/hough transform is run in an earlier step
@@ -542,10 +544,10 @@ def muEFInsideOutRecoSequenceCfg(flags, RoIs, name):
 
   cbMuonName = muNames.EFCBInOutName
   if 'Late' in name:
-    cbMuonName = cbMuonName+"_Late"
+    cbMuonName = recordable(cbMuonName+"_Late")
     acc.merge(MuGirlStauAlgCfg(flags, name="TrigMuonLateInsideOutRecoAlg_"+name,InDetCandidateLocation="InDetCandidates_"+name))
-    acc.merge(StauCreatorAlgCfg(flags, name="TrigLateMuonCreatorAlg_"+name, TagMaps=["stauTagMap"],InDetCandidateLocation="InDetCandidates_"+name,
-                                         MuonContainerLocation = cbMuonName, MonTool = MuonCreatorAlgMonitoring(flags, "LateMuonCreatorAlg_"+name)))
+    acc.merge(StauCreatorAlgCfg(flags, name="TrigLateMuonCreatorAlg_"+name, TagMaps=["stauTagMap"], SegmentContainerName="", InDetCandidateLocation="InDetCandidates_"+name,
+                                         MuonContainerLocation=cbMuonName, MonTool=MuonCreatorAlgMonitoring(flags, "LateMuonCreatorAlg_"+name)))
   else:
     acc.merge(MuonInDetToMuonSystemExtensionAlgCfg(flags, name="TrigInDetMuonExtensionAlg_"+name, InputInDetCandidates="InDetCandidates_"+name,
                                                           WriteInDetCandidates="InDetCandidatesSystemExtended_"+name))
@@ -596,8 +598,10 @@ def efmuisoRecoSequenceCfg( flags, RoIs, Muons, doMSiso=False ):
 
 def VDVLateMuCfg(flags):
   acc = ComponentAccumulator()
-  # TODO: Replace MuCTPI_RDO dependency with xAOD::MuonRoIContainer for BC+1, BC-1 candidates, ATR-25031
-  dataObjects = [( 'MuCTPI_RDO' , 'StoreGateSvc+MUCTPI_RDO' )]
+  dataObjects = [( 'xAOD::MuonRoIContainer', 'StoreGateSvc+LVL1MuonRoIsBCm2' ),
+                 ( 'xAOD::MuonRoIContainer', 'StoreGateSvc+LVL1MuonRoIsBCm1' ),
+                 ( 'xAOD::MuonRoIContainer', 'StoreGateSvc+LVL1MuonRoIsBCp1' ),
+                 ( 'xAOD::MuonRoIContainer', 'StoreGateSvc+LVL1MuonRoIsBCp2' )]
 
   alg = CompFactory.AthViews.ViewDataVerifier( name = "efLateMuRoIVDV",
                                                DataObjects = dataObjects)
@@ -608,10 +612,6 @@ def VDVLateMuCfg(flags):
 def efLateMuRoISequenceCfg(flags):
 
   acc = VDVLateMuCfg(flags)
-  # Make sure the RDOs are still available at whole-event level
-  loadFromSG= [( 'MuCTPI_RDO' , 'StoreGateSvc+MUCTPI_RDO' )]
-  from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-  acc.merge(SGInputLoaderCfg(flags, Load=loadFromSG))
 
   from TrigmuRoI.TrigmuRoIConfig import TrigmuRoIConfig
   sequenceOut = "LateMuRoIs"
