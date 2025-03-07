@@ -51,6 +51,34 @@ namespace GlobalSim {
 								     m_portsOutReadKey,
 								     ctx);
     CHECK(ports_out.isValid());
+
+    {
+      std::stringstream ss;
+      ss << "eEmTobs from FIFO:\n";
+      for (const auto& i : *fifo) {
+	ss << i.m_I_eEmTobs << '\n';
+      }
+
+      ATH_MSG_DEBUG(ss.str());
+    }
+
+    {
+      std::stringstream ss;
+      ss << "eEmSortSelectCountContainerPortsOut tob bits:\n";
+      for (const auto& tob : ports_out->m_O_eEmGenTob) {
+	ss << tob->as_bits() << '\n';
+      }
+      ss << '\n';
+      ATH_MSG_DEBUG(ss.str());
+    }
+    
+    {
+      std::stringstream ss;
+      ss << "eEmSortSelectCountContainerPortsOut multiplicity bits:\n";
+      ss << *(ports_out->m_O_Multiplicity) << '\n';
+      ATH_MSG_DEBUG(ss.str());
+    }
+ 
    
     return StatusCode::SUCCESS;
   }

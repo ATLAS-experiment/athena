@@ -42,11 +42,25 @@ namespace GlobalSim {
 	"key to write out Fifo containing ports data"};
 
     Gaudi::Property<std::string>
-    m_eEmFileName{this,
-      "eEmFileName",
+    m_testsFileName{this,
+      "testsFileName",
       {},
       "name of file with APP FIFO data"};
 
+    
+    Gaudi::Property<std::string>
+    m_expectedMults_FileName{this,
+      "expectedMults_FileName",
+      {},
+      "name of file with the expected multiplicity values from HW Sim"};
+    
+    Gaudi::Property<std::string>
+    m_expectedTobs_FileName{this,
+      "expectedTobs_FileName",
+      {},
+      "name of file with the expected Generic TOB values from HW Sim"};
+    
+    
     // One elenement of the following vector is written out each event.
     std::vector<std::unique_ptr<GepAlgoHypothesisFIFO>>  m_fifos;
     std::size_t m_fifo_ptr{0};
@@ -54,6 +68,8 @@ namespace GlobalSim {
     // m_fifo fillers, called from init()
     StatusCode init_manual();
     StatusCode init_from_file();
+    StatusCode init_tests_from_file();
+    StatusCode init_expected_mult_from_file();
 
     StatusCode
     hexTOB2bitsetTOB(std::string, std::bitset<72>&) const;

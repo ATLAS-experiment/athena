@@ -32,6 +32,7 @@ namespace GlobalSim {
     constexpr static std::size_t GenericMuonFlagBitWidth{2};
     
     
+    GenericTob(){};
     GenericTob(const eEmTobPtr& in_tob);
     
     unsigned int Et() const {return m_Et;}
