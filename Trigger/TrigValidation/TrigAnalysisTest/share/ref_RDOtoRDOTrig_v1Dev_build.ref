@@ -251,132 +251,85 @@ HLT_2g10_loose_EgammaPEBTLA_L12DR15-M70-2eEM9L:
   eventCount: 0
   stepCounts:
     0: 1
-    1: 1
-    2: 1
   stepFeatures:
-    0: 5
-    1: 2
-    2: 2
+    0: 3
+    1: 1
 HLT_2g10_loose_L1eEM9_mu20_L1MU14FCH:
   eventCount: 0
   stepCounts:
-    0: 5
-    1: 1
-    2: 1
+    0: 3
   stepFeatures:
-    0: 29
-    1: 9
-    2: 3
-    3: 1
+    0: 15
+    1: 4
 HLT_2g10_loose_L1eEM9_mu23_L1MU18VFCH:
   eventCount: 0
   stepCounts:
-    0: 5
-    1: 1
-    2: 1
+    0: 3
   stepFeatures:
-    0: 29
-    1: 9
-    2: 3
-    3: 1
+    0: 15
+    1: 4
 HLT_2g10_medium_EgammaPEBTLA_L12DR15-M70-2eEM9L:
   eventCount: 0
   stepCounts:
     0: 1
-    1: 1
-    2: 1
   stepFeatures:
-    0: 5
-    1: 2
-    2: 2
+    0: 3
+    1: 1
 HLT_2g13_loose_EgammaPEBTLA_L113DR25-25M70-2eEM12L:
-  eventCount: 1
-  stepCounts:
-    0: 1
-    1: 1
-    2: 1
-    3: 1
-    4: 1
+  eventCount: 0
   stepFeatures:
-    0: 2
-    1: 2
-    2: 2
-    3: 2
-    4: 2
+    0: 1
 HLT_2g13_loose_EgammaPEBTLA_L12DR15-0M30-2eEM12L:
   eventCount: 0
 HLT_2g13_loose_EgammaPEBTLA_L12DR15-M70-2eEM12L:
   eventCount: 0
   stepCounts:
     0: 1
-    1: 1
-    2: 1
-  stepFeatures:
-    0: 3
-    1: 2
-    2: 2
-HLT_2g13_loose_L113DR25-25M70-2eEM12L:
-  eventCount: 1
-  stepCounts:
-    0: 1
-    1: 1
-    2: 1
-    3: 1
   stepFeatures:
     0: 2
-    1: 2
-    2: 2
-    3: 2
+    1: 1
+HLT_2g13_loose_L113DR25-25M70-2eEM12L:
+  eventCount: 0
+  stepFeatures:
+    0: 1
 HLT_2g13_loose_L12DR15-0M30-2eEM12L:
   eventCount: 0
 HLT_2g13_medium_EgammaPEBTLA_L12DR15-M70-2eEM12L:
   eventCount: 0
   stepCounts:
     0: 1
+  stepFeatures:
+    0: 2
+    1: 1
+HLT_2g15_loose_25dphiAA_invmAA80_L12eEM9:
+  eventCount: 0
+  stepCounts:
+    0: 11
     1: 1
     2: 1
   stepFeatures:
-    0: 3
-    1: 2
+    0: 32
+    1: 8
     2: 2
-HLT_2g15_loose_25dphiAA_invmAA80_L12eEM9:
-  eventCount: 1
-  stepCounts:
-    0: 16
-    1: 5
-    2: 5
     3: 1
-  stepFeatures:
-    0: 48
-    1: 15
-    2: 10
-    3: 5
 HLT_2g15_loose_25dphiAA_invmAA80_L1DPHI-M70-2eEM15M:
   eventCount: 0
 HLT_2g15_tight_25dphiAA_L12eEM9:
   eventCount: 0
   stepCounts:
-    0: 16
-    1: 5
-    2: 5
+    0: 9
   stepFeatures:
-    0: 48
-    1: 15
-    2: 10
-    3: 3
+    0: 28
+    1: 7
 HLT_2g15_tight_25dphiAA_L1DPHI-M70-2eEM15M:
   eventCount: 0
 HLT_2g15_tight_25dphiAA_invmAA80_L12eEM9:
   eventCount: 0
   stepCounts:
-    0: 16
-    1: 5
-    2: 5
+    0: 9
   stepFeatures:
-    0: 48
-    1: 15
-    2: 10
-    3: 3
+    0: 28
+    1: 7
 HLT_2g15_tight_25dphiAA_invmAA80_L1DPHI-M70-2eEM15M:
   eventCount: 0
 HLT_2g15_tight_L1DPHI-M70-2eEM15M:
@@ -384,36 +337,24 @@ HLT_2g15_tight_L1DPHI-M70-2eEM15M:
 HLT_2g20_loose_L12eEM18L:
   eventCount: 0
   stepCounts:
-    0: 3
-    1: 2
-    2: 2
+    0: 2
   stepFeatures:
-    0: 7
-    1: 5
-    2: 4
-    3: 1
+    0: 5
+    1: 2
 HLT_2g20_medium_L12eEM18L:
   eventCount: 0
   stepCounts:
-    0: 3
-    1: 2
-    2: 2
+    0: 2
   stepFeatures:
-    0: 7
-    1: 5
-    2: 4
-    3: 1
+    0: 5
+    1: 2
 HLT_2g20_tight_icaloloose_L12eEM18M:
   eventCount: 0
   stepCounts:
-    0: 2
-    1: 2
-    2: 2
+    0: 1
   stepFeatures:
-    0: 5
-    1: 4
-    2: 4
-    3: 1
+    0: 3
+    1: 1
 HLT_2g20_tight_icaloloose_ringer_L12eEM18M:
   eventCount: 0
   stepCounts:
@@ -424,14 +365,10 @@ HLT_2g20_tight_icaloloose_ringer_L12eEM18M:
 HLT_2g22_tight_L12eEM18M:
   eventCount: 0
   stepCounts:
-    0: 2
-    1: 2
-    2: 1
+    0: 1
   stepFeatures:
-    0: 5
-    1: 4
-    2: 3
-    3: 1
+    0: 3
+    1: 1
 HLT_2g22_tight_L12eEM9_EMPTY:
   eventCount: 0
 HLT_2g22_tight_L1eEM15_EMPTY:
@@ -449,22 +386,12 @@ HLT_2g22_tight_ringer_L12eEM18M:
     1: 1
 HLT_2g25_loose_g15_loose_L12eEM24L:
   eventCount: 0
-  stepCounts:
-    0: 1
   stepFeatures:
-    0: 13
-    1: 3
+    0: 9
 HLT_2g50_loose_L12eEM24L:
   eventCount: 0
-  stepCounts:
-    0: 2
-    1: 1
-    2: 1
   stepFeatures:
-    0: 5
-    1: 3
-    2: 2
-    3: 1
+    0: 3
 HLT_2g50_loose_ringer_L12eEM24L:
   eventCount: 0
   stepFeatures:
@@ -478,41 +405,38 @@ HLT_2g50_tight_L1eEM9_EMPTY:
 HLT_2g50_tight_L1eEM9_UNPAIRED_ISO:
   eventCount: 0
 HLT_2g9_loose_25dphiAA_invmAA80_L12eEM9:
-  eventCount: 2
+  eventCount: 0
   stepCounts:
-    0: 18
-    1: 14
-    2: 14
-    3: 2
+    0: 11
+    1: 7
+    2: 7
   stepFeatures:
-    0: 76
-    1: 49
-    2: 51
-    3: 12
+    0: 33
+    1: 21
+    2: 21
+    3: 4
 HLT_2g9_loose_25dphiAA_invmAA80_L1DPHI-M70-2eEM9:
-  eventCount: 2
+  eventCount: 0
   stepCounts:
-    0: 5
-    1: 4
-    2: 4
-    3: 2
+    0: 3
+    1: 3
+    2: 3
   stepFeatures:
-    0: 21
-    1: 15
-    2: 14
-    3: 6
+    0: 8
+    1: 6
+    2: 6
+    3: 2
 HLT_2g9_loose_25dphiAA_invmAA80_L1DPHI-M70-2eEM9L:
-  eventCount: 2
+  eventCount: 0
   stepCounts:
-    0: 2
+    0: 1
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 3
     1: 2
     2: 2
-    3: 2
-  stepFeatures:
-    0: 10
-    1: 10
-    2: 10
-    3: 5
+    3: 1
 HLT_2j100_2timeSig15_L1jJ90:
   eventCount: 0
 HLT_2j100_2timeSig_L1jJ90:
@@ -3777,24 +3701,24 @@ HLT_e20_lhvloose_L1eEM18L:
 HLT_e24_lhmedium_g12_loose_g12_loose_02dRAB_02dRAC_02dRBC_L1eEM24L_3eEM12L:
   eventCount: 0
   stepFeatures:
-    0: 6
+    0: 4
 HLT_e24_lhmedium_g25_medium_02dRAB_L12eEM24L:
   eventCount: 0
   stepCounts:
-    0: 2
-    1: 2
-    2: 2
-    3: 2
+    0: 1
+    1: 1
+    2: 1
+    3: 1
+    4: 1
+    5: 1
+  stepFeatures:
+    0: 7
+    1: 3
+    2: 6
+    3: 3
     4: 2
     5: 2
-  stepFeatures:
-    0: 9
-    1: 6
-    2: 9
-    3: 5
-    4: 3
-    5: 3
-    6: 2
+    6: 1
 HLT_e24_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM26M:
   eventCount: 0
   stepCounts:
@@ -3923,16 +3847,16 @@ HLT_e25_mergedtight_g35_medium_90invmAB_02dRAB_L12eEM24L:
   eventCount: 0
   stepCounts:
     0: 2
-    1: 2
-    2: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
   stepFeatures:
-    0: 10
-    1: 7
-    2: 25
-    3: 5
+    0: 8
+    1: 5
+    2: 7
+    3: 3
     4: 2
     5: 2
     6: 1
@@ -7790,14 +7714,14 @@ HLT_e30_lhloose_nopix_lrtmedium_L1eEM28M:
 HLT_e30_lhloose_nopix_lrtmedium_probe_g25_medium_L1eEM24L:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
   stepFeatures:
-    0: 12
-    1: 9
-    2: 9
+    0: 8
+    1: 5
+    2: 5
     3: 4
     4: 4
 HLT_e30_lhtight_ivarloose_noringer_L1eEM28M:
@@ -7957,9 +7881,9 @@ HLT_e5_etcut_L1eEM5:
 HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L:
   eventCount: 2
   stepCounts:
-    0: 9
-    1: 9
-    2: 9
+    0: 7
+    1: 6
+    2: 6
     3: 4
     4: 2
     5: 2
@@ -7967,9 +7891,9 @@ HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L:
     7: 2
     8: 2
   stepFeatures:
-    0: 12
-    1: 10
-    2: 10
+    0: 8
+    1: 6
+    2: 6
     3: 4
     4: 7
     5: 5
@@ -8747,38 +8671,38 @@ HLT_g100_loose_L1eEM26M:
   eventCount: 1
   stepCounts:
     0: 2
-    1: 2
+    1: 1
     2: 1
     3: 1
   stepFeatures:
-    0: 4
-    1: 3
-    2: 2
+    0: 2
+    1: 1
+    2: 1
     3: 1
 HLT_g100_loose_L1eEM28M:
   eventCount: 1
   stepCounts:
     0: 2
-    1: 2
+    1: 1
     2: 1
     3: 1
   stepFeatures:
-    0: 4
-    1: 3
-    2: 2
+    0: 2
+    1: 1
+    2: 1
     3: 1
 HLT_g10_loose_L1eEM9:
-  eventCount: 7
+  eventCount: 6
   stepCounts:
-    0: 19
-    1: 13
-    2: 11
-    3: 7
+    0: 17
+    1: 9
+    2: 9
+    3: 6
   stepFeatures:
-    0: 77
-    1: 23
-    2: 22
-    3: 12
+    0: 33
+    1: 11
+    2: 12
+    3: 6
 HLT_g120_loose_L1eEM26M:
   eventCount: 1
   stepCounts:
@@ -8816,19 +8740,12 @@ HLT_g120_loose_ringer_L1eEM26M:
     2: 1
     3: 1
 HLT_g13_loose_g10_loose_EgammaPEBTLA_L113DR25-25M70-eEM12LeEM9L:
-  eventCount: 1
+  eventCount: 0
   stepCounts:
     0: 1
-    1: 1
-    2: 1
-    3: 1
-    4: 1
   stepFeatures:
-    0: 9
-    1: 4
-    2: 4
-    3: 4
-    4: 4
+    0: 3
+    1: 2
 HLT_g13_loose_g10_loose_EgammaPEBTLA_L12DR15-0M30-eEM12LeEM9L:
   eventCount: 0
 HLT_g140_loose_L1eEM26M:
@@ -8965,29 +8882,29 @@ HLT_g15_loose_L1eEM10L_2mu10_msonly_L1MU3V_EMPTY:
 HLT_g15_loose_L1eEM10L_2mu10_msonly_L1MU3V_UNPAIRED_ISO:
   eventCount: 0
 HLT_g15_loose_L1eEM12L:
-  eventCount: 6
-  stepCounts:
-    0: 10
-    1: 9
-    2: 8
-    3: 6
-  stepFeatures:
-    0: 17
-    1: 14
-    2: 12
-    3: 7
-HLT_g15_tight_L1eEM12L:
   eventCount: 5
   stepCounts:
-    0: 10
-    1: 9
-    2: 8
+    0: 7
+    1: 7
+    2: 7
     3: 5
   stepFeatures:
-    0: 17
-    1: 14
-    2: 12
+    0: 9
+    1: 7
+    2: 7
     3: 5
+HLT_g15_tight_L1eEM12L:
+  eventCount: 4
+  stepCounts:
+    0: 7
+    1: 7
+    2: 7
+    3: 4
+  stepFeatures:
+    0: 9
+    1: 7
+    2: 7
+    3: 4
 HLT_g15_tight_ringer_L1eEM12L:
   eventCount: 4
   stepCounts:
@@ -9001,29 +8918,29 @@ HLT_g15_tight_ringer_L1eEM12L:
     2: 7
     3: 4
 HLT_g20_loose_L1eEM18L:
-  eventCount: 6
+  eventCount: 5
   stepCounts:
-    0: 9
-    1: 9
-    2: 9
-    3: 6
+    0: 7
+    1: 7
+    2: 7
+    3: 5
   stepFeatures:
-    0: 13
-    1: 11
-    2: 11
-    3: 6
+    0: 9
+    1: 7
+    2: 7
+    3: 5
 HLT_g20_loose_L1eEM18M:
-  eventCount: 6
+  eventCount: 5
   stepCounts:
-    0: 9
-    1: 9
-    2: 9
-    3: 6
+    0: 7
+    1: 7
+    2: 7
+    3: 5
   stepFeatures:
-    0: 12
-    1: 11
-    2: 11
-    3: 6
+    0: 8
+    1: 7
+    2: 7
+    3: 5
 HLT_g20_loose_ringer_L1eEM18M:
   eventCount: 5
   stepCounts:
@@ -9039,14 +8956,14 @@ HLT_g20_loose_ringer_L1eEM18M:
 HLT_g20_medium_L1eEM18M:
   eventCount: 4
   stepCounts:
-    0: 9
-    1: 9
-    2: 9
+    0: 7
+    1: 7
+    2: 7
     3: 4
   stepFeatures:
-    0: 12
-    1: 11
-    2: 11
+    0: 8
+    1: 7
+    2: 7
     3: 4
 HLT_g20_medium_ringer_L1eEM18M:
   eventCount: 4
@@ -9063,27 +8980,27 @@ HLT_g20_medium_ringer_L1eEM18M:
 HLT_g20_tight_L1eEM18M:
   eventCount: 4
   stepCounts:
-    0: 9
-    1: 9
-    2: 9
+    0: 7
+    1: 7
+    2: 7
     3: 4
   stepFeatures:
-    0: 12
-    1: 11
-    2: 11
+    0: 8
+    1: 7
+    2: 7
     3: 4
 HLT_g20_tight_icaloloose_L1eEM18M:
   eventCount: 4
   stepCounts:
-    0: 9
-    1: 9
-    2: 9
+    0: 7
+    1: 7
+    2: 7
     3: 4
     4: 4
   stepFeatures:
-    0: 12
-    1: 11
-    2: 11
+    0: 8
+    1: 7
+    2: 7
     3: 4
     4: 4
 HLT_g20_tight_icaloloose_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jMJJ-300:
@@ -9096,9 +9013,9 @@ HLT_g20_tight_icaloloose_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS500j35_pf_ftf_
     4: 1
     5: 1
   stepFeatures:
-    0: 5
-    1: 4
-    2: 4
+    0: 3
+    1: 2
+    2: 2
     3: 1
     4: 1
     5: 3
@@ -9112,9 +9029,9 @@ HLT_g20_tight_icaloloose_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS500j35_pf_ftf_
     4: 1
     5: 1
   stepFeatures:
-    0: 5
-    1: 4
-    2: 4
+    0: 3
+    1: 2
+    2: 2
     3: 1
     4: 1
     5: 3
@@ -9129,9 +9046,9 @@ HLT_g20_tight_icaloloose_j40_j35a_j20c_j0_DJMASS300j35_pf_ftf_L1eEM22M_jMJJ-300:
     5: 1
     6: 1
   stepFeatures:
-    0: 5
-    1: 4
-    2: 4
+    0: 3
+    1: 2
+    2: 2
     3: 1
     4: 1
     5: 4
@@ -9146,9 +9063,9 @@ HLT_g20_tight_icaloloose_j40_j35a_j25a_j25_j20c_j0_DJMASS300j35_pf_ftf_L1eEM22M_
     4: 1
     5: 1
   stepFeatures:
-    0: 5
-    1: 4
-    2: 4
+    0: 3
+    1: 2
+    2: 2
     3: 1
     4: 1
     5: 6
@@ -9175,9 +9092,9 @@ HLT_g20_tight_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jM
     3: 1
     4: 1
   stepFeatures:
-    0: 5
-    1: 4
-    2: 4
+    0: 3
+    1: 2
+    2: 2
     3: 1
     4: 3
 HLT_g20_tight_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jMJJ-300:
@@ -9189,9 +9106,9 @@ HLT_g20_tight_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jM
     3: 1
     4: 1
   stepFeatures:
-    0: 5
-    1: 4
-    2: 4
+    0: 3
+    1: 2
+    2: 2
     3: 1
     4: 3
 HLT_g20_tight_probe_L1eEM18M_2mu14_L12MU8F:
@@ -9215,14 +9132,14 @@ HLT_g20_tight_ringer_L1eEM18M:
 HLT_g22_tight_L1eEM18M:
   eventCount: 4
   stepCounts:
-    0: 9
-    1: 9
-    2: 9
+    0: 7
+    1: 7
+    2: 6
     3: 4
   stepFeatures:
-    0: 12
-    1: 11
-    2: 10
+    0: 8
+    1: 7
+    2: 6
     3: 4
 HLT_g22_tight_probe_L1eEM18M_2mu14_L12MU8F:
   eventCount: 0
@@ -9245,17 +9162,17 @@ HLT_g22_tight_ringer_L1eEM18M:
 HLT_g24_tight_icaloloose_j40c_j30c_j24c_03dRAB35_03dRAC35_15dRBC45_50invmBC130_pf_ftf_L1eEM26M:
   eventCount: 2
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
     6: 2
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 12
@@ -9263,17 +9180,17 @@ HLT_g24_tight_icaloloose_j40c_j30c_j24c_03dRAB35_03dRAC35_15dRBC45_50invmBC130_p
 HLT_g24_tight_icaloloose_j50c_j30c_j24c_03dRAB30_03dRAC30_15dRBC45_50invmBC130_pf_ftf_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
     6: 1
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 12
@@ -9281,17 +9198,17 @@ HLT_g24_tight_icaloloose_j50c_j30c_j24c_03dRAB30_03dRAC30_15dRBC45_50invmBC130_p
 HLT_g24_tight_icaloloose_j50c_j30c_j24c_03dRAB35_03dRAC35_15dRBC45_50invmBC130_pf_ftf_L1eEM26M:
   eventCount: 2
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
     6: 2
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 12
@@ -9301,17 +9218,17 @@ HLT_g250_etcut_L1eEM26M:
 HLT_g250_etcut_L1eEM28M:
   eventCount: 0
 HLT_g25_loose_L1eEM24L:
-  eventCount: 6
+  eventCount: 5
   stepCounts:
-    0: 9
-    1: 9
-    2: 9
-    3: 6
+    0: 7
+    1: 6
+    2: 6
+    3: 5
   stepFeatures:
-    0: 12
-    1: 10
-    2: 10
-    3: 6
+    0: 8
+    1: 6
+    2: 6
+    3: 5
 HLT_g25_loose_ringer_L1eEM24L:
   eventCount: 5
   stepCounts:
@@ -9327,30 +9244,30 @@ HLT_g25_loose_ringer_L1eEM24L:
 HLT_g25_loose_xe40_cell_xe50_tcpufit_18dphiAB_18dphiAC_80mTAC_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
-    3: 6
+    0: 6
+    1: 5
+    2: 5
+    3: 5
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
-    3: 6
+    0: 6
+    1: 5
+    2: 5
+    3: 5
 HLT_g25_medium_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 8
     5: 8
@@ -9359,18 +9276,18 @@ HLT_g25_medium_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM
 HLT_g25_medium_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 8
     5: 8
@@ -9379,18 +9296,18 @@ HLT_g25_medium_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM
 HLT_g25_medium_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 8
     5: 8
@@ -9399,18 +9316,18 @@ HLT_g25_medium_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L
 HLT_g25_medium_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 8
     5: 8
@@ -9419,144 +9336,128 @@ HLT_g25_medium_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L
 HLT_g25_medium_4j35a_j0_DJMASS1000j35_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
 HLT_g25_medium_4j35a_j0_DJMASS1000j35_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
 HLT_g25_medium_L1eEM18L_mu24_L1MU14FCH:
   eventCount: 0
   stepCounts:
-    0: 3
-    1: 2
-    2: 2
+    0: 2
   stepFeatures:
-    0: 10
-    1: 5
-    2: 4
-    3: 2
+    0: 8
+    1: 2
 HLT_g25_medium_L1eEM18L_mu24_L1MU18VFCH:
   eventCount: 0
   stepCounts:
-    0: 3
-    1: 2
-    2: 2
+    0: 2
   stepFeatures:
-    0: 10
-    1: 5
-    2: 4
-    3: 2
+    0: 8
+    1: 2
 HLT_g25_medium_L1eEM24L:
   eventCount: 4
   stepCounts:
-    0: 9
-    1: 9
-    2: 9
+    0: 7
+    1: 6
+    2: 6
     3: 4
   stepFeatures:
-    0: 12
-    1: 10
-    2: 10
+    0: 8
+    1: 6
+    2: 6
     3: 4
 HLT_g25_medium_L1eEM26M_mu24_ivarmedium_L1MU14FCH:
   eventCount: 0
   stepCounts:
-    0: 2
-    1: 2
-    2: 2
+    0: 1
   stepFeatures:
-    0: 9
-    1: 4
-    2: 4
-    3: 2
+    0: 7
+    1: 1
 HLT_g25_medium_L1eEM26M_mu24_ivarmedium_L1MU18VFCH:
   eventCount: 0
   stepCounts:
-    0: 2
-    1: 2
-    2: 2
+    0: 1
   stepFeatures:
-    0: 9
-    1: 4
-    2: 4
-    3: 2
+    0: 7
+    1: 1
 HLT_g25_medium_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 12
     5: 12
 HLT_g25_medium_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 12
     5: 12
 HLT_g25_medium_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 12
     5: 12
 HLT_g25_medium_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 12
     5: 12
@@ -9581,164 +9482,164 @@ HLT_g25_medium_ringer_L1eEM24L:
 HLT_g25_medium_tau25_dikaonmass_tracktwoMVA_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
   stepFeatures:
-    0: 37
-    1: 36
-    2: 36
-    3: 31
+    0: 33
+    1: 28
+    2: 24
+    3: 23
 HLT_g25_medium_tau25_dikaonmass_tracktwoMVA_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
   stepFeatures:
-    0: 37
-    1: 36
-    2: 36
-    3: 31
+    0: 33
+    1: 28
+    2: 24
+    3: 23
 HLT_g25_medium_tau25_dipion1_tracktwoMVA_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
   stepFeatures:
-    0: 37
-    1: 36
-    2: 36
-    3: 31
+    0: 33
+    1: 28
+    2: 24
+    3: 23
 HLT_g25_medium_tau25_dipion1_tracktwoMVA_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
   stepFeatures:
-    0: 37
-    1: 36
-    2: 36
-    3: 31
+    0: 33
+    1: 28
+    2: 24
+    3: 23
 HLT_g25_medium_tau25_dipion2_tracktwoMVA_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
   stepFeatures:
-    0: 37
-    1: 36
-    2: 36
-    3: 31
+    0: 33
+    1: 28
+    2: 24
+    3: 23
 HLT_g25_medium_tau25_dipion2_tracktwoMVA_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
   stepFeatures:
-    0: 37
-    1: 36
-    2: 36
-    3: 31
+    0: 33
+    1: 28
+    2: 24
+    3: 23
 HLT_g25_medium_tau25_kaonpi1_tracktwoMVA_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
   stepFeatures:
-    0: 37
-    1: 36
-    2: 36
-    3: 31
+    0: 33
+    1: 28
+    2: 24
+    3: 23
 HLT_g25_medium_tau25_kaonpi1_tracktwoMVA_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
   stepFeatures:
-    0: 37
-    1: 36
-    2: 36
-    3: 31
+    0: 33
+    1: 28
+    2: 24
+    3: 23
 HLT_g25_medium_tau25_kaonpi2_tracktwoMVA_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
   stepFeatures:
-    0: 37
-    1: 36
-    2: 36
-    3: 31
+    0: 33
+    1: 28
+    2: 24
+    3: 23
 HLT_g25_medium_tau25_kaonpi2_tracktwoMVA_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
   stepFeatures:
-    0: 37
-    1: 36
-    2: 36
-    3: 31
+    0: 33
+    1: 28
+    2: 24
+    3: 23
 HLT_g25_medium_tau25_singlepion_tracktwoMVA_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
   stepFeatures:
-    0: 37
-    1: 36
-    2: 36
-    3: 31
+    0: 33
+    1: 28
+    2: 24
+    3: 23
     4: 1
 HLT_g25_medium_tau25_singlepion_tracktwoMVA_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
   stepFeatures:
-    0: 37
-    1: 36
-    2: 36
-    3: 31
+    0: 33
+    1: 28
+    2: 24
+    3: 23
     4: 1
 HLT_g25_tight_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 8
     5: 8
@@ -9747,18 +9648,18 @@ HLT_g25_tight_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM2
 HLT_g25_tight_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 8
     5: 8
@@ -9767,18 +9668,18 @@ HLT_g25_tight_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM2
 HLT_g25_tight_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 8
     5: 8
@@ -9787,18 +9688,18 @@ HLT_g25_tight_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1
 HLT_g25_tight_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 8
     5: 8
@@ -9807,9 +9708,9 @@ HLT_g25_tight_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1
 HLT_g25_tight_icaloloose_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
@@ -9817,9 +9718,9 @@ HLT_g25_tight_icaloloose_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX
     7: 4
     8: 1
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 8
@@ -9829,9 +9730,9 @@ HLT_g25_tight_icaloloose_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX
 HLT_g25_tight_icaloloose_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
@@ -9839,9 +9740,9 @@ HLT_g25_tight_icaloloose_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX
     7: 4
     8: 1
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 8
@@ -9851,9 +9752,9 @@ HLT_g25_tight_icaloloose_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX
 HLT_g25_tight_icaloloose_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
@@ -9861,9 +9762,9 @@ HLT_g25_tight_icaloloose_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo
     7: 4
     8: 1
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 8
@@ -9873,9 +9774,9 @@ HLT_g25_tight_icaloloose_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo
 HLT_g25_tight_icaloloose_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
@@ -9883,9 +9784,9 @@ HLT_g25_tight_icaloloose_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo
     7: 4
     8: 1
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 8
@@ -9895,45 +9796,45 @@ HLT_g25_tight_icaloloose_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo
 HLT_g25_tight_icaloloose_L1eEM24L:
   eventCount: 4
   stepCounts:
-    0: 9
-    1: 9
-    2: 9
+    0: 7
+    1: 6
+    2: 6
     3: 4
     4: 4
   stepFeatures:
-    0: 12
-    1: 10
-    2: 10
+    0: 8
+    1: 6
+    2: 6
     3: 4
     4: 4
 HLT_g25_tight_icaloloose_L1eEM26M:
   eventCount: 4
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
 HLT_g25_tight_icaloloose_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
     6: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 12
@@ -9941,17 +9842,17 @@ HLT_g25_tight_icaloloose_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_
 HLT_g25_tight_icaloloose_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
     6: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 12
@@ -9959,17 +9860,17 @@ HLT_g25_tight_icaloloose_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_
 HLT_g25_tight_icaloloose_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
     6: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 12
@@ -9977,17 +9878,17 @@ HLT_g25_tight_icaloloose_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_
 HLT_g25_tight_icaloloose_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
     6: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 12
@@ -9995,149 +9896,149 @@ HLT_g25_tight_icaloloose_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_
 HLT_g25_tight_icalomedium_L1eEM24L:
   eventCount: 4
   stepCounts:
-    0: 9
-    1: 9
-    2: 9
+    0: 7
+    1: 6
+    2: 6
     3: 4
     4: 4
   stepFeatures:
-    0: 12
-    1: 10
-    2: 10
+    0: 8
+    1: 6
+    2: 6
     3: 4
     4: 4
 HLT_g25_tight_icalotight_L1eEM24L:
   eventCount: 4
   stepCounts:
-    0: 9
-    1: 9
-    2: 9
+    0: 7
+    1: 6
+    2: 6
     3: 4
     4: 4
   stepFeatures:
-    0: 12
-    1: 10
-    2: 10
+    0: 8
+    1: 6
+    2: 6
     3: 4
     4: 4
 HLT_g25_tight_icalotight_L1eEM26M:
   eventCount: 4
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
 HLT_g25_tight_icalotight_xe40_cell_xe40_tcpufit_xe40_pfopufit_80mTAC_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 6
 HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_80mTAC_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
 HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
 HLT_g25_tight_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 12
     5: 12
 HLT_g25_tight_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 12
     5: 12
 HLT_g25_tight_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 12
     5: 12
 HLT_g25_tight_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 8
-    1: 8
-    2: 8
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 10
-    1: 9
-    2: 9
+    0: 6
+    1: 5
+    2: 5
     3: 4
     4: 12
     5: 12
@@ -10146,94 +10047,86 @@ HLT_g300_etcut_L1eEM26M:
 HLT_g300_etcut_L1eEM28M:
   eventCount: 0
 HLT_g30_loose_L1eEM24L:
-  eventCount: 5
+  eventCount: 4
   stepCounts:
-    0: 8
-    1: 8
-    2: 7
-    3: 5
+    0: 6
+    1: 5
+    2: 4
+    3: 4
   stepFeatures:
-    0: 11
-    1: 9
-    2: 8
-    3: 5
+    0: 7
+    1: 5
+    2: 4
+    3: 4
 HLT_g35_loose_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
-  eventCount: 5
+  eventCount: 4
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
-    3: 5
-    4: 5
-    5: 5
-    6: 5
-    7: 5
+    0: 5
+    1: 4
+    2: 4
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
-    3: 5
-    4: 5
-    5: 25
-    6: 30
-    7: 10
+    0: 5
+    1: 4
+    2: 4
+    3: 4
+    4: 4
+    5: 20
+    6: 24
+    7: 8
 HLT_g35_loose_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
-  eventCount: 5
+  eventCount: 4
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
-    3: 5
-    4: 5
-    5: 5
-    6: 5
-    7: 5
+    0: 5
+    1: 4
+    2: 4
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
-    3: 5
-    4: 5
-    5: 25
-    6: 30
-    7: 10
+    0: 5
+    1: 4
+    2: 4
+    3: 4
+    4: 4
+    5: 20
+    6: 24
+    7: 8
 HLT_g35_loose_mu15_mu2noL1_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 2
-    1: 2
-    2: 2
+    0: 1
   stepFeatures:
-    0: 11
-    1: 4
-    2: 4
-    3: 2
+    0: 7
+    1: 1
 HLT_g35_loose_mu18_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 2
-    1: 2
-    2: 2
+    0: 1
   stepFeatures:
-    0: 11
-    1: 4
-    2: 4
-    3: 2
+    0: 7
+    1: 1
 HLT_g35_medium_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 8
     5: 8
@@ -10242,18 +10135,18 @@ HLT_g35_medium_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM
 HLT_g35_medium_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 8
     5: 8
@@ -10262,18 +10155,18 @@ HLT_g35_medium_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM
 HLT_g35_medium_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 8
     5: 8
@@ -10282,18 +10175,18 @@ HLT_g35_medium_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L
 HLT_g35_medium_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 8
     5: 8
@@ -10302,50 +10195,46 @@ HLT_g35_medium_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L
 HLT_g35_medium_4j35a_j0_DJMASS1000j35_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
 HLT_g35_medium_4j35a_j0_DJMASS1000j35_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
 HLT_g35_medium_L1eEM24L:
   eventCount: 4
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
 HLT_g35_medium_g25_medium_L12eEM24L:
   eventCount: 0
   stepCounts:
-    0: 3
-    1: 1
-    2: 1
+    0: 1
   stepFeatures:
-    0: 11
-    1: 8
-    2: 4
-    3: 2
+    0: 7
+    1: 2
 HLT_g35_medium_g25_medium_L12eEM9_EMPTY:
   eventCount: 0
 HLT_g35_medium_g25_medium_L1eEM15_EMPTY:
@@ -10357,75 +10246,71 @@ HLT_g35_medium_g25_medium_L1eEM9_UNPAIRED_ISO:
 HLT_g35_medium_g25_medium_ringer_L12eEM24L:
   eventCount: 0
   stepCounts:
-    0: 3
-    1: 1
-    2: 1
+    0: 1
   stepFeatures:
-    0: 9
-    1: 6
-    2: 3
-    3: 2
+    0: 7
+    1: 2
 HLT_g35_medium_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 12
     5: 12
 HLT_g35_medium_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 12
     5: 12
 HLT_g35_medium_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 12
     5: 12
 HLT_g35_medium_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 12
     5: 12
@@ -10450,212 +10335,212 @@ HLT_g35_medium_ringer_L1eEM24L:
 HLT_g35_medium_tau25_dikaonmass_tracktwoMVA_L1eTAU20_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_medium_tau25_dikaonmass_tracktwoMVA_L1eTAU20_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_medium_tau25_dipion1_tracktwoMVA_L1eTAU20_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_medium_tau25_dipion1_tracktwoMVA_L1eTAU20_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_medium_tau25_dipion2_tracktwoMVA_L1eTAU20_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_medium_tau25_dipion2_tracktwoMVA_L1eTAU20_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_medium_tau25_dipion3_tracktwoMVA_L1eTAU12_60invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 36
-    1: 30
-    2: 30
-    3: 26
+    0: 32
+    1: 22
+    2: 18
+    3: 18
 HLT_g35_medium_tau25_dipion3_tracktwoMVA_L1eTAU12_60invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 36
-    1: 30
-    2: 30
-    3: 26
+    0: 32
+    1: 22
+    2: 18
+    3: 18
 HLT_g35_medium_tau25_dipion3_tracktwoMVA_L1eTAU20_60invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_medium_tau25_dipion3_tracktwoMVA_L1eTAU20_60invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_medium_tau25_kaonpi1_tracktwoMVA_L1eTAU20_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_medium_tau25_kaonpi1_tracktwoMVA_L1eTAU20_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_medium_tau25_kaonpi2_tracktwoMVA_L1eTAU20_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_medium_tau25_kaonpi2_tracktwoMVA_L1eTAU20_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_medium_tau25_singlepion_tracktwoMVA_L1eTAU20_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
     4: 1
 HLT_g35_medium_tau25_singlepion_tracktwoMVA_L1eTAU20_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
     4: 1
 HLT_g35_tight_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 8
     5: 8
@@ -10664,18 +10549,18 @@ HLT_g35_tight_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM2
 HLT_g35_tight_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 8
     5: 8
@@ -10684,18 +10569,18 @@ HLT_g35_tight_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM2
 HLT_g35_tight_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 8
     5: 8
@@ -10704,18 +10589,18 @@ HLT_g35_tight_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1
 HLT_g35_tight_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
     7: 1
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 8
     5: 8
@@ -10724,45 +10609,45 @@ HLT_g35_tight_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1
 HLT_g35_tight_3j25_L1eEM26M:
   eventCount: 4
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 19
 HLT_g35_tight_3j25_L1eEM28M:
   eventCount: 4
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 19
 HLT_g35_tight_3j25_PhysicsTLA_L1eEM26M:
   eventCount: 4
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 19
     5: 23
@@ -10770,17 +10655,17 @@ HLT_g35_tight_3j25_PhysicsTLA_L1eEM26M:
 HLT_g35_tight_3j25_PhysicsTLA_L1eEM28M:
   eventCount: 4
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 19
     5: 23
@@ -10788,50 +10673,50 @@ HLT_g35_tight_3j25_PhysicsTLA_L1eEM28M:
 HLT_g35_tight_3j25_pf_ftf_L1eEM26M:
   eventCount: 4
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 20
 HLT_g35_tight_3j25_pf_ftf_L1eEM28M:
   eventCount: 4
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 20
 HLT_g35_tight_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
   eventCount: 4
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
     7: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 20
@@ -10840,18 +10725,18 @@ HLT_g35_tight_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
 HLT_g35_tight_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
   eventCount: 4
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
     7: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 20
@@ -10860,33 +10745,33 @@ HLT_g35_tight_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
 HLT_g35_tight_4j35a_j0_DJMASS1000j35_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
 HLT_g35_tight_4j35a_j0_DJMASS1000j35_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
 HLT_g35_tight_icaloloose_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
@@ -10894,9 +10779,9 @@ HLT_g35_tight_icaloloose_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX
     7: 4
     8: 1
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 8
@@ -10906,9 +10791,9 @@ HLT_g35_tight_icaloloose_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX
 HLT_g35_tight_icaloloose_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
@@ -10916,9 +10801,9 @@ HLT_g35_tight_icaloloose_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX
     7: 4
     8: 1
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 8
@@ -10928,9 +10813,9 @@ HLT_g35_tight_icaloloose_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX
 HLT_g35_tight_icaloloose_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
@@ -10938,9 +10823,9 @@ HLT_g35_tight_icaloloose_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo
     7: 4
     8: 1
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 8
@@ -10950,9 +10835,9 @@ HLT_g35_tight_icaloloose_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo
 HLT_g35_tight_icaloloose_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
@@ -10960,9 +10845,9 @@ HLT_g35_tight_icaloloose_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo
     7: 4
     8: 1
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 8
@@ -10972,17 +10857,17 @@ HLT_g35_tight_icaloloose_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo
 HLT_g35_tight_icaloloose_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 12
@@ -10990,17 +10875,17 @@ HLT_g35_tight_icaloloose_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_
 HLT_g35_tight_icaloloose_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 12
@@ -11008,17 +10893,17 @@ HLT_g35_tight_icaloloose_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_
 HLT_g35_tight_icaloloose_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 12
@@ -11026,17 +10911,17 @@ HLT_g35_tight_icaloloose_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_
 HLT_g35_tight_icaloloose_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
     6: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 12
@@ -11044,125 +10929,125 @@ HLT_g35_tight_icaloloose_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_
 HLT_g35_tight_icalotight_mu15noL1_mu2noL1_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
 HLT_g35_tight_icalotight_mu18noL1_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
 HLT_g35_tight_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 12
     5: 12
 HLT_g35_tight_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 12
     5: 12
 HLT_g35_tight_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 12
     5: 12
 HLT_g35_tight_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 12
     5: 12
 HLT_g35_tight_mu15noL1_mu2noL1_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
 HLT_g35_tight_mu18noL1_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
 HLT_g35_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
   eventCount: 4
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
@@ -11170,9 +11055,9 @@ HLT_g35_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
     7: 4
     8: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
@@ -11182,9 +11067,9 @@ HLT_g35_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
 HLT_g35_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
   eventCount: 4
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
@@ -11192,9 +11077,9 @@ HLT_g35_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
     7: 4
     8: 4
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 5
+    1: 4
+    2: 4
     3: 4
     4: 4
     5: 4
@@ -11204,220 +11089,212 @@ HLT_g35_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
 HLT_g35_tight_tau25_dikaonmass_tracktwoMVA_L1eTAU20_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_tight_tau25_dikaonmass_tracktwoMVA_L1eTAU20_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_tight_tau25_dipion1_tracktwoMVA_L1eTAU20_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_tight_tau25_dipion1_tracktwoMVA_L1eTAU20_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_tight_tau25_dipion2_tracktwoMVA_L1eTAU20_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_tight_tau25_dipion2_tracktwoMVA_L1eTAU20_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_tight_tau25_dipion3_tracktwoMVA_L1eTAU20_60invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_tight_tau25_dipion3_tracktwoMVA_L1eTAU20_60invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_tight_tau25_kaonpi1_tracktwoMVA_L1eTAU20_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_tight_tau25_kaonpi1_tracktwoMVA_L1eTAU20_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_tight_tau25_kaonpi2_tracktwoMVA_L1eTAU20_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_tight_tau25_kaonpi2_tracktwoMVA_L1eTAU20_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
 HLT_g35_tight_tau25_singlepion_tracktwoMVA_L1eTAU20_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
     4: 1
 HLT_g35_tight_tau25_singlepion_tracktwoMVA_L1eTAU20_50invmAB_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 7
-    1: 7
-    2: 7
+    0: 5
+    1: 4
+    2: 4
     3: 4
   stepFeatures:
-    0: 32
-    1: 27
-    2: 27
-    3: 23
+    0: 28
+    1: 19
+    2: 15
+    3: 15
     4: 1
 HLT_g40_loose_L1eEM24L:
-  eventCount: 4
+  eventCount: 3
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
-    3: 4
+    0: 4
+    1: 3
+    2: 3
+    3: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
-    3: 4
+    0: 4
+    1: 3
+    2: 3
+    3: 3
 HLT_g40_loose_L1eEM24L_mu40_msonly_L1MU14FCH:
   eventCount: 0
   stepCounts:
-    0: 2
-    1: 2
-    2: 1
+    0: 1
   stepFeatures:
-    0: 9
-    1: 2
-    2: 3
+    0: 7
 HLT_g40_loose_L1eEM24L_mu40_msonly_L1MU18VFCH:
   eventCount: 0
   stepCounts:
-    0: 2
-    1: 2
-    2: 1
+    0: 1
   stepFeatures:
-    0: 9
-    1: 2
-    2: 3
+    0: 7
 HLT_g40_tight_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
   eventCount: 3
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
     6: 3
     7: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 15
@@ -11426,18 +11303,18 @@ HLT_g40_tight_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
 HLT_g40_tight_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
   eventCount: 3
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
     6: 3
     7: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 15
@@ -11446,9 +11323,9 @@ HLT_g40_tight_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
 HLT_g40_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
   eventCount: 3
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11456,9 +11333,9 @@ HLT_g40_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
     7: 3
     8: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11468,9 +11345,9 @@ HLT_g40_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
 HLT_g40_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
   eventCount: 3
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11478,9 +11355,9 @@ HLT_g40_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
     7: 3
     8: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11491,61 +11368,49 @@ HLT_g45_loose_6j45c_L14jJ40p0ETA25:
   eventCount: 0
   stepCounts:
     0: 3
-    1: 3
-    2: 3
+    1: 2
+    2: 2
     3: 2
   stepFeatures:
-    0: 7
-    1: 4
-    2: 4
+    0: 4
+    1: 2
+    2: 2
     3: 2
 HLT_g45_medium_g20_medium_L12eEM18L:
   eventCount: 0
   stepCounts:
-    0: 3
-    1: 2
-    2: 2
+    0: 2
   stepFeatures:
-    0: 12
-    1: 9
-    2: 7
-    3: 2
+    0: 8
+    1: 3
 HLT_g45_medium_g20_medium_L12eEM18M:
   eventCount: 0
   stepCounts:
-    0: 2
-    1: 2
-    2: 2
+    0: 1
   stepFeatures:
-    0: 9
-    1: 7
-    2: 7
-    3: 2
+    0: 5
+    1: 1
 HLT_g45_medium_g20_medium_L1eEM40L_2eEM18L:
   eventCount: 0
   stepCounts:
-    0: 3
-    1: 2
-    2: 2
+    0: 2
   stepFeatures:
-    0: 12
-    1: 9
-    2: 7
-    3: 2
+    0: 8
+    1: 3
 HLT_g45_tight_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
     6: 1
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 10
@@ -11553,17 +11418,17 @@ HLT_g45_tight_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
 HLT_g45_tight_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
     6: 1
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 10
@@ -11571,17 +11436,17 @@ HLT_g45_tight_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
 HLT_g45_tight_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
     6: 1
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 9
@@ -11589,17 +11454,17 @@ HLT_g45_tight_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
 HLT_g45_tight_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
     6: 1
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 9
@@ -11607,18 +11472,18 @@ HLT_g45_tight_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
 HLT_g45_tight_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
   eventCount: 3
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
     6: 3
     7: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 15
@@ -11627,18 +11492,18 @@ HLT_g45_tight_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
 HLT_g45_tight_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
   eventCount: 3
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
     6: 3
     7: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 15
@@ -11647,18 +11512,18 @@ HLT_g45_tight_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
 HLT_g45_tight_icaloloose_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
     6: 3
     7: 1
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11667,18 +11532,18 @@ HLT_g45_tight_icaloloose_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
 HLT_g45_tight_icaloloose_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
     6: 3
     7: 1
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11687,18 +11552,18 @@ HLT_g45_tight_icaloloose_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
 HLT_g45_tight_icaloloose_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
     6: 3
     7: 1
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11707,18 +11572,18 @@ HLT_g45_tight_icaloloose_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
 HLT_g45_tight_icaloloose_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
     6: 3
     7: 1
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11727,9 +11592,9 @@ HLT_g45_tight_icaloloose_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
 HLT_g45_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
   eventCount: 3
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11737,9 +11602,9 @@ HLT_g45_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
     7: 3
     8: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11749,9 +11614,9 @@ HLT_g45_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
 HLT_g45_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
   eventCount: 3
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11759,9 +11624,9 @@ HLT_g45_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
     7: 3
     8: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11769,17 +11634,17 @@ HLT_g45_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
     7: 18
     8: 6
 HLT_g50_loose_L1eEM24L:
-  eventCount: 4
+  eventCount: 3
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
-    3: 4
+    0: 4
+    1: 3
+    2: 3
+    3: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
-    3: 4
+    0: 4
+    1: 3
+    2: 3
+    3: 3
 HLT_g50_loose_probe_L1eEM24L_2mu14_L12MU8F:
   eventCount: 0
   stepCounts:
@@ -11801,92 +11666,84 @@ HLT_g50_loose_ringer_L1eEM24L:
 HLT_g50_loose_xe40_cell_xe70_pfopufit_80mTAC_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
-    3: 4
+    0: 4
+    1: 3
+    2: 3
+    3: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
-    3: 4
-    4: 4
+    0: 4
+    1: 3
+    2: 3
+    3: 3
+    4: 3
 HLT_g50_loose_xe40_cell_xe70_pfopufit_80mTAC_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
-    3: 4
+    0: 4
+    1: 3
+    2: 3
+    3: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
-    3: 4
-    4: 4
+    0: 4
+    1: 3
+    2: 3
+    3: 3
+    4: 3
 HLT_g50_loose_xe40_cell_xe70_pfopufit_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
-    3: 4
+    0: 4
+    1: 3
+    2: 3
+    3: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
-    3: 4
-    4: 4
+    0: 4
+    1: 3
+    2: 3
+    3: 3
+    4: 3
 HLT_g50_loose_xe40_cell_xe70_pfopufit_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
-    3: 4
+    0: 4
+    1: 3
+    2: 3
+    3: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
-    3: 4
-    4: 4
+    0: 4
+    1: 3
+    2: 3
+    3: 3
+    4: 3
 HLT_g50_medium_g20_medium_L12eEM18L:
   eventCount: 0
   stepCounts:
-    0: 3
-    1: 2
-    2: 2
+    0: 2
   stepFeatures:
-    0: 12
-    1: 9
-    2: 7
-    3: 2
+    0: 8
+    1: 3
 HLT_g50_medium_g20_medium_L12eEM18M:
   eventCount: 0
   stepCounts:
-    0: 2
-    1: 2
-    2: 2
+    0: 1
   stepFeatures:
-    0: 9
-    1: 7
-    2: 7
-    3: 2
+    0: 5
+    1: 1
 HLT_g50_tight_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
   eventCount: 3
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
     6: 3
     7: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 15
@@ -11895,18 +11752,18 @@ HLT_g50_tight_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
 HLT_g50_tight_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
   eventCount: 3
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
     6: 3
     7: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 15
@@ -11915,9 +11772,9 @@ HLT_g50_tight_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
 HLT_g50_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
   eventCount: 3
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11925,9 +11782,9 @@ HLT_g50_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
     7: 3
     8: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11937,9 +11794,9 @@ HLT_g50_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
 HLT_g50_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
   eventCount: 3
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11947,9 +11804,9 @@ HLT_g50_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
     7: 3
     8: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
     5: 3
@@ -11959,79 +11816,79 @@ HLT_g50_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
 HLT_g50_tight_xe40_cell_xe50_pfopufit_80mTAC_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
 HLT_g50_tight_xe40_cell_xe50_pfopufit_80mTAC_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
 HLT_g50_tight_xe40_cell_xe60_pfopufit_80mTAC_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
 HLT_g50_tight_xe40_cell_xe60_pfopufit_80mTAC_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
 HLT_g50_tight_xe40_cell_xe70_pfopufit_80mTAC_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
 HLT_g50_tight_xe40_cell_xe70_pfopufit_80mTAC_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 6
-    1: 6
-    2: 6
+    0: 4
+    1: 3
+    2: 3
     3: 3
   stepFeatures:
-    0: 8
-    1: 7
-    2: 7
+    0: 4
+    1: 3
+    2: 3
     3: 3
     4: 3
 HLT_g5_nopid_L1eEM5:
@@ -12047,42 +11904,42 @@ HLT_g5_nopid_L1eEM5:
     2: 166
     3: 147
 HLT_g60_loose_L1eEM26M:
-  eventCount: 2
+  eventCount: 1
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
-    3: 2
+    0: 2
+    1: 1
+    2: 1
+    3: 1
   stepFeatures:
-    0: 6
-    1: 5
-    2: 5
-    3: 2
+    0: 2
+    1: 1
+    2: 1
+    3: 1
 HLT_g60_loose_L1eEM28M:
-  eventCount: 2
+  eventCount: 1
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
-    3: 2
+    0: 2
+    1: 1
+    2: 1
+    3: 1
   stepFeatures:
-    0: 6
-    1: 5
-    2: 5
-    3: 2
+    0: 2
+    1: 1
+    2: 1
+    3: 1
 HLT_g60_tight_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
   stepFeatures:
-    0: 6
-    1: 5
-    2: 5
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 4
@@ -12090,16 +11947,16 @@ HLT_g60_tight_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
 HLT_g60_tight_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
   stepFeatures:
-    0: 6
-    1: 5
-    2: 5
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 4
@@ -12107,16 +11964,16 @@ HLT_g60_tight_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
 HLT_g60_tight_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
   stepFeatures:
-    0: 6
-    1: 5
-    2: 5
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 3
@@ -12124,16 +11981,16 @@ HLT_g60_tight_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
 HLT_g60_tight_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
   stepFeatures:
-    0: 6
-    1: 5
-    2: 5
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 3
@@ -12141,18 +11998,18 @@ HLT_g60_tight_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
 HLT_g60_tight_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
     6: 1
     7: 1
   stepFeatures:
-    0: 6
-    1: 5
-    2: 5
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 4
@@ -12161,18 +12018,18 @@ HLT_g60_tight_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
 HLT_g60_tight_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
     6: 1
     7: 1
   stepFeatures:
-    0: 6
-    1: 5
-    2: 5
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 4
@@ -12181,17 +12038,17 @@ HLT_g60_tight_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
 HLT_g60_tight_icaloloose_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
     6: 1
   stepFeatures:
-    0: 6
-    1: 5
-    2: 5
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
@@ -12200,17 +12057,17 @@ HLT_g60_tight_icaloloose_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
 HLT_g60_tight_icaloloose_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
     6: 1
   stepFeatures:
-    0: 6
-    1: 5
-    2: 5
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
@@ -12219,17 +12076,17 @@ HLT_g60_tight_icaloloose_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
 HLT_g60_tight_icaloloose_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
   eventCount: 0
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
     6: 1
   stepFeatures:
-    0: 6
-    1: 5
-    2: 5
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
@@ -12238,17 +12095,17 @@ HLT_g60_tight_icaloloose_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
 HLT_g60_tight_icaloloose_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
   eventCount: 0
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
     6: 1
   stepFeatures:
-    0: 6
-    1: 5
-    2: 5
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
@@ -12257,9 +12114,9 @@ HLT_g60_tight_icaloloose_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM28M:
 HLT_g60_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
@@ -12267,9 +12124,9 @@ HLT_g60_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
     7: 1
     8: 1
   stepFeatures:
-    0: 6
-    1: 5
-    2: 5
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
@@ -12279,9 +12136,9 @@ HLT_g60_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M:
 HLT_g60_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 4
-    1: 4
-    2: 4
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
@@ -12289,9 +12146,9 @@ HLT_g60_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
     7: 1
     8: 1
   stepFeatures:
-    0: 6
-    1: 5
-    2: 5
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
@@ -12299,96 +12156,96 @@ HLT_g60_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
     7: 5
     8: 2
 HLT_g7_loose_EgammaPEBTLA_L1eEM5:
-  eventCount: 8
+  eventCount: 6
   stepCounts:
-    0: 20
-    1: 19
-    2: 19
-    3: 8
-    4: 8
+    0: 17
+    1: 15
+    2: 15
+    3: 6
+    4: 6
   stepFeatures:
-    0: 115
-    1: 69
-    2: 82
-    3: 14
-    4: 14
+    0: 35
+    1: 26
+    2: 42
+    3: 6
+    4: 6
 HLT_g7_loose_L1eEM5:
-  eventCount: 8
+  eventCount: 6
   stepCounts:
-    0: 20
-    1: 19
-    2: 19
-    3: 8
+    0: 17
+    1: 15
+    2: 15
+    3: 6
   stepFeatures:
-    0: 115
-    1: 69
-    2: 82
-    3: 14
+    0: 35
+    1: 26
+    2: 42
+    3: 6
 HLT_g80_loose_L1eEM26M:
   eventCount: 1
   stepCounts:
-    0: 3
-    1: 3
-    2: 3
+    0: 2
+    1: 1
+    2: 1
     3: 1
   stepFeatures:
-    0: 5
-    1: 4
-    2: 4
+    0: 2
+    1: 1
+    2: 1
     3: 1
 HLT_g80_loose_L1eEM28M:
   eventCount: 1
   stepCounts:
-    0: 3
-    1: 3
-    2: 3
+    0: 2
+    1: 1
+    2: 1
     3: 1
   stepFeatures:
-    0: 5
-    1: 4
-    2: 4
+    0: 2
+    1: 1
+    2: 1
     3: 1
 HLT_g85_tight_3j50_L1eEM26M:
   eventCount: 1
   stepCounts:
     0: 2
-    1: 2
-    2: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
   stepFeatures:
-    0: 4
-    1: 3
-    2: 3
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 4
 HLT_g85_tight_3j50_L1eEM28M:
   eventCount: 1
   stepCounts:
     0: 2
-    1: 2
-    2: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
   stepFeatures:
-    0: 4
-    1: 3
-    2: 3
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 4
 HLT_g85_tight_3j50_pf_ftf_L1eEM26M:
   eventCount: 1
   stepCounts:
     0: 2
-    1: 2
-    2: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
   stepFeatures:
-    0: 4
-    1: 3
-    2: 3
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 4
@@ -12396,15 +12253,15 @@ HLT_g85_tight_3j50_pf_ftf_L1eEM28M:
   eventCount: 1
   stepCounts:
     0: 2
-    1: 2
-    2: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 1
   stepFeatures:
-    0: 4
-    1: 3
-    2: 3
+    0: 2
+    1: 1
+    2: 1
     3: 1
     4: 1
     5: 4
@@ -12412,25 +12269,25 @@ HLT_g90_loose_xe90_cell_L1eEM26M:
   eventCount: 0
   stepCounts:
     0: 2
-    1: 2
-    2: 2
+    1: 1
+    2: 1
     3: 1
   stepFeatures:
-    0: 4
-    1: 3
-    2: 3
+    0: 2
+    1: 1
+    2: 1
     3: 1
 HLT_g90_loose_xe90_cell_L1eEM28M:
   eventCount: 0
   stepCounts:
     0: 2
-    1: 2
-    2: 2
+    1: 1
+    2: 1
     3: 1
   stepFeatures:
-    0: 4
-    1: 3
-    2: 3
+    0: 2
+    1: 1
+    2: 1
     3: 1
 HLT_hitdvjet200_medium_L1gXEJWOJ100:
   eventCount: 0

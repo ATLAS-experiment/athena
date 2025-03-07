@@ -878,7 +878,7 @@ PhotonChainParts = {
     'reccalibInfo'   : [],
     'trkInfo'        : [],
     'caloInfo'       : [],
-    'L2IDAlg'        : ['ringer'],
+    'L2IDAlg'        : ['noringer','ringer'],
     'hypoInfo'       : '',
     'recoAlg'        : [],
     'FSinfo'         : [],
