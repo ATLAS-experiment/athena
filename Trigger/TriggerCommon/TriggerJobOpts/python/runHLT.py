@@ -50,13 +50,22 @@ def set_flags(flags):
    flags.Scheduler.AutoLoadUnmetDependencies = False
 
 
-def runHLTCfg(flags):
-   """Main function to configure the HLT in athena and athenaHLT"""
+def runHLTCfg(flags, checkMT=True):
+   """Main function to configure the HLT in athena and athenaHLT.
+
+   checkMT: perform sanity check if we are running in MT mode
+   """
+
    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
    from AthenaCommon.Logging import logging
 
    log = logging.getLogger('runHLT')
    cfg = ComponentAccumulator()
+
+   # This needs to be conditional on checkMT because for the HLT use-case, we trapped the
+   # Concurrency flags and they cannot be accessed at this point anymore.
+   if checkMT and flags.Concurrency.NumThreads == 0:
+      raise RuntimeError("Trigger jobs must be run in multi-threaded mode. Use --threads=1 (or greater).")
 
    # Load these objects from StoreGate
    loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
@@ -127,8 +136,8 @@ def athenaHLTCfg(flags):
    # Lock flags
    lock_and_restrict(flags)
 
-   # Configure HLT
-   cfg = runHLTCfg(flags)
+   # Configure HLT (always runs in MT mode)
+   cfg = runHLTCfg(flags, checkMT=False)
    return cfg
 
 
@@ -185,7 +194,7 @@ def athenaCfg(flags, parser=None):
        cfg.merge(PoolReadCfg(flags))
 
    # Configure HLT
-   cfg.merge(runHLTCfg(flags))
+   cfg.merge(runHLTCfg(flags, checkMT=False))  # MT check already done above
 
    if args.postExec:
       exec(args.postExec)
