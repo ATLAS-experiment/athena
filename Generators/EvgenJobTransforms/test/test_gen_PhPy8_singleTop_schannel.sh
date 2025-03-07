@@ -10,8 +10,8 @@
 ## Any arguments are considered overrides, and will be added at the end
 export TRF_ECHO=True;
 rm *;
-Gen_tf.py --ecmEnergy=13600 --jobConfig=421358 \
-    --outputTXTFile=test_powheg_t.TXT.tar.gz \
+Gen_tf.py --ecmEnergy=13600 --jobConfig=601348 --maxEvents=10 \
+    --outputEVNTFile=test_powheg_t.root \
 
 echo "art-result: $? generate"
 
