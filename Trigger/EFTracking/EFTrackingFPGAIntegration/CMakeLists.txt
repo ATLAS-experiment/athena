@@ -10,8 +10,8 @@ if( NOT DEFINED ENV{XILINX_XRT} )
    # and are useful to be implemented in FPGATrackSim for FPGA test vector generation
 
     atlas_add_component(EFTrackingFPGAIntegration
-    src/FPGADataFormat* src/FPGAOutputValidationAlg* src/OutputConversionTool* src/TestVectorTool* src/xAODContainerMaker* src/components/FPGA*.cxx 
-    LINK_LIBRARIES GaudiKernel AthenaBaseComps xAODInDetMeasurement InDetPrepRawData InDetIdentifier InDetReadoutGeometry
+    src/FPGADataFormat* src/FPGAOutputValidationAlg* src/OutputConversionTool* src/TestVectorTool* src/xAODContainerMaker* src/components/FPGA*.cxx
+    LINK_LIBRARIES GaudiKernel AthenaBaseComps AthenaMonitoringKernelLib xAODInDetMeasurement InDetPrepRawData InDetIdentifier InDetReadoutGeometry
     )
     atlas_install_python_modules(python/*.py)
 
@@ -43,6 +43,7 @@ atlas_add_component(EFTrackingFPGAIntegration
     LINK_LIBRARIES GaudiKernel 
                    AthenaBaseComps 
                    AthXRTInterfacesLib
+                   AthenaMonitoringLib
                    xAODInDetMeasurement 
                    ${OpenCL_LIBRARIES} 
                    InDetPrepRawData 
