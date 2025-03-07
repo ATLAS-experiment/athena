@@ -717,3 +717,89 @@ def ActsSeedsToTrackParamsCfg(flags) -> ComponentAccumulator:
     if flags.Detector.EnableITkStrip:
         acc.merge(ActsStripSeedsToTrackParamsAlgCfg(flags))
     return acc
+
+def ActsResidualAnalysisAlgCfg(flags,
+                               name : str = "ActsResidualAnalysisAlg",
+                               **kwargs) -> ComponentAccumulator:
+
+    acc = ComponentAccumulator()
+    
+    kwargs.setdefault('InDetTrackParticles', 'InDetTrackParticles')
+    kwargs.setdefault("MonGroupName", kwargs['InDetTrackParticles'])
+
+    from AthenaMonitoring import AthMonitorCfgHelper
+    helper = AthMonitorCfgHelper(flags, kwargs['InDetTrackParticles'] + 'AnalysisAlgCfg')
+
+    ResidualMonitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.ITkAlignMonResidualsAlg, name, **kwargs)
+    
+    layersPix = ['0', '1', '2', '3', '4']
+
+    residualXArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixResidualX', topPath = '/ActsAnalysis/Residuals')
+    residualYArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixResidualY', topPath = '/ActsAnalysis/Residuals')
+    pullXArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixPullX', topPath = '/ActsAnalysis/Residuals')
+    pullYArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixPullY', topPath = '/ActsAnalysis/Residuals')
+
+    layersStrip = ['0','1','2','3','4','5','6','7','8']
+    stripResidualXArray  = helper.addArray([len(layersStrip)], ResidualMonitoringAlgorithm, 'StripResidualX', topPath = '/ActsAnalysis/Residuals')
+    stripPullXArray  = helper.addArray([len(layersStrip)], ResidualMonitoringAlgorithm, 'StripPullX', topPath = '/ActsAnalysis/Residuals')
+    
+    
+    xminX  = -100
+    xmaxX  = 100
+    xminY  = -200
+    xmaxY  = 200
+    pullX  = 6    
+    
+    for postfix,tool in residualXArray.Tools.items():
+        layer = layersPix[int(postfix.split("_")[1])]
+        title = ('UnBiased X Residual Pixel Barrel %s' % layer)
+        name = 'm_pix_residualsx;pix_b' + layer + '_residualx'
+        tool.defineHistogram(name, title = title, type = 'TH1F',
+                              xbins = 100, xmin = xminX, xmax = xmaxX) #in um
+
+        
+    for postfix,tool in residualYArray.Tools.items():
+        layer = layersPix[int(postfix.split("_")[1])]
+        title = ('UnBiased Y Residual Pixel Barrel %s' % layer)
+        name = 'm_pix_residualsy;pix_b' + layer + '_residualy'
+        tool.defineHistogram(name, title = title, type = 'TH1F',
+                              xbins = 100, xmin = xminY, xmax = xmaxY) #in um
+
+
+    for postfix,tool in pullXArray.Tools.items():
+        
+        layer = layersPix[int(postfix.split("_")[1])]
+        title = ('UnBiased X Pull Pixel Barrel %s' % layer)
+        name = 'm_pix_pullsx;pix_b' + layer + '_pullx'
+        tool.defineHistogram(name, title = title, type = 'TH1F',
+                              xbins = 100, xmin = -pullX, xmax = pullX) #in um
+
+        
+    for postfix,tool in pullYArray.Tools.items():
+        layer = layersPix[int(postfix.split("_")[1])]
+        title = ('UnBiased Y Pull Pixel Barrel %s' % layer)
+        name = 'm_pix_pullsy;pix_b' + layer + '_pully'
+        tool.defineHistogram(name, title = title, type = 'TH1F',
+                              xbins = 100, xmin = -pullX, xmax = pullX) #in um
+
+
+
+    for postfix,tool in stripResidualXArray.Tools.items():
+        layer = layersStrip[int(postfix.split("_")[1])]
+        title = ('UnBiased X Residual Strip Barrel %s' % layer)
+        name = 'm_strip_residualsx;strip_b' + layer + '_residualx'
+        tool.defineHistogram(name, title = title, type = 'TH1F',
+                              xbins = 100, xmin = xminX, xmax = xmaxX) #in um
+
+
+    for postfix,tool in stripPullXArray.Tools.items():
+        layer = layersStrip[int(postfix.split("_")[1])]
+        title = ('UnBiased X Pull Strip Barrel %s' % layer)
+        name = 'm_strip_pullsx;strip_b' + layer + '_pullx'
+        tool.defineHistogram(name, title = title, type = 'TH1F',
+                              xbins = 100, xmin = -pullX, xmax = pullX) #in um
+        
+    acc.merge(helper.result())
+    return acc
+
+

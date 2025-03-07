@@ -13,6 +13,7 @@
 #include "src/TrackAnalysisAlg.h"
 #include "src/TrackParticleAnalysisAlg.h"
 #include "src/SeedsToTrackParamsAlg.h"
+#include "src/ITkAlignMonResidualsAlg.h"
 // Tools
 #include "src/PhysValTool.h"
 
@@ -27,5 +28,6 @@ DECLARE_COMPONENT( ActsTrk::EstimatedTrackParamsAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::TrackAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::TrackParticleAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::SeedsToTrackParamsAlg )
+DECLARE_COMPONENT( ActsTrk::ITkAlignMonResidualsAlg )
 // Tools
 DECLARE_COMPONENT( ActsTrk::PhysValTool )
