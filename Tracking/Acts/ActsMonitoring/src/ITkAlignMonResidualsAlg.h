@@ -37,7 +37,6 @@ namespace ActsTrk {
     std::vector<int> m_pixPullY;
     std::vector<int> m_stripResidualX;
     std::vector<int> m_stripPullX;
-    int m_warnCount{0};
     
   };
   
