@@ -482,10 +482,7 @@ class MultiTrajectory
 
   void moveLinks(const ActsTrk::MutableMultiTrajectory* mtj);
 
-  std::vector<Acts::HashedString> dynamicKeys_impl() const {
-      // @TODO: This currently does not do anything useful
-      return {};
-  }
+  std::vector<Acts::HashedString> dynamicKeys_impl() const;
 
  private:
   const DataLink<xAOD::TrackStateAuxContainer> m_trackStatesAux;
