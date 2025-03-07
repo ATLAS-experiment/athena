@@ -209,23 +209,24 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     unsigned bitmask_best(0);
     unsigned nhit_best(0);
     for (auto const &road : roads) {
-      unsigned bitmask = road->getHitLayers();
-      if (road->getNHitLayers() > nhit_best) {
-	nhit_best = road->getNHitLayers();
-	bitmask_best = bitmask;
-      }
-      for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers(); l++) {
-        if (bitmask & (1 << l)) {
-            auto mon_layerIDs = Monitored::Scalar<unsigned>("layerIDs_2nd",l);
-            Monitored::Group(m_monTool,mon_layerIDs);
+        unsigned bitmask = road->getHitLayers();
+        if (road->getNHitLayers() > nhit_best) {
+            nhit_best = road->getNHitLayers();
+            bitmask_best = bitmask;
         }
-      }
+        for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers(); l++) {
+            if (bitmask & (1 << l)) {
+                auto mon_layerIDs = Monitored::Scalar<unsigned>("layerIDs_2nd",l);
+                Monitored::Group(m_monTool,mon_layerIDs);
+            }
+        }
     }
+
     for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers(); l++) {
-      if (bitmask_best & (1 << l)) {
-	auto mon_layerIDs_best = Monitored::Scalar<unsigned>("layerIDs_2nd_best",l);
-	Monitored::Group(m_monTool,mon_layerIDs_best);
-      }
+        if (bitmask_best & (1 << l)) {
+            auto mon_layerIDs_best = Monitored::Scalar<unsigned>("layerIDs_2nd_best",l);
+            Monitored::Group(m_monTool,mon_layerIDs_best);
+        }
     }
     Monitored::Group(m_monTool, mon_nroads);
 
@@ -456,6 +457,7 @@ StatusCode FPGATrackSimSecondStageAlg::finalize()
 
     ATH_MSG_INFO("PRINTING FPGATRACKSIM SIMPLE STATS: SECOND STAGE");
     ATH_MSG_INFO("========================================================================================");
+    ATH_MSG_INFO("Ran on events = " << m_evt);
     ATH_MSG_INFO("Inclusive efficiency to find a road = " << m_nRoadsFound/(float)m_evt_truth);
     ATH_MSG_INFO("Inclusive efficiency to find a track = " << m_nTracksFound/(float)m_evt_truth);
     ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 = " << m_nTracksChi2Found/(float)m_evt_truth);
@@ -467,11 +469,11 @@ StatusCode FPGATrackSimSecondStageAlg::finalize()
     ATH_MSG_INFO("Number of 2nd stage tracks passing chi2/event = " << m_nTracksChi2Tot/(float)m_evt);
     ATH_MSG_INFO("Number of 2nd stage tracks passing chi2 and OLR/event = " << m_nTracksChi2OLRTot/(float)m_evt);
     ATH_MSG_INFO("========================================================================================");
-    
+
     ATH_MSG_INFO("Max number of 2nd stage roads in an event = " << m_maxNRoadsFound);
     ATH_MSG_INFO("Max number of 2nd stage track combinations in an event = " << m_maxNTracksTot);
     ATH_MSG_INFO("Max number of 2nd stage tracks passing chi2 in an event = " << m_maxNTracksChi2Tot);
     ATH_MSG_INFO("Max number of 2nd stage tracks passing chi2 and OLR in an event = " << m_maxNTracksChi2OLRTot);
-    ATH_MSG_INFO("========================================================================================");    
+    ATH_MSG_INFO("========================================================================================");
     return StatusCode::SUCCESS;
 }

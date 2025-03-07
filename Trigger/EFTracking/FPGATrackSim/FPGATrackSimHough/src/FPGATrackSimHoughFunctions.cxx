@@ -430,6 +430,16 @@ long getCoarseID(const FPGATrackSimHit & hit)
   return offset + layerID;
 }
 
+bool isFineIDInStrip(long ID)
+{
+  return (ID < 16);
+}
+
+bool isFineIDInPixel(long ID)
+{
+  return !isFineIDInStrip(ID);
+}
+
 long getFineID(const FPGATrackSimHit & hit)
 {
   // Custom labelling for the detector layers

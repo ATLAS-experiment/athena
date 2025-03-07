@@ -47,12 +47,14 @@ def FPGATrackSimNNPathfinderExtensionToolCfg(flags):
     FPGATrackSimNNPathfinderExtensionTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
 
     # Hardcoded settings for now, hook up to flags later...
-    FPGATrackSimNNPathfinderExtensionTool.threshold = 11
+    FPGATrackSimNNPathfinderExtensionTool.threshold = 10
     FPGATrackSimNNPathfinderExtensionTool.windowR = flags.Trigger.FPGATrackSim.windowR
     FPGATrackSimNNPathfinderExtensionTool.windowZ = flags.Trigger.FPGATrackSim.windowZ
     FPGATrackSimNNPathfinderExtensionTool.maxBranches = flags.Trigger.FPGATrackSim.maxBranches
     FPGATrackSimNNPathfinderExtensionTool.doOutsideIn = True
-    if (flags.Trigger.FPGATrackSim.ActiveConfig.genScan): FPGATrackSimNNPathfinderExtensionTool.doOutsideIn = False
+    if (flags.Trigger.FPGATrackSim.ActiveConfig.genScan):
+        FPGATrackSimNNPathfinderExtensionTool.doOutsideIn = False
+        FPGATrackSimNNPathfinderExtensionTool.predictionWindowLength = 4
     
     # Other settings
     FPGATrackSimNNPathfinderExtensionTool.OutputLevel=flags.Trigger.FPGATrackSim.loglevel

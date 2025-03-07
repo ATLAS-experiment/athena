@@ -566,103 +566,105 @@ if __name__ == "__main__":
         raise AssertionError("ERROR You are trying to run the pipeline " + flags.Trigger.FPGATrackSim.pipeline + " which is not yet supported!")
 
     if (not flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')): ### if DP pipeline skip everything else!
-       
-       splitPipeline=flags.Trigger.FPGATrackSim.pipeline.split('-')
-       trackingOption=9999999
-       if (len(splitPipeline) > 1): trackingOption=int(splitPipeline[1])
-       if (trackingOption < 9999999):           
-           trackingOptionMod = (trackingOption % 100)
-           if (trackingOptionMod == 0):
-               print("You are trying to run the linearized chi2 fit as part of a pipeline! I am going to enable this for you whether you want to or not")
-               flags.Trigger.FPGATrackSim.tracking = True
-               flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis = False
-           elif (trackingOptionMod == 10):
-               print("You are trying to run the NN fake rejection as part of a pipeline! I am going to enable this for you whether you want to or not")               
-               flags.Trigger.FPGATrackSim.tracking = True
-               flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis = True
-           else:
-               raise AssertionError("ERROR Your tracking option for the pipeline = " + str(trackingOption) + " is not yet supported!")
-   
-       if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
-           log.info("wrapperFile is string, converting to list")
-           flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
-           flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
-   
-       flags.lock()
-       flags.dump()
-       flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
-       acc=MainServicesCfg(flags)
-       if flags.Trigger.FPGATrackSim.Hough.writeOutputData:
-        acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
 
-        if (flags.Trigger.FPGATrackSim.Hough.houghRootoutput):
-            acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
-   
-        acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
+        splitPipeline=flags.Trigger.FPGATrackSim.pipeline.split('-')
+        trackingOption=9999999
+        if (len(splitPipeline) > 1): trackingOption=int(splitPipeline[1])
+        if (trackingOption < 9999999):
+            trackingOptionMod = (trackingOption % 100)
+            if (trackingOptionMod == 0):
+                print("You are trying to run the linearized chi2 fit as part of a pipeline! I am going to enable this for you whether you want to or not")
+                flags.Trigger.FPGATrackSim.tracking = True
+                flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis = False
+            elif (trackingOptionMod == 10):
+                print("You are trying to run the NN fake rejection as part of a pipeline! I am going to enable this for you whether you want to or not")
+                flags.Trigger.FPGATrackSim.tracking = True
+                flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis = True
+            else:
+                raise AssertionError("ERROR Your tracking option for the pipeline = " + str(trackingOption) + " is not yet supported!")
 
-        if (flags.Trigger.FPGATrackSim.Hough.genScan):
-               acc.addService(CompFactory.THistSvc(Output = ["GENSCAN DATAFILE='genscan.root', OPT='RECREATE'"]))
-       
-       if not flags.Trigger.FPGATrackSim.wrapperFileName:
-           from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-           acc.merge(PoolReadCfg(flags))
-       
-           if flags.Input.isMC:
-               from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
-               acc.merge(GEN_AOD2xAODCfg(flags))
-   
-               from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg # TO DO: check if this is indeed necessary for pileup samples
-               acc.merge(addTruthPileupJetsToOutputCfg(flags))
-           
-           if flags.Detector.EnableCalo:
-               from CaloRec.CaloRecoConfig import CaloRecoCfg
-               acc.merge(CaloRecoCfg(flags))
-   
-           if flags.Tracking.recoChain:
-               from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
-               acc.merge(InDetTrackRecoCfg(flags))
-   
-       # Configure both the dataprep and logical hits algorithms.
-       acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
-       acc.merge(FPGATrackSimLogicalHitsProcessAlgCfg(flags))
+        if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
+            log.info("wrapperFile is string, converting to list")
+            flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
+            flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
 
-       # If second stage is turned on, turn that algorithm on too.
-       if flags.Trigger.FPGATrackSim.Hough.secondStage:
-           acc.merge(FPGATrackSimSecondStageConfig.FPGATrackSimSecondStageAlgCfg(flags))
-   
-       if flags.Trigger.FPGATrackSim.doEDMConversion:
-           stage = "_2nd" if flags.Trigger.FPGATrackSim.Hough.secondStage else "_1st"
-           convertTracks = flags.Trigger.FPGATrackSim.tracking
-           acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = f"FPGAConversionAlg{stage}",
-                                                                     stage = f"{stage}",
-                                                                     doActsTrk=True,
-                                                                     doSP=flags.Trigger.FPGATrackSim.spacePoints,
-                                                                     useRoads=not flags.Trigger.FPGATrackSim.tracking))
-           
-           from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGATruthDecorationCfg, FPGAProtoTrackFitCfg
-           acc.merge(FPGAProtoTrackFitCfg(flags,stage=f"{stage}",
-                                          useRoads=not flags.Trigger.FPGATrackSim.tracking)) # Run ACTS KF
-           acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage=f"{stage}")) # Run Truth Matching/Decoration chain
-           if not flags.Trigger.FPGATrackSim.wrapperFileName and flags.Trigger.FPGATrackSim.runCKF:
-               from FPGATrackSimConfTools.FPGATrackExtensionConfig import FPGATrackExtensionAlgCfg
-               acc.merge(FPGATrackExtensionAlgCfg(flags, enableTrackStatePrinter=False, name="FPGATrackExtension",
-                                                  ProtoTracksLocation=f"ActsProtoTracks{stage}FromFPGATrack")) # run CKF track extension on FPGA tracks
-   
-           if flags.Trigger.FPGATrackSim.writeToAOD: acc.merge(FPGATrackSimDataPrepConfig.WriteToAOD(flags,
-                                                                                                     stage = f"{stage}",
-                                                                                                     finalTrackParticles=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))
-   
-           # Reporting algorithm (used for debugging - can be disabled)
-           from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
-           acc.merge(FPGATrackSimReportingCfg(flags, stage=f"{stage}",
-                                              perEventReports = ((flags.Trigger.FPGATrackSim.sampleType != 'skipTruth') and flags.Exec.MaxEvents<=10 ) )) # disable perEventReports for pileup samples or many events
-       
-       acc.store(open('AnalysisConfig.pkl','wb'))
-   
-       acc.foreach_component("FPGATrackSim*").OutputLevel=flags.Trigger.FPGATrackSim.loglevel
-       if flags.Trigger.FPGATrackSim.msgLimit!=-1:
-        acc.getService("MessageSvc").debugLimit = flags.Trigger.FPGATrackSim.msgLimit
-        acc.getService("MessageSvc").infoLimit = flags.Trigger.FPGATrackSim.msgLimit
+        flags.lock()
+        flags.dump()
+        flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
+        acc=MainServicesCfg(flags)
 
-       statusCode = acc.run(flags.Exec.MaxEvents)
-       assert statusCode.isSuccess() is True, "Application execution did not succeed"
+        if flags.Trigger.FPGATrackSim.Hough.writeOutputData:
+            acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
+            acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUTNNPATHFINDER DATAFILE='NNPathfinder.root', OPT='RECREATE'"]))
+
+            if (flags.Trigger.FPGATrackSim.Hough.houghRootoutput):
+                acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
+
+            acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
+
+            if (flags.Trigger.FPGATrackSim.Hough.genScan):
+                acc.addService(CompFactory.THistSvc(Output = ["GENSCAN DATAFILE='genscan.root', OPT='RECREATE'"]))
+
+        if not flags.Trigger.FPGATrackSim.wrapperFileName:
+            from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+            acc.merge(PoolReadCfg(flags))
+
+            if flags.Input.isMC:
+                from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+                acc.merge(GEN_AOD2xAODCfg(flags))
+
+                from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg # TO DO: check if this is indeed necessary for pileup samples
+                acc.merge(addTruthPileupJetsToOutputCfg(flags))
+
+            if flags.Detector.EnableCalo:
+                from CaloRec.CaloRecoConfig import CaloRecoCfg
+                acc.merge(CaloRecoCfg(flags))
+
+            if flags.Tracking.recoChain:
+                from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
+                acc.merge(InDetTrackRecoCfg(flags))
+
+        # Configure both the dataprep and logical hits algorithms.
+        acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
+        acc.merge(FPGATrackSimLogicalHitsProcessAlgCfg(flags))
+
+        # If second stage is turned on, turn that algorithm on too.
+        if flags.Trigger.FPGATrackSim.Hough.secondStage:
+            acc.merge(FPGATrackSimSecondStageConfig.FPGATrackSimSecondStageAlgCfg(flags))
+
+        if flags.Trigger.FPGATrackSim.doEDMConversion:
+            stage = "_2nd" if flags.Trigger.FPGATrackSim.Hough.secondStage else "_1st"
+            convertTracks = flags.Trigger.FPGATrackSim.tracking
+            acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = f"FPGAConversionAlg{stage}",
+                                                                        stage = f"{stage}",
+                                                                        doActsTrk=True,
+                                                                        doSP=flags.Trigger.FPGATrackSim.spacePoints,
+                                                                        useRoads=not flags.Trigger.FPGATrackSim.tracking))
+
+            from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGATruthDecorationCfg, FPGAProtoTrackFitCfg
+            acc.merge(FPGAProtoTrackFitCfg(flags,stage=f"{stage}",
+                                            useRoads=not flags.Trigger.FPGATrackSim.tracking)) # Run ACTS KF
+            acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage=f"{stage}")) # Run Truth Matching/Decoration chain
+            if not flags.Trigger.FPGATrackSim.wrapperFileName and flags.Trigger.FPGATrackSim.runCKF:
+                from FPGATrackSimConfTools.FPGATrackExtensionConfig import FPGATrackExtensionAlgCfg
+                acc.merge(FPGATrackExtensionAlgCfg(flags, enableTrackStatePrinter=False, name="FPGATrackExtension",
+                                                    ProtoTracksLocation=f"ActsProtoTracks{stage}FromFPGATrack")) # run CKF track extension on FPGA tracks
+
+            if flags.Trigger.FPGATrackSim.writeToAOD: acc.merge(FPGATrackSimDataPrepConfig.WriteToAOD(flags,
+                                                                                                        stage = f"{stage}",
+                                                                                                        finalTrackParticles=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))
+
+            # Reporting algorithm (used for debugging - can be disabled)
+            from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
+            acc.merge(FPGATrackSimReportingCfg(flags, stage=f"{stage}",
+                                                perEventReports = ((flags.Trigger.FPGATrackSim.sampleType != 'skipTruth') and flags.Exec.MaxEvents<=10 ) )) # disable perEventReports for pileup samples or many events
+
+        acc.store(open('AnalysisConfig.pkl','wb'))
+
+        acc.foreach_component("FPGATrackSim*").OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+        if flags.Trigger.FPGATrackSim.msgLimit!=-1:
+            acc.getService("MessageSvc").debugLimit = flags.Trigger.FPGATrackSim.msgLimit
+            acc.getService("MessageSvc").infoLimit = flags.Trigger.FPGATrackSim.msgLimit
+
+        statusCode = acc.run(flags.Exec.MaxEvents)
+        assert statusCode.isSuccess() is True, "Application execution did not succeed"
