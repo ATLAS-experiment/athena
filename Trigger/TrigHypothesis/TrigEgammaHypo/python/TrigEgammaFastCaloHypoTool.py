@@ -250,9 +250,9 @@ class TrigEgammaFastCaloHypoToolConfig:
     elif self.pidname() in self.__operation_points and 'noringer' not in self.noringerinfo() and self.isElectron():
       self.nominal()
 
-    elif self.pidname() in self.__operation_points and self.isPhoton() and  'ringer'!=self.noringerinfo():
+    elif self.pidname() in self.__operation_points and self.isPhoton() and  'noringer' in self.noringerinfo(): 
       self.etcut()
-    elif self.pidname() in self.__operation_points and self.isPhoton() and  'ringer'==self.noringerinfo():
+    elif self.pidname() in self.__operation_points and self.isPhoton() and  'noringer' not in self.noringerinfo():
       self.nominal()
    
     elif self.etthr()==0:
