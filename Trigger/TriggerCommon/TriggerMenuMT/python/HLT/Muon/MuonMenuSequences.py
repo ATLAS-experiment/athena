@@ -749,16 +749,15 @@ def muEFCBFSSequenceGenCfg(flags, is_probe_leg=False):
     return efmuCBSequence
 
 
-def efLateMuRoIAlgSequenceCfg(flags):
+def efLateMuRoIAlgSequenceCfg(flags, is_probe_leg=False):
 
-    selAcc = SelectionCA('EFLateMuSel')
+    selAcc = SelectionCA('EFLateMuSel', isProbe=is_probe_leg)
     
-    viewName="EFLateMuRoIReco"
-    viewcreator         = CompFactory.ViewCreatorInitialROITool
+    viewName = "EFLateMuRoIReco"
+    viewcreator = CompFactory.ViewCreatorInitialROITool
     roiTool = viewcreator()
-    requireParentView = True
                                                          
-    recoLateMu = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView)
+    recoLateMu = InViewRecoCA(name=viewName, RoITool = roiTool, isProbe=is_probe_leg)
 
     from .MuonRecoSequences import efLateMuRoISequenceCfg
 
@@ -771,9 +770,9 @@ def efLateMuRoIAlgSequenceCfg(flags):
 
 
 @AccumulatorCache
-def efLateMuRoISequenceGenCfg(flags):
+def efLateMuRoISequenceGenCfg(flags, is_probe_leg=False):
 
-    (selAcc, sequenceOut) = efLateMuRoIAlgSequenceCfg(flags)
+    (selAcc, sequenceOut) = efLateMuRoIAlgSequenceCfg(flags, is_probe_leg)
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonLateMuRoIHypoAlgCfg, TrigMuonLateMuRoIHypoToolFromDict
     latemuHypo = TrigMuonLateMuRoIHypoAlgCfg( flags,
@@ -789,17 +788,16 @@ def efLateMuRoISequenceGenCfg(flags):
     return latemuRoISequence
 
 
-def efLateMuAlgSequenceCfg(flags):
+def efLateMuAlgSequenceCfg(flags, is_probe_leg=False):
 
     from .MuonRecoSequences import muEFInsideOutRecoSequenceCfg, muonDecodeCfg, muonIDFastTrackingSequenceCfg
-    selAcc = SelectionCA('EFLateMuAlg')
+    selAcc = SelectionCA('EFLateMuAlg', isProbe=is_probe_leg)
     
-    viewName="EFLateMuReco"
-    viewcreator         = CompFactory.ViewCreatorNamedROITool
+    viewName = "EFLateMuReco"
+    viewcreator = CompFactory.ViewCreatorNamedROITool
     roiTool = viewcreator(ROILinkName="feature")
-    requireParentView = True
                                                          
-    recoLateMu = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView, mergeUsingFeature=True)
+    recoLateMu = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView=True, mergeUsingFeature=True, isProbe=is_probe_leg)
 
 
     #Clone and replace offline flags so we can set muon trigger specific values
@@ -822,9 +820,9 @@ def efLateMuAlgSequenceCfg(flags):
 
 
 @AccumulatorCache
-def efLateMuSequenceGenCfg(flags):
+def efLateMuSequenceGenCfg(flags, is_probe_leg=False):
 
-    (selAcc, sequenceOut) = efLateMuAlgSequenceCfg(flags)
+    (selAcc, sequenceOut) = efLateMuAlgSequenceCfg(flags, is_probe_leg=False)
 
     # setup EFCB hypo
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFHypoAlgCfg
