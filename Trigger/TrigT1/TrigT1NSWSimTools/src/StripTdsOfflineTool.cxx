@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -26,9 +26,7 @@ namespace NSWL1 {
 
     StripTdsOfflineTool::StripTdsOfflineTool( const std::string& type, const std::string& name, const IInterface* parent) :
       AthAlgTool(type,name,parent),
-      m_incidentSvc("IncidentSvc",name),
-      m_detManager(nullptr),
-      m_tree(nullptr)
+      m_detManager(nullptr)
     {
       declareInterface<NSWL1::IStripTdsTool>(this);
     }
@@ -37,133 +35,14 @@ namespace NSWL1 {
     ATH_MSG_DEBUG( "initializing " << name() );
 
     ATH_MSG_DEBUG( name() << " configuration:");
-    ATH_MSG_DEBUG(" " << std::setw(32) << std::setfill('.') << std::setiosflags(std::ios::left) << m_doNtuple.name() << ((m_doNtuple)? "[True]":"[False]")
-                       << std::setfill(' ') << std::setiosflags(std::ios::right) );
 
     ATH_CHECK(m_sTgcDigitContainer.initialize());
     ATH_CHECK(m_sTgcSdoContainer.initialize(m_isMC));
 
-    const IInterface* parent = this->parent();
-    const INamedInterface* pnamed = dynamic_cast<const INamedInterface*>(parent);
-    const std::string& algo_name = pnamed->name();
-
-    if ( m_doNtuple ) {
-      if (Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 1) {
-        ATH_MSG_ERROR("DoNtuple is not possible in multi-threaded mode");
-        return StatusCode::FAILURE;
-      }
-
-      ATH_CHECK( m_incidentSvc.retrieve() );
-      m_incidentSvc->addListener(this,IncidentType::BeginEvent);
-
-      if ( algo_name=="NSWL1Simulation" ) {
-        SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
-        ATH_CHECK( tHistSvc.isValid() );
-        m_tree = 0;
-        std::string ntuple_name = algo_name+"Tree";
-        ATH_CHECK(tHistSvc->getTree(ntuple_name,m_tree));
-        ATH_CHECK(this->book_branches());
-      }
-    }
     ATH_CHECK(detStore()->retrieve(m_detManager));
     ATH_CHECK(m_idHelperSvc.retrieve());
     return StatusCode::SUCCESS;
   }
-
-    void StripTdsOfflineTool::handle(const Incident& inc) {
-      if( inc.type()==IncidentType::BeginEvent ) {
-        this->clear_ntuple_variables();
-      }
-    }
-
-
-    StatusCode StripTdsOfflineTool::book_branches() {
-      m_nStripHits = 0;
-      m_stripCharge= new std::vector< float >();
-      m_stripCharge_6bit= new std::vector< float >();
-      m_stripCharge_10bit= new std::vector< float >();
-      m_strip_global_X= new std::vector< float >();
-      m_strip_global_Y= new std::vector< float >();
-      m_strip_global_Z= new std::vector< float >();
-      m_strip_local_X= new std::vector< float >();
-      m_strip_local_Y= new std::vector< float >();
-      m_strip_layer= new std::vector< float >();
-      m_strip_isSmall= new std::vector< bool >();
-      m_strip_eta= new std::vector< float >();
-      m_strip_phi= new std::vector< float >();
-      m_strip_readStrip = new std::vector<bool >();
-      m_strip_channel= new std::vector< int >();
-      m_strip_BCID= new std::vector< int >();
-      m_strip_wedge= new std::vector< int >();
-      m_strip_time= new std::vector< float >();
-
-      if (m_tree) {
-        std::string ToolName = name().substr(  name().find("::")+2,std::string::npos );
-        const char* n = ToolName.c_str();
-        m_tree->Branch(TString::Format("%s_nStripHits",n).Data(),&m_nStripHits,TString::Format("%s_nStripHits/i",n).Data());
-        m_tree->Branch(TString::Format("%s_charge",n).Data(),&m_stripCharge);
-        m_tree->Branch(TString::Format("%s_charge_6bit",n).Data(),&m_stripCharge_6bit);
-        m_tree->Branch(TString::Format("%s_charge_10bit",n).Data(),&m_stripCharge_10bit);
-        m_tree->Branch(TString::Format("%s_global_X",n).Data(),&m_strip_global_X);
-        m_tree->Branch(TString::Format("%s_global_Y",n).Data(),&m_strip_global_Y);
-        m_tree->Branch(TString::Format("%s_global_Z",n).Data(),&m_strip_global_Z);
-        m_tree->Branch(TString::Format("%s_local_X",n).Data(),&m_strip_local_X);
-        m_tree->Branch(TString::Format("%s_local_Y",n).Data(),&m_strip_local_Y);
-        m_tree->Branch(TString::Format("%s_layer",n).Data(),&m_strip_layer);
-        m_tree->Branch(TString::Format("%s_isSmall",n).Data(),&m_strip_isSmall);
-        m_tree->Branch(TString::Format("%s_eta",n).Data(),&m_strip_eta);
-        m_tree->Branch(TString::Format("%s_phi",n).Data(),&m_strip_phi);
-        m_tree->Branch(TString::Format("%s_readStrip",n).Data(),&m_strip_readStrip);
-        m_tree->Branch(TString::Format("%s_channel",n).Data(),&m_strip_channel);
-        m_tree->Branch(TString::Format("%s_BCID",n).Data(),&m_strip_BCID);
-        m_tree->Branch(TString::Format("%s_wedge",n).Data(),&m_strip_wedge);
-        m_tree->Branch(TString::Format("%s_time",n).Data(),&m_strip_time);
-      }
-      return StatusCode::SUCCESS;
-    }
-
-
-    void StripTdsOfflineTool::clear_ntuple_variables() {
-      if(m_tree==0) return;
-      m_nStripHits = 0;
-      m_stripCharge->clear();
-      m_stripCharge_6bit->clear();
-      m_stripCharge_10bit->clear();
-      m_stripCharge->clear();
-      m_stripCharge_6bit->clear();
-      m_stripCharge_10bit->clear();
-      m_strip_global_X->clear();
-      m_strip_global_Y->clear();
-      m_strip_global_Z->clear();
-      m_strip_local_X->clear();
-      m_strip_local_Y->clear();
-      m_strip_layer->clear();
-      m_strip_isSmall->clear();
-      m_strip_eta->clear();
-      m_strip_phi->clear();
-      m_strip_readStrip->clear();
-      m_strip_channel->clear();
-      m_strip_BCID->clear();
-      m_strip_time->clear();
-      m_strip_wedge->clear();
-    }
-
-  void StripTdsOfflineTool::fill_strip_validation_id(std::vector<std::unique_ptr<StripData>> &strip_cache) const {
-    for (const auto &hit : strip_cache) {
-      m_nStripHits++;
-      ATH_MSG_DEBUG("Hits :" << m_nStripHits << " Cache strip  " << hit.get() << "  " << strip_cache.size() );
-
-      m_stripCharge->push_back(hit->strip_charge());
-      m_stripCharge_6bit->push_back(hit->strip_charge_6bit());
-      m_stripCharge_10bit->push_back(hit->strip_charge_10bit());
-      m_strip_readStrip->push_back(hit->readStrip());
-      m_strip_channel->push_back(hit->channelId());
-      m_strip_BCID->push_back(hit->trig_BCID());
-      m_strip_time->push_back(hit->time());
-      m_strip_wedge->push_back(hit->wedge());
-    }
-  }
-
 
   StatusCode StripTdsOfflineTool::gather_strip_data(std::vector<std::unique_ptr<StripData>>& strips, const std::vector<std::unique_ptr<PadTrigger>>& padTriggers) const {
       ATH_MSG_DEBUG( "gather_strip_data: start gathering all strip htis");
@@ -250,18 +129,6 @@ namespace NSWL1 {
             ATH_MSG_DEBUG("sTGC Strip hit " << strip_hit_number << ":  Trigger Sector [" << trigger_sector << "]" << "  Cache Index ["  << cache_index << "]" );
 
             // process STRIP hit time: apply the time delay, set the BC tag for the hit according to the trigger capture window
-            ATH_MSG_DEBUG( "Filling ntuple variables" );
-            if (m_doNtuple) {
-              m_strip_global_X->push_back(strip_gpos.x());
-              m_strip_global_Y->push_back(strip_gpos.y());
-              m_strip_global_Z->push_back(strip_gpos.z());
-              m_strip_local_X->push_back(strip_lpos.x());
-              m_strip_local_Y->push_back(strip_lpos.y());
-              m_strip_layer->push_back(layer);
-              m_strip_isSmall->push_back(isSmall);
-              m_strip_eta->push_back(stationEta);
-              m_strip_phi->push_back(stationPhi);
-            }
             auto strip=std::make_unique<StripOfflineData>(Id,&m_idHelperSvc->stgcIdHelper(),digit);
             strip->set_locX(strip_lpos.x());
             strip->set_locY(strip_lpos.y());
@@ -295,7 +162,6 @@ namespace NSWL1 {
             strip_cache.push_back(std::move(strip));
         }//collections
       }//items
-      if (m_doNtuple) this->fill_strip_validation_id(strip_cache);
       ATH_MSG_DEBUG( "fill_strip_cache: end of processing" );
       return StatusCode::SUCCESS;
   }

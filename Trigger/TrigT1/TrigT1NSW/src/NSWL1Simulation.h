@@ -7,9 +7,7 @@
 
 // Basic includes
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/ToolHandle.h"
-#include "Gaudi/Property.h"
+#include "GaudiKernel/ConcurrencyFlags.h"
 
 // NSWL1SimTools includes
 #include "TrigT1NSWSimTools/IPadTdsTool.h"
@@ -18,13 +16,8 @@
 #include "TrigT1NSWSimTools/IStripSegmentTool.h"
 #include "TrigT1NSWSimTools/IMMTriggerTool.h"
 #include "TrigT1NSWSimTools/IPadTriggerLogicTool.h"
-
-#include "MuonRDO/NSW_PadTriggerDataContainer.h"
-#include "MuonRDO/NSW_TrigRawDataContainer.h"
 #include "TrigT1NSWSimTools/PadTriggerAdapter.h"
 #include "TrigT1NSWSimTools/TriggerProcessorTool.h"
-
-#include "TTree.h"
 
 // Forward includes
 class StoreGateSvc;
@@ -57,6 +50,8 @@ namespace NSWL1 {
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
+    virtual StatusCode finalize() override;
+    const ServiceHandle<ITHistSvc>& histSvc() const { return m_histSvc; }
 
   protected:
     SG::WriteHandleKey<Muon::NSW_TrigRawDataContainer> m_trigRdoContainer{this, "NSWTrigRDOContainerName", "L1_NSWTrigContainer", "Name of the NSW trigger RDO container"};
@@ -77,8 +72,9 @@ namespace NSWL1 {
     Gaudi::Property<bool> m_doStrip{this, "DoStrip", false, "Run data analysis for sTGC strip trigger"};
     Gaudi::Property<bool> m_doPad{this, "DoPad", false, "Run data analysis for sTGC pad trigger"};
 
-    // put analysis variables here
-    TTree*       m_tree;                                    //!< analysis ntuple
+    // External services
+    ServiceHandle<ITHistSvc> m_histSvc;
+    mutable MuonVal::MuonTesterTree m_altree ATLAS_THREAD_SAFE {"SimulationTree", "/NSWL1Simulation"};
   };  // end of NSWL1Simulation class
 } // namespace NSWL1
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -10,186 +10,20 @@ namespace NSWL1 {
 
   StripClusterTool::StripClusterTool( const std::string& type, const std::string& name, const IInterface* parent) :
     AthAlgTool(type,name,parent),
-    m_detManager(nullptr),
-    m_tree(nullptr)
+    m_detManager(nullptr)
   {
     declareInterface<NSWL1::IStripClusterTool>(this);
   }
 
   StatusCode StripClusterTool::initialize() {
     ATH_MSG_DEBUG( "initializing " << name() );
-    ATH_MSG_DEBUG( name() << " configuration:");
-    ATH_MSG_DEBUG(" " << std::setw(32) << std::setfill('.') << std::setiosflags(std::ios::left) << m_doNtuple.name() << ((m_doNtuple)? "[True]":"[False]")
-                      << std::setfill(' ') << std::setiosflags(std::ios::right) );
 
     ATH_CHECK(m_sTgcSdoContainerKey.initialize(m_isMC));
-
-    const IInterface* parent = this->parent();
-    const INamedInterface* pnamed = dynamic_cast<const INamedInterface*>(parent);
-    const std::string& algo_name = pnamed->name();
-
-    if ( m_doNtuple ) {
-      if (Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 1) {
-        ATH_MSG_ERROR("DoNtuple is not possible in multi-threaded mode");
-        return StatusCode::FAILURE;
-      }
-
-      ATH_CHECK( m_incidentSvc.retrieve() );
-      m_incidentSvc->addListener(this,IncidentType::BeginEvent);
-
-      if ( algo_name=="NSWL1Simulation" ){
-        SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
-        ATH_CHECK( tHistSvc.isValid() );
-        m_tree = 0;
-        std::string ntuple_name = algo_name+"Tree";
-        ATH_CHECK(this->init_branches());
-        ATH_CHECK(tHistSvc->getTree(ntuple_name,m_tree));
-        ATH_CHECK(this->book_branches());
-      }
-    }
 
     // retrieve the MuonDetectormanager
     ATH_CHECK(detStore()->retrieve( m_detManager ));
     ATH_CHECK(m_idHelperSvc.retrieve());
     return StatusCode::SUCCESS;
-  }
-
-  void StripClusterTool::handle(const Incident& inc) {
-    if( inc.type()==IncidentType::BeginEvent ) {
-      this->clear_ntuple_variables();
-    }
-  }
-
-  StatusCode StripClusterTool::init_branches() {
-    m_cl_n = 0;
-    m_cl_charge = nullptr;
-    m_cl_size = nullptr;
-    m_cl_x = nullptr;
-    m_cl_y = nullptr;
-    m_cl_z = nullptr;
-    m_cl_lx = nullptr;
-    m_cl_ly = nullptr;
-    m_cl_lz = nullptr;
-    m_cl_ltgx = nullptr;
-    m_cl_ltgy = nullptr;
-    m_cl_ltgz = nullptr;
-    m_cl_truth_x = nullptr;
-    m_cl_truth_y = nullptr;
-    m_cl_truth_z = nullptr;
-    m_cl_truth_lx = nullptr;
-    m_cl_truth_ly = nullptr;
-    m_cl_truth_lz = nullptr;
-    m_cl_truth_E = nullptr;
-    m_cl_truth_n = nullptr;
-    m_cl_side = nullptr;
-    m_cl_isSmall = nullptr;
-    m_cl_wedge = nullptr;
-    m_cl_sector = nullptr;
-    m_cl_module = nullptr;
-    m_cl_layer = nullptr;
-    m_cl_bandId = nullptr;
-    m_cl_phiId = nullptr;
-
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode StripClusterTool::book_branches() {
-    m_cl_n= 0;
-    m_cl_charge = new std::vector< int >();
-    m_cl_size = new std::vector< int >();
-    m_cl_x= new std::vector< float >();
-    m_cl_y= new std::vector< float >();
-    m_cl_z= new std::vector< float >();
-    m_cl_lx= new std::vector< float >();
-    m_cl_ly= new std::vector< float >();
-    m_cl_lz= new std::vector< float >();
-    m_cl_ltgx= new std::vector< float >();
-    m_cl_ltgy= new std::vector< float >();
-    m_cl_ltgz= new std::vector< float >();
-    m_cl_truth_x= new std::vector<float >();
-    m_cl_truth_y= new std::vector<float >();
-    m_cl_truth_z= new std::vector<float>();
-    m_cl_truth_lx= new std::vector<float >();
-    m_cl_truth_ly= new std::vector<float >();
-    m_cl_truth_lz= new std::vector<float>();
-    m_cl_truth_E= new std::vector<float >();
-    m_cl_truth_n= new std::vector<int >();
-    m_cl_side= new std::vector<int>();
-    m_cl_isSmall= new std::vector<int>();
-    m_cl_wedge= new std::vector<int>();
-    m_cl_sector= new std::vector<int>();
-    m_cl_module= new std::vector<int>();
-    m_cl_layer= new std::vector<int>();
-    m_cl_bandId= new std::vector<int>();
-    m_cl_phiId= new std::vector<int>();
-
-    if (m_tree) {
-      std::string ToolName = name().substr(  name().find("::")+2,std::string::npos );
-      const char* n = ToolName.c_str();
-      m_tree->Branch(TString::Format("%s_cl_n",n).Data(),&m_cl_n,TString::Format("%s_cl_n/i",n).Data());
-      m_tree->Branch(TString::Format("%s_cl_charge",n).Data(),&m_cl_charge);
-      m_tree->Branch(TString::Format("%s_cl_x",n).Data(),&m_cl_x);
-      m_tree->Branch(TString::Format("%s_cl_y",n).Data(),&m_cl_y);
-      m_tree->Branch(TString::Format("%s_cl_z",n).Data(),&m_cl_z);
-      m_tree->Branch(TString::Format("%s_cl_lx",n).Data(),&m_cl_lx);
-      m_tree->Branch(TString::Format("%s_cl_ly",n).Data(),&m_cl_ly);
-      m_tree->Branch(TString::Format("%s_cl_lz",n).Data(),&m_cl_lz);
-      m_tree->Branch(TString::Format("%s_cl_ltgx",n).Data(),&m_cl_ltgx);
-      m_tree->Branch(TString::Format("%s_cl_ltgy",n).Data(),&m_cl_ltgy);
-      m_tree->Branch(TString::Format("%s_cl_ltgz",n).Data(),&m_cl_ltgz);
-      m_tree->Branch(TString::Format("%s_cl_size",n).Data(),&m_cl_size);
-      m_tree->Branch(TString::Format("%s_cl_isSmall",n).Data(),&m_cl_isSmall);
-      m_tree->Branch(TString::Format("%s_cl_side",n).Data(),&m_cl_side);
-      m_tree->Branch(TString::Format("%s_cl_wedge",n).Data(),&m_cl_wedge);
-      m_tree->Branch(TString::Format("%s_cl_sector",n).Data(),&m_cl_sector);
-      m_tree->Branch(TString::Format("%s_cl_module",n).Data(),&m_cl_module);
-      m_tree->Branch(TString::Format("%s_cl_layer",n).Data(),&m_cl_layer);
-      m_tree->Branch(TString::Format("%s_cl_bandId",n).Data(),&m_cl_bandId);
-      m_tree->Branch(TString::Format("%s_cl_phiId",n).Data(),&m_cl_phiId);
-      m_tree->Branch(TString::Format("%s_cl_truth_x",n).Data(),&m_cl_truth_x);
-      m_tree->Branch(TString::Format("%s_cl_truth_y",n).Data(),&m_cl_truth_y);
-      m_tree->Branch(TString::Format("%s_cl_truth_z",n).Data(),&m_cl_truth_z);
-      m_tree->Branch(TString::Format("%s_cl_truth_lx",n).Data(),&m_cl_truth_lx);
-      m_tree->Branch(TString::Format("%s_cl_truth_ly",n).Data(),&m_cl_truth_ly);
-      m_tree->Branch(TString::Format("%s_cl_truth_lz",n).Data(),&m_cl_truth_lz);
-      m_tree->Branch(TString::Format("%s_cl_truth_E",n).Data(),&m_cl_truth_E);
-      m_tree->Branch(TString::Format("%s_cl_truth_n",n).Data(),&m_cl_truth_n);
-    }
-    return StatusCode::SUCCESS;
-  }
-
-  void StripClusterTool::clear_ntuple_variables() {
-    if ( m_tree==0 ) return;
-
-    //clear the ntuple variables
-    m_cl_n = 0;
-    m_cl_charge->clear();
-    m_cl_x->clear();
-    m_cl_y->clear();
-    m_cl_z->clear();
-    m_cl_lx->clear();
-    m_cl_ly->clear();
-    m_cl_lz->clear();
-    m_cl_ltgx->clear();
-    m_cl_ltgy->clear();
-    m_cl_ltgz->clear();
-    m_cl_size->clear();
-    m_cl_truth_x->clear();
-    m_cl_truth_y->clear();
-    m_cl_truth_z->clear();
-    m_cl_truth_E->clear();
-    m_cl_truth_n->clear();
-    m_cl_truth_lx->clear();
-    m_cl_truth_ly->clear();
-    m_cl_truth_lz->clear();
-    m_cl_side->clear();
-    m_cl_isSmall->clear();
-    m_cl_wedge->clear();
-    m_cl_sector->clear();
-    m_cl_module->clear();
-    m_cl_layer->clear();
-    m_cl_bandId->clear();
-    m_cl_phiId->clear();
   }
 
   StatusCode StripClusterTool::fill_strip_validation_id(const EventContext& ctx,
@@ -271,17 +105,6 @@ namespace NSWL1 {
             ATH_MSG_DEBUG("Cluster hit, truth localPosX = " << lpos.x()
                           << ", truth localPosY = " << lpos.y()
                           << ", truth enegy deposit = " << truth_energy);
-
-            if (m_doNtuple) {
-              m_cl_truth_x->push_back( hit_gpos.x() );
-              m_cl_truth_y->push_back( hit_gpos.y() );
-              m_cl_truth_z->push_back( hit_gpos.z() );
-
-              m_cl_truth_lx->push_back( lpos.x() );
-              m_cl_truth_ly->push_back( lpos.y() );
-              m_cl_truth_lz->push_back( 0 );
-              m_cl_truth_E->push_back( truth_energy );
-            }
           }
         }
 
@@ -324,26 +147,6 @@ namespace NSWL1 {
         y_lpos=y_lpos/charge;
         z_lpos=z_lpos/charge;
       }
-      if (m_doNtuple) {
-        m_cl_x->push_back(x_pos);
-        m_cl_y->push_back(y_pos);
-        m_cl_z->push_back(z_pos);
-
-        m_cl_lx->push_back(x_lpos);
-        m_cl_ly->push_back(y_lpos);
-        m_cl_lz->push_back(z_lpos);
-        m_cl_charge->push_back(charge);
-        m_cl_size->push_back(n_strip);
-
-        m_cl_side->push_back(this_cl->at(0)->sideId() );
-        m_cl_isSmall->push_back(this_cl->at(0)->isSmall() );
-        m_cl_wedge->push_back(this_cl->at(0)->wedge());
-        m_cl_sector->push_back(this_cl->at(0)->sectorId());
-        m_cl_module->push_back(this_cl->at(0)->moduleId() );
-        m_cl_layer->push_back(this_cl->at(0)->layer());
-        m_cl_bandId->push_back(this_cl->at(0)->bandId());
-        m_cl_phiId->push_back(this_cl->at(0)->phiId());
-      }
       ATH_MSG_DEBUG("Cluster dump with X:" << x_pos << " Y: " << y_pos << " Z: " << z_pos << " cluster charge: " << charge);
       ATH_MSG_DEBUG("Cluster dump with lX:" << x_lpos << " lY: " << y_lpos << " lZ: " << z_lpos << " cluster charge: " << charge);
 
@@ -364,8 +167,6 @@ namespace NSWL1 {
                z_pos);
       clusters.push_back(std::move(stripClOfflData));
     }
-    if (m_doNtuple) m_cl_n = clusters.size();
-    ATH_MSG_DEBUG("Finished Fill");
     return StatusCode::SUCCESS;
   }
 
