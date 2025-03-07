@@ -29,45 +29,45 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
 
     Monitored::Group(
       m_monitoringTool,
-      std::move(Monitored::Collection(key.key() + "_LOCALPOSITION_X", *handle, [](const xAOD::PixelCluster* cluster){
+      Monitored::Collection(key.key() + "_LOCALPOSITION_X", *handle, [](const xAOD::PixelCluster* cluster){
         return cluster->localPosition<2>()[0];
-      })),
-      std::move(Monitored::Collection(key.key() + "_LOCALPOSITION_Y", *handle, [](const xAOD::PixelCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_LOCALPOSITION_Y", *handle, [](const xAOD::PixelCluster* cluster){
         return cluster->localPosition<2>()[1];
-      })),
-      std::move(Monitored::Collection(key.key() + "_LOCALCOVARIANCE_XX", *handle, [](const xAOD::PixelCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_LOCALCOVARIANCE_XX", *handle, [](const xAOD::PixelCluster* cluster){
         return cluster->localCovariance<2>()(0, 0);
-      })),
-      std::move(Monitored::Collection(key.key() + "_LOCALCOVARIANCE_YY", *handle, [](const xAOD::PixelCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_LOCALCOVARIANCE_YY", *handle, [](const xAOD::PixelCluster* cluster){
         return cluster->localCovariance<2>()(1, 1);
-      })),
-      std::move(Monitored::Collection(key.key() + "_OMEGA_X", *handle, [](const xAOD::PixelCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_OMEGA_X", *handle, [](const xAOD::PixelCluster* cluster){
         return cluster->omegaX();
-      })),
-      std::move(Monitored::Collection(key.key() + "_OMEGA_Y", *handle, [](const xAOD::PixelCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_OMEGA_Y", *handle, [](const xAOD::PixelCluster* cluster){
         return cluster->omegaY();
-      })),
-      std::move(Monitored::Collection(key.key() + "_GLOBALPOSITION_X", *handle, [](const xAOD::PixelCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_GLOBALPOSITION_X", *handle, [](const xAOD::PixelCluster* cluster){
         return cluster->globalPosition()[0];
-      })),
-      std::move(Monitored::Collection(key.key() + "_GLOBALPOSITION_Y", *handle, [](const xAOD::PixelCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_GLOBALPOSITION_Y", *handle, [](const xAOD::PixelCluster* cluster){
         return cluster->globalPosition()[1];
-      })),
-      std::move(Monitored::Collection(key.key() + "_GLOBALPOSITION_Z", *handle, [](const xAOD::PixelCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_GLOBALPOSITION_Z", *handle, [](const xAOD::PixelCluster* cluster){
         return cluster->globalPosition()[2];
-      })),
-      std::move(Monitored::Collection(key.key() + "_CHANNELS_IN_PHI", *handle, [](const xAOD::PixelCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_CHANNELS_IN_PHI", *handle, [](const xAOD::PixelCluster* cluster){
         return cluster->channelsInPhi();
-      })),
-      std::move(Monitored::Collection(key.key() + "_CHANNELS_IN_ETA", *handle, [](const xAOD::PixelCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_CHANNELS_IN_ETA", *handle, [](const xAOD::PixelCluster* cluster){
         return cluster->channelsInEta();
-      })),
-      std::move(Monitored::Collection(key.key() + "_WIDTH_IN_ETA", *handle, [](const xAOD::PixelCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_WIDTH_IN_ETA", *handle, [](const xAOD::PixelCluster* cluster){
         return cluster->widthInEta();
-      })),
-      std::move(Monitored::Collection(key.key() + "_TOTAL_TOT", *handle, [](const xAOD::PixelCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_TOTAL_TOT", *handle, [](const xAOD::PixelCluster* cluster){
         return cluster->totalToT();
-      }))
+      })
     );
   }
       
@@ -77,30 +77,30 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
 
     Monitored::Group(
       m_monitoringTool,
-      std::move(Monitored::Collection(key.key() + "_LOCALPOSITION_X", *handle, [](const xAOD::StripCluster* cluster){
+      Monitored::Collection(key.key() + "_LOCALPOSITION_X", *handle, [](const xAOD::StripCluster* cluster){
         return cluster->localPosition<2>()[0];
-      })),
-      std::move(Monitored::Collection(key.key() + "_LOCALPOSITION_Y", *handle, [](const xAOD::StripCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_LOCALPOSITION_Y", *handle, [](const xAOD::StripCluster* cluster){
         return cluster->localPosition<2>()[1];
-      })),
-      std::move(Monitored::Collection(key.key() + "_LOCALCOVARIANCE_XX", *handle, [](const xAOD::StripCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_LOCALCOVARIANCE_XX", *handle, [](const xAOD::StripCluster* cluster){
         return cluster->localCovariance<2>()(0, 0);
-      })),
-      std::move(Monitored::Collection(key.key() + "_LOCALCOVARIANCE_YY", *handle, [](const xAOD::StripCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_LOCALCOVARIANCE_YY", *handle, [](const xAOD::StripCluster* cluster){
         return cluster->localCovariance<2>()(1, 1);
-      })),
-      std::move(Monitored::Collection(key.key() + "_GLOBALPOSITION_X", *handle, [](const xAOD::StripCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_GLOBALPOSITION_X", *handle, [](const xAOD::StripCluster* cluster){
         return cluster->globalPosition()[0];
-      })),
-      std::move(Monitored::Collection(key.key() + "_GLOBALPOSITION_Y", *handle, [](const xAOD::StripCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_GLOBALPOSITION_Y", *handle, [](const xAOD::StripCluster* cluster){
         return cluster->globalPosition()[1];
-      })),
-      std::move(Monitored::Collection(key.key() + "_GLOBALPOSITION_Z", *handle, [](const xAOD::StripCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_GLOBALPOSITION_Z", *handle, [](const xAOD::StripCluster* cluster){
         return cluster->globalPosition()[2];
-      })),
-      std::move(Monitored::Collection(key.key() + "_CHANNELS_IN_PHI", *handle, [](const xAOD::StripCluster* cluster){
+      }),
+      Monitored::Collection(key.key() + "_CHANNELS_IN_PHI", *handle, [](const xAOD::StripCluster* cluster){
         return cluster->channelsInPhi();
-      }))
+      })
     );
   }
 
