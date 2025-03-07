@@ -484,7 +484,8 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::finalize()
 
 
     ATH_MSG_INFO("PRINTING FPGATRACKSIM SIMPLE STATS");
-    ATH_MSG_INFO("========================================================================================");
+    ATH_MSG_INFO("========================================================================================");    
+    ATH_MSG_INFO("Ran on events = " << m_evt);
     ATH_MSG_INFO("Inclusive efficiency to find a road = " << m_nRoadsFound/m_evt_truth);
     ATH_MSG_INFO("Inclusive efficiency to find a track = " << m_nTracksFound/m_evt_truth);
     ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 = " << m_nTracksChi2Found/m_evt_truth);

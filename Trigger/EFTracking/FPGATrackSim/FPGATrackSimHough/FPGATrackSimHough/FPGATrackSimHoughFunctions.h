@@ -19,6 +19,8 @@ enum class ORAlgo {Normal, InvertGrouping};
 long getVolumeID(const FPGATrackSimHit & hit);
 long getCoarseID(const FPGATrackSimHit & hit);
 long getFineID(const FPGATrackSimHit & hit);
+bool isFineIDInStrip(long ID);
+bool isFineIDInPixel(long ID);
 
 void getMissingInfo(const FPGATrackSimRoad & road, int & nMissing, bool & missPixel, bool & missStrip, layer_bitmask_t & missing_mask, layer_bitmask_t & norecovery_mask, const ServiceHandle<IFPGATrackSimMappingSvc> & FPGATrackSimMapping, const TrackCorrType idealCoordFitType);
 void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack & temp, std::vector<FPGATrackSimTrack>& track_cands, const ServiceHandle<IFPGATrackSimMappingSvc> & FPGATrackSimMapping);
