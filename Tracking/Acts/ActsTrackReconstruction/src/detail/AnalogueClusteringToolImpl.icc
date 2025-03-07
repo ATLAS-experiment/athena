@@ -29,6 +29,12 @@ StatusCode AnalogueClusteringToolImpl<calib_data_t, traj_t>::initialize()
     ATH_CHECK(m_lorentzAngleTool.retrieve());
     ATH_CHECK(AthAlgTool::detStore()->retrieve(m_pixelid, "PixelID"));
     ATH_MSG_DEBUG(AthAlgTool::name() << " successfully initialized");
+
+    ATH_MSG_DEBUG( m_thickness );
+    ATH_MSG_DEBUG( m_postCalibration );
+    ATH_MSG_DEBUG( m_correctCovariance );
+    ATH_MSG_DEBUG( m_calibratedCovarianceLowerBound );
+
     return StatusCode::SUCCESS;
 }
 
@@ -215,9 +221,12 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getCorrectedError(
     const std::pair<float, float>& angles,
     const xAOD::PixelCluster& cluster) const
 {
-    std::optional<float> errX;
-    std::optional<float> errY;
-
+  std::optional<float> errX {std::nullopt};
+  std::optional<float> errY {std::nullopt};
+  if (not m_correctCovariance) {
+    return std::make_pair(errX, errY);
+  }
+  
     int nrows = cluster.channelsInPhi();
     int ncols = cluster.channelsInEta();
 
@@ -238,9 +247,9 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getCorrectedError(
         IdentifierHash idHash = element.identifyHash();
 	auto [vX, vY] = errorData.getDeltaError(idHash);
 	if (vX > 0)
-	    errX = vX;
+	  errX = vX;
 	if (vY > 0)
-	    errY = vY;
+	  errY = vY;
     }
 
     return std::make_pair(errX, errY);
@@ -306,11 +315,15 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate(
 	pos[Acts::eBoundLoc1] = *posY;
 
     auto [errX, errY] = getCorrectedError(*errorData, detElement, angles, cluster);
-    if (errX.has_value())
-	cov(0, 0) = (*errX) * (*errX);
-    if (errY.has_value())
-	cov(1, 1) = (*errY) * (*errY);
-
+    if (errX.has_value()) {
+      double newErr = *errX;
+      cov(0, 0) = std::max(newErr * newErr, cov(0, 0) * m_calibratedCovarianceLowerBound);
+    }
+    if (errY.has_value()) {
+      double newErr = *errY;
+      cov(1, 1) = std::max(newErr * newErr, cov(1, 1) * m_calibratedCovarianceLowerBound);
+    }
+    
     return std::make_pair(pos, cov);
 }
 
