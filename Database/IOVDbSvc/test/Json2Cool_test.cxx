@@ -42,7 +42,7 @@ using namespace std::string_literals;
 using namespace IOVDbNamespace;
 using namespace cool;
 const auto larJson=R"foo({"data":{"0":["[DB=8C26DCEB-1065-E011-8322-00145EDD7651][CNT=CollectionTree(CaloRec::CaloCellPositionShift/LArCellPositionShift)][CLID=3B3CCC72-7238-468E-B25E-6F85BA5C9D64][TECH=00000202][OID=00000003-00000000]"]}})foo";
-const std::string spec="PoolRef:String4k";
+const std::string spec="[{\"PoolRef\":\"String4k\"}]";
 
 BOOST_AUTO_TEST_SUITE(Json2CoolTest)
   BOOST_AUTO_TEST_CASE(Constructor){
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_SUITE(Json2CoolTest)
   }
   
   BOOST_AUTO_TEST_CASE(parsePayloadSpec){
-    const std::string testSpecString="crate: UChar, ROB: Int32, BCIDOffset: Int16, AName: String255, fTest: Float";
+    const std::string testSpecString="[{\"crate\":\"UChar\"},{\"ROB\":\"Int32\"},{\"BCIDOffset\":\"Int16\"},{\"AName\":\"String255\"},{\"fTest\":\"Float\"}]";
     auto *referenceSpec = new cool::RecordSpecification();
     referenceSpec->extend("crate", StorageType::UChar);
     referenceSpec->extend("ROB", StorageType::Int32);

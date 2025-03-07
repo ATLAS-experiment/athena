@@ -1,12 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // IOVDbFolder.cxx - helper class for IOVDbSvc to manage folder & data cache
 // Richard Hawkings, started 24/11/08
-
-
-
 
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/IOpaqueAddress.h"
@@ -52,16 +49,20 @@
 
 #include "Cool2Json.h"
 #include "Json2Cool.h"
-#include "BasicFolder.h"
 
 #include "CrestFunctions.h"
 #include <sstream>
 #include <stdexcept>
 #include <fstream>
+#include <filesystem>
 
-#include "CrestApi/CrestApi.h"
+#include "CrestApi/CrestApiFs.h"
+
+#include "IOVDbJsonStringFunctions.h"
 
 using namespace IOVDbNamespace;
+using namespace cool;
+using namespace Crest;
 
 namespace{
   const std::string fileSuffix{".json"};
@@ -74,7 +75,8 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
                          IClassIDSvc* clidsvc, IIOVDbMetaDataTool* metadatatool,
                          const bool checklock, const bool outputToFile,
                          const std::string & source, const bool crestToFile,
-                         const std::string & crestServer, const std::string & crestTag):
+                         const std::string & crestServer, const std::string & crestTag,
+			 const bool crestCoolToFile):
   AthMessaging("IOVDbFolder"),
   p_clidSvc(clidsvc),
   p_metaDataTool(metadatatool),
@@ -84,6 +86,7 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
   m_chansel(cool::ChannelSelection::all()),
   m_outputToFile{outputToFile},
   m_crestToFile{crestToFile},
+  m_crestCoolToFile{crestCoolToFile},
   m_source{source},
   m_crestServer{crestServer},
   m_crestTag{crestTag}
@@ -106,6 +109,8 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
   m_cachepar = folderprop.cache();
   // check for <noover> - disables using tag override read from input file
   m_notagoverride=folderprop.noTagOverride();
+  if (m_source == "CREST")
+    m_cfunctions.emplace(IOVDbNamespace::CrestFunctions(m_crestServer));	  
   if (m_notagoverride) ATH_MSG_INFO( "Inputfile tag override disabled for " << m_foldername );
 
   // channel selection from 'channelSelection' property
@@ -230,184 +235,21 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   // timer to track amount of time in loadCache
   TStopwatch cachetimer;
   const auto & [cachestart, cachestop] = m_iovs.getCacheBounds();
-  BasicFolder basicFolder;
-  if (m_source == "CREST"){
-    //const std::string  jsonFolderName=sanitiseCrestTag(m_foldername);
 
-    CrestFunctions cfunctions(m_crestServer);
-    
+  bool vectorPayload{};
+  std::string strCrestNodeDesc;
+  if (m_source == "CREST"){
     ATH_MSG_INFO("Download tag would be: "<<m_crestTag);
 
-    std::string crestPayloadType="crest-json-single-iov";
-    nlohmann::json tagProperties = cfunctions.getTagProperties(m_crestTag);
-    if(tagProperties!=nullptr){
-      if(tagProperties.contains("payloadSpec"))
-        crestPayloadType=tagProperties["payloadSpec"].get<std::string>();
-    }
-    ATH_MSG_INFO("CREST payload type: "<<crestPayloadType);
-    // *** *** *** *** *** ***
-    // Routine which converts openended CREST IOVs into non-overlapping IOVs
-    
-    // Get a vector of pairs retrieved from crest
-    //  <IOV_SINCE(string),HASH(string)>
-    auto crestIOVs = cfunctions.getIovsForTag(m_crestTag);
-    if(crestIOVs.empty()){
-      ATH_MSG_WARNING("Load cache failed for " << m_foldername << ". No IOVs retrieved from the DB");
-    }
-    typedef std::pair<cool::ValidityKey,size_t> IOV2Index; // <CREST_IOV(converted to ull),Index_in_crestIOVs>
-    std::vector<IOV2Index> iov2IndexVect;                  // Temporary vector for sorting IOV_SINCE values
-    iov2IndexVect.reserve(crestIOVs.size());
-    size_t hashInd{0};
-    for(const auto& crestIOV : crestIOVs) {
-      iov2IndexVect.emplace_back(std::stoull(crestIOV.first),hashInd++);
-    }
-
-    std::sort(iov2IndexVect.begin(),iov2IndexVect.end(),
-	      [](const IOV2Index& a, const IOV2Index& b)
-	      {
-		return a.first < b.first;
-	      });
-
-
-    typedef std::pair<IovStore::Iov_t,std::string> IOVHash; // <<IOV_SINCE(ull),IOV_UNTIL(ull)>,HASH(string)>
-    std::vector<IOVHash> iovHashVect;                       // Vector of non-overlapping IOVs + corresponding Hashes
-    size_t nIOVs = iov2IndexVect.size();
-    iovHashVect.reserve(nIOVs);
-    if(nIOVs>0) {
-      if(nIOVs>1) {
-    	  for(size_t ind=0; ind<nIOVs-1; ++ind) {
-      	 	  iovHashVect.emplace_back(IovStore::Iov_t(iov2IndexVect[ind].first
-							   , iov2IndexVect[ind+1].first)
-					   , crestIOVs[iov2IndexVect[ind].second].second);
-    	  }
-      }
-      iovHashVect.emplace_back(IovStore::Iov_t(iov2IndexVect[nIOVs-1].first
-					       , cool::ValidityKeyMax)
-			       , crestIOVs[iov2IndexVect[nIOVs-1].second].second);
-    }
-    // End of the CREST IOV conversion routine
-    // *** *** *** *** *** ***
-
-    int indIOV = iovHashVect.empty() ? -1 : 0;
-    for(const auto& iovhash : iovHashVect) {
-      if(vkey >= iovhash.first.second) {
-	++indIOV;
-	continue;
-      }
-      if(vkey < iovhash.first.first) {
-	ATH_MSG_WARNING("Load cache failed for " << m_foldername
-			<< ". VKey " << vkey << " is earlier than the start of the first IOV retrieved from the DB");
-	indIOV = -1;
-      }
-      break;
-    }
-
-    if(indIOV>=0) {
-      ATH_MSG_DEBUG("Found IOV for " << m_foldername << " and VKEY " << vkey << " "
-		   << iovHashVect[indIOV].first);
-    }
-
-
-   std::string reply = indIOV==-1 ? std::string{} : cfunctions.getPayloadForHash(iovHashVect[indIOV].second);
-   if(crestPayloadType.compare("crest-json-multi-iov")==0){
-        try{
-          nlohmann::json multiPayload = nlohmann::json::parse(reply);
-          nlohmann::json jsIovs=multiPayload["obj"];
-          iov2IndexVect.clear();
-          iov2IndexVect.reserve(jsIovs.size());
-          hashInd=0;
-          for(const auto& jsIov : jsIovs.items()) {
-            iov2IndexVect.emplace_back(std::stoull(jsIov.key()),hashInd++);
-          }
-
-          std::sort(iov2IndexVect.begin(),iov2IndexVect.end(),
-              [](const IOV2Index& a, const IOV2Index& b)
-              {
-                return a.first < b.first;
-              });
-          if(vkey < iov2IndexVect[0].first) {
-             ATH_MSG_FATAL("Load cache failed for " << m_foldername << ". No valid IOV retrieved from the payload");
-             return false;
-          }
-
-          uint64_t iov = 0;
-          for(const auto& iovhash : iov2IndexVect) {
-            if(vkey >= iovhash.first) {
-              iov=iovhash.first;
-              continue;
-            }
-            else {
-              break;
-            }
-          }
-          iovHashVect[indIOV].first.first=iov;
-          nlohmann::json payload={};
-          payload["data"]=jsIovs[std::to_string(iov)];
-          reply=payload.dump();
-        } catch (std::exception & e){
-          ATH_MSG_FATAL("Failed of parce multi iovs struct of internal iovs from payload for DCS type: " << e.what());
-        }
-    }
-    ATH_MSG_DEBUG("Found IOV for " << m_foldername << " and VKEY " << vkey
-		  << " " << iovHashVect[indIOV].first);
-
-    if (m_crestToFile and (indIOV>=0)){ //indIOV must be >=0, it's used as a vector index in this block
-     
-      unsigned long long sinceT =  iovHashVect[indIOV].first.first;
-
-      std::string crest_work_dir=std::filesystem::current_path();
-      crest_work_dir += "/crest_data";
-      bool crest_rewrite = true;
-      Crest::CrestClient crestFSClient = Crest::CrestClient(crest_rewrite, crest_work_dir);
-
-      nlohmann::json js =
-      {
-        {"name", m_crestTag}
-      };
-
-      try{
-        crestFSClient.createTag(js);
-        ATH_MSG_INFO("Tag " << m_crestTag << " saved to disk.");
-        ATH_MSG_INFO("CREST Dump dir = " << crest_work_dir);
-      }
-      catch (const std::exception& e) {
-        ATH_MSG_WARNING("Data saving for tag " << m_crestTag << " failed: " << e.what());
-      }
-
-      try{
-        crestFSClient.storePayloadDump(m_crestTag, sinceT, reply);
-        ATH_MSG_INFO("Data (payload and IOV) saved for tag " << m_crestTag << ".");
-      }
-      catch (const std::exception& e) {
-        ATH_MSG_WARNING("Data (payload and IOV) saving for tag " << m_crestTag<<" failed; " << e.what());
-      }
-    }
-
-    //
     if (m_crest_tag != m_crestTag){
       m_crest_tag = m_crestTag;
-      m_tag_info = cfunctions.getTagInfo(m_crestTag);
+      m_tag_info = m_cfunctions.value().getTagInfo(m_crestTag); 
     }
-
-    const std::string& nodeDescription = cfunctions.getTagInfoElement(m_tag_info,"node_description");
-    if(nodeDescription.find("CondAttrListVec") != std::string::npos) {
-      basicFolder.setVectorPayloadFlag(true);
-    }
-
-    const std::string& specString = cfunctions.getTagInfoElement(m_tag_info,"payload_spec");
-    if (specString.empty()){
-      ATH_MSG_FATAL("Reading payload spec from "<<m_foldername<<" failed.");
-      return false;
-    }
-    //basic folder now contains the info
-    if(!reply.empty()) { //this also takes care of the case if indIOV<0, since reply is empty in this case
-      std::istringstream ss(reply);
-      Json2Cool inputJson(ss, basicFolder, specString, &(iovHashVect[indIOV].first));
-      if (basicFolder.empty()){
-        ATH_MSG_FATAL("Reading channel data from "<<m_foldername<<" failed.");
-        return false;
-      }
-    }
+    strCrestNodeDesc = m_cfunctions.value().folderDescriptionForTag(m_crestTag);
+    vectorPayload = (strCrestNodeDesc.find("CondAttrListVec") != std::string::npos);
+  }
+  else {
+    vectorPayload = (m_foldertype ==CoraCool) or (m_foldertype == CoolVector);
   }
 
   ATH_MSG_DEBUG( "Load cache for folder " << m_foldername << " validitykey " << vkey);
@@ -420,9 +262,6 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   }
   ++m_ndbread;
   auto [changedCacheLo, changedCacheHi] = m_iovs.getCacheBounds();
-  //
-  //
-  //new
   if (cacheDiv>0) {
     // quantise queries on boundaries that are sub-multiples of cache length
     unsigned long long cacheq=m_cachelength/cacheDiv;
@@ -445,12 +284,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   //
   const auto & [since, until] = m_iovs.getCacheBounds();
   ATH_MSG_DEBUG( "IOVDbFolder:loadCache limits set to ["  << since << "," << until << "]" );
-  bool vectorPayload{};
-  if (m_source=="CREST"){
-    vectorPayload = basicFolder.isVectorPayload();
-  } else {
-    vectorPayload = (m_foldertype ==CoraCool) or (m_foldertype == CoolVector);
-  }
+
   if (m_cachespec==nullptr) {
     // on first init, guess size based on channel count
     unsigned int estsize=m_nchan;
@@ -476,7 +310,6 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   }
   bool retrievedone=false;
   unsigned int nChannelsExpected = (m_chanrange.empty())? (m_nchan) : (IOVDbNamespace::countSelectedChannels(m_channums, m_chansel));
-
   if (m_source == "COOL_DATABASE"){
     // query to fill cache - request for database activates connection
     if (not m_conn->open()) {
@@ -537,23 +370,9 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
         } else {
           auto [since,until] = m_iovs.getCacheBounds();
           cool::IObjectIteratorPtr itr=folder->browseObjects(since,until,m_chansel,m_tag);
-          if (m_outputToFile){
+          if (m_outputToFile ||m_crestCoolToFile ) {
             Cool2Json json(folder, since, until, m_chansel, m_tag);
-            std::ofstream myFile;
-            const std::string sanitisedFolder=sanitiseFilename(m_foldername);
-            const std::string fabricatedName=sanitisedFolder+delimiter+std::to_string(since)+fileSuffix;
-            myFile.open(fabricatedName,std::ios::out);
-            if (not myFile.is_open()){
-              ATH_MSG_FATAL("File creation for "<<fabricatedName<<" failed.");
-            } else{
-              ATH_MSG_INFO("File "<<fabricatedName<<" created.");
-            }
-            myFile<<IOVDbNamespace::Cool2Json::open();
-            myFile<<json.description()<<IOVDbNamespace::Cool2Json::delimiter()<<std::endl;
-            myFile<<json.payloadSpec()<<IOVDbNamespace::Cool2Json::delimiter()<<std::endl;
-            myFile<<json.iov()<<IOVDbNamespace::Cool2Json::delimiter()<<std::endl;
-            myFile<<json.payload()<<std::endl;
-            myFile<<IOVDbNamespace::Cool2Json::close();
+	    dumpFile("cool_dump",vkey,&json,m_crestCoolToFile,nullptr,"","");
           }
           while (itr->goToNext()) {
             const cool::IObject& ref=itr->currentRef();
@@ -603,45 +422,60 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
         if (not m_conn->dropAndReconnect()) ATH_MSG_ERROR("Tried to reconnect in 'loadCache' but failed");
       }
     }
-  } /*end of 'if ... COOL_DATABASE'*/ else {
-    //this is code using CREST objects now
+  } // End of COOL reading section
+  else {
+    // CREST reading section
+    auto [since,until] = m_iovs.getCacheBounds();
+    std::vector<BasicFolder> crestObjs;
+    try {
+      crestObjs = fetchCrestObjects(since,until,vectorPayload,vkey,strCrestNodeDesc);
+    }
+    catch(std::exception&) {
+      return false;
+    }
+
+    unsigned int iadd = 0;
+
+    if (!resolveTag(nullptr,globalTag)) return false; 
     ATH_MSG_DEBUG( "loadCache: Expecting to see " << nChannelsExpected << " channels" );
-    if (!resolveTag(nullptr,globalTag)) return false;
-    const auto & channelNumbers=basicFolder.channelIds();
-    ATH_MSG_DEBUG( "ChannelIds is " << channelNumbers.size() << " long" );
-    unsigned int iadd{};
-    for (const auto & chan: channelNumbers){
-      m_cachechan.push_back(chan);
-      addIOVtoCache(basicFolder.iov().first, basicFolder.iov().second);
-      if (basicFolder.isVectorPayload()) {
-        const auto & vPayload = basicFolder.getVectorPayload(chan);
-        const unsigned int istart=m_cacheattr.size();
-        for (const auto & attList:vPayload){
+
+    for(BasicFolder& basicFolder : crestObjs) {
+      const auto & channelNumbers=basicFolder.channelIds();
+      ATH_MSG_DEBUG( "ChannelIds is " << channelNumbers.size() << " long" );
+      for (const auto & chan: channelNumbers){
+        addIOVtoCache(basicFolder.iov().first, basicFolder.iov().second);
+        m_cachechan.push_back(chan);
+        if (basicFolder.isVectorPayload()) {
+          const auto & vPayload = basicFolder.getVectorPayload(chan);
+          const unsigned int istart=m_cacheattr.size();
+          for (const auto & attList:vPayload){
+            if (m_cachespec==nullptr) setSharedSpec(attList);
+            m_cacheattr.emplace_back(*m_cachespec,true);// maybe needs to be cleared before
+            m_cacheattr.back().fastCopyData(attList);
+            m_nbytesread+=IOVDbNamespace::attributeListSize(attList);
+          }
+          m_cacheccstart.push_back(istart);
+          m_cacheccend.push_back(m_cacheattr.size());
+          ++iadd;
+        } else {
+          auto const & attList = basicFolder.getPayload(chan);
           if (m_cachespec==nullptr) setSharedSpec(attList);
-          m_cacheattr.emplace_back(*m_cachespec,true);// maybe needs to be cleared before
+          const coral::AttributeList c(*m_cachespec,true);
+          m_cacheattr.push_back(c);// maybe needs to be cleared before
           m_cacheattr.back().fastCopyData(attList);
           m_nbytesread+=IOVDbNamespace::attributeListSize(attList);
+          ++iadd;
         }
-        m_cacheccstart.push_back(istart);
-        m_cacheccend.push_back(m_cacheattr.size());
-        ++iadd;
-      } else {
-        auto const & attList = basicFolder.getPayload(chan);
-        if (m_cachespec==nullptr) setSharedSpec(attList);
-        const coral::AttributeList c(*m_cachespec,true);
-        m_cacheattr.push_back(c);// maybe needs to be cleared before
-        m_cacheattr.back().fastCopyData(attList);
-        m_nbytesread+=IOVDbNamespace::attributeListSize(attList);
-        ++iadd;
       }
     }
     retrievedone=true;
     ATH_MSG_DEBUG( "Retrieved " << iadd << " objects for "<< m_nchan << " channels into cache" );
     m_nobjread+=iadd;
-  } //end of attempted retrieves using one of the methods
+  } // End of reading from CREST
+
   if (!retrievedone) {
     const auto & [since,until] = m_iovs.getCacheBounds();
-    ATH_MSG_ERROR( "Could not retrieve COOL data for folder " <<
+    ATH_MSG_ERROR( "Could not retrieve Cond data for folder " <<
       m_foldername << " tag " << m_tag << " validityKeys [" << since <<
       "," << until << "]" );
     return false;
@@ -1065,13 +899,11 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   p_tagInfoMgr = tagInfoMgr;
   if( not m_useFileMetaData ) {
     if(m_source=="CREST"){
-      CrestFunctions cfunctions(m_crestServer);
-
       if (m_crest_tag != m_crestTag){
         m_crest_tag = m_crestTag;
-        m_tag_info = cfunctions.getTagInfo(m_crestTag);
+        m_tag_info = m_cfunctions.value().getTagInfo(m_crestTag); 
       }
-      m_folderDescription = cfunctions.getTagInfoElement(m_tag_info,"node_description");
+      m_folderDescription = m_cfunctions.value().folderDescriptionForTag(m_crestTag);
     } else {
       //folder desc from db
       std::tie(m_multiversion, m_folderDescription) = IOVDbNamespace::folderMetadata(m_conn, m_foldername);
@@ -1094,12 +926,10 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   // setup channel list and folder type
   if( not m_useFileMetaData ) {
     if(m_source=="CREST"){
-        CrestFunctions cfunctions(m_crestServer); 
-
-        const std::string & payloadSpec = cfunctions.getTagInfoElement(m_tag_info,"payload_spec");  
-        std::string chanList = cfunctions.getTagInfoElement(m_tag_info,"channel_list");
-        std::tie(m_channums, m_channames) = cfunctions.extractChannelListFromString(chanList);
-
+        const std::string & payloadSpec = m_cfunctions.value().getTagInfoElement(m_tag_info,"payload_spec");   
+        std::string chanList = m_cfunctions.value().getTagInfoElement(m_tag_info,"channel_list"); 
+        std::tie(m_channums, m_channames) = m_cfunctions.value().extractChannelListFromString(chanList); 
+	
         //determine foldertype from the description, the spec and the number of channels
         m_foldertype = IOVDbNamespace::determineFolderType(m_folderDescription, payloadSpec, m_channums);
  
@@ -1128,15 +958,19 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
           tagInfo["node_description"] = m_folderDescription;
           tagInfo["payload_spec"] = payloadSpec;
 
-          tag_meta["tagInfo"] = tagInfo;
+          tag_meta["tagInfo"] = tagInfo.dump();
 
           std::string crest_work_dir=std::filesystem::current_path();
           crest_work_dir += "/crest_data";
           bool crest_rewrite = true;
-          Crest::CrestClient crestFSClient = Crest::CrestClient(crest_rewrite, crest_work_dir);
+
+	  Crest::CrestApiFs crestFSClient = Crest::CrestApiFs(crest_rewrite, crest_work_dir);
 
           try{
-            crestFSClient.createTagMetaInfo(tag_meta);;
+	    TagMetaDto dto = TagMetaDto();
+	    dto = dto.fromJson(tag_meta);
+            crestFSClient.createTagMeta(dto);
+	    
             ATH_MSG_INFO("Tag meta info for " << m_crestTag << " saved to disk.");
             ATH_MSG_INFO("CREST Dump dir = " << crest_work_dir);
           }
@@ -1335,4 +1169,316 @@ IOVDbFolder::printCache(){
     }
     ATH_MSG_DEBUG("folder cache printout -------------------");
   
+}
+
+std::vector<IOVDbFolder::IOVHash> IOVDbFolder::fetchCrestIOVs(cool::ValidityKey since, cool::ValidityKey until)
+{
+  std::vector<IOVHash> result;
+
+  // Get a vector of pairs retrieved from crest
+  auto crestIOVs = m_cfunctions.value().getIovsForTag(m_crestTag, since, until); 
+  if(crestIOVs.empty()){
+    ATH_MSG_WARNING("Load cache failed for " << m_foldername << ". No IOVs retrieved from the DB");
+    return result; 
+  }
+  std::vector<IOV2Index> iov2IndexVect;                  // Temporary vector for sorting IOV_SINCE values
+  iov2IndexVect.reserve(crestIOVs.size());
+  size_t hashInd{0};
+  for(const auto& crestIOV : crestIOVs) {
+    iov2IndexVect.emplace_back(std::stoull(crestIOV.first),hashInd++);
+  }
+
+  size_t nIOVs = iov2IndexVect.size();
+  result.reserve(nIOVs);
+  if(nIOVs>0) {
+    if(nIOVs>1) {
+      for(size_t ind=0; ind<nIOVs-1; ++ind) {
+	result.emplace_back(IovStore::Iov_t(iov2IndexVect[ind].first
+					    , iov2IndexVect[ind+1].first)
+			    , crestIOVs[iov2IndexVect[ind].second].second);
+      }
+    }
+    result.emplace_back(IovStore::Iov_t(iov2IndexVect[nIOVs-1].first
+				        , cool::ValidityKeyMax)
+		        , crestIOVs[iov2IndexVect[nIOVs-1].second].second);
+  }
+  
+  return result;
+}
+
+void IOVDbFolder::dumpFile(const std::string& dumpName
+		           , const cool::ValidityKey& vkey
+			   , Cool2Json* json
+			   , bool skipCoolIoV
+			   , BasicFolder* basicFolder
+			   , const std::string& crestNodeDescr
+			   , const std::string& specString) const
+{
+  std::ofstream myFile;
+  std::string fMain(dumpName);
+  const std::string sanitisedFolder=fMain+"/"+sanitiseFilename(m_foldername);
+  const std::string fabricatedName=sanitisedFolder+delimiter+std::to_string(vkey)+fileSuffix;
+  std::filesystem::create_directory(fMain);
+  myFile.open(fabricatedName,std::ios::out);
+  if (not myFile.is_open()) {
+    std::string errorMessage{"File creation for "+fabricatedName+" failed."};
+    ATH_MSG_FATAL(errorMessage);
+    throw std::runtime_error(errorMessage);
+  }
+  else {
+    ATH_MSG_INFO("File "<<fabricatedName<<" created.");
+  }
+
+  myFile<<s_openJson;
+  if(json) {
+    // Dump COOL data
+    myFile<<json->description()<<s_delimiterJson<<std::endl;
+    myFile<<json->payloadSpec()<<s_delimiterJson<<std::endl;
+    if(!skipCoolIoV) {
+      myFile<<json->iov()<<s_delimiterJson<<std::endl;
+    }
+    myFile<<json->payload()<<std::endl;
+  }
+  else {
+    // Dump CREST data
+    std::string newNodeDescription = std::regex_replace(crestNodeDescr, std::regex("\""), "\\\"");
+    std::string newSpecString = std::regex_replace(specString, std::regex(":"), ": ");
+    newSpecString = std::regex_replace(newSpecString, std::regex(","), s_delimiterJson);
+    myFile<<"\"node_description\" : \""<<newNodeDescription<< '\"'<<s_delimiterJson<<std::endl;
+    myFile<<"\"folder_payloadspec\": \""<<newSpecString<< '\"'<<s_delimiterJson<<std::endl;
+    myFile<<basicFolder->jsonPayload(newNodeDescription,newSpecString)<<std::endl;
+  }
+  myFile<<s_closeJson;
+}
+
+std::vector<BasicFolder> IOVDbFolder::fetchCrestObjects(cool::ValidityKey since
+                                                        , cool::ValidityKey until
+                                                        , bool vectorPayloadFlag
+					                , cool::ValidityKey vkey
+							, const std::string& nodeDesc)
+{
+
+  std::string crestPayloadType="crest-json-single-iov";
+  nlohmann::json tagProperties = m_cfunctions.value().getTagProperties(m_crestTag);
+  if(tagProperties!=nullptr
+     && tagProperties.contains("payloadSpec")) {
+    crestPayloadType=tagProperties["payloadSpec"].get<std::string>();
+  }
+
+  if(crestPayloadType.compare("crest-json-multi-iov")==0) {
+/*
+   try {
+      nlohmann::json multiPayload = nlohmann::json::parse(reply);
+      nlohmann::json jsIovs=multiPayload["obj"];
+      std::vector<IOV2Index> iov2IndexVect;
+      iov2IndexVect.reserve(jsIovs.size());
+      size_t hashInd{0};
+      for(const auto& jsIov : jsIovs.items()) {
+	iov2IndexVect.emplace_back(std::stoull(jsIov.key()),hashInd++);
+      }
+      std::sort(iov2IndexVect.begin(),iov2IndexVect.end(),
+		[](const IOV2Index& a, const IOV2Index& b)
+		{
+		  return a.first < b.first;
+		});
+      if(vkey < iov2IndexVect[0].first) {
+	std::string errorMessage{"Load cache failed for "+m_foldername+". No valid IOV retrieved from the payload"};
+	ATH_MSG_FATAL(errorMessage);
+	throw std::runtime_error{errorMessage};
+      }
+
+      uint64_t iov = 0;
+      for(const auto& iovhash : iov2IndexVect) {
+	if(vkey >= iovhash.first) {
+          iov=iovhash.first;
+	  continue;
+	}
+	else {
+	  break;
+	}
+      }
+      if (indIOV>=0){
+        iovHashVect[indIOV].first.first=iov;
+        nlohmann::json payload={};
+        payload["data"]=jsIovs[std::to_string(iov)];
+        reply=payload.dump();
+      } else {
+        ATH_MSG_FATAL("indIOV is negative in IOVDbFolder::dumpFile");
+      }
+    }
+    catch (std::exception & e) {
+      std::string errorMessage = "Failed of parse multi iovs struct of internal iovs from payload for DCS type: " + std::string{e.what()};
+      ATH_MSG_FATAL(errorMessage);
+      throw std::runtime_error{errorMessage};
+    }
+  }
+  ATH_MSG_DEBUG("Found IOV for " << m_foldername << " and VKEY " << vkey
+		<< " " << iovHashVect[indIOV].first);
+
+  if (m_crestToFile and (indIOV>=0)) { //indIOV must be >=0, it's used as a vector index in this block
+    unsigned long long sinceT =  iovHashVect[indIOV].first.first;
+
+    std::string crest_work_dir=std::filesystem::current_path();
+    crest_work_dir += "/crest_data";
+    bool crest_rewrite = true;
+    Crest::CrestClient crestFSClient = Crest::CrestClient(crest_rewrite, crest_work_dir);
+
+    nlohmann::json js =
+    {
+      {"name", m_crestTag}
+    };
+
+    try{
+      crestFSClient.createTag(js);
+      ATH_MSG_INFO("Tag " << m_crestTag << " saved to disk.");
+      ATH_MSG_INFO("CREST Dump dir = " << crest_work_dir);
+    }
+    catch (const std::exception& e) {
+      ATH_MSG_WARNING("Data saving for tag " << m_crestTag << " failed: " << e.what());
+    }
+
+    try{
+      crestFSClient.storePayloadDump(m_crestTag, sinceT, reply);
+      ATH_MSG_INFO("Data (payload and IOV) saved for tag " << m_crestTag << ".");
+    }
+    catch (const std::exception& e) {
+      ATH_MSG_WARNING("Data (payload and IOV) saving for tag " << m_crestTag<<" failed; " << e.what());
+    }
+  }
+
+  const std::string& specString = cfunctions.getTagInfoElement(m_tag_info,"payload_spec");
+  if (specString.empty()) {
+    std::string errorMessage = "Reading payload spec from "+m_foldername+" failed.";
+*/
+    // Support for this type of payload will be added later
+    std::string errorMessage = m_foldername + ": has multi-iov payload. Folders with multi-iov payloads currently not supported!";
+    ATH_MSG_FATAL(errorMessage);
+    throw std::runtime_error{errorMessage};
+  }
+  const std::string specString = m_cfunctions.value().getTagInfoElement(m_tag_info,"payload_spec");
+  if (specString.empty()) {
+    std::string errorMessage = "Reading payload spec from " + m_foldername + " failed.";
+    ATH_MSG_FATAL(errorMessage);
+    throw std::runtime_error{errorMessage};
+  }
+
+  std::vector<BasicFolder> retVector;
+
+  // Vector of non-overlapping IOVs + corresponding Hashes
+  std::vector<IOVHash> iovHashVect = fetchCrestIOVs(since, until);
+
+  if(iovHashVect.empty() || until<=iovHashVect[0].first.first) {
+    if(iovHashVect.empty()) {
+      ATH_MSG_INFO("NO IOVs retrieved for the folder "+ m_foldername);
+    }
+    else {
+      ATH_MSG_INFO("Cache boundaries outside available IOVs for the folder "+ m_foldername);
+    }
+    BasicFolder basicFolder;
+    basicFolder.setVectorPayloadFlag(vectorPayloadFlag);
+    retVector.push_back(basicFolder);
+    return retVector;
+  }
+
+  unsigned indIOVStart = 0;
+  for(const auto& iovhash : iovHashVect) {
+    if(since < iovhash.first.first) break; // 'since' is earlier that the first IOV segment. indIOVStart=0
+    if(since < iovhash.first.second
+       && since >= iovhash.first.first) {
+      break;
+    }
+    ++indIOVStart;
+  }
+  unsigned indIOVEnd = indIOVStart;
+  while(indIOVEnd < iovHashVect.size()) {
+    if(iovHashVect[indIOVEnd].first.first < until
+       && iovHashVect[indIOVEnd].first.second >= until) {
+       break;
+    }
+    ++indIOVEnd;
+  }
+
+  for(unsigned ind = indIOVStart; ind <= indIOVEnd; ++ind) {
+    std::string reply = m_cfunctions.value().getPayloadForHash(iovHashVect[ind].second); 
+
+    if (m_crestToFile) { 
+      unsigned long long sinceT =  iovHashVect[ind].first.first;
+
+      std::string crest_work_dir=std::filesystem::current_path();
+      crest_work_dir += "/crest_data";
+      bool crest_rewrite = true;
+      Crest::CrestApiFs crestFSClient = Crest::CrestApiFs(crest_rewrite, crest_work_dir);
+
+      nlohmann::json js =
+      {
+          {"description", "none"},
+          {"endOfValidity", 0},
+          {"lastValidatedTime", 0},
+          {"name", m_crestTag},
+          {"payloadSpec", "none"},
+          {"synchronization", "none"},
+          {"timeType", "time"}};
+
+      TagDto dto = TagDto();
+      dto = dto.fromJson(js);
+
+      try{
+	crestFSClient.createTag(dto);
+	
+        ATH_MSG_INFO("Tag " << m_crestTag << " saved to disk.");
+        ATH_MSG_INFO("CREST Dump dir = " << crest_work_dir);
+      }
+      catch (const std::exception& e) {
+        ATH_MSG_WARNING("Data saving for tag " << m_crestTag << " failed: " << e.what());
+      }
+
+      uint64_t endtime = 0;
+      nlohmann::json elem = 
+        {
+          {"since", sinceT},
+          {"data", reply},
+          {"streamerInfo", "none"}
+        };
+
+      nlohmann::json jResources = json::array();
+      jResources.push_back(elem);
+
+      nlohmann::json jsStoreSet= 
+      {
+        {"size", 1},
+        {"datatype", "data"},
+        {"format", "StoreSetDto"},
+        {"resources", jResources}
+      };
+
+      StoreSetDto storeSetDto = StoreSetDto::fromJson(jsStoreSet);
+      
+      try{
+        crestFSClient.storeData(m_crestTag, storeSetDto, "JSON", "test", "test", "1", endtime);
+	
+        ATH_MSG_INFO("Data (payload and IOV) saved for tag " << m_crestTag << ".");
+      }
+      catch (const std::exception& e) {
+        ATH_MSG_WARNING("Data (payload and IOV) saving for tag " << m_crestTag<<" failed; " << e.what());
+      }
+    }
+
+    //basic folder now contains the info
+    BasicFolder basicFolder;
+    basicFolder.setVectorPayloadFlag(vectorPayloadFlag);
+    std::istringstream ss(reply);
+    Json2Cool inputJson(ss, basicFolder, specString, &(iovHashVect[ind].first));
+    if (basicFolder.empty()){
+      std::string errorMessage = "Reading channel data from "+m_foldername+" failed.";
+      ATH_MSG_FATAL(errorMessage);
+      throw std::runtime_error{errorMessage};
+    }
+
+    if(m_crestCoolToFile) {
+      dumpFile("crest_dump",vkey,nullptr,false,&basicFolder,nodeDesc,specString);
+    }
+
+    retVector.push_back(basicFolder);
+  }
+  return retVector;
 }

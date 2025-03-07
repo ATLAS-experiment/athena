@@ -70,10 +70,7 @@ namespace IOVDbNamespace{
         std::cout<<e.what()<<std::endl; //typically a parsing error
       }
       m_sharedSpec = parsePayloadSpec(specString);
-      const auto & payload=j["data"];//payload is an object in any case, of form {"0":["datastring"]}
-      //keep these lines for reference: iov handling is not yet implemented, but should be
-      //const auto & iovFromFile=j["iov"];//iov is a two-element array
-      //const std::pair<cool::ValidityKey, cool::ValidityKey> iov(iovFromFile[0], iovFromFile[1]);
+      const auto & payload=(j.contains("data")) ? j["data"] : j;
       if(iov) {
 	m_basicFolder.setIov(*iov);
       }
@@ -113,8 +110,24 @@ namespace IOVDbNamespace{
   cool::RecordSpecification *
   Json2Cool::parsePayloadSpec(const std::string & stringSpecification){
     if (stringSpecification.empty()) return nullptr;
-    std::string input(stringSpecification);
     auto *spec = new cool::RecordSpecification();
+
+    std::string inputObj=stringSpecification;
+    nlohmann::json nl=nlohmann::json::parse(stringSpecification);
+    if(nl.is_array()){
+      for (unsigned int i = 0; i < nl.size(); i++)
+      {
+        if(nl[i].size()>0){
+	  auto it = nl[i].items().begin();
+	  std::string n((*it).key());
+          std::string t((*it).value());
+          spec->extend(n, typeCorrespondance.find(t)->second);	  
+	}	
+      }
+      return spec;
+    }
+
+    std::string input(stringSpecification);
     
     std::string regex=R"delim(([^\s,:]*):\s?([^\s,]*),?)delim";
     boost::regex expression(regex);

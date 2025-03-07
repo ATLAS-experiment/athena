@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 // @file Cool2Json.h
 // Header for Cool2Json class
@@ -29,11 +29,6 @@ namespace IOVDbNamespace {
     //
     public:
     //class methods
-    ///Produce a representation of a coral::Attribute as a json string
-    static std::string jsonAttribute(const coral::Attribute&);
-    
-    ///Produce a representation of a coral::AttributeList as a json string
-    static std::string jsonAttributeList(const coral::AttributeList&);
     
     //@Constructor sets internal variables
     Cool2Json(const cool::IFolderPtr & pFolder, const cool::ValidityKey & since, 
@@ -44,7 +39,7 @@ namespace IOVDbNamespace {
     std::string description() const;
     
     ///Payload specification for this folder
-    std::string payloadSpec() const;
+    const std::string& payloadSpec() const;
     
     ///Payload (data for the given channel selection and iov)
     std::string payload();
@@ -59,7 +54,7 @@ namespace IOVDbNamespace {
     std::string iovBase() const;
     
     ///Simply the tag string passed to the constructor
-    std::string tag() const;
+    const std::string& tag() const;
     
     ///json open tag, '{'
     static std::string open();

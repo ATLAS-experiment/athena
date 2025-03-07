@@ -5,8 +5,9 @@
 // IOVDbFolder.h
 // helper class for IOVDbSvc managing folder access
 // Richard Hawkings, started 24/11/08
-#ifndef IOVDbSvc_IOVDbFolder_h
-#define IOVDbSvc_IOVDbFolder_h
+
+#ifndef IOVDBSVC_IOVDBFOLDER_H
+#define IOVDBSVC_IOVDBFOLDER_H
 
 #include <string>
 #include "GaudiKernel/IClassIDSvc.h"
@@ -26,10 +27,13 @@
 #include <memory>
 #include <algorithm>
 #include "FolderTypes.h"
+#include "BasicFolder.h"
 #include "IovStore.h"
 
 #include <map> 
 #include "nlohmann/json.hpp"
+
+#include "CrestFunctions.h"
 
 class MsgStream;
 class IOVDbConn;
@@ -40,13 +44,18 @@ class IIOVDbMetaDataTool;
 class CondAttrListCollection;
 class ITagInfoMgr;
 
+namespace IOVDbNamespace {
+  class Cool2Json;
+  class BasicFolder;
+}
+
 class IOVDbFolder : public AthMessaging {
 public:
   IOVDbFolder(IOVDbConn* conn, const IOVDbParser& folderprop, MsgStream& msg,
               IClassIDSvc* clidsvc, IIOVDbMetaDataTool* metadatatool,
               const bool checklock, const bool outputToFile=false,
               const std::string & source="COOL_DATABASE", const bool crestToFile=false,
-              const std::string & crestServer="",const std::string & crestTag="");
+              const std::string & crestServer="",const std::string & crestTag="",const bool crestCoolToFile=false);
   ~IOVDbFolder();
   
 
@@ -76,7 +85,7 @@ public:
   CLID clid() const;
   unsigned long long bytesRead() const;
   float readTime() const;
-  IOVRange currentRange() const;
+  const IOVRange& currentRange() const;
 
   // set methods - used after folder creation to set properties externally
 
@@ -223,6 +232,32 @@ private:
   void 
   specialCacheUpdate(const cool::IObject& obj,const ServiceHandle<IIOVSvc>& iovSvc);
 
+  // _________ Helper functions for the CREST reading _________
+  using IOVHash=std::pair<IOVDbNamespace::IovStore::Iov_t,std::string>;
+  using IOV2Index=std::pair<cool::ValidityKey,size_t>;
+
+  // Function which converts openended CREST IOVs into non-overlapping IOVs
+  // It returns a vector of non-overlapping IOVs + corresponding Hashes
+  std::vector<IOVHash> fetchCrestIOVs(cool::ValidityKey since, cool::ValidityKey until); 
+
+  // Function which reads CREST objects by the cache IOV boundaries
+  std::vector<IOVDbNamespace::BasicFolder> fetchCrestObjects(cool::ValidityKey since
+		                                             , cool::ValidityKey until
+					                     , bool vectorPayloadFlag
+					                     , cool::ValidityKey vkey /* Temporary! */
+							     , const std::string& nodeDesc);
+
+  // __________________________________________________________
+
+  // Function for generating dump files
+  void dumpFile(const std::string& dumpName
+		, const cool::ValidityKey& vkey
+		, IOVDbNamespace::Cool2Json* json          // Argument for dumping COOL data
+		, bool skipCoolIoV                         // Argument for dumping COOL data
+		, IOVDbNamespace::BasicFolder* basicFolder // Argument for dumping CREST data
+		, const std::string& crestNodeDescr        // Argument for dumping CREST data
+		, const std::string& specString            // Argument for dumping CREST data
+	       ) const;
 
   ITagInfoMgr*         p_tagInfoMgr{nullptr};   // pointer to TagInfoMgr
   IClassIDSvc*         p_clidSvc{nullptr};      // pointer to CLID service
@@ -289,11 +324,14 @@ private:
   IOVDbNamespace::IovStore m_iovs;
   const bool m_outputToFile{false};
   const bool m_crestToFile{false};
+  const bool m_crestCoolToFile{false};
   const std::string m_source;
   const std::string m_crestServer;
   const std::string m_crestTag;
   std::string m_crest_tag = "";
   nlohmann::json m_tag_info = nullptr;
+
+  std::optional<IOVDbNamespace::CrestFunctions> m_cfunctions;
 };
 
 inline const std::string& IOVDbFolder::folderName() const {return m_foldername;}
@@ -344,7 +382,7 @@ inline unsigned long long IOVDbFolder::bytesRead() const
 inline float IOVDbFolder::readTime() const 
 { return m_readtime; }
 
-inline IOVRange IOVDbFolder::currentRange() const { return m_currange; }
+inline const IOVRange& IOVDbFolder::currentRange() const { return m_currange; }
 
 inline bool IOVDbFolder::cacheValid(const cool::ValidityKey reftime) const {
   const auto & [cacheStart, cacheStop]=m_iovs.getCacheBounds();
