@@ -219,18 +219,6 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
 
             count ++;
 
-            if(count > 50)
-            {
-                // We are too deep into the extrapolation, exit out and push all the roads into completed roads
-                ATH_MSG_WARNING("We are at " << count << " iterations into extrapolations. Exiting out");
-                for(auto& road: roadsToExtrapolate)
-                {
-                    completedRoads.push_back(road);
-                }
-                roadsToExtrapolate.clear();
-                break;
-            }
-
             if(m_debugEvent) ATH_MSG_DEBUG("\033[1;31m-------------------------- extraploating road "<< count << "------------------ \033[0m");
             printRoad(currentRoad);
 
@@ -300,6 +288,12 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             // Now search for the hits
             bool foundhitForRoad = false;
             bool skipSPInNextLayer = false;
+
+            if(fineID == 215){
+                ATH_MSG_DEBUG("Stopping condition reached");
+                completedRoads.push_back(currentRoad);
+                break;
+            }
 
             // Get the last layer in the road. And only check layers above that
             unsigned lastLayerInRoad = 0;
