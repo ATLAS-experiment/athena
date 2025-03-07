@@ -35,7 +35,12 @@ public:
   void setClusterEquiv(const FPGATrackSimHit& input) { m_clusterEquiv = input; }
 
   // filling functions
-  void push_backHitList(const FPGATrackSimHit& input) { m_hitlist.push_back(input); }
+  void push_backHitList(const FPGATrackSimHit& input) {
+    m_hitlist.push_back(input);
+    m_clusterEquiv.addIDHashToVec(input.getIdentifierHash());
+    m_clusterEquiv.addPhiIndexToVec(input.getPhiIndex());
+    m_clusterEquiv.addEtaIndexToVec(input.getEtaIndex());
+  }
 
 private:
   hitVector m_hitlist; // list of hits that make the cluster, the seed of the cluster will be the first entry in this list.

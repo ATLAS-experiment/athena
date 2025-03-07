@@ -184,6 +184,14 @@ public:
     int getCluster2ID() const {return m_clusterIndex2ForFPGA;}
     void setCluster2ID(int v) {m_clusterIndex2ForFPGA = v;}
 
+    // methods for hit cluster equiv
+    const std::vector<int>& getPhiIndexVec() const { return m_PhiIndexVec;}
+    const std::vector<int>& getEtaIndexVec() const { return m_EtaIndexVec;}  
+    const std::vector<unsigned>& getIDHashVec() const { return m_IDhashVec;}
+  
+    void addPhiIndexToVec(int phi) {m_PhiIndexVec.push_back(phi);}
+    void addEtaIndexToVec(int eta) {m_EtaIndexVec.push_back(eta);}
+    void addIDHashToVec(unsigned id) {m_IDhashVec.push_back(id);}
     ///////////////////////////////////////////////////////////////////////
     // Other Interface
 
@@ -278,7 +286,10 @@ protected:
 
     int m_roadID = 0;
 
-    ClassDefNV(FPGATrackSimHit, 11);
+    std::vector<unsigned> m_IDhashVec; // for a cluster, when we get the equivalent hit info we want to store all the ID hash containing it
+    std::vector<int> m_PhiIndexVec; // for a cluster, all the phi indices in it
+    std::vector<int> m_EtaIndexVec; // for a cluster, all the eta indices in it  
+    ClassDefNV(FPGATrackSimHit, 12);
 };
 
 // Container of <FPGATrackSimHit const *>
