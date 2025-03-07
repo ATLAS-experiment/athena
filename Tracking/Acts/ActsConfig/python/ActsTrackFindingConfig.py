@@ -420,8 +420,10 @@ def ActsTrackToTrackParticleCnvAlgCfg(flags,
 
     if flags.Acts.storeTrackStateInfo:
         from ActsConfig.ActsObjectDecorationConfig import ActsMeasurementToTrackParticleDecorationCfg
-
         acc.merge(ActsMeasurementToTrackParticleDecorationCfg(flags))
+
+        from ActsConfig.ActsAnalysisConfig import ActsResidualAnalysisAlgCfg
+        acc.merge(ActsResidualAnalysisAlgCfg(flags))
 
     return acc
 
