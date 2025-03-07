@@ -131,7 +131,7 @@ namespace ActsTrk {
       nSharedPerTrack.push_back(nShared);
     }
     
-    auto monitor_nsharedpertrack = Monitored::Collection("NsharedPerTrack", nSharedPerTrack);
+    auto monitor_nsharedpertrack = Monitored::Collection("nShared", nSharedPerTrack);
     auto monitor_nsharedperlayer_pixelbarrel = Monitored::Collection("NsharedPerLayer_pixelBarrel", nSharedPixelBarrelLayer);
     auto monitor_nsharedperlayer_pixelendcap = Monitored::Collection("NsharedPerLayer_pixelEndCap", nSharedPixelEndCapLayer);
     auto monitor_nsharedperlayer_stripbarrel = Monitored::Collection("NsharedPerLayer_stripBarrel", nSharedStripBarrelLayer);
@@ -154,6 +154,8 @@ namespace ActsTrk {
     auto monitor_nStripHits = Monitored::Collection("nStripHits", proxies, [&tracks](const ConstTrackProxy& tp){
        return countHits(*tracks,tp)[static_cast<unsigned int>(xAOD::UncalibMeasType::StripClusterType)]; } );
     auto monitor_nmeas = Monitored::Collection("nMeasurements", proxies, [](const ConstTrackProxy& tp){ return static_cast<double>(tp.nMeasurements()); } );
+    auto monitor_noutliers = Monitored::Collection("nOutliers", proxies, [](const ConstTrackProxy& tp){ return static_cast<double>(tp.nOutliers()); } );
+    auto monitor_nholes = Monitored::Collection("nHoles", proxies, [](const ConstTrackProxy& tp){ return static_cast<double>(tp.nHoles()); } );
     auto monitor_surftype = Monitored::Collection("surfaceType", proxies, [](const ConstTrackProxy& tp){ return static_cast<double>(tp.referenceSurface().type()); } );
 
 
@@ -163,7 +165,7 @@ namespace ActsTrk {
 	 monitor_nsharedperlayer_stripbarrel, monitor_nsharedperlayer_stripendcap,
 	 monitor_ntracks, monitor_theta, monitor_eta, monitor_phi, 
 	 monitor_qoverp, monitor_nstates, monitor_phi, monitor_chi2, monitor_chi2OverNdof, 
-	 monitor_ndof, monitor_nstates, monitor_nmeas, monitor_surftype,
+	 monitor_ndof, monitor_nstates, monitor_nmeas, monitor_noutliers, monitor_nholes, monitor_surftype,
 	 monitor_nPixelHits, monitor_nStripHits);
     
     return StatusCode::SUCCESS;

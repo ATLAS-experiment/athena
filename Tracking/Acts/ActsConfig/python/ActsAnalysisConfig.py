@@ -19,8 +19,6 @@ def ActsTrackAnalysisAlgCfg(flags,
 
     monitoringGroup.defineHistogram('Ntracks', title='Number of Tracks;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=500, xmin=0, xmax=20000)
-    monitoringGroup.defineHistogram('NsharedPerTrack', title='Number of shared hits per track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
-                                    xbins=35, xmin=0, xmax=35)
 
     monitoringGroup.defineHistogram('NsharedPerLayer_pixelBarrel', title='Number of shared hits per layer - Pixel Barrel;Layer;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=5, xmin=0, xmax=5)    
@@ -46,6 +44,13 @@ def ActsTrackAnalysisAlgCfg(flags,
                                     xbins=60, xmin=0, xmax=60)
     monitoringGroup.defineHistogram('nMeasurements', title='Number of measurements / track;# measurements;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=35, xmin=0, xmax=35)
+    monitoringGroup.defineHistogram('nShared', title='Number of shared hits per track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=35, xmin=0, xmax=35)
+    monitoringGroup.defineHistogram('nOutliers', title='Number of outliers hits per track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=35, xmin=0, xmax=35)
+    monitoringGroup.defineHistogram('nHoles', title='Number of holes hits per track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=35, xmin=0, xmax=35)
+
     monitoringGroup.defineHistogram('nPixelHits', title='Number of pixel hits / track;# pixel hits;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=35, xmin=0, xmax=35)
     monitoringGroup.defineHistogram('nStripHits', title='Number of strip hits / track;# strip hits;Entries', type='TH1I', path=kwargs['MonGroupName'],
@@ -57,7 +62,13 @@ def ActsTrackAnalysisAlgCfg(flags,
     monitoringGroup.defineHistogram('eta,nMeasurements', title='Track eta;#eta;Entries', type='TH2F', path=kwargs['MonGroupName'],
                                     xbins=128, xmin=-4, xmax=4,
                                     ybins=35, ymin=0, ymax=35)
-    monitoringGroup.defineHistogram('eta,NsharedPerTrack', title='Track eta;#eta;Entries', type='TH2F', path=kwargs['MonGroupName'],
+    monitoringGroup.defineHistogram('eta,nShared', title='Track eta;#eta;Entries', type='TH2F', path=kwargs['MonGroupName'],
+                                    xbins=128, xmin=-4, xmax=4,
+                                    ybins=35, ymin=0, ymax=35)
+    monitoringGroup.defineHistogram('eta,nOutliers', title='Track eta;#eta;Entries', type='TH2F', path=kwargs['MonGroupName'],
+                                    xbins=128, xmin=-4, xmax=4,
+                                    ybins=35, ymin=0, ymax=35)
+    monitoringGroup.defineHistogram('eta,nHoles', title='Track eta;#eta;Entries', type='TH2F', path=kwargs['MonGroupName'],
                                     xbins=128, xmin=-4, xmax=4,
                                     ybins=35, ymin=0, ymax=35)
 
