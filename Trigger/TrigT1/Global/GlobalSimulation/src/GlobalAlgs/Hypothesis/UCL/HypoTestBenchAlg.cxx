@@ -42,7 +42,7 @@ namespace GlobalSim {
     // initialisation is either from a file of test vectors
     // or by filling in values by hand in this Algorithm
 
-    if (m_eEmFileName.empty()){
+    if (m_testsFileName.empty()){
       CHECK(init_manual());
     } else {
       CHECK(init_from_file());
@@ -133,12 +133,18 @@ namespace GlobalSim {
 
   StatusCode
   HypoTestBenchAlg::init_from_file() {
+    CHECK(init_tests_from_file());
+    return StatusCode::SUCCESS;
+  }
+  
+  StatusCode
+  HypoTestBenchAlg::init_tests_from_file() {
 
 
-    std::ifstream tob_stream(m_eEmFileName);
+    std::ifstream tob_stream(m_testsFileName);
     if(!tob_stream) {
       std::stringstream ss;
-      ATH_MSG_FATAL("Failure to open tob file " << m_eEmFileName);
+      ATH_MSG_FATAL("Failure to open tob file " << m_testsFileName);
       return StatusCode::FAILURE;
     }
 
@@ -165,6 +171,44 @@ namespace GlobalSim {
     
     return StatusCode::SUCCESS;
   }
+
+   
+  StatusCode
+  HypoTestBenchAlg::init_expected_mult_from_file() {
+
+
+    std::ifstream tob_stream(m_expectedMults_FileName);
+    if(!tob_stream) {
+      std::stringstream ss;
+      ATH_MSG_FATAL("Failure to open expected multiplicities file "
+		    << m_expectedMults_FileName);
+      return StatusCode::FAILURE;
+    }
+
+    auto padded_line = std::string();
+    auto fifo = std::make_unique<GepAlgoHypothesisFIFO>();
+    
+    while (std::getline(tob_stream, padded_line)) {
+      auto line = trim(padded_line);
+      auto ports_in = GepAlgoHypothesisPortsIn();
+      CHECK(hexTOB2bitsetTOB(line, *(ports_in.m_I_eEmTobs)));
+
+      fifo->push_back(ports_in);
+      
+      // the end of the fifo data is signaled by having the top bit
+      // set on an input tob
+
+      auto top_ind = (ports_in.m_I_eEmTobs)->size()-1;
+      if ((ports_in.m_I_eEmTobs)->test(top_ind)) {
+	m_fifos.push_back(std::move(fifo));
+	fifo = std::make_unique<GepAlgoHypothesisFIFO>();
+      }
+
+    }
+    
+    return StatusCode::SUCCESS;
+  }
+
 
   
 }

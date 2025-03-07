@@ -18,7 +18,7 @@ namespace GlobalSim {
 
   struct eEmSortSelectCountContainerPortsOut {
 
-       //eEmSortSelectCount
+    //eEmSortSelectCount
 
     // +1 is spare
     constexpr static std::size_t NumSort{7};
@@ -98,7 +98,12 @@ namespace GlobalSim {
     // Output counts. VHDL variable is a bit array
     BSPtrNumTotalCountWidth
     m_O_Multiplicity{std::make_shared<std::bitset<NumTotalCountWidth>>()};
-  
+
+    eEmSortSelectCountContainerPortsOut(){
+      for(std::size_t i = 0; i != NumTotalTobWidth; ++i) {
+	m_O_eEmGenTob[i] = std::make_shared<GenericTob>();
+      }
+    }    
   };
 
 }
