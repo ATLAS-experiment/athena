@@ -1,21 +1,15 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-#include "GaudiKernel/ConcurrencyFlags.h"
 
 #include "TrigT1NSWSimTools/MMTriggerTool.h"
 
 namespace NSWL1 {
 
   MMTriggerTool::MMTriggerTool( const std::string& type, const std::string& name, const IInterface* parent) :
-    AthAlgTool(type,name,parent),
+    base_class(type,name,parent),
     m_detManager(nullptr),
-    m_MmIdHelper(nullptr),
-    m_tree(nullptr)
-  {
-    declareInterface<NSWL1::IMMTriggerTool>(this);
-  }
+    m_MmIdHelper(nullptr) {}
 
   StatusCode MMTriggerTool::initialize() {
 
@@ -30,28 +24,9 @@ namespace NSWL1 {
     ATH_CHECK(m_keyMuonEntryLayer.initialize(m_isMC));
     ATH_CHECK(m_keyMmDigitContainer.initialize());
 
-    const IInterface* parent = this->parent();
-    const INamedInterface* pnamed = dynamic_cast<const INamedInterface*>(parent);
-    const std::string& algo_name = pnamed->name();
-    if ( m_doNtuple ) {
-      if (Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 1) {
-        ATH_MSG_ERROR("DoNtuple is not possible in multi-threaded mode");
-        return StatusCode::FAILURE;
-      }
-
-      ATH_CHECK( m_incidentSvc.retrieve() );
-      m_incidentSvc->addListener(this,IncidentType::BeginEvent);
-
-      if ( algo_name=="NSWL1Simulation" ) {
-        SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
-        ATH_CHECK( tHistSvc.isValid() );
-
-        m_tree = nullptr;
-        std::string ntuple_name = algo_name+"Tree";
-        ATH_CHECK( tHistSvc->getTree(ntuple_name,m_tree) );
-        ATH_MSG_DEBUG("Analysis ntuple succesfully retrieved");
-        ATH_CHECK( this->book_branches() );
-      }
+    if(m_doNtuple and Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 1) {
+      ATH_MSG_ERROR("DoNtuple is not possible in multi-threaded mode");
+      return StatusCode::FAILURE;
     }
 
     //  retrieve the MuonDetectormanager
@@ -63,6 +38,99 @@ namespace NSWL1 {
     m_par_large = std::make_shared<MMT_Parameters>("xxuvuvxx",'L', m_detManager);
     m_par_small = std::make_shared<MMT_Parameters>("xxuvuvxx",'S', m_detManager);
 
+    return StatusCode::SUCCESS;
+  }
+
+  StatusCode MMTriggerTool::attachBranches(MuonVal::MuonTesterTree &tree) {
+    m_trigger_diamond_ntrig = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_ntrig");
+    m_trigger_diamond_bc = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_diamond_bc");
+    m_trigger_diamond_sector = std::make_shared<MuonVal::VectorBranch<char> >(tree, "MM_diamond_sector");
+    m_trigger_diamond_stationPhi = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_diamond_stationPhi");
+    m_trigger_diamond_totalCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_totalCount");
+    m_trigger_diamond_realCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_realCount");
+    m_trigger_diamond_iX = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_diamond_iX");
+    m_trigger_diamond_iU = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_diamond_iU");
+    m_trigger_diamond_iV = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_diamond_iV");
+    m_trigger_diamond_XbkgCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_XbkgCount");
+    m_trigger_diamond_UVbkgCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_UVbkgCount");
+    m_trigger_diamond_XmuonCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_XmuonCount");
+    m_trigger_diamond_UVmuonCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_UVmuonCount");
+    m_trigger_diamond_age = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_diamond_age");
+    m_trigger_diamond_mx = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_diamond_mx");
+    m_trigger_diamond_my = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_diamond_my");
+    m_trigger_diamond_Uavg = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_diamond_Uavg");
+    m_trigger_diamond_Vavg = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_diamond_Vavg");
+    m_trigger_diamond_mxl = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_diamond_mxl");
+    m_trigger_diamond_theta = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_diamond_theta");
+    m_trigger_diamond_eta = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_diamond_eta");
+    m_trigger_diamond_dtheta = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_diamond_dtheta");
+    m_trigger_diamond_phi = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_diamond_phi");
+    m_trigger_diamond_phiShf = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_diamond_phiShf");
+    m_trigger_diamond_TP_phi_id = std::make_shared<MuonVal::VectorBranch<uint8_t> >(tree, "MM_diamond_TP_phi_id");
+    m_trigger_diamond_TP_R_id = std::make_shared<MuonVal::VectorBranch<uint8_t> >(tree, "MM_diamond_TP_R_id");
+    m_trigger_diamond_TP_dTheta_id = std::make_shared<MuonVal::VectorBranch<uint8_t> >(tree, "MM_diamond_TP_dTheta_id");
+    m_trigger_RZslopes = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_RZslopes");
+    m_trigger_trueEtaRange = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_trueEtaRange");
+    m_trigger_truePtRange = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_truePtRange");
+    m_trigger_VMM = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_VMM");
+    m_trigger_plane = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_plane");
+    m_trigger_station = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_station");
+    m_trigger_strip = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_strip");
+    m_trigger_slope = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_slope");
+    m_trigger_trueThe = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_trueThe");
+    m_trigger_truePhi = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_truePhi");
+    m_trigger_trueDth = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_trueDth");
+    m_trigger_trueEtaEnt = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_trueEtaEnt");
+    m_trigger_trueTheEnt = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_trueTheEnt");
+    m_trigger_truePhiEnt = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_truePhiEnt");
+    m_trigger_trueEtaPos = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_trueEtaPos");
+    m_trigger_trueThePos = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_trueThePos");
+    m_trigger_truePhiPos = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_truePhiPos");
+
+    tree.addBranch(m_trigger_diamond_ntrig);
+    tree.addBranch(m_trigger_diamond_bc);
+    tree.addBranch(m_trigger_diamond_sector);
+    tree.addBranch(m_trigger_diamond_stationPhi);
+    tree.addBranch(m_trigger_diamond_totalCount);
+    tree.addBranch(m_trigger_diamond_realCount);
+    tree.addBranch(m_trigger_diamond_iX);
+    tree.addBranch(m_trigger_diamond_iU);
+    tree.addBranch(m_trigger_diamond_iV);
+    tree.addBranch(m_trigger_diamond_XbkgCount);
+    tree.addBranch(m_trigger_diamond_UVbkgCount);
+    tree.addBranch(m_trigger_diamond_XmuonCount);
+    tree.addBranch(m_trigger_diamond_UVmuonCount);
+    tree.addBranch(m_trigger_diamond_age);
+    tree.addBranch(m_trigger_diamond_mx);
+    tree.addBranch(m_trigger_diamond_my);
+    tree.addBranch(m_trigger_diamond_Uavg);
+    tree.addBranch(m_trigger_diamond_Vavg);
+    tree.addBranch(m_trigger_diamond_mxl);
+    tree.addBranch(m_trigger_diamond_theta);
+    tree.addBranch(m_trigger_diamond_eta);
+    tree.addBranch(m_trigger_diamond_dtheta);
+    tree.addBranch(m_trigger_diamond_phi);
+    tree.addBranch(m_trigger_diamond_phiShf);
+    tree.addBranch(m_trigger_diamond_TP_phi_id);
+    tree.addBranch(m_trigger_diamond_TP_R_id);
+    tree.addBranch(m_trigger_diamond_TP_dTheta_id);
+    tree.addBranch(m_trigger_RZslopes);
+    tree.addBranch(m_trigger_trueEtaRange);
+    tree.addBranch(m_trigger_truePtRange);
+    tree.addBranch(m_trigger_VMM);
+    tree.addBranch(m_trigger_plane);
+    tree.addBranch(m_trigger_station);
+    tree.addBranch(m_trigger_strip);
+    tree.addBranch(m_trigger_slope);
+    tree.addBranch(m_trigger_trueThe);
+    tree.addBranch(m_trigger_truePhi);
+    tree.addBranch(m_trigger_trueDth);
+    tree.addBranch(m_trigger_trueEtaEnt);
+    tree.addBranch(m_trigger_trueTheEnt);
+    tree.addBranch(m_trigger_truePhiEnt);
+    tree.addBranch(m_trigger_trueEtaPos);
+    tree.addBranch(m_trigger_trueThePos);
+    tree.addBranch(m_trigger_truePhiPos);
     return StatusCode::SUCCESS;
   }
 
@@ -108,9 +176,8 @@ namespace NSWL1 {
       ATH_MSG_ERROR("Cannot retrieve MmDigitContainer");
       return StatusCode::FAILURE;
     }
-    histogramDigitVariables histDigVars;
-    ATH_CHECK( load.getMMDigitsInfo(ctx, ptrMcEventCollection, ptrMuonEntryLayer, readMmDigitContainer.cptr(), entries, Hits_Data_Set_Time, Event_Info, histDigVars) );
-    if (m_doNtuple) this->fillNtuple(histDigVars);
+
+    ATH_CHECK( load.getMMDigitsInfo(ctx, ptrMcEventCollection, ptrMuonEntryLayer, readMmDigitContainer.cptr(), entries, Hits_Data_Set_Time, Event_Info) );
 
     if (entries.empty()) {
       ATH_MSG_WARNING("No digits available for processing, exiting");

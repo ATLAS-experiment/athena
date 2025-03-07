@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -24,31 +24,6 @@ StatusCode PadTriggerLogicOfflineTool::initialize() {
     ATH_MSG_DEBUG( "initializing " << name() );
     ATH_MSG_DEBUG( name() << " configuration:");
 
-    const IInterface* parent = this->parent();
-    const INamedInterface* pnamed = dynamic_cast<const INamedInterface*>(parent);
-    const std::string& algo_name = pnamed->name();
-
-    if ( m_doNtuple ) {
-        if (Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 1) {
-            ATH_MSG_ERROR("DoNtuple is not possible in multi-threaded mode");
-            return StatusCode::FAILURE;
-        }
-        m_validation_tree = std::make_unique<PadTriggerValidationTree>();
-
-        ATH_CHECK( m_incidentSvc.retrieve() );
-        m_incidentSvc->addListener(this,IncidentType::BeginEvent);
-
-        if ( algo_name=="NSWL1Simulation" ) {
-            SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
-            ATH_CHECK( tHistSvc.isValid() );
-
-            TTree *tree=nullptr;
-            std::string treename = algo_name+"Tree";
-            ATH_CHECK(tHistSvc->getTree(treename, tree));
-            m_validation_tree->init_tree(tree);
-        }
-    }
-
     // retrieve the MuonDetectormanager
     ATH_CHECK( detStore()->retrieve( m_detManager ) );
 
@@ -56,13 +31,6 @@ StatusCode PadTriggerLogicOfflineTool::initialize() {
     return StatusCode::SUCCESS;
 }
 //------------------------------------------------------------------------------
-void PadTriggerLogicOfflineTool::handle(const Incident& inc) {
-    if( inc.type()==IncidentType::BeginEvent && m_doNtuple ) {
-        // Ntuple can only be enabled in single-threaded mode (see initialize)
-        [[maybe_unused]] bool success ATLAS_THREAD_SAFE = m_validation_tree->reset_ntuple_variables();
-    }
-}
-
 void PadTriggerLogicOfflineTool::fillGeometricInformation(const std::shared_ptr<PadOfflineData>& pod) const {
     const MuonGM::sTgcReadoutElement* rdoEl = m_detManager->getsTgcReadoutElement(pod->Identity());
     const Trk::PlaneSurface &surface = rdoEl->surface(pod->Identity());
@@ -201,12 +169,6 @@ StatusCode PadTriggerLogicOfflineTool::compute_pad_triggers(const std::vector<st
             } // if(sector_pads)
         } // for(sector)
     } // for(side)
-    // Fill Ntuple
-    if(m_doNtuple) {
-      // Ntuple can only be enabled in single-threaded mode (see initialize)
-      [[maybe_unused]] bool b1 ATLAS_THREAD_SAFE = m_validation_tree->fill_num_pad_triggers(triggers.size());
-      [[maybe_unused]] bool b2 ATLAS_THREAD_SAFE = m_validation_tree->fill_pad_trigger_basics(triggers);
-    }
     return StatusCode::SUCCESS;
 }
 //------------------------------------------------------------------------------
