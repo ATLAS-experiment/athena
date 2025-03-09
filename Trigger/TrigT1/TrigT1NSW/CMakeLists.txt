@@ -11,5 +11,4 @@ atlas_add_component( TrigT1NSW
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel MuonRDO TrigT1NSWSimToolsLib )
-
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel MuonRDO MuonTesterTreeLib TrigT1NSWSimToolsLib )

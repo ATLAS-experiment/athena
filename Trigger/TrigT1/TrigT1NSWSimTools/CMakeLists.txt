@@ -13,7 +13,7 @@ atlas_add_library( TrigT1NSWSimToolsLib
                    src/*.cxx
                    PUBLIC_HEADERS TrigT1NSWSimTools
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel FourMomUtils GaudiKernel GeoPrimitives Identifier MuonDigitContainer MuonIdHelpersLib MuonRDO MuonReadoutGeometry MuonSimData MuonSimEvent RegSelLUT TrkSurfaces TrackRecordLib
+                   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel FourMomUtils GaudiKernel GeoPrimitives Identifier MuonDigitContainer MuonIdHelpersLib MuonRDO MuonReadoutGeometry MuonSimData MuonSimEvent MuonTesterTreeLib RegSelLUT TrkSurfaces TrackRecordLib
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AGDDKernel AtlasHepMCLib TruthUtils GeneratorObjects PathResolver StoreGateLib )
 
 # Component(s) in the package:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NSWL1_PADTRIGGERLOGICOFFLINETOOL_H
@@ -9,8 +9,6 @@
 #include "CLHEP/Random/RandGauss.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/IIncidentSvc.h"
-#include "GaudiKernel/IIncidentListener.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
@@ -19,7 +17,6 @@
 #include "MuonSimData/MuonSimDataCollection.h"
 #include "MuonSimData/MuonSimData.h"
 #include "TrigT1NSWSimTools/IPadTriggerLogicTool.h"
-#include "TrigT1NSWSimTools/PadTriggerValidationTree.h"
 #include "TrigT1NSWSimTools/L1TdrStgcTriggerLogic.h"
 #include "TrigT1NSWSimTools/TriggerTypes.h"
 #include "TrigT1NSWSimTools/PadData.h"
@@ -35,7 +32,6 @@
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
-#include "TTree.h"
 #include "Math/Vector3D.h"
 #include <functional>
 #include <algorithm>
@@ -68,14 +64,13 @@ namespace NSWL1 {
      * Major updates for release 22 processing: francesco.giuseppe.gravili@cern.ch
      */
     class PadTriggerLogicOfflineTool:
-            virtual public IPadTriggerLogicTool, public AthAlgTool, public IIncidentListener {
+            virtual public IPadTriggerLogicTool, public AthAlgTool {
     public:
         PadTriggerLogicOfflineTool(const std::string& type,
                         const std::string& name,
                         const IInterface* parent);
         virtual ~PadTriggerLogicOfflineTool()=default;
-        virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE () override;
-        virtual void handle (const Incident& inc) override;
+        virtual StatusCode initialize () override;
         /// Log a message using the Athena controlled logging system
 
         virtual StatusCode compute_pad_triggers(const std::vector<std::shared_ptr<PadData>>& pads, std::vector<std::unique_ptr<PadTrigger>> &triggers) const override;
@@ -97,15 +92,12 @@ namespace NSWL1 {
         mutable std::atomic<bool> m_isInitialized ATLAS_THREAD_SAFE{false};
         mutable std::mutex m_mutex ATLAS_THREAD_SAFE{};
 
-        ServiceHandle<IIncidentSvc> m_incidentSvc{this, "IncidentSvc", "IncidentSvc"};  //!< Athena/Gaudi incident Service
         SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detManagerKey{this, "MuonManagerKey", "MuonDetectorManager"};
 
         Gaudi::Property<float> m_PadEfficiency {this, "PadEfficiency",   1.0,   "Pad trigger efficiency"};
         Gaudi::Property<int>   m_phiIdBits     {this, "PhiIdBits",       6,     "Number of bit to compute Phi-Id of pad triggers"};
         Gaudi::Property<bool>  m_useSimple4of4 {this, "UseSimple4of4",   false, "Use simplified logic requiring 4 hits on 4 gas gaps"};
-        Gaudi::Property<bool>  m_doNtuple      {this, "DoNtuple",        false, "Save the trigger outputs in an analysis ntuple"};
 
-        std::unique_ptr<PadTriggerValidationTree> m_validation_tree;
         void fillGeometricInformation(PadOfflineData&) const;
         void fillPhiTable() const;
         L1TdrStgcTriggerLogic m_tdrLogic;

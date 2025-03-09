@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PADTDSOFFLINETOOL_H
@@ -12,8 +12,6 @@
 #include "CxxUtils/checker_macros.h"
 #include "Gaudi/Property.h"
 #include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/IIncidentSvc.h"
-#include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "MuonDigitContainer/sTgcDigitContainer.h"
@@ -26,16 +24,13 @@
 #include "TrigT1NSWSimTools/IPadTdsTool.h"
 #include "TrigT1NSWSimTools/PadOfflineData.h"
 #include "TrigT1NSWSimTools/tdr_compat_enum.h"
-#include "PadTdsValidationTree.h"
 
-#include "TTree.h"
 #include <functional>
 #include <algorithm>
 #include <map>
 #include <utility>
 
 class sTgcDigit;
-class TTree;
 class MuonSimDataCollection;
 class sTgcDigitContainer;
 
@@ -81,16 +76,14 @@ namespace NSWL1 {
     class PadTrigger;
 
     class PadTdsOfflineTool: virtual public IPadTdsTool,
-                            public AthAlgTool,
-                            public IIncidentListener {
+                            public AthAlgTool {
 
     public:
         PadTdsOfflineTool(const std::string& type,
                         const std::string& name,
                         const IInterface* parent);
         virtual ~PadTdsOfflineTool()=default;
-        virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE () override;
-        virtual void handle (const Incident& inc) override;
+        virtual StatusCode initialize () override;
         virtual StatusCode gather_pad_data(std::vector<std::shared_ptr<PadData>>& pads, int side=-1, int sector=-1) const override;
 
     public:
@@ -122,7 +115,6 @@ namespace NSWL1 {
     private:
         // methods implementing the internal data processing
         StatusCode fill_pad_cache(std::vector< std::vector<std::shared_ptr<PadData>> > &pad_cache) const; //!< Apply the additional processing then fill the cache, locally
-        StatusCode fill_pad_validation_id ATLAS_NOT_THREAD_SAFE (std::vector< std::vector<std::shared_ptr<PadData>> > &pad_cache) const; //!< Fill the ntuple branch for the PadTdsOffline
 
         double computeTof(const sTgcDigit* digit) const;        //!< compute the time of flight of particle giving the PAD hit
         double computeTimeJitter() const;                       //!< extract the time jitter t subtract from the PAD hit time
@@ -143,7 +135,6 @@ namespace NSWL1 {
         void print_pad_cache(std::vector< std::vector<std::shared_ptr<PadData>> > &pad_cache) const; //!< Print all info stored in the pad cache
 
         // needed Servives, Tools and Helpers
-        ServiceHandle<IIncidentSvc> m_incidentSvc{this, "IncidentSvc", "IncidentSvc"};  //!< Athena/Gaudi incident Service
         ServiceHandle<IAthRNGSvc>   m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};        //!< Random number generator engine to use
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
         SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detManagerKey{this, "MuonManagerKey", "MuonDetectorManager"};
@@ -151,7 +142,6 @@ namespace NSWL1 {
         // properties: container and service names
         Gaudi::Property<bool>         m_isMC          {this, "IsMC",            true,               "This is MC"};
         Gaudi::Property<std::string>  m_rndmEngineName{this, "RndmEngineName", "PadTdsOfflineTool", "Name of the random engine"};
-        Gaudi::Property<bool>         m_doNtuple      {this, "DoNtuple",        false,              "Input PadTds branches into the analysis ntuple"};
         Gaudi::Property<float>        m_vmmTimeOverThreshold{this, "VMM_TimeOverThreshold", 0.,  "Time to form a digital signal"};
         Gaudi::Property<float>        m_vmmShapingTime      {this, "VMM_ShapingTime",       0.,  "Time from the leading edge of the signal and its peak"};
         Gaudi::Property<float>        m_vmmDeadTime         {this, "VMM_DeadTime",          50., "VMM chip dead time to produce another signal on the same channel"};
@@ -164,7 +154,6 @@ namespace NSWL1 {
         Gaudi::Property<bool> m_applyVMM_ShapingTime          {this, "ApplyVMMShapingTime",        false, "VMM Shaping time condition"};
         Gaudi::Property<bool> m_applyVMM_DeadTime             {this, "ApplyVMMDeadTime",           false, "VMM Dead time condition"};
 
-        std::unique_ptr<PadTdsValidationTree> m_validation_tree;
         SG::ReadHandleKey<sTgcDigitContainer> m_sTgcDigitContainer = {this,"sTGC_DigitContainerName","sTGC_DIGITS","the name of the sTGC digit container"};
         SG::ReadHandleKey<MuonSimDataCollection> m_sTgcSdoContainer = {this,"sTGC_SdoContainerName","sTGC_SDO","the name of the sTGC SDO container"};
     };

@@ -14,17 +14,16 @@ HLT_2e20_loose_nogsf_ion_L12eEM18:
     4: 35
     5: 6
 HLT_2g15_loose_L12eEM12:
-  eventCount: 1
+  eventCount: 0
   stepCounts:
-    0: 17
-    1: 6
-    2: 4
-    3: 1
+    0: 11
+    1: 1
+    2: 1
   stepFeatures:
-    0: 57
-    1: 19
-    2: 10
-    3: 4
+    0: 33
+    1: 8
+    2: 2
+    3: 1
 HLT_2g15_loose_ion_L12eEM12:
   eventCount: 1
   stepCounts:
@@ -290,15 +289,15 @@ HLT_e50_etcut_ion_L1eEM26:
 HLT_g10_loose_L1eEM9_VjTE200:
   eventCount: 0
   stepCounts:
-    0: 2
+    0: 1
   stepFeatures:
-    0: 4
+    0: 2
 HLT_g10_medium_L1eEM9_VjTE200:
   eventCount: 0
   stepCounts:
-    0: 2
+    0: 1
   stepFeatures:
-    0: 4
+    0: 2
 HLT_g13_etcut_ion_L1eEM12:
   eventCount: 17
   stepCounts:
@@ -384,17 +383,17 @@ HLT_g20_etcut_ion_L1eEM15:
     1: 43
     2: 38
 HLT_g20_loose_L1eEM15:
-  eventCount: 7
+  eventCount: 6
   stepCounts:
     0: 17
-    1: 11
-    2: 11
-    3: 7
+    1: 10
+    2: 10
+    3: 6
   stepFeatures:
-    0: 43
-    1: 17
-    2: 16
-    3: 7
+    0: 32
+    1: 13
+    2: 12
+    3: 6
 HLT_g20_loose_ion_L1eEM15:
   eventCount: 8
   stepCounts:
