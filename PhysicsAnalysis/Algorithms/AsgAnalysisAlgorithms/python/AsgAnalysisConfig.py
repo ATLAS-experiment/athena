@@ -516,6 +516,7 @@ class OutputThinningBlock (ConfigBlock):
             alg.preselection = selection
             alg.particles = config.readName (self.containerName)
             alg.selectionDecoration = 'outputSelect' + postfix
+            config.addSelection (self.containerName, alg.selectionDecoration, selection)
             selection = 'outputSelect' + postfix
 
         alg = config.createAlgorithm( 'CP::AsgViewFromSelectionAlg', 'DeepCopyAlg' + self.containerName + postfix )
