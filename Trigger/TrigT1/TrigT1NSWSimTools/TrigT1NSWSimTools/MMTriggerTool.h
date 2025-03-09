@@ -38,7 +38,7 @@ namespace NSWL1 {
     MMTriggerTool(const std::string& type, const std::string& name, const IInterface* parent);
     virtual ~MMTriggerTool() override = default;
 
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override;
     StatusCode attachBranches(MuonVal::MuonTesterTree &tree) override;
     StatusCode runTrigger(const EventContext& ctx, Muon::NSW_TrigRawDataContainer* rdo, const bool do_MMDiamonds) const override;
 
