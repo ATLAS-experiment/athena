@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -9,6 +9,7 @@
 #define TRIGGER_ANALYSIS_ALGORITHMS__TRIG_PRESCALES_ALG_H
 
 #include <functional>
+#include <unordered_map>
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <AsgAnalysisInterfaces/IPileupReweightingTool.h>
@@ -64,6 +65,14 @@ namespace CP
     /// \brief the accessors for \ref m_prescaleDecoration and \ref m_trigList combination
   private:
     std::vector<SG::AuxElement::Decorator<float>> m_prescaleAccessors;
+
+    /// \brief the decoration for trigger selection
+  private:
+    Gaudi::Property<std::string> m_selectionDecoration {this, "selectionDecoration", "", "the decoration the trigger pass status"};
+
+    /// \brief the accessors for \ref m_selectionDecoration and \ref m_trigList combination
+  private:
+    std::unordered_map<std::string, SG::AuxElement::ConstAccessor<bool>> m_selectionAccessors;
   };
 }
 
