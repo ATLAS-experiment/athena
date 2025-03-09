@@ -5,7 +5,7 @@
 
 atlas_subdir( KLFitterAnalysisAlgorithms )
 
-if(XAOD_STANDALONE)
+if(XAOD_ANALYSIS)
   # Find KLFitter package in atlasexternals,
   # source from https://www.github.com/KLFitter/KLFitter
   find_package(KLFitter)
