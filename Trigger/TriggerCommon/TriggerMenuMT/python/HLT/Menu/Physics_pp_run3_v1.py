@@ -172,9 +172,9 @@ def setupMenu():
         ChainProp(name='HLT_2mu10_l2mt_L1MU10BO', groups=MultiMuonGroup+SupportGroup+['RATE:CPS_MU10BO']),
         ChainProp(name='HLT_2mu4_l2mt_L1MU4BOM', groups=MultiMuonGroup+SupportGroup),
 
-        # Late muons - disabled until ATR-25031 is fixed
-        # ChainProp(name='HLT_mu10_lateMu_L1LATE-MU8F_jJ90', l1SeedThresholds=['FSNOSEED'], groups=SingleMuonGroup+PrimaryPhIGroup),
-        # ChainProp(name='HLT_mu10_lateMu_L1LATE-MU8F_jXE70', l1SeedThresholds=['FSNOSEED'], groups=SingleMuonGroup+PrimaryPhIGroup),
+        # Late muons (ATR-26284)
+        ChainProp(name='HLT_mu10_lateMu_L1LATE-MU8F_jJ90', l1SeedThresholds=['FSNOSEED'], groups=Topo2Group+SingleMuonGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_mu10_lateMu_L1LATE-MU8F_jXE70', l1SeedThresholds=['FSNOSEED'], groups=Topo2Group+SingleMuonGroup+PrimaryPhIGroup),
 
         # Bell measurement at low-mu run (ATR-23494)
         ChainProp(name='HLT_2mu3_L12MU3V',  groups=MultiMuonGroup+SupportGroup+['RATE:CPS_2MU3V']),

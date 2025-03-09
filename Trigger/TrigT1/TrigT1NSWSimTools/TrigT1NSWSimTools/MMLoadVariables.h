@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MMLOADVARIABLES_H
@@ -27,25 +27,6 @@ namespace MuonGM {
   class MuonDetectorManager;
 }
 
-struct histogramDigitVariables{
-    std::vector<std::string> NSWMM_dig_stationName{};
-    std::vector<int> NSWMM_dig_stationEta{};
-    std::vector<int> NSWMM_dig_stationPhi{};
-    std::vector<int> NSWMM_dig_multiplet{};
-    std::vector<int> NSWMM_dig_gas_gap{};
-    std::vector<int> NSWMM_dig_channel{};
-
-    std::vector< std::vector<float> >  NSWMM_dig_time{};
-    std::vector< std::vector<float> >  NSWMM_dig_charge{};
-    std::vector< std::vector<int> >    NSWMM_dig_stripPosition{};
-    std::vector< std::vector<double> > NSWMM_dig_stripLposX{};
-    std::vector< std::vector<double> > NSWMM_dig_stripLposY{};
-    std::vector< std::vector<double> > NSWMM_dig_stripGposX{};
-    std::vector< std::vector<double> > NSWMM_dig_stripGposY{};
-    std::vector< std::vector<double> > NSWMM_dig_stripGposZ{};
-};
-
-
  class MMLoadVariables : public AthMessaging {
 
   public:
@@ -57,8 +38,7 @@ struct histogramDigitVariables{
                                const MmDigitContainer *nsw_MmDigitContainer,
                                std::map<std::pair<int,unsigned int>,std::vector<digitWrapper> >& entries,
                                std::map<std::pair<int,unsigned int>,std::vector<hitData_entry> >& Hits_Data_Set_Time,
-                               std::map<std::pair<int,unsigned int>,evInf_entry>& Event_Info,
-                               histogramDigitVariables &histDigVars) const;
+                               std::map<std::pair<int,unsigned int>,evInf_entry>& Event_Info) const;
 
   private:
     const MuonGM::MuonDetectorManager* m_detManager;        //!< MuonDetectorManager

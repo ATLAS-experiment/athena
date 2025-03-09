@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/MMLoadVariables.h"
@@ -17,8 +17,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
                                             const MmDigitContainer *nsw_MmDigitContainer,
                                             std::map<std::pair<int,unsigned int>,std::vector<digitWrapper> >& entries,
                                             std::map<std::pair<int,unsigned int>,std::vector<hitData_entry> >& Hits_Data_Set_Time,
-                                            std::map<std::pair<int,unsigned int>,evInf_entry>& Event_Info,
-                                            histogramDigitVariables &histDigVars) const {
+                                            std::map<std::pair<int,unsigned int>,evInf_entry>& Event_Info) const {
       //*******Following MuonPRD code to access all the variables**********
       std::vector<ROOT::Math::PtEtaPhiEVector> truthParticles, truthParticles_ent, truthParticles_pos;
       std::vector<int> pdg;
@@ -123,13 +122,6 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
             std::vector<int>    VMM{channel};
 
             bool isValid = false;
-            histDigVars.NSWMM_dig_stationName.push_back(stName);
-            histDigVars.NSWMM_dig_stationEta.push_back(stationEta);
-            histDigVars.NSWMM_dig_stationPhi.push_back(stationPhi);
-            histDigVars.NSWMM_dig_multiplet.push_back(multiplet);
-            histDigVars.NSWMM_dig_gas_gap.push_back(gas_gap);
-            histDigVars.NSWMM_dig_channel.push_back(channel);
-
             std::vector<double> localPosX;
             std::vector<double> localPosY;
             std::vector<double> globalPosX;
@@ -172,16 +164,6 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
                   globalPosZ[nstrip-1] = cr_strip_gpos[2];
               }
             }//end of strip position loop
-
-            //NTUPLE FILL DIGITS
-            histDigVars.NSWMM_dig_time.push_back(time);
-            histDigVars.NSWMM_dig_charge.push_back(charge);
-            histDigVars.NSWMM_dig_stripPosition.push_back(stripPosition);
-            histDigVars.NSWMM_dig_stripLposX.push_back(localPosX);
-            histDigVars.NSWMM_dig_stripLposY.push_back(localPosY);
-            histDigVars.NSWMM_dig_stripGposX.push_back(globalPosX);
-            histDigVars.NSWMM_dig_stripGposY.push_back(globalPosY);
-            histDigVars.NSWMM_dig_stripGposZ.push_back(globalPosZ);
             if(globalPosY.empty()) continue;
 
             if (!time.empty()) entries_tmp.push_back(

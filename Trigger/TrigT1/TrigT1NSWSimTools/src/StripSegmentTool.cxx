@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -9,8 +9,7 @@
 namespace NSWL1 {
 
   StripSegmentTool::StripSegmentTool( const std::string& type, const std::string& name, const IInterface* parent) :
-    AthAlgTool(type,name,parent),
-    m_tree(nullptr)
+    AthAlgTool(type,name,parent)
   {
     declareInterface<NSWL1::IStripSegmentTool>(this);
   }
@@ -18,37 +17,10 @@ namespace NSWL1 {
   StatusCode StripSegmentTool::initialize() {
     ATH_MSG_DEBUG("initializing " << name() );
     ATH_MSG_DEBUG(name() << " configuration:");
-    const IInterface* parent = this->parent();
-    const INamedInterface* pnamed = dynamic_cast<const INamedInterface*>(parent);
-    const std::string& algo_name = pnamed->name();
-    if ( m_doNtuple ) {
-      if (Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 1) {
-        ATH_MSG_ERROR("DoNtuple is not possible in multi-threaded mode");
-        return StatusCode::FAILURE;
-      }
-
-      ATH_CHECK( m_incidentSvc.retrieve() );
-      m_incidentSvc->addListener(this,IncidentType::BeginEvent);
-
-      if ( algo_name=="NSWL1Simulation" ) {
-        SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
-        ATH_CHECK( tHistSvc.isValid() );
-        std::string ntuple_name = algo_name+"Tree";
-        m_tree = nullptr;
-        ATH_CHECK(tHistSvc->getTree(ntuple_name,m_tree));
-        ATH_CHECK(this->book_branches());
-      }
-    }
 
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_regSelTableKey.initialize());
     return StatusCode::SUCCESS;
-  }
-
-  void StripSegmentTool::handle(const Incident& inc) {
-    if( inc.type()==IncidentType::BeginEvent ) {
-      this->clear_ntuple_variables();
-    }
   }
 
   StatusCode StripSegmentTool::FetchDetectorEnvelope(Envelope_t &env) const {
@@ -184,8 +156,6 @@ namespace NSWL1 {
       float gly1=0;
       float glx2=0;
       float gly2=0;
-      float glx=0;
-      float gly=0;
       float charge1=0;
       float charge2=0;
 
@@ -236,11 +206,6 @@ namespace NSWL1 {
         gly2=gly2/charge2;
       }
 
-      //centroid calc
-      glx=(glx1+glx2)/2.;
-      gly=(gly1+gly2)/2.;
-      float avg_z=(z1+z2)/2.;
-
       //segment calc
       ROOT::Math::XYZVector v3_centr1(glx1,gly1,z1), v3_centr2(glx2,gly2,z2);
       ROOT::Math::XYZVector v3_segment = v3_centr2 - v3_centr1;
@@ -281,23 +246,6 @@ namespace NSWL1 {
       bool lowRes=false;//we do not have a recipe  for a singlewedge trigger.  so lowres is always false for now
       uint8_t dtheta_int=findDtheta(dtheta);
 
-      if (m_doNtuple) {
-        m_seg_wedge1_size->push_back(band.second[0].size());
-        m_seg_wedge2_size->push_back(band.second[1].size());
-        m_seg_bandId->push_back(bandId);
-        m_seg_phiId->push_back(phiId);
-        m_seg_rIdx->push_back(rIndex);
-        m_seg_theta->push_back(theta);
-        m_seg_dtheta->push_back(dtheta);
-        m_seg_dtheta_int->push_back(dtheta_int);
-        m_seg_eta->push_back(eta);
-        m_seg_eta_inf->push_back(eta_inf);
-        m_seg_phi->push_back(phi);
-        m_seg_global_x->push_back(glx);
-        m_seg_global_y->push_back(gly);
-        m_seg_global_z->push_back(avg_z);
-      }
-
       //However it needs to be kept an eye on... will be something in between 7 and 15 mrad needs to be decided
       if(std::abs(dtheta)>15) continue;
       auto rdo_segment= std::make_unique<Muon::NSW_TrigRawDataSegment>( dtheta_int,  (uint8_t)phiId, (rIndex), lowRes,  phiRes);
@@ -307,62 +255,4 @@ namespace NSWL1 {
     }//end of clmap loop
     return StatusCode::SUCCESS;
   }
-
-  StatusCode StripSegmentTool::book_branches() {
-
-    m_seg_theta = new std::vector< float >();
-    m_seg_dtheta = new std::vector< float >();
-    m_seg_dtheta_int = new std::vector< uint8_t >();
-    m_seg_eta = new std::vector< float >();
-    m_seg_eta_inf=new std::vector< float >();
-    m_seg_phi = new std::vector< float >();
-    m_seg_global_x = new std::vector< float >();
-    m_seg_global_y = new std::vector< float >();
-    m_seg_global_z = new std::vector< float >();
-    m_seg_bandId = new std::vector< int >();
-    m_seg_phiId = new std::vector< int >();
-    m_seg_rIdx=new std::vector< int >();
-    m_seg_wedge1_size = new std::vector< int >();
-    m_seg_wedge2_size = new std::vector< int >();
-
-    if (m_tree) {
-      std::string ToolName = name().substr(  name().find("::")+2,std::string::npos );
-      const char* n = ToolName.c_str();
-      m_tree->Branch(TString::Format("%s_seg_theta",n).Data(),&m_seg_theta);
-      m_tree->Branch(TString::Format("%s_seg_dtheta",n).Data(),&m_seg_dtheta);
-      m_tree->Branch(TString::Format("%s_seg_dtheta_int",n).Data(),&m_seg_dtheta_int);
-      m_tree->Branch(TString::Format("%s_seg_eta",n).Data(),&m_seg_eta);
-      m_tree->Branch(TString::Format("%s_seg_eta_inf",n).Data(),&m_seg_eta_inf);
-      m_tree->Branch(TString::Format("%s_seg_phi",n).Data(),&m_seg_phi);
-      m_tree->Branch(TString::Format("%s_seg_global_x",n).Data(),&m_seg_global_x);
-      m_tree->Branch(TString::Format("%s_seg_global_y",n).Data(),&m_seg_global_y);
-      m_tree->Branch(TString::Format("%s_seg_global_z",n).Data(),&m_seg_global_z);
-      m_tree->Branch(TString::Format("%s_seg_bandId",n).Data(),&m_seg_bandId);
-      m_tree->Branch(TString::Format("%s_seg_phiId",n).Data(),&m_seg_phiId);
-      m_tree->Branch(TString::Format("%s_seg_rIdx",n).Data(),&m_seg_rIdx);
-      m_tree->Branch(TString::Format("%s_seg_wedge1_size",n).Data(),&m_seg_wedge1_size);
-      m_tree->Branch(TString::Format("%s_seg_wedge2_size",n).Data(),&m_seg_wedge2_size);
-    }
-    return StatusCode::SUCCESS;
-  }
-
-  void StripSegmentTool::clear_ntuple_variables() {
-    if(m_tree==nullptr) return;
-
-    m_seg_theta->clear();
-    m_seg_dtheta->clear();
-    m_seg_dtheta_int->clear();
-    m_seg_eta->clear();
-    m_seg_eta_inf->clear();
-    m_seg_phi->clear();
-    m_seg_global_x->clear();
-    m_seg_global_y->clear();
-    m_seg_global_z->clear();
-    m_seg_bandId->clear();
-    m_seg_phiId->clear();
-    m_seg_rIdx->clear();
-    m_seg_wedge2_size->clear();
-    m_seg_wedge1_size->clear();
-  }
 }
-

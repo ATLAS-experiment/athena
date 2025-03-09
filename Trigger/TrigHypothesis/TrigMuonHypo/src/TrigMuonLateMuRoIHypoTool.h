@@ -19,10 +19,10 @@ class TrigMuonLateMuRoIHypoTool: public ::AthAlgTool {
  
   struct MuonEFInfo {
   MuonEFInfo( TrigCompositeUtils::Decision* d,
-	      const TrigRoiDescriptor* r,
+              const TrigRoiDescriptor* r,
               const TrigRoiDescriptor* rl,
-	      const TrigCompositeUtils::Decision* previousDecision)
-  : decision( d ), 
+              const TrigCompositeUtils::Decision* previousDecision)
+    : decision( d ), 
       roi( r ),
       roiLate( rl ),
       previousDecisionIDs(TrigCompositeUtils::decisionIDs( previousDecision ).begin(), 
