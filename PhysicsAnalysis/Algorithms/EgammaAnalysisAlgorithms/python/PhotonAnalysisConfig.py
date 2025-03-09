@@ -477,7 +477,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
                     PATCore.ParticleDataType.Full
             alg.efficiencyCorrectionTool.IsoKey = self.isolationWP.replace("FixedCut","")
             if config.geometry() >= LHCPeriod.Run2:
-                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map0.txt'
+                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map1.txt'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'ph_isol_bad_eff' + postfix
             alg.photons = config.readName (self.containerName)
