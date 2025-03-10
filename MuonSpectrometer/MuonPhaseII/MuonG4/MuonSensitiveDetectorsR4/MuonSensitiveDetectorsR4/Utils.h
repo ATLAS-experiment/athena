@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSENSITIVEDETECTORSR4_UTILS_H
 #define MUONSENSITIVEDETECTORSR4_UTILS_H
@@ -33,7 +33,8 @@ namespace MuonG4R4 {
         ostr<<"time: "<<step.GetGlobalTime()<<", ";
         ostr<<"mass: "<<step.GetDefinition()->GetPDGMass()<<", ";
         ostr<<"kinetic energy: "<<step.GetKineticEnergy()<<", ";
-        ostr<<"charge: "<<step.GetDefinition()->GetPDGCharge();
+        ostr<<"charge: "<<step.GetDefinition()->GetPDGCharge()<<", ";
+        ostr<<"G4Id: "<<step.GetTrackID();
         return ostr;
     }
     inline std::ostream& operator<<(std::ostream& ostr, const G4StepPoint& step) {

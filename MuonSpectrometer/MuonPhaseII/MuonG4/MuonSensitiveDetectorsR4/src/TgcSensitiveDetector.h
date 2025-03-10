@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONG4R4_TGCSensitiveDetector_H
 #define MUONG4R4_TGCSensitiveDetector_H
 
-#include "G4VSensitiveDetector.hh"
+#include "MuonSensitiveDetector.h"
 
 #include <StoreGate/WriteHandle.h>
 #include <AthenaBaseComps/AthMessaging.h>
@@ -14,50 +14,27 @@
 
 namespace MuonG4R4 {
 
-class TgcSensitiveDetector : public G4VSensitiveDetector, public AthMessaging {
-
-
-public:
-    /** @brief Constructor
-     *  @param name: Name of the Sensitive detctor / AthMessaging module
-     *  @param output_key: Key under which the sim hits are written into store gate
-     *  @param trf_storeKey: Location of the DetctorAlignmentStore holding the transformations per event
-     *  @param detMgr: Pointer to the run-4 detector manager
-    */
-    TgcSensitiveDetector(const std::string& name, 
-                         const std::string& output_key,
-                         const std::string& trf_storKey,
-                         const MuonGMR4::MuonDetectorManager* detMgr);
+  class TgcSensitiveDetector : public MuonSensitiveDetector {
+    public:
+      using MuonSensitiveDetector::MuonSensitiveDetector;
+      ~TgcSensitiveDetector()=default;
     
-    ~TgcSensitiveDetector()=default;
-    
-    /** member functions */
-    void   Initialize(G4HCofThisEvent* HCE) override final;
-    G4bool ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist) override final;
+      virtual G4bool ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist) override final;
 
     
-private:
-    /// Retrieves the matching readout element to a G4 hit
-    const MuonGMR4::TgcReadoutElement* getReadoutElement(const G4TouchableHistory* touchHist) const;
-    
-    Identifier getIdentifier(const ActsGeometryContext& gctx,
-                             const MuonGMR4::TgcReadoutElement* readOutEle, 
-                             const Amg::Vector3D& hitAtGapPlane, bool phiGap) const;
-    /* 
-     *  For the moment use write handles because the sensitive detectors are 
-     *  managed by a service which must not have a data dependency
-    */
-    SG::WriteHandle<xAOD::MuonSimHitContainer> m_writeHandle;
-    /*
-     *  ReadHandleKey to the DetectorAlignmentStore caching
-     *  the relevant transformations needed in this event
-    */
-    SG::ReadHandleKey<ActsTrk::DetectorAlignStore> m_trfCacheKey;
-
-    /// Pointer to the acts Geometry context
-    const ActsGeometryContext m_gctx{};
-    /// Pointer to the underlying detector manager
-    const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
+    private:
+      /** @brief Retrieves the readout element that's associates with the TouchableHistory. 
+       *         The readout element is decoded from the volume name in the history.
+       *  @param touchHist: History of the hit to determine the readout element from */
+      const MuonGMR4::TgcReadoutElement* getReadoutElement(const G4TouchableHistory* touchHist) const;
+      /** @brief Constructs the Identifier of the gasGap using the readoutElement and the hit expressed 
+       *         in it's local coordinate frame
+       *  @param gctx: Geometry context to transform the hit accordingly
+       *  @param readOutEle: ReadoutElement that's identified from the TouchableHistory
+       *  @param hitAtGapPlane: Position of the hit expressed at the gasGap centre in global coordinates  */
+      Identifier getIdentifier(const ActsGeometryContext& gctx,
+                               const MuonGMR4::TgcReadoutElement* readOutEle, 
+                               const Amg::Vector3D& hitAtGapPlane, bool phiGap) const;
 };
 }
 

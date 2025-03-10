@@ -1,8 +1,8 @@
-#ifndef MUONG4R4_MmSensitiveDetector_H
-#define MUONG4R4_MmSensitiveDetector_H
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+#ifndef MUONSENSITIVEDETECTORSR4_MMSENSITIVEDETECTOR_H
+#define MUONSENSITIVEDETECTORSR4_MMSENSITIVEDETECTOR_H
 
 /** @class MmSensitiveDetector
     @section MmSensitiveDetector Class methods and properties
@@ -19,61 +19,34 @@ which inherits from the MuonHitIdHelper base class.
 
 */
 
-#include "G4VSensitiveDetector.hh"
+#include "MuonSensitiveDetector.h"
 
-#include <StoreGate/WriteHandle.h>
-#include <AthenaBaseComps/AthMessaging.h>
-#include <MuonReadoutGeometryR4/MuonDetectorManager.h>
+
 #include <MuonReadoutGeometryR4/MmReadoutElement.h>
-#include <xAODMuonSimHit/MuonSimHitContainer.h>
 
 namespace MuonG4R4 {
 
-class MmSensitiveDetector : public G4VSensitiveDetector, public AthMessaging {
+class MmSensitiveDetector : public MuonSensitiveDetector {
 
 
-public:
-    /** @brief Constructor
-     *  @param name: Name of the Sensitive detctor / AthMessaging module
-     *  @param output_key: Key under which the sim hits are written into store gate
-     *  @param trf_storeKey: Location of the DetctorAlignmentStore holding the transformations per event
-     *  @param detMgr: Pointer to the run-4 detector manager
-    */
-    MmSensitiveDetector(const std::string& name, 
-                        const std::string& output_key,
-                        const std::string& trf_storKey,
-                        const MuonGMR4::MuonDetectorManager* detMgr);
- 
-    ~MmSensitiveDetector()=default;
+    public:
+        using MuonSensitiveDetector::MuonSensitiveDetector;
     
-    /** member functions */
-    void   Initialize(G4HCofThisEvent* HCE) override final;
-    G4bool ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist) override final;
+        ~MmSensitiveDetector()=default;
+    
+        /** member functions */
+        virtual G4bool ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist) override final;
 
     
-private:
-    /// Retrieves the matching readout element to a G4 hit
-    const MuonGMR4::MmReadoutElement* getReadoutElement(const ActsGeometryContext& gctx,
-                                                        const G4TouchableHistory* touchHist) const;
-    /// Identify the gasGap layer of the hit
-    Identifier getIdentifier(const ActsGeometryContext& gctx,
-                             const MuonGMR4::MmReadoutElement* readOutEle, 
-                             const Amg::Vector3D& hitAtGapPlane) const;
-    /* 
-     *  For the moment use write handles because the sensitive detectors are 
-     *  managed by a service which must not have a data dependency
-    */
-    SG::WriteHandle<xAOD::MuonSimHitContainer> m_writeHandle;
-    /**
-     *  ReadHandleKey to the DetectorAlignmentStore caching
-     *  the relevant transformations needed in this event
-    */
-    SG::ReadHandleKey<ActsTrk::DetectorAlignStore> m_trfCacheKey;
-
-    /// Pointer to the underlying detector manager
-    const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
+    private:
+        /// Retrieves the matching readout element to a G4 hit
+        const MuonGMR4::MmReadoutElement* getReadoutElement(const ActsGeometryContext& gctx,
+                                                            const G4TouchableHistory* touchHist) const;
+        /// Identify the gasGap layer of the hit
+        Identifier getIdentifier(const ActsGeometryContext& gctx,
+                                const MuonGMR4::MmReadoutElement* readOutEle, 
+                                const Amg::Vector3D& hitAtGapPlane) const;
    
-};
-
+    };
 }
 #endif
