@@ -118,7 +118,7 @@ namespace pool {
           type[1] = it->second;
         }
         std::string leaflist = name + type;
-        m_tree->Branch( name.c_str(), 0, leaflist.c_str(), TBRANCH_DEF_BUFSIZE);
+        m_tree->Branch( name.c_str(), 0, leaflist.c_str() );
      
         m_schemaWritten = false;
         m_poolOut << coral::Debug << "Created Branch " <<  name
@@ -491,8 +491,6 @@ namespace pool {
       }
 
       m_poolOut << coral::Info <<  "Root collection opened, size = " << m_tree->GetEntries() << corENDL;
-      TTree::SetMaxTreeSize(TTREE_MAX_SIZE);
-      m_tree->SetAutoFlush(TTREE_AUTO_FLUSH);
 
       if( m_session && m_mode == ICollection::UPDATE ) {
         m_tree->SetDirectory(0);

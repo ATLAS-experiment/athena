@@ -30,14 +30,6 @@ namespace pool {
 
    namespace RootCollection {
 
-      // compressed data size for buffer auto-resize (negative == bytes)
-      const int TTREE_AUTO_FLUSH = -1*1024*1024;
-      
-      const int TBRANCH_DEF_BUFSIZE = 8*1024;
-
-      // increase TTree size limit to 100GB
-      const unsigned long long TTREE_MAX_SIZE = 100*1024*1024*1024ULL;
-
       class Attribute;
       class AttributeSpecification;
   
