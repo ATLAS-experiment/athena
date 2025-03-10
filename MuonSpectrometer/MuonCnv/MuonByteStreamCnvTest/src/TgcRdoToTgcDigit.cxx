@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcRdoToTgcDigit.h"
 
-TgcRdoToTgcDigit::TgcRdoToTgcDigit(const std::string& name, ISvcLocator* pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode TgcRdoToTgcDigit::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -18,12 +17,8 @@ StatusCode TgcRdoToTgcDigit::initialize() {
 StatusCode TgcRdoToTgcDigit::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("in execute()");
     // retrieve the collection of RDO
-    SG::ReadHandle<TgcRdoContainer> rdoRH(m_tgcRdoKey, ctx);
-    if (!rdoRH.isValid()) {
-        ATH_MSG_WARNING("No TGC RDO container found!");
-        return StatusCode::SUCCESS;
-    }
-    const TgcRdoContainer* rdoContainer = rdoRH.cptr();
+    SG::ReadHandle rdoContainer{m_tgcRdoKey, ctx};
+    ATH_CHECK(rdoContainer.isPresent());
     ATH_MSG_DEBUG("Retrieved " << rdoContainer->size() << " TGC RDOs.");
 
     SG::WriteHandle<TgcDigitContainer> wh_tgcDigit(m_tgcDigitKey, ctx);

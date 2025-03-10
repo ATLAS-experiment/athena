@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONBYTESTREAMCNVTEST_STGCRDOTOSTGCDIGIT_H
@@ -15,7 +15,7 @@
 
 class STGC_RdoToDigit : public AthReentrantAlgorithm {
 public:
-    STGC_RdoToDigit(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;    
     virtual ~STGC_RdoToDigit() = default;
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;

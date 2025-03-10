@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // NSWValAlg inlcudes
@@ -22,73 +22,73 @@ namespace MuonVal{
 
 StatusCode HitValAlg::setupSimHits(){
     if (m_doSTGCHit) { 
-        m_tree.addBranch(std::make_unique<sTGCSimHitVariables>(m_tree, m_NSWsTGC_ContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<sTGCSimHitVariables>(m_tree, m_sTgcSimKey, msgLevel())); 
     }
     if (m_doMMHit) { 
-        m_tree.addBranch(std::make_unique<MMSimHitVariables>(m_tree, m_NSWMM_ContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<MMSimHitVariables>(m_tree, m_MmSimKey, msgLevel())); 
     }
     if (m_doCSCHit) { 
         m_tree.addBranch(std::make_unique<CSCSimHitVariables>(m_tree, m_CSC_SimContainerName, msgLevel())); 
     }
     if (m_doMDTHit) { 
-        m_tree.addBranch(std::make_unique<MDTSimHitVariables>(m_tree, m_MDT_SimContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<MDTSimHitVariables>(m_tree, m_MdtSimHitKey, msgLevel())); 
     }
     if (m_doTGCHit) { 
-        m_tree.addBranch(std::make_unique<TGCSimHitVariables>(m_tree, m_TGC_SimContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<TGCSimHitVariables>(m_tree, m_TgcSimHitKey, msgLevel())); 
     }
     if (m_doRPCHit) { 
-        m_tree.addBranch(std::make_unique<RPCSimHitVariables>(m_tree, m_RPC_SimContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<RPCSimHitVariables>(m_tree, m_RpcSimHitKey, msgLevel())); 
     }
     return StatusCode::SUCCESS;
 }
 StatusCode HitValAlg::setupSDOs(){
     if (m_doSTGCSDO) {
-        m_tree.addBranch(std::make_unique<sTgcSDOVariables>(m_tree, m_NSWsTGC_SDOContainerName, msgLevel()));
+        m_tree.addBranch(std::make_unique<sTgcSDOVariables>(m_tree, m_sTgcSdoKey, msgLevel()));
     }
     if (m_doMMSDO) {
-        m_tree.addBranch(std::make_unique<MMSDOVariables>(m_tree, m_NSWMM_SDOContainerName, msgLevel()));
+        m_tree.addBranch(std::make_unique<MMSDOVariables>(m_tree, m_MmSdoKey, msgLevel()));
     }
     if (m_doCSCSDO) { 
         m_tree.addBranch(std::make_unique<CscSDOVariables>(m_tree, m_CSC_SDOContainerName, msgLevel())); 
     }
     if (m_doMDTSDO) { 
-        m_tree.addBranch(std::make_unique<MdtSDOVariables>(m_tree, m_MDT_SDOContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<MdtSDOVariables>(m_tree, m_MdtSdoKey, msgLevel())); 
     }
     if (m_doRPCSDO) { 
-        m_tree.addBranch(std::make_unique<RpcSDOVariables>(m_tree, m_RPC_SDOContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<RpcSDOVariables>(m_tree, m_RpcSdoKey, msgLevel())); 
     }
     if (m_doTGCSDO) { 
-        m_tree.addBranch(std::make_unique<TgcSDOVariables>(m_tree, m_TGC_SDOContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<TgcSDOVariables>(m_tree, m_TgcSdoKey, msgLevel())); 
     }
     return StatusCode::SUCCESS;
 }
 StatusCode HitValAlg::setupDigits(){
     if (m_doSTGCDigit) {
-        m_tree.addBranch(std::make_unique<sTgcDigitVariables>(m_tree, m_NSWsTGC_DigitContainerName, msgLevel()));
+        m_tree.addBranch(std::make_unique<sTgcDigitVariables>(m_tree, m_sTgcDigitKey, msgLevel()));
     }
     if (m_doMMDigit) {
-        m_tree.addBranch(std::make_unique<MMDigitVariables>(m_tree, m_NSWMM_DigitContainerName, msgLevel()));
+        m_tree.addBranch(std::make_unique<MMDigitVariables>(m_tree, m_MmDigitKey, msgLevel()));
     }
     if (m_doCSCDigit) { 
         m_tree.addBranch(std::make_unique<CscDigitVariables>(m_tree, m_CSC_DigitContainerName, msgLevel())); 
     }
     if (m_doMDTDigit) { 
-        m_tree.addBranch(std::make_unique<MdtDigitVariables>(m_tree, m_MDT_DigitContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<MdtDigitVariables>(m_tree, m_MdtDigitKey, msgLevel())); 
     }
     if (m_doRPCDigit) { 
-        m_tree.addBranch(std::make_unique<RpcDigitVariables>(m_tree, m_RPC_DigitContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<RpcDigitVariables>(m_tree, m_RpcDigitKey, msgLevel())); 
     }
     if (m_doTGCDigit) { 
-        m_tree.addBranch(std::make_unique<TgcDigitVariables>(m_tree, m_TGC_DigitContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<TgcDigitVariables>(m_tree, m_TgcDigitKey, msgLevel())); 
     }
     return StatusCode::SUCCESS;
 }
 StatusCode HitValAlg::setupRDOs(){
     if (m_doSTGCRDO) { 
-        m_tree.addBranch(std::make_unique<sTGCRDOVariables>(m_tree, m_NSWsTGC_RDOContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<sTGCRDOVariables>(m_tree, m_sTgcRdoKey, msgLevel())); 
     }
     if (m_doMMRDO) { 
-        m_tree.addBranch(std::make_unique<MMRDOVariables>(m_tree, m_NSWMM_RDOContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<MMRDOVariables>(m_tree, m_MmRdoKey, msgLevel())); 
     }
     if (m_doCSCRDO) { 
         ATH_CHECK(m_csc_decoder.retrieve());
@@ -96,31 +96,32 @@ StatusCode HitValAlg::setupRDOs(){
     }
     if (m_doTGCRDO) {
         ATH_CHECK(m_tgcCabling.retrieve());
-        m_tree.addBranch(std::make_unique<TGCRDOVariables>(m_tree, m_TGC_RDOContainerName, msgLevel(), m_tgcCabling));
+        m_tree.addBranch(std::make_unique<TGCRDOVariables>(m_tree, m_TgcRdoKey, msgLevel(), m_tgcCabling));
     }
     return StatusCode::SUCCESS;
 }
 StatusCode HitValAlg::setupPRDs(){
     if (m_doSTGCPRD) { 
-        m_tree.addBranch(std::make_unique<sTGCPRDVariables>(m_tree, m_NSWsTGC_PRDContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<sTGCPRDVariables>(m_tree, m_sTgcPRDKey, msgLevel())); 
     }
     if (m_doMMPRD) { 
-        m_tree.addBranch(std::make_unique<MMPRDVariables>(m_tree, m_NSWMM_PRDContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<MMPRDVariables>(m_tree, m_MmPrdKey, msgLevel())); 
     }
     if (m_doCSCPRD) { 
         m_tree.addBranch(std::make_unique<CSCPRDVariables>(m_tree, m_CSC_PRDContainerName, msgLevel())); 
     }
     if (m_doTGCPRD) { 
-        m_tree.addBranch(std::make_unique<TGCPRDVariables>(m_tree, m_TGC_PRDContainerName, msgLevel())); 
+        m_tree.addBranch(std::make_unique<TGCPRDVariables>(m_tree, m_TgcPrdKey, msgLevel())); 
     }
     return StatusCode::SUCCESS;
 }
 
 StatusCode HitValAlg::initialize() {
     ATH_MSG_DEBUG("initialize()");
+    ATH_CHECK(m_evtInfo.initialize());
     unsigned int ev_infomask{EventInfoBranch::writePileUp};
     if (!m_isData) ev_infomask |= EventInfoBranch::isMC | EventInfoBranch::writeBeamSpot;    
-    m_tree.addBranch(std::make_unique<EventInfoBranch>(m_tree,ev_infomask));
+    m_tree.addBranch(std::make_unique<EventInfoBranch>(m_tree,ev_infomask, m_evtInfo.key()));
 
     ATH_CHECK(m_idHelperSvc.retrieve());
   
