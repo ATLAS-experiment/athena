@@ -88,7 +88,7 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
     ATH_CHECK( m_FPGAHitKey.initialize() );
     ATH_CHECK( m_FPGASpacePointsKey.initialize() );
     ATH_CHECK( m_FPGAHitUnmappedKey.initialize() );
-    ATH_CHECK( m_inputTruthParticleContainerKey.initialize(m_runOnRDO) );
+    ATH_CHECK( m_inputTruthParticleContainerKey.initialize(m_useInternalTruthTracks) );
     ATH_CHECK( m_truthLinkContainerKey.initialize() );
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );
     ATH_CHECK( m_FPGAOfflineTrackKey.initialize() );
@@ -162,7 +162,7 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
         else {
             ATH_MSG_DEBUG("Event accepted by: " << m_evtSel->name());
             // Make a new truth link vector based on FPGATrackSim selections 
-            if (m_runOnRDO) {
+            if (m_useInternalTruthTracks) {
                 SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainer(m_inputTruthParticleContainerKey, ctx); // Read offline TruthParticles
                 if (!truthParticleContainer.isValid()) {
                     ATH_MSG_ERROR("No valid truth particle container with key " << truthParticleContainer.key());

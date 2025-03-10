@@ -87,9 +87,13 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('doEDMConversion', False)
     cf.addFlag('convertUnmappedHits', False)
     cf.addFlag('writeToAOD', False)
-
+    
+    # Monitoring
+    cf.addFlag('writeAdditionalOutputData', True)
+    
     # ACTS Tracking
     cf.addFlag('runCKF',True)
+    cf.addFlag('useFPGATruthTrackMatching',False)
     return cf
 
 
@@ -105,7 +109,6 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('realHitsOverlay', False)
     cf.addFlag('hitFiltering', False)
     cf.addFlag('spacePointFiltering', False)
-    cf.addFlag('writeOutputData', True)
 
     # road finding selection
     cf.addFlag('houghRootoutput', False)

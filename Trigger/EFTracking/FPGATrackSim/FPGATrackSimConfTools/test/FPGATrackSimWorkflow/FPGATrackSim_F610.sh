@@ -33,7 +33,7 @@ run_F610(){
         Trigger.FPGATrackSim.doEDMConversion=True \
         Trigger.FPGATrackSim.doOverlapRemoval=False \
         Trigger.FPGATrackSim.writeToAOD=True \
-        Trigger.FPGATrackSim.Hough.writeOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
+        Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
         Trigger.FPGATrackSim.FakeNNonnxFile=$ONNX_INPUT_FAKE \
         Trigger.FPGATrackSim.ParamNNonnxFile=$ONNX_INPUT_PARAM \
         Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
