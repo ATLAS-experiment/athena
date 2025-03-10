@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/TypelessWriteHandle.h
@@ -49,6 +49,10 @@ public:
                                 const EventContext& ctx);
 
   
+  // Disallow initialization from a temporary Key object.
+  explicit TypelessWriteHandle (SG::TypelessWriteHandleKey&& key) = delete; // Not allowed from a temporary.
+
+
   /**
    * @brief Can the handle be successfully dereferenced?
    *
