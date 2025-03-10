@@ -93,6 +93,15 @@ InDetPerfPlot_Hits::initializePlots() {
   book(m_nSCTHits_vs_etaphi, "nSCTHits_vs_etaphi");
   book(m_nSCTHoles_vs_etaphi, "nSCTHoles_vs_etaphi");
 
+  if(!m_isITk){
+    book(m_nTRTHits_vs_etaphi, "nTRTHits_vs_etaphi");
+    book(m_nTRTHitsXe_vs_etaphi, "nTRTHitsXe_vs_etaphi");
+    book(m_nTRTHitsAr_vs_etaphi, "nTRTHitsAr_vs_etaphi");
+    book(m_nTRTHighThresholdHits_vs_etaphi, "nTRTHighThresholdHits_vs_etaphi");
+    book(m_nTRTHighThresholdHitsXe_vs_etaphi, "nTRTHighThresholdHitsXe_vs_etaphi");
+    book(m_nTRTHighThresholdHitsAr_vs_etaphi, "nTRTHighThresholdHitsAr_vs_etaphi");
+  }
+
   book(m_pixeldEdx, "pixeldEdx");
 
   if (m_iDetailLevel >= 100){
@@ -282,12 +291,17 @@ InDetPerfPlot_Hits::fill(const xAOD::TrackParticle& track, float mu, float weigh
     fillHisto(m_nTRTHits, iTrtHits, weight);
     fillHisto(m_nTRTHits_vs_eta, eta, iTrtHits, weight);
     fillHisto(m_nTRTHits_vs_phi, phi, iTrtHits, weight);
+    fillHisto(m_nTRTHits_vs_etaphi, eta, phi, iTrtHits, weight);
+
     if (m_iDetailLevel >= 100) fillHisto(m_nTRTHits_vs_mu, mu, iTrtHits, weight);
     if (track.summaryValue(iTrtXeHits, xAOD::numberOfTRTXenonHits)) {
       fillHisto(m_nTRTHitsXe, iTrtXeHits, weight);
       fillHisto(m_nTRTHitsXe_vs_eta, eta, iTrtXeHits, weight);
+      fillHisto(m_nTRTHitsXe_vs_etaphi, eta, phi, iTrtXeHits, weight);
       fillHisto(m_nTRTHitsAr, iTrtHits-iTrtXeHits, weight);
       fillHisto(m_nTRTHitsAr_vs_eta, eta, iTrtHits-iTrtXeHits, weight);
+      fillHisto(m_nTRTHitsAr_vs_etaphi, eta, phi, iTrtHits-iTrtXeHits, weight);
+
       if (m_iDetailLevel >= 100){ 
         if(eta < -1){
           fillHisto(m_nTRTHitsXe_vs_mu_ECsideC, mu, iTrtXeHits, weight);
@@ -322,12 +336,16 @@ InDetPerfPlot_Hits::fill(const xAOD::TrackParticle& track, float mu, float weigh
     fillHisto(m_nTRTHighThresholdHits, iTrtHTHits, weight);
     fillHisto(m_nTRTHighThresholdHits_vs_eta, eta, iTrtHTHits, weight);
     fillHisto(m_nTRTHighThresholdHits_vs_phi, phi, iTrtHTHits, weight);
+    fillHisto(m_nTRTHighThresholdHits_vs_etaphi, eta, phi, iTrtHTHits, weight);
+
     if (m_iDetailLevel >= 100) fillHisto(m_nTRTHighThresholdHits_vs_mu, mu, iTrtHTHits, weight);
     if (track.summaryValue(iTrtHTXeHits, xAOD::numberOfTRTHighThresholdHits)) {
       fillHisto(m_nTRTHighThresholdHitsXe, iTrtHTXeHits, weight);
       fillHisto(m_nTRTHighThresholdHitsXe_vs_eta, eta, iTrtHTXeHits, weight);
+      fillHisto(m_nTRTHighThresholdHitsXe_vs_etaphi, eta, phi, iTrtHTXeHits, weight);
       fillHisto(m_nTRTHighThresholdHitsAr, iTrtHTHits-iTrtHTXeHits, weight);
       fillHisto(m_nTRTHighThresholdHitsAr_vs_eta, eta, iTrtHTHits-iTrtHTXeHits, weight);
+      fillHisto(m_nTRTHighThresholdHitsAr_vs_etaphi, eta, phi, iTrtHTHits-iTrtHTXeHits, weight);
       if (m_iDetailLevel >= 100){ 
         if(eta < -1){
           fillHisto(m_nTRTHighThresholdHitsXe_vs_mu_ECsideC, mu, iTrtHTXeHits, weight);
