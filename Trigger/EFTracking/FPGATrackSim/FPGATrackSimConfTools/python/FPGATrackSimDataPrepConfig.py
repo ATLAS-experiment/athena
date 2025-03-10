@@ -232,12 +232,13 @@ def WriteToAOD(flags, stage = '',finalTrackParticles = ''): #  store xAOD contai
     
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
     toAOD = []
-    toAOD += [f"xAOD::PixelClusterContainer#xAODPixelClusters{stage}FromFPGACluster",f"xAOD::PixelClusterAuxContainer#xAODPixelClusters{stage}FromFPGAClusterAux.",
-              f"xAOD::StripClusterContainer#xAODStripClusters{stage}FromFPGACluster",f"xAOD::StripClusterAuxContainer#xAODStripClusters{stage}FromFPGAClusterAux.",
-              f"xAOD::TrackParticleContainer#{finalTrackParticles}",f"xAOD::TrackParticleAuxContainer#{finalTrackParticles}Aux.",
-              f"xAOD::SpacePointContainer#xAODPixelSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODPixelSpacePoints{stage}FromFPGAAux.-measurements",
-              f"xAOD::SpacePointContainer#xAODStripSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODStripSpacePoints{stage}FromFPGAAux.-measurements.-sctSpacePointLink",
-            ]
+    toAOD = [f"xAOD::TrackParticleContainer#{finalTrackParticles}",f"xAOD::TrackParticleAuxContainer#{finalTrackParticles}Aux."]
+    if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
+        toAOD += [f"xAOD::PixelClusterContainer#xAODPixelClusters{stage}FromFPGACluster",f"xAOD::PixelClusterAuxContainer#xAODPixelClusters{stage}FromFPGAClusterAux.",
+                f"xAOD::StripClusterContainer#xAODStripClusters{stage}FromFPGACluster",f"xAOD::StripClusterAuxContainer#xAODStripClusters{stage}FromFPGAClusterAux.",
+                f"xAOD::SpacePointContainer#xAODPixelSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODPixelSpacePoints{stage}FromFPGAAux.-measurements",
+                f"xAOD::SpacePointContainer#xAODStripSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODStripSpacePoints{stage}FromFPGAAux.-measurements.-sctSpacePointLink",
+                ]
     
     result.merge(addToAOD(flags, toAOD))
 
@@ -323,10 +324,10 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
 
     theFPGATrackSimDataPrepAlg=CompFactory.FPGATrackSimDataPrepAlg()
     theFPGATrackSimDataPrepAlg.HitFiltering = flags.Trigger.FPGATrackSim.ActiveConfig.hitFiltering
-    theFPGATrackSimDataPrepAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
+    theFPGATrackSimDataPrepAlg.writeOutputData = flags.Trigger.FPGATrackSim.writeAdditionalOutputData
     theFPGATrackSimDataPrepAlg.Clustering = flags.Trigger.FPGATrackSim.clustering
     theFPGATrackSimDataPrepAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
-    theFPGATrackSimDataPrepAlg.runOnRDO = not flags.Trigger.FPGATrackSim.wrapperFileName
+    theFPGATrackSimDataPrepAlg.useInternalTruthTracks = flags.Trigger.FPGATrackSim.useFPGATruthTrackMatching
     
     FPGATrackSimMaping = result.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
     theFPGATrackSimDataPrepAlg.FPGATrackSimMapping = FPGATrackSimMaping
@@ -502,7 +503,7 @@ def runDataPrepChain():
     flags.dump()
     
     acc=MainServicesCfg(flags)
-    if flags.Trigger.FPGATrackSim.Hough.writeOutputData:
+    if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
         acc.addService(CompFactory.THistSvc(Output = [f"EXPERT DATAFILE='{flags.Trigger.FPGATrackSim.outputMonitorFile}', OPT='RECREATE'"]))
         acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='dataprep.root', OPT='RECREATE'"]))
 
@@ -544,7 +545,7 @@ def runDataPrepChain():
                                 'TrackFindingAlg.UncalibratedMeasurementContainerKeys' : ["xAODPixelClusters_1stFromFPGACluster","xAODStripClusters_1stFromFPGACluster"],
                                 'PixelClusterToTruthAssociationAlg.Measurements' : 'xAODPixelClusters_1stFromFPGACluster',
                                 'StripClusterToTruthAssociationAlg.Measurements' : 'xAODStripClusters_1stFromFPGACluster'}))
-        
+
         if flags.Trigger.FPGATrackSim.writeToAOD:
             acc.merge(WriteToAOD(flags, stage = '_1st',))
             if flags.Trigger.FPGATrackSim.spacePoints : acc.merge(WriteToAOD(flags,

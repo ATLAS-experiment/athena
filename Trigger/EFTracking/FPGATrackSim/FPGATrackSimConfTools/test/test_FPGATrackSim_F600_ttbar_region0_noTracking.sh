@@ -63,7 +63,7 @@ run "${PREFIX} pipeline" \
         Trigger.FPGATrackSim.doOverlapRemoval=True \
         Trigger.FPGATrackSim.Hough.secondStage=False \
         Trigger.FPGATrackSim.writeToAOD=True \
-        Trigger.FPGATrackSim.Hough.writeOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
+        Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
         Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
         Output.AODFileName=${INPUT_AOD_FILE}
 

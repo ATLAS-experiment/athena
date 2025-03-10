@@ -87,7 +87,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK( m_FPGAHitFilteredKey.initialize() );
     ATH_CHECK( m_FPGARoadKey.initialize() );
     ATH_CHECK( m_FPGATrackKey.initialize() );
-    ATH_CHECK( m_inputTruthParticleContainerKey.initialize(m_runOnRDO) );
     ATH_CHECK( m_FPGAHitKey.initialize() );
     ATH_CHECK( m_FPGAHitKey_2nd.initialize(m_doHoughRootOutput) );
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );

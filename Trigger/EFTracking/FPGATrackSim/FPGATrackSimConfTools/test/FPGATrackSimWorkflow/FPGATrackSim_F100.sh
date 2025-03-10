@@ -31,7 +31,7 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
     Trigger.FPGATrackSim.mapsDir=$MAPS_9L \
     Trigger.FPGATrackSim.writeToAOD=True \
-    Trigger.FPGATrackSim.Hough.writeOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
+    Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
     Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root"
 
 
