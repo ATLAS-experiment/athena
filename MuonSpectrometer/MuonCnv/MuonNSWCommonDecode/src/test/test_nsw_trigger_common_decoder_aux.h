@@ -561,25 +561,3 @@ class CRCMonHelper {
   }
 
 };
-
-class CRCL1AHelper {
- public:
-  CRCL1AHelper() {} 
-
-  template <typename Source>
-    uint getCRC(const std::span<const Source> words) {
-    uint crc = 0;
-    uint N = sizeof(Source)/2; //N 16b subwords per word
-
-    double pad = 1;
-    if (words[std::size(words)-1] & 0x0000FFFF) {pad = 0;}
-
-    for (uint i = 0; i<std::size(words); ++i) {
-      for (uint j = 0; j<N-(i==(std::size(words)-1) && pad == 0 ? 2 : 0 ); ++j) {
-        crc = crc ^ ((words[i] >> (N*16-(j+1)*16)) & 0xFFFF);
-      }
-    }
-    return crc;
-  }
-
-};

@@ -64,6 +64,9 @@ namespace Muon
 
       uint32_t trailer_CRC () const {return m_trailer_CRC;};
 
+      uint32_t trailer_CRC_calc () const {return m_trailer_CRC_calc;};
+      bool is_crc_ok () const {return m_trailer_CRC == m_trailer_CRC_calc;};
+
       const std::vector<std::shared_ptr<Muon::nsw::MMARTPacket>>& art_packets () const {return m_art_packets;};
       const std::vector<std::shared_ptr<Muon::nsw::MMTrigPacket>>& trig_packets () const {return m_trig_packets;};
 
@@ -102,7 +105,9 @@ namespace Muon
       //first vector had stream index
       //second vector contains stream data words - length defined by m_stream_head_nwords
       //third vector used because stream data size (m_stream_head_nwords) can exceed maximum compiler size (uint64_t)
+      //CRC are actually 16b for now but keeping 32b for future proofing
       uint32_t m_trailer_CRC;
+      uint32_t m_trailer_CRC_calc; //calculated CRC
 
       std::vector<std::shared_ptr<Muon::nsw::MMARTPacket>> m_art_packets;
       std::vector<std::shared_ptr<Muon::nsw::MMTrigPacket>> m_trig_packets;

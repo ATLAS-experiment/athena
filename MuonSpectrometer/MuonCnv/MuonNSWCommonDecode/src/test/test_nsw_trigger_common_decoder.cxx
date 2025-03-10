@@ -236,7 +236,6 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
       }
     }
     if (robType == "MML1A") {
-      uint bs_pointer = 0;
       for (const auto& baseLink : nsw_trigger_decoder.get_elinks()) {
         const auto link = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerMML1AElink>(baseLink);
         if (link->status()) {
@@ -319,10 +318,9 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
         data.b_MML1A_trig_phiBin.push_back(tmp_trig_phiBin);
         data.b_MML1A_trig_rBin.push_back(tmp_trig_rBin);
 
-        CRCL1AHelper CRCL1A;
-        std::span<const uint32_t> load{bs + bs_pointer + 2, link->nwordsFlx() - 2};
-        bs_pointer += link->nwordsFlx();
-        data.b_MML1A_CRC_ok.push_back((CRCL1A.getCRC(load) == link->trailer_CRC()));
+	data.b_MML1A_trailer_CRC.push_back(link->trailer_CRC());
+	data.b_MML1A_CRC_ok.push_back(link->is_crc_ok());
+	
       }
     }
     if (robType == "MMMon") {
