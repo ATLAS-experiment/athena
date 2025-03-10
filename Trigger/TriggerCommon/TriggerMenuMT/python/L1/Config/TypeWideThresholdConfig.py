@@ -246,6 +246,7 @@ def getConfig_eEM(do_HI_tob_thresholds):
     confObj["ptMinToTopo"] = 0.6 if do_HI_tob_thresholds else 3
     confObj["maxEt"] = 60
     confObj["resolutionMeV"] = 100
+    confObj["algoVersion"] = 1
 
     # Add any eta-dependent cuts that are defined for specific working points
     # with higher priority than the low-granularity values above
