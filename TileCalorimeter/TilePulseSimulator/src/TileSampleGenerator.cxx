@@ -61,9 +61,9 @@ void TileSampleGenerator::fillSamples(double t0, double pedestal, double amplitu
 
 //
 //________________________________________________________
-void TileSampleGenerator::fillNSamples(double t0, double pedestal, double amp_it, vector<float> amp_pu, TF1* pdf, bool addNoise, double itOffset, int nSamples, int nPul) {
+void TileSampleGenerator::fillNSamples(double t0, double pedestal, double amp_it, const std::vector<float>& amp_pu, TF1* pdf, bool addNoise, double itOffset, int nSamples, int nPul) {
 
-    std::unique_ptr<TileSampleBuffer> bufall(new TileSampleBuffer(nPul, -25*((nPul-1)/2), 25.));
+        std::unique_ptr<TileSampleBuffer> bufall = std::make_unique<TileSampleBuffer>(nPul, -25*((nPul-1)/2), 25.);
 
 	if(m_DEBUG){
 		cout << "Pileup pulses:" << std::endl;
@@ -125,6 +125,47 @@ void TileSampleGenerator::fillNSamples(double t0, double pedestal, double amp_it
 	}
 
 	return;
+}
+
+float TileSampleGenerator::fillSample(double t0, double pedestal, const vector<float>& amp_pu, TF1* pdf, bool addNoise, int nPul, int gain) {
+
+        std::unique_ptr<TileSampleBuffer> bufall = std::make_unique<TileSampleBuffer>(nPul, -25*((nPul-1)/2), 25.);
+
+	if(m_DEBUG){
+		std::cout << "Pileup pulses:" << std::endl;
+		for (std::vector<float>::const_iterator i = amp_pu.begin(); i != amp_pu.end(); ++i)
+		std::cout << *i << ' ';
+		std::cout << std::endl;
+	}
+
+	double amp_it_out = pedestal;
+	vector<int> t(nPul);
+
+	for (int pul=0; pul < nPul; pul++){
+
+		t[pul] = bufall->getTime(pul) - t0;
+
+		if(gain == 1){
+		  amp_it_out += m_ps->eval(t[pul], false, true) * amp_pu.at(pul);
+		}
+		else{
+		  amp_it_out += (m_ps->eval(t[pul], false, true) * amp_pu.at(pul)) / 40;
+		}
+
+		if(m_DEBUG){
+			std::cout << "nPul-1-pul: " << pul << " getTime(nPul-1-pul) " << bufall->getTime(pul) << " ps " << m_ps->eval(bufall->getTime(pul), false, true) << std::endl;
+			std::cout << "PU sample " << pul << ", pulse shape evaluated for t'=" << t[pul] << std::endl;
+			std::cout << "Contribution for in time amp " << m_ps->eval(t[pul], false, true) << " * " << amp_pu.at(pul) << std::endl;
+			std::cout << std::endl;
+		}
+	}
+
+	if (addNoise) {
+		amp_it_out += pdf->GetRandom();
+	}
+
+	return amp_it_out;
+
 }
 
 //
