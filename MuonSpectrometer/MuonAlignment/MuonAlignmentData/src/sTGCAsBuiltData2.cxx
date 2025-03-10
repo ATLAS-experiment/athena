@@ -19,7 +19,12 @@ Amg::Vector2D sTGCAsBuiltData2::correctPosition(const Identifier& channelId, con
     Amg::Vector2D correctedPos = pos;
     Parameters pars = par_itr->second;
     constexpr double convScale = 1.e-3; // parameters are stored in um and mrad therefore dividing by 1000
-    correctedPos.x() = pos.x() + (pars.offset * convScale  + pars.rotation *convScale * pos.y() + pars.scale*convScale*pos.x() + pars.nonPara * convScale * convScale * pos.x()*pos.y()); 
+    
+    // For the QL3 modules described by the legacy (Run 3) geometry EDM the origin of the local frame is shifted with respect to the actual center of the gap.
+    // Therefore a shift is introduced which stabilizes the as built fit which must also be applied here since the parameters are expressed using the actual center of the gap.
+    float shift = (std::fabs(m_idHelperSvc->stationEta(channelId)) == 3 && m_idHelperSvc->stationNameString(channelId) == "STL" ?  24.74 : 0.0);
+
+    correctedPos.x() = pos.x() +  (pars.offset * convScale  + pars.rotation *convScale * pos.y() + pars.scale*convScale*(pos.x() + shift ) + pars.nonPara * convScale * convScale * (pos.x() + shift  )*pos.y()); 
     return correctedPos;
 }
 
