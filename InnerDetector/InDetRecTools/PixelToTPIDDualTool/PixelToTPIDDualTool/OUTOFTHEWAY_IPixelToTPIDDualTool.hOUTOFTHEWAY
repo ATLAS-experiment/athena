@@ -1,0 +1,41 @@
+//#ifndef IPIXELTOTPIDDUALTOOL_H
+//#define IPIXELTOTPIDDUALTOOL_H
+#ifndef PIXELTOTPIDDUALTOOL_IPIXELTOTPIDDUALTOOL_H
+#define PIXELTOTPIDDUALTOOL_IPIXELTOTPIDDUALTOOL_H
+
+// Framework include(s):
+#include "AsgTools/IAsgTool.h"
+
+#ifndef XAOD_ANALYSIS
+#include "TrkTrack/Track.h"
+#endif
+#include "xAODTracking/TrackParticle.h"
+
+namespace CP {
+
+  /// Interface for the Pixel ToT PID tool.
+  /// This is refactoring of the tool for dual use in Athena and AnalysisBase using CP Algs.
+
+  class IPixelToTPIDDualTool : public virtual asg::IAsgTool {
+    /// Declare the interface that the class provides
+    ASG_TOOL_INTERFACE(CP::IPixelToTPIDDualTool);  // depends where I put the interface...
+    
+  public:
+    
+#ifndef XAOD_ANALYSIS
+    // Athena
+    virtual float dEdx(const EventContext& ctx,
+                       const Trk::Track& track,
+                       int& nUsedHits,
+                       int& nUsedIBLOverflowHits) const = 0;
+#endif
+    // AnalysisBase
+    virtual float dEdx(const xAOD::TrackParticle& track,
+                       int& nUsedHits,
+                       int& nUsedIBLOverflowHits) const = 0;
+
+  }; //class IPixelToTPIDDualTool
+
+} // namespace CP
+
+#endif  // PIXELTOTPIDDUALTOOL_IPIXELTOTPIDDUALTOOL_H

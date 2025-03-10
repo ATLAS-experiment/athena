@@ -1,0 +1,666 @@
+#include "PixelToTPIDDualTool/PixelToTPIDDualTool.h"
+
+// Needed?
+#include "AsgDataHandles/ReadHandle.h"
+#include "PathResolver/PathResolver.h"
+#ifndef XAOD_STANDALONE
+#include "TrkTrack/Track.h"
+#include "TrkTrack/TrackStateOnSurface.h"
+#include "TrkMeasurementBase/MeasurementBase.h"
+#include "TrkParameters/TrackParameters.h"
+#include "TrkRIO_OnTrack/RIO_OnTrack.h"
+#include "TrkSurfaces/Surface.h"
+#include "TrkTrack/TrackInfo.h"
+#include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
+#include "Identifier/Identifier.h" // needed?
+#include "InDetIdentifier/PixelID.h"
+#include "PixelGeoModel/IIBLParameterSvc.h"
+#endif
+#include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/TrackStateValidationContainer.h"
+#include "xAODTracking/TrackMeasurementValidationContainer.h"
+
+#include <cmath>
+
+namespace {
+
+  // Some functions
+
+  // Accessors
+
+} // namepsace
+
+namespace CP {
+  
+  PixelToTPIDDualTool::PixelToTPIDDualTool(const std::string& tool_name) : asg::AsgTool(tool_name) {    
+    float energyPair = 3.68e-6; // Energy in MeV to create an electron-hole pair in silicon
+    float sidensity = 2.329; // silicon density in g cm^-3
+    m_conversionfactor=energyPair/sidensity;
+
+    m_Pixel_sensorthickness=.025; //250 microns Pixel Planars
+    m_IBL_3D_sensorthickness=.023; //230 microns IBL 3D
+    m_IBL_PLANAR_sensorthickness=.020;// 200 microns IBL Planars
+  }
+
+  PixelToTPIDDualTool::~PixelToTPIDDualTool() = default;
+
+  StatusCode PixelToTPIDDualTool::initialize() {
+    ATH_MSG_INFO("Initializing PixelToTPIDDualTool");
+
+    if (m_equalizeClusterMeasurements) {
+      ATH_MSG_INFO("Will equalize cluster dE/dx measurements before calculating truncated mean.");
+
+      if (m_sfDirLocal != "")
+        ATH_MSG_WARNING("!! SETTING UP WITH USER SPECIFIED INPUT LOCATION \"" << m_sfDirLocal << "\"!! FOR DEVELOPMENT USE ONLY !! ");
+
+      ATH_CHECK(initSFsFromTrees()); // Eventually want to be able to choose between trees and the conditions database.
+    }
+    else{
+      ATH_MSG_INFO("Will NOT equalize cluster dE/dx measurements before calculating truncated mean.");
+    }
+
+#ifndef XAOD_STANDALONE
+    ATH_CHECK(m_eventInfo.initialize());
+    m_pixelid = nullptr;
+    
+    if (!m_IBLParameterSvc.empty()) {
+      if (m_IBLParameterSvc.retrieve().isFailure()) {
+        ATH_MSG_FATAL("Could not retrieve IBLParameterSvc"); 
+        return StatusCode::FAILURE; 
+      } else
+        ATH_MSG_INFO("Retrieved service " << m_IBLParameterSvc); 
+    }
+#endif
+
+    return StatusCode::SUCCESS;
+  }
+
+  //////////////////
+  //////////////////
+  //////////////////
+
+  StatusCode PixelToTPIDDualTool::initSFsFromTrees()  {
+    
+    ATH_MSG_INFO("Initializing dE/dx equalization scale factor trees");
+
+    /// Get path to SF trees.
+    std::string filename;
+    
+    if (!m_sfDirLocal.empty()) {      
+      filename = PathResolverFindCalibFile( Form("%s/%s", m_sfDirLocal.value().c_str(), m_sfFileName.value().c_str()) );
+    }
+    else {
+      filename = PathResolverFindCalibFile( Form("%s/%s", m_sfDir.value().c_str(), m_sfFileName.value().c_str()) );
+    }
+
+    //// For testing
+    filename = "../athena/InnerDetector/InDetRecTools//PixelToTPIDDualTool/share/nTuple_data_lowMu_flat.root";
+
+    if (filename.empty()) {
+      ATH_MSG_ERROR("Could not find file: " << filename);
+      return StatusCode::FAILURE;
+    }
+
+    ATH_MSG_INFO("Found scale factor tree file: " << filename);
+
+    m_file = std::make_unique<TFile>(filename.c_str(), "READ");
+    if (!m_file || m_file->IsZombie()) {
+      ATH_MSG_ERROR("Failed to open file: " << filename);
+      return StatusCode::FAILURE;
+    }
+    m_df.emplace(m_sfTreeName.value().c_str(), m_file.get());
+
+    ATH_MSG_INFO("RDataFrame successfully initialized.");
+
+    /// Ideally, would filter the dataframe here only keeping the rows from the closest runNumber.
+    /// But we don't know the runNumber until execute...
+    /// Unless runNumber is included as a property...
+    /// Or the runNumber is cached the first time in execute:
+    ///    In .h:  std::optional<int> m_cachedRunNumber;
+    ///    In execute: if (!m_cachedRunNumber) m_cachedRunNumber = currentRunNumber;
+
+    return StatusCode::SUCCESS;
+  }
+
+  //////////////////
+  //////////////////
+  //////////////////
+
+#ifndef XAOD_STANDALONE
+
+  /// Will return the dE/dx, and will update nUsedHits (the divisor in the truncated mean) and nUsedIBLOverflowHits.
+  /// Whether this is the raw or equalized dE/dx will be determined by the tool properties.
+  float PixelToTPIDDualTool::dEdx(const EventContext& ctx,
+                                  const Trk::Track& track,
+                                  int& nUsedHits,
+                                  int& nUsedIBLOverflowHits) const
+  {
+    
+    int pixelhits = 0;
+
+    /// passed by ref, so will update here.  
+    nUsedHits=0;
+    nUsedIBLOverflowHits=0;
+    
+    /// Get pixel clusters in this simple struct to unify the two EDMs.
+    std::vector<PixelCluster> clusters;
+
+    ////second value keeps track if the cluster is in IBL and has at least an overflow hit
+    std::multimap<float,int> dEdxMap;
+
+    // Check for track states:
+    const Trk::TrackStates* recoTrackStates = track.trackStateOnSurfaces();
+    if (recoTrackStates) {
+      Trk::TrackStates::const_iterator tsosIter    = recoTrackStates->begin();
+      Trk::TrackStates::const_iterator tsosIterEnd = recoTrackStates->end();
+
+      // Loop over track states on surfaces (i.e. generalized hits):
+      for (; tsosIter != tsosIterEnd; ++tsosIter) {
+        const Trk::MeasurementBase *measurement = (*tsosIter)->measurementOnTrack();
+        if (measurement && !(*tsosIter)->type(Trk::TrackStateOnSurface::Outlier)) {
+          if (!(*tsosIter)->trackParameters()) {
+            msg(MSG::WARNING) << "No track parameters available for a state of type measurement, returning -1" << endmsg;
+            msg(MSG::WARNING) << "Don't run this tool on slimmed tracks!" << endmsg;
+            return -1;
+          }
+
+          const InDet::PixelClusterOnTrack* pixclus = nullptr;
+          if (measurement->type(Trk::MeasurementBaseType::RIO_OnTrack)) {
+            const Trk::RIO_OnTrack* tmpRio = static_cast<const Trk::RIO_OnTrack*>(measurement);
+            if (tmpRio->rioType(Trk::RIO_OnTrackType::PixelCluster)) {
+              pixclus = static_cast<const InDet::PixelClusterOnTrack*>(tmpRio);
+            }
+          }
+          if (pixclus) {
+
+            /// Build PixelCluster to unify EDMs.
+            PixelCluster cluster;            
+            cluster.locx=pixclus->localParameters()[Trk::locX];
+            cluster.locy=pixclus->localParameters()[Trk::locY];
+            cluster.bec=m_pixelid->barrel_ec(pixclus->identify());
+            cluster.layer=m_pixelid->layer_disk(pixclus->identify());
+            cluster.eta_module=m_pixelid->eta_module(pixclus->identify());//check eta module to select thickness
+            
+            float dotProd = (*tsosIter)->trackParameters()->momentum().dot( (*tsosIter)->trackParameters()->associatedSurface().normal() );
+            cluster.cosalpha = fabs(dotProd / (*tsosIter)->trackParameters()->momentum().mag());
+            cluster.charge = pixclus->prepRawData()->totalCharge()*cluster.cosalpha;
+
+            /// keep track if this is an ibl cluster with overflow
+            int iblOverflow=0;
+            if ((m_IBLParameterSvc->containsIBL()) and (cluster.bec==0) and (cluster.layer==0)) { // check if IBL
+              
+              //loop over ToT and check if anyone is overflow (ToT==14) check for IBL cluster overflow
+              int overflowIBLToT = SG::ReadCondHandle<PixelChargeCalibCondData>(m_moduleDataKey, ctx)->getFEI4OverflowToT();
+              const std::vector<int>& ToTs = pixclus->prepRawData()->totList();
+              
+              for (int pixToT : ToTs) {
+                if (pixToT >= overflowIBLToT) {
+                  //overflow pixel hit -- flag cluster
+                  iblOverflow = 1;
+                  break; //no need to check other hits of this cluster
+                }
+              }// end
+              cluster.isIBL = true;
+              cluster.iblOverflow = iblOverflow; //why int?
+            }
+
+            /// Skip if too shallow.
+            if (std::abs(cluster.cosalpha)<0.16) { continue; }
+
+            /// Add function to insert info into dEdxMap.
+            /// Apply all cuts here.  Don't forget abs(cosalpha).
+            /// Make them configurable?
+            
+            float clusterdEdx = getClusterdEdx(cluster, pixelhits, nUsedIBLOverflowHits); // returns -1 if bad cluster measurement.
+
+            /// Check if good measurement.
+            if (clusterdEdx < 0.0) { continue; }
+
+            cluster.dEdx = clusterdEdx;
+            
+            /// Apply cluster-level equalization.
+            /// Read from trees on CVMFS or from conditions database.
+            if(m_equalizeClusterMeasurements){
+
+              /// Get dE/dx equalization scale factor.
+              /// Need runNumber.  See MuonSelectionTool for an example.
+              float SF = 1.;
+
+              /// Apply scale factor and store
+              cluster.dEdxEq = clusterdEdx * SF;
+
+              /// Decorate PixelClusterOnTrack?  Might not want to for ESD.  Definitely want to for xAOD.
+
+            }
+
+            clusters.push_back(cluster);
+          } // pixclus iterator
+        } // end if measurement found and not outlier. 
+      } // tsos iterator
+    } // end if reco track states found.
+
+    /// Always calculate raw truncated mean.
+    float averagedEdx = getTruncatedMean(clusters, nUsedHits, pixelhits);
+    //float averagedEdx = getTruncatedMean(dEdxMap, nUsedHits, pixelhits);
+    
+    /// Calculate equalized truncated mean.
+    if(m_equalizeClusterMeasurements) {
+      int nUsedHitsEq=0; // need separate counter or will double count if calculating both raw and equalized dE/dx
+      float averagedEdxEq = getTruncatedMean(clusters, nUsedHitsEq, pixelhits, true);
+
+      /// Sanity check that nUsedHits and nUsedHitsEq are the same.
+      if (nUsedHitsEq != nUsedHits) {
+        ATH_MSG_ERROR("The numberOfUsedHitsdEdx calculated for the raw ("<< nUsedHits <<") and equalized ("<< nUsedHitsEq <<") dE/dx differ!  Should not happen!");
+      }
+
+      return averagedEdxEq;
+    }
+    else {
+      return averagedEdx;
+    }
+  }
+#endif
+
+  //////////////////
+  //////////////////
+  //////////////////
+
+  /// Will return the dE/dx, and will update nUsedHits (the divisor in the truncated mean) and nUsedIBLOverflowHits.
+  /// Whether this is the raw or equalized dE/dx will be determined by the tool properties.
+  float PixelToTPIDDualTool::dEdx(const xAOD::TrackParticle& track,
+                                  int& nUsedHits,
+                                  int& nUsedIBLOverflowHits) const 
+  {
+
+    using StatesOnTrack = std::vector<ElementLink<xAOD::TrackStateValidationContainer>>;
+
+    int pixelhits = 0;
+
+    /// Passed by ref, so will update here.  
+    nUsedHits=0;
+    nUsedIBLOverflowHits=0;
+
+    /// Get pixel clusters in this simple struct to unify the two EDMs.
+    std::vector<PixelCluster> clusters;
+
+    /// second value keeps track if the cluster is in IBL and has at least an overflow hit
+    std::multimap<float,int> dEdxMap;
+
+    /// Get runNumber.  
+    /// Not ideal that this is happening in execute()
+    /// Would be nice to do this in initialize or to have it as a property 
+    int runNumber = 0;
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);        
+    /// Case of data
+    if (!eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) {
+      ATH_MSG_DEBUG("The current event is a data event. Return runNumber.");
+      runNumber =  eventInfo->runNumber();
+    }
+    /// Case of MC (to write).
+
+    /// If using SFs from trees, get the closest run.
+    /// Ideally, would filter the dataframe in initialize, only keeping the rows from the closest runNumber.
+    /// But we don't know the runNumber until execute...
+    /// Unless runNumber is included as a property...
+    /// Or the runNumber is cached the first time in execute:
+    ///    In .h:  std::optional<int> m_cachedRunNumber;
+    ///    In execute: if (!m_cachedRunNumber) m_cachedRunNumber = currentRunNumber;
+    int closestRunNumber = 0;
+    std::map<keyMap,valMap> sfMap; 
+    if( m_equalizeClusterMeasurements ) {
+      
+      ROOT::RDataFrame df = *m_df;
+
+      /// Get closest run number in SF RDataFrame
+      auto runNumbers = df.Take<int>("runNumber");
+      closestRunNumber = *std::min_element(runNumbers.begin(), runNumbers.end(), 
+                                           [runNumber](int a, int b) {
+                                             return std::abs(a - runNumber) < std::abs(b - runNumber); });
+      ATH_MSG_INFO("Closest run number:" << closestRunNumber);
+
+      /// Filter the RDataFrame to just keep this run:
+      auto filtered_df = df.Filter([closestRunNumber](int run) { return run == closestRunNumber; }, {"runNumber"});
+      
+      /// Fill SF map for later use.
+      /// Can't use filtered dataframe directly outside this scope, and don't want to copy dataframe & filter for every cluster.
+      filtered_df.Foreach([&sfMap](int bec, int layerID, int etaM, double SF, double SF_error) { //mpv, mpv_error, mpv_spread, nentries
+          /// Process only the selected columns
+          keyMap thisKeyMap = {{"bec",bec}, {"layerID",layerID}, {"etaM",etaM}};
+          valMap thisValMap = {{"SF",SF}, {"SF_error",SF_error}};
+          sfMap.insert( {thisKeyMap, thisValMap} );
+        }, {"bec", "layerID", "etaM", "SF", "SF_error"});
+    }
+
+    /// Check for track states:
+    static const SG::AuxElement::ConstAccessor< StatesOnTrack > trackStateAcc(m_msosLink);
+    if( ! trackStateAcc.isAvailable( track ) ) {
+      ATH_MSG_INFO("Cannot find TrackState link from xAOD::TrackParticle. Skipping track.");
+      return -1;
+    }
+    const StatesOnTrack& measurementsOnTrack = trackStateAcc(track);
+
+    /// Loop over MSOS.
+    for( const ElementLink<xAOD::TrackStateValidationContainer>& msos : measurementsOnTrack) {
+      if (not msos.isValid()) {
+        continue; //not a valid link
+      }
+      if ((int) (*msos)->detType() != 1) {
+        continue; // not a pixel cluster. See Tracking/TrkEvent/TrkEventPrimitives/TrkEventPrimitives/TrackStateDefs.h
+      }
+      if ( (*msos)->type()!=0) {
+        continue; // not fittable.  See Tracking/TrkEvent/TrkEventPrimitives/TrkEventPrimitives/TrackStateDefs. Want this?
+      }
+      
+      /// Get the corresponding TrackMeasurementValidation object (cluster/drift tube)
+      const ElementLink<xAOD::TrackMeasurementValidationContainer> pixclus = (*msos)->trackMeasurementValidationLink();
+      if (not pixclus.isValid()) {
+        ATH_MSG_INFO("Invalid link to cluster.");
+        continue; //not a valid link
+      }
+      if (*pixclus == nullptr) {
+        ATH_MSG_INFO("pixclus is a nullptr.");
+        continue; //not linking to a valid object -- is it necessary?
+      }
+      
+      /// Build PixelCluster to unify EDMs.
+      PixelCluster cluster;
+      static const SG::AuxElement::ConstAccessor< float > localXAcc("localX");
+      if (localXAcc.isAvailable(**pixclus)) {
+        cluster.locx = localXAcc(**pixclus);
+      } else {
+        ATH_MSG_WARNING("localX auxdata is missing!");
+        continue;
+      }
+
+      static const SG::AuxElement::ConstAccessor< float > localYAcc("localY");
+      if (localYAcc.isAvailable(**pixclus)) {
+        cluster.locy = localYAcc(**pixclus);
+      } else {
+        ATH_MSG_WARNING("localY auxdata is missing!");
+        continue;
+      }
+
+      static const SG::AuxElement::ConstAccessor< int > becAcc("bec");
+      if (becAcc.isAvailable(**pixclus)) {
+        cluster.bec = becAcc(**pixclus);
+      } else {
+        ATH_MSG_WARNING("bec auxdata is missing!");
+        continue;
+      }
+
+      static const SG::AuxElement::ConstAccessor< int > layerAcc("layer");
+      if (layerAcc.isAvailable(**pixclus)) {
+        cluster.layer = layerAcc(**pixclus);
+      } else {
+        ATH_MSG_WARNING("layer auxdata is missing!");
+        continue;
+      }
+
+      static const SG::AuxElement::ConstAccessor< int > etaAcc("eta_module");
+      if (etaAcc.isAvailable(**pixclus)) {
+        cluster.eta_module = etaAcc(**pixclus);
+      } else {
+        ATH_MSG_WARNING("eta_module auxdata is missing!");
+        continue;
+      }
+
+      float msosTheta = (*msos)->localTheta();
+      float msosPhi = (*msos)->localPhi();
+      float alpha = std::atan(std::hypot(std::tan(msosTheta),std::tan(msosPhi))); //check using correct Theta, phi
+      cluster.cosalpha = std::cos(alpha);
+
+      static const SG::AuxElement::ConstAccessor< float > chargeAcc("charge");
+      if (chargeAcc.isAvailable(**pixclus)) {
+        cluster.charge = chargeAcc(**pixclus) * cluster.cosalpha; // NB: multiplying by cosalpha!
+      } else {
+        ATH_MSG_WARNING("charge auxdata is missing!");
+        continue;
+      }
+
+      /// Keep track if this is an ibl cluster with overflow
+      int iblOverflow=0;
+      if ((cluster.bec==0) and (cluster.layer==0)) { // check if IBL
+        int overflowIBLToT = 16; // CHECK!
+        std::vector<int> ToTs;
+        static const SG::AuxElement::ConstAccessor< std::vector<int> > totAcc("rdo_tot");
+        if (totAcc.isAvailable(**pixclus)) {
+          ToTs = totAcc(**pixclus);
+        } else {
+          ATH_MSG_WARNING("rdo_tot auxdata is missing!");
+          continue;
+        }
+        
+        for (int pixToT : ToTs) {
+          if (pixToT >= overflowIBLToT) {
+            //overflow pixel hit -- flag cluster
+            iblOverflow = 1;
+            break; //no need to check other hits of this cluster
+          }
+        }// end
+        cluster.isIBL = true;
+        cluster.iblOverflow = iblOverflow;
+      }
+
+      /// Skip if too shallow.
+      if (std::abs(cluster.cosalpha)<0.16) { continue; }
+      
+      /// Get raw cluster dE/dx
+      float clusterdEdx = getClusterdEdx(cluster, pixelhits, nUsedIBLOverflowHits); // returns -1 if bad cluster measurement.
+
+      /// Check if good measurement.
+      if (clusterdEdx < 0.0) { continue; }
+      
+      /// Store
+      cluster.dEdx = clusterdEdx;
+    
+      /// Apply cluster-level equalization.
+      /// Read from trees on CVMFS or from conditions database.
+      if(m_equalizeClusterMeasurements){
+        
+        /// Get scale factor from tree (tree->RDataFrame->filtered RDataFrame->map).
+        valMap thisValMap = getScaleFactorFromMap(cluster, sfMap);
+        if(thisValMap.size()==0) {
+          ATH_MSG_ERROR("Could not find the scale factor for this pixel cluster!");
+          return -1;
+        }
+        float SF = thisValMap["SF"];
+        // float SF_error = thisValMap["SF_error"]; // can add more columns (branches from SF tree).
+
+        /// Apply scale factor and store
+        cluster.dEdxEq = clusterdEdx * SF;
+
+        /// Decorate PixelClusterOnTrack?  Might not want to for ESD.  Definitely want to for xAOD.
+        
+      }
+     
+      /// Add cluster to vector for truncated mean calculation
+      clusters.push_back(cluster);
+    } // MSOS iterator
+  
+    /// Always calculate raw truncated mean.
+    float averagedEdx = getTruncatedMean(clusters, nUsedHits, pixelhits);
+
+    /// Sanity check that the recalculated raw dE/dx matches what was calculated during reco and stored as a track summary variable.    
+    float stored_dEdx { 0 };
+    unsigned char stored_numberOfUsedHitsdEdx = -1;
+    float epsilon = 1e-3;
+    track.summaryValue(stored_dEdx, xAOD::pixeldEdx);
+    static const SG::AuxElement::ConstAccessor< unsigned char > nUsedAcc("numberOfUsedHitsdEdx");
+    if (nUsedAcc.isAvailable(track)) {
+      stored_numberOfUsedHitsdEdx = nUsedAcc(track);
+    } else {
+      ATH_MSG_WARNING("numberOfUsedHitsdEdx auxdata is missing!");
+    }
+    if ( std::fabs(stored_dEdx - averagedEdx) > epsilon ) {
+      ATH_MSG_WARNING("The track dE/dx stored in the AOD as summary variable (" << stored_dEdx << ") does not match the value calculated here (" << averagedEdx << ")!");
+      ATH_MSG_WARNING("This may be due to the local (x,y) of the cluster migrating from the ESD to AOD EDM.");
+    }
+    if ( (int)stored_numberOfUsedHitsdEdx != nUsedHits ) {
+      ATH_MSG_WARNING("The numberOfUsedHitsdEdx stored in the AOD ("<< stored_numberOfUsedHitsdEdx <<") does not match the value calculated here ("<< nUsedHits <<")!");
+      ATH_MSG_WARNING("This may be due to the local (x,y) of the cluster migrating from the ESD to AOD EDM.");
+    }
+
+    /// Calculate equalized truncated mean.
+    if(m_equalizeClusterMeasurements) {
+      int nUsedHitsEq=0; // need separate counter or will double count if calculating both raw and equalized dE/dx
+      float averagedEdxEq = getTruncatedMean(clusters, nUsedHitsEq, pixelhits, true);
+      
+      /// Sanity check that nUsedHits and nUsedHitsEq are the same.
+      if (nUsedHitsEq != nUsedHits) {
+        ATH_MSG_ERROR("The numberOfUsedHitsdEdx calculated for the raw ("<< nUsedHits <<") and equalized ("<< nUsedHitsEq <<") dE/dx differ!  Should not happen!");
+      }
+
+      return(averagedEdxEq);
+    }
+    else {
+      return averagedEdx;
+    }
+  } 
+
+  //////////////////
+  //////////////////
+  //////////////////
+
+  float PixelToTPIDDualTool::getClusterdEdx(const PixelCluster& cluster,
+                                            int& pixelhits,
+                                            int& nUsedIBLOverflowHits) const{    
+    float dEdxValue;
+
+    if (cluster.isIBL) { // check if IBL      
+      if (((cluster.eta_module >= -10 && cluster.eta_module <= -7) ||
+           (cluster.eta_module >= 6 && cluster.eta_module <= 9)) &&
+          (fabs(cluster.locy) < 10. &&
+           (cluster.locx > -8.33 &&
+            cluster.locx < 8.3))) { // check if IBL 3D and good cluster selection
+        dEdxValue = cluster.charge * m_conversionfactor / m_IBL_3D_sensorthickness;
+        pixelhits++;
+        if (cluster.iblOverflow == 1) {
+          nUsedIBLOverflowHits++;
+        }
+      } else if ((cluster.eta_module >= -6 && cluster.eta_module <= 5) &&
+                 (fabs(cluster.locy) < 20. &&
+                  (cluster.locx > -8.33 &&
+                   cluster.locx < 8.3))) { // check if IBL planar and good cluster
+        // selection
+        dEdxValue = cluster.charge * m_conversionfactor / m_IBL_PLANAR_sensorthickness;
+        pixelhits++;
+        if (cluster.iblOverflow == 1) {
+          nUsedIBLOverflowHits++;
+        }
+      } else {
+        dEdxValue=-1;
+      } // end check which IBL Module
+    }
+    //PIXEL layer and ENDCAP
+    else if(cluster.bec==0 && fabs(cluster.locy)<30. &&  ((cluster.locx>-8.20 && cluster.locx<-0.60) || (cluster.locx>0.50 && cluster.locx<8.10))) {
+      dEdxValue = cluster.charge * m_conversionfactor / m_Pixel_sensorthickness;
+      pixelhits++;
+    }
+    else if (std::abs(cluster.bec)==2 && fabs(cluster.locy)<30. && ((cluster.locx>-8.15 && cluster.locx<-0.55) || (cluster.locx>0.55 && cluster.locx<8.15))) {
+      dEdxValue = cluster.charge * m_conversionfactor / m_Pixel_sensorthickness;
+      pixelhits++;
+    }
+    else{
+      dEdxValue=-1;
+      ATH_MSG_DEBUG("Returning -1 for a cluster dE/dx. bec: " << cluster.bec << ", layer: " << cluster.layer << ", locx: " << cluster.locx << ", locy: " << cluster.locy);
+    }
+
+    return dEdxValue;
+  }
+
+  //////////////////
+  //////////////////
+  //////////////////
+
+  float PixelToTPIDDualTool::getTruncatedMean(const std::vector<PixelCluster>& clusters,
+                                              int& nUsedHits, 
+                                              int pixelhits,
+                                              bool equalize) const {
+
+    /// Get the dEdxMap.  First in pair is the dE/dx (raw or equalized).  Second indicates if it's a IBL cluster in with ToT in overflow.
+    /// The nice thing about multimaps is that it will automatically sort based on the first element in the pair.  Useful for truncated mean alg.
+    std::multimap<float,int> dEdxMap;
+    for (const auto& cluster : clusters) {
+      if(equalize) {
+        dEdxMap.insert(std::pair<float, int>(cluster.dEdxEq, cluster.iblOverflow));
+      }
+      else {
+        dEdxMap.insert(std::pair<float, int>(cluster.dEdx, cluster.iblOverflow));
+      }
+    }
+
+    /// Now calculate the truncated mean.
+    float averagedEdx=0.;
+    nUsedHits=0;
+    int IBLOverflow=0;
+    for (std::pair<float,int> itdEdx : dEdxMap) {
+      if (itdEdx.second==0) {
+        averagedEdx += itdEdx.first;
+        nUsedHits++;
+      }
+      if (itdEdx.second>0) { IBLOverflow++; }
+
+      //break, skipping last or the two last elements depending on total measurements
+      if (((int)pixelhits>=5) and ((int)nUsedHits>=(int)pixelhits-2)) { break; }
+
+      //break, IBL Overflow case pixelhits==3 and 4
+      if ((int)IBLOverflow>0 and ((int)pixelhits==3) and (int)nUsedHits==1) { break; }
+      if ((int)IBLOverflow>0 and ((int)pixelhits==4) and (int)nUsedHits==2) { break; }
+
+      if (((int)pixelhits > 1) and ((int)nUsedHits >=(int)pixelhits-1)) { break; }
+
+      if ((int)IBLOverflow>0 and (int)pixelhits==1) { //only IBL in overflow
+        averagedEdx=itdEdx.first;
+        break;
+      }
+    }
+
+    if (nUsedHits>0 or (nUsedHits==0 and(int)IBLOverflow>0 and (int)pixelhits==1)) {
+      if (nUsedHits>0) { averagedEdx=averagedEdx/nUsedHits; }
+
+      ATH_MSG_DEBUG("NEW dEdx = " << averagedEdx);
+      ATH_MSG_DEBUG("Used hits: " << nUsedHits << ", IBL overflows: " << IBLOverflow );
+      ATH_MSG_DEBUG("Original number of measurements = " << pixelhits << "( map size = " << dEdxMap.size() << ")");
+      return averagedEdx;
+    }
+    return -1;
+  }
+
+  //////////////////
+  //////////////////
+  //////////////////
+  
+  /// Get scale factor from the map<keyMap, valMap>
+  /// keyMap has bec, layerID, abs(etaM).
+  /// valMap has SF, SF_error, mpv, mpv_error, mpv_spread,
+  /// SFs are originally stored in flat TTrees & read as RDataFrame in initialize().
+  /// Filter this RDF to only keep rows from the closest run number in execute (don't know runNumber before).  Before cluster loop.
+  ///    Actually filtering a copy.  
+  ///    Some tricks required to get around RDFs lack of a default construction --> have to initialize when declare (std::optional).
+  ///    Also some concern about thread safety if filtering the m_df  directly.
+  /// Transform into this filtered RDF to somewhat complicated map.
+  ///    Need to transform to something besides an RDF related scopes and inability to declare without initialzing.
+  ///    Chose somewhat complicated map where the key and value are also maps.
+  ///    Key is the module (bec, layerID, etaM).  Value is the (SF, SF_error, etc.).
+  ///    Chose this format for lookup table  b/c can use variable names.  Don't have to remember positions.
+  valMap PixelToTPIDDualTool::getScaleFactorFromMap(const PixelCluster& cluster, 
+                                                    const std::map<keyMap,valMap>& sfMap) const {
+  
+    keyMap thisKeyMap = {{"bec",cluster.bec}, {"layerID",cluster.layer}, {"etaM", std::abs(cluster.eta_module)}}; // note abs(eta)!!!
+    
+    auto it = sfMap.find(thisKeyMap);
+    if (it != sfMap.end()) {
+      valMap thisValMap = sfMap.at(thisKeyMap); // won't modify.
+      ATH_MSG_DEBUG("Found scale factor: " << thisValMap["SF"] << " with error: " << thisValMap["SF_error"]
+                    << " for (bec, layer, etaM): (" <<cluster.bec<<", "<<cluster.layer<<", "<<cluster.eta_module<<").");
+      return thisValMap;
+    }
+    else {
+      ATH_MSG_ERROR("Could not find scale factor! (bec, layer, etaM): (" 
+                    <<cluster.bec<<", "<<cluster.layer<<", "<<cluster.eta_module<<").");
+      valMap empty;
+      return empty;
+    }
+  }
+  
+} // namespace CP
