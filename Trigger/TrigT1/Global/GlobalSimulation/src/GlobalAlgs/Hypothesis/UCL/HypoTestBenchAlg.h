@@ -15,6 +15,8 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 
 #include "GepAlgoHypothesisPortsIn.h"
+#include "eEmSortSelectCountExpectations.h"
+
 
 #include <string>
 #include <memory>
@@ -41,6 +43,14 @@ namespace GlobalSim {
 	"hypoFIFO",
 	"key to write out Fifo containing ports data"};
 
+    SG::WriteHandleKey<eEmSortSelectCountExpectations>
+    m_eEmSortSelectCountExpectations_WriteKey {
+      this,
+	"eEmSortSelectCountExpectationsWriteKey",
+	"eEmSortSelectCountExpectations",
+	"key to write out expectations for eEmSortSelecCount regression tests"
+    };
+    
     Gaudi::Property<std::string>
     m_testsFileName{this,
       "testsFileName",
@@ -50,13 +60,13 @@ namespace GlobalSim {
     
     Gaudi::Property<std::string>
     m_expectedMults_FileName{this,
-      "expectedMults_FileName",
+      "expectedMultsFileName",
       {},
       "name of file with the expected multiplicity values from HW Sim"};
     
     Gaudi::Property<std::string>
     m_expectedTobs_FileName{this,
-      "expectedTobs_FileName",
+      "expectedTobsFileName",
       {},
       "name of file with the expected Generic TOB values from HW Sim"};
     
@@ -65,11 +75,20 @@ namespace GlobalSim {
     std::vector<std::unique_ptr<GepAlgoHypothesisFIFO>>  m_fifos;
     std::size_t m_fifo_ptr{0};
 
+    // expected values for counts coorespoinding to the  FIFO data.
+    std::vector<std::string>  m_expected_mults;
+    std::vector<std::string>  m_expected_tobs;
+
+
     // m_fifo fillers, called from init()
     StatusCode init_manual();
     StatusCode init_from_file();
     StatusCode init_tests_from_file();
-    StatusCode init_expected_mult_from_file();
+    StatusCode init_expected_mults_from_file();
+    StatusCode init_expected_tobs_from_file();
+    StatusCode init_expected_from_file(std::vector<std::string>&,
+				       const std::string&);
+
 
     StatusCode
     hexTOB2bitsetTOB(std::string, std::bitset<72>&) const;

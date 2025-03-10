@@ -15,6 +15,7 @@
 
 #include "GepAlgoHypothesisPortsIn.h"
 #include "eEmSortSelectCountContainerPortsOut.h"
+#include "eEmSortSelectCountExpectations.h"
 
 #include "../../../IGlobalSimAlgTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -62,7 +63,16 @@ namespace GlobalSim {
       this,
       "PortsOutKey",
       "eEmSortSelectCount",
-      "key to write output ports data"};
+      "key to read in  output ports data"};
+
+     
+
+    SG::ReadHandleKey<GlobalSim::eEmSortSelectCountExpectations>
+    m_eEmSortSelectCountExpectationsReadKey {
+      this,
+      "eEmSortSelectCountExpectationsReadKey",
+      "eEmSortSelectCountExpectations",
+      "key to read in eEmSortSelectCount regression test expectations"};
   };
 }
     
