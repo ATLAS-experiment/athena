@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from __future__ import print_function
 
 import ROOT
@@ -53,6 +53,12 @@ def jsonfixup(instr, fuzzyarray=False):
     if 'fBranches' in j:
         for branch in j['fBranches']['arr']:
             branch['fBasketSeek'] = []
+    # The formatting of the opt array changed in newer ROOT versions
+    # to be filled with instances of None rather than empty strings.
+    if 'fXaxis' in j and 'fLabels' in j['fXaxis'] and j['fXaxis']['fLabels'] is not None and 'opt' in j['fXaxis']['fLabels']:
+        opt = j['fXaxis']['fLabels']['opt']
+        for i in range(len(opt)):
+            if opt[i] is None: opt[i] = ''
     return json.dumps(j, sort_keys=True)
 
 parser=argparse.ArgumentParser()
