@@ -1,6 +1,8 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+import os
+
 if __name__ == '__main__':
     
     from AthenaCommon.Logging import logging
@@ -92,8 +94,18 @@ if __name__ == '__main__':
     hypoTestBench_alg = CompFactory.GlobalSim.HypoTestBenchAlg(
         "testBenchAlg")
 
-    hypoTestBench_alg.testsFileName = \
-        "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/GlobalSimTest/eEmSortSelectCount/tests_00.dat"
+    base_data = "/eos/atlas/atlascerngroupdisk/data-art/"\
+        "large-input/trig-val/GlobalSimTest/eEmSortSelectCount/"
+
+    test_data = os.path.join(base_data, 'tests_00.dat')
+    hypoTestBench_alg.testsFileName = test_data
+
+    mults_data =  os.path.join(base_data, 'expected_multiplicity_00.dat')
+    hypoTestBench_alg.expectedMultsFileName = mults_data
+    
+    tobs_data =  os.path.join(base_data, 'expected_tobs_00.dat')
+    hypoTestBench_alg.expectedTobsFileName = tobs_data
+
     
     acc.addEventAlgo(hypoTestBench_alg)
     from AthenaCommon.Constants import DEBUG

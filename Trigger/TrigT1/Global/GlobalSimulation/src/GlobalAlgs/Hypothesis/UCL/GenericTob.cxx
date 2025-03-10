@@ -31,21 +31,6 @@ namespace GlobalSim {
 	if(et.test(s_ptr)) {m_bits.set(r_ptr);}
       }
 
-      const auto& reta = in_tob->REta;
-      for (std::size_t s_ptr=0; s_ptr < reta.size(); ++s_ptr, ++r_ptr) {
-	if(reta.test(s_ptr)) {m_bits.set(r_ptr);}
-      }
-
-      const auto& rhad = in_tob->RHad;
-      for (std::size_t s_ptr=0; s_ptr < rhad.size(); ++s_ptr, ++r_ptr) {
-	if(rhad.test(s_ptr)) {m_bits.set(r_ptr);}
-      }
-      
-      const auto& wstot = in_tob->WsTot;
-      for (std::size_t s_ptr=0; s_ptr < wstot.size(); ++s_ptr, ++r_ptr) {
-	if(wstot.test(s_ptr)) {m_bits.set(r_ptr);}
-      }
-
       const auto& eta = in_tob->Eta;
       for (std::size_t s_ptr=0; s_ptr < eta.size(); ++s_ptr, ++r_ptr) {
 	if(eta.test(s_ptr)) {m_bits.set(r_ptr);}
@@ -60,13 +45,13 @@ namespace GlobalSim {
 
 std::ostream& operator << (std::ostream& os, const GlobalSim::GenericTob& tob) {
   
-  // using bitsetToInt = GlobalSim::bitSetToInt;
   
   os << "GlobalSim::GenericTob\n"
      << "Et: " << tob.Et() << ' ' << std::bitset<13>{tob.Et()} << '\n'
      << "Eta: " << tob.Eta() << '\n'
      << "Phi: " << tob.Phi() << '\n'
      << "Charge: " << tob.Charge() << '\n'
-     << "overflow: " << tob.overflow() << '\n';
+     << "overflow: " << tob.overflow() << '\n'
+     << "bits: " << tob.as_bits() << '\n';
   return os;
 }
