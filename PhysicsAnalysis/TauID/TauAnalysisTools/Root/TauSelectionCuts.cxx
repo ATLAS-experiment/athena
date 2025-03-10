@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -576,7 +576,12 @@ bool TauSelectionCutEleIDWP::accept(const xAOD::TauJet& xTau,
     m_tTST->msg() << MSG::WARNING << "The electron ID working point with the enum " << m_tTST->m_iEleIDWP << " is not available" << endmsg;
     break;
   }
-    
+
+  // apply eVeto cut only for 1 prong tau 
+  if( xTau.nTracks() != 1){
+     bPass = true;
+  }
+
   if (bPass)
   {
     acceptData.setCutResult( "EleIDWP", true );
