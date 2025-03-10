@@ -182,7 +182,6 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
          cabling = cablingHandle.cptr();
     }
 
-    const Amg::Transform3D trans{readoutEle->getMaterialGeom()->getAbsoluteTransform()};
     m_readoutTransform = readoutEle->getMaterialGeom()->getAbsoluteTransform();
     
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
