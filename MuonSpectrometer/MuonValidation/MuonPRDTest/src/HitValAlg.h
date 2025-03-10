@@ -11,6 +11,7 @@
 #include "MuonTesterTree/MuonTesterTree.h"
 #include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 #include "MuonCSC_CnvTools/ICSC_RDO_Decoder.h"
+#include "xAODEventInfo/EventInfo.h"
 
 namespace MuonVal{
 class HitValAlg : public AthHistogramAlgorithm {
@@ -31,7 +32,7 @@ private:
     StatusCode setupRDOs();
     StatusCode setupPRDs();
     
-    MuonVal::MuonTesterTree m_tree{"HitValidTree", "MUONHITVALIDSTREAM"};
+    MuonVal::MuonTesterTree m_tree{"MuonHitValidTree", "MUONHITVALIDSTREAM"};
 
     ServiceHandle<MuonTGC_CablingSvc> m_tgcCabling{this, "TGCCablingSvc", "MuonTGC_CablingSvc"};
 
@@ -81,20 +82,21 @@ private:
     Gaudi::Property<bool> m_doTGCPRD{this, "doTGCPRD", false};                // switch on the output of the TGC prepdata
 
 
+    SG::ReadHandleKey<xAOD::EventInfo> m_evtInfo{this, "EvtInfo", "EventInfo"};
     Gaudi::Property<std::string> m_Truth_ContainerName{this, "Truth_ContainerName", "TruthEvent"};
     Gaudi::Property<std::string> m_MuEntry_ContainerName{this, "MuonEntryLayer_ContainerName", "MuonEntryLayer"};
 
-    Gaudi::Property<std::string> m_NSWsTGC_ContainerName{this, "NSWsTGC_ContainerName", "sTGC_Hits"};
-    Gaudi::Property<std::string> m_NSWsTGC_SDOContainerName{this, "NSWsTGC_SDOContainerName", "sTGC_SDO"};
-    Gaudi::Property<std::string> m_NSWsTGC_DigitContainerName{this, "NSWsTGC_DigitContainerName", "sTGC_DIGITS"};
-    Gaudi::Property<std::string> m_NSWsTGC_RDOContainerName{this, "NSWsTGC_RDOContainerName", "sTGCRDO"};
-    Gaudi::Property<std::string> m_NSWsTGC_PRDContainerName{this, "NSWsTGC_PRDContainerName", "STGC_Measurements"};
+    Gaudi::Property<std::string> m_sTgcSimKey{this, "sTgcSimKey", "sTGC_Hits"};
+    Gaudi::Property<std::string> m_sTgcSdoKey{this, "sTgcSdoKey", "sTGC_SDO"};
+    Gaudi::Property<std::string> m_sTgcDigitKey{this, "sTgcDigitKey", "sTGC_DIGITS"};
+    Gaudi::Property<std::string> m_sTgcRdoKey{this, "sTgcRdoKey", "sTGCRDO"};
+    Gaudi::Property<std::string> m_sTgcPRDKey{this, "sTgcPrdKey", "STGC_Measurements"};
 
-    Gaudi::Property<std::string> m_NSWMM_ContainerName{this, "NSWMM_ContainerName", "MM_Hits"};
-    Gaudi::Property<std::string> m_NSWMM_SDOContainerName{this, "NSWMM_SDOContainerName", "MM_SDO"};
-    Gaudi::Property<std::string> m_NSWMM_DigitContainerName{this, "NSWMM_DigitContainerName", "MM_DIGITS"};
-    Gaudi::Property<std::string> m_NSWMM_RDOContainerName{this, "NSWMM_RDOContainerName", "MMRDO"};
-    Gaudi::Property<std::string> m_NSWMM_PRDContainerName{this, "NSWMM_PRDContainerName", "MM_Measurements"};
+    Gaudi::Property<std::string> m_MmSimKey{this, "MmSimKey", "MM_Hits"};
+    Gaudi::Property<std::string> m_MmSdoKey{this, "MmSdoKey", "MM_SDO"};
+    Gaudi::Property<std::string> m_MmDigitKey{this, "MmDigitKey", "MM_DIGITS"};
+    Gaudi::Property<std::string> m_MmRdoKey{this, "MmRdoKey", "MMRDO"};
+    Gaudi::Property<std::string> m_MmPrdKey{this, "MmPrdKey", "MM_Measurements"};
 
     Gaudi::Property<std::string> m_CSC_SimContainerName{this, "CSC_SimContainerName", "CSC_Hits"};
     Gaudi::Property<std::string> m_CSC_SDOContainerName{this, "CSC_SDOContainerName", "CSC_SDO"};
@@ -102,19 +104,19 @@ private:
     Gaudi::Property<std::string> m_CSC_RDOContainerName{this, "CSC_RDOContainerName", "CSCRDO"};
     Gaudi::Property<std::string> m_CSC_PRDContainerName{this, "CSC_PRDContainerName", "CSC_Clusters"};
 
-    Gaudi::Property<std::string> m_MDT_SimContainerName{this, "MDT_SimContainerName", "MDT_Hits"};
-    Gaudi::Property<std::string> m_MDT_SDOContainerName{this, "MDT_SDOContainerName", "MDT_SDO"};
-    Gaudi::Property<std::string> m_MDT_DigitContainerName{this, "MDT_DigitContainerName", "MDT_DIGITS"};
+    Gaudi::Property<std::string> m_MdtSimHitKey{this, "MdtSimKey", "MDT_Hits"};
+    Gaudi::Property<std::string> m_MdtSdoKey{this, "MdtSdoKey", "MDT_SDO"};
+    Gaudi::Property<std::string> m_MdtDigitKey{this, "MdtDigitKey", "MDT_DIGITS"};
 
-    Gaudi::Property<std::string> m_RPC_SimContainerName{this, "RPC_SimContainerName", "RPC_Hits"};
-    Gaudi::Property<std::string> m_RPC_SDOContainerName{this, "RPC_SDOContainerName", "RPC_SDO"};
-    Gaudi::Property<std::string> m_RPC_DigitContainerName{this, "RPC_DigitContainerName", "RPC_DIGITS"};
+    Gaudi::Property<std::string> m_RpcSimHitKey{this, "RpcSimKey", "RPC_Hits"};
+    Gaudi::Property<std::string> m_RpcSdoKey{this, "RpcSdoKey", "RPC_SDO"};
+    Gaudi::Property<std::string> m_RpcDigitKey{this, "RpcDigitKey", "RPC_DIGITS"};
 
-    Gaudi::Property<std::string> m_TGC_SimContainerName{this, "TGC_SimContainerName", "TGC_Hits"};
-    Gaudi::Property<std::string> m_TGC_SDOContainerName{this, "TGC_SDOContainerName", "TGC_SDO"};
-    Gaudi::Property<std::string> m_TGC_DigitContainerName{this, "TGC_DigitContainerName", "TGC_DIGITS"};
-    Gaudi::Property<std::string> m_TGC_RDOContainerName{this, "TGC_RDOContainerName", "TGCRDO"};
-    Gaudi::Property<std::string> m_TGC_PRDContainerName{this, "TGC_PRDContainerName", "TGC_Measurements"};
+    Gaudi::Property<std::string> m_TgcSimHitKey{this, "TgcSimKey", "TGC_Hits"};
+    Gaudi::Property<std::string> m_TgcSdoKey{this, "TgcSdoKey", "TGC_SDO"};
+    Gaudi::Property<std::string> m_TgcDigitKey{this, "TgcDigitKey", "TGC_DIGITS"};
+    Gaudi::Property<std::string> m_TgcRdoKey{this, "TgcRdoKey", "TGCRDO"};
+    Gaudi::Property<std::string> m_TgcPrdKey{this, "TgcPrdKey", "TGC_Measurements"};
 
     // Matching algorithm
 

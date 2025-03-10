@@ -45,7 +45,7 @@ def RpcRdoToRpcDigitCfg(flags, name="RpcRdoToRpcDigitAlg", **kwargs):
     """Return ComponentAccumulator with configured RpcRdoToRpcDigit algorithm"""
     acc = ComponentAccumulator()
 
-    if flags.Common.isOverlay:
+    if flags.Common.isOverlay or flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("RpcRdoContainer", f"{flags.Overlay.BkgPrefix}RPCPAD")
         kwargs.setdefault("RpcDigitContainer", f"{flags.Overlay.BkgPrefix}RPC_DIGITS")
         kwargs.setdefault("NRpcRdoContainer", f"{flags.Overlay.BkgPrefix}NRPCRDO")

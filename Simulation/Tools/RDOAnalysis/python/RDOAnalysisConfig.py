@@ -236,31 +236,49 @@ def RDOAnalysisCfg(flags):
         acc.merge(TileRDOAnalysisCfg(flags))
 
     if flags.Detector.EnableMDT:
-        if "MDTCSM" in flags.Input.Collections:
-            from MuonConfig.MuonByteStreamCnvTestConfig import MdtRdoToMdtDigitCfg
+        from MuonConfig.MuonByteStreamCnvTestConfig import MdtRdoToMdtDigitCfg
+
+        if  "MDTCSM" in flags.Input.Collections:
             acc.merge(MdtRdoToMdtDigitCfg(flags))
+        elif f"{flags.Overlay.BkgPrefix}MDTCSM" in flags.Input.Collections:
+            acc.merge(MdtRdoToMdtDigitCfg(flags, MdtRdoContainer =f"{flags.Overlay.BkgPrefix}MDTCSM",
+                                                 MdtDigitContainer=f"{flags.Overlay.BkgPrefix}MDT_DIGITS" ))
+
         acc.merge(MDT_RDOAnalysisCfg(flags))
 
     if flags.Detector.EnableRPC:
-        if "RPCPAD" in flags.Input.Collections:
+        if "RPCPAD" in flags.Input.Collections or f"{flags.Overlay.BkgPrefix}RPCPAD" in flags.Input.Collections:
             from MuonConfig.MuonByteStreamCnvTestConfig import RpcRdoToRpcDigitCfg
             acc.merge(RpcRdoToRpcDigitCfg(flags))
         acc.merge(RPC_RDOAnalysisCfg(flags))
 
     if flags.Detector.EnableTGC:
+        from MuonConfig.MuonByteStreamCnvTestConfig import TgcRdoToTgcDigitCfg
         if "TGCRDO" in flags.Input.Collections:
-            from MuonConfig.MuonByteStreamCnvTestConfig import TgcRdoToTgcDigitCfg
             acc.merge(TgcRdoToTgcDigitCfg(flags))
+        elif f"{flags.Overlay.BkgPrefix}TGCRDO" in flags.Input.Collections:
+            acc.merge(TgcRdoToTgcDigitCfg(flags,TgcRdoContainer = f"{flags.Overlay.BkgPrefix}TGCRDO",
+                                                TgcDigitContainer=f"{flags.Overlay.BkgPrefix}TGC_DIGITS"))
         acc.merge(TGC_RDOAnalysisCfg(flags))
 
     if flags.Detector.EnablesTGC:
+        from MuonConfig.MuonByteStreamCnvTestConfig import STGC_RdoToDigitCfg
         if "sTGCRDO" in flags.Input.Collections:
-            from MuonConfig.MuonByteStreamCnvTestConfig import STGC_RdoToDigitCfg
             acc.merge(STGC_RdoToDigitCfg(flags))
+        elif f"{flags.Overlay.BkgPrefix}sTGCRDO" in flags.Input.Collections:
+            acc.merge(STGC_RdoToDigitCfg(flags,
+                                          sTgcRdoContainer=f"{flags.Overlay.BkgPrefix}sTGCRDO",
+                                          sTgcDigitContainer=f"{flags.Overlay.BkgPrefix}sTGC_DIGITS"))
+
+            
     if flags.Detector.EnableMM:
+        from MuonConfig.MuonByteStreamCnvTestConfig import MM_RdoToDigitCfg
         if "MMRDO" in flags.Input.Collections:
-            from MuonConfig.MuonByteStreamCnvTestConfig import MM_RdoToDigitCfg
             acc.merge(MM_RdoToDigitCfg(flags))
+        elif f"{flags.Overlay.BkgPrefix}MMRDO" in flags.Input.Collections:
+            acc.merge(MM_RdoToDigitCfg(flags,MmRdoContainer=f"{flags.Overlay.BkgPrefix}MMRDO",
+                                             MmDigitContainer=f"{flags.Overlay.BkgPrefix}MM_DIGITS"))
+            
 
     if flags.Detector.EnableMuon:
         from MuonPRDTest.MuonPRDTestCfg import AddHitValAlgCfg

@@ -70,6 +70,21 @@ def AddHitValAlgCfg(flags, name = "HitValAlg", outFile="NSWPRDValAlg.ntuple.root
     kwargs.setdefault("doCSCDigit", flags.Detector.EnableCSC)
     kwargs.setdefault("doCSCRDO", flags.Detector.EnableCSC)
     kwargs.setdefault("doCSCPRD", flags.Detector.EnableCSC)
+    from AthenaConfiguration.Enums import ProductionStep
+
+    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        kwargs.setdefault("EvtInfo", f"{flags.Overlay.BkgPrefix}EventInfo")
+        kwargs.setdefault("MdtDigitKey", f"{flags.Overlay.BkgPrefix}MDT_DIGITS")
+        kwargs.setdefault("RpcDigitKey", f"{flags.Overlay.BkgPrefix}RPC_DIGITS")
+        kwargs.setdefault("TgcDigitKey", f"{flags.Overlay.BkgPrefix}TGC_DIGITS")
+        kwargs.setdefault("MmDigitKey", f"{flags.Overlay.BkgPrefix}MM_DIGITS")
+        kwargs.setdefault("sTgcDigitKey", f"{flags.Overlay.BkgPrefix}sTGC_DIGITS")
+        
+        kwargs.setdefault("MdtSdoKey", f"{flags.Overlay.BkgPrefix}MDT_SDO")
+        kwargs.setdefault("RpcSdoKey", f"{flags.Overlay.BkgPrefix}RPC_SDO")
+        kwargs.setdefault("TgcSdoKey", f"{flags.Overlay.BkgPrefix}TGC_SDO")
+        kwargs.setdefault("MmSdoKey", f"{flags.Overlay.BkgPrefix}MM_SDO")
+        kwargs.setdefault("sTgcSdoKey", f"{flags.Overlay.BkgPrefix}sTGC_SDO")
 
     the_alg = CompFactory.MuonVal.HitValAlg(name, **kwargs)
     result.addEventAlgo(the_alg)
