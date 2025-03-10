@@ -578,8 +578,8 @@ StatusCode Pythia8_i::fillWeights(HepMC::GenEvent *evt){
   // to make clear that it should not be used in analyses, save it always with a -10 factor (so that its goal is clear even if not checking its name)
   if (m_lheFile!="") 
   {
-       fWeights["AUX_bare_not_for_analyses"]=(-10.0)*m_pythia->info.eventWeightLHEF;
-       if(m_internal_event_number == 1)  m_weightIDs.push_back("AUX_bare_not_for_analyses");
+       fWeights["EXTRA_bare_LHE_weight"]=(-10.0)*m_pythia->info.eventWeightLHEF;
+       if(m_internal_event_number == 1)  m_weightIDs.push_back("EXTRA_bare_LHE_weight");
   }
 
   // Sad, but needed: create a string vector with acceptable order of weight names
@@ -608,7 +608,7 @@ StatusCode Pythia8_i::fillWeights(HepMC::GenEvent *evt){
   }
   evt->run_info()->set_weight_names(m_weightNames);
 
-  // for the first event, weight AUX_bare_not_for_analyses is not present in evt->weights(), so we need to book a place for it by hand
+  // for the first event, weight EXTRA_bare_LHE_weight is not present in evt->weights(), so we need to book a place for it by hand
   if (m_internal_event_number == 1 && evt->run_info()->weight_names().size() == evt->weights().size()+1 ) {
      evt->weights().push_back(1.0);
   }
