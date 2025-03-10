@@ -7,6 +7,7 @@ atlas_subdir( TruthRivetTools )
 find_package( Rivet )
 find_package( YODA )
 find_package( FastJet )
+find_package( FastJetContrib )
 find_package( ROOT COMPONENTS Core Physics )
 find_package( GSL )
 find_package( HighFive QUIET )   #  Public dependency of Rivet 4.0.0
@@ -21,9 +22,9 @@ atlas_add_library( TruthRivetToolsLib
    SHARED
    PUBLIC_HEADERS TruthRivetTools
    INCLUDE_DIRS ${RIVET_INCLUDE_DIRS} ${YODA_INCLUDE_DIRS}
-   ${FASTJET_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS}
+   ${FASTJET_INCLUDE_DIRS} ${FASTJETCONTRIB_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS}
 	LINK_LIBRARIES ${RIVET_LIBRARIES} ${YODA_LIBRARIES}
-   ${FASTJET_LIBRARIES} ${ROOT_LIBRARIES} ${GSL_LIBRARIES} AsgTools AtlasHepMCLib AtlasHepMCsearchLib
+   ${FASTJET_LIBRARIES} ${FASTJETCONTRIB_LIBRARIES} ${ROOT_LIBRARIES} ${GSL_LIBRARIES} ${HDF5_LIBRARIES} AsgTools AtlasHepMCLib AtlasHepMCsearchLib
    CxxUtils GenInterfacesLib )
 if( HIGHFIVE_FOUND )
    target_include_directories( TruthRivetToolsLib
