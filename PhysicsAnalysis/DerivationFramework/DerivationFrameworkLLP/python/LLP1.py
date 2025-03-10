@@ -1025,15 +1025,15 @@ def LLP1Cfg(flags):
                                                TriggerList = LLP1TriggerListsHelper.Run2TriggerNamesNoTau)
         # Schedule additional pre-matching against LLP offline muons and electrons
         acc.merge(LLP1TriggerMatchingToolRun2Cfg(flags,
-                                              name = "LRTTriggerMatchingTool",
-                                              OutputContainerPrefix = "LRTTrigMatch_",
+                                              name = "LRTTriggerMatchingTool_LLP1",
+                                              OutputContainerPrefix = "LRTTrigMatch_LLP1_",
                                               TriggerList = LLP1TriggerListsHelper.Run2TriggerNamesNoTau,
                                               InputElectrons=MergedElectronContainer,
                                               InputMuons=MergedMuonContainer_wZPH
                                               ))
         # And add the additional LLP trigger matching branches to the slimming helper 
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = LLP1SlimmingHelper,
-                                               OutputContainerPrefix = "LRTTrigMatch_",
+                                               OutputContainerPrefix = "LRTTrigMatch_LLP1_",
                                                TriggerList = LLP1TriggerListsHelper.Run2TriggerNamesNoTau,
                                                InputElectrons=MergedElectronContainer,
                                                InputMuons=MergedMuonContainer_wZPH
