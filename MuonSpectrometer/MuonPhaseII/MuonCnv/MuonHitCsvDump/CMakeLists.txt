@@ -8,7 +8,7 @@ atlas_subdir( MuonHitCsvDump )
 atlas_add_component( MuonHitCsvDump
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES  AthenaBaseComps GeoPrimitives MuonIdHelpersLib  
+                     LINK_LIBRARIES  AthenaBaseComps GeoPrimitives MuonIdHelpersLib  MuonRecHelperToolsLib
                                      MuonSimEvent xAODMuonSimHit StoreGateLib MuonTruthHelpers
                                      MuonSpacePoint xAODMuon MuonPatternHelpers)
                                      
