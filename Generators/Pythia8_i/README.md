@@ -61,21 +61,21 @@ To use a development version not already in a release, you will need to check
 out and build the relevant packages from the ATLAS Git repository. Before doing
 this, follow the ATLAS Git workflow instructions at
 https://atlassoftwaredocs.web.cern.ch/gittutorial/workflow-quick/ to get a
-personal fork of the ATLAS codebase. Then make and a sparse checkout of the
+personal fork of the ATLAS codebase. Then make a sparse checkout of the
 `Pythia8_i` package with your preferred Git branch or tag:
 
     setupATLAS; lsetup asetup; lsetup git
     git atlas init-workdir https://:@gitlab.cern.ch/USERNAME/athena.git
     cd athena
     git atlas addpkg Pythia8_i
-    git checkout -b 23.6 release/23.6.20 --no-track   #< use your own preferred tag or branch
+    git checkout -b 23.6 release/23.6.45 --no-track   #< use your own preferred tag or branch
     cd ..
 
 Now make a build directory separate from the source checkout, set up the release
 to build against with your local modifications, and build & set up the run:
 
     mkdir athena-build && cd athena-build
-    asetup 23.6.20,AthGeneration
+    asetup 23.6.45,AthGeneration
     cmake -DATLAS_PACKAGE_FILTER_FILE=../package_filters.txt ../athena/Projects/WorkDir
     make
     source x86_64-*/setup.sh
