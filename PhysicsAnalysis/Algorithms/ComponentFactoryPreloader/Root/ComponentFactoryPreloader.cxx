@@ -106,6 +106,7 @@
 #include <JetAnalysisAlgorithms/BJetCalibrationAlg.h>
 #include <JetAnalysisAlgorithms/JetCalibrationAlg.h>
 #include <JetAnalysisAlgorithms/JetDecoratorAlg.h>
+#include <JetAnalysisAlgorithms/JetFFSmearingAlg.h>
 #include <JetAnalysisAlgorithms/JetGhostMergingAlg.h>
 #include <JetAnalysisAlgorithms/JetGhostMuonAssociationAlg.h>
 #include <JetAnalysisAlgorithms/JetModifierAlg.h>
@@ -123,6 +124,7 @@
 #include <JetJvtEfficiency/NNJvtSelectionTool.h>
 #include <JetMomentTools/JetVertexNNTagger.h>
 #include <JetUncertainties/JetUncertaintiesTool.h>
+#include <JetUncertainties/FFJetSmearingTool.h>
 #include <LRTElectronAnalysisTools/ElectronLRTOverlapRemovalTool.h>
 #include <LRTMuonAnalysisTools/MuonLRTOverlapRemovalTool.h>
 #include <METUtilities/METMaker.h>
@@ -258,6 +260,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::IOStatsAlg>("CP::IOStatsAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetCalibrationAlg>("CP::JetCalibrationAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetDecoratorAlg>("CP::JetDecoratorAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::JetFFSmearingAlg>("CP::JetFFSmearingAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetGhostMergingAlg>("CP::JetGhostMergingAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetGhostMuonAssociationAlg>("CP::JetGhostMuonAssociationAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetModifierAlg>("CP::JetModifierAlg"));
@@ -340,6 +343,7 @@ namespace CP
     ANA_CHECK (asg::registerToolFactory<CP::EgammaCalibrationAndSmearingTool> ("CP::EgammaCalibrationAndSmearingTool"));
     ANA_CHECK (asg::registerToolFactory<CP::EgammaIsGoodOQSelectionTool> ("CP::EgammaIsGoodOQSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<CP::ElectronLRTOverlapRemovalTool> ("CP::ElectronLRTOverlapRemovalTool"));
+    ANA_CHECK (asg::registerToolFactory<CP::FFJetSmearingTool> ("CP::FFJetSmearingTool"));
     ANA_CHECK (asg::registerToolFactory<CP::IsolationCorrectionTool> ("CP::IsolationCorrectionTool"));
     ANA_CHECK (asg::registerToolFactory<CP::IsolationSelectionTool> ("CP::IsolationSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<CP::JvtEfficiencyTool> ("CP::JvtEfficiencyTool"));
