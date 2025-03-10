@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DITAUREC_CLUSTERFINDER_H
@@ -25,7 +25,6 @@ class ClusterFinder : public DiTauToolBase {
 
 
  private:
-  std::string m_ClusterContainerName;
   float m_Rsubjet;
 
 };
