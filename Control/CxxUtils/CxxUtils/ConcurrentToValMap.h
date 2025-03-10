@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/ConcurrentToValMap.h
@@ -95,10 +95,10 @@ template <class KEY, class VALUE, template <class> class UPDATER,
           class HASHER = std::hash<KEY>,
           class MATCHER = std::equal_to<KEY>,
           detail::ConcurrentHashmapVal_t NULLVAL = 0>
-ATH_REQUIRES (detail::IsConcurrentHashmapPayload<KEY> &&
-              detail::IsUpdater<UPDATER> && 
-              detail::IsHash<HASHER, KEY> &&
-              detail::IsBinaryPredicate<MATCHER, KEY>)
+requires (detail::IsConcurrentHashmapPayload<KEY> &&
+          detail::IsUpdater<UPDATER> && 
+          detail::IsHash<HASHER, KEY> &&
+          detail::IsBinaryPredicate<MATCHER, KEY>)
 class ConcurrentToValMap
 {
 private:

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/ConcurrentPtrSet.icc
@@ -13,7 +13,7 @@ namespace CxxUtils {
 
 
 #define T_CONCURRENTPTRSET template <class VALUE, template <class> class UPDATER> \
-  ATH_REQUIRES (detail::IsUpdater<UPDATER>)
+  requires (detail::IsUpdater<UPDATER>)
 
 
 #define CONCURRENTPTRSET ConcurrentPtrSet<VALUE, UPDATER>

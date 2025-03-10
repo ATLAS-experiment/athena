@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/copy_bounded.h
@@ -14,7 +14,6 @@
 #define CXXUTILS_COPY_BOUNDED_H
 
 
-#include "CxxUtils/concepts.h"
 #include <iterator>
 #include <algorithm>
 
@@ -73,10 +72,8 @@ copy_bounded1 (InputIterator begi, InputIterator endi,
  *                              std::distance(bego,endo)) elements.
  * Returns bego + n.
  */
-template <class InputIterator, class OutputIterator>
-ATH_REQUIRES( std::input_iterator<InputIterator> &&
-              std::output_iterator<OutputIterator,
-                typename std::iterator_traits<InputIterator>::value_type> )
+template <std::input_iterator InputIterator,
+          std::output_iterator<typename std::iterator_traits<InputIterator>::value_type> OutputIterator>
 inline
 OutputIterator
 copy_bounded (InputIterator begi, InputIterator endi,

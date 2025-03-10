@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/ConcurrentToValMap.icc
@@ -17,10 +17,10 @@ namespace CxxUtils {
                                        template <class> class UPDATER,  \
                                        class HASHER, class MATCHER,     \
                                        detail::ConcurrentHashmapVal_t NULLVAL> \
-  ATH_REQUIRES (detail::IsConcurrentHashmapPayload<KEY> &&              \
-                detail::IsUpdater<UPDATER> &&                           \
-                detail::IsHash<HASHER, KEY> &&                          \
-                detail::IsBinaryPredicate<MATCHER, KEY>)
+  requires (detail::IsConcurrentHashmapPayload<KEY> &&                  \
+            detail::IsUpdater<UPDATER> &&                               \
+            detail::IsHash<HASHER, KEY> &&                              \
+            detail::IsBinaryPredicate<MATCHER, KEY>)
 
 #define CONCURRENTTOVALMAP ConcurrentToValMap<KEY, VALUE, UPDATER, HASHER, MATCHER, NULLVAL>
 
