@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 /**
@@ -341,7 +341,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                         double predz = predhit[2];
                         if (abs(hitr - predr) < m_windowR.value() && abs(hitz - predz) < m_windowZ.value())
                         {
-                            std::vector<std::shared_ptr<const FPGATrackSimHit>> hits {hit};
+                            std::vector<std::shared_ptr<const FPGATrackSimHit>> theseHits {hit};
                             hitsInWindow = hitsInWindow + 1;
 
                             // If the hit is a space point, skip the next layer, as it will be duplicated space point and we have already taken care of that in the adding of the hits
@@ -355,9 +355,8 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
 
                                 if (hit->getHitType() == HitType::spacepoint) {
                                     skipSPInNextLayer = true;
-
                                     // find the hit in the next layer
-                                    if(!findHitinNextStripLayer(hit,  m_phits_atLayer[slice][layerToCheck], hits))
+                                    if(!findHitinNextStripLayer(hit,  m_phits_atLayer[slice][layerToCheck], theseHits))
                                     {
                                         ATH_MSG_WARNING("For a SP in layer "<<layer<<" Couldn't find a matching strip SP in layer "<<layerToCheck);
                                     }
@@ -372,13 +371,13 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                                     if(isFineIDInStrip(fineID))  guessedSecondHitPtr->setDetType(SiliconTech::strip);
                                     else  guessedSecondHitPtr->setDetType(SiliconTech::pixel);
 
-                                    hits.push_back(guessedSecondHitPtr);
+                                    theseHits.push_back(guessedSecondHitPtr);
                                 }
                             }
 
                             // We got a hit, lets make a road
                             FPGATrackSimRoad newroad;
-                            if(!addHitToRoad(newroad, currentRoad, std::move(hits)))
+                            if(!addHitToRoad(newroad, currentRoad, std::move(theseHits)))
                             {
                                 ATH_MSG_WARNING("Failed to make a new road");
                                 continue;
@@ -418,14 +417,14 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                 }
                 else
                 {
-                    std::vector<std::shared_ptr<const FPGATrackSimHit>> hits;
+                    std::vector<std::shared_ptr<const FPGATrackSimHit>> theseHits;
                     // first make the fake hit that we will add
-                    if (!getFakeHit(currentRoad, slice, predhit, fineID, hits)) {
+                    if (!getFakeHit(currentRoad, slice, predhit, fineID, theseHits)) {
                         ATH_MSG_WARNING("Failed adding a guessed hit in extrapolation");
                         continue;
                     }
 
-                    if((isFineIDInPixel(fineID) && hits.size() != 1) || (isFineIDInStrip(fineID) && hits.size() != 2))
+                    if((isFineIDInPixel(fineID) && theseHits.size() != 1) || (isFineIDInStrip(fineID) && theseHits.size() != 2))
                     {
                         continue;
                     }
@@ -433,7 +432,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                     // add the hit to the road
                     FPGATrackSimRoad newroad;
 
-                    if (!addHitToRoad(newroad, currentRoad, std::move(hits))) {
+                    if (!addHitToRoad(newroad, currentRoad, std::move(theseHits))) {
                         ATH_MSG_WARNING("Failed making a new road with fake hit");
                         continue;
                     }
@@ -624,7 +623,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::addHitToRoad(FPGATrackSimRoad&
         }
         these_hits[hit->getLayer()].push_back(hit);
     }
-
+    const auto nTheseHits = these_hits.size();
     newroad.setHits(std::move(these_hits));
 
     // Update the bitmasks depending on whether this was real or not
@@ -633,7 +632,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::addHitToRoad(FPGATrackSimRoad&
 
     for (auto& hit: hits)
     {
-        if(hit->getLayer() > these_hits.size())
+        if(hit->getLayer() > nTheseHits)
         {
             ATH_MSG_WARNING("Adding a hit with layer: "<<hit->getLayer()<<" which is beyond the total size of the layers");
             continue;
