@@ -2307,15 +2307,14 @@ namespace Trk {
     }
 
     cache.m_reintoutl = old_reintoutl;
-    MeasurementSet::const_iterator itSet = addMeasColl.begin();
-    MeasurementSet::const_iterator itSetEnd = addMeasColl.end();
 
-    for (; itSet != itSetEnd; ++itSet) {
-      if ((*itSet) == nullptr) {
+    for (const auto & measBase : addMeasColl) {
+      if (measBase == nullptr) {
         ATH_MSG_WARNING("There is an empty MeasurementBase object in the track! Skip this object..");
-      } else {
-        makeProtoStateFromMeasurement(cache, trajectory, *itSet);
+        continue;
       }
+
+      makeProtoStateFromMeasurement(cache, trajectory, measBase);
     }
 
     // fit set of MeasurementBase using main method, start with first TrkParameter in inputTrack
@@ -2843,29 +2842,27 @@ namespace Trk {
 
     // loop over confined layers
     if (confinedLayers != nullptr) {
-      Trk::BinnedArraySpan<Trk::Layer const * const >layerVector = confinedLayers->arrayObjects();
-      Trk::BinnedArraySpan<Trk::Layer const * const >::iterator layerIter = layerVector.begin();
-
       // loop over layers
-      for (; layerIter != layerVector.end(); ++layerIter) {
+      for (const auto & layer : confinedLayers->arrayObjects()) {
         // push_back the layer
-        if (*layerIter != nullptr) {
+        if (layer != nullptr) {
           // get the layerIndex
-          const Trk::LayerIndex & layIndex = (*layerIter)->layerIndex();
+          const Trk::LayerIndex & layIndex = layer->layerIndex();
           // skip navigaion layers for the moment
 
-          if ((layIndex.value() == 0) || ((*layerIter)->layerMaterialProperties() == nullptr)) {
+          if ((layIndex.value() == 0) || (layer->layerMaterialProperties() == nullptr)) {
             continue;
           }
 
           const CylinderLayer *cyllay = nullptr;
-          if ((*layerIter)->surfaceRepresentation().type() == Trk::SurfaceType::Cylinder)
-            cyllay = static_cast<const CylinderLayer *>((*layerIter));
+          if (layer->surfaceRepresentation().type() == Trk::SurfaceType::Cylinder) {
+            cyllay = static_cast<const CylinderLayer *>(layer);
+          }
 
           const DiscLayer *disclay = nullptr;
-
-          if ((*layerIter)->surfaceRepresentation().type() == Trk::SurfaceType::Disc)
-            disclay = static_cast<const DiscLayer *>((*layerIter));
+          if (layer->surfaceRepresentation().type() == Trk::SurfaceType::Disc) {
+            disclay = static_cast<const DiscLayer *>(layer);
+          }
 
           if (disclay != nullptr) {
             if (disclay->center().z() < 0) {
@@ -2932,14 +2929,9 @@ namespace Trk {
     const TrackingVolumeArray* confinedVolumes = tvol->confinedVolumes();
     // get the confined volumes and loop over it -> call recursively
     if (confinedVolumes != nullptr) {
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
-
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const >::iterator volIter = volumes.begin();
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::iterator volIterEnd = volumes.end();
-
-      for (; volIter != volIterEnd; ++volIter) {
-        if (*volIter != nullptr) {
-          bool ok = processTrkVolume(cache, *volIter);
+      for (const auto & volume : confinedVolumes->arrayObjects()) {
+        if (volume != nullptr) {
+          const bool ok = processTrkVolume(cache, volume);
           if (!ok) {
             return false;
           }
@@ -4615,21 +4607,18 @@ namespace Trk {
         GXFTrackState *scatstate2 = nullptr;
         int scatindex = 0;
 
-        for (std::vector<std::unique_ptr<GXFTrackState>>::iterator it =
-               trajectory.trackStates().begin();
-             it != trajectory.trackStates().end();
-             ++it) {
-          if ((**it).getStateType(TrackStateOnSurface::Scatterer)) {
+        for (const auto & state : trajectory.trackStates()) {
+          if (state->getStateType(TrackStateOnSurface::Scatterer)) {
             if (
               scatindex == trajectory.numberOfScatterers() / 2 ||
-              (**it).materialEffects()->deltaE() == 0
+              state->materialEffects()->deltaE() == 0
             ) {
-              scatstate2 = (*it).get();
+              scatstate2 = state.get();
               break;
             }
 
             scatindex++;
-            scatstate = (*it).get();
+            scatstate = state.get();
           }
         }
 
@@ -6763,17 +6752,13 @@ namespace Trk {
       std::vector<std::pair<const Layer *, const Layer *>> & upstreamlayers = oldtrajectory.upstreamMaterialLayers();
       bool first = true;
 
-      for (int i = (int)upstreamlayers.size() - 1; i >= 0; i--) {
+      for (const auto & [layer1, layer2] : upstreamlayers | std::views::reverse) {
         if (prevpar == nullptr) {
           break;
         }
 
         PropDirection propdir = oppositeMomentum;
-        const Layer *layer = upstreamlayers[i].first;
-
-        if (layer == nullptr) {
-          layer = upstreamlayers[i].second;
-        }
+        const Layer *layer = layer1 != nullptr ? layer1 : layer2;
 
         DistanceSolution distsol = layer->surfaceRepresentation().straightLineDistanceEstimate(
           prevpar->position(), prevpar->momentum().unit()
