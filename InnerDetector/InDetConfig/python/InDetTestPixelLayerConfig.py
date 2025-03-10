@@ -46,9 +46,9 @@ def InDetTestPixelLayerToolInnerCfg(
         name = name.replace("InDet", "ITk")
         return ITkTestPixelLayerToolInnerCfg(flags, name, **kwargs)
 
-    kwargs.setdefault("CheckActiveAreas", False)
-    kwargs.setdefault("CheckDeadRegions", False)
-    kwargs.setdefault("CheckDisabledFEs", False)
+    kwargs.setdefault("CheckActiveAreas", flags.InDet.doPixelFEcheckExpHits)
+    kwargs.setdefault("CheckDeadRegions", flags.InDet.doPixelFEcheckExpHits)
+    kwargs.setdefault("CheckDisabledFEs", flags.InDet.doPixelFEcheckExpHits)
     # To allow for extrapolation up to B-layer = next-to-innermost
     kwargs.setdefault("OuterRadius", 100.)
     return InDetTestPixelLayerToolCfg(flags, name, **kwargs)
