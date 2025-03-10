@@ -11,7 +11,6 @@
 
 
 #include "CxxUtils/ConcurrentHashmapImpl.h"
-#include "CxxUtils/concepts.h"
 #include "CxxUtils/IsUpdater.h"
 #include "boost/iterator/iterator_facade.hpp"
 #include "boost/range/iterator_range.hpp"
@@ -72,7 +71,7 @@ namespace CxxUtils {
  * since the test doesn't do any locking in that case.
  */
 template <class VALUE, template <class> class UPDATER>
-ATH_REQUIRES (detail::IsUpdater<UPDATER>)
+requires (detail::IsUpdater<UPDATER>)
 class ConcurrentPtrSet
 {
 private:

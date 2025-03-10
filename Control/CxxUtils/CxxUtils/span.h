@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/span.h
@@ -19,11 +19,7 @@
 #include <type_traits>
 #include <iterator>
 #include <cassert>
-
-#include "CxxUtils/features.h"
-#if HAVE_STD_RANGES
-# include <ranges>
-#endif
+#include <ranges>
 
 
 namespace CxxUtils {
@@ -61,9 +57,7 @@ inline constexpr bool valid_span_type_v = std::is_convertible_v<U(*)[], T(*)[]>;
  */
 template <class T>
 class span
-#if HAVE_STD_RANGES
   : public std::ranges::view_base
-#endif
 {
 public:
   /// Required typedefs.
@@ -93,12 +87,8 @@ public:
    * @param ptr Start of the span.
    * @param sz Length of the span.
    */
-#if HAVE_CONCEPTS
   template <class U>
   requires (valid_span_type_v<T, U>)
-#else
-  template <class U, typename = std::enable_if_t<valid_span_type_v<T, U> > >
-#endif
   span (U* ptr, size_type sz);
 
 
@@ -107,12 +97,8 @@ public:
    * @param beg Start of the span.
    * @param end One past the end of the span.
    */
-#if HAVE_CONCEPTS
   template <class U>
   requires (valid_span_type_v<T, U>)
-#else
-  template <class U, typename = std::enable_if_t<valid_span_type_v<T, U> > >
-#endif
   span (U* beg, U* end);
 
 
@@ -125,12 +111,8 @@ public:
    * @brief Constructor from another span.
    * @param other Span to copy from.
    */
-#if HAVE_CONCEPTS
   template <class U>
   requires (valid_span_type_v<T, U>)
-#else
-  template <class U, typename = std::enable_if_t<valid_span_type_v<T, U> > >
-#endif
   span (const span<U>& other);
 
 
@@ -333,8 +315,7 @@ span (T* beg, T* end) -> span<T>;
  * @param c The container for which to make a span.
  *          It must have contiguous iterators.
  */
-template <class CONTAINER>
-ATH_REQUIRES( detail::IsContiguousContainer<CONTAINER> )
+template <detail::IsContiguousContainer CONTAINER>
 auto make_span (CONTAINER& c)
 {
   return CxxUtils::span (c.data(), c.size());

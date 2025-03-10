@@ -37,7 +37,6 @@
 
 
 #include "CxxUtils/Arrayrep.h"
-#include "CxxUtils/concepts.h"
 #include <iterator>
 
 
@@ -801,7 +800,7 @@ public:
  * @param x[out] Result of the conversion.
  */
 template <class T>
-  ATH_REQUIRES(std::assignable_from<T&, float>)
+  requires std::assignable_from<T&, float>
 void fromArrayrep (const CaloRec::Arrayrep& rep, T& x);
 
 

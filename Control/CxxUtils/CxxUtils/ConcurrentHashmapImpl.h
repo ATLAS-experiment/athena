@@ -40,9 +40,6 @@ namespace detail {
 using ConcurrentHashmapVal_t = uintptr_t;
 
 
-#if HAVE_CONCEPTS
-
-
 /**
  * @brief Concept for a value that can be saved in a concurrent hash map.
  *
@@ -52,10 +49,6 @@ template <class T>
 concept IsConcurrentHashmapPayload = std::is_standard_layout_v<T> &&
   std::is_trivial_v<T> &&
   sizeof (T) <= sizeof (ConcurrentHashmapVal_t);
-
-
-#endif
-
 
 
 /**

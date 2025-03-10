@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/span.icc
@@ -31,12 +31,8 @@ span<T>::span()
   * @param sz Length of the span.
   */
 template <class T>
-#if HAVE_CONCEPTS
 template <class U>
 requires (valid_span_type_v<T, U>)
-#else
-template <class U, typename>
-#endif
 inline
 span<T>::span (U* ptr, size_type sz)
   : m_ptr (ptr),
@@ -52,12 +48,8 @@ span<T>::span (U* ptr, size_type sz)
   * @param end One past the end of the span.
   */
 template <class T>
-#if HAVE_CONCEPTS
 template <class U>
 requires (valid_span_type_v<T, U>)
-#else
-template <class U, typename>
-#endif
 inline
 span<T>::span (U* beg, U* end)
   : m_ptr (beg),
@@ -72,12 +64,8 @@ span<T>::span (U* beg, U* end)
  * @param other Span to copy from.
   */
 template <class T>
-#if HAVE_CONCEPTS
 template <class U>
 requires (valid_span_type_v<T, U>)
-#else
-template <class U, typename>
-#endif
 inline
 span<T>::span (const span<U>& other)
   : m_ptr (other.begin()),

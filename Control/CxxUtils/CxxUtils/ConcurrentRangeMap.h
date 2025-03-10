@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/ConcurrentRangeMap.h
@@ -15,7 +15,6 @@
 
 
 #include "CxxUtils/stall.h"
-#include "CxxUtils/concepts.h"
 #include "CxxUtils/IsUpdater.h"
 #include "boost/range/iterator_range.hpp"
 #include <atomic>
@@ -91,9 +90,6 @@ private:
 //*****************************************************************************
 
 
-#if HAVE_CONCEPTS
-
-
 namespace detail {
 
 
@@ -118,9 +114,6 @@ concept IsConcurrentRangeCompare = requires (const COMPARE& c,
 
 
 } // namespace detail
-
-
-#endif // HAVE_CONCEPTS
 
 
 //*****************************************************************************
@@ -214,8 +207,8 @@ concept IsConcurrentRangeCompare = requires (const COMPARE& c,
  */
 template <class RANGE, class KEY, class T, class COMPARE,
           template <class> class UPDATER>
-ATH_REQUIRES (detail::IsUpdater<UPDATER> &&
-              detail::IsConcurrentRangeCompare<COMPARE, RANGE, KEY, typename UPDATER<int>::Context_t>)
+requires (detail::IsUpdater<UPDATER> &&
+          detail::IsConcurrentRangeCompare<COMPARE, RANGE, KEY, typename UPDATER<int>::Context_t>)
 class ConcurrentRangeMap
 {
 public:
