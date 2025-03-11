@@ -609,15 +609,67 @@ namespace Trk {
       const ParticleHypothesis
     ) const;
 
-    void fillResiduals(
+    /*
+     * @brief Fill the residual and error vector
+     *
+     * Loop over all track states and extract residual and error data. Then
+     * fill the data sorted into vectors. Since we have all data here, we
+     * already sum over all chi2 contributions. The b-vector is in this step
+     * only filled with the scattering contributions.
+     *
+     * @param[in] ctx An event context for extrapolation.
+     * @param[in] cache General cache object for asym energy loss.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in] it The current iteration, we are in.
+     * @param[in, out] b The b-vector to be filled with scattering elements.
+     * @param[in, out] bremno_maxbrempull The position of the maxbrempull in all brempull elements.
+     * @param[in, out] state_maxbrempull The actual state holding the maxbrempull.
+     */
+    void fillResidualsAndErrors(
       const EventContext& ctx,
-      Cache &,
-      GXFTrajectory &,
-      int,
-      Amg::SymMatrixX &,
-      Amg::VectorX &,
-      Amg::SymMatrixX &,
-      bool &
+      const Cache & cache,
+      GXFTrajectory & trajectory,
+      const int it,
+      Amg::VectorX & b,
+      int & bremno_maxbrempull,
+      GXFTrackState* & state_maxbrempull
+    ) const;
+
+    /*
+     * @brief Check if we already converged and set the flag.
+     *
+     * We run a few checks on convergence. Depending on the iteration we are in,
+     * different criteria are applied.
+     *
+     * @param[in] cache General cache object for the external iteration goal.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in] it The current iteration, we are in.
+     */
+    void tryToConverge(
+      const Cache & cache,
+      GXFTrajectory & trajectory,
+      const int it
+    ) const;
+
+    /*
+     * @brief Update errors with the information from the maxbremspull.
+     *
+     * Marks the state of the maxbremspull as a kink and updates the
+     * sigmaDeltaE. Then the error for the corresponding resiudal is updated.
+     * The [a]-matrix is modified with the new error information.
+     *
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in] bremno_maxbrempull The position of the maxbrempull in the brempull list.
+     * @param[in, out] state_maxbrempull Pointer to the state, so we can modify it.
+     * @param[in, out] a The [a]-matrix of the system.
+     *
+     * @note You might want to redo your derivatives after this step.
+     */
+    void updateSystemWithMaxBremPull(
+      GXFTrajectory & trajectory,
+      const int bremno_maxbrempull,
+      GXFTrackState* state_maxbrempull,
+      Amg::SymMatrixX & a
     ) const;
 
     void fillDerivatives(
