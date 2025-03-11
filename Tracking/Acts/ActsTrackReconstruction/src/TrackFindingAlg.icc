@@ -1,0 +1,25 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+namespace ActsTrk {
+  template <class HandleArrayKeyType, class ContainerType>
+  StatusCode TrackFindingAlg::getContainersFromKeys(
+      const EventContext &ctx,
+      HandleArrayKeyType &handleKeyArray,
+      std::vector<const ContainerType *> &outputContainers,
+      std::size_t &sum) const {
+    outputContainers.reserve(handleKeyArray.size());
+    for (const auto &handleKey : handleKeyArray) {
+      ATH_MSG_DEBUG("Reading input collection with key " << handleKey.key());
+      auto handle = SG::makeHandle(handleKey, ctx);
+      ATH_CHECK(handle.isValid());
+      outputContainers.push_back(handle.cptr());
+      ATH_MSG_DEBUG("Retrieved " << outputContainers.back()->size()
+                                 << " input elements from key " << handle.key());
+      sum += outputContainers.back()->size();
+    }
+
+    return StatusCode::SUCCESS;
+  }
+}  // namespace ActsTrk
