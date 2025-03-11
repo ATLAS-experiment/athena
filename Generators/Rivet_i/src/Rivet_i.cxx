@@ -89,7 +89,11 @@ StatusCode Rivet_i::initialize ATLAS_NOT_THREAD_SAFE () {
   if (!env_rap.empty()) ATH_MSG_DEBUG("Loading Rivet plugin analyses from env path: " << env_rap);
 
   // Set up analysis handler
+  #if RIVET_VERSION_CODE >= 40100
+  m_analysisHandler = new Rivet::AnalysisHandler();
+  #else
   m_analysisHandler = new Rivet::AnalysisHandler(m_runname);
+  #endif
   assert(m_analysisHandler);
 
   #if RIVET_VERSION_CODE >= 40000

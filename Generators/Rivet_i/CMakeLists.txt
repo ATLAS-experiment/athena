@@ -18,9 +18,9 @@ atlas_disable_as_needed()
 # Component(s) in the package:
 atlas_add_component( Rivet_i
    src/*.h src/*.cxx src/components/*.cxx
-   INCLUDE_DIRS ${FASTJET_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+   INCLUDE_DIRS ${FASTJET_INCLUDE_DIRS} ${FASTJETCONTRIB_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
     ${RIVET_INCLUDE_DIRS} ${YODA_INCLUDE_DIRS}
-   LINK_LIBRARIES ${FASTJET_LIBRARIES} ${ROOT_LIBRARIES} AtlasHepMCLib TruthUtils
+   LINK_LIBRARIES ${FASTJET_LIBRARIES} ${FASTJETCONTRIB_LIBRARIES} ${ROOT_LIBRARIES} AtlasHepMCLib TruthUtils
    ${RIVET_LIBRARIES} ${YODA_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel GenInterfacesLib
    AthenaKernel GeneratorObjects PathResolver xAODEventInfo )
 if( HIGHFIVE_FOUND )
