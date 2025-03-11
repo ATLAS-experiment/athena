@@ -1,12 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ########################################################################
 #
 # SliceDef file for tau chains
 #
 #########################################################################
-
-from typing import List
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info(f'Importing {__name__}')
