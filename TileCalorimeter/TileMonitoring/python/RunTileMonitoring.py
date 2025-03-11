@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 '''@file RunTileMonitoring.py
 @brief Script to run Tile Reconstrcution/Monitoring with new-style configuration
@@ -246,11 +246,11 @@ if __name__=='__main__':
     if args.online:
         flags.Common.isOnline = True
     if flags.Common.isOnline:
-        flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2023-01' if runNumber > 232498 else 'COMCOND-HLTP-004-02'
+        flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2025-01' if runNumber > 232498 else 'COMCOND-HLTP-004-02'
         flags.DQ.Environment = 'online'
         flags.DQ.FileKey = ''
     else:
-        flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2023-01' if runNumber > 232498 else 'COMCOND-BLKPA-RUN1-06'
+        flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2024-04' if runNumber > 232498 else 'COMCOND-BLKPA-RUN1-06'
 
     if any([args.laser, args.cis]):
         if args.laser:
@@ -352,7 +352,8 @@ if __name__=='__main__':
 
     if args.cells:
         from TileMonitoring.TileCellMonitorAlgorithm import TileCellMonitoringConfig
-        cfg.merge(TileCellMonitoringConfig(flags, fillHistogramsForL1Triggers = l1Triggers, fillGapScintilatorHistograms=True))
+        cfg.merge(TileCellMonitoringConfig(flags, fillHistogramsForL1Triggers = l1Triggers,
+                                           fillGapScintilatorHistograms=True, fillChannelTimeHistograms=True))
 
     if args.towers:
         from TileMonitoring.TileTowerMonitorAlgorithm import TileTowerMonitoringConfig
@@ -414,6 +415,8 @@ if __name__=='__main__':
         ppa.ExtraInputs = {( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )}
         ppa.Interval = args.postProcessingInterval
         ppa.ConfigFiles = configurations
+        if not hasattr(ppa, '_descriptors'):
+            ppa._descriptors = {} # Dummy descriptors to allow print detailed config
         ppa._ctr = 1 # Start postprocessing only after specified number of events (not during the first one)
         if flags.Common.isOnline:
             fileKey = flags.DQ.FileKey
@@ -440,7 +443,9 @@ if __name__=='__main__':
     if args.stateless and args.cis:
         cfg.getEventAlgo('TileDQstatusAlg').TileBeamElemContainer=""
 
-    cfg.printConfig(withDetails=args.printDetailedConfig)
+    cfg.printConfig(withDetails=args.printDetailedConfig,
+                    summariseProps=args.printDetailedConfig,
+                    printDefaults=args.printDetailedConfig)
 
     sc = cfg.run()
     sys.exit(0 if sc.isSuccess() else 1)
