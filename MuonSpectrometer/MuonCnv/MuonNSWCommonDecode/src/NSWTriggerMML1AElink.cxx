@@ -137,7 +137,12 @@ Muon::nsw::NSWTriggerMML1AElink::NSWTriggerMML1AElink (const uint32_t *bs, const
     
   }
 
-  //warning: how the swROD is behaving if the last work is a uint16 only? Just 0-padding?
+  // warning: swROD is zero padding the last word to 32b
+  // this means that there can be a leftover 16b 0x0000 after the CRC
+  // m_wordCountFlx is anyway "aware" of this
   m_trailer_CRC = Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_trailer_CRC);
+
+  // calculate CRC by hand now - need to exclude the FEC header (2 words)
+  m_trailer_CRC_calc = Muon::nsw::get_16bxor_crc(bs+2, m_wordCountFlx-2);
 
 }

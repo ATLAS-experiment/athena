@@ -102,6 +102,7 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nTRTHighThresholdHitsAr_vs_etaphi, "nTRTHighThresholdHitsAr_vs_etaphi");
   }
 
+
   book(m_pixeldEdx, "pixeldEdx");
 
   if (m_iDetailLevel >= 100){

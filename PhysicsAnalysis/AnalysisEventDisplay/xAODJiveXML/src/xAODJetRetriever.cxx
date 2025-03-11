@@ -86,7 +86,7 @@ namespace JiveXML {
    * Retrieve basic parameters, mainly four-vectors, for each collection.
    * Also association with clusters and tracks (ElementLink).
    */
-  const DataMap xAODJetRetriever::getData(const xAOD::JetContainer* jetCont, const std::string& jetkey) {
+  const DataMap xAODJetRetriever::getData(const xAOD::JetContainer* jetCont, const std::string &jetkey) {
 
     ATH_MSG_DEBUG( "in getData()" );
 

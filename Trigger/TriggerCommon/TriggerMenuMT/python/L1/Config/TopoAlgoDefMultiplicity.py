@@ -135,10 +135,10 @@ class TopoAlgoDefMultiplicity:
 
             'jJ50p0ETA25',
 
+            'jJ5p30ETA49', 'jJ10p30ETA49',
+
             # spares
             'jJSPARE1',
-            'jJSPARE2',
-            'jJSPARE3',
 
         ]
 
