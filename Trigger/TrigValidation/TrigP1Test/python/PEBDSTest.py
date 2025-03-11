@@ -181,5 +181,5 @@ def run(flags):
             ('xAOD::ElectronAuxContainer#HLT_egamma_Electrons_GSFAux.',            'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
         ]
     flags.lock()
-    acc = runHLT.runHLTCfg(flags)
+    acc = runHLT.runHLTCfg(flags, checkMT=False)  # athenaHLT is always MT-mode
     return acc
