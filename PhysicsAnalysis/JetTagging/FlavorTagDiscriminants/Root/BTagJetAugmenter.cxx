@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/BTagJetAugmenter.h"
@@ -10,6 +10,7 @@
 
 #include "xAODJet/Jet.h"
 #include "xAODBTagging/BTaggingUtilities.h"
+#include "CxxUtils/trapping_fp.h"
 
 #include "TVector3.h"
 
@@ -337,6 +338,9 @@ void BTagJetAugmenter::augment(const xAOD::BTagging &btag) const {
 
   // Loop over tracks in the jet
   for (const auto &jet_track_link : m_jet_track_links(btag)) {
+    // Tell clang to optimize assuming that FP operations may trap.
+    CXXUTILS_TRAPPING_FP;
+
     const xAOD::TrackParticle &track_particle = **jet_track_link;
 
     uint8_t n_pixel_hits;
