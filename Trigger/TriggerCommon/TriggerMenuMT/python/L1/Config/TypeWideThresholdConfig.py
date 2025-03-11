@@ -597,9 +597,9 @@ def getConfig_jJ(do_HI_tob_thresholds):
     confObj["ptMinxTOB2"] = 5 if do_HI_tob_thresholds else 15
     confObj["ptMinxTOB3"] = 5 if do_HI_tob_thresholds else 15
     confObj["resolutionMeV"] = 200  
-    confObj["seedThreshold1"] = -1 # signed, in GeV, negative values in practice mean no seed threshold. 
-    confObj["seedThreshold2"] = -1 # Max value (HW constraint): (2^20)-1 * 25MeV = 26214.375 (GeV)
-    confObj["seedThreshold3"] = -1 
+    confObj["seedThreshold1"] = 3 # signed, in GeV, negative values in practice mean no seed threshold. 
+    confObj["seedThreshold2"] = 3 # Max value (HW constraint): (2^20)-1 * 25MeV = 26214.375 (GeV)
+    confObj["seedThreshold3"] = 3 
     return confObj
 
 def getConfig_jLJ():
