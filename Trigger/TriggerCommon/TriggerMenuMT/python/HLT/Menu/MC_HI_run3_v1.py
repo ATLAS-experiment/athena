@@ -1,30 +1,13 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
 # MC_HI_run3_v1.py menu for the obsoleted Phase-0 L1Calo based chains
 #------------------------------------------------------------------------#
 
 # All chains are represented as ChainProp objects in a ChainStore
-from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from .SignatureDicts import ChainStore
 
 import TriggerMenuMT.HLT.Menu.PhysicsP1_HI_run3_v1 as physics_menu
-from .Physics_pp_run3_v1 import (
-        SingleElectronGroup,
-        SinglePhotonGroup,
-        SingleJetGroup,
-        SingleBjetGroup,
-        SingleMuonGroup,
-        PrimaryL1MuGroup,
-        MultiMuonGroup,
-        MultiElectronGroup,
-        MinBiasGroup,
-        SupportLegGroup,
-        PrimaryLegGroup,
-        PrimaryPhIGroup,
-        SupportPhIGroup,
-        SupportGroup,
-)
 
 HardProbesStream="HardProbes"
 MinBiasStream="MinBias"

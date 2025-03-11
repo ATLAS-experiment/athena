@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
 # P1_run3_v1.py menu containing monitoring chains used only at P1
@@ -16,7 +16,6 @@ from .Physics_pp_run3_v1 import (
     MinBiasGroup,
     ZeroBiasGroup,
     SupportGroup,
-    SupportLegGroup,
     SupportPhIGroup,
     Topo2Group,
     Topo3Group,
