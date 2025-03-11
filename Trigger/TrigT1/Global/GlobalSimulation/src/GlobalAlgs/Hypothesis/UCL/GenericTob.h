@@ -5,15 +5,9 @@
 #ifndef GLOBALSIM_GENERICTOB_H
 #define GLOBALSIM_GENERICTOB_H
 
-
-#include "AlgoConstants.h"
-#include "AlgoDataTypes.h"
-#include "eEmTob.h"
-
+#include "eEmTob.h" //for eEmTobPtr
 #include <bitset>
-#include <ostream>
-#include <vector>
-#include <memory>
+#include <iosfwd>
 
 namespace GlobalSim {
 
