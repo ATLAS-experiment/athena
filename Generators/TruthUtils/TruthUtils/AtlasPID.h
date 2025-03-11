@@ -46,8 +46,8 @@ static const std::array<int,TABLESIZE> triple_charge = {
 };
 
 
-static const int UQUARK = 1;
-static const int DQUARK = 2;
+static const int DQUARK = 1;
+static const int UQUARK = 2;
 static const int SQUARK = 3;
 static const int CQUARK = 4;
 static const int BQUARK = 5;
