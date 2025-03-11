@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileTBBeamMonitorAlgorithm.h"
@@ -507,12 +507,12 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
             int drawerIdx2 = TileCalibUtils::getDrawerIdx(ros2, drawer2);
 
             if (m_monitoredDrawerIdx[drawerIdx1] || m_monitoredDrawerIdx[drawerIdx2]) {
-              if ((m_maskedChannels[drawerIdx1][channel1] >> gain1) & 1U) {
-                if (!((m_maskedChannels[drawerIdx2][channel2] >> gain2) & 1U)) {
+              if (gain1 < 0 || ((m_maskedChannels[drawerIdx1][channel1] >> gain1) & 1U)) {
+                if (gain2 >= 0 && !((m_maskedChannels[drawerIdx2][channel2] >> gain2) & 1U)) {
                   energy = tile_cell->ene2() * 2;
                 }
-              } else if ((m_maskedChannels[drawerIdx2][channel2] >> gain2) & 1U) {
-                if (!((m_maskedChannels[drawerIdx1][channel1] >> gain1) & 1U)) {
+              } else if (gain2 >= 0 && ((m_maskedChannels[drawerIdx2][channel2] >> gain2) & 1U)) {
+                if (gain1 >= 0 && !((m_maskedChannels[drawerIdx1][channel1] >> gain1) & 1U)) {
                   energy = tile_cell->ene1() * 2;
                 }
               } else {

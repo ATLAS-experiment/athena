@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileCellMonitorAlgorithm.h"
@@ -13,6 +13,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "AthenaKernel/Units.h"
+#include "CxxUtils/trapping_fp.h"
 
 using Athena::Units::GeV;
 using Athena::Units::ns;
@@ -257,6 +258,9 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 
 
   for (const CaloCell* cell : *caloCellContainer) {
+    // Tell clang to optimize assuming that FP operations may trap.
+    // Prevents spurious FPEs from the division by energy.
+    CXXUTILS_TRAPPING_FP;
     Identifier id = cell->ID();
     if (m_tileID->is_tile(id)) {
 
