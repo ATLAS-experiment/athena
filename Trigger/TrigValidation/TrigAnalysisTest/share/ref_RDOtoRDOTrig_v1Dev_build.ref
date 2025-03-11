@@ -15755,13 +15755,13 @@ HLT_j85_a10sd_cssk_pf_jes_ftf_preselj50_L1jJ50:
     0: 17
     1: 30
 HLT_j85_a10sd_cssk_pf_jes_ftf_preselj50_L1jLJ60:
-  eventCount: 13
+  eventCount: 12
   stepCounts:
-    0: 13
-    1: 13
+    0: 12
+    1: 12
   stepFeatures:
-    0: 13
-    1: 24
+    0: 12
+    1: 23
 HLT_j85_a10sd_cssk_pf_nojcalib_ftf_preselj50_L1jJ50:
   eventCount: 15
   stepCounts:
@@ -15773,10 +15773,10 @@ HLT_j85_a10sd_cssk_pf_nojcalib_ftf_preselj50_L1jJ50:
 HLT_j85_a10sd_cssk_pf_nojcalib_ftf_preselj50_L1jLJ60:
   eventCount: 12
   stepCounts:
-    0: 13
+    0: 12
     1: 12
   stepFeatures:
-    0: 13
+    0: 12
     1: 19
 HLT_j85_a10t_lcw_jes_L1jJ50:
   eventCount: 13
