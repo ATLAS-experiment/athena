@@ -109,9 +109,11 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('realHitsOverlay', False)
     cf.addFlag('hitFiltering', False)
     cf.addFlag('spacePointFiltering', False)
+    cf.addFlag('writeTestOutput', True)
 
     # road finding selection
-    cf.addFlag('houghRootoutput', False)
+    cf.addFlag('houghRootoutput1st', False)
+    cf.addFlag('houghRootoutput2nd', False)
     cf.addFlag('hough', True)
     cf.addFlag('hough1D', False)
     cf.addFlag('genScan', False)

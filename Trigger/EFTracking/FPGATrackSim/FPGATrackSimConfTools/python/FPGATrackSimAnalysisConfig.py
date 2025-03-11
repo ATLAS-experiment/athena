@@ -429,7 +429,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHitsProcessAlg.tracking = flags.Trigger.FPGATrackSim.tracking
     theFPGATrackSimLogicalHitsProcessAlg.doOverlapRemoval = flags.Trigger.FPGATrackSim.doOverlapRemoval
     theFPGATrackSimLogicalHitsProcessAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
-    theFPGATrackSimLogicalHitsProcessAlg.DoHoughRootOutput = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput
+    theFPGATrackSimLogicalHitsProcessAlg.DoHoughRootOutput1st = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput1st
     theFPGATrackSimLogicalHitsProcessAlg.NumOfHitPerGrouping = flags.Trigger.FPGATrackSim.ActiveConfig.NumOfHitPerGrouping
     theFPGATrackSimLogicalHitsProcessAlg.DoNNTrack = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis
     theFPGATrackSimLogicalHitsProcessAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))
@@ -596,10 +596,11 @@ if __name__ == "__main__":
             acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
             acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUTNNPATHFINDER DATAFILE='NNPathfinder.root', OPT='RECREATE'"]))
 
-            if (flags.Trigger.FPGATrackSim.Hough.houghRootoutput):
+            if (flags.Trigger.FPGATrackSim.Hough.houghRootoutput1st | flags.Trigger.FPGATrackSim.Hough.houghRootoutput2nd):
                 acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
 
-            acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
+            if flags.Trigger.FPGATrackSim.Hough.writeTestOutput:
+                acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
 
             if (flags.Trigger.FPGATrackSim.Hough.genScan):
                 acc.addService(CompFactory.THistSvc(Output = ["GENSCAN DATAFILE='genscan.root', OPT='RECREATE'"]))

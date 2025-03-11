@@ -98,7 +98,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         Gaudi::Property<bool> m_doMissingHitsChecks {this, "DoMissingHitsChecks", false};
         Gaudi::Property<bool> m_filterRoads  {this, "FilterRoads", false, "enable first road filter"};
         Gaudi::Property<bool> m_filterRoads2  {this, "FilterRoads2", false,  "enable second road filter"};
-        Gaudi::Property<bool> m_doHoughRootOutput {this, "DoHoughRootOutput", false, "Dump output from the Hough Transform to flat ntuples"};
+        Gaudi::Property<bool> m_doHoughRootOutput1st {this, "DoHoughRootOutput1st", false, "Dump output from the Hough Transform to flat ntuples"};
         Gaudi::Property<bool> m_doNNTrack  {this, "DoNNTrack", false, "Run NN track filtering"};
         Gaudi::Property<bool> m_doLRT {this, "doLRT", false, "Enable Large Radius Tracking"};
         Gaudi::Property<bool> m_doLRTHitFiltering {this, "LRTHitFiltering", false, "flag to enable hit/cluster filtering for LRT"};
