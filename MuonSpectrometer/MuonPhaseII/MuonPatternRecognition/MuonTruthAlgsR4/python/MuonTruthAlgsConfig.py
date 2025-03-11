@@ -87,6 +87,39 @@ def PrdMultiTruthMakerCfg(flags):
         result.addEventAlgo(the_alg) 
     return result
 
+
+def SdoMultiTruthMakerCfg(flags):
+    result = ComponentAccumulator()
+
+    if flags.Detector.GeometryMDT: 
+        the_alg = CompFactory.MuonR4.SdoMultiTruthMaker("SdoMultiTruthMakerMdt",
+                                                        SimContainer = "xMdtSimHits", 
+                                                        WriteKey = "MDT_TruthMap")
+        result.addEventAlgo(the_alg)
+    if flags.Detector.GeometryRPC:
+        the_alg = CompFactory.MuonR4.SdoMultiTruthMaker("SdoMultiTruthMakerRpc",
+                                                        SimContainer = "xRpcSimHits", 
+                                                        WriteKey = "RPC_TruthMap")
+        result.addEventAlgo(the_alg)
+    if flags.Detector.GeometryTGC: 
+        the_alg = CompFactory.MuonR4.SdoMultiTruthMaker("SdoMultiTruthMakerTgc",
+                                                        SimContainer ="xTgcSimHits",
+                                                        WriteKey = "TGC_TruthMap")
+        result.addEventAlgo(the_alg)       
+    if flags.Detector.GeometryMM: 
+        the_alg = CompFactory.MuonR4.SdoMultiTruthMaker("SdoMultiTruthMakerMm",
+                                                        SimContainer = "xMmSimHits", 
+                                                        WriteKey = "MM_TruthMap")
+        result.addEventAlgo(the_alg) 
+    if flags.Detector.GeometrysTGC: 
+        the_alg = CompFactory.MuonR4.SdoMultiTruthMaker("SdoMultiTruthMakerSTGC",
+                                                        SimContainer = "xStgcSimHits", 
+                                                        WriteKey = "STGC_TruthMap")
+        result.addEventAlgo(the_alg) 
+
+    return result
+
+
 def TruthSegmentToTruthPartAssocCfg(flags, name="MuonTruthSegmentToTruthAssocAlg", **kwargs):
     result = ComponentAccumulator()
     hitDecors = []

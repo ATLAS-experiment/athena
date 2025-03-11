@@ -35,7 +35,7 @@ namespace Muon {
 
         // loop over truth coll
         for (const xAOD::TruthParticle* truth : *truthContainer) {
-            if (!MC::isStable(truth)	 || !truth->isMuon() || truth->pt() < m_pt) continue;
+            if (!MC::isStable(truth)	 || !m_pdgIds.value().count(truth->absPdgId()) || truth->pt() < m_pt) continue;
             xAOD::TruthParticle* truthParticle = muonTruthContainer->push_back(std::make_unique<xAOD::TruthParticle>());
             truthParticle->setPdgId(truth->pdgId());
             truthParticle->setBarcode(HepMC::barcode(truth)); // FIXME barcode-based
