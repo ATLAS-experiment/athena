@@ -41,6 +41,8 @@ namespace Muon {
 
         Gaudi::Property<float> m_pt{this, "ptCut", 1000.};
 
+        Gaudi::Property<std::set<int>> m_pdgIds{this, "pdgIds", {13,}};
+
         //IdHelper service handle
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
