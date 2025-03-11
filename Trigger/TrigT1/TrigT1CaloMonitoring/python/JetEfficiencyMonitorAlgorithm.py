@@ -134,37 +134,15 @@ def JetEfficiencyMonitoringConfig(flags):
 
         helper.defineHistogram('raw_eta',  title='Eta Distribution for all leading offline jets (with no trigger requirments);#eta; Count', fillGroup=groupName, path=trigPath + distributionPath, xbins=nbins["SReta"], xmin=binmin["SReta"], xmax=binmax["SReta"])
     
-    plateau_dict = {} #in case there are low stats for some of the triggers, we could modify the threshold ranges for some triggers
-    #gives warning if we dont reach platau by first value, gives error if we dont reach it by second value
-    threshold_dict = {"L1_gJ20p0ETA25" : [55e3, 75e3], #hits 50% at 50 for a good run, 100% around 75
-                      "L1_gJ50p0ETA25" : [110e3, 180e3], #hits 50% at 109 for a good run, 100% around 180
-                      "L1_gJ100p0ETA25" : [195e3, 3000e3],#hits 50% at 185 for a good run, 100% around 300
-                      "L1_gJ400p0ETA25" : [620e3, 900e3],#hits 50% at 611 for a good run, 100% around 900
-                      "L1_gLJ80p0ETA25" : [125e3, 200e3],#hits 50% at 113 for a good run, 100% around 200
-                      "L1_gLJ100p0ETA25" : [150e3, 240e3],#hits 50% at 137 for a good run, 100% around 240
-                      "L1_gLJ140p0ETA25" : [210e3, 315e3],#hits 50% at 197 for a good run, 100% around 315
-                      "L1_gLJ160p0ETA25" : [240e3, 260e3],#hits 50% at 225 for a good run, 100% around 350
-                      "L1_jJ30" : [50e3, 85e3],#hits 50% at 46 for a good run, 100% around 85
-                      "L1_jJ40" : [55e3, 90e3],#hits 50% at 47 for a good run, 100% around 90
-                      "L1_jJ50" : [60e3, 100e3],#hits 50% at 53 for a good run, 100% around 100
-                      "L1_jJ60" : [90e3, 130e3],#hits 50% at 85 for a good run, 100% around 130
-                      "L1_jJ80" : [90e3, 155e3],#hits 50% at 86 for a good run, 100% around 155
-                      "L1_jJ90" : [110e3, 185e3],#hits 50% at 105 for a good run, 100% around 185
-                      "L1_jJ125" : [145e3, 230e3],#hits 50% at 140 for a good run, 100% around 230
-                      "L1_jJ140" : [160e3, 225e3],#hits 50% at 150 for a good run, 100% around 255
-                      "L1_jJ160" : [180e3, 260e3],#hits 50% at 170 for a good run, 100% around 260
-                      "L1_jJ180" : [235e3, 320e3],#hits 50% at 223 for a good run, 100% around 320
-                      "L1_SC111-CjJ40": [195e3, 300e3],#hits 50% at 190 for a good run, 100% around 300
-    }
-    
     ######### define all the histograms 
     for tgroup in trigger_groups: #iterate through the trigger groups (gFEX SR & LR, jFEX SR & LR)
         for t in trigger_group_list[tgroup]: #iterate through the triggers within subgroups 
             #add algorithm that flags if the efficiency is not reaching 100% 
             # assemble thresholdConfig dict
             thresholdConfig = {"Plateau":plateau_dict.get(t,[0.99,0.95])}
-            xMaxConfig = min(threshold_dict[t][1]*2.5, binmax["SRpt"]) #set the x maximum of the fit to be 6 times the upper limit, to help the fit work better
-            if t in threshold_dict: thresholdConfig["Threshold"] = threshold_dict[t]
+            thresholdConfig["Threshold"] = get_or_estimate_thresholds(t)
+            xMaxConfig = min(thresholdConfig["Threshold"][1]*2.5, binmax["SRpt"]) #set the x maximum of the fit to be 6 times the upper limit, to help the fit work better
+            # if t in threshold_dict: thresholdConfig["Threshold"] = threshold_dict[t]
             helper.defineDQAlgorithm("JetEfficiency_"+t, 
                                     hanConfig={"libname":"libdqm_algorithms.so","name":"Simple_fermi_Fit_TEff", "xmax":xMaxConfig, "ImproveFit":1}, # this line is always the same
                                     thresholdConfig=thresholdConfig
@@ -189,8 +167,92 @@ def JetEfficiencyMonitoringConfig(flags):
     result.merge(acc)
     print("flags.DQ.Environment = " + flags.DQ.Environment )
     return result
- 
 
+def get_closest_threshold(trigger_value, extracted_values, lower_bounds, upper_bounds):
+    """
+    Finds and returns the threshold values of the closest existing trigger.
+    """
+    import numpy as np
+    closest_index = np.abs(extracted_values - trigger_value).argmin()
+    return [lower_bounds[closest_index], upper_bounds[closest_index]]
+
+def estimate_thresold(trigger_name):
+    """
+    Estimates the DQ monitoring threshold range for a given trigger name based on given threshold_dict,
+    treating jet types (gJ, gLJ, jJ, and jLJ) as separate for extrapolation.
+    If interpolation fails, it returns the closest existing trigger values.
+    """
+    import re
+    import numpy as np
+    # Extract the numeric portion and type from the trigger name
+    match = re.search(r'(gJ|gLJ|jJ|jLJ)(\d+)', trigger_name)
+    if not match:
+        return None
+
+    trigger_type, trigger_value = match.groups()
+    trigger_value = int(trigger_value)
+
+    # Gather existing numeric values and their thresholds for the same type
+    extracted_values = []
+    lower_bounds = []
+    upper_bounds = []
+
+    for key, (low, high) in threshold_dict.items():
+        key_match = re.search(r'(gJ|gLJ|jJ|jLJ)(\d+)', key)
+        if key_match and key_match.group(1) == trigger_type:
+            extracted_values.append(int(key_match.group(2)))
+            lower_bounds.append(low)
+            upper_bounds.append(high)
+
+    if not extracted_values:
+        return None  # No matching trigger types found
+
+    extracted_values = np.array(extracted_values)
+    lower_bounds = np.array(lower_bounds)
+    upper_bounds = np.array(upper_bounds)
+
+    # Try interpolation/extrapolation
+    lower_pred = np.interp(trigger_value, extracted_values, lower_bounds, left=lower_bounds[0], right=lower_bounds[-1])
+    upper_pred = np.interp(trigger_value, extracted_values, upper_bounds, left=upper_bounds[0], right=upper_bounds[-1])
+
+    return [lower_pred, upper_pred]
+
+def get_or_estimate_thresholds(trigger_name):
+    """
+    Returns the threshold from threshold_dict if it exists.
+    Otherwise, predicts the thresholds using estimate_thresold.
+    """
+    if trigger_name in threshold_dict:
+        return threshold_dict[trigger_name]  # Return stored values if available
+    else:
+        print("WARNING, trigger " + trigger_name + " doesn't have predifined thresholds for DQ Algorithm. Estimating thresholds with a fit, or using thresholds from closest exisiting trigger.")
+        print("Please add thresholds to the threshold_dict for trigger " + trigger_name)
+        print(estimate_thresold(trigger_name)) 
+        return estimate_thresold(trigger_name)  # Predict or use closest match
+
+
+plateau_dict = {} #in case there are low stats for some of the triggers, we could modify the threshold ranges for some triggers
+threshold_dict = {"L1_gJ20p0ETA25" : [55e3, 75e3], #hits 50% at 50 for a good run, 100% around 75
+                    "L1_gJ50p0ETA25" : [110e3, 180e3], #hits 50% at 109 for a good run, 100% around 180
+                    "L1_gJ100p0ETA25" : [195e3, 3000e3],#hits 50% at 185 for a good run, 100% around 300
+                    "L1_gJ400p0ETA25" : [620e3, 900e3],#hits 50% at 611 for a good run, 100% around 900
+                    "L1_gLJ80p0ETA25" : [125e3, 200e3],#hits 50% at 113 for a good run, 100% around 200
+                    "L1_gLJ100p0ETA25" : [150e3, 240e3],#hits 50% at 137 for a good run, 100% around 240
+                    "L1_gLJ140p0ETA25" : [210e3, 315e3],#hits 50% at 197 for a good run, 100% around 315
+                    "L1_gLJ160p0ETA25" : [240e3, 260e3],#hits 50% at 225 for a good run, 100% around 350
+                    "L1_jJ30" : [50e3, 85e3],#hits 50% at 46 for a good run, 100% around 85
+                    "L1_jJ40" : [55e3, 90e3],#hits 50% at 47 for a good run, 100% around 90
+                    "L1_jJ50" : [60e3, 100e3],#hits 50% at 53 for a good run, 100% around 100
+                    "L1_jJ60" : [90e3, 130e3],#hits 50% at 85 for a good run, 100% around 130
+                    "L1_jJ80" : [90e3, 155e3],#hits 50% at 86 for a good run, 100% around 155
+                    "L1_jJ90" : [110e3, 185e3],#hits 50% at 105 for a good run, 100% around 185
+                    "L1_jJ125" : [145e3, 230e3],#hits 50% at 140 for a good run, 100% around 230
+                    "L1_jJ140" : [160e3, 225e3],#hits 50% at 150 for a good run, 100% around 255
+                    "L1_jJ160" : [180e3, 260e3],#hits 50% at 170 for a good run, 100% around 260
+                    "L1_jJ180" : [235e3, 320e3],#hits 50% at 223 for a good run, 100% around 320
+                    "L1_SC111-CjJ40": [195e3, 300e3],#hits 50% at 190 for a good run, 100% around 300
+}
+ 
 
 if __name__=='__main__':
     # set debug level for whole job

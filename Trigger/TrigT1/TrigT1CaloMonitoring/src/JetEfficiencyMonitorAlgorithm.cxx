@@ -27,12 +27,21 @@ static const std::map<std::string, int> l1_trigger_flatline_vals = {
 };
 
 // Define gFEX_trigger_thresholds as a static const map
-static const std::map<std::string, int> gFEX_trigger_thresholds = {
-    {"L1_gLJ80p0ETA25", 80 * GeV}, {"L1_gLJ100p0ETA25", 100 * GeV},
-    {"L1_gLJ140p0ETA25", 140 * GeV}, {"L1_gLJ160p0ETA25", 160 * GeV},
-    {"L1_gJ20p0ETA25", 20 * GeV}, {"L1_gJ50p0ETA25", 50 * GeV},
-    {"L1_gJ100p0ETA25", 100 * GeV}, {"L1_gJ400p0ETA25", 800 * GeV}
-};
+// can add triggers and their corresponding threshold value as: {"L1_gLJ80p0ETA25", 100 * GeV}
+// if the value is easily extracted from the trigger name, then just use the trigger name
+// use trigger name from the function extractgFEXThresholdValue
+static const std::map<std::string, int> gFEX_trigger_thresholds = {};
+int JetEfficiencyMonitorAlgorithm::extractgFEXThresholdValue(const std::string& key) const {
+  std::regex pattern(R"(L1_g(?:LJ|J)(\d+)(?:p0ETA25)?)");
+  std::smatch match;
+  
+  if (std::regex_search(key, match, pattern)) {
+      return std::stoi(match[1]) * GeV;
+  } else {
+      std::cerr << "Could not extract threshold from key: " << key << std::endl;
+      return -1; // Error indicator
+  }
+}
 
 
 JetEfficiencyMonitorAlgorithm::JetEfficiencyMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
@@ -255,7 +264,6 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
         auto passed_pt_bool  = Monitored::Scalar<bool>("bool_"+r+"_"+trigger_name, trig_of_interest_decision);
         fill(m_packageName, pt_ref, passed_pt_bool);
         
-        
          //filling histograms that are effiency curves as a funciton of eta
          //in order to ensure that we are isolating only the eta behavior, we have a
          // flatline value where the pt effiencies aproximtley flatten out to 1
@@ -271,19 +279,32 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
           } //(close IF) jet pt is greater than pt flatline vlaue loop
         } //(close IF) loop that checks if the trigger of interest is in list of flatline trigger vals
       } //(close FOR) loop that iterates through all of L1 single jet triggers we make effiency curves for
-      
+
+      // if a gFEX trigger is not defined in the menu, then we populate the turn on curve using TOBs
+      // check the map to see if there is a predefined 
       for (const auto& trigger_name : m_SmallRadiusJetTriggers_gFEX) {
         bool trig_of_interest_decision = false; // Default to false
+        int gFEX_threshold = -1; // Default invalid threshold value
+          // Check if the trigger name exists in the map first
         auto gFEX_threshold_it = gFEX_trigger_thresholds.find(trigger_name);
-        // Ensure key exists in the map before accessing .second
         if (gFEX_threshold_it != gFEX_trigger_thresholds.end()) {
-            int gFEX_threshold = gFEX_threshold_it->second;
-            if (jet_pt["leadingGfex_SmallRadiusTOB"] >= gFEX_threshold) { trig_of_interest_decision = true;}
+            gFEX_threshold = gFEX_threshold_it->second;
+            ATH_MSG_WARNING("gfex threshold in map! "<< gFEX_threshold);
+        } else {
+            // If not found in the map, extract the threshold dynamically
+            gFEX_threshold = extractgFEXThresholdValue(trigger_name);
+        }
+        ATH_MSG_WARNING("gfex threshold used: "<< gFEX_threshold);
+        // Proceed only if a valid threshold was obtained
+        if (gFEX_threshold != -1) {
+            if (jet_pt["leadingGfex_SmallRadiusTOB"] >= gFEX_threshold) {
+                trig_of_interest_decision = true;
+            }
         }
         // Get values and fill the histogram of offline jet pt and boolean of trigger passing
-        auto passed_pt_bool_gFEX = Monitored::Scalar<bool>("bool_"+r+"_"+trigger_name, trig_of_interest_decision);
+        auto passed_pt_bool_gFEX = Monitored::Scalar<bool>("bool_" + r + "_" + trigger_name, trig_of_interest_decision);
         fill(m_packageName, pt_ref, passed_pt_bool_gFEX);
-      }
+      } 
       
     } //(close IF) loop that checks if the reference trigger and physical property pass is passed
   } //(close FOR) the iteration that fills effiency histogram for 4 different kinds of refernce triggers
@@ -321,16 +342,25 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
         } //(close IF) loop that checks if the trigger of interest is in list of flatline trigger vals
         for (const auto& trigger_name : m_LargeRadiusJetTriggers_gFEX) {
           bool trig_of_interest_decision = false; // Default to false
+          int gFEX_threshold = -1; // Default invalid threshold value
+            // Check if the trigger name exists in the map first
           auto gFEX_threshold_it = gFEX_trigger_thresholds.find(trigger_name);
-          // Ensure key exists in the map before accessing .second
           if (gFEX_threshold_it != gFEX_trigger_thresholds.end()) {
-              int gFEX_threshold = gFEX_threshold_it->second;
-              if (jet_pt["leadingGfex_LargeRadiusTOB"] >= gFEX_threshold) { trig_of_interest_decision = true;}
+              gFEX_threshold = gFEX_threshold_it->second;
+          } else {
+              // If not found in the map, extract the threshold dynamically
+              gFEX_threshold = extractgFEXThresholdValue(trigger_name);
+          }
+          // Proceed only if a valid threshold was obtained
+          if (gFEX_threshold != -1) {
+              if (jet_pt["leadingGfex_LargeRadiusTOB"] >= gFEX_threshold) {
+                  trig_of_interest_decision = true;
+              }
           }
           // Get values and fill the histogram of offline jet pt and boolean of trigger passing
-          auto passed_pt_bool_gFEX = Monitored::Scalar<bool>("bool_"+r+"_"+trigger_name, trig_of_interest_decision);
+          auto passed_pt_bool_gFEX = Monitored::Scalar<bool>("bool_" + r + "_" + trigger_name, trig_of_interest_decision);
           fill(m_packageName, pt_ref, passed_pt_bool_gFEX);
-        }
+        } 
       } //(close FOR) loop that iterates through all of the triggers we make effiency curves for
     } //(close FOR) the iteration that fills effiency histogram for 4 different kinds of refernce triggers
   } //(close IF) loop that checks if the physical properties were passed for the jet
