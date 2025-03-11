@@ -62,7 +62,7 @@ StatusCode FPGATrackSimSecondStageAlg::initialize()
         }
     }
 
-    ATH_CHECK(m_houghRootOutputTool.retrieve(EnableTool{m_doHoughRootOutput}));
+    ATH_CHECK(m_houghRootOutputTool.retrieve(EnableTool{m_doHoughRootOutput2nd}));
     ATH_CHECK(m_NNTrackTool.retrieve(EnableTool{m_doNNTrack}));
     if (m_doSpacepoints) ATH_CHECK(m_spRoadFilterTool.retrieve(EnableTool{m_spRoadFilterTool}));
 
@@ -398,7 +398,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     }
 
     // This one we can do-- by passing in truth and offline tracks via storegate above.
-    if (m_doHoughRootOutput) {
+    if (m_doHoughRootOutput2nd) {
       ATH_CHECK(m_houghRootOutputTool->fillTree(roads, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut, m_NumOfHitPerGrouping));
     }
 

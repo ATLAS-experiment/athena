@@ -58,7 +58,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK(m_roadFinderTool.retrieve());
     ATH_CHECK(m_LRTRoadFilterTool.retrieve(EnableTool{m_doLRT}));
     ATH_CHECK(m_LRTRoadFinderTool.retrieve(EnableTool{m_doLRT}));
-    ATH_CHECK(m_houghRootOutputTool.retrieve(EnableTool{m_doHoughRootOutput}));
+    ATH_CHECK(m_houghRootOutputTool.retrieve(EnableTool{m_doHoughRootOutput1st}));
     ATH_CHECK(m_NNTrackTool.retrieve(EnableTool{m_doNNTrack}));
     ATH_CHECK(m_roadFilterTool.retrieve(EnableTool{m_filterRoads}));
     ATH_CHECK(m_roadFilterTool2.retrieve(EnableTool{m_filterRoads2}));
@@ -88,7 +88,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK( m_FPGARoadKey.initialize() );
     ATH_CHECK( m_FPGATrackKey.initialize() );
     ATH_CHECK( m_FPGAHitKey.initialize() );
-    ATH_CHECK( m_FPGAHitKey_2nd.initialize(m_doHoughRootOutput) );
+    ATH_CHECK( m_FPGAHitKey_2nd.initialize(m_doHoughRootOutput1st) );
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );
     ATH_CHECK( m_FPGAOfflineTrackKey.initialize() );
 
@@ -391,7 +391,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
 
     // This one we can do-- by passing in truth and offline tracks via storegate above.
-    if (m_doHoughRootOutput) {
+    if (m_doHoughRootOutput1st) {
         SG::ReadHandle<FPGATrackSimHitCollection> FPGAHits_2nd(m_FPGAHitKey_2nd.at(0), ctx);
 
         if (!FPGAHits_2nd.isValid()) {
