@@ -171,7 +171,7 @@ namespace CP {
                 const TrackSet tracks = getAssociatedTracks(prim, cache.prim_vtx);
                 cache.tracks.insert(tracks.begin(), tracks.end());
             }
-            const ClusterSet clusters = getAssociatedClusters(ctx, prim);
+            const ClusterSet clusters = getAssociatedClusters(ctx, prim, cache);
             cache.clusters.insert(clusters.begin(), clusters.end());
         }
         getAssocFlowElements(ctx, cache);
@@ -344,7 +344,7 @@ namespace CP {
 
     CorrectionCode IsolationCloseByCorrectionTool::subtractCloseByContribution(const EventContext& ctx, 
                                                                                const xAOD::IParticle* par,
-                                                                               const ObjectCache& cache) const {
+                                                                               ObjectCache& cache) const {
         const IsoVector& types = getIsolationTypes(par);
         if (types.empty()) {
             ATH_MSG_WARNING("No isolation types are defiend for " << particleName(par));
@@ -500,10 +500,10 @@ namespace CP {
     //   - for electrons and photons, collect the associated clusters
     //   - for muons, use associated cluster, if it exists, to get topocluster, otherwise, extrapolate the InDet trackParticle to calo 
     //     and look for topoclusters matching in dR the core muon cone
-    ClusterSet IsolationCloseByCorrectionTool::getAssociatedClusters(const EventContext& ctx, const xAOD::IParticle* P) const {
-        // Use accessor to mark topoclusters which are associated to an egamma object, electron or photon
-        // This will be used to avoid associating the same object to a muon during getCloseByCorrectionPflowIso or getCloseByCorrectionTopoIso
-        static const CharDecorator acc_isAssociatedToEG{"isAssociatedToEG"};
+    ClusterSet IsolationCloseByCorrectionTool::getAssociatedClusters(const EventContext& ctx,const xAOD::IParticle* P,
+                                                                     ObjectCache& cache) const {
+        // Remember topoclusters which are associated to an egamma object, electron or photon
+        // This will be used to avoid associating the same object to a muon
         ClusterSet clusters;
         if (isEgamma(P)) {
             const xAOD::Egamma* egamm = static_cast<const xAOD::Egamma*>(P);
@@ -513,11 +513,10 @@ namespace CP {
                 std::vector<const xAOD::CaloCluster*> constituents = xAOD::EgammaHelpers::getAssociatedTopoClusters(clust);
                 for (const xAOD::CaloCluster* cluster : constituents) {
                     if (cluster && std::abs(cluster->eta()) < 7. && cluster->e() > MinClusterEnergy) { 
-                        clusters.emplace(cluster); 
-                        acc_isAssociatedToEG(*cluster) = true; // set flag that this cluster is associate to an electron or photon
+                        clusters.emplace(cluster);
+                        cache.eg_associated_clusters.insert(cluster); // set flag that this cluster is associated to an electron or photon
                         ATH_MSG_VERBOSE("getAssociatedClusters: " << P->type() << " has topo cluster with pt: " << cluster->pt() * MeVtoGeV << " GeV, eta: " 
-                                         << cluster->eta() << ", phi: " << cluster->phi() 
-                                         << ", isAssociatedToEG: " << (int)acc_isAssociatedToEG(*cluster));
+                                         << cluster->eta() << ", phi: " << cluster->phi());
                     }
                 }
             }
@@ -538,7 +537,7 @@ namespace CP {
                 for (const xAOD::CaloCluster* cluster : constituents) {
                     if (cluster && std::abs(cluster->eta()) < 7. && cluster->e() > MinClusterEnergy) {
                         // skip association if this cluster is already associated with an electron or photon - priority is given to egamma reco
-                        if (!acc_isAssociatedToEG.isAvailable(*cluster) || !acc_isAssociatedToEG(*cluster)) {
+                        if (!cache.eg_associated_clusters.contains(cluster)) {
                             clusters.emplace(cluster);
                             foundMuonTopo = true;
                             ATH_MSG_VERBOSE("getAssociatedClusters: muon has topo cluster with pt: " << cluster->pt() * MeVtoGeV << " GeV, eta: " 
@@ -696,7 +695,7 @@ namespace CP {
     }
 
     CorrectionCode IsolationCloseByCorrectionTool::getCloseByCorrectionTopoIso(const EventContext& ctx, const xAOD::IParticle* primary,
-                                                                               const IsoType type, const ObjectCache& cache,
+                                                                               const IsoType type, ObjectCache& cache,
                                                                                float& isoValue) const {
         // check if the isolation can be loaded
         if (!isTopoEtIso(type)) {
@@ -722,7 +721,7 @@ namespace CP {
             ATH_MSG_VERBOSE("getCloseByCorrectionTopoIso: " << toString(type) << " of " << particleName(primary) << " with pt: " 
                             << primary->pt() * MeVtoGeV << " GeV, eta: " << primary->eta()
                             << ", phi: " << primary->phi() << " before correction: " << isoValue * MeVtoGeV << " GeV. ");
-            ClusterSet assoc = getAssociatedClusters(ctx, primary);
+            ClusterSet assoc = getAssociatedClusters(ctx, primary, cache);
             for (const CaloClusterPtr& calo : cache.clusters) {
                 const float dR = xAOD::P4Helpers::deltaR(ref_eta, ref_phi, calo->eta(), calo->phi());
                 ATH_MSG_VERBOSE("getCloseByCorrectionTopoIso: Loop over cluster: " << calo->pt() * MeVtoGeV << " GeV, eta: " << calo->eta() << " phi: " << calo->phi() << " dR: " << dR);
