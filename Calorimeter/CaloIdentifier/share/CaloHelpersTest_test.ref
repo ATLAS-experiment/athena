@@ -1,6 +1,12 @@
 CaloIdentifier/CaloHelpersTest
 test1
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
 LArMiniFCAL_ID       INFO  initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
 LArEM: 173312 36
 LArHEC: 5632 16
 LArFCAL: 3524 6

@@ -137,12 +137,8 @@ IdDictDetDescrCnv    INFO Dictionary LArHighVoltage       version fullAtlas     
 IdDictDetDescrCnv    INFO Dictionary MuonSpectrometer     version R.01                 DetDescr tag MuonIdentifier-02         file IdDictParser/IdDictMuonSpectrometer_R.01.xml
 IdDictDetDescrCnv    INFO Dictionary TileCalorimeter      version fullAtlasAndTestBeam DetDescr tag TileIdentifier-00         file IdDictParser/IdDictTileCalorimeter.xml
 LArElectrodeID       INFO  => initialize_from_dictionary()
-AtlasDetectorID      INFO initialize_from_dictionary - OK
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 LArHVLineIDDetD...   INFO in createObj: creating a LArHVLineID helper object in the detector store
 LArHVLineID          INFO  => initialize_from_dictionary()
-AtlasDetectorID      INFO initialize_from_dictionary - OK
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 LArHVLineID          INFO  => initialize_from_dictionary(dict_mgr) =0
 LArHVLineID          INFO Register_dict_tag of LArHighVoltage is OK
 LArHVLineID          INFO setDictVersion of LArHighVoltage is OK
@@ -164,7 +160,6 @@ EMECConstruction     INFO activating LAr::EMEC::Pos::OuterWheel
 ClassIDSvc           INFO getRegistryEntries: read 3129 CLIDRegistry entries for module ALL
 CaloIDHelper_ID...   INFO in createObj: creating a TileTBID helper object in the detector store
 TileTBID             INFO initialize_from_dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 EndcapDMConstru...   INFO Start building EC electronics geometry
 EMECConstruction     INFO multi-layered version of absorbers activated, parameter value is 1
 EMECConstruction     INFO activating LAr::EMEC::Neg::InnerWheel
@@ -180,26 +175,19 @@ TileDddbManager      INFO n_saddle = 1
 TileDddbManager      INFO n_tilb = 20
 TileDddbManager      INFO n_tileSwitches = 1
 CaloIDHelper_ID...   INFO in createObj: creating a TileID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 TileNeighbour        INFO Reading file  /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc8-opt/2021-09-29T2101/Athena/22.0.45/InstallArea/x86_64-centos7-gcc8-opt/share/TileNeighbour_reduced.txt
 TileHWIDDetDesc...   INFO in createObj: creating a TileHWID helper object in the detector store
 TileHWID             INFO initialize_from_dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 ClassIDSvc           INFO getRegistryEntries: read 55 CLIDRegistry entries for module ALL
 CaloIDHelper_ID...   INFO in createObj: creating a CaloCell_ID helper object in the detector store
 CaloIDHelper_ID...   INFO in createObj: creating a LArEM_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a LArHEC_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a LArFCAL_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 LArFCAL_Base_ID      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc8-opt/2021-09-29T2101/Athena/22.0.45/InstallArea/x86_64-centos7-gcc8-opt/share/FCal2DNeighbors-April2011.txt
 LArFCAL_Base_ID      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc8-opt/2021-09-29T2101/Athena/22.0.45/InstallArea/x86_64-centos7-gcc8-opt/share/FCal3DNeighborsNext-April2011.txt
 LArFCAL_Base_ID      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc8-opt/2021-09-29T2101/Athena/22.0.45/InstallArea/x86_64-centos7-gcc8-opt/share/FCal3DNeighborsPrev-April2011.txt
 CaloIDHelper_ID...   INFO in createObj: creating a LArMiniFCAL_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 LArMiniFCAL_ID       INFO  initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 GeoModelSvc.Til...   INFO Ushape parameter from database is: 1
 GeoModelSvc.Til...   INFO Glue parameter from database is: 1
 GeoModelSvc.Til...   INFO PVT parameter from database is: 0
@@ -291,27 +279,19 @@ CaloIdMgrDetDes...   INFO in createObj: creating a CaloDescrManager object in th
 ClassIDSvc           INFO getRegistryEntries: read 188 CLIDRegistry entries for module ALL
 CaloIDHelper_ID...   INFO in createObj: creating a CaloDM_ID helper object in the detector store
 CaloDM_ID            INFO initialize_from_dictionary
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a CaloLVL1_ID helper object in the detector store
 CaloLVL1_ID          INFO initialize_from_dictionary
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a TTOnlineID helper object in the detector store
 TTOnlineID           INFO initialize_from_dictionary
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a CaloCell_SuperCell_ID helper object in the detector store
 CaloIDHelper_ID...   INFO in createObj: creating a LArEM_SuperCell_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a LArHEC_SuperCell_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a LArFCAL_SuperCell_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 LArFCAL_Base_ID      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc8-opt/2021-09-29T2101/Athena/22.0.45/InstallArea/x86_64-centos7-gcc8-opt/share/FCalSuperCells2DNeighborsNew-April2014.txt
 LArFCAL_Base_ID      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc8-opt/2021-09-29T2101/Athena/22.0.45/InstallArea/x86_64-centos7-gcc8-opt/share/FCalSuperCells3DNeighborsNextNew-April2014.txt
 LArFCAL_Base_ID      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc8-opt/2021-09-29T2101/Athena/22.0.45/InstallArea/x86_64-centos7-gcc8-opt/share/FCalSuperCells3DNeighborsPrevNew-April2014.txt
 CaloIDHelper_ID...   INFO in createObj: creating a Tile_SuperCell_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 TileNeighbour        INFO Reading file  /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc8-opt/2021-09-29T2101/Athena/22.0.45/InstallArea/x86_64-centos7-gcc8-opt/share/TileSuperCellNeighbour.txt
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIdMgrDetDes...   INFO  Finished 
 CaloIdMgrDetDes...   INFO Initializing CaloIdMgr from values in CaloIdMgrDetDescrCnv 
 Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 8667C6F2-1559-DE11-A611-000423D9A21A
