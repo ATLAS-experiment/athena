@@ -606,6 +606,7 @@ def getDevSignatures():
         ChainProp(name='HLT_tau30_mediumGNTau_L1cTAU30M', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),
         ChainProp(name='HLT_tau35_mediumGNTau_L1cTAU30M', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),
         ChainProp(name='HLT_tau40_mediumGNTau_L1cTAU35M', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_tau50_mediumGNTau_L1cTAU50M', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),
         ChainProp(name='HLT_tau60_mediumGNTau_L1eTAU60', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),
         ChainProp(name='HLT_tau80_mediumGNTau_L1eTAU80', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),
         #----------------------------------------------------------------------------------------------------------------------
@@ -631,6 +632,15 @@ def getDevSignatures():
         ChainProp(name='HLT_tau25_mediumGNTau_L1jTAU20', groups=SupportPhIGroup+SingleTauGroup, monGroups=['tauMon:t0']),
         ChainProp(name='HLT_tau35_mediumGNTau_L1eTAU30', groups=SupportPhIGroup+SingleTauGroup, monGroups=['tauMon:t0']),
         #----------------------------------------------------------------------------------------------------------------------
+
+
+        # g-2 tau triggers (ATR-30638)
+        ChainProp(name='HLT_2tau50_mediumRNN_29dphiAA_L12cTAU50M_DPHI-2eTAU50', l1SeedThresholds=['cTAU50M'], groups=MultiTauGroup+DevGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_2tau50_mediumGNTau_29dphiAA_L12cTAU50M_DPHI-2eTAU50', l1SeedThresholds=['cTAU50M'], groups=MultiTauGroup+DevGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_tau70_mediumRNN_tau50_mediumRNN_29dphiAB_L1eTAU70_2cTAU50M_DPHI-2eTAU50', l1SeedThresholds=['eTAU70', 'cTAU50M'], groups=MultiTauGroup+DevGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_tau70_mediumGNTau_tau50_mediumGNTau_29dphiAB_L1eTAU70_2cTAU50M_DPHI-2eTAU50', l1SeedThresholds=['eTAU70', 'cTAU50M'], groups=MultiTauGroup+DevGroup, monGroups=['tauMon:t0']),
+
+
 
 
         # Loose and Tight variations

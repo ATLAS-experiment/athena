@@ -298,10 +298,12 @@ namespace TrigConf {
 	 LOOSE = 1, MEDIUM = 2, TIGHT = 3, 
 	 HADLOOSE = 4, HADMEDIUM = 5, HADTIGHT = 6, HAD = 7, // HAD = HADMEDIUM for backward compatibility
 
-	 // cTAU-specific WPs
+	     // cTAU-specific WPs
          LOOSE12 = 8, LOOSE20 = 9, LOOSE30 = 10, LOOSE35 = 11,
          MEDIUM12 = 12, MEDIUM20 = 13, MEDIUM30 = 14, MEDIUM35 = 15,
-         TIGHT12 = 16, TIGHT20 = 17, TIGHT30 = 18, TIGHT35 = 19
+         TIGHT12 = 16, TIGHT20 = 17, TIGHT30 = 18, TIGHT35 = 19,
+         LOOSE50 = 20, MEDIUM50 = 21, TIGHT50 = 22,
+         LOOSE55 = 23, MEDIUM55 = 24, TIGHT55 = 25
       };
       static std::string wpToString(WP);
       static WP stringToWP(const std::string &);

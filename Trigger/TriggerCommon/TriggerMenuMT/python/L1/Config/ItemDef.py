@@ -541,12 +541,14 @@ class ItemDef:
         MenuItem('L1_cTAU30M' ).setLogic( d.cTAU30M  & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU35'  ).setLogic( d.eTAU35   & physcond).setTriggerType( TT.calo )
         MenuItem('L1_cTAU35M' ).setLogic( d.cTAU35M  & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_cTAU50M' ).setLogic( d.cTAU50M  & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU40HM').setLogic( d.eTAU40HM & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU40HT').setLogic( d.eTAU40HT & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU60HM').setLogic( d.eTAU60HM & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU80HL').setLogic( d.eTAU80HL & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU60HL').setLogic( d.eTAU60HL & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU60'  ).setLogic( d.eTAU60   & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_eTAU70'  ).setLogic( d.eTAU70   & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU80'  ).setLogic( d.eTAU80   & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU140' ).setLogic( d.eTAU140  & physcond).setTriggerType( TT.calo )
 
@@ -2168,7 +2170,8 @@ class ItemDef:
             MenuItem('L1_DPHI-2jTAU1').setLogic( d.TOPO_23DPHI32_2jTAU1s & physcond)
 
             # g-2 tau (ATR-30638)
-            MenuItem('L1_DPHI-2eTAU60').setLogic(d.TOPO_30DPHI32_2eTAU60s & physcond)
+            MenuItem('L1_2cTAU50M_DPHI-2eTAU50').setLogic(d.cTAU50M.x(2) & d.TOPO_30DPHI32_2eTAU50s & physcond)
+            MenuItem('L1_eTAU70_2cTAU50M_DPHI-2eTAU50').setLogic(d.eTAU70 & d.cTAU50M.x(2) & d.TOPO_30DPHI32_2eTAU50s & physcond)
 
             # ATR-30657
             MenuItem('L1_BTAG-MU5VFjJ30').setLogic( d.TOPO_0DR04_MU5VFab_CjJ30ab & physcond)
