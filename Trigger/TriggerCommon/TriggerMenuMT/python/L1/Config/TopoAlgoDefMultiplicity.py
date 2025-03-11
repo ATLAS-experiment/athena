@@ -63,7 +63,7 @@ class TopoAlgoDefMultiplicity:
             tm.registerTopoAlgo(alg)
                 
         etauThresholds_3bits = [ 
-            'eTAU1', 'eTAU12', 'eTAU20',
+            'eTAU1', 'eTAU12', 'eTAU20', 'eTAU70',
         ]
         jtauThresholds_3bits = [ 
             'jTAU20'
@@ -73,17 +73,16 @@ class TopoAlgoDefMultiplicity:
         ]
         etauThresholds_2bits = [ 
             'eTAU20L', 'eTAU20M', 'eTAU30', 'eTAU30M', 'eTAU35', 'eTAU35M', 'eTAU40HM', 'eTAU60', 'eTAU80', 'eTAU140', 
-            'eTAU40HT', 'eTAU60HM','eTAU60HL', 'eTAU80HL',
+            'eTAU40HT', 'eTAU60HM','eTAU60HL', 'eTAU80HL', 
         ]
         jtauThresholds_2bits = [ 
             'jTAU1',
         ]
         ctauThresholds_2bits = [ 
-            'cTAU30M', 'cTAU35M',  
+            'cTAU30M', 'cTAU35M',  'cTAU50M', 
 
             # spares
             'cTAUSPARE2',
-            'cTAUSPARE3',
         ]
 
         for tau in etauThresholds_3bits:

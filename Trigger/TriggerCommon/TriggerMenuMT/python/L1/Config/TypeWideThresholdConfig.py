@@ -495,9 +495,21 @@ class L1Config_cTAU:
     eTAU_rCoreMin_WP_fw_medium35: eTAUWP = eTAUWP.Medium
     eTAU_rHadMin_WP_fw_medium35: eTAUWP = eTAUWP.NoSelection
 
+    #cTAU50M (Medium50)
+    isolation_fw_medium50: int = 650 + 550
+    isolation_jTAUCoreScale_fw_medium50: int = 550
+    eTAU_rCoreMin_WP_fw_medium50: eTAUWP = eTAUWP.Tight
+    eTAU_rHadMin_WP_fw_medium50: eTAUWP = eTAUWP.NoSelection
+
+    #cTAU55M (Medium55)
+    isolation_fw_medium55: int = 650 + 550
+    isolation_jTAUCoreScale_fw_medium55: int = 550
+    eTAU_rCoreMin_WP_fw_medium55: eTAUWP = eTAUWP.Tight
+    eTAU_rHadMin_WP_fw_medium55: eTAUWP = eTAUWP.NoSelection
+
     def __post_init__(self):
         # By default, duplicate the configs of isolation_fw_loose and isolation_fw_tight:
-        for default_wp, wp_list in {'Loose': ['Loose12', 'Loose20', 'Loose30', 'Loose35'], 'Tight': ['Tight12', 'Tight20', 'Tight30', 'Tight35']}.items():
+        for default_wp, wp_list in {'Loose': ['Loose12', 'Loose20', 'Loose30', 'Loose35', 'Loose50', 'Loose55'], 'Tight': ['Tight12', 'Tight20', 'Tight30', 'Tight35', 'Tight50', 'Tight55']}.items():
             for wp in wp_list:
                 setattr(self, f'isolation_fw_{wp.lower()}', getattr(self, f'isolation_fw_{default_wp.lower()}'))
                 setattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}', getattr(self, f'isolation_jTAUCoreScale_fw_{default_wp.lower()}'))
@@ -508,13 +520,17 @@ class L1Config_cTAU:
         confObj = odict()
         confObj['workingPoints'] = odict()
 
-        for wp in ['Loose', 'Medium', 'Tight', 'Loose12', 'Loose20', 'Loose30', 'Loose35', 'Medium12', 'Medium20', 'Medium30', 'Medium35', 'Tight12', 'Tight20', 'Tight30', 'Tight35']:
-            confObj['workingPoints'][wp] = [
-                odict([('isolation', cTAUfwToFlowConversion(getattr(self, f'isolation_fw_{wp.lower()}'))), ('isolation_fw', getattr(self, f'isolation_fw_{wp.lower()}')),
-                       ('isolation_jTAUCoreScale', cTAUfwToFlowConversion(getattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}'))), ('isolation_jTAUCoreScale_fw', getattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}')),
-                       ('eTAU_rCoreMin', getattr(self, f'eTAU_rCoreMin_WP_fw_{wp.lower()}').rCoreMinCut(do_eFex_BDT_Tau)), ('eTAU_rCoreMin_WP_fw', getattr(self, f'eTAU_rCoreMin_WP_fw_{wp.lower()}').value),
-                       ('eTAU_rHadMin', getattr(self, f'eTAU_rHadMin_WP_fw_{wp.lower()}').rHadMinCut(do_eFex_BDT_Tau)), ('eTAU_rHadMin_WP_fw', getattr(self, f'eTAU_rHadMin_WP_fw_{wp.lower()}').value)]),
-            ]
+        for wp in [f'{wp}{thr}' for wp in ('Loose', 'Medium', 'Tight') for thr in ('', 12, 20, 30, 35, 50, 55)]:
+            confObj['workingPoints'][wp] = [{
+                'isolation': cTAUfwToFlowConversion(getattr(self, f'isolation_fw_{wp.lower()}')),
+                'isolation_fw': getattr(self, f'isolation_fw_{wp.lower()}'),
+                'isolation_jTAUCoreScale': cTAUfwToFlowConversion(getattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}')),
+                'isolation_jTAUCoreScale_fw': getattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}'),
+                'eTAU_rCoreMin': getattr(self, f'eTAU_rCoreMin_WP_fw_{wp.lower()}').rCoreMinCut(do_eFex_BDT_Tau),
+                'eTAU_rCoreMin_WP_fw': getattr(self, f'eTAU_rCoreMin_WP_fw_{wp.lower()}').value,
+                'eTAU_rHadMin': getattr(self, f'eTAU_rHadMin_WP_fw_{wp.lower()}').rHadMinCut(do_eFex_BDT_Tau),
+                'eTAU_rHadMin_WP_fw': getattr(self, f'eTAU_rHadMin_WP_fw_{wp.lower()}').value,
+            }]
 
         confObj['resolutionMeV'] = 100
 
@@ -522,11 +538,8 @@ class L1Config_cTAU:
         for wp in confObj['workingPoints']:
             for ssthr in confObj['workingPoints'][wp]:
                 for ssthr_i in ssthr:
-                    if '_fw' in ssthr_i:
-                         if not isinstance(ssthr[ssthr_i], int):
-                              raise RuntimeError(f'Threshold {ssthr_i} in cTAU configuration is not an integer!')
-                         elif ssthr[ssthr_i] < 0:
-                            raise RuntimeError('Threshold {ssthr_i} in cTAU configuration is negative!')
+                    if '_fw' in ssthr_i and (not isinstance(ssthr[ssthr_i], int) or ssthr[ssthr_i] < 0):
+                        raise RuntimeError(f'Threshold {ssthr_i} in cTAU configuration must be a non-negative integer!')
 
         return confObj
 
@@ -597,9 +610,9 @@ def getConfig_jJ(do_HI_tob_thresholds):
     confObj["ptMinxTOB2"] = 5 if do_HI_tob_thresholds else 15
     confObj["ptMinxTOB3"] = 5 if do_HI_tob_thresholds else 15
     confObj["resolutionMeV"] = 200  
-    confObj["seedThreshold1"] = -1 # signed, in GeV, negative values in practice mean no seed threshold. 
-    confObj["seedThreshold2"] = -1 # Max value (HW constraint): (2^20)-1 * 25MeV = 26214.375 (GeV)
-    confObj["seedThreshold3"] = -1 
+    confObj["seedThreshold1"] = 3 # signed, in GeV, negative values in practice mean no seed threshold. 
+    confObj["seedThreshold2"] = 3 # Max value (HW constraint): (2^20)-1 * 25MeV = 26214.375 (GeV)
+    confObj["seedThreshold3"] = 3 
     return confObj
 
 def getConfig_jLJ():

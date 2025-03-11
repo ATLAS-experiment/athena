@@ -40,6 +40,8 @@ private:
   Gaudi::Property<std::vector<std::string>> m_SmallRadiusJetTriggers_gFEX{this,"SmallRadiusJetTriggers_gFEX",{},"Vector of all small radius gFEX triggers, whose trigger decision is emulated using gFEX TOB values"};
   Gaudi::Property<std::vector<std::string>> m_LargeRadiusJetTriggers_gFEX{this,"LargeRadiusJetTriggers_gFEX",{},"Vector of all large radius gFEX triggers, whose trigger decision is emulated using gFEX TOB values"};
 
+  int extractgFEXThresholdValue(const std::string& key) const;
+
 
   
   // container keys including steering parameter and description

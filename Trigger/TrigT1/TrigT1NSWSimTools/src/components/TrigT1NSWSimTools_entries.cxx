@@ -4,7 +4,7 @@
 #include "TrigT1NSWSimTools/StripClusterTool.h"
 #include "TrigT1NSWSimTools/StripSegmentTool.h"
 #include "TrigT1NSWSimTools/MMTriggerTool.h"
-#include "TrigT1NSWSimTools/TriggerProcessorTool.h"
+#include "src/TriggerProcessorTool.h"
 
 using NSWL1::PadTdsOfflineTool;
 using NSWL1::PadTriggerLogicOfflineTool;

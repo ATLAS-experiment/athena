@@ -183,7 +183,7 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     array.defineHistogram('timeOverThreshold', type='TH1I', title='Time over threshold for station {0}, layer {1};timeOverThreshold; entries', path='SiTimeOverThreshold/{0}', xbins=16, xmin=0.5, xmax=16.5)
     
     array.defineHistogram('clusterY,clusterX', title='Cluster position in station {0} Layer {1};x [mm];y [mm]', type='TH2F', path='Cluster/{0}', xbins=336, xmin=0.0, xmax=17.0, ybins=80, ymin=0.0, ymax=20.0)        
-    
+    array.defineHistogram('sit_plane_eff_passed, sit_plane_eff_triedY, sit_plane_eff_triedX ;Efficiency', title='Efficiency for station {0} Layer {1};x [mm];y [mm]', type='TEfficiency', path='Efficiency/{0}', xbins=336, xmin=0.0, xmax=17.0, ybins=80, ymin=0.0, ymax=20.0)
     #Sync clusters
     array.defineHistogram('lbClustersPerPlanesAll,clustersPerPlaneAllPP', title='(All) Number of clusters in station {0}, plane {1} per lumiblock divided by <mu> per event;lumiblock;clusters/<mu> per event', type='TProfile', path='Synchronization/Clusters/', xbins=2000, xmin=0.5, xmax=2000.5)
     array.defineHistogram('lbClustersPerPlanesFront,clustersPerPlaneFrontPP', title='(Front) Number of clusters in station {0}, plane {1} per lumiblock divided by <mu> per event;lumiblock; clusters/<mu> per event', type='TProfile', path='Synchronization/Clusters/Front/', xbins=2000, xmin=0.5, xmax=2000.5)
@@ -234,7 +234,8 @@ if __name__=='__main__':
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Input.Files = ['/eos/user/v/vlysenko/DQ/testing/data24_13p6TeV/data24_13p6TeV.00484780.physics_Main.merge.AOD.f1514_m2248._lb0793._0003.1']
+    #flags.Input.Files = ['/eos/user/v/vlysenko/DQ/testing/data24_13p6TeV/data24_13p6TeV.00484780.physics_Main.merge.AOD.f1514_m2248._lb0793._0003.1']
+    flags.Input.Files = ['/eos/user/l/lvicenik/afp_data/data24_13p6TeV/data24_13p6TeV.00484780.physics_Main.merge.AOD.f1514_m2248._lb0793._0003.1']
     flags.Input.isMC = False
     flags.Output.HISTFileName = 'clean-AFPTest-24.root'
     

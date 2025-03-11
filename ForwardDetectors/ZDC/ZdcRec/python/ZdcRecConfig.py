@@ -281,7 +281,7 @@ def ZdcRecRun3Cfg(flags):
         elif flags.Input.ProjectName == "data24_hi": # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
             doCalib = True
             doTimeCalib = True
-            doFADCCorr = True
+            doFADCCorr = False
             doNonLinCorr = False
 
     # No calibration required (or exists) for MC
@@ -432,7 +432,7 @@ def ZdcLEDRecCfg(flags):
         doFADCCorr = False
 
         if (flags.GeoModel.Run == LHCPeriod.Run3):
-            doFADCCorr = True
+            doFADCCorr = False
         
         acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
         acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
