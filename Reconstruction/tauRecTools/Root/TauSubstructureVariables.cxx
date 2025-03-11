@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //********************************************************************//
@@ -14,6 +14,7 @@
 
 #include "xAODJet/Jet.h"
 #include "xAODTau/TauJet.h"
+#include "CxxUtils/trapping_fp.h"
 
 #include "tauRecTools/CaloClusterVariables.h"
 #include "tauRecTools/TauSubstructureVariables.h"
@@ -138,6 +139,9 @@ StatusCode TauSubstructureVariables::execute(xAOD::TauJet& tau) const {
   float HADEnergy(0.);
 
   for (const xAOD::CaloVertexedTopoCluster& vertexedCluster : vertexedClusterList) {
+    // Tell clang to optimize assuming that FP operations may trap.
+    CXXUTILS_TRAPPING_FP;
+
     // It is at EM/LC scale for EM/LC seed jets
     float clEnergy = vertexedCluster.e();
 
