@@ -5,7 +5,6 @@ EventLoopMgr      WARNING Unable to locate service "EventSelector"
 EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
-RpcIdHelper          INFO initialize_from_dictionary - OK
 RpcIdHelper          INFO MultiRange built successfully to doubletR: MultiRange size is 261
 RpcIdHelper          INFO MultiRange built successfully to detectorElement: DetectorElement MultiRange size is 261
 RpcIdHelper          INFO MultiRange built successfully to rpcStrip: MultiRange size is 261

@@ -72,12 +72,8 @@ IdDictDetDescrCnv                                    INFO Dictionary LArHighVolt
 IdDictDetDescrCnv                                    INFO Dictionary MuonSpectrometer     version R.03                 DetDescr tag MuonIdentifier-08         file IdDictParser/IdDictMuonSpectrometer_R.03.xml
 IdDictDetDescrCnv                                    INFO Dictionary TileCalorimeter      version fullAtlasAndTestBeam DetDescr tag TileIdentifier-00         file IdDictParser/IdDictTileCalorimeter.xml
 LArElectrodeID                                       INFO  => initialize_from_dictionary()
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 LArHVLineIDDetDescrCnv                               INFO in createObj: creating a LArHVLineID helper object in the detector store
 LArHVLineID                                          INFO  => initialize_from_dictionary()
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 LArHVLineID                                          INFO  => initialize_from_dictionary(dict_mgr) =0
 LArHVLineID                                          INFO Register_dict_tag of LArHighVoltage is OK
 LArHVLineID                                          INFO setDictVersion of LArHighVoltage is OK
@@ -92,7 +88,6 @@ EMECConstruction                                     INFO activating LAr::EMEC::
 EMECConstruction                                     INFO activating LAr::EMEC::Pos::OuterWheel
 ClassIDSvc                                           INFO getRegistryEntries: read 6660 CLIDRegistry entries for module ALL
 TileTBID                                             INFO initialize_from_dictionary 
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 EndcapDMConstruction                                 INFO Start building EC electronics geometry
 EMECConstruction                                     INFO multi-layered version of absorbers activated, parameter value is 1
 EMECConstruction                                     INFO activating LAr::EMEC::Neg::InnerWheel
@@ -105,21 +100,14 @@ TileDddbManager                                      INFO n_cuts = 9
 TileDddbManager                                      INFO n_saddle = 1
 TileDddbManager                                      INFO n_tilb = 21
 TileDddbManager                                      INFO n_tileSwitches = 1
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 TileNeighbour                                        INFO Reading file  /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-02-11T2101/Athena/24.0.24/InstallArea/x86_64-el9-gcc13-opt/share/TileNeighbour_reduced.txt
 TileHWIDDetDescrCnv                                  INFO in createObj: creating a TileHWID helper object in the detector store
 TileHWID                                             INFO initialize_from_dictionary 
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 ClassIDSvc                                           INFO getRegistryEntries: read 55 CLIDRegistry entries for module ALL
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 LArFCAL_Base_ID                                      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-02-11T2101/Athena/24.0.24/InstallArea/x86_64-el9-gcc13-opt/share/FCal2DNeighbors-April2011.txt
 LArFCAL_Base_ID                                      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-02-11T2101/Athena/24.0.24/InstallArea/x86_64-el9-gcc13-opt/share/FCal3DNeighborsNext-April2011.txt
 LArFCAL_Base_ID                                      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-02-11T2101/Athena/24.0.24/InstallArea/x86_64-el9-gcc13-opt/share/FCal3DNeighborsPrev-April2011.txt
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 LArMiniFCAL_ID                                       INFO  initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 TileDetDescrManager                                  INFO Entering create_elements()
 AthenaEventLoopMgr                                   INFO Initializing AthenaEventLoopMgr
 ClassIDSvc                                           INFO getRegistryEntries: read 609 CLIDRegistry entries for module ALL
@@ -135,20 +123,12 @@ AthenaEventLoopMgr                                   INFO   ===>>>  start proces
 CaloIdMgrDetDescrCnv                                 INFO in createObj: creating a CaloDescrManager object in the detector store
 ClassIDSvc                                           INFO getRegistryEntries: read 240 CLIDRegistry entries for module ALL
 CaloDM_ID                                            INFO initialize_from_dictionary
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 CaloLVL1_ID                                          INFO initialize_from_dictionary
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 TTOnlineID                                           INFO initialize_from_dictionary
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 LArFCAL_Base_ID                                      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-02-11T2101/Athena/24.0.24/InstallArea/x86_64-el9-gcc13-opt/share/FCalSuperCells2DNeighborsNew-April2014.txt
 LArFCAL_Base_ID                                      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-02-11T2101/Athena/24.0.24/InstallArea/x86_64-el9-gcc13-opt/share/FCalSuperCells3DNeighborsNextNew-April2014.txt
 LArFCAL_Base_ID                                      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-02-11T2101/Athena/24.0.24/InstallArea/x86_64-el9-gcc13-opt/share/FCalSuperCells3DNeighborsPrevNew-April2014.txt
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 TileNeighbour                                        INFO Reading file  /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-02-11T2101/Athena/24.0.24/InstallArea/x86_64-el9-gcc13-opt/share/TileSuperCellNeighbour.txt
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 CaloAlignCondAlg                                     INFO recorded new CaloDetDescr Manager condition object with key CaloDetDescrManager and range {[0,l:0] - [4294967294,l:4294967294]}
 test1
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===

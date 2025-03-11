@@ -178,7 +178,6 @@ IdDictDetDescrCnv    INFO Dictionary LArHighVoltage       version fullAtlas     
 IdDictDetDescrCnv    INFO Dictionary MuonSpectrometer     version R.01                 DetDescr tag MuonIdentifier-02         file IdDictParser/IdDictMuonSpectrometer_R.01.xml
 IdDictDetDescrCnv    INFO Dictionary TileCalorimeter      version fullAtlasAndTestBeam DetDescr tag TileIdentifier-00         file IdDictParser/IdDictTileCalorimeter.xml
 PixelID              INFO Initialize from dictionary
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 indet 1 2,4,5,7,10,11,12,13 7 1fffffffffffffff 61 3 0 min/max 2 13 values  2 4 5 7 10 11 12 13 indexes  0 0 1 2 0 3 0 0 4 5 6 7 indices  8 prev  0 next  0 mode  enumerated  cont mode  none  
 pixel 1 1:3 3 e7ffffffffffffff 59 2 3 min/max 1 3 values  indexes  indices  3 prev  0 next  0 mode  both_bounded  cont mode  none  
 bec 1 -2,0,2 3 f9ffffffffffffff 57 2 5 min/max -2 2 values  -2 0 2 indexes  0 0 1 0 2 indices  3 prev  0 next  0 mode  enumerated  cont mode  none  
@@ -245,7 +244,6 @@ GeoModelSvc.SCT...   INFO Building SCT with Version Tag: ATLAS-R1-2012-03-02-00 
 GeoModelSvc.SCT...   INFO SCT Version: SCT-GEO-01  Package Version: SCT_GeoModel-00-00-00
 SCT_IDDetDescrCnv    INFO in createObj: creating a SCT_ID helper object in the detector store
 SCT_ID               INFO Initialize from dictionary
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 indet 1 2,4,5,7,10,11,12,13 7 1fffffffffffffff 61 3 0
 sct1 1:3 3 e7ffffffffffffff 59 2 3
 bec1 -2,0,2 3 f9ffffffffffffff 57 2 5
@@ -302,7 +300,6 @@ TRT_GeoModel      WARNING Tool setup will force to NOT to use ARGON. Ignore this
 TRT_GeoModel      WARNING Tool setup will force to NOT to use KRYPTON. Ignore this warning if you are running RECONSTRUCTION or DIGI, but cross-check if you are running SIMULATION
 TRT_IDDetDescrCnv    INFO in createObj: creating a TRT_ID helper object in the detector store
 TRT_ID               INFO Initialize from dictionary msgSvc 0x2c7dede8
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 TRT_GeoModel         INFO In TRT Detector Factory (For DC2 and later geometries)
 TRT_GeoModel         INFO  Version: TRT-GEO-00, Name: DC3, Layout: Initial, Code Version: 4.01.01, Description: DC3 Geometry
 TRT_GeoModel         INFO  Static run1 type alignment folder structure found
@@ -342,7 +339,6 @@ MuGM:MuonFactory     INFO MDTIDHELPER retrieved from DetStore
 MDT_IDDetDescrCnv    INFO in createObj: creating a MdtIdHelper object in the detector store
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 MdtIdHelper          INFO MultiRange built successfully to Technology: MultiRange size is 203
 MdtIdHelper          INFO MultiRange built successfully to detector element: Multilayer MultiRange size is 234
 MdtIdHelper          INFO MultiRange built successfully to tube: MultiRange size is 234
@@ -354,7 +350,6 @@ MuGM:MuonFactory     INFO RPCIDHELPER retrieved from DetStore
 RPC_IDDetDescrCnv    INFO in createObj: creating a RpcIdHelper object in the detector store
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 RpcIdHelper          INFO MultiRange built successfully to doubletR: MultiRange size is 234
 RpcIdHelper          INFO MultiRange built successfully to detectorElement: DetectorElement MultiRange size is 234
 RpcIdHelper          INFO MultiRange built successfully to rpcStrip: MultiRange size is 234
@@ -366,7 +361,6 @@ MuGM:MuonFactory     INFO TGCIDHELPER retrieved from DetStore
 TGC_IDDetDescrCnv    INFO in createObj: creating a TgcIdHelper object in the detector store
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 TgcIdHelper          INFO MultiRange built successfully to Technology: MultiRange size is 203
 TgcIdHelper          INFO MultiRange built successfully to detector element: Multilayer MultiRange size is 203
 TgcIdHelper          INFO MultiRange built successfully to channel: MultiRange size is 234
@@ -378,7 +372,6 @@ MuGM:MuonFactory     INFO CSCIDHELPER retrieved from DetStore
 CSC_IDDetDescrCnv    INFO in createObj: creating a CcscIdHelper object in the detector store
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CscIdHelper          INFO MultiRange built successfully to Technology: MultiRange size is 203
 CscIdHelper          INFO MultiRange built successfully to detector element: Multilayer MultiRange size is 230
 CscIdHelper          INFO MultiRange built successfully to cscStrip: MultiRange size is 234
@@ -391,12 +384,10 @@ MuGM:MuonFactory     INFO STGCIDHELPER retrieved from DetStore
 sTGC_IDDetDescrCnv   INFO in createObj: creating a sTgcIdHelper object in the detector store
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 MuGM:MuonFactory     INFO MMIDHELPER retrieved from DetStore
 MM_IDDetDescrCnv     INFO in createObj: creating a MmIdHelper object in the detector store
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 MuGM:MuonFactory     INFO  **************** MuonDetectorFactory001 ************************
 MuGM:MuonFactory     INFO  *** Start building the Muon Geometry Tree **********************
 MuGM:RDBReadAtlas    INFO Start retriving dbObjects with tag = <ATLAS-R1-2012-03-02-00> node <ATLAS>

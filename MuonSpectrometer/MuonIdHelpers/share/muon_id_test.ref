@@ -5,7 +5,6 @@ AtlasDetectorID...  DEBUG initialize_from_dictionary - unable to find stgc regio
 AtlasDetectorID     DEBUG initLevelsFromDict - there are no sTGC entries in the dictionary! 
 AtlasDetectorID     DEBUG initLevelsFromDict - there are no MM entries in the dictionary! 
 AtlasDetectorID     DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 MdtIdHelper         DEBUG  MDT decode index and bit fields for each level: 
 MdtIdHelper         DEBUG  muon        decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 MdtIdHelper         DEBUG  station     decode 1 vals 0,1,2,3,4,5,6,7,8,9,10,13,14,15,17,18,20,21,41,42,43,44,45,46,47,48,49,50,51,52,53,54 mask/zero mask/shift/bits/offset 1f  e0ffffffffffffff 56 5  3  indexes 0 1 2 3 4 5 6 7 8 9 10 0 0 11 12 13 0 14 15 0 16 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 19 20 21 22 23 24 25 26 27 28 29 30 31 mode  enumerated  
@@ -447,7 +446,6 @@ AtlasDetectorID...  DEBUG initialize_from_dictionary - unable to find stgc regio
 AtlasDetectorID     DEBUG initLevelsFromDict - there are no sTGC entries in the dictionary! 
 AtlasDetectorID     DEBUG initLevelsFromDict - there are no MM entries in the dictionary! 
 AtlasDetectorID     DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 RpcIdHelper         DEBUG  RPC decode index and bit fields for each level: 
 RpcIdHelper         DEBUG  muon        decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 RpcIdHelper         DEBUG  station     decode 1 vals 0,1,2,3,4,5,6,7,8,9,10,13,14,15,17,18,20,21,41,42,43,44,45,46,47,48,49,50,51,52,53,54 mask/zero mask/shift/bits/offset 1f  e0ffffffffffffff 56 5  3  indexes 0 1 2 3 4 5 6 7 8 9 10 0 0 11 12 13 0 14 15 0 16 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 19 20 21 22 23 24 25 26 27 28 29 30 31 mode  enumerated  
@@ -639,7 +637,6 @@ AtlasDetectorID...  DEBUG initialize_from_dictionary - unable to find stgc regio
 AtlasDetectorID     DEBUG initLevelsFromDict - there are no sTGC entries in the dictionary! 
 AtlasDetectorID     DEBUG initLevelsFromDict - there are no MM entries in the dictionary! 
 AtlasDetectorID     DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 TgcIdHelper         DEBUG  TGC decode index and bit fields for each level: 
 TgcIdHelper         DEBUG  muon        decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 TgcIdHelper         DEBUG  station     decode 1 vals 0,1,2,3,4,5,6,7,8,9,10,13,14,15,17,18,20,21,41,42,43,44,45,46,47,48,49,50,51,52,53,54 mask/zero mask/shift/bits/offset 1f  e0ffffffffffffff 56 5  3  indexes 0 1 2 3 4 5 6 7 8 9 10 0 0 11 12 13 0 14 15 0 16 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 19 20 21 22 23 24 25 26 27 28 29 30 31 mode  enumerated  
@@ -739,7 +736,6 @@ AtlasDetectorID...  DEBUG initialize_from_dictionary - unable to find stgc regio
 AtlasDetectorID     DEBUG initLevelsFromDict - there are no sTGC entries in the dictionary! 
 AtlasDetectorID     DEBUG initLevelsFromDict - there are no MM entries in the dictionary! 
 AtlasDetectorID     DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CscIdHelper         DEBUG  CSC decode index and bit fields for each level: 
 CscIdHelper         DEBUG  muon        decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 CscIdHelper         DEBUG  station     decode 1 vals 0,1,2,3,4,5,6,7,8,9,10,13,14,15,17,18,20,21,41,42,43,44,45,46,47,48,49,50,51,52,53,54 mask/zero mask/shift/bits/offset 1f  e0ffffffffffffff 56 5  3  indexes 0 1 2 3 4 5 6 7 8 9 10 0 0 11 12 13 0 14 15 0 16 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 19 20 21 22 23 24 25 26 27 28 29 30 31 mode  enumerated  
@@ -778,7 +774,6 @@ CscIdHelper       VERBOSE MuonIdHelper::init_neighbors
 =========>  checking dictionnary file=IdDictMuonSpectrometer_R.09.02.Asym.xml
 MdtIdHelper         DEBUG (Re)initialize
 AtlasDetectorID     DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 MdtIdHelper         DEBUG  MDT decode index and bit fields for each level: 
 MdtIdHelper         DEBUG  muon        decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 MdtIdHelper         DEBUG  station     decode 1 vals 0,1,2,3,4,5,6,7,8,9,10,13,14,15,17,18,20,21,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58 mask/zero mask/shift/bits/offset 3f  e07fffffffffffff 55 6  3  indexes 0 1 2 3 4 5 6 7 8 9 10 0 0 11 12 13 0 14 15 0 16 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 mode  enumerated  
@@ -1222,7 +1217,6 @@ MdtIdHelper       VERBOSE MuonIdHelper::init_neighbors
 MdtIdHelper         DEBUG  Maximum number of MDT tubes is 108
 RpcIdHelper         DEBUG (Re)initialize
 AtlasDetectorID     DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 RpcIdHelper         DEBUG  RPC decode index and bit fields for each level: 
 RpcIdHelper         DEBUG  muon        decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 RpcIdHelper         DEBUG  station     decode 1 vals 0,1,2,3,4,5,6,7,8,9,10,13,14,15,17,18,20,21,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58 mask/zero mask/shift/bits/offset 3f  e07fffffffffffff 55 6  3  indexes 0 1 2 3 4 5 6 7 8 9 10 0 0 11 12 13 0 14 15 0 16 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 mode  enumerated  
@@ -1413,7 +1407,6 @@ RpcIdHelper       VERBOSE MuonIdHelper::init_neighbors
 RpcIdHelper         DEBUG  Maximum number of RPC gas gaps is 3
 TgcIdHelper         DEBUG (Re)initialize
 AtlasDetectorID     DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 TgcIdHelper         DEBUG  TGC decode index and bit fields for each level: 
 TgcIdHelper         DEBUG  muon        decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 TgcIdHelper         DEBUG  station     decode 1 vals 0,1,2,3,4,5,6,7,8,9,10,13,14,15,17,18,20,21,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58 mask/zero mask/shift/bits/offset 3f  e07fffffffffffff 55 6  3  indexes 0 1 2 3 4 5 6 7 8 9 10 0 0 11 12 13 0 14 15 0 16 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 mode  enumerated  
@@ -1509,7 +1502,6 @@ TgcIdHelper          INFO Initializing TGC hash indices for finding neighbors ..
 TgcIdHelper       VERBOSE MuonIdHelper::init_neighbors 
 CscIdHelper         DEBUG (Re)initialize
 AtlasDetectorID     DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CscIdHelper         DEBUG  CSC decode index and bit fields for each level: 
 CscIdHelper         DEBUG  muon        decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 CscIdHelper         DEBUG  station     decode 1 vals 0,1,2,3,4,5,6,7,8,9,10,13,14,15,17,18,20,21,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58 mask/zero mask/shift/bits/offset 3f  e07fffffffffffff 55 6  3  indexes 0 1 2 3 4 5 6 7 8 9 10 0 0 11 12 13 0 14 15 0 16 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 mode  enumerated  
@@ -1539,7 +1531,6 @@ CscIdHelper          INFO Initializing CSC hash indices for finding neighbors ..
 CscIdHelper       VERBOSE MuonIdHelper::init_neighbors 
 TgcIdHelper         DEBUG (Re)initialize
 AtlasDetectorID     DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 TgcIdHelper         DEBUG  TGC decode index and bit fields for each level: 
 TgcIdHelper         DEBUG  muon        decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 TgcIdHelper         DEBUG  station     decode 1 vals 0,1,2,3,4,5,6,7,8,9,10,13,14,15,17,18,20,21,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58 mask/zero mask/shift/bits/offset 3f  e07fffffffffffff 55 6  3  indexes 0 1 2 3 4 5 6 7 8 9 10 0 0 11 12 13 0 14 15 0 16 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 mode  enumerated  
@@ -1635,7 +1626,6 @@ TgcIdHelper          INFO Initializing TGC hash indices for finding neighbors ..
 TgcIdHelper       VERBOSE MuonIdHelper::init_neighbors 
 MmIdHelper          DEBUG (Re)initialize 
 AtlasDetectorID     DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 MmIdHelper          DEBUG  MicroMegas decode index and bit fields for each level: 
 MmIdHelper          DEBUG  muon        decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 MmIdHelper          DEBUG  station     decode 1 vals 0,1,2,3,4,5,6,7,8,9,10,13,14,15,17,18,20,21,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58 mask/zero mask/shift/bits/offset 3f  e07fffffffffffff 55 6  3  indexes 0 1 2 3 4 5 6 7 8 9 10 0 0 11 12 13 0 14 15 0 16 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 mode  enumerated  
@@ -1673,7 +1663,6 @@ MmIdHelper        VERBOSE MuonIdHelper::init_neighbors
 MdtIdHelper         DEBUG (Re)initialize
 AtlasDetectorID...  DEBUG initialize_from_dictionary - unable to find csc region index: group, region size 0 0
 AtlasDetectorID     DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 MdtIdHelper         DEBUG  MDT decode index and bit fields for each level: 
 MdtIdHelper         DEBUG  muon        decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 MdtIdHelper         DEBUG  station     decode 1 vals 0,1,2,3,4,5,6,7,8,9,10,13,14,15,17,18,20,21,41,42,43,44,45,46,48,52,53,54,55,56,57,58 mask/zero mask/shift/bits/offset 1f  e0ffffffffffffff 56 5  3  indexes 0 1 2 3 4 5 6 7 8 9 10 0 0 11 12 13 0 14 15 0 16 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 19 20 21 22 23 0 24 0 0 0 25 26 27 28 29 30 31 mode  enumerated  
@@ -2094,7 +2083,6 @@ MdtIdHelper         DEBUG  Maximum number of MDT tubes is 108
 RpcIdHelper         DEBUG (Re)initialize
 AtlasDetectorID...  DEBUG initialize_from_dictionary - unable to find csc region index: group, region size 0 0
 AtlasDetectorID     DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 RpcIdHelper         DEBUG  RPC decode index and bit fields for each level: 
 RpcIdHelper         DEBUG  muon        decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 RpcIdHelper         DEBUG  station     decode 1 vals 0,1,2,3,4,5,6,7,8,9,10,13,14,15,17,18,20,21,41,42,43,44,45,46,48,52,53,54,55,56,57,58 mask/zero mask/shift/bits/offset 1f  e0ffffffffffffff 56 5  3  indexes 0 1 2 3 4 5 6 7 8 9 10 0 0 11 12 13 0 14 15 0 16 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 19 20 21 22 23 0 24 0 0 0 25 26 27 28 29 30 31 mode  enumerated  
@@ -2286,7 +2274,6 @@ RpcIdHelper         DEBUG  Maximum number of RPC gas gaps is 3
 TgcIdHelper         DEBUG (Re)initialize
 AtlasDetectorID...  DEBUG initialize_from_dictionary - unable to find csc region index: group, region size 0 0
 AtlasDetectorID     DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 TgcIdHelper         DEBUG  TGC decode index and bit fields for each level: 
 TgcIdHelper         DEBUG  muon        decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 TgcIdHelper         DEBUG  station     decode 1 vals 0,1,2,3,4,5,6,7,8,9,10,13,14,15,17,18,20,21,41,42,43,44,45,46,48,52,53,54,55,56,57,58 mask/zero mask/shift/bits/offset 1f  e0ffffffffffffff 56 5  3  indexes 0 1 2 3 4 5 6 7 8 9 10 0 0 11 12 13 0 14 15 0 16 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 19 20 21 22 23 0 24 0 0 0 25 26 27 28 29 30 31 mode  enumerated  
@@ -2379,7 +2366,6 @@ TgcIdHelper       VERBOSE MuonIdHelper::init_neighbors
 TgcIdHelper         DEBUG (Re)initialize
 AtlasDetectorID...  DEBUG initialize_from_dictionary - unable to find csc region index: group, region size 0 0
 AtlasDetectorID     DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 TgcIdHelper         DEBUG  TGC decode index and bit fields for each level: 
 TgcIdHelper         DEBUG  muon        decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 TgcIdHelper         DEBUG  station     decode 1 vals 0,1,2,3,4,5,6,7,8,9,10,13,14,15,17,18,20,21,41,42,43,44,45,46,48,52,53,54,55,56,57,58 mask/zero mask/shift/bits/offset 1f  e0ffffffffffffff 56 5  3  indexes 0 1 2 3 4 5 6 7 8 9 10 0 0 11 12 13 0 14 15 0 16 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 19 20 21 22 23 0 24 0 0 0 25 26 27 28 29 30 31 mode  enumerated  
@@ -2472,7 +2458,6 @@ TgcIdHelper       VERBOSE MuonIdHelper::init_neighbors
 MmIdHelper          DEBUG (Re)initialize 
 AtlasDetectorID...  DEBUG initialize_from_dictionary - unable to find csc region index: group, region size 0 0
 AtlasDetectorID     DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 MmIdHelper          DEBUG  MicroMegas decode index and bit fields for each level: 
 MmIdHelper          DEBUG  muon        decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 MmIdHelper          DEBUG  station     decode 1 vals 0,1,2,3,4,5,6,7,8,9,10,13,14,15,17,18,20,21,41,42,43,44,45,46,48,52,53,54,55,56,57,58 mask/zero mask/shift/bits/offset 1f  e0ffffffffffffff 56 5  3  indexes 0 1 2 3 4 5 6 7 8 9 10 0 0 11 12 13 0 14 15 0 16 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 18 19 20 21 22 23 0 24 0 0 0 25 26 27 28 29 30 31 mode  enumerated  
