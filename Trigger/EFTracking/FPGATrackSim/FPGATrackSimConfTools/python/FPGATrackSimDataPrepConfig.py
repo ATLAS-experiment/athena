@@ -378,6 +378,7 @@ def FPGATrackSimDataPrepConnectToFastTracking(flagsIn,FinalTracks="F100-",**kwar
     actsFastWorkflowFlags(flags)
     
     flags.Tracking.ActiveConfig.extension=FinalTracks 
+    flags.Tracking.writeExtendedSi_PRDInfo=True
     flags.lock()
     flags.dump()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass") # TODO: Check if it's really necessary 
@@ -465,13 +466,16 @@ def FPGATrackSimDataPrepConnectToFastTracking(flagsIn,FinalTracks="F100-",**kwar
                                                     TrackParticleContainerName=f"{FinalTracks}TrackParticles",
                                                     TruthParticleHitCounts=f"{prefix}TruthParticleHitCounts",
                                                     ComputeTrackRecoEfficiency=True))
+
+    if flags.Tracking.writeExtendedSi_PRDInfo:
+        from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
+        result.merge(ITkActsPrepDataToxAODCfg(flags))
     
     return result
 
 def runDataPrepChain():
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-
 
     FinalDataPrepTrackChainxAODTracksKeyPrefix="FPGA"
     
@@ -526,6 +530,9 @@ def runDataPrepChain():
         if not flags.Reco.EnableTrackOverlay:
             from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
             acc.merge(InDetTrackRecoCfg(flags))
+            from InDetConfig.InDetPrepRawDataToxAODConfig import TruthParticleIndexDecoratorAlgCfg
+            acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
+   
 
     # Use the imported configuration function for the data prep algorithm.
     acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
