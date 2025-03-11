@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALCHI2FITTER_H
 #define GLOBALCHI2FITTER_H
-//#define GXFDEBUGCODE
+
 #include "TrkDetDescrInterfaces/IMaterialEffectsOnTrackProvider.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaBaseComps/AthCheckedComponent.h"
@@ -226,10 +226,6 @@ namespace Trk {
 
       int m_lastiter{};
       int m_miniter{};
-
-      #ifdef GXFDEBUGCODE
-      int m_iterations = 0;
-      #endif
 
       Amg::MatrixX m_derivmat;
       Amg::SymMatrixX m_fullcovmat;
