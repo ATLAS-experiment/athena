@@ -161,13 +161,36 @@ namespace Muon
       constexpr Out fill_bitmask(const uint8_t first_bit,  const uint8_t num_bits) {
       return CxxUtils::ones<Out> (num_bits) << first_bit;
     }
-    
+
+
+    uint16_t get_16bxor_crc(const uint32_t * dataPointer, uint32_t dataSize);
+
   }
+
 }
 
 inline uint32_t Muon::nsw::helper::get_bits (uint32_t word, uint32_t mask, uint8_t position)
 {
   return (word >> position) & mask;
+}
+
+
+inline uint16_t Muon::nsw::get_16bxor_crc(const uint32_t * dataPointer, uint32_t dataSize) {
+
+  uint16_t crc = 0;
+  // checking if last 16b are 0 padding (possibly added by swROD)
+  bool hasPadding = (dataPointer[dataSize-1] & 0xFFFF)==0; // unsafe if the CRC can be 0x0000 but it should never be the case
+  // one could simply cast the (std::uint32_t*) to a (std::uint16_t*) 
+  // but then we might need to handle the word swap (system dependent)
+  for (uint32_t i = 0; i<dataSize-1; ++i) {
+    crc = crc ^ ((dataPointer[i] >> 16) & 0xFFFF);
+    crc = crc ^ ((dataPointer[i] >>  0) & 0xFFFF);
+  }
+  // last word can be: 1) 16b CRC + 16b 0padding 2) 16b of valida data + 16b CRC
+  // need to handle case 2) 
+  if (!hasPadding) {crc = crc ^ ((dataPointer[dataSize-1] >> 16) & 0xFFFF);}
+  
+  return crc;    
 }
 
 //inline uint32_t Muon::nsw::helper::set_bits (uint32_t word, uint32_t setbits, uint32_t mask)

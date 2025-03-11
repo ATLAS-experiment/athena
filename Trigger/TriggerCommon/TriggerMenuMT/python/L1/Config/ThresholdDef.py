@@ -232,12 +232,12 @@ class ThresholdDef:
         # ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ12p0ETA25V', 'jJ'), pt=12, shift_set=1, rangemin=0, rangemax=25 )
 
         # jJET forward jet
-        jJ_cuts = [15, 20, 40, 50, 60, 90, 125]
+        jJ_cuts = [5, 10, 15, 20, 40, 50, 60, 90, 125]
         for thrV in jJ_cuts:
-            ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ%ip30ETA49' % thrV, 'jJ'), pt=get_threshold_cut('FjJ', thrV), shift_set=0, rangemin=30, rangemax=49 )
+            ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ%ip30ETA49' % thrV, 'jJ'), pt=max(get_threshold_cut('FjJ', thrV),ptMin), shift_set=0, rangemin=30, rangemax=49 )
 
         # jJET SPARES
-        for thrV in range(1,4):
+        for thrV in range(1,2):
             jJetThreshold('jJSPARE%i' % thrV, 'jJ').addThrValue(thrVal_SPARE)
 
         # jLJET (default range)

@@ -715,7 +715,9 @@ class ItemDef:
         MenuItem('L1_J400_LAR' ).setLogic( d.J400 & physcond).setTriggerType(TT.lardigital) # ATR-22344
 
         MenuItem('L1_jJ5'           ).setLogic( d.jJ5         & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jJ5p30ETA49'   ).setLogic( d.jJ530ETA49   & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ10'          ).setLogic( d.jJ10         & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jJ10p30ETA49'  ).setLogic( d.jJ1030ETA49  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ20'          ).setLogic( d.jJ20         & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ30'                    ).setLogic( d.jJ30  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ30_EMPTY'              ).setLogic( d.jJ30  & cosmiccond).setTriggerType(TT.calo)
@@ -1596,6 +1598,17 @@ class ItemDef:
         MenuItem('L1_VZDC_A_VZDC_C_jJ10_VjTE200' ).setLogic( PHYS_VZDC_A_VZDC_C & d.jJ10 & Not(d.jTE200)   & physcond)
         MenuItem('L1_1ZDC_NZDC_jJ10_VjTE200' ).setLogic( PHYS_1ZDC_NZDC & d.jJ10 & Not(d.jTE200)   & physcond)
         MenuItem('L1_ZDC_XOR_jJ10_VjTE200' ).setLogic( ZDC_XOR & d.jJ10 & Not(d.jTE200)   & physcond)
+
+        # ATR-30727
+        MenuItem('L1_eTAU1_jJ5_VjTE200' ).setLogic( d.eTAU1 & d.jJ5 & Not(d.jTE200)   & physcond)
+        MenuItem('L1_jJ5_TRT_VjTE200' ).setLogic( d.jJ5 & d.NIMTRT & Not(d.jTE200)   & physcond)
+        MenuItem('L1_eTAU1_jJ5_TRT_VjTE200' ).setLogic( d.eTAU1 & d.jJ5 & d.NIMTRT & Not(d.jTE200)   & physcond)
+        MenuItem('L1_2jJ5_VjTE200' ).setLogic( d.jJ5.x(2) & Not(d.jTE200)   & physcond)
+        MenuItem('L1_2jJ5_TRT_VjTE200' ).setLogic( d.jJ5.x(2) & d.NIMTRT & Not(d.jTE200)   & physcond)
+        MenuItem('L1_jJ5p30ETA49_VjTE200' ).setLogic( d.jJ530ETA49 &  Not(d.jTE200)   & physcond)
+        MenuItem('L1_jJ10p30ETA49_VjTE200' ).setLogic( d.jJ1030ETA49 &  Not(d.jTE200)   & physcond)
+        MenuItem('L1_2jJ5p30ETA49_VjTE200' ).setLogic( d.jJ530ETA49.x(2) & Not(d.jTE200)   & physcond)
+        MenuItem('L1_2jJ10p30ETA49_VjTE200' ).setLogic( d.jJ1030ETA49.x(2) & Not(d.jTE200)   & physcond)
 
         MenuItem('L1_VZDC_A_VZDC_C_TE5_VTE200_UNPAIRED_ISO' ).setLogic( PHYS_VZDC_A_VZDC_C & d.TE5 & Not(d.TE200)   & unpaired_isocond)
         MenuItem('L1_VZDC_A_VZDC_C_jTE5_VjTE200_UNPAIRED_ISO' ).setLogic( PHYS_VZDC_A_VZDC_C & d.jTE5 & Not(d.jTE200)   & unpaired_isocond)
