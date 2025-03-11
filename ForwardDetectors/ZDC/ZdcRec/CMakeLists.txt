@@ -22,6 +22,9 @@ atlas_add_component( ZdcRec
 atlas_add_test( ZDCCalibTest
   SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data23_hi.00463427.calibration_ZDCCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
   POST_EXEC_SCRIPT noerror.sh)
+atlas_add_test( ZDCCalibTest24
+  SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data24_hi.00488915.calibration_ZDCCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
+  POST_EXEC_SCRIPT noerror.sh)
 atlas_add_test( ZDCLEDCalibTest
   SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data23_hi.00463427.calibration_ZDCLEDCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
   POST_EXEC_SCRIPT noerror.sh)

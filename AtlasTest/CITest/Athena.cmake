@@ -93,7 +93,12 @@ atlas_add_citest( RecoRun3Data_Express
 atlas_add_citest( ZdcRec_ZDCCalib 
     SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data23_hi.00463427.calibration_ZDCCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
   )
-atlas_add_citest( ZdcRec_ZDCLEDCalib 
+
+  atlas_add_citest( ZdcRec_ZDCCalib24
+    SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data24_hi.00488915.calibration_ZDCCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
+  )
+
+  atlas_add_citest( ZdcRec_ZDCLEDCalib 
     SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data23_hi.00463427.calibration_ZDCLEDCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
   )
 atlas_add_citest( ZdcRec_ZDCInjCalib 
