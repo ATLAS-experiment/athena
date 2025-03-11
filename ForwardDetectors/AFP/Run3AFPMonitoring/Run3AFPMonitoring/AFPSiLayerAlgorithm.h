@@ -23,7 +23,8 @@ public:
 	virtual ~AFPSiLayerAlgorithm();
 	virtual StatusCode initialize() override;
 	virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
-
+	virtual StatusCode fillHistogramsPlaneEff(const xAOD::AFPSiHitContainer&) const;
+	
 private:
 	std::map<std::string,std::map<std::string,int>> m_StationPlaneGroup;
 	std::map<std::string,int> m_StationGroup; 
