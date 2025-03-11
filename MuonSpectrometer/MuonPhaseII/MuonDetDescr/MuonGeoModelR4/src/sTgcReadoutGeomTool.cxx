@@ -131,7 +131,7 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
 
         if(gapPars.yCutOut) {
             /// Diamond Strip Design       
-            stripDesign->defineDiamond(gapPars.shortWidth, gapPars.longWidth, gapPars.halfHeight, paramBook.yCutoutCathode);
+            stripDesign->defineDiamond(gapPars.shortWidth, gapPars.longWidth, gapPars.halfHeight + 0.001, paramBook.yCutoutCathode);
             ATH_MSG_VERBOSE("The yCutout of the active area is: " << gapPars.yCutOut);
             stripDesign->defineStripLayout(Amg::Vector2D{firstStripPos, 0.},
                                         paramBook.stripPitch, paramBook.stripWidth, paramBook.numStrips);
