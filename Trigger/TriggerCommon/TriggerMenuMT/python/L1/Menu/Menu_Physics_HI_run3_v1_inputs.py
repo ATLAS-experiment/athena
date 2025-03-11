@@ -9,11 +9,9 @@ def defineInputsMenu():
 
     phys_menu_inputs.defineInputsMenu()
 
-    # For now this reproduces the pp menu exactly
-    # In case changes are needed, the example of the MC menu inputs
-    # can be followed in order to overwrite the contents to be modified
-
-    #----------------------------------------------
+    L1MenuFlags.ThresholdMap = {
+        'eTAU70': 'eTAU1',
+    }
 
     remapThresholds(L1MenuFlags)
 

@@ -166,7 +166,7 @@ class ThresholdDef:
             jEMThreshold('jEMSPARE%i' % thrV, 'jEM').addThrValue(thrVal_SPARE)
 
         # eTAU
-        eTAU_cuts = [1, 12, 20, 30, 35, 60, 80, 140]
+        eTAU_cuts = [1, 12, 20, 30, 35, 60, 70, 80, 140]
         # get ptMinToTopo value (different for pp and HI), then adjust threshold for lowest pT items based on this value
         ttconfig = tc.l1menu.thresholds.typeWideThresholdConfig('eTAU')
         ptMin = ttconfig["ptMinToTopo"]
@@ -194,12 +194,12 @@ class ThresholdDef:
             eTauThreshold('eTAUSPARE%i' % thrV, 'eTAU').setEt(thrVal_SPARE)
 
         # cTAU
-        cTAU_cuts = [12, 20, 30, 35]
+        cTAU_cuts = [12, 20, 30, 35, 50]
         for thrV in cTAU_cuts:
             cTauThreshold('cTAU%iM' % thrV, 'cTAU').setEt(get_threshold_cut('cTAU', thrV)).setIsolation( isolation = f'Medium{thrV}' )
 
         # cTAU SPARES
-        for thrV in range(1,4):
+        for thrV in range(1, 2+1):
             cTauThreshold('cTAUSPARE%i' % thrV, 'cTAU').setEt(thrVal_SPARE)
 
         # jTAU
