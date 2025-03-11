@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArClusterRec/LArClusterCollisionTimeAlg.h"
+#include "CxxUtils/trapping_fp.h"
 
 #include <algorithm>
 
@@ -35,6 +36,9 @@ LArClusterCollisionTimeAlg::perSide_t LArClusterCollisionTimeAlg::analyseCluster
   result.nClusters=std::min(m_maxClusters.value(),clusters.size());
   
   if (result.nClusters>0) {
+    // Tell clang to optimize assuming that FP operations may trap.
+    CXXUTILS_TRAPPING_FP;
+
     for (size_t i=0;i<result.nClusters;++i) {
       const xAOD::CaloCluster* clu=clusters[i];
       result.time+=clu->time();
