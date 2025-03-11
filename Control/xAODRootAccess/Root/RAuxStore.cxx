@@ -898,7 +898,9 @@ namespace xAOD {
 
       m_inNtuple->LoadEntry( 0 );
       for( const auto& field :
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+         m_inNtuple->GetModel().GetConstFieldZero().GetConstSubfields()
+#elif ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
          m_inNtuple->GetModel().GetConstFieldZero().GetSubFields()
 #else
          m_inNtuple->GetModel().GetFieldZero().GetSubFields()
@@ -909,7 +911,11 @@ namespace xAOD {
          if( m_topStore && ( fieldName == m_prefix ) ) {
             // loop over the subfields of the top store
             for( const auto& subField : 
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+                                          m_inNtuple->GetModel()
+                                          .GetConstField( fieldName )
+                                          .GetConstSubfields()
+#elif ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
                                           m_inNtuple->GetModel()
                                           .GetConstField( fieldName )
                                           .GetSubFields() 

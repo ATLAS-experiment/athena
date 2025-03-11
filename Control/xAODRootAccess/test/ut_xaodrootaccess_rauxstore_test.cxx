@@ -474,7 +474,11 @@ int main() {
    outputNtuple->PrintInfo();
 
    // It should have 2 top level fields (var1 and decoration).
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+   SIMPLE_ASSERT(
+       outputNtuple->GetModel().GetConstFieldZero().GetConstSubfields().size() ==
+       2 );
+#elif ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
    SIMPLE_ASSERT(
        outputNtuple->GetModel().GetConstFieldZero().GetSubFields().size() ==
        2 );
