@@ -156,14 +156,6 @@ private:
   TProfile2D* m_nSCTHoles_vs_etaphi{nullptr};
   TProfile2D* m_nSCTDeadSensors_vs_etaphi{nullptr};
   TProfile2D* m_nSCTDoubleHoles_vs_etaphi{nullptr};
-
-  TProfile2D* m_nTRTHits_vs_etaphi{nullptr};
-  TProfile2D* m_nTRTHitsXe_vs_etaphi{nullptr};
-  TProfile2D* m_nTRTHitsAr_vs_etaphi{nullptr};
-  TProfile2D* m_nTRTHighThresholdHits_vs_etaphi{nullptr};
-  TProfile2D* m_nTRTHighThresholdHitsXe_vs_etaphi{nullptr};
-  TProfile2D* m_nTRTHighThresholdHitsAr_vs_etaphi{nullptr};
-
   //
   //TProfiles versus mu
   //
