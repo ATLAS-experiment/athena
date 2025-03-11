@@ -222,10 +222,8 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                     m_numPads.push_back(reElement->numChannels(layID));
                     m_numPadEta.push_back(reElement->numPadEta(layID));
                     m_numPadPhi.push_back(reElement->numPadPhi(layID));
-                    // m_firstPadHeight.push_back(reElement->firstPadHeight(layID));
-                    m_padHeight.push_back(reElement->padHeight(layID));
                     m_padPhiShift.push_back(reElement->padPhiShift(layID));
-                    // m_firstPadPhiDiv.push_back(reElement->firstPadPhiDiv(layID));
+                    m_firstPadPhiDiv.push_back(reElement->padDesign(layID).firstPadPhiDiv());
                     m_anglePadPhi = reElement->anglePadPhi(layID);
                     m_beamlineRadius = reElement->beamlineRadius(layID);
                     for (unsigned int pad = 1; pad <= reElement->numChannels(layID); ++pad) {
@@ -239,7 +237,12 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                                        <<" layer: "<<layer<<" pad: "<<pad<<" channelType: "<<chType);
                             continue;
                         }
-
+                        if (pad == 1) {
+                            m_firstPadHeight.push_back(reElement->padHeight(padID));                    
+                        }
+                        else if (pad == 2) {
+                            m_padHeight.push_back(reElement->padHeight(padID));
+                        }
                         Amg::Vector2D localPadPos(Amg::Vector2D::Zero());
                         std::array<Amg::Vector2D,4> localPadCorners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
                         Amg::Vector3D globalPadPos(Amg::Vector3D::Zero());
@@ -321,7 +324,6 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                     m_firstWireGroupWidth.push_back(design.numWiresInGroup(1));
                     m_numWireGroups.push_back(numWireGroup);
                     m_wireCutout.push_back(design.wireCutout()); 
-                    std::cout << "The number of wire groups are:" << numWireGroup << std::endl;
                     for (unsigned int wireGroup = 1; wireGroup <= numWireGroup; ++wireGroup) {
                         bool isValidWire{false};
                         const Identifier wireGroupID = id_helper.channelID(reElement->identify(), 

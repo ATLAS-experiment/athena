@@ -75,7 +75,8 @@ inline unsigned int sTgcReadoutElement::numPadPhi(const Identifier& measId) cons
 inline unsigned int sTgcReadoutElement::numPadPhi(const IdentifierHash& measHash) const { return padDesign(measHash).numPadPhi(); }
 
 inline double sTgcReadoutElement::padHeight(const Identifier& measId) const { return padHeight(measurementHash(measId)); }
-inline double sTgcReadoutElement::padHeight(const IdentifierHash& measHash) const { return padDesign(measHash).padHeight(); }
+inline double sTgcReadoutElement::padHeight(const IdentifierHash& measHash) const { return (padEta(measHash) == 1) ? 
+                                                                                    padDesign(measHash).firstPadHeight() : padDesign(measHash).padHeight(); }
 
 inline double sTgcReadoutElement::padPhiShift(const Identifier& measId) const { return padPhiShift(measurementHash(measId)); }
 inline double sTgcReadoutElement::padPhiShift(const IdentifierHash& measHash) const { return padDesign(measHash).padPhiShift(); }
@@ -188,7 +189,23 @@ inline Amg::Vector3D sTgcReadoutElement::globalChannelPosition(const ActsGeometr
 }
 
 inline const StripLayer& sTgcReadoutElement::stripLayer(const IdentifierHash& measHash) const {
-    return m_pars.stripLayers[gasGapNumber(measHash)];
+    unsigned int layIdx = static_cast<unsigned int>(measHash);
+    unsigned int gasGap = gasGapNumber(measHash);
+    if(chType(measHash) == ReadoutChannelType::Strip && gasGap < m_pars.stripLayers.size()) {
+        return m_pars.stripLayers[gasGap];
+    }
+    else if (chType(measHash) == ReadoutChannelType::Wire && gasGap < m_pars.wireGroupLayers.size()) {
+        return m_pars.wireGroupLayers[gasGap];
+    }
+    else if (chType(measHash) == ReadoutChannelType::Pad && gasGap < m_pars.padLayers.size()) {
+        return m_pars.padLayers[gasGap];
+    }
+    else {
+        unsigned int maxReadoutLayers =  m_pars.stripLayers.size() + m_pars.wireGroupLayers.size() + m_pars.padLayers.size();
+        ATH_MSG_ERROR(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                    <<" is out of range. Maximum range "<< maxReadoutLayers);
+        return m_pars.stripLayers[0];
+    }
 }
 inline const StripLayer& sTgcReadoutElement::stripLayer(const Identifier& measId) const {
     return stripLayer(measurementHash(measId));
