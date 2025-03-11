@@ -4,6 +4,7 @@
 
 
 #include "GenericTob.h"
+#include "AlgoDataTypes.h"
 
 namespace GlobalSim {
 

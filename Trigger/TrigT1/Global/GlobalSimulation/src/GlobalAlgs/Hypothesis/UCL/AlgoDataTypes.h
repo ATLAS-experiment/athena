@@ -5,9 +5,10 @@
 #ifndef GLOBALSIM_ALGODATATYPES_H
 #define GLOBALSIM_ALGODATATYPES_H
 
-#include "AlgoConstants.h"
+//need the << operator on these two
 #include "GenericTob.h"
 #include "eEmTob.h"
+
 #include <bitset>
 #include <ostream>
 #include <vector>
@@ -17,10 +18,7 @@ namespace GlobalSim {
 
   template<typename BITSET>
   int bitSetToInt(BITSET bitset) {
-
-
     if (!bitset[bitset.size()-1]) { return bitset.to_ulong();}
-
     bitset.flip();
     return -(bitset.to_ulong() + 1);
   }
