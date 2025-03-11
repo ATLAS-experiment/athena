@@ -30,7 +30,7 @@ StatusCode ComboHypoToolBase::setLegMultiplicity(const Combo::MultiplicityReqMap
 
   m_legDecisionIds.clear();
   for (size_t i = 0; i < m_legMultiplicities.size(); ++i) {
-    if(m_legMultiplicities.at(i) <= 0) {
+    if(m_legMultiplicities.at(i) < 0) {
       ATH_MSG_ERROR("ComboHypoTool for " << m_decisionId << " has been configured with an impossible multiplicity requirement of " << m_legMultiplicities.at(i) << " on leg " << i);
       return StatusCode::FAILURE;
     }
