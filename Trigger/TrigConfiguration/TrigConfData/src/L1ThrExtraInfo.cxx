@@ -315,6 +315,8 @@ TrigConf::L1ThrExtraInfo_eEM::load()
                iso.addRangeValue(WorkingPoints_eEM(c.second), etamin, etamax, priority, /*symmetric=*/ false);
             }
          }
+      } else if (x.first == "algoVersion") {
+          m_algoVersion = x.second.getValue<unsigned int>();
       }
    }
 }
@@ -410,7 +412,7 @@ TrigConf::L1ThrExtraInfo_eTAU::load()
             }
          }
       } else if (x.first == "algoVersion") {
-	 m_algoVersion = x.second.getValue<unsigned int>();
+          m_algoVersion = x.second.getValue<unsigned int>();
       }
    }
 }
