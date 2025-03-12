@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "RpcFastDigiTool.h"
 #include "xAODMuonViews/ChamberViewer.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
 namespace {
@@ -46,7 +47,7 @@ namespace MuonR4 {
         do {
             DeadTimeMap deadTimes{};
             for (const TimedHit& simHit : viewer) {
-                if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13){
+                if (m_digitizeMuonOnly && !MC::isMuon(simHit)){
                     continue;
                 }
                 const Identifier hitId{simHit->identify()};
