@@ -5,7 +5,7 @@
 # Application: Quarkonium
 # Triggers: Low pT di-muon
 # Selection: Offline MB event selection
-# Content: ES summary, electrons, muons and associated tracks
+# Content: ES summary, electrons, muons and associated tracks, R=0.2 HI jets, R=0.4 HI jets, InDet tracks with pT>1 GeV
 # Additions: Muon vertex reconstruction
 # Needs HI-specific trigger info
 # Needs HIEventShape summary container
@@ -222,15 +222,20 @@ if (HIDerivationFlags.isPPb() or HIDerivationFlags.isPP()):
     "L1_MU4",
     "L1_2MU4",
     "L1_MU6",
+    "HLT_2mu3",
     "HLT_2mu4",
     "HLT_2mu6",
     "HLT_2mu4_nomucomb",
     "HLT_2mu4_bJpsimumu",
     "HLT_2mu4_bUpsimumu",
+    "HLT_mu4_mu4noL1",
+    "HLT_mu3",
     "HLT_mu4",
     "HLT_mu6",
+    "HLT_mu8",
     "HLT_mu4_nomucomb",
     "HLT_mu6_nomucomb",
+    "HLT_mu4noL1",
     "HLT_mu4_bJpsi_Trkloose",
     "HLT_mu6_bJpsi_Trkloose" ]
 
@@ -240,9 +245,12 @@ else:
     	"HLT_mb_mbts_L1MBTS_1"]
     MuonTriggers = [ 
    	"L1_MU4", 
-   	"L1_MU6", 
+   	"L1_MU6",
+    "HLT_mu3",
    	"HLT_mu4", 
-   	"HLT_mu6", 
+   	"HLT_mu6",
+    "HLT_mu8",
+    "HLT_mu4noL1",
    	"HLT_2mu4", 
    	"HLT_mu4_mu4noL1", 
    	"HLT_2mu4_nomucomb"]
@@ -277,6 +285,7 @@ print HION3_SelectEvent
 #====================================================================
 streamName = derivationFlags.WriteDAOD_HION3Stream.StreamName
 fileName   = buildFileName( derivationFlags.WriteDAOD_HION3Stream )
+DerivationName=streamName.split('_')[-1]
 HION3Stream = MSMgr.NewPoolRootStream( streamName, fileName )
 HION3Stream.AcceptAlgs(["HION3Kernel"])
 
@@ -324,6 +333,27 @@ if not (HIDerivationFlags.isPPb() or HIDerivationFlags.isPP()):
     HION3ThinningTools.append(HION3Thin_vtxTrk)
 if globalflags.DataSource()=='geant4':
     HION3ThinningTools.append(HION3TruthThinTool)
+
+#Track related information
+TrackThinningThreshold=1000 #in MeV
+from InDetTrackSelectionTool.InDetTrackSelectionToolConf import InDet__InDetTrackSelectionTool
+HITrackSelector=InDet__InDetTrackSelectionTool("InDetTrackSelectionTool_%s" % DerivationName) 
+HITrackSelector.CutLevel = "Loose"
+HITrackSelector.maxNSiSharedModules  = 100
+HITrackSelector.minPt=TrackThinningThreshold
+ToolSvc+=HITrackSelector
+
+from DerivationFrameworkHI.DerivationFrameworkHIConf import DerivationFramework__HITrackParticleThinningTool
+TPThinningTool=DerivationFramework__HITrackParticleThinningTool(name='%sTPThinningTool' % DerivationName,
+                                                                ThinningService="%sThinningSvc" % DerivationName,
+                                                                InDetTrackParticlesKey="InDetTrackParticles",
+                                                                PrimaryVertexKey="PrimaryVertices",
+                                                                PrimaryVertexSelection="sumPt2",
+                                                                TrackSelectionTool=HITrackSelector)
+
+
+ToolSvc+=TPThinningTool
+HION3ThinningTools=[TPThinningTool]
 
 # The name of the kernel (HION3Kernel in this case) must be unique to this derivation
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
@@ -373,7 +403,8 @@ if (HIDerivationFlags.isPPb() or HIDerivationFlags.isPP()):
     HION3SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % HION3Psi2SelectAndWrite.OutputVtxContainerName]
 
 if isSimulation:
-    HION3SlimmingHelper.AllVariables += ["TruthEvents","TruthParticles","TruthVertices","MuonTruthParticles"]
+    HION3SlimmingHelper.AllVariables += ["TruthEvents","TruthParticles","TruthVertices","MuonTruthParticles","AntiKt2TruthJets","AntiKt4TruthJets"]
+
 
 # Jet related information
 CollectionList=['AntiKt2HIJets','AntiKt4HIJets','DFAntiKt2HIJets','DFAntiKt4HIJets']
