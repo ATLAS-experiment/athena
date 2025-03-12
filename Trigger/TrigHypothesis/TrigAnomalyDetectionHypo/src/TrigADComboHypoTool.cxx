@@ -232,12 +232,12 @@ StatusCode TrigADComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, cons
 }
 
 bool TrigADComboHypoTool::getAdDecision(
-  std::vector<const xAOD::Jet*> input_jets,
-  std::vector<const xAOD::Muon*> input_muons,
-  std::vector<const xAOD::Electron*> input_electrons,
-  std::vector<const xAOD::Photon*> input_photons,
-  std::vector<const xAOD::TauJet*> input_taus,
-  std::vector<const xAOD::TrigMissingET*> input_mets) const{
+  const std::vector<const xAOD::Jet*> &input_jets,
+  const std::vector<const xAOD::Muon*> &input_muons,
+  const std::vector<const xAOD::Electron*> &input_electrons,
+  const std::vector<const xAOD::Photon*> &input_photons,
+  const std::vector<const xAOD::TauJet*> &input_taus,
+  const std::vector<const xAOD::TrigMissingET*> &input_mets) const{
 
   ATH_MSG_DEBUG( "Counting AD input objects in the event ... "
 		 << "Jets: " << input_jets.size() << ", "
