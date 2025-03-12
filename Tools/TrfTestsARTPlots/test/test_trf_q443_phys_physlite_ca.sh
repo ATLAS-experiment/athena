@@ -41,7 +41,7 @@ Reco_tf.py \
   echo "art-result: ${rcfail} Reco_tf_q443_phys_physlite_mt_mp_fail"
 fi
 
-Derivation_tf.py \
+stdbuf -i0 -o0 -e0 Derivation_tf.py \
   --inputAODFile myAOD.pool.root \
   --outputDAODFile art.pool.root \
   --sharedWriter True \
