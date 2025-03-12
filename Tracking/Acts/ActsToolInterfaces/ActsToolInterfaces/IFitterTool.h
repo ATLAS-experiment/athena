@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTOOLINTERFACES_IFITTERTOOL_H
@@ -47,7 +47,14 @@ namespace ActsTrk {
       const Acts::CalibrationContext& calContext,
       const DetectorElementToActsGeometryIdMap &detector_element_to_geoid,
       const Acts::Surface* targetSurface = nullptr) const = 0;
+
+    virtual
+     StatusCode fit(const EventContext& ctx,
+		    const ActsTrk::TrackContainer::ConstTrackProxy& track,          
+		    ActsTrk::MutableTrackContainer& trackContainer) const = 0;
+    
   };
+  
 
 }
 

@@ -912,4 +912,13 @@ std::unique_ptr<ActsTrk::MutableTrackContainer> GlobalChiSquareFitterTool::fit(
              detectorElementToGeometryIdMap, surfaces.front());
 }
 
+
+StatusCode GlobalChiSquareFitterTool::fit(
+  const EventContext& /*ctx*/,
+    const ActsTrk::TrackContainer::ConstTrackProxy& /*track*/,          
+  ActsTrk::MutableTrackContainer& /*trackContainer*/) const 
+{
+  ATH_MSG_ERROR("Track refit method not implemented in GlobalChiSquareFitterTool yet");
+  return StatusCode::FAILURE;
+}
 }  // namespace ActsTrk

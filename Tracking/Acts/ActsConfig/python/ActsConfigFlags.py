@@ -108,9 +108,10 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.trackFitterType', TrackFitterType.KalmanFitter, type=TrackFitterType) # Define Tracking algorithm for refitting
 
     # GSF specific flags
-    actscf.addFlag("Acts.useActsGsfInEgamma", False)
+    actscf.addFlag("Acts.GsfRefitLegacyTrk", False) # Refit Legacy tracks using ACTS GSF
+    actscf.addFlag("Acts.GsfRefitActs", False) # Refit ACTS tracks using ACTS GSF
     actscf.addFlag("Acts.GsfMaxComponents", 12)
-    actscf.addFlag("Acts.GsfComponentMergeMethod", 'eMaxWeight')
+    actscf.addFlag("Acts.GsfComponentMergeMethod", 'MaxWeight')
     actscf.addFlag("Acts.GsfDirectNavigation", False)
     actscf.addFlag("Acts.GsfOutlierChi2Cut", 20.0)
 
