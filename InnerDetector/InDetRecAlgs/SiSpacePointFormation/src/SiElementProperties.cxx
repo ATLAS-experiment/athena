@@ -59,6 +59,18 @@ SiElementProperties::SiElementProperties(const IdentifierHash&			idHash,
             neighbourHash = nextInEta->identifyHash();
             m_neighbours.push_back(neighbourHash);
         }
+
+        int trig_eta = idHelper.eta_module(compact);
+        if(trig_eta==9){
+            // For ITk strip endcaps we have a change of module granularity between eta_module=9 and 10
+            // therefore when we are at eta_module=9, we can have two neighbours at larger radius
+            // the second neighbour is put in "prevInEta()" in SCT_DetectorManager (a bit hacky, yes)
+            const InDetDD::SiDetectorElement* nextInEta2 = element.prevInEta();
+            if(nextInEta2){
+                neighbourHash = nextInEta2->identifyHash();
+                m_neighbours.push_back(neighbourHash);
+            }   
+        }
     }
 
     // Find half width of wafer at centre
