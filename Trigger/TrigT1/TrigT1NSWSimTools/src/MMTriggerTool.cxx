@@ -136,7 +136,7 @@ namespace NSWL1 {
 
   StatusCode MMTriggerTool::runTrigger(const EventContext& ctx, Muon::NSW_TrigRawDataContainer* rdo, const bool do_MMDiamonds) const {
 
-    int event = ctx.eventID().event_number();
+    uint64_t event = ctx.eventID().event_number();
     ATH_MSG_DEBUG("********************************************************* EVENT NUMBER = " << event);
 
     //////////////////////////////////////////////////////////////
@@ -150,9 +150,9 @@ namespace NSWL1 {
     pars["MMS"] = m_par_small;
     MMLoadVariables load = MMLoadVariables(m_detManager, m_MmIdHelper);
 
-    std::map<std::pair<int, unsigned int>,std::vector<digitWrapper> > entries;
-    std::map<std::pair<int, unsigned int>,std::vector<hitData_entry> > Hits_Data_Set_Time;
-    std::map<std::pair<int, unsigned int>,evInf_entry> Event_Info;
+    std::map<std::pair<uint64_t, unsigned int>,std::vector<digitWrapper> > entries;
+    std::map<std::pair<uint64_t, unsigned int>,std::vector<hitData_entry> > Hits_Data_Set_Time;
+    std::map<std::pair<uint64_t, unsigned int>,evInf_entry> Event_Info;
 
     const McEventCollection* ptrMcEventCollection = nullptr;
     const TrackRecordCollection* ptrMuonEntryLayer = nullptr;
