@@ -41,6 +41,9 @@ struct MmChamber{
     int multilayer{0};
     std::string design{};
 
+    /// Transformation of the underlying Alignable node
+    Amg::Transform3D alignableTransform{Amg::Transform3D::Identity()};
+
     /// Sorting operator to insert the object into std::set
     bool operator<(const MmChamber& other) const {
         if (stationIndex != other.stationIndex) return stationIndex < other.stationIndex;
@@ -72,6 +75,8 @@ struct MmChamber{
         Amg::Vector3D leftEdge{Amg::Vector3D::Zero()};
         /// Right edge of the strip
         Amg::Vector3D rightEdge{Amg::Vector3D::Zero()};
+        /// @brief length of the strip
+        double stripLength{0.};
         /// @brief  strip number
         unsigned int channel{0};
         /// @brief  Gas gap of the strip
@@ -186,6 +191,10 @@ std::set<MmChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> geoModelTransformY{treeReader, "GeoModelTransformY"};
     TTreeReaderValue<std::vector<float>> geoModelTransformZ{treeReader, "GeoModelTransformZ"};
 
+    TTreeReaderValue<std::vector<float>> alignableNodeX{treeReader, "AlignableNodeX"};
+    TTreeReaderValue<std::vector<float>> alignableNodeY{treeReader, "AlignableNodeY"};
+    TTreeReaderValue<std::vector<float>> alignableNodeZ{treeReader, "AlignableNodeZ"};
+
     TTreeReaderValue<std::vector<float>> stripRotCol1X{treeReader, "stripRotLinearCol1X"};
     TTreeReaderValue<std::vector<float>> stripRotCol1Y{treeReader, "stripRotLinearCol1Y"};
     TTreeReaderValue<std::vector<float>> stripRotCol1Z{treeReader, "stripRotLinearCol1Z"};
@@ -232,7 +241,12 @@ std::set<MmChamber> readTreeDump(const std::string& inputFile) {
         geoRot.col(1) = Amg::Vector3D((*geoModelTransformX)[2], (*geoModelTransformY)[2], (*geoModelTransformZ)[2]);
         geoRot.col(2) = Amg::Vector3D((*geoModelTransformX)[3], (*geoModelTransformY)[3], (*geoModelTransformZ)[3]);       
         newchamber.geoModelTransform = Amg::getTransformFromRotTransl(std::move(geoRot), std::move(geoTrans)); 
-        
+
+        geoRot.col(0) = Amg::Vector3D((*alignableNodeX)[1], (*alignableNodeY)[1], (*alignableNodeZ)[1]);
+        geoRot.col(1) = Amg::Vector3D((*alignableNodeX)[2], (*alignableNodeY)[2], (*alignableNodeZ)[2]);
+        geoRot.col(2) = Amg::Vector3D((*alignableNodeX)[3], (*alignableNodeY)[3], (*alignableNodeZ)[3]);
+        geoTrans = Amg::Vector3D{(*alignableNodeX)[0], (*alignableNodeY)[0], (*alignableNodeZ)[0]};
+        newchamber.alignableTransform = Amg::getTransformFromRotTransl(std::move(geoRot), std::move(geoTrans));
         //Strips
         for (size_t s = 0; s < stripCenterX->size(); ++s){
             MmChamber::MmChannel newStrip{};
@@ -244,6 +258,7 @@ std::set<MmChamber> readTreeDump(const std::string& inputFile) {
             newStrip.gasGap = (*gasGap)[s];
             newStrip.channel = (*channel)[s];
             newStrip.isStereo = (*isStereo)[s];
+            newStrip.stripLength = (*stripLength)[s];
             newchamber.channels.insert(std::move(newStrip));
         }
 
@@ -331,6 +346,13 @@ int main( int argc, char** argv ) {
         bool chamberOkay{true};
         const MmChamber& test = {*test_itr};
 
+        const Amg::Transform3D alignableDistort = test.alignableTransform.inverse()*(reference.alignableTransform );
+        if (!Amg::doesNotDeform(alignableDistort) || alignableDistort.translation().mag() > tolerance) {
+            std::cerr<<"runMmGeoComparison() "<<__LINE__<<": The alignable nodes are at differnt places for  "
+                     <<test<<". " <<Amg::toString(alignableDistort, true)<<std::endl;
+            chamberOkay = false;
+        }
+
         ///GasGap Dimensions for debugging
         TEST_BASICPROP(ActiveWidthS, "GasGap length on the short side");
         TEST_BASICPROP(ActiveWidthL, "GasGap length on the long side");
@@ -365,13 +387,14 @@ int main( int argc, char** argv ) {
             }
             
             
-            if (!Amg::doesNotDeform(refLayer.transform.inverse()* testLayer.transform)){
+            if (!Amg::isIdentity(refLayer.transform.inverse()* testLayer.transform)){
                 std::cerr<<"runMmGeoComparison() "<<__LINE__<<": in "<<test<<" "
                          <<testLayer<<" differs w.r.t. reference "<<Amg::toString(refLayer.transform)<<". vs. "
                          <<Amg::toString(refLayer.transform.inverse()*testLayer.transform)<<std::endl;
                 chamberOkay = false;
             }           
         }
+        if (!chamberOkay) continue;
         unsigned int failedEta{0}, lastGap{0};
         for (const MmChamber::MmChannel& refStrip : reference.channels) {
             std::set<MmChamber::MmChannel>::const_iterator strip_itr = test.channels.find(refStrip);
@@ -400,12 +423,14 @@ int main( int argc, char** argv ) {
                 const double centerDist = stripDir.dot(testStrip.globCenter - refStrip.globCenter);
                 const double leftDist = stripDir.dot(testStrip.leftEdge -refStrip.globCenter);
                 const double rightDist = stripDir.dot(testStrip.rightEdge - refStrip.globCenter);
-                if ( std::abs(centerDist) > tolerance || std::abs(leftDist) > tolerance || std::abs(rightDist) > tolerance) {
+                if ( std::abs(centerDist) > tolerance || std::abs(leftDist) > tolerance || std::abs(rightDist) > tolerance ||
+                    std::abs(testStrip.stripLength - refStrip.stripLength) > tolerance) {
                      std::cerr<<"runMmGeoComparison() "<<__LINE__<<": In "
                              <<test<<" " <<testStrip <<" + mu "<<Amg::toString(testDir,2) 
                              <<"/local: "<<Amg::toString(testStrip.locCenter, 2) 
                              <<" does not describe the same stereo strip as "
-                             <<Amg::toString(refStrip.globCenter, 2)<<" + lambda "<<Amg::toString(stripDir,2)
+                             <<Amg::toString(refStrip.globCenter, 2)<<"/local:"
+                             <<Amg::toString(refStrip.locCenter,2)<<" + lambda "<<Amg::toString(stripDir,2)
                              <<". Distances to the left-edge/center/right-edge: "
                              <<leftDist<<"/"<<centerDist<<"/"<<rightDist<<", dot: "
                              <<std::acos(std::clamp(stripDir.dot(testDir),- 1., 1.)) / Gaudi::Units::deg<<std::endl;
