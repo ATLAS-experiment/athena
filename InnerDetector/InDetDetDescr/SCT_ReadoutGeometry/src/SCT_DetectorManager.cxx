@@ -133,8 +133,18 @@ namespace InDetDD {
         else if(m_doEndcapEtaNeighbour){
           // In endcaps the neighbours cannot be found with id+/-1, therefore we cannot rely on SCT_ID and need
           // a dedicated search, considering only neighbour at larger radius (compatible wih outgoing particle)
-          result = getStripEndcapEtaNeighbour(element, idHashOther);
+          result = getStripEndcapEtaNeighbour(element, idHashOther, false);
           if(result==0) element->setNextInEta(m_elementCollection[idHashOther]);
+
+          // In ITk strip endcap, when we move from eta_module=9 to eta_module=10 we have change of module 
+          // granularity in phi: twice more module in eta_module=10, therefore for module at eta_module=9
+          // and phi_module=phi we have two neighbours at larger radius: both at eta_module=10, but one with
+          // phi_module=2*phi the other with phi_module=2*phi+1, for completeness we store this neighbour in
+          // "PrevInEta" even if it is a misnomer in this case
+          if( m_idHelper->eta_module(element->identify())==9 ){
+            result = getStripEndcapEtaNeighbour(element, idHashOther, true);
+            if(result==0) element->setPrevInEta(m_elementCollection[idHashOther]);
+          }
         }
 
         result = m_idHelper->get_prev_in_eta(idHash, idHashOther);
@@ -152,7 +162,9 @@ namespace InDetDD {
     }
   }
 
-int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* element, IdentifierHash& idHashNeighbour) const
+int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* element, 
+                                                    IdentifierHash& idHashNeighbour,
+                                                    const bool phi_plus_one) const
 {
   // Check we are well in strip endcap
   if( !(element->isSCT() && element->isEndcap()) ) return 1;
@@ -170,6 +182,12 @@ int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* ele
   // and stero cluster (on side 1 for ITk)
   if(element->isStereo()) return 1;
 
+  // Most of the time we want to find neighbours in same phi
+  // but in transition region (eta_module 9->10) the module granularity in phi changes
+  // we have to look for two neighours, at: 2*phi and 2*phi+1
+  int target_phi = phi_module;
+  if (eta_module==9) target_phi = (phi_plus_one)? 2*phi_module+1 : 2*phi_module;
+
   // Brute force search, loop on all elements to find a neighbour
   for(const SiDetectorElement* other_element : m_elementCollection){
 
@@ -183,7 +201,7 @@ int SCT_DetectorManager::getStripEndcapEtaNeighbour(const SiDetectorElement* ele
     if(other_layer_disk != layer_disk) continue;
 
     int other_phi_module = m_idHelper->phi_module(other_id);
-    if(other_phi_module != phi_module) continue;
+    if(other_phi_module != target_phi) continue;
 
     // We keep only neighbour at eta_module+1 (larger radius)
     int other_eta_module = m_idHelper->eta_module(other_id);

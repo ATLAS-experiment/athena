@@ -83,6 +83,7 @@ namespace InDet {
     //@{
     DoubleProperty m_stripLengthTolerance{this, "StripLengthTolerance", 0.01};
     DoubleProperty m_SCTgapParameter{this, "SCTGapParameter", 0., "Recommend 0.001 - 0.0015 for ITK geometry"};
+    DoubleProperty m_locXOffset_ECEtaOvlpRaws9n10{this, "locXOffset_ECEtaOvlpRaws9n10", 31.4, "Local x offset between EC raws 9 and 10 (31.4 for ITk)"};
     //@}
 
     /// @name ID helper

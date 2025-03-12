@@ -1081,7 +1081,7 @@ StatusCode InDet::DumpObjects::execute() {
 					   m_CLeta_module[clusterIDMapIdx[cl_2->identify()]],
 					   m_CLphi_module[clusterIDMapIdx[cl_2->identify()]]);
 	
-	if ( flag<1 || flag > 2 )
+	if ( flag<1 || flag > 3 )
 	  ATH_MSG_WARNING("Unexpected overlap SP flag: "<<flag);
 	
 	
