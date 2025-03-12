@@ -1,7 +1,7 @@
 // This is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PROMPT_DECORATEPLIT_H
@@ -19,6 +19,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
+#include "AthContainers/Decorator.h"
 
 // xAOD
 #include "xAODEgamma/ElectronContainer.h"
@@ -129,6 +130,10 @@ namespace Prompt {
     SG::WriteDecorHandleKeyArray<xAOD::ElectronContainer>  m_dec_el_plit_output{this, "PLITelOutput", {}};
     SG::WriteDecorHandleKeyArray<xAOD::MuonContainer> m_dec_mu_plit_output{this, "PLITmuOutput", {}};
 
+    const SG::Decorator<float> m_dec_trk_dr_lepton{"dr_lepton"};
+    const SG::Decorator<char> m_dec_trk_electron_track{"electron_track"};
+    const SG::Decorator<char> m_dec_trk_muon_track{"muon_track"};
+    const SG::Decorator<float> m_dec_trk_dr_leptontrack{"dr_leptontrack"};
   };
 }
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 lep_tag_log = logging.getLogger('LeptonTaggersConfig')
@@ -466,6 +466,17 @@ def DecoratePLITAlgsCfg(
       
     if lepton_type in ["", "Muons"]:
         acc.merge(DecoratePLITCfg(ConfigFlags, Tagger_name="PLIT", lepton_name="Muons"))
+
+    # Both algorithms above will be writing to the same decorations.
+    # So we need to explicitly lock them.
+    # (This is not MT-compatible.)
+    acc.addEventAlgo(CompFactory.DerivationFramework.LockDecorations
+                     ('LockPLITDecorations',
+                      Decorations = ['InDetTrackParticles.dr_lepton',
+                                     'InDetTrackParticles.electron_track',
+                                     'InDetTrackParticles.muon_track',
+                                     'InDetTrackParticles.dr_leptontrack',
+                                     ]))
   
     return acc
 

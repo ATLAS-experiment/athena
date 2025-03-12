@@ -1,7 +1,7 @@
 // This is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LeptonTaggers/DecoratePLIT.h"
@@ -110,6 +110,14 @@ namespace Prompt {
   StatusCode DecoratePLIT::execute(const EventContext& ctx) const {
     SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_tracksKey, ctx);
     SG::ReadHandle<xAOD::CaloClusterContainer> caloclusters(m_caloclustersKey, ctx);
+
+    // Make sure all the decorations are added as long as tracks exist.
+    if (!tracks->empty()) {
+      m_dec_trk_dr_lepton.getDecorationArray (*tracks);
+      m_dec_trk_electron_track.getDecorationArray (*tracks);
+      m_dec_trk_muon_track.getDecorationArray (*tracks);
+      m_dec_trk_dr_leptontrack.getDecorationArray (*tracks);
+    }
 
     if (!m_electronsKey.empty()) {
         // prepare decorators
@@ -784,16 +792,10 @@ namespace Prompt {
       bool isUsedForMuon,
       const xAOD::TrackParticle* trackLep) const
   {
-      // define decorators
-      SG::AuxElement::Decorator<float> dec_trk_dr_lepton("dr_lepton");
-      SG::AuxElement::Decorator<char> dec_trk_electron_track("electron_track");
-      SG::AuxElement::Decorator<char> dec_trk_muon_track("muon_track");
-      SG::AuxElement::Decorator<float> dec_trk_dr_leptontrack("dr_leptontrack");
-
       // Apply values to decorators
-      dec_trk_dr_lepton(track) = dr_lepton;
-      dec_trk_electron_track(track) = static_cast<char>(isUsedForElectron);
-      dec_trk_muon_track(track) = static_cast<char>(isUsedForMuon);
+      m_dec_trk_dr_lepton(track) = dr_lepton;
+      m_dec_trk_electron_track(track) = static_cast<char>(isUsedForElectron);
+      m_dec_trk_muon_track(track) = static_cast<char>(isUsedForMuon);
 
       float dr_leptontrack = -99;
       if (trackLep) {
@@ -801,7 +803,7 @@ namespace Prompt {
               dr_leptontrack = track.p4().DeltaR(trackLep->p4());
           }
       }
-      dec_trk_dr_leptontrack(track) = dr_leptontrack;
+      m_dec_trk_dr_leptontrack(track) = dr_leptontrack;
 
       return StatusCode::SUCCESS;
   }
