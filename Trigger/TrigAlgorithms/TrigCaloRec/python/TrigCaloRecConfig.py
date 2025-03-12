@@ -49,7 +49,7 @@ def trigCaloClusterMonitoringTool(flags, doMonCells = False, isFullScan = None):
 
 
 @AccumulatorCache
-def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None, monitorCells=False, doTau=False):
+def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None, monitorCells=False, doTau=False,sequenceName=None):
     acc = ComponentAccumulator()
     from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg, CaloDataAccessSvcDependencies
     acc.merge(trigCaloDataAccessSvcCfg(flags))
@@ -75,6 +75,9 @@ def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None,
         monTool.defineHistogram('Cells_phi', path='EXPERT', type='TH1F', title="Cells #phi; #phi ; Nclusters",
                                 xbins=128, xmin=-3.2, xmax=3.2)
 
+    if sequenceName is not None:
+        from AthenaCommon.CFElements import parOR
+        acc.merge(ComponentAccumulator(parOR(sequenceName)))
     cellMaker = CompFactory.HLTCaloCellMaker(name,
                                              CellsName = cells,
                                              TrigDataAccessMT = acc.getService('TrigCaloDataAccessSvc'),
@@ -83,7 +86,7 @@ def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None,
                                              monitorCells = monitorCells,
                                              MonTool = monTool,
                                              TileCellsInROI = False if not doTau else True)
-    acc.addEventAlgo(cellMaker, primary=True)
+    acc.addEventAlgo(cellMaker, primary=True,sequenceName=sequenceName)
     return acc
 
 @AccumulatorCache
@@ -98,14 +101,14 @@ def hltCaloCellCorrectorCfg(flags,name='HLTCaloCellCorrector', inputEDM='CellsCl
   
 
 @AccumulatorCache
-def hltCaloCellSeedlessMakerCfg(flags, roisKey='UNSPECIFIED'):
+def hltCaloCellSeedlessMakerCfg(flags, roisKey='UNSPECIFIED',sequenceName=None):
     acc = ComponentAccumulator()
     hltCaloCellMakerAcc = hltCaloCellMakerCfg(flags, "CaloCellSeedLessFS",
                                                     roisKey = roisKey,
                                                     CellsName ="SeedLessFS", 
                                                     monitorCells=False)
 
-    acc.merge(hltCaloCellMakerAcc)
+    acc.merge(hltCaloCellMakerAcc,sequenceName=sequenceName)
 
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     acc.merge(CaloNoiseCondAlgCfg(flags, noisetype="electronicNoise"))
@@ -129,14 +132,17 @@ def L0CaloGlobalRoIBuilderCfg(flags,DoNoiseThrRings=True):
         nameContRinger='Ringer2sigGlobal'
     ringer = RingerReFexConfig(flags,name=nameTool,RingerKey='NOTNEEDED',
           ClustersName=nameContCalo,DoNoiseThrRings=DoNoiseThrRings)
+    from AthenaCommon.CFElements import parOR
+    accSeq = ComponentAccumulator(parOR("HLTBeginSeq"))
     L0CaloGlobalRoIBuilderAlg = CompFactory.CaloGlobalRoIBuilder(name=nameAlgo,
                       Cells ="SeedLessFS", ClustersName=nameContCalo,
                       RingerKey=nameContRinger,
                       RingerTool=ringer )
-    acc.addEventAlgo(L0CaloGlobalRoIBuilderAlg)
+    accSeq.addEventAlgo(L0CaloGlobalRoIBuilderAlg, sequenceName="HLTBeginSeq")
 
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     acc.merge(CaloNoiseCondAlgCfg(flags))
+    acc.merge(accSeq)
 
     return acc
 
@@ -155,9 +161,12 @@ def CaloL0RingerCfg(flags,DoNoiseThrRings=True):
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD,addToAOD
     extraContent=CaloL0RingerPrepareList(DoNoiseThrRings)
     acc = ComponentAccumulator()
+    from AthenaCommon.CFElements import parOR
     if (flags.Output.doWriteRDO):
-       acc.merge(hltCaloCellSeedlessMakerCfg(flags))
-       acc.merge(L0CaloGlobalRoIBuilderCfg(flags,DoNoiseThrRings=DoNoiseThrRings))
+       accSeq = ComponentAccumulator(parOR("HLTBeginSeq"))
+       accSeq.merge(hltCaloCellSeedlessMakerCfg(flags, sequenceName="HLTBeginSeq"))
+       accSeq.merge(L0CaloGlobalRoIBuilderCfg(flags,DoNoiseThrRings=DoNoiseThrRings))
+       acc.merge(accSeq)
 
     if (flags.Output.doWriteESD or flags.Output.doWriteAOD):
        if ( flags.Output.doWriteESD ):
@@ -573,6 +582,9 @@ if __name__ == "__main__":
     storeGateSvc.Dump=True
     theL0CaloGlobalRoIBuilderCfg = L0CaloGlobalRoIBuilderCfg(flags)
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+
+    from AthenaCommon.CFElements import parOR
+    cfg.addSequence(parOR("HLTBeginSeq"),parentName="AthMasterSeq")
     
     CAs = [hltCaloCellSeedlessMakerCfg(flags,roisKey=''),
            theL0CaloGlobalRoIBuilderCfg,
