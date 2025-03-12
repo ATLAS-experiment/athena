@@ -41,6 +41,9 @@ namespace MuonR4{
 
 
         using IdDecorHandle_t = SG::ReadDecorHandle<xAOD::TruthParticleContainer, std::vector<unsigned long long>>;
+        using TruthSegLink_t = std::vector<ElementLink<xAOD::MuonSegmentContainer>>;
+        SG::WriteDecorHandle<xAOD::TruthParticleContainer, TruthSegLink_t> segLinkDecor{m_segLinkKey ,ctx};
+
         /// Initialize the Identifier decorators
         std::vector<IdDecorHandle_t> idDecorHandles{};
         for (const SG::ReadDecorHandleKey<xAOD::TruthParticleContainer>& hitKey : m_simHitKeys) {
@@ -52,6 +55,7 @@ namespace MuonR4{
         std::vector<TruthTuple_t> truthPartWithIds{};
         truthPartWithIds.reserve(truthParticles->size());
         for (const xAOD::TruthParticle* truthMuon : *truthParticles){
+            segLinkDecor(*truthMuon).clear();
             IdSet_t assocIds{};
             ATH_MSG_DEBUG("Truth muon "<<truthMuon->pt()<<", eta: "<<truthMuon->eta()<<", "<<truthMuon->phi()
                          <<", barcode: "<<truthMuon->barcode());
@@ -70,8 +74,6 @@ namespace MuonR4{
         ATH_CHECK(segments.isPresent());
         
         /// Setup the write decorators
-        using TruthSegLink_t = std::vector<ElementLink<xAOD::MuonSegmentContainer>>;
-        SG::WriteDecorHandle<xAOD::TruthParticleContainer, TruthSegLink_t> segLinkDecor{m_segLinkKey ,ctx};
         using TruthPartLink_t = ElementLink<xAOD::TruthParticleContainer>;
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, TruthPartLink_t> truthLinkDecor{m_truthLinkKey, ctx};
 
