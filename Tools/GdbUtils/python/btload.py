@@ -11,7 +11,6 @@ from findlib import findlib
 
 
 def btload (limit = 100):
-    print ('foobar')
     retry = True
     last_iframe = -1
     while retry:
@@ -23,7 +22,7 @@ def btload (limit = 100):
                 lib = findlib (frame.pc())
                 if lib and lib != 'libubsan.so' and lib != 'libasan.so':
                     retry = True
-                    break
+                break
             if frame.name() == 'ApplicationMgr::executeRun':
                 break
             if frame.name() == '_Py_UnixMain':
