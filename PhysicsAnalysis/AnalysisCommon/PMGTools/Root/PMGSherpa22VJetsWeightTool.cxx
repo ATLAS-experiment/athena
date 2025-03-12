@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: PMGSherpa22VJetsWeightTool.cxx 764400 2016-07-26 17:47:39Z tripiana $
@@ -144,8 +144,8 @@ namespace PMGTools {
 	
 	// Only select final state electrons and muons:
 	if( !MC::isStable(truthParticle) ||
-	    ( ( std::abs( truthParticle->pdgId() ) != 11 ) &&
-	      ( std::abs( truthParticle->pdgId() ) != 13 ) ) ) {
+	    (  !MC::isElectron(truthParticle)  &&
+	       !MC::isMuon( truthParticle)  ) ) {
 	  continue;
 	}
 	// ...which also pass some basic kinematic cuts:
