@@ -94,16 +94,19 @@ def ActsMainTrackFindingAlgCfg(flags,
         kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2max))
         # clusters with chi2 above this value will be discarded.
         kwargs.setdefault("chi2OutlierCutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
-    else:
+    else:        
         # new default chi2 cuts optimise efficiency vs speed. Set same value as Athena's Xi2maxNoAdd.
-        kwargs.setdefault("chi2CutOff", [25])
-        kwargs.setdefault("chi2OutlierCutOff", [25])
+        if flags.Tracking.doITkFastTracking:
+            kwargs.setdefault("chi2CutOff", [100])
+            kwargs.setdefault("chi2OutlierCutOff", [100])
+        else:
+            kwargs.setdefault("chi2CutOff", [25])
+            kwargs.setdefault("chi2OutlierCutOff", [25])
     if flags.Acts.trackFindingTrackSelectorConfig > 0 and flags.Acts.trackFindingTrackSelectorConfig != 3:
         kwargs.setdefault("branchStopperPtMinFactor", 0.9)
         kwargs.setdefault("branchStopperAbsEtaMaxExtra", 0.1)
 
     kwargs.setdefault("numMeasurementsCutOff", [1])
-
 
     # there is always an over and underflow bin so the first bin will be 0. - 0.5 the last bin 3.5 - inf.
     # if all eta bins are >=0. the counter will be categorized by abs(eta) otherwise eta

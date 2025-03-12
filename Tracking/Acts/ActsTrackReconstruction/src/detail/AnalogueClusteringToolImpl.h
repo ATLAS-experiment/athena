@@ -101,7 +101,7 @@ namespace ActsTrk::detail {
     Gaudi::Property<int> m_thickness {this, "PixelThickness", 250};  
     Gaudi::Property<bool> m_postCalibration{this, "CalibrateAfterMeasurementSelection", false};
     Gaudi::Property<bool> m_correctCovariance{this, "PerformCovarianceCalibration", true};
-    Gaudi::Property<double> m_calibratedCovarianceLowerBound {this, "CalibratedCovarianceLowerBound", 0.75};
+    Gaudi::Property<double> m_calibratedCovarianceLowerBound {this, "CalibratedCovarianceLowerBound", 0.};
     
     const PixelID* m_pixelid {nullptr};
   };
