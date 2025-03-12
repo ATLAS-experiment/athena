@@ -249,62 +249,7 @@ namespace GlobalSim {
     CHECK(h_write.record(std::move(ports_out)));
     return StatusCode::SUCCESS;
   }
-    
-
-  eEmTobPtr to_eEmTob(const GepAlgoHypothesisPortsIn& ports_in) {
-
-    auto tob = std::make_shared<eEmTob>();
-    const auto& w_tob = ports_in.m_I_eEmTobs;
-
-    std::size_t i;
-    std::size_t j;
-
-    for (i = 0; i != AlgoConstants::eFexEtBitWidth; ++i) {
-      tob->Et[i] = (*w_tob)[i];
-    }
-
-    for (i = 16, j=0;
-	 i != 16+ AlgoConstants::eFexPhiBitWidth;
-	 ++i, ++j) {
-      tob->Phi[j] = (*w_tob)[i];
-    }
-
-    for (i = 32, j=0;
-	 i != 32+ AlgoConstants::eFexEtaBitWidth;
-	 ++i, ++j) {
-      tob->Eta[j] = (*w_tob)[i];
-    }
-
-
-    for (i = 48, j=0;
-	 i != 48+ AlgoConstants::eFexDiscriminantBitWidth;
-	 ++i, ++j)
-      {
-	tob->REta[j] = (*w_tob)[i];
-      }
-    
-
-    for (i = 48+ AlgoConstants::eFexDiscriminantBitWidth, j=0;
-	 i != 48 + 2*AlgoConstants::eFexDiscriminantBitWidth;
-	 ++i, ++j)
-      {
-	tob->RHad[j] = (*w_tob)[i];
-      }
-
-    
-    for (i = 48+ 2*AlgoConstants::eFexDiscriminantBitWidth, j=0;
-	 i != 48 + 3*AlgoConstants::eFexDiscriminantBitWidth;
-	 ++i, ++j)
-      {
-	tob->WsTot[j] = (*w_tob)[i];
-      }
-
-    tob->Overflow[0] = (*w_tob)[63];
-
-    return tob;
-  }
-
-  
+ 
   std::vector<eEmTobPtr>
   make_eEmTobs(const GlobalSim::GepAlgoHypothesisFIFO& fifo) {
 
@@ -314,7 +259,9 @@ namespace GlobalSim {
     std::transform(fifo.cbegin(),
 		   fifo.cend(),
 		   std::back_inserter(eEmTobs),
-		   to_eEmTob);
+		   [](const auto& f) {
+		     return std::make_shared<eEmTob>(f);
+		   });
 
     return eEmTobs;
   }
@@ -332,10 +279,10 @@ namespace GlobalSim {
 		       rHadMin = m_RHadMin[i],
 		       wsTotMin = m_WsTotMin[i]](const auto& tob){
 	return
-	  bitSetToInt(tob->Et) >= etMin and
-	  bitSetToInt(tob->REta) >= rEtaMin and
-	  bitSetToInt(tob->RHad) >= rHadMin and
-	  bitSetToInt(tob->WsTot) >= wsTotMin;
+	  bitSetToInt(tob->Et_bits()) >= etMin and
+	  bitSetToInt(tob->REta_bits()) >= rEtaMin and
+	  bitSetToInt(tob->RHad_bits()) >= rHadMin and
+	  bitSetToInt(tob->WsTot_bits()) >= wsTotMin;
       };
    
       std::vector<eEmTobPtr> s_tobs;
