@@ -22,7 +22,7 @@
 #include "xrt/xrt_device.h"
 #include "xrt/xrt_kernel.h"
 
-namespace {
+namespace EFTrackingFPGAIntegration{
 // Some kernels require the length of the input test vector. storeGateKey is 
 // used to get the std::vector which we will call size() on to get the 
 // test vector length.
@@ -94,7 +94,7 @@ class EFTrackingXrtAlgorithm : public AthReentrantAlgorithm
   mutable std::vector<xrt::bo> m_outputBuffers ATLAS_THREAD_SAFE {};
 
   // VSize objects
-  std::vector<VSize> m_vsizes{};
+  std::vector<EFTrackingFPGAIntegration::VSize> m_vsizes{};
 
  public:
   EFTrackingXrtAlgorithm(const std::string& name, ISvcLocator* pSvcLocator);
