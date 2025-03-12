@@ -25,3 +25,10 @@ if( NOT XAOD_STANDALONE )
 endif()
 
 atlas_install_python_modules( python/*.py )
+atlas_install_data( data/* )
+
+atlas_add_test( TestCPRunPL
+   SCRIPT CPRun.py --work-dir cmake_test_plDir --text-config TruthParticleLevelAnalysisAlgorithms/test_configuration_Run2_PL.yaml -e 30 --input-file $ASG_TEST_FILE_MC
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES TIMEOUT 400 
+)
