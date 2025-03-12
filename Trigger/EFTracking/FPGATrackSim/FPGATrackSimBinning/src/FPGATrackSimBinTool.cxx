@@ -1,7 +1,7 @@
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 /**
- * @file PGATrackSimGenScanTool.cxx
+ * @file FPGATrackSimGenScanTool.cxx
  * @author Elliot Lipeles
  * @date Feb 13, 2025
  * @brief See header file.
