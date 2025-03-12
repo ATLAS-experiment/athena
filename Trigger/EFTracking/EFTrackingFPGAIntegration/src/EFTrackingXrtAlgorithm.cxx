@@ -126,7 +126,7 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
 
       switch (interfaceMode) {
         case EFTrackingXrtParameters::InterfaceMode::INPUT: {
-          m_inputDataStreamKeys.push_back({storeGateKey});
+          m_inputDataStreamKeys.emplace_back(storeGateKey);
           ATH_CHECK(m_inputDataStreamKeys.back().initialize());
 
           m_inputBuffers.emplace_back(
@@ -141,7 +141,7 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
           break;
         }
         case EFTrackingXrtParameters::InterfaceMode::OUTPUT: {
-          m_outputDataStreamKeys.push_back({storeGateKey});
+          m_outputDataStreamKeys.emplace_back(storeGateKey);
           ATH_CHECK(m_outputDataStreamKeys.back().initialize());
 
           m_outputBuffers.emplace_back(
@@ -158,7 +158,7 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
         case EFTrackingXrtParameters::InterfaceMode::VSIZE: {
           m_vsizes.push_back({.runIndex = static_cast<int>(m_runs.size()) - 1,
                               .argumentIndex = argumentIndex,
-                              .storeGateKey = {storeGateKey}});
+                              .storeGateKey = SG::ReadHandleKey<std::vector<long unsigned int>>(storeGateKey)});
 
           ATH_CHECK(m_vsizes.back().storeGateKey.initialize());
 
@@ -206,7 +206,7 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
   }
 
   ATH_MSG_DEBUG("Writing VSizes");
-  for (const VSize& vsize : m_vsizes) {
+  for (const EFTrackingFPGAIntegration::VSize& vsize : m_vsizes) {
     SG::ReadHandle<std::vector<unsigned long>> inputDataStream(vsize.storeGateKey, ctx);
 
     m_runs.at(vsize.runIndex)->set_arg(vsize.argumentIndex, inputDataStream->size());
