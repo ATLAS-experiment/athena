@@ -1,5 +1,5 @@
 
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimGenScanBinDesc.cxx
@@ -34,6 +34,8 @@ StatusCode FPGATrackSimBinStep::setRanges(const FPGATrackSimBinStep *prev,
     m_stepNum = prev->m_stepNum+1;
   } else {
     m_stepNum = 0;
+    //prev is dereferenced in several places after this; better to exit than crash
+    return StatusCode::FAILURE;
   }
   m_parMin = parMin;
   m_parMax = parMax;
@@ -100,7 +102,7 @@ IdxSet FPGATrackSimBinStep::binIdx(const ParSet &pars) const
 
 // Convert to previous steps idx
 IdxSet FPGATrackSimBinStep::convertToPrev(const IdxSet &cur) const {
-  IdxSet retv;
+  IdxSet retv{};
   if (m_prev) {
     for (unsigned par =0; par < FPGATrackSimTrackPars::NPARS; par++) {
       retv[par] = (cur[par]*m_prev->m_parBins[par]/m_parBins[par]);
