@@ -59,7 +59,8 @@ class TrigITkModuleCuda : public TrigAccel::WorkFactory {
 
     SeedMakingManagedDeviceContext* createManagedSeedMakingContext(int) const;
 
-
+    GbtsDeviceContext* createGbtsContext(int id, const TrigAccel::ITk::GRAPH_MAKING_INPUT_DATA*) const;
+  
     bool m_dumpTimeLine;
     
     std::atomic<unsigned int> m_workItemCounters[100];//atomic counters for unique Work identification

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGACCELEVENT_TRIGINDETACCELCODES_H
@@ -27,7 +27,8 @@ namespace TrigAccel {
     ID_CABLING_EXPORT  = 10000,
     FIND_SEEDS         = 14000,
     MAKE_SEEDS         = 14001, 
-    FIND_TRACKS        = 15000 
+    FIND_TRACKS        = 15000,
+    RUN_GBTS           = 16000
   };
 }
 
