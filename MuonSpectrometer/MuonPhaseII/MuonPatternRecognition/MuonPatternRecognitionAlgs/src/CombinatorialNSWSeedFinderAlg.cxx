@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CombinatorialNSWSeedFinderAlg.h"
@@ -15,7 +15,7 @@
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "xAODMuonPrepData/MMCluster.h"
 
-
+#include "TruthUtils/HepMCHelpers.h"
 
 #include <ranges>
 #include <vector>
@@ -279,7 +279,7 @@ CombinatorialNSWSeedFinderAlg::findSeedsFromMaximum(const HoughMaximum &max, con
         for (const SpacePoint* sp : max.getHitsInMax()) {
             const auto* mmClust = static_cast<const xAOD::MMCluster*>(sp->primaryMeasurement());
             const xAOD::MuonSimHit* simHit = getTruthMatchedHit(*mmClust);
-            if (!simHit || std::abs(simHit->pdgId()) != 13) continue;
+            if (!simHit || !MC::isMuon(simHit)) continue;
             const MuonGMR4::MmReadoutElement* reEle = mmClust->readoutElement();
             const MuonGMR4::StripDesign& design = reEle->stripLayer(mmClust->measurementHash()).design();
             const Amg::Transform3D toChamb = reEle->msSector()->globalToLocalTrans(gctx) * 

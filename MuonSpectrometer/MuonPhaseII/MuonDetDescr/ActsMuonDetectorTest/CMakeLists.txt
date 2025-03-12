@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: ActsMuonDetectorTest
@@ -10,7 +10,7 @@ atlas_add_component( ActsMuonDetectorTest
                      src/components/*.cxx src/*.cxx
                      LINK_LIBRARIES AthenaKernel StoreGateLib GeoModelUtilities MuonTesterTreeLib
                                     GaudiKernel MuonReadoutGeometryR4 MuonGeoModelR4Lib ActsGeometryLib AthenaPoolUtilities
-                                    xAODTruth xAODMuonSimHit CxxUtils)
+                                    xAODTruth xAODMuonSimHit CxxUtils TruthUtils)
 
 atlas_add_test( testMuonDetectorNav
                 SCRIPT python -m ActsMuonDetectorTest.testMuonDetector
