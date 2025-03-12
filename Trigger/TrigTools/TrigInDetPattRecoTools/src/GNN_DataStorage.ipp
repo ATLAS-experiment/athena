@@ -63,17 +63,11 @@ void TrigFTF_GNN_EtaBin<externalSP>::initializeNodes() {
   m_params.resize(m_vn.size());
   
   m_in.resize(m_vn.size());
+  for(auto& v : m_in) v.reserve(50);//reasonably high number of incoming edges per node
   
-  for(unsigned int nIdx=0;nIdx<m_vn.size();nIdx++) {
-    m_in[nIdx].reserve(50);//reasonably high number of incoming edges per node
-    m_params[nIdx][0] = -100.0;//default cut on cot(theta)
-    m_params[nIdx][1] = 100.0; //default cut on cot(theta)
-    const TrigFTF_GNN_Node<externalSP>* pN = m_vn.at(nIdx);
-    m_params[nIdx][2] = pN->phi();
-    m_params[nIdx][3] = pN->r();
-    m_params[nIdx][4] = pN->z();
-  }
-  
+  std::transform(m_vn.begin(), m_vn.end(), m_params.begin(),
+                   [](const TrigFTF_GNN_Node<externalSP>* pN) { std::array<float,5> a = {-100.0, 100.0, pN->phi(), pN->r(), pN->z()}; return a;});
+    
   auto [min_iter, max_iter] = std::minmax_element(m_vn.begin(), m_vn.end(),
 						  [](const TrigFTF_GNN_Node<externalSP>* s, const TrigFTF_GNN_Node<externalSP>* s1) { return (s->r() < s1->r()); });
   m_maxRadius = (*max_iter)->r();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETPATTRECOTOOLS_TRIGINDETTRACKSEEDINGTOOL_H
@@ -15,6 +15,9 @@
 #include "TrkSpacePoint/SpacePointContainer.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
 
+//for GPU offloading
+
+#include "TrigInDetAccelerationService/ITrigInDetAccelerationSvc.h"
 
 #include "IRegionSelector/IRegSelTool.h"
 #include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
@@ -51,8 +54,7 @@ class TrigInDetTrackSeedingTool: public SeedingToolBase<const Trk::SpacePoint*>,
 
   BooleanProperty m_usePixelSpacePoints{this,  "UsePixelSpacePoints", true};
   BooleanProperty m_useSctSpacePoints{this, "UseSctSpacePoints", false};
-
-
+  
   //offline/EF containers
   SG::ReadHandleKey<SpacePointContainer> m_sctSpacePointsContainerKey{this, "SCT_SP_ContainerName", "ITkStripTrigSpacePoints"};
   SG::ReadHandleKey<SpacePointContainer> m_pixelSpacePointsContainerKey{this, "PixelSP_ContainerName", "ITkPixelTrigSpacePoints"};
@@ -62,6 +64,10 @@ class TrigInDetTrackSeedingTool: public SeedingToolBase<const Trk::SpacePoint*>,
   ToolHandle<IRegSelTool> m_regsel_pix { this, "RegSelTool_Pixel",  "RegSelTool/RegSelTool_Pixel" };
   ToolHandle<IRegSelTool> m_regsel_sct { this, "RegSelTool_SCT",    "RegSelTool/RegSelTool_SCT"   };
 
+  // for GPU offloading
+  
+  BooleanProperty m_useGPU{this, "UseGPU", false};
+  ServiceHandle<ITrigInDetAccelerationSvc> m_accelSvc {this, "TrigAccelerationSvc", ""};
   
 };
 #endif

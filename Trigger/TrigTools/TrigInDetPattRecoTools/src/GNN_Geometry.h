@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETPATTRECOTOOLS_GNN_GEOMETRY_H
@@ -34,16 +34,14 @@ public:
   std::vector<float> m_minBinCoord;
   std::vector<float> m_maxBinCoord;
 
-  float m_minEta, m_maxEta;
+  float m_minEta, m_maxEta, m_etaBin;
 
 protected:
 
   float m_etaBinWidth;
 
   float m_r1, m_z1, m_r2, m_z2;
-  int m_nBins;
-  float m_etaBin;
-  
+  int m_nBins; 
 
 };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cuda.h>
@@ -10,6 +10,7 @@
 #include "TrigITkModuleCuda.h"
 #include "SeedMakingDataStructures_ITk.h"
 #include "SeedMakingWorkCuda_ITk.h"
+#include "GbtsWorkCuda_ITk.h"
 
 #include "TrigAccelEvent/TrigInDetAccelCodes.h"
 #include "gpu_helpers.h"
@@ -169,6 +170,172 @@ SeedMakingManagedDeviceContext* TrigITkModuleCuda::createManagedSeedMakingContex
   return p;
 }
 
+
+GbtsDeviceContext* TrigITkModuleCuda::createGbtsContext(int id, const TrigAccel::ITk::GRAPH_MAKING_INPUT_DATA *pData) const {
+
+  cudaSetDevice(id);
+  checkError(11);
+  
+  GbtsDeviceContext* p = new GbtsDeviceContext;
+
+  p->m_deviceId = id;
+
+  //set stream
+
+  cudaStreamCreate(&p->m_stream);
+  checkError(12);
+  
+  //Allocate memory and copy input data
+
+  GbtsDeviceContext& ctx = *p;
+
+  ctx.m_nMaxEdges = pData->m_nMaxEdges;
+  ctx.m_maxEtaBin = pData->m_maxEtaBin + 1;
+  ctx.m_nNodes    = pData->m_nSpacepoints;
+  ctx.m_nLayers   = pData->m_nLayers;
+
+  //1. spacepoint params storage
+
+  size_t data_size = 4*pData->m_nSpacepoints*sizeof(float);//x,y,z,w
+
+  cudaMalloc((void**) &ctx.d_sp_params, data_size);
+
+  cudaMemcpy(ctx.d_sp_params, &pData->m_params, data_size, cudaMemcpyHostToDevice);
+
+  ctx.d_size += data_size;
+
+  //2. layer information: spacepoint views and geometry
+
+  data_size = 4*pData->m_nLayers*sizeof(int);
+
+  cudaMalloc((void**) &ctx.d_layer_info, data_size);
+  cudaMemcpy(ctx.d_layer_info, pData->m_layerInfo, data_size, cudaMemcpyHostToDevice);
+
+  ctx.d_size += data_size;
+    
+  data_size = 2*pData->m_nLayers*sizeof(float);
+
+  cudaMalloc((void**) &ctx.d_layer_geo, data_size);
+  cudaMemcpy(ctx.d_layer_geo, pData->m_layerGeo, data_size, cudaMemcpyHostToDevice);
+
+  ctx.d_size += data_size;
+    
+  //4. algorithm parameters
+    
+  data_size = sizeof(pData->m_algo_params);
+
+  cudaMalloc((void**) &ctx.d_algo_params, data_size);
+    
+  cudaMemcpy(ctx.d_algo_params, pData->m_algo_params, data_size, cudaMemcpyHostToDevice);
+    
+  ctx.d_size += data_size;
+    
+  //5. graph node storage
+    
+  data_size = 5*pData->m_nSpacepoints*sizeof(float);//tau1, tau2, r, phi, z
+
+  cudaMalloc((void**) &ctx.d_node_params, data_size);
+
+  ctx.d_size += data_size;
+
+  //6. eta-phi binning structures
+
+  data_size = pData->m_nSpacepoints*sizeof(int);
+
+  cudaMalloc((void**) &ctx.d_node_eta_index, data_size);
+
+  ctx.d_size += data_size;
+
+  cudaMalloc((void**) &ctx.d_node_phi_index, data_size);
+
+  ctx.d_size += data_size;
+
+  cudaMalloc((void**) &ctx.d_node_index, data_size);
+
+  ctx.d_size += data_size;
+
+  data_size = ctx.m_maxEtaBin*TrigAccel::ITk::GBTS_MAX_PHI_BIN*sizeof(unsigned int);
+
+  cudaMalloc((void**) &ctx.d_eta_phi_histo, data_size);
+
+  ctx.d_size += data_size;
+
+  cudaMemset(ctx.d_eta_phi_histo, 0, data_size);
+
+  cudaMalloc((void**) &ctx.d_phi_cusums, data_size);
+
+  ctx.d_size += data_size;
+
+  data_size = ctx.m_maxEtaBin*sizeof(unsigned int);
+
+  cudaMalloc((void**) &ctx.d_eta_node_counter, data_size);
+
+  ctx.d_size += data_size;
+
+  data_size = 2*ctx.m_maxEtaBin*sizeof(int);
+
+  cudaMalloc((void**) &ctx.d_eta_bin_views, data_size);
+
+  ctx.d_size += data_size;
+
+  data_size = 2*ctx.m_maxEtaBin*sizeof(float);
+
+  cudaMalloc((void**) &ctx.d_bin_rads, data_size);
+  
+  ctx.d_size += data_size;
+
+  checkError(13);
+
+  //8. data structure for graph building,  will be allocated later
+
+  ctx.h_bin_rads = 0;
+  ctx.h_eta_bin_views = 0;
+  ctx.d_bin_pair_views = 0;
+  ctx.d_bin_pair_dphi  = 0;
+  ctx.d_edge_links = 0;
+  ctx.d_num_neighbours = 0;
+  ctx.d_reIndexer = 0;
+  ctx.d_neighbours = 0;
+  ctx.d_output_graph = 0;
+
+  //9. the graph
+
+  data_size = 4*sizeof(unsigned int);
+
+  cudaMalloc((void **)&ctx.d_counters, data_size);
+  cudaMemset(ctx.d_counters, 0, data_size);
+
+  ctx.d_size += data_size;
+    
+  data_size = 2*ctx.m_nMaxEdges*sizeof(int);
+  cudaMalloc((void **)&ctx.d_edge_nodes, data_size);
+
+  ctx.d_size += data_size;
+    
+  data_size = 4*ctx.m_nMaxEdges*sizeof(float);
+  cudaMalloc((void **)&ctx.d_edge_params, data_size);
+
+  ctx.d_size += data_size;
+
+  data_size = ctx.m_nNodes*sizeof(unsigned int);
+
+  cudaMalloc((void **)&ctx.d_num_incoming_edges, data_size);
+  cudaMemset(ctx.d_num_incoming_edges, 0, data_size);
+
+  ctx.d_size += data_size;
+  
+  data_size = ctx.m_nNodes*sizeof(int);
+    
+  cudaMalloc((void **)&ctx.d_link_counters, data_size);
+  cudaMemset(ctx.d_link_counters, 0, data_size);
+
+  ctx.d_size += data_size;
+  
+  checkError(14);
+
+  return p;
+}
+
 TrigAccel::Work* TrigITkModuleCuda::createWork(int workType, std::shared_ptr<TrigAccel::OffloadBuffer> data){
   
   if(workType == TrigAccel::InDetJobControlCode::SIL_LAYERS_EXPORT){
@@ -245,6 +412,26 @@ TrigAccel::Work* TrigITkModuleCuda::createWork(int workType, std::shared_ptr<Tri
     return w;
   }
 
+  if(workType == TrigAccel::InDetJobControlCode::RUN_GBTS){
+
+    int deviceId = 0;//always using device 0 for the time being
+
+    //TO-DO: to support mult-GPU load balancing get deviceId from a tbb_concurrent_queue
+
+    TrigAccel::ITk::GRAPH_MAKING_INPUT_DATA *pData = reinterpret_cast<TrigAccel::ITk::GRAPH_MAKING_INPUT_DATA*>(data->get());
+
+    GbtsDeviceContext* ctx = createGbtsContext(deviceId, pData);
+    
+    
+    unsigned int workNum = m_workItemCounters[0]++;
+    
+    unsigned int workId = workNum*100;
+    
+    GbtsWorkCudaITk* w = new GbtsWorkCudaITk(workId, ctx, data, &m_timeLine);
+    
+    return w;
+  }
+
   return 0;
 }
 
@@ -252,7 +439,8 @@ const std::vector<int> TrigITkModuleCuda::getProvidedAlgs(){
   std::vector<int> v{
       TrigAccel::InDetJobControlCode::SIL_LAYERS_EXPORT,
       TrigAccel::InDetJobControlCode::MAKE_SEEDS,//the default
-      TrigAccel::InDetJobControlCode::FIND_SEEDS //the alternative
+      TrigAccel::InDetJobControlCode::FIND_SEEDS, //the alternative
+      TrigAccel::InDetJobControlCode::RUN_GBTS
   };
   return v;
 }
