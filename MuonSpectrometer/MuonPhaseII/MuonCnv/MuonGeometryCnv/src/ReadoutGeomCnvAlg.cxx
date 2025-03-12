@@ -1089,8 +1089,6 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                     const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, chID);
                     Amg::Vector3D testChannelPos{Amg::Vector3D::Zero()}; 
                     testEle.stripGlobalPosition(chID, testChannelPos);
-                    Amg::Vector3D localRefPos {testTrans.inverse()*refChannelPos};
-                    Amg::Vector3D localTestPos{testTrans.inverse()*testChannelPos};
                     if ((refChannelPos - testChannelPos).mag() > 1. * Gaudi::Units::micrometer){
                         ATH_MSG_ERROR("Mismatch in strip positions "<<m_idHelperSvc->toString(chID)
                                 <<" ref: "<<Amg::toString(refChannelPos)<<" test: "<<Amg::toString(testChannelPos)
