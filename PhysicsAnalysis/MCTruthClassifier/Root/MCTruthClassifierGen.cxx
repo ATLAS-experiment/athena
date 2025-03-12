@@ -1381,8 +1381,13 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
           break;
         }
         skipnext = true;
-      } else if ((apdgID1 == 11 && apdgID2 == 12) || (apdgID1 == 14 && apdgID2 == 14) ||
-                 (apdgID1 == 16 && apdgID2 == 16)) {
+      } else if ((apdgID1 == 11 && apdgID2 == 12) || 
+                 (apdgID1 == 12 && apdgID2 == 11) ||
+                 (apdgID1 == 13 && apdgID2 == 14) ||
+                 (apdgID1 == 14 && apdgID2 == 13) ||                 
+                 (apdgID1 == 15 && apdgID2 == 16) ||
+                 (apdgID1 == 16 && apdgID2 == 15)
+                 ) {
         // WBoson
         if (thePartToCheck == theDaug || thePartToCheck == theNextDaug) {
           isWboson = true;
