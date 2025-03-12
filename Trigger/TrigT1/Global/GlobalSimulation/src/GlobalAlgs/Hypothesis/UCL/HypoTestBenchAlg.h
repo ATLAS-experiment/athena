@@ -70,14 +70,47 @@ namespace GlobalSim {
       {},
       "name of file with the expected Generic TOB values from HW Sim"};
     
+    Gaudi::Property<std::vector<std::string>>
+    m_testVecs_in{
+      this,
+      "testVecs",
+      {},
+      "test vectors for manual tests. Hex"};
+
+    Gaudi::Property<std::string>
+    m_expMults_in{
+      this,
+      "expMults",
+      {},
+      "expected counts for manual tests. Hex"};
+
+    
+    Gaudi::Property<std::string>
+    m_expTobs_in {
+      this,
+      "expTobs",
+      {},
+      "expected output generic TOBs for manual tests. Hex"};
+
+    // choose int rather than unsigned someting to avoid unpleasantness
+    // if initialised with a negative value
+    Gaudi::Property<int>
+    m_testRepeat {
+      this,
+      "testRepeat",
+      {1},
+      "number of times to repeat manual test values"};
+
+    // test vectors after repeat has been applied to testVecs_in
+    std::vector<std::string> m_testVecs{};
     
     // One elenement of the following vector is written out each event.
     std::vector<std::unique_ptr<GepAlgoHypothesisFIFO>>  m_fifos;
     std::size_t m_fifo_ptr{0};
 
     // expected values for counts coorespoinding to the  FIFO data.
-    std::vector<std::string>  m_expected_mults;
-    std::vector<std::string>  m_expected_tobs;
+    std::vector<std::string>  m_expected_mults{};
+    std::vector<std::string>  m_expected_tobs{};
 
 
     // m_fifo fillers, called from init()

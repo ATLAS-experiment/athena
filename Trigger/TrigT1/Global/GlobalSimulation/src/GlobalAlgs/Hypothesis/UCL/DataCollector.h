@@ -6,6 +6,7 @@
 #define GLOBALSIM_DATACOLLECTOR_H
 
 #include "AlgoDataTypes.h"
+#include "GenericTob.h"
 #include "eEmSortSelectCountContainerPortsOut.h"
 #include <ostream>
 #include <map>

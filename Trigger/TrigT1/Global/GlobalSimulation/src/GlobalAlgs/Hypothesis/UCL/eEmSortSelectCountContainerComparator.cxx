@@ -67,7 +67,7 @@ namespace GlobalSim {
       std::stringstream ss;
       ss << "eEmSortSelectCountContainerPortsOut tob bits:\n";
       for (const auto& tob : ports_out->m_O_eEmGenTob) {
-	ss << tob->as_bits() << '\n';
+	ss << tob->as_bits() << ' ' << std::hex << tob->as_bits().to_ulong() << '\n';
       }
       ss << '\n';
       ATH_MSG_DEBUG(ss.str());
@@ -110,7 +110,7 @@ namespace GlobalSim {
     auto ntobs = exp_tobs.size();
     if (ntobs != ports_out->m_O_eEmGenTob.size()) {
       ATH_MSG_ERROR("exp_tobs size " << exp_tobs.size() <<
-		    "port tobs size : " << ports_out->m_O_eEmGenTob.size());
+		    " port tobs size : " << ports_out->m_O_eEmGenTob.size());
       return StatusCode::FAILURE;
     }
 

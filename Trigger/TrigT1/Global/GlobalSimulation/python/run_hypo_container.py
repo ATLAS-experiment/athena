@@ -97,15 +97,21 @@ if __name__ == '__main__':
     base_data = "/eos/atlas/atlascerngroupdisk/data-art/"\
         "large-input/trig-val/GlobalSimTest/eEmSortSelectCount/"
 
-    test_data = os.path.join(base_data, 'tests_00.dat')
-    hypoTestBench_alg.testsFileName = test_data
-
-    mults_data =  os.path.join(base_data, 'expected_multiplicity_00.dat')
-    hypoTestBench_alg.expectedMultsFileName = mults_data
+    # an example input file name of test vectors
+    ## would be os.path.join(base_data, 'tests_00.dat')
     
-    tobs_data =  os.path.join(base_data, 'expected_tobs_00.dat')
-    hypoTestBench_alg.expectedTobsFileName = tobs_data
+    exp_mults_data =  os.path.join(base_data, 'expected_multiplicity_00.dat')
+    hypoTestBench_alg.expectedMultsFileName = exp_mults_data
+    
+    exp_tobs_data =  os.path.join(base_data, 'expected_tobs_00.dat')
+    hypoTestBench_alg.expectedTobsFileName = exp_tobs_data
 
+    # values for manual testing.
+    # manual testing is active if no input file name is given
+    hypoTestBench_alg.testVecs = ['000000001a005a0015']
+    hypoTestBench_alg.expTobs = '0'* (198*8)
+    hypoTestBench_alg.expMults = '0' * 52
+    
     
     acc.addEventAlgo(hypoTestBench_alg)
     from AthenaCommon.Constants import DEBUG

@@ -5,9 +5,12 @@
 #ifndef GLOBALSIM_GENERICTOB_H
 #define GLOBALSIM_GENERICTOB_H
 
-#include "eEmTob.h" //for eEmTobPtr
+#include "AlgoConstants.h"
+#include "AlgoDataTypes.h"  //bitSetToInt
+#include "eEmTob.h"
+
 #include <bitset>
-#include <iosfwd>
+#include <ostream>
 
 namespace GlobalSim {
 
@@ -29,26 +32,28 @@ namespace GlobalSim {
     GenericTob(){};
     GenericTob(const eEmTobPtr& in_tob);
     
-    unsigned int Et() const {return m_Et;}
-    int Eta() const {return m_Eta;}
-    int Phi() const {return m_Phi;}
-    int Charge() const {return m_Charge;}
-    const std::bitset<1>& overflow() const {return m_Overflow;}
-    const std::bitset<32>& as_bits() const {return m_bits;}
+    const std::bitset<13>& Et_bits() const {return m_Et_bits;}
+    const std::bitset<9>& Eta_bits() const {return m_Eta_bits;}
+    const std::bitset<7>& Phi_bits() const {return m_Phi_bits;}
+    const std::bitset<2>& Charge_bits() const {return m_Charge_bits;}
+    const std::bitset<1>& overflow_bits() const {return m_Overflow_bits;}
+    std::bitset<32> as_bits() const;
+ 
+    ulong Et () const {return m_Et_bits.to_ulong();}
+    int Eta () const {return bitSetToInt(m_Eta_bits);}
+    int Phi () const {return bitSetToInt(m_Phi_bits);}
+    int Charge () const{return bitSetToInt(m_Charge_bits);}
+      
     
   private:
 
-    void setBits(const eEmTobPtr& in_tob);
- 
     // at the time of writing the int widhs in the VHDL code were all < 16.
-    
-    unsigned int m_Et{0}; // originally 13 bits
-    int m_Eta{0}; // originally 9 bits
-    int m_Phi{0}; // originally 7 bits
-    int m_Charge{0}; // originally 2 bits
-    std::bitset<1> m_Overflow; // originally 1 bit
-
-    std::bitset<32> m_bits;
+       
+    std::bitset<GenericEtBitWidth> m_Et_bits;
+    std::bitset<GenericEtaBitWidth> m_Eta_bits;
+    std::bitset<GenericPhiBitWidth> m_Phi_bits;
+    std::bitset<GenericMuonFlagBitWidth> m_Charge_bits;
+    std::bitset<1> m_Overflow_bits;
     
   };
 

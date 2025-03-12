@@ -40,8 +40,14 @@ std::ostream& operator << (std::ostream& os,
   os << "\n vector of GenericTob containers:\n\n";
 
   for (const auto& p : col.m_vec_GenericTobContainers) {
-    os << '\n' << p.first << " [" << p.second.size() << "]\n"
-       << p.second<<'\n';
+    const auto& vecOfvec = p.second;
+    os << '\n' << p.first << " [" << vecOfvec.size() << "]\n";
+      for (const auto& vec : vecOfvec) {
+	os << "\n inner vec size [" << vec.size() << "]\n";
+	for(const auto& e : vec) {
+	  os << *e<<'\n';
+	}
+      }
   }
  
   return os;

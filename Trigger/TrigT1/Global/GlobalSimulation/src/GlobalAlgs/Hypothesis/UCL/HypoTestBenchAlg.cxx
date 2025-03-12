@@ -97,27 +97,34 @@ namespace GlobalSim {
     // GepAlgoHypothesisPortsIn objects. The PortsIn objects contain
     // data only for eEmTobs.
 
-
-    auto fifo = std::make_unique<GepAlgoHypothesisFIFO>();
-    for(int i = 0; i < 5; ++i) {
- 
-      auto ports_in = GepAlgoHypothesisPortsIn();
-
-      // set bottom bits of I_eEmTob - this is Et
-      *(ports_in.m_I_eEmTobs) = i;
-    
-      std::bitset<AlgoConstants::eFexEtaBitWidth> bit_eta = 80+10*i;
-      for (std::size_t i = 0; i != AlgoConstants::eFexEtaBitWidth; ++i){
-	if (bit_eta.test(i)) {
-	  (ports_in.m_I_eEmTobs)->set(32+i);
-	}
-      }
-
-      fifo->push_back(ports_in);
+    // if we reach this point, expect some test data
+    if (m_testVecs_in.empty() ) {
+      ATH_MSG_ERROR("Requested manual testing, but no data provided");
+      return StatusCode::FAILURE;
     }
 
+    if (m_testRepeat < 1) {
+      ATH_MSG_ERROR("Invalid repeat of input data requested: " << m_testRepeat);
+      return StatusCode::FAILURE;
+    }
+
+    for(int i = 0; i != m_testRepeat; ++i) {
+      m_testVecs.insert(std::begin(m_testVecs),
+			std::cbegin(m_testVecs_in),
+			std::cend(m_testVecs_in));
+    }
+
+    auto fifo = std::make_unique<GepAlgoHypothesisFIFO>();
+    for (const auto& tv : m_testVecs) {
+      auto ports_in = GepAlgoHypothesisPortsIn();
+      CHECK(hexTOB2bitsetTOB(tv, *(ports_in.m_I_eEmTobs)));
+      fifo->push_back(ports_in);
+    }
     m_fifos.push_back(std::move(fifo));
-		      
+
+    m_expected_mults.push_back(m_expMults_in);
+    m_expected_tobs.push_back(m_expTobs_in);
+
     return StatusCode::SUCCESS;
   }
 

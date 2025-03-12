@@ -7,52 +7,73 @@
 #include "AlgoDataTypes.h"
 
 namespace GlobalSim {
-
-
     
   GenericTob::GenericTob(const eEmTobPtr& in_tob) {
-      m_Et = bitSetToInt(in_tob->Et);
 
-      auto etaBin = (in_tob->Eta).to_ulong();
-      m_Eta = etaBin < 200 ? -100 + etaBin : 100;
-      
-      m_Phi = static_cast<unsigned int>(bitSetToInt(in_tob->Phi));
-    
-      m_Charge = 0;
-      m_Overflow = 0;
-
-      setBits(in_tob);
-    }	      
-
-  void GenericTob::setBits(const eEmTobPtr& in_tob) {
-      
-      std::size_t r_ptr{0};
-      const auto& et = in_tob->Et;
-      for (std::size_t s_ptr=0; s_ptr < et.size(); ++s_ptr, ++r_ptr) {
-	if(et.test(s_ptr)) {m_bits.set(r_ptr);}
-      }
-
-      const auto& eta = in_tob->Eta;
-      for (std::size_t s_ptr=0; s_ptr < eta.size(); ++s_ptr, ++r_ptr) {
-	if(eta.test(s_ptr)) {m_bits.set(r_ptr);}
-      }
-
-      const auto& phi = in_tob->Phi;
-      for (std::size_t s_ptr=0; s_ptr < phi.size(); ++s_ptr, ++r_ptr) {
-	if(phi.test(s_ptr)) {m_bits.set(r_ptr);}
-      }
+    {
+      const auto& in = in_tob->Et_bits();
+      auto sz = in.size();
+      for (auto i = 0U; i != sz; ++i) {m_Et_bits[i] = in[i];}
     }
+
+    
+    {
+      const auto& in = in_tob->Eta_bits();
+      
+      // vhdl etaL to_signed(unsigned(-100 + in, GenericEtaBitWidth)
+      m_Eta_bits = (-0x64 + bitSetToInt(in)+ 0xff + 0x01);
+    }
+
+    {
+      const auto& in = in_tob->Phi_bits();
+      m_Phi_bits = 2*(bitSetToInt(in)+2);
+    }
+
+  }
+
+  std::bitset<32> GenericTob::as_bits() const {
+
+    auto result = std::bitset<32>();
+    
+    std::size_t begin = 0;
+    std::size_t end = GenericEtBitWidth;;
+    
+
+    for(std::size_t i = begin; i != end; ++i) {
+      result[i] = m_Et_bits[i];
+    }
+
+    begin = end;
+    end = begin + GenericEtaBitWidth;
+
+    for(std::size_t i = 0; i != GenericEtaBitWidth; ++i) {
+      result[begin+i] = m_Eta_bits[i];
+    }
+
+    begin = end;
+    end = begin + GenericPhiBitWidth;
+    
+    for(std::size_t i = 0; i != GenericPhiBitWidth; ++i) {
+      result[begin+i] = m_Phi_bits[i];
+    }
+
+    
+    
+    return result;
+
+  }
+
 }
 
 std::ostream& operator << (std::ostream& os, const GlobalSim::GenericTob& tob) {
   
   
   os << "GlobalSim::GenericTob\n"
-     << "Et: " << tob.Et() << ' ' << std::bitset<13>{tob.Et()} << '\n'
-     << "Eta: " << tob.Eta() << '\n'
-     << "Phi: " << tob.Phi() << '\n'
-     << "Charge: " << tob.Charge() << '\n'
-     << "overflow: " << tob.overflow() << '\n'
+     << "Et: " << tob.Et_bits() << '\n'
+     << "Eta: " << tob.Eta_bits() << '\n'
+     << "Phi: " << tob.Phi_bits() << '\n'
+     << "Charge: " << tob.Charge_bits() << '\n'
+     << "overflow: " << tob.overflow_bits() << '\n'
      << "bits: " << tob.as_bits() << '\n';
   return os;
 }

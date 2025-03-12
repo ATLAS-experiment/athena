@@ -5,9 +5,8 @@
 #ifndef GLOBALSIM_ALGODATATYPES_H
 #define GLOBALSIM_ALGODATATYPES_H
 
-//need the << operator on these two
-#include "GenericTob.h"
-#include "eEmTob.h"
+
+#include "AlgoConstants.h"
 
 #include <bitset>
 #include <ostream>
