@@ -93,7 +93,8 @@ namespace Muon
     };
 
     namespace MMTRIG {
-      constexpr int size_trig_padding =         32;
+      constexpr int size_trig_globalX =         16;
+      constexpr int size_trig_globalU =         16;
       constexpr int size_trig_BCID =            12;
       constexpr int size_trig_reserved =         1;
       constexpr int size_trig_dTheta =           5;

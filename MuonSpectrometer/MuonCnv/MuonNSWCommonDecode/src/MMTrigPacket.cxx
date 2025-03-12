@@ -20,7 +20,8 @@ Muon::nsw::MMTrigPacket::MMTrigPacket (std::vector<uint32_t>& payload){
     throw std::runtime_error( Muon::nsw::format( "MM Trigger packet size not as expected: expected exactly 2 uint32_t, got {}", payload.size() ));
   }
 
-  m_trig_padding =  Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTRIG::size_trig_padding);
+  m_trig_globalX =  Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTRIG::size_trig_globalX);
+  m_trig_globalU =  Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTRIG::size_trig_globalU);
   m_trig_BCID =     Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTRIG::size_trig_BCID);
   m_trig_reserved = Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTRIG::size_trig_reserved);
   m_trig_dTheta =   Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTRIG::size_trig_dTheta);

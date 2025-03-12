@@ -303,24 +303,29 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
         data.b_MML1A_art_channels.push_back(tmp_art_channels);
 
         const std::vector<std::shared_ptr<Muon::nsw::MMTrigPacket>>& trigs = link->trig_packets();
+        std::vector<uint32_t> tmp_trig_globalX;
+        std::vector<uint32_t> tmp_trig_globalU;
         std::vector<uint32_t> tmp_trig_BCID;
         std::vector<uint32_t> tmp_trig_dTheta;
         std::vector<uint32_t> tmp_trig_phiBin;
         std::vector<uint32_t> tmp_trig_rBin;
         for (const auto& trig : trigs) {
+          tmp_trig_globalX.push_back(trig->trig_globalX());
+          tmp_trig_globalU.push_back(trig->trig_globalU());
           tmp_trig_BCID.push_back(trig->trig_BCID());
           tmp_trig_dTheta.push_back(trig->trig_dTheta());
           tmp_trig_phiBin.push_back(trig->trig_phiBin());
           tmp_trig_rBin.push_back(trig->trig_rBin());
         }
+        data.b_MML1A_trig_globalX.push_back(tmp_trig_globalX);
+        data.b_MML1A_trig_globalU.push_back(tmp_trig_globalU);
         data.b_MML1A_trig_BCID.push_back(tmp_trig_BCID);
         data.b_MML1A_trig_dTheta.push_back(tmp_trig_dTheta);
         data.b_MML1A_trig_phiBin.push_back(tmp_trig_phiBin);
         data.b_MML1A_trig_rBin.push_back(tmp_trig_rBin);
 
-	data.b_MML1A_trailer_CRC.push_back(link->trailer_CRC());
-	data.b_MML1A_CRC_ok.push_back(link->is_crc_ok());
-	
+        data.b_MML1A_trailer_CRC.push_back(link->trailer_CRC());
+        data.b_MML1A_CRC_ok.push_back(link->is_crc_ok());
       }
     }
     if (robType == "MMMon") {

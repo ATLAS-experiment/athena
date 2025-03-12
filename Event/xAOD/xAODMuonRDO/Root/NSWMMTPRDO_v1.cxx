@@ -60,6 +60,8 @@ namespace xAOD{
   IMPLEMENT_VECTOR(uint16_t, art_channel)
 
   //trigger data
+  IMPLEMENT_VECTOR(uint16_t, trig_globalX)
+  IMPLEMENT_VECTOR(uint16_t, trig_globalU)
   IMPLEMENT_VECTOR(uint16_t, trig_BCID)
   IMPLEMENT_VECTOR(uint8_t,  trig_dTheta)
   IMPLEMENT_VECTOR(uint8_t,  trig_ROI_rID)

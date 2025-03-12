@@ -62,6 +62,8 @@ namespace xAOD {
         DECLARE_VEC_MEMBER(uint16_t, art_channel)
 
         //trigger data
+        DECLARE_VEC_MEMBER(uint16_t, trig_globalX)
+        DECLARE_VEC_MEMBER(uint16_t, trig_globalU)
         DECLARE_VEC_MEMBER(uint16_t, trig_BCID)
         DECLARE_VEC_MEMBER(uint8_t,  trig_dTheta)
         DECLARE_VEC_MEMBER(uint8_t,  trig_ROI_rID)
