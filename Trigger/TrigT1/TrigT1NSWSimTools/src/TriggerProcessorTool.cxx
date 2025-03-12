@@ -1,15 +1,13 @@
-/*                                                                                                                                                     
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration                                                                              
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrigT1NSWSimTools/TriggerProcessorTool.h"
+#include "TriggerProcessorTool.h"
 
 namespace NSWL1 {
 
   TriggerProcessorTool::TriggerProcessorTool(const std::string& type, const std::string& name, const IInterface* parent) :
-    AthAlgTool(type,name,parent) 
-  {
-  }
+    base_class(type,name,parent) {}
 
   StatusCode TriggerProcessorTool::initialize() {
 
@@ -58,18 +56,18 @@ namespace NSWL1 {
     for (const auto rawData : *stripTriggerContainer) {
       Muon::NSW_TrigRawData* trigRawData = new Muon::NSW_TrigRawData(*rawData, true);
       ATH_MSG_DEBUG("L1NSW-Strip Trigger Output: "
-		    << "sectorSide=" << trigRawData->sectorSide() << " "
-		    << "sectorId=" << trigRawData->sectorId() << " "
-		    << "bcId=" << trigRawData->bcId());
+                    << "sectorSide=" << trigRawData->sectorSide() << " "
+                    << "sectorId=" << trigRawData->sectorId() << " "
+                    << "bcId=" << trigRawData->bcId());
       for(const auto seg : *trigRawData){
-	ATH_MSG_DEBUG("\tStripSegment: "
-		      << "deltaTheta=" << static_cast<int16_t>(seg->deltaTheta()) << " "
-		      << "phiIndex=" << static_cast<int16_t>(seg->phiIndex()) << " "
-		      << "rIndex=" << static_cast<int16_t>(seg->rIndex()) << " "
-		      << "spare=" << static_cast<int16_t>(seg->spare()) << " "
-		      << "lowRes=" << seg->lowRes() << " "
-		      << "phiRes=" << seg->phiRes() << " "
-		      << "monitor=" << seg->monitor());
+        ATH_MSG_DEBUG("\tStripSegment: "
+                      << "deltaTheta=" << static_cast<int16_t>(seg->deltaTheta()) << " "
+                      << "phiIndex=" << static_cast<int16_t>(seg->phiIndex()) << " "
+                      << "rIndex=" << static_cast<int16_t>(seg->rIndex()) << " "
+                      << "spare=" << static_cast<int16_t>(seg->spare()) << " "
+                      << "lowRes=" << seg->lowRes() << " "
+                      << "phiRes=" << seg->phiRes() << " "
+                      << "monitor=" << seg->monitor());
       }
       trigRdoContainer->push_back(trigRawData);
     }
@@ -78,18 +76,18 @@ namespace NSWL1 {
     for (const auto rawData : *MMTriggerContainer) {
       Muon::NSW_TrigRawData* trigRawData = new Muon::NSW_TrigRawData(*rawData, false);
       ATH_MSG_DEBUG("L1NSW-MM Trigger Output: "
-		    << "sectorSide=" << trigRawData->sectorSide() << " "
-		    << "sectorId=" << trigRawData->sectorId() << " "
-		    << "bcId=" << trigRawData->bcId());
+                    << "sectorSide=" << trigRawData->sectorSide() << " "
+                    << "sectorId=" << trigRawData->sectorId() << " "
+                    << "bcId=" << trigRawData->bcId());
       for(const auto seg : *trigRawData){
-	ATH_MSG_DEBUG("\tMMSegment: "
-		      << "deltaTheta=" << static_cast<int16_t>(seg->deltaTheta()) << " "
-		      << "phiIndex=" << static_cast<int16_t>(seg->phiIndex()) << " "
-		      << "rIndex=" << static_cast<int16_t>(seg->rIndex()) << " "
-		      << "spare=" << static_cast<int16_t>(seg->spare()) << " "
-		      << "lowRes=" << seg->lowRes() << " "
-		      << "phiRes=" << seg->phiRes() << " "
-		      << "monitor=" << seg->monitor());
+        ATH_MSG_DEBUG("\tMMSegment: "
+                      << "deltaTheta=" << static_cast<int16_t>(seg->deltaTheta()) << " "
+                      << "phiIndex=" << static_cast<int16_t>(seg->phiIndex()) << " "
+                      << "rIndex=" << static_cast<int16_t>(seg->rIndex()) << " "
+                      << "spare=" << static_cast<int16_t>(seg->spare()) << " "
+                      << "lowRes=" << seg->lowRes() << " "
+                      << "phiRes=" << seg->phiRes() << " "
+                      << "monitor=" << seg->monitor());
       }
       trigRdoContainer->push_back(trigRawData);
     }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
 # Dev_HI_run3_v1.py menu for Run 3 development
@@ -9,24 +9,13 @@ from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from .SignatureDicts import ChainStore
 
 from .Physics_pp_run3_v1 import (
-    #SingleMuonGroup,
     MinBiasGroup,
-    #MultiMuonGroup,
-    #SinglePhotonGroup,
-    #SingleElectronGroup,
-    #MultiElectronGroup,
-    PrimaryLegGroup,
     PrimaryPhIGroup,
-    #PrimaryL1MuGroup,
     SupportGroup,
-    SupportLegGroup,
     SupportPhIGroup,
     SingleJetGroup,
-    #SingleBjetGroup,
-    #TagAndProbeGroup,
-    #ZeroBiasGroup
 )
-from .PhysicsP1_HI_run3_v1 import HardProbesStream,MinBiasStream,UPCStream,MinBiasOverlayStream,UCCStream
+from .PhysicsP1_HI_run3_v1 import HardProbesStream, MinBiasStream, UPCStream
 from . import MC_HI_run3_v1 as mc_menu
 
 

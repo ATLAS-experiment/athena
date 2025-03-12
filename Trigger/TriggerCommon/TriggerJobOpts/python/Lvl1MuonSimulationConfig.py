@@ -288,7 +288,7 @@ def NSWTriggerConfig(flags):
                                                StripClusterTool = StripClusterTool,
                                                StripSegmentTool = StripSegmentTool,
                                                MMTriggerTool = MMTriggerTool,
-                                               MMTriggerProcessorTool = TriggerProcessorTool,
+                                               TriggerProcessorTool = TriggerProcessorTool,
                                                NSWTrigRDOContainerName = "L1_NSWTrigContainer" )
     acc.addEventAlgo(nswAlg)
     return acc

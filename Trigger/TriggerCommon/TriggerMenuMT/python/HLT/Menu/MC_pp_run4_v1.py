@@ -13,7 +13,7 @@ from .SignatureDicts import ChainStore
 
 import TriggerMenuMT.HLT.Menu.Physics_pp_run4_v1 as physics_menu 
 from TriggerMenuMT.HLT.Menu.Physics_pp_run4_v1 import ( 
-    PhysicsStream,
+    #PhysicsStream,
     #ExpressStream,
     SingleMuonGroup,
     MultiMuonGroup,

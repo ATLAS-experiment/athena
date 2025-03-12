@@ -17,7 +17,7 @@
 #include "TrigT1NSWSimTools/IMMTriggerTool.h"
 #include "TrigT1NSWSimTools/IPadTriggerLogicTool.h"
 #include "TrigT1NSWSimTools/PadTriggerAdapter.h"
-#include "TrigT1NSWSimTools/TriggerProcessorTool.h"
+#include "TrigT1NSWSimTools/ITriggerProcessorTool.h"
 
 // Forward includes
 class StoreGateSvc;
@@ -63,7 +63,7 @@ namespace NSWL1 {
     ToolHandle <IStripClusterTool>     m_strip_cluster{this, "StripClusterTool", "NSWL1::StripClusterTool", "Tool simulating the sTGC Strip Clustering"};
     ToolHandle <IStripSegmentTool>     m_strip_segment{this, "StripSegmentTool", "NSWL1::StripSegmentTool", "Tool simulating the sTGC Segment finding"};
     ToolHandle <IMMTriggerTool>        m_mmtrigger{this, "MMTriggerTool", "NSWL1::MMTriggerTool", "Tool simulating the MM Trigger"};
-    ToolHandle <TriggerProcessorTool>  m_trigProcessor{this, "MMTriggerProcessorTool", "NSWL1::TriggerProcessorTool", "Tool simulating the TP"};
+    ToolHandle <ITriggerProcessorTool> m_trigProcessor{this, "TriggerProcessorTool", "NSWL1::TriggerProcessorTool", "Tool simulating the TP"};
 
     Gaudi::Property<bool> m_doNtuple{this, "DoNtuple", false,  "Create an ntuple for data analysis"};
     Gaudi::Property<bool> m_doMM{this, "DoMM", false, "Run data analysis for MM"};

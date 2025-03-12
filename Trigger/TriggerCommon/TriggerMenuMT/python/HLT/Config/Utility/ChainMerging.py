@@ -1,10 +1,9 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.MenuAlignmentTools import get_alignment_group_ordering as getAlignmentGroupOrdering
-from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequenceCfg, isEmptySequenceCfg, createEmptyMenuSequenceCfg
+from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, isEmptySequenceCfg, createEmptyMenuSequenceCfg
 
 from AthenaCommon.Logging import logging
-from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 from TrigCompositeUtils.TrigCompositeUtils import legName
 import functools
 from itertools import repeat

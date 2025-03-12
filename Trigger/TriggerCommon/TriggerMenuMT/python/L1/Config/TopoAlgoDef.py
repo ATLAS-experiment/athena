@@ -2463,7 +2463,7 @@ class TopoAlgoDef:
         # g-2 tau (ATR-30638)
         Algo = namedtuple('Algo', ['dPhiMin', 'dPhiMax', 'otype', 'olist', 'ocut1', 'ocut2', 'nTOB'])
         algolist=[
-            Algo(dPhiMin=30, dPhiMax=32, otype='eTAU', olist='s', ocut1=60, ocut2=60, nTOB=HW.eTauOutputWidthSort), #30DPHI32-2eTAU60s
+            Algo(dPhiMin=30, dPhiMax=32, otype='eTAU', olist='s', ocut1=50, ocut2=50, nTOB=HW.eTauOutputWidthSort), #30DPHI32-2eTAU50s
         ]
         for x in algolist:
             name = f'{x.dPhiMin}DPHI{x.dPhiMax}-'

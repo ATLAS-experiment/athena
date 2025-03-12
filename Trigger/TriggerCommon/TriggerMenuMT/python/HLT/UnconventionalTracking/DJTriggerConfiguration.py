@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon.CFElements import (parOR,seqAND)
+from AthenaCommon.CFElements import seqAND
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA, InViewRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator

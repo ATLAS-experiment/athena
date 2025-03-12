@@ -139,7 +139,7 @@ def createMuonConfigFlags():
     # Muon Trigger Flags
     mcf.addFlag("Muon.MuonTrigger", False) 
     mcf.addFlag("Muon.SAMuonTrigger", False) 
-    mcf.addFlag("Muon.disableNSWForL2SA", False) 
+    mcf.addFlag("Muon.disableNSWForL2SA", True)
 
     mcf.addFlag("Muon.enableAlignment",lambda flags: (flags.Common.Project is not Project.AthSimulation \
                                                       and (flags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain] or flags.Overlay.DataOverlay)))
