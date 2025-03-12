@@ -52,6 +52,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('windowR', 20)
     cf.addFlag('windowZ', 20)
     cf.addFlag('maxBranches', -1)
+    cf.addFlag('hitThreshold', 10)
     
     def __httHough1DFlags():
         """Additional function delays import"""

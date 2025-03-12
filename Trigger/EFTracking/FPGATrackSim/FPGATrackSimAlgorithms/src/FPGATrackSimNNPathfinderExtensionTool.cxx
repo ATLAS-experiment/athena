@@ -200,13 +200,6 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
 
         while(roadsToExtrapolate.size() > 0)
         {
-
-            if (m_maxBranches.value() >= 0 && (int)(roadsToExtrapolate.size()) >= m_maxBranches.value()) {
-                // TODO:: This needs to change. If branching is setup, we need take the N inner most hits
-                ATH_MSG_WARNING("We are at " << roadsToExtrapolate.size() << " roads to extrapolate, bigger than maxbranches = " << m_maxBranches.value() << " so stopping");
-                break;
-            }
-
             FPGATrackSimRoad currentRoad = *roadsToExtrapolate.begin();
             std::vector<unsigned long> tmp_currentRoadHitFineIDs = *tmp_predictedHitsFineID.begin();
             std::vector<unsigned int> tmp_currentRoadHitITkLayer = *tmp_foundHitITkLayer.begin();
@@ -327,6 +320,10 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                     continue;
                 }
                 unsigned int hitsInWindow = 0;
+
+                // List of all the hits, with their distances to the predicted point
+                std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> listofHitsFound;
+
                 for (const std::shared_ptr<const FPGATrackSimHit>& hit: m_phits_atLayer[slice][layer])
                 {
                     if(skipSP && hit->isStrip() && hit->getHitType() == HitType::spacepoint) continue;
@@ -339,6 +336,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                         double hitr = hit->getR();
                         double predr = sqrt(predhit[0]*predhit[0] + predhit[1] * predhit[1]);
                         double predz = predhit[2];
+
                         if (abs(hitr - predr) < m_windowR.value() && abs(hitz - predz) < m_windowZ.value())
                         {
                             std::vector<std::shared_ptr<const FPGATrackSimHit>> theseHits {hit};
@@ -347,7 +345,6 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                             // If the hit is a space point, skip the next layer, as it will be duplicated space point and we have already taken care of that in the adding of the hits
                             if(hit->isStrip())
                             {
-
                                 // If we are in odd layer, the corresponding surface is +1
                                 // if we are in an even layer, the corresponsding surface is at -1
                                 int layerToCheck = layer + 1;
@@ -374,34 +371,82 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                                     theseHits.push_back(guessedSecondHitPtr);
                                 }
                             }
-
-                            // We got a hit, lets make a road
-                            FPGATrackSimRoad newroad;
-                            if(!addHitToRoad(newroad, currentRoad, std::move(theseHits)))
-                            {
-                                ATH_MSG_WARNING("Failed to make a new road");
-                                continue;
-                            }
-
-                            roadsToExtrapolate.push_back(newroad);
-                            foundhitForRoad = true;
-                            float distancePredFound = sqrt((hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz));
-                            tmp_currentRoadHitFineIDs.push_back(fineID);
-                            tmp_predictedHitsFineID.push_back(tmp_currentRoadHitFineIDs);
-                            tmp_currentRoadHitITkLayer.push_back(hit->getLayerDisk());
-                            tmp_foundHitITkLayer.push_back(tmp_currentRoadHitITkLayer);
-                            tmp_currentRoadHitDistancePredFound.push_back(distancePredFound);
-                            tmp_foundHitDistancePredFound.push_back(tmp_currentRoadHitDistancePredFound);
-
-                            if(m_debugEvent)
-                            {
-                                ATH_MSG_DEBUG("------ road grown with hit from layer "<<layer<<" to");
-                                printRoad(newroad);
-                            }
-
+                            // Store the hits for now
+                            listofHitsFound.push_back(theseHits);
                         }
                     }
                 }
+
+                // Sort the hit by the distance
+                std::sort(listofHitsFound.begin(), listofHitsFound.end(), [&predhit](auto& a, auto& b){
+                    double predr = sqrt(predhit[0]*predhit[0] + predhit[1] * predhit[1]);
+                    double predz = predhit[2];
+
+                    // HitA
+                    double hitz = a[0]->getZ();
+                    double hitr = a[0]->getR();
+                    float distance_a= sqrt((hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz));
+
+                    // HitB
+                    hitz = b[0]->getZ();
+                    hitr = b[0]->getR();
+                    float distance_b= sqrt((hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz));
+
+                    return distance_a < distance_b;
+                });
+
+                // Select the top N hits
+                std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> cleanHitsToGrow;
+
+                // If max branches are limited, pick only the top N from the list of hits found at each level 
+                if (m_maxBranches.value() >= 0) 
+                {
+                    int nHitsToChoose = std::min(int(m_maxBranches.value()), int(listofHitsFound.size()));
+                    cleanHitsToGrow.reserve(nHitsToChoose);
+                    std::copy(listofHitsFound.begin(), listofHitsFound.begin() + nHitsToChoose, std::back_inserter(cleanHitsToGrow));
+                }
+                else
+                {
+                    cleanHitsToGrow = listofHitsFound;
+                }
+
+
+                for (auto& hitsFound: cleanHitsToGrow)
+                {
+                    // get the first hit
+                    auto hit = hitsFound[0];
+
+                    // a hit is in the right fine ID == layer
+                    double hitz = hit->getZ();
+                    double hitr = hit->getR();
+                    double predr = sqrt(predhit[0]*predhit[0] + predhit[1] * predhit[1]);
+                    double predz = predhit[2];
+                    float distancePredFound = sqrt((hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz));
+
+                    // We got a hit, lets make a road
+                    FPGATrackSimRoad newroad;
+                    if(!addHitToRoad(newroad, currentRoad, std::move(hitsFound)))
+                    {
+                        ATH_MSG_WARNING("Failed to make a new road");
+                        continue;
+                    }
+
+                    roadsToExtrapolate.push_back(newroad);
+                    foundhitForRoad = true;
+                    tmp_currentRoadHitFineIDs.push_back(fineID);
+                    tmp_predictedHitsFineID.push_back(tmp_currentRoadHitFineIDs);
+                    tmp_currentRoadHitITkLayer.push_back(hit->getLayerDisk());
+                    tmp_foundHitITkLayer.push_back(tmp_currentRoadHitITkLayer);
+                    tmp_currentRoadHitDistancePredFound.push_back(distancePredFound);
+                    tmp_foundHitDistancePredFound.push_back(tmp_currentRoadHitDistancePredFound);
+
+                    if(m_debugEvent)
+                    {
+                        ATH_MSG_DEBUG("------ road grown with hit from layer "<<layer<<" to");
+                        printRoad(newroad);
+                    }
+                }
+                
                 if (hitsInWindow != 0) m_nHitsInSearchWindow.push_back(hitsInWindow);
             }
             // If the hit wasn't found, push a fake hit
@@ -475,6 +520,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
         roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
     }
     ATH_MSG_DEBUG("Found " << roads.size() << " new roads in second stage.");
+
     m_tree->Fill();
     m_NcompletedRoads.clear();
     m_predictedHitsFineID.clear();
