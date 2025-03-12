@@ -35,6 +35,7 @@ class ConditionDefaults:
             'mult': {'min': '0', 'max': 'inf'},
             'smc': {'min': '0', 'max': 'inf'},
             'jvt': {'min': '0', 'max': 'inf'},
+            'nnJvt': {'min': '0', 'max': '0'}, # Not used; boolean pass/fail
             'bsel': {'min': '-inf', 'max': 'inf'},
             'tausel': {'min': '-inf', 'max': 'inf'},
             'clrsel': {'min': '-inf', 'max': 'inf'},
@@ -63,6 +64,7 @@ class ConditionDefaults:
             'mult': 1,
             'smc': 1000.,
             'jvt': 0.01,
+            'nnJvt': 0.,
             'clrsel': 0.01,
             'pileuprm': 0.01,
             'momCuts': 0.01,
