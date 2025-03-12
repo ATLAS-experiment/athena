@@ -52,6 +52,7 @@ class MuonSimHit_v1 : public SG::AuxElement {
 
     ///@brief Returns the pdgID of the traversing particle
     int pdgId() const;
+    int pdg_id() const {return pdgId();}; // alternate interface to match other EDM classes
     ///@brief Sets the pdgID of the traversing particle
     void setPdgId(int id);
 
