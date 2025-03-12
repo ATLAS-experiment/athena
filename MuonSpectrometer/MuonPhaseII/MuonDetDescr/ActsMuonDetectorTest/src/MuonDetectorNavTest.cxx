@@ -18,6 +18,8 @@
 
 #include "xAODTruth/TruthVertex.h"
 
+#include "TruthUtils/HepMCHelpers.h"
+
 #include <fstream>
 
 using namespace Acts::UnitLiterals;
@@ -145,7 +147,7 @@ namespace ActsTrk {
 		const Acts::Experimental::Detector* detector = m_detVolSvc->detector().get();
 		for(const auto truthParticle : *truthParticles){
 			//Require that we only propagate on muons, and of status 1
-			if(truthParticle->status() == 1 and truthParticle->pdgId() == 13){
+                  if(MC::isStable(truthParticle) and truthParticle->pdgId() == MC::MUON){ // FIXME not antimuons?
 				const auto& particle = truthParticle->p4();
 				const auto& prodVertex = (!truthParticle->hasProdVtx()) ? nullptr : truthParticle->prodVtx();
 				double x = prodVertex ? prodVertex->x() : 0.;
