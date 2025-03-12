@@ -353,9 +353,11 @@ atlas_add_citest( ACTS_ActsGSFRefitting
    SCRIPT ActsGSFRefitting.sh
    LOG_IGNORE_PATTERN "ActsReFitterAlg.*ERROR Propagation reached the step count limit" )
 
-atlas_add_citest( ACTS_ActsGSFInEgamma
-   SCRIPT ActsGSFInEgamma.sh
-   LOG_IGNORE_PATTERN "Acts.*ERROR.*Propagation reached the step count limit")
+atlas_add_citest( ACTS_ActsGSFRefitLegacy
+   SCRIPT ActsGSFRefitLegacy.sh )
+
+atlas_add_citest( ACTS_ActsGSFRefitActs
+   SCRIPT ActsGSFRefitActs.sh )
 
 atlas_add_citest( ACTS_ActsPersistifySeeds
    SCRIPT ActsPersistifySeeds.sh )

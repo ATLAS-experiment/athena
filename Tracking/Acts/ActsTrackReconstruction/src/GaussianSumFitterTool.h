@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_GAUSSIANSUMFITTERTOOL_H
@@ -26,9 +26,11 @@
 
 // PACKAGE
 #include "ActsEvent/TrackContainer.h"
+#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
+#include "ActsToolInterfaces/IFitterTool.h"
 #include "src/detail/FitterHelperFunctions.h"
 #include "src/detail/TrkMeasurementCalibrator.h"
 #include "ActsGeometry/ATLASSourceLinkSurfaceAccessor.h"
@@ -42,7 +44,7 @@
 namespace ActsTrk {
 
 class GaussianSumFitterTool
-  : public extends<AthAlgTool, Trk::ITrackFitter> {
+  : public extends<AthAlgTool, Trk::ITrackFitter, ActsTrk::IFitterTool> {
 public:
   
   GaussianSumFitterTool(const std::string&, const std::string&, const IInterface*);
@@ -98,6 +100,32 @@ public:
     const Trk::RunOutlierRemoval runOutlier = false,
     const Trk::ParticleHypothesis matEffects = Trk::nonInteracting) const override;
 
+  //! Acts seed fit
+  virtual
+    std::unique_ptr< ActsTrk::MutableTrackContainer >
+    fit(const EventContext& ctx,
+	const ActsTrk::Seed &seed,
+	const Acts::BoundTrackParameters& initialParams,
+	const Acts::GeometryContext& tgContext,
+	const Acts::MagneticFieldContext& mfContext,
+	const Acts::CalibrationContext& calContext,
+	const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap) const override;
+
+  virtual
+  std::unique_ptr< ActsTrk::MutableTrackContainer >
+  fit(const EventContext& ctx,
+      const std::vector< ActsTrk::ATLASUncalibSourceLink> & clusterList,
+      const Acts::BoundTrackParameters& initialParams,
+      const Acts::GeometryContext& tgContext,
+      const Acts::MagneticFieldContext& mfContext,
+      const Acts::CalibrationContext& calContext,
+      const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
+      const Acts::Surface* targetSurface) const override;
+  
+  virtual StatusCode fit(
+    const EventContext& ctx,
+        const ActsTrk::TrackContainer::ConstTrackProxy& track,          
+    ActsTrk::MutableTrackContainer& trackContainer) const override;
 
   ///////////////////////////////////////////////////////////////////
   // Private methods:
@@ -160,8 +188,8 @@ private:
   Gaudi::Property< double > m_weightCutOff {this, "WeightCutOff", 1.e-4,
 					    "component weight cut off"};
 
-  Gaudi::Property<std::string> m_option_componentMergeMethod{this, "ComponentMergeMethod", "eMaxWeight"
-						      , "method to merge components {eMean, eMaxWeight}"};
+  Gaudi::Property<std::string> m_option_componentMergeMethod{this, "ComponentMergeMethod", "MaxWeight"
+						      , "method to merge components {Mean, MaxWeight}"};
 
   Acts::ComponentMergeMethod m_componentMergeMethod;
 

@@ -4,6 +4,7 @@
 #include "../egammaTruthAssociationAlg.h"
 #include "../egammaTrackThinner.h"
 #include "../EMBremCollectionBuilder.h"
+#include "../ActsEMBremCollectionBuilder.h"
 #include "../EMVertexBuilder.h"
 #include "../egammaTopoClusterCopier.h"
 #include "../electronSuperClusterBuilder.h"
@@ -18,6 +19,7 @@ DECLARE_COMPONENT( egammaForwardBuilder )
 DECLARE_COMPONENT( egammaTruthAssociationAlg )
 DECLARE_COMPONENT( egammaTrackThinner )
 DECLARE_COMPONENT( EMBremCollectionBuilder )
+DECLARE_COMPONENT( ActsEMBremCollectionBuilder )
 DECLARE_COMPONENT( EMVertexBuilder )
 DECLARE_COMPONENT( egammaTopoClusterCopier )
 DECLARE_COMPONENT( electronSuperClusterBuilder )
