@@ -1372,6 +1372,7 @@ StatusCode HltEventLoopMgr::startNextEvent()
     ++m_freeSlots;
     if (!m_loopStatus.loopEnded && m_inputThread!=nullptr) {
       m_inputThread->cond().notify_all();
+      m_outputThread->cond().notify_all();
     }
     return StatusCode::SUCCESS;
   }
