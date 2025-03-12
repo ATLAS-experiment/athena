@@ -747,6 +747,15 @@ void ActsTrk::MultiTrajectory::moveLinks(const ActsTrk::MutableMultiTrajectory* 
   m_uncalibratedSourceLinks = std::move(mtj->m_uncalibratedSourceLinks);
 }
 
+std::vector<Acts::HashedString> ActsTrk::MultiTrajectory::dynamicKeys_impl() const {
+  std::vector<Acts::HashedString> keys;
+  for ( const ActsTrk::detail::Decoration& d: m_decorations) {
+    keys.push_back(d.hash);
+  }
+  return keys;
+}
+
+
 void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, const Acts::GeometryContext& geoContext ) {
   if ( not m_surfaces.empty() )
     return;

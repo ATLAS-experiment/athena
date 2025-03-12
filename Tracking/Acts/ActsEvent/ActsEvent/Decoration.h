@@ -66,7 +66,9 @@ const std::any decorationGetter(const SG::IAuxStore* container,
 template <typename T>
 std::any decorationSetter(SG::IAuxStore* container, ActsTrk::IndexType idx,
                           SG::auxid_t decorationId) {
-  void* data = container->getData(decorationId, idx + 1, idx + 1);
+  assert (idx < container->size());
+  // The size requested for the decoration must match the size of the container.
+  void* data = container->getData(decorationId, container->size(), container->size());
   return &(static_cast<T*>(data)[idx]);
 }
 
