@@ -60,11 +60,23 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
                 case OutputConversion::FSM::PixelEDM:
                 {
                     state = OutputConversion::FSM::PixelEDM;
+                    if(pcAux == nullptr)
+                    {
+                        ATH_MSG_ERROR("The PixelClusterAuxInput is not provided to decode function! Something is wrong");
+                        state = OutputConversion::FSM::Error;
+                        break;
+                    }
                     break;
                 }
                 case OutputConversion::FSM::StripEDM:
                 {
                     state = OutputConversion::FSM::StripEDM;
+                    if(scAux == nullptr)
+                    {
+                        ATH_MSG_ERROR("The StripClusterAuxInput is not provided to decode function! Something is wrong");
+                        state = OutputConversion::FSM::Error;
+                        break;
+                    }
                     break;
                 }
                 default:
@@ -166,8 +178,8 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
         case OutputConversion::FSM::PixelEDM:
         {
             pixel_edm_words.push_back(word);
-            // Read in 7 consecutive words
-            if (pixel_edm_words.size() == 7)
+            // Read in 10 consecutive words
+            if (pixel_edm_words.size() == 10)
             {
                 // decode the pixel EDM
                 // For pixel EDM aux, we need
@@ -176,26 +188,26 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
                 // omegaX, omegaY, global position
                 // totalToT
                 pcAux->idHash.push_back(get_bitfields_EDM_PIXELCLUSTER_w1(pixel_edm_words[0]).id_hash);
-                pcAux->id.push_back(get_bitfields_EDM_PIXELCLUSTER_w1(pixel_edm_words[0]).identfier);
-                pcAux->localPosition.push_back(to_real_EDM_PIXELCLUSTER_w4_localposition_x(get_bitfields_EDM_PIXELCLUSTER_w4(pixel_edm_words[3]).localposition_x));
-                pcAux->localPosition.push_back(to_real_EDM_PIXELCLUSTER_w4_localposition_y(get_bitfields_EDM_PIXELCLUSTER_w4(pixel_edm_words[3]).localposition_y));
-                pcAux->channelsInPhi.push_back(get_bitfields_EDM_PIXELCLUSTER_w4(pixel_edm_words[3]).channels_in_phi);
-                pcAux->channelsInEta.push_back(get_bitfields_EDM_PIXELCLUSTER_w4(pixel_edm_words[3]).channels_in_eta);
-                pcAux->widthInEta.push_back(to_real_EDM_PIXELCLUSTER_w4_width_in_eta(get_bitfields_EDM_PIXELCLUSTER_w4(pixel_edm_words[3]).width_in_eta));
-                pcAux->localCovariance.push_back(to_real_EDM_PIXELCLUSTER_w5_localcovariance_xx(get_bitfields_EDM_PIXELCLUSTER_w5(pixel_edm_words[4]).localcovariance_xx));
-                pcAux->localCovariance.push_back(to_real_EDM_PIXELCLUSTER_w5_localcovariance_yy(get_bitfields_EDM_PIXELCLUSTER_w5(pixel_edm_words[4]).localcovariance_yy));
-                pcAux->omegaX.push_back(to_real_EDM_PIXELCLUSTER_w5_omega_x(get_bitfields_EDM_PIXELCLUSTER_w5(pixel_edm_words[4]).omega_x));
-                pcAux->omegaY.push_back(to_real_EDM_PIXELCLUSTER_w5_omega_y(get_bitfields_EDM_PIXELCLUSTER_w5(pixel_edm_words[4]).omega_y));
-                pcAux->globalPosition.push_back(to_real_EDM_PIXELCLUSTER_w6_globalposition_x(get_bitfields_EDM_PIXELCLUSTER_w6(pixel_edm_words[5]).globalposition_x));
-                pcAux->globalPosition.push_back(to_real_EDM_PIXELCLUSTER_w6_globalposition_y(get_bitfields_EDM_PIXELCLUSTER_w6(pixel_edm_words[5]).globalposition_y));
-                pcAux->globalPosition.push_back(to_real_EDM_PIXELCLUSTER_w7_globalposition_z(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).globalposition_z));
-                pcAux->totalToT.push_back(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).total_tot);
+                pcAux->id.push_back(get_bitfields_EDM_PIXELCLUSTER_w2(pixel_edm_words[1]).identifier);
+                pcAux->localPosition.push_back(to_real_EDM_PIXELCLUSTER_w7_localposition_x(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).localposition_x));
+                pcAux->localPosition.push_back(to_real_EDM_PIXELCLUSTER_w7_localposition_y(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).localposition_y));
+                pcAux->channelsInPhi.push_back(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).channels_in_phi);
+                pcAux->channelsInEta.push_back(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).channels_in_eta);
+                pcAux->widthInEta.push_back(to_real_EDM_PIXELCLUSTER_w7_width_in_eta(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).width_in_eta));
+                pcAux->localCovariance.push_back(to_real_EDM_PIXELCLUSTER_w8_localcovariance_xx(get_bitfields_EDM_PIXELCLUSTER_w8(pixel_edm_words[7]).localcovariance_xx));
+                pcAux->localCovariance.push_back(to_real_EDM_PIXELCLUSTER_w8_localcovariance_yy(get_bitfields_EDM_PIXELCLUSTER_w8(pixel_edm_words[7]).localcovariance_yy));
+                pcAux->omegaX.push_back(to_real_EDM_PIXELCLUSTER_w8_omega_x(get_bitfields_EDM_PIXELCLUSTER_w8(pixel_edm_words[7]).omega_x));
+                pcAux->omegaY.push_back(to_real_EDM_PIXELCLUSTER_w8_omega_y(get_bitfields_EDM_PIXELCLUSTER_w8(pixel_edm_words[7]).omega_y));
+                pcAux->globalPosition.push_back(to_real_EDM_PIXELCLUSTER_w9_globalposition_x(get_bitfields_EDM_PIXELCLUSTER_w9(pixel_edm_words[8]).globalposition_x));
+                pcAux->globalPosition.push_back(to_real_EDM_PIXELCLUSTER_w9_globalposition_y(get_bitfields_EDM_PIXELCLUSTER_w9(pixel_edm_words[8]).globalposition_y));
+                pcAux->globalPosition.push_back(to_real_EDM_PIXELCLUSTER_w10_globalposition_z(get_bitfields_EDM_PIXELCLUSTER_w10(pixel_edm_words[9]).globalposition_z));
+                pcAux->totalToT.push_back(get_bitfields_EDM_PIXELCLUSTER_w10(pixel_edm_words[9]).total_tot);
 
                 // check if the rdo list word is empty, there are only 4 words in the pixel EDM
-                auto rdo_w1 = get_bitfields_EDM_PIXELCLUSTER_w2(pixel_edm_words[1]).rdo_list_w1;
-                auto rdo_w2 = get_bitfields_EDM_PIXELCLUSTER_w2(pixel_edm_words[1]).rdo_list_w2;
-                auto rdo_w3 = get_bitfields_EDM_PIXELCLUSTER_w3(pixel_edm_words[2]).rdo_list_w3;
-                auto rdo_w4 = get_bitfields_EDM_PIXELCLUSTER_w3(pixel_edm_words[2]).rdo_list_w4;
+                auto rdo_w1 = get_bitfields_EDM_PIXELCLUSTER_w3(pixel_edm_words[2]).rdo_list_w1;
+                auto rdo_w2 = get_bitfields_EDM_PIXELCLUSTER_w4(pixel_edm_words[3]).rdo_list_w2;
+                auto rdo_w3 = get_bitfields_EDM_PIXELCLUSTER_w5(pixel_edm_words[4]).rdo_list_w3;
+                auto rdo_w4 = get_bitfields_EDM_PIXELCLUSTER_w6(pixel_edm_words[5]).rdo_list_w4;
 
                 unsigned short current_rdo_size = 0;
                 if (rdo_w1 != 0)
@@ -223,7 +235,7 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
                 counter++;
 
                 // Determine if this is the last cluster
-                if (get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).lastword == 1)
+                if (get_bitfields_EDM_PIXELCLUSTER_w10(pixel_edm_words[9]).lastword == 1)
                 {
                     metadata->pcRdoIndexSize = counter;
                     metadata->numOfPixelClusters = counter;
@@ -259,22 +271,22 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
         case OutputConversion::FSM::StripEDM:
         {
             strip_edm_words.push_back(word);
-            // Read in 6 consecutive words
-            if (strip_edm_words.size() == 6)
+            // Read in 9 consecutive words
+            if (strip_edm_words.size() == 9)
             {
                 scAux->idHash.push_back(get_bitfields_EDM_STRIPCLUSTER_w1(strip_edm_words[0]).id_hash);
-                scAux->id.push_back(get_bitfields_EDM_STRIPCLUSTER_w1(strip_edm_words[0]).identifier);
-                scAux->localPosition.push_back(to_real_EDM_STRIPCLUSTER_w4_localposition_x(get_bitfields_EDM_STRIPCLUSTER_w4(strip_edm_words[3]).localposition_x));
-                scAux->localCovariance.push_back(to_real_EDM_STRIPCLUSTER_w4_localcovariance_xx(get_bitfields_EDM_STRIPCLUSTER_w4(strip_edm_words[3]).localcovariance_xx));
-                scAux->globalPosition.push_back(to_real_EDM_STRIPCLUSTER_w5_globalposition_x(get_bitfields_EDM_STRIPCLUSTER_w5(strip_edm_words[4]).globalposition_x));
-                scAux->globalPosition.push_back(to_real_EDM_STRIPCLUSTER_w5_globalposition_y(get_bitfields_EDM_STRIPCLUSTER_w5(strip_edm_words[4]).globalposition_y));
-                scAux->globalPosition.push_back(to_real_EDM_STRIPCLUSTER_w6_globalposition_z(get_bitfields_EDM_STRIPCLUSTER_w6(strip_edm_words[5]).globalposition_z));
-                scAux->channelsInPhi.push_back(get_bitfields_EDM_STRIPCLUSTER_w5(strip_edm_words[4]).channels_in_phi);
+                scAux->id.push_back(get_bitfields_EDM_STRIPCLUSTER_w2(strip_edm_words[1]).identifier);
+                scAux->localPosition.push_back(to_real_EDM_STRIPCLUSTER_w7_localposition_x(get_bitfields_EDM_STRIPCLUSTER_w7(strip_edm_words[6]).localposition_x));
+                scAux->localCovariance.push_back(to_real_EDM_STRIPCLUSTER_w7_localcovariance_xx(get_bitfields_EDM_STRIPCLUSTER_w7(strip_edm_words[6]).localcovariance_xx));
+                scAux->globalPosition.push_back(to_real_EDM_STRIPCLUSTER_w8_globalposition_x(get_bitfields_EDM_STRIPCLUSTER_w8(strip_edm_words[7]).globalposition_x));
+                scAux->globalPosition.push_back(to_real_EDM_STRIPCLUSTER_w8_globalposition_y(get_bitfields_EDM_STRIPCLUSTER_w8(strip_edm_words[7]).globalposition_y));
+                scAux->globalPosition.push_back(to_real_EDM_STRIPCLUSTER_w9_globalposition_z(get_bitfields_EDM_STRIPCLUSTER_w9(strip_edm_words[8]).globalposition_z));
+                scAux->channelsInPhi.push_back(get_bitfields_EDM_STRIPCLUSTER_w8(strip_edm_words[7]).channels_in_phi);
                 // check if the rdo list word is empty, there are only 4 words in the strip EDM
-                auto rdo_w1 = get_bitfields_EDM_STRIPCLUSTER_w2(strip_edm_words[1]).rdo_list_w1;
-                auto rdo_w2 = get_bitfields_EDM_STRIPCLUSTER_w2(strip_edm_words[1]).rdo_list_w2;
-                auto rdo_w3 = get_bitfields_EDM_STRIPCLUSTER_w3(strip_edm_words[2]).rdo_list_w3;
-                auto rdo_w4 = get_bitfields_EDM_STRIPCLUSTER_w3(strip_edm_words[2]).rdo_list_w4;
+                auto rdo_w1 = get_bitfields_EDM_STRIPCLUSTER_w3(strip_edm_words[2]).rdo_list_w1;
+                auto rdo_w2 = get_bitfields_EDM_STRIPCLUSTER_w4(strip_edm_words[3]).rdo_list_w2;
+                auto rdo_w3 = get_bitfields_EDM_STRIPCLUSTER_w5(strip_edm_words[4]).rdo_list_w3;
+                auto rdo_w4 = get_bitfields_EDM_STRIPCLUSTER_w6(strip_edm_words[5]).rdo_list_w4;
 
                 unsigned short current_rdo_size = 0;
                 if (rdo_w1 != 0)
@@ -302,7 +314,7 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
                 counter++;
 
                 // Determine if this is the last cluster
-                if (get_bitfields_EDM_STRIPCLUSTER_w6(strip_edm_words[5]).lastword == 1)
+                if (get_bitfields_EDM_STRIPCLUSTER_w9(strip_edm_words[8]).lastword == 1)
                 {
                     metadata->scRdoIndexSize = counter;
                     metadata->numOfStripClusters = counter;

@@ -87,7 +87,6 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
             m_pixelId->phi_index(rdoId), // COL
             pixelRawData->getToT(), // TOT
             pixelRawData->getLVL1A(),  // Lvl!
-            pixelCounter,  // id
             0 // Spare
             );
             pixelCounter++;
@@ -193,9 +192,8 @@ StatusCode FPGADataFormatTool::convertStripRDO(
                 auto stripWord = FPGADataFormatUtilities::fill_STRIP_EF_RDO(
                     lastBit,          // last bit indicating module boundary
                     chipID,           // chip ID
-                    ITkStripID,       // strip ID
+                    ITkStripID,      // cluster number
                     stripEncodingForITK.at(stripID), // cluster map
-                    stripNumber,      // cluster ID
                     0                // spare bits
                 );
 

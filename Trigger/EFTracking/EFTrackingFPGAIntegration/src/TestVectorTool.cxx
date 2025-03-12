@@ -179,9 +179,14 @@ StatusCode TestVectorTool::encodePixelL2G(const xAOD::PixelClusterContainer *pix
     for (unsigned int i = 0; i < pixelClusters->size(); i++)
     {
         // Pixel cluster w1
-        auto pixelCluster_w1 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w1(pixelClusters->at(i)->identifierHash(),
-                                                                                 pixelClusters->at(i)->identifier());
+        auto pixelCluster_w1 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w1(FPGADataFormatUtilities::EDM_PIXELCLUSTER_FLAG,
+                                                                                 pixelClusters->at(i)->identifierHash(),
+                                                                                 0);
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w1(pixelCluster_w1));
+
+        // Pixel cluster w2
+        auto pixelCluster_w2 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w2(pixelClusters->at(i)->identifier());
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w2(pixelCluster_w2));
 
         // Determine the size of rdo list and retrieve accordingly
         uint64_t rdoList[4] = {0, 0, 0, 0}; // Current dataformat only supports 4 RDOs
@@ -193,44 +198,52 @@ StatusCode TestVectorTool::encodePixelL2G(const xAOD::PixelClusterContainer *pix
             rdoList[j] = pixelClusters->at(i)->rdoList().at(j).get_compact();
         }
 
-        // Pixel cluster w2
-        auto pixelCluster_w2 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w2(rdoList[0], rdoList[1]);
-        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w2(pixelCluster_w2));
-
         // Pixel cluster w3
-        auto pixelCluster_w3 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w3(rdoList[2], rdoList[3]);
+        auto pixelCluster_w3 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w3(rdoList[0]);
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w3(pixelCluster_w3));
 
         // Pixel cluster w4
-        auto pixelCluster_w4 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w4(pixelClusters->at(i)->localPosition<2>()(0, 0),
+        auto pixelCluster_w4 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w4(rdoList[1]);
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w4(pixelCluster_w4));
+
+        // Pixel cluster w5
+        auto pixelCluster_w5 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w5(rdoList[2]);
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w5(pixelCluster_w5));
+
+        // Pixel cluster w6
+        auto pixelCluster_w6 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w6(rdoList[3]);
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w6(pixelCluster_w6));
+
+        // Pixel cluster w7
+        auto pixelCluster_w7 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w7(pixelClusters->at(i)->localPosition<2>()(0, 0),
                                                                                  pixelClusters->at(i)->localPosition<2>()(1, 0),
                                                                                  pixelClusters->at(i)->channelsInPhi(),
                                                                                  pixelClusters->at(i)->channelsInEta(),
                                                                                  pixelClusters->at(i)->widthInEta(),
                                                                                  0);
-        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w4(pixelCluster_w4));
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w7(pixelCluster_w7));
 
-        // Pixel cluster w5
-        auto pixelCluster_w5 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w5(pixelClusters->at(i)->localCovariance<2>()(0, 0),
+        // Pixel cluster w8
+        auto pixelCluster_w8 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w8(pixelClusters->at(i)->localCovariance<2>()(0, 0),
                                                                                  pixelClusters->at(i)->localCovariance<2>()(1, 1),
                                                                                  pixelClusters->at(i)->omegaX(),
                                                                                  pixelClusters->at(i)->omegaY(),
                                                                                  0);
-        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w5(pixelCluster_w5));
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w8(pixelCluster_w8));
 
-        // Pixel cluster w6
-        auto pixelCluster_w6 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w6(pixelClusters->at(i)->globalPosition()[0],
+        // Pixel cluster w9
+        auto pixelCluster_w9 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w9(pixelClusters->at(i)->globalPosition()[0],
                                                                                  pixelClusters->at(i)->globalPosition()[1],
                                                                                  0);
-        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w6(pixelCluster_w6));
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w9(pixelCluster_w9));
 
-        // Pixel cluster w7
+        // Pixel cluster w10
         isLast = i == (pixelClusters->size() - 1) ? 1 : 0;
-        auto pixelCluster_w7 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w7(pixelClusters->at(i)->globalPosition()[2],
-                                                                                 pixelClusters->at(i)->totalToT(),
-                                                                                 isLast,
-                                                                                 0);
-        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w7(pixelCluster_w7));
+        auto pixelCluster_w10 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w10(pixelClusters->at(i)->globalPosition()[2],
+                                                                                   pixelClusters->at(i)->totalToT(),
+                                                                                   isLast,
+                                                                                   0);
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w10(pixelCluster_w10));
     }
 
     // Fill the event footer
@@ -272,9 +285,14 @@ StatusCode TestVectorTool::encodeStripL2G(const xAOD::StripClusterContainer *str
     for (unsigned int i = 0; i < stripClusters->size(); i++)
     {
         // Strip cluster w1
-        auto stripCluster_w1 = FPGADataFormatUtilities::fill_EDM_STRIPCLUSTER_w1(stripClusters->at(i)->identifierHash(),
-                                                                                 stripClusters->at(i)->identifier());
+        auto stripCluster_w1 = FPGADataFormatUtilities::fill_EDM_STRIPCLUSTER_w1(FPGADataFormatUtilities::EDM_STRIPCLUSTER_FLAG,
+                                                                                 stripClusters->at(i)->identifierHash(),
+                                                                                 0);
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_STRIPCLUSTER_w1(stripCluster_w1));
+
+        // Strip cluster w2
+        auto stripCluster_w2 = FPGADataFormatUtilities::fill_EDM_STRIPCLUSTER_w2(stripClusters->at(i)->identifier());
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_STRIPCLUSTER_w2(stripCluster_w2));
 
         // Determine the size of rdo list and retrieve accordingly
         uint64_t rdoList[4] = {0, 0, 0, 0}; // Current dataformat only supports 4 RDOs
@@ -286,33 +304,41 @@ StatusCode TestVectorTool::encodeStripL2G(const xAOD::StripClusterContainer *str
             rdoList[j] = stripClusters->at(i)->rdoList().at(j).get_compact();
         }
 
-        // Strip cluster w2
-        auto stripCluster_w2 = FPGADataFormatUtilities::fill_EDM_STRIPCLUSTER_w2(rdoList[0], rdoList[1]);
-        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_STRIPCLUSTER_w2(stripCluster_w2));
-
         // Strip cluster w3
-        auto stripCluster_w3 = FPGADataFormatUtilities::fill_EDM_STRIPCLUSTER_w3(rdoList[2], rdoList[3]);
+        auto stripCluster_w3 = FPGADataFormatUtilities::fill_EDM_STRIPCLUSTER_w3(rdoList[0]);
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_STRIPCLUSTER_w3(stripCluster_w3));
 
         // Strip cluster w4
-        auto stripCluster_w4 = FPGADataFormatUtilities::fill_EDM_STRIPCLUSTER_w4(stripClusters->at(i)->localPosition<1>()(0, 0),
-                                                                                 0, // Strip cluster has no local position y
-                                                                                 stripClusters->at(i)->localCovariance<1>()(0, 0),
-                                                                                 0);
+        auto stripCluster_w4 = FPGADataFormatUtilities::fill_EDM_STRIPCLUSTER_w4(rdoList[1]);
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_STRIPCLUSTER_w4(stripCluster_w4));
 
         // Strip cluster w5
-        auto stripCluster_w5 = FPGADataFormatUtilities::fill_EDM_STRIPCLUSTER_w5(stripClusters->at(i)->globalPosition()[0],
+        auto stripCluster_w5 = FPGADataFormatUtilities::fill_EDM_STRIPCLUSTER_w5(rdoList[2]);
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_STRIPCLUSTER_w5(stripCluster_w5));
+
+        // Strip cluster w6
+        auto stripCluster_w6 = FPGADataFormatUtilities::fill_EDM_STRIPCLUSTER_w6(rdoList[3]);
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_STRIPCLUSTER_w6(stripCluster_w6));
+
+        // Strip cluster w7
+        auto stripCluster_w7 = FPGADataFormatUtilities::fill_EDM_STRIPCLUSTER_w7(stripClusters->at(i)->localPosition<1>()(0, 0),
+                                                                                 0, // Strip cluster has no local position y
+                                                                                 stripClusters->at(i)->localCovariance<1>()(0, 0),
+                                                                                 0);
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_STRIPCLUSTER_w7(stripCluster_w7));
+
+        // Strip cluster w8
+        auto stripCluster_w8 = FPGADataFormatUtilities::fill_EDM_STRIPCLUSTER_w8(stripClusters->at(i)->globalPosition()[0],
                                                                                  stripClusters->at(i)->globalPosition()[1],
                                                                                  stripClusters->at(i)->channelsInPhi(),
                                                                                  0);
-        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_STRIPCLUSTER_w5(stripCluster_w5));
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_STRIPCLUSTER_w8(stripCluster_w8));
 
+        // Strip cluster w9
         isLast = i == (stripClusters->size() - 1) ? 1 : 0;
-        // Strip cluster w6
-        auto stripCluster_w6 = FPGADataFormatUtilities::fill_EDM_STRIPCLUSTER_w6(stripClusters->at(i)->globalPosition()[2],
+        auto stripCluster_w9 = FPGADataFormatUtilities::fill_EDM_STRIPCLUSTER_w9(stripClusters->at(i)->globalPosition()[2],
                                                                                  isLast, i, 0);
-        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_STRIPCLUSTER_w6(stripCluster_w6));
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_STRIPCLUSTER_w9(stripCluster_w9));
     }
 
     // Fill the event footer

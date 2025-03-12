@@ -151,13 +151,13 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
       ATH_MSG_DEBUG("===");
       ATH_MSG_DEBUG("\tCluster [" << i << "] has id: " << pcAux.id[i]);
       ATH_MSG_DEBUG("\tCluster [" << i << "] has idHash: " << pcAux.idHash[i]);
-      ATH_MSG_DEBUG("\tCluster [" << i << "] has localPosition x: " << pcAux.localPosition[i]);
-      ATH_MSG_DEBUG("\tCluster [" << i << "] has localPosition y: " << pcAux.localPosition[i + 1]);
-      ATH_MSG_DEBUG("\tCluster [" << i << "] has localCovariance xx: " << pcAux.localCovariance[i]);
-      ATH_MSG_DEBUG("\tCluster [" << i << "] has localCovariance yy: " << pcAux.localCovariance[i + 1]);
-      ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition x: " << pcAux.globalPosition[i]);
-      ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition y: " << pcAux.globalPosition[i + 1]);
-      ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition z: " << pcAux.globalPosition[i + 2]);
+      ATH_MSG_DEBUG("\tCluster [" << i << "] has localPosition x: " << pcAux.localPosition[2 * i]);
+      ATH_MSG_DEBUG("\tCluster [" << i << "] has localPosition y: " << pcAux.localPosition[2 * i + 1]);
+      ATH_MSG_DEBUG("\tCluster [" << i << "] has localCovariance xx: " << pcAux.localCovariance[2 * i]);
+      ATH_MSG_DEBUG("\tCluster [" << i << "] has localCovariance yy: " << pcAux.localCovariance[2 * i + 1]);
+      ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition x: " << pcAux.globalPosition[3 * i]);
+      ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition y: " << pcAux.globalPosition[3 * i + 1]);
+      ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition z: " << pcAux.globalPosition[3 * i + 2]);
       ATH_MSG_DEBUG("\tCluster [" << i << "] has channelsInPhi: " << pcAux.channelsInPhi[i]);
       ATH_MSG_DEBUG("\tCluster [" << i << "] has omegaX: " << pcAux.omegaX[i]);
       ATH_MSG_DEBUG("\tCluster [" << i << "] has omegaY: " << pcAux.omegaY[i]);
@@ -173,9 +173,9 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
       ATH_MSG_DEBUG("\tCluster [" << i << "] has idHash: " << scAux.idHash[i]);
       ATH_MSG_DEBUG("\tCluster [" << i << "] has localPosition x: " << scAux.localPosition[i]);
       ATH_MSG_DEBUG("\tCluster [" << i << "] has localCovariance xx: " << scAux.localCovariance[i]);
-      ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition x: " << scAux.globalPosition[i]);
-      ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition y: " << scAux.globalPosition[i + 1]);
-      ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition z: " << scAux.globalPosition[i + 2]);
+      ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition x: " << scAux.globalPosition[3 * i]);
+      ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition y: " << scAux.globalPosition[3 * i + 1]);
+      ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition z: " << scAux.globalPosition[3 * i + 2]);
       ATH_MSG_DEBUG("\tCluster [" << i << "] has channelsInPhi: " << scAux.channelsInPhi[i]);
     }
     ATH_MSG_DEBUG("===================End of Event Summary====================");
