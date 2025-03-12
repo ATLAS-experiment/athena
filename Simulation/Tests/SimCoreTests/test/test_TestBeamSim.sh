@@ -9,7 +9,7 @@
 # art-output: log.*
 # art-output: Config*.pkl
 
-conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_MC)")
 
 TestBeam_tf.py \
     --CA \
