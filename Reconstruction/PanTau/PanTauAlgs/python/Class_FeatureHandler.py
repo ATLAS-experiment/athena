@@ -162,8 +162,6 @@ class FeatureHandler:
         self.addTypeSpecificFeatures_PID()
         self.addTypeSpecificFeatures_Shots()
         self.addTypeSpecificFeatures_Ratios()
-        #self.addTypeSpecificFeatures_EtRings()     #Note wrt EtRings and Isolations:
-        #self.addTypeSpecificFeatures_Isolations()  #     Move to different function in FeatureCalc
         self.addTypeSpecificFeatures_Mean()
         self.addTypeSpecificFeatures_StdDevs()
         self.addTypeSpecificFeatures_HLV()
@@ -377,47 +375,7 @@ class FeatureHandler:
             self.addToFeatures_AllTypes(iVar, self.m_VarTypeName_Ratio, "F")
         #end loop over variables with energy types
     #end addTypeSpecificFeatures_Ratios
-    
-    
-    def addTypeSpecificFeatures_EtRings(self):
-        Variables = []
-        Variables += ["00To01"]
-        Variables += ["01To02"]
-        Variables += ["02To03"]
-        Variables += ["03To04"]
-        Variables += ["04To05"]
-        for iVar in Variables:
-            completeFeatureName = self.m_ConstituentTypeName_All + "_" + self.m_VarTypeName_EtInRing + "_" + iVar
-            self.addToFeatures_FullName(completeFeatureName, self.m_VarTypeName_EtInRing, "F")
-        #end loop over variables
-    #end addTypeSpecificFeatures_EtRings
-    
-    
-    def addTypeSpecificFeatures_Isolations(self):
-        Variables = []
-        Variables += ["EtIn01Over"]
-        Variables += ["EtIn02Over"]
-        Variables += ["EtIn03Over"]
-        Variables += ["EtIn04Over"]
-        Variables += ["EtIn00To02Over"]
-        Variables += ["EtIn02To04Over"]
-        
-        for iVar in Variables:
-            for iEnergyType in self.m_EnergyVariantsList:
-                completeFeatureName = self.m_ConstituentTypeName_All + "_" + self.m_VarTypeName_Isolation + "_" + iVar + iEnergyType
-                self.addToFeatures_FullName(completeFeatureName, self.m_VarTypeName_Isolation, "F")
-        #end loop over variables
-        
-        Variables = []
-        Variables += ["EtIn01OverEtIn02"]
-        Variables += ["EtIn01OverEtIn04"]
-        for iVar in Variables:
-            completeFeatureName = self.m_ConstituentTypeName_All + "_" + self.m_VarTypeName_Isolation + iVar
-            self.addToFeatures_FullName(completeFeatureName, self.m_VarTypeName_Isolation, "F")
-        #end loop over variables
-        
-    #end addTypeSpecificFeatures_Isolations
-    
+   
     
     def addTypeSpecificFeatures_Mean(self):
         Variables_WithEnergyTypes = []

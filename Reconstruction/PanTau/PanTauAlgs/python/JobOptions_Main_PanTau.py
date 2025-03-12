@@ -136,7 +136,7 @@ def PanTauCfg(flags):
     _name = sPrefix + 'PanTau'
    
     # set up the job properties
-    from PanTauAlgs.Class_InformationHandler_New import InformationHandler
+    from PanTauAlgs.Class_InformationHandler import InformationHandler
     infoHandler = InformationHandler(flags)
 
     curInAlg = 'CellBased'

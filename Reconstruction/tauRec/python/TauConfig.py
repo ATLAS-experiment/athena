@@ -144,7 +144,7 @@ def TauRunnerAlgCfg(flags):
     tools.append( result.popToolsAndMerge(tauTools.TauSubstructureCfg(flags)) )
 
     if flags.Tau.doPanTau:
-        import PanTauAlgs.JobOptions_Main_PanTau_New as pantau
+        import PanTauAlgs.JobOptions_Main_PanTau as pantau
         tools.append( result.popToolsAndMerge(pantau.PanTauCfg(flags)) )
 
     tools.append(result.popToolsAndMerge(tauTools.TauCombinedTESCfg(flags)) )
