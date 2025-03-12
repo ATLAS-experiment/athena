@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MMT_DIAMOND_H
@@ -11,10 +11,10 @@
 #include <vector>
 
 struct slope_t {
-  slope_t(int ev=-1, int bc=-1, unsigned int tC=999, unsigned int rC=999, int iX=-1, int iU=-1, int iV=-1, unsigned int uvb=999, unsigned int xb=999,
+  slope_t(uint64_t ev=0, int bc=-1, unsigned int tC=999, unsigned int rC=999, int iX=-1, int iU=-1, int iV=-1, unsigned int uvb=999, unsigned int xb=999,
           unsigned int uvm=999, unsigned int xm=999, int age=-1, double mxl=999., double my=999., double uavg=999., double vavg=999., double mx=999.,
           double th=999., double eta=999., double dth=999., char side='-', double phi=999., double phiS=999., bool lowRes=false);
-  unsigned int event;
+  uint64_t event;
   int BC;
   unsigned int totalCount;
   unsigned int realCount;
@@ -56,7 +56,7 @@ class MMT_Diamond : public AthMessaging {
 
     void clearEvent();
     void createRoads_fillHits(const unsigned int iterator, std::vector<hitData_entry> &hitDatas, const MuonGM::MuonDetectorManager* detManager, std::shared_ptr<MMT_Parameters> par, const int phi);
-    void findDiamonds(const unsigned int iterator, const int event);
+    void findDiamonds(const unsigned int iterator, const uint64_t event);
     double phiShift(const int n, const double phi, const char side) const;
     std::vector<diamond_t> getDiamondVector() const { return m_diamonds; }
     diamond_t getDiamond(const unsigned int iterator) const { return m_diamonds.at(iterator); }

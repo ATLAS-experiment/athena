@@ -15,9 +15,9 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
                                             const McEventCollection *truthContainer,
                                             const TrackRecordCollection* trackRecordCollection,
                                             const MmDigitContainer *nsw_MmDigitContainer,
-                                            std::map<std::pair<int,unsigned int>,std::vector<digitWrapper> >& entries,
-                                            std::map<std::pair<int,unsigned int>,std::vector<hitData_entry> >& Hits_Data_Set_Time,
-                                            std::map<std::pair<int,unsigned int>,evInf_entry>& Event_Info) const {
+                                            std::map<std::pair<uint64_t,unsigned int>,std::vector<digitWrapper> >& entries,
+                                            std::map<std::pair<uint64_t,unsigned int>,std::vector<hitData_entry> >& Hits_Data_Set_Time,
+                                            std::map<std::pair<uint64_t,unsigned int>,evInf_entry>& Event_Info) const {
       //*******Following MuonPRD code to access all the variables**********
       std::vector<ROOT::Math::PtEtaPhiEVector> truthParticles, truthParticles_ent, truthParticles_pos;
       std::vector<int> pdg;
@@ -95,7 +95,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
       } //end truth container loop (should be only 1 container per event)
       } // if truth container is not null
 
-      int event = ctx.eventID().event_number();
+      uint64_t event = ctx.eventID().event_number();
       int TruthParticle_n = j;
       unsigned int digit_particles = 0;
       for(auto digitCollectionIter : *nsw_MmDigitContainer) {
