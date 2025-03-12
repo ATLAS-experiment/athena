@@ -78,16 +78,10 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
     Monitored::Group(
       m_monitoringTool,
       Monitored::Collection(key.key() + "_LOCALPOSITION_X", *handle, [](const xAOD::StripCluster* cluster){
-        return cluster->localPosition<2>()[0];
-      }),
-      Monitored::Collection(key.key() + "_LOCALPOSITION_Y", *handle, [](const xAOD::StripCluster* cluster){
-        return cluster->localPosition<2>()[1];
+        return cluster->localPosition<1>()(0,0);
       }),
       Monitored::Collection(key.key() + "_LOCALCOVARIANCE_XX", *handle, [](const xAOD::StripCluster* cluster){
-        return cluster->localCovariance<2>()(0, 0);
-      }),
-      Monitored::Collection(key.key() + "_LOCALCOVARIANCE_YY", *handle, [](const xAOD::StripCluster* cluster){
-        return cluster->localCovariance<2>()(1, 1);
+        return cluster->localCovariance<1>()(0, 0);
       }),
       Monitored::Collection(key.key() + "_GLOBALPOSITION_X", *handle, [](const xAOD::StripCluster* cluster){
         return cluster->globalPosition()[0];

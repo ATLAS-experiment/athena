@@ -34,7 +34,6 @@ def FPGAOutputValidationCfg(flags, **kwargs):
 
     for key in kwargs["stripKeys"]:
         monitoringTool.defineHistogram(f"{key}_LOCALPOSITION_X", path = "FPGAOutputValidation", type = "TH1F", title = f"{key}_LOCALPOSITION_X", xbins =  200, xmin =  -100, xmax =  100) 
-        monitoringTool.defineHistogram(f"{key}_LOCALPOSITION_Y", path = "FPGAOutputValidation", type = "TH1F", title = f"{key}_LOCALPOSITION_Y", xbins =  200, xmin =  -100, xmax =  100) 
         
         monitoringTool.defineHistogram(f"{key}_LOCALCOVARIANCE_XX", path = "FPGAOutputValidation", type = "TH1F", title = f"{key}_LOCALCOVARIANCE_XX", xbins =  100, xmin =  0, xmax =  1) 
         
