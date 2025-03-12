@@ -445,8 +445,8 @@ namespace PMGTools {
        
        // Only select final state electrons and muons:
        if( !MC::isStable(truthParticle) ||
-	   ( ( std::abs( truthParticle->pdgId() ) != 11 ) &&
-	     ( std::abs( truthParticle->pdgId() ) != 13 ) ) ) {
+	   ( !MC::isElectron(truthParticle) &&
+	     !MC::isMuon(truthParticle) ) ) {
 	 continue;
        }
        // ...which also pass some basic kinematic cuts:
