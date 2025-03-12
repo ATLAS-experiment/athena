@@ -34,7 +34,7 @@ def addCommonP1Signatures(chains):
     chainsP1['Muon'] = [
         # ATR-20650
         ChainProp(name='HLT_mu0_muoncalib_L1MU3V_EMPTY', stream=['Muon_Calibration'], groups=['RATE:Muon_Calibration','BW:Muon']),
-        ChainProp(name='HLT_mu0_muoncalib_L1MU14FCH', stream=['Muon_Calibration'], groups=['RATE:Muon_Calibration','BW:Muon']),
+        ChainProp(name='HLT_mu0_muoncalib_L1MU14FCH', stream=['Muon_Calibration'], groups=['RATE:Muon_Calibration','BW:Muon'],monGroups=['detMon']),
         ChainProp(name='HLT_mu0_muoncalib_L1MU3V', stream=['Muon_Calibration'], groups=['RATE:Muon_Calibration','BW:Muon']),
         ChainProp(name='HLT_mu0_muoncalib_L1MU5VF', stream=['Muon_Calibration'], groups=['RATE:Muon_Calibration','BW:Muon']),
     ]
@@ -145,7 +145,7 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_noalg_AFPPEB_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['AFPCalib'], groups=SupportGroup),
 
         #NSW mon
-        ChainProp(name='HLT_noalg_L1NSW_MONITOR', l1SeedThresholds=['FSNOSEED'], stream=['NSWTriggerMonitor'], groups=SupportGroup),
+        ChainProp(name='HLT_noalg_L1NSW_MONITOR', l1SeedThresholds=['FSNOSEED'], stream=['NSWTriggerMonitor'], groups=SupportGroup,monGroups=['detMon']),
 
         #ATR-26256 PixelNoise Stream
         ChainProp(name='HLT_noalg_LumiPEB_L1RD0_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['PixelNoise'], groups=SupportGroup),
@@ -269,7 +269,7 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_noalg_LArPEBNoise_L1jJ60p30ETA49_EMPTY', l1SeedThresholds=['jJ60p30ETA49'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         
         # TGC
-        ChainProp(name='HLT_noalg_L1TGC_BURST',  l1SeedThresholds=['FSNOSEED'], stream=['TgcNoiseBurst'],groups=['RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_L1TGC_BURST',  l1SeedThresholds=['FSNOSEED'], stream=['TgcNoiseBurst'],groups=['RATE:Calibration','BW:Detector'],monGroups=['detMon']),
 
 #        ChainProp(name='HLT_noalg_L1RD1_BGRP10', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo','express'],groups=['RATE:Calibration','BW:Detector']),
 
