@@ -229,7 +229,7 @@ def defineInputsMenu():
             'cTAUSPARE2',
 
             # jEM thresholds for commissioning
-            'jEM20', 'jEM20M', 
+            'jEM25', 'jEM20M', 
             # jEM thresholds for production
             'jEMSPARE1',
     
@@ -406,8 +406,8 @@ def defineInputsMenu():
                                                                                                        'KF-jXE60-AjJall',
                                                                                                        'KF-jXE65-AjJall',
                                                                                                        'KF-jXE75-AjJall'] ),
-                    TopoMenuDef( 'ZAFB_DPHI',                      outputbits = (6,7), outputlines = [ '60INVM-04DPHI32-eEM18abm-jEM20s625ETA49',
-                                                                                                       '60INVM-25DPHI32-eEM18abm-jEM20s625ETA49'] ),
+                    TopoMenuDef( 'ZAFB_DPHI',                      outputbits = (6,7), outputlines = [ '60INVM-04DPHI32-eEM18abm-jEM25s625ETA49',
+                                                                                                       '60INVM-25DPHI32-eEM18abm-jEM25s625ETA49'] ),
                     TopoMenuDef( 'CEP_CjJ',                        outputbits = (8,9), outputlines = [ 'CEP-CjJ90s6',
                                                                                                        'CEP-CjJ100s6'] ),
                     TopoMenuDef( 'ZAFB_DPHIM',                    outputbits = (10,11), outputlines = [ '60INVM-04DPHI32-eEM18abm-jEM20sm625ETA49',
