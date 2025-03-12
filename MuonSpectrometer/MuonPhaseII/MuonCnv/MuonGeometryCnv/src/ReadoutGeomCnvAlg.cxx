@@ -224,6 +224,9 @@ StatusCode ReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
     cacheObj.world->add(cacheObj.newIdTag());
     GeoIntrusivePtr<GeoAlignableTransform> trf = make_intrusive<GeoAlignableTransform>(alignedTransform);
     newStation->setTransform(trf);
+    
+    newStation->setNominalAmdbLRSToGlobal( trf->getTransform()); 
+    
     cacheObj.detMgr->addMuonStation(std::move(newStation));
 
     cacheObj.world->add(trf);   
