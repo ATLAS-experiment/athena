@@ -443,6 +443,8 @@ JetChainParts = {
       +['320eta490'], # TODO: Kept temporarily for validation
     'jvt'           : # Jet Vertex Tagger pileup discriminant
       ['010jvt', '011jvt', '015jvt', '020jvt', '050jvt', '059jvt'],
+    'nnJvt'         : # NN Jet Vertex Tagger pileup discriminant
+      ['nnJvtv1'], # No range cuts, boolean pass/fail
     'momCuts'       : # Generic moment cut on single jets
        ['050momemfrac100','momemfrac006','momemfrac024','momemfrac012', 'momhecfrac010', '050momemfrac100XXmomhecfrac010', 'momemfrac072', 'momemfrac048' ],
     'timing'        : # delayed jets, with absolute delay requirement [ns]
@@ -513,6 +515,7 @@ JetChainParts_Default = {
     #
     'etaRange'      : '0eta320',
     'jvt'           : '',
+    'nnJvt'         : '',
     'momCuts'       : '',
     'timing'        : '',
     'timeSig'       : '',
