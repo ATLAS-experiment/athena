@@ -289,15 +289,15 @@ def getConfig_eEM(do_HI_tob_thresholds):
 
 def getConfig_jEM():
 
-    iso_loose_float = 0.2 # PLACEHOLDER
-    iso_medium_float = 0.14 # PLACEHOLDER
-    iso_tight_float = 0.08 # PLACEHOLDER    
-    frac_loose_float = 0.14 # PLACEHOLDER
-    frac_medium_float = 0.1 # PLACEHOLDER
-    frac_tight_float = 0.06 # PLACEHOLDER
-    frac2_loose_float = 0.12 # PLACEHOLDER
-    frac2_medium_float = 0.08 # PLACEHOLDER
-    frac2_tight_float = 0.04 # PLACEHOLDER
+    iso_loose_float = 1 
+    iso_medium_float = 0.9 
+    iso_tight_float = 0.08 
+    frac_loose_float = 0.14 
+    frac_medium_float = 0.1 
+    frac_tight_float = 0.06
+    frac2_loose_float = 0.12
+    frac2_medium_float = 0.08
+    frac2_tight_float = 0.04
 
     confObj = odict()
     confObj["workingPoints"] = odict()
