@@ -60,6 +60,7 @@ namespace ActsTrk
        {this, "MaximumIterations", 10000u, "Maximum number of iterations to resolve ambiguities among all tracks."};
     Gaudi::Property<unsigned int> m_nMeasurementsMin
        {this, "NMeasurementsMin", 7u, "Minimum number of measurements per track."};
+    Gaudi::Property<bool> m_countSharedHits{this, "countSharedHits", true, "add shared hit flags to tracks"};
 
     std::unique_ptr<Acts::GreedyAmbiguityResolution> m_ambi;
 

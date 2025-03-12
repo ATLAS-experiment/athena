@@ -94,6 +94,8 @@ class ScoreBasedAmbiguityResolutionAlg : public AthReentrantAlgorithm {
       this, "jsonFileName", "ScoreBasedAmbiguity_Config.json",
       "Name of the JSON file that contains the config file."};
 
+  Gaudi::Property<bool> m_countSharedHits{this, "countSharedHits", true, "add shared hit flags to tracks"};
+
   std::unique_ptr<Acts::ScoreBasedAmbiguityResolution> m_ambi{nullptr};
 
   /** ITk eta-dependent cuts*/

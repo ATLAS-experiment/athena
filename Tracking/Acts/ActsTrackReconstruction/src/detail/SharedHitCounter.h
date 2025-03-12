@@ -28,14 +28,33 @@ namespace ActsTrk::detail {
     SharedHitCounter &operator=(SharedHitCounter &&) noexcept = default;
     ~SharedHitCounter() = default;
 
+    using ReturnSharedAndBad = std::pair<std::size_t, std::size_t>;
+
     template <Acts::TrackContainerFrontend track_container_t>
-    inline std::pair<std::size_t, std::size_t> computeSharedHits(typename track_container_t::TrackProxy &track, track_container_t &tracks, const MeasurementIndex& measurementIndex);
+    inline auto computeSharedHitsDynamic(typename track_container_t::TrackProxy &track,
+                                         track_container_t &tracks,
+                                         MeasurementIndex &measurementIndex)
+        -> ReturnSharedAndBad;
+
+    template <Acts::TrackContainerFrontend track_container_t>
+    inline auto computeSharedHits(typename track_container_t::TrackProxy &track,
+                                  track_container_t &tracks,
+                                  const MeasurementIndex &measurementIndex)
+        -> ReturnSharedAndBad;
+
+    template <Acts::TrackContainerFrontend track_container_t, typename IndexFun>
+    inline auto computeSharedHits(typename track_container_t::TrackProxy &track,
+                                  track_container_t &tracks,
+                                  std::size_t indexSize,
+                                  IndexFun &&indexFun)
+        -> ReturnSharedAndBad;
 
   private:
-    struct TrackStateIndex {
+  struct TrackStateIndex {
       std::size_t trackIndex;
       std::size_t stateIndex;
     };
+    static constexpr TrackStateIndex s_noTrackState{std::numeric_limits<std::size_t>::max(), std::numeric_limits<std::size_t>::max()};
     std::vector<TrackStateIndex> m_firstTrackStateOnTheHit;
   };
 
