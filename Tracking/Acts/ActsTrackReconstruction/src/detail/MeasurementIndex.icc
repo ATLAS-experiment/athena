@@ -18,21 +18,26 @@ inline std::size_t MeasurementIndex::size() const {
   return m_size;
 }
 
+inline bool MeasurementIndex::addMeasurement(const xAOD::UncalibratedMeasurement &hit) {
+  ++m_nMeasurements;
+  auto container = hit.container();  // owning container, which might be different from clusterContainer
+  if (container == m_lastContainer) return false;
+  if (std::any_of(m_measurementContainerOffsets.begin(),
+                  m_measurementContainerOffsets.end(),
+                  [container](const auto& c) { return c.first == container; }))
+    return false;
+  m_measurementContainerOffsets.emplace_back(container, m_size);
+  m_lastContainerOffset = m_size;
+  m_lastContainerSize = container->size_v();
+  m_size += m_lastContainerSize;
+  m_lastContainer = container;
+  return true;
+}
+
 inline void MeasurementIndex::addMeasurements(const xAOD::UncalibratedMeasurementContainer& clusterContainer) {
-  for (const auto* measurement : clusterContainer) {
-    auto container = measurement->container();  // owning container, which might be different from clusterContainer
-    if (container != m_lastContainer &&
-        std::none_of(m_measurementContainerOffsets.begin(),
-                     m_measurementContainerOffsets.end(),
-                     [container](const auto& c) { return c.first == container; })) {
-      m_measurementContainerOffsets.emplace_back(container, m_size);
-      m_lastContainerOffset = m_size;
-      m_lastContainerSize = container->size_v();
-      m_size += m_lastContainerSize;
-      m_lastContainer = container;
-    }
+  for (const xAOD::UncalibratedMeasurement* hit : clusterContainer) {
+    addMeasurement(*hit);
   }
-  m_nMeasurements += clusterContainer.size();
 }
 
 inline std::size_t MeasurementIndex::index(const xAOD::UncalibratedMeasurement& hit) const {
@@ -59,6 +64,11 @@ inline std::size_t MeasurementIndex::index(const xAOD::UncalibratedMeasurement& 
     return m_size;
 
   return m_lastContainerOffset + ind;
+}
+
+inline std::pair<std::size_t,bool> MeasurementIndex::newMeasurementIndex(const xAOD::UncalibratedMeasurement& hit) {
+  bool newContainer = addMeasurement(hit);
+  return {index(hit), newContainer};
 }
 
 }  // namespace ActsTrk::detail

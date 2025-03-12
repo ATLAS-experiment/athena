@@ -23,6 +23,8 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsInterop/Logger.h"
+#include "src/detail/MeasurementIndex.h"
+#include "src/detail/SharedHitCounter.h"
 
 namespace {
 std::size_t sourceLinkHash(const Acts::SourceLink &slink) {
@@ -152,10 +154,23 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::execute(
   ActsTrk::MutableTrackContainer solvedTracks;
   solvedTracks.ensureDynamicColumns(updatedTracks);
 
+  detail::MeasurementIndex measurementIndex;
+  detail::SharedHitCounter sharedHits;
+
+  std::size_t totalShared = 0;
   for (auto iTrack : goodTracks) {
     auto destProxy = solvedTracks.getTrack(solvedTracks.addTrack());
     destProxy.copyFrom(updatedTracks.getTrack(iTrack));
+    if (m_countSharedHits) {
+      auto [nShared, nBadTrackMeasurements] = sharedHits.computeSharedHitsDynamic(destProxy, solvedTracks, measurementIndex);
+      if (nBadTrackMeasurements > 0)
+        ATH_MSG_ERROR("computeSharedHits: " << nBadTrackMeasurements << " track measurements not found in input track");
+      totalShared += nShared;
+    }
   }
+  if (m_countSharedHits)
+    ATH_MSG_DEBUG("total number of shared hits = " << totalShared);
+
   std::unique_ptr<ActsTrk::TrackContainer> outputTracks =
       m_resolvedTracksBackendHandles.moveToConst(
           std::move(solvedTracks),
