@@ -20,7 +20,7 @@ Reco_tf.py \
 rc1=$?
 echo "art-result: ${rc1} Reco_tf_q442_phys_physlite_mt_mp" 
 
-Derivation_tf.py \
+stdbuf -i0 -o0 -e0 Derivation_tf.py \
   --inputAODFile myAOD.pool.root \
   --outputDAODFile art.pool.root \
   --sharedWriter True \

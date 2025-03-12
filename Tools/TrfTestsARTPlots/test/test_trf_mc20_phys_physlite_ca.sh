@@ -11,7 +11,7 @@
 export ATHENA_CORE_NUMBER=8
 AODFILE=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/input/v0/1000events_mc20_ttbar.AOD.pool.root 
 
-Derivation_tf.py \
+stdbuf -i0 -o0 -e0 Derivation_tf.py \
   --inputAODFile $AODFILE \
   --outputDAODFile art.pool.root \
   --formats PHYS PHYSLITE \
