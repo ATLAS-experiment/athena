@@ -959,7 +959,6 @@ int main( int argc, char* argv[] ) {
 
       // Jets - get goodjets
       if (slices["jet"]) {
-        xAOD::JetInput::Type jetInputType = xAOD::JetInput::Uncategorized;
         ANA_MSG_DEBUG("GoodJets?");
         for (const auto& jet : *jets) {
           if (ST::acc_baseline(*jet) == 1  &&
@@ -967,24 +966,6 @@ int main( int argc, char* argv[] ) {
               ST::acc_signal(*jet) == 1  &&
               jet->pt() > 20000.  && ( std::abs(jet->eta()) < 2.5) ) {
             goodJets->push_back(jet);
-          }
-          // PHYSLITE doesn't bother trying to keep JetInputType as a decoration
-          if (stream.compare("PHYSVAL")==0) jetInputType = jet->getInputType();
-          else if (stream.find("PHYS")!=std::string::npos) jetInputType = xAOD::JetInput::PFlow;
-          else if (stream.find("SUSY")!=std::string::npos) {
-             std::string jetcoll = jets_nominal_aux->name(); 
-             if (jetcoll.find("EMTopo")!=std::string::npos) jetInputType = xAOD::JetInput::EMTopo;
-             else if (jetcoll.find("EMPFlow")!=std::string::npos) jetInputType = xAOD::JetInput::PFlow;
-          }
-        }
-
-        std::string jetCollection = xAOD::JetInput::typeName(jetInputType);
-        ANA_MSG_DEBUG ("xAOD::JetInputtypeName: " << jetCollection); 
-        if (jetCollection == "EMPFlow") {
-          if (objTool.treatAsYear()<2017 && !objTool.IsPFlowCrackVetoCleaning(electrons, photons)) { 
-              ANA_MSG_WARNING( "Event failed 2015+2016 IsPFlowCrackVetoCleaning(electrons, photons), skipping..." );
-              store.clear();
-              continue;
           }
         }
       }
