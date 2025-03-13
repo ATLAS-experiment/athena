@@ -38,12 +38,12 @@ private:
   Gaudi::Property<double> m_adScoreThres{this, "adScoreThres", {0.}, "HLT AD score threshold"};
 
   bool getAdDecision(
-    std::vector<const xAOD::Jet*> input_jets,
-    std::vector<const xAOD::Muon*> input_muons,
-    std::vector<const xAOD::Electron*> input_electrons,
-    std::vector<const xAOD::Photon*> input_photons,
-    std::vector<const xAOD::TauJet*> input_taus,
-    std::vector<const xAOD::TrigMissingET*> input_mets) const;
+    const std::vector<const xAOD::Jet*> &input_jets,
+    const std::vector<const xAOD::Muon*> &input_muons,
+    const std::vector<const xAOD::Electron*> &input_electrons,
+    const std::vector<const xAOD::Photon*> &input_photons,
+    const std::vector<const xAOD::TauJet*> &input_taus,
+    const std::vector<const xAOD::TrigMissingET*> &input_mets) const;
 
   float runInference(std::vector<float> &tensor) const;
 
