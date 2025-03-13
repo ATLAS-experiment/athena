@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstdio> // For sprintf on gcc45
@@ -88,19 +88,9 @@ TestDriver::write ATLAS_NOT_THREAD_SAFE ()
    }
 
    cout << "Adding 20 elements to the collection." << endl;
-   pool::CollectionRowBuffer rowBuffer;
    // Create empty collection and data table row buffers
-   pool::TokenList                 tokenList;
-   coral::AttributeList         attributeList;
-   for( int j = 0; j < description.numberOfTokenColumns(); j++ ) {
-      tokenList.extend( description.tokenColumn( j ).name() );
-   }
-   for( int j = 0; j < description.numberOfAttributeColumns(); j++ ) {
-      const auto& attrCol = description.attributeColumn( j );
-      attributeList.extend( attrCol.name(), attrCol.type() );
-   }
-   rowBuffer.setTokenList( tokenList );
-   rowBuffer.setAttributeList( attributeList );
+   pool::CollectionRowBuffer rowBuffer;
+   collection->initNewRow( rowBuffer );
 
    for( unsigned int i=100; i<105; i++ )   {
       rowBuffer.attributeList()[ "attr1" ].data<int>() = i ;
@@ -179,19 +169,9 @@ TestDriver::update ATLAS_NOT_THREAD_SAFE ()
    }   
 
    cout << "Adding new 10 elements to the collection." << endl;
-   pool::CollectionRowBuffer rowBuffer;
    // Create empty collection and data table row buffers
-   pool::TokenList                 tokenList;
-   coral::AttributeList         attributeList;
-   for( int j = 0; j < collection->description().numberOfTokenColumns(); j++ ) {
-      tokenList.extend( collection->description().tokenColumn( j ).name() );
-   }
-   for( int j = 0; j < collection->description().numberOfAttributeColumns(); j++ ) {
-      const auto& attrCol = collection->description().attributeColumn( j );
-      attributeList.extend( attrCol.name(), attrCol.type() );
-   }
-   rowBuffer.setTokenList( tokenList );
-   rowBuffer.setAttributeList( attributeList );
+   pool::CollectionRowBuffer rowBuffer;
+   collection->initNewRow( rowBuffer );
    
    for( unsigned int i=120; i<130; i++ )   {
      rowBuffer.attributeList()[ "attr1" ].data<int>() = i ;

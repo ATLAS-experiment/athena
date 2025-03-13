@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RNTCOLLECTION_H
@@ -25,6 +25,8 @@ class IFileMgr;
 // Import classes from experimental namespace for the time being
 namespace ROOT::Experimental {
    class RNTupleReader;
+   class RNTupleWriter;
+   class RNTupleModel;
 }
 
 namespace pool {
@@ -34,8 +36,12 @@ namespace pool {
    namespace RootCollection {
 
       using RNTupleReader = ROOT::Experimental::RNTupleReader;
+      using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
+      using RNTupleModel  = ROOT::Experimental::RNTupleModel;
       class Attribute;
       class AttributeSpecification;
+
+      static constexpr auto MODULE_NAME = "RootCollection";
   
       /**
          @brief Collection (and CollectionProxy) implementation based on RNTuple
@@ -82,36 +88,37 @@ namespace pool {
         ~RNTCollection();
     
         /// Return openMode
-        virtual ICollection::OpenMode openMode() const; 
+        virtual ICollection::OpenMode openMode() const final override; 
 
         /// Explicitly re-opens the collection after it has been closed.
-        virtual void open();
+        virtual void open() final override;
     
         /// Checks if the collection is open.
-        virtual bool isOpen() const;
+        virtual bool isOpen() const final override;
 
         /// Adds a new row of data to the collection.
-        virtual void insertRow( const pool::CollectionRowBuffer& inputRowBuffer );
+        virtual void insertRow( const pool::CollectionRowBuffer& inputRowBuffer ) final override;
 
         /// Commits the last changes made to the collection
-        virtual void commit( bool restartTransaction = false );
+        virtual void commit( bool restartTransaction = false ) final override;
     
         /// Explicitly closes the collection
-        virtual void close();
+        virtual void close() final override;
     
         /// Returns an object used to describe the collection properties.
-        virtual const ICollectionDescription& description() const;
+        virtual const ICollectionDescription& description() const final override;
 
         /// Returns an object used to query the collection.
-        virtual ICollectionQuery*             newQuery();
+        virtual ICollectionQuery*             newQuery() final override;
 
      private:    
         /// copying unimplemented in this class.
         RNTCollection(const RNTCollection &) = delete;
         RNTCollection & operator = (const RNTCollection &) = delete;
     
-        void delayedFileOpen( const std::string& method );
+        void delayedFileOpen(const std::string& method);
         std::unique_ptr< RNTupleReader > getCollectionRNTuple();
+        void addField(RNTupleModel* model, const std::string& field_name, const std::string& field_type);
 
         bool fileCatalogRequired() const;
         std::string retrievePFN() const;
@@ -122,8 +129,9 @@ namespace pool {
 
         void cleanup();
 
-        std::unique_ptr< RNTupleReader >     m_reader;
         CollectionDescription                m_description;
+        std::unique_ptr< RNTupleReader >     m_reader;
+        std::unique_ptr< RNTupleWriter >     m_rntupleWriter;
         
         std::string                          m_name;
         std::string                          m_fileName;
@@ -133,12 +141,11 @@ namespace pool {
         bool                                 m_open;
         bool                                 m_readOnly;
         
-        std::unique_ptr<pool::IFileCatalog> m_fileCatalog;
-        coral::MessageStream                m_poolOut;
+        std::unique_ptr<pool::IFileCatalog>  m_fileCatalog;
+        coral::MessageStream                 m_poolOut;
 
         SmartIF<IFileMgr>                    m_fileMgr;
       };
    }
 }
 #endif
-
