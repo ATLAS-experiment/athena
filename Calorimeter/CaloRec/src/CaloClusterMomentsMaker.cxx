@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -332,22 +332,6 @@ struct cellinfo {
   double volume;
   CaloCell_ID::CaloSample sample;
   unsigned int identifier;
-  cellinfo(const bool useGPUCriteria = false)
-  {
-    if (useGPUCriteria) {
-      x = 0;
-      y = 0;
-      z = 0;
-      energy = 0;
-      eta = 0;
-      phi = 0;
-      r = 0;
-      lambda = 0;
-      volume = 0;
-      sample = CaloCell_ID::Unknown;
-      identifier = 0;
-    }
-  }
 };
 
 } // namespace CaloClusterMomentsMaker_detail
@@ -441,16 +425,16 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
     double eTile2(0),eTile2Q(0);
     double eBadLArHV(0);
     int nbad(0),nbad_dac(0),nBadLArHV(0);
-    unsigned int ncell(0),i,nSigSampl(0);
+    unsigned int i,nSigSampl(0);
     unsigned int theNumOfCells = theCluster->size();
     
     // these two are needed for the LATERAL moment
     int iCellMax(-1);
     int iCellScndMax(-1);
 
+    cellinfo.clear();
     if (cellinfo.capacity() == 0)
       cellinfo.reserve (theNumOfCells*2);
-    cellinfo.resize (theNumOfCells, CaloClusterMomentsMaker_detail::cellinfo(m_useGPUCriteria));
     
     for(i=0;i<(unsigned int)CaloCell_ID::Unknown;i++) 
       maxSampE[i] = 0;
@@ -516,7 +500,7 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 	    noise->getNoise(pCell->ID(),pCell->gain());
 
 	  sumSig2 += sigma*sigma;
-	  // use geomtery weighted energy of cell for leading cell significance
+	  // use geometry weighted energy of cell for leading cell significance
 	  double Sig = (sigma>0?ene*weight/sigma:0);
 	  if (m_useGPUCriteria) {
 	    unsigned int thisSampl = myCDDE->getSampling();
@@ -571,16 +555,20 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 	  }
 	  if ( ene > 0. && weight > 0) {
 	    // get all geometric information needed ...
-	    CaloClusterMomentsMaker_detail::cellinfo& ci = cellinfo[ncell];
-	    ci.x          = myCDDE->x();
-	    ci.y          = myCDDE->y();
-	    ci.z          = myCDDE->z();
-	    ci.eta        = myCDDE->eta();
-	    ci.phi        = myCDDE->phi();
-	    ci.energy     = ene*weight;
-	    ci.volume     = myCDDE->volume();
-	    ci.sample     = myCDDE->getSampling();
-	    ci.identifier = m_calo_id->calo_cell_hash(myId);
+            cellinfo.push_back (CaloClusterMomentsMaker_detail::cellinfo {
+                .x = myCDDE->x(),
+                .y = myCDDE->y(),
+                .z = myCDDE->z(),
+                .energy = ene*weight,
+                .eta = myCDDE->eta(),
+                .phi = myCDDE->phi(),
+                .r = 0,       // These two are filled in later.
+                .lambda = 0,
+                .volume = myCDDE->volume(),
+                .sample = myCDDE->getSampling(),
+                .identifier = m_calo_id->calo_cell_hash(myId)});
+
+	    CaloClusterMomentsMaker_detail::cellinfo& ci = cellinfo.back();
 
 	    if ( ci.energy > maxSampE[(unsigned int)ci.sample] )
 	      maxSampE[(unsigned int)ci.sample] = ci.energy;
@@ -590,24 +578,24 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 		  ci.energy > cellinfo[iCellMax].energy                                                     ||
 		  (ci.energy == cellinfo[iCellMax].energy && ci.identifier > cellinfo[iCellMax].identifier)    ) {
 		iCellScndMax = iCellMax;
-		iCellMax = ncell;
+		iCellMax = cellinfo.size()-1;
 	      }
 	      else if (iCellScndMax < 0                                                                                  ||
 		       ci.energy > cellinfo[iCellScndMax].energy                                                         ||
 		       (ci.energy == cellinfo[iCellScndMax].energy && ci.identifier > cellinfo[iCellScndMax].identifier)    )
 		{
-		  iCellScndMax = ncell;
+		  iCellScndMax = cellinfo.size()-1;
 		}
 	    }
 	    else {
 	      if (iCellMax < 0 || ci.energy > cellinfo[iCellMax].energy ) {
 		iCellScndMax = iCellMax;
-		iCellMax = ncell;
+		iCellMax = cellinfo.size()-1;
 	      }
 	      else if (iCellScndMax < 0 ||
 		       ci.energy > cellinfo[iCellScndMax].energy )
 		{
-		  iCellScndMax = ncell;
+		  iCellScndMax = cellinfo.size()-1;
 		}
 	    }
 	  
@@ -626,8 +614,6 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 	    mz += ci.energy*ci.z*dir;
 	    
 	    w  += ci.energy;
-	    
-	    ncell++;
 	  } // cell has E>0 and weight != 0
 	} // cell has valid DDE
       } //end of loop over all cells
@@ -668,10 +654,9 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 	// property m_maxAxisAngle
 
 	double angle(0),deltaPhi(0),deltaTheta(0);
-	if ( ncell > 2 ) {
+	if ( cellinfo.size() > 2 ) {
 	  Eigen::Matrix3d C=Eigen::Matrix3d::Zero();
-	  for(i=0;i<ncell;i++) {
-            const CaloClusterMomentsMaker_detail::cellinfo& ci = cellinfo[i];
+	  for(const CaloClusterMomentsMaker_detail::cellinfo& ci : cellinfo) {
             const double e2 = ci.energy * ci.energy;
             
 	    C(0,0) += e2*(ci.x-xc)*(ci.x-xc);
@@ -744,7 +729,7 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 	      ATH_MSG_DEBUG("Eigenvalues close to 0, do not use principal axis");
 	    }
 	  }//end got eigenvalues
-	} //end if ncell>2
+	} //end if cellinfo.size()>2
       
 	ATH_MSG_DEBUG("Shower Axis = (" << showerAxis[Amg::x] << ", "
 		      << showerAxis[Amg::y] << ", " << showerAxis[Amg::z] << ")");
@@ -766,9 +751,9 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 	
 	// define common norm for all simple moments
 	double commonNorm = 0;
-        double phi0 = ncell > 0 ? cellinfo[0].phi : 0;
+        double phi0 = cellinfo.size() > 0 ? cellinfo[0].phi : 0;
 
-	for(unsigned i=0;i<ncell;i++) {
+	for(unsigned i=0;i<cellinfo.size();i++) {
 	  const CaloClusterMomentsMaker_detail::cellinfo& ci = cellinfo[i];
 	  // loop over all valid moments
 	  commonNorm += ci.energy;
