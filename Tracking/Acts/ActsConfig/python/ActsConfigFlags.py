@@ -117,4 +117,7 @@ def createActsConfigFlags():
 
     actscf.addFlag('Acts.useDefaultActsMeasurementSelector', False) # if True, uses no outlier chi2 cut as before (chi2<25,inf)
 
+    # Decorations
+    actscf.addFlag('Acts.decoratePRD.sdoSiHit', lambda pcf: pcf.Tracking.doTIDE_AmbiTrackMonitoring)
+    
     return actscf
