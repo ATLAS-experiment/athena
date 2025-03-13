@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITkStripCablingAlg_H
@@ -43,7 +43,7 @@ class ITkStripCablingAlg: public AthReentrantAlgorithm {
   virtual bool isClonable() const override { return true; };
   
 private:
-  StringProperty m_source{this, "DataSource", "ITkStripCabling.dat", "a plain text file for the ITkStrip cabling"};
+  StringProperty m_source{this, "DataSource", "ITkStripCabling.dat", "A data file for the ITkStrip cabling"};
   SG::WriteCondHandleKey<ITkStripCablingData> m_writeKey{this, "WriteKey", "ITkStripCablingData", "Key of output (derived) conditions data"};
   const SCT_ID* m_idHelper{nullptr};
 };
