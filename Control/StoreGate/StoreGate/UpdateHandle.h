@@ -1,7 +1,10 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
+
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
+
+// $Id: UpdateHandle.h 797637 2017-02-17 02:32:11Z ssnyder $
 /**
  * @file StoreGate/UpdateHandle.h
  * @author S. Binet, P. Calafiura, scott snyder <snyder@bnl.gov>
@@ -117,32 +120,12 @@ namespace SG {
 
 
     /**
-     * @brief Constructor specifying the key as a string.
+     * @brief Constructor with full arguments.
      * @param sgkey StoreGate key of the referenced object.
      * @param storename Name of the referenced event store.
      */
     UpdateHandle(const std::string& sgkey,
                  const std::string& storename = StoreID::storeName(StoreID::EVENT_STORE));
-
-
-    /**
-     * @brief Constructor specifying the key as a string, with context.
-     * @param sgkey StoreGate key of the referenced object.
-     * @param ctx The event context.
-     */
-    explicit UpdateHandle(const std::string& sgkey,
-                          const EventContext& ctx);
-
-
-    /**
-     * @brief Constructor specifying the key as a string, with context.
-     * @param sgkey StoreGate key of the referenced object.
-     * @param storename Name of the referenced event store.
-     * @param ctx The event context.
-     */
-    explicit UpdateHandle(const std::string& sgkey,
-                          const std::string& storename,
-                          const EventContext& ctx);
 
 
     /**
@@ -167,12 +150,6 @@ namespace SG {
      * store from the event context will be used.
      */
     explicit UpdateHandle (const UpdateHandleKey<T>& key,const EventContext& ctx);
-
-
-    // Disallow initialization from a temporary Key object.
-    explicit UpdateHandle (SG::UpdateHandleKey<T>&& key) = delete; // Not allowed from a temporary.
-    explicit UpdateHandle (SG::UpdateHandleKey<T>&& key, 
-                           const EventContext& ctx) = delete; // Not allowed from a temporary.
 
 
     /**
