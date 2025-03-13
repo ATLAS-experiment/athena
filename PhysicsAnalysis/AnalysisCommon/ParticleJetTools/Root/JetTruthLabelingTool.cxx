@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ParticleJetTools/JetTruthLabelingTool.h"
@@ -239,22 +239,22 @@ int JetTruthLabelingTool::getTruthJetLabelDR( DecorHandles& dh,
     float dR = tlv_truth.first.DeltaR(jet.p4());
     if( dR < m_dRTruthPart ) {
 
-      if ( std::abs(tlv_truth.second) == 23 && !matchZ ) {
+      if ( MC::isZ(tlv_truth.second) && !matchZ ) {
         dR_Z = dR;
         matchZ = true;
       }
 
-      if ( std::abs(tlv_truth.second) == 24 && !matchW ) {
+      if ( MC::isW(tlv_truth.second) && !matchW ) {
         dR_W = dR;
         matchW = true;
       }
 
-      if ( std::abs(tlv_truth.second) == 25 && !matchH ) {
+      if ( MC::isHiggs(tlv_truth.second) && !matchH ) {
         dR_H = dR;
         matchH = true;
       }
 
-      if ( std::abs(tlv_truth.second) == 6 && !matchTop ) {
+      if ( MC::isTop(tlv_truth.second) && !matchTop ) {
         dR_Top = dR;
         matchTop = true;
       }
@@ -625,7 +625,7 @@ void JetTruthLabelingTool::getTLVs( std::vector<std::pair<TLorentzVector,int> > 
       if ( MC::isPhysical(part1) ) continue;
 
       /// Skip anything that isn't a light quark
-      if ( std::abs(part1->pdgId()) > 5 ) continue;
+      if ( std::abs(part1->pdgId()) > MC::BQUARK ) continue;
 
       countStatus3++;
       /// We want to look at first 2 partons except beam particles. Sometimes beam particles are dropped from DxAODs...
@@ -642,7 +642,7 @@ void JetTruthLabelingTool::getTLVs( std::vector<std::pair<TLorentzVector,int> > 
         if (  MC::isPhysical(part2) ) continue;
 
         /// Skip anything that isn't a light quark
-        if ( std::abs(part2->pdgId()) > 5 ) continue;
+        if ( std::abs(part2->pdgId()) > MC::BQUARK ) continue;
 
         p2 = part2->p4();
 
@@ -651,7 +651,7 @@ void JetTruthLabelingTool::getTLVs( std::vector<std::pair<TLorentzVector,int> > 
           isZCand = true;
         }
         /// W+ daughters should have a positive u or c
-        else if ( part1->pdgId() == 2 || part1->pdgId() == 4 || part2->pdgId() == 2 || part2->pdgId() == 4 ) {
+        else if ( part1->pdgId() == MC::UQUARK || part1->pdgId() == MC::CQUARK || part2->pdgId() == MC::UQUARK || part2->pdgId() == MC::CQUARK ) {
           isWPCand = true;
         }
         /// W+ daughters should have a positive u or c
@@ -692,14 +692,14 @@ void JetTruthLabelingTool::getTLVs( std::vector<std::pair<TLorentzVector,int> > 
 
   /// Store W/Z/H bosons
   for ( const xAOD::TruthParticle* part : *truthBosons ) {
-    if ( !(selectTruthParticle(part,23) || selectTruthParticle(part,24) || selectTruthParticle(part,25)) ) continue;
+    if ( !(selectTruthParticle(part,MC::Z0BOSON) || selectTruthParticle(part,MC::WPLUSBOSON) || selectTruthParticle(part,MC::HIGGSBOSON)) ) continue;
     /// Save 4-vector and pdgId
     tlvs.push_back(std::make_pair(part->p4(),part->pdgId()));
   }
 
   /// Store top quarks
   for ( const xAOD::TruthParticle* part : *truthTop ) {
-    if ( !selectTruthParticle(part,6) ) continue;
+    if ( !selectTruthParticle(part,MC::TQUARK) ) continue;
     /// Save 4-vector and pdgId
     tlvs.push_back(std::make_pair(part->p4(),part->pdgId()));
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValTau.cxx 
@@ -185,7 +185,7 @@ StatusCode PhysValTau::fillHistograms()
            m_oTauValidationPlots->m_oElMatchedParamPlotsNom.fill(*tau, weight);
            m_oTauValidationPlots->m_oElMatchedEVetoPlotsNom.fill(*tau, weight);
         }
-      } else if( std::abs(trueTau->pdgId()) < 7 || trueTau->pdgId() == 21){
+      } else if( MC::isSMQuark(trueTau) || MC::isGluon(trueTau) ){
         ATH_MSG_DEBUG("Tau is matched to a jet");
         m_oTauValidationPlots->m_oFakeGeneralTauAllProngsPlots.fill(*tau, weight);
         // Substructure/PFO histograms
