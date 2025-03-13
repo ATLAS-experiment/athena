@@ -48,7 +48,7 @@ test.get_step('CheckFile').input_file = 'ESD.pool.root,ESD.Module1.pool.root'
 # Ultimately there should be no per-event messages
 msgcount = test.get_step("MessageCount")
 msgcount.thresholds = {
-  'WARNING': 550,  # Remaining warnings are mostly from ATLASRECTS-3866
+  'WARNING': 600,  # Remaining warnings are mostly from ATLASRECTS-3866 # Increased from 550->600 due to ATR-27438.
   'INFO': 500,
   'other': 50
 }

@@ -2138,7 +2138,7 @@ class TopoAlgoDef:
         ZAFBDphimap = [
             { "minInvm": 60 , "minDphiList": [4, 25], "maxDphi": 32, "minEta2": 25, "maxEta2": 49,
               "inputwidth1": HW.eEmOutputWidthSelect, "otype1" : "eEM", "ocut1" : 18, "olist1" : "abm",
-              "nleading1" : HW.eEmOutputWidthSelect, "inputwidth2": HW.jEmOutputWidthSort,  "ocut2" : 20, "nleading2" : 6 }
+              "nleading1" : HW.eEmOutputWidthSelect, "inputwidth2": HW.jEmOutputWidthSort,  "ocut2" : 20, "ocut3" : 25, "nleading2" : 6 }
         ]
         for x in ZAFBDphimap:
             class d:
@@ -2150,7 +2150,7 @@ class TopoAlgoDef:
             for minDphi in d.minDphiList:
                 toponames.append ("%iINVM-%02dDPHI%i-%s%s%s%s-jEM%ss%s%iETA%i"  % (d.minInvm, minDphi, d.maxDphi,
                                                                                      d.otype1, str(d.ocut1) , d.olist1, str(d.nleading1) if d.olist1=="s" else "",
-                                                                                     str(d.ocut2) , str(d.nleading2) , d.minEta2, d.maxEta2))
+                                                                                     str(d.ocut3) , str(d.nleading2) , d.minEta2, d.maxEta2))
             alg = AlgConf.InvariantMassDeltaPhiInclusive2( name = 'ZAFB_DPHI', inputs = inputList, outputs = toponames)
             alg.addgeneric('InputWidth1', d.inputwidth1)
             alg.addgeneric('InputWidth2', d.inputwidth2)
@@ -2160,7 +2160,7 @@ class TopoAlgoDef:
             alg.addgeneric('ApplyEtaCut', 1)
             for bitid,minDphi in enumerate(d.minDphiList):
                 alg.addvariable('MinET1',  get_threshold_cut(d.otype1, d.ocut1)*_et_conversion, bitid)
-                alg.addvariable('MinET2',  get_threshold_cut('jEM', d.ocut2)*_et_conversion, bitid)
+                alg.addvariable('MinET2',  get_threshold_cut('jEM', d.ocut3)*_et_conversion, bitid)
                 alg.addvariable('MinMSqr', d.minInvm*d.minInvm*_et_conversion*_et_conversion, bitid)
                 alg.addvariable('MaxMSqr', _no_m_upper_threshold, bitid)
                 alg.addvariable('MinEta1',  0*_eta_conversion, bitid)

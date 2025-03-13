@@ -116,6 +116,8 @@ StatusCode Muon::NSWMMTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAM
       }
     }
     for (const auto& t: l->trig_packets()) {
+      rdo->trig_globalX().push_back(t->trig_globalX());
+      rdo->trig_globalU().push_back(t->trig_globalU());
       rdo->trig_BCID().push_back(t->trig_BCID());
       rdo->trig_dTheta().push_back(t->trig_dTheta());
       rdo->trig_ROI_rID().push_back(t->trig_rBin());

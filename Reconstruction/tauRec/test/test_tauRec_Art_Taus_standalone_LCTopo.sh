@@ -11,4 +11,3 @@ python -m tauRec.runTauOnly_LCTopo | tee temp.log
 echo "art-result: ${PIPESTATUS[0]}"
 RecExRecoTest_postProcessing_Errors.sh temp.log
 
-

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/MMT_Diamond.h"
@@ -107,7 +107,7 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
   ATH_MSG_DEBUG("CreateRoadsAndFillHits: Feeding hitDatas Ended");
 }
 
-void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
+void MMT_Diamond::findDiamonds(const unsigned int iterator, const uint64_t event) {
   if (m_diamonds[iterator].ev_hits.empty()) return;
 
   auto t0 = std::chrono::high_resolution_clock::now();
@@ -279,7 +279,7 @@ void MMT_Diamond::resetSlopes() {
   if (!m_hitslopes.empty()) m_hitslopes.clear();
 }
 
-slope_t::slope_t(int ev, int bc, unsigned int tC, unsigned int rC, int iX, int iU, int iV, unsigned int uvb, unsigned int xb, unsigned int uvm, unsigned int xm,
+slope_t::slope_t(uint64_t ev, int bc, unsigned int tC, unsigned int rC, int iX, int iU, int iV, unsigned int uvb, unsigned int xb, unsigned int uvm, unsigned int xm,
                  int age, double mxl, double my, double uavg, double vavg, double mx, double th, double eta, double dth, char side, double phi, double phiS,
                  bool lowRes) :
   event(ev), BC(bc), totalCount(tC), realCount(rC), iRoad(iX), iRoadu(iU), iRoadv(iV), uvbkg(uvb), xbkg(xb), uvmuon(uvm), xmuon(xm),

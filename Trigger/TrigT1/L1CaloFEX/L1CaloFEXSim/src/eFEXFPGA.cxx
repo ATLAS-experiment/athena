@@ -88,6 +88,10 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
   auto & thr_eEM = l1Menu->thrExtraInfo().eEM();
   auto & thr_eTAU = l1Menu->thrExtraInfo().eTAU();
 
+  auto emAlgoVersion = thr_eEM.algoVersion();
+  auto tauAlgoVersion = thr_eTAU.algoVersion();
+
+
   // Define eta range to consider extra towers in edge cases
   int min_eta;
   int overflow_eta;
@@ -193,8 +197,8 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       int phi_ind = iphi - 1;
 
       //form the egamma tob word and xTOB words
-      uint32_t tobword = m_eFEXFormTOBsTool->formEmTOBWord(m_id,eta_ind,phi_ind,RhadWP,WstotWP,RetaWP,seed,und,eEMTobEt,ptMinToTopoCounts);
-      std::vector<uint32_t> xtobwords = m_eFEXFormTOBsTool->formEmxTOBWords(m_efexid,m_id,eta_ind,phi_ind,RhadWP,WstotWP,RetaWP,seed,und,eEMTobEt,ptMinToTopoCounts);
+      uint32_t tobword = m_eFEXFormTOBsTool->formEmTOBWord(m_id,eta_ind,phi_ind,RhadWP,WstotWP,RetaWP,seed,und,eEMTobEt,ptMinToTopoCounts, emAlgoVersion);
+      std::vector<uint32_t> xtobwords = m_eFEXFormTOBsTool->formEmxTOBWords(m_efexid,m_id,eta_ind,phi_ind,RhadWP,WstotWP,RetaWP,seed,und,eEMTobEt,ptMinToTopoCounts, emAlgoVersion);
 
       std::unique_ptr<eFEXegTOB> tmp_tob = m_eFEXegAlgoTool->geteFEXegTOB();
       
@@ -363,10 +367,10 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
 		      << ptTauMinToTopoCounts << ", maxEtCountsTau: " << maxEtCountsTau
 		      << ", bdtScore: " << bdtScore << " bdtMinEtCounts: " << bdtMinEtCounts << " bdtRHadWP " << bdtRHadWP);
 
-      uint32_t tobwordBDT = m_eFEXFormTOBsTool->formTauBDTTOBWord(m_id, eta_ind, phi_ind, eTauBDTTobEt, bdtRHadWP, bdtCondition, bdtSeed, ptTauMinToTopoCounts);
-      xtobwordsBDT = m_eFEXFormTOBsTool->formTauBDTxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauBDTTobEt, bdtRHadWP, bdtCondition, bdtSeed, ptTauMinToTopoCounts, bdtScore);
-      uint32_t tobword = m_eFEXFormTOBsTool->formTauTOBWord(m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
-      xtobwords = m_eFEXFormTOBsTool->formTauxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
+      uint32_t tobwordBDT = m_eFEXFormTOBsTool->formTauTOBWord(m_id, eta_ind, phi_ind, eTauBDTTobEt, bdtRHadWP, bdtCondition, bdtSeed,0, ptTauMinToTopoCounts, tauAlgoVersion);
+      xtobwordsBDT = m_eFEXFormTOBsTool->formTauxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauBDTTobEt, bdtRHadWP, bdtCondition, bdtSeed, 0, ptTauMinToTopoCounts, tauAlgoVersion, bdtScore);
+      uint32_t tobword = m_eFEXFormTOBsTool->formTauTOBWord(m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts, 0);
+      xtobwords = m_eFEXFormTOBsTool->formTauxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts, 0, 0);
 
       std::unique_ptr<eFEXtauTOB> tmp_tau_tob = m_eFEXtauAlgoTool->getTauTOB();
       tmp_tau_tob->setFPGAID(m_id);

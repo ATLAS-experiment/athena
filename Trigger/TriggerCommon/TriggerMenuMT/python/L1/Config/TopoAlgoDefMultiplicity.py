@@ -51,7 +51,7 @@ class TopoAlgoDefMultiplicity:
             tm.registerTopoAlgo(alg)
 
         emThresholds_2bits = [ 
-            'jEM20', 'jEM20M', 
+            'jEM25', 'jEM20M', 
   
             #spares
             'jEMSPARE1', 

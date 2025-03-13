@@ -126,7 +126,10 @@ StatusCode eFEXTOBEtTool::getTOBCellEnergies(float etaTOB, float phiTOB, std::ve
                     return StatusCode::FAILURE;
                   }
                   for(size_t c=0;c<nCells;c++) {
-			               ClusterCellETs.push_back( tower->getET(il,c) );
+                      // Note: energy counts can technically be negative (although noise cuts should usually prevent this)
+                      // But algo developers wanted the energy count decoration to be a vector of unsigned int for historical reasons
+                      // It is therefore possible for the unsigned int to be an overflow of int max
+                      ClusterCellETs.push_back( tower->getET(il,c) );
                   }
                 }
             }
