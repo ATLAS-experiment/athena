@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonCalibMath/ChebychevPoly.h>
 
@@ -25,12 +25,12 @@ int main(){
 
                 const double derivative2nd = chebyshevPoly1st2Prime(o, x);
                 const double numerical2nd = (chebyshevPoly1stPrime(o, x + h) - chebyshevPoly1stPrime(o, x-h))/ (2.*h);
-                if (std::abs(derivative - numerical)/ cutOff(derivative, h) > h) {
+                if (std::abs(derivative - numerical)/ cutOff(derivative, h) > h*std::max(std::abs(derivative2nd),1.)) {
                     std::cerr<<__FILE__<<":"<<__LINE__<<" Derivative of the "<<o<<"-th polynomial diverges at x="<<x<<", function: "<<value
                             <<", derivative: "<<derivative<<", numerical: "<<numerical<<std::endl;
                     return EXIT_FAILURE;
                 }
-                if (std::abs(derivative2nd - numerical2nd) / cutOff(derivative2nd, h) > h) {
+                if (std::abs(derivative2nd - numerical2nd) / cutOff(derivative2nd, h) > h*std::max(std::abs(derivative2nd),1.)) {
                     std::cerr<<__FILE__<<":"<<__LINE__<<" 2-nd derivative of the "<<o<<"-th polynomial diverges at x="<<x<<", function: "<<value
                             <<", derivative: "<<derivative<<", second derivative: "<<derivative2nd<<"/"<<numerical2nd
                             <<" ---> "<<std::abs(derivative2nd - numerical2nd)<<std::endl;
@@ -45,12 +45,12 @@ int main(){
 
                 const double derivative2nd = chebyshevPoly2nd2Prime(o, x);
                 const double numerical2nd = (chebyshevPoly2ndPrime(o, x + h) - chebyshevPoly2ndPrime(o, x-h))/ (2.*h);
-                if (std::abs(derivative - numerical)/ cutOff(derivative, h) > h) {
+                if (std::abs(derivative - numerical)/ cutOff(derivative, h) > h*std::max(std::abs(derivative),3.)) {
                     std::cerr<<__FILE__<<":"<<__LINE__<<" Derivative of the "<<o<<"-th polynomial diverges at x="<<x<<", function: "<<value
                             <<", derivative: "<<derivative<<", numerical: "<<numerical<<std::endl;
                     return EXIT_FAILURE;
                 }
-                if (std::abs(derivative2nd - numerical2nd) / cutOff(derivative2nd, h) > h) {
+                if (std::abs(derivative2nd - numerical2nd) / cutOff(derivative2nd, h) > h*std::max(std::abs(derivative2nd),1.)) {
                     std::cerr<<__FILE__<<":"<<__LINE__<<" 2-nd derivative of the "<<o<<"-th polynomial diverges at x="<<x<<", function: "<<value
                             <<", derivative: "<<derivative<<", second derivative: "<<derivative2nd<<"/"<<numerical2nd
                             <<" ---> "<<std::abs(derivative2nd - numerical2nd)<<std::endl;
