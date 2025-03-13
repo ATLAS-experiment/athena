@@ -62,6 +62,10 @@ class OutputAnalysisConfig (ConfigBlock):
             "prefaced by the keywords enable or disable) to turn on/off the "
             "writing of branches to the output ntuple. The default is None "
             "(no modification to the scheduled output branches).")
+        self.addOption ('commandsOnlyForDSIDs', {}, type=None,
+            info="a dictionary with individual DSIDs as keys, and a list of strings "
+            "like for the 'commands' option as items. These 'commands' will only be run "
+            "for the corresponding DSID.")
         self.addOption ('alwaysAddNosys', False, type=bool,
             info="If set to True, all branches will be given a systematics suffix, "
             "even if they have no systematics (beyond the nominal).")
@@ -131,6 +135,11 @@ class OutputAnalysisConfig (ConfigBlock):
                 else :
                     outputConfig.outputContainerName = config.readName (containerName)
                 outputConfigs[prefix + outputName] = outputConfig
+
+        # check for DSID-specific commands
+        for dsid, dsid_commands in self.commandsOnlyForDSIDs.items():
+            if filter_dsids([dsid], config):
+                self.commands += dsid_commands
 
         for command in self.commands :
             words = command.split (' ')
