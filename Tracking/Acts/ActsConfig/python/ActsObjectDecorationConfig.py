@@ -37,6 +37,10 @@ def ActsPixelClusterTruthDecorator(flags,
 
     acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterTruthDecorator(name,**kwargs))
 
+    # add SDO and SiHit info
+    if flags.Acts.decoratePRD.sdoSiHit:
+        acc.merge(ActsPixelClusterSiHitDecoratorAlgCfg(flags))
+    
     # Persistification
     if flags.Tracking.writeExtendedSi_PRDInfo:
         toAOD = [
@@ -68,4 +72,15 @@ def ActsStripClusterTruthDecorator(flags,
         from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
         acc.merge(addToAOD(flags, toAOD))
 
+    return acc
+
+def ActsPixelClusterSiHitDecoratorAlgCfg(flags,
+                                         name: str = "ActsPixelClusterSiHitDecoratorAlg",
+                                         **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault('Measurements', 'ITkPixelMeasurements')
+    kwargs.setdefault('Clusters', 'ITkPixelClusters')
+    kwargs.setdefault('SDOs', 'ITkPixelSDO_Map')
+    kwargs.setdefault('SiHits', 'ITkPixelHits')
+    acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterSiHitDecoratorAlg(name, **kwargs))
     return acc
