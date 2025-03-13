@@ -753,15 +753,6 @@ class TrigTauMonAlgBuilder:
     elif 'jTAU' in trigger:
         mon_group.defineHistogram('L1jFexRoIIso', title='L1 jTAU RoI Isolation; jTAU Isolation [GeV]; N RoI', xbins=25, xmin=0, xmax=50, opt='kAlwaysCreate')
 
-    else: # Legacy
-        mon_group.defineHistogram('L1RoIEMIsol', title='L1 Legacy RoI EM Isol; E_{T}^{EM Iso} [GeV]; RoIs', xbins=16, xmin=-2, xmax=30, opt='kAlwaysCreate')
-        mon_group.defineHistogram('L1RoIHadCore', title='L1 Legacy RoI Had Core; E_{T}^{Had} [GeV]; RoIs', xbins=16, xmin=-2, xmax=30, opt='kAlwaysCreate')
-        mon_group.defineHistogram('L1RoIHadIsol', title='L1 Legacy RoI Had Isol; E_{T}^{Had Iso} [GeV]; RoIs', xbins=16, xmin=-2, xmax=30, opt='kAlwaysCreate')
-        mon_group.defineHistogram('L1RoITauClus', title='L1 Legacy RoI E_{T}; E_{T} [GeV]; RoIs', xbins=260, xmin=0, xmax=130, opt='kAlwaysCreate')
-        mon_group.defineHistogram('L1RoITauClus,L1RoIEMIsol', type='TH2F', title='L1 RoI E_{T} vs EM Isol; E_{T} [GeV]; E_{T}^{EM Iso} [GeV]',
-                                  xbins=140, xmin=10, xmax=80, ybins=42, ymin=-1, ymax=20, opt='kAlwaysCreate')
-
-
   def getCustomPtBinning(self, trigger, fine=False):
     info = self.getTriggerInfo(trigger)
 

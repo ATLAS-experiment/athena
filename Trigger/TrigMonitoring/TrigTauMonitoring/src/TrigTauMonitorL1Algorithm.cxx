@@ -75,15 +75,7 @@ StatusCode TrigTauMonitorL1Algorithm::processEvent(const EventContext& ctx) cons
                 fillL1Efficiencies(ctx, offline_taus_3p, "3P", trigger, eTau_rois);
 	    }
 
-        } else { // Legacy
-            std::vector<const xAOD::EmTauRoI*> rois = getL1LegacyTAUs(ctx, info.getL1TauItem());
-
-            if(m_do_variable_plots) fillL1LegacyVars(trigger, rois);
-	    if(m_do_efficiency_plots) {
-                fillL1Efficiencies(ctx, offline_taus_1p, "1P", trigger, rois);
-                fillL1Efficiencies(ctx, offline_taus_3p, "3P", trigger, rois);
-	    }
-        }
+        } 
     }
 
     return StatusCode::SUCCESS;
@@ -163,27 +155,6 @@ void TrigTauMonitorL1Algorithm::fillL1cTauVars(const std::string& trigger, const
 
     ATH_MSG_DEBUG("After fill L1 variables: " << trigger);
 }
-
-
-void TrigTauMonitorL1Algorithm::fillL1LegacyVars(const std::string& trigger, const std::vector<const xAOD::EmTauRoI*>& rois)  const
-{
-    ATH_MSG_DEBUG("Fill L1 variables: " << trigger);
-
-    auto monGroup = getGroup(trigger+"_L1Vars");
-
-    auto L1RoIEt      = Monitored::Collection("L1RoIEt"     , rois, [](const xAOD::EmTauRoI* L1roi){ return L1roi->eT()/Gaudi::Units::GeV; });
-    auto L1RoIEta     = Monitored::Collection("L1RoIEta"    , rois, [](const xAOD::EmTauRoI* L1roi){ return L1roi->eta(); });
-    auto L1RoIPhi     = Monitored::Collection("L1RoIPhi"    , rois, [](const xAOD::EmTauRoI* L1roi){ return L1roi->phi(); });
-    auto L1RoITauClus = Monitored::Collection("L1RoITauClus", rois, [](const xAOD::EmTauRoI* L1roi){ return L1roi->tauClus()/Gaudi::Units::GeV; });
-    auto L1RoIEMIsol  = Monitored::Collection("L1RoIEMIsol" , rois, [](const xAOD::EmTauRoI* L1roi){ return L1roi->emIsol()/Gaudi::Units::GeV; });
-    auto L1RoIHadCore = Monitored::Collection("L1RoIHadCore", rois, [](const xAOD::EmTauRoI* L1roi){ return L1roi->hadCore()/Gaudi::Units::GeV; });
-    auto L1RoIHadIsol = Monitored::Collection("L1RoIHadIsol", rois, [](const xAOD::EmTauRoI* L1roi){ return L1roi->hadIsol()/Gaudi::Units::GeV; });
-
-    fill(monGroup, L1RoIEt, L1RoIEta, L1RoIPhi, L1RoITauClus, L1RoIEMIsol, L1RoIHadCore, L1RoIHadIsol);
-
-    ATH_MSG_DEBUG("After fill L1 variables: " << trigger);
-}
-
 
 std::vector<const xAOD::eFexTauRoI*> TrigTauMonitorL1Algorithm::getL1xTOBeTAUs() const
 {

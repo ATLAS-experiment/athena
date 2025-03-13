@@ -21,7 +21,6 @@ StatusCode TrigTauMonitorBaseAlgorithm::initialize() {
     ATH_CHECK( m_offlineTauJetKey.initialize() );
 
     if(m_L1_select_by_et_only) ATH_MSG_INFO("L1 RoI selection by Et cut only! No isolated L1 tau items are allowed!");
-    ATH_CHECK( m_legacyl1TauRoIKey.initialize() );
     ATH_CHECK( m_phase1l1eTauRoIKey.initialize() );
     ATH_CHECK( m_phase1l1eTauRoIThresholdPatternsKey.initialize(!m_L1_select_by_et_only) );
     ATH_CHECK( m_phase1l1jTauRoIKey.initialize() );
@@ -227,37 +226,6 @@ std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>> TrigTau
 
     return roi_vec;
 }
-
-
-std::vector<const xAOD::EmTauRoI*> TrigTauMonitorBaseAlgorithm::getL1LegacyTAUs(const EventContext& ctx, const std::string& l1_item) const
-{
-    std::vector<const xAOD::EmTauRoI*> roi_vec;
-
-    SG::ReadHandle<xAOD::EmTauRoIContainer> rois(m_legacyl1TauRoIKey, ctx);
-    if(!rois.isValid()) {
-        ATH_MSG_WARNING("Failed to retrieve EmTauRoI ");
-        return roi_vec;
-    }
-
-    for(const xAOD::EmTauRoI* roi : *rois) {
-        for(const std::string& thr_item : roi->thrNames()) {
-            // check which threshold has passed based on the current L1 item under monitoring
-            // reference : https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/L1/Config/ItemDef.py
-            if((l1_item.find("TAU8") != std::string::npos && thr_item.find("HA8") != std::string::npos)
-                || (l1_item.find("TAU12IM") != std::string::npos && thr_item.find("HA12IM") != std::string::npos)
-                || (l1_item.find("TAU20IM") != std::string::npos && thr_item.find("HA20IM") != std::string::npos)
-                || (l1_item.find("TAU40")   != std::string::npos && thr_item.find("HA40")   != std::string::npos)
-                || (l1_item.find("TAU60")   != std::string::npos && thr_item.find("HA60")   != std::string::npos)
-                || (l1_item.find("TAU100")  != std::string::npos && thr_item.find("HA100")  != std::string::npos)) {
-                roi_vec.push_back(roi);
-                break;
-            }
-        }
-    }
-
-    return roi_vec;
-}
-
 
 const SG::ReadHandleKey<xAOD::TauJetContainer>& TrigTauMonitorBaseAlgorithm::getOnlineContainerKey(const std::string& trigger) const
 {
