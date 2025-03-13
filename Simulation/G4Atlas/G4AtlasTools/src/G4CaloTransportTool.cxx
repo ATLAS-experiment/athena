@@ -61,7 +61,9 @@ StatusCode G4CaloTransportTool::initializePropagator() {
     propagator = makePropagator();
     m_propagatorHolder.set(propagator);
   } else {
-    ATH_MSG_ERROR("G4CaloTransportTool::initializePropagator() Propagator already initialized!");
+    ATH_MSG_ERROR(
+        "G4CaloTransportTool::initializePropagator() Propagator already "
+        "initialized!");
   }
 
   return StatusCode::SUCCESS;
@@ -151,11 +153,15 @@ void G4CaloTransportTool::doStep(G4FieldTrack& fieldTrack) {
 std::vector<G4FieldTrack> G4CaloTransportTool::transport(
     const G4Track& G4InputTrack) {
 
+  // Get the PDG ID of the particle
+  int pdgId = G4InputTrack.GetDefinition()->GetPDGEncoding();
+
   // Get the navigator for the current thread
   auto navigator = m_propagatorHolder.get()->GetNavigatorForPropagating();
 
   // Create a vector to store the output steps
   std::vector<G4FieldTrack> outputStepVector;
+
   // Initialize the tmpFieldTrack with the input track
   G4FieldTrack tmpFieldTrack('0');
   G4FieldTrackUpdator::Update(&tmpFieldTrack, &G4InputTrack);
@@ -164,24 +170,46 @@ std::vector<G4FieldTrack> G4CaloTransportTool::transport(
 
   // Iterate until we reach the maximum number of steps or the requested volume
   for (unsigned int iStep = 0; iStep < m_maxSteps; iStep++) {
+    // Save preStep information
+    G4ThreeVector preStepPos = tmpFieldTrack.GetPosition();
+    G4ThreeVector preStepMom = tmpFieldTrack.GetMomentum();
+
     // Perform a single Geant4 step
     doStep(tmpFieldTrack);
+
     // Fill the output vector with the updated track
     outputStepVector.push_back(tmpFieldTrack);
+
     // Get the name of the volume in which the particle is located
-    auto volumn = navigator->LocateGlobalPointAndSetup(tmpFieldTrack.GetPosition(), nullptr);
-    if (volumn != nullptr) {
-      std::string volName = volumn->GetName();
+    auto volume = navigator->LocateGlobalPointAndSetup(
+        tmpFieldTrack.GetPosition(), nullptr);
+
+    if (volume != nullptr) {
+      // Get the name of the current volume
+      std::string volName = volume->GetName();
+
       // We stop the track navigation once we have reached the provided volume
-      if (volName.find(m_transportLimitVolume) != std::string::npos)
+      if (volName.find(m_transportLimitVolume) != std::string::npos) {
         break;
+      }
     } else {
       G4ExceptionDescription description;
-      description <<"at step " << iStep << "/" << m_maxSteps.value() << " with position " << tmpFieldTrack.GetPosition() << " and momentum " << tmpFieldTrack.GetMomentum();
+      description
+          << "Transport failure for particle PID: " << pdgId << " at step "
+          << iStep << "/" << m_maxSteps << G4endl
+          << " - PreStep position: " << preStepPos << G4endl
+          << " - PreStep momentum: " << preStepMom << G4endl
+          << " - PostStep position: " << tmpFieldTrack.GetPosition() << G4endl
+          << " - PostStep momentum: " << tmpFieldTrack.GetMomentum() << G4endl
+          << "Possible cause: The transport is likely outside the world volume."
+          << G4endl
+          << "Check if an envelope volume is defined and properly set up."
+          << G4endl << "This issue should not occur during normal operation.";
       G4Exception("G4CaloTransportTool::transport",
-            "Cannot get LocateGlobalPointAndSetup",
-            JustWarning,
-            description);
+                  "LocateGlobalPointAndSetup failed: Particle may be "
+                  "transported outside the world volume.",
+                  JustWarning, description);
+      break;
     }
   }
 
