@@ -66,7 +66,7 @@ bool RNTCollectionCursor::next()
       elem.first->fromString( elem.second );
    }
 
-/* 
+/*
   // Get iterator over current row.
   coral::AttributeList::const_iterator iData = m_cursor.currentRow().begin();
   cout << " * Cursor next(), values: " << endl;
@@ -76,7 +76,6 @@ bool RNTCollectionCursor::next()
       std::cout << "] ";
   }
   cout << endl;  
-  iData = m_cursor.currentRow().begin();
 */
   
   return true;

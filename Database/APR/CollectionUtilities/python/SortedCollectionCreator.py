@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 __author__ = "Marcin Nowak"
 __doc__ = """
@@ -6,11 +6,13 @@ Create a sorted collection of Event references from a set of Athnea files contai
 (or from other compatible APR Event collections)
 """
 
+from CollectionUtilities.GetCollectionType import getCollectionType
+
 
 class SortedCollectionCreator:
    """Creates a sorted (APR) collection of event references from input files"""
    
-   def __init__(self, name= "sortEvents"):
+   def __init__(self, name="sortEvents"):
       from AthenaCommon import Logging
       Logging.log.name = name
       self.name = name
@@ -18,22 +20,18 @@ class SortedCollectionCreator:
       self.debug = Logging.log.debug
       self.verbose = Logging.log.verbose
       self.collDescription = None
-      self.allRows = []
-      self.attrNames = []
-      self.attrTypes = {}
-      self.tokenName = None
       self.collSvc = None
 
    def loadRoot(self):
       """import ROOT, create CollectionSvc"""
       import ROOT
-      self.collSvc = ROOT.pool.CollectionService()
+      self.pool = ROOT.pool
+      self.collSvc = self.pool.CollectionService()
 
    def readCollectionDescription(self, collection):
       """read Collection Description and remember it"""
       desc =  collection.description()
       self.debug("Reading Collection Description from {}".format(desc.name()))
-      import ROOT
       # read attributes' names and types from the description and remember them
       for an in range(0, desc.numberOfAttributeColumns()):
          attr = desc.attributeColumn(an)
@@ -42,7 +40,7 @@ class SortedCollectionCreator:
          self.attrTypes[name] = attr.type()
       self.tokenName = desc.eventReferenceColumnName()
       # make a local copy of the description
-      self.collDescription = ROOT.pool.CollectionDescription( desc )
+      self.collDescription = self.pool.CollectionDescription( desc )
       # prevent overwriting input by accident
       self.collDescription.setName("")
 
@@ -50,9 +48,13 @@ class SortedCollectionCreator:
    def readInputCollections(self, inputCollections):
       """read all input collections into memore"""
       self.collDescription = None
+      self.allRows = []
+      self.attrNames = []
+      self.attrTypes = {}
+      self.tokenName = None
       for inFileName in inputCollections:
          self.debug("Opening {}".format(inFileName))
-         iColl = self.collSvc.open( "PFN:"+inFileName, "RootCollection")
+         iColl = self.collSvc.open( "PFN:"+inFileName, getCollectionType(inFileName))
          self.debug("{} opened".format(inFileName))
          if self.collDescription is None:
             self.readCollectionDescription(iColl)
@@ -73,7 +75,7 @@ class SortedCollectionCreator:
          iColl.close()
 
       for t in self.allRows:
-         self.verbose( t[1:], t[0])
+         self.verbose( (t[1:], t[0]) )
       self.verbose('='*80)
       self.info("Finished reading input collections, total events read: {}".format(len(self.allRows)) )
 
@@ -85,28 +87,18 @@ class SortedCollectionCreator:
       self.allRows.sort( key=lambda t: t[attrPos], reverse=sortReverse )
 
       for t in self.allRows:
-         self.verbose( t[1:], t[0] )
+         self.verbose( (t[1:], t[0]) )
       self.verbose('='*80)
 
-   def writeCollection(self, outputCollection):
+   def writeCollection(self, outputCollection, outputCollectionType):
       """write sorted collection into a Collection file"""
       self.info("Writing Event collection {} ".format(outputCollection+".root"))
       self.collDescription.setName(outputCollection)
-      self.collDescription.setType("RootCollection")
+      self.collDescription.setType(outputCollectionType)
       # create the output collection (file)
       dstColl = self.collSvc.create(self.collDescription)
-      import ROOT
-      #import coral
-      tokenList = ROOT.pool.TokenList()
-      tokenList.extend(self.tokenName)
-      attributeList = ROOT.coral.AttributeList()
-      for nam in self.attrNames:
-          attributeList.extend( nam, self.attrTypes[nam] )
-
-      row = ROOT.pool.CollectionRowBuffer()
-      row.setTokenList(tokenList)
-      row.setAttributeList(attributeList)
-
+      row = self.pool.CollectionRowBuffer()
+      dstColl.initNewRow( row )
       for t in self.allRows:
          row.tokenList()[0].fromString( t[0] )
          for idx,nam in enumerate(self.attrNames):
@@ -117,10 +109,11 @@ class SortedCollectionCreator:
       dstColl.commit()
       dstColl.close()
        
-   def execute(self, inputCollections, outputCollection="PFN:collection.root", sortAttribute="LumiBlockN", sortOrder="Ascending"):
+   def execute(self, inputCollections, outputCollection="PFN:collection.root", sortAttribute="LumiBlockN",
+               sortOrder="Ascending", outputCollectionType="RootCollection"):
       sort_opts = ("Ascending", "Descending")
-      self.info("Executing SortedCollectionCreator, inputs={}, output='{}', sort by: {}, order: {}"
-                .format(inputCollections, outputCollection, sortAttribute, sortOrder))
+      self.info("Executing SortedCollectionCreator, inputs={}, output='{}' ({}), sort by: {}, order: {}"
+                .format(inputCollections, outputCollection, outputCollectionType, sortAttribute, sortOrder))
       if isinstance(inputCollections, str):
          inputs = [inputCollections]
       else:
@@ -131,6 +124,6 @@ class SortedCollectionCreator:
       self.loadRoot()
       self.readInputCollections(inputs)
       self.sortEvents(sortAttribute, sortReverse)
-      self.writeCollection(outputCollection)
+      self.writeCollection(outputCollection, outputCollectionType)
       
 

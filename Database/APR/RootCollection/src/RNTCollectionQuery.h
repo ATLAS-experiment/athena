@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RNTCOLLECTIONQUERY_H
 #define RNTCOLLECTIONQUERY_H
 
 #include "CoralBase/AttributeList.h"
+
+#include "AthenaBaseComps/AthMessaging.h"
 
 #include "CollectionBase/TokenList.h"
 #include "CollectionBase/ICollectionQuery.h"
@@ -23,7 +25,7 @@ namespace pool::RootCollection {
     *
     * An interface used to query an RNTuple collection.
     */
-   class RNTCollectionQuery : public ICollectionQuery
+   class RNTCollectionQuery : public ICollectionQuery, public AthMessaging
    {
    public:
       /// Constructor
