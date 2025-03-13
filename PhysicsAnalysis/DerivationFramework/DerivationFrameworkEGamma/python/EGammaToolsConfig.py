@@ -47,15 +47,6 @@ def EGPhotonCleaningWrapperCfg(flags, name, **kwargs):
     return acc
 
 
-# Crack veto cleaning tool
-def EGCrackVetoCleaningToolCfg(flags, name, **kwargs):
-    """Configure the crack veto cleaning tool"""
-    acc = ComponentAccumulator()
-    EGCrackVetoCleaningTool = CompFactory.DerivationFramework.EGCrackVetoCleaningTool
-    acc.addPublicTool(EGCrackVetoCleaningTool(name, **kwargs), primary=True)
-    return acc
-
-
 # Electron ambiguity tool
 def EGElectronAmbiguityToolCfg(flags, name, **kwargs):
     """Configure the electron ambiguity tool"""

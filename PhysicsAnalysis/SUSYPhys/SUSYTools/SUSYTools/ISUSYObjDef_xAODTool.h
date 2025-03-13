@@ -288,7 +288,6 @@ namespace ST {
     virtual StatusCode prepareLRTElectrons(const xAOD::ElectronContainer* inElectrons, xAOD::ElectronContainer* copy) const = 0;
 
     virtual StatusCode SetBtagWeightDecorations(const xAOD::Jet& input, const asg::AnaToolHandle<IBTaggingSelectionTool>& btagSelTool, const std::string& btagTagger) const = 0;
-    virtual bool IsPFlowCrackVetoCleaning(const xAOD::ElectronContainer* elec = nullptr, const xAOD::PhotonContainer* gamma = nullptr) const = 0;
 
     virtual bool IsSignalJet(const xAOD::Jet& input,  const float ptcut, const float etacut) const = 0;
 

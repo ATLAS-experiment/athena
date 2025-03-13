@@ -690,27 +690,6 @@ def EGammaCommonCfg(ConfigFlags):
         )
     )
 
-    # decorate central electrons and photons with a flag to tell if the
-    # candidates are affected by the crack bug in mc16a and data 2015+2016
-    from DerivationFrameworkEGamma.EGammaToolsConfig import EGCrackVetoCleaningToolCfg
-
-    PhotonPassCrackVeto = acc.getPrimaryAndMerge(
-        EGCrackVetoCleaningToolCfg(
-            ConfigFlags,
-            name="PhotonPassCrackVeto",
-            StoreGateEntryName="DFCommonCrackVetoCleaning",
-            ContainerName="Photons",
-        )
-    )
-    ElectronPassCrackVeto = acc.getPrimaryAndMerge(
-        EGCrackVetoCleaningToolCfg(
-            ConfigFlags,
-            name="ElectronPassCrackVeto",
-            StoreGateEntryName="DFCommonCrackVetoCleaning",
-            ContainerName="Electrons",
-        )
-    )
-
     # decorate some electrons with an additional ambiguity flag
     # against internal and early material conversion
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronAmbiguityToolCfg
@@ -743,8 +722,6 @@ def EGammaCommonCfg(ConfigFlags):
         PhotonPassIsEMTight,
         PhotonPassIsEMTightPtIncl,
         PhotonPassCleaning,
-        PhotonPassCrackVeto,
-        ElectronPassCrackVeto,
         ElectronAmbiguity,
     ]
 
