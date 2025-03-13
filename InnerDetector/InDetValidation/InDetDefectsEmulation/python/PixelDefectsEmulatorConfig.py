@@ -62,7 +62,7 @@ def ITkPixelDefectsEmulatorCondAlgCfg(flags,
 
 
 def PixelDefectsEmulatorAlgCfg(flags,
-                                  name: str = "ITkPixelDefectsEmulatorAlg",
+                                  name: str = "PixelDefectsEmulatorAlg",
                                   **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
@@ -73,7 +73,7 @@ def PixelDefectsEmulatorAlgCfg(flags,
 
     if "EmulatedDefectsKey" not in kwargs :
         # create defects conditions data
-        acc.merge( ITkPixelDefectsEmulatorCondAlgCfg(flags))
+        acc.merge( PixelDefectsEmulatorCondAlgCfg(flags))
         kwargs.setdefault("EmulatedDefectsKey", "PixelEmulatedDefects")
     kwargs.setdefault("OutputKey","PixelRDOs")
     kwargs.setdefault("HistogramGroupName","") # disable histogramming, enable e.g. /PixelDefects/RejectedRDOs/
