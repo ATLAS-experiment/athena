@@ -4383,6 +4383,24 @@ HLT_e5_nopid_L1eEM5:
     4: 60
     5: 60
     6: 41
+HLT_e5_nopid_lrtloose_L1eEM5:
+  eventCount: 14
+  stepCounts:
+    0: 26
+    1: 26
+    2: 21
+    3: 20
+    4: 20
+    5: 20
+    6: 14
+  stepFeatures:
+    0: 61
+    1: 61
+    2: 134
+    3: 57
+    4: 57
+    5: 57
+    6: 40
 HLT_e60_dnnmedium_L1eEM26M:
   eventCount: 0
 HLT_e60_dnnmedium_L1eEM28M:
