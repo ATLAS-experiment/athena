@@ -53,6 +53,9 @@ def createITkConfigFlags():
     itkcf.addFlag("ITk.doStripModuleVeto", False)
     # Path to the JSON file to mask the modules
     itkcf.addFlag("ITk.JsonPathStripModuleVeto", "")
+    # Path to the JSON file to mask the modules for Pixel.
+    # A non-empty string activates the veto automatically 
+    itkcf.addFlag("ITk.JsonPathPixelModuleVeto", "")
     # Enable check for dead modules and FEs
     itkcf.addFlag("ITk.checkDeadPixelsOnTrack", True)
     # defines if the X1X mode is used for the offline or not

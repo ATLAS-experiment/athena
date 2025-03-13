@@ -19,6 +19,8 @@
 #include "StoreGate/WriteCondHandleKey.h"
 #include "PixelConditionsData/PixelDeadMapCondData.h"
 
+#include "InDetIdentifier/PixelID.h"
+
 #include "Gaudi/Property.h"
 
 class PixelDeadMapCondAlg : public AthReentrantAlgorithm {
@@ -28,14 +30,22 @@ class PixelDeadMapCondAlg : public AthReentrantAlgorithm {
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;
     virtual bool isReEntrant() const override final { return false; }
-
+  
   private:
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey
-    {this, "ReadKey", "/PIXEL/PixelModuleFeMask", "Input deadmap folder"};
 
-    SG::WriteCondHandleKey<PixelDeadMapCondData> m_writeKey
+  // To convert from identifier to identifier hash
+  const PixelID *m_pixelID{nullptr};
+
+  // Readkey takes precedence over the jsonPath. If readKey not empty json is ignored
+  SG::ReadCondHandleKey<CondAttrListCollection> m_readKey
+      {this, "ReadKey", "/PIXEL/PixelModuleFeMask", "Input deadmap folder"};
+  
+  SG::WriteCondHandleKey<PixelDeadMapCondData> m_writeKey
     {this, "WriteKey", "PixelDeadMapCondData", "Output deadmap data"};
-
+  
+  Gaudi::Property<std::string> m_JsonLocation{this,"JsonPath","","Path to the JSON file containing list of modules to be masked"};
+  
+  
 };
 
 #endif

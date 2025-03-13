@@ -1,4 +1,5 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#!/usr/bin/env python
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # This scripts selects the required set of modules from the geometry.json (contains all the modules from the Strip Detector) obtained using geometry_dat_to_joson.py script.
 # It has three sets of functions:
@@ -22,19 +23,19 @@ def find(bec=None, layer_disk=None, phi=None, eta=None, side=None, asdec=False, 
     IDs = []
 
     for ID, info in data.items():
-        if bec is not None and info["BEC"] != str(bec):
+        if bec is not None and int(info["BEC"]) != bec:
             continue
 
-        if layer_disk is not None and info["LayerDisk"] != str(layer_disk):
+        if layer_disk is not None and int(info["LayerDisk"]) != layer_disk:
             continue
 
-        if phi is not None and info["PhiModule"] not in str([i for i in phi]):
+        if phi is not None and int(info["PhiModule"]) not in [i for i in phi]:
             continue
 
-        if eta is not None and info["EtaModule"] > str(eta):
+        if eta is not None and int(info["EtaModule"]) > eta:
             continue
 
-        if side is not None and info["Side"] != str(side):
+        if side is not None and int(info["Side"]) != side:
             continue
 
         if asdec:
@@ -96,7 +97,7 @@ def select_random(frac = None, input_data=None, output_file=None):
     IDs = []
 
     num = int(round(frac * len(data), 0))
-    IDs = random.choices(list(data.keys()), k=num)
+    IDs = random.sample(list(data.keys()), k=num)
 
     for ID, info in data.items():
         info["Decimal_ID"] = str(int(ID, 16))
@@ -110,5 +111,5 @@ def select_random(frac = None, input_data=None, output_file=None):
 
 if __name__ == "__main__": 
     #data = select_random(frac = 0.01, input_data="geometry.json", output_file="test_selected_frac_modules.json")
-    data = find(bec = 0, layer_disk = 0, phi = [0,1,2,3,4], asdec = True, output_file="test_selected_modules.json")
+    data = find(bec = 0, layer_disk = 0, asdec = True, input_data="PixelGeometry.json", output_file="IBL_selected_modules.json")
     #data = merge(file_1="selected_modules_ec_minus_2_layer_0_side_0.json", file_2="selected_modules_ec_minus_2_layer_1_side_0.json", output_file="test_merged_file.json")
