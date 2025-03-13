@@ -372,7 +372,7 @@ class GenerateMenuMT(metaclass=Singleton):
         """
 
         from TriggerMenuMT.HLT.Config.Utility.ChainDictTools import splitInterSignatureChainDict
-        from TriggerMenuMT.HLT.Config.Utility.ComboHypoHandling import addTopoInfo, comboConfigurator, topoLegIndices
+        from TriggerMenuMT.HLT.Config.Utility.ComboHypoHandling import addTopoInfo, comboConfigurator, topoLegIndices, anomdetWPIndices
         from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
         from TriggerMenuMT.HLT.CommonSequences import EventBuildingSequences, TLABuildingSequences
 
@@ -454,7 +454,11 @@ class GenerateMenuMT(metaclass=Singleton):
                     theChainConfig = listOfChainConfigs[0]
                 
                 for topoID in range(len(mainChainDict['extraComboHypos'])):
-                    thetopo = mainChainDict['extraComboHypos'][topoID].strip(string.digits).rstrip(topoLegIndices)                    
+                    thetopo = mainChainDict['extraComboHypos'][topoID].strip(string.digits).rstrip(topoLegIndices)
+
+                    if "anomdet" in thetopo:
+                        thetopo = thetopo.rstrip(anomdetWPIndices)
+                    
                     theChainConfig.addTopo((comboConfigurator[thetopo],thetopo))
                                     
                 # Now we know where the topos should go, we can insert them in the right steps

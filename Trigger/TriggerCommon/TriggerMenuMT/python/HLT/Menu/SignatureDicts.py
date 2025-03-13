@@ -443,6 +443,8 @@ JetChainParts = {
       +['320eta490'], # TODO: Kept temporarily for validation
     'jvt'           : # Jet Vertex Tagger pileup discriminant
       ['010jvt', '011jvt', '015jvt', '020jvt', '050jvt', '059jvt'],
+    'nnJvt'         : # NN Jet Vertex Tagger pileup discriminant
+      ['nnJvtv1'], # No range cuts, boolean pass/fail
     'momCuts'       : # Generic moment cut on single jets
        ['050momemfrac100','momemfrac006','momemfrac024','momemfrac012', 'momhecfrac010', '050momemfrac100XXmomhecfrac010', 'momemfrac072', 'momemfrac048' ],
     'timing'        : # delayed jets, with absolute delay requirement [ns]
@@ -513,6 +515,7 @@ JetChainParts_Default = {
     #
     'etaRange'      : '0eta320',
     'jvt'           : '',
+    'nnJvt'         : '',
     'momCuts'       : '',
     'timing'        : '',
     'timeSig'       : '',
@@ -1351,6 +1354,7 @@ UnconventionalTrackingChainParts_Default = {
 AllowedTopos_comb = [
     'idZmumu','idJpsimumu',
     'dRAA12', 'dRAB15', '03dRAB','02dRAB10','03dRAB10','03dRAB30','03dRAB35','dRAD04', 'dRAF04','dRAB03','dRAB04', 'dRAB05', '02dRAB','02dRAC','03dRAC30','03dRAC35','02dRBC','15dRBC45','50invmAB','60invmAB','afpdijet','18dphiAB','18dphiAC','80mTAC','80mTAD',
+    'anomdet','anomdetL','anomdetM','anomdetT',
     '29dphiAA', '29dphiAB', '30dphiAA', '30dphiAB', # g-2 tau triggers
     '90invmAB',# TEST
     '1invmAB5','50invmAB130','50invmBC130', # Jpsiee, Zee/Zeg
