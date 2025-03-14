@@ -130,7 +130,7 @@ namespace MuonGMR4 {
         const Amg::Vector2D strip{stripPosition(stripCh)};
         CheckVector2D bottomIsect{}, topIsect{};
         if (!(bottomIsect = rightInterSect(strip)) || !(topIsect = leftInterSect(strip))) {
-            ATH_MSG_WARNING("The strip "<<Amg::toString(strip)<<" is outside of the trapezoid");
+            ATH_MSG_WARNING("The strip "<<Amg::toString(strip)<<" is outside of the trapezoid "<<(*this));
             return 0;
         }
         const Amg::Vector2D delta = (*bottomIsect) - (*topIsect);

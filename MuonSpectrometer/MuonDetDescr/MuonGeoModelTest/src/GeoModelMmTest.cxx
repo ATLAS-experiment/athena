@@ -157,6 +157,9 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx, const MuonGM::MMR
     m_stationPhi = roEl->getStationPhi();
     m_stationName = id_helper.stationName(detElId);
     const int multilayer = id_helper.multilayer(detElId);
+    m_moduleHeight = roEl->getRsize();
+    m_moduleWidthS = roEl->getSsize();
+    m_moduleWidthL = roEl->getLongSsize();
     m_multilayer = multilayer;
     m_stStripPitch = roEl->getDesign(detElId)->inputPitch;
     const Amg::Transform3D permute{GeoTrf::GeoRotation{90.*Gaudi::Units::deg,90.*Gaudi::Units::deg, 0.}};
@@ -193,9 +196,10 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx, const MuonGM::MMR
 
             const MuonGM::MuonChannelDesign& design{*roEl->getDesign(strip_id)};
 
-            design.leftEdge(channel, l_left);
-            design.center(channel, l_cen);
-            design.rightEdge(channel, l_right);
+            if (!design.leftEdge(channel, l_left) || !design.center(channel, l_cen) ||
+                !design.rightEdge(channel, l_right)){
+                continue;
+            }
 
             roEl->surface(strip_id).localToGlobal(l_left, Amg::Vector3D::Zero(), strip_leftEdge);
             roEl->surface(strip_id).localToGlobal(l_cen, Amg::Vector3D::Zero(), strip_center);
@@ -218,11 +222,13 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx, const MuonGM::MMR
             m_ActiveWidthS =  design.minYSize();
 
             if (channel != fStrip) continue;
-
+            ATH_MSG_VERBOSE(m_idHelperSvc->toStringGasGap(strip_id)<<" "<<Amg::toString(roEl->transform(strip_id).translation(), 4)
+                        <<", "<<roEl->transform(strip_id).translation().perp());
             m_stripRot.push_back(roEl->transform(strip_id));
             m_stripRotGasGap.push_back(gasgap);
             m_firstStripPos.push_back(design.firstPos() * Amg::Vector2D::UnitX()); 
-            m_readoutFirstStrip.push_back(design.numberOfMissingBottomStrips() + 1);
+            m_firstStrip.push_back(design.numberOfMissingBottomStrips() + 1);
+            m_nStrips.push_back(design.nch);
             m_readoutSide.push_back(roEl->getReadoutSide()[gasgap -1]);    
         }
     }
