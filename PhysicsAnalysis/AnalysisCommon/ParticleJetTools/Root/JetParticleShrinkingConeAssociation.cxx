@@ -32,7 +32,7 @@ JetParticleShrinkingConeAssociation::match(const xAOD::JetContainer& jets, const
             part_itr != parts.end(); ++part_itr) {
 
         const xAOD::IParticle& part = **part_itr;
-        //std::cout << "Mario: trying " << part.TrkOriginVertex() << std::endl;
+
         double drmin = -1;
         int matchjetidx = -1;
         for (unsigned int iJet = 0; iJet < jets.size(); iJet++) {
