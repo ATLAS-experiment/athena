@@ -5647,6 +5647,66 @@ namespace Trk {
     }
   }
 
+  void GlobalChi2Fitter::fillFirstLastMeasurement(
+    Cache & cache,
+    GXFTrajectory & trajectory
+  ) const {
+    const int nFitPars = trajectory.numberOfFitParameters();
+    const int nPerPars = trajectory.numberOfPerigeeParameters();
+    const int nScatPars = 2 * trajectory.numberOfScatterers();
+    const int nBrem = trajectory.numberOfBrems();
+    const int nUpstreamStates = trajectory.numberOfUpstreamStates();
+
+    const Amg::VectorX & res = trajectory.residuals();
+    const int nMeas = (int) res.size();
+
+    cache.m_firstmeasurement.resize(nFitPars);
+    cache.m_lastmeasurement.resize(nFitPars);
+
+    for (int i = 0; i < nPerPars; i++) {
+      cache.m_firstmeasurement[i] = 0;
+      cache.m_lastmeasurement[i] = nMeas - nBrem;
+    }
+
+    int measno = 0;
+    int scatno = 0;
+    int bremno = 0;
+    for (int i = 0; i < (int) trajectory.trackStates().size(); i++) {
+      const std::unique_ptr<GXFTrackState> & state = trajectory.trackStates()[i];
+      const GXFMaterialEffects *meff = state->materialEffects();
+
+      if (meff == nullptr) {
+        measno += state->numberOfMeasuredParameters();
+        continue;
+      }
+
+      const int firstMeasurement = i < nUpstreamStates ? 0 : measno;
+      const int lastMeasurement = i < nUpstreamStates ? measno : nMeas - nBrem;
+
+      if (meff->sigmaDeltaTheta() != 0
+          && (trajectory.prefit() == 0 || meff->deltaE() == 0)) {
+        const int scatterPos = nPerPars + 2 * scatno;
+
+        cache.m_firstmeasurement[scatterPos] = firstMeasurement;
+        cache.m_lastmeasurement[scatterPos] = lastMeasurement;
+
+        cache.m_firstmeasurement[scatterPos + 1] = firstMeasurement;
+        cache.m_lastmeasurement[scatterPos + 1] = lastMeasurement;
+
+        scatno++;
+      }
+
+      if (meff->sigmaDeltaE() > 0) {
+        const int bremPos = nPerPars + nScatPars + bremno;
+
+        cache.m_firstmeasurement[bremPos] = firstMeasurement;
+        cache.m_lastmeasurement[bremPos] = lastMeasurement;
+
+        bremno++;
+      }
+    }
+  }
+
   FitterStatusCode GlobalChi2Fitter::runIteration(
     const EventContext& ctx,
     Cache & cache,
@@ -5660,7 +5720,6 @@ namespace Trk {
     int nfitpars = trajectory.numberOfFitParameters();
     int nperpars = trajectory.numberOfPerigeeParameters();
     int scatpars = 2 * trajectory.numberOfScatterers();
-    int nupstreamstates = trajectory.numberOfUpstreamStates();
     int nbrem = trajectory.numberOfBrems();
     double oldchi2 = trajectory.chi2();
     double oldredchi2 = (trajectory.nDOF() > 0) ? oldchi2 / trajectory.nDOF() : 0;
@@ -5735,52 +5794,7 @@ namespace Trk {
     }
 
     if (cache.m_firstmeasurement.empty()) {
-      cache.m_firstmeasurement.resize(nfitpars);
-      cache.m_lastmeasurement.resize(nfitpars);
-      for (int i = 0; i < nperpars; i++) {
-        cache.m_firstmeasurement[i] = 0;
-        cache.m_lastmeasurement[i] = nmeas - nbrem;
-      }
-      int measno = 0;
-      int scatno = 0;
-      int bremno = 0;
-      for (int i = 0; i < (int) trajectory.trackStates().size(); i++) {
-        std::unique_ptr<GXFTrackState> & state = trajectory.trackStates()[i];
-        GXFMaterialEffects *meff = state->materialEffects();
-        if (meff == nullptr) {
-          measno += state->numberOfMeasuredParameters();
-        }
-        if (meff != nullptr) {
-          if (meff->sigmaDeltaTheta() != 0
-              && ((trajectory.prefit() == 0) || meff->deltaE() == 0)) {
-            int scatterPos = nperpars + 2 * scatno;
-            if (i < nupstreamstates) {
-              cache.m_lastmeasurement[scatterPos] =
-                cache.m_lastmeasurement[scatterPos + 1] = measno;
-              cache.m_firstmeasurement[scatterPos] =
-                cache.m_firstmeasurement[scatterPos + 1] = 0;
-            } else {
-              cache.m_lastmeasurement[scatterPos] =
-                cache.m_lastmeasurement[scatterPos + 1] = nmeas - nbrem;
-              cache.m_firstmeasurement[scatterPos] =
-                cache.m_firstmeasurement[scatterPos + 1] = measno;
-            }
-            scatno++;
-          }
-          if (meff->sigmaDeltaE() > 0) {
-            if (i < nupstreamstates) {
-              cache.m_firstmeasurement[nperpars + scatpars + bremno] = 0;
-              cache.m_lastmeasurement[nperpars + scatpars + bremno] = measno;
-            } else {
-              cache.m_firstmeasurement[nperpars + scatpars + bremno] = measno;
-              cache.m_lastmeasurement[nperpars + scatpars + bremno] =
-                nmeas - nbrem;
-            }
-
-            bremno++;
-          }
-        }
-      }
+      fillFirstLastMeasurement(cache, trajectory);
     }
 
     if (a.cols() != nfitpars) {
