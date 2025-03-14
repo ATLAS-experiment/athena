@@ -66,10 +66,10 @@ namespace GlobalSim {
 
     // Select cuts: values set in init()
     // outer vector: NumSelect entries. Inner vector: N_eta entries
-    std::vector<int> m_EtMin;
-    std::vector<int> m_REtaMin;
-    std::vector<int> m_RHadMin;
-    std::vector<int> m_WsTotMin;
+    std::vector<unsigned> m_EtMin;
+    std::vector<unsigned> m_REtaMin;
+    std::vector<unsigned> m_RHadMin;
+    std::vector<unsigned> m_WsTotMin;
 
     // Count cuts. Each count has three eta regions
     // The outer vector will be initialised  to have  length
@@ -107,10 +107,12 @@ namespace GlobalSim {
       eEmSortSelectCountContainerPortsOut::NumNoSort;
 
 
+    constexpr static auto& s_SortOutWidths =
+      eEmSortSelectCountContainerPortsOut::SortOutWidths;
+
     constexpr static auto& s_SortOutWidth =
       eEmSortSelectCountContainerPortsOut::SortOutWidth;
-
-    
+     
     constexpr static auto& s_SortOutStart =
       eEmSortSelectCountContainerPortsOut::SortOutStart;
 

@@ -21,7 +21,11 @@ namespace GlobalSim {
       const auto& in = in_tob->Eta_bits();
       
       // vhdl etaL to_signed(unsigned(-100 + in, GenericEtaBitWidth)
-      m_Eta_bits = (-0x64 + bitSetToInt(in)+ 0xff + 0x01);
+      int val = (-0x64 + bitSetToInt(in));
+
+      bool neg{val < 0};
+      m_Eta_bits = std::abs(val);
+      if (neg) {m_Eta_bits = m_Eta_bits.flip().to_ulong()+1;}
     }
 
     {

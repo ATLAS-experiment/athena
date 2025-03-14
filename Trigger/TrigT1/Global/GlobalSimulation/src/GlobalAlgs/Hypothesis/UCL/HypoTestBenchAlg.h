@@ -21,6 +21,7 @@
 #include <string>
 #include <memory>
 #include <bitset>
+#include <vector>
 
 
 namespace GlobalSim {
@@ -63,19 +64,19 @@ namespace GlobalSim {
       "expectedMultsFileName",
       {},
       "name of file with the expected multiplicity values from HW Sim"};
-    
+
+    Gaudi::Property<std::vector<std::string>>
+    m_testVecs_in {
+      this,
+      "test_vecs",
+      {},
+      "test vectors for manual tests. Hex"};
+
     Gaudi::Property<std::string>
     m_expectedTobs_FileName{this,
       "expectedTobsFileName",
       {},
       "name of file with the expected Generic TOB values from HW Sim"};
-    
-    Gaudi::Property<std::vector<std::string>>
-    m_testVecs_in{
-      this,
-      "testVecs",
-      {},
-      "test vectors for manual tests. Hex"};
 
     Gaudi::Property<std::string>
     m_expMults_in{

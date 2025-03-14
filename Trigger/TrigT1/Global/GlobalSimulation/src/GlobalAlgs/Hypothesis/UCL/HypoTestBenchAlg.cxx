@@ -44,15 +44,17 @@ namespace GlobalSim {
     // or by filling in values by hand in this Algorithm
 
     if (m_testsFileName.empty()){
+      ATH_MSG_INFO("Initialisation is manual");
       CHECK(init_manual());
     } else {
+      ATH_MSG_INFO("Initialisation is from file " <<  m_testsFileName);
       CHECK(init_from_file());
     }
 
     ATH_MSG_INFO("Number of fifos " << m_fifos.size());
-    if (m_fifos.empty()) {
-      ATH_MSG_ERROR("No FIFOS created");
-      return StatusCode::FAILURE;
+    for(const auto& fifo : m_fifos) {
+          ATH_MSG_INFO("Fifo size " <<
+		       fifo->size());
     }
 	
     return StatusCode::SUCCESS;
@@ -96,12 +98,6 @@ namespace GlobalSim {
     // build a single  GepAlgoHypothesisFIFO  that contains five
     // GepAlgoHypothesisPortsIn objects. The PortsIn objects contain
     // data only for eEmTobs.
-
-    // if we reach this point, expect some test data
-    if (m_testVecs_in.empty() ) {
-      ATH_MSG_ERROR("Requested manual testing, but no data provided");
-      return StatusCode::FAILURE;
-    }
 
     if (m_testRepeat < 1) {
       ATH_MSG_ERROR("Invalid repeat of input data requested: " << m_testRepeat);

@@ -20,7 +20,7 @@ namespace GlobalSim {
 
     eEmTob(const GepAlgoHypothesisPortsIn& ports_in);
     
-    std::bitset<32> asBits() const;
+    std::bitset<32> as_bits() const;
 
         
     const std::bitset<AlgoConstants::eFexEtBitWidth>&
@@ -43,6 +43,7 @@ namespace GlobalSim {
     
     const std::bitset<1>&
     Overflow_bits () const;
+
  
   private:
     // vhdl type: record

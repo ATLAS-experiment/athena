@@ -3,7 +3,31 @@
 */
 
 #include "GepAlgoHypothesisPortsIn.h"
+#include <sstream>
 
+namespace GlobalSim {
+  std::string eEmInputTOBToString(const std::bitset<72>& bs) {
+    std::stringstream ss;
+    ss << bs.to_string()
+       << "  Et ";
+    for (int i = AlgoConstants::eFexEtBitWidth; i != -1;  --i) {
+      ss << bs[i];
+    }
+    ss << " Phi ";
+    for (int i = 16 + AlgoConstants::eFexPhiBitWidth; i != 15;  --i) {
+      ss << bs[i];
+    }
+
+    ss << " Eta ";
+    for (int i = 32 + AlgoConstants::eFexEtaBitWidth; i != 31;  --i) {
+      ss << bs[i];
+    }
+
+    return ss.str();
+  }
+    
+
+}
 using namespace GlobalSim;
 
 std::ostream&
