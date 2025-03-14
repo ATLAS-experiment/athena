@@ -35,6 +35,7 @@ def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
     Run flavour tagging in derivations.
     Configures several jet collections at once.
     """
+
     if pv_cols is None:
         pv_cols = ['PrimaryVertices'] * len(jet_cols)
     if len(pv_cols) != len(jet_cols):
@@ -74,14 +75,12 @@ def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
                     trackAugmenterPrefix=trackAugmenterPrefix
                 )
             )
-          
     
 
     if  cfgFlags.BTagging.GNNVertexFitter  and cfgFlags.GeoModel.Run < LHCPeriod.Run4:
       from GNNVertexFitter.GNNVertexFitterConfig import GNNVertexFitterAlgCfg
       acc.merge(GNNVertexFitterAlgCfg(cfgFlags))
       acc.merge(GNNVertexFitterAlgCfg(cfgFlags, inclusive=True))
-   
     
     return acc
 
