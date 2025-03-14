@@ -131,7 +131,7 @@ def JETM7KernelCfg(flags, name='JETM7Kernel', **kwargs):
 
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, 
-                                      ThinningTools = [],
+                                      ThinningTools = thinningTools,
                                       SkimmingTools =[skimmingTool] if not flags.Input.isMC else []))   
 
 
@@ -211,16 +211,11 @@ def JETM7Cfg(flags):
                                             "InDetTrackParticles",
                                             "AntiKt4EMPFlowJets",
                                             "EventInfo",
-                                            "BTagging_AntiKt4EMPFlowByVertex",
                                             ]
 
     
-    JETM7SlimmingHelper.ExtraVariables = ["InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.btagIp_TrkOriginVtx.btagIp_TrkOriginVtx_idx.btagIp_d0.btagIp_z0SinTheta.btagIp_d0Uncertainty.btagIp_z0SinThetaUncertainty.btagIp_trackDisplacement.btagIp_trackMomentum.btagIp_qOverP"]
-    JETM7SlimmingHelper.AllVariables = ["BTagging_AntiKt4EMPFlowByVertex",]
-    # Add BTagging containers
-    from DerivationFrameworkFlavourTag import FtagBaseContent
-    FtagBaseContent.add_baseline_slimming_smartcollections(JETM7SlimmingHelper)
-    FtagBaseContent.add_baseline_slimming_allvariables(JETM7SlimmingHelper)
+    JETM7SlimmingHelper.ExtraVariables = ["InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights"]
+
     # Truth containers
     if flags.Input.isMC:
 
@@ -237,7 +232,7 @@ def JETM7Cfg(flags):
                                              "TruthVertices", "TruthEvents"]
         JETM7SlimmingHelper.ExtraVariables += ["InDetTrackParticles.truthMatchProbability", "TruthVertices.barcode.z"]
 
-    FtagBaseContent.add_truth_to_SlimmingHelper(JETM7SlimmingHelper)
+
     # Trigger content
     JETM7SlimmingHelper.IncludeTriggerNavigation = True
     JETM7SlimmingHelper.IncludeJetTriggerContent = False
@@ -267,15 +262,14 @@ def JETM7Cfg(flags):
     jetOutputList = ["AntiKt4EMPFlowByVertexJets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(JETM7SlimmingHelper, jetOutputList, JETM7SlimmingHelper.SmartCollections)
-    
-    # Flavour tagging
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
-    acc.merge(FtagJetCollectionsCfg(flags,jetOutputList))
-    
-    # Output stream 
+
+    # Output stream    
     JETM7ItemList = JETM7SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_JETM7", ItemList=JETM7ItemList, AcceptAlgs=["JETM7Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM7", AcceptAlgs=["JETM7Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
+
+
+
 
