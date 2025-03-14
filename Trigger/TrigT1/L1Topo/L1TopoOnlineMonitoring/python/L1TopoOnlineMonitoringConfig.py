@@ -68,7 +68,9 @@ def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=Tru
                                           doHwMonCTP = doHwMonCtp,
                                           doComp = doComp,
                                           doMultComp = doMultComp,
-                                          forceCTPasHdw=forceCtp)
+                                          forceCTPasHdw=forceCtp,
+                                          MultiplicityVetoList=["ZeroBiasC","ZeroBiasB"],
+                                          AlgorithmVetoList   =["jXE40delay"])
     if logLevel : alg.OutputLevel=logLevel
     alg.MonTool = GenericMonitoringTool(flags, 'MonTool')
     alg.MonTool.HistPath = name
@@ -85,7 +87,9 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwM
                                           doHwMonCTP = doHwMonCtp,
                                           doComp = doComp,
                                           doMultComp = doMultComp,
-                                          forceCTPasHdw=forceCtp)
+                                          forceCTPasHdw=forceCtp,
+                                          MultiplicityVetoList=["ZeroBiasA","ZeroBiasB"],
+                                          AlgorithmVetoList   =["jXE40delay"])
 
     #Define the Monitoring plots for L1Calo DQ
     helper.defineDQAlgorithm("L1TopoMismatchRate",
