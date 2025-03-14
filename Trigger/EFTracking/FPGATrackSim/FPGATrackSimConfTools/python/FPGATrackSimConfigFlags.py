@@ -49,8 +49,13 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('ExtensionNNHitonnxFile', 'banks_9L/v0.20/Ath_Extrap_v51_6_superBig_0_outsideIN.onnx')
     cf.addFlag('ParamNNonnxFile', 'banks_9L/v0.20/ParamEstimationHT_v5.onnx')
     cf.addFlag('doNNPathFinder', False)
-    cf.addFlag('windowR', 20)
-    cf.addFlag('windowZ', 20)
+    cf.addFlag('windowR', [20])
+    cf.addFlag('windowZ', [20])
+    cf.addFlag('lowPtvalueR', -1)
+    cf.addFlag('lowPtvalueZ', -1)
+    cf.addFlag('lowPtWindowRScaling', 1.0)
+    cf.addFlag('lowPtWindowZScaling', 1.0)
+    
     cf.addFlag('maxBranches', -1)
     cf.addFlag('hitThreshold', 10)
     

@@ -33,6 +33,17 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::initialize() {
     m_nLayers_1stStage = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
     m_nLayers_2ndStage = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers() - m_nLayers_1stStage;
 
+    if (m_windowR.size() != 1 && m_windowR.size() != m_nLayers_2ndStage) {
+      ATH_MSG_ERROR("Window r size = " << m_windowR << " is not equal to 1 (for all layers) and not equal to " << m_nLayers_2ndStage);
+      return StatusCode::FAILURE;
+    }
+
+    if (m_windowZ.size() != 1 && m_windowZ.size() != m_nLayers_2ndStage) {
+      ATH_MSG_ERROR("Window z size = " << m_windowZ << " is not equal to 1 (for all layers) and not equal to " << m_nLayers_2ndStage);
+      return StatusCode::FAILURE;
+    }
+
+    
     m_maxMiss = (m_nLayers_1stStage + m_nLayers_2ndStage) - m_threshold;
 
     if (m_FPGATrackSimMapping->getExtensionNNVolMapString() != "" && m_FPGATrackSimMapping->getExtensionNNHitMapString() != "") {
@@ -139,7 +150,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
 
 
         size_t slice = track->getSubRegion();
-
+	float pt = track->getPt();
         layer_bitmask_t hitLayers = 0;
         layer_bitmask_t wcLayers = 0;
         // Loop over all hits
@@ -336,8 +347,21 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                         double hitr = hit->getR();
                         double predr = sqrt(predhit[0]*predhit[0] + predhit[1] * predhit[1]);
                         double predz = predhit[2];
+			double windowR = m_windowR[0]; // default for all layers
+			double windowZ = m_windowZ[0]; // default for all layers
 
-                        if (abs(hitr - predr) < m_windowR.value() && abs(hitz - predz) < m_windowZ.value())
+			// But if available pick up per-window values
+			if (m_windowR.size() > 1) {
+			  windowR = m_windowR[layer-m_nLayers_1stStage]; // offset by n1st stage
+			}
+			if (m_windowZ.size() > 1) {
+			  windowZ = m_windowZ[layer-m_nLayers_1stStage]; // offset by n1st stage
+			}
+			// now scale windows for low pt, if desired
+			if (pt < m_lowPtValueForWindowRScaling.value()) windowR *= m_lowPtWindowRScaling.value();
+			if (pt < m_lowPtValueForWindowZScaling.value()) windowZ *= m_lowPtWindowZScaling.value();			
+			
+                        if (abs(hitr - predr) < windowR && abs(hitz - predz) < windowZ)
                         {
                             std::vector<std::shared_ptr<const FPGATrackSimHit>> theseHits {hit};
                             hitsInWindow = hitsInWindow + 1;

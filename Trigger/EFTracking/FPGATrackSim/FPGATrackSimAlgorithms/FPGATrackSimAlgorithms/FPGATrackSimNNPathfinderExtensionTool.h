@@ -61,8 +61,13 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         // The eta pattern option here should probably be dropped, because we're not using it
         // and supporting it requires having two sets of eta patterns (one for the first stage, one for the second)
         // and then running the eta pattern filter a second time.
-        Gaudi::Property <float> m_windowR { this, "windowR", 20.0, "Window Size to search in for r, right now one value for all layers"};
-        Gaudi::Property <float> m_windowZ { this, "windowZ", 20.0, "Window Size to search in for z, right now one value for all layers"};
+        Gaudi::Property<std::vector<float>> m_windowR { this, "windowR", {20.0}, "Window Size to search in for r, either pass one value for all layers or use the number of layers"};
+        Gaudi::Property<std::vector<float>> m_windowZ { this, "windowZ", {20.0}, "Window Size to search in for z, either pass one value for all layers or use the number of layers"};
+        Gaudi::Property <float> m_lowPtValueForWindowRScaling { this, "lowPtValueWindowR", -1, "Value in MeV below which we scale the r window size"};
+        Gaudi::Property <float> m_lowPtWindowRScaling {this, "lowPtRScaling", 1.0, "Scaling factor for low pt in R"};
+        Gaudi::Property <float> m_lowPtValueForWindowZScaling { this, "lowPtValueWindowZ", -1, "Value in MeV below which we scale the r window size"};
+        Gaudi::Property <float> m_lowPtWindowZScaling {this, "lowPtZScaling", 1.0, "Scaling factor for low pt in Z"};
+
         Gaudi::Property <int> m_maxBranches { this, "maxBranches", -1, "Max number of branches before we stop, if negative this is disabled"};
         Gaudi::Property <bool> m_doOutsideIn { this, "doOutsideIn", true, "Setup the tool so it's doing outside in extrap"};
         Gaudi::Property <int> m_predictionWindowLength { this, "predictionWindowLength", 3, "Length of hits needed for prediction"};
