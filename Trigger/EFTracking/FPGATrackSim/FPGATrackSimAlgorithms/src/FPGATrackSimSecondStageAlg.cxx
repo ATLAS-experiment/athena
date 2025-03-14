@@ -387,9 +387,10 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         ATH_CHECK(writeOutputData(roads, tracks, dataFlowInfo.get()));
     }
 
-    // This one we can do-- by passing in truth and offline tracks via storegate above.
+
     if (m_doHoughRootOutput2nd) {
-      ATH_CHECK(m_houghRootOutputTool->fillTree(roads, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut, m_NumOfHitPerGrouping));
+        ATH_MSG_DEBUG("Running HoughRootOutputTool in 2nd stage.");
+        ATH_CHECK(m_houghRootOutputTool->fillTree(roads, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut, m_NumOfHitPerGrouping, true));
     }
 
     // Reset data pointers

@@ -393,6 +393,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // This one we can do-- by passing in truth and offline tracks via storegate above.
     if (m_doHoughRootOutput1st) {
+        ATH_MSG_DEBUG("Running HoughRootOutputTool in 1st stage.");
 
         SmartIF<IEventProcessor> appMgr{service("ApplicationMgr")};
         if (!appMgr) {
@@ -402,7 +403,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         // Concatenate 1st and 2nd stage hits vectors to access both in the OutputTool
         phits_2nd.insert(phits_2nd.end(), std::make_move_iterator(phits_1st.begin()), std::make_move_iterator(phits_1st.end()));
         // Create output ROOT file
-        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut, m_NumOfHitPerGrouping));
+        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut, m_NumOfHitPerGrouping, false));
     }
 
     // Reset data pointers

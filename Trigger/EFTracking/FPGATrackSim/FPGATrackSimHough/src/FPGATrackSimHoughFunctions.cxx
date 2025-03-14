@@ -282,17 +282,22 @@ void getMissingInfo(const FPGATrackSimRoad & road, int & nMissing, bool & missPi
  *
  * NB: If the number of combinations becomes large and memory is a concern,
  * it may be worth turning this function into a sort of iterator
- * over `combs`, return a single track each call. 
+ * over `combs`, return a single track each call.
  */
 void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack & temp, std::vector<FPGATrackSimTrack>& track_cands, const ServiceHandle<IFPGATrackSimMappingSvc> & FPGATrackSimMapping)
 {
     int idbase = 0;           // offset for new track ids
     int subregion = road.getSubRegion();
+    auto pmap = FPGATrackSimMapping->PlaneMap_2nd(subregion);
+
+    if (temp.getTrackStage() == TrackStage::FIRST) {
+      pmap = FPGATrackSimMapping->PlaneMap_1st(subregion);
+    }
 
     std::vector<std::vector<int>> combs = ::getComboIndices(road.getNHits_layer());
     track_cands.resize(combs.size(), temp);
 
-    const FPGATrackSimRegionMap* SUBREGIONMAP = FPGATrackSimMapping->SubRegionMap();
+    const FPGATrackSimRegionMap* SUBREGIONMAP = FPGATrackSimMapping->SubRegionMap_2nd();
     //
     //get the WC hits:
     layer_bitmask_t wcbits= road.getWCLayers();
@@ -301,28 +306,28 @@ void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack 
     {
       //Need to set the ID and the hits size of this track
       track_cands[icomb].setTrackID(idbase + icomb);
-      track_cands[icomb].setNLayers(FPGATrackSimMapping->PlaneMap_1st(subregion)->getNLogiLayers());
+      track_cands[icomb].setNLayers(pmap->getNLogiLayers());
 
       // If this is an idealized coordinate fit; keep references to the idealized radii.
-      track_cands[icomb].setIdealRadii(SUBREGIONMAP->getAvgRadii(0));
+      track_cands[icomb].setIdealRadii(SUBREGIONMAP->getAvgRadii(subregion));
       track_cands[icomb].setPassedOR(1);
 
         std::vector<int> const & hit_indices = combs[icomb]; // size nLayers
-        for (unsigned layer = 0; layer < FPGATrackSimMapping->PlaneMap_1st(subregion)->getNLogiLayers(); layer++)
+        for (unsigned layer = 0; layer < pmap->getNLogiLayers(); layer++)
         {
             if (hit_indices[layer] < 0) // Set a dummy hit if road has no hits in this layer
             {
                 FPGATrackSimHit newhit=FPGATrackSimHit();
                 newhit.setLayer(layer);
                 newhit.setSection(0);
-                if (FPGATrackSimMapping->PlaneMap_1st(subregion)->getDim(layer) == 2) newhit.setDetType(SiliconTech::pixel);
+                if (pmap->getDim(layer) == 2) newhit.setDetType(SiliconTech::pixel);
 	            else newhit.setDetType(SiliconTech::strip);
 
                 if (wcbits & (1 << layer ) ) {
                     newhit.setHitType(HitType::wildcard);
-		    newhit.setLayer(layer);
-		}
-                
+                    newhit.setLayer(layer);
+                }
+
                 track_cands[icomb].setFPGATrackSimHit(layer, newhit);
             }
             else
@@ -339,7 +344,7 @@ void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack 
                         track_cands[icomb].setValidCand(false);
                     }
                 }
-                track_cands[icomb].setFPGATrackSimHit(layer, *hit);               
+                track_cands[icomb].setFPGATrackSimHit(layer, *hit);
             }
         }
     }
