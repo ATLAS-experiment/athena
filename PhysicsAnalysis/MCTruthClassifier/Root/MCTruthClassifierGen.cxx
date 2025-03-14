@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -268,7 +268,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   //
 
   if ((abs(motherPDG) == 13 || abs(motherPDG) == 15 || abs(motherPDG) == 24) && mothOriVert != nullptr && !samePart) {
-    long pPDG(0);
+    int pPDG(0);
     const xAOD::TruthParticle* MotherParent(nullptr);
     do {
       pPDG = 0;
@@ -562,7 +562,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   int motherPDG = mother->pdgId();
 
   if ((MC::isTau(motherPDG)|| MC::isW(motherPDG)) && mothOriVert != nullptr) {
-    long pPDG(0);
+    int pPDG(0);
     const xAOD::TruthParticle* MotherParent(nullptr);
     do {
       //
@@ -799,7 +799,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
 
   if (MC::isW(motherPDG) && mothOriVert != nullptr) {
     MotherParent = MC::findMother(mother);
-    long pPDG(0);
+    int pPDG(0);
 
     if (MotherParent) {//MotherParent checked here...
       pPDG = MotherParent->pdgId();
@@ -988,7 +988,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   int NumOfTau(0);
   int NumOfPht(0);
   int NumOfLQ(0);
-  long DaugType(0);
+  int DaugType(0);
   long NumOfLep(0);
   long NumOfNeut(0);
   long NumOfPartons(0);
@@ -1023,7 +1023,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
       !(Daug && info && info->Mother() && HepMC::is_same_generator_particle(Daug, info->Mother())) && mothOriVert != nullptr &&
       mothOriVert->nIncomingParticles() == 1) {
     int itr = 0;
-    long PartPDG = 0;
+    int PartPDG = 0;
     const xAOD::TruthVertex* prodVert = mothOriVert;
     const xAOD::TruthVertex* Vert = nullptr;
     do {
@@ -1238,7 +1238,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   //
   if ((abs(motherPDG) == nuFlav || abs(motherPDG) == 15 || MC::isW(motherPDG)) && mothOriVert != nullptr &&
       !samePart) {
-    long pPDG(0);
+    int pPDG(0);
     const xAOD::TruthParticle* MotherParent(nullptr);
     do {
       pPDG = 0;
