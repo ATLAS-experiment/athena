@@ -30,17 +30,12 @@
 
 #include "GaudiKernel/IEventProcessor.h"
 
+constexpr bool enableBenchmark = 
 #ifdef BENCHMARK_LOGICALHITSALG
-#define TIME(name) \
-    t_1 = std::chrono::steady_clock::now(); \
-    (name) += std::chrono::duration_cast<std::chrono::microseconds>(t_1 - t_0).count(); \
-    t_0 = t_1;
-
-size_t m_troads = 0, m_troad_filter = 0, m_tlrt = 0, m_ttracks = 0, m_tOR = 0, m_tmon = 0, m_tfin = 0;
+    true;
 #else
-#define TIME(name)
+    false;
 #endif
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Initialize
@@ -94,6 +89,7 @@ StatusCode FPGATrackSimSecondStageAlg::initialize()
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );
     ATH_CHECK( m_FPGAOfflineTrackKey.initialize() );
 
+    ATH_CHECK( m_chrono.retrieve() );
     ATH_MSG_DEBUG("initialize() Finished");
 
     return StatusCode::SUCCESS;
@@ -106,13 +102,7 @@ StatusCode FPGATrackSimSecondStageAlg::initialize()
 
 StatusCode FPGATrackSimSecondStageAlg::execute()
 {
-#ifdef BENCHMARK_LOGICALHITSALG
-    std::chrono::time_point<std::chrono::steady_clock> t_0, t_1;
-    t_0 = std::chrono::steady_clock::now();
-#endif
-
     const EventContext& ctx = getContext();
-
     // Get reference to hits from StoreGate.
     // Hits have been procesed by the DataPrep algorithm. Now, we need to read them.
     // If they aren't passed, assume this means we are done.
@@ -128,7 +118,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         }
         return appMgr->stopRun();
     }
-
+    
     SG::ReadHandle<FPGATrackSimTrackCollection> FPGAInputTracks (m_FPGAInputTrackKey, ctx);
     if (!FPGAInputTracks.isValid()) {
         SmartIF<IEventProcessor> appMgr{service("ApplicationMgr")};
@@ -148,7 +138,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
 
     SG::WriteHandle<FPGATrackSimTrackCollection> FPGATracks_2ndHandle (m_FPGATrackKey, ctx);
     ATH_CHECK(FPGATracks_2ndHandle.record (std::make_unique<FPGATrackSimTrackCollection>()));
-
+    if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: EventSelection");
     // Query the event selection service to make sure this event passed cuts.
     if (!m_evtSel->getSelectedEvent()) {
         ATH_MSG_DEBUG("Event skipped by: " << m_evtSel->name());
@@ -157,6 +147,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
 
     // Event passes cuts, count it. technically, DataPrep does this now.
     m_evt++;
+    if constexpr (enableBenchmark) m_chrono->chronoStop("2nd Stage: EventSelection");
 
     // If we get here, FPGAHits_2nd is valid, copy it over.
     std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_2nd;
@@ -190,6 +181,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> prefilter_roads;
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads = prefilter_roads;
 
+    if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: TrackExtension");
     // Use the track extension tool to actually produce a new set of roads.
     ATH_CHECK(m_trackExtensionTool->extendTracks(phits_2nd, tracks_1st, roads));
 
@@ -204,7 +196,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         FPGAHitsInRoads_2nd->push_back(road_hits);
         FPGARoads_2nd->push_back(*road);
     }
-
+    if constexpr (enableBenchmark) m_chrono->chronoStop("2nd Stage: TrackExtension");
     auto mon_nroads = Monitored::Scalar<unsigned>("nroads_2nd", roads.size());
     unsigned bitmask_best(0);
     unsigned nhit_best(0);
@@ -230,25 +222,24 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     }
     Monitored::Group(m_monTool, mon_nroads);
 
-    TIME(m_troads);
-
     // NOTE: for now we don't support road filtering again in the second stage,
     // except for the special case of the spacepoint road filter tool. In principle filters
     // could be added here.
 
+    if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: Road Filtering");
     // Spacepoint road filter tool. Needed when fitting to spacepoints.
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> post_spfilter_roads;
     if (m_doSpacepoints) {
         ATH_CHECK(m_spRoadFilterTool->filterRoads(roads, post_spfilter_roads));
         roads = post_spfilter_roads;
     }
+    if constexpr (enableBenchmark) m_chrono->chronoStop("2nd Stage: Road Filtering");
     auto mon_nroads_postfilter = Monitored::Scalar<unsigned>("nroads_2nd_postfilter", roads.size());
     Monitored::Group(m_monTool, mon_nroads_postfilter);
 
-    TIME(m_troad_filter);
-
     // Get tracks, again, after extrapolation.
     // All of this code is effectively copied from LogicalHitsProcessAlg, except we use 2nd stage now.
+    if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: Track Extraction");
     std::vector<FPGATrackSimTrack> tracks;
     if (m_doTracking) {
         if (m_doNNTrack) {
@@ -319,12 +310,12 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         }
         tracks.resize(ntrackDummy); // Dummy tracks for monitoring
     }
+    if constexpr (enableBenchmark) m_chrono->chronoStop("2nd Stage: Track Extraction");
     auto mon_ntracks = Monitored::Scalar<unsigned>("ntrack_2nd", tracks.size());
     Monitored::Group(m_monTool,mon_ntracks);
 
-    TIME(m_ttracks);
-
     // Overlap removal
+    if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: Overlap Removal");
     ATH_CHECK(m_overlapRemovalTool->runOverlapRemoval(tracks));
     unsigned ntrackOLRChi2 = 0;
     for (const FPGATrackSimTrack& track : tracks) {
@@ -341,6 +332,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
             }
         }
     }
+    if constexpr (enableBenchmark) m_chrono->chronoStop("2nd Stage: Overlap Removal");
     auto mon_ntracks_olr = Monitored::Scalar<unsigned>("ntrack_2nd_afterOLR", ntrackOLRChi2);
     Monitored::Group(m_monTool,mon_ntracks_olr);
 
@@ -389,8 +381,6 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
 
     for (const FPGATrackSimTrack& track : tracks) FPGATracks_2ndHandle->push_back(track);
 
-    TIME(m_tOR);
-
     // Write the output and reset
     if (m_writeOutputData)  {
         auto dataFlowInfo = std::make_unique<FPGATrackSimDataFlowInfo>();
@@ -405,8 +395,6 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     // Reset data pointers
     m_slicedHitHeader->reset();
     m_logicEventOutputHeader->reset();
-
-    TIME(m_tfin);
 
     return StatusCode::SUCCESS;
 }
@@ -444,17 +432,6 @@ StatusCode FPGATrackSimSecondStageAlg::writeOutputData( const std::vector<std::s
 
 StatusCode FPGATrackSimSecondStageAlg::finalize()
 {
-#ifdef BENCHMARK_LOGICALHITSALG
-    ATH_MSG_INFO("Timings:" <<
-            "\nroads (2nd):       " << std::setw(10) << m_troads <<
-            "\nroad filter (2nd): " << std::setw(10) << m_troad_filter <<
-            "\ntracks (2nd):      " << std::setw(10) << m_ttracks <<
-            "\nOR (2nd):          " << std::setw(10) << m_tOR <<
-            "\nmon (2nd):         " << std::setw(10) << m_tmon <<
-            "\nfin (@nd):         " << std::setw(10) << m_tfin
-    );
-#endif
-
     ATH_MSG_INFO("PRINTING FPGATRACKSIM SIMPLE STATS: SECOND STAGE");
     ATH_MSG_INFO("========================================================================================");
     ATH_MSG_INFO("Ran on events = " << m_evt);

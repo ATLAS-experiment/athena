@@ -90,7 +90,9 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         ToolHandle<FPGATrackSimOutputHeaderTool>         m_writeOutputTool {this, "OutputTool", "FPGATrackSimOutputHeaderTool/FPGATrackSimOutputHeaderTool", "Output tool"};
         ServiceHandle<IFPGATrackSimMappingSvc>           m_FPGATrackSimMapping {this, "FPGATrackSimMapping", "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<IFPGATrackSimEventSelectionSvc>    m_evtSel {this, "eventSelector", "FPGATrackSimEventSelectionSvc", "Event selection Svc"};
-        
+        // chrono service
+        ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
+
         // Flags
         Gaudi::Property<bool> m_doSpacepoints {this, "Spacepoints", false, "flag to enable the spacepoint formation"};
         Gaudi::Property<bool> m_doTracking {this, "tracking", false, "flag to enable the tracking"};
@@ -146,10 +148,9 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
 
         // Read hits from data prep algorithm. TODO: regionalize.
-        SG::ReadHandleKeyArray<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey",{"FPGAHits_1st"},"FPGATrackSim Hits key"};
-        SG::ReadHandleKeyArray<FPGATrackSimHitCollection> m_FPGAHitKey_2nd{this, "FPGATrackSimHitKey_2nd",{"FPGAHits_2nd"},"FPGATrackSim 2nd stage hits key"};
-
+        SG::ReadHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey {this, "FPGATrackSimHitKey","FPGAHits", "FPGATrackSim hits key"};
         // Write out roads, hits in roads, and tracks.
+        SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey_2nd{this, "FPGATrackSimHitKey_2nd","FPGAHits_2nd","FPGATrackSim 2nd stage hits key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitFilteredKey{this, "FPGATrackSimHitFiltered1stKey","FPGAHitsFiltered_1st","FPGATrackSim Filtered Hits 1st stage key"};
         SG::WriteHandleKey<FPGATrackSimHitContainer> m_FPGAHitInRoadsKey{this, "FPGATrackSimHitInRoads1stKey","FPGAHitsInRoads_1st","FPGATrackSim Hits in 1st stage roads key"};
         SG::WriteHandleKey<FPGATrackSimRoadCollection> m_FPGARoadKey{this, "FPGATrackSimRoad1stKey","FPGARoads_1st","FPGATrackSim Roads 1st stage key"};
