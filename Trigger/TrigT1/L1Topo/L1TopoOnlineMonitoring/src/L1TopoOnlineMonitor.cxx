@@ -94,6 +94,108 @@ StatusCode L1TopoOnlineMonitor::initialize() {
   ATH_CHECK(m_monTool.retrieve(DisableTool{m_monTool.name().empty()}));
   ATH_CHECK(m_errorFlagsKey.initialize());
 
+  const TrigConf::L1Menu * l1menu = nullptr;
+  ATH_CHECK( m_detStore->retrieve(l1menu) );
+
+  auto & conn2EL = l1menu->connector("Topo2El");
+  auto & conn3EL = l1menu->connector("Topo3El");
+
+  auto & connOpt0 = l1menu->connector("Topo1Opt0");
+  auto & connOpt1 = l1menu->connector("Topo1Opt1");
+  auto & connOpt2 = l1menu->connector("Topo1Opt2");
+  auto & connOpt3 = l1menu->connector("Topo1Opt3");
+
+  m_TopoAlgTriggerNames.reserve(32*4);
+  m_TopoAlgTriggerNotVetoed.reserve(32*4);
+  m_TopoMultTriggerNames.reserve(64*4);
+  m_TopoMultTriggerNotVetoed.reserve(64*4);
+
+  //TopoOpt
+  auto & tlopt0 = connOpt0.triggerLines();
+  auto & tlopt1 = connOpt1.triggerLines();
+  auto & tlopt2 = connOpt2.triggerLines();
+  auto & tlopt3 = connOpt3.triggerLines();
+
+  long unsigned int size_tlopt0 = tlopt0.size();
+  long unsigned int size_tlopt1 = tlopt1.size();
+  long unsigned int size_tlopt2 = tlopt2.size();
+  long unsigned int size_tlopt3 = tlopt3.size();
+
+  long unsigned int total_size_opt = size_tlopt0+size_tlopt1+size_tlopt2+size_tlopt3;
+
+  for  (size_t j = 0; j < size_tlopt0; ++j) m_TopoMultTriggerNames.push_back(tlopt0[j].name());
+  for  (size_t j = 0; j < size_tlopt1; ++j) m_TopoMultTriggerNames.push_back(tlopt1[j].name());
+  for  (size_t j = 0; j < size_tlopt2; ++j) m_TopoMultTriggerNames.push_back(tlopt2[j].name());
+  for  (size_t j = 0; j < size_tlopt3; ++j) m_TopoMultTriggerNames.push_back(tlopt3[j].name());
+
+  //Topo2a
+  auto & tl2a0 = conn2EL.triggerLines(0, 0); //clock 0
+  auto & tl2a1 = conn2EL.triggerLines(0, 1); //clock 1
+  long unsigned int size_tl2a0 = tl2a0.size();
+  long unsigned int size_tl2a1 = tl2a1.size();
+  //Topo2b
+  auto & tl2b0 = conn2EL.triggerLines(1, 0); //clock 0
+  auto & tl2b1 = conn2EL.triggerLines(1, 1); //clock 1
+  long unsigned int size_tl2b0 = tl2b0.size();
+  long unsigned int size_tl2b1 = tl2b1.size();
+  //Topo3a
+  auto & tl3a0 = conn3EL.triggerLines(0, 0); //clock 0
+  auto & tl3a1 = conn3EL.triggerLines(0, 1); //clock 1
+  long unsigned int size_tl3a0 = tl3a0.size();
+  long unsigned int size_tl3a1 = tl3a1.size();
+  //Topo3b
+  auto & tl3b0 = conn3EL.triggerLines(1, 0); //clock 0
+  auto & tl3b1 = conn3EL.triggerLines(1, 1); //clock 1
+  long unsigned int size_tl3b0 = tl3b0.size();
+  long unsigned int size_tl3b1 = tl3b1.size();
+
+  for (size_t i = 0; i < 16; ++i) {
+    if (i < size_tl2a0) m_TopoAlgTriggerNames.push_back(tl2a0[i].name());
+    else                m_TopoAlgTriggerNames.push_back("Empty");
+    if (i < size_tl2a1) m_TopoAlgTriggerNames.push_back(tl2a1[i].name());
+    else                m_TopoAlgTriggerNames.push_back("Empty");
+  }
+
+  for (size_t i = 0; i < 16; ++i) {
+    if (i < size_tl2b0) m_TopoAlgTriggerNames.push_back(tl2b0[i].name());
+    else                m_TopoAlgTriggerNames.push_back("Empty");
+    if (i < size_tl2b1) m_TopoAlgTriggerNames.push_back(tl2b1[i].name());
+    else                m_TopoAlgTriggerNames.push_back("Empty");
+  }
+
+    for (size_t i = 0; i < 16; ++i) {
+    if (i < size_tl3a0) m_TopoAlgTriggerNames.push_back(tl3a0[i].name());
+    else                m_TopoAlgTriggerNames.push_back("Empty");
+    if (i < size_tl3a1) m_TopoAlgTriggerNames.push_back(tl3a1[i].name());
+    else                m_TopoAlgTriggerNames.push_back("Empty");
+  }
+
+  for (size_t i = 0; i < 16; ++i) {
+    if (i < size_tl3b0) m_TopoAlgTriggerNames.push_back(tl3b0[i].name());
+    else                m_TopoAlgTriggerNames.push_back("Empty");
+    if (i < size_tl3b1) m_TopoAlgTriggerNames.push_back(tl3b1[i].name());
+    else                m_TopoAlgTriggerNames.push_back("Empty");
+  }
+
+  //Fill Vector of booleans to fill corresponding triggers
+  //Only elements with a corresponding Veto are set to false
+
+  for (size_t j = 0; j < total_size_opt; ++j) {
+    m_TopoMultTriggerNotVetoed[j] = true;
+    for (const std::string& VetoedElement : m_MultiplicityVetoList) {
+      if ( !m_TopoMultTriggerNotVetoed[j] || m_TopoMultTriggerNames[j].find(VetoedElement)!= std::string::npos) m_TopoMultTriggerNotVetoed[j] = false;
+      else m_TopoMultTriggerNotVetoed[j] = true;
+    }
+  }
+
+  for (int j =0; j<128;j++){
+    m_TopoAlgTriggerNotVetoed[j] = true;
+    for (const std::string& VetoedElement : m_AlgorithmVetoList) {
+      if ( !m_TopoAlgTriggerNotVetoed[j] || m_TopoAlgTriggerNames[j].find(VetoedElement)!= std::string::npos) m_TopoAlgTriggerNotVetoed[j] = false;
+      else m_TopoAlgTriggerNotVetoed[j] = true;
+    }
+  }
+
   return AthMonitorAlgorithm::initialize();
 }
 
@@ -523,13 +625,16 @@ StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits, const EventC
   auto mon_matchVsLumi_DQ = Monitored::Scalar<unsigned>("L1TopoAlgorithmMissMatchVsLumi");
 
   for (size_t i=0;i<4;i++) {
+
     auto mon_trig = Monitored::Scalar<unsigned>("Phase1TopoTrigger_"+std::to_string(i));
     auto mon_match = Monitored::Scalar<unsigned>("Phase1TopoMissMatch_"+std::to_string(i));
     auto mon_match_DQ = Monitored::Scalar<unsigned>("L1TopoAlgorithmMissMatch_"+std::to_string(i));
     auto mon_match_OF_DQ = Monitored::Scalar<unsigned>("L1TopoAlgorithmOverflowMissMatch_"+std::to_string(i));
     auto mon_weight = Monitored::Scalar<float>("Phase1TopoWeight_"+std::to_string(i));
     auto mon_OFweight = Monitored::Scalar<float>("Phase1TopoOFWeight_"+std::to_string(i));
+    
     for (size_t j=0;j<32;j++) {
+      
       if (ambiguityBitsSim[32*i+j] == 0) {
         mon_trig = static_cast<unsigned>(j);
         mon_trig_allboards = static_cast<unsigned>(32*i+j);
@@ -554,7 +659,7 @@ StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits, const EventC
 	if ( m_countSim[32*i+j]  < m_countHdw[32*i+j] ){ mon_match_DQ = 0;  mon_matchVsLumi_DQ = 1;}
 	if ( m_countSim[32*i+j]  > m_countHdw[32*i+j] ){ mon_match_DQ = 1;  mon_matchVsLumi_DQ = 1;}
 	if ( m_countSim[32*i+j] == m_countHdw[32*i+j] ){ mon_match_DQ = 2;  mon_matchVsLumi_DQ = 0;}
-	if ( m_countSim[32*i+j] > 0 ||  m_countHdw[32*i+j] > 0) {
+	if ( (m_countSim[32*i+j] > 0 ||  m_countHdw[32*i+j] > 0 ) && m_TopoAlgTriggerNotVetoed[32*i+j] ) {
 	  Monitored::Group(m_monTool, mon_trig, mon_match_DQ);
 	  Monitored::Group(m_monTool, lbn, mon_trig_allboards, mon_matchVsLumi_DQ);
 	}
@@ -562,7 +667,7 @@ StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits, const EventC
 	if (m_overflow_countSim[32*i+j]  <m_overflow_countHdw[32*i+j] ) mon_match_OF_DQ = 0;
 	if (m_overflow_countSim[32*i+j]  >m_overflow_countHdw[32*i+j] ) mon_match_OF_DQ = 1;
 	if (m_overflow_countSim[32*i+j] ==m_overflow_countHdw[32*i+j] ) mon_match_OF_DQ = 2;
-	if (m_overflow_countSim[32*i+j] > 0 || m_overflow_countHdw[32*i+j] > 0) Monitored::Group(m_monTool, mon_trig, mon_match_OF_DQ);
+	if ( (m_overflow_countSim[32*i+j] > 0 || m_overflow_countHdw[32*i+j] > 0 ) && m_TopoAlgTriggerNotVetoed[32*i+j] ) Monitored::Group(m_monTool, mon_trig, mon_match_OF_DQ);
 
         rate = m_countHdw[32*i+j]>0 ? m_countHdwNotSim[32*i+j]/m_countHdw[32*i+j] : 0;
         if (rate != m_rateHdwNotSim[32*i+j]) {
@@ -649,7 +754,7 @@ StatusCode L1TopoOnlineMonitor::doMultComp( std::vector<std::vector<unsigned>> &
       if (monMultSim == monMultHdw){mon_match = 2;  mon_matchVsLumi_DQ = 0;}
       mon_multiplicity = static_cast<unsigned>(k);
       mon_multiplicity_allboards = static_cast<unsigned>(k+AccumulatedPosition);
-      if ( monMultSim > 0 ||  monMultHdw > 0){
+      if (( monMultSim > 0 ||  monMultHdw > 0) && m_TopoMultTriggerNotVetoed[k+AccumulatedPosition]) {
 	Monitored::Group(m_monTool, mon_multiplicity, mon_match);
 	Monitored::Group(m_monTool, lbn, mon_multiplicity_allboards, mon_matchVsLumi_DQ);
       }

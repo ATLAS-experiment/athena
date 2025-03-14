@@ -259,12 +259,12 @@ bool TrigADComboHypoTool::getAdDecision(
 		   << jet->eta() << ", "
 		   << jet->phi() << ", "
 		   << jet->m()/1000 << ")");
-    if (jet_count<m_maxjs) {
+    if (jet_count<m_maxjs.value()) {
       inputTensor.insert(inputTensor.end(), {static_cast<float>(jet->pt()/1000), static_cast<float>(jet->eta()), static_cast<float>(jet->phi())});
+      jet_count++;
     }
-    jet_count++;
   }
-  inputTensor.insert(inputTensor.end(), 3*(m_maxjs-jet_count), 0.);
+  inputTensor.insert(inputTensor.end(), 3*(m_maxjs.value()-jet_count), 0.);
 
   unsigned int ele_count = 0;
   for(const auto &ele : input_electrons){
@@ -274,12 +274,12 @@ bool TrigADComboHypoTool::getAdDecision(
 		   << ele->eta() << ", "
 		   << ele->phi() << ", "
 		   << ele->m()/1000 << ")");
-    if (ele_count<m_maxes) {
+    if (ele_count<m_maxes.value()) {
       inputTensor.insert(inputTensor.end(), {static_cast<float>(ele->pt()/1000), static_cast<float>(ele->eta()), static_cast<float>(ele->phi())});
+      ele_count++;
     }
-    ele_count++;
   }
-  inputTensor.insert(inputTensor.end(), 3*(m_maxes-ele_count), 0.);
+  inputTensor.insert(inputTensor.end(), 3*(m_maxes.value()-ele_count), 0.);
 
   unsigned int muon_count = 0;
   for(const auto &muon : input_muons){
@@ -289,12 +289,12 @@ bool TrigADComboHypoTool::getAdDecision(
 		   << muon->eta() << ", "
 		   << muon->phi() << ", "
 		   << muon->m()/1000 << ")");
-    if (muon_count<m_maxms) {
+    if (muon_count<m_maxms.value()) {
       inputTensor.insert(inputTensor.end(), {static_cast<float>(muon->pt()/1000), static_cast<float>(muon->eta()), static_cast<float>(muon->phi())});
+      muon_count++;
     }
-    muon_count++;
   }
-  inputTensor.insert(inputTensor.end(), 3*(m_maxms-muon_count), 0.);
+  inputTensor.insert(inputTensor.end(), 3*(m_maxms.value()-muon_count), 0.);
 	
   unsigned int gam_count = 0;
   for(const auto &gam : input_photons){
@@ -304,12 +304,12 @@ bool TrigADComboHypoTool::getAdDecision(
 		   << gam->eta() << ", "
 		   << gam->phi() << ", "
 		   << gam->m()/1000 << ")");
-    if (gam_count<m_maxgs) {
+    if (gam_count<m_maxgs.value()) {
       inputTensor.insert(inputTensor.end(), {static_cast<float>(gam->pt()/1000), static_cast<float>(gam->eta()), static_cast<float>(gam->phi())});
+      gam_count++;
     }
-    gam_count++;
   }
-  inputTensor.insert(inputTensor.end(), 3*(m_maxgs-gam_count), 0.);
+  inputTensor.insert(inputTensor.end(), 3*(m_maxgs.value()-gam_count), 0.);
 
   inputTensor.insert(inputTensor.end(), {0., 0., 0.});
   for(const auto &met : input_mets){

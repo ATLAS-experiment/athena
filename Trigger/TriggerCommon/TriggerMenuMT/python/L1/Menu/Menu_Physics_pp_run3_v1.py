@@ -174,6 +174,8 @@ def defineMenu():
         'L1_2jJ40_jXE110',
         'L1_3jJ40p0ETA25_jXE80',
         
+        #ATR-29523
+        'L1_3jJ40p0ETA25',
         # new calo
         #'L1_gXERHO70', 'L1_gXERHO100',
         'L1_gXENC70', 'L1_gXENC100',

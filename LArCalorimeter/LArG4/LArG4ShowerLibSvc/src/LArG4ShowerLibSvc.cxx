@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4ShowerLibSvc/LArG4ShowerLibSvc.h"
@@ -43,22 +43,25 @@ LArG4ShowerLibSvc::~LArG4ShowerLibSvc()
 
 StatusCode LArG4ShowerLibSvc::initialize()
 {
-  ATH_MSG_DEBUG("Initializing");
+  ATH_MSG_INFO("Initializing");
 
+  std::vector<std::string> ignoredLibraryFiles{};
   // iterate through filenames in list
   for (const std::string& fileName : m_fileNameList) {
     std::string resolvedFilename = PathResolverFindCalibFile(fileName);
     if (resolvedFilename.empty()) {
       ATH_MSG_WARNING("Could not resolve input filename " << (fileName) << ". Ignoring!");
+      ignoredLibraryFiles.push_back(fileName);
       continue;
     } else {
-      ATH_MSG_DEBUG("Resolving input filename to " << resolvedFilename);
+      ATH_MSG_INFO("Resolving input filename to " << resolvedFilename);
     }
 
     TFile rootfile(resolvedFilename.c_str(),"READ");
 
     if (rootfile.IsZombie()) {
       ATH_MSG_WARNING("File " << resolvedFilename << " is not a valid ROOT file");
+      ignoredLibraryFiles.push_back(fileName);
       continue;
     }
 
@@ -70,11 +73,13 @@ StatusCode LArG4ShowerLibSvc::initialize()
     // if no library can be created based on the file nullptr is returned
     if (library == nullptr) {
       ATH_MSG_WARNING("File " << resolvedFilename << " is not a valid library file");
+      ignoredLibraryFiles.push_back(fileName);
       continue;
     }
 
     if (m_detmap.find(library->detector()) == m_detmap.end()) {
       ATH_MSG_WARNING("Library " << resolvedFilename << " is produced for unknown detector: " << library->detector());
+      ignoredLibraryFiles.push_back(fileName);
       delete library;
       continue;
     }
@@ -96,18 +101,25 @@ StatusCode LArG4ShowerLibSvc::initialize()
 
   // no point in the service with no libraries
   if (m_libraryMap.empty()) {
-    ATH_MSG_WARNING("No library files found");
-  } else {
-    ATH_MSG_DEBUG("List of loaded libraries:");
-    for (const auto& m : m_libraryMap) {
-      ATH_MSG_DEBUG("      " << m_locations[m.first] << ": " << m.second->comment());
-#ifdef DEBUG_FrozenShowers
-      m_statisticsMap[m.second] = m.second->createStatistics();
-#endif
-    }
+    ATH_MSG_ERROR("No library files found. Please check the configuration of this job.");
+    return StatusCode::FAILURE;
   }
-
-  ATH_MSG_DEBUG("Shower library successfully initialized.");
+  // some of the configured library files did not work
+  if (!ignoredLibraryFiles.empty() ) {
+    for (const std::string& fileName : ignoredLibraryFiles) {
+      ATH_MSG_ERROR("Failed to create a library from filename: " << (fileName));
+    }
+    ATH_MSG_ERROR("Some library filenames were invalid. Please check the configuration of this job.");
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_INFO("List of loaded libraries:");
+  for (const auto& m : m_libraryMap) {
+    ATH_MSG_INFO("      " << m_locations[m.first] << ": " << m.second->comment());
+#ifdef DEBUG_FrozenShowers
+    m_statisticsMap[m.second] = m.second->createStatistics();
+#endif
+  }
+  ATH_MSG_INFO("Shower library successfully initialized.");
 
   return StatusCode::SUCCESS;
 }
@@ -115,17 +127,17 @@ StatusCode LArG4ShowerLibSvc::initialize()
 StatusCode LArG4ShowerLibSvc::finalize()
 {
 
-  ATH_MSG_DEBUG("Finalizing shower library service.");
+  ATH_MSG_INFO("Finalizing shower library service.");
 
   libmap::const_iterator iter;
 
   for (iter = m_libraryMap.begin(); iter != m_libraryMap.end(); ++iter) {
-    ATH_MSG_DEBUG("Found ShowerLib at location " << m_locations[(*iter).first]);
-    ATH_MSG_DEBUG(std::endl << (*iter).second->statistics());
+    ATH_MSG_INFO("Found ShowerLib at location " << m_locations[(*iter).first]);
+    ATH_MSG_INFO(std::endl << (*iter).second->statistics());
     if (m_statisticsMap.find((*iter).second) != m_statisticsMap.end())
-      ATH_MSG_DEBUG(m_statisticsMap.find((*iter).second)->second->statistics());
+      ATH_MSG_INFO(m_statisticsMap.find((*iter).second)->second->statistics());
     else
-      ATH_MSG_DEBUG("No statistics available for this kind of library");
+      ATH_MSG_INFO("No statistics available for this kind of library");
     // delete the library:
     delete (*iter).second ;
   }

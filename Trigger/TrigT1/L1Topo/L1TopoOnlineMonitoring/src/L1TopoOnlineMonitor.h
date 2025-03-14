@@ -63,6 +63,11 @@ private:
     }
   };
 
+  std::vector<std::string> m_TopoAlgTriggerNames;
+  std::vector<bool>        m_TopoAlgTriggerNotVetoed;
+  std::vector<std::string> m_TopoMultTriggerNames;
+  std::vector<bool>        m_TopoMultTriggerNotVetoed;
+
   std::unique_ptr<float[]> m_rateHdwNotSim;
   std::unique_ptr<float[]> m_rateSimNotHdw;
   std::unique_ptr<float[]> m_rateHdwAndSim;
@@ -110,6 +115,10 @@ private:
     this, "doMultComp", false, "Enable L1Topo Multiplicity HW/Sim comparison"};
   Gaudi::Property<bool> m_forceCTPasHdw {
     this, "forceCTPasHdw", false, "Force to CTP monitoring as primary in Sim/Hdw comparison"};
+  Gaudi::Property<std::vector<std::string>> m_AlgorithmVetoList {
+    this, "AlgorithmVetoList", {}, "List of L1Topo algorithm items Vetoed for monitoring in L1CaloDQ package due to known Sim/Hdw mismatches"};
+  Gaudi::Property<std::vector<std::string>> m_MultiplicityVetoList {
+    this, "MultiplicityVetoList", {}, "List of multiplicity items Vetoed for monitoring in L1CaloDQ package due to known Sim/Hdw mismatches"};
 
   ServiceHandle<StoreGateSvc> m_detStore { this, "DetectorStore", "StoreGateSvc/DetectorStore", "Detector store to get the menu" };
 
