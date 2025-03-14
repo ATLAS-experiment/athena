@@ -8,7 +8,6 @@
 #define PARTICLEJETTOOLS_JETPARTICLESHRINKINGCONEASSOCIATION_H
 
 #include "ParticleJetTools/JetParticleAssociation.h"
-#include "AsgDataHandles/ReadDecorHandle.h"
 
 #include <vector>
 #include <string>
@@ -21,7 +20,7 @@ class JetParticleShrinkingConeAssociation : public JetParticleAssociation {
 
         virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
             match(const xAOD::JetContainer&, const xAOD::IParticleContainer&) const override;
-        
+
         inline double coneSize(double pt) const {
             return (m_coneSizeFitPar1 + exp(m_coneSizeFitPar2 + m_coneSizeFitPar3*pt));
         }
