@@ -248,7 +248,7 @@ bool TrigADComboHypoTool::getAdDecision(
 		 << "METs: " << input_mets.size());
 
   // pt1 eta1 phi1 pt2 eta2 phi2 ... for 6 jets, 3 electrons, 3 muons, 3 photons, and MET
-  unsigned int metind = (m_maxjs+m_maxes+m_maxms+m_maxgs)*3;
+  unsigned int metind = (m_maxjs.value()+m_maxes.value()+m_maxms.value()+m_maxgs.value())*3;
   std::vector<float> inputTensor;
 
   unsigned int jet_count = 0;
@@ -345,7 +345,7 @@ float TrigADComboHypoTool::runInference(std::vector<float> &tensor) const {
     ATH_MSG_DEBUG("in TrigADComboHypoTool::runInference()");
 
     auto memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
-    int input_tensor_size = (m_maxjs+m_maxes+m_maxms+m_maxgs+1)*3;
+    int input_tensor_size = (m_maxjs.value()+m_maxes.value()+m_maxms.value()+m_maxgs.value()+1)*3;
     Ort::Value input_tensor = Ort::Value::CreateTensor<float>(memory_info, tensor.data(), input_tensor_size, m_input_node_dims.data(), m_input_node_dims.size());
 
     // Ort::Session::Run is non-const.

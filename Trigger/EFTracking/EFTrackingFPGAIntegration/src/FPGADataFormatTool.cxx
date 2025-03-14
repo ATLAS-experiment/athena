@@ -60,7 +60,6 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
     const EventContext &/*ctx*/
     ) const {
 
-  int pixelCounter = 0;
   bool filledHeader = false;
   for (const InDetRawDataCollection<PixelRDORawData>* pixel_rdoCollection : pixelRDO) 
   {
@@ -89,7 +88,6 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
             pixelRawData->getLVL1A(),  // Lvl!
             0 // Spare
             );
-            pixelCounter++;
 
           // Push the word into the vector
           encodedData.push_back(FPGADataFormatUtilities::get_dataformat_PIXEL_EF_RDO(pixelWord));
