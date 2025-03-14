@@ -672,6 +672,23 @@ namespace Trk {
       GXFTrajectory & traj
     ) const;
 
+    /*
+     * @brief Find and set first and last measurement for each fit parameter.
+     *
+     * Find the first and last measurement relevant for each parameter. The
+     * perigee parameter use all real measurements. For the scattering and
+     * brems parameters, all measurements after/before encountering that
+     * surface are skipped, depending if we are still looking at upstream
+     * states or not.
+     *
+     * @param[in, out] cache General cache object to fill with first/last.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     */
+    void fillFirstLastMeasurement(
+      Cache & cache,
+      GXFTrajectory & trajectory
+    ) const;
+
     FitterStatusCode runIteration(
       const EventContext& ctx,
       Cache &,
