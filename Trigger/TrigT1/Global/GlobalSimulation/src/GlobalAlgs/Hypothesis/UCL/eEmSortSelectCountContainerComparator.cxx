@@ -4,6 +4,7 @@
 */
 
 #include "eEmSortSelectCountContainerComparator.h"
+#include "hexStrToBinStr.h" 
 
 #include "../../../dump.h"
 #include "../../../dump.icc"
@@ -15,9 +16,7 @@
 #include <algorithm>
 
 namespace GlobalSim {
-  
 
-  
   eEmSortSelectCountContainerComparator::eEmSortSelectCountContainerComparator(const std::string& type,
 									 const std::string& name,
 									 const IInterface* parent) :
@@ -33,6 +32,23 @@ namespace GlobalSim {
     return StatusCode::SUCCESS;
   }
 
+  struct TestCounts {
+    std::size_t nInputPorts{0};
+    std::size_t nOutputTobs{0};
+    std::size_t nOutputTobs_pass{0};
+    std::size_t nCounts{0};
+    std::size_t nCounts_pass{0};
+  };
+  std::ostream& operator << (std::ostream& os, const TestCounts& tc) {
+    os << "test counts. nInputPorts: " << tc.nInputPorts  
+       << " nOutputTobs: " << tc.nOutputTobs
+       << " nOutputTobs_pass: " << tc.nOutputTobs_pass
+       << " nCounts: " << tc.nCounts
+       << " nCounts_pass: " << tc.nCounts_pass;
+    return os;
+  }
+      
+				      
   StatusCode
   eEmSortSelectCountContainerComparator::run(const EventContext& ctx) const {
     ATH_MSG_DEBUG("run()");
@@ -53,33 +69,17 @@ namespace GlobalSim {
 								     ctx);
     CHECK(ports_out.isValid());
 
+    auto tcounts = TestCounts();
+    tcounts.nInputPorts = fifo->size();
     {
       std::stringstream ss;
       ss << "eEmTobs from FIFO:\n";
       for (const auto& i : *fifo) {
-	ss << *(i.m_I_eEmTobs) << '\n';
+	ss << eEmInputTOBToString(*(i.m_I_eEmTobs)) << '\n';
       }
 
       ATH_MSG_DEBUG(ss.str());
     }
-
-    {
-      std::stringstream ss;
-      ss << "eEmSortSelectCountContainerPortsOut tob bits:\n";
-      for (const auto& tob : ports_out->m_O_eEmGenTob) {
-	ss << tob->as_bits() << ' ' << std::hex << tob->as_bits().to_ulong() << '\n';
-      }
-      ss << '\n';
-      ATH_MSG_DEBUG(ss.str());
-    }
-    
-    {
-      std::stringstream ss;
-      ss << "eEmSortSelectCountContainerPortsOut multiplicity bits:\n";
-      ss << *(ports_out->m_O_Multiplicity) << '\n';
-      ATH_MSG_DEBUG(ss.str());
-    }
-
 
     auto expectations =
       SG::ReadHandle<GlobalSim::eEmSortSelectCountExpectations>(m_eEmSortSelectCountExpectationsReadKey, ctx);
@@ -114,15 +114,53 @@ namespace GlobalSim {
       return StatusCode::FAILURE;
     }
 
+    //for some reason the tobs are delivered in reverse order. Fix this.
+    std::reverse(std::begin(exp_tobs), std::end(exp_tobs));
+
+
     {
-      std::stringstream ss;
-      ATH_MSG_DEBUG("expected tob bits :");
-	for (const auto& ts : exp_tobs) {ss << ts << '\n';}
+
+      auto fnd_tobs = ports_out->m_O_eEmGenTob;
+
+      std::size_t idx{0};
+
+      // compare only sorted TOBS - the  the ordering of the unsorted TOBS
+      // may differ in the VHDL code
+      auto ss = std::stringstream();
+      for (;idx != fnd_tobs.size(); ++idx) {
+
+	
+	const auto& f_tob = fnd_tobs[idx];
+	bool pass{(f_tob->as_bits().to_ulong()  == exp_tobs[idx].to_ulong())};
+	ss << '\n' << idx << " found    " <<  f_tob->as_bits() << ' '
+	   << std::hex << f_tob->as_bits().to_ulong() 
+	   << " expected " <<  exp_tobs[idx] << ' '
+	   << exp_tobs[idx].to_ulong()
+	   << ' ' << std::boolalpha
+	   << pass
+	   << '\n';
+	tcounts.nOutputTobs += 1;
+	if (pass) {tcounts.nOutputTobs_pass +=1;}
+      }
+      ATH_MSG_DEBUG(ss.str());
     }
+
     
     {
-      std::stringstream ss;
-      ATH_MSG_DEBUG("expected multiplicity bits :\n" << (*expectations).m_expected_multiplicity_bits);
+      const auto& mult_bits = ports_out-> m_O_Multiplicity;
+      
+      auto found = mult_bits->to_string();
+      auto exp_str = hexStrToBinStr((*expectations).m_expected_multiplicity_bits);
+      ATH_MSG_DEBUG("\nmultiplicity bits. found: " << found
+		    << " expected: "
+		    << exp_str);
+      
+      tcounts.nCounts +=1;
+      if (found == exp_str) {
+	tcounts.nCounts_pass +=1;
+      }
+      
+      ATH_MSG_DEBUG(tcounts);
     }
     
     return StatusCode::SUCCESS;

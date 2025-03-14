@@ -73,6 +73,9 @@ namespace GlobalSim {
       "eEmSortSelectCountExpectationsReadKey",
       "eEmSortSelectCountExpectations",
       "key to read in eEmSortSelectCount regression test expectations"};
+
+    constexpr static auto& s_SortOutWidth =
+      eEmSortSelectCountContainerPortsOut::SortOutWidth;
   };
 }
     

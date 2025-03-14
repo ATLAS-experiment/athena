@@ -26,25 +26,28 @@ namespace GlobalSim {
     constexpr static std::size_t NumNoSort{1};
 
     // no of sorts = No of items to keep for each sort
-    constexpr static std::array<std::size_t, NumSort> SortOutWidth {
+    constexpr static std::array<std::size_t, NumSort> SortOutWidths {
       {6UL, 6UL, 6UL, 10UL, 10UL, 10UL, 6UL}
     };
 
+    
+    constexpr static std::size_t SortOutWidth{
+      std::accumulate(std::begin(SortOutWidths),
+		      std::end(SortOutWidths),
+		      0U)};
+
     constexpr static std::size_t NoSortOutWidth{144};
 
-    constexpr static std::size_t NumTotalTobWidth{
-      std::accumulate(std::begin(SortOutWidth),
-		      std::end(SortOutWidth),
-		      0U) + NoSortOutWidth};
-
+    constexpr static std::size_t NumTotalTobWidth{SortOutWidth +
+						  NoSortOutWidth};
 
     // indices to place sorted tobs in output array found by compile
     // time summing of width values.
     constexpr static std::array<std::size_t, NumSort> SortOutStart =
       []{
 	std::array<std::size_t, NumSort> a{};
-	std::partial_sum(std::cbegin(SortOutWidth),
-			 std::cend(SortOutWidth)-1,
+	std::partial_sum(std::cbegin(SortOutWidths),
+			 std::cend(SortOutWidths)-1,
 			 a.begin()+1,
 			 std::plus<std::size_t>());
 	return a;

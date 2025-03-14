@@ -38,10 +38,10 @@ namespace GlobalSim {
     // Cut values for Select part of Algorithm. Not yet provided in VHDL
 
     
-    m_EtMin = std::vector(s_NumSelect, 0);
-    m_REtaMin = std::vector(s_NumSelect, 0);
-    m_RHadMin = std::vector(s_NumSelect, 0);
-    m_WsTotMin = std::vector(s_NumSelect, 0);
+    m_EtMin = std::vector(s_NumSelect, 0U);
+    m_REtaMin = std::vector(s_NumSelect, 0U);
+    m_RHadMin = std::vector(s_NumSelect, 0U);
+    m_WsTotMin = std::vector(s_NumSelect, 0U);
 
     // Cut values for the Count part of Algorithm.
     // All values set to EM5 for now
@@ -55,8 +55,9 @@ namespace GlobalSim {
     // Eta min is tricky:
     // It has been set to 0x100000000 in a 9 bit word. So it is negative.
     // But our words have > 9 bits.
-    m_count_EtaMin = std::vector<std::vector<int>>(s_NumCnt,
-					 std::vector<int>(s_NumEtaRanges, -0b011111111));
+    m_count_EtaMin =
+      std::vector<std::vector<int>>(s_NumCnt,
+				    std::vector<int>(s_NumEtaRanges, -0b011111111));
     
     m_count_EtaMax = std::vector<std::vector<int>>(s_NumCnt,
 						   std::vector<int>(s_NumEtaRanges, 0b011111111));
@@ -79,6 +80,16 @@ namespace GlobalSim {
      
     ATH_MSG_DEBUG("read in GepAlgoHypothesis fifo ");
 
+    {
+      std::stringstream ss;
+      ss <<'\n';
+      for (const auto& p : *fifo) {
+	ss  << eEmInputTOBToString(*(p.m_I_eEmTobs)) << '\n';
+      }
+      ATH_MSG_DEBUG(ss.str());
+    }
+      
+    
     auto eEmTobs = make_eEmTobs(*fifo);
 
     auto collector = std::make_unique<DataCollector>();
@@ -128,7 +139,7 @@ namespace GlobalSim {
 
       auto& sel =  selected_genericTobs[i];
       auto divider = std::begin(sel) + std::min(sel.size(),
-						s_SortOutWidth[i]);
+						s_SortOutWidths[i]);
 
 
       std::partial_sort(std::begin(sel),
@@ -149,11 +160,12 @@ namespace GlobalSim {
 
 
     // write unsorted generic TOBs to the output port
-    std::size_t numToCopy = std::min(s_NumNoSort, eEmTobs.size());
-    
+    std::size_t numToCopy = std::min(outputTobs.size()-s_SortOutWidth,
+				     eEmTobs.size());
+
     std::transform(std::cbegin(eEmTobs),
-		   std::cbegin(eEmTobs)+s_NumNoSort-1,
-		   std::begin(outputTobs) + numToCopy,
+		   std::cbegin(eEmTobs)+numToCopy,
+		   std::begin(outputTobs) + s_SortOutWidth,
 		   make_genericTob);
 		   
 		   
@@ -278,11 +290,12 @@ namespace GlobalSim {
 		       rEtaMin= m_REtaMin[i],
 		       rHadMin = m_RHadMin[i],
 		       wsTotMin = m_WsTotMin[i]](const auto& tob){
+
 	return
-	  bitSetToInt(tob->Et_bits()) >= etMin and
-	  bitSetToInt(tob->REta_bits()) >= rEtaMin and
-	  bitSetToInt(tob->RHad_bits()) >= rHadMin and
-	  bitSetToInt(tob->WsTot_bits()) >= wsTotMin;
+	  (tob->Et_bits()).to_ulong() >= etMin and
+	  (tob->REta_bits()).to_ulong() >= rEtaMin and
+	  (tob->RHad_bits()).to_ulong() >= rHadMin and
+	  (tob->WsTot_bits()).to_ulong() >= wsTotMin;
       };
    
       std::vector<eEmTobPtr> s_tobs;

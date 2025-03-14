@@ -58,21 +58,22 @@ namespace GlobalSim {
   }
 
 
-  std::bitset<32>  eEmTob::asBits() const  {
+  std::bitset<32>  eEmTob::as_bits() const  {
     auto result = std::bitset<32>();
     std::size_t r_ptr{0};
+ 
     for (std::size_t s_ptr=0; s_ptr < m_Et.size(); ++s_ptr, ++r_ptr) {
       if(m_Et.test(s_ptr)) {result.set(r_ptr);}
     }
-
+    
     for (std::size_t s_ptr=0; s_ptr < m_REta.size(); ++s_ptr, ++r_ptr) {
       if(m_REta.test(s_ptr)) {result.set(r_ptr);}
     }
-      
+
     for (std::size_t s_ptr=0; s_ptr < m_RHad.size(); ++s_ptr, ++r_ptr) {
       if(m_RHad.test(s_ptr)) {result.set(r_ptr);}
     }
-            
+
     for (std::size_t s_ptr=0; s_ptr < m_WsTot.size(); ++s_ptr, ++r_ptr) {
       if(m_WsTot.test(s_ptr)) {result.set(r_ptr);}
     }
@@ -84,6 +85,7 @@ namespace GlobalSim {
     for (std::size_t s_ptr=0; s_ptr < m_Phi.size(); ++s_ptr, ++r_ptr) {
       if(m_Phi.test(s_ptr)) {result.set(r_ptr);}
     }
+ 
 
     return result;
   }
@@ -99,7 +101,9 @@ namespace GlobalSim {
        << "RHad: " << std::hex<< tob.RHad_bits().to_ulong() << '\n'
        << "WsTot: " << std::hex<< tob.WsTot_bits().to_ulong() << '\n'
        << "Eta: " << std::hex<< tob.Eta_bits().to_ulong() << '\n'
-       << "Phi: " << std::hex<< tob.Phi_bits().to_ulong() << '\n';
+       << "Phi: " << std::hex<< tob.Phi_bits().to_ulong() << '\n'
+       << tob.as_bits() << ' ' << std::hex << tob.as_bits().to_ulong()
+       << '\n';
     return os;
   }
 }
