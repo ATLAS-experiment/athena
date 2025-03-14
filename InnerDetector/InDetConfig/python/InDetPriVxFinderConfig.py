@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetPriVxFinder package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -139,6 +139,8 @@ if __name__ == "__main__":
         flags.Tracking.PriVertex.setup = VertexSetup.IVF
     elif "FastIterativeFinding" in sys.argv:
         flags.Tracking.PriVertex.setup = VertexSetup.FastIVF
+    elif "GridFinding" in sys.argv: 
+        flags.Tracking.PriVertex.setup = VertexSetup.ActsGridDensity  
     flags.lock()
 
     acc = MainServicesCfg(flags)
@@ -155,3 +157,4 @@ if __name__ == "__main__":
     )
 
     acc.wasMerged()
+

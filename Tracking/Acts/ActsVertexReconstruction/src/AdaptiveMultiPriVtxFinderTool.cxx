@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/AdaptiveMultiPriVtxFinderTool.h"
@@ -21,6 +21,11 @@
 #include "Acts/Utilities/AnnealingUtility.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Vertexing/TrackAtVertex.hpp"
+
+#include "Acts/Vertexing/GaussianGridTrackDensity.hpp"
+#include "Acts/Vertexing/GridDensityVertexFinder.hpp"
+#include "Acts/Vertexing/GaussianTrackDensity.hpp"
+
 
 // STL
 #include <iostream>
@@ -103,40 +108,83 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
     fitterCfg.trackLinearizer.connect<&TrackLinearizer::linearizeTrack>(&*m_linearizer);
     VertexFitter fitter(fitterCfg, logger().cloneWithSuffix("Fitter"));
 
-    // Set up Gaussian track density
-    Acts::GaussianTrackDensity::Config trackDensityConfig;
-    trackDensityConfig.d0MaxSignificance = m_gaussianMaxD0Significance;
-    trackDensityConfig.z0MaxSignificance = m_gaussianMaxZ0Significance;
-    trackDensityConfig.extractParameters.connect<&TrackWrapper::extractParameters>();
-    Acts::GaussianTrackDensity trackDensity(trackDensityConfig);
+  std::string seederType = m_seederType;
 
-    // Vertex seed finder
-    VertexSeedFinder::Config seedFinderConfig{trackDensity};
-    auto seedFinder = std::make_shared<VertexSeedFinder>(seedFinderConfig);
-    VertexFinder::Config finderConfig(std::move(fitter), seedFinder,
-        ipEst, bField);
+    if (seederType == "Grid") {
+      Acts::GaussianGridTrackDensity::Config trackDensityConfig;
+      trackDensityConfig.mainGridSize           = m_gridMainGridSize;
+      trackDensityConfig.trkGridSize            = m_gridTrkGridSize;
+      trackDensityConfig.useHighestSumZPosition = m_gridUseHighestSumZPosition;
+      Acts::GaussianGridTrackDensity trackDensity(trackDensityConfig);
 
-    // Vertex finder config
-    finderConfig.tracksMaxZinterval = m_tracksMaxZinterval;
-    finderConfig.tracksMaxSignificance = m_tracksMaxSignificance;
-    finderConfig.maxVertexChi2 = m_maxVertexChi2;
-    finderConfig.doRealMultiVertex = m_doRealMultiVertex;
-    finderConfig.useFastCompatibility = m_useFastCompatibility;
-    finderConfig.maxMergeVertexSignificance = m_maxMergeVertexSignificance;
-    finderConfig.minWeight = m_minWeight;
-    finderConfig.maxIterations = m_maxIterations;
-    finderConfig.addSingleTrackVertices = m_addSingleTrackVertices;
-    finderConfig.doFullSplitting = m_doFullSplitting;
-    finderConfig.maximumVertexContamination = m_maximumVertexContamination;
-    finderConfig.initialVariances = Acts::Vector4::Constant(m_looseConstrValue);
-    finderConfig.useVertexCovForIPEstimation = m_useVertexCovForIPEstimation;
-    finderConfig.useSeedConstraint = m_useSeedConstraint;
-    finderConfig.extractParameters.connect<&TrackWrapper::extractParameters>();
-    m_vertexFinder = std::make_shared<VertexFinder>(std::move(finderConfig),
-						    logger().cloneWithSuffix("Finder"));
-    
+      Acts::GridDensityVertexFinder::Config gridSeedFinderConfig(trackDensity);
+      gridSeedFinderConfig.extractParameters.connect<&TrackWrapper::extractParameters>();
+      gridSeedFinderConfig.maxD0TrackSignificance = m_gridMaxD0Significance;
+      gridSeedFinderConfig.maxZ0TrackSignificance = m_gridMaxZ0Significance;
+
+      Acts::GridDensityVertexFinder gridSeedFinder(gridSeedFinderConfig);
+
+      VertexFinder::Config finderConfig(
+          std::move(fitter),
+          std::make_shared<Acts::GridDensityVertexFinder>(gridSeedFinder),
+          ipEst,
+          bField
+      );
+
+      initializeVertexFinder(finderConfig);
+    }
+    else if (seederType == "Gaussian") {
+      Acts::GaussianTrackDensity::Config trackDensityConfig;
+      trackDensityConfig.d0MaxSignificance = m_gaussianMaxD0Significance;
+      trackDensityConfig.z0MaxSignificance = m_gaussianMaxZ0Significance;
+      trackDensityConfig.extractParameters.connect<&TrackWrapper::extractParameters>();
+
+      Acts::GaussianTrackDensity trackDensity(trackDensityConfig);
+      VertexSeedFinder::Config seedFinderConfig(trackDensity);
+      auto seedFinder = std::make_shared<VertexSeedFinder>(seedFinderConfig);
+
+      VertexFinder::Config finderConfig(
+          std::move(fitter),
+          seedFinder,
+          ipEst,
+          bField
+      );
+
+      initializeVertexFinder(finderConfig);
+    }
+    else {
+      ATH_MSG_ERROR("Unknown seederType '" << seederType << "'.");
+      return StatusCode::FAILURE;
+    }
+
     ATH_MSG_INFO("ACTS AMVF tool successfully initialized");
     return StatusCode::SUCCESS;
+  }
+
+  void
+  ActsTrk::AdaptiveMultiPriVtxFinderTool::initializeVertexFinder(VertexFinder::Config& finderConfig)
+  {
+ 
+  finderConfig.tracksMaxZinterval          = m_tracksMaxZinterval;
+  finderConfig.tracksMaxSignificance       = m_tracksMaxSignificance;
+  finderConfig.maxVertexChi2               = m_maxVertexChi2;
+  finderConfig.doRealMultiVertex           = m_doRealMultiVertex;
+  finderConfig.useFastCompatibility        = m_useFastCompatibility;
+  finderConfig.maxMergeVertexSignificance  = m_maxMergeVertexSignificance;
+  finderConfig.minWeight                   = m_minWeight;
+  finderConfig.maxIterations               = m_maxIterations;
+  finderConfig.addSingleTrackVertices      = m_addSingleTrackVertices;
+  finderConfig.doFullSplitting             = m_doFullSplitting;
+  finderConfig.maximumVertexContamination  = m_maximumVertexContamination;
+  finderConfig.initialVariances            = Acts::Vector4::Constant(m_looseConstrValue);
+  finderConfig.useVertexCovForIPEstimation = m_useVertexCovForIPEstimation;
+  finderConfig.useSeedConstraint           = m_useSeedConstraint;
+
+  finderConfig.extractParameters.connect<&TrackWrapper::extractParameters>();
+
+  m_vertexFinder = std::make_shared<VertexFinder>(
+      std::move(finderConfig),
+      logger().cloneWithSuffix("Finder"));
 }
 
 std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
