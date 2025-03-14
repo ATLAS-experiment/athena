@@ -61,4 +61,11 @@ atlas_add_test( testEfex
    PRIVATE_WORKING_DIRECTORY
    POST_EXEC_SCRIPT noerror.sh )
 
+   
+
+atlas_add_test( test_eEmSortSelectCount
+   SCRIPT python/run_hypo_container_ctest.py --evtMax 1
+   PRIVATE_WORKING_DIRECTORY
+   POST_EXEC_SCRIPT noerror.sh )
+
 

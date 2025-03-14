@@ -38,6 +38,11 @@ namespace GlobalSim {
     std::size_t nOutputTobs_pass{0};
     std::size_t nCounts{0};
     std::size_t nCounts_pass{0};
+
+    bool success() const {
+      return nOutputTobs == nOutputTobs_pass and
+	nCounts == nCounts_pass;
+    }
   };
   std::ostream& operator << (std::ostream& os, const TestCounts& tc) {
     os << "test counts. nInputPorts: " << tc.nInputPorts  
@@ -159,8 +164,13 @@ namespace GlobalSim {
       if (found == exp_str) {
 	tcounts.nCounts_pass +=1;
       }
-      
-      ATH_MSG_DEBUG(tcounts);
+    }
+
+    if (!tcounts.success()) {
+      ATH_MSG_ERROR ("Count tests fail: " << tcounts);
+      return StatusCode::FAILURE;
+    } else {
+      ATH_MSG_DEBUG ("Count tests succeed: " << tcounts);
     }
     
     return StatusCode::SUCCESS;
