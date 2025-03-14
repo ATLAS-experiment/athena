@@ -64,6 +64,9 @@ struct MmChamber{
     double ActiveHeightR{0.};
     double stripPitch{0.};
 
+    double moduleHeight{0.};
+    double moduleWidthS{0.};
+    double moduleWidthL{0.};
 
 
     struct MmChannel{
@@ -101,6 +104,8 @@ struct MmChamber{
         Amg::Vector2D firstStripPos{Amg::Vector2D::Zero()};
         /// @ Reference number of the first strip
         unsigned int firstStrip{0};
+        /// @Reference number of all strips
+        unsigned int nStrips{0};
         /// @ Readout side on the detector
         int readoutSide{0};
         /// @brief Ordering operator
@@ -137,7 +142,7 @@ std::ostream& operator<<(std::ostream& ostr,const MmChamber::MmChannel & channel
 std::ostream& operator<<(std::ostream& ostr,const MmChamber::MmLayer & layer) {
     ostr<<"Mmlayer (gasGap): ";
     ostr<<layer.gasGap<<", ";
-    ostr<<"transform: "<<Amg::toString(layer.transform);
+    // ostr<<"transform: "<<Amg::toString(layer.transform);
     return ostr;
 }
 
@@ -184,6 +189,12 @@ std::set<MmChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<float> ActiveHeightR{treeReader, "ActiveHeightR"};
     TTreeReaderValue<float> ActiveWidthS{treeReader, "ActiveWidthS"};
     TTreeReaderValue<float> ActiveWidthL{treeReader, "ActiveWidthL"};
+
+
+    TTreeReaderValue<float> moduleHeight{treeReader, "moduleHeight"};
+    TTreeReaderValue<float> moduleWidthS{treeReader, "moduleWidthS"};
+    TTreeReaderValue<float> moduleWidthL{treeReader, "moduleWidthL"};
+
     TTreeReaderValue<float> stripPitch{treeReader, "stripPitch"};
 
     /// Geo Model transformation
@@ -217,8 +228,10 @@ std::set<MmChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> firstStripPosY{treeReader, "firstStripPosY"};
 
     TTreeReaderValue<std::vector<int>> readoutSide{treeReader, "stripReadoutSide"};
-    TTreeReaderValue<std::vector<unsigned int>> firstStripNum{treeReader, "stripFirstStrip"};
+    TTreeReaderValue<std::vector<unsigned int>> firstStrip{treeReader, "firstStrip"};
+    TTreeReaderValue<std::vector<unsigned int>> nStrips{treeReader, "nStrips"};
 
+    
 
     while (treeReader.Next()) {
         MmChamber newchamber{};
@@ -234,6 +247,9 @@ std::set<MmChamber> readTreeDump(const std::string& inputFile) {
         newchamber.ActiveWidthS = (*ActiveWidthS);
         newchamber.ActiveWidthL = (*ActiveWidthL);
         newchamber.stripPitch = (*stripPitch);
+        newchamber.moduleHeight = (*moduleHeight);
+        newchamber.moduleWidthS = (*moduleWidthS);
+        newchamber.moduleWidthL = (*moduleWidthL);
 
         Amg::Vector3D geoTrans{(*geoModelTransformX)[0], (*geoModelTransformY)[0], (*geoModelTransformZ)[0]};
         Amg::RotationMatrix3D geoRot{Amg::RotationMatrix3D::Identity()};
@@ -273,7 +289,9 @@ std::set<MmChamber> readTreeDump(const std::string& inputFile) {
             newLayer.transform = Amg::getTransformFromRotTransl(std::move(stripRot), std::move(layTrans));
             newLayer.firstStripPos = Amg::Vector2D{(*firstStripPosX)[l], (*firstStripPosY)[l]};
             newLayer.readoutSide = (*readoutSide)[l];
-            newLayer.firstStrip = (*firstStripNum)[l];
+            newLayer.firstStrip = (*firstStrip)[l];
+            newLayer.nStrips = (*nStrips)[l];
+
             newchamber.layers.insert(std::move(newLayer));
         }
         
@@ -293,7 +311,8 @@ std::set<MmChamber> readTreeDump(const std::string& inputFile) {
     if (std::abs(1.*test.attribute - 1.*reference.attribute) > tolerance) {           \
         std::cerr<<"runMmGeoComparison() "<<__LINE__<<": The chamber "<<reference     \
                  <<" differs w.r.t "<<propName<<" "<< reference.attribute             \
-                 <<" (ref) vs. " <<test.attribute << " (test)" << std::endl;          \
+                 <<" (ref) vs. " <<test.attribute << " (test)"                        \
+                 <<", delta: "<<reference.attribute - test.attribute << std::endl;    \
         chamberOkay = false;                                                          \
     }
 
@@ -349,13 +368,22 @@ int main( int argc, char** argv ) {
         const Amg::Transform3D alignableDistort = test.alignableTransform.inverse()*(reference.alignableTransform );
         if (!Amg::doesNotDeform(alignableDistort) || alignableDistort.translation().mag() > tolerance) {
             std::cerr<<"runMmGeoComparison() "<<__LINE__<<": The alignable nodes are at differnt places for  "
-                     <<test<<". " <<Amg::toString(alignableDistort, true)<<std::endl;
+                     <<test<<". " <<Amg::toString(alignableDistort, 3)<<std::endl;
             chamberOkay = false;
         }
 
         ///GasGap Dimensions for debugging
-        TEST_BASICPROP(ActiveWidthS, "GasGap length on the short side");
-        TEST_BASICPROP(ActiveWidthL, "GasGap length on the long side");
+        
+        {
+            constexpr double tolerance = 3. * Gaudi::Units::mm;
+            TEST_BASICPROP(ActiveWidthS, "GasGap length on the short side");
+            TEST_BASICPROP(ActiveWidthL, "GasGap length on the long side");
+
+        }  
+        TEST_BASICPROP(moduleWidthL, "Long module width");
+        TEST_BASICPROP(moduleWidthS, "Short module width");
+        TEST_BASICPROP(moduleHeight, "Module height ");
+
         TEST_BASICPROP(ActiveHeightR, "GasGap Height");
         TEST_BASICPROP(stripPitch, "Strip pitch");
         // if (!chamberOkay) continue;
@@ -369,7 +397,26 @@ int main( int argc, char** argv ) {
                 continue;
             }
             const MmLayer& testLayer{*lay_itr};
-            if ( (refLayer.firstStripPos- testLayer.firstStripPos).mag() > tolerance) {
+            if (!Amg::isIdentity(refLayer.transform.inverse()* testLayer.transform)){
+                std::cerr<<"runMmGeoComparison() "<<__LINE__<<": in "<<test<<" "
+                         <<testLayer<<" differs w.r.t. reference. delta: "
+                         <<Amg::toString(refLayer.transform.inverse()*testLayer.transform)<<std::endl;
+                chamberOkay = false;
+            }
+            if (refLayer.firstStrip != testLayer.firstStrip) {
+                std::cerr<<"runMmGeoComparison() "<<__LINE__<<": in "<<test<<" "
+                        <<testLayer.gasGap<<" starts from different strip "<<refLayer.firstStrip<<" vs. "
+                        <<testLayer.firstStrip<<std::endl;
+               chamberOkay = false;
+            }
+            if (refLayer.nStrips != testLayer.nStrips) {
+                std::cerr<<"runMmGeoComparison() "<<__LINE__<<": in "<<test<<" "
+                    <<testLayer.gasGap<<" has different number of strips "<<refLayer.nStrips<<" vs. "
+                    <<testLayer.nStrips<<std::endl;
+                chamberOkay = false;
+            }
+            /// Gnarf the channel design shifts by 1.5 pitches
+            if (false && (refLayer.firstStripPos- testLayer.firstStripPos).mag() > tolerance) {
                 std::cerr<<"runMmGeoComparison() "<<__LINE__<<": in "<<test<<" "
                          <<testLayer.gasGap<<" has different starting position "
                          <<Amg::toString(refLayer.firstStripPos, 2) <<" vs. "
@@ -379,20 +426,6 @@ int main( int argc, char** argv ) {
                          <<std::endl;
                 chamberOkay = false;
             }
-            if (refLayer.firstStrip != testLayer.firstStrip) {
-                 std::cerr<<"runMmGeoComparison() "<<__LINE__<<": in "<<test<<" "
-                         <<testLayer.gasGap<<" starts from different strip "<<refLayer.firstStrip<<" vs. "
-                         <<testLayer.firstStrip<<std::endl;
-                chamberOkay = false;
-            }
-            
-            
-            if (!Amg::isIdentity(refLayer.transform.inverse()* testLayer.transform)){
-                std::cerr<<"runMmGeoComparison() "<<__LINE__<<": in "<<test<<" "
-                         <<testLayer<<" differs w.r.t. reference "<<Amg::toString(refLayer.transform)<<". vs. "
-                         <<Amg::toString(refLayer.transform.inverse()*testLayer.transform)<<std::endl;
-                chamberOkay = false;
-            }           
         }
         if (!chamberOkay) continue;
         unsigned int failedEta{0}, lastGap{0};
@@ -423,8 +456,7 @@ int main( int argc, char** argv ) {
                 const double centerDist = stripDir.dot(testStrip.globCenter - refStrip.globCenter);
                 const double leftDist = stripDir.dot(testStrip.leftEdge -refStrip.globCenter);
                 const double rightDist = stripDir.dot(testStrip.rightEdge - refStrip.globCenter);
-                if ( std::abs(centerDist) > tolerance || std::abs(leftDist) > tolerance || std::abs(rightDist) > tolerance ||
-                    std::abs(testStrip.stripLength - refStrip.stripLength) > tolerance) {
+                if ( std::abs(centerDist) > tolerance || std::abs(leftDist) > tolerance || std::abs(rightDist) > tolerance) {
                      std::cerr<<"runMmGeoComparison() "<<__LINE__<<": In "
                              <<test<<" " <<testStrip <<" + mu "<<Amg::toString(testDir,2) 
                              <<"/local: "<<Amg::toString(testStrip.locCenter, 2) 

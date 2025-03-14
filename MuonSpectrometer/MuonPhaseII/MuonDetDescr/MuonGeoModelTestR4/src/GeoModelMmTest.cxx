@@ -119,7 +119,7 @@ StatusCode GeoModelMmTest::execute() {
             const int fStrip = reElement->firstStrip(layerHash);
             const int lStrip = fStrip+numStrips-1;
             
-            for (int strip = fStrip; strip <= lStrip; ++strip) {
+            for (int strip = fStrip; strip < lStrip; ++strip) {
                 bool isValid{false};
                 
                 const Identifier chId = id_helper.channelID(reElement->identify(),
@@ -187,8 +187,8 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
 
     ///
     m_moduleHeight = reElement->moduleHeight();
-    m_moduleWidthS = reElement->moduleWidthL();
-    m_moduleWidthL = reElement->moduleWidthS();
+    m_moduleWidthS = reElement->moduleWidthS();
+    m_moduleWidthL = reElement->moduleWidthL();
 
     const MmIdHelper& id_helper{m_idHelperSvc->mmIdHelper()};
     for (unsigned int layer = 1; layer <= reElement->nGasGaps(); ++layer) {
@@ -212,31 +212,35 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
             const IdentifierHash measHash{reElement->measurementHash(chId)};
 
             const MuonGMR4::StripDesign& design{reElement->stripLayer(measHash).design()};
-            m_locStripCenter.push_back(design.center(strip).value_or(Amg::Vector2D::Zero()));
+            if (strip == fStrip) {
+                const Amg::Transform3D stripLocalToGlob = reElement->localToGlobalTrans(gctx, chId);
+                ATH_MSG_VERBOSE(m_idHelperSvc->toStringGasGap(chId)<<" "<< "transform: " 
+                            << Amg::toString(stripLocalToGlob)<<", perp: "<<stripLocalToGlob.translation().perp());
+                m_stripRot.push_back(stripLocalToGlob);
+                m_stripRotGasGap.push_back(layer);
+                m_firstStripPos.push_back(design.firstStripPos());
+                m_readoutSide.push_back(reElement->readoutSide(measHash));
+
+                m_ActiveWidthS = reElement->gapLengthS(measHash);
+                m_ActiveWidthL = reElement->gapLengthL(measHash);
+                m_ActiveHeightR = reElement->gapHeight(measHash);
+                m_firstStrip.push_back(design.firstStripNumber());
+                m_nStrips.push_back(design.numStrips());
+            }
+            CheckVector2D center = design.center(strip);
+            if (!center) {
+                ATH_MSG_WARNING("Strip "<<m_idHelperSvc->toString(chId)<<" is outside bounds "<<design);
+                continue;
+            }
+            m_stripLength.push_back(reElement->stripLength(measHash));
+            m_locStripCenter.push_back(center.value());
             m_isStereo.push_back(design.hasStereoAngle());
             m_stripCenter.push_back(reElement->stripPosition(gctx, measHash));
             m_stripLeftEdge.push_back(reElement->leftStripEdge(gctx,measHash));
-            m_stripRightEdge.push_back(reElement->rightStripEdge(gctx,measHash));
-            m_stripLength.push_back(reElement->stripLength(measHash));
+            m_stripRightEdge.push_back(reElement->rightStripEdge(gctx,measHash));            
             m_gasGap.push_back(layer);
             m_channel.push_back(strip);
-
-            m_ActiveWidthS = reElement->gapLengthS(measHash);
-            m_ActiveWidthL = reElement->gapLengthL(measHash);
-            m_ActiveHeightR = reElement->gapHeight(measHash);
-
-            if (strip != fStrip) continue;
-            const Amg::Transform3D stripGlobToLoc = reElement->globalToLocalTrans(gctx, chId);
-            ATH_MSG_VERBOSE("The global to local transformation on layers is: " << Amg::toString(stripGlobToLoc));
-            ATH_MSG_VERBOSE("The local to global transformation on layers is: " << Amg::toString(reElement->localToGlobalTrans(gctx, chId)));
-            m_stripRot.push_back(stripGlobToLoc);
-            m_stripRotGasGap.push_back(layer);
-            m_firstStripPos.push_back(design.firstStripPos());
-            m_readoutFirstStrip.push_back(design.firstStripNumber());
-            m_readoutSide.push_back(reElement->readoutSide(measHash));
-            
         }
-
     }
     return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;
 }
