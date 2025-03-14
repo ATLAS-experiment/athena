@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKPRIVTXFINDERTOOL_ADAPTIVEMULTIPRIVTXFINDERTOOL_H
@@ -90,17 +90,20 @@ namespace ActsTrk {
     virtual std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
        findVertex(const EventContext& ctx, const xAOD::TrackParticleContainer* trackParticles) const override;
 
-
   private:
 
+    // Overload that takes vector of ITrackLink
     std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
     findVertex(const EventContext& ctx, const std::vector<std::unique_ptr<Trk::ITrackLink>>& trackVector) const;
 
+    // Convert Acts::BoundTrackParameters -> Trk::Perigee
     Trk::Perigee* actsBoundToTrkPerigee(
     const Acts::BoundTrackParameters& bound, const Acts::Vector3& surfCenter) const;
 
+    // Helper to compute "signal compatibility" for sorting vertices
     double estimateSignalCompatibility(xAOD::Vertex* vtx) const;
 
+    // Provide access to the geometry tool
     virtual
     const IActsTrackingGeometryTool*
     trackingGeometryTool() const
@@ -115,11 +118,12 @@ namespace ActsTrk {
     using Propagator = Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>;
     using TrackLinearizer = Acts::HelicalTrackLinearizer;
     using VertexFitter = Acts::AdaptiveMultiVertexFitter;
-    using VertexSeedFinder = Acts::TrackDensityVertexFinder;
+    using VertexSeedFinder= Acts::TrackDensityVertexFinder;
     using VertexFinder = Acts::AdaptiveMultiVertexFinder;
 
-    std::shared_ptr<VertexFinder> m_vertexFinder = nullptr;
+    void initializeVertexFinder(VertexFinder::Config& finderConfig);
 
+    std::shared_ptr<VertexFinder> m_vertexFinder = nullptr;
     std::shared_ptr<Propagator> m_propagator = nullptr;
 
     // optional because of late initializatio
@@ -143,7 +147,8 @@ namespace ActsTrk {
     DoubleProperty m_fitterMaxRelativeShift{this, "fitterMaxRelativeShift", 0.01, "Vertex fitter max. relative shift"};
     BooleanProperty m_fitterDoSmoothing{this, "fitterDoSmoothing", true, "Vertex fitter doSmoothing"};
     DoubleProperty m_minWeightFitter{this, "minWeightFitter", 0.001, "Min track weight for fitter"};
-    // Finder config variables
+
+    // Finder config
     BooleanProperty m_useBeamConstraint{this, "useBeamConstraint", true, "Use beam constraint"};
     DoubleProperty m_tracksMaxZinterval{this, "tracksMaxZinterval", 1., "Tracks max. Z-interval"};
     DoubleProperty m_tracksMaxSignificance{this, "tracksMaxSignificance", 5., "Tracks max. significance"};
@@ -161,14 +166,23 @@ namespace ActsTrk {
     BooleanProperty m_useSeedConstraint{this, "useSeedConstraint", false, "Use seed constraint in fit"};
     // Final vertex selection variables
     DoubleProperty m_finalCutMaxVertexChi2{this, "finalCutMaxVertexChi2", 18.42, "Final cut max. vertex chi2"};
-    // Gaussian seed finder variables
+    // Gaussian seeder finder variables
     DoubleProperty m_gaussianMaxD0Significance{this, "gaussianMaxD0Significance", 3.5, "Gaussian seeder max d0 track significance"};
     DoubleProperty m_gaussianMaxZ0Significance{this, "gaussianMaxDZSignificance", 12.0, "Gaussian seeder max z0 track significance"};
+    // Grid seeder finder variables
+    UnsignedIntegerProperty m_gridMainGridSize{this, "GridMainGridSize", 20, "Main grid size for Acts::GaussianGridTrackDensity"};
+    UnsignedIntegerProperty m_gridTrkGridSize{this, "GridTrkGridSize", 10, "Track grid size for Acts::GaussianGridTrackDensity"};
+    BooleanProperty m_gridUseHighestSumZPosition{this, "GridUseHighestSumZPosition", false, "Use highest sum Z position in the grid seeder"};
+    // Grid seeder selection thresholds
+    DoubleProperty m_gridMaxD0Significance{this, "gridMaxD0Significance", 3.5, "Grid seeder max d0 track significance"};
+    DoubleProperty m_gridMaxZ0Significance{this, "gridMaxZ0Significance", 12.0, "Grid seeder max z0 track significance"};
+
     // IP Estimator config
     UnsignedIntegerProperty m_ipEstMaxIterations{this, "ipEstMaxIterations", 20, "IpEstimator max. iterations"};
     DoubleProperty m_ipEstPrecision{this, "ipEstPrecision", 1e-10, "IpEstimator precision"};
-
+    StringProperty m_seederType{this, "seederType", "Gaussian", "type of seeder, \"Grid\" for Grid seeder, other for Gaussian seeder (default)"};
   };
 }
 
 #endif // ACTSTRKPRIVTXFINDERTOOL_ADAPTIVEMULTIPRIVTXFINDERTOOL_H
+
