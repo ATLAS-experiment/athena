@@ -48,6 +48,8 @@ namespace xAOD {
       TPAUX_VARIABLE(art_channel);
       
       //trigger data
+      TPAUX_VARIABLE(trig_globalX);
+      TPAUX_VARIABLE(trig_globalU);
       TPAUX_VARIABLE(trig_BCID);
       TPAUX_VARIABLE(trig_dTheta);
       TPAUX_VARIABLE(trig_ROI_rID);

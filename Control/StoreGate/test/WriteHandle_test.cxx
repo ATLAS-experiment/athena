@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/WriteHandle_test.cxx
@@ -169,20 +169,6 @@ void test1()
     k7.initialize().ignore();
     EXPECT_EXCEPTION (SG::ExcUninitKey, SG::WriteHandle<MyObj> h7 (k7, ctx5));
   }
-
-  SG::WriteHandle<MyObj> h8 ("foo", ctx5);
-  assert (h8.clid() == MyCLID);
-  assert (h8.key() == "foo");
-  assert (h8.storeHandle().name() == "StoreGateSvc");
-  assert (h8.mode() == Gaudi::DataHandle::Writer);
-  assert (h8.store() == "TestStore");
-
-  SG::WriteHandle<MyObj> h9 ("foo", "OtherStore", ctx5);
-  assert (h9.clid() == MyCLID);
-  assert (h9.key() == "foo");
-  assert (h9.storeHandle().name() == "OtherStore");
-  assert (h9.mode() == Gaudi::DataHandle::Writer);
-  assert (h9.store() == "OtherStore_Impl");
 }
 
 

@@ -27,7 +27,8 @@ threshold_mapping = {
         40:39,
     },
     'jEM': {
-        20:15,
+        20:14,
+        25:20,
     },
     'eTAU': {
         # in pp menu (doHeavyIonTobThresholds=False) ptMinToTopo value is assigined to eTAU1

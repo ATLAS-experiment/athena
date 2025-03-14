@@ -155,7 +155,7 @@ def defineMenu():
         'L1_jLJ80', 'L1_jLJ120', 'L1_jLJ140', 'L1_jLJ180',
 
         # jEM
-        'L1_jEM20', 'L1_jEM20M',   
+        'L1_jEM25', 'L1_jEM20M',   
 
         # gJ
         'L1_gJ20p0ETA25', 'L1_gJ20p0ETA25_EMPTY', 'L1_gJ20p25ETA49', 'L1_gJ50p0ETA25', 'L1_gJ100p0ETA25', 'L1_gJ400p0ETA25',
@@ -334,6 +334,9 @@ def defineMenu():
         #ATR-30666
         'L1_ZAFB-04DPHIM-eEM18M',
         'L1_ZAFB-25DPHIM-eEM18M',
+        #ATR-30822
+        'L1_eEM18M_jEM25',
+
         #ATR-22109
         #'L1_ZAFB-25DPHI-eEM18M',
 

@@ -282,7 +282,7 @@ def defineMenu():
         'L1_jLJ180':'',
 
         # other non-primary
-        'L1_jEM20':'',
+        'L1_jEM25':'',
         'L1_jEM20M':'',
 
         # combined non-primary

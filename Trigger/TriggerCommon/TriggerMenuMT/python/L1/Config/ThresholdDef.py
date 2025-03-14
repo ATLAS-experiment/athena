@@ -153,7 +153,7 @@ class ThresholdDef:
                                               thr=eEMVarThreshold( 'eEM%iVM' % thrV, 'eEM').setIsolation( reta = "Medium", wstot = "Medium", rhad = "Medium" ) )
 
         # jEM
-        jEM_cuts = [20]
+        jEM_cuts = [25]
         for thrV in jEM_cuts:
             jEMThreshold('jEM%i' % thrV, 'jEM').addThrValue(get_threshold_cut('jEM',thrV))
 

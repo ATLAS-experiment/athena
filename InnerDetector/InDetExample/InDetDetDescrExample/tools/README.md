@@ -9,10 +9,10 @@ Creating a JSON file for masking:
 
 - In order to make this selection first the entire list of modules has to be converted into a JSON file and then another script can be use to select specific modules from this list.
 
-- First run the script: /athena/InnerDetector/InDetExample/InDetDetDescrExample/tools/RunPrintSiDetElements.py using: python InDetDetDescrExample /RunPrintSiDetElements.py
+- First run the script: /athena/InnerDetector/InDetExample/InDetDetDescrExample/tools/RunPrintSiDetElements.py using: RunPrintSiDetElements.py
 - This will create 2 files, one for Pixels and one for Strips, named `PixelGeometry.dat` and `StripGeometry.dat` containing the list of modules along with their specifications e.g. whether the module in the barrel or end cap (#barrel_ec), to which layer or disk does (#layer_disk) it belong to, its number in phi and eta (#phi_module and #eta_module) and which side of the detector does it belong to (#side) etc.
 - Use the python script /athena/InnerDetector/InDetExample/InDetDetDescrExample/tools/geometry_dat_to_json.py to convert a geometry.dat into a json file say geometry.json
-`python InDetDetDescrExample/geometry_dat_to_json.py --infile PixelGeometry.dat --outfile PixelGeometry.json`
+`geometry_dat_to_json.py --infile PixelGeometry.dat --outfile PixelGeometry.json`
 
 
 - Use /athena/InnerDetector/InDetExample/InDetDetDescrExample/tools/module_selector_from_json.py to select modules from the geometry.json and create a separate json file.
@@ -37,7 +37,7 @@ Reco_tf.py \
      --inputRDOFile  ${input_rdo} \
      --outputAODFile ${outFile} \
      --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-     --preExec "ConfigFlags.ITk.doStripModuleVeto = True; ConfigFlags.ITk.JsonPathStripModuleVeto=\"$jsonFile\"" \
+     --preExec "flags.ITk.doStripModuleVeto = True; flags.ITk.JsonPathStripModuleVeto=\"$jsonFile\"" \
      --maxEvents ${n_events} \
      --multithreaded 'True'
 ```
@@ -47,4 +47,4 @@ Reco_tf.py \
 Masking Strip Modules using SQLite DB (not recently tested):
 - To use database one needs to turn on the flag "kwargs.setdefault("useDB", False)" in the /athena/InnerDetector/InDetConditions/SCT_ConditionsTools/python/ITkStripConditionsToolsConfig.py
 - Also the reconstruction command should include:
-   --preExec 'ConfigFlags.ITk.doStripModuleVeto = True'
+   --preExec 'flags.ITk.doStripModuleVeto = True'

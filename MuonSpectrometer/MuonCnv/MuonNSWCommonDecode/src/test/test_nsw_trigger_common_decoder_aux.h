@@ -93,7 +93,8 @@ struct outBranches
   std::vector<std::vector<uint32_t>> b_MML1A_art_fiberID = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_art_layers = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_art_channels = {} ;
-  std::vector<std::vector<uint32_t>> b_MML1A_trig_padding = {} ;
+  std::vector<std::vector<uint32_t>> b_MML1A_trig_globalX = {} ;
+  std::vector<std::vector<uint32_t>> b_MML1A_trig_globalU = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_trig_BCID = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_trig_dTheta = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_trig_phiBin = {} ;
@@ -329,7 +330,8 @@ int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data
     outtree.Branch( "MML1A_art_fiberID", &data.b_MML1A_art_fiberID);
     outtree.Branch( "MML1A_art_layers", &data.b_MML1A_art_layers);
     outtree.Branch( "MML1A_art_channels", &data.b_MML1A_art_channels);
-    outtree.Branch( "MML1A_trig_padding", &data.b_MML1A_trig_padding);
+    outtree.Branch( "MML1A_trig_globalX", &data.b_MML1A_trig_globalX);
+    outtree.Branch( "MML1A_trig_globalU", &data.b_MML1A_trig_globalU);
     outtree.Branch( "MML1A_trig_BCID", &data.b_MML1A_trig_BCID);
     outtree.Branch( "MML1A_trig_dTheta", &data.b_MML1A_trig_dTheta);
     outtree.Branch( "MML1A_trig_phiBin", &data.b_MML1A_trig_phiBin);

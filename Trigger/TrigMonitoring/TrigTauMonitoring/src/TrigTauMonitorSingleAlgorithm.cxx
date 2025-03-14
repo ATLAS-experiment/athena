@@ -166,7 +166,7 @@ void TrigTauMonitorSingleAlgorithm::fillHLTEfficiencies(const EventContext& ctx,
     for(const auto *offline_tau : offline_tau_vec) {
         bool L1_match = false;
     
-        // Check the matching offline tau with L1 item -> depending on the L1 type (legacy, phase-1 eTAU, jTAU, cTAU)
+        // Check the matching offline tau with L1 item -> depending on the L1 type (phase-1 eTAU, jTAU, cTAU)
         // All L1 RoIs have a core size of 3x3 TTs -> 0.3 x 0.3
         for(const TLorentzVector& roi : rois) {
             L1_match = offline_tau->p4().DeltaR(roi) <= 0.3;
@@ -505,12 +505,7 @@ std::vector<TLorentzVector> TrigTauMonitorSingleAlgorithm::getRoIsVector(const E
             v.SetPtEtaPhiM(eTau_roi->et(), eTau_roi->eta(), eTau_roi->phi(), 0);
             ret.push_back(v);
         }
-    } else { // Legacy
-        for(const xAOD::EmTauRoI* roi : getL1LegacyTAUs(ctx, info.getL1TauItem())) {
-            v.SetPtEtaPhiM(roi->eT(), roi->eta(), roi->phi(), 0);
-            ret.push_back(v);
-        }
-    }
+    } 
 
     return ret;
 }

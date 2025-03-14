@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/MMT_struct.h"
@@ -135,13 +135,13 @@ std::vector<ROOT::Math::XYZVector> MMT_Parameters::MM_firststrip_positions(const
    return positions;
 }
 
-evInf_entry::evInf_entry(int event,int pdg,double e,double p,double ieta,double peta,double eeta,double iphi,double pphi,double ephi,double ithe,double pthe,double ethe,double dth,
+evInf_entry::evInf_entry(uint64_t event,int pdg,double e,double p,double ieta,double peta,double eeta,double iphi,double pphi,double ephi,double ithe,double pthe,double ethe,double dth,
                          int trn,int mun,const ROOT::Math::XYZVector& tex):
    athena_event(event),pdg_id(pdg),E(e),pt(p),eta_ip(ieta),eta_pos(peta),eta_ent(eeta),phi_ip(iphi),phi_pos(pphi),phi_ent(ephi),theta_ip(ithe),theta_pos(pthe),theta_ent(ethe),
    dtheta(dth),truth_n(trn),mu_n(mun),vertex(tex) {}
 
 
-hitData_entry::hitData_entry(int ev, double gt, double q, int vmm, int mmfe, int pl, int st, int est, int phi, int mult, int gg, double locX, double tr_the, double tru_phi,
+hitData_entry::hitData_entry(uint64_t ev, double gt, double q, int vmm, int mmfe, int pl, int st, int est, int phi, int mult, int gg, double locX, double tr_the, double tru_phi,
                              bool q_tbg, int bct, const ROOT::Math::XYZVector& tru, const ROOT::Math::XYZVector& rec):
   event(ev),gtime(gt),charge(q),VMM_chip(vmm),MMFE_VMM(mmfe),plane(pl),strip(st),station_eta(est),station_phi(phi),multiplet(mult),gasgap(gg),localX(locX),tru_theta_ip(tr_the),tru_phi_ip(tru_phi),truth_nbg(q_tbg),BC_time(bct),truth(tru),recon(rec) {}
 

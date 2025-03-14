@@ -70,7 +70,6 @@ private:
     void fillL1eTauVars(const std::string& trigger, const std::vector<const xAOD::eFexTauRoI*>& rois, const std::vector<const xAOD::eFexTauRoI*>& xtob_rois) const;
     void fillL1jTauVars(const std::string& trigger, const std::vector<const xAOD::jFexTauRoI*>& rois) const;
     void fillL1cTauVars(const std::string& trigger, const std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>>& rois, const std::vector<const xAOD::eFexTauRoI*>& xtob_rois) const;
-    void fillL1LegacyVars(const std::string& trigger, const std::vector<const xAOD::EmTauRoI*>& rois) const;
 };
 
 #endif
