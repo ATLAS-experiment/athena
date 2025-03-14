@@ -6,14 +6,16 @@ if __name__=="__main__":
     parser = SetupArgParser()
     parser.add_argument("--noMonitorPlots", help="If set to true, there're no monitoring plots", default = False,
                                             action='store_true')
-    
+    parser.add_argument("--writeSpacePoints", help="If set to true, the spacepoints in the bucket are saved to disk",
+                                              default=False, action='store_true')
     parser.set_defaults(nEvents = -1)
-    #parser.set_defaults(noMM=True)
-    #parser.set_defaults(noSTGC=True)
+   
+    parser.set_defaults(noMM=True)
+    parser.set_defaults(noSTGC=True)
 
    
     parser.set_defaults(outRootFile="HoughTransformTester.root")
-    #parser.set_defaults(condTag="CONDBR2-BLKPA-2023-03")
+    #parser.set_defaults(condTag="CONDBR2-BLKPA-2024-03")
     parser.set_defaults(inputFile=[
                                     #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
                                     "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"
@@ -56,7 +58,7 @@ if __name__=="__main__":
         cfg.merge(MuonHoughTransformTesterCfg(flags, SegmentSeedKey = "MuonHoughNswSegmentSeeds", SegmentKey = "R4NswSegments" ))  
     else:
         cfg.merge(MuonSegmentFittingAlgCfg(flags))
-        cfg.merge(MuonHoughTransformTesterCfg(flags))  
+        cfg.merge(MuonHoughTransformTesterCfg(flags, writeSpacePoints = args.writeSpacePoints))  
 
     if not args.noMonitorPlots and (flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC):
         cfg.getEventAlgo("MuonEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
