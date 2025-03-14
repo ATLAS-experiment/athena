@@ -19,11 +19,11 @@ class PixelClusterdEdxCondData {
   public:
     PixelClusterdEdxCondData();
     virtual ~PixelClusterdEdxCondData();
-    long double getVar(const std::tuple<int,int,int>& module_coordinates) const;
-    void setVar(const std::vector<std::tuple<std::tuple<int,int,int>,long double>>& value);
+    float getVar(const std::tuple<int,int,int>& module_coordinates) const;
+    void setVar(const std::vector<std::tuple<std::tuple<int,int,int>,float>>& value);
  
   private:
-    std::vector<std::tuple<std::tuple<int,int,int>,long double>> m_var; //Default for testing
+    std::vector<std::tuple<std::tuple<int,int,int>,float>> m_var; //Default for testing
 };
 
 CLASS_DEF( PixelClusterdEdxCondData , 112527067 , 1 );

@@ -70,7 +70,7 @@ StatusCode PixelClusterdEdxCondAlg::execute(const EventContext& ctx) const {
       std::vector<int> bec_data = dataJson["bec"];
       std::vector<int> layerID_data = dataJson["layerID"]; 
       std::vector<std::vector<int>> etaM_data = dataJson["etaM"];
-      std::vector<std::vector<long double>> SF_data = dataJson["SF"];
+      std::vector<std::vector<float>> SF_data = dataJson["SF"];
       //Data structure:
       // // IBL: bec=0; layer=0; etaM=[-10,9] {Planars=[-6,5] & 3D=[6,9;-10,7]}; phiM=[0,13]
       // B-layer: bec=0; layer=1; etaM=[-6,6]; phiM=[0,21]
@@ -81,11 +81,11 @@ StatusCode PixelClusterdEdxCondAlg::execute(const EventContext& ctx) const {
       //D2: layer=1; etaM=0; phiM=[0,47]
       //D3: layer=2; etaM=0; phiM=[0,47]
       // Want to store like: [((bec,layerID,etaM),SF)),...] 
-      std::vector<std::tuple<std::tuple<int,int,int>,long double>> params;
+      std::vector<std::tuple<std::tuple<int,int,int>,float>> params;
       for (size_t i = 0; i < bec_data.size(); ++i) { // Assumption of bec.size() == layerID.size()
         for (size_t j = 0; j < etaM_data[i].size(); ++j) { //Similarly etaM[i].size() == SF.size()
           std::tuple<int,int,int> sf_coordinates = std::make_tuple(bec_data[i],layerID_data[i],etaM_data[i][j]);
-          std::tuple<std::tuple<int,int,int>,long double> sf_coordinate_value = std::make_tuple(sf_coordinates, SF_data[i][j]); 
+          std::tuple<std::tuple<int,int,int>,float> sf_coordinate_value = std::make_tuple(sf_coordinates, SF_data[i][j]); 
           params.push_back(sf_coordinate_value);
         }
       }

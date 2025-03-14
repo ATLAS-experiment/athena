@@ -141,7 +141,7 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
           if (std::abs(cosalpha)<0.16) { continue; }
 
           // Get SF for cluster 
-          long double scaleFactor = SG::ReadCondHandle<PixelClusterdEdxCondData>(m_clusterSfKey, ctx)->getVar(std::make_tuple(bec,layer,eta_module)); //XXXRebecca
+          float scaleFactor = SG::ReadCondHandle<PixelClusterdEdxCondData>(m_clusterSfKey, ctx)->getVar(std::make_tuple(bec,layer,eta_module)); //XXXRebecca
           ATH_MSG_INFO("Rebecca - Did I read from PixelChargeCalibCondData?");
           ATH_MSG_INFO("bec: " << bec << " layer: " << layer << " etaM: " << eta_module);
           ATH_MSG_INFO(scaleFactor);
