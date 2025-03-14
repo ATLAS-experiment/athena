@@ -96,9 +96,7 @@ def defineMenu():
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ40',
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ30',
         'L1_cTAU30M_2cTAU20M_3jJ30p0ETA25',
-        #ATR-29523
-        'L1_3jJ40p0ETA25',
-
+        
         # ATR-29651 - Tau+X chains using eTAU20M seeds
         'L1_eEM18M_2eTAU20M_4jJ30', 'L1_eTAU60_2eTAU20M_jXE80', 'L1_eEM18M_2eTAU20M_jXE70', 
 
