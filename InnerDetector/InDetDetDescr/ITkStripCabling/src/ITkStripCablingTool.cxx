@@ -30,7 +30,6 @@ static const std::string defaultSource(coracool);
 static const std::string file("ITkStrip_Sept08Cabling_svc.dat");
 //invalid identifiers to return in case of error
 static const ITkStripOnlineId invalidId;
-static const IdentifierHash invalidHash;
 
 // Constructor
 ITkStripCablingTool::ITkStripCablingTool(const std::string& type, const std::string& name, const IInterface* parent) :
