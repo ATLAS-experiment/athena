@@ -274,68 +274,59 @@ namespace Trk {
   void GXFTrajectory::setReferenceParameters(std::unique_ptr<const TrackParameters> per) {
     if (m_refpar != nullptr) {
       m_refpar = std::move(per);
-    } else {
-      m_refpar = std::move(per);
-      m_nupstreamstates = m_nupstreamscatterers = m_nupstreamcaloscatterers = m_nupstreambrems = 0;
+      return;
+    }
 
-      std::vector<std::unique_ptr<GXFTrackState>>::iterator it = m_states.begin();
-      std::vector<std::unique_ptr<GXFTrackState>>::iterator it2 = m_states.begin();
+    m_refpar = std::move(per);
 
-      while (it2 != m_states.end()) {
+    m_nupstreamstates = 0;
+    m_nupstreamscatterers = 0;
+    m_nupstreamcaloscatterers = 0;
+    m_nupstreambrems = 0;
+
+    for (const auto & state : m_states) {
+      if (state->trackParameters() != nullptr) {
+        const double inprod = m_refpar->momentum().dot(state->position() - m_refpar->position());
+
+        if (inprod > 0) {
+          return;
+        }
+      } else {
+        const DistanceSolution distsol =
+          state->associatedSurface().straightLineDistanceEstimate(m_refpar->position(), m_refpar->momentum().unit());
+
         double distance = 0;
-        bool isdownstream = false;
-
-        if ((**it2).trackParameters() != nullptr) {
-          distance = ((**it2).position() - m_refpar->position()).mag();
-          double inprod = m_refpar->momentum().dot((**it2).position() - m_refpar->position());
-
-          if (inprod > 0) {
-            isdownstream = true;
-          }
-        } else {
-          DistanceSolution distsol = (**it2).associatedSurface().straightLineDistanceEstimate(m_refpar->position(),m_refpar->momentum().unit());
-
-          if (distsol.numberOfSolutions() == 1) {
-            distance = distsol.first();
-          } else if (distsol.numberOfSolutions() == 2) {
-            distance =
-              std::abs(distsol.first()) < std::abs(distsol.second()) ?
-              distsol.first() :
-              distsol.second();
-          }
-
-          if (distance > 0) {
-            isdownstream = true;
-          }
-
-          distance = fabs(distance);
+        if (distsol.numberOfSolutions() == 1) {
+          distance = distsol.first();
+        } else if (distsol.numberOfSolutions() == 2) {
+          distance =
+            std::abs(distsol.first()) < std::abs(distsol.second()) ?
+            distsol.first() :
+            distsol.second();
         }
 
-        if (isdownstream) {
-          it = it2;
-          break;
+        if (distance > 0) {
+          return;
         }
+      }
 
-        m_nupstreamstates++;
+      m_nupstreamstates++;
 
-        if (
-          (**it2).getStateType(TrackStateOnSurface::Scatterer) &&
-          (**it2).materialEffects()->sigmaDeltaTheta() != 0
-        ) {
-          m_nupstreamscatterers++;
+      const GXFMaterialEffects *meff = state->materialEffects();
 
-          if ((**it2).materialEffects()->deltaE() == 0) {
-            m_nupstreamcaloscatterers++;
-          }
+      if (
+        state->getStateType(TrackStateOnSurface::Scatterer) &&
+        meff->sigmaDeltaTheta() != 0
+      ) {
+        m_nupstreamscatterers++;
+
+        if (meff->deltaE() == 0) {
+          m_nupstreamcaloscatterers++;
         }
-        if (
-          ((**it2).materialEffects() != nullptr) &&
-          (**it2).materialEffects()->sigmaDeltaE() > 0
-        ) {
-          m_nupstreambrems++;
-        }
+      }
 
-        ++it2;
+      if (meff != nullptr && meff->sigmaDeltaE() > 0) {
+        m_nupstreambrems++;
       }
     }
   }
