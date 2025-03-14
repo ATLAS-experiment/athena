@@ -83,11 +83,26 @@ namespace MuonValR4{
                                                           
     SG::ReadHandleKey<MuonR4::SegmentSeedContainer> m_inHoughSegmentSeedKey{this, "SegmentSeedKey", "MuonHoughStationSegmentSeeds"};
     SG::ReadHandleKey<MuonR4::SegmentContainer> m_inSegmentKey{this, "SegmentKey", "R4MuonSegments"};
-    
+    SG::ReadHandleKey<MuonR4::SpacePointContainer> m_spKey{this, "SpacePointKey", "MuonSpacePoints"};
+
     SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
    
+    Gaudi::Property<bool> m_writeSpacePoints{this, "writeSpacePoints", false,
+                                             "Toggle whether the particular space poitns shall be written"};
+    
+    /// @brief Branch dumping all the space points from the difference buckets
+    std::shared_ptr<SpacePointTesterModule> m_spTester{};
+    /// @brief Branch indicating to which bucket the i-th pattern is associated
+    std::shared_ptr<MuonVal::VectorBranch<uint16_t>> m_patternBucket{};
+    /// @brief Branch indicatin to which bucket the i-th segment is associated
+    std::shared_ptr<MuonVal::VectorBranch<uint16_t>> m_segmentBucket{};
+    /// @brief Branch indicating which space points in the tree are associated to the i-th pattern
+    std::shared_ptr<MuonVal::MatrixBranch<unsigned char>> m_spMatchedToPattern{};
+    /// @brief Branch indicating which space points in the tree are associated to the i-th segment
+    std::shared_ptr<MuonVal::MatrixBranch<unsigned char>> m_spMatchedToSegment{};
+
     /// Pattern visualization tool
     ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
  

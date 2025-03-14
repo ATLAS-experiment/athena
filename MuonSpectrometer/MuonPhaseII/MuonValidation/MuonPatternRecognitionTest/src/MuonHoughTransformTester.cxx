@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHoughTransformTester.h"
@@ -11,6 +11,7 @@
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
+#include "Acts/Utilities/Enumerate.hpp"
 #include "GaudiKernel/PhysicalConstants.h"
 
 
@@ -31,9 +32,27 @@ namespace MuonValR4 {
         ATH_CHECK(m_inHoughSegmentSeedKey.initialize());
         ATH_CHECK(m_truthSegmentKey.initialize(!m_truthSegmentKey.empty()));
         ATH_CHECK(m_inSegmentKey.initialize(!m_inSegmentKey.empty()));
+        ATH_CHECK(m_spKey.initialize(m_writeSpacePoints));
+        if (m_writeSpacePoints) {
+            m_spTester = std::make_unique<SpacePointTesterModule>(m_tree, m_spKey.key(), msgLevel());
+            m_tree.addBranch(m_spTester);
+
+            m_patternBucket = std::make_unique<MuonVal::VectorBranch<uint16_t>>(m_tree, "seedBucketId");
+            m_segmentBucket = std::make_unique<MuonVal::VectorBranch<uint16_t>>(m_tree, "segmentBucketId");
+            
+            m_tree.addBranch(m_patternBucket);
+            m_tree.addBranch(m_segmentBucket);
+
+
+            m_spMatchedToPattern = std::make_unique<MuonVal::MatrixBranch<unsigned char>>(m_tree, "seedMatchedSp");
+            m_spMatchedToSegment = std::make_unique<MuonVal::MatrixBranch<unsigned char>>(m_tree, "segmentMatchedSp");
+            m_tree.addBranch(m_spMatchedToPattern);
+            m_tree.addBranch(m_spMatchedToSegment);
+        }
         ATH_CHECK(m_tree.initialize(this)); 
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(detStore()->retrieve(m_r4DetMgr));
+
         ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));
         ATH_MSG_DEBUG("Succesfully initialised");
         return StatusCode::SUCCESS;
@@ -232,9 +251,40 @@ namespace MuonValR4 {
             m_tree.fillTruthInfo(obj.truthSegment, m_r4DetMgr, gctx);
             m_tree.fillSeedInfo(obj);
             m_tree.fillSegmentInfo(gctx, obj);
+            if (m_writeSpacePoints) {
+                for (const auto& [counter, max] : Acts::enumerate(obj.matchedSeeds)) {
+                    m_patternBucket->get(counter) = m_spTester->push_back(*max->parentBucket());
+                    std::vector<unsigned char> matched{};
+                    matched.resize(max->parentBucket()->size());
+
+                    for (const MuonR4::SpacePoint* sp : max->getHitsInMax()) {
+                        unsigned treeIdx = m_spTester->push_back(*sp);
+                        if (treeIdx >= matched.size()){
+                            matched.resize(treeIdx +1);
+                        }
+                        matched[treeIdx] = true;
+                    }
+                    m_spMatchedToPattern->get(counter) = std::move(matched);
+                }
+                for (const auto& [counter, segment] : Acts::enumerate(obj.matchedSegments)) {
+                    m_segmentBucket->get(counter) = m_spTester->push_back(*segment->parent()->parentBucket());
+                    std::vector<unsigned char> matched{};
+                    matched.resize(segment->parent()->parentBucket()->size());
+                    for (const auto& meas : segment->measurements()) {
+                        if (!meas->spacePoint()) {
+                            continue;
+                        }
+                        unsigned treeIdx = m_spTester->push_back(*meas->spacePoint());
+                        if (treeIdx >= matched.size()){
+                            matched.resize(treeIdx +1);
+                        }
+                        matched[treeIdx] = true;
+                    }
+                    m_spMatchedToSegment->get(counter) = std::move(matched);
+                }
+            }
             ATH_CHECK(m_tree.fill(ctx));
         }
-
         return StatusCode::SUCCESS;
     }
 }  // namespace MuonValR4
