@@ -240,7 +240,7 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
 
   // copy roads to output vector
   roads.reserve(m_roads.size());  
-  for (FPGATrackSimRoad & r : m_roads) roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
+  for (auto & r : m_roads) roads.push_back(std::move(r));
   ATH_MSG_DEBUG("Roads = " << roads.size());
   m_monitoring->fillOutputSummary(m_validSlice, m_validSliceAndScan);
 
@@ -735,20 +735,20 @@ void FPGATrackSimGenScanTool::addRoad(std::vector<const StoredHit *> const &hits
     sorted_hits[hit->layer].push_back(hit->hitptr);
   }
 
-  m_roads.emplace_back();
-  FPGATrackSimRoad &r = m_roads.back();
+  m_roads.emplace_back(std::make_unique<FPGATrackSimRoad>());
+  FPGATrackSimRoad *r = m_roads.back().get();
 
-  r.setRoadID(m_roads.size() - 1);
+  r->setRoadID(m_roads.size() - 1);
   //    r.setPID(y * m_imageSize_y + x);
-  r.setHits(std::move(sorted_hits));
+  r->setHits(std::move(sorted_hits));
   
   FPGATrackSimTrackPars trackpars = m_binning->parSetToTrackPars(m_binning->binCenter(idx));
-  r.setX(trackpars[FPGATrackSimTrackPars::IPHI]);
-  r.setY(trackpars[FPGATrackSimTrackPars::IHIP]);
-  r.setXBin(idx[3]);
-  r.setYBin(idx[4]);
-  r.setHitLayers(hitLayers);
-  r.setSubRegion(0);
+  r->setX(trackpars[FPGATrackSimTrackPars::IPHI]);
+  r->setY(trackpars[FPGATrackSimTrackPars::IHIP]);
+  r->setXBin(idx[3]);
+  r->setYBin(idx[4]);
+  r->setHitLayers(hitLayers);
+  r->setSubRegion(0);
 }
 
 

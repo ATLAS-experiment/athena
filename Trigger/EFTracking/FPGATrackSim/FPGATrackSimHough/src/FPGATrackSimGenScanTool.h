@@ -333,7 +333,7 @@ protected:
     FPGATrackSimGenScanArray< std::map<unsigned,unsigned> > m_mod_to_lyr_map;
 
     // output roads
-    std::vector<FPGATrackSimRoad> m_roads{};
+    std::vector<std::unique_ptr<FPGATrackSimRoad>> m_roads{};
 };
 
 #endif // FPGATrackSimGenScanTool_H
