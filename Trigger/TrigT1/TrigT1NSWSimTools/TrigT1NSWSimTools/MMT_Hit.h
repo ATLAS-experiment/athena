@@ -25,7 +25,7 @@ class MMT_Hit {
     int getVMM() const { return m_VMM_chip; }
     int getMMFE8() const { return m_MMFE_VMM; }
     float getShift() const { return m_shift; }
-    std::string getStationName() const { return m_station_name; }
+    const std::string& getStationName() const { return m_station_name; }
     int getStationEta() const { return m_station_eta; }
     int getStationPhi() const { return m_station_phi; }
     double getR() const { return m_R; }

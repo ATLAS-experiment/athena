@@ -8,7 +8,7 @@
 #include "MuonReadoutGeometry/MuonChannelDesign.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 
-MMT_Parameters::MMT_Parameters(std::string layerSetup, char wedgeSize, const MuonGM::MuonDetectorManager* detManager)
+MMT_Parameters::MMT_Parameters(const std::string& layerSetup, char wedgeSize, const MuonGM::MuonDetectorManager* detManager)
   : AthMessaging(Athena::getMessageSvc(), "MMT_Parameters") {
 
   // Get the modules for each multiplet, the sector and side arguement (third and fifth argument, respectively) shouldn't matter

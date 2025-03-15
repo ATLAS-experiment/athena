@@ -31,6 +31,8 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.ForceCoolVectorPayload", False)
     # Turn on SCT_ModuleVetoSvc, allowing it to be configured later
     icf.addFlag("InDet.doSCTModuleVeto", False)
+    # Turn on SCT simple width calculation in clustering tool
+    icf.addFlag("InDet.doSCTSimpleWidth", True)
     # Path to the JSON file to mask the modules for Pixel.
     # A non-empty string activates the veto automatically
     icf.addFlag("InDet.JsonPathPixelModuleVeto", "")

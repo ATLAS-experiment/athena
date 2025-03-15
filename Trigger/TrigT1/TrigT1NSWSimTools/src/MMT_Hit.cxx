@@ -10,9 +10,10 @@
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 #include <cmath>
 
-MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::string_view stName, const std::vector<ROOT::Math::XYZVector> &planeCoordinates) {
+MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::string_view stName, const std::vector<ROOT::Math::XYZVector> &planeCoordinates)
+   : m_station_name(stName)
+ {
   m_sector = stName[2];
-  m_station_name = stName;
   m_VMM_chip = entry.VMM_chip;
   m_MMFE_VMM = entry.MMFE_VMM;
   m_ART_ASIC = std::ceil(1.*entry.MMFE_VMM/2);
