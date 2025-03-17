@@ -102,12 +102,20 @@ StatusCode TauCalibrateLC::initialize() {
 /********************************************************************/
 StatusCode TauCalibrateLC::execute(xAOD::TauJet& tau) const
 { 
+  // get IntermediateAxis or DetectorAxis momentum
+  auto tau_p4 = m_doVertexCorrection ? tau.p4(xAOD::TauJetParameters::IntermediateAxis) : tau.p4(xAOD::TauJetParameters::DetectorAxis);
+
+  // skip calibration if negative pt
+  if ( tau_p4.Pt() <= 0.) {
+    ATH_MSG_DEBUG("tau energy at LC scale is " << tau_p4.Pt()/GeV << "--> set energy=0.001");
+    tau.setP4(0.001, tau_p4.Eta(), tau_p4.Phi(), tau.m());
+    tau.setP4(xAOD::TauJetParameters::TauEnergyScale, tau.pt(), tau.eta(), tau.phi(), tau.m());
+    return StatusCode::SUCCESS;
+  }
+ 
   // energy calibration depends on number of tracks - 1p or Mp
   int prongBin = 1; //Mp
   if (tau.nTracks() <= 1) prongBin = 0; //1p
-
-  // get IntermediateAxis or DetectorAxis momentum
-  auto tau_p4 = m_doVertexCorrection ? tau.p4(xAOD::TauJetParameters::IntermediateAxis) : tau.p4(xAOD::TauJetParameters::DetectorAxis);
 
   double absEta = std::abs( tau_p4.Eta() );
   int etaBin = std::as_const(*m_etaBinHist).GetXaxis()->FindBin(absEta) - 1;
@@ -150,13 +158,6 @@ StatusCode TauCalibrateLC::execute(xAOD::TauJet& tau) const
 
   // pt (energy) response parameterized as a function of pileup-corrected pt (energy)
   double energyLC = tau_p4.Pt()/GeV;
-
-  if (energyLC <= 0.) {
-    ATH_MSG_DEBUG("tau energy at LC scale is " << energyLC << "--> set energy=0.001");           
-    tau.setP4(0.001, tau_p4.Eta(), tau_p4.Phi(), tau.m());
-    tau.setP4(xAOD::TauJetParameters::TauEnergyScale, tau.pt(), tau.eta(), tau.phi(), tau.m());
-    return StatusCode::SUCCESS;
-  }
 
   if (energyLC - offset <= 0.) {
     ATH_MSG_DEBUG("after pile-up correction energy would be = " << energyLC - offset << " --> setting offset=0 now!");
