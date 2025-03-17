@@ -8,12 +8,10 @@
  * @brief Default track extension algorithm to produce "second stage" roads.
  * Much of this code originally written by Alec, ported/adapted to FPGATrackSim.
  */
-
-#include "FPGATrackSimObjects/FPGATrackSimTypes.h"
-#include "FPGATrackSimObjects/FPGATrackSimHit.h"
+#include "FPGATrackSimAlgorithms/FPGATrackSimNNPathfinderExtensionTool.h"
 #include "FPGATrackSimBanks/FPGATrackSimSectorBank.h"
 
-#include "FPGATrackSimAlgorithms/FPGATrackSimNNPathfinderExtensionTool.h"
+
 #include "FPGATrackSimHough/FPGATrackSimHoughFunctions.h"
 
 #include <cmath>
@@ -438,7 +436,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                 }
                 else
                 {
-                    cleanHitsToGrow = listofHitsFound;
+                    cleanHitsToGrow = std::move(listofHitsFound);
                 }
 
 
