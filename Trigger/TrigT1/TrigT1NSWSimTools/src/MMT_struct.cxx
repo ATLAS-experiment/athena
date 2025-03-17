@@ -3,6 +3,8 @@
 */
 
 #include "TrigT1NSWSimTools/MMT_struct.h"
+#include "MuonAGDDDescription/MMDetectorDescription.h"
+#include "MuonAGDDDescription/MMDetectorHelper.h"
 #include "MuonReadoutGeometry/MuonChannelDesign.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 
@@ -11,27 +13,68 @@ MMT_Parameters::MMT_Parameters(const std::string& layerSetup, char wedgeSize, co
 
   // Get the modules for each multiplet, the sector and side arguement (third and fifth argument, respectively) shouldn't matter
   // since the algorithm computes locally
-  std::string wedgeString = (wedgeSize=='L' ? "MML" : "MMS");
+  char side   = 'A';
   m_sector = wedgeSize;
+  MMDetectorHelper aHelper;
+  MMDetectorDescription* mm_top_mult1    = aHelper.Get_MMDetector(m_sector, 2, 5, 1, side); // Parameters: sector, eta, phi, layer/multiplet
+  MMDetectorDescription* mm_top_mult2    = aHelper.Get_MMDetector(m_sector, 2, 5, 2, side);
+  MMDetectorDescription* mm_bottom_mult1 = aHelper.Get_MMDetector(m_sector, 1, 5, 1, side);
+  MMDetectorDescription* mm_bottom_mult2 = aHelper.Get_MMDetector(m_sector, 1, 5, 2, side);
 
-  Identifier mm_top_ele_id = detManager->mmIdHelper()->elementID(wedgeString, 2, 5);
-  Identifier mm_bottom_ele_id = detManager->mmIdHelper()->elementID(wedgeString, 1, 5);
-
-  const MuonGM::MMReadoutElement* mm_ReadOut_top = detManager->getMMReadoutElement(mm_top_ele_id);
-  const MuonGM::MMReadoutElement* mm_ReadOut_bottom = detManager->getMMReadoutElement(mm_bottom_ele_id);
-
-  m_lWidth = mm_ReadOut_top->getLongSsize(); 
-  m_pitch = mm_ReadOut_top->getDesign(mm_top_ele_id)->inputPitch;
+  MMReadoutParameters roParam_top_mult1    = mm_top_mult1->GetReadoutParameters();
+  MMReadoutParameters roParam_top_mult2    = mm_top_mult2->GetReadoutParameters();
+  MMReadoutParameters roParam_bottom_mult1 = mm_bottom_mult1->GetReadoutParameters();
+  MMReadoutParameters roParam_bottom_mult2 = mm_bottom_mult2->GetReadoutParameters();
 
   //Needed to get the max channels for the deadZone in the x planes... a little annoying...
   //Only changes for small or large and per module. Phi, layer, etc don't matter (just set to 1)
+  std::string wedgeString = (wedgeSize=='L' ? "MML" : "MMS");
 
-  m_innerRadiusEta1 = mm_ReadOut_bottom->absTransform().translation().perp() - 0.5*mm_ReadOut_bottom->getRsize();
-  m_innerRadiusEta2 = mm_ReadOut_top->absTransform().translation().perp() - 0.5*mm_ReadOut_top->getRsize();
+  m_pitch = roParam_bottom_mult1.stripPitch;
+  m_lWidth = mm_top_mult1->lWidth();
+  m_innerRadiusEta1 = roParam_bottom_mult1.distanceFromZAxis;
+  m_innerRadiusEta2 = roParam_top_mult1.distanceFromZAxis;
+  m_missedBottomEta = roParam_bottom_mult1.nMissedBottomEta;
+  m_missedBottomStereo = roParam_bottom_mult1.nMissedBottomStereo;
+  if (m_sector == 'L') {
+    ATH_MSG_DEBUG("LM1 \n" <<
+                 "\t\t\t\t Total Strips: " << roParam_bottom_mult1.tStrips << " with pitch: " << roParam_bottom_mult1.stripPitch << "\n" <<
+                 "\t\t\t\t KO strips TopEta: " << roParam_bottom_mult1.nMissedTopEta << " - BottomEta: " << roParam_bottom_mult1.nMissedBottomEta << "\n" <<
+                 "\t\t\t\t KO strips TopStereo: " << roParam_bottom_mult1.nMissedTopStereo << " - BottomStereo: " << roParam_bottom_mult1.nMissedBottomStereo << "\n" <<
+                 "\t\t\t\t (Top, Bottom, Length): (" << mm_bottom_mult1->lWidth() << ", " << mm_bottom_mult1->sWidth() << ", " << mm_bottom_mult1->Length() << ")\n" <<
+                 "\t\t\t\t Zpos - Distance from ZAxis: " << roParam_bottom_mult1.zpos << " - " << roParam_bottom_mult1.distanceFromZAxis << "\n" <<
+                 "\t\t\t\t dlStereoTop/Bottom: " << roParam_bottom_mult1.dlStereoTop << " " << roParam_bottom_mult1.dlStereoBottom << "\n" <<
+                 "\t\t\t\t Active area --> (Bottom, Top, Height) : (" << roParam_bottom_mult1.activeBottomLength << ", " << roParam_bottom_mult1.activeTopLength << ", " << roParam_bottom_mult1.activeH << ")");
+  } else if (m_sector == 'S') {
+    ATH_MSG_DEBUG("SM1 \n" <<
+                 "\t\t\t\t KO strips TopEta: " << roParam_bottom_mult1.nMissedTopEta << " - BottomEta: " << roParam_bottom_mult1.nMissedBottomEta << "\n" <<
+                 "\t\t\t\t KO strips TopStereo: " << roParam_bottom_mult1.nMissedTopStereo << " - BottomStereo: " << roParam_bottom_mult1.nMissedBottomStereo << "\n" <<
+                 "\t\t\t\t Total Strips: " << roParam_bottom_mult1.tStrips << " with pitch: " << roParam_bottom_mult1.stripPitch << "\n" <<
+                 "\t\t\t\t (Top, Bottom, Length): (" << mm_bottom_mult1->lWidth() << ", " << mm_bottom_mult1->sWidth() << ", " << mm_bottom_mult1->Length() << ")\n" <<
+                 "\t\t\t\t Zpos - Distance from ZAxis: " << roParam_bottom_mult1.zpos << " - " << roParam_bottom_mult1.distanceFromZAxis << "\n" <<
+                 "\t\t\t\t dlStereoTop/Bottom: " << roParam_bottom_mult1.dlStereoTop << " " << roParam_bottom_mult1.dlStereoBottom << "\n" <<
+                 "\t\t\t\t Active area --> (Bottom, Top, Height) : (" << roParam_bottom_mult1.activeBottomLength << ", " << roParam_bottom_mult1.activeTopLength << ", " << roParam_bottom_mult1.activeH << ")");
+  }
 
-  const auto design = mm_ReadOut_bottom->getDesign(mm_bottom_ele_id);
-  m_missedBottomEta = design->nMissedBottomEta;
-  m_missedBottomStereo = design->nMissedBottomStereo;
+  if (m_sector == 'L') {
+    ATH_MSG_DEBUG("LM2 \n" <<
+                 "\t\t\t\t Total Strips: " << roParam_top_mult1.tStrips << " with pitch: " << roParam_top_mult1.stripPitch << "\n" <<
+                 "\t\t\t\t KO strips TopEta: " << roParam_top_mult1.nMissedTopEta << " - BottomEta: " << roParam_top_mult1.nMissedBottomEta << "\n" <<
+                 "\t\t\t\t KO strips TopStereo: " << roParam_top_mult1.nMissedTopStereo << " - BottomStereo: " << roParam_top_mult1.nMissedBottomStereo << "\n" <<
+                 "\t\t\t\t (Top, Bottom, Length): (" << mm_top_mult1->lWidth() << ", " << mm_top_mult1->sWidth() << ", " << mm_top_mult1->Length() << ")\n" <<
+                 "\t\t\t\t Zpos - Distance from ZAxis: " << roParam_top_mult1.zpos << " - " << roParam_top_mult1.distanceFromZAxis << "\n" <<
+                 "\t\t\t\t dlStereoTop/Bottom: " << roParam_top_mult1.dlStereoTop << " " << roParam_top_mult1.dlStereoBottom << "\n" <<
+                 "\t\t\t\t Active area --> (Top, Bottom, Height) : (" << roParam_top_mult1.activeTopLength << ", " << roParam_top_mult1.activeBottomLength << ", " << roParam_top_mult1.activeH << ")");
+  } else if (m_sector == 'S') {
+    ATH_MSG_DEBUG("SM2 \n" <<
+                 "\t\t\t\t KO strips TopEta: " << roParam_top_mult1.nMissedTopEta << " - BottomEta: " << roParam_top_mult1.nMissedBottomEta << "\n" <<
+                 "\t\t\t\t KO strips TopStereo: " << roParam_top_mult1.nMissedTopStereo << " - BottomStereo: " << roParam_top_mult1.nMissedBottomStereo << "\n" <<
+                 "\t\t\t\t (Top, Bottom, Length): (" << mm_top_mult1->lWidth() << ", " << mm_top_mult1->sWidth() << ", " << mm_top_mult1->Length() << ")\n" <<
+                 "\t\t\t\t Zpos - Distance from ZAxis: " << roParam_top_mult1.zpos << " - " << roParam_top_mult1.distanceFromZAxis << "\n" <<
+                 "\t\t\t\t dlStereoTop/Bottom: " << roParam_top_mult1.dlStereoTop << " " << roParam_top_mult1.dlStereoBottom << "\n" <<
+                 "\t\t\t\t Active area --> (Top, Bottom, Height) : (" << roParam_top_mult1.activeTopLength << ", " << roParam_top_mult1.activeBottomLength << ", " << roParam_top_mult1.activeH << ")");
+    for (const auto &angle : roParam_top_mult1.stereoAngle) ATH_MSG_DEBUG("Stereo angle: " << angle);
+  }
 
   // retrieve the z-position of the planes
   std::vector<double> z_nominal;
@@ -42,64 +85,6 @@ MMT_Parameters::MMT_Parameters(const std::string& layerSetup, char wedgeSize, co
     ATH_MSG_WARNING("Number of planes in setup is "<< layerSetup.size() << ", but we have a nominal " << z_nominal.size() << " planes.");
     throw std::runtime_error("MMT_Parameters: Invalid number of planes");
   }
-
-  float stereo_degree = design->stereoAngle();
-
-  // MM_firststrip_positions returns the position for phi sector 1.
-  // => for the small sectors, rotate this by -1/16 of a rotation to make our lives easier.
-  // in this coordinate basis, x is up/down the wedge (radial), and y is left/right (phi).
-  float cos_rotation = std::cos(-2*M_PI / 16.0);
-  float sin_rotation = std::sin(-2*M_PI / 16.0);
-  float x_rotated = 0.0;
-  float y_rotated = 0.0;
-
-  float st_angle = 0.0;
-
-  float radial_pos      = 0;
-  float radial_pos_xx_1 = 0, radial_pos_xx_2 = 0;
-  float radial_pos_uv_1 = 0, radial_pos_uv_2 = 0;
-
-  for (unsigned int eta = 1; eta <= 2; eta++){
-    unsigned int layer = 1;
-    for (const auto& pos: MM_firststrip_positions(detManager, wedgeString, eta)){
-
-      if (wedgeString=="MMS"){
-        x_rotated = pos.X()*cos_rotation - pos.Y()*sin_rotation;
-        y_rotated = pos.X()*sin_rotation + pos.Y()*cos_rotation;
-      }
-      else{
-        x_rotated = pos.X();
-        y_rotated = pos.Y();
-      }
-
-      if      (is_u(layer)) st_angle = -1*std::abs(stereo_degree);
-      else if (is_v(layer)) st_angle =    std::abs(stereo_degree);
-      else                  st_angle = 0;
-
-      // walk from the center of the strip to the position of the strip at the center of the wedge.
-      // NB: for X-planes, this is simply the center of the strip: tan(0) = 0.
-      radial_pos = std::abs(x_rotated - y_rotated*std::tan(st_angle * M_PI/180.0));
-
-      if (is_x(layer) && eta==1) radial_pos_xx_1 = radial_pos;
-      else if (is_x(layer) && eta==2) radial_pos_xx_2 = radial_pos;
-      if (is_u(layer) && eta==1) radial_pos_uv_1 = radial_pos;
-      else if (is_u(layer) && eta==2) radial_pos_uv_2 = radial_pos;
-
-      layer++;
-    }
-  }
-
-  // store radial positions as fixed point
-  std::array<float, 2> radial_pos_xx = {radial_pos_xx_1, radial_pos_xx_2};
-  std::array<float, 2> radial_pos_uv = {radial_pos_uv_1, radial_pos_uv_2};
-  m_ybases[0] = radial_pos_xx;
-  m_ybases[1] = radial_pos_xx;
-  m_ybases[2] = radial_pos_uv;
-  m_ybases[3] = radial_pos_uv;
-  m_ybases[4] = radial_pos_uv;
-  m_ybases[5] = radial_pos_uv;
-  m_ybases[6] = radial_pos_xx;
-  m_ybases[7] = radial_pos_xx;
 }
 
 std::vector<ROOT::Math::XYZVector> MMT_Parameters::MM_firststrip_positions(const MuonGM::MuonDetectorManager* detManager, const std::string& wedge, int eta) const {

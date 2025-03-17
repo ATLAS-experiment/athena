@@ -1,22 +1,19 @@
 /*
- *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TrigT1NSWSimTools/MMT_Hit.h"
+#include "MuonAGDDDescription/MMDetectorDescription.h"
+#include "MuonAGDDDescription/MMDetectorHelper.h"
 #include "MuonReadoutGeometry/MuonChannelDesign.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 #include <cmath>
 
-MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::shared_ptr<MMT_Parameters> par, const std::vector<ROOT::Math::XYZVector> &planeCoordinates) {
-  m_sector = par->getSector();
-
-  std::string module(1, m_sector);
-  module += (std::abs(entry.station_eta) == 1) ? "M1" : "M2";
-  m_module = module;
-
-  m_station_name = "MM";
-  m_station_name += m_sector;
+MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::string_view stName, const std::vector<ROOT::Math::XYZVector> &planeCoordinates)
+   : m_station_name(stName)
+ {
+  m_sector = stName[2];
   m_VMM_chip = entry.VMM_chip;
   m_MMFE_VMM = entry.MMFE_VMM;
   m_ART_ASIC = std::ceil(1.*entry.MMFE_VMM/2);
@@ -29,14 +26,12 @@ MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* 
   m_localX = entry.localX;
   m_BC_time = entry.BC_time;
   m_age = entry.BC_time;
-  m_Y = -1.;
   m_Z = -1.;
   m_R = -1.;
   m_Rp = -1.;
   m_isNoise = false;
   m_time = entry.gtime;
   m_RZslope = -1.;
-  m_YZslope = -1.;
   m_PitchOverZ = -1.;
   m_shift = -1.;
 
@@ -88,28 +83,25 @@ MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* 
   Amg::Vector3D globalPos(0.0, 0.0, 0.0);
   if(readout->stripGlobalPosition(strip_id, globalPos)) {
 
+    MMDetectorHelper aHelper;
+    char side = (globalPos.z() > 0.) ? 'A' : 'C';
+    MMDetectorDescription* mm = aHelper.Get_MMDetector(m_sector, std::abs(m_station_eta), m_station_phi, m_multiplet, side);
+    MMReadoutParameters roP   = mm->GetReadoutParameters();
+
     m_R = globalPos.perp();
     m_Z = globalPos.z();
-    const double stripPitch{readout->getDesign(strip_id)->inputPitch};
-    m_PitchOverZ = stripPitch/m_Z;
+    m_PitchOverZ = roP.stripPitch/m_Z;
     m_RZslope = m_R / m_Z;
 
-    int eta = std::abs(m_station_eta)-1;
-    double base = par->getYbase(m_plane, eta);
-    m_Y = base + m_strip*stripPitch - stripPitch/2.;
-    m_YZslope = m_Y / m_Z;
-
     double index = std::round((std::abs(m_RZslope)-0.1)/5e-04); // 0.0005 is approx. the step in slope achievable with a road size of 8 strips
-    double roundedSlope = 0.1 + index*((0.6 - 0.1)/1000.); 
-    const double distanceFromZAxis = readout->absTransform().translation().perp() - 0.5*readout->getRsize();
-    m_Rp = distanceFromZAxis + roundedSlope*(planeCoordinates[m_plane].Z() - planeCoordinates[0].Z());
+    double roundedSlope = 0.1 + index*((0.6 - 0.1)/1000.);
+    m_Rp = roP.distanceFromZAxis + roundedSlope*(planeCoordinates[m_plane].Z() - planeCoordinates[0].Z());
     m_shift = m_Rp / m_Z;
   }
 }
 
 MMT_Hit::MMT_Hit(const MMT_Hit* hit)
   : m_sector (hit->m_sector),
-    m_module (hit->m_module),
     m_station_name (hit->m_station_name),
     m_VMM_chip (hit->m_VMM_chip),
     m_MMFE_VMM (hit->m_MMFE_VMM),
@@ -122,10 +114,8 @@ MMT_Hit::MMT_Hit(const MMT_Hit* hit)
     m_strip (hit->m_strip),
     m_localX (hit->m_localX),
     m_RZslope (hit->m_RZslope),
-    m_YZslope (hit->m_YZslope),
     m_BC_time (hit->m_BC_time),
     m_age (hit->m_age),
-    m_Y (hit->m_Y),
     m_Z (hit->m_Z),
     m_PitchOverZ (hit->m_PitchOverZ),
     m_R (hit->m_R),
