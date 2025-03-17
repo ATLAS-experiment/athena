@@ -74,7 +74,6 @@ def DecorateReFitPrimaryVertexCfg(
 
     kwargs.setdefault("DistToRefittedPriVtxName", "distToRefittedPriVtx")
     kwargs.setdefault("NormDistToRefittedPriVtxName", "normDistToRefittedPriVtx")
-    kwargs.setdefault("RefittedVtxLinkName", "RefittedPriVtxLink")
     kwargs.setdefault("RefittedVtxWithoutLeptonLinkName",
                       f"RefittedPriVtxWithoutLepton_{lepton_type}")
 

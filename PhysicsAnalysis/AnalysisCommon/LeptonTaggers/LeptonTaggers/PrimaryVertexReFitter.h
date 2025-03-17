@@ -1,7 +1,7 @@
 // This is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PROMPT_PRIMARYVERTEXREFITTER_H
@@ -26,14 +26,19 @@
 // Athena
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "AthContainers/Accessor.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 // xAOD
 #include "xAODTracking/VertexContainer.h"
 
 // ROOT
 #include "TStopwatch.h"
+
+#include <optional>
 
 namespace Prompt
 {
@@ -49,17 +54,17 @@ namespace Prompt
 
     private:
 
+        using accessorFloat_t = SG::Accessor<float>;
+        using decoratorHandElemVtx_t = SG::WriteDecorHandle<xAOD::IParticleContainer, ElementLink<xAOD::VertexContainer> >;
+
+
         bool decorateLepWithReFitPrimaryVertex(const FittingInput &input,
             const xAOD::TrackParticle* tracklep,
             const xAOD::IParticle *lep,
             const std::vector<const xAOD::TrackParticle*> &tracks,
-            xAOD::VertexContainer &refitVtxContainer);
+            xAOD::VertexContainer &refitVtxContainer,
+            decoratorHandElemVtx_t& lepRefittedRMVtxLinkDec);
 
-
-    private:
-
-        typedef SG::AuxElement::Decorator<float> decoratorFloat_t;
-        typedef SG::AuxElement::Decorator<ElementLink<xAOD::VertexContainer> > decoratorElemVtx_t;
 
     private:
 
@@ -80,12 +85,6 @@ namespace Prompt
         };
         Gaudi::Property<std::string> m_normDistToRefittedPriVtxName {
             this, "NormDistToRefittedPriVtxName", "default"
-        };
-        Gaudi::Property<std::string> m_lepVtxLinkName {
-            this, "RefittedVtxLinkName", "default"
-        };
-        Gaudi::Property<std::string> m_lepRefittedVtxWithoutLeptonLinkName {
-            this, "RefittedVtxWithoutLeptonLinkName", "default"
         };
 
         TStopwatch m_timerAll;
@@ -110,11 +109,13 @@ namespace Prompt
         };
 
         //
-        // Decorators:
+        // Accessors/Decorators
         //
-        std::unique_ptr<decoratorFloat_t> m_distToRefittedPriVtx;
-        std::unique_ptr<decoratorFloat_t> m_normdistToRefittedPriVtx;
-        std::unique_ptr<decoratorElemVtx_t> m_lepRefittedRMVtxLinkDec;
+        std::optional<accessorFloat_t> m_distToRefittedPriVtx;
+        std::optional<accessorFloat_t> m_normdistToRefittedPriVtx;
+
+        SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_lepRefittedVtxWithoutLeptonLinkName
+          { this, "RefittedVtxWithoutLeptonLinkName", m_leptonContainerKey, "default", "" };
     };
 }
 
