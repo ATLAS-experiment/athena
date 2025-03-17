@@ -288,6 +288,9 @@ atlas_add_citest( EgammaESD
 atlas_add_citest( ActsConfiguration
    SCRIPT ActsConfiguration.sh )
 
+atlas_add_citest( ActsExtendedTruth
+   SCRIPT ActsExtendedTruth.sh )
+ 
 atlas_add_citest( ACTS_Propagation_ITk
    SCRIPT ActsITkTest.py )
 

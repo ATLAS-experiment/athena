@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "src/PixelClusterSiHitDecoratorAlg.h"
+#include "src/StripClusterSiHitDecoratorAlg.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "Identifier/IdentifierHash.h"
@@ -11,19 +11,19 @@
 
 namespace ActsTrk {
 
-  PixelClusterSiHitDecoratorAlg::PixelClusterSiHitDecoratorAlg(const std::string &name,
+  StripClusterSiHitDecoratorAlg::StripClusterSiHitDecoratorAlg(const std::string &name,
 							       ISvcLocator *pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator)
   {}
 
-  StatusCode PixelClusterSiHitDecoratorAlg::initialize()
+  StatusCode StripClusterSiHitDecoratorAlg::initialize()
   {
     ATH_MSG_DEBUG( "Initializing " << name() << " ..." );
 
     ATH_CHECK( m_inputMeasurementsKey.initialize() );
     ATH_CHECK( m_inputClustersKey.initialize() );
     ATH_CHECK( m_SDOcontainer_key.initialize() );
-    ATH_CHECK( m_pixelDetEleCollKey.initialize() );
+    ATH_CHECK( m_stripDetEleCollKey.initialize() );
     ATH_CHECK( m_siHitsKey.initialize() );
     
     // SDO decorations
@@ -62,13 +62,12 @@ namespace ActsTrk {
     ATH_CHECK( m_sihit_endPosY_decor_key.initialize() );
     ATH_CHECK( m_sihit_endPosZ_decor_key.initialize() );
 
-    ATH_CHECK( detStore()->retrieve(m_PixelHelper, "PixelID") );
+    ATH_CHECK( detStore()->retrieve(m_StripHelper, "SCT_ID") );
     
     return StatusCode::SUCCESS;
   }
 
-
-  StatusCode PixelClusterSiHitDecoratorAlg::execute(const EventContext& ctx) const
+  StatusCode StripClusterSiHitDecoratorAlg::execute(const EventContext& ctx) const
   {
     ATH_MSG_DEBUG( "Executing " << name() << " ..." );
 
@@ -77,10 +76,10 @@ namespace ActsTrk {
     ATH_CHECK( measurementHandle.isValid() );
     const xAOD::TrackMeasurementValidationContainer* measurements = measurementHandle.cptr();
 
-    ATH_MSG_DEBUG( "Retrieving PixelClusterContainer with key: " << m_inputClustersKey.key() );
-    SG::ReadHandle< xAOD::PixelClusterContainer > clusterHandle = SG::makeHandle( m_inputClustersKey, ctx );
+    ATH_MSG_DEBUG( "Retrieving StripClusterContainer with key: " << m_inputClustersKey.key() );
+    SG::ReadHandle< xAOD::StripClusterContainer > clusterHandle = SG::makeHandle( m_inputClustersKey, ctx );
     ATH_CHECK( clusterHandle.isValid() );
-    const xAOD::PixelClusterContainer* clusters = clusterHandle.cptr();
+    const xAOD::StripClusterContainer* clusters = clusterHandle.cptr();
 
     ATH_MSG_DEBUG( "Retrieving InDetSimDataCollection with key: " << m_SDOcontainer_key.key() );
     SG::ReadHandle< InDetSimDataCollection > sdoHandle = SG::makeHandle( m_SDOcontainer_key, ctx );
@@ -92,9 +91,9 @@ namespace ActsTrk {
     ATH_CHECK(siHitsHandle.isValid());
     const SiHitCollection* siHits = siHitsHandle.cptr();
 
-    SG::ReadCondHandle< InDetDD::SiDetectorElementCollection > pixelDetEleHandle = SG::makeHandle( m_pixelDetEleCollKey, ctx );
-    ATH_CHECK(pixelDetEleHandle.isValid());
-    const InDetDD::SiDetectorElementCollection* pixElements = pixelDetEleHandle.cptr();
+    SG::ReadCondHandle< InDetDD::SiDetectorElementCollection > stripDetEleHandle = SG::makeHandle( m_stripDetEleCollKey, ctx );
+    ATH_CHECK(stripDetEleHandle.isValid());
+    const InDetDD::SiDetectorElementCollection* stripElements = stripDetEleHandle.cptr();
 
     // SDO decorators
     SG::WriteDecorHandle< xAOD::TrackMeasurementValidationContainer, std::vector<int> > decor_sdo_words( m_sdo_words, ctx );
@@ -120,20 +119,21 @@ namespace ActsTrk {
     ATH_CHECK( measurements->size() == clusters->size() );
 
     // organize the si hits in such a way we group them together by idhash
-    std::vector< std::vector< const SiHit* > > siHitsCollections(m_PixelHelper->wafer_hash_max());
+    std::vector< std::vector< const SiHit* > > siHitsCollections(m_StripHelper->wafer_hash_max());
     for (const SiHit& siHit: *siHits) {
-      if (!siHit.isPixel()) {
-	ATH_MSG_ERROR("Si Hit in Pixel collection is not Pixel!!!");
+      if ( not siHit.isSCT() ) {
+	ATH_MSG_ERROR("Si Hit in Strip collection is not Strip!!!");
 	return StatusCode::FAILURE;
       }
       
-      Identifier wafer_id(m_PixelHelper->wafer_id(siHit.getBarrelEndcap(),
+      Identifier wafer_id(m_StripHelper->wafer_id(siHit.getBarrelEndcap(),
 						  siHit.getLayerDisk(),
 						  siHit.getPhiModule(),
-						  siHit.getEtaModule()));
-      IdentifierHash wafer_hash(m_PixelHelper->wafer_hash(wafer_id));
+						  siHit.getEtaModule(),
+						  siHit.getSide()));
+      IdentifierHash wafer_hash(m_StripHelper->wafer_hash(wafer_id));
       
-      if (wafer_hash >= m_PixelHelper->wafer_hash_max()) {
+      if (wafer_hash >= m_StripHelper->wafer_hash_max()) {
 	ATH_MSG_ERROR("There is a problem with Si Hit collection.");
 	ATH_MSG_ERROR("Wafer hash is too big");
 	return StatusCode::FAILURE;
@@ -142,30 +142,30 @@ namespace ActsTrk {
     } // loop on si hits
     
     
-    ContainerAccessor<xAOD::PixelCluster, IdentifierHash, 1>
-      pixelAccessor ( *clusters,
-		      [] (const xAOD::PixelCluster& cl) -> IdentifierHash { return cl.identifierHash(); },
-		      pixElements->size());
+    ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>
+      stripAccessor ( *clusters,
+		      [] (const xAOD::StripCluster& cl) -> IdentifierHash { return cl.identifierHash(); },
+		      stripElements->size());
 
     // run on id hashes
-    const auto& allIdHashes = pixelAccessor.allIdentifiers();
+    const auto& allIdHashes = stripAccessor.allIdentifiers();
     for (const auto& hashId : allIdHashes) {
-      const InDetDD::SiDetectorElement *element = pixElements->getDetectorElement(hashId);
+      const InDetDD::SiDetectorElement *element = stripElements->getDetectorElement(hashId);
       if ( not element ) {
-        ATH_MSG_FATAL( "Invalid pixel detector element for hash " << hashId);
+        ATH_MSG_FATAL( "Invalid strip detector element for hash " << hashId);
         return StatusCode::FAILURE;
       }
       
-      auto [startRange, stopRange] = pixelAccessor.rangesForIdentifierDirect(hashId).front();
+      auto [startRange, stopRange] = stripAccessor.rangesForIdentifierDirect(hashId).front();
       const std::vector< const SiHit* >& siHitsWithCurrentHash = siHitsCollections.at(hashId);
 
       for (auto itr = startRange; itr != stopRange; ++itr) {
-	const xAOD::PixelCluster* cluster = *startRange;
+	const xAOD::StripCluster* cluster = *startRange;
 	const xAOD::TrackMeasurementValidation* measurement = measurements->at(cluster->index());
 	ATH_CHECK(measurement->identifier() == Identifier(static_cast<int>(cluster->identifier())).get_compact() );
 
 	auto [word, depositsBarcode, depositsEnergy] = ActsTrk::detail::getSDOInformation(cluster->rdoList(), *sdos);
-	std::vector<SiHit> compatibleSiHits = findAllHitsCompatibleWithCluster(*cluster, *element, siHitsWithCurrentHash, depositsBarcode);
+	std::vector<SiHit> compatibleSiHits = findAllHitsCompatibleWithCluster(*cluster, *element, siHitsWithCurrentHash);
 
 	auto [energyDeposit, meanTime, barcode, pdgid,
 	      startPosX, startPosY, startPosZ,
@@ -195,43 +195,30 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
 
-  
-  std::vector<SiHit> PixelClusterSiHitDecoratorAlg::findAllHitsCompatibleWithCluster( const xAOD::PixelCluster& cluster,
+    
+  std::vector<SiHit> StripClusterSiHitDecoratorAlg::findAllHitsCompatibleWithCluster( const xAOD::StripCluster& cluster,
 										      const InDetDD::SiDetectorElement& element,
-										      const std::vector<const SiHit*>& sihits,
-										      const std::vector< std::vector< int > >& sdoTracks) const
+										      const std::vector<const SiHit*>& siHits) const
   {
     std::vector<SiHit> matchingHits {};
     std::vector<const SiHit*> multiMatchingHits {};
 
-    for ( const SiHit* siHit : sihits) {
+    for (const SiHit* siHit: siHits) {
       // Now we have all hits in the module that match lets check to see if they match the cluster
-      // Must be within +/- 1 hits of any hit in the cluster to be included
-      if ( m_useSiHitsGeometryMatching ) {
-	HepGeom::Point3D<double>  averagePosition =  0.5 * (siHit->localStartPosition() + siHit->localEndPosition());
-	Amg::Vector2D pos = element.hitLocalToLocal( averagePosition.z(), averagePosition.y() );
-	InDetDD::SiCellId diode = element.cellIdOfPosition(pos);
+      // Must be within +/- 1 hits of any hit in the cluster to be included      
+      HepGeom::Point3D<double> averagePosition = 0.5 * (siHit->localStartPosition() + siHit->localEndPosition());
+      Amg::Vector2D pos = element.hitLocalToLocal(averagePosition.z(), averagePosition.y());
+      InDetDD::SiCellId diode = element.cellIdOfPosition(pos);
+      
+      for (const auto& hitIdentifier: cluster.rdoList()) {
+	ATH_MSG_DEBUG("Truth Strip " <<  diode.phiIndex() << " Cluster Strip " << m_StripHelper->strip(hitIdentifier));
 	
-	for( const auto& hitIdentifier : cluster.rdoList() ){
-	    ATH_MSG_DEBUG("Truth Phi " <<  diode.phiIndex() << " Cluster Phi " <<   m_PixelHelper->phi_index( hitIdentifier ) );
-	    ATH_MSG_DEBUG("Truth Eta " <<  diode.etaIndex() << " Cluster Eta " <<   m_PixelHelper->eta_index( hitIdentifier ) );
-	    if( std::abs( static_cast<int>(diode.etaIndex()) - m_PixelHelper->eta_index( hitIdentifier ) ) <= 1 and
-		std::abs( static_cast<int>(diode.phiIndex()) - m_PixelHelper->phi_index( hitIdentifier ) ) <= 1 ) {
-	      multiMatchingHits.push_back(siHit);
-	      break;
-	    }
-	} // list on rdos
-	
-      } else { // not m_useSiHitsGeometryMatching
-	auto siHitBarcode = HepMC::barcode(siHit->particleLink());       
-	for ( const std::vector<int>& barcodeSDOColl : sdoTracks ) {
-	  if (std::find(barcodeSDOColl.begin(), barcodeSDOColl.end(), siHitBarcode) == barcodeSDOColl.end()) continue;
-	  multiMatchingHits.push_back(siHit);	
+	if (std::abs( static_cast<int>(diode.phiIndex()) - m_StripHelper->strip(hitIdentifier) ) <= 1) {
+	  multiMatchingHits.push_back(siHit);
 	  break;
-	}	
+	}
       }
-
-    } // loop on si hits
+    } // loop on si hits 
     
     // Now we will now make 1 SiHit for each true particle if the SiHits "touch" other
     std::vector<const SiHit* >::iterator siHitIter  = multiMatchingHits.begin();
@@ -278,7 +265,7 @@ namespace ActsTrk {
       if ( ajoiningHits.empty() ) {
 	ATH_MSG_WARNING("This should really never happen");
 	continue;
-      }else if ( ajoiningHits.size() == 1 ) {
+      } else if ( ajoiningHits.size() == 1 ) {
 	// Copy Si Hit ready to return
 	matchingHits.push_back( *ajoiningHits[0] );
 	continue;
@@ -299,7 +286,7 @@ namespace ActsTrk {
 				  energyDep,
 				  time,
 				  HepMC::barcode((*siHitIter)->particleLink()),
-				  0, // 0 for pixel 1 for strip
+				  1, // 0 for pixel 1 for strip
 				  (*siHitIter)->getBarrelEndcap(),
 				  (*siHitIter)->getLayerDisk(),
 				  (*siHitIter)->getEtaModule(),
