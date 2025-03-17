@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ITkPixChargeCalibAlg.h"
@@ -42,7 +42,7 @@ namespace{
   
   LegacyFitParameters 
   defaultLegacyParameters(){
-    static const LegacyFitParameters legacyFit{14.0f, -1000.f, 8000.f};
+    static const LegacyFitParameters legacyFit{14.0f, -1000.f, 8000.f, 14.0f};
     return legacyFit;
   }
   

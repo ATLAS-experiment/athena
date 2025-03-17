@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
@@ -75,7 +75,7 @@ PixelChargeCalibCondData::setAllFromConfigData(unsigned int moduleHash, const Pi
       configData->getDefaultAnalogThresholdNoise(barrel_ec, layer), configData->getDefaultInTimeThreshold(barrel_ec, layer)};
     setThresholds(t, moduleHash, std::vector<Thresholds>(numFE, thresholds));
     //
-    const LegacyFitParameters defaultParams{configData->getDefaultQ2TotA(), configData->getDefaultQ2TotE(), configData->getDefaultQ2TotC()};
+    const LegacyFitParameters defaultParams{configData->getDefaultQ2TotA(), configData->getDefaultQ2TotE(), configData->getDefaultQ2TotC(), LegacyFitParameters::defaultOverflow};
     setLegacyFitParameters(t, moduleHash, std::vector<LegacyFitParameters>(numFE, defaultParams));
     //
     const auto zeroLinFit = PixelChargeCalib::LinearFitParameters();
@@ -213,7 +213,9 @@ PixelChargeCalibCondData::getCharge(InDetDD::PixelDiodeType type,
     const LinearFitParameters & lin  = getLinearFitParameters(type, moduleHash, FE);
     if (float charge1 = lin.Q(ToT); charge1 != 0.f) return charge1;
   }
+  
   return charge;
+
 }
 
 
@@ -282,7 +284,6 @@ PixelChargeCalibCondData::getChargeLUTFEI4(unsigned int moduleHash, unsigned int
   if (ToT < 1 || ToT > IBLCalibrationSize) {
     throw generateError(__func__, moduleHash,FE, ToT);
   }
-
   const IBLCalibration &charges = getTot2Charges(moduleHash,FE);
   return charges[ToT - 1];
 }

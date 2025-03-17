@@ -149,7 +149,7 @@ StatusCode PixelChargeCalibCondAlg::execute(const EventContext& ctx) const {
             configData->getDefaultAnalogThresholdNoise(barrel_ec, layer), configData->getDefaultInTimeThreshold(barrel_ec, layer)};
       const std::vector<Thresholds> allDefaultThresholds(numFE, defaultThreshold);
       //
-      const LegacyFitParameters defaultParam{configData->getDefaultQ2TotA(), configData->getDefaultQ2TotE(), configData->getDefaultQ2TotC()};
+      const LegacyFitParameters defaultParam{configData->getDefaultQ2TotA(), configData->getDefaultQ2TotE(), configData->getDefaultQ2TotC(), LegacyFitParameters::defaultOverflow};
       const std::vector<LegacyFitParameters> allDefaultFitParams(numFE, defaultParam);
       //
       const LinearFitParameters defaultLinParam{0.0f, 0.0f};
