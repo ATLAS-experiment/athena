@@ -9,7 +9,7 @@
 #include "AsgTools/AsgTool.h"
 #include "PATInterfaces/SystematicsCache.h"
 #include <nlohmann/json.hpp>
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 class BTaggingEfficiencyJsonTool: public asg::AsgTool,
                                   virtual public IBTaggingEfficiencyJsonTool 

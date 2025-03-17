@@ -8,7 +8,7 @@
 #include "FTagAnalysisInterfaces/IBTaggingSelectionJsonTool.h"
 #include "AsgTools/AsgTool.h"
 #include <nlohmann/json.hpp>
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 class BTaggingSelectionJsonTool: public asg::AsgTool,
 			     public virtual IBTaggingSelectionJsonTool {
