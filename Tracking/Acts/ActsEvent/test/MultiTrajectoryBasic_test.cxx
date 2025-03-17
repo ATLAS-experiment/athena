@@ -313,6 +313,28 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
              boost::test_tools::tolerance(0.01));
   BOOST_TEST((ro_ts2.component<float, "mcprob"_hash>()) == 0.0,
              boost::test_tools::tolerance(0.01));
+
+  auto dest_mtj = std::make_unique<ActsTrk::MutableMultiTrajectory>();
+  dest_mtj->addColumn<short>("author");
+  dest_mtj->addColumn<float>("mcprob");
+  using namespace Acts::HashedStringLiteral;
+
+  auto dest_i0 = dest_mtj->addTrackState(kMask);
+  auto dest_ts0 = dest_mtj->getTrackState(dest_i0);
+  dest_ts0.copyFrom(ts0);
+
+  BOOST_CHECK_EQUAL((ro_ts0.component<short, "author"_hash>()),
+                    (dest_ts0.component<short, "author"_hash>()));
+
+  BOOST_CHECK_EQUAL((ro_ts0.component<float, "mcprob"_hash>()),
+                    (dest_ts0.component<float, "mcprob"_hash>()));
+
+
+  // make completely new r/o MTJ
+  auto fresh_ro_mtj = std::make_unique<ActsTrk::MultiTrajectory>(*mtj.get());
+
+
+  BOOST_CHECK_EQUAL(fresh_ro_mtj->size(), mtj->size());
 }
 
 // FIXME - test below should use ACTS::MTJ api once available in needed shape

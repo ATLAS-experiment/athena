@@ -6,7 +6,6 @@
 constexpr bool ActsTrk::MutableMultiTrajectory::hasColumn_impl(
     Acts::HashedString key) const {
   using namespace Acts::HashedStringLiteral;
-  INSPECTCALL(key);
 
   switch (key) {
     case "previous"_hash:
@@ -38,13 +37,15 @@ template <typename T>
 void ActsTrk::MutableMultiTrajectory::addColumn_impl(std::string_view name) {
   // It is actually not clear if we would allow decorating RO MTJ, maybe we do
   if constexpr (ActsTrk::detail::accepted_decoration_types<T>::value) {
-    m_decorations.emplace_back( ActsTrk::detail::decoration<T>( 
+    m_decorations.emplace_back( ActsTrk::detail::decoration<T>(
         name,
         ActsTrk::detail::constDecorationGetter<T>,
         ActsTrk::detail::decorationCopier<T>,
         ActsTrk::detail::decorationSetter<T>
     )
   );
+  INSPECTCALL("added dynamic decoration " << name << " n decorations now " << m_decorations.size());
+
     // it would be useful to force presence of decoration already here
   } else {
     throw std::runtime_error("Can't add decoration of this type to MutableMultiTrajectory");
