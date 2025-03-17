@@ -55,7 +55,8 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('lowPtvalueZ', -1)
     cf.addFlag('lowPtWindowRScaling', 1.0)
     cf.addFlag('lowPtWindowZScaling', 1.0)
-    
+    cf.addFlag('missedHitRScaling', -1.0)
+    cf.addFlag('missedHitZScaling', -1.0)    
     cf.addFlag('maxBranches', -1)
     cf.addFlag('hitThreshold', 10)
     
