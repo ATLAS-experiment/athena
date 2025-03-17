@@ -33,8 +33,6 @@ def ActsPixelClusterTruthDecorator(flags,
 
     #Using the same name of the xAOD::SiCluster causes bunch of warnings
     kwargs.setdefault("OutputClusterContainer","ITkPixelMeasurements")
-
-
     acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterTruthDecorator(name,**kwargs))
 
     # add SDO and SiHit info
@@ -60,9 +58,11 @@ def ActsStripClusterTruthDecorator(flags,
     kwargs.setdefault("SiClusterContainer","ITkStripClusters")
     kwargs.setdefault("AssociationMapOut","ITkStripClustersToTruthParticles")
     kwargs.setdefault("OutputClusterContainer","ITkStripMeasurements")
-
     acc.addEventAlgo(CompFactory.ActsTrk.StripClusterTruthDecorator(name,**kwargs))
 
+    if flags.Acts.decoratePRD.sdoSiHit:
+        acc.merge(ActsStripClusterSiHitDecoratorAlgCfg(flags))
+        
     # Persistification
     if flags.Tracking.writeExtendedSi_PRDInfo:
         toAOD = [
@@ -83,4 +83,15 @@ def ActsPixelClusterSiHitDecoratorAlgCfg(flags,
     kwargs.setdefault('SDOs', 'ITkPixelSDO_Map')
     kwargs.setdefault('SiHits', 'ITkPixelHits')
     acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterSiHitDecoratorAlg(name, **kwargs))
+    return acc
+
+def ActsStripClusterSiHitDecoratorAlgCfg(flags,
+                                         name: str = "ActsStripClusterSiHitDecoratorAlg",
+                                         **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault('Measurements', 'ITkStripMeasurements')
+    kwargs.setdefault('Clusters', 'ITkStripClusters')
+    kwargs.setdefault('SDOs', 'ITkStripSDO_Map')
+    kwargs.setdefault('SiHits', 'ITkStripHits')
+    acc.addEventAlgo(CompFactory.ActsTrk.StripClusterSiHitDecoratorAlg(name, **kwargs))
     return acc
