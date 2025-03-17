@@ -15,6 +15,8 @@ class PixelToTPIDDualToolConfig (ConfigBlock) :  ## should match the alg in ../T
             info="the name of the input container.")
         self.addOption ('postfix', "", type=str,
             info="a postfix to apply to decorations and algorithm names.")
+        self.addOption ('equalizeClusterMeasurements', False, type=bool,
+            info="whether to equalize cluster level dE/dx measurements. ")
 
         
     def makeAlgs (self, config) :
@@ -23,7 +25,11 @@ class PixelToTPIDDualToolConfig (ConfigBlock) :  ## should match the alg in ../T
         # Setup the muon quality selection
         alg = config.createAlgorithm( 'CP::PixelDEdxEqualizationAlg', ## should match the alg in ../TrackingAnalysisAlgorithms I think... not the tool...
                                'PixelDEdxEqualizationAlg' + self.postfix )
-        config.addPrivateTool( 'PixelDEdxEqualizationAlg', 'CP::PixelDEdxEqualizationAlg' )
+        #config.addPrivateTool( 'PixelDEdxEqualizationAlg', 'CP::PixelDEdxEqualizationAlg' )
+        config.addPrivateTool( 'PixelToTPIDDualTool', 'CP::PixelToTPIDDualTool' )
+        alg.PixelToTPIDDualTool.TrackContainerName = self.containerName
+        alg.PixelToTPIDDualTool.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
+    
 
 
 ### Migrate others from TrackingAnalysisAlgorithmsConfig.py

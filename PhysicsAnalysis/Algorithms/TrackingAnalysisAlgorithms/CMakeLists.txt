@@ -15,7 +15,7 @@ atlas_add_library( TrackingAnalysisAlgorithmsLib
    PUBLIC_HEADERS TrackingAnalysisAlgorithms
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${VDT_LIBRARIES} AnaAlgorithmLib EventBookkeeperToolsLib xAODTracking InDetSecVtxTruthMatchToolLib
-   AsgDataHandlesLib AsgTools AthContainers PathResolver SystematicsHandlesLib)
+   AsgDataHandlesLib AsgTools AthContainers PathResolver SystematicsHandlesLib TrkAnalysisInterfacesLib)
 
 atlas_add_dictionary( TrackingAnalysisAlgorithmsDict
    TrackingAnalysisAlgorithms/TrackingAnalysisAlgorithmsDict.h

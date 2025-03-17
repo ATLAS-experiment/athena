@@ -18,6 +18,10 @@
 #include <AsgDataHandles/WriteHandle.h>
 #include <AsgDataHandles/ReadHandle.h>
 #include "PathResolver/PathResolver.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
+
+#include "TrkAnalysisInterfaces/IPixelToTPIDDualTool.h"
 
 #include <string>
 #include <vdt/vdtMath.h> // for RDataFrame
@@ -58,38 +62,18 @@ namespace CP {
     /// @{
     // Declare the algorithm's properties:
 
-    /* GIVE TO TOOL INSTEAD
-    /// Switching to PathResolver?
-    StringProperty m_scaleFactorTreePath
-    { this, "ScaleFactorTreePath", "", "Path to ROOT file containing the scale factor trees." }; // default to somewhere on CVMFS eventually?
-    
-    StringProperty m_scaleFactorTreeName
-    { this, "ScaleFactorTreeName", "SFs_TTree", "Name of TTree containing the scale factors." }; // default to somewhere on CVMFS eventually?
-    */
-    
-
-    // SysListHandle m_systematicsList {this};
-
     /// Input track collection to decorate
-    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_inputTrackParticles {
-      this, "InputTrackParticles", "InDetTrackParticles", "Input track collection to decorate with corrected dE/dx measurements."};
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackContainerName {
+    this, "TrackContainerName", "InDetTrackParticles", "Input track collection to decorate with corrected dE/dx measurements."};
 
-    // SysReadHandle<xAOD::TrackParticleContainer> m_inputTrackParticles {
-    //   this, "InputTrackParticles", "InDetTrackParticles", "Input track collection to decorate with corrected dE/dx measurements."};
-
+    // Gaudi::Property<std::string> m_trackContainerName{this, "TrackContainer", "InDetTrackParticles", "SG key for the input jet container"};
+  
     /// Decorators
-    // SysWriteDecorHandle<float> m_pixeldEdxEqualDecor {
-    //   this, "pixeldEdxEqualDecor", "", "the decoration for the equalized truncated mean dE/dx."};
-    // }
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dEdxEqKey{this, "dEdxEqName", "dEdxEq", "SG key for the equalized pixel dE/dx attribute"};
 
     /// Counters
     mutable std::atomic<unsigned long> m_nEventsProcessed{};
     mutable std::atomic<unsigned long> m_nTracksProcessed{};
-
-    /*
-    /// RDataFrame that will contain the scale factors. JUST LOAD IN TOOL
-    std::unique_ptr<ROOT::RDataFrame> m_df;  // Store the RDataFrame in memory
-    */
 
   }; // class PixelDEdxEqualizationAlg
 

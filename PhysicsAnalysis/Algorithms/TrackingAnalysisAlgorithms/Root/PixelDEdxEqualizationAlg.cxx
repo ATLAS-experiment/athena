@@ -16,56 +16,16 @@ namespace CP {
 
     ATH_MSG_DEBUG("Initializing PixelDEdxEqualizationAlg");
 
-    if (m_m_pixeldEdxEqualDecor.empty())
-      {
-        ANA_MSG_ERROR ("No equalized dEdx  decoration name set");
-        return StatusCode::FAILURE;
-      }
-
+    /// containers
+    ANA_CHECK ( m_trackContainerName.initialize () );
 
     ANA_CHECK ( m_pixelToTPIDDualTool.retrieve() );
-    ANA_CHECK ( m_pixelToTPIDDualTool->setProperty("EqualizeClusterMeasurements",true) ); // no reason to use this tool otherwise, right?
-    ANA_CHECK ( m_pixelToTPIDDualTool->initialize() );
+    // ANA_CHECK ( m_pixelToTPIDDualTool->initialize() ); // Not defined in interface.  But in header.
+    // ANA_CHECK ( m_pixelToTPIDDualTool->setProperty("EqualizeClusterMeasurements",true) ); // done through python config?
       
-    ATH_CHECK( m_inputTrackParticles.initialize() );
-    // ATH_CHECK( m_pixeldEdxEqual.initialize() );
+    ATH_CHECK ( m_trackContainerName.initialize() );
     
-    /*
-    if (m_scaleFactorTreePath.empty()) {
-      ATH_MSG_FATAL("No path to the ROOT file containing the scale factor trees  provided!");
-      return StatusCode::FAILURE;
-    }
-    if (m_scaleFactorTreeName.empty()) {
-      ATH_MSG_FATAL("No name for scale factor tree provided!");
-      return StatusCode::FAILURE;
-    }
-
-    // Initialize RDataFrame with scale factors
-    // Check if the file exists
-    std::string pathdEdxSFs = PathResolverFindCalibFile(m_scaleFactorTreePath); // Looks in CALIBPATH.
-    if (pathdEdxSFs.empty()) {
-      ATH_MSG_WARNING("Failed to find dedx equalization SF file called: " << m_scaleFactorTreePath);
-      return StatusCode::FAILURE;
-    }
-    else {
-      ATH_MSG_INFO("Using dE/dx scale factor file: " << pathdEdxSFs);
-    }
-
-    // Verify file is not a zombie
-    std::unique_ptr<TFile> file(TFile::Open(pathdEdxSFs.c_str(), "READ"));
-    if (!file || file->IsZombie()) {
-      ATH_MSG_ERROR("Failed to open ROOT file: " << m_scaleFactorTreePath);
-      return StatusCode::FAILURE;
-    }
-    // Verify TTree exists
-    if (!file->FindKey(m_scaleFactorTreeName.value().c_str())) { // Check key only.  Don't load.
-      ATH_MSG_ERROR("TTree " << m_scaleFactorTreeName << " not found in file: " << m_scaleFactorTreePath);
-      return StatusCode::FAILURE;
-    }
-
-    // Create the RDataFrame
-    m_df = std::make_unique<ROOT::RDataFrame>(m_scaleFactorTreeName.value(), pathdEdxSFs);
-    */
+    ANA_CHECK ( m_dEdxEqKey.initialize() );
     
     return StatusCode::SUCCESS;
   }
@@ -75,12 +35,12 @@ namespace CP {
     // Increase the event counter
     m_nEventsProcessed.fetch_add(1, std::memory_order_relaxed);
 
-    SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_inputTrackParticles, ctx);
+    SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_trackContainerName, ctx);
     ATH_CHECK( tracks.isValid() );
     
-    // Create decoration handles
+    /*// Create decoration handles
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> pixeldEdxEqualDecor(m_pixeldEdxEqual, ctx);
-    ATH_CHECK( pixeldEdxEqualDecor.isValid() );
+    ATH_CHECK( pixeldEdxEqualDecor.isValid() );*/
 
     // Increase the track counter
     unsigned int nTracks = tracks->size();
@@ -90,40 +50,36 @@ namespace CP {
     // Now decorate
     for (const auto* trk : *tracks) {
       
-      // 1. Call fuction that decorates the pixel clusters on a track
-      //    Follows links to MSOSs and Clusters.
-      //    Calculates raw dE/dx from charge, sensor thickness, & path-length through silicon.
-      //       TODO: eventually refactor PixelToTPIDTool.cxx (which runs during reco) so not duplicating this logic
-      //    Get correct SF and decorates cluster with equalized (and raw) dE/dx.  And maybe error.
-      //    Only call if links, clusters, and MSOSs are present.
-      // 2. Have a separate function that calculates the truncated mean, or any other metric.
-      //    Make it configurable for what it calculates...
-      //       TODO: Eventually refactor PixelToTPIDTool.cxx (which runs during reco) so not duplicating this logic.
+      /// Apply dE/dx equalization scale factors and recalculate the dE/dx truncated mean.
+      ///    This is to account for radiation damage (worsens charge collection eff) and conditions changes (bias voltage, threshold, feedback current).
+      ///    These SFs are calculated using IDTIDE data from every run.
+      /// During reconstruction, the dE/dx is calculated for each pixel cluster, then the truncated mean is calculated.
+      ///    Only this truncated mean is stored in the AOD (as a track summary variable).
+      /// For the nominal AODs, one can apply a run-specific equalization scale factor to the raw truncated mean.
+      ///    These SFs are also binned in track eta and IBL overflow status. 
+      /// However, the charge collection eff. in each layer of the pixel detector is degrading at a different rate.
+      ///    This motivates run- and module-specific equalization scale factors.
+      ///    To use these, custom datasets with pixel clusters and MSOSs are required.
+      /// If pixel clusters & MSOSs are available, this tool will follow the links from the track to the clusters.
+      ///    It will then calculate the cluster dE/dx, apply the equalization SF, and decorate the cluster with the equalized dE/dx.
+      ///    It will also calculate the truncated mean using the equalized cluster measurements.
+      /// If pixel clusters & MSOSs are not available (e.g. in nominal AODs), the simple run-specific SFs will be applied the the stored truncated mean instead.
       
-      // Apply decorations
-      // if (m_pixeldEdxEqualDecor) {
       float pixeldEdxEqual = -99.0;
       int nUsedHits = -1;
       int nUsedIBLOverflowHits = -1;
-      pixeldEdxEqual = m_pixelToTPIDDualTool-->dEdx(*trk, nUsedHits, nUsedIBLOverflowHits);
+      pixeldEdxEqual = m_pixelToTPIDDualTool->dEdx(*trk, nUsedHits, nUsedIBLOverflowHits); // returns raw or equalized based on 'EqualizeClusterMeasurements' boolean property
 
-      // m_pixeldEdxEqualDecor.set (*trk, pixeldEdxEqual, sys)
-      // }
+      /// As a sanity check, can confirm that nUsedHits & nUsedIBLOverflowHits match what was calculated during reconstruction.
+      /// NB: these actually can be different since the dE/dx calculated during reco uses the ESD EDM.
+      ///    There might be some migration between ESD to xAOD, particularly in the local (x,y) position of the cluster (maybe due to a refitting?).
+      ///    If a cluster is too close to a sensor edge, it is ignored in the calculation.
+      ///    So some clusters included in the truncated mean during reco (ESD) may not be included here (xAOD).  And vice versa. 
+
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > dEdxEqHandle(m_dEdxEqKey);
+      dEdxEqHandle(*trk) = pixeldEdxEqual;
+
     }
-
-
-
-    /*  
-   /// ReadHandleKeyArray way
-    auto readHandles = m_inputTrackParticles.makeHandles(ctx);
-    for (auto& readHandle : readHandles) {
-      for (const xAOD::TrackParticle* tp : *readHandle) {
-        // do something
-        }
-      }
-    }
-    */
-
 
 
 
