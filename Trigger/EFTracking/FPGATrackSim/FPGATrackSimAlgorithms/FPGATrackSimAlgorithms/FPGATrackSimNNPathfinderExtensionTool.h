@@ -67,7 +67,8 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         Gaudi::Property <float> m_lowPtWindowRScaling {this, "lowPtRScaling", 1.0, "Scaling factor for low pt in R"};
         Gaudi::Property <float> m_lowPtValueForWindowZScaling { this, "lowPtValueWindowZ", -1, "Value in MeV below which we scale the r window size"};
         Gaudi::Property <float> m_lowPtWindowZScaling {this, "lowPtZScaling", 1.0, "Scaling factor for low pt in Z"};
-
+        Gaudi::Property <float> m_missedHitRScaling {this, "missedHitRScaling", -1, "Amount to scale R window if previous hit was missed. Negative means this is disabled"};
+        Gaudi::Property <float> m_missedHitZScaling {this, "missedHitZScaling", -1, "Amount to scale Z window if previous hit was missed. Negative means this is disabled"};  
         Gaudi::Property <int> m_maxBranches { this, "maxBranches", -1, "Max number of branches before we stop, if negative this is disabled"};
         Gaudi::Property <bool> m_doOutsideIn { this, "doOutsideIn", true, "Setup the tool so it's doing outside in extrap"};
         Gaudi::Property <int> m_predictionWindowLength { this, "predictionWindowLength", 3, "Length of hits needed for prediction"};

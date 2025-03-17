@@ -308,6 +308,8 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                 continue;
             }
 
+	    bool lastHitWasReal = lastHit->isReal();
+	    
             //  if the last layer is m_nLayers_1stStage + m_nLayers_2ndStage, then we have hit the end already
             if((lastLayerInRoad + 1) >= m_nLayers_1stStage + m_nLayers_2ndStage)
             {
@@ -357,6 +359,11 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
 			if (m_windowZ.size() > 1) {
 			  windowZ = m_windowZ[layer-m_nLayers_1stStage]; // offset by n1st stage
 			}
+
+			// If last hit was not real and we want to, scale the window
+			if (m_missedHitRScaling > 0 && !lastHitWasReal) windowR *= m_missedHitRScaling;
+			if (m_missedHitZScaling > 0 && !lastHitWasReal) windowZ *= m_missedHitZScaling;			
+			
 			// now scale windows for low pt, if desired
 			if (pt < m_lowPtValueForWindowRScaling.value()) windowR *= m_lowPtWindowRScaling.value();
 			if (pt < m_lowPtValueForWindowZScaling.value()) windowZ *= m_lowPtWindowZScaling.value();			
