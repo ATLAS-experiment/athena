@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -617,7 +617,10 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
 	}
 
       mass_corr = jetStartP4.mass() / massFactor;
-    
+      if (mass_corr > jetStartP4.e()) {
+        mass_corr = jetStartP4.mass();
+      }
+
       if(!m_pTfixed) pT_corr = std::sqrt(jetStartP4.e()*jetStartP4.e()-mass_corr*mass_corr)/std::cosh( jetStartP4.eta() );
     }
 
