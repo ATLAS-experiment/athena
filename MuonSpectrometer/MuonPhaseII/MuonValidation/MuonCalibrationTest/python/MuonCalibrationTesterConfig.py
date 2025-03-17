@@ -10,20 +10,19 @@ def MdtCalibDbAlgTestCfg(flags, name = "MdtCalibDbAlgTest", **kwargs):
     return result
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg,geoModelFileDefault
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
     parser = SetupArgParser()
-    parser.add_argument("--setupRun4", default=True, action="store_true")
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(outRootFile="MdtCalibDbAlgTest.root")
     parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R4SimHits.pool.root"])
     parser.set_defaults(eventPrintoutLevel = 1000)
+    parser.set_defaults(defaultGeoFile="RUN4")
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
     parser.set_defaults(noRpc=True)    
     parser.set_defaults(noTgc=True)
 
     args = parser.parse_args()
-    args.geoModelFile = geoModelFileDefault(args.setupRun4)
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = True

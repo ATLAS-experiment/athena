@@ -46,12 +46,12 @@ atlas_add_test( RpcCabling_Run3MC
 
 
 atlas_add_test( RpcCabling_Run4MC
-                SCRIPT python -m MuonCondDump.dumpR4ToyCablings --setupRun4 && python -m MuonCondTest.RpcCablingTesterR4  --setupRun4 --JSONFile RpcCabling.json
+                SCRIPT python -m MuonCondDump.dumpR4ToyCablings --defaultGeoFile RUN4 && python -m MuonCondTest.RpcCablingTesterR4  --defaultGeoFile RUN4 --JSONFile RpcCabling.json
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 1200
                 POST_EXEC_SCRIPT nopost.sh)
 atlas_add_test( RpcCabling_Run4MC_COOL
-                SCRIPT python -m MuonCondTest.RpcCablingTesterR4  --setupRun4  
+                SCRIPT python -m MuonCondTest.RpcCablingTesterR4  --defaultGeoFile RUN4  
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 1200
                 POST_EXEC_SCRIPT nopost.sh)
@@ -89,13 +89,13 @@ atlas_add_test( TgcDigiJitterTest
 
 
 atlas_add_test( MdtCalibDbR4Test
-                SCRIPT python -m MuonCondTest.MdtCalibDbTesterR4 --setupRun4
+                SCRIPT python -m MuonCondTest.MdtCalibDbTesterR4 --defaultGeoFile RUN4
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 1200
                 POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( MdtTwinCablingTest
-                SCRIPT python -m MuonCondDump.dumpTwinCabling --setupRun4 --cablingMap twinCabling.json  --chamberToTwin all && python -m MuonCondTest.MdtTwinTester --setupRun4 --cablingJSON twinCabling.json
+                SCRIPT python -m MuonCondDump.dumpTwinCabling --defaultGeoFile RUN4 --cablingMap twinCabling.json  --chamberToTwin all && python -m MuonCondTest.MdtTwinTester --defaultGeoFile RUN4 --cablingJSON twinCabling.json
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 1200
                 POST_EXEC_SCRIPT nopost.sh)

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 def MdtTwinCablingTestCfg(flags, name="MdtTwinMappingTestAlg", **kwargs):
     from AthenaConfiguration.ComponentFactory import CompFactory
@@ -10,9 +10,8 @@ def MdtTwinCablingTestCfg(flags, name="MdtTwinMappingTestAlg", **kwargs):
 
 
 if __name__ == "__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, geoModelFileDefault
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
     parser = SetupArgParser()
-    parser.add_argument("--setupRun4", default=True, action="store_true")
     parser.add_argument("--cablingJSON", help="Location of the twin tube cabling file to test", type=str, default="")
     parser.set_defaults(nEvents = 1)
     parser.set_defaults(noMM=True)
@@ -21,7 +20,6 @@ if __name__ == "__main__":
     parser.set_defaults(noTgc=True)
 
     args = parser.parse_args()
-    args.geoModelFile = geoModelFileDefault(args.setupRun4)
     flags, cfg = setupGeoR4TestCfg(args)
     from MuonConfig.MuonCablingConfig import MdtTwinTubeMapCondAlgCfg
     cfg.merge(MdtTwinTubeMapCondAlgCfg(flags, JSONFile = args.cablingJSON))
