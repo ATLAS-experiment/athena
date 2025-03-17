@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -26,7 +26,8 @@ def ITkStripCablingCondAlgCfg(flags, name="ITkStripCablingCondAlg"):
                                                    ReadKeyRod=path+"ROD",
                                                    ReadKeyRodMur=path+"RODMUR",
                                                    ReadKeyMur=path+"MUR",
-                                                   ReadKeyGeo=path+"Geog"))
+                                                   ReadKeyGeo=path+"Geog",
+                                                   WriteKey="ITkStripCablingData"))
     return cfg
 
 
