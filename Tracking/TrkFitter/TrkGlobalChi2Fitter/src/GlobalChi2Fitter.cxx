@@ -5528,29 +5528,51 @@ namespace Trk {
         const auto [bremmin, bremmax] = std::minmax(bremno, nbremupstream);
 
         Amg::MatrixX & derivatives = state->derivatives();
-        double sinstereo = 0;
 
-        if (hittype == TrackState::SCT || hittype == TrackState::TGC) {
-          sinstereo = state->sinStereo();
-        }
+        /*
+         * Get the stereo angles for SCT and TGC.
+         */
+        const double sinStereo =
+          hittype == TrackState::SCT || hittype == TrackState::TGC ?
+          state->sinStereo() :
+          0;
+        const double cosStereo =
+          sinStereo != 0 ?
+          std::sqrt(1 - std::pow(sinStereo, 2)) :
+          1.;
 
-        double cosstereo = (sinstereo == 0) ? 1. : std::sqrt(1 - sinstereo * sinstereo);
+        /*
+         * For SCT and TGC we need modified derivatives, taking into account
+         * the orientation.This lambda chooses the correct accessor and rotates
+         * the derivative accordingly.
+         */
+        auto getThisDeriv = [sinStereo, cosStereo, &derivatives](int i, int j) -> double {
+          if (i == 0 && sinStereo != 0) {
+            return derivatives(0, j) * cosStereo + sinStereo * derivatives(1, j);
+          } else {
+            return derivatives(i, j);
+          }
+        };
 
         for (int i = 0; i < 5; i++) {
-          if (
-            !measbase->localParameters().contains(paraccessor.pardef[i]) ||
-            (i > 0 && (hittype == TrackState::SCT || hittype == TrackState::TGC))
-          ) {
+          if (!measbase->localParameters().contains(paraccessor.pardef[i])) {
             continue;
           }
 
-          if (trajectory.numberOfPerigeeParameters() > 0) {
-            int cols = trajectory.m_straightline ? 4 : 5;
+          /*
+           * SCT and TGC have all information stored in the first parameter.
+           */
+          if ((hittype == TrackState::SCT || hittype == TrackState::TGC) && i > 0) {
+            break;
+          }
 
-            if (i == 0) {
+          if (trajectory.numberOfPerigeeParameters() > 0) {
+            const int cols = trajectory.m_straightline ? 4 : 5;
+
+            if (i == 0 && sinStereo != 0) {
               weightderiv.row(measno).head(cols) =
-                (derivatives.row(0).head(cols) * cosstereo +
-                 sinstereo * derivatives.row(1).head(cols)) /
+                (derivatives.row(0).head(cols) * cosStereo +
+                 sinStereo * derivatives.row(1).head(cols)) /
                 error[measno];
             } else {
               weightderiv.row(measno).head(cols) = derivatives.row(i).head(cols) / error[measno];
@@ -5558,39 +5580,19 @@ namespace Trk {
           }
 
           for (int j = scatmin; j < scatmax; j++) {
-            int index = nperparams + ((trajectory.prefit() != 1) ? 2 * j : j);
-            double thisderiv = 0;
-
-            if (i == 0 && sinstereo != 0) {
-              thisderiv = derivatives(0, index) * cosstereo + sinstereo * derivatives(1, index);
+            if (trajectory.prefit() == 1) {
+              const int index = nperparams + j;
+              weightderiv(measno, index) = getThisDeriv(i, index) / error[measno];
             } else {
-              thisderiv = derivatives(i, index);
-            }
-
-            weightderiv(measno, index) = thisderiv / error[measno];
-
-            if (trajectory.prefit() != 1) {
-              index++;
-
-              if (i == 0 && sinstereo != 0) {
-                thisderiv = derivatives(0, index) * cosstereo + sinstereo * derivatives(1, index);
-              } else {
-                thisderiv = derivatives(i, index);
-              }
-
-              weightderiv(measno, index) = thisderiv / error[measno];
+              const int index = nperparams + 2 * j;
+              weightderiv(measno, index) = getThisDeriv(i, index) / error[measno];
+              weightderiv(measno, index + 1) = getThisDeriv(i, index + 1) / error[measno];
             }
           }
 
           for (int j = bremmin; j < bremmax; j++) {
-            double thisderiv = 0;
-            int index = j + nperparams + 2 * nscat;
-            if (i == 0 && sinstereo != 0) {
-              thisderiv = derivatives(0, index) * cosstereo + sinstereo * derivatives(1, index);
-            } else {
-              thisderiv = derivatives(i, index);
-            }
-            weightderiv(measno, index) = thisderiv / error[measno];
+            const int index = j + nperparams + 2 * nscat;
+            weightderiv(measno, index) = getThisDeriv(i, index) / error[measno];
           }
 
           measno++;
