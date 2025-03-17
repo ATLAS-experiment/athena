@@ -16,7 +16,7 @@ using FullElement  = DataHeader_p6::FullElement;
 
 //______________________________________________________________________________
 bool DataHeaderCnv_p6::persToElem( const DataHeader_p6* pers, unsigned p_idx,
-                                    DataHeaderElement* trans, const DataHeaderForm_p6& form )
+                                    DataHeaderElement* trans, const DataHeaderForm_p6& form ) const
 {
    delete trans->m_token;  trans->m_token = nullptr;
    int obj_idx = pers->m_shortElements[p_idx];
@@ -60,32 +60,36 @@ bool DataHeaderCnv_p6::persToElem( const DataHeader_p6* pers, unsigned p_idx,
 //______________________________________________________________________________
 DataHeader* DataHeaderCnv_p6::createTransient( const DataHeader_p6* pers,
                                                const DataHeaderForm_p6& form,
-                                               const Token* dhToken )
+                                               const Token* dhToken ) const
 {
    DataHeader* trans = new DataHeader();
    const unsigned int provSize = pers->m_provenanceSize;
    trans->m_inputDataHeader.resize(provSize);
    // DataHeaders with a self Reference at the end have the list longer by 1 element
-   int hasSelfRefSizeCorrection = (form.version() ==  DataHeaderForm_p6::DHverFormRef? 1 : 0);
-   trans->m_dataHeader.resize( pers->m_shortElements.size() - hasSelfRefSizeCorrection - provSize );
+   int selfRefSizeCorrection = (form.version() ==  DataHeaderForm_p6::DHverFormRef? 1 : 0);
+   size_t nelts = pers->m_shortElements.size() - provSize;
+   trans->m_dataHeader.resize( nelts );
 
    // convert all elements - transient vectors need to have the right sizes
    unsigned i = 0;
    for( auto& elem : trans->m_dataHeader ) {
       persToElem( pers, i++, &elem, form );
+      // Last entry is the self-reference, which is handled below.
+      if (i == nelts - selfRefSizeCorrection) break;
    }
    for( auto& elem : trans->m_inputDataHeader ) {
       persToElem( pers, i++, &elem, form );
    }
    // Add the self reference
-   trans->m_dataHeader.resize( trans->m_dataHeader.size() + 1 );
-   auto& elem = trans->m_dataHeader.back();
-   // convert the self ref that was stored at the end of the element list
-   persToElem( pers, i++, &elem, form );
+   if (selfRefSizeCorrection > 0) {
+     auto& elem = trans->m_dataHeader.back();
+     // convert the self ref that was stored at the end of the element list
+     persToElem( pers, i++, &elem, form );
 
-   if( elem.getToken()->contID().find("DataHeader") == std::string::npos ) {
-      // discard wrong element
-      trans->m_dataHeader.pop_back();
+     if( elem.getToken()->contID().find("DataHeader") == std::string::npos ) {
+       // discard wrong element
+       trans->m_dataHeader.pop_back();
+     }
    }
    trans->setStatus(DataHeader::Input);
    trans->setEvtRefTokenStr( dhToken->toString() );
@@ -96,7 +100,7 @@ DataHeader* DataHeaderCnv_p6::createTransient( const DataHeader_p6* pers,
 //______________________________________________________________________________
 void DataHeaderCnv_p6::elemToPers(const DataHeaderElement* trans,
                                   DataHeader_p6* pers,
-                                  DataHeaderForm_p6& form)
+                                  DataHeaderForm_p6& form) const
 {
    // Translate PoolToken
    const Token *token =  trans->getToken();
@@ -133,7 +137,7 @@ void DataHeaderCnv_p6::elemToPers(const DataHeaderElement* trans,
 }
 
 //______________________________________________________________________________
-DataHeader_p6* DataHeaderCnv_p6::createPersistent(const DataHeader* trans, DataHeaderForm_p6& form)
+DataHeader_p6* DataHeaderCnv_p6::createPersistent(const DataHeader* trans, DataHeaderForm_p6& form) const
 {
    DataHeader_p6* pers = new DataHeader_p6();
    const unsigned int provSize = trans->m_inputDataHeader.size();
@@ -153,7 +157,7 @@ DataHeader_p6* DataHeaderCnv_p6::createPersistent(const DataHeader* trans, DataH
 //______________________________________________________________________________
 void DataHeaderCnv_p6::insertDHRef( DataHeader_p6* pers,
                                     const std::string& key, const std::string& tokstr,
-                                    DataHeaderForm_p6& form )
+                                    DataHeaderForm_p6& form ) const
 {
    Token* token = new Token();
    token->fromString( tokstr );
