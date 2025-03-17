@@ -4,11 +4,13 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 import AthenaCommon.SystemOfUnits as Units
 
-class PixelToTPIDDualToolConfig (ConfigBlock) :  ## should match the alg in ../TrackingAnalysisAlgorithms I think... not the tool...
+#class PixelToTPIDDualToolConfig (ConfigBlock) :  ## should match the alg in ../TrackingAnalysisAlgorithms I think... not the tool...
+class PixelToTPIDBlock (ConfigBlock) :  ## should match the alg in ../TrackingAnalysisAlgorithms I think... not the tool...
     """the ConfigBlock for the Pixel ToT PID tool"""
 
     def __init__ (self, containerName='') :
-        super (PixelToTPIDDualToolConfig, self).__init__ ()
+        # super (PixelToTPIDDualToolConfig, self).__init__ ()
+        super (PixelToTPIDBlock, self).__init__ ()
         self.setBlockName('PixelToTPID')
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
@@ -20,7 +22,8 @@ class PixelToTPIDDualToolConfig (ConfigBlock) :  ## should match the alg in ../T
 
         
     def makeAlgs (self, config) :
-        log = logging.getLogger('PixelToTPIDDualToolConfig')
+        # log = logging.getLogger('PixelToTPIDDualToolConfig')
+        log = logging.getLogger('PixelToTPIDBlock')
         
         # Setup the muon quality selection
         alg = config.createAlgorithm( 'CP::PixelDEdxEqualizationAlg', ## should match the alg in ../TrackingAnalysisAlgorithms I think... not the tool...
