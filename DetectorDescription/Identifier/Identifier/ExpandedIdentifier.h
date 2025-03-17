@@ -153,6 +153,8 @@ public:
 
   /// String representation of the identifier using the input format
   operator std::string () const;
+  /// Returns whether the expanded Identifier contains any information
+  bool isValid() const;
   /// Send to std::cout
   void show () const;
 
