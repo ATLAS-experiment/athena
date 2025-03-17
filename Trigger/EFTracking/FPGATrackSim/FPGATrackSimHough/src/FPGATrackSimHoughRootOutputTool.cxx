@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPGATrackSimHough/FPGATrackSimHoughRootOutputTool.h"
@@ -357,7 +357,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
 
 
   // now do the same for offline tree, once per event
-  for (auto track : offlineTracks) {
+  for (const auto & track : offlineTracks) {
     if (!m_EvtSel->passCuts(track)) continue;
 
     m_offline_d0.push_back(track.getD0());

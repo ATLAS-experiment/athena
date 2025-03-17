@@ -1,4 +1,8 @@
-/**
+/*
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ */
+ 
+ /**
  * @file src/OutputConversionTool.cxx
  * @author zhaoyuan.cui@cern.ch
  */
@@ -272,7 +276,7 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
         {
             strip_edm_words.push_back(word);
             // Read in 9 consecutive words
-            if (strip_edm_words.size() == 9)
+            if (strip_edm_words.size() == 9 and scAux)
             {
                 scAux->idHash.push_back(get_bitfields_EDM_STRIPCLUSTER_w1(strip_edm_words[0]).id_hash);
                 scAux->id.push_back(get_bitfields_EDM_STRIPCLUSTER_w2(strip_edm_words[1]).identifier);
