@@ -5707,6 +5707,121 @@ namespace Trk {
     }
   }
 
+  void GlobalChi2Fitter::fillBfromMeasurements(
+    const Cache & cache,
+    GXFTrajectory & trajectory,
+    Amg::VectorX & b
+  ) const {
+    const int nFitPars = trajectory.numberOfFitParameters();
+    const int nPerPars = trajectory.numberOfPerigeeParameters();
+    const int nScatPars = 2 * trajectory.numberOfScatterers();
+    const int nBrem = trajectory.numberOfBrems();
+    const Amg::MatrixX & weightDeriv = trajectory.weightedResidualDerivatives();
+
+    const Amg::VectorX & res = trajectory.residuals();
+    const Amg::VectorX & error = trajectory.errors();
+
+    const int nMeas = (int) res.size();
+
+    for (int k = 0; k < nFitPars; k++) {
+      const int minMeasK = cache.m_firstmeasurement[k];
+      const int maxMeasK = cache.m_lastmeasurement[k];
+
+      /*
+       * NOTE: It is necessary to do r * invError * weight instead of doing
+       *       r / error * w. Otherwise, the implementation tests fail do to
+       *       numerical reasons.
+       */
+      for (int measno = minMeasK; measno < maxMeasK; measno++) {
+        b[k] += res[measno] * (1. / error[measno]) * weightDeriv(measno, k);
+      }
+
+      /*
+       * For qOverP and brems, we also have a contribution to brems elements.
+       *
+       * NOTE: It is necessary to do r * invError * weight instead of doing
+       *       r / error * w. Otherwise, the implementation tests fail do to
+       *       numerical reasons.
+       */
+      if (k == 4 || k >= nPerPars + nScatPars) {
+        for (int measno = nMeas - nBrem; measno < nMeas; measno++) {
+          b[k] += res[measno] * (1. / error[measno]) * weightDeriv(measno, k);
+        }
+      }
+    }
+  }
+
+  void GlobalChi2Fitter::fillAfromMeasurements(
+    const Cache & cache,
+    GXFTrajectory & trajectory,
+    Amg::SymMatrixX & a
+  ) const {
+    const int nFitPars = trajectory.numberOfFitParameters();
+    const Amg::MatrixX & weightDeriv = trajectory.weightedResidualDerivatives();
+
+    for (int k = 0; k < nFitPars; k++) {
+      for (int l = k; l < nFitPars; l++) {
+        const int minMeas = std::max(cache.m_firstmeasurement[k], cache.m_firstmeasurement[l]);
+        const int maxMeas = std::min(cache.m_lastmeasurement[k], cache.m_lastmeasurement[l]);
+
+        double a_kl = 0;
+        for (int measno = minMeas; measno < maxMeas; measno++) {
+          a_kl += weightDeriv(measno, k) * weightDeriv(measno, l);
+        }
+
+        a.fillSymmetric(l, k, a_kl);
+      }
+    }
+  }
+
+  void GlobalChi2Fitter::fillAfromScatterers(
+    GXFTrajectory & trajectory,
+    Amg::SymMatrixX & a
+  ) const {
+    const int nFitPars = trajectory.numberOfFitParameters();
+    const int nPerPars = trajectory.numberOfPerigeeParameters();
+    const int nScatPars = 2 * trajectory.numberOfScatterers();
+    const int nBrem = trajectory.numberOfBrems();
+    const Amg::MatrixX & weightDeriv = trajectory.weightedResidualDerivatives();
+
+    const Amg::VectorX & res = trajectory.residuals();
+    const auto & scatSigmas = trajectory.scatteringSigmas();
+
+    const int nMeas = (int) res.size();
+
+    int scatno = 0;
+
+    /*
+     * Direct contribution on the diagonal from the scatterer itself.
+     */
+    for (int k = nPerPars; k < nPerPars + nScatPars; k += 2) {
+      a(k, k) += 1. / std::pow(scatSigmas[scatno].first, 2);
+      a(k + 1, k + 1) += 1. / std::pow(scatSigmas[scatno].second, 2);
+
+      scatno++;
+    }
+
+    /*
+     * Indirect contribution on the qOverP and brems derivatives.
+     */
+    for (int measno = nMeas - nBrem; measno < nMeas; measno++) {
+      for (int k = 4; k < nFitPars; k++) {
+        if (k == 5) {
+          k = nPerPars + nScatPars;
+        }
+
+        for (int l = k; l < nFitPars; l++) {
+          if (l == 5) {
+            l = nPerPars + nScatPars;
+          }
+
+          const double a_kl = a(l, k) + weightDeriv(measno, k) * weightDeriv(measno, l);
+          a.fillSymmetric(l, k, a_kl);
+        }
+      }
+    }
+  }
+
   FitterStatusCode GlobalChi2Fitter::runIteration(
     const EventContext& ctx,
     Cache & cache,
@@ -5719,8 +5834,6 @@ namespace Trk {
   ) const {
     int nfitpars = trajectory.numberOfFitParameters();
     int nperpars = trajectory.numberOfPerigeeParameters();
-    int scatpars = 2 * trajectory.numberOfScatterers();
-    int nbrem = trajectory.numberOfBrems();
     double oldchi2 = trajectory.chi2();
     double oldredchi2 = (trajectory.nDOF() > 0) ? oldchi2 / trajectory.nDOF() : 0;
     int nsihits = trajectory.numberOfSiliconHits();
@@ -5780,14 +5893,6 @@ namespace Trk {
       return FitterStatusCode::Success;
     }
 
-    Amg::VectorX & res = trajectory.residuals();
-    Amg::VectorX & error = trajectory.errors();
-    std::vector < std::pair < double, double >>&scatsigmas = trajectory.scatteringSigmas();
-
-    int nmeas = (int) res.size();
-
-    const Amg::MatrixX & weight_deriv = trajectory.weightedResidualDerivatives();
-
     if (doderiv) {
       calculateDerivatives(trajectory);
       fillDerivatives(trajectory);
@@ -5801,60 +5906,15 @@ namespace Trk {
       ATH_MSG_ERROR("Your assumption is wrong!!!!");
     }
 
-    for (int k = 0; k < nfitpars; k++) {
-      int minmeas = cache.m_firstmeasurement[k];
-      int maxmeas = cache.m_lastmeasurement[k];
+    fillBfromMeasurements(cache, trajectory, b);
 
-      for (int measno = minmeas; measno < maxmeas; measno++) {
-        b[k] += res[measno] * (1. / error[measno]) * weight_deriv(measno, k);
-      }
-
-      if (k == 4 || k >= nperpars + scatpars) {
-        for (int measno = nmeas - nbrem; measno < nmeas; measno++) {
-          b[k] += res[measno] * (1. / error[measno]) * weight_deriv(measno, k);
-        }
-      }
-
-      if (doderiv) {
-        for (int l = k; l < nfitpars; l++) {
-          maxmeas =
-            std::min(cache.m_lastmeasurement[k], cache.m_lastmeasurement[l]);
-          minmeas =
-            std::max(cache.m_firstmeasurement[k],
-                     cache.m_firstmeasurement[l]);
-          double tmp = 0;
-          for (int measno = minmeas; measno < maxmeas; measno++) {
-            tmp += weight_deriv(measno, k) * weight_deriv(measno, l);
-          }
-          a.fillSymmetric(l, k, tmp);
-        }
-      }
-    }
-
+    /*
+     * The [a]-matrix does not depend on the residuals. We only need to change
+     * it, if the derivatives have changed.
+     */
     if (doderiv) {
-      int scatno = 0;
-
-      for (int k = nperpars; k < nperpars + scatpars; k += 2) {
-        a(k, k) += 1. / (scatsigmas[scatno].first * scatsigmas[scatno].first);
-        a(k + 1, k + 1) += 1. / (scatsigmas[scatno].second * scatsigmas[scatno].second);
-        scatno++;
-      }
-
-      for (int measno = nmeas - nbrem; measno < nmeas; measno++) {
-        for (int k = 4; k < nfitpars; k++) {
-          if (k == 5) {
-            k = nperpars + scatpars;
-          }
-
-          for (int l = k; l < nfitpars; l++) {
-            if (l == 5) {
-              l = nperpars + scatpars;
-            }
-            double tmp = a(l, k) + weight_deriv(measno, k) * weight_deriv(measno, l);
-            a.fillSymmetric(l, k, tmp);
-          }
-        }
-      }
+      fillAfromMeasurements(cache, trajectory, a);
+      fillAfromScatterers(trajectory, a);
     }
 
     unsigned int scatno = 0;

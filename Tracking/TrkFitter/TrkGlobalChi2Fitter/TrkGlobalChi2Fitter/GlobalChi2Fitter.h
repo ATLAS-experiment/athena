@@ -651,7 +651,7 @@ namespace Trk {
      * @brief Update errors with the information from the maxbremspull.
      *
      * Marks the state of the maxbremspull as a kink and updates the
-     * sigmaDeltaE. Then the error for the corresponding resiudal is updated.
+     * sigmaDeltaE. Then the error for the corresponding residual is updated.
      * The [a]-matrix is modified with the new error information.
      *
      * @param[in, out] trajectory The trajectory, we want to analyse.
@@ -687,6 +687,62 @@ namespace Trk {
     void fillFirstLastMeasurement(
       Cache & cache,
       GXFTrajectory & trajectory
+    ) const;
+
+    /*
+     * @brief Fill the b-vector with the residual information from the measurements.
+     *
+     * Loop over all fit parameters. For each, loop over all relevant,
+     * measurements and add the information to the b-vector. For each fit
+     * parameter k we get:
+     *   b[k] = sum( res / error * derivative )
+     * For qOverP and brems we get also a contribution the brems elements in
+     * the b-vector.
+     *
+     * @param[out] cache General cache object for first/last measurements.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in, out] b The b-vector of the system.
+     */
+    void fillBfromMeasurements(
+      const Cache & cache,
+      GXFTrajectory & trajectory,
+      Amg::VectorX & b
+    ) const;
+
+    /*
+     * @brief Fill the [a]-matrix with the derivative information from the measurements.
+     *
+     * Loop over all fit parameters in two dimensions k and l. For each, loop
+     * over all relevant, measurements and add the information to the
+     * [a]-matrix. We get:
+     *   [a]_kl = sum( derivative_k * derivative_l )
+     *
+     * @param[out] cache General cache object for first/last measurements.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in, out] a The [a]-matrix of the system.
+     */
+    void fillAfromMeasurements(
+      const Cache & cache,
+      GXFTrajectory & trajectory,
+      Amg::SymMatrixX & a
+    ) const;
+
+    /*
+     * @brief Fill the [a]-matrix with the derivative information from the scatterers.
+     *
+     * Loop over non-perigee (except qOverP) parameters in two dimensions k and
+     * l. For each, loop over all relevant, derivative entries and add the
+     * information to the [a]-matrix. We get an update of the diagonal:
+     *   [a]_kk += 1 / scatSigma^2
+     * and an update of the general elements:
+     *   [a]_kl += sum( derivative_k * derivative_l )
+     *
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in, out] a The [a]-matrix of the system.
+     */
+    void fillAfromScatterers(
+      GXFTrajectory & trajectory,
+      Amg::SymMatrixX & a
     ) const;
 
     FitterStatusCode runIteration(
