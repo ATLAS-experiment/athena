@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #define FILLEVENTNORMALIZATION(NBINS, MIN, WIDTH, VALUE, VARPASSED, VAR, HISTGROUP) \
@@ -30,6 +30,7 @@ for (int i = 1; i <= NBINS; i++) \
 #include "InDetConditionsSummaryService/IInDetConditionsSvc.h"
 
 #include "EventPrimitives/EventPrimitivesHelpers.h"
+#include "CxxUtils/trapping_fp.h"
 
 #include <sstream>
 #include <iomanip>
@@ -1560,6 +1561,8 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTRDOs(const EventContext& ctx,
 
                     if (nclass >= 0) {
                         if (ibe == 0) {
+                            // Tell clang to optimize assuming that FP operations may trap.
+                            CXXUTILS_TRAPPING_FP;
                             float occLL = float(moduleHits_B[modulenum_tmp]) / float(numberOfStrawsMod[nclass]);
                             float occHL = float(HLmoduleHits_B[modulenum_tmp]) / float(numberOfStrawsMod[nclass]);
                             AvgLLOcc_side_x = i - (32 * nclass);
