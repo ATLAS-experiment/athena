@@ -246,10 +246,10 @@ int AtlasDetectorID::initialize_from_dictionary(const IdDictMgr &dict_mgr) {
     }
     // Initialize helper, needed for init of AtlasDetectorID
     if (!m_helper) {
-        m_helper = std::make_unique<AtlasDetectorIDHelper>(m_msgSvc).release();
+        m_helper = std::make_unique<AtlasDetectorIDHelper>().release();
     }
 
-    if (m_helper->initialize_from_dictionary(dict_mgr, m_quiet)){
+    if (m_helper->initialize_from_dictionary(dict_mgr)){
         ATH_MSG_ERROR(__func__<<":"<<__LINE__<<" - Initialization from dictionary failed.");
         return 1;
     }
