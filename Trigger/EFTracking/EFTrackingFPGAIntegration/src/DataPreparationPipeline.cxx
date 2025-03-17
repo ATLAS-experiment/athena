@@ -58,7 +58,8 @@ StatusCode DataPreparationPipeline::initialize()
     }
   }
 
-  ATH_CHECK(m_xAODContainerMaker.retrieve());
+  ATH_CHECK(m_xAODClusterMaker.retrieve());
+  ATH_CHECK(m_xAODSpacePointMaker.retrieve());
 
   return StatusCode::SUCCESS;
 }
@@ -69,12 +70,21 @@ StatusCode DataPreparationPipeline::execute(const EventContext &ctx) const
   {
     EFTrackingTransient::StripClusterAuxInput scAux;
     EFTrackingTransient::PixelClusterAuxInput pxAux;
+    
+    // Create separate structures for pixel and strip space points
+    EFTrackingTransient::SpacePointAuxInput pixelSpAux;
+    EFTrackingTransient::SpacePointAuxInput stripSpAux;
+    
     std::unique_ptr<EFTrackingTransient::Metadata> metadata =
         std::make_unique<EFTrackingTransient::Metadata>();
 
-    ATH_CHECK(m_passThroughTool->runPassThrough(scAux, pxAux, metadata.get(), ctx));
-    ATH_CHECK(m_xAODContainerMaker->makeStripClusterContainer(scAux, metadata.get(), ctx));
-    ATH_CHECK(m_xAODContainerMaker->makePixelClusterContainer(pxAux, metadata.get(), ctx));
+    // Pass both aux structures to the PassThroughTool
+    ATH_CHECK(m_passThroughTool->runPassThrough(scAux, pxAux, stripSpAux, pixelSpAux, metadata.get(), ctx));
+    ATH_CHECK(m_xAODClusterMaker->makeStripClusterContainer(scAux, metadata.get(), ctx));
+    ATH_CHECK(m_xAODClusterMaker->makePixelClusterContainer(pxAux, metadata.get(), ctx));
+
+    ATH_CHECK(m_xAODSpacePointMaker->makeStripSpacePointContainer(stripSpAux, metadata.get(), ctx));
+    ATH_CHECK(m_xAODSpacePointMaker->makePixelSpacePointContainer(pixelSpAux, metadata.get(), ctx));
 
     return StatusCode::SUCCESS;
   }

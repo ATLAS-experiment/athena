@@ -183,19 +183,20 @@ namespace EFTrackingTransient
   struct SpacePointOutput
   {
 
-    unsigned int *spIdHash;
-    float *spGlobalPosition;
-    float *spRadius;
-    float *spVarianceR;
-    float *spVarianceZ;
-    int *spMeasurementIndexes;
-    float *spTopHalfStripLength;
-    float *spBottomHalfStripLength;
-    float *spTopStripDirection;
-    float *spBottomStripDirection;
-    float *spStripCenterDistance;
-    float *spTopStripCenter;
-  };
+  unsigned int *spIdHash;
+  float *spGlobalPosition;
+  float *spRadius;
+  float *spVarianceR;
+  float *spVarianceZ;
+  int *spMeasurementIndexes;
+  unsigned int *spElementIdList;
+  float *spTopHalfStripLength;
+  float *spBottomHalfStripLength;
+  float *spTopStripDirection;
+  float *spBottomStripDirection;
+  float *spStripCenterDistance;
+  float *spTopStripCenter;
+};
 
   /**
    * @brief The StripClusterAuxInput struct is used to simplify the creaction of

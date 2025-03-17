@@ -14,7 +14,8 @@
 #include "FPGADataFormatTool.h"
 #include "TestVectorTool.h"
 #include "OutputConversionTool.h"
-#include "xAODContainerMaker.h"
+#include "xAODClusterMaker.h"
+#include "xAODSpacePointMaker.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IChronoSvc.h"
 
@@ -59,7 +60,8 @@ class FPGADataFormatAlg : public AthReentrantAlgorithm
     ToolHandle<OutputConversionTool> m_outputConversionTool{this, "OutputConversionTool", "OutputConversionTool", "tool for output conversion"};
 
     // Tool for making xAOD containers
-    ToolHandle<xAODContainerMaker> m_xAODContainerMaker{this, "xAODContainerMaker", "xAODContainerMaker", "tool for making xAOD containers"};
+    ToolHandle<xAODClusterMaker> m_xAODClusterMaker{this, "xAODClusterMaker", "xAODClusterMaker", "tool for making xAOD cluster"};
+    ToolHandle<xAODSpacePointMaker> m_xAODSpacePointMaker{this, "xAODSpacePointMaker", "xAODSpacePointMaker", "tool for making xAOD space point"};
 
     // Chrono service
     ServiceHandle<IChronoStatSvc> m_chronoSvc{"ChronoStatSvc", name()};

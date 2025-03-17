@@ -27,8 +27,8 @@ namespace EFTrackingFPGAIntegration{
 // used to get the std::vector which we will call size() on to get the 
 // test vector length.
 struct VSize {
-  const int runIndex;
-  const int argumentIndex;
+  int runIndex;
+  int argumentIndex;
   SG::ReadHandleKey<std::vector<unsigned long>> storeGateKey;
 };
 }
