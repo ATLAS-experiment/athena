@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -17,7 +17,6 @@
  *
  */
 
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "CxxUtils/SealCommon.h"               // wlav
 #include "CxxUtils/SealSharedLib.h"            // wlav
@@ -71,7 +70,6 @@
 
 //namespace seal {                                wlav
 namespace Athena {                             // wlav
-//<<<<<< PRIVATE DEFINES                                                >>>>>>
 
 #ifndef SHLIB_UNSUPPORTED
 # define  SHLIB_UNSUPPORTED \
@@ -145,12 +143,6 @@ enumModules (LPSTR name, ULONG base_address, PVOID context)
 }
 #endif
 
-//<<<<<< PUBLIC FUNCTION DEFINITIONS                                    >>>>>>
-//<<<<<< MEMBER FUNCTION DEFINITIONS                                    >>>>>>
-
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
 
 std::string
 SharedLibrary::path (void)
@@ -173,13 +165,7 @@ SharedLibrary::path ATLAS_NOT_THREAD_SAFE (const std::string &path)
 
     const char *pathvar = PATH;
     if (pathvar) {
-        const int path_size = strlen(pathvar) + 1 + path.length () + 1;
-	char *var = (char *) malloc (path_size);
-	snprintf (var, path_size, "%s=%s", pathvar, path.c_str ());
-	putenv (var);
-#if HAVE_COPYING_PUTENV
-	free (var);
-#endif
+        setenv(pathvar, path.c_str(),1);
     }
 }
 
