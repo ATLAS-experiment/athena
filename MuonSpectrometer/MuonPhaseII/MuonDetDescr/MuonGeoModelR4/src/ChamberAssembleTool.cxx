@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef SIMULATIONBASE
 
@@ -44,7 +44,7 @@ namespace {
          return Amg::Transform3D::Identity();
       }
       return Amg::getRotateZ3D(-90. * Gaudi::Units::deg) *
-              Amg::getRotateY3D(-90. * Gaudi::Units::deg);
+             Amg::getRotateY3D(-90. * Gaudi::Units::deg);
    }
    
    using BoundEnum = Acts::TrapezoidVolumeBounds::BoundValues;
@@ -60,11 +60,6 @@ namespace {
 namespace MuonGMR4{
 
 using chamberArgs = Chamber::defineArgs;
-
-ChamberAssembleTool::ChamberAssembleTool(const std::string &type, const std::string &name,
-                                         const IInterface *parent):
-    base_class{type,name,parent}{}
-
 
 
 double ChamberAssembleTool::trapezoidEdgeDist(const Amg::Vector3D& linePos,
@@ -179,11 +174,14 @@ ChamberAssembleTool::BoundTrfPair
                ATH_MSG_VERBOSE("Envelope "<<(*envelopeBounds)<<", transform: "<<Amg::toString(newCentreTrf));
                continue;
             }
-            /// Hack to cope with the RPCs which may be rotated by 180 degrees around the z-axis in cases,
+            /// Hack to cope with the RPCs which may be rotated by 180 degrees around the x or z-axis in cases,
             /// they're upside down.
             GeoTrf::CoordEulerAngles rotAngles = GeoTrf::getCoordRotationAngles(trf);
             if (std::abs(rotAngles.gamma - 180.*Gaudi::Units::deg)< std::numeric_limits<float>::epsilon()){
                trf = trf *Amg::getRotateZ3D(180.*Gaudi::Units::deg);
+            }
+            if (std::abs(rotAngles.alpha - 180.*Gaudi::Units::deg)< std::numeric_limits<float>::epsilon()){
+               trf = trf *Amg::getRotateX3D(180.*Gaudi::Units::deg);
             }
             /// Check whether the bounds are already embedded in the trapezoid
             const std::array<Amg::Vector3D, 8> corners = cornerPoints(trf, *bounds);
