@@ -14,7 +14,8 @@ StatusCode FPGADataFormatAlg::initialize()
   ATH_CHECK(m_FPGADataFormatTool.retrieve());
   ATH_CHECK(m_testVectorTool.retrieve());
   ATH_CHECK(m_outputConversionTool.retrieve());
-  ATH_CHECK(m_xAODContainerMaker.retrieve());
+  ATH_CHECK(m_xAODClusterMaker.retrieve());
+  ATH_CHECK(m_xAODSpacePointMaker.retrieve());
 
   ATH_CHECK(m_chronoSvc.retrieve());
 
@@ -184,12 +185,12 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
   // Make the xAOD
   {
     Athena::Chrono chrono("MakePixelContainers", m_chronoSvc.get());
-    ATH_CHECK(m_xAODContainerMaker->makePixelClusterContainer(pcAux, metadata.get(), ctx));
+    ATH_CHECK(m_xAODClusterMaker->makePixelClusterContainer(pcAux, metadata.get(), ctx));
   }
 
   {
     Athena::Chrono chrono("MakeStripContainers", m_chronoSvc.get());
-    ATH_CHECK(m_xAODContainerMaker->makeStripClusterContainer(scAux, metadata.get(), ctx));
+    ATH_CHECK(m_xAODClusterMaker->makeStripClusterContainer(scAux, metadata.get(), ctx));
   }
 
   return StatusCode::SUCCESS;

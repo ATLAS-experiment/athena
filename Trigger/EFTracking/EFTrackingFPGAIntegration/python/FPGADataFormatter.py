@@ -37,10 +37,11 @@ def xAODContainerMakerCfg(flags, name = 'xAODContainerMaker', **kwarg):
     
     kwarg.setdefault('name', name)
     kwarg.setdefault('OutputStripName', 'FPGAStripClusters')
-    kwarg.setdefault('OutputPixelName', 'FPGAPixelClusters')    
-    # Spacepoints below will be further refined when the full pass-through kernel is ready
-    kwarg.setdefault('OutputStripSpacePointName', 'PlaceHolderStripSpacePoints') 
-    kwarg.setdefault('OutputPixelSpacePointName', 'PlaceHolderPixelSpacePoints')
+    kwarg.setdefault('OutputPixelName', 'FPGAPixelClusters')
+        
+    # Update space point container names to match what ACTS expects
+    kwarg.setdefault('OutputStripSpacePointName', 'FPGAStripSpacePoints')
+    kwarg.setdefault('OutputPixelSpacePointName', 'FPGAPixelSpacePoints')
     
     acc.setPrivateTools(CompFactory.xAODContainerMaker(**kwarg))
     return acc

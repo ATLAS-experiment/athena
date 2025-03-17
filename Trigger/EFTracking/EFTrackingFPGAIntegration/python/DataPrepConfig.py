@@ -22,19 +22,30 @@ def FPGATrackSimReportingCfg(flags, name='FPGATrackSimReportingAlg',**kwargs):
 
     return acc
 
-
-def xAODContainerMakerCfg(flags, name = 'xAODContainerMaker', **kwarg):
+def xAODClusterMakerCfg(flags, name = 'xAODClusterMaker', **kwarg):
+    """Configure the xAODClusterMaker tool"""
     
     acc = ComponentAccumulator()
     
-    kwarg.setdefault('name', name)
-    kwarg.setdefault('OutputStripName', 'FPGAStripClusters')
-    kwarg.setdefault('OutputPixelName', 'FPGAPixelClusters')    
-    # Spacepoints below will be further refined when the full pass-through kernel is ready
-    kwarg.setdefault('OutputStripSpacePointName', 'PlaceHolderStripSpacePoints') 
-    kwarg.setdefault('OutputPixelSpacePointName', 'PlaceHolderPixelSpacePoints')
+    kwarg.setdefault('PixelClusterContainerKey', 'FPGAPixelClusters')
+    kwarg.setdefault('StripClusterContainerKey', 'FPGAStripClusters')
     
-    acc.setPrivateTools(CompFactory.xAODContainerMaker(**kwarg))
+    acc.setPrivateTools(CompFactory.xAODClusterMaker(name, **kwarg))
+    return acc
+
+def xAODSpacePointMakerCfg(flags, name = 'xAODSpacePointMaker', **kwarg):
+    """Configure the xAODSpacePointMaker tool"""
+    
+    acc = ComponentAccumulator()
+    
+    # Input clusters to read from
+    kwarg.setdefault('PixelClusterContainerKey', 'FPGAPixelClusters')
+    kwarg.setdefault('StripClusterContainerKey', 'FPGAStripClusters')
+    # Output space points to create
+    kwarg.setdefault('PixelSpacePointContainerKey', 'FPGAPixelSpacePoints')
+    kwarg.setdefault('StripSpacePointContainerKey', 'FPGAStripSpacePoints')
+    
+    acc.setPrivateTools(CompFactory.xAODSpacePointMaker(name, **kwarg))
     return acc
 
 def PassThroughToolCfg(flags, name = 'PassThroughTool', **kwarg):
@@ -46,6 +57,8 @@ def PassThroughToolCfg(flags, name = 'PassThroughTool', **kwarg):
     kwarg.setdefault('PixelClusterContainerKey', 'ITkPixelClusters')
     kwarg.setdefault('RunSW', flags.FPGADataPrep.PassThrough.RunSoftware)
     kwarg.setdefault('ClusterOnlyPassThrough', flags.FPGADataPrep.PassThrough.ClusterOnly)
+    kwarg.setdefault('MaxClusterNum', flags.FPGADataPrep.PassThrough.MaxClusterNum)
+    kwarg.setdefault('MaxSpacePointNum', flags.FPGADataPrep.PassThrough.MaxSpacePointNum)
         
     acc.setPrivateTools(CompFactory.PassThroughTool(**kwarg))
     return acc
@@ -54,11 +67,14 @@ def DataPrepCfg(flags, name = "DataPreparationPipeline", **kwarg):
 
     acc = ComponentAccumulator()
     
-    containerMakerTool = acc.popToolsAndMerge(xAODContainerMakerCfg(flags))
+    # Configure both tools
+    clusterMakerTool = acc.popToolsAndMerge(xAODClusterMakerCfg(flags))
+    spacePointMakerTool = acc.popToolsAndMerge(xAODSpacePointMakerCfg(flags))
     passThroughTool = acc.popToolsAndMerge(PassThroughToolCfg(flags))
     
     kwarg.setdefault('name', name)
-    kwarg.setdefault('xAODMaker', containerMakerTool)
+    kwarg.setdefault('xAODClusterMaker', clusterMakerTool)
+    kwarg.setdefault('xAODSpacePointMaker', spacePointMakerTool)
     kwarg.setdefault('PassThroughTool', passThroughTool)
     # xclbin and kernels
     kwarg.setdefault('xclbin', '')
@@ -79,29 +95,33 @@ def DataPrepCfg(flags, name = "DataPreparationPipeline", **kwarg):
 if __name__=="__main__":
     from EFTrackingFPGAIntegration.IntegrationConfigFlag import addFPGADataPrepFlags
     flags = addFPGADataPrepFlags()
+    
+    # useful for testing -> /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root
 
     # The input file should be specified by the user
     flags.Input.Files = [""]
+    
+    # Single muon with PU 200
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900492.PG_single_muonpm_Pt1_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33645151._000047.pool.root.1"]
+    
+    # ttbar with PU 200
+    # flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"]
+    
     flags.Output.AODFileName = "DataPrepAOD.pool.root"
     
     # For pass-through kernel
     flags.FPGADataPrep.RunPassThrough = False
     flags.FPGADataPrep.PassThrough.RunSoftware = True
     flags.FPGADataPrep.PassThrough.ClusterOnly = True
-    
     # ensure that the xAOD SP and cluster containers are available
     flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
     flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
-
-    # For Spacepoint formation
-    if flags.FPGADataPrep.PassThrough.ClusterOnly:
-        flags.Detector.EnableITkPixel = True
-        flags.Detector.EnableITkStrip = True
-        flags.Acts.useCache = False
-        flags.Tracking.ITkMainPass.doActsSeed=True
+    flags.Acts.useCache = False
+    flags.Tracking.ITkMainPass.doActsSeed=True
     
     # Disable calo for this test
     flags.Detector.EnableCalo = False
+    
 
     ###########################################
     # IDTPM flags
@@ -175,6 +195,10 @@ if __name__=="__main__":
                     "xAOD::StripClusterAuxContainer#FPGAStripClustersAux.",
                     "xAOD::PixelClusterContainer#FPGAPixelClusters",
                     "xAOD::PixelClusterAuxContainer#FPGAPixelClustersAux.",
+                    "xAOD::SpacePointContainer#FPGAPixelSpacePoints",
+                    "xAOD::SpacePointAuxContainer#FPGAPixelSpacePointsAux.-measurements",
+                    "xAOD::SpacePointContainer#FPGAStripSpacePoints",
+                    "xAOD::SpacePointAuxContainer#FPGAStripSpacePointsAux.-measurements",
                     "xAOD::TrackParticleContainer#FPGATrackParticles",
                     "xAOD::TrackParticleAuxContainer#FPGATrackParticlesAux."
                     ]

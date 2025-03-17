@@ -31,10 +31,13 @@ public:
      * @brief Call this function at the DataPreparationPipeline to run the pass-through kernels
      *
      */
-    StatusCode runPassThrough(EFTrackingTransient::StripClusterAuxInput &scAux,
-                              EFTrackingTransient::PixelClusterAuxInput &pxAux,
-                              EFTrackingTransient::Metadata *metadata,
-                              const EventContext &ctx) const;
+    StatusCode runPassThrough(
+        EFTrackingTransient::StripClusterAuxInput &scAux,
+        EFTrackingTransient::PixelClusterAuxInput &pxAux,
+        EFTrackingTransient::SpacePointAuxInput &stripSpAux,
+        EFTrackingTransient::SpacePointAuxInput &pixelSpAux,
+        EFTrackingTransient::Metadata *metadata,
+        const EventContext &ctx) const;
 
     /**
      * @brief Convert the strip cluster from xAOD container to simple std::vector
@@ -115,18 +118,28 @@ public:
      */
     bool runSW() const { return m_runSW; }
 
+
 private:
     Gaudi::Property<bool> m_runSW{this, "RunSW", true, "Run software mode"};               //!< Software mode, not running on the FPGA
     Gaudi::Property<bool> m_doSpacepoints{this, "DoSpacepoints", false, "Do spacepoints"}; //!< Temporary flag before spacepoints are ready
-    Gaudi::Property<bool> m_clusterOnlyPassThrouth{this, "ClusterOnlyPassThrough", false,
-                                                   "Use the cluster-only pass-through kernel"}; //!< Use the cluster-only pass through tool
-
+    Gaudi::Property<bool> m_clusterOnlyPassThrough{this, "ClusterOnlyPassThrough", false,
+                                                   "Use the cluster-only pass-through kernel"}; //!< Use the cluster-only pass through tool       
+    Gaudi::Property<unsigned int> m_maxClusterNum{this, "MaxClusterNum", 500000,
+                                                   "Maximum number of clusters that can be processed"};
+    Gaudi::Property<unsigned int> m_maxSpacePointNum{this, "MaxSpacePointNum", 500000,
+                                                   "Maximum number of space points that can be processed"};
+                                                   
+    
     SG::ReadHandleKey<xAOD::StripClusterContainer> m_stripClustersKey{
         this, "StripClusterContainerKey", "ITkStripClusters",
         "Key for Strip Cluster Containers"};
     SG::ReadHandleKey<xAOD::PixelClusterContainer> m_pixelClustersKey{
         this, "PixelClusterContainerKey", "ITkPixelClusters",
         "Key for Pixel Cluster Containers"};
+    SG::ReadHandleKey<xAOD::SpacePointContainer> m_spacePointsKey{
+        this, "SpacePointContainerKey", "ITkPixelSpacePoints",
+        "Key for Space Point Containers"};
+    
 };
 
 #endif // EFTRACKING_FPGA_INTEGRATION__PASSTHROUGH_TOOL_H
