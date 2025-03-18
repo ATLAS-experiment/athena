@@ -1,15 +1,14 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// TRT_BarrelElement.h
-///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
+/**
+ * @file TRT_BarrelElement.h
+ */
 
-#ifndef TRT_BarrelElement_h
-#define TRT_BarrelElement_h 1
+#ifndef TRT_READOUTGEOMETRY_TRT_BARRELELEMENT_H
+#define TRT_READOUTGEOMETRY_TRT_BARRELELEMENT_H
+
 #include "TRT_ReadoutGeometry/TRT_BarrelCode.h"
 #include "TRT_ReadoutGeometry/TRT_BarrelDescriptor.h"
 #include "TRT_ReadoutGeometry/TRT_BaseElement.h"
@@ -125,12 +124,12 @@ namespace InDetDD {
     const TRT_BarrelElement& operator=(const TRT_BarrelElement& right) = delete;
     /** These transforms are effectively to the local coord
       system of a straw derived from GeoModel -> hence CLHEP */
-    virtual HepGeom::Transform3D calculateStrawTransform(int straw) const override;
+    virtual HepGeom::Transform3D calculateStrawTransform(int straw, GeoAlignmentStore* alignStore) const override;
     HepGeom::Transform3D calculateLocalStrawTransform(int straw) const;
     /** return the surface of the element */
     virtual const Trk::Surface & elementSurface() const override;
     /** create the cache for the element */
-    virtual void createSurfaceCache() const override;
+    virtual void createSurfaceCache(GeoAlignmentStore* alignStore) const override;
     SurfaceCache createSurfaceCacheHelper() const;
 
     // Private Member data:

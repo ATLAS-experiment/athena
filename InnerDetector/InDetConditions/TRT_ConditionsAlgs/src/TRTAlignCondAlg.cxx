@@ -1,9 +1,7 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-
-// Gaudi
 #include "GaudiKernel/MsgStream.h"
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 #include "TRTAlignCondAlg.h"
@@ -179,7 +177,7 @@ StatusCode TRTAlignCondAlg::execute()
 
   // Update all detector elements caches
   for (InDetDD::TRT_BaseElement* newEl : *(writeCdoDetElCont->getElements())) {
-    newEl->updateAllCaches();
+    newEl->updateAllCaches(writeCdoAlignStore.get());
   }
 
   // Record WriteCondHandle

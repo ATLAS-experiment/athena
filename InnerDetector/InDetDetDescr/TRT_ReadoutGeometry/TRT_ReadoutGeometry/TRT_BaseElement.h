@@ -1,16 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// TRT_BaseElement.h
-///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
+/**
+ * @file TRT_BaseElement.h
+ */
 
-#ifndef TRT_BaseElement_h
-#define TRT_BaseElement_h 1
-
+#ifndef TRT_READOUTGEOMETRY_TRT_BASEELEMENT_H
+#define TRT_READOUTGEOMETRY_TRT_BASEELEMENT_H
 
 //include the Amg packages they include the Eigen plug-ins
 #include "EventPrimitives/EventPrimitives.h"
@@ -30,8 +27,6 @@
 #include "CxxUtils/CachedUniquePtr.h"
 #include "CxxUtils/CachedValue.h"
 #include <vector>
-
-
 
 class TRT_ID;
 class GeoAlignmentStore;
@@ -169,13 +164,13 @@ namespace InDetDD {
     void invalidate();
 
     /** Update all caches */
-    void updateAllCaches();
+    void updateAllCaches(GeoAlignmentStore* alignStore=nullptr);
 
     /** Return the TRT_Conditions object associated to this Detector element */
     const TRT_Conditions* conditions() const;
 
     /** to be overloaded by the extended classes */
-    virtual   HepGeom::Transform3D calculateStrawTransform(int straw) const = 0;
+    virtual HepGeom::Transform3D calculateStrawTransform(int straw, GeoAlignmentStore* alignStore=nullptr) const = 0;
 
     /** the straw bounds */
     virtual const Trk::SurfaceBounds&  strawBounds() const = 0;
@@ -184,10 +179,10 @@ namespace InDetDD {
     virtual const Trk::Surface&  elementSurface() const = 0;
 
     /** create the surface cache of the detector element, to be implementd in the deried class */
-    virtual void createSurfaceCache() const = 0;
+    virtual void createSurfaceCache(GeoAlignmentStore* alignStore=nullptr) const = 0;
 
     /** create the surface & surface cache for the straw */
-    void createSurfaceCache(Identifier id) const;
+    void createSurfaceCache(Identifier id, GeoAlignmentStore* alignStore=nullptr) const;
 
     /** invalidate action on the cache */
     void invalidateOther() const {};
@@ -198,7 +193,7 @@ namespace InDetDD {
     const TRT_BaseElement& operator=(const TRT_BaseElement&right);
     /** Helper method for cache dealing */
     void deleteCache();
-    std::unique_ptr<SurfaceCacheBase> createSurfaceCacheHelper(int straw) const;
+    std::unique_ptr<SurfaceCacheBase> createSurfaceCacheHelper(int straw, GeoAlignmentStore* alignStore=nullptr) const;
 
   protected:
     Identifier                                          m_id;
