@@ -7,6 +7,9 @@ from Herwig7_i.Herwig7ConfigLHEF import Hw7ConfigLHEF
 genSeq += Herwig7()
 Herwig7Config = Hw7ConfigLHEF(genSeq, runArgs)
 
+# Set Herwig7 for evgen
+evgenConfig.generators += ["Herwig7"]
+
 # handle compressed LHE files passed via runArgs.inputGeneratorFile
 import glob
 from AthenaCommon import Logging

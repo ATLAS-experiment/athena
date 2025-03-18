@@ -2,6 +2,9 @@
 assert hasattr(genSeq, "Herwig7")
 include("EvtGen_i/EvtGen_Fragment.py")
 
+# Set Herwig7 for evgen
+evgenConfig.generators += ["Herwig7"]
+
 # Set the aux-files depending on the current Herwig version
 evgenConfig.auxfiles += ['Herwig71Inclusive.pdt']
 genSeq.EvtInclusiveDecay.pdtFile = "Herwig71Inclusive.pdt"
