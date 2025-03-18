@@ -45,7 +45,7 @@ StatusCode ITkPixelDecodingAlg::execute(const EventContext& ctx) const
 
   }
 
-  std::shared_ptr<PixelRDO_Container> pixelRDOContainer = std::make_shared<PixelRDO_Container>(100); //dummy // will need to setup the container
+  std::shared_ptr<ITkPixelRDO_Container> pixelRDOContainer = std::make_shared<ITkPixelRDO_Container>(100); //dummy // will need to setup the container
   ATH_CHECK(m_hitSortingTool->createRDO(EventHitMaps, pixelRDOContainer.get()));
   
   //store the filled RDO container to SG

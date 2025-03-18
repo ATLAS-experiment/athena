@@ -6,7 +6,7 @@
 #define ITKPIXEL_ENCODINGALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "InDetRawData/PixelRDO_Container.h"
+#include "ITkPixelRDO_Container.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "ITkPixelHitSortingTool.h"
 #include "ITkPixelEncodingTool.h"
@@ -34,7 +34,7 @@ class ITkPixelEncodingAlg : public AthReentrantAlgorithm
 
     typedef std::vector< std::vector<uint32_t >> ITkPacketCollection;
   
-    SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey{this, "PixelRDOKey", "ITkPixelRDOs", "StoreGate Key of Pixel RDOs"};
+    SG::ReadHandleKey<ITkPixelRDO_Container> m_pixelRDOKey{this, "PixelRDOKey", "ITkPixelRDOs", "StoreGate Key of Pixel RDOs"};
     SG::WriteHandleKey<std::vector<uint32_t>> m_EncodedStreamKey{this, "EncodedStreamKey", "ITkEncodedStream", "StoreGate Key for Encoded Stream"};
 
 
