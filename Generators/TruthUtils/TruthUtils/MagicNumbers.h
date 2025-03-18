@@ -167,7 +167,7 @@ namespace HepMC {
         auto pv = p->production_vertex();
         if (pv) {
           for (auto pa: pv->particles_in()) {
-            if (pa->pdg_id() != p->pdg_id()) continue;
+            if (!pa || pa->pdg_id() != p->pdg_id()) continue;
             out.push_front(uniqueID(p));
             get_particle_history(pa, out, -1);
             break;
@@ -180,7 +180,7 @@ namespace HepMC {
         auto pv = p->end_vertex();
         if (pv) {
           for (auto pa: pv->particles_out()) {
-            if (pa->pdg_id() != p->pdg_id()) continue;
+            if (!pa || pa->pdg_id() != p->pdg_id()) continue;
             out.push_back(uniqueID(p));
             get_particle_history(pa, out, 1);
             break;
