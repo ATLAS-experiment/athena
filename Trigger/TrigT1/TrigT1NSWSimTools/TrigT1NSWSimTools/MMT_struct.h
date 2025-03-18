@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MM_STRUCT_H
@@ -57,21 +57,20 @@ class MMT_Parameters : public AthMessaging {
 };
 
 struct evInf_entry{
-  evInf_entry(uint64_t event=0,int pdg=0,double e=0,double p=0,double ieta=0,double peta=0,double eeta=0,double iphi=0,double pphi=0,double ephi=0,
+  evInf_entry(int event=0,int pdg=0,double e=0,double p=0,double ieta=0,double peta=0,double eeta=0,double iphi=0,double pphi=0,double ephi=0,
               double ithe=0,double pthe=0,double ethe=0,double dth=0,int trn=0,int mun=0,const ROOT::Math::XYZVector& tex=ROOT::Math::XYZVector());
 
-  uint64_t athena_event;
-  int pdg_id;
+  int athena_event,pdg_id;
   double E,pt,eta_ip,eta_pos,eta_ent,phi_ip,phi_pos,phi_ent,theta_ip,theta_pos,theta_ent,dtheta;
   int truth_n,mu_n;
   ROOT::Math::XYZVector vertex;
 };
 
 struct hitData_entry{
-  hitData_entry(uint64_t ev=0, double gt=0, double q=0, int vmm=0, int mmfe=0, int pl=0, int st=0, int est=0, int phi=0, int mult=0, int gg=0, double locX=0, double tr_the=0, double tru_phi=0,
+  hitData_entry(int ev=0, double gt=0, double q=0, int vmm=0, int mmfe=0, int pl=0, int st=0, int est=0, int phi=0, int mult=0, int gg=0, double locX=0, double tr_the=0, double tru_phi=0,
                 bool q_tbg=0, int bct=0, const ROOT::Math::XYZVector& tru=ROOT::Math::XYZVector(), const ROOT::Math::XYZVector& rec=ROOT::Math::XYZVector());
 
-  uint64_t event;
+  int event;
   double gtime,charge;
   int VMM_chip,MMFE_VMM,plane,strip,station_eta,station_phi,multiplet,gasgap;
   double localX,tru_theta_ip,tru_phi_ip;

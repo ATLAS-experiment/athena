@@ -36,9 +36,9 @@ namespace MuonGM {
                                const McEventCollection *truthContainer,
                                const TrackRecordCollection* trackRecordCollection,
                                const MmDigitContainer *nsw_MmDigitContainer,
-                               std::map<std::pair<uint64_t,unsigned int>,std::vector<digitWrapper> >& entries,
-                               std::map<std::pair<uint64_t,unsigned int>,std::vector<hitData_entry> >& Hits_Data_Set_Time,
-                               std::map<std::pair<uint64_t,unsigned int>,evInf_entry>& Event_Info) const;
+                               std::map<std::pair<int,unsigned int>,std::vector<digitWrapper> >& entries,
+                               std::map<std::pair<int,unsigned int>,std::vector<hitData_entry> >& Hits_Data_Set_Time,
+                               std::map<std::pair<int,unsigned int>,evInf_entry>& Event_Info) const;
 
   private:
     const MuonGM::MuonDetectorManager* m_detManager;        //!< MuonDetectorManager
