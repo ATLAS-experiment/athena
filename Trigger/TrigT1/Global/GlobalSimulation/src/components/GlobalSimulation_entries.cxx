@@ -4,6 +4,7 @@
 
 #include "../GlobalSimulationAlg.h"
 #include "../GlobalAlgs/Hypothesis/UCL/HypoTestBenchAlg.h"
+#include "../GlobalAlgs/Hypothesis/UCL/InvMassDPhiInc2TestBenchAlg.h"
 
 #include "../L1TopoAlgs/cTauMultiplicityAlgTool.h"
 #include "../L1TopoAlgs/EnergyThresholdAlgTool_jXE.h"
@@ -30,6 +31,7 @@
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
 DECLARE_COMPONENT(GlobalSim::HypoTestBenchAlg)
+DECLARE_COMPONENT(GlobalSim::InvMassDPhiInc2TestBenchAlg)
 
 
 DECLARE_COMPONENT(GlobalSim::cTauMultiplicityAlgTool)

@@ -6,6 +6,8 @@
 #include "GenericTob.h"
 #include "AlgoDataTypes.h"
 
+#include <sstream>
+
 namespace GlobalSim {
     
   GenericTob::GenericTob(const eEmTobPtr& in_tob) {
@@ -32,6 +34,22 @@ namespace GlobalSim {
       const auto& in = in_tob->Phi_bits();
       m_Phi_bits = 2*(bitSetToInt(in)+2);
     }
+
+  }
+
+  GenericTob::GenericTob(const std::string& bit_string) {
+    if(bit_string.size() != GenericTobWidth) {
+      std::stringstream ss;
+      ss << "GenericTob ctr expected " << GenericTobWidth
+	 << " bits, received " << bit_string.size();
+      throw std::out_of_range(ss.str());
+    }
+
+    auto bitstream = std::stringstream(bit_string);
+    bitstream >> m_Et_bits;
+    bitstream >> m_Eta_bits;
+    bitstream >> m_Phi_bits;
+    bitstream >> m_Charge_bits;
 
   }
 

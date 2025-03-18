@@ -27,10 +27,15 @@ namespace GlobalSim {
     
     constexpr static std::size_t GenericPhiBitWidth{7};
     constexpr static std::size_t GenericMuonFlagBitWidth{2};
-    
+
+    constexpr static std::size_t GenericTobWidth =
+      GenericEtBitWidth + GenericEtaBitWidth +
+      GenericPhiBitWidth + GenericMuonFlagBitWidth;
     
     GenericTob(){};
     GenericTob(const eEmTobPtr& in_tob);
+    GenericTob(const std::string&);
+
     
     const std::bitset<13>& Et_bits() const {return m_Et_bits;}
     const std::bitset<9>& Eta_bits() const {return m_Eta_bits;}
