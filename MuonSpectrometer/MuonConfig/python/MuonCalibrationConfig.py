@@ -235,3 +235,16 @@ def NswErrorCalibDbAlgCfg(flags, name = "NswErrorCalibDbAlg", **kwargs):
     the_alg = CompFactory.NswUncertDbAlg(name = name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
+
+def MmCTPCondDbAlgCfg(flags, name = "MmCTPCondDbAlg", **kwargs):
+    result = ComponentAccumulator()
+    if "readFromJSON" in kwargs:
+      kwargs.setdefault("ReadKey", "")
+    else:
+      from IOVDbSvc.IOVDbSvcConfig import addFolders
+      kwargs.setdefault("ReadKey", "/MDT/MM/CTPSLOPE")
+      result.merge(addFolders(flags, kwargs["ReadKey"], className='CondAttrListCollection', detDb="MDT_OFL", tag="MMCTPCorrections_toroidOn_v1" )) 
+
+    the_alg = CompFactory.MmCTPCondDbAlg(name = name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)
+    return result
