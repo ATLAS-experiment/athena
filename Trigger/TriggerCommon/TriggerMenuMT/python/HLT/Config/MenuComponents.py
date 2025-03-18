@@ -24,6 +24,7 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
 # Pool of mutable ComboHypo instances (FIXME: ATR-29181)
 _ComboHypoPool = dict()
+_CustomComboHypoAllowed = set()
 
 class Node(object):
     """base class representing one Alg + inputs + outputs, to be used to connect """
@@ -790,12 +791,14 @@ class ChainStep(object):
         funcName = self.getComboHypoFncName() # name of the function generator
         key = hash((comboNameFromStep, funcName))
         if key not in _ComboHypoPool:            
-            tmpCombo = ComboHypoNode(comboNameFromStep, self.comboHypoCfg)                
+            tmpCombo = ComboHypoNode(comboNameFromStep, self.comboHypoCfg) 
+            CHname = tmpCombo.name[:-4]   # remove 'Node'
             # exceptions for BLS chains that re-use the same custom CH in differnt steps
-            # this breaks the run one CH per step, but the BLS CH are able to handle decisions internally
-            if comboNameFromStep+"Node" != tmpCombo.name:
-                log.info("WARNING Created ComboHypo with name %s, expected from the step is instead %s. This is accepted only for allowed custom ComboHypos", tmpCombo.name, comboNameFromStep)
-                key = hash((tmpCombo.name, funcName))
+            # this breaks the run-one-CH-per-step, but the BLS CH are able to handle decisions internally
+            if comboNameFromStep != CHname:
+                log.debug("Created ComboHypo with name %s, expected from the step is instead %s. This is accepted only for allowed custom ComboHypos", CHname, comboNameFromStep)
+                _CustomComboHypoAllowed.add(CHname)
+                key = hash((CHname, funcName))
             _ComboHypoPool[key] = tmpCombo
         self.combo = _ComboHypoPool[key] 
         log.debug("Created combo %s with name %s, step comboName %s, key %s", funcName, self.combo.name, comboNameFromStep,key)
