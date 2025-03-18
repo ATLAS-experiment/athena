@@ -9,11 +9,11 @@ atlas_subdir( ActsMuonDetectorTest )
 atlas_add_component( ActsMuonDetectorTest
                      src/components/*.cxx src/*.cxx
                      LINK_LIBRARIES AthenaKernel StoreGateLib GeoModelUtilities MuonTesterTreeLib
-                                    GaudiKernel MuonReadoutGeometryR4 MuonGeoModelR4Lib ActsGeometryLib AthenaPoolUtilities
-                                    xAODTruth xAODMuonSimHit CxxUtils TruthUtils)
+                                    GaudiKernel MuonReadoutGeometryR4 MuonGeoModelR4Lib ActsGeometryLib AthenaPoolUtilities MuonTruthHelpers
+                                    xAODTruth xAODMuonSimHit TrkExInterfaces CxxUtils ActsInteropLib)
 
 atlas_add_test( testMuonDetectorNav
-                SCRIPT python -m ActsMuonDetectorTest.testMuonDetector
+                SCRIPT python -m ActsMuonDetectorTest.testMuonDetector 
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
