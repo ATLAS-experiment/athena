@@ -95,7 +95,7 @@ namespace GlobalSim {
   HypoTestBenchAlg::init_manual() {
 
 
-    // build a single  GepAlgoHypothesisFIFO  that contains five
+    // build a single  GepAlgoHypothesisFIFO  that contains
     // GepAlgoHypothesisPortsIn objects. The PortsIn objects contain
     // data only for eEmTobs.
 
