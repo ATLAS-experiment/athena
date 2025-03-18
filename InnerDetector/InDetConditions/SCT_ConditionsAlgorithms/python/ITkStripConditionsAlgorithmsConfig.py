@@ -55,7 +55,7 @@ def ITkStripConfigurationCondAlgCfg(flags, name="ITkStripConfigurationCondAlg", 
                                     className="CondAttrListVec",
                                     splitMC=True))
 
-    from SCT_Cabling.ITkStripCablingConfig import ITkStripCablingToolCfg
+    from ITkStripCabling.ITkStripCablingConfig import ITkStripCablingToolCfg
     kwargs.setdefault("SCT_CablingTool", acc.popToolsAndMerge(ITkStripCablingToolCfg(flags)))
 
     from SCT_ConditionsTools.ITkStripConditionsToolsConfig import ITkStripReadoutToolCfg
