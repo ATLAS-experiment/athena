@@ -5,6 +5,7 @@
 #define CONNECTEDMODULESUTIL_H
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
 #include <vector>
 #include <ranges>

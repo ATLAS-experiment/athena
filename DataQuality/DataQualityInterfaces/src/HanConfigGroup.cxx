@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -228,11 +228,11 @@ Accept( Visitor& visitor, boost::shared_ptr<dqm_core::Region> dqParent ) const
   std::string nodeName( GetName() );
   boost::shared_ptr<dqm_core::Region> dqr;
   if( nodeName != "top_level" ) {
-    boost::shared_ptr<dqm_core::Node> dqp(visitor.Visit( this, dqParent ));
+    boost::shared_ptr<dqm_core::Node> dqp(visitor.Visit( this, std::move(dqParent) ));
     dqr = boost::dynamic_pointer_cast<dqm_core::Region>( dqp );
   }
   else {
-    dqr = dqParent;
+    dqr = std::move(dqParent);
   }
 
   // Accept the same visitor on all containing m_groups and m_assessors

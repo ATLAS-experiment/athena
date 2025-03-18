@@ -62,7 +62,7 @@ def ITkPixelDefectsEmulatorCondAlgCfg(flags,
 
 
 def PixelDefectsEmulatorAlgCfg(flags,
-                                  name: str = "ITkPixelDefectsEmulatorAlg",
+                                  name: str = "PixelDefectsEmulatorAlg",
                                   **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
@@ -73,7 +73,7 @@ def PixelDefectsEmulatorAlgCfg(flags,
 
     if "EmulatedDefectsKey" not in kwargs :
         # create defects conditions data
-        acc.merge( ITkPixelDefectsEmulatorCondAlgCfg(flags))
+        acc.merge( PixelDefectsEmulatorCondAlgCfg(flags))
         kwargs.setdefault("EmulatedDefectsKey", "PixelEmulatedDefects")
     kwargs.setdefault("OutputKey","PixelRDOs")
     kwargs.setdefault("HistogramGroupName","") # disable histogramming, enable e.g. /PixelDefects/RejectedRDOs/
@@ -101,6 +101,14 @@ def ITkPixelDefectsEmulatorAlgCfg(flags,
     acc.addEventAlgo(CompFactory.InDet.PixelDefectsEmulatorAlg(name,**kwargs))
     return acc
 
+def ITkPixelDefectsEmulatorToDetectorElementStatusCondAlgCfg(flags,
+                                                             name: str = "ITkPixelDefectsEmulatorToDetectorElementStatusCondAlgCfg",
+                                                             **kwargs: dict) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault("EmulatedDefectsKey","ITkPixelEmulatedDefects")
+    kwargs.setdefault("WriteKey","ITkPixelDetectorElementStatusFromEmulatedDefects")
+    acc.addCondAlgo(CompFactory.InDet.PixelEmulatedDefectsToDetectorElementStatusCondAlg(name,**kwargs))
+    return acc
 
 if __name__ == "__main__":
 
@@ -139,6 +147,9 @@ if __name__ == "__main__":
                                           RunConsistencyChecks=False,
                                           ObjDebugOutput=False))
 
+    from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusCondAlgNoByteStreamErrorsCfg
+    acc.merge(ITkPixelDetectorElementStatusCondAlgNoByteStreamErrorsCfg(flags))
+
     from PixelDefectsEmulatorPostInclude import emulateITkPixelDefectsPoisson
     emulateITkPixelDefectsPoisson(flags,acc)
 
@@ -147,4 +158,4 @@ if __name__ == "__main__":
 
     if sc.isFailure():
         import sys
-        sys.exit(1)
+        sys.exit(1) 

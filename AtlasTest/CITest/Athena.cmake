@@ -45,7 +45,7 @@ atlas_add_citest( PileUpPresamplingRun4FullTruth
    SCRIPT RunWorkflowTests_Run4.py --CI -p -w PileUpPresampling -e '--maxEvents 5' )
 
 atlas_add_citest( DataOverlayPreparationRun3
-   SCRIPT RunWorkflowTests_Run3.py --CI -p -w MinbiasPreprocessing -e '--maxEvents 5' )
+   SCRIPT RunWorkflowTests_Run3.py --CI -p -w MinbiasPreprocessing -e '--maxEvents 5 --conditionsTag CONDBR2-BLKPA-2023-06' )
 
 atlas_add_citest( OverlayRun2MC
    SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay -e '--conditionsTag OFLCOND-MC16-SDR-RUN2-12')
@@ -71,7 +71,7 @@ atlas_add_citest( RecoRun2MC_PileUp
    DEPENDS_SUCCESS PileUpPresamplingRun2 )
 
 atlas_add_citest( RecoRun3Data
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--maxEvents 100 --preExec="flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-13' --run-only 
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--maxEvents 100 --preExec="flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-16' --run-only 
    PROPERTIES PROCESSORS 8 )
 
 atlas_add_citest( RecoRun3Data_Checks
@@ -79,7 +79,7 @@ atlas_add_citest( RecoRun3Data_Checks
    DEPENDS_SUCCESS RecoRun3Data )
 
 atlas_add_citest( RecoRun3Data_Bulk
-    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a f1333 --threads 8  -e '--skipEvents 100 --maxEvents 500 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data --conditionsTag CONDBR2-BLKPA-2022-13'  --run-only --no-output-checks 
+    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a f1333 --threads 8  -e '--skipEvents 100 --maxEvents 500 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data --conditionsTag CONDBR2-BLKPA-2022-16'  --run-only --no-output-checks 
    PROPERTIES PROCESSORS 8 )
 
 atlas_add_citest( RecoRun3Data_Bulk_Checks
@@ -87,7 +87,7 @@ atlas_add_citest( RecoRun3Data_Bulk_Checks
    DEPENDS_SUCCESS RecoRun3Data_Bulk )
 
 atlas_add_citest( RecoRun3Data_Express
-    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x785 -e '--maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data24_13p6TeV.00477023.express_express.merge.RAW._lb0287._SFO-ALL._0001.1 --conditionsTag CONDBR2-ES1PA-2024-03 ' --no-output-checks
+    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x785 -e '--maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data24_13p6TeV.00477023.express_express.merge.RAW._lb0287._SFO-ALL._0001.1 --conditionsTag CONDBR2-ES1PA-2024-05 ' --no-output-checks
     LOG_IGNORE_PATTERN "WARNING FPE .*PixelChargeLUTCalibCondAlg"
     # ignore FPEs from PixelChargeLUTCalibCondAlg
   )
@@ -95,7 +95,12 @@ atlas_add_citest( RecoRun3Data_Express
 atlas_add_citest( ZdcRec_ZDCCalib 
     SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data23_hi.00463427.calibration_ZDCCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
   )
-atlas_add_citest( ZdcRec_ZDCLEDCalib 
+
+  atlas_add_citest( ZdcRec_ZDCCalib24
+    SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data24_hi.00488915.calibration_ZDCCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
+  )
+
+  atlas_add_citest( ZdcRec_ZDCLEDCalib 
     SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data23_hi.00463427.calibration_ZDCLEDCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
   )
 atlas_add_citest( ZdcRec_ZDCInjCalib 
@@ -103,10 +108,10 @@ atlas_add_citest( ZdcRec_ZDCInjCalib
   )
 
 atlas_add_citest( RecoRun3Data_Cosmics 
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q450 -e '--maxEvents 25  --preExec="all:flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-13'  --no-output-checks)
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q450 -e '--maxEvents 25  --preExec="all:flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-16'  --no-output-checks)
 
 atlas_add_citest( RecoRun3Data_Calib
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q451 -e '--maxEvents 25  --preExec="all:flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-13' --no-output-checks)
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q451 -e '--maxEvents 25  --preExec="all:flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-16' --no-output-checks)
 
 atlas_add_citest( RecoRun3MC
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--maxEvents 25 --conditionsTag OFLCOND-MC23-SDR-RUN3-08' )
@@ -246,7 +251,7 @@ atlas_add_citest( CPAlgorithmsRun3Data_PHYSLITE
 # Data Quality
 #################################################################################
 atlas_add_citest( GlobalMonitoring
-   SCRIPT GlobalMonitoring.py IOVDb.GlobalTag="CONDBR2-HLTP-2024-03" --offline  --evtMax 20 )
+   SCRIPT GlobalMonitoring.py IOVDb.GlobalTag="CONDBR2-HLTP-2025-01" --offline  --evtMax 20 )
 
 atlas_add_citest( DataQuality_Run3MC
    SCRIPT Run3DQTestingDriver.py 'Input.Files=["../RecoRun3MC/run_q454/myAOD.pool.root"]' DQ.Environment=AOD DQ.Steering.doHLTMon=False --threads=1
@@ -283,6 +288,9 @@ atlas_add_citest( EgammaESD
 atlas_add_citest( ActsConfiguration
    SCRIPT ActsConfiguration.sh )
 
+atlas_add_citest( ActsExtendedTruth
+   SCRIPT ActsExtendedTruth.sh )
+ 
 atlas_add_citest( ACTS_Propagation_ITk
    SCRIPT ActsITkTest.py )
 
@@ -348,9 +356,11 @@ atlas_add_citest( ACTS_ActsGSFRefitting
    SCRIPT ActsGSFRefitting.sh
    LOG_IGNORE_PATTERN "ActsReFitterAlg.*ERROR Propagation reached the step count limit" )
 
-atlas_add_citest( ACTS_ActsGSFInEgamma
-   SCRIPT ActsGSFInEgamma.sh
-   LOG_IGNORE_PATTERN "Acts.*ERROR.*Propagation reached the step count limit")
+atlas_add_citest( ACTS_ActsGSFRefitLegacy
+   SCRIPT ActsGSFRefitLegacy.sh )
+
+atlas_add_citest( ACTS_ActsGSFRefitActs
+   SCRIPT ActsGSFRefitActs.sh )
 
 atlas_add_citest( ACTS_ActsPersistifySeeds
    SCRIPT ActsPersistifySeeds.sh )
@@ -393,6 +403,10 @@ atlas_add_citest( ACTS_CheckObjectCounts_WorkflowHgtd
   SCRIPT CheckCountTest.sh ActsCheckObjectCountsHgtd
   LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.Acts.*ERROR.*SurfaceError:1|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
 
+atlas_add_citest( ACTS_CheckObjectCounts_WorkflowFastTracking
+  SCRIPT CheckCountTest.sh ActsCheckObjectCountsFastTracking
+  LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.Acts.*ERROR.*SurfaceError:1|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
+
 #################################################################################
 #                 Muon Phase II CI tests
 #################################################################################
@@ -430,3 +444,7 @@ atlas_add_citest( TriggerConfigFlags
 
 atlas_add_citest( EFTracking_FPGATrackSim_workflow
   SCRIPT test_FPGATrackSimWorkflow.sh )
+
+atlas_add_citest (TrigInDetValidationMenu 
+               SCRIPT TrigInDetValidation_menu_test.py
+               POST_EXEC_SCRIPT nopost.sh )

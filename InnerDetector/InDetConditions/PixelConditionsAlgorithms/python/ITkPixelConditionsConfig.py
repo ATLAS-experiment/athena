@@ -168,18 +168,18 @@ def ITkPixelOfflineCalibCondAlgCfg(flags, name="ITkPixelOfflineCalibCondAlg", **
     folderName = ""
     if flags.ITk.Conditions.PixelOfflineCalibTag:
         folderName = '/PIXEL/ITkClusterError'
+
         CalibTag = flags.ITk.Conditions.PixelOfflineCalibTag     
         if flags.ITk.Conditions.PixelOfflineCalibFile:
             acc.merge(addFolders(flags, folderName, flags.ITk.Conditions.PixelOfflineCalibFile, tag=CalibTag, db="OFLP200", className="CondAttrListCollection"))
         else:
             acc.merge(addFolders(flags, folderName, "PIXEL_OFL", tag=CalibTag, db="OFLP200", className="CondAttrListCollection"))
 
+    else:
+        folderName = "/ITk/PixelClusterError"
+        acc.merge(addFolders(flags, folderName, "INDET_OFL", db="OFLP200", className="CondAttrListCollection"))
 
-    # TODO: enable once in the DB
-    # else:
-    #    acc.merge(addFolders(flags, "/PIXEL/ITkClusterError", "PIXEL_OFL", db="OFLP200", className="CondAttrListCollection"))
-
-    kwargs.setdefault("ReadKey", "/PIXEL/ITkClusterError")
+    kwargs.setdefault("ReadKey", folderName)
     kwargs.setdefault("WriteKey", "ITkPixelOfflineCalibData")
     kwargs.setdefault("InputSource", 2)
     acc.addCondAlgo(CompFactory.ITk.PixelOfflineCalibCondAlg(name, **kwargs))

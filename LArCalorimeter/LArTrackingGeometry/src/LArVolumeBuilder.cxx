@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////
 
 // Calo
-#include "LArTrackingGeometry/LArVolumeBuilder.h"
+#include "LArVolumeBuilder.h"
 // LAr
 #include "LArReadoutGeometry/LArDetectorManager.h"
 // CaloDepth
@@ -24,9 +24,8 @@
 #include "GeoModelKernel/GeoMaterial.h"
 #include "GeoModelUtilities/StoredPhysVol.h"
 #include "GeoModelUtilities/GeoVisitVolumes.h"
+#include "GeoModelUtilities/GeoAlignmentStore.h"
 // Trk
-#include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
-#include "TrkDetDescrInterfaces/ITrackingVolumeCreator.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkDetDescrUtils/GeometrySignature.h"
@@ -46,39 +45,12 @@
 #include "TrkSurfaces/DiscBounds.h"
 #include "TrkGeometrySurfaces/SlidingCylinderSurface.h"
 #include "TrkGeometrySurfaces/SlidingDiscSurface.h"
-#include "GaudiKernel/SystemOfUnits.h"
-
-using Gaudi::Units::mm;
 
 // constructor
 LAr::LArVolumeBuilder::LArVolumeBuilder(const std::string& t, const std::string& n, const IInterface* p) :
-  AthAlgTool(t,n,p),
-  m_lArMgrLocation("LArMgr"),
-  m_lArTrackingVolumeHelper("Trk::TrackingVolumeHelper/LArTrackingVolumeHelper"),
-  m_trackingVolumeCreator("Trk::CylinderVolumeCreator/TrackingVolumeCreator"),
-  m_lArBarrelEnvelope(25.*mm),
-  m_lArEndcapEnvelope(25.*mm),
-  m_useCaloSurfBuilder(true),
-  m_lArLayersPerRegion(1),
-  m_useCaloTrackingGeometryBounds(true),
-  m_calosurf("CaloSurfaceBuilder"),
-  m_scale_HECmaterial(1.1)
+  AthAlgTool(t,n,p)
 {
   declareInterface<Trk::ICaloTrackingVolumeBuilder>(this);
-  // declare the properties via Python
-  declareProperty("LArDetManagerLocation",             m_lArMgrLocation);
-  declareProperty("TrackingVolumeCreator",            m_trackingVolumeCreator);
-  declareProperty("TrackingVolumeHelper",              m_lArTrackingVolumeHelper);
-  // endcap
-  declareProperty("BarrelEnvelopeCover",               m_lArBarrelEnvelope);
-  declareProperty("EndcapEnvelopeCover",               m_lArEndcapEnvelope);
-
-  declareProperty("UseCaloSurfBuilder",                m_useCaloSurfBuilder);
-  declareProperty("LayersPerRegion",                   m_lArLayersPerRegion);
-  declareProperty("UseCaloTrackingGeometryBounds",     m_useCaloTrackingGeometryBounds);
-  declareProperty("CaloSurfaceBuilder",                m_calosurf);
-  declareProperty("ScaleFactor_HECmaterial",           m_scale_HECmaterial);
-
 }
 
 // destructor
@@ -90,29 +62,17 @@ LAr::LArVolumeBuilder::~ LArVolumeBuilder()
 // initialize
 StatusCode LAr::LArVolumeBuilder::initialize()
 {
-  
-  // Retrieve the tracking volume helper   -------------------------------------------------    
-  if (m_lArTrackingVolumeHelper.retrieve().isFailure())
-    {
-      ATH_MSG_FATAL( "Failed to retrieve tool " << m_lArTrackingVolumeHelper );
-      return StatusCode::FAILURE;
-    } else
-    ATH_MSG_DEBUG( "Retrieved tool " << m_lArTrackingVolumeHelper );
+  // Retrieve the tracking volume helper
+  ATH_CHECK(m_lArTrackingVolumeHelper.retrieve());
+  ATH_MSG_DEBUG( "Retrieved tool " << m_lArTrackingVolumeHelper );
 
   // Retrieve the volume creator
-  if (m_trackingVolumeCreator.retrieve().isFailure()){
-    ATH_MSG_FATAL( "Failed to retrieve tool " << m_trackingVolumeCreator );
-    return StatusCode::FAILURE;
-  } else
-    ATH_MSG_DEBUG( "Retrieved tool " << m_trackingVolumeCreator );
+  ATH_CHECK(m_trackingVolumeCreator.retrieve());
+  ATH_MSG_DEBUG( "Retrieved tool " << m_trackingVolumeCreator );
   
   if(m_useCaloSurfBuilder){
-    if(m_calosurf.retrieve().isFailure())
-      {
-        ATH_MSG_FATAL( "Failed to retrieve tool " << m_calosurf );
-        return StatusCode::FAILURE;
-      } else
-      ATH_MSG_DEBUG( "Retrieved tool " << m_calosurf );
+    ATH_CHECK(m_calosurf.retrieve());
+    ATH_MSG_DEBUG( "Retrieved tool " << m_calosurf );
   }
   
   ATH_MSG_DEBUG( name() << " initialize() successful" );
@@ -133,10 +93,9 @@ StatusCode LAr::LArVolumeBuilder::finalize()
 }
 
 std::vector<Trk::TrackingVolume*>*
-LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
+LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
+				       , const GeoAlignmentStore* geoAlign) const
 {
-  // the return vector
-  std::vector<Trk::TrackingVolume*>* lArTrackingVolumes = new std::vector<Trk::TrackingVolume*>;
   // the converter helpers
   //Trk::GeoShapeConverter    geoShapeToVolumeBounds;
   //Trk::GeoMaterialConverter geoMaterialToMaterialProperties;
@@ -162,6 +121,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
   const LArDetectorManager* lArMgr=nullptr;
   if (detStore()->retrieve(lArMgr, m_lArMgrLocation).isFailure()) {
     ATH_MSG_FATAL( "Could not get LArDetectorManager! Calo TrackingGeometry will not be built");
+    return nullptr;
   }
 
   // out of couriosity
@@ -175,8 +135,8 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
     unsigned int currentChilds = currentVPhysVolLink->getNChildVols();
     
     ATH_MSG_DEBUG( "Processing " << currentLogVol->getName() << "... has " 
-		   << currentChilds << " childs, position " << currentVPhysVolLink->getX().translation());
-    //printInfo( currentVPhysVolLink,2);
+		   << currentChilds << " childs, position " << currentVPhysVolLink->getX(geoAlign).translation());
+    //printInfo( currentVPhysVolLink,geoAlign,2);
   }
 
 
@@ -228,7 +188,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
     }
   GeoFullPhysVol* lArBarrelPosPhysVol = storedPV ? storedPV->getPhysVol() : nullptr;
 
-  //if (lArBarrelPosPhysVol) printInfo(lArBarrelPosPhysVol,2);
+  //if (lArBarrelPosPhysVol) printInfo(lArBarrelPosPhysVol,geoAlign,2);
   
   if(detStore()->contains<StoredPhysVol>("EMB_NEG"))
     {
@@ -669,7 +629,9 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
      const GeoShape*    lArNegativeEndcapShape  = lArNegativeEndcapLogVol->getShape();
 
      // get the transforms
-     const Amg::Transform3D& lArPositiveEndcapTransform = lArPositiveEndcapPhysVol->getAbsoluteTransform();
+     const Amg::Transform3D& lArPositiveEndcapTransform = geoAlign
+       ? lArPositiveEndcapPhysVol->getCachedAbsoluteTransform(geoAlign)
+       : lArPositiveEndcapPhysVol->getAbsoluteTransform();
      //const Amg::Transform3D& lArNegativeEndcapTransform = Amg::CLHEPTransformToEigen(lArNegativeEndcapPhysVol->getAbsoluteTransform());
      Amg::Vector3D lArPositiveEndcapNomPosition = lArPositiveEndcapTransform.translation();
      //Amg::Vector3D lArNegativeEndcapNomPosition = lArNegativeEndcapTransform.translation();
@@ -942,7 +904,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
 	}
     }
   GeoFullPhysVol* lArECPresamplerPhysVol = storedPV ? storedPV->getPhysVol() : nullptr;
-  // if (lArECPresamplerPhysVol) printInfo(lArECPresamplerPhysVol);
+  // if (lArECPresamplerPhysVol) printInfo(lArECPresamplerPhysVol, geoAlign);
 
   const GeoLogVol* lArECPresamplerLogVol = lArECPresamplerPhysVol ? lArECPresamplerPhysVol->getLogVol() : nullptr;
 
@@ -961,8 +923,9 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
   if (  lArECPresamplerLogVol ) {
   
     const GeoShape*    lArECPresamplerShape  = lArECPresamplerLogVol->getShape();
-    const Amg::Transform3D& lArECPresamplerTransform = lArECPresamplerPhysVol->getAbsoluteTransform();
-
+    const Amg::Transform3D& lArECPresamplerTransform = geoAlign
+      ? lArECPresamplerPhysVol->getCachedAbsoluteTransform(geoAlign)
+      : lArECPresamplerPhysVol->getAbsoluteTransform();
     // dynamic cast to 'Tubs' shape
     const GeoTubs* psTubs = dynamic_cast<const GeoTubs*>(lArECPresamplerShape);
  
@@ -1104,10 +1067,18 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
     const GeoShape*    lArNegativeHec2Shape  = lArNegativeHec2LogVol->getShape();
     
     // get the transforms
-    const Amg::Transform3D& lArPositiveHec1Transform = lArPositiveHec1PhysVol->getAbsoluteTransform();
-    const Amg::Transform3D& lArPositiveHec2Transform = lArPositiveHec2PhysVol->getAbsoluteTransform();
-    const Amg::Transform3D& lArNegativeHec1Transform = lArNegativeHec1PhysVol->getAbsoluteTransform();
-    const Amg::Transform3D& lArNegativeHec2Transform = lArNegativeHec2PhysVol->getAbsoluteTransform();
+    const Amg::Transform3D& lArPositiveHec1Transform = geoAlign
+      ? lArPositiveHec1PhysVol->getCachedAbsoluteTransform(geoAlign)
+      : lArPositiveHec1PhysVol->getAbsoluteTransform();
+    const Amg::Transform3D& lArPositiveHec2Transform = geoAlign
+      ? lArPositiveHec2PhysVol->getCachedAbsoluteTransform(geoAlign)
+      : lArPositiveHec2PhysVol->getAbsoluteTransform();
+    const Amg::Transform3D& lArNegativeHec1Transform = geoAlign
+      ? lArNegativeHec1PhysVol->getCachedAbsoluteTransform(geoAlign)
+      : lArNegativeHec1PhysVol->getAbsoluteTransform();
+    const Amg::Transform3D& lArNegativeHec2Transform = geoAlign
+      ? lArNegativeHec2PhysVol->getCachedAbsoluteTransform(geoAlign)
+      : lArNegativeHec2PhysVol->getAbsoluteTransform();
     
     Amg::Vector3D lArPositiveHec1NomPosition = lArPositiveHec1Transform.translation();
     Amg::Vector3D lArPositiveHec2NomPosition = lArPositiveHec2Transform.translation();
@@ -1285,13 +1256,25 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
 
 
      // get the transforms
-     const Amg::Transform3D& lArPositiveFcal1Transform = lArPositiveFcal1PhysVol->getAbsoluteTransform();
-     const Amg::Transform3D& lArPositiveFcal2Transform = lArPositiveFcal2PhysVol->getAbsoluteTransform();
-     const Amg::Transform3D& lArPositiveFcal3Transform = lArPositiveFcal3PhysVol->getAbsoluteTransform();
+     const Amg::Transform3D& lArPositiveFcal1Transform = geoAlign
+       ? lArPositiveFcal1PhysVol->getCachedAbsoluteTransform(geoAlign)
+       : lArPositiveFcal1PhysVol->getAbsoluteTransform();
+     const Amg::Transform3D& lArPositiveFcal2Transform = geoAlign
+       ? lArPositiveFcal2PhysVol->getCachedAbsoluteTransform(geoAlign)
+       : lArPositiveFcal2PhysVol->getAbsoluteTransform();
+     const Amg::Transform3D& lArPositiveFcal3Transform = geoAlign
+       ? lArPositiveFcal3PhysVol->getCachedAbsoluteTransform(geoAlign)
+       : lArPositiveFcal3PhysVol->getAbsoluteTransform();
 
-     const Amg::Transform3D& lArNegativeFcal1Transform = lArNegativeFcal1PhysVol->getAbsoluteTransform();
-     const Amg::Transform3D& lArNegativeFcal2Transform = lArNegativeFcal2PhysVol->getAbsoluteTransform();
-     const Amg::Transform3D& lArNegativeFcal3Transform = lArNegativeFcal3PhysVol->getAbsoluteTransform();
+     const Amg::Transform3D& lArNegativeFcal1Transform = geoAlign
+       ? lArNegativeFcal1PhysVol->getCachedAbsoluteTransform(geoAlign)
+       : lArNegativeFcal1PhysVol->getAbsoluteTransform();
+     const Amg::Transform3D& lArNegativeFcal2Transform = geoAlign
+       ? lArNegativeFcal2PhysVol->getCachedAbsoluteTransform(geoAlign)
+       : lArNegativeFcal2PhysVol->getAbsoluteTransform();
+     const Amg::Transform3D& lArNegativeFcal3Transform = geoAlign
+       ? lArNegativeFcal3PhysVol->getCachedAbsoluteTransform(geoAlign)
+       : lArNegativeFcal3PhysVol->getAbsoluteTransform();
 
      Amg::Vector3D lArPositiveFcal1NomPosition = lArPositiveFcal1Transform.translation();
      Amg::Vector3D lArPositiveFcal2NomPosition = lArPositiveFcal2Transform.translation();
@@ -1654,7 +1637,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
    // pass MBTS info to CaloTG 
   // MBTS
   const PVConstLink topEC = lArMgr->getTreeTop(1U);
-  Amg::Transform3D trIn= topEC->getX();   
+  Amg::Transform3D trIn= topEC->getX(geoAlign);
   Amg::Transform3D tr2(trIn);   
   const PVConstLink mbts= getChild(topEC,"MBTS_mother",trIn);
 
@@ -1755,7 +1738,10 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
     ATH_MSG_DEBUG( "   -> Calo::Detectors::LAr::LArNegativeECPresampler      ");
     printCheckResult(msg(MSG::DEBUG), lArNegECPresampler);
   } // end of detailed output
-  
+
+  // the return vector
+  std::vector<Trk::TrackingVolume*>* lArTrackingVolumes = new std::vector<Trk::TrackingVolume*>;
+
   // check if everything went fine
   if (solenoid && solenoidLArBarrelGap && lArBarrelPresampler && lArBarrel &&
       lArPositiveEndcap && lArPositiveHec && lArPositiveFcal && lArPositiveHecFcalCover &&
@@ -1807,7 +1793,7 @@ void LAr::LArVolumeBuilder::printCheckResult(MsgStream& log, const Trk::Tracking
   else     log << "... missing" << endmsg;
 }
 
-void LAr::LArVolumeBuilder::printInfo(const PVConstLink& pv, int gen) const
+void LAr::LArVolumeBuilder::printInfo(const PVConstLink& pv, const GeoAlignmentStore* gas, int gen) const
 {
   const GeoLogVol* lv = pv->getLogVol();
     ATH_MSG_VERBOSE( "New LAr Object:"<<lv->getName()<<", made of"<<lv->getMaterial()->getName()<<","<<lv->getShape()->type());
@@ -1824,7 +1810,7 @@ void LAr::LArVolumeBuilder::printInfo(const PVConstLink& pv, int gen) const
 	      ATH_MSG_VERBOSE("polycone:"<<i<<":"<< con->getRMinPlane(i)<<","<<con->getRMaxPlane(i)<<","<<con->getZPlane(i));
       }
     }
-    Amg::Transform3D transf =  pv->getX();
+    Amg::Transform3D transf =  pv->getX(gas);
     ATH_MSG_VERBOSE( "position:"<< "R:"<<transf.translation().perp()<<",phi:"<< transf.translation().phi()<<",x:"<<transf.translation().x()<<",y:"<<transf.translation().y()<<",z:"<<transf.translation().z());
     int igen = 0;
     printChildren(pv,gen,igen,transf);

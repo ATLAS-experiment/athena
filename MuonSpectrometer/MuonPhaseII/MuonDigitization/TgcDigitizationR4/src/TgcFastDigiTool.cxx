@@ -1,7 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "TgcFastDigiTool.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "xAODMuonViews/ChamberViewer.h"
@@ -216,7 +217,7 @@ namespace MuonR4 {
             DeadTimeMap deadTimes{};
             for (const TimedHit& simHit : viewer) {
                 /// ignore radiation for now
-                if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13) {
+                if (m_digitizeMuonOnly && !MC::isMuon(simHit)) {
                     continue;
                 }
                 TgcDigitCollection* outColl = fetchCollection(simHit->identify(), digitCache);

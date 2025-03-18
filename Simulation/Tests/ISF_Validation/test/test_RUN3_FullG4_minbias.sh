@@ -9,14 +9,16 @@
 # art-output: test.HITS.pool.root
 
 # RUN3 setup - Frozen Showers currently off by default
-# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-08
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 Sim_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
     --simulator 'FullG4MT' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc12_valid.119994.Pythia8_A2MSTW2008LO_minbias_inelastic.evgen.EVNT.e3099.01517253._000001.pool.root.1" \
     --outputHITSFile "test.HITS.pool.root" \
     --maxEvents 50 \

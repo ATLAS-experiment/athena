@@ -11,7 +11,7 @@ def ActsGaussianSumFitterToolCfg(flags,
     kwargs.setdefault("RefitOnly", True) # Track summary will be added in the algorithm
 
     kwargs.setdefault("UseDirectNavigation", flags.Acts.GsfDirectNavigation) # direct navigation used for refitting measurements
-    kwargs.setdefault("ComponentMergeMethod", flags.Acts.GsfComponentMergeMethod) # eMean or eMaxWeight
+    kwargs.setdefault("ComponentMergeMethod", flags.Acts.GsfComponentMergeMethod) # Mean or MaxWeight
     kwargs.setdefault("MaxComponents", flags.Acts.GsfMaxComponents)
     kwargs.setdefault("OutlierChi2Cut", flags.Acts.GsfOutlierChi2Cut)
 

@@ -131,7 +131,6 @@ TauVertexFinder::getPV_TJVA(const xAOD::TauJet& pTau,
   std::vector<const xAOD::TrackParticle*> tracksForTJVA;
   const double dDeltaRMax(0.2);
 
-  std::vector<const xAOD::Vertex*> matchedVertexOnline;
   // the implementation follows closely the example given in modifyJet(...) in https://svnweb.cern.ch/trac/atlasoff/browser/Reconstruction/Jet/JetMomentTools/trunk/Root/JetVertexFractionTool.cxx#15
 
   std::vector<const xAOD::TrackParticle*> assocTracks;

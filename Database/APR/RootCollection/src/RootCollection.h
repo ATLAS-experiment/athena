@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ROOTCOLLECTION_ROOTCOLLECTION_H
@@ -29,14 +29,6 @@ namespace pool {
    class ISession; 
 
    namespace RootCollection {
-
-      // compressed data size for buffer auto-resize (negative == bytes)
-      const int TTREE_AUTO_FLUSH = -1*1024*1024;
-      
-      const int TBRANCH_DEF_BUFSIZE = 8*1024;
-
-      // increase TTree size limit to 100GB
-      const unsigned long long TTREE_MAX_SIZE = 100*1024*1024*1024ULL;
 
       class Attribute;
       class AttributeSpecification;
@@ -117,28 +109,28 @@ namespace pool {
         virtual void addTreeBranch( const std::string& name, const std::string& type_name );
 
         /// Return openMode
-        virtual ICollection::OpenMode openMode() const; 
+        virtual ICollection::OpenMode openMode() const final override; 
 
         /// Explicitly re-opens the collection after it has been closed.
-        virtual void open();
+        virtual void open() final override;
     
         /// Checks if the collection is open.
-        virtual bool isOpen() const;
+        virtual bool isOpen() const final override;
 
         /// Adds a new row of data to the collection.
-        virtual void insertRow( const pool::CollectionRowBuffer& inputRowBuffer );
+        virtual void insertRow( const pool::CollectionRowBuffer& inputRowBuffer ) final override;
 
         /// Commits the last changes made to the collection
-        virtual void commit( bool restartTransaction = false );
+        virtual void commit( bool restartTransaction = false ) final override;
     
         /// Explicitly closes the collection
-        virtual void close();
+        virtual void close() final override;
     
         /// Returns an object used to describe the collection properties.
-        virtual const ICollectionDescription& description() const;
+        virtual const ICollectionDescription& description() const final override;
 
         /// Returns an object used to query the collection.
-        virtual ICollectionQuery*         newQuery();
+        virtual ICollectionQuery*         newQuery() final override;
 
      private:
     

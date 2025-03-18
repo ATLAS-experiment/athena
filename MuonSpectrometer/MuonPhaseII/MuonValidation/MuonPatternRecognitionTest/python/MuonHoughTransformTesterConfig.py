@@ -6,14 +6,16 @@ if __name__=="__main__":
     parser = SetupArgParser()
     parser.add_argument("--noMonitorPlots", help="If set to true, there're no monitoring plots", default = False,
                                             action='store_true')
-    
+    parser.add_argument("--writeSpacePoints", help="If set to true, the spacepoints in the bucket are saved to disk",
+                                              default=False, action='store_true')
     parser.set_defaults(nEvents = -1)
-    #parser.set_defaults(noMM=True)
-    #parser.set_defaults(noSTGC=True)
+    parser.set_defaults(noSTGC=True)
+    parser.set_defaults(noMM=True)
+
 
    
     parser.set_defaults(outRootFile="HoughTransformTester.root")
-    #parser.set_defaults(condTag="CONDBR2-BLKPA-2023-03")
+    #parser.set_defaults(condTag="CONDBR2-BLKPA-2024-03")
     parser.set_defaults(inputFile=[
                                     #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
                                     "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"
@@ -39,7 +41,7 @@ if __name__=="__main__":
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
 
-    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg, MuonSegmentFittingAlgCfg
+    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg
     from MuonPatternRecognitionTest.PatternTestConfig import MuonHoughTransformTesterCfg, PatternVisualizationToolCfg
 
     cfg.merge(MuonPatternRecognitionCfg(flags))
@@ -50,13 +52,9 @@ if __name__=="__main__":
         from IOVDbSvc.IOVDbSvcConfig import addOverride
         cfg.merge(addOverride(flags, "/MDT/TWINMAPPING", "MDTTwinMapping_compactFormat_Run123"))
 
-
-    if flags.Detector.GeometryMM or flags.Detector.GeometrysTGC:
-        cfg.merge(MuonSegmentFittingAlgCfg(flags, name = "MuonSegmentFittingAlg", ReadKey = "MuonHoughNswSegmentSeeds" ,MuonSegmentContainer = "R4NswSegments"))
-        cfg.merge(MuonHoughTransformTesterCfg(flags, SegmentSeedKey = "MuonHoughNswSegmentSeeds", SegmentKey = "R4NswSegments" ))  
-    else:
-        cfg.merge(MuonSegmentFittingAlgCfg(flags))
-        cfg.merge(MuonHoughTransformTesterCfg(flags))  
+    
+    cfg.merge(MuonHoughTransformTesterCfg(flags,
+                                          VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
 
     if not args.noMonitorPlots and (flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC):
         cfg.getEventAlgo("MuonEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
@@ -69,14 +67,14 @@ if __name__=="__main__":
                                                                                                 displayTruthOnly = True, saveSinglePDFs = False, saveSummaryPDF= False))
         cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="SegmentPlotValid",
-                                                                                                AllCanvasName="AllSegmentFitPlots",                                   displayTruthOnly = True,
+                                                                                                AllCanvasName="AllSegmentFitPlots", displayTruthOnly = True,
                                                                                                 saveSinglePDFs = True, saveSummaryPDF= False))
     if not args.noMonitorPlots and (flags.Detector.GeometryMM or flags.Detector.GeometrysTGC):
-        cfg.getEventAlgo("MuonNswEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+        cfg.getEventAlgo("NswEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="NswEtaHoughPlotValid",
                                                                                                 AllCanvasName="AllNswEtaHoughiDiPuffPlots",
                                                                                                 saveSinglePDFs = True, saveSummaryPDF= False))
-        cfg.getEventAlgo("MuonNswPhiSeedFinderAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+        cfg.getEventAlgo("NswPhiSeedFinderAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="NswPhiHoughPlotValid",
                                                                                                 AllCanvasName="AllNswPhiHoughiDiPuffPlots",
                                                                                                 saveSinglePDFs = True, saveSummaryPDF= False))

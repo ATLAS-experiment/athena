@@ -13,11 +13,14 @@ CONDTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditi
 GEOTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
 BKGFILE=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_BKG_RUN3[0])")
 
-Reco_tf.py --CA --multithreaded --maxEvents=300 \
---inputHITSFile="${INPUTFILE}" --conditionsTag="${CONDTAG}" --geometryVersion="${GEOTAG}" \
---inputRDO_BKGFile="${BKGFILE}" \
---outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root \
---preInclude 'Campaigns.MC23a'
+Reco_tf.py --CA "default:True" "RDOtoRDOTrigger:False" \
+           --multithreaded --maxEvents=300 \
+	   --asetup "RDOtoRDOTrigger:Athena,23.0.20.7" \
+	   --steering "doOverlay" "doRDO_TRIG" "doTRIGtoALL" \
+	   --inputHITSFile="${INPUTFILE}" --conditionsTag="${CONDTAG}" --geometryVersion="${GEOTAG}" \
+	   --inputRDO_BKGFile="${BKGFILE}" \
+	   --outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root \
+	   --preInclude 'Campaigns.MC23a'
 
 RES=$?
 echo "art-result: $RES Reco"

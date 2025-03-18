@@ -153,7 +153,7 @@ class ThresholdDef:
                                               thr=eEMVarThreshold( 'eEM%iVM' % thrV, 'eEM').setIsolation( reta = "Medium", wstot = "Medium", rhad = "Medium" ) )
 
         # jEM
-        jEM_cuts = [20]
+        jEM_cuts = [25]
         for thrV in jEM_cuts:
             jEMThreshold('jEM%i' % thrV, 'jEM').addThrValue(get_threshold_cut('jEM',thrV))
 
@@ -166,7 +166,7 @@ class ThresholdDef:
             jEMThreshold('jEMSPARE%i' % thrV, 'jEM').addThrValue(thrVal_SPARE)
 
         # eTAU
-        eTAU_cuts = [1, 12, 20, 30, 35, 60, 80, 140]
+        eTAU_cuts = [1, 12, 20, 30, 35, 60, 70, 80, 140]
         # get ptMinToTopo value (different for pp and HI), then adjust threshold for lowest pT items based on this value
         ttconfig = tc.l1menu.thresholds.typeWideThresholdConfig('eTAU')
         ptMin = ttconfig["ptMinToTopo"]
@@ -194,12 +194,12 @@ class ThresholdDef:
             eTauThreshold('eTAUSPARE%i' % thrV, 'eTAU').setEt(thrVal_SPARE)
 
         # cTAU
-        cTAU_cuts = [12, 20, 30, 35]
+        cTAU_cuts = [12, 20, 30, 35, 50]
         for thrV in cTAU_cuts:
             cTauThreshold('cTAU%iM' % thrV, 'cTAU').setEt(get_threshold_cut('cTAU', thrV)).setIsolation( isolation = f'Medium{thrV}' )
 
         # cTAU SPARES
-        for thrV in range(1,4):
+        for thrV in range(1, 2+1):
             cTauThreshold('cTAUSPARE%i' % thrV, 'cTAU').setEt(thrVal_SPARE)
 
         # jTAU
@@ -232,12 +232,12 @@ class ThresholdDef:
         # ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ12p0ETA25V', 'jJ'), pt=12, shift_set=1, rangemin=0, rangemax=25 )
 
         # jJET forward jet
-        jJ_cuts = [15, 20, 40, 50, 60, 90, 125]
+        jJ_cuts = [5, 10, 15, 20, 40, 50, 60, 90, 125]
         for thrV in jJ_cuts:
-            ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ%ip30ETA49' % thrV, 'jJ'), pt=get_threshold_cut('FjJ', thrV), shift_set=0, rangemin=30, rangemax=49 )
+            ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ%ip30ETA49' % thrV, 'jJ'), pt=max(get_threshold_cut('FjJ', thrV),ptMin), shift_set=0, rangemin=30, rangemax=49 )
 
         # jJET SPARES
-        for thrV in range(1,4):
+        for thrV in range(1,2):
             jJetThreshold('jJSPARE%i' % thrV, 'jJ').addThrValue(thrVal_SPARE)
 
         # jLJET (default range)

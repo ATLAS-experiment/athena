@@ -1,23 +1,23 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <memory>
 
 
 
-#include "SCT_GeoModel/SCT_GeometryManager.h"
+#include "SCT_GeometryManager.h"
 
 #include "InDetGeoModelUtils/DistortedMaterialManager.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "ReadoutGeometryBase/SiCommonItems.h"
-#include "SCT_GeoModel/SCT_BarrelParameters.h"
-#include "SCT_GeoModel/SCT_BarrelModuleParameters.h"
-#include "SCT_GeoModel/SCT_DataBase.h"
-#include "SCT_GeoModel/SCT_ForwardParameters.h"
-#include "SCT_GeoModel/SCT_ForwardModuleParameters.h"
-#include "SCT_GeoModel/SCT_GeneralParameters.h"
-#include "SCT_GeoModel/SCT_GeoModelAthenaComps.h"
+#include "SCT_BarrelParameters.h"
+#include "SCT_BarrelModuleParameters.h"
+#include "SCT_DataBase.h"
+#include "SCT_ForwardParameters.h"
+#include "SCT_ForwardModuleParameters.h"
+#include "SCT_GeneralParameters.h"
+#include "SCT_GeoModelAthenaComps.h"
 
 SCT_GeometryManager::SCT_GeometryManager(SCT_DataBase* rdb)
   : m_athenaComps{rdb->athenaComps()},

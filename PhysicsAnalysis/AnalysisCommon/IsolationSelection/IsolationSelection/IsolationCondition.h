@@ -43,6 +43,7 @@ namespace CP {
         unsigned int num_types() const;
         xAOD::Iso::IsolationType type(unsigned int n = 0) const;
         const FloatAccessor& accessor(unsigned int n = 0) const;
+        const FloatAccessor& accessor_noCloseBy(unsigned int n = 0) const;
 
         virtual bool accept(const xAOD::IParticle& x) const = 0;
         virtual bool accept(const strObj& x) const = 0;
@@ -51,6 +52,7 @@ namespace CP {
         std::string m_name;
         std::vector<xAOD::Iso::IsolationType> m_isolationType;
         std::vector<FloatAccessor> m_acc;
+        std::vector<FloatAccessor> m_acc_noCloseBy;
         
     protected:
         std::string m_isoDecSuffix{};

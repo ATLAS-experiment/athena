@@ -8,10 +8,11 @@
 #include <cstdint>
 
 // Provider of simple function for conversion of data into the FPGA dataformat
+// Using FPGA Dataformat doc v0.6.2
 namespace FPGADataFormatUtilities
 {
     consteval uint64_t SELECTBITS(uint8_t len, uint8_t startbit) {
-        return (len == 64 ? UINTMAX_MAX : (((1ULL << len) - 1ULL) << startbit));
+        return (len == 64 ? 0xFFFFFFFFFFFFFFFFULL : (((1ULL << len) - 1ULL) << startbit));
     }
 
 	// EVT_HDR defined flags
@@ -94,24 +95,24 @@ namespace FPGADataFormatUtilities
 
 	inline uint64_t get_dataformat_EVT_HDR_w1 (const EVT_HDR_w1& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.flag) << EVT_HDR_W1_FLAG_lsb);
-		temp |= (static_cast<uint64_t>(in.l0id) << EVT_HDR_W1_L0ID_lsb);
-		temp |= (static_cast<uint64_t>(in.bcid) << EVT_HDR_W1_BCID_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << EVT_HDR_W1_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.flag)) & SELECTBITS(EVT_HDR_W1_FLAG_bits, 0)) << EVT_HDR_W1_FLAG_lsb);
+		temp |= (((static_cast<uint64_t>(in.l0id)) & SELECTBITS(EVT_HDR_W1_L0ID_bits, 0)) << EVT_HDR_W1_L0ID_lsb);
+		temp |= (((static_cast<uint64_t>(in.bcid)) & SELECTBITS(EVT_HDR_W1_BCID_bits, 0)) << EVT_HDR_W1_BCID_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(EVT_HDR_W1_SPARE_bits, 0)) << EVT_HDR_W1_SPARE_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EVT_HDR_w2 (const EVT_HDR_w2& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.runnumber) << EVT_HDR_W2_RUNNUMBER_lsb);
-		temp |= (static_cast<uint64_t>(in.time) << EVT_HDR_W2_TIME_lsb);
+		temp |= (((static_cast<uint64_t>(in.runnumber)) & SELECTBITS(EVT_HDR_W2_RUNNUMBER_bits, 0)) << EVT_HDR_W2_RUNNUMBER_lsb);
+		temp |= (((static_cast<uint64_t>(in.time)) & SELECTBITS(EVT_HDR_W2_TIME_bits, 0)) << EVT_HDR_W2_TIME_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EVT_HDR_w3 (const EVT_HDR_w3& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.status) << EVT_HDR_W3_STATUS_lsb);
-		temp |= (static_cast<uint64_t>(in.crc) << EVT_HDR_W3_CRC_lsb);
+		temp |= (((static_cast<uint64_t>(in.status)) & SELECTBITS(EVT_HDR_W3_STATUS_bits, 0)) << EVT_HDR_W3_STATUS_lsb);
+		temp |= (((static_cast<uint64_t>(in.crc)) & SELECTBITS(EVT_HDR_W3_CRC_bits, 0)) << EVT_HDR_W3_CRC_lsb);
 		return temp;
 	}
 
@@ -238,22 +239,22 @@ namespace FPGADataFormatUtilities
 
 	inline uint64_t get_dataformat_EVT_FTR_w1 (const EVT_FTR_w1& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.flag) << EVT_FTR_W1_FLAG_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << EVT_FTR_W1_SPARE_lsb);
-		temp |= (static_cast<uint64_t>(in.hdr_crc) << EVT_FTR_W1_HDR_CRC_lsb);
+		temp |= (((static_cast<uint64_t>(in.flag)) & SELECTBITS(EVT_FTR_W1_FLAG_bits, 0)) << EVT_FTR_W1_FLAG_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(EVT_FTR_W1_SPARE_bits, 0)) << EVT_FTR_W1_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.hdr_crc)) & SELECTBITS(EVT_FTR_W1_HDR_CRC_bits, 0)) << EVT_FTR_W1_HDR_CRC_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EVT_FTR_w2 (const EVT_FTR_w2& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.error_flags) << EVT_FTR_W2_ERROR_FLAGS_lsb);
+		temp |= (((static_cast<uint64_t>(in.error_flags)) & SELECTBITS(EVT_FTR_W2_ERROR_FLAGS_bits, 0)) << EVT_FTR_W2_ERROR_FLAGS_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EVT_FTR_w3 (const EVT_FTR_w3& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.word_count) << EVT_FTR_W3_WORD_COUNT_lsb);
-		temp |= (static_cast<uint64_t>(in.crc) << EVT_FTR_W3_CRC_lsb);
+		temp |= (((static_cast<uint64_t>(in.word_count)) & SELECTBITS(EVT_FTR_W3_WORD_COUNT_bits, 0)) << EVT_FTR_W3_WORD_COUNT_lsb);
+		temp |= (((static_cast<uint64_t>(in.crc)) & SELECTBITS(EVT_FTR_W3_CRC_bits, 0)) << EVT_FTR_W3_CRC_lsb);
 		return temp;
 	}
 
@@ -340,10 +341,10 @@ namespace FPGADataFormatUtilities
 
 	inline uint64_t get_dataformat_M_HDR_w1 (const M_HDR_w1& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.flag) << M_HDR_W1_FLAG_lsb);
-		temp |= (static_cast<uint64_t>(in.modid) << M_HDR_W1_MODID_lsb);
-		temp |= (static_cast<uint64_t>(in.modhash) << M_HDR_W1_MODHASH_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << M_HDR_W1_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.flag)) & SELECTBITS(M_HDR_W1_FLAG_bits, 0)) << M_HDR_W1_FLAG_lsb);
+		temp |= (((static_cast<uint64_t>(in.modid)) & SELECTBITS(M_HDR_W1_MODID_bits, 0)) << M_HDR_W1_MODID_lsb);
+		temp |= (((static_cast<uint64_t>(in.modhash)) & SELECTBITS(M_HDR_W1_MODHASH_bits, 0)) << M_HDR_W1_MODHASH_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(M_HDR_W1_SPARE_bits, 0)) << M_HDR_W1_SPARE_lsb);
 		return temp;
 	}
 
@@ -373,7 +374,7 @@ namespace FPGADataFormatUtilities
 	}
 
 	// SLICE_HDR defined flags
-	const int SLICE_HDR_FLAG = 0x92;
+	const int SLICE_HDR_FLAG = 0x88;
 
 	// SLICE_HDR_W1 word description
 	const int SLICE_HDR_W1_FLAG_bits = 8;
@@ -416,11 +417,11 @@ namespace FPGADataFormatUtilities
 
 	inline uint64_t get_dataformat_SLICE_HDR_w1 (const SLICE_HDR_w1& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.flag) << SLICE_HDR_W1_FLAG_lsb);
-		temp |= (static_cast<uint64_t>(in.sliceid) << SLICE_HDR_W1_SLICEID_lsb);
-		temp |= (static_cast<uint64_t>(in.eta_region) << SLICE_HDR_W1_ETA_REGION_lsb);
-		temp |= (static_cast<uint64_t>(in.phi_region) << SLICE_HDR_W1_PHI_REGION_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << SLICE_HDR_W1_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.flag)) & SELECTBITS(SLICE_HDR_W1_FLAG_bits, 0)) << SLICE_HDR_W1_FLAG_lsb);
+		temp |= (((static_cast<uint64_t>(in.sliceid)) & SELECTBITS(SLICE_HDR_W1_SLICEID_bits, 0)) << SLICE_HDR_W1_SLICEID_lsb);
+		temp |= (((static_cast<uint64_t>(in.eta_region)) & SELECTBITS(SLICE_HDR_W1_ETA_REGION_bits, 0)) << SLICE_HDR_W1_ETA_REGION_lsb);
+		temp |= (((static_cast<uint64_t>(in.phi_region)) & SELECTBITS(SLICE_HDR_W1_PHI_REGION_bits, 0)) << SLICE_HDR_W1_PHI_REGION_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(SLICE_HDR_W1_SPARE_bits, 0)) << SLICE_HDR_W1_SPARE_lsb);
 		return temp;
 	}
 
@@ -555,24 +556,24 @@ namespace FPGADataFormatUtilities
 
 	inline uint64_t get_dataformat_RD_HDR_w1 (const RD_HDR_w1& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.flag) << RD_HDR_W1_FLAG_lsb);
-		temp |= (static_cast<uint64_t>(in.type) << RD_HDR_W1_TYPE_lsb);
-		temp |= (static_cast<uint64_t>(in.eta_region) << RD_HDR_W1_ETA_REGION_lsb);
-		temp |= (static_cast<uint64_t>(in.phi_region) << RD_HDR_W1_PHI_REGION_lsb);
-		temp |= (static_cast<uint64_t>(in.slice) << RD_HDR_W1_SLICE_lsb);
-		temp |= (static_cast<uint64_t>(in.hough_x_bin) << RD_HDR_W1_HOUGH_X_BIN_lsb);
-		temp |= (static_cast<uint64_t>(in.hough_y_bin) << RD_HDR_W1_HOUGH_Y_BIN_lsb);
-		temp |= (static_cast<uint64_t>(in.second_stage) << RD_HDR_W1_SECOND_STAGE_lsb);
-		temp |= (static_cast<uint64_t>(in.layer_bitmask) << RD_HDR_W1_LAYER_BITMASK_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << RD_HDR_W1_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.flag)) & SELECTBITS(RD_HDR_W1_FLAG_bits, 0)) << RD_HDR_W1_FLAG_lsb);
+		temp |= (((static_cast<uint64_t>(in.type)) & SELECTBITS(RD_HDR_W1_TYPE_bits, 0)) << RD_HDR_W1_TYPE_lsb);
+		temp |= (((static_cast<uint64_t>(in.eta_region)) & SELECTBITS(RD_HDR_W1_ETA_REGION_bits, 0)) << RD_HDR_W1_ETA_REGION_lsb);
+		temp |= (((static_cast<uint64_t>(in.phi_region)) & SELECTBITS(RD_HDR_W1_PHI_REGION_bits, 0)) << RD_HDR_W1_PHI_REGION_lsb);
+		temp |= (((static_cast<uint64_t>(in.slice)) & SELECTBITS(RD_HDR_W1_SLICE_bits, 0)) << RD_HDR_W1_SLICE_lsb);
+		temp |= (((static_cast<uint64_t>(in.hough_x_bin)) & SELECTBITS(RD_HDR_W1_HOUGH_X_BIN_bits, 0)) << RD_HDR_W1_HOUGH_X_BIN_lsb);
+		temp |= (((static_cast<uint64_t>(in.hough_y_bin)) & SELECTBITS(RD_HDR_W1_HOUGH_Y_BIN_bits, 0)) << RD_HDR_W1_HOUGH_Y_BIN_lsb);
+		temp |= (((static_cast<uint64_t>(in.second_stage)) & SELECTBITS(RD_HDR_W1_SECOND_STAGE_bits, 0)) << RD_HDR_W1_SECOND_STAGE_lsb);
+		temp |= (((static_cast<uint64_t>(in.layer_bitmask)) & SELECTBITS(RD_HDR_W1_LAYER_BITMASK_bits, 0)) << RD_HDR_W1_LAYER_BITMASK_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(RD_HDR_W1_SPARE_bits, 0)) << RD_HDR_W1_SPARE_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_RD_HDR_w2 (const RD_HDR_w2& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.global_phi) << RD_HDR_W2_GLOBAL_PHI_lsb);
-		temp |= (static_cast<uint64_t>(in.global_eta) << RD_HDR_W2_GLOBAL_ETA_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << RD_HDR_W2_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.global_phi)) & SELECTBITS(RD_HDR_W2_GLOBAL_PHI_bits, 0)) << RD_HDR_W2_GLOBAL_PHI_lsb);
+		temp |= (((static_cast<uint64_t>(in.global_eta)) & SELECTBITS(RD_HDR_W2_GLOBAL_ETA_bits, 0)) << RD_HDR_W2_GLOBAL_ETA_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(RD_HDR_W2_SPARE_bits, 0)) << RD_HDR_W2_SPARE_lsb);
 		return temp;
 	}
 
@@ -788,37 +789,37 @@ namespace FPGADataFormatUtilities
 		temp.spare = (in & SELECTBITS(GTRACK_HDR_W3_SPARE_bits, GTRACK_HDR_W3_SPARE_lsb)) >> GTRACK_HDR_W3_SPARE_lsb;
 		return temp;
 	}
-	 
+
 	inline uint64_t get_dataformat_GTRACK_HDR_w1 (const GTRACK_HDR_w1& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.flag) << GTRACK_HDR_W1_FLAG_lsb);
-		temp |= (static_cast<uint64_t>(in.type) << GTRACK_HDR_W1_TYPE_lsb);
-		temp |= (static_cast<uint64_t>(in.eta_region) << GTRACK_HDR_W1_ETA_REGION_lsb);
-		temp |= (static_cast<uint64_t>(in.phi_region) << GTRACK_HDR_W1_PHI_REGION_lsb);
-		temp |= (static_cast<uint64_t>(in.slice) << GTRACK_HDR_W1_SLICE_lsb);
-		temp |= (static_cast<uint64_t>(in.hough_x_bin) << GTRACK_HDR_W1_HOUGH_X_BIN_lsb);
-		temp |= (static_cast<uint64_t>(in.hough_y_bin) << GTRACK_HDR_W1_HOUGH_Y_BIN_lsb);
-		temp |= (static_cast<uint64_t>(in.second_stage) << GTRACK_HDR_W1_SECOND_STAGE_lsb);
-		temp |= (static_cast<uint64_t>(in.layer_bitmask) << GTRACK_HDR_W1_LAYER_BITMASK_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << GTRACK_HDR_W1_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.flag)) & SELECTBITS(GTRACK_HDR_W1_FLAG_bits, 0)) << GTRACK_HDR_W1_FLAG_lsb);
+		temp |= (((static_cast<uint64_t>(in.type)) & SELECTBITS(GTRACK_HDR_W1_TYPE_bits, 0)) << GTRACK_HDR_W1_TYPE_lsb);
+		temp |= (((static_cast<uint64_t>(in.eta_region)) & SELECTBITS(GTRACK_HDR_W1_ETA_REGION_bits, 0)) << GTRACK_HDR_W1_ETA_REGION_lsb);
+		temp |= (((static_cast<uint64_t>(in.phi_region)) & SELECTBITS(GTRACK_HDR_W1_PHI_REGION_bits, 0)) << GTRACK_HDR_W1_PHI_REGION_lsb);
+		temp |= (((static_cast<uint64_t>(in.slice)) & SELECTBITS(GTRACK_HDR_W1_SLICE_bits, 0)) << GTRACK_HDR_W1_SLICE_lsb);
+		temp |= (((static_cast<uint64_t>(in.hough_x_bin)) & SELECTBITS(GTRACK_HDR_W1_HOUGH_X_BIN_bits, 0)) << GTRACK_HDR_W1_HOUGH_X_BIN_lsb);
+		temp |= (((static_cast<uint64_t>(in.hough_y_bin)) & SELECTBITS(GTRACK_HDR_W1_HOUGH_Y_BIN_bits, 0)) << GTRACK_HDR_W1_HOUGH_Y_BIN_lsb);
+		temp |= (((static_cast<uint64_t>(in.second_stage)) & SELECTBITS(GTRACK_HDR_W1_SECOND_STAGE_bits, 0)) << GTRACK_HDR_W1_SECOND_STAGE_lsb);
+		temp |= (((static_cast<uint64_t>(in.layer_bitmask)) & SELECTBITS(GTRACK_HDR_W1_LAYER_BITMASK_bits, 0)) << GTRACK_HDR_W1_LAYER_BITMASK_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(GTRACK_HDR_W1_SPARE_bits, 0)) << GTRACK_HDR_W1_SPARE_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_GTRACK_HDR_w2 (const GTRACK_HDR_w2& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.score) << GTRACK_HDR_W2_SCORE_lsb);
-		temp |= (static_cast<uint64_t>(in.d0) << GTRACK_HDR_W2_D0_lsb);
-		temp |= (static_cast<uint64_t>(in.z0) << GTRACK_HDR_W2_Z0_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << GTRACK_HDR_W2_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.score)) & SELECTBITS(GTRACK_HDR_W2_SCORE_bits, 0)) << GTRACK_HDR_W2_SCORE_lsb);
+		temp |= (((static_cast<uint64_t>(in.d0)) & SELECTBITS(GTRACK_HDR_W2_D0_bits, 0)) << GTRACK_HDR_W2_D0_lsb);
+		temp |= (((static_cast<uint64_t>(in.z0)) & SELECTBITS(GTRACK_HDR_W2_Z0_bits, 0)) << GTRACK_HDR_W2_Z0_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(GTRACK_HDR_W2_SPARE_bits, 0)) << GTRACK_HDR_W2_SPARE_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_GTRACK_HDR_w3 (const GTRACK_HDR_w3& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.qoverpt) << GTRACK_HDR_W3_QOVERPT_lsb);
-		temp |= (static_cast<uint64_t>(in.phi) << GTRACK_HDR_W3_PHI_lsb);
-		temp |= (static_cast<uint64_t>(in.eta) << GTRACK_HDR_W3_ETA_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << GTRACK_HDR_W3_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.qoverpt)) & SELECTBITS(GTRACK_HDR_W3_QOVERPT_bits, 0)) << GTRACK_HDR_W3_QOVERPT_lsb);
+		temp |= (((static_cast<uint64_t>(in.phi)) & SELECTBITS(GTRACK_HDR_W3_PHI_bits, 0)) << GTRACK_HDR_W3_PHI_lsb);
+		temp |= (((static_cast<uint64_t>(in.eta)) & SELECTBITS(GTRACK_HDR_W3_ETA_bits, 0)) << GTRACK_HDR_W3_ETA_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(GTRACK_HDR_W3_SPARE_bits, 0)) << GTRACK_HDR_W3_SPARE_lsb);
 		return temp;
 	}
 
@@ -837,11 +838,11 @@ namespace FPGADataFormatUtilities
 		return temp;
 	}
 
-	inline GTRACK_HDR_w2 fill_GTRACK_HDR_w2 (const uint64_t& score, const int64_t& d0, const int64_t& z0, const uint64_t& spare) {
+	inline GTRACK_HDR_w2 fill_GTRACK_HDR_w2 (const double& score, const double& d0, const double& z0, const uint64_t& spare) {
 		GTRACK_HDR_w2 temp;
-		temp.score = score;
-		temp.d0 = d0;
-		temp.z0 = z0;
+		temp.score = (uint64_t)(score * GTRACK_HDR_W2_SCORE_mf);
+		temp.d0 = (int64_t)(d0 * GTRACK_HDR_W2_D0_mf);
+		temp.z0 = (int64_t)(z0 * GTRACK_HDR_W2_Z0_mf);
 		temp.spare = spare;
 		return temp;
 	}
@@ -895,16 +896,16 @@ namespace FPGADataFormatUtilities
 		return in;
 	}
 
-	inline uint64_t to_real_GTRACK_HDR_w2_score (const uint64_t& in) {
-		return in;
+	inline double to_real_GTRACK_HDR_w2_score (const uint64_t& in) {
+		return (double)in / GTRACK_HDR_W2_SCORE_mf;
 	}
 
-	inline int64_t to_real_GTRACK_HDR_w2_d0 (const int64_t& in) {
-		return in;
+	inline double to_real_GTRACK_HDR_w2_d0 (const int64_t& in) {
+		return (double)in / GTRACK_HDR_W2_D0_mf;
 	}
 
-	inline int64_t to_real_GTRACK_HDR_w2_z0 (const int64_t& in) {
-		return in;
+	inline double to_real_GTRACK_HDR_w2_z0 (const int64_t& in) {
+		return (double)in / GTRACK_HDR_W2_Z0_mf;
 	}
 
 	inline uint64_t to_real_GTRACK_HDR_w2_spare (const uint64_t& in) {
@@ -940,25 +941,25 @@ namespace FPGADataFormatUtilities
 	const int PIXEL_CLUSTER_ROW_lsb = 37;
 	const float PIXEL_CLUSTER_ROW_mf = 1.;
 
-	const int PIXEL_CLUSTER_CLUSTERID_bits = 13;
-	const int PIXEL_CLUSTER_CLUSTERID_lsb = 24;
-	const float PIXEL_CLUSTER_CLUSTERID_mf = 1.;
-
 	const int PIXEL_CLUSTER_CENTROID_COL_bits = 12;
-	const int PIXEL_CLUSTER_CENTROID_COL_lsb = 12;
+	const int PIXEL_CLUSTER_CENTROID_COL_lsb = 25;
 	const float PIXEL_CLUSTER_CENTROID_COL_mf = 16.;
 
 	const int PIXEL_CLUSTER_CENTROID_ROW_bits = 12;
-	const int PIXEL_CLUSTER_CENTROID_ROW_lsb = 0;
+	const int PIXEL_CLUSTER_CENTROID_ROW_lsb = 13;
 	const float PIXEL_CLUSTER_CENTROID_ROW_mf = 16.;
+
+	const int PIXEL_CLUSTER_SPARE_bits = 13;
+	const int PIXEL_CLUSTER_SPARE_lsb = 0;
+	const float PIXEL_CLUSTER_SPARE_mf = 1.;
 
 	typedef struct PIXEL_CLUSTER {
 		uint64_t last : PIXEL_CLUSTER_LAST_bits;
 		uint64_t col : PIXEL_CLUSTER_COL_bits;
 		uint64_t row : PIXEL_CLUSTER_ROW_bits;
-		uint64_t clusterid : PIXEL_CLUSTER_CLUSTERID_bits;
 		uint64_t centroid_col : PIXEL_CLUSTER_CENTROID_COL_bits;
 		uint64_t centroid_row : PIXEL_CLUSTER_CENTROID_ROW_bits;
+		uint64_t spare : PIXEL_CLUSTER_SPARE_bits;
 	} PIXEL_CLUSTER;
 
 	inline PIXEL_CLUSTER get_bitfields_PIXEL_CLUSTER (const uint64_t& in) {
@@ -966,31 +967,31 @@ namespace FPGADataFormatUtilities
 		temp.last = (in & SELECTBITS(PIXEL_CLUSTER_LAST_bits, PIXEL_CLUSTER_LAST_lsb)) >> PIXEL_CLUSTER_LAST_lsb;
 		temp.col = (in & SELECTBITS(PIXEL_CLUSTER_COL_bits, PIXEL_CLUSTER_COL_lsb)) >> PIXEL_CLUSTER_COL_lsb;
 		temp.row = (in & SELECTBITS(PIXEL_CLUSTER_ROW_bits, PIXEL_CLUSTER_ROW_lsb)) >> PIXEL_CLUSTER_ROW_lsb;
-		temp.clusterid = (in & SELECTBITS(PIXEL_CLUSTER_CLUSTERID_bits, PIXEL_CLUSTER_CLUSTERID_lsb)) >> PIXEL_CLUSTER_CLUSTERID_lsb;
 		temp.centroid_col = (in & SELECTBITS(PIXEL_CLUSTER_CENTROID_COL_bits, PIXEL_CLUSTER_CENTROID_COL_lsb)) >> PIXEL_CLUSTER_CENTROID_COL_lsb;
 		temp.centroid_row = (in & SELECTBITS(PIXEL_CLUSTER_CENTROID_ROW_bits, PIXEL_CLUSTER_CENTROID_ROW_lsb)) >> PIXEL_CLUSTER_CENTROID_ROW_lsb;
+		temp.spare = (in & SELECTBITS(PIXEL_CLUSTER_SPARE_bits, PIXEL_CLUSTER_SPARE_lsb)) >> PIXEL_CLUSTER_SPARE_lsb;
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_PIXEL_CLUSTER (const PIXEL_CLUSTER& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.last) << PIXEL_CLUSTER_LAST_lsb);
-		temp |= (static_cast<uint64_t>(in.col) << PIXEL_CLUSTER_COL_lsb);
-		temp |= (static_cast<uint64_t>(in.row) << PIXEL_CLUSTER_ROW_lsb);
-		temp |= (static_cast<uint64_t>(in.clusterid) << PIXEL_CLUSTER_CLUSTERID_lsb);
-		temp |= (static_cast<uint64_t>(in.centroid_col) << PIXEL_CLUSTER_CENTROID_COL_lsb);
-		temp |= (static_cast<uint64_t>(in.centroid_row) << PIXEL_CLUSTER_CENTROID_ROW_lsb);
+		temp |= (((static_cast<uint64_t>(in.last)) & SELECTBITS(PIXEL_CLUSTER_LAST_bits, 0)) << PIXEL_CLUSTER_LAST_lsb);
+		temp |= (((static_cast<uint64_t>(in.col)) & SELECTBITS(PIXEL_CLUSTER_COL_bits, 0)) << PIXEL_CLUSTER_COL_lsb);
+		temp |= (((static_cast<uint64_t>(in.row)) & SELECTBITS(PIXEL_CLUSTER_ROW_bits, 0)) << PIXEL_CLUSTER_ROW_lsb);
+		temp |= (((static_cast<uint64_t>(in.centroid_col)) & SELECTBITS(PIXEL_CLUSTER_CENTROID_COL_bits, 0)) << PIXEL_CLUSTER_CENTROID_COL_lsb);
+		temp |= (((static_cast<uint64_t>(in.centroid_row)) & SELECTBITS(PIXEL_CLUSTER_CENTROID_ROW_bits, 0)) << PIXEL_CLUSTER_CENTROID_ROW_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(PIXEL_CLUSTER_SPARE_bits, 0)) << PIXEL_CLUSTER_SPARE_lsb);
 		return temp;
 	}
 
-	inline PIXEL_CLUSTER fill_PIXEL_CLUSTER (const uint64_t& last, const uint64_t& col, const uint64_t& row, const uint64_t& clusterid, const double& centroid_col, const double& centroid_row) {
+	inline PIXEL_CLUSTER fill_PIXEL_CLUSTER (const uint64_t& last, const uint64_t& col, const uint64_t& row, const double& centroid_col, const double& centroid_row, const uint64_t& spare) {
 		PIXEL_CLUSTER temp;
 		temp.last = last;
 		temp.col = col;
 		temp.row = row;
-		temp.clusterid = clusterid;
 		temp.centroid_col = (uint64_t)(centroid_col * PIXEL_CLUSTER_CENTROID_COL_mf);
 		temp.centroid_row = (uint64_t)(centroid_row * PIXEL_CLUSTER_CENTROID_ROW_mf);
+		temp.spare = spare;
 		return temp;
 	}
 
@@ -1006,16 +1007,16 @@ namespace FPGADataFormatUtilities
 		return in;
 	}
 
-	inline uint64_t to_real_PIXEL_CLUSTER_clusterid (const uint64_t& in) {
-		return in;
-	}
-
 	inline double to_real_PIXEL_CLUSTER_centroid_col (const uint64_t& in) {
 		return (double)in / PIXEL_CLUSTER_CENTROID_COL_mf;
 	}
 
 	inline double to_real_PIXEL_CLUSTER_centroid_row (const uint64_t& in) {
 		return (double)in / PIXEL_CLUSTER_CENTROID_ROW_mf;
+	}
+
+	inline uint64_t to_real_PIXEL_CLUSTER_spare (const uint64_t& in) {
+		return in;
 	}
 
 	// STRIP_CLUSTER word description
@@ -1027,19 +1028,15 @@ namespace FPGADataFormatUtilities
 	const int STRIP_CLUSTER_ROW_lsb = 30;
 	const float STRIP_CLUSTER_ROW_mf = 1.;
 
-	const int STRIP_CLUSTER_NSTRIPS_bits = 2;
-	const int STRIP_CLUSTER_NSTRIPS_lsb = 28;
+	const int STRIP_CLUSTER_NSTRIPS_bits = 8;
+	const int STRIP_CLUSTER_NSTRIPS_lsb = 22;
 	const float STRIP_CLUSTER_NSTRIPS_mf = 1.;
 
 	const int STRIP_CLUSTER_STRIP_INDEX_bits = 12;
-	const int STRIP_CLUSTER_STRIP_INDEX_lsb = 16;
+	const int STRIP_CLUSTER_STRIP_INDEX_lsb = 10;
 	const float STRIP_CLUSTER_STRIP_INDEX_mf = 1.;
 
-	const int STRIP_CLUSTER_CLUSTERID_bits = 13;
-	const int STRIP_CLUSTER_CLUSTERID_lsb = 3;
-	const float STRIP_CLUSTER_CLUSTERID_mf = 1.;
-
-	const int STRIP_CLUSTER_SPARE_bits = 3;
+	const int STRIP_CLUSTER_SPARE_bits = 10;
 	const int STRIP_CLUSTER_SPARE_lsb = 0;
 	const float STRIP_CLUSTER_SPARE_mf = 1.;
 
@@ -1048,19 +1045,15 @@ namespace FPGADataFormatUtilities
 		uint64_t row : STRIP_CLUSTER_ROW_bits;
 		uint64_t nstrips : STRIP_CLUSTER_NSTRIPS_bits;
 		uint64_t strip_index : STRIP_CLUSTER_STRIP_INDEX_bits;
-		uint64_t clusterid : STRIP_CLUSTER_CLUSTERID_bits;
 		uint64_t spare : STRIP_CLUSTER_SPARE_bits;
 	} STRIP_CLUSTER;
 
-	// Even though the input is 64 bits, this function really only operates on the lower 32 bits
-	// Make sure to shift right by 32 bits to get the upper 32 bits
 	inline STRIP_CLUSTER get_bitfields_STRIP_CLUSTER (const uint64_t& in) {
 		STRIP_CLUSTER temp;
 		temp.last = (in & SELECTBITS(STRIP_CLUSTER_LAST_bits, STRIP_CLUSTER_LAST_lsb)) >> STRIP_CLUSTER_LAST_lsb;
 		temp.row = (in & SELECTBITS(STRIP_CLUSTER_ROW_bits, STRIP_CLUSTER_ROW_lsb)) >> STRIP_CLUSTER_ROW_lsb;
 		temp.nstrips = (in & SELECTBITS(STRIP_CLUSTER_NSTRIPS_bits, STRIP_CLUSTER_NSTRIPS_lsb)) >> STRIP_CLUSTER_NSTRIPS_lsb;
 		temp.strip_index = (in & SELECTBITS(STRIP_CLUSTER_STRIP_INDEX_bits, STRIP_CLUSTER_STRIP_INDEX_lsb)) >> STRIP_CLUSTER_STRIP_INDEX_lsb;
-		temp.clusterid = (in & SELECTBITS(STRIP_CLUSTER_CLUSTERID_bits, STRIP_CLUSTER_CLUSTERID_lsb)) >> STRIP_CLUSTER_CLUSTERID_lsb;
 		temp.spare = (in & SELECTBITS(STRIP_CLUSTER_SPARE_bits, STRIP_CLUSTER_SPARE_lsb)) >> STRIP_CLUSTER_SPARE_lsb;
 		return temp;
 	}
@@ -1075,12 +1068,11 @@ namespace FPGADataFormatUtilities
 
 	inline uint64_t get_dataformat_STRIP_CLUSTER (const STRIP_CLUSTER& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.last) << STRIP_CLUSTER_LAST_lsb);
-		temp |= (static_cast<uint64_t>(in.row) << STRIP_CLUSTER_ROW_lsb);
-		temp |= (static_cast<uint64_t>(in.nstrips) << STRIP_CLUSTER_NSTRIPS_lsb);
-		temp |= (static_cast<uint64_t>(in.strip_index) << STRIP_CLUSTER_STRIP_INDEX_lsb);
-		temp |= (static_cast<uint64_t>(in.clusterid) << STRIP_CLUSTER_CLUSTERID_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << STRIP_CLUSTER_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.last)) & SELECTBITS(STRIP_CLUSTER_LAST_bits, 0)) << STRIP_CLUSTER_LAST_lsb);
+		temp |= (((static_cast<uint64_t>(in.row)) & SELECTBITS(STRIP_CLUSTER_ROW_bits, 0)) << STRIP_CLUSTER_ROW_lsb);
+		temp |= (((static_cast<uint64_t>(in.nstrips)) & SELECTBITS(STRIP_CLUSTER_NSTRIPS_bits, 0)) << STRIP_CLUSTER_NSTRIPS_lsb);
+		temp |= (((static_cast<uint64_t>(in.strip_index)) & SELECTBITS(STRIP_CLUSTER_STRIP_INDEX_bits, 0)) << STRIP_CLUSTER_STRIP_INDEX_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(STRIP_CLUSTER_SPARE_bits, 0)) << STRIP_CLUSTER_SPARE_lsb);
 		return temp;
 	}
 
@@ -1089,13 +1081,12 @@ namespace FPGADataFormatUtilities
 		return (temp | low);
 }
 
-	inline STRIP_CLUSTER fill_STRIP_CLUSTER (const uint64_t& last, const uint64_t& row, const uint64_t& nstrips, const uint64_t& strip_index, const uint64_t& clusterid, const uint64_t& spare) {
+	inline STRIP_CLUSTER fill_STRIP_CLUSTER (const uint64_t& last, const uint64_t& row, const uint64_t& nstrips, const uint64_t& strip_index, const uint64_t& spare) {
 		STRIP_CLUSTER temp;
 		temp.last = last;
 		temp.row = row;
 		temp.nstrips = nstrips;
 		temp.strip_index = strip_index;
-		temp.clusterid = clusterid;
 		temp.spare = spare;
 		return temp;
 	}
@@ -1116,10 +1107,6 @@ namespace FPGADataFormatUtilities
 		return in;
 	}
 
-	inline uint64_t to_real_STRIP_CLUSTER_clusterid (const uint64_t& in) {
-		return in;
-	}
-
 	inline uint64_t to_real_STRIP_CLUSTER_spare (const uint64_t& in) {
 		return in;
 	}
@@ -1129,40 +1116,44 @@ namespace FPGADataFormatUtilities
 	const int GHITZ_W1_LAST_lsb = 63;
 	const float GHITZ_W1_LAST_mf = 1.;
 
-	const int GHITZ_W1_LYR_bits = 4;
-	const int GHITZ_W1_LYR_lsb = 59;
+	const int GHITZ_W1_LYR_bits = 6;
+	const int GHITZ_W1_LYR_lsb = 57;
 	const float GHITZ_W1_LYR_mf = 1.;
 
 	const int GHITZ_W1_RAD_bits = 18;
-	const int GHITZ_W1_RAD_lsb = 41;
+	const int GHITZ_W1_RAD_lsb = 39;
 	const float GHITZ_W1_RAD_mf = 256.;
 
 	const int GHITZ_W1_PHI_bits = 16;
-	const int GHITZ_W1_PHI_lsb = 25;
+	const int GHITZ_W1_PHI_lsb = 23;
 	const float GHITZ_W1_PHI_mf = 8192.;
 
-	const int GHITZ_W1_Z_bits = 18;
-	const int GHITZ_W1_Z_lsb = 7;
+	const int GHITZ_W1_Z_bits = 20;
+	const int GHITZ_W1_Z_lsb = 3;
 	const float GHITZ_W1_Z_mf = 128.;
 
-	const int GHITZ_W1_ROW_bits = 6;
-	const int GHITZ_W1_ROW_lsb = 1;
-	const float GHITZ_W1_ROW_mf = 1.;
-
 	const int GHITZ_W1_LASTOFSLICE_bits = 1;
-	const int GHITZ_W1_LASTOFSLICE_lsb = 0;
+	const int GHITZ_W1_LASTOFSLICE_lsb = 2;
 	const float GHITZ_W1_LASTOFSLICE_mf = 1.;
 
+	const int GHITZ_W1_SPARE_bits = 2;
+	const int GHITZ_W1_SPARE_lsb = 0;
+	const float GHITZ_W1_SPARE_mf = 1.;
+
 	// GHITZ_W2 word description
-	const int GHITZ_W2_CLUSTER1_bits = 13;
-	const int GHITZ_W2_CLUSTER1_lsb = 51;
+	const int GHITZ_W2_CLUSTER1_bits = 19;
+	const int GHITZ_W2_CLUSTER1_lsb = 45;
 	const float GHITZ_W2_CLUSTER1_mf = 1.;
 
-	const int GHITZ_W2_CLUSTER2_bits = 13;
-	const int GHITZ_W2_CLUSTER2_lsb = 38;
+	const int GHITZ_W2_CLUSTER2_bits = 19;
+	const int GHITZ_W2_CLUSTER2_lsb = 26;
 	const float GHITZ_W2_CLUSTER2_mf = 1.;
 
-	const int GHITZ_W2_SPARE_bits = 38;
+	const int GHITZ_W2_ROW_bits = 6;
+	const int GHITZ_W2_ROW_lsb = 20;
+	const float GHITZ_W2_ROW_mf = 1.;
+
+	const int GHITZ_W2_SPARE_bits = 20;
 	const int GHITZ_W2_SPARE_lsb = 0;
 	const float GHITZ_W2_SPARE_mf = 1.;
 
@@ -1172,13 +1163,14 @@ namespace FPGADataFormatUtilities
 		uint64_t rad : GHITZ_W1_RAD_bits;
 		int64_t phi : GHITZ_W1_PHI_bits;
 		int64_t z : GHITZ_W1_Z_bits;
-		uint64_t row : GHITZ_W1_ROW_bits;
 		uint64_t lastofslice : GHITZ_W1_LASTOFSLICE_bits;
+		uint64_t spare : GHITZ_W1_SPARE_bits;
 	} GHITZ_w1;
 
 	typedef struct GHITZ_w2 {
 		uint64_t cluster1 : GHITZ_W2_CLUSTER1_bits;
 		uint64_t cluster2 : GHITZ_W2_CLUSTER2_bits;
+		uint64_t row : GHITZ_W2_ROW_bits;
 		uint64_t spare : GHITZ_W2_SPARE_bits;
 	} GHITZ_w2;
 
@@ -1189,8 +1181,8 @@ namespace FPGADataFormatUtilities
 		temp.rad = (in & SELECTBITS(GHITZ_W1_RAD_bits, GHITZ_W1_RAD_lsb)) >> GHITZ_W1_RAD_lsb;
 		temp.phi = (in & SELECTBITS(GHITZ_W1_PHI_bits, GHITZ_W1_PHI_lsb)) >> GHITZ_W1_PHI_lsb;
 		temp.z = (in & SELECTBITS(GHITZ_W1_Z_bits, GHITZ_W1_Z_lsb)) >> GHITZ_W1_Z_lsb;
-		temp.row = (in & SELECTBITS(GHITZ_W1_ROW_bits, GHITZ_W1_ROW_lsb)) >> GHITZ_W1_ROW_lsb;
 		temp.lastofslice = (in & SELECTBITS(GHITZ_W1_LASTOFSLICE_bits, GHITZ_W1_LASTOFSLICE_lsb)) >> GHITZ_W1_LASTOFSLICE_lsb;
+		temp.spare = (in & SELECTBITS(GHITZ_W1_SPARE_bits, GHITZ_W1_SPARE_lsb)) >> GHITZ_W1_SPARE_lsb;
 		return temp;
 	}
 
@@ -1198,46 +1190,49 @@ namespace FPGADataFormatUtilities
 		GHITZ_w2 temp;
 		temp.cluster1 = (in & SELECTBITS(GHITZ_W2_CLUSTER1_bits, GHITZ_W2_CLUSTER1_lsb)) >> GHITZ_W2_CLUSTER1_lsb;
 		temp.cluster2 = (in & SELECTBITS(GHITZ_W2_CLUSTER2_bits, GHITZ_W2_CLUSTER2_lsb)) >> GHITZ_W2_CLUSTER2_lsb;
+		temp.row = (in & SELECTBITS(GHITZ_W2_ROW_bits, GHITZ_W2_ROW_lsb)) >> GHITZ_W2_ROW_lsb;
 		temp.spare = (in & SELECTBITS(GHITZ_W2_SPARE_bits, GHITZ_W2_SPARE_lsb)) >> GHITZ_W2_SPARE_lsb;
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_GHITZ_w1 (const GHITZ_w1& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.last) << GHITZ_W1_LAST_lsb);
-		temp |= (static_cast<uint64_t>(in.lyr) << GHITZ_W1_LYR_lsb);
-		temp |= (static_cast<uint64_t>(in.rad) << GHITZ_W1_RAD_lsb);
-		temp |= (static_cast<uint64_t>(in.phi) << GHITZ_W1_PHI_lsb);
-		temp |= (static_cast<uint64_t>(in.z) << GHITZ_W1_Z_lsb);
-		temp |= (static_cast<uint64_t>(in.row) << GHITZ_W1_ROW_lsb);
-		temp |= (static_cast<uint64_t>(in.lastofslice) << GHITZ_W1_LASTOFSLICE_lsb);
+		temp |= (((static_cast<uint64_t>(in.last)) & SELECTBITS(GHITZ_W1_LAST_bits, 0)) << GHITZ_W1_LAST_lsb);
+		temp |= (((static_cast<uint64_t>(in.lyr)) & SELECTBITS(GHITZ_W1_LYR_bits, 0)) << GHITZ_W1_LYR_lsb);
+		temp |= (((static_cast<uint64_t>(in.rad)) & SELECTBITS(GHITZ_W1_RAD_bits, 0)) << GHITZ_W1_RAD_lsb);
+		temp |= (((static_cast<uint64_t>(in.phi)) & SELECTBITS(GHITZ_W1_PHI_bits, 0)) << GHITZ_W1_PHI_lsb);
+		temp |= (((static_cast<uint64_t>(in.z)) & SELECTBITS(GHITZ_W1_Z_bits, 0)) << GHITZ_W1_Z_lsb);
+		temp |= (((static_cast<uint64_t>(in.lastofslice)) & SELECTBITS(GHITZ_W1_LASTOFSLICE_bits, 0)) << GHITZ_W1_LASTOFSLICE_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(GHITZ_W1_SPARE_bits, 0)) << GHITZ_W1_SPARE_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_GHITZ_w2 (const GHITZ_w2& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.cluster1) << GHITZ_W2_CLUSTER1_lsb);
-		temp |= (static_cast<uint64_t>(in.cluster2) << GHITZ_W2_CLUSTER2_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << GHITZ_W2_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.cluster1)) & SELECTBITS(GHITZ_W2_CLUSTER1_bits, 0)) << GHITZ_W2_CLUSTER1_lsb);
+		temp |= (((static_cast<uint64_t>(in.cluster2)) & SELECTBITS(GHITZ_W2_CLUSTER2_bits, 0)) << GHITZ_W2_CLUSTER2_lsb);
+		temp |= (((static_cast<uint64_t>(in.row)) & SELECTBITS(GHITZ_W2_ROW_bits, 0)) << GHITZ_W2_ROW_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(GHITZ_W2_SPARE_bits, 0)) << GHITZ_W2_SPARE_lsb);
 		return temp;
 	}
 
-	inline GHITZ_w1 fill_GHITZ_w1 (const uint64_t& last, const uint64_t& lyr, const double& rad, const double& phi, const double& z, const uint64_t& row, const uint64_t& lastofslice) {
+	inline GHITZ_w1 fill_GHITZ_w1 (const uint64_t& last, const uint64_t& lyr, const double& rad, const double& phi, const double& z, const uint64_t& lastofslice, const uint64_t& spare) {
 		GHITZ_w1 temp;
 		temp.last = last;
 		temp.lyr = lyr;
 		temp.rad = (uint64_t)(rad * GHITZ_W1_RAD_mf);
 		temp.phi = (int64_t)(phi * GHITZ_W1_PHI_mf);
 		temp.z = (int64_t)(z * GHITZ_W1_Z_mf);
-		temp.row = row;
 		temp.lastofslice = lastofslice;
+		temp.spare = spare;
 		return temp;
 	}
 
-	inline GHITZ_w2 fill_GHITZ_w2 (const uint64_t& cluster1, const uint64_t& cluster2, const uint64_t& spare) {
+	inline GHITZ_w2 fill_GHITZ_w2 (const uint64_t& cluster1, const uint64_t& cluster2, const uint64_t& row, const uint64_t& spare) {
 		GHITZ_w2 temp;
 		temp.cluster1 = cluster1;
 		temp.cluster2 = cluster2;
+		temp.row = row;
 		temp.spare = spare;
 		return temp;
 	}
@@ -1262,11 +1257,11 @@ namespace FPGADataFormatUtilities
 		return (double)in / GHITZ_W1_Z_mf;
 	}
 
-	inline uint64_t to_real_GHITZ_w1_row (const uint64_t& in) {
+	inline uint64_t to_real_GHITZ_w1_lastofslice (const uint64_t& in) {
 		return in;
 	}
 
-	inline uint64_t to_real_GHITZ_w1_lastofslice (const uint64_t& in) {
+	inline uint64_t to_real_GHITZ_w1_spare (const uint64_t& in) {
 		return in;
 	}
 
@@ -1278,758 +1273,930 @@ namespace FPGADataFormatUtilities
 		return in;
 	}
 
+	inline uint64_t to_real_GHITZ_w2_row (const uint64_t& in) {
+		return in;
+	}
+
 	inline uint64_t to_real_GHITZ_w2_spare (const uint64_t& in) {
 		return in;
 	}
 
+	// EDM_STRIPCLUSTER defined flags
+	const int EDM_STRIPCLUSTER_FLAG = 0x66;
+
 	// EDM_STRIPCLUSTER_W1 word description
+	const int EDM_STRIPCLUSTER_W1_FLAG_bits = 8;
+	const int EDM_STRIPCLUSTER_W1_FLAG_lsb = 56;
+	const float EDM_STRIPCLUSTER_W1_FLAG_mf = 1.;
+
 	const int EDM_STRIPCLUSTER_W1_ID_HASH_bits = 32;
-	const int EDM_STRIPCLUSTER_W1_ID_HASH_lsb = 32;
+	const int EDM_STRIPCLUSTER_W1_ID_HASH_lsb = 24;
 	const float EDM_STRIPCLUSTER_W1_ID_HASH_mf = 1.;
 
-	const int EDM_STRIPCLUSTER_W1_IDENTIFIER_bits = 32;
-	const int EDM_STRIPCLUSTER_W1_IDENTIFIER_lsb = 0;
-	const float EDM_STRIPCLUSTER_W1_IDENTIFIER_mf = 1.;
+	const int EDM_STRIPCLUSTER_W1_Spare_bits = 24;
+	const int EDM_STRIPCLUSTER_W1_Spare_lsb = 0;
+	const float EDM_STRIPCLUSTER_W1_Spare_mf = 1.;
 
 	// EDM_STRIPCLUSTER_W2 word description
-	const int EDM_STRIPCLUSTER_W2_RDO_LIST_W1_bits = 32;
-	const int EDM_STRIPCLUSTER_W2_RDO_LIST_W1_lsb = 32;
-	const float EDM_STRIPCLUSTER_W2_RDO_LIST_W1_mf = 1.;
-
-	const int EDM_STRIPCLUSTER_W2_RDO_LIST_W2_bits = 32;
-	const int EDM_STRIPCLUSTER_W2_RDO_LIST_W2_lsb = 0;
-	const float EDM_STRIPCLUSTER_W2_RDO_LIST_W2_mf = 1.;
+	const int EDM_STRIPCLUSTER_W2_IDENTIFIER_bits = 64;
+	const int EDM_STRIPCLUSTER_W2_IDENTIFIER_lsb = 0;
+	const float EDM_STRIPCLUSTER_W2_IDENTIFIER_mf = 1.;
 
 	// EDM_STRIPCLUSTER_W3 word description
-	const int EDM_STRIPCLUSTER_W3_RDO_LIST_W3_bits = 32;
-	const int EDM_STRIPCLUSTER_W3_RDO_LIST_W3_lsb = 32;
-	const float EDM_STRIPCLUSTER_W3_RDO_LIST_W3_mf = 1.;
-
-	const int EDM_STRIPCLUSTER_W3_RDO_LIST_W4_bits = 32;
-	const int EDM_STRIPCLUSTER_W3_RDO_LIST_W4_lsb = 0;
-	const float EDM_STRIPCLUSTER_W3_RDO_LIST_W4_mf = 1.;
+	const int EDM_STRIPCLUSTER_W3_RDO_LIST_W1_bits = 64;
+	const int EDM_STRIPCLUSTER_W3_RDO_LIST_W1_lsb = 0;
+	const float EDM_STRIPCLUSTER_W3_RDO_LIST_W1_mf = 1.;
 
 	// EDM_STRIPCLUSTER_W4 word description
-	const int EDM_STRIPCLUSTER_W4_LOCALPOSITION_X_bits = 21;
-	const int EDM_STRIPCLUSTER_W4_LOCALPOSITION_X_lsb = 43;
-	const float EDM_STRIPCLUSTER_W4_LOCALPOSITION_X_mf = 8192.;
-
-	const int EDM_STRIPCLUSTER_W4_LOCALPOSITION_Y_bits = 21;
-	const int EDM_STRIPCLUSTER_W4_LOCALPOSITION_Y_lsb = 22;
-	const float EDM_STRIPCLUSTER_W4_LOCALPOSITION_Y_mf = 8192.;
-
-	const int EDM_STRIPCLUSTER_W4_LOCALCOVARIANCE_XX_bits = 20;
-	const int EDM_STRIPCLUSTER_W4_LOCALCOVARIANCE_XX_lsb = 2;
-	const float EDM_STRIPCLUSTER_W4_LOCALCOVARIANCE_XX_mf = 524288.;
-
-	const int EDM_STRIPCLUSTER_W4_SPARE_bits = 2;
-	const int EDM_STRIPCLUSTER_W4_SPARE_lsb = 0;
-	const float EDM_STRIPCLUSTER_W4_SPARE_mf = 1.;
+	const int EDM_STRIPCLUSTER_W4_RDO_LIST_W2_bits = 64;
+	const int EDM_STRIPCLUSTER_W4_RDO_LIST_W2_lsb = 0;
+	const float EDM_STRIPCLUSTER_W4_RDO_LIST_W2_mf = 1.;
 
 	// EDM_STRIPCLUSTER_W5 word description
-	const int EDM_STRIPCLUSTER_W5_GLOBALPOSITION_X_bits = 27;
-	const int EDM_STRIPCLUSTER_W5_GLOBALPOSITION_X_lsb = 37;
-	const float EDM_STRIPCLUSTER_W5_GLOBALPOSITION_X_mf = 65536.;
-
-	const int EDM_STRIPCLUSTER_W5_GLOBALPOSITION_Y_bits = 27;
-	const int EDM_STRIPCLUSTER_W5_GLOBALPOSITION_Y_lsb = 10;
-	const float EDM_STRIPCLUSTER_W5_GLOBALPOSITION_Y_mf = 65536.;
-
-	const int EDM_STRIPCLUSTER_W5_CHANNELS_IN_PHI_bits = 6;
-	const int EDM_STRIPCLUSTER_W5_CHANNELS_IN_PHI_lsb = 4;
-	const float EDM_STRIPCLUSTER_W5_CHANNELS_IN_PHI_mf = 1.;
-
-	const int EDM_STRIPCLUSTER_W5_SPARE_bits = 4;
-	const int EDM_STRIPCLUSTER_W5_SPARE_lsb = 0;
-	const float EDM_STRIPCLUSTER_W5_SPARE_mf = 1.;
+	const int EDM_STRIPCLUSTER_W5_RDO_LIST_W3_bits = 64;
+	const int EDM_STRIPCLUSTER_W5_RDO_LIST_W3_lsb = 0;
+	const float EDM_STRIPCLUSTER_W5_RDO_LIST_W3_mf = 1.;
 
 	// EDM_STRIPCLUSTER_W6 word description
-	const int EDM_STRIPCLUSTER_W6_GLOBALPOSITION_Z_bits = 29;
-	const int EDM_STRIPCLUSTER_W6_GLOBALPOSITION_Z_lsb = 35;
-	const float EDM_STRIPCLUSTER_W6_GLOBALPOSITION_Z_mf = 65536.;
+	const int EDM_STRIPCLUSTER_W6_RDO_LIST_W4_bits = 64;
+	const int EDM_STRIPCLUSTER_W6_RDO_LIST_W4_lsb = 0;
+	const float EDM_STRIPCLUSTER_W6_RDO_LIST_W4_mf = 1.;
 
-	const int EDM_STRIPCLUSTER_W6_LASTWORD_bits = 1;
-	const int EDM_STRIPCLUSTER_W6_LASTWORD_lsb = 34;
-	const float EDM_STRIPCLUSTER_W6_LASTWORD_mf = 1.;
+	// EDM_STRIPCLUSTER_W7 word description
+	const int EDM_STRIPCLUSTER_W7_LOCALPOSITION_X_bits = 21;
+	const int EDM_STRIPCLUSTER_W7_LOCALPOSITION_X_lsb = 43;
+	const float EDM_STRIPCLUSTER_W7_LOCALPOSITION_X_mf = 8192.;
 
-	const int EDM_STRIPCLUSTER_W6_INDEX_bits = 32;
-	const int EDM_STRIPCLUSTER_W6_INDEX_lsb = 2;
-	const float EDM_STRIPCLUSTER_W6_INDEX_mf = 1.;
+	const int EDM_STRIPCLUSTER_W7_LOCALPOSITION_Y_bits = 21;
+	const int EDM_STRIPCLUSTER_W7_LOCALPOSITION_Y_lsb = 22;
+	const float EDM_STRIPCLUSTER_W7_LOCALPOSITION_Y_mf = 8192.;
 
-	const int EDM_STRIPCLUSTER_W6_SPARE_bits = 2;
-	const int EDM_STRIPCLUSTER_W6_SPARE_lsb = 0;
-	const float EDM_STRIPCLUSTER_W6_SPARE_mf = 1.;
+	const int EDM_STRIPCLUSTER_W7_LOCALCOVARIANCE_XX_bits = 20;
+	const int EDM_STRIPCLUSTER_W7_LOCALCOVARIANCE_XX_lsb = 2;
+	const float EDM_STRIPCLUSTER_W7_LOCALCOVARIANCE_XX_mf = 524288.;
+
+	const int EDM_STRIPCLUSTER_W7_SPARE_bits = 2;
+	const int EDM_STRIPCLUSTER_W7_SPARE_lsb = 0;
+	const float EDM_STRIPCLUSTER_W7_SPARE_mf = 1.;
+
+	// EDM_STRIPCLUSTER_W8 word description
+	const int EDM_STRIPCLUSTER_W8_GLOBALPOSITION_X_bits = 27;
+	const int EDM_STRIPCLUSTER_W8_GLOBALPOSITION_X_lsb = 37;
+	const float EDM_STRIPCLUSTER_W8_GLOBALPOSITION_X_mf = 65536.;
+
+	const int EDM_STRIPCLUSTER_W8_GLOBALPOSITION_Y_bits = 27;
+	const int EDM_STRIPCLUSTER_W8_GLOBALPOSITION_Y_lsb = 10;
+	const float EDM_STRIPCLUSTER_W8_GLOBALPOSITION_Y_mf = 65536.;
+
+	const int EDM_STRIPCLUSTER_W8_CHANNELS_IN_PHI_bits = 6;
+	const int EDM_STRIPCLUSTER_W8_CHANNELS_IN_PHI_lsb = 4;
+	const float EDM_STRIPCLUSTER_W8_CHANNELS_IN_PHI_mf = 1.;
+
+	const int EDM_STRIPCLUSTER_W8_SPARE_bits = 4;
+	const int EDM_STRIPCLUSTER_W8_SPARE_lsb = 0;
+	const float EDM_STRIPCLUSTER_W8_SPARE_mf = 1.;
+
+	// EDM_STRIPCLUSTER_W9 word description
+	const int EDM_STRIPCLUSTER_W9_GLOBALPOSITION_Z_bits = 29;
+	const int EDM_STRIPCLUSTER_W9_GLOBALPOSITION_Z_lsb = 35;
+	const float EDM_STRIPCLUSTER_W9_GLOBALPOSITION_Z_mf = 65536.;
+
+	const int EDM_STRIPCLUSTER_W9_LASTWORD_bits = 1;
+	const int EDM_STRIPCLUSTER_W9_LASTWORD_lsb = 34;
+	const float EDM_STRIPCLUSTER_W9_LASTWORD_mf = 1.;
+
+	const int EDM_STRIPCLUSTER_W9_INDEX_bits = 32;
+	const int EDM_STRIPCLUSTER_W9_INDEX_lsb = 2;
+	const float EDM_STRIPCLUSTER_W9_INDEX_mf = 1.;
+
+	const int EDM_STRIPCLUSTER_W9_SPARE_bits = 2;
+	const int EDM_STRIPCLUSTER_W9_SPARE_lsb = 0;
+	const float EDM_STRIPCLUSTER_W9_SPARE_mf = 1.;
 
 	typedef struct EDM_STRIPCLUSTER_w1 {
+		uint64_t flag : EDM_STRIPCLUSTER_W1_FLAG_bits;
 		uint64_t id_hash : EDM_STRIPCLUSTER_W1_ID_HASH_bits;
-		uint64_t identifier : EDM_STRIPCLUSTER_W1_IDENTIFIER_bits;
+		uint64_t spare : EDM_STRIPCLUSTER_W1_Spare_bits;
 	} EDM_STRIPCLUSTER_w1;
 
 	typedef struct EDM_STRIPCLUSTER_w2 {
-		uint64_t rdo_list_w1 : EDM_STRIPCLUSTER_W2_RDO_LIST_W1_bits;
-		uint64_t rdo_list_w2 : EDM_STRIPCLUSTER_W2_RDO_LIST_W2_bits;
+		uint64_t identifier : EDM_STRIPCLUSTER_W2_IDENTIFIER_bits;
 	} EDM_STRIPCLUSTER_w2;
 
 	typedef struct EDM_STRIPCLUSTER_w3 {
-		uint64_t rdo_list_w3 : EDM_STRIPCLUSTER_W3_RDO_LIST_W3_bits;
-		uint64_t rdo_list_w4 : EDM_STRIPCLUSTER_W3_RDO_LIST_W4_bits;
+		uint64_t rdo_list_w1 : EDM_STRIPCLUSTER_W3_RDO_LIST_W1_bits;
 	} EDM_STRIPCLUSTER_w3;
 
 	typedef struct EDM_STRIPCLUSTER_w4 {
-		int64_t localposition_x : EDM_STRIPCLUSTER_W4_LOCALPOSITION_X_bits;
-		int64_t localposition_y : EDM_STRIPCLUSTER_W4_LOCALPOSITION_Y_bits;
-		uint64_t localcovariance_xx : EDM_STRIPCLUSTER_W4_LOCALCOVARIANCE_XX_bits;
-		uint64_t spare : EDM_STRIPCLUSTER_W4_SPARE_bits;
+		uint64_t rdo_list_w2 : EDM_STRIPCLUSTER_W4_RDO_LIST_W2_bits;
 	} EDM_STRIPCLUSTER_w4;
 
 	typedef struct EDM_STRIPCLUSTER_w5 {
-		int64_t globalposition_x : EDM_STRIPCLUSTER_W5_GLOBALPOSITION_X_bits;
-		int64_t globalposition_y : EDM_STRIPCLUSTER_W5_GLOBALPOSITION_Y_bits;
-		uint64_t channels_in_phi : EDM_STRIPCLUSTER_W5_CHANNELS_IN_PHI_bits;
-		uint64_t spare : EDM_STRIPCLUSTER_W5_SPARE_bits;
+		uint64_t rdo_list_w3 : EDM_STRIPCLUSTER_W5_RDO_LIST_W3_bits;
 	} EDM_STRIPCLUSTER_w5;
 
 	typedef struct EDM_STRIPCLUSTER_w6 {
-		int64_t globalposition_z : EDM_STRIPCLUSTER_W6_GLOBALPOSITION_Z_bits;
-		uint64_t lastword : EDM_STRIPCLUSTER_W6_LASTWORD_bits;
-		uint64_t index : EDM_STRIPCLUSTER_W6_INDEX_bits;
-		uint64_t spare : EDM_STRIPCLUSTER_W6_SPARE_bits;
+		uint64_t rdo_list_w4 : EDM_STRIPCLUSTER_W6_RDO_LIST_W4_bits;
 	} EDM_STRIPCLUSTER_w6;
+
+	typedef struct EDM_STRIPCLUSTER_w7 {
+		int64_t localposition_x : EDM_STRIPCLUSTER_W7_LOCALPOSITION_X_bits;
+		int64_t localposition_y : EDM_STRIPCLUSTER_W7_LOCALPOSITION_Y_bits;
+		uint64_t localcovariance_xx : EDM_STRIPCLUSTER_W7_LOCALCOVARIANCE_XX_bits;
+		uint64_t spare : EDM_STRIPCLUSTER_W7_SPARE_bits;
+	} EDM_STRIPCLUSTER_w7;
+
+	typedef struct EDM_STRIPCLUSTER_w8 {
+		int64_t globalposition_x : EDM_STRIPCLUSTER_W8_GLOBALPOSITION_X_bits;
+		int64_t globalposition_y : EDM_STRIPCLUSTER_W8_GLOBALPOSITION_Y_bits;
+		uint64_t channels_in_phi : EDM_STRIPCLUSTER_W8_CHANNELS_IN_PHI_bits;
+		uint64_t spare : EDM_STRIPCLUSTER_W8_SPARE_bits;
+	} EDM_STRIPCLUSTER_w8;
+
+	typedef struct EDM_STRIPCLUSTER_w9 {
+		int64_t globalposition_z : EDM_STRIPCLUSTER_W9_GLOBALPOSITION_Z_bits;
+		uint64_t lastword : EDM_STRIPCLUSTER_W9_LASTWORD_bits;
+		uint64_t index : EDM_STRIPCLUSTER_W9_INDEX_bits;
+		uint64_t spare : EDM_STRIPCLUSTER_W9_SPARE_bits;
+	} EDM_STRIPCLUSTER_w9;
 
 	inline EDM_STRIPCLUSTER_w1 get_bitfields_EDM_STRIPCLUSTER_w1 (const uint64_t& in) {
 		EDM_STRIPCLUSTER_w1 temp;
+		temp.flag = (in & SELECTBITS(EDM_STRIPCLUSTER_W1_FLAG_bits, EDM_STRIPCLUSTER_W1_FLAG_lsb)) >> EDM_STRIPCLUSTER_W1_FLAG_lsb;
 		temp.id_hash = (in & SELECTBITS(EDM_STRIPCLUSTER_W1_ID_HASH_bits, EDM_STRIPCLUSTER_W1_ID_HASH_lsb)) >> EDM_STRIPCLUSTER_W1_ID_HASH_lsb;
-		temp.identifier = (in & SELECTBITS(EDM_STRIPCLUSTER_W1_IDENTIFIER_bits, EDM_STRIPCLUSTER_W1_IDENTIFIER_lsb)) >> EDM_STRIPCLUSTER_W1_IDENTIFIER_lsb;
+		temp.spare = (in & SELECTBITS(EDM_STRIPCLUSTER_W1_Spare_bits, EDM_STRIPCLUSTER_W1_Spare_lsb)) >> EDM_STRIPCLUSTER_W1_Spare_lsb;
 		return temp;
 	}
 
 	inline EDM_STRIPCLUSTER_w2 get_bitfields_EDM_STRIPCLUSTER_w2 (const uint64_t& in) {
 		EDM_STRIPCLUSTER_w2 temp;
-		temp.rdo_list_w1 = (in & SELECTBITS(EDM_STRIPCLUSTER_W2_RDO_LIST_W1_bits, EDM_STRIPCLUSTER_W2_RDO_LIST_W1_lsb)) >> EDM_STRIPCLUSTER_W2_RDO_LIST_W1_lsb;
-		temp.rdo_list_w2 = (in & SELECTBITS(EDM_STRIPCLUSTER_W2_RDO_LIST_W2_bits, EDM_STRIPCLUSTER_W2_RDO_LIST_W2_lsb)) >> EDM_STRIPCLUSTER_W2_RDO_LIST_W2_lsb;
+		temp.identifier = (in & SELECTBITS(EDM_STRIPCLUSTER_W2_IDENTIFIER_bits, EDM_STRIPCLUSTER_W2_IDENTIFIER_lsb)) >> EDM_STRIPCLUSTER_W2_IDENTIFIER_lsb;
 		return temp;
 	}
 
 	inline EDM_STRIPCLUSTER_w3 get_bitfields_EDM_STRIPCLUSTER_w3 (const uint64_t& in) {
 		EDM_STRIPCLUSTER_w3 temp;
-		temp.rdo_list_w3 = (in & SELECTBITS(EDM_STRIPCLUSTER_W3_RDO_LIST_W3_bits, EDM_STRIPCLUSTER_W3_RDO_LIST_W3_lsb)) >> EDM_STRIPCLUSTER_W3_RDO_LIST_W3_lsb;
-		temp.rdo_list_w4 = (in & SELECTBITS(EDM_STRIPCLUSTER_W3_RDO_LIST_W4_bits, EDM_STRIPCLUSTER_W3_RDO_LIST_W4_lsb)) >> EDM_STRIPCLUSTER_W3_RDO_LIST_W4_lsb;
+		temp.rdo_list_w1 = (in & SELECTBITS(EDM_STRIPCLUSTER_W3_RDO_LIST_W1_bits, EDM_STRIPCLUSTER_W3_RDO_LIST_W1_lsb)) >> EDM_STRIPCLUSTER_W3_RDO_LIST_W1_lsb;
 		return temp;
 	}
 
 	inline EDM_STRIPCLUSTER_w4 get_bitfields_EDM_STRIPCLUSTER_w4 (const uint64_t& in) {
 		EDM_STRIPCLUSTER_w4 temp;
-		temp.localposition_x = (in & SELECTBITS(EDM_STRIPCLUSTER_W4_LOCALPOSITION_X_bits, EDM_STRIPCLUSTER_W4_LOCALPOSITION_X_lsb)) >> EDM_STRIPCLUSTER_W4_LOCALPOSITION_X_lsb;
-		temp.localposition_y = (in & SELECTBITS(EDM_STRIPCLUSTER_W4_LOCALPOSITION_Y_bits, EDM_STRIPCLUSTER_W4_LOCALPOSITION_Y_lsb)) >> EDM_STRIPCLUSTER_W4_LOCALPOSITION_Y_lsb;
-		temp.localcovariance_xx = (in & SELECTBITS(EDM_STRIPCLUSTER_W4_LOCALCOVARIANCE_XX_bits, EDM_STRIPCLUSTER_W4_LOCALCOVARIANCE_XX_lsb)) >> EDM_STRIPCLUSTER_W4_LOCALCOVARIANCE_XX_lsb;
-		temp.spare = (in & SELECTBITS(EDM_STRIPCLUSTER_W4_SPARE_bits, EDM_STRIPCLUSTER_W4_SPARE_lsb)) >> EDM_STRIPCLUSTER_W4_SPARE_lsb;
+		temp.rdo_list_w2 = (in & SELECTBITS(EDM_STRIPCLUSTER_W4_RDO_LIST_W2_bits, EDM_STRIPCLUSTER_W4_RDO_LIST_W2_lsb)) >> EDM_STRIPCLUSTER_W4_RDO_LIST_W2_lsb;
 		return temp;
 	}
 
 	inline EDM_STRIPCLUSTER_w5 get_bitfields_EDM_STRIPCLUSTER_w5 (const uint64_t& in) {
 		EDM_STRIPCLUSTER_w5 temp;
-		temp.globalposition_x = (in & SELECTBITS(EDM_STRIPCLUSTER_W5_GLOBALPOSITION_X_bits, EDM_STRIPCLUSTER_W5_GLOBALPOSITION_X_lsb)) >> EDM_STRIPCLUSTER_W5_GLOBALPOSITION_X_lsb;
-		temp.globalposition_y = (in & SELECTBITS(EDM_STRIPCLUSTER_W5_GLOBALPOSITION_Y_bits, EDM_STRIPCLUSTER_W5_GLOBALPOSITION_Y_lsb)) >> EDM_STRIPCLUSTER_W5_GLOBALPOSITION_Y_lsb;
-		temp.channels_in_phi = (in & SELECTBITS(EDM_STRIPCLUSTER_W5_CHANNELS_IN_PHI_bits, EDM_STRIPCLUSTER_W5_CHANNELS_IN_PHI_lsb)) >> EDM_STRIPCLUSTER_W5_CHANNELS_IN_PHI_lsb;
-		temp.spare = (in & SELECTBITS(EDM_STRIPCLUSTER_W5_SPARE_bits, EDM_STRIPCLUSTER_W5_SPARE_lsb)) >> EDM_STRIPCLUSTER_W5_SPARE_lsb;
+		temp.rdo_list_w3 = (in & SELECTBITS(EDM_STRIPCLUSTER_W5_RDO_LIST_W3_bits, EDM_STRIPCLUSTER_W5_RDO_LIST_W3_lsb)) >> EDM_STRIPCLUSTER_W5_RDO_LIST_W3_lsb;
 		return temp;
 	}
 
 	inline EDM_STRIPCLUSTER_w6 get_bitfields_EDM_STRIPCLUSTER_w6 (const uint64_t& in) {
 		EDM_STRIPCLUSTER_w6 temp;
-		temp.globalposition_z = (in & SELECTBITS(EDM_STRIPCLUSTER_W6_GLOBALPOSITION_Z_bits, EDM_STRIPCLUSTER_W6_GLOBALPOSITION_Z_lsb)) >> EDM_STRIPCLUSTER_W6_GLOBALPOSITION_Z_lsb;
-		temp.lastword = (in & SELECTBITS(EDM_STRIPCLUSTER_W6_LASTWORD_bits, EDM_STRIPCLUSTER_W6_LASTWORD_lsb)) >> EDM_STRIPCLUSTER_W6_LASTWORD_lsb;
-		temp.index = (in & SELECTBITS(EDM_STRIPCLUSTER_W6_INDEX_bits, EDM_STRIPCLUSTER_W6_INDEX_lsb)) >> EDM_STRIPCLUSTER_W6_INDEX_lsb;
-		temp.spare = (in & SELECTBITS(EDM_STRIPCLUSTER_W6_SPARE_bits, EDM_STRIPCLUSTER_W6_SPARE_lsb)) >> EDM_STRIPCLUSTER_W6_SPARE_lsb;
+		temp.rdo_list_w4 = (in & SELECTBITS(EDM_STRIPCLUSTER_W6_RDO_LIST_W4_bits, EDM_STRIPCLUSTER_W6_RDO_LIST_W4_lsb)) >> EDM_STRIPCLUSTER_W6_RDO_LIST_W4_lsb;
+		return temp;
+	}
+
+	inline EDM_STRIPCLUSTER_w7 get_bitfields_EDM_STRIPCLUSTER_w7 (const uint64_t& in) {
+		EDM_STRIPCLUSTER_w7 temp;
+		temp.localposition_x = (in & SELECTBITS(EDM_STRIPCLUSTER_W7_LOCALPOSITION_X_bits, EDM_STRIPCLUSTER_W7_LOCALPOSITION_X_lsb)) >> EDM_STRIPCLUSTER_W7_LOCALPOSITION_X_lsb;
+		temp.localposition_y = (in & SELECTBITS(EDM_STRIPCLUSTER_W7_LOCALPOSITION_Y_bits, EDM_STRIPCLUSTER_W7_LOCALPOSITION_Y_lsb)) >> EDM_STRIPCLUSTER_W7_LOCALPOSITION_Y_lsb;
+		temp.localcovariance_xx = (in & SELECTBITS(EDM_STRIPCLUSTER_W7_LOCALCOVARIANCE_XX_bits, EDM_STRIPCLUSTER_W7_LOCALCOVARIANCE_XX_lsb)) >> EDM_STRIPCLUSTER_W7_LOCALCOVARIANCE_XX_lsb;
+		temp.spare = (in & SELECTBITS(EDM_STRIPCLUSTER_W7_SPARE_bits, EDM_STRIPCLUSTER_W7_SPARE_lsb)) >> EDM_STRIPCLUSTER_W7_SPARE_lsb;
+		return temp;
+	}
+
+	inline EDM_STRIPCLUSTER_w8 get_bitfields_EDM_STRIPCLUSTER_w8 (const uint64_t& in) {
+		EDM_STRIPCLUSTER_w8 temp;
+		temp.globalposition_x = (in & SELECTBITS(EDM_STRIPCLUSTER_W8_GLOBALPOSITION_X_bits, EDM_STRIPCLUSTER_W8_GLOBALPOSITION_X_lsb)) >> EDM_STRIPCLUSTER_W8_GLOBALPOSITION_X_lsb;
+		temp.globalposition_y = (in & SELECTBITS(EDM_STRIPCLUSTER_W8_GLOBALPOSITION_Y_bits, EDM_STRIPCLUSTER_W8_GLOBALPOSITION_Y_lsb)) >> EDM_STRIPCLUSTER_W8_GLOBALPOSITION_Y_lsb;
+		temp.channels_in_phi = (in & SELECTBITS(EDM_STRIPCLUSTER_W8_CHANNELS_IN_PHI_bits, EDM_STRIPCLUSTER_W8_CHANNELS_IN_PHI_lsb)) >> EDM_STRIPCLUSTER_W8_CHANNELS_IN_PHI_lsb;
+		temp.spare = (in & SELECTBITS(EDM_STRIPCLUSTER_W8_SPARE_bits, EDM_STRIPCLUSTER_W8_SPARE_lsb)) >> EDM_STRIPCLUSTER_W8_SPARE_lsb;
+		return temp;
+	}
+
+	inline EDM_STRIPCLUSTER_w9 get_bitfields_EDM_STRIPCLUSTER_w9 (const uint64_t& in) {
+		EDM_STRIPCLUSTER_w9 temp;
+		temp.globalposition_z = (in & SELECTBITS(EDM_STRIPCLUSTER_W9_GLOBALPOSITION_Z_bits, EDM_STRIPCLUSTER_W9_GLOBALPOSITION_Z_lsb)) >> EDM_STRIPCLUSTER_W9_GLOBALPOSITION_Z_lsb;
+		temp.lastword = (in & SELECTBITS(EDM_STRIPCLUSTER_W9_LASTWORD_bits, EDM_STRIPCLUSTER_W9_LASTWORD_lsb)) >> EDM_STRIPCLUSTER_W9_LASTWORD_lsb;
+		temp.index = (in & SELECTBITS(EDM_STRIPCLUSTER_W9_INDEX_bits, EDM_STRIPCLUSTER_W9_INDEX_lsb)) >> EDM_STRIPCLUSTER_W9_INDEX_lsb;
+		temp.spare = (in & SELECTBITS(EDM_STRIPCLUSTER_W9_SPARE_bits, EDM_STRIPCLUSTER_W9_SPARE_lsb)) >> EDM_STRIPCLUSTER_W9_SPARE_lsb;
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EDM_STRIPCLUSTER_w1 (const EDM_STRIPCLUSTER_w1& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.id_hash) << EDM_STRIPCLUSTER_W1_ID_HASH_lsb);
-		temp |= (static_cast<uint64_t>(in.identifier) << EDM_STRIPCLUSTER_W1_IDENTIFIER_lsb);
+		temp |= (((static_cast<uint64_t>(in.flag)) & SELECTBITS(EDM_STRIPCLUSTER_W1_FLAG_bits, 0)) << EDM_STRIPCLUSTER_W1_FLAG_lsb);
+		temp |= (((static_cast<uint64_t>(in.id_hash)) & SELECTBITS(EDM_STRIPCLUSTER_W1_ID_HASH_bits, 0)) << EDM_STRIPCLUSTER_W1_ID_HASH_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(EDM_STRIPCLUSTER_W1_Spare_bits, 0)) << EDM_STRIPCLUSTER_W1_Spare_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EDM_STRIPCLUSTER_w2 (const EDM_STRIPCLUSTER_w2& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.rdo_list_w1) << EDM_STRIPCLUSTER_W2_RDO_LIST_W1_lsb);
-		temp |= (static_cast<uint64_t>(in.rdo_list_w2) << EDM_STRIPCLUSTER_W2_RDO_LIST_W2_lsb);
+		temp |= (((static_cast<uint64_t>(in.identifier)) & SELECTBITS(EDM_STRIPCLUSTER_W2_IDENTIFIER_bits, 0)) << EDM_STRIPCLUSTER_W2_IDENTIFIER_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EDM_STRIPCLUSTER_w3 (const EDM_STRIPCLUSTER_w3& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.rdo_list_w3) << EDM_STRIPCLUSTER_W3_RDO_LIST_W3_lsb);
-		temp |= (static_cast<uint64_t>(in.rdo_list_w4) << EDM_STRIPCLUSTER_W3_RDO_LIST_W4_lsb);
+		temp |= (((static_cast<uint64_t>(in.rdo_list_w1)) & SELECTBITS(EDM_STRIPCLUSTER_W3_RDO_LIST_W1_bits, 0)) << EDM_STRIPCLUSTER_W3_RDO_LIST_W1_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EDM_STRIPCLUSTER_w4 (const EDM_STRIPCLUSTER_w4& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.localposition_x) << EDM_STRIPCLUSTER_W4_LOCALPOSITION_X_lsb);
-		temp |= (static_cast<uint64_t>(in.localposition_y) << EDM_STRIPCLUSTER_W4_LOCALPOSITION_Y_lsb);
-		temp |= (static_cast<uint64_t>(in.localcovariance_xx) << EDM_STRIPCLUSTER_W4_LOCALCOVARIANCE_XX_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << EDM_STRIPCLUSTER_W4_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.rdo_list_w2)) & SELECTBITS(EDM_STRIPCLUSTER_W4_RDO_LIST_W2_bits, 0)) << EDM_STRIPCLUSTER_W4_RDO_LIST_W2_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EDM_STRIPCLUSTER_w5 (const EDM_STRIPCLUSTER_w5& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.globalposition_x) << EDM_STRIPCLUSTER_W5_GLOBALPOSITION_X_lsb);
-		temp |= (static_cast<uint64_t>(in.globalposition_y) << EDM_STRIPCLUSTER_W5_GLOBALPOSITION_Y_lsb);
-		temp |= (static_cast<uint64_t>(in.channels_in_phi) << EDM_STRIPCLUSTER_W5_CHANNELS_IN_PHI_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << EDM_STRIPCLUSTER_W5_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.rdo_list_w3)) & SELECTBITS(EDM_STRIPCLUSTER_W5_RDO_LIST_W3_bits, 0)) << EDM_STRIPCLUSTER_W5_RDO_LIST_W3_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EDM_STRIPCLUSTER_w6 (const EDM_STRIPCLUSTER_w6& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.globalposition_z) << EDM_STRIPCLUSTER_W6_GLOBALPOSITION_Z_lsb);
-		temp |= (static_cast<uint64_t>(in.lastword) << EDM_STRIPCLUSTER_W6_LASTWORD_lsb);
-		temp |= (static_cast<uint64_t>(in.index) << EDM_STRIPCLUSTER_W6_INDEX_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << EDM_STRIPCLUSTER_W6_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.rdo_list_w4)) & SELECTBITS(EDM_STRIPCLUSTER_W6_RDO_LIST_W4_bits, 0)) << EDM_STRIPCLUSTER_W6_RDO_LIST_W4_lsb);
 		return temp;
 	}
 
-	inline EDM_STRIPCLUSTER_w1 fill_EDM_STRIPCLUSTER_w1 (const uint64_t& id_hash, const uint64_t& identifier) {
+	inline uint64_t get_dataformat_EDM_STRIPCLUSTER_w7 (const EDM_STRIPCLUSTER_w7& in) {
+		uint64_t temp = 0;
+		temp |= (((static_cast<uint64_t>(in.localposition_x)) & SELECTBITS(EDM_STRIPCLUSTER_W7_LOCALPOSITION_X_bits, 0)) << EDM_STRIPCLUSTER_W7_LOCALPOSITION_X_lsb);
+		temp |= (((static_cast<uint64_t>(in.localposition_y)) & SELECTBITS(EDM_STRIPCLUSTER_W7_LOCALPOSITION_Y_bits, 0)) << EDM_STRIPCLUSTER_W7_LOCALPOSITION_Y_lsb);
+		temp |= (((static_cast<uint64_t>(in.localcovariance_xx)) & SELECTBITS(EDM_STRIPCLUSTER_W7_LOCALCOVARIANCE_XX_bits, 0)) << EDM_STRIPCLUSTER_W7_LOCALCOVARIANCE_XX_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(EDM_STRIPCLUSTER_W7_SPARE_bits, 0)) << EDM_STRIPCLUSTER_W7_SPARE_lsb);
+		return temp;
+	}
+
+	inline uint64_t get_dataformat_EDM_STRIPCLUSTER_w8 (const EDM_STRIPCLUSTER_w8& in) {
+		uint64_t temp = 0;
+		temp |= (((static_cast<uint64_t>(in.globalposition_x)) & SELECTBITS(EDM_STRIPCLUSTER_W8_GLOBALPOSITION_X_bits, 0)) << EDM_STRIPCLUSTER_W8_GLOBALPOSITION_X_lsb);
+		temp |= (((static_cast<uint64_t>(in.globalposition_y)) & SELECTBITS(EDM_STRIPCLUSTER_W8_GLOBALPOSITION_Y_bits, 0)) << EDM_STRIPCLUSTER_W8_GLOBALPOSITION_Y_lsb);
+		temp |= (((static_cast<uint64_t>(in.channels_in_phi)) & SELECTBITS(EDM_STRIPCLUSTER_W8_CHANNELS_IN_PHI_bits, 0)) << EDM_STRIPCLUSTER_W8_CHANNELS_IN_PHI_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(EDM_STRIPCLUSTER_W8_SPARE_bits, 0)) << EDM_STRIPCLUSTER_W8_SPARE_lsb);
+		return temp;
+	}
+
+	inline uint64_t get_dataformat_EDM_STRIPCLUSTER_w9 (const EDM_STRIPCLUSTER_w9& in) {
+		uint64_t temp = 0;
+		temp |= (((static_cast<uint64_t>(in.globalposition_z)) & SELECTBITS(EDM_STRIPCLUSTER_W9_GLOBALPOSITION_Z_bits, 0)) << EDM_STRIPCLUSTER_W9_GLOBALPOSITION_Z_lsb);
+		temp |= (((static_cast<uint64_t>(in.lastword)) & SELECTBITS(EDM_STRIPCLUSTER_W9_LASTWORD_bits, 0)) << EDM_STRIPCLUSTER_W9_LASTWORD_lsb);
+		temp |= (((static_cast<uint64_t>(in.index)) & SELECTBITS(EDM_STRIPCLUSTER_W9_INDEX_bits, 0)) << EDM_STRIPCLUSTER_W9_INDEX_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(EDM_STRIPCLUSTER_W9_SPARE_bits, 0)) << EDM_STRIPCLUSTER_W9_SPARE_lsb);
+		return temp;
+	}
+
+	inline EDM_STRIPCLUSTER_w1 fill_EDM_STRIPCLUSTER_w1 (const uint64_t& flag, const uint64_t& id_hash, const uint64_t& spare) {
 		EDM_STRIPCLUSTER_w1 temp;
+		temp.flag = flag;
 		temp.id_hash = id_hash;
-		temp.identifier = identifier;
-		return temp;
-	}
-
-	inline EDM_STRIPCLUSTER_w2 fill_EDM_STRIPCLUSTER_w2 (const uint64_t& rdo_list_w1, const uint64_t& rdo_list_w2) {
-		EDM_STRIPCLUSTER_w2 temp;
-		temp.rdo_list_w1 = rdo_list_w1;
-		temp.rdo_list_w2 = rdo_list_w2;
-		return temp;
-	}
-
-	inline EDM_STRIPCLUSTER_w3 fill_EDM_STRIPCLUSTER_w3 (const uint64_t& rdo_list_w3, const uint64_t& rdo_list_w4) {
-		EDM_STRIPCLUSTER_w3 temp;
-		temp.rdo_list_w3 = rdo_list_w3;
-		temp.rdo_list_w4 = rdo_list_w4;
-		return temp;
-	}
-
-	inline EDM_STRIPCLUSTER_w4 fill_EDM_STRIPCLUSTER_w4 (const double& localposition_x, const double& localposition_y, const double& localcovariance_xx, const uint64_t& spare) {
-		EDM_STRIPCLUSTER_w4 temp;
-		temp.localposition_x = (int64_t)(localposition_x * EDM_STRIPCLUSTER_W4_LOCALPOSITION_X_mf);
-		temp.localposition_y = (int64_t)(localposition_y * EDM_STRIPCLUSTER_W4_LOCALPOSITION_Y_mf);
-		temp.localcovariance_xx = (uint64_t)(localcovariance_xx * EDM_STRIPCLUSTER_W4_LOCALCOVARIANCE_XX_mf);
 		temp.spare = spare;
 		return temp;
 	}
 
-	inline EDM_STRIPCLUSTER_w5 fill_EDM_STRIPCLUSTER_w5 (const double& globalposition_x, const double& globalposition_y, const uint64_t& channels_in_phi, const uint64_t& spare) {
+	inline EDM_STRIPCLUSTER_w2 fill_EDM_STRIPCLUSTER_w2 (const uint64_t& identifier) {
+		EDM_STRIPCLUSTER_w2 temp;
+		temp.identifier = identifier;
+		return temp;
+	}
+
+	inline EDM_STRIPCLUSTER_w3 fill_EDM_STRIPCLUSTER_w3 (const uint64_t& rdo_list_w1) {
+		EDM_STRIPCLUSTER_w3 temp;
+		temp.rdo_list_w1 = rdo_list_w1;
+		return temp;
+	}
+
+	inline EDM_STRIPCLUSTER_w4 fill_EDM_STRIPCLUSTER_w4 (const uint64_t& rdo_list_w2) {
+		EDM_STRIPCLUSTER_w4 temp;
+		temp.rdo_list_w2 = rdo_list_w2;
+		return temp;
+	}
+
+	inline EDM_STRIPCLUSTER_w5 fill_EDM_STRIPCLUSTER_w5 (const uint64_t& rdo_list_w3) {
 		EDM_STRIPCLUSTER_w5 temp;
-		temp.globalposition_x = (int64_t)(globalposition_x * EDM_STRIPCLUSTER_W5_GLOBALPOSITION_X_mf);
-		temp.globalposition_y = (int64_t)(globalposition_y * EDM_STRIPCLUSTER_W5_GLOBALPOSITION_Y_mf);
+		temp.rdo_list_w3 = rdo_list_w3;
+		return temp;
+	}
+
+	inline EDM_STRIPCLUSTER_w6 fill_EDM_STRIPCLUSTER_w6 (const uint64_t& rdo_list_w4) {
+		EDM_STRIPCLUSTER_w6 temp;
+		temp.rdo_list_w4 = rdo_list_w4;
+		return temp;
+	}
+
+	inline EDM_STRIPCLUSTER_w7 fill_EDM_STRIPCLUSTER_w7 (const double& localposition_x, const double& localposition_y, const double& localcovariance_xx, const uint64_t& spare) {
+		EDM_STRIPCLUSTER_w7 temp;
+		temp.localposition_x = (int64_t)(localposition_x * EDM_STRIPCLUSTER_W7_LOCALPOSITION_X_mf);
+		temp.localposition_y = (int64_t)(localposition_y * EDM_STRIPCLUSTER_W7_LOCALPOSITION_Y_mf);
+		temp.localcovariance_xx = (uint64_t)(localcovariance_xx * EDM_STRIPCLUSTER_W7_LOCALCOVARIANCE_XX_mf);
+		temp.spare = spare;
+		return temp;
+	}
+
+	inline EDM_STRIPCLUSTER_w8 fill_EDM_STRIPCLUSTER_w8 (const double& globalposition_x, const double& globalposition_y, const uint64_t& channels_in_phi, const uint64_t& spare) {
+		EDM_STRIPCLUSTER_w8 temp;
+		temp.globalposition_x = (int64_t)(globalposition_x * EDM_STRIPCLUSTER_W8_GLOBALPOSITION_X_mf);
+		temp.globalposition_y = (int64_t)(globalposition_y * EDM_STRIPCLUSTER_W8_GLOBALPOSITION_Y_mf);
 		temp.channels_in_phi = channels_in_phi;
 		temp.spare = spare;
 		return temp;
 	}
 
-	inline EDM_STRIPCLUSTER_w6 fill_EDM_STRIPCLUSTER_w6 (const double& globalposition_z, const uint64_t& lastword, const uint64_t& index, const uint64_t& spare) {
-		EDM_STRIPCLUSTER_w6 temp;
-		temp.globalposition_z = (int64_t)(globalposition_z * EDM_STRIPCLUSTER_W6_GLOBALPOSITION_Z_mf);
+	inline EDM_STRIPCLUSTER_w9 fill_EDM_STRIPCLUSTER_w9 (const double& globalposition_z, const uint64_t& lastword, const uint64_t& index, const uint64_t& spare) {
+		EDM_STRIPCLUSTER_w9 temp;
+		temp.globalposition_z = (int64_t)(globalposition_z * EDM_STRIPCLUSTER_W9_GLOBALPOSITION_Z_mf);
 		temp.lastword = lastword;
 		temp.index = index;
 		temp.spare = spare;
 		return temp;
 	}
 
+	inline uint64_t to_real_EDM_STRIPCLUSTER_w1_flag (const uint64_t& in) {
+		return in;
+	}
+
 	inline uint64_t to_real_EDM_STRIPCLUSTER_w1_id_hash (const uint64_t& in) {
 		return in;
 	}
 
-	inline uint64_t to_real_EDM_STRIPCLUSTER_w1_identifier (const uint64_t& in) {
+	inline uint64_t to_real_EDM_STRIPCLUSTER_w1_spare (const uint64_t& in) {
 		return in;
 	}
 
-	inline uint64_t to_real_EDM_STRIPCLUSTER_w2_rdo_list_w1 (const uint64_t& in) {
+	inline uint64_t to_real_EDM_STRIPCLUSTER_w2_identifier (const uint64_t& in) {
 		return in;
 	}
 
-	inline uint64_t to_real_EDM_STRIPCLUSTER_w2_rdo_list_w2 (const uint64_t& in) {
+	inline uint64_t to_real_EDM_STRIPCLUSTER_w3_rdo_list_w1 (const uint64_t& in) {
 		return in;
 	}
 
-	inline uint64_t to_real_EDM_STRIPCLUSTER_w3_rdo_list_w3 (const uint64_t& in) {
+	inline uint64_t to_real_EDM_STRIPCLUSTER_w4_rdo_list_w2 (const uint64_t& in) {
 		return in;
 	}
 
-	inline uint64_t to_real_EDM_STRIPCLUSTER_w3_rdo_list_w4 (const uint64_t& in) {
+	inline uint64_t to_real_EDM_STRIPCLUSTER_w5_rdo_list_w3 (const uint64_t& in) {
 		return in;
 	}
 
-	inline double to_real_EDM_STRIPCLUSTER_w4_localposition_x (const int64_t& in) {
-		return (double)in / EDM_STRIPCLUSTER_W4_LOCALPOSITION_X_mf;
-	}
-
-	inline double to_real_EDM_STRIPCLUSTER_w4_localposition_y (const int64_t& in) {
-		return (double)in / EDM_STRIPCLUSTER_W4_LOCALPOSITION_Y_mf;
-	}
-
-	inline double to_real_EDM_STRIPCLUSTER_w4_localcovariance_xx (const uint64_t& in) {
-		return (double)in / EDM_STRIPCLUSTER_W4_LOCALCOVARIANCE_XX_mf;
-	}
-
-	inline uint64_t to_real_EDM_STRIPCLUSTER_w4_spare (const uint64_t& in) {
+	inline uint64_t to_real_EDM_STRIPCLUSTER_w6_rdo_list_w4 (const uint64_t& in) {
 		return in;
 	}
 
-	inline double to_real_EDM_STRIPCLUSTER_w5_globalposition_x (const int64_t& in) {
-		return (double)in / EDM_STRIPCLUSTER_W5_GLOBALPOSITION_X_mf;
+	inline double to_real_EDM_STRIPCLUSTER_w7_localposition_x (const int64_t& in) {
+		return (double)in / EDM_STRIPCLUSTER_W7_LOCALPOSITION_X_mf;
 	}
 
-	inline double to_real_EDM_STRIPCLUSTER_w5_globalposition_y (const int64_t& in) {
-		return (double)in / EDM_STRIPCLUSTER_W5_GLOBALPOSITION_Y_mf;
+	inline double to_real_EDM_STRIPCLUSTER_w7_localposition_y (const int64_t& in) {
+		return (double)in / EDM_STRIPCLUSTER_W7_LOCALPOSITION_Y_mf;
 	}
 
-	inline uint64_t to_real_EDM_STRIPCLUSTER_w5_channels_in_phi (const uint64_t& in) {
+	inline double to_real_EDM_STRIPCLUSTER_w7_localcovariance_xx (const uint64_t& in) {
+		return (double)in / EDM_STRIPCLUSTER_W7_LOCALCOVARIANCE_XX_mf;
+	}
+
+	inline uint64_t to_real_EDM_STRIPCLUSTER_w7_spare (const uint64_t& in) {
 		return in;
 	}
 
-	inline uint64_t to_real_EDM_STRIPCLUSTER_w5_spare (const uint64_t& in) {
+	inline double to_real_EDM_STRIPCLUSTER_w8_globalposition_x (const int64_t& in) {
+		return (double)in / EDM_STRIPCLUSTER_W8_GLOBALPOSITION_X_mf;
+	}
+
+	inline double to_real_EDM_STRIPCLUSTER_w8_globalposition_y (const int64_t& in) {
+		return (double)in / EDM_STRIPCLUSTER_W8_GLOBALPOSITION_Y_mf;
+	}
+
+	inline uint64_t to_real_EDM_STRIPCLUSTER_w8_channels_in_phi (const uint64_t& in) {
 		return in;
 	}
 
-	inline double to_real_EDM_STRIPCLUSTER_w6_globalposition_z (const int64_t& in) {
-		return (double)in / EDM_STRIPCLUSTER_W6_GLOBALPOSITION_Z_mf;
-	}
-
-	inline uint64_t to_real_EDM_STRIPCLUSTER_w6_lastword (const uint64_t& in) {
+	inline uint64_t to_real_EDM_STRIPCLUSTER_w8_spare (const uint64_t& in) {
 		return in;
 	}
 
-	inline uint64_t to_real_EDM_STRIPCLUSTER_w6_index (const uint64_t& in) {
+	inline double to_real_EDM_STRIPCLUSTER_w9_globalposition_z (const int64_t& in) {
+		return (double)in / EDM_STRIPCLUSTER_W9_GLOBALPOSITION_Z_mf;
+	}
+
+	inline uint64_t to_real_EDM_STRIPCLUSTER_w9_lastword (const uint64_t& in) {
 		return in;
 	}
 
-	inline uint64_t to_real_EDM_STRIPCLUSTER_w6_spare (const uint64_t& in) {
+	inline uint64_t to_real_EDM_STRIPCLUSTER_w9_index (const uint64_t& in) {
 		return in;
 	}
+
+	inline uint64_t to_real_EDM_STRIPCLUSTER_w9_spare (const uint64_t& in) {
+		return in;
+	}
+
+	// EDM_PIXELCLUSTER defined flags
+	const int EDM_PIXELCLUSTER_FLAG = 0x77;
 
 	// EDM_PIXELCLUSTER_W1 word description
+	const int EDM_PIXELCLUSTER_W1_FLAG_bits = 8;
+	const int EDM_PIXELCLUSTER_W1_FLAG_lsb = 56;
+	const float EDM_PIXELCLUSTER_W1_FLAG_mf = 1.;
+
 	const int EDM_PIXELCLUSTER_W1_ID_HASH_bits = 32;
-	const int EDM_PIXELCLUSTER_W1_ID_HASH_lsb = 32;
+	const int EDM_PIXELCLUSTER_W1_ID_HASH_lsb = 24;
 	const float EDM_PIXELCLUSTER_W1_ID_HASH_mf = 1.;
 
-	const int EDM_PIXELCLUSTER_W1_IDENTFIER_bits = 32;
-	const int EDM_PIXELCLUSTER_W1_IDENTFIER_lsb = 0;
-	const float EDM_PIXELCLUSTER_W1_IDENTFIER_mf = 1.;
+	const int EDM_PIXELCLUSTER_W1_Spare_bits = 24;
+	const int EDM_PIXELCLUSTER_W1_Spare_lsb = 0;
+	const float EDM_PIXELCLUSTER_W1_Spare_mf = 1.;
 
 	// EDM_PIXELCLUSTER_W2 word description
-	const int EDM_PIXELCLUSTER_W2_RDO_LIST_W1_bits = 32;
-	const int EDM_PIXELCLUSTER_W2_RDO_LIST_W1_lsb = 32;
-	const float EDM_PIXELCLUSTER_W2_RDO_LIST_W1_mf = 1.;
-
-	const int EDM_PIXELCLUSTER_W2_RDO_LIST_W2_bits = 32;
-	const int EDM_PIXELCLUSTER_W2_RDO_LIST_W2_lsb = 0;
-	const float EDM_PIXELCLUSTER_W2_RDO_LIST_W2_mf = 1.;
+	const int EDM_PIXELCLUSTER_W2_IDENTIFIER_bits = 64;
+	const int EDM_PIXELCLUSTER_W2_IDENTIFIER_lsb = 0;
+	const float EDM_PIXELCLUSTER_W2_IDENTIFIER_mf = 1.;
 
 	// EDM_PIXELCLUSTER_W3 word description
-	const int EDM_PIXELCLUSTER_W3_RDO_LIST_W3_bits = 32;
-	const int EDM_PIXELCLUSTER_W3_RDO_LIST_W3_lsb = 32;
-	const float EDM_PIXELCLUSTER_W3_RDO_LIST_W3_mf = 1.;
-
-	const int EDM_PIXELCLUSTER_W3_RDO_LIST_W4_bits = 32;
-	const int EDM_PIXELCLUSTER_W3_RDO_LIST_W4_lsb = 0;
-	const float EDM_PIXELCLUSTER_W3_RDO_LIST_W4_mf = 1.;
+	const int EDM_PIXELCLUSTER_W3_RDO_LIST_W1_bits = 64;
+	const int EDM_PIXELCLUSTER_W3_RDO_LIST_W1_lsb = 0;
+	const float EDM_PIXELCLUSTER_W3_RDO_LIST_W1_mf = 1.;
 
 	// EDM_PIXELCLUSTER_W4 word description
-	const int EDM_PIXELCLUSTER_W4_LOCALPOSITION_X_bits = 20;
-	const int EDM_PIXELCLUSTER_W4_LOCALPOSITION_X_lsb = 44;
-	const float EDM_PIXELCLUSTER_W4_LOCALPOSITION_X_mf = 8192.;
-
-	const int EDM_PIXELCLUSTER_W4_LOCALPOSITION_Y_bits = 20;
-	const int EDM_PIXELCLUSTER_W4_LOCALPOSITION_Y_lsb = 24;
-	const float EDM_PIXELCLUSTER_W4_LOCALPOSITION_Y_mf = 8192.;
-
-	const int EDM_PIXELCLUSTER_W4_CHANNELS_IN_PHI_bits = 5;
-	const int EDM_PIXELCLUSTER_W4_CHANNELS_IN_PHI_lsb = 19;
-	const float EDM_PIXELCLUSTER_W4_CHANNELS_IN_PHI_mf = 1.;
-
-	const int EDM_PIXELCLUSTER_W4_CHANNELS_IN_ETA_bits = 5;
-	const int EDM_PIXELCLUSTER_W4_CHANNELS_IN_ETA_lsb = 14;
-	const float EDM_PIXELCLUSTER_W4_CHANNELS_IN_ETA_mf = 1.;
-
-	const int EDM_PIXELCLUSTER_W4_WIDTH_IN_ETA_bits = 6;
-	const int EDM_PIXELCLUSTER_W4_WIDTH_IN_ETA_lsb = 8;
-	const float EDM_PIXELCLUSTER_W4_WIDTH_IN_ETA_mf = 32.;
-
-	const int EDM_PIXELCLUSTER_W4_SPARE_bits = 8;
-	const int EDM_PIXELCLUSTER_W4_SPARE_lsb = 0;
-	const float EDM_PIXELCLUSTER_W4_SPARE_mf = 1.;
+	const int EDM_PIXELCLUSTER_W4_RDO_LIST_W2_bits = 64;
+	const int EDM_PIXELCLUSTER_W4_RDO_LIST_W2_lsb = 0;
+	const float EDM_PIXELCLUSTER_W4_RDO_LIST_W2_mf = 1.;
 
 	// EDM_PIXELCLUSTER_W5 word description
-	const int EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_XX_bits = 20;
-	const int EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_XX_lsb = 44;
-	const float EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_XX_mf = 524288.;
-
-	const int EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_YY_bits = 20;
-	const int EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_YY_lsb = 24;
-	const float EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_YY_mf = 524288.;
-
-	const int EDM_PIXELCLUSTER_W5_OMEGA_X_bits = 10;
-	const int EDM_PIXELCLUSTER_W5_OMEGA_X_lsb = 14;
-	const float EDM_PIXELCLUSTER_W5_OMEGA_X_mf = 512.;
-
-	const int EDM_PIXELCLUSTER_W5_OMEGA_Y_bits = 10;
-	const int EDM_PIXELCLUSTER_W5_OMEGA_Y_lsb = 4;
-	const float EDM_PIXELCLUSTER_W5_OMEGA_Y_mf = 512.;
-
-	const int EDM_PIXELCLUSTER_W5_SPARE_bits = 4;
-	const int EDM_PIXELCLUSTER_W5_SPARE_lsb = 0;
-	const float EDM_PIXELCLUSTER_W5_SPARE_mf = 1.;
+	const int EDM_PIXELCLUSTER_W5_RDO_LIST_W3_bits = 64;
+	const int EDM_PIXELCLUSTER_W5_RDO_LIST_W3_lsb = 0;
+	const float EDM_PIXELCLUSTER_W5_RDO_LIST_W3_mf = 1.;
 
 	// EDM_PIXELCLUSTER_W6 word description
-	const int EDM_PIXELCLUSTER_W6_GLOBALPOSITION_X_bits = 26;
-	const int EDM_PIXELCLUSTER_W6_GLOBALPOSITION_X_lsb = 38;
-	const float EDM_PIXELCLUSTER_W6_GLOBALPOSITION_X_mf = 65536.;
-
-	const int EDM_PIXELCLUSTER_W6_GLOBALPOSITION_Y_bits = 26;
-	const int EDM_PIXELCLUSTER_W6_GLOBALPOSITION_Y_lsb = 12;
-	const float EDM_PIXELCLUSTER_W6_GLOBALPOSITION_Y_mf = 65536.;
-
-	const int EDM_PIXELCLUSTER_W6_SPARE_bits = 12;
-	const int EDM_PIXELCLUSTER_W6_SPARE_lsb = 0;
-	const float EDM_PIXELCLUSTER_W6_SPARE_mf = 1.;
+	const int EDM_PIXELCLUSTER_W6_RDO_LIST_W4_bits = 64;
+	const int EDM_PIXELCLUSTER_W6_RDO_LIST_W4_lsb = 0;
+	const float EDM_PIXELCLUSTER_W6_RDO_LIST_W4_mf = 1.;
 
 	// EDM_PIXELCLUSTER_W7 word description
-	const int EDM_PIXELCLUSTER_W7_GLOBALPOSITION_Z_bits = 27;
-	const int EDM_PIXELCLUSTER_W7_GLOBALPOSITION_Z_lsb = 37;
-	const float EDM_PIXELCLUSTER_W7_GLOBALPOSITION_Z_mf = 65536.;
+	const int EDM_PIXELCLUSTER_W7_LOCALPOSITION_X_bits = 20;
+	const int EDM_PIXELCLUSTER_W7_LOCALPOSITION_X_lsb = 44;
+	const float EDM_PIXELCLUSTER_W7_LOCALPOSITION_X_mf = 8192.;
 
-	const int EDM_PIXELCLUSTER_W7_TOTAL_TOT_bits = 9;
-	const int EDM_PIXELCLUSTER_W7_TOTAL_TOT_lsb = 28;
-	const float EDM_PIXELCLUSTER_W7_TOTAL_TOT_mf = 1.;
+	const int EDM_PIXELCLUSTER_W7_LOCALPOSITION_Y_bits = 20;
+	const int EDM_PIXELCLUSTER_W7_LOCALPOSITION_Y_lsb = 24;
+	const float EDM_PIXELCLUSTER_W7_LOCALPOSITION_Y_mf = 8192.;
 
-	const int EDM_PIXELCLUSTER_W7_LASTWORD_bits = 1;
-	const int EDM_PIXELCLUSTER_W7_LASTWORD_lsb = 27;
-	const float EDM_PIXELCLUSTER_W7_LASTWORD_mf = 1.;
+	const int EDM_PIXELCLUSTER_W7_CHANNELS_IN_PHI_bits = 8;
+	const int EDM_PIXELCLUSTER_W7_CHANNELS_IN_PHI_lsb = 16;
+	const float EDM_PIXELCLUSTER_W7_CHANNELS_IN_PHI_mf = 1.;
 
-	const int EDM_PIXELCLUSTER_W7_SPARE_bits = 27;
+	const int EDM_PIXELCLUSTER_W7_CHANNELS_IN_ETA_bits = 8;
+	const int EDM_PIXELCLUSTER_W7_CHANNELS_IN_ETA_lsb = 8;
+	const float EDM_PIXELCLUSTER_W7_CHANNELS_IN_ETA_mf = 1.;
+
+	const int EDM_PIXELCLUSTER_W7_WIDTH_IN_ETA_bits = 6;
+	const int EDM_PIXELCLUSTER_W7_WIDTH_IN_ETA_lsb = 2;
+	const float EDM_PIXELCLUSTER_W7_WIDTH_IN_ETA_mf = 32.;
+
+	const int EDM_PIXELCLUSTER_W7_SPARE_bits = 2;
 	const int EDM_PIXELCLUSTER_W7_SPARE_lsb = 0;
 	const float EDM_PIXELCLUSTER_W7_SPARE_mf = 1.;
 
+	// EDM_PIXELCLUSTER_W8 word description
+	const int EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_XX_bits = 20;
+	const int EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_XX_lsb = 44;
+	const float EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_XX_mf = 524288.;
+
+	const int EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_YY_bits = 20;
+	const int EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_YY_lsb = 24;
+	const float EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_YY_mf = 524288.;
+
+	const int EDM_PIXELCLUSTER_W8_OMEGA_X_bits = 10;
+	const int EDM_PIXELCLUSTER_W8_OMEGA_X_lsb = 14;
+	const float EDM_PIXELCLUSTER_W8_OMEGA_X_mf = 512.;
+
+	const int EDM_PIXELCLUSTER_W8_OMEGA_Y_bits = 10;
+	const int EDM_PIXELCLUSTER_W8_OMEGA_Y_lsb = 4;
+	const float EDM_PIXELCLUSTER_W8_OMEGA_Y_mf = 512.;
+
+	const int EDM_PIXELCLUSTER_W8_SPARE_bits = 4;
+	const int EDM_PIXELCLUSTER_W8_SPARE_lsb = 0;
+	const float EDM_PIXELCLUSTER_W8_SPARE_mf = 1.;
+
+	// EDM_PIXELCLUSTER_W9 word description
+	const int EDM_PIXELCLUSTER_W9_GLOBALPOSITION_X_bits = 26;
+	const int EDM_PIXELCLUSTER_W9_GLOBALPOSITION_X_lsb = 38;
+	const float EDM_PIXELCLUSTER_W9_GLOBALPOSITION_X_mf = 65536.;
+
+	const int EDM_PIXELCLUSTER_W9_GLOBALPOSITION_Y_bits = 26;
+	const int EDM_PIXELCLUSTER_W9_GLOBALPOSITION_Y_lsb = 12;
+	const float EDM_PIXELCLUSTER_W9_GLOBALPOSITION_Y_mf = 65536.;
+
+	const int EDM_PIXELCLUSTER_W9_SPARE_bits = 12;
+	const int EDM_PIXELCLUSTER_W9_SPARE_lsb = 0;
+	const float EDM_PIXELCLUSTER_W9_SPARE_mf = 1.;
+
+	// EDM_PIXELCLUSTER_W10 word description
+	const int EDM_PIXELCLUSTER_W10_GLOBALPOSITION_Z_bits = 29;
+	const int EDM_PIXELCLUSTER_W10_GLOBALPOSITION_Z_lsb = 35;
+	const float EDM_PIXELCLUSTER_W10_GLOBALPOSITION_Z_mf = 65536.;
+
+	const int EDM_PIXELCLUSTER_W10_TOTAL_TOT_bits = 9;
+	const int EDM_PIXELCLUSTER_W10_TOTAL_TOT_lsb = 26;
+	const float EDM_PIXELCLUSTER_W10_TOTAL_TOT_mf = 1.;
+
+	const int EDM_PIXELCLUSTER_W10_LASTWORD_bits = 1;
+	const int EDM_PIXELCLUSTER_W10_LASTWORD_lsb = 25;
+	const float EDM_PIXELCLUSTER_W10_LASTWORD_mf = 1.;
+
+	const int EDM_PIXELCLUSTER_W10_SPARE_bits = 25;
+	const int EDM_PIXELCLUSTER_W10_SPARE_lsb = 0;
+	const float EDM_PIXELCLUSTER_W10_SPARE_mf = 1.;
+
 	typedef struct EDM_PIXELCLUSTER_w1 {
+		uint64_t flag : EDM_PIXELCLUSTER_W1_FLAG_bits;
 		uint64_t id_hash : EDM_PIXELCLUSTER_W1_ID_HASH_bits;
-		uint64_t identfier : EDM_PIXELCLUSTER_W1_IDENTFIER_bits;
+		uint64_t spare : EDM_PIXELCLUSTER_W1_Spare_bits;
 	} EDM_PIXELCLUSTER_w1;
 
 	typedef struct EDM_PIXELCLUSTER_w2 {
-		uint64_t rdo_list_w1 : EDM_PIXELCLUSTER_W2_RDO_LIST_W1_bits;
-		uint64_t rdo_list_w2 : EDM_PIXELCLUSTER_W2_RDO_LIST_W2_bits;
+		uint64_t identifier : EDM_PIXELCLUSTER_W2_IDENTIFIER_bits;
 	} EDM_PIXELCLUSTER_w2;
 
 	typedef struct EDM_PIXELCLUSTER_w3 {
-		uint64_t rdo_list_w3 : EDM_PIXELCLUSTER_W3_RDO_LIST_W3_bits;
-		uint64_t rdo_list_w4 : EDM_PIXELCLUSTER_W3_RDO_LIST_W4_bits;
+		uint64_t rdo_list_w1 : EDM_PIXELCLUSTER_W3_RDO_LIST_W1_bits;
 	} EDM_PIXELCLUSTER_w3;
 
 	typedef struct EDM_PIXELCLUSTER_w4 {
-		int64_t localposition_x : EDM_PIXELCLUSTER_W4_LOCALPOSITION_X_bits;
-		int64_t localposition_y : EDM_PIXELCLUSTER_W4_LOCALPOSITION_Y_bits;
-		uint64_t channels_in_phi : EDM_PIXELCLUSTER_W4_CHANNELS_IN_PHI_bits;
-		uint64_t channels_in_eta : EDM_PIXELCLUSTER_W4_CHANNELS_IN_ETA_bits;
-		uint64_t width_in_eta : EDM_PIXELCLUSTER_W4_WIDTH_IN_ETA_bits;
-		uint64_t spare : EDM_PIXELCLUSTER_W4_SPARE_bits;
+		uint64_t rdo_list_w2 : EDM_PIXELCLUSTER_W4_RDO_LIST_W2_bits;
 	} EDM_PIXELCLUSTER_w4;
 
 	typedef struct EDM_PIXELCLUSTER_w5 {
-		uint64_t localcovariance_xx : EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_XX_bits;
-		uint64_t localcovariance_yy : EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_YY_bits;
-		uint64_t omega_x : EDM_PIXELCLUSTER_W5_OMEGA_X_bits;
-		uint64_t omega_y : EDM_PIXELCLUSTER_W5_OMEGA_Y_bits;
-		uint64_t spare : EDM_PIXELCLUSTER_W5_SPARE_bits;
+		uint64_t rdo_list_w3 : EDM_PIXELCLUSTER_W5_RDO_LIST_W3_bits;
 	} EDM_PIXELCLUSTER_w5;
 
 	typedef struct EDM_PIXELCLUSTER_w6 {
-		int64_t globalposition_x : EDM_PIXELCLUSTER_W6_GLOBALPOSITION_X_bits;
-		int64_t globalposition_y : EDM_PIXELCLUSTER_W6_GLOBALPOSITION_Y_bits;
-		uint64_t spare : EDM_PIXELCLUSTER_W6_SPARE_bits;
+		uint64_t rdo_list_w4 : EDM_PIXELCLUSTER_W6_RDO_LIST_W4_bits;
 	} EDM_PIXELCLUSTER_w6;
 
 	typedef struct EDM_PIXELCLUSTER_w7 {
-		int64_t globalposition_z : EDM_PIXELCLUSTER_W7_GLOBALPOSITION_Z_bits;
-		uint64_t total_tot : EDM_PIXELCLUSTER_W7_TOTAL_TOT_bits;
-		uint64_t lastword : EDM_PIXELCLUSTER_W7_LASTWORD_bits;
+		int64_t localposition_x : EDM_PIXELCLUSTER_W7_LOCALPOSITION_X_bits;
+		int64_t localposition_y : EDM_PIXELCLUSTER_W7_LOCALPOSITION_Y_bits;
+		uint64_t channels_in_phi : EDM_PIXELCLUSTER_W7_CHANNELS_IN_PHI_bits;
+		uint64_t channels_in_eta : EDM_PIXELCLUSTER_W7_CHANNELS_IN_ETA_bits;
+		uint64_t width_in_eta : EDM_PIXELCLUSTER_W7_WIDTH_IN_ETA_bits;
 		uint64_t spare : EDM_PIXELCLUSTER_W7_SPARE_bits;
 	} EDM_PIXELCLUSTER_w7;
 
+	typedef struct EDM_PIXELCLUSTER_w8 {
+		uint64_t localcovariance_xx : EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_XX_bits;
+		uint64_t localcovariance_yy : EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_YY_bits;
+		uint64_t omega_x : EDM_PIXELCLUSTER_W8_OMEGA_X_bits;
+		uint64_t omega_y : EDM_PIXELCLUSTER_W8_OMEGA_Y_bits;
+		uint64_t spare : EDM_PIXELCLUSTER_W8_SPARE_bits;
+	} EDM_PIXELCLUSTER_w8;
+
+	typedef struct EDM_PIXELCLUSTER_w9 {
+		int64_t globalposition_x : EDM_PIXELCLUSTER_W9_GLOBALPOSITION_X_bits;
+		int64_t globalposition_y : EDM_PIXELCLUSTER_W9_GLOBALPOSITION_Y_bits;
+		uint64_t spare : EDM_PIXELCLUSTER_W9_SPARE_bits;
+	} EDM_PIXELCLUSTER_w9;
+
+	typedef struct EDM_PIXELCLUSTER_w10 {
+		int64_t globalposition_z : EDM_PIXELCLUSTER_W10_GLOBALPOSITION_Z_bits;
+		uint64_t total_tot : EDM_PIXELCLUSTER_W10_TOTAL_TOT_bits;
+		uint64_t lastword : EDM_PIXELCLUSTER_W10_LASTWORD_bits;
+		uint64_t spare : EDM_PIXELCLUSTER_W10_SPARE_bits;
+	} EDM_PIXELCLUSTER_w10;
+
 	inline EDM_PIXELCLUSTER_w1 get_bitfields_EDM_PIXELCLUSTER_w1 (const uint64_t& in) {
 		EDM_PIXELCLUSTER_w1 temp;
+		temp.flag = (in & SELECTBITS(EDM_PIXELCLUSTER_W1_FLAG_bits, EDM_PIXELCLUSTER_W1_FLAG_lsb)) >> EDM_PIXELCLUSTER_W1_FLAG_lsb;
 		temp.id_hash = (in & SELECTBITS(EDM_PIXELCLUSTER_W1_ID_HASH_bits, EDM_PIXELCLUSTER_W1_ID_HASH_lsb)) >> EDM_PIXELCLUSTER_W1_ID_HASH_lsb;
-		temp.identfier = (in & SELECTBITS(EDM_PIXELCLUSTER_W1_IDENTFIER_bits, EDM_PIXELCLUSTER_W1_IDENTFIER_lsb)) >> EDM_PIXELCLUSTER_W1_IDENTFIER_lsb;
+		temp.spare = (in & SELECTBITS(EDM_PIXELCLUSTER_W1_Spare_bits, EDM_PIXELCLUSTER_W1_Spare_lsb)) >> EDM_PIXELCLUSTER_W1_Spare_lsb;
 		return temp;
 	}
 
 	inline EDM_PIXELCLUSTER_w2 get_bitfields_EDM_PIXELCLUSTER_w2 (const uint64_t& in) {
 		EDM_PIXELCLUSTER_w2 temp;
-		temp.rdo_list_w1 = (in & SELECTBITS(EDM_PIXELCLUSTER_W2_RDO_LIST_W1_bits, EDM_PIXELCLUSTER_W2_RDO_LIST_W1_lsb)) >> EDM_PIXELCLUSTER_W2_RDO_LIST_W1_lsb;
-		temp.rdo_list_w2 = (in & SELECTBITS(EDM_PIXELCLUSTER_W2_RDO_LIST_W2_bits, EDM_PIXELCLUSTER_W2_RDO_LIST_W2_lsb)) >> EDM_PIXELCLUSTER_W2_RDO_LIST_W2_lsb;
+		temp.identifier = (in & SELECTBITS(EDM_PIXELCLUSTER_W2_IDENTIFIER_bits, EDM_PIXELCLUSTER_W2_IDENTIFIER_lsb)) >> EDM_PIXELCLUSTER_W2_IDENTIFIER_lsb;
 		return temp;
 	}
 
 	inline EDM_PIXELCLUSTER_w3 get_bitfields_EDM_PIXELCLUSTER_w3 (const uint64_t& in) {
 		EDM_PIXELCLUSTER_w3 temp;
-		temp.rdo_list_w3 = (in & SELECTBITS(EDM_PIXELCLUSTER_W3_RDO_LIST_W3_bits, EDM_PIXELCLUSTER_W3_RDO_LIST_W3_lsb)) >> EDM_PIXELCLUSTER_W3_RDO_LIST_W3_lsb;
-		temp.rdo_list_w4 = (in & SELECTBITS(EDM_PIXELCLUSTER_W3_RDO_LIST_W4_bits, EDM_PIXELCLUSTER_W3_RDO_LIST_W4_lsb)) >> EDM_PIXELCLUSTER_W3_RDO_LIST_W4_lsb;
+		temp.rdo_list_w1 = (in & SELECTBITS(EDM_PIXELCLUSTER_W3_RDO_LIST_W1_bits, EDM_PIXELCLUSTER_W3_RDO_LIST_W1_lsb)) >> EDM_PIXELCLUSTER_W3_RDO_LIST_W1_lsb;
 		return temp;
 	}
 
 	inline EDM_PIXELCLUSTER_w4 get_bitfields_EDM_PIXELCLUSTER_w4 (const uint64_t& in) {
 		EDM_PIXELCLUSTER_w4 temp;
-		temp.localposition_x = (in & SELECTBITS(EDM_PIXELCLUSTER_W4_LOCALPOSITION_X_bits, EDM_PIXELCLUSTER_W4_LOCALPOSITION_X_lsb)) >> EDM_PIXELCLUSTER_W4_LOCALPOSITION_X_lsb;
-		temp.localposition_y = (in & SELECTBITS(EDM_PIXELCLUSTER_W4_LOCALPOSITION_Y_bits, EDM_PIXELCLUSTER_W4_LOCALPOSITION_Y_lsb)) >> EDM_PIXELCLUSTER_W4_LOCALPOSITION_Y_lsb;
-		temp.channels_in_phi = (in & SELECTBITS(EDM_PIXELCLUSTER_W4_CHANNELS_IN_PHI_bits, EDM_PIXELCLUSTER_W4_CHANNELS_IN_PHI_lsb)) >> EDM_PIXELCLUSTER_W4_CHANNELS_IN_PHI_lsb;
-		temp.channels_in_eta = (in & SELECTBITS(EDM_PIXELCLUSTER_W4_CHANNELS_IN_ETA_bits, EDM_PIXELCLUSTER_W4_CHANNELS_IN_ETA_lsb)) >> EDM_PIXELCLUSTER_W4_CHANNELS_IN_ETA_lsb;
-		temp.width_in_eta = (in & SELECTBITS(EDM_PIXELCLUSTER_W4_WIDTH_IN_ETA_bits, EDM_PIXELCLUSTER_W4_WIDTH_IN_ETA_lsb)) >> EDM_PIXELCLUSTER_W4_WIDTH_IN_ETA_lsb;
-		temp.spare = (in & SELECTBITS(EDM_PIXELCLUSTER_W4_SPARE_bits, EDM_PIXELCLUSTER_W4_SPARE_lsb)) >> EDM_PIXELCLUSTER_W4_SPARE_lsb;
+		temp.rdo_list_w2 = (in & SELECTBITS(EDM_PIXELCLUSTER_W4_RDO_LIST_W2_bits, EDM_PIXELCLUSTER_W4_RDO_LIST_W2_lsb)) >> EDM_PIXELCLUSTER_W4_RDO_LIST_W2_lsb;
 		return temp;
 	}
 
 	inline EDM_PIXELCLUSTER_w5 get_bitfields_EDM_PIXELCLUSTER_w5 (const uint64_t& in) {
 		EDM_PIXELCLUSTER_w5 temp;
-		temp.localcovariance_xx = (in & SELECTBITS(EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_XX_bits, EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_XX_lsb)) >> EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_XX_lsb;
-		temp.localcovariance_yy = (in & SELECTBITS(EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_YY_bits, EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_YY_lsb)) >> EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_YY_lsb;
-		temp.omega_x = (in & SELECTBITS(EDM_PIXELCLUSTER_W5_OMEGA_X_bits, EDM_PIXELCLUSTER_W5_OMEGA_X_lsb)) >> EDM_PIXELCLUSTER_W5_OMEGA_X_lsb;
-		temp.omega_y = (in & SELECTBITS(EDM_PIXELCLUSTER_W5_OMEGA_Y_bits, EDM_PIXELCLUSTER_W5_OMEGA_Y_lsb)) >> EDM_PIXELCLUSTER_W5_OMEGA_Y_lsb;
-		temp.spare = (in & SELECTBITS(EDM_PIXELCLUSTER_W5_SPARE_bits, EDM_PIXELCLUSTER_W5_SPARE_lsb)) >> EDM_PIXELCLUSTER_W5_SPARE_lsb;
+		temp.rdo_list_w3 = (in & SELECTBITS(EDM_PIXELCLUSTER_W5_RDO_LIST_W3_bits, EDM_PIXELCLUSTER_W5_RDO_LIST_W3_lsb)) >> EDM_PIXELCLUSTER_W5_RDO_LIST_W3_lsb;
 		return temp;
 	}
 
 	inline EDM_PIXELCLUSTER_w6 get_bitfields_EDM_PIXELCLUSTER_w6 (const uint64_t& in) {
 		EDM_PIXELCLUSTER_w6 temp;
-		temp.globalposition_x = (in & SELECTBITS(EDM_PIXELCLUSTER_W6_GLOBALPOSITION_X_bits, EDM_PIXELCLUSTER_W6_GLOBALPOSITION_X_lsb)) >> EDM_PIXELCLUSTER_W6_GLOBALPOSITION_X_lsb;
-		temp.globalposition_y = (in & SELECTBITS(EDM_PIXELCLUSTER_W6_GLOBALPOSITION_Y_bits, EDM_PIXELCLUSTER_W6_GLOBALPOSITION_Y_lsb)) >> EDM_PIXELCLUSTER_W6_GLOBALPOSITION_Y_lsb;
-		temp.spare = (in & SELECTBITS(EDM_PIXELCLUSTER_W6_SPARE_bits, EDM_PIXELCLUSTER_W6_SPARE_lsb)) >> EDM_PIXELCLUSTER_W6_SPARE_lsb;
+		temp.rdo_list_w4 = (in & SELECTBITS(EDM_PIXELCLUSTER_W6_RDO_LIST_W4_bits, EDM_PIXELCLUSTER_W6_RDO_LIST_W4_lsb)) >> EDM_PIXELCLUSTER_W6_RDO_LIST_W4_lsb;
 		return temp;
 	}
 
 	inline EDM_PIXELCLUSTER_w7 get_bitfields_EDM_PIXELCLUSTER_w7 (const uint64_t& in) {
 		EDM_PIXELCLUSTER_w7 temp;
-		temp.globalposition_z = (in & SELECTBITS(EDM_PIXELCLUSTER_W7_GLOBALPOSITION_Z_bits, EDM_PIXELCLUSTER_W7_GLOBALPOSITION_Z_lsb)) >> EDM_PIXELCLUSTER_W7_GLOBALPOSITION_Z_lsb;
-		temp.total_tot = (in & SELECTBITS(EDM_PIXELCLUSTER_W7_TOTAL_TOT_bits, EDM_PIXELCLUSTER_W7_TOTAL_TOT_lsb)) >> EDM_PIXELCLUSTER_W7_TOTAL_TOT_lsb;
-		temp.lastword = (in & SELECTBITS(EDM_PIXELCLUSTER_W7_LASTWORD_bits, EDM_PIXELCLUSTER_W7_LASTWORD_lsb)) >> EDM_PIXELCLUSTER_W7_LASTWORD_lsb;
+		temp.localposition_x = (in & SELECTBITS(EDM_PIXELCLUSTER_W7_LOCALPOSITION_X_bits, EDM_PIXELCLUSTER_W7_LOCALPOSITION_X_lsb)) >> EDM_PIXELCLUSTER_W7_LOCALPOSITION_X_lsb;
+		temp.localposition_y = (in & SELECTBITS(EDM_PIXELCLUSTER_W7_LOCALPOSITION_Y_bits, EDM_PIXELCLUSTER_W7_LOCALPOSITION_Y_lsb)) >> EDM_PIXELCLUSTER_W7_LOCALPOSITION_Y_lsb;
+		temp.channels_in_phi = (in & SELECTBITS(EDM_PIXELCLUSTER_W7_CHANNELS_IN_PHI_bits, EDM_PIXELCLUSTER_W7_CHANNELS_IN_PHI_lsb)) >> EDM_PIXELCLUSTER_W7_CHANNELS_IN_PHI_lsb;
+		temp.channels_in_eta = (in & SELECTBITS(EDM_PIXELCLUSTER_W7_CHANNELS_IN_ETA_bits, EDM_PIXELCLUSTER_W7_CHANNELS_IN_ETA_lsb)) >> EDM_PIXELCLUSTER_W7_CHANNELS_IN_ETA_lsb;
+		temp.width_in_eta = (in & SELECTBITS(EDM_PIXELCLUSTER_W7_WIDTH_IN_ETA_bits, EDM_PIXELCLUSTER_W7_WIDTH_IN_ETA_lsb)) >> EDM_PIXELCLUSTER_W7_WIDTH_IN_ETA_lsb;
 		temp.spare = (in & SELECTBITS(EDM_PIXELCLUSTER_W7_SPARE_bits, EDM_PIXELCLUSTER_W7_SPARE_lsb)) >> EDM_PIXELCLUSTER_W7_SPARE_lsb;
+		return temp;
+	}
+
+	inline EDM_PIXELCLUSTER_w8 get_bitfields_EDM_PIXELCLUSTER_w8 (const uint64_t& in) {
+		EDM_PIXELCLUSTER_w8 temp;
+		temp.localcovariance_xx = (in & SELECTBITS(EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_XX_bits, EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_XX_lsb)) >> EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_XX_lsb;
+		temp.localcovariance_yy = (in & SELECTBITS(EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_YY_bits, EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_YY_lsb)) >> EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_YY_lsb;
+		temp.omega_x = (in & SELECTBITS(EDM_PIXELCLUSTER_W8_OMEGA_X_bits, EDM_PIXELCLUSTER_W8_OMEGA_X_lsb)) >> EDM_PIXELCLUSTER_W8_OMEGA_X_lsb;
+		temp.omega_y = (in & SELECTBITS(EDM_PIXELCLUSTER_W8_OMEGA_Y_bits, EDM_PIXELCLUSTER_W8_OMEGA_Y_lsb)) >> EDM_PIXELCLUSTER_W8_OMEGA_Y_lsb;
+		temp.spare = (in & SELECTBITS(EDM_PIXELCLUSTER_W8_SPARE_bits, EDM_PIXELCLUSTER_W8_SPARE_lsb)) >> EDM_PIXELCLUSTER_W8_SPARE_lsb;
+		return temp;
+	}
+
+	inline EDM_PIXELCLUSTER_w9 get_bitfields_EDM_PIXELCLUSTER_w9 (const uint64_t& in) {
+		EDM_PIXELCLUSTER_w9 temp;
+		temp.globalposition_x = (in & SELECTBITS(EDM_PIXELCLUSTER_W9_GLOBALPOSITION_X_bits, EDM_PIXELCLUSTER_W9_GLOBALPOSITION_X_lsb)) >> EDM_PIXELCLUSTER_W9_GLOBALPOSITION_X_lsb;
+		temp.globalposition_y = (in & SELECTBITS(EDM_PIXELCLUSTER_W9_GLOBALPOSITION_Y_bits, EDM_PIXELCLUSTER_W9_GLOBALPOSITION_Y_lsb)) >> EDM_PIXELCLUSTER_W9_GLOBALPOSITION_Y_lsb;
+		temp.spare = (in & SELECTBITS(EDM_PIXELCLUSTER_W9_SPARE_bits, EDM_PIXELCLUSTER_W9_SPARE_lsb)) >> EDM_PIXELCLUSTER_W9_SPARE_lsb;
+		return temp;
+	}
+
+	inline EDM_PIXELCLUSTER_w10 get_bitfields_EDM_PIXELCLUSTER_w10 (const uint64_t& in) {
+		EDM_PIXELCLUSTER_w10 temp;
+		temp.globalposition_z = (in & SELECTBITS(EDM_PIXELCLUSTER_W10_GLOBALPOSITION_Z_bits, EDM_PIXELCLUSTER_W10_GLOBALPOSITION_Z_lsb)) >> EDM_PIXELCLUSTER_W10_GLOBALPOSITION_Z_lsb;
+		temp.total_tot = (in & SELECTBITS(EDM_PIXELCLUSTER_W10_TOTAL_TOT_bits, EDM_PIXELCLUSTER_W10_TOTAL_TOT_lsb)) >> EDM_PIXELCLUSTER_W10_TOTAL_TOT_lsb;
+		temp.lastword = (in & SELECTBITS(EDM_PIXELCLUSTER_W10_LASTWORD_bits, EDM_PIXELCLUSTER_W10_LASTWORD_lsb)) >> EDM_PIXELCLUSTER_W10_LASTWORD_lsb;
+		temp.spare = (in & SELECTBITS(EDM_PIXELCLUSTER_W10_SPARE_bits, EDM_PIXELCLUSTER_W10_SPARE_lsb)) >> EDM_PIXELCLUSTER_W10_SPARE_lsb;
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EDM_PIXELCLUSTER_w1 (const EDM_PIXELCLUSTER_w1& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.id_hash) << EDM_PIXELCLUSTER_W1_ID_HASH_lsb);
-		temp |= (static_cast<uint64_t>(in.identfier) << EDM_PIXELCLUSTER_W1_IDENTFIER_lsb);
+		temp |= (((static_cast<uint64_t>(in.flag)) & SELECTBITS(EDM_PIXELCLUSTER_W1_FLAG_bits, 0)) << EDM_PIXELCLUSTER_W1_FLAG_lsb);
+		temp |= (((static_cast<uint64_t>(in.id_hash)) & SELECTBITS(EDM_PIXELCLUSTER_W1_ID_HASH_bits, 0)) << EDM_PIXELCLUSTER_W1_ID_HASH_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(EDM_PIXELCLUSTER_W1_Spare_bits, 0)) << EDM_PIXELCLUSTER_W1_Spare_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EDM_PIXELCLUSTER_w2 (const EDM_PIXELCLUSTER_w2& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.rdo_list_w1) << EDM_PIXELCLUSTER_W2_RDO_LIST_W1_lsb);
-		temp |= (static_cast<uint64_t>(in.rdo_list_w2) << EDM_PIXELCLUSTER_W2_RDO_LIST_W2_lsb);
+		temp |= (((static_cast<uint64_t>(in.identifier)) & SELECTBITS(EDM_PIXELCLUSTER_W2_IDENTIFIER_bits, 0)) << EDM_PIXELCLUSTER_W2_IDENTIFIER_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EDM_PIXELCLUSTER_w3 (const EDM_PIXELCLUSTER_w3& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.rdo_list_w3) << EDM_PIXELCLUSTER_W3_RDO_LIST_W3_lsb);
-		temp |= (static_cast<uint64_t>(in.rdo_list_w4) << EDM_PIXELCLUSTER_W3_RDO_LIST_W4_lsb);
+		temp |= (((static_cast<uint64_t>(in.rdo_list_w1)) & SELECTBITS(EDM_PIXELCLUSTER_W3_RDO_LIST_W1_bits, 0)) << EDM_PIXELCLUSTER_W3_RDO_LIST_W1_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EDM_PIXELCLUSTER_w4 (const EDM_PIXELCLUSTER_w4& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.localposition_x) << EDM_PIXELCLUSTER_W4_LOCALPOSITION_X_lsb);
-		temp |= (static_cast<uint64_t>(in.localposition_y) << EDM_PIXELCLUSTER_W4_LOCALPOSITION_Y_lsb);
-		temp |= (static_cast<uint64_t>(in.channels_in_phi) << EDM_PIXELCLUSTER_W4_CHANNELS_IN_PHI_lsb);
-		temp |= (static_cast<uint64_t>(in.channels_in_eta) << EDM_PIXELCLUSTER_W4_CHANNELS_IN_ETA_lsb);
-		temp |= (static_cast<uint64_t>(in.width_in_eta) << EDM_PIXELCLUSTER_W4_WIDTH_IN_ETA_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << EDM_PIXELCLUSTER_W4_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.rdo_list_w2)) & SELECTBITS(EDM_PIXELCLUSTER_W4_RDO_LIST_W2_bits, 0)) << EDM_PIXELCLUSTER_W4_RDO_LIST_W2_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EDM_PIXELCLUSTER_w5 (const EDM_PIXELCLUSTER_w5& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.localcovariance_xx) << EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_XX_lsb);
-		temp |= (static_cast<uint64_t>(in.localcovariance_yy) << EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_YY_lsb);
-		temp |= (static_cast<uint64_t>(in.omega_x) << EDM_PIXELCLUSTER_W5_OMEGA_X_lsb);
-		temp |= (static_cast<uint64_t>(in.omega_y) << EDM_PIXELCLUSTER_W5_OMEGA_Y_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << EDM_PIXELCLUSTER_W5_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.rdo_list_w3)) & SELECTBITS(EDM_PIXELCLUSTER_W5_RDO_LIST_W3_bits, 0)) << EDM_PIXELCLUSTER_W5_RDO_LIST_W3_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EDM_PIXELCLUSTER_w6 (const EDM_PIXELCLUSTER_w6& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.globalposition_x) << EDM_PIXELCLUSTER_W6_GLOBALPOSITION_X_lsb);
-		temp |= (static_cast<uint64_t>(in.globalposition_y) << EDM_PIXELCLUSTER_W6_GLOBALPOSITION_Y_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << EDM_PIXELCLUSTER_W6_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.rdo_list_w4)) & SELECTBITS(EDM_PIXELCLUSTER_W6_RDO_LIST_W4_bits, 0)) << EDM_PIXELCLUSTER_W6_RDO_LIST_W4_lsb);
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_EDM_PIXELCLUSTER_w7 (const EDM_PIXELCLUSTER_w7& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.globalposition_z) << EDM_PIXELCLUSTER_W7_GLOBALPOSITION_Z_lsb);
-		temp |= (static_cast<uint64_t>(in.total_tot) << EDM_PIXELCLUSTER_W7_TOTAL_TOT_lsb);
-		temp |= (static_cast<uint64_t>(in.lastword) << EDM_PIXELCLUSTER_W7_LASTWORD_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << EDM_PIXELCLUSTER_W7_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.localposition_x)) & SELECTBITS(EDM_PIXELCLUSTER_W7_LOCALPOSITION_X_bits, 0)) << EDM_PIXELCLUSTER_W7_LOCALPOSITION_X_lsb);
+		temp |= (((static_cast<uint64_t>(in.localposition_y)) & SELECTBITS(EDM_PIXELCLUSTER_W7_LOCALPOSITION_Y_bits, 0)) << EDM_PIXELCLUSTER_W7_LOCALPOSITION_Y_lsb);
+		temp |= (((static_cast<uint64_t>(in.channels_in_phi)) & SELECTBITS(EDM_PIXELCLUSTER_W7_CHANNELS_IN_PHI_bits, 0)) << EDM_PIXELCLUSTER_W7_CHANNELS_IN_PHI_lsb);
+		temp |= (((static_cast<uint64_t>(in.channels_in_eta)) & SELECTBITS(EDM_PIXELCLUSTER_W7_CHANNELS_IN_ETA_bits, 0)) << EDM_PIXELCLUSTER_W7_CHANNELS_IN_ETA_lsb);
+		temp |= (((static_cast<uint64_t>(in.width_in_eta)) & SELECTBITS(EDM_PIXELCLUSTER_W7_WIDTH_IN_ETA_bits, 0)) << EDM_PIXELCLUSTER_W7_WIDTH_IN_ETA_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(EDM_PIXELCLUSTER_W7_SPARE_bits, 0)) << EDM_PIXELCLUSTER_W7_SPARE_lsb);
 		return temp;
 	}
 
-	inline EDM_PIXELCLUSTER_w1 fill_EDM_PIXELCLUSTER_w1 (const uint64_t& id_hash, const uint64_t& identfier) {
+	inline uint64_t get_dataformat_EDM_PIXELCLUSTER_w8 (const EDM_PIXELCLUSTER_w8& in) {
+		uint64_t temp = 0;
+		temp |= (((static_cast<uint64_t>(in.localcovariance_xx)) & SELECTBITS(EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_XX_bits, 0)) << EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_XX_lsb);
+		temp |= (((static_cast<uint64_t>(in.localcovariance_yy)) & SELECTBITS(EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_YY_bits, 0)) << EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_YY_lsb);
+		temp |= (((static_cast<uint64_t>(in.omega_x)) & SELECTBITS(EDM_PIXELCLUSTER_W8_OMEGA_X_bits, 0)) << EDM_PIXELCLUSTER_W8_OMEGA_X_lsb);
+		temp |= (((static_cast<uint64_t>(in.omega_y)) & SELECTBITS(EDM_PIXELCLUSTER_W8_OMEGA_Y_bits, 0)) << EDM_PIXELCLUSTER_W8_OMEGA_Y_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(EDM_PIXELCLUSTER_W8_SPARE_bits, 0)) << EDM_PIXELCLUSTER_W8_SPARE_lsb);
+		return temp;
+	}
+
+	inline uint64_t get_dataformat_EDM_PIXELCLUSTER_w9 (const EDM_PIXELCLUSTER_w9& in) {
+		uint64_t temp = 0;
+		temp |= (((static_cast<uint64_t>(in.globalposition_x)) & SELECTBITS(EDM_PIXELCLUSTER_W9_GLOBALPOSITION_X_bits, 0)) << EDM_PIXELCLUSTER_W9_GLOBALPOSITION_X_lsb);
+		temp |= (((static_cast<uint64_t>(in.globalposition_y)) & SELECTBITS(EDM_PIXELCLUSTER_W9_GLOBALPOSITION_Y_bits, 0)) << EDM_PIXELCLUSTER_W9_GLOBALPOSITION_Y_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(EDM_PIXELCLUSTER_W9_SPARE_bits, 0)) << EDM_PIXELCLUSTER_W9_SPARE_lsb);
+		return temp;
+	}
+
+	inline uint64_t get_dataformat_EDM_PIXELCLUSTER_w10 (const EDM_PIXELCLUSTER_w10& in) {
+		uint64_t temp = 0;
+		temp |= (((static_cast<uint64_t>(in.globalposition_z)) & SELECTBITS(EDM_PIXELCLUSTER_W10_GLOBALPOSITION_Z_bits, 0)) << EDM_PIXELCLUSTER_W10_GLOBALPOSITION_Z_lsb);
+		temp |= (((static_cast<uint64_t>(in.total_tot)) & SELECTBITS(EDM_PIXELCLUSTER_W10_TOTAL_TOT_bits, 0)) << EDM_PIXELCLUSTER_W10_TOTAL_TOT_lsb);
+		temp |= (((static_cast<uint64_t>(in.lastword)) & SELECTBITS(EDM_PIXELCLUSTER_W10_LASTWORD_bits, 0)) << EDM_PIXELCLUSTER_W10_LASTWORD_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(EDM_PIXELCLUSTER_W10_SPARE_bits, 0)) << EDM_PIXELCLUSTER_W10_SPARE_lsb);
+		return temp;
+	}
+
+	inline EDM_PIXELCLUSTER_w1 fill_EDM_PIXELCLUSTER_w1 (const uint64_t& flag, const uint64_t& id_hash, const uint64_t& spare) {
 		EDM_PIXELCLUSTER_w1 temp;
+		temp.flag = flag;
 		temp.id_hash = id_hash;
-		temp.identfier = identfier;
+		temp.spare = spare;
 		return temp;
 	}
 
-	inline EDM_PIXELCLUSTER_w2 fill_EDM_PIXELCLUSTER_w2 (const uint64_t& rdo_list_w1, const uint64_t& rdo_list_w2) {
+	inline EDM_PIXELCLUSTER_w2 fill_EDM_PIXELCLUSTER_w2 (const uint64_t& identifier) {
 		EDM_PIXELCLUSTER_w2 temp;
+		temp.identifier = identifier;
+		return temp;
+	}
+
+	inline EDM_PIXELCLUSTER_w3 fill_EDM_PIXELCLUSTER_w3 (const uint64_t& rdo_list_w1) {
+		EDM_PIXELCLUSTER_w3 temp;
 		temp.rdo_list_w1 = rdo_list_w1;
+		return temp;
+	}
+
+	inline EDM_PIXELCLUSTER_w4 fill_EDM_PIXELCLUSTER_w4 (const uint64_t& rdo_list_w2) {
+		EDM_PIXELCLUSTER_w4 temp;
 		temp.rdo_list_w2 = rdo_list_w2;
 		return temp;
 	}
 
-	inline EDM_PIXELCLUSTER_w3 fill_EDM_PIXELCLUSTER_w3 (const uint64_t& rdo_list_w3, const uint64_t& rdo_list_w4) {
-		EDM_PIXELCLUSTER_w3 temp;
+	inline EDM_PIXELCLUSTER_w5 fill_EDM_PIXELCLUSTER_w5 (const uint64_t& rdo_list_w3) {
+		EDM_PIXELCLUSTER_w5 temp;
 		temp.rdo_list_w3 = rdo_list_w3;
+		return temp;
+	}
+
+	inline EDM_PIXELCLUSTER_w6 fill_EDM_PIXELCLUSTER_w6 (const uint64_t& rdo_list_w4) {
+		EDM_PIXELCLUSTER_w6 temp;
 		temp.rdo_list_w4 = rdo_list_w4;
 		return temp;
 	}
 
-	inline EDM_PIXELCLUSTER_w4 fill_EDM_PIXELCLUSTER_w4 (const double& localposition_x, const double& localposition_y, const uint64_t& channels_in_phi, const uint64_t& channels_in_eta, const double& width_in_eta, const uint64_t& spare) {
-		EDM_PIXELCLUSTER_w4 temp;
-		temp.localposition_x = (int64_t)(localposition_x * EDM_PIXELCLUSTER_W4_LOCALPOSITION_X_mf);
-		temp.localposition_y = (int64_t)(localposition_y * EDM_PIXELCLUSTER_W4_LOCALPOSITION_Y_mf);
+	inline EDM_PIXELCLUSTER_w7 fill_EDM_PIXELCLUSTER_w7 (const double& localposition_x, const double& localposition_y, const uint64_t& channels_in_phi, const uint64_t& channels_in_eta, const double& width_in_eta, const uint64_t& spare) {
+		EDM_PIXELCLUSTER_w7 temp;
+		temp.localposition_x = (int64_t)(localposition_x * EDM_PIXELCLUSTER_W7_LOCALPOSITION_X_mf);
+		temp.localposition_y = (int64_t)(localposition_y * EDM_PIXELCLUSTER_W7_LOCALPOSITION_Y_mf);
 		temp.channels_in_phi = channels_in_phi;
 		temp.channels_in_eta = channels_in_eta;
-		temp.width_in_eta = (uint64_t)(width_in_eta * EDM_PIXELCLUSTER_W4_WIDTH_IN_ETA_mf);
+		temp.width_in_eta = (uint64_t)(width_in_eta * EDM_PIXELCLUSTER_W7_WIDTH_IN_ETA_mf);
 		temp.spare = spare;
 		return temp;
 	}
 
-	inline EDM_PIXELCLUSTER_w5 fill_EDM_PIXELCLUSTER_w5 (const double& localcovariance_xx, const double& localcovariance_yy, const double& omega_x, const double& omega_y, const uint64_t& spare) {
-		EDM_PIXELCLUSTER_w5 temp;
-		temp.localcovariance_xx = (uint64_t)(localcovariance_xx * EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_XX_mf);
-		temp.localcovariance_yy = (uint64_t)(localcovariance_yy * EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_YY_mf);
-		temp.omega_x = (uint64_t)(omega_x * EDM_PIXELCLUSTER_W5_OMEGA_X_mf);
-		temp.omega_y = (uint64_t)(omega_y * EDM_PIXELCLUSTER_W5_OMEGA_Y_mf);
+	inline EDM_PIXELCLUSTER_w8 fill_EDM_PIXELCLUSTER_w8 (const double& localcovariance_xx, const double& localcovariance_yy, const double& omega_x, const double& omega_y, const uint64_t& spare) {
+		EDM_PIXELCLUSTER_w8 temp;
+		temp.localcovariance_xx = (uint64_t)(localcovariance_xx * EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_XX_mf);
+		temp.localcovariance_yy = (uint64_t)(localcovariance_yy * EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_YY_mf);
+		temp.omega_x = (uint64_t)(omega_x * EDM_PIXELCLUSTER_W8_OMEGA_X_mf);
+		temp.omega_y = (uint64_t)(omega_y * EDM_PIXELCLUSTER_W8_OMEGA_Y_mf);
 		temp.spare = spare;
 		return temp;
 	}
 
-	inline EDM_PIXELCLUSTER_w6 fill_EDM_PIXELCLUSTER_w6 (const double& globalposition_x, const double& globalposition_y, const uint64_t& spare) {
-		EDM_PIXELCLUSTER_w6 temp;
-		temp.globalposition_x = (int64_t)(globalposition_x * EDM_PIXELCLUSTER_W6_GLOBALPOSITION_X_mf);
-		temp.globalposition_y = (int64_t)(globalposition_y * EDM_PIXELCLUSTER_W6_GLOBALPOSITION_Y_mf);
+	inline EDM_PIXELCLUSTER_w9 fill_EDM_PIXELCLUSTER_w9 (const double& globalposition_x, const double& globalposition_y, const uint64_t& spare) {
+		EDM_PIXELCLUSTER_w9 temp;
+		temp.globalposition_x = (int64_t)(globalposition_x * EDM_PIXELCLUSTER_W9_GLOBALPOSITION_X_mf);
+		temp.globalposition_y = (int64_t)(globalposition_y * EDM_PIXELCLUSTER_W9_GLOBALPOSITION_Y_mf);
 		temp.spare = spare;
 		return temp;
 	}
 
-	inline EDM_PIXELCLUSTER_w7 fill_EDM_PIXELCLUSTER_w7 (const double& globalposition_z, const uint64_t& total_tot, const uint64_t& lastword, const uint64_t& spare) {
-		EDM_PIXELCLUSTER_w7 temp;
-		temp.globalposition_z = (int64_t)(globalposition_z * EDM_PIXELCLUSTER_W7_GLOBALPOSITION_Z_mf);
+	inline EDM_PIXELCLUSTER_w10 fill_EDM_PIXELCLUSTER_w10 (const double& globalposition_z, const uint64_t& total_tot, const uint64_t& lastword, const uint64_t& spare) {
+		EDM_PIXELCLUSTER_w10 temp;
+		temp.globalposition_z = (int64_t)(globalposition_z * EDM_PIXELCLUSTER_W10_GLOBALPOSITION_Z_mf);
 		temp.total_tot = total_tot;
 		temp.lastword = lastword;
 		temp.spare = spare;
 		return temp;
 	}
 
+	inline uint64_t to_real_EDM_PIXELCLUSTER_w1_flag (const uint64_t& in) {
+		return in;
+	}
+
 	inline uint64_t to_real_EDM_PIXELCLUSTER_w1_id_hash (const uint64_t& in) {
 		return in;
 	}
 
-	inline uint64_t to_real_EDM_PIXELCLUSTER_w1_identfier (const uint64_t& in) {
+	inline uint64_t to_real_EDM_PIXELCLUSTER_w1_spare (const uint64_t& in) {
 		return in;
 	}
 
-	inline uint64_t to_real_EDM_PIXELCLUSTER_w2_rdo_list_w1 (const uint64_t& in) {
+	inline uint64_t to_real_EDM_PIXELCLUSTER_w2_identifier (const uint64_t& in) {
 		return in;
 	}
 
-	inline uint64_t to_real_EDM_PIXELCLUSTER_w2_rdo_list_w2 (const uint64_t& in) {
+	inline uint64_t to_real_EDM_PIXELCLUSTER_w3_rdo_list_w1 (const uint64_t& in) {
 		return in;
 	}
 
-	inline uint64_t to_real_EDM_PIXELCLUSTER_w3_rdo_list_w3 (const uint64_t& in) {
+	inline uint64_t to_real_EDM_PIXELCLUSTER_w4_rdo_list_w2 (const uint64_t& in) {
 		return in;
 	}
 
-	inline uint64_t to_real_EDM_PIXELCLUSTER_w3_rdo_list_w4 (const uint64_t& in) {
+	inline uint64_t to_real_EDM_PIXELCLUSTER_w5_rdo_list_w3 (const uint64_t& in) {
 		return in;
 	}
 
-	inline double to_real_EDM_PIXELCLUSTER_w4_localposition_x (const int64_t& in) {
-		return (double)in / EDM_PIXELCLUSTER_W4_LOCALPOSITION_X_mf;
-	}
-
-	inline double to_real_EDM_PIXELCLUSTER_w4_localposition_y (const int64_t& in) {
-		return (double)in / EDM_PIXELCLUSTER_W4_LOCALPOSITION_Y_mf;
-	}
-
-	inline uint64_t to_real_EDM_PIXELCLUSTER_w4_channels_in_phi (const uint64_t& in) {
+	inline uint64_t to_real_EDM_PIXELCLUSTER_w6_rdo_list_w4 (const uint64_t& in) {
 		return in;
 	}
 
-	inline uint64_t to_real_EDM_PIXELCLUSTER_w4_channels_in_eta (const uint64_t& in) {
+	inline double to_real_EDM_PIXELCLUSTER_w7_localposition_x (const int64_t& in) {
+		return (double)in / EDM_PIXELCLUSTER_W7_LOCALPOSITION_X_mf;
+	}
+
+	inline double to_real_EDM_PIXELCLUSTER_w7_localposition_y (const int64_t& in) {
+		return (double)in / EDM_PIXELCLUSTER_W7_LOCALPOSITION_Y_mf;
+	}
+
+	inline uint64_t to_real_EDM_PIXELCLUSTER_w7_channels_in_phi (const uint64_t& in) {
 		return in;
 	}
 
-	inline double to_real_EDM_PIXELCLUSTER_w4_width_in_eta (const uint64_t& in) {
-		return (double)in / EDM_PIXELCLUSTER_W4_WIDTH_IN_ETA_mf;
-	}
-
-	inline uint64_t to_real_EDM_PIXELCLUSTER_w4_spare (const uint64_t& in) {
+	inline uint64_t to_real_EDM_PIXELCLUSTER_w7_channels_in_eta (const uint64_t& in) {
 		return in;
 	}
 
-	inline double to_real_EDM_PIXELCLUSTER_w5_localcovariance_xx (const uint64_t& in) {
-		return (double)in / EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_XX_mf;
-	}
-
-	inline double to_real_EDM_PIXELCLUSTER_w5_localcovariance_yy (const uint64_t& in) {
-		return (double)in / EDM_PIXELCLUSTER_W5_LOCALCOVARIANCE_YY_mf;
-	}
-
-	inline double to_real_EDM_PIXELCLUSTER_w5_omega_x (const uint64_t& in) {
-		return (double)in / EDM_PIXELCLUSTER_W5_OMEGA_X_mf;
-	}
-
-	inline double to_real_EDM_PIXELCLUSTER_w5_omega_y (const uint64_t& in) {
-		return (double)in / EDM_PIXELCLUSTER_W5_OMEGA_Y_mf;
-	}
-
-	inline uint64_t to_real_EDM_PIXELCLUSTER_w5_spare (const uint64_t& in) {
-		return in;
-	}
-
-	inline double to_real_EDM_PIXELCLUSTER_w6_globalposition_x (const int64_t& in) {
-		return (double)in / EDM_PIXELCLUSTER_W6_GLOBALPOSITION_X_mf;
-	}
-
-	inline double to_real_EDM_PIXELCLUSTER_w6_globalposition_y (const int64_t& in) {
-		return (double)in / EDM_PIXELCLUSTER_W6_GLOBALPOSITION_Y_mf;
-	}
-
-	inline uint64_t to_real_EDM_PIXELCLUSTER_w6_spare (const uint64_t& in) {
-		return in;
-	}
-
-	inline double to_real_EDM_PIXELCLUSTER_w7_globalposition_z (const int64_t& in) {
-		return (double)in / EDM_PIXELCLUSTER_W7_GLOBALPOSITION_Z_mf;
-	}
-
-	inline uint64_t to_real_EDM_PIXELCLUSTER_w7_total_tot (const uint64_t& in) {
-		return in;
-	}
-
-	inline uint64_t to_real_EDM_PIXELCLUSTER_w7_lastword (const uint64_t& in) {
-		return in;
+	inline double to_real_EDM_PIXELCLUSTER_w7_width_in_eta (const uint64_t& in) {
+		return (double)in / EDM_PIXELCLUSTER_W7_WIDTH_IN_ETA_mf;
 	}
 
 	inline uint64_t to_real_EDM_PIXELCLUSTER_w7_spare (const uint64_t& in) {
+		return in;
+	}
+
+	inline double to_real_EDM_PIXELCLUSTER_w8_localcovariance_xx (const uint64_t& in) {
+		return (double)in / EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_XX_mf;
+	}
+
+	inline double to_real_EDM_PIXELCLUSTER_w8_localcovariance_yy (const uint64_t& in) {
+		return (double)in / EDM_PIXELCLUSTER_W8_LOCALCOVARIANCE_YY_mf;
+	}
+
+	inline double to_real_EDM_PIXELCLUSTER_w8_omega_x (const uint64_t& in) {
+		return (double)in / EDM_PIXELCLUSTER_W8_OMEGA_X_mf;
+	}
+
+	inline double to_real_EDM_PIXELCLUSTER_w8_omega_y (const uint64_t& in) {
+		return (double)in / EDM_PIXELCLUSTER_W8_OMEGA_Y_mf;
+	}
+
+	inline uint64_t to_real_EDM_PIXELCLUSTER_w8_spare (const uint64_t& in) {
+		return in;
+	}
+
+	inline double to_real_EDM_PIXELCLUSTER_w9_globalposition_x (const int64_t& in) {
+		return (double)in / EDM_PIXELCLUSTER_W9_GLOBALPOSITION_X_mf;
+	}
+
+	inline double to_real_EDM_PIXELCLUSTER_w9_globalposition_y (const int64_t& in) {
+		return (double)in / EDM_PIXELCLUSTER_W9_GLOBALPOSITION_Y_mf;
+	}
+
+	inline uint64_t to_real_EDM_PIXELCLUSTER_w9_spare (const uint64_t& in) {
+		return in;
+	}
+
+	inline double to_real_EDM_PIXELCLUSTER_w10_globalposition_z (const int64_t& in) {
+		return (double)in / EDM_PIXELCLUSTER_W10_GLOBALPOSITION_Z_mf;
+	}
+
+	inline uint64_t to_real_EDM_PIXELCLUSTER_w10_total_tot (const uint64_t& in) {
+		return in;
+	}
+
+	inline uint64_t to_real_EDM_PIXELCLUSTER_w10_lastword (const uint64_t& in) {
+		return in;
+	}
+
+	inline uint64_t to_real_EDM_PIXELCLUSTER_w10_spare (const uint64_t& in) {
 		return in;
 	}
 
@@ -2054,11 +2221,7 @@ namespace FPGADataFormatUtilities
 	const int PIXEL_EF_RDO_LVL1_lsb = 38;
 	const float PIXEL_EF_RDO_LVL1_mf = 1.;
 
-	const int PIXEL_EF_RDO_ID_bits = 13;
-	const int PIXEL_EF_RDO_ID_lsb = 25;
-	const float PIXEL_EF_RDO_ID_mf = 1.;
-
-	const int PIXEL_EF_RDO_SPARE_bits = 25;
+	const int PIXEL_EF_RDO_SPARE_bits = 38;
 	const int PIXEL_EF_RDO_SPARE_lsb = 0;
 	const float PIXEL_EF_RDO_SPARE_mf = 1.;
 
@@ -2068,7 +2231,6 @@ namespace FPGADataFormatUtilities
 		uint64_t col : PIXEL_EF_RDO_COL_bits;
 		uint64_t tot : PIXEL_EF_RDO_TOT_bits;
 		uint64_t lvl1 : PIXEL_EF_RDO_LVL1_bits;
-		uint64_t id : PIXEL_EF_RDO_ID_bits;
 		uint64_t spare : PIXEL_EF_RDO_SPARE_bits;
 	} PIXEL_EF_RDO;
 
@@ -2079,31 +2241,28 @@ namespace FPGADataFormatUtilities
 		temp.col = (in & SELECTBITS(PIXEL_EF_RDO_COL_bits, PIXEL_EF_RDO_COL_lsb)) >> PIXEL_EF_RDO_COL_lsb;
 		temp.tot = (in & SELECTBITS(PIXEL_EF_RDO_TOT_bits, PIXEL_EF_RDO_TOT_lsb)) >> PIXEL_EF_RDO_TOT_lsb;
 		temp.lvl1 = (in & SELECTBITS(PIXEL_EF_RDO_LVL1_bits, PIXEL_EF_RDO_LVL1_lsb)) >> PIXEL_EF_RDO_LVL1_lsb;
-		temp.id = (in & SELECTBITS(PIXEL_EF_RDO_ID_bits, PIXEL_EF_RDO_ID_lsb)) >> PIXEL_EF_RDO_ID_lsb;
 		temp.spare = (in & SELECTBITS(PIXEL_EF_RDO_SPARE_bits, PIXEL_EF_RDO_SPARE_lsb)) >> PIXEL_EF_RDO_SPARE_lsb;
 		return temp;
 	}
 
 	inline uint64_t get_dataformat_PIXEL_EF_RDO (const PIXEL_EF_RDO& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.last) << PIXEL_EF_RDO_LAST_lsb);
-		temp |= (static_cast<uint64_t>(in.row) << PIXEL_EF_RDO_ROW_lsb);
-		temp |= (static_cast<uint64_t>(in.col) << PIXEL_EF_RDO_COL_lsb);
-		temp |= (static_cast<uint64_t>(in.tot) << PIXEL_EF_RDO_TOT_lsb);
-		temp |= (static_cast<uint64_t>(in.lvl1) << PIXEL_EF_RDO_LVL1_lsb);
-		temp |= (static_cast<uint64_t>(in.id) << PIXEL_EF_RDO_ID_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << PIXEL_EF_RDO_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.last)) & SELECTBITS(PIXEL_EF_RDO_LAST_bits, 0)) << PIXEL_EF_RDO_LAST_lsb);
+		temp |= (((static_cast<uint64_t>(in.row)) & SELECTBITS(PIXEL_EF_RDO_ROW_bits, 0)) << PIXEL_EF_RDO_ROW_lsb);
+		temp |= (((static_cast<uint64_t>(in.col)) & SELECTBITS(PIXEL_EF_RDO_COL_bits, 0)) << PIXEL_EF_RDO_COL_lsb);
+		temp |= (((static_cast<uint64_t>(in.tot)) & SELECTBITS(PIXEL_EF_RDO_TOT_bits, 0)) << PIXEL_EF_RDO_TOT_lsb);
+		temp |= (((static_cast<uint64_t>(in.lvl1)) & SELECTBITS(PIXEL_EF_RDO_LVL1_bits, 0)) << PIXEL_EF_RDO_LVL1_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(PIXEL_EF_RDO_SPARE_bits, 0)) << PIXEL_EF_RDO_SPARE_lsb);
 		return temp;
 	}
 
-	inline PIXEL_EF_RDO fill_PIXEL_EF_RDO (const uint64_t& last, const uint64_t& row, const uint64_t& col, const uint64_t& tot, const uint64_t& lvl1, const uint64_t& id, const uint64_t& spare) {
+	inline PIXEL_EF_RDO fill_PIXEL_EF_RDO (const uint64_t& last, const uint64_t& row, const uint64_t& col, const uint64_t& tot, const uint64_t& lvl1, const uint64_t& spare) {
 		PIXEL_EF_RDO temp;
 		temp.last = last;
 		temp.row = row;
 		temp.col = col;
 		temp.tot = tot;
 		temp.lvl1 = lvl1;
-		temp.id = id;
 		temp.spare = spare;
 		return temp;
 	}
@@ -2128,10 +2287,6 @@ namespace FPGADataFormatUtilities
 		return in;
 	}
 
-	inline uint64_t to_real_PIXEL_EF_RDO_id (const uint64_t& in) {
-		return in;
-	}
-
 	inline uint64_t to_real_PIXEL_EF_RDO_spare (const uint64_t& in) {
 		return in;
 	}
@@ -2153,11 +2308,7 @@ namespace FPGADataFormatUtilities
 	const int STRIP_EF_RDO_CLUSTER_MAP_lsb = 16;
 	const float STRIP_EF_RDO_CLUSTER_MAP_mf = 1.;
 
-	const int STRIP_EF_RDO_ID_bits = 13;
-	const int STRIP_EF_RDO_ID_lsb = 3;
-	const float STRIP_EF_RDO_ID_mf = 1.;
-
-	const int STRIP_EF_RDO_SPARE_bits = 3;
+	const int STRIP_EF_RDO_SPARE_bits = 16;
 	const int STRIP_EF_RDO_SPARE_lsb = 0;
 	const float STRIP_EF_RDO_SPARE_mf = 1.;
 
@@ -2166,7 +2317,6 @@ namespace FPGADataFormatUtilities
 		uint64_t chipid : STRIP_EF_RDO_CHIPID_bits;
 		uint64_t strip_num : STRIP_EF_RDO_STRIP_NUM_bits;
 		uint64_t cluster_map : STRIP_EF_RDO_CLUSTER_MAP_bits;
-		uint64_t id : STRIP_EF_RDO_ID_bits;
 		uint64_t spare : STRIP_EF_RDO_SPARE_bits;
 	} STRIP_EF_RDO;
 
@@ -2176,7 +2326,6 @@ namespace FPGADataFormatUtilities
 		temp.chipid = (in & SELECTBITS(STRIP_EF_RDO_CHIPID_bits, STRIP_EF_RDO_CHIPID_lsb)) >> STRIP_EF_RDO_CHIPID_lsb;
 		temp.strip_num = (in & SELECTBITS(STRIP_EF_RDO_STRIP_NUM_bits, STRIP_EF_RDO_STRIP_NUM_lsb)) >> STRIP_EF_RDO_STRIP_NUM_lsb;
 		temp.cluster_map = (in & SELECTBITS(STRIP_EF_RDO_CLUSTER_MAP_bits, STRIP_EF_RDO_CLUSTER_MAP_lsb)) >> STRIP_EF_RDO_CLUSTER_MAP_lsb;
-		temp.id = (in & SELECTBITS(STRIP_EF_RDO_ID_bits, STRIP_EF_RDO_ID_lsb)) >> STRIP_EF_RDO_ID_lsb;
 		temp.spare = (in & SELECTBITS(STRIP_EF_RDO_SPARE_bits, STRIP_EF_RDO_SPARE_lsb)) >> STRIP_EF_RDO_SPARE_lsb;
 		return temp;
 	}
@@ -2191,12 +2340,11 @@ namespace FPGADataFormatUtilities
 
 	inline uint64_t get_dataformat_STRIP_EF_RDO (const STRIP_EF_RDO& in) {
 		uint64_t temp = 0;
-		temp |= (static_cast<uint64_t>(in.last) << STRIP_EF_RDO_LAST_lsb);
-		temp |= (static_cast<uint64_t>(in.chipid) << STRIP_EF_RDO_CHIPID_lsb);
-		temp |= (static_cast<uint64_t>(in.strip_num) << STRIP_EF_RDO_STRIP_NUM_lsb);
-		temp |= (static_cast<uint64_t>(in.cluster_map) << STRIP_EF_RDO_CLUSTER_MAP_lsb);
-		temp |= (static_cast<uint64_t>(in.id) << STRIP_EF_RDO_ID_lsb);
-		temp |= (static_cast<uint64_t>(in.spare) << STRIP_EF_RDO_SPARE_lsb);
+		temp |= (((static_cast<uint64_t>(in.last)) & SELECTBITS(STRIP_EF_RDO_LAST_bits, 0)) << STRIP_EF_RDO_LAST_lsb);
+		temp |= (((static_cast<uint64_t>(in.chipid)) & SELECTBITS(STRIP_EF_RDO_CHIPID_bits, 0)) << STRIP_EF_RDO_CHIPID_lsb);
+		temp |= (((static_cast<uint64_t>(in.strip_num)) & SELECTBITS(STRIP_EF_RDO_STRIP_NUM_bits, 0)) << STRIP_EF_RDO_STRIP_NUM_lsb);
+		temp |= (((static_cast<uint64_t>(in.cluster_map)) & SELECTBITS(STRIP_EF_RDO_CLUSTER_MAP_bits, 0)) << STRIP_EF_RDO_CLUSTER_MAP_lsb);
+		temp |= (((static_cast<uint64_t>(in.spare)) & SELECTBITS(STRIP_EF_RDO_SPARE_bits, 0)) << STRIP_EF_RDO_SPARE_lsb);
 		return temp;
 	}
 
@@ -2205,13 +2353,12 @@ namespace FPGADataFormatUtilities
 		return (temp | low);
 }
 
-	inline STRIP_EF_RDO fill_STRIP_EF_RDO (const uint64_t& last, const uint64_t& chipid, const uint64_t& strip_num, const uint64_t& cluster_map, const uint64_t& id, const uint64_t& spare) {
+	inline STRIP_EF_RDO fill_STRIP_EF_RDO (const uint64_t& last, const uint64_t& chipid, const uint64_t& strip_num, const uint64_t& cluster_map, const uint64_t& spare) {
 		STRIP_EF_RDO temp;
 		temp.last = last;
 		temp.chipid = chipid;
 		temp.strip_num = strip_num;
 		temp.cluster_map = cluster_map;
-		temp.id = id;
 		temp.spare = spare;
 		return temp;
 	}
@@ -2229,10 +2376,6 @@ namespace FPGADataFormatUtilities
 	}
 
 	inline uint64_t to_real_STRIP_EF_RDO_cluster_map (const uint64_t& in) {
-		return in;
-	}
-
-	inline uint64_t to_real_STRIP_EF_RDO_id (const uint64_t& in) {
 		return in;
 	}
 

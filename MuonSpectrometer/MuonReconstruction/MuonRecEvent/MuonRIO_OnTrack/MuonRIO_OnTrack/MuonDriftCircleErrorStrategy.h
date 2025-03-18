@@ -22,12 +22,10 @@ public:
                           StationError,//!< A term is added to account for misaligned
                           ErrorAtPredictedPosition,
                           T0Refit, //!< A special error was applied to account for the T0 refit (user defined via jobProperties)
-                          WireSagGeomCorrection, //!< Wire sag was applied, and so will affect errors
                           TofCorrection, //!< Time of flight correction was applied in calibration
                           PropCorrection, //!< Propagation correction was applied in calibration
                           TempCorrection, //!< Temperature correction was applied in calibration
-                          MagFieldCorrection, //!< Magnetic field correction was applied in calibration
-                          WireSagTimeCorrection, //!< Wire sag correction was applied in calibration
+                          MagFieldCorrection, //!< Magnetic field correction was applied in calibration                          
                           SlewCorrection, //!< Slewing correction was applied in calibration
                           BackgroundCorrection, //!< Background correction was applied in calibration
                           Segment, //!< Treating a segment or a track

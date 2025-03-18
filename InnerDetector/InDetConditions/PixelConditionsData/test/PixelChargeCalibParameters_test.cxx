@@ -28,7 +28,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 BOOST_AUTO_TEST_SUITE(PixelChargeCalibParametersTest)
   BOOST_AUTO_TEST_CASE( Construction ){
     BOOST_CHECK_NO_THROW(LegacyFitParameters());
-    BOOST_CHECK_NO_THROW(LegacyFitParameters(2.3f, 2.f, 3.f));
+    BOOST_CHECK_NO_THROW(LegacyFitParameters(2.3f, 2.f, 3.f, 32.f));
     //
     BOOST_CHECK_NO_THROW(LinearFitParameters());
     BOOST_CHECK_NO_THROW(LinearFitParameters(1.f, 2.f));
@@ -41,13 +41,13 @@ BOOST_AUTO_TEST_SUITE(PixelChargeCalibParametersTest)
   }
   BOOST_AUTO_TEST_CASE( Streaming ){
     boost::test_tools::output_test_stream output;
-    LegacyFitParameters leg(2.3f, 2.f, 3.f);
+    LegacyFitParameters leg(2.3f, 2.f, 3.f, 32.f);
     LinearFitParameters lin(1.f, 2.f);
     Thresholds t(2, 2, 3, 4);
     Resolutions r(1.3f, 2.f);
     //
     output<<leg;
-    BOOST_CHECK(output.is_equal("(2.3, 2, 3)"));
+    BOOST_CHECK(output.is_equal("(2.3, 2, 3, 32)"));
     //note: stream is flushed by default
     output<<lin;
     BOOST_CHECK(output.is_equal("(1, 2)"));
@@ -59,9 +59,9 @@ BOOST_AUTO_TEST_SUITE(PixelChargeCalibParametersTest)
     BOOST_CHECK(output.is_equal("(1.3, 2)"));
   }
   BOOST_AUTO_TEST_CASE( Equality ){
-    LegacyFitParameters leg1(2.3f, 2.f, 3.f);
-    LegacyFitParameters leg2(2.3f, 2.f, 3.f);
-    LegacyFitParameters leg3(2.2f, 2.f, 3.f);
+    LegacyFitParameters leg1(2.3f, 2.f, 3.f, 32.f);
+    LegacyFitParameters leg2(2.3f, 2.f, 3.f, 32.f);
+    LegacyFitParameters leg3(2.2f, 2.f, 3.f, 32.f);
     BOOST_CHECK(leg1 == leg2);
     BOOST_CHECK(leg1 != leg3);
     //

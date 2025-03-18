@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelConditionsSummaryTool.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
-#include "PixelDetectorElementStatus.h"
+#include "PixelReadoutGeometry/PixelDetectorElementStatus.h"
 #include "PixelReadoutGeometry/PixelFEUtils.h"
 #include "PixelConditionsData/PixelByteStreamErrors.h"
 

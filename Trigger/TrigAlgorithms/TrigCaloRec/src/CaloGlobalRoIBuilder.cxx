@@ -79,6 +79,7 @@ StatusCode CaloGlobalRoIBuilder::execute(const EventContext& ctx) const
        ptrigEmCluster->setEt(cell->pt());
        ptrigEmCluster->setEta(cell->eta());
        ptrigEmCluster->setPhi(cell->phi());
+       ptrigEmCluster->setE233(thr);
        double etaWidth(0.2);
        double phiWidth(0.2);
        double etamin = std::max(-2.5, cell->eta() - etaWidth);

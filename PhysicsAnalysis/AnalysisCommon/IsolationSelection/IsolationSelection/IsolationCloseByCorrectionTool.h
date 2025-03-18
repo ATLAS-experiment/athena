@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef IsolationSelection_IsolationCloseByCorrectionTool_H
@@ -90,6 +90,7 @@ namespace CP {
             TrackSet tracks{};
             ClusterSet clusters{};
             PflowSet flows{};
+            UnorderedClusterSet eg_associated_clusters{};
         };
 
     private:
@@ -113,13 +114,13 @@ namespace CP {
         const IsoVector& getIsolationTypes(const xAOD::IParticle* particle) const;
 
         // Functions to  perfrom  the isolation correction  directly
-        CorrectionCode subtractCloseByContribution(const EventContext& ctx, const xAOD::IParticle* P, const ObjectCache& cache) const;
+        CorrectionCode subtractCloseByContribution(const EventContext& ctx, const xAOD::IParticle* P, ObjectCache& cache) const;
         // Remove close-by tracks from the track isolation variables
         CorrectionCode getCloseByCorrectionTrackIso(const xAOD::IParticle* primary, const IsoType type, const ObjectCache& cache,
                                                     float& isoValue) const;
         // Remove close-by calo clusters from the topo et isolation variables
         CorrectionCode getCloseByCorrectionTopoIso(const EventContext& ctx, const xAOD::IParticle* primary, const IsoType type,
-                                                   const ObjectCache& cache, float& isoValue) const;
+                                                   ObjectCache& cache, float& isoValue) const;
         // Remove close-by flow elements from the neflow isolation variables
         CorrectionCode getCloseByCorrectionPflowIso(const EventContext& ctx, const xAOD::IParticle* primary, const IsoType type,
                                                     const ObjectCache& cache, float& isoValue) const;
@@ -128,7 +129,8 @@ namespace CP {
 
 
          /// Loads the topo clusters associated with the primary IParticle
-        ClusterSet getAssociatedClusters(const EventContext& ctx, const xAOD::IParticle* particle) const;
+        ClusterSet getAssociatedClusters(const EventContext& ctx, const xAOD::IParticle* particle,
+                                         ObjectCache& cache) const;
         /// Loads the pflow elements associated with the primary IParticle
         PflowSet getAssocFlowElements(const EventContext& ctx, const xAOD::IParticle* particle) const;
 

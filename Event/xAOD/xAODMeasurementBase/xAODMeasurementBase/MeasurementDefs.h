@@ -1,12 +1,13 @@
 
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMEASUREMENTBASE_MEASUREMENTDEFS_H
 #define XAODMEASUREMENTBASE_MEASUREMENTDEFS_H
 // EDM include(s):
 #include <array>
 
+#include "xAODMeasurementBase/EigenZeroDefs.h"
 #include "AthContainers/AuxElement.h"
 #include "EventPrimitives/EventPrimitives.h"
 

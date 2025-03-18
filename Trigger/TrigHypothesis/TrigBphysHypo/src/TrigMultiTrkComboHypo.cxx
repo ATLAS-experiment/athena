@@ -33,6 +33,7 @@
 
 #include "AthViews/View.h"
 #include "AthViews/ViewHelper.h"
+#include "CxxUtils/inline_hints.h"
 
 #include "Math/GenVector/VectorUtil.h"
 #include "Math/Vector2D.h"
@@ -45,6 +46,21 @@ using TrigCompositeUtils::DecisionIDContainer;
 using ROOT::Math::XYVector;
 
 typedef struct PDG20 PDG;
+
+
+namespace {
+
+
+// Break this out into a separate function to avoid some bogus
+// warnings from gcc15.
+ATH_NOINLINE
+bool prev_perm (std::vector<char>& v)
+{
+  return std::ranges::prev_permutation(v).found;;
+}
+
+
+} // anonymous namespace
 
 
 TrigMultiTrkComboHypo::TrigMultiTrkComboHypo(const std::string& name, ISvcLocator* pSvcLocator)
@@ -547,7 +563,7 @@ StatusCode TrigMultiTrkComboHypo::filterTrackCombinations(TrigMultiTrkStateBase&
       state.setEventAccepted(true);
       break;
 
-    } while (std::prev_permutation(idx.begin(), idx.end()));
+    } while (prev_perm(idx));
   }
 
   if (!state.isEventAccepted()) {
@@ -680,7 +696,7 @@ StatusCode TrigMultiTrkComboHypo::findMultiLeptonCandidates(TrigMultiTrkState<T>
       etatrack1.push_back((*tracklist[0])->eta());
       etatrack2.push_back((*tracklist[1])->eta());
 
-    } while (std::prev_permutation(combination.begin(), combination.end()));
+    } while (prev_perm(combination));
   }
   return StatusCode::SUCCESS;
 }

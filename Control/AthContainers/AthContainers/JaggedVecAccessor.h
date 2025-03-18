@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/JaggedVecAccessor.h
@@ -21,7 +21,6 @@
 #include "AthContainers/Accessor.h"
 #include "AthContainers/AuxVectorData.h"
 #include "AthContainers/AuxTypeRegistry.h"
-#include "CxxUtils/concepts.h"
 #include "CxxUtils/ranges.h"
 #include "CxxUtils/checker_macros.h"
 #include "CxxUtils/range_with_at.h"

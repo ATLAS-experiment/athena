@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "TruthSegmentMaker.h"
 
@@ -17,6 +17,8 @@
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 
 #include "MuonPatternEvent/MuonHoughDefs.h"
+
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "GaudiKernel/PhysicalConstants.h"
 
@@ -90,7 +92,7 @@ namespace MuonR4{
                     genParticle = genLink.cptr(); 
                 }
                 /// skip empty truth matches for now
-                if (!genParticle || (m_useOnlyMuonHits && std::abs(simHit->pdgId()) != 13)) {
+                if (!genParticle || (m_useOnlyMuonHits && !MC::isMuon(simHit))) {
                     ATH_MSG_VERBOSE("Skip hit "<<m_idHelperSvc->toString(simHit->identify())<<
                                   " pdgId: "<<simHit->pdgId()<<", energy: "<<simHit->kineticEnergy());
                     continue;

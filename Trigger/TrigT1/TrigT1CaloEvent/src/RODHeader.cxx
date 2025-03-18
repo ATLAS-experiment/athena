@@ -1,16 +1,10 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloEvent/RODHeader.h"
 
 namespace LVL1 {
-
-RODHeader::RODHeader() : m_version(0), m_sourceId(0), m_run(0), m_lvl1Id(0),
-                         m_bcId(0), m_trigType(0), m_detType(0),
-			 m_statusWords(0), m_payloadSize(0)
-{
-}
 
 RODHeader::RODHeader(uint32_t version, uint32_t sourceId, uint32_t run,
                      uint32_t lvl1Id,  uint32_t bcId,     uint32_t trigType,
@@ -23,8 +17,5 @@ RODHeader::RODHeader(uint32_t version, uint32_t sourceId, uint32_t run,
 {
 }
 
-RODHeader::~RODHeader()
-{
-}
 
 } // end namespace

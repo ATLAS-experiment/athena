@@ -50,6 +50,7 @@ class FastReductionAlgToolFactory:
             'qjmass': [CompFactory.TrigJetConditionConfig_qjet_mass, 0],
             'smc': [CompFactory.TrigJetConditionConfig_smc, 0],
             'jvt': [CompFactory.TrigJetConditionConfig_jvt, 0],
+            'nnJvt': [CompFactory.TrigJetConditionConfig_nnjvt, 0],
             'ht': [CompFactory.TrigJetConditionConfig_htfr, 0],
             'htdipz': [CompFactory.TrigJetConditionConfig_htdipz, 0],
             'dipz_mlpl': [CompFactory.TrigJetConditionConfig_dipzmlpl, 0],

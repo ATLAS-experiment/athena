@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGACCELEVENT_TRIGINDETACCELEDM_ITK_H
@@ -103,7 +103,55 @@ namespace ITk {
     float m_Q[MAX_NUMBER_OUTPUT_SEEDS];
     float m_pT[MAX_NUMBER_OUTPUT_SEEDS];
   } OUTPUT_SEED_STORAGE;
+
+    //B: Graph-based track seeding algorithm implementation on GPU
   
+  static constexpr unsigned int GBTS_MAX_NUMBER_SPACEPOINTS  = 350000;
+  static constexpr unsigned int GBTS_MAX_SILICON_LAYERS      = 216;
+  static constexpr unsigned int GBTS_MAX_PHI_BIN             = 120;
+  static constexpr unsigned int GBTS_MAX_ETA_BIN             = 1000;
+  static constexpr unsigned int GBTS_MAX_ETA_BIN_PAIR        = 8000;
+  static constexpr unsigned int GBTS_NODE_BUFFER_LENGTH      = 250;
+  static constexpr unsigned int GBTS_MAX_NUM_NEIGHBOURS      = 6;
+  
+  typedef struct GraphMakingInputData {
+  public:
+    
+    unsigned int m_nSpacepoints, m_nLayers, m_nEtaBins, m_maxEtaBin, m_nBinPairs, m_nMaxEdges;
+    
+    float m_params[4*GBTS_MAX_NUMBER_SPACEPOINTS];//x,y,z,cluster width
+    
+    int m_layerIdx[GBTS_MAX_SILICON_LAYERS];
+
+    //the views for the above storage space assuming float4 packing (x,y,z,w)
+    
+    int m_layerInfo[4*GBTS_MAX_SILICON_LAYERS];//view begin, view end, num eta bins, first eta bin
+
+    //eta binning geometry of the layers
+
+    float m_layerGeo[2*GBTS_MAX_SILICON_LAYERS];//min eta, eta bin width
+
+    //eta bin pairings
+
+    int m_bin_pairs[2*GBTS_MAX_ETA_BIN_PAIR];
+
+    float m_algo_params[32];//reserved space for GBTS algoritm parameters
+    
+  } GRAPH_MAKING_INPUT_DATA;
+
+  typedef struct CompressedGraph {
+  public:
+    CompressedGraph() : m_nEdges(0), m_nMaxNeighbours(0), m_nLinks(0), m_graphArray(nullptr) {};
+    ~CompressedGraph() {
+      delete[] m_graphArray;
+      m_graphArray = nullptr;
+    }
+    unsigned int m_nEdges;
+    unsigned int m_nMaxNeighbours;
+    unsigned int m_nLinks;
+    int* m_graphArray;
+  } COMPRESSED_GRAPH;
+
 }
 }
 

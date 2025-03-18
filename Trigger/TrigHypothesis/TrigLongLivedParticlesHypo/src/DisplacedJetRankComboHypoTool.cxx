@@ -17,7 +17,7 @@ StatusCode DisplacedJetRankComboHypoTool::decide(Combo::LegDecisionsMap& passing
 	std::vector<std::vector<Combo::LegDecision>> legDecisions;
   	ATH_CHECK(selectLegs(passingLegs, legDecisions));
 
-	//get all the passing jets across all legs
+	//get all the passing jets across all legs valid for this tool
 	//also fill a map of jet -> decisions
 	//derive ranks for these jets
 	//get the list of decision objects which can go on
@@ -27,12 +27,15 @@ StatusCode DisplacedJetRankComboHypoTool::decide(Combo::LegDecisionsMap& passing
 
 	ATH_MSG_DEBUG("Have "<<passingLegs.size()<<" passing legs in");
 
-	for(auto it : passingLegs){
-		if(it.second.size() == 0) continue; //empty set of decisions
-		//only need to look at the first decision
-		const TrigCompositeUtils::Decision* decision(*(it.second[0]));
+	for(auto legId: legDecisionIds()){
+		if(!passingLegs.contains(legId)) continue;
+
+		auto decs = passingLegs[legId];
+		if(decs.size() == 0) continue;
+
+		const TrigCompositeUtils::Decision* decision(*(decs[0]));
 		if(decision->hasObjectLink("djtrig_counts")){
-			dispj_leg_ids.insert(it.first);
+			dispj_leg_ids.insert(legId);
 		}
 	}
 

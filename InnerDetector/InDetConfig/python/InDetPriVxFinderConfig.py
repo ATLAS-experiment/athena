@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetPriVxFinder package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -24,6 +24,10 @@ def InDetPriVxFinderCfg(flags,
     kwargs.setdefault("doVertexSorting", True)
 
     if flags.Tracking.perigeeExpression == "Vertex":
+        associationMapName = "PRDtoTrackMapMerge_CombinedInDetTracks"
+        if flags.Detector.GeometryITk:
+            associationMapName = "PRDtoTrackMapMerge_CombinedITkTracks"
+        
         from xAODTrackingCnv.xAODTrackingCnvConfig import (
             BeamLineTrackParticleCnvAlgCfg)
         from InDetConfig.TrackRecoConfig import (
@@ -32,7 +36,7 @@ def InDetPriVxFinderCfg(flags,
             flags,
             ClusterSplitProbabilityName = \
             ClusterSplitProbabilityContainerName(flags),
-            AssociationMapName = "PRDtoTrackMapMerge_CombinedInDetTracks",
+            AssociationMapName = associationMapName,
             xAODTrackParticlesFromTracksContainerName = \
             "InDetTrackParticlesTemporary"))
         kwargs["TracksName"]="InDetTrackParticlesTemporary"
@@ -91,6 +95,10 @@ def primaryVertexFindingCfg(flags,
                               **kwargs)
 
     if flags.Tracking.perigeeExpression == "Vertex":
+        associationMapName = "PRDtoTrackMapMerge_CombinedInDetTracks"
+        if flags.Detector.GeometryITk:
+            associationMapName = "PRDtoTrackMapMerge_CombinedITkTracks"
+            
         from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgCfg
         from InDetConfig.TrackRecoConfig import (
             ClusterSplitProbabilityContainerName)
@@ -98,7 +106,7 @@ def primaryVertexFindingCfg(flags,
             flags,
             ClusterSplitProbabilityName=ClusterSplitProbabilityContainerName(
                 flags),
-            AssociationMapName="PRDtoTrackMapMerge_CombinedInDetTracks"))
+            AssociationMapName=associationMapName))
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
 
@@ -131,6 +139,8 @@ if __name__ == "__main__":
         flags.Tracking.PriVertex.setup = VertexSetup.IVF
     elif "FastIterativeFinding" in sys.argv:
         flags.Tracking.PriVertex.setup = VertexSetup.FastIVF
+    elif "GridFinding" in sys.argv: 
+        flags.Tracking.PriVertex.setup = VertexSetup.ActsGridDensity  
     flags.lock()
 
     acc = MainServicesCfg(flags)
@@ -147,3 +157,4 @@ if __name__ == "__main__":
     )
 
     acc.wasMerged()
+

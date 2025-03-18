@@ -25,6 +25,8 @@ class PreJetAnalysisConfig (ConfigBlock) :
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
             "the correct config blocks to call for small- or large-R jets.")
+        self.addOption('outputTruthLabelIDs', False, type=bool,
+            info='Enable or disable HadronConeExclTruthLabelID and PartonTruthLabelID decorations')
         # TODO: add info string
         self.addOption ('runOriginalObjectLink', False, type=bool,
             info="")
@@ -92,6 +94,10 @@ class PreJetAnalysisConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True, enabled=False)
+
+        if self.outputTruthLabelIDs and config.dataType() is not DataType.Data:
+            config.addOutputVar (self.containerName, 'HadronConeExclTruthLabelID', 'HadronConeExclTruthLabelID', noSys=True)
+            config.addOutputVar (self.containerName, 'PartonTruthLabelID', 'PartonTruthLabelID', noSys=True)
 
 
 
@@ -530,8 +536,10 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::JetCalibrationAlg on PHYSLITE "
             "derivations. The default is True.")
-        self.addOption ('systematicsModelJER', "Full", type=str) # this is the test for JER
-        self.addOption ('systematicsModelJMS', "Full", type=str) # this is the test for JER
+        self.addOption ('systematicsModelJER', "Full", type=str)
+        self.addOption ('systematicsModelJMS', "Full", type=str)
+        self.addOption ('systematicsModelJMR', "Full", type=str,
+            info="the NP reduction scheme to use for JMR: Full, Simple. The default is Full.")
         self.addOption ('runJERsystematicsOnData', False, type=bool,
             info="whether to run the All/Full JER model variations also on data samples. Expert option!")
         # Adding these options to override the jet uncertainty config file when we have new recommendations
@@ -600,7 +608,6 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
                 config_file = "rel22/Winter2024_PreRec/" + config_file
             else:
-                log = logging.getLogger('LargeRJetAnalysisConfig')
                 log.warning("Uncertainties for UFO jets are not for Run 4!")
 
         # Calibration area:
@@ -665,6 +672,43 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             jetUncertaintiesAlg.uncertaintiesToolPD.MCType = mcType
             jetUncertaintiesAlg.uncertaintiesToolPD.IsData = True
             jetUncertaintiesAlg.uncertaintiesToolPD.PseudoDataJERsmearingMode = True
+
+    def createFFSmearingTool(self, jetFFSmearingAlg, config):
+        # Retrieve appropriate large-R jet mass resolution recommendations for the FFJetSmearingTool.
+
+        log = logging.getLogger('LargeRJetAnalysisConfig')
+
+        # Config file:
+        if self.systematicsModelJMR in ["Simple", "Full"]:
+            config_file = f"R10_{self.systematicsModelJMR}JMR.config"
+        else:
+            raise ValueError(
+                f"Invalid request for systematicsModelJMR settings: {self.systematicsModelJMR}"
+            )
+
+        # Expert override for config path:
+        if self.uncertToolConfigPath is not None:
+            config_file = self.uncertToolConfigPath
+        else:
+            if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
+                config_file = "rel22/Fall2024_PreRec/" + config_file
+            else:
+                log.warning("Uncertainties for UFO jets are not for Run 4!")
+
+        # MC type:
+        if config.geometry() is LHCPeriod.Run2:
+            if config.dataType() is DataType.FastSim:
+                mc_type = "MC20AF3"
+            else:
+                mc_type = "MC20"
+        elif config.geometry() is LHCPeriod.Run3:
+            mc_type = "MC23"
+
+        # Set up the FF smearing tool
+        config.addPrivateTool( 'FFSmearingTool', 'CP::FFJetSmearingTool')
+        jetFFSmearingAlg.FFSmearingTool.MassDef = "UFO"
+        jetFFSmearingAlg.FFSmearingTool.MCType = mc_type
+        jetFFSmearingAlg.FFSmearingTool.ConfigFile = config_file
 
     def makeAlgs (self, config) :
 
@@ -761,6 +805,16 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', 'outOfValidity')
 
+        if self.jetInput == "UFO" and config.dataType() is not DataType.Data:
+            # set up the FF smearing algorithm
+            alg = config.createAlgorithm( 'CP::JetFFSmearingAlg', 'JetFFSmearingAlg'+self.containerName )
+            self.createFFSmearingTool(alg, config)
+            alg.outOfValidity = 2 # SILENT
+            alg.outOfValidityDeco = 'outOfValidityJMR'
+            alg.jets = config.readName (self.containerName)
+            alg.jetsOut = config.copyName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+
         if self.minPt > 0 or self.maxPt > 0 or self.maxEta > 0:
             # Set up the the pt-eta selection
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'JetPtEtaCutAlg'+self.containerName )
@@ -785,7 +839,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', alg.selectionDecoration,
                                  preselection=True)
-
+            
         config.addOutputVar (self.containerName, 'm', 'm')
 
 # These algorithms set up the jet recommendations as-of 04/02/2019.

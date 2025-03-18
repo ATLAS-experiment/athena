@@ -121,7 +121,7 @@ BOOST_FIXTURE_TEST_SUITE( ITkStripCablingAlgTest, TestFixture )
     ITkStripCablingAlg a("MyAlg", svcLoc);
     a.addRef();
     //add property definitions for later (normally in job opts)
-    BOOST_TEST(a.setProperty("DataSource","ITkStripCabling.dat").isSuccess());
+    BOOST_TEST(a.setProperty("DataSource","/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/ITkStripCabling/ITkStripCabling.dat").isSuccess());
     //
     BOOST_TEST(a.sysInitialize().isSuccess() );
     ServiceHandle<StoreGateSvc> conditionStore ("ConditionStore", "ITkStripCablingData");

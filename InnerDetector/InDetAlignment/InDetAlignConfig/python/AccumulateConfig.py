@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # File: InDetAlignConfig/python/AccumulateConfig.py
 # Author: David Brunner (david.brunner@cern.ch), Thomas Strebler (thomas.strebler@cern.ch)
@@ -13,9 +13,9 @@ def ConstrainedTrackProviderCfg(flags, name="ConstrainedTrackProvider", **kwargs
     cfg = ComponentAccumulator()
 
     if "TrackFitter" not in kwargs:
-        from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterCfg
+        from TrkConfig.CommonTrackFitterConfig import InDetStandaloneTrackFitterCfg
         kwargs.setdefault("TrackFitter", cfg.addPublicTool(cfg.popToolsAndMerge(
-            InDetTrackFitterCfg(flags, FillDerivativeMatrix = True))))
+            InDetStandaloneTrackFitterCfg(flags, FillDerivativeMatrix = True))))
 
     kwargs.setdefault("MinPt", 0.)
     from AthenaCommon.Utils.unixtools import find_datafile

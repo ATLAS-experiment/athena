@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_HistogramFiller_HistogramFiller2D_h
@@ -23,7 +23,7 @@ namespace Monitored {
   class HistogramFiller2DGeneric : public HistogramFiller {
   public:
     HistogramFiller2DGeneric(const HistogramDef& definition, std::shared_ptr<IHistogramProvider> provider)
-      : HistogramFiller(definition, provider) {}
+      : HistogramFiller(definition, std::move(provider)) {}
 
     virtual unsigned fill( const HistogramFiller::VariablesPack& vars) const override {
       if (ATH_UNLIKELY(vars.var[0] == nullptr or vars.var[1] == nullptr )) return 0;
@@ -73,7 +73,7 @@ namespace Monitored {
       }
 
       if (not vars.cut) return HistogramFiller::fill<H>(detail::noWeight, detail::noCut, *vars.var[0], *vars.var[1]);
-      else                  return HistogramFiller::fill<H>(detail::noWeight, cutMaskAccessor, *vars.var[0], *vars.var[1]);
+      else                  return HistogramFiller::fill<H>(detail::noWeight, std::move(cutMaskAccessor), *vars.var[0], *vars.var[1]);
     }
   };
 

@@ -10,7 +10,7 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "CxxUtils/ArrayHelper.h"
 #include "MuonReadoutGeometry/MuonReadoutElement.h"
-#include "TrkDistortedSurfaces/SaggedLineSurface.h"
+#include "TrkSurfaces/StraightLineSurface.h"
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 class BLinePar;
 namespace MuonGMR4{
@@ -163,8 +163,8 @@ namespace MuonGM {
         void fillCache() override final;
 
         virtual const Trk::Surface& surface() const override final;
-        virtual const Trk::SaggedLineSurface& surface(const Identifier& id) const override final;
-        virtual const Trk::SaggedLineSurface& surface(const int tubeLayer, const int tube) const;
+        virtual const Trk::StraightLineSurface& surface(const Identifier& id) const override final;
+        virtual const Trk::StraightLineSurface& surface(const int tubeLayer, const int tube) const;
         virtual const Trk::SurfaceBounds& bounds() const override final;
         virtual const Trk::CylinderBounds& bounds(const Identifier& id) const override final;
         virtual const Trk::CylinderBounds& bounds(const int tubeLayer, const int tube) const;
@@ -255,7 +255,7 @@ namespace MuonGM {
 
         const BLinePar* m_BLinePar{nullptr};
         CxxUtils::CachedValue<Amg::Vector3D> m_elemNormal{};                               // one
-        std::vector<CxxUtils::CachedUniquePtr<Trk::SaggedLineSurface> > m_tubeSurfaces{};  // one per tube
+        std::vector<CxxUtils::CachedUniquePtr<Trk::StraightLineSurface> > m_tubeSurfaces{};  // one per tube
         std::vector<CxxUtils::CachedUniquePtr<Trk::CylinderBounds> > m_tubeBounds{};       // one per step in tube-length
 
         /// Flag whether any elements have been inserted

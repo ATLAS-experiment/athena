@@ -16,5 +16,5 @@ atlas_add_component( PileUpComps
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                      LINK_LIBRARIES 
                      ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel
-                     PileUpToolsLib StoreGateLib EventInfo
+                     PileUpToolsLib StoreGateLib
                      EventInfoUtils xAODEventInfo GaudiKernel CxxUtils)

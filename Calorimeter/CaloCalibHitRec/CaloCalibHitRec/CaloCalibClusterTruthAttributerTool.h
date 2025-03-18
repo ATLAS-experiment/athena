@@ -27,5 +27,8 @@ private:
    /** Toggle storage of invisible and escaped energy - by default this is false, and hence we do not store the invisible or escaped calibration hit truth (ctt) energy. Hence only the EM and nonEM truth ctt energy is stored by default */
   Gaudi::Property<bool> m_fullTruthEnergy{this,"storeFullTruthEnergy",false,"Toggle storage of invisible and escaped energy"};
 
+  /** Toggle whether to use cell weights or not to calculate calibration hit contribution */
+  Gaudi::Property<bool> m_useCellWeights{this,"useCellWeights",false,"Toggle whether to use cell weights or not to calculate calibration hit contribution"};
+
 };
 #endif

@@ -4,6 +4,7 @@
 
 #include "../GlobalSimulationAlg.h"
 #include "../GlobalAlgs/Hypothesis/UCL/HypoTestBenchAlg.h"
+#include "../GlobalAlgs/Hypothesis/UCL/InvMassDPhiInc2TestBenchAlg.h"
 
 #include "../L1TopoAlgs/cTauMultiplicityAlgTool.h"
 #include "../L1TopoAlgs/EnergyThresholdAlgTool_jXE.h"
@@ -24,10 +25,13 @@
 #include "../GlobalAlgs/Egamma1BDTAlgTool.h"
 
 #include "../GlobalAlgs/Hypothesis/UCL/eEmSortSelectCountContainerAlgTool.h"
+#include "../GlobalAlgs/Hypothesis/UCL/eEmSortSelectCountContainerComparator.h"
+#include "../GlobalAlgs/Hypothesis/UCL/InvariantMassDeltaPhiInclusive2AlgTool.h"
 
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
 DECLARE_COMPONENT(GlobalSim::HypoTestBenchAlg)
+DECLARE_COMPONENT(GlobalSim::InvMassDPhiInc2TestBenchAlg)
 
 
 DECLARE_COMPONENT(GlobalSim::cTauMultiplicityAlgTool)
@@ -49,3 +53,5 @@ DECLARE_COMPONENT(GlobalSim::ERatioAlgTool)
 DECLARE_COMPONENT(GlobalSim::Egamma1BDTAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::eEmSortSelectCountContainerAlgTool)
+DECLARE_COMPONENT(GlobalSim::eEmSortSelectCountContainerComparator)
+DECLARE_COMPONENT(GlobalSim::InvariantMassDeltaPhiInclusive2AlgTool)

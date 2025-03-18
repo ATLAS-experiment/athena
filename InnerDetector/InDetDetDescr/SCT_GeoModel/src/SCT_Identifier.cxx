@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SCT_GeoModel/SCT_Identifier.h"
+#include "SCT_Identifier.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "Identifier/Identifier.h"
 

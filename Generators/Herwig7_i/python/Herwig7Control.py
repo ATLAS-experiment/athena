@@ -346,16 +346,6 @@ def start_banner():
   banner += "##   with software versions:       ##\n"
   banner += "##   - Herwig7:    {}{}   ##\n".format(herwig_version_number, herwig_version_space)
   banner += "##   - ThePEG:     {}{}   ##\n".format(thepeg_version_number, thepeg_version_space)
-  # banner += "##                                            ##\n"
-  # banner += "##   with depencency versions                 ##\n"
-  # banner += "##   - GoSam\n"
-  # banner += "##     - GoSam-Contrib\n"
-  # banner += "##     - GoSam\n"
-  # banner += "##   - HJets\n"
-  # banner += "##   - MadGraph5_aMC@NLO: \n"
-  # banner += "##   - NJet: \n"
-  # banner += "##   - OpenLoops: \n"
-  # banner += "##   - VBFNLO: \n"
   banner += "##                                 ##\n"
   banner += "#####################################\n"
   return(banner)

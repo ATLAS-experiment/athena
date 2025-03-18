@@ -229,7 +229,7 @@ def ActsMainSpacePointFormationCfg(flags,
                                                                   **extractChildKwargs(prefix='StripOverlapSpacePointPreparationAlg.', **kwargs)))
             
     # Analysis extensions
-    if flags.Acts.doAnalysis:
+    if flags.Acts.SpacePoints.doAnalysis:
         if kwargs['processPixels']:
             from ActsConfig.ActsAnalysisConfig import ActsPixelSpacePointAnalysisAlgCfg
             acc.merge(ActsPixelSpacePointAnalysisAlgCfg(flags, **extractChildKwargs(prefix='PixelSpacePointAnalysisAlg.', **kwargs)))
@@ -406,7 +406,7 @@ def ActsSpacePointFormationCfg(flags,
                 kwargs.setdefault('StripOverlapSpacePointPreparationAlg.InputPrdMap', f'{previousActsExtension}PrdMap')
 
     # Analysis algo(s)
-    if flags.Acts.doAnalysis:
+    if flags.Acts.SpacePoints.doAnalysis:
         # Run analysis code on the resulting space point collection produced by this tracking pass        
         # This collection is the result of (3) if it ran, else the result of (2). We are sure at least one of them run
         if kwargs['processPixels']:

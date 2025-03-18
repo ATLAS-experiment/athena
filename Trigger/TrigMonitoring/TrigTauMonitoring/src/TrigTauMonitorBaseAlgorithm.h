@@ -56,7 +56,6 @@ protected:
     std::vector<const xAOD::eFexTauRoI*> getL1eTAUs(const EventContext& ctx, const std::string& l1_item) const;
     std::vector<const xAOD::jFexTauRoI*> getL1jTAUs(const EventContext& ctx, const std::string& l1_item) const;
     std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>> getL1cTAUs(const EventContext& ctx, const std::string& l1_item) const;
-    std::vector<const xAOD::EmTauRoI*> getL1LegacyTAUs(const EventContext& ctx, const std::string& l1_item) const;
 
     // Process event, after bad event cleaning
     virtual StatusCode processEvent(const EventContext& ctx) const = 0;
@@ -95,10 +94,10 @@ protected:
     template <typename T1 = xAOD::IParticle, typename T2 = xAOD::IParticle>
     inline bool matchTruthObjects(const T1* true_tau, const std::vector<const T2*>& tau_vec, float threshold) const
     {
-      static const SG::AuxElement::ConstAccessor<double> acc_ptvis("pt_vis");
-      static const SG::AuxElement::ConstAccessor<double> acc_etavis("eta_vis");
-      static const SG::AuxElement::ConstAccessor<double> acc_phivis("phi_vis");
-      static const SG::AuxElement::ConstAccessor<double> acc_mvis("mvis");
+      static const SG::ConstAccessor<double> acc_ptvis("pt_vis");
+      static const SG::ConstAccessor<double> acc_etavis("eta_vis");
+      static const SG::ConstAccessor<double> acc_phivis("phi_vis");
+      static const SG::ConstAccessor<double> acc_mvis("mvis");
       TLorentzVector true_tau_p4;
       true_tau_p4.SetPtEtaPhiM(acc_ptvis(*true_tau), acc_etavis(*true_tau), acc_phivis(*true_tau), acc_mvis(*true_tau));
 
@@ -121,7 +120,6 @@ protected:
 
     SG::ReadHandleKey<xAOD::TauJetContainer> m_offlineTauJetKey{this, "OfflineTauJetKey", "TauJets", "Offline taujet container key"};
 
-    SG::ReadHandleKey<xAOD::EmTauRoIContainer> m_legacyl1TauRoIKey{ this, "LegacyL1TauRoIKey", "LVL1EmTauRoIs", "Tau Legacy L1 RoI key"};
     SG::ReadHandleKey<xAOD::eFexTauRoIContainer>  m_phase1l1eTauRoIKey{this, "Phase1L1eTauRoIKey", "L1_eTauRoI", "eTau Phase1 L1 RoI key"};
     SG::ReadDecorHandleKey<xAOD::eFexTauRoIContainer> m_phase1l1eTauRoIThresholdPatternsKey{this, "Phase1L1eTauRoIThresholdPatternsKey", "L1_eTauRoI.thresholdPatterns", "Decoration for the threshold patterns for the eTau RoIs"};
     SG::ReadHandleKey<xAOD::jFexTauRoIContainer>  m_phase1l1jTauRoIKey{this, "Phase1L1jTauRoIKey", "L1_jFexTauRoI", "jTau Phase1 L1 RoI key"};

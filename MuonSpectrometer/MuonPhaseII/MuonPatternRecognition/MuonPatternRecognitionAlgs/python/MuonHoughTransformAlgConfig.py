@@ -46,9 +46,10 @@ def MuonPatternRecognitionCfg(flags):
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
     result.merge(ActsGeometryContextAlgCfg(flags))
     if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
-        result.merge(MuonEtaHoughTransformAlgCfg(flags,name="MuonNswEtaHoughTransformAlg", EtaHoughMaxContainer = "MuonHoughNswMaxima", SpacePointContainer = "NswSpacePoints"))
-        result.merge(MuonNSWPhiSeedFinderAlgCfg(flags, name="MuonNswPhiSeedFinderAlg", CombinatorialPhiWriteKey = "MuonHoughNswSegmentSeeds", CombinatorialReadKey = "MuonHoughNswMaxima"))
+        result.merge(MuonEtaHoughTransformAlgCfg(flags,name="NswEtaHoughTransformAlg", EtaHoughMaxContainer = "MuonHoughNswMaxima", SpacePointContainer = "NswSpacePoints"))
+        result.merge(MuonNSWPhiSeedFinderAlgCfg(flags, name="NswPhiSeedFinderAlg", CombinatorialPhiWriteKey = "MuonHoughNswSegmentSeeds", CombinatorialReadKey = "MuonHoughNswMaxima"))
     if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
         result.merge(MuonEtaHoughTransformAlgCfg(flags))
         result.merge(MuonPhiHoughTransformAlgCfg(flags))
+        result.merge(MuonSegmentFittingAlgCfg(flags))
     return result

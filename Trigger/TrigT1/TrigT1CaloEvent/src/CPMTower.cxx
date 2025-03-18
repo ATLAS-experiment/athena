@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           CPMTower.cpp  -  description
@@ -15,25 +15,20 @@ namespace LVL1 {
 
 // default constructor for persistency
 LVL1::CPMTower::CPMTower::CPMTower():
-	m_em_energy(1),
-        m_had_energy(1),
-	m_em_error(1),
-	m_had_error(1),
-	m_phi(0.0),
-	m_eta(0.0),
-	m_peak(0)
+    m_em_energy(1),
+    m_had_energy(1),
+    m_em_error(1),
+    m_had_error(1),
+    m_phi(0.0),
+    m_eta(0.0),
+    m_peak(0)
  {
  }
+ 
 /** constructs a trigger tower and sets the key. */
 LVL1::CPMTower::CPMTower::CPMTower(double phi, double eta):
-	m_em_energy(1),
-        m_had_energy(1),
-	m_em_error(1),
-	m_had_error(1),
 	m_phi(phi),
-	m_eta(eta),
-	m_peak(0)
-{
+	m_eta(eta){
 }
 /** constructs a trigger tower and sets everything */
 LVL1::CPMTower::CPMTower::CPMTower(double phi, double eta,
@@ -52,8 +47,6 @@ LVL1::CPMTower::CPMTower::CPMTower(double phi, double eta,
 {
 }
 
-CPMTower::~CPMTower(){
-}
 
 /** Method for filling tower data */
 void LVL1::CPMTower::fill(const std::vector<int>& em_et,

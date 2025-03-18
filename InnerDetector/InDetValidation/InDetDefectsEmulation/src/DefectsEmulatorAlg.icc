@@ -8,6 +8,10 @@
 #include "InDetRawData/SCT3_RawData.h"
 #include "InDetRawData/Pixel1RawData.h"
 
+#include "AthenaKernel/RNGWrapper.h"
+#include "CLHEP/Random/RandPoisson.h"
+#include "CLHEP/Random/RandFlat.h"
+
 #include "StoreGate/WriteHandle.h"
 
 #include <vector>
@@ -15,6 +19,25 @@
 #include <mutex>
 
 namespace InDet{
+
+  template <class T_RDO_Container>
+  bool DefectsEmulatorAlg<T_RDO_Container>::setModuleData(const ActsDetectorElement &acts_detector_element,
+                                                          ModuleIdentifierMatchUtil::ModuleData_t &module_data) const {
+     // It is assumed that a module is unambiguously identified by the detector type and the id hash,
+     // and all modules with the same detector type are relevant for the given RDO container.
+     if (acts_detector_element.detectorType() == DETECTOR_TYPE) {
+        const auto*si_detector_element  = dynamic_cast<const InDetDD::SiDetectorElement*>(acts_detector_element.upstreamDetectorElement());
+        if(si_detector_element  != nullptr) {
+           const T_ModuleDesign &moduleDesign = dynamic_cast<const T_ModuleDesign &>(si_detector_element->design());
+           ModuleIdentifierMatchUtil::setModuleData(*m_idHelper,
+                                                    acts_detector_element.identify(),
+                                                    moduleDesign,
+                                                    module_data);
+           return true;
+        }
+     }
+     return false;
+  }
 
   template <class T_RDO_Container>
   StatusCode DefectsEmulatorAlg<T_RDO_Container>::initialize(){
@@ -35,10 +58,20 @@ namespace InDet{
     SG::WriteHandle<T_RDO_Container> rdoOutContainer(m_rdoOutContainerKey, ctx);
     ATH_CHECK( rdoOutContainer.record (std::make_unique<T_RDO_Container>(origRdoContainer->size(), EventContainers::Mode::OfflineFast)) );
 
+    CLHEP::HepRandomEngine *rndmEngine{};
+    if (!m_noiseProbability.value().empty()){
+       m_rndmSvc->getEngine(this, m_rngName);
+       ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_rngName);
+       rngWrapper->setSeed( m_rngName, ctx );
+       rndmEngine = rngWrapper->getEngine(ctx);
+    }
+
     unsigned int n_rejected=0u;
     unsigned int n_split_rdos=0u;
     unsigned int n_new=0;
     T_ID_Adapter id_helper(m_idHelper);
+    unsigned int n_added_noise_hits=0u;
+    unsigned int n_defect_noise_hits=0u;
 
     std::vector<typename T_ModuleHelper::KEY_TYPE> sorted_keys;
     for(const InDetRawDataCollection<T_RDORawData>* collection : *origRdoContainer ) {
@@ -48,20 +81,31 @@ namespace InDet{
           clone = std::make_unique<InDetRawDataCollection<T_RDORawData> >(idHash);
        clone->setIdentifier(collection->identify());
        unsigned int rejected_per_mod=0u;
+       unsigned int noise_per_mod=0u;
        if (!emulatedDefects->isModuleDefect(idHash)) {
-          clone->reserve( collection->size());
+          unsigned int n_cells = module_helper.nCells();
+          unsigned int n_noise_hits=rndmEngine && m_noiseParamIdx.at(idHash)<m_noiseProbability.size()
+                                    ? CLHEP::RandPoisson::shoot(rndmEngine,
+                                                                n_cells * m_noiseProbability.value()[ m_noiseParamIdx[idHash] ] )
+                                    : 0u;
+          clone->reserve( collection->size() + n_noise_hits);
           if (!module_helper) {
              ATH_MSG_ERROR( "Not module design for " << idHash);
              return StatusCode::FAILURE;
           }
           TH2 *h2_rejected_hits=nullptr;
+          TH2 *h2_noise_hits=nullptr;
+          TH1 *h1_noise_shape=nullptr;
           if (m_histogrammingEnabled) {
              std::lock_guard<std::mutex> lock(m_histMutex);
-             h2_rejected_hits = findHist(module_helper.nSensorRows(), module_helper.nSensorColumns());
+             std::tuple<TH2 *, TH2 *, TH1 *> hists = findHist(module_helper.nSensorRows(), module_helper.nSensorColumns());
+             h2_rejected_hits=std::get<0>(hists);
+             h2_noise_hits=std::get<1>(hists);
+             h1_noise_shape=std::get<2>(hists);
           }
 
           sorted_keys.clear();
-          sorted_keys.reserve( collection->size());
+          sorted_keys.reserve( collection->size()+n_noise_hits);
           for(const auto *const rdo : *collection) {
              const Identifier rdoID = rdo->identify();
 
@@ -98,6 +142,55 @@ namespace InDet{
              }
 
           }
+
+          // add random noise hits
+          for (unsigned int i=0; i<n_noise_hits; ++i) {
+             for (unsigned int attempt_i=0; attempt_i<10; ++attempt_i) {
+                unsigned int cell_idx=CLHEP::RandFlat::shoot(rndmEngine,n_cells); // %pixels;
+                unsigned int row_idx = cell_idx % module_helper.rows();
+                unsigned int col_idx = cell_idx / module_helper.rows();
+                unsigned int key = module_helper.hardwareCoordinates(row_idx,col_idx);
+                if (emulatedDefects->isDefect(module_helper, idHash, row_idx, col_idx)) {
+                   ++n_defect_noise_hits;
+                   break;
+                }
+                auto iter = std::lower_bound(sorted_keys.begin(), sorted_keys.end(), key);
+                if (iter == sorted_keys.end()) {
+                   sorted_keys.push_back(key);
+                }
+                else {
+                   if (*iter != key) {
+                      sorted_keys.insert(iter, key);
+                   }
+                   else {
+                      continue;
+                   }
+                }
+                float prob = CLHEP::RandFlat::shoot(rndmEngine,1.);
+                assert( m_noiseParamIdx[idHash]  < m_noiseShapeCummulative.size() );
+                const std::vector<float> &noise_shape = m_noiseShapeCummulative[ m_noiseParamIdx[idHash] ];
+                unsigned int noise_value=0;
+                for (noise_value=0; noise_value<noise_shape.size(); ++noise_value) {
+                   if (noise_shape[noise_value]>prob) {
+                      break;
+                   }
+                }
+
+                clone->push_back( id_helper.createNoiseHit( module_helper, collection->identify(), cell_idx, noise_value).release() );
+                if (m_histogrammingEnabled && h2_noise_hits) {
+                   unsigned int row_idx = cell_idx % module_helper.rows();
+                   unsigned int col_idx = cell_idx / module_helper.rows();
+
+                   std::lock_guard<std::mutex> lock(m_histMutex);
+                   h2_noise_hits->Fill(col_idx, row_idx);
+                   h1_noise_shape->Fill(noise_value);
+                }
+                ++noise_per_mod;
+                break;
+             }
+          }
+
+
        }
        else {
           rejected_per_mod += collection->size();
@@ -105,16 +198,22 @@ namespace InDet{
        if (m_histogrammingEnabled) {
           std::lock_guard<std::mutex> lock(m_histMutex);
           unsigned int bin_i=m_moduleHist[kRejectedHits]->GetBin( idHash%100+1, idHash/100+1);
+          assert(m_moduleHist[kRejectedHits]->GetNbinsX() == m_moduleHist[kNoiseHits]->GetNbinsX());
+          assert(m_moduleHist[kRejectedHits]->GetNbinsY() == m_moduleHist[kNoiseHits]->GetNbinsY());
           m_moduleHist[kRejectedHits]->SetBinContent(bin_i, rejected_per_mod );
+          m_moduleHist[kNoiseHits]->SetBinContent(bin_i, noise_per_mod );
        }
+       n_added_noise_hits += noise_per_mod;
        n_rejected += rejected_per_mod;
        n_new += clone->size();
        rdoOutContainer->addCollection( clone.release(), idHash).ignore();
     }
     m_rejectedRDOs += n_rejected;
     m_totalRDOs += n_new;
+    m_totalNoise += n_added_noise_hits;
     m_splitRDOs += n_split_rdos;
     ATH_MSG_DEBUG("rejected  " << m_rejectedRDOs << ", copied " << m_totalRDOs << " RDOs"
+                 << " noise " << n_added_noise_hits << " (+" << n_defect_noise_hits << ")"
                  << " split hits: " << n_split_rdos);
 
     return StatusCode::SUCCESS;

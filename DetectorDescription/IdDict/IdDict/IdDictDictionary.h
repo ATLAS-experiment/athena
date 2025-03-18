@@ -213,10 +213,10 @@ public:
     void                set_dict_tag     (const std::string& tag);
 
 
-    std::string m_name;  
-    std::string m_version;  
-    std::string m_date;  
-    std::string m_author;  
+    std::string m_name{};  
+    std::string m_version{};  
+    std::string m_date{};  
+    std::string m_author{};  
   
     typedef std::vector<IdDictDictEntry*> entries_type;
     typedef entries_type::iterator        entries_it;
@@ -236,14 +236,14 @@ public:
     std::vector<IdDictRegion*>            m_all_regions;  // all regions
     std::vector<IdDictGroup*>             m_groups;    
     std::vector<std::string>              m_subdictionary_names; 
-    IdDictDictionary*                     m_parent_dict;
+    IdDictDictionary*                     m_parent_dict{nullptr};
 
 private:
-    std::string m_file_name;  
-    std::string m_dict_tag;  
-    bool m_generated_implementation;
-    bool  m_do_checks;
-    bool  m_do_neighbours;
+    std::string m_file_name{};  
+    std::string m_dict_tag{};  
+    bool m_generated_implementation{false};
+    bool  m_do_checks{false};
+    bool  m_do_neighbours{true};
 };
 
 //-------------------

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_VARHANDLEKEYARRAY_H
@@ -30,6 +30,7 @@ namespace SG {
     VarHandleKeyArray(){};
     virtual ~VarHandleKeyArray() = default;
     virtual StatusCode assign(const std::vector<std::string>& vs)=0;
+    virtual void push_back(const std::string& key)=0;
     virtual std::string toString() const = 0;
     virtual Gaudi::DataHandle::Mode mode() const = 0;
 
@@ -90,7 +91,7 @@ namespace SG {
      */
     VarHandleKeyArrayCommon( std::initializer_list<std::string> l ) {
       for (auto &e : l) {
-        this->push_back( Base{e} );
+        std::vector<Base>::push_back( Base{e} );
       }
     }    
     
@@ -107,6 +108,14 @@ namespace SG {
      * @param vs vector of initializer strings
      */
     virtual StatusCode assign(const std::vector<std::string>& vs) override;
+
+    /**
+     * @brief Add a new key to the VarHandleKeyArray
+     * @param key name of the key
+     */
+    virtual void push_back(const std::string& key) override {
+      std::vector<Base>::push_back( Base(key) );
+    }
 
     /**
      * @brief string representation of the VarHandleKeyArray

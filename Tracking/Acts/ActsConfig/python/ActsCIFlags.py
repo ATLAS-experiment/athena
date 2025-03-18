@@ -11,7 +11,7 @@ def actsWorkflowFlags(flags) -> None:
 def actsFastWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""
     flags.Reco.EnableHGTDExtension = False
-    flags.Acts.doAmbiguityResolution = False
+    flags.Acts.doAmbiguityResolution = True
     flags.Tracking.doITkFastTracking = True
     flags.Tracking.recoChain = [TrackingComponent.ActsFastChain]
 
@@ -96,3 +96,16 @@ def actsValidateGX2FFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use GlobalChiSquareFitter"""
     from ActsConfig.ActsConfigFlags import TrackFitterType
     flags.Acts.trackFitterType = TrackFitterType.GlobalChiSquareFitter
+
+def actsGSFEgammaFlags(flags) -> None:
+    """flags for Reco_tf with CA used in CI tests: ACTS GSF refitting for electron ACTS tracks"""
+    flags.DQ.useTrigger = False
+    flags.Acts.doAnalysis =  False
+    flags.Acts.doMonitoring = False
+    flags.Acts.doAmbiguityResolution = True
+    flags.Tracking.recoChain = [ TrackingComponent.ActsChain]
+    flags.Reco.EnableHGTDExtension = False
+    flags.Tracking.doITkConversion = False
+    flags.Acts.GsfRefitActs = True
+    flags.Acts.GsfDirectNavigation = True
+    

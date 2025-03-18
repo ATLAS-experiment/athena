@@ -142,7 +142,7 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1Topo
 
     return acc
 
-def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
+def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False, doMonitoring=True):
 
     acc = ComponentAccumulator()
 
@@ -223,6 +223,7 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
                                                     JetInputProvider = jfexProvider,
                                                     EnergyInputProvider = gfexProvider,
                                                     IsLegacyTopo = False,
+                                                    doMonitoring = doMonitoring,
                                                     EnableInputDump = flags.Trigger.enableL1TopoDump,
                                                     UseBitwise = flags.Trigger.enableL1TopoBWSimulation
                                                     )

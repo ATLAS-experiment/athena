@@ -4,30 +4,70 @@ log = logging.getLogger( __name__ )
 log.debug("Importing %s",__name__)
 
 from copy import deepcopy
+from collections import OrderedDict
+import itertools
 
 #==========================================================
 # This is stored in chainDict['Signature']
 #==========================================================
-SliceIDDict = {
-    'Electron': 'e',
-    'Photon'  : 'g',
-    'Jet'     : 'j',
-    'Muon'    : 'mu',
-    'Tau'     : 'tau',
-    'MET'     : 'xe',
-    'XS'      : 'xs',
-    'TE'      : 'te',
-    'MinBias' : 'mb',
-    'HeavyIon' : 'hi',
-    'Cosmic'  : 'cosmic',
-    'Calib'   : 'calib',
-    'Streaming'     : 'streamer',
-    'Monitor'    : 'mon',
-    'Beamspot'      : 'beamspot',
-    'EnhancedBias'  : 'eb',
-    'UnconventionalTracking'  : ['isotrk', 'fslrt', 'dedxtrk', 'hitdvjet', 'fsvsi', 'distrk', 'dispjet', 'dispvtx'],
-    'Test'          : 'TestChain',
-}
+
+# this dictionary contains all the informations about the signatures, needed to create the Chaindicitonary. It has the shape of:
+# 'signature': ('substring', 'group')
+# if the substring is '', the signature is not mapped to the chain name
+# if the group is '', the signature is not mapped to any group
+SignatureDict = OrderedDict({
+    'Electron': ('e','AllTag'),
+    'Photon'  : ('g','AllTag'),
+    'Muon'    : ('mu','AllTag'),
+    'Bphysics': ('', 'AllTag'),
+    'Tau'     : ('tau','AllTag'),
+    'Jet'     : ('j',  'JetMET'),
+    'Bjet'    : ('', 'JetMET'),
+    'MET'     : ('xe', 'JetMET'),
+    'XS'      : ('xs', 'JetMET'),
+    'TE'      : ('te', 'JetMET'),
+    'MinBias' : ('mb', 'MinBias'),
+    'HeavyIon' : ('hi', 'MinBias'),
+    'Cosmic'  : ('cosmic', ''),
+    'Calib'   : ('calib', ''),
+    'Streaming' : ('streamer', ''),
+    'Monitor'   : ('mon', ''),
+    'Beamspot'  : ('beamspot','Beamspot'),
+    'MuonnoL1'  : ( '', 'MuonnoL1'),
+    'EnhancedBias' : ('eb', ''),
+    'UnconventionalTracking'  : (['isotrk', 'fslrt', 'dedxtrk', 'hitdvjet', 'fsvsi', 'distrk', 'dispjet', 'dispvtx'], 'JetMET'),
+    'Test'          : ('TestChain', ''),
+    'Electronprobe': ('', 'AllProbe'),
+    'Photonprobe'  : ('', 'AllProbe'),
+    'Tauprobe'     : ('', 'AllProbe'),
+    'Muonprobe'    : ('', 'AllProbe')
+})
+
+
+def getSignatureDict():
+    # removes the grouping from the dict and creates a new one signature : string
+    new_dict = OrderedDict({key: value[0] for key, value in SignatureDict.items() if value[0] != ''})
+    return new_dict
+
+SliceIDDict = getSignatureDict()
+
+def getSignatureGroupingDict():
+    # removes the substring from the dict and creates a new one signature : group
+    new_dict = OrderedDict({key: value[1] for key, value in SignatureDict.items() if value[1] != ''})
+    return new_dict
+
+def getListOfSignatureStrings():   
+    ''' returns the list of substrings representing the signautres in the chain name'''
+
+    list_of_strings = list(SliceIDDict.values())      # this is a list of lists
+    flattened_list = list(itertools.chain.from_iterable((item if isinstance(item, list) else [item]) for item in list_of_strings))
+    return flattened_list
+
+def getListOfSignatures():   
+    ''' returns the list of substrings representing the signautres in the chain name'''
+    return SliceIDDict.keys()
+
+
 
 class ChainStore(dict):
     """Class to hold list of chains for each signature (dictionary with fixed set of keys)"""
@@ -403,6 +443,8 @@ JetChainParts = {
       +['320eta490'], # TODO: Kept temporarily for validation
     'jvt'           : # Jet Vertex Tagger pileup discriminant
       ['010jvt', '011jvt', '015jvt', '020jvt', '050jvt', '059jvt'],
+    'nnJvt'         : # NN Jet Vertex Tagger pileup discriminant
+      ['nnJvtv1'], # No range cuts, boolean pass/fail
     'momCuts'       : # Generic moment cut on single jets
        ['050momemfrac100','momemfrac006','momemfrac024','momemfrac012', 'momhecfrac010', '050momemfrac100XXmomhecfrac010', 'momemfrac072', 'momemfrac048' ],
     'timing'        : # delayed jets, with absolute delay requirement [ns]
@@ -473,6 +515,7 @@ JetChainParts_Default = {
     #
     'etaRange'      : '0eta320',
     'jvt'           : '',
+    'nnJvt'         : '',
     'momCuts'       : '',
     'timing'        : '',
     'timeSig'       : '',
@@ -838,7 +881,7 @@ PhotonChainParts = {
     'reccalibInfo'   : [],
     'trkInfo'        : [],
     'caloInfo'       : [],
-    'L2IDAlg'        : ['ringer'],
+    'L2IDAlg'        : ['noringer','ringer'],
     'hypoInfo'       : '',
     'recoAlg'        : [],
     'FSinfo'         : [],
@@ -1310,7 +1353,9 @@ UnconventionalTrackingChainParts_Default = {
 #==========================================================
 AllowedTopos_comb = [
     'idZmumu','idJpsimumu',
-    'dRAA12', 'dRAB15', '03dRAB','02dRAB10','03dRAB10','03dRAB30','03dRAB35','dRAB03','dRAB04', 'dRAB05', '02dRAB','02dRAC','03dRAC30','03dRAC35','02dRBC','15dRBC45','50invmAB','60invmAB','afpdijet','18dphiAB','18dphiAC','80mTAC','80mTAD',
+    'dRAA12', 'dRAB15', '03dRAB','02dRAB10','03dRAB10','03dRAB30','03dRAB35','dRAD04', 'dRAF04','dRAB03','dRAB04', 'dRAB05', '02dRAB','02dRAC','03dRAC30','03dRAC35','02dRBC','15dRBC45','50invmAB','60invmAB','afpdijet','18dphiAB','18dphiAC','80mTAC','80mTAD',
+    'anomdet','anomdetL','anomdetM','anomdetT',
+    '29dphiAA', '29dphiAB', '30dphiAA', '30dphiAB', # g-2 tau triggers
     '90invmAB',# TEST
     '1invmAB5','50invmAB130','50invmBC130', # Jpsiee, Zee/Zeg
     '25dphiAA','25dphiBB','25dphiCC','invmAA80', # Low-mass diphoton

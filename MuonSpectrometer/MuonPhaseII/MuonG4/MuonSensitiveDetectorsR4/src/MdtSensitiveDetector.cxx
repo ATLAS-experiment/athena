@@ -3,18 +3,16 @@
 */
 
 #include "MuonSensitiveDetectorsR4/Utils.h"
+
 #include "MdtSensitiveDetector.h"
 
 
 #include <MCTruth/TrackHelper.h>
-#include <G4Geantino.hh>
-#include <G4ChargedGeantino.hh>
 
 #include <limits>
 #include <iostream>
 #include <GeoPrimitives/CLHEPtoEigenConverter.h>
 #include <GeoModelKernel/throwExcept.h>
-#include <xAODMuonSimHit/MuonSimHitAuxContainer.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <StoreGate/ReadHandle.h>
 
@@ -22,30 +20,6 @@ using namespace MuonGMR4;
 using namespace CxxUtils;
 using namespace ActsTrk;
 namespace MuonG4R4{
-
-MdtSensitiveDetector::MdtSensitiveDetector(const std::string& name, 
-                                           const std::string& output_key,
-                                           const std::string& trfStore_key,
-                                           const MuonGMR4::MuonDetectorManager* detMgr):
-    G4VSensitiveDetector{name},
-    AthMessaging{name},
-    m_writeHandle{output_key},
-    m_trfCacheKey{trfStore_key},
-    m_detMgr{detMgr} {
-    m_trfCacheKey.initialize().ignore();
-}
-// Implemenation of memebr functions
-void MdtSensitiveDetector::Initialize(G4HCofThisEvent*) {
-  if (m_writeHandle.isValid()) {
-      ATH_MSG_VERBOSE("Simulation hit container "<<m_writeHandle.fullKey()<<" is already written");
-      return;
-  }
-  if (!m_writeHandle.recordNonConst(std::make_unique<xAOD::MuonSimHitContainer>(),
-                                    std::make_unique<xAOD::MuonSimHitAuxContainer>()).isSuccess()) {
-      THROW_EXCEPTION(" Failed to record "<<m_writeHandle.fullKey());     
-  }
-  ATH_MSG_DEBUG("Output container "<<m_writeHandle.fullKey()<<" has been successfully created");
-}
 
 const MuonGMR4::MdtReadoutElement* MdtSensitiveDetector::getReadoutElement(const G4TouchableHistory* touchHist) const {
    /// The third volume in the history is the volume corresponding to the Muon multilayer
@@ -74,31 +48,19 @@ const MuonGMR4::MdtReadoutElement* MdtSensitiveDetector::getReadoutElement(const
 }
  
 G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROHist*/) {
-    G4Track* currentTrack = aStep->GetTrack();
 
-    // MDTs sensitive to charged particle only
-    if (currentTrack->GetDefinition()->GetPDGCharge() == 0.0) {
-      if (currentTrack->GetDefinition()!= G4Geantino::GeantinoDefinition()) return true;
-      else if (currentTrack->GetDefinition() != G4ChargedGeantino::ChargedGeantinoDefinition()) return true;
+    /// Check whether the detector is sensitive to the traversing particle
+    if (!processStep(aStep)) {
+      return true;
     }
-
-    
-    /// Reject secondary particles
-    constexpr double velCutOff = 10.*Gaudi::Units::micrometer / Gaudi::Units::second;
-    if (currentTrack->GetVelocity() < velCutOff) return true;
- 
-    const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(currentTrack->GetTouchable());
+    G4Track* currentTrack = aStep->GetTrack();
+    const G4StepPoint* preStep = aStep->GetPreStepPoint();
+    const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(preStep->GetTouchable());
     const MdtReadoutElement* reEle{getReadoutElement(touchHist)};
 
-    ActsGeometryContext gctx{};
+    const ActsGeometryContext gctx{getGeoContext()};
 
-    SG::ReadHandle trfStoreHandle{m_trfCacheKey};
-    if (!trfStoreHandle.isValid()) {
-      ATH_MSG_FATAL("Failed to retrieve "<<m_trfCacheKey.fullKey()<<".");
-      return false;
-    }
-    gctx.setStore(std::make_unique<DetectorAlignStore>(*trfStoreHandle));
-    
+  
     const Identifier HitID = getIdentifier(gctx, reEle, touchHist);
     if (!HitID.is_valid()) {
         ATH_MSG_VERBOSE("No valid hit found");
@@ -108,42 +70,42 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     const Amg::Transform3D globalToLocal{reEle->globalToLocalTrans(gctx, reEle->measurementHash(HitID))};
 
     // transform pre and post step positions to local positions
-    const Amg::Vector3D trackPosition{Amg::Hep3VectorToEigen(aStep->GetPreStepPoint()->GetPosition())};
-    const Amg::Vector3D trackDirection{Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection())};
+    const Amg::Vector3D prePosition{Amg::Hep3VectorToEigen(preStep->GetPosition())};
+    const Amg::Vector3D postPosition{Amg::Hep3VectorToEigen(aStep->GetPostStepPoint()->GetPosition())};
+    
+    const Amg::Vector3D trackDirection{(postPosition - prePosition).unit()};
 
-    const Amg::Vector3D trackLocPos{globalToLocal * trackPosition};  
+    const Amg::Vector3D trackLocPos{globalToLocal * prePosition};  
     const Amg::Vector3D trackLocDir{globalToLocal.linear()* trackDirection};
   
-    /// Calculate the closest approach of the track w.r.t. the wire. We're starting with the prestep
+    /// Calculate the closest approach of the track w.r.t. the wire. We're starting with the post step
     /// position and if, there's a closer approach to the wire from that, the propagation distance 
-    /// will be greater zero. Otherwise one would need to go backwards along the trajectory
+    /// will be always less than zero. Otherwise one would need to go forward along the trajectory
     double lambda = Amg::intersect<3>(Amg::Vector3D::Zero(), Amg::Vector3D::UnitZ(),
-                                            trackLocPos, trackLocDir).value_or(0);
+                                      trackLocPos, trackLocDir).value_or(0);
     if (std::abs(currentTrack->GetDefinition()->GetPDGEncoding()) == 11) {
-      lambda = std::max(lambda, 0.);
+        lambda = std::clamp(lambda, 0., aStep->GetStepLength());
     }
+    /// Closest approach of the step
     const Amg::Vector3D driftHit{trackLocPos + lambda * trackLocDir};
 
-    const double globalTime{currentTrack->GetGlobalTime() +  lambda / currentTrack->GetVelocity()};
+
+    const double globalTime{preStep->GetGlobalTime() +  lambda / currentTrack->GetVelocity()};
+
+    if (std::abs(currentTrack->GetDefinition()->GetPDGEncoding()) == 11) {
+        const xAOD::MuonSimHit* lastRecord = lastSnapShot(HitID, aStep);
+        if (lastRecord && lastRecord->localPosition().perp() < driftHit.perp()) {
+            return true;
+        }
+    }
   
-    TrackHelper trHelp{currentTrack};
+    TrackHelper trkHelp{currentTrack};
 
     ATH_MSG_VERBOSE(" Dumping of hit "<<m_detMgr->idHelperSvc()->toString(HitID)
-                  <<", barcode: "<<trHelp.GenerateParticleLink().barcode()
+                  <<", barcode: "<<trkHelp.GenerateParticleLink().barcode()
                   <<", "<<(*currentTrack) <<", driftCircle: "<<Amg::toString(driftHit, 4)
                   <<", direction "<<Amg::toString(trackLocDir, 4) <<" to SimHit container ahead. ");
-
-    xAOD::MuonSimHit* hit = m_writeHandle->push_back(std::make_unique<xAOD::MuonSimHit>());
-    hit->setIdentifier(HitID); 
-    hit->setLocalPosition(xAOD::toStorage(driftHit));  
-    hit->setLocalDirection(xAOD::toStorage(trackLocDir));
-    hit->setMass(currentTrack->GetDefinition()->GetPDGMass());
-    hit->setGlobalTime(globalTime);
-    hit->setPdgId(currentTrack->GetDefinition()->GetPDGEncoding());
-    hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit());
-    hit->setKineticEnergy(currentTrack->GetKineticEnergy());
-    hit->setGenParticleLink(trHelp.GenerateParticleLink());
-    hit->setStepLength(currentTrack->GetStepLength());
+    saveHit(HitID, driftHit, trackLocDir, globalTime, aStep);
     return true;
 }
 Identifier MdtSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,

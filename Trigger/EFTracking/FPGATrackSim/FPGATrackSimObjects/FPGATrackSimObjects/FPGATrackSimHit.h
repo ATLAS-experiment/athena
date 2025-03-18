@@ -178,6 +178,20 @@ public:
     void setStripChipIDForITk(int v){ m_stripChipinITKEDM = v;}
     void setStripHitMapForITk(int v){ m_stripHitMapinITKEDM = v;}
 
+    int getCluster1ID() const {return m_clusterIndex1ForFPGA;}
+    void setCluster1ID(int v) {m_clusterIndex1ForFPGA = v;}
+
+    int getCluster2ID() const {return m_clusterIndex2ForFPGA;}
+    void setCluster2ID(int v) {m_clusterIndex2ForFPGA = v;}
+
+    // methods for hit cluster equiv
+    const std::vector<int>& getPhiIndexVec() const { return m_PhiIndexVec;}
+    const std::vector<int>& getEtaIndexVec() const { return m_EtaIndexVec;}  
+    const std::vector<unsigned>& getIDHashVec() const { return m_IDhashVec;}
+  
+    void addPhiIndexToVec(int phi) {m_PhiIndexVec.push_back(phi);}
+    void addEtaIndexToVec(int eta) {m_EtaIndexVec.push_back(eta);}
+    void addIDHashToVec(unsigned id) {m_IDhashVec.push_back(id);}
     ///////////////////////////////////////////////////////////////////////
     // Other Interface
 
@@ -261,15 +275,21 @@ protected:
 
 
     // For ITk EDM encoding
+    int m_clusterIndex1ForFPGA = -1; // Index1 to keep a track of all the clusters used in track in FPGA
+    int m_clusterIndex2ForFPGA = -1; // Index2 to keep a track of all the clusters used in track in FPGA
 
     bool m_isValidForITK = false; // Should this hit be used for ITk EDM testing
     int m_stripRowinITKEDM = -1; // Strip hit row ID in ITk EDM format
     int m_stripChipinITKEDM = -1; // Strip chip ID in ITk EDM format
     int m_stripHitMapinITKEDM = -1; // Strip hit map in ITk EDM format
 
+
     int m_roadID = 0;
 
-    ClassDefNV(FPGATrackSimHit, 10);
+    std::vector<unsigned> m_IDhashVec; // for a cluster, when we get the equivalent hit info we want to store all the ID hash containing it
+    std::vector<int> m_PhiIndexVec; // for a cluster, all the phi indices in it
+    std::vector<int> m_EtaIndexVec; // for a cluster, all the eta indices in it  
+    ClassDefNV(FPGATrackSimHit, 12);
 };
 
 // Container of <FPGATrackSimHit const *>

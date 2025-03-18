@@ -73,12 +73,14 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         ToolHandle<FPGATrackSimOutputHeaderTool>         m_writeOutputTool {this, "OutputTool", "FPGATrackSimOutputHeaderTool/FPGATrackSimOutputHeaderTool", "Output tool"};
         ServiceHandle<IFPGATrackSimMappingSvc>           m_FPGATrackSimMapping {this, "FPGATrackSimMapping", "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<IFPGATrackSimEventSelectionSvc>    m_evtSel {this, "eventSelector", "FPGATrackSimEventSelectionSvc", "Event selection Svc"};
+        // chrono service
+        ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
 
         // Flags
         Gaudi::Property<bool> m_doSpacepoints {this, "Spacepoints", false, "flag to enable the spacepoint formation"};
         Gaudi::Property<bool> m_doTracking {this, "tracking", false, "flag to enable the tracking"};
         Gaudi::Property<bool> m_doMissingHitsChecks {this, "DoMissingHitsChecks", false};
-        Gaudi::Property<bool> m_doHoughRootOutput {this, "DoHoughRootOutput", false, "Dump output from the Hough Transform to flat ntuples"};
+        Gaudi::Property<bool> m_doHoughRootOutput2nd {this, "DoHoughRootOutput2nd", false, "Dump output from the Hough Transform to flat ntuples"};
         Gaudi::Property<bool> m_doNNTrack  {this, "DoNNTrack", false, "Run NN track filtering"};
         Gaudi::Property<bool> m_writeOutputData  {this, "writeOutputData", true,"write the output TTree"};
         Gaudi::Property<float> m_trackScoreCut {this, "TrackScoreCut", 25.0, "Minimum track score (e.g. chi2 or NN)." };

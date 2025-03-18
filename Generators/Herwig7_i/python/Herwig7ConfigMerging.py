@@ -233,14 +233,6 @@ class Hw7ConfigMerging(hw7Config.Hw7Config):
     if not os.path.isfile(os.path.join(MG5aMC_path, 'bin', 'mg5_aMC')):
       athMsgLog.warn(hw7Utils.ansi_format_warning("The MadGraph5_aMC@NLO installation can't be found from $MADPATH = {}, so don't be surprised if your run crashes in you are using matrix elements from MG5_aMC@NLO in Herwig7 / Matchbox. Please ensure that the location exists, that you have permissions to access it and that it contains the executable 'bin/mg5_aMC'".format(MG5aMC_path)))
 
-    # try to locate the GoSam installation
-    try:
-      GoSam_path = os.environ['GOSAM_PATH']
-    except KeyError:
-      raise RuntimeError("GOSAM_PATH environment variable not set")
-    if not os.path.isfile(os.path.join(GoSam_path, 'bin', 'gosam.py')):
-      athMsgLog.warn(hw7Utils.ansi_format_warning("The GoSam installation can't be found from $GOSAMPATH = {}, so don't be surprised if your run crashes in you are using matrix elements from GoSam in Herwig7 / Matchbox. Please ensure that the location exists, that you have permissions to access it and that it contains the script 'bin/gosam.py'".format(GoSam_path)))
-
     try:
       OpenLoops_path= os.environ['OPENLOOPSPATH']
     except KeyError:
@@ -260,25 +252,19 @@ set /Herwig/MatrixElements/Matchbox/Amplitudes/MadGraph:BinDir {0}
 set /Herwig/MatrixElements/Matchbox/Amplitudes/MadGraph:DataDir {1}
 set /Herwig/MatrixElements/Matchbox/Amplitudes/MadGraph:MadgraphPrefix {2}
 
-## Fixing interface locations for GoSam
-set /Herwig/MatrixElements/Matchbox/Amplitudes/GoSam:BinDir {0}
-set /Herwig/MatrixElements/Matchbox/Amplitudes/GoSam:DataDir {1}
-set /Herwig/MatrixElements/Matchbox/Amplitudes/GoSam:GoSamPrefix {3}
-
 ##Fixing interface locations of Openloops
-set /Herwig/MatrixElements/Matchbox/Amplitudes/OpenLoops:OpenLoopsLibs {5}
-set /Herwig/MatrixElements/Matchbox/Amplitudes/OpenLoops:OpenLoopsPrefix {6}    
+set /Herwig/MatrixElements/Matchbox/Amplitudes/OpenLoops:OpenLoopsLibs {4}
+set /Herwig/MatrixElements/Matchbox/Amplitudes/OpenLoops:OpenLoopsPrefix {5}    
 
 # Currently the Dipole Snippet is broken (reads to the Rivet interface which we don't build)
 # For now manually copy all the relevant settings in
 read snippets/DipoleMerging.in
-read snippets/{4}Collider.in
+read snippets/{3}Collider.in
 read Merging/Merging-Dipole-FactorCMWSchemeTune.in
 read Merging/FactorCMWScheme.in
 """.format(hw7Control.herwig7_bin_path,
            hw7Control.herwig7_share_path,
            MG5aMC_path,
-           GoSam_path,
            self.beams,
            os.path.join(OpenLoops_path,"proclib"),
            OpenLoops_path)

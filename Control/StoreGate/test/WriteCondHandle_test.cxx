@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -423,7 +423,7 @@ void test2( StoreGateSvc* cs )
     Gaudi::Hive::setCurrentContext(ctx);
     
     // can't record without a range
-    std::cout << "expected ERROR: ";
+    std::cout << "expected ERROR follows:" << std::endl;
     assert ( we1.record( std::make_unique<MyDObj>( MyDObj(0) ) ).isFailure() );
 
     SG::ReadCondHandle<MyObj>  rerr(rk1);
@@ -431,7 +431,7 @@ void test2( StoreGateSvc* cs )
     assert ( we1.getRange() == r1_1 );
     
     // can't record with a range, when dep already set
-    std::cout << "expected ERROR: ";
+    std::cout << "expected ERROR follows:" << std::endl;
     assert ( we1.record( r2_1, std::make_unique<MyDObj>( MyDObj(0) ) ).isFailure() );
   }
     

@@ -1152,6 +1152,8 @@ HLT_MuonL2SAInfoIOmodeAuxDyn.viewIndex
 HLT_MuonL2SAInfol2mtmode
 HLT_MuonL2SAInfol2mtmodeAux.
 HLT_MuonL2SAInfol2mtmodeAuxDyn.viewIndex
+HLT_MuonsCBInsideOut_Late
+HLT_MuonsCBInsideOut_LateAux.
 HLT_MuonsCB_FS
 HLT_MuonsCB_FSAux.
 HLT_MuonsCB_FSAuxDyn.viewIndex

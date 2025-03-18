@@ -16,6 +16,7 @@
 #include <GeoModelKernel/GeoDefinitions.h>
 #include <GeoModelHelpers/StringUtils.h>
 #include <GeoModelHelpers/TransformToStringConverter.h>
+#include <GeoModelHelpers/getChildNodesWithTrf.h>
 
 #include <cmath>
 #include <ext/alloc_traits.h>
@@ -67,7 +68,6 @@ namespace MuonGM {
         setStationName(fixName);       
         setChamberLayer(mL);
         setIdentifier(id); // representative identifier, with stName, stEta, stPhi, mL 
-
     }
 
 
@@ -76,6 +76,16 @@ namespace MuonGM {
 
     //============================================================================
     void sTgcReadoutElement::initDesignFromSQLite(double thickness) {
+
+     PVConstLink pvc {getMaterialGeom()};
+     auto sensitiveVol = getAllSubVolumes(pvc,[](const GeoChildNodeWithTrf& node){
+         return node.nodeName.find("Gas") != std::string::npos;
+     });
+     assert(sensitiveVol.size() == m_nlayers);
+     for (unsigned int llay = 0; llay< sensitiveVol.size(); ++llay) {
+        m_Xlg[llay] = sensitiveVol[llay].transform;
+     }
+
       SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
       SmartIF<IRDBAccessSvc> accessSvc{Gaudi::svcLocator()->service(geoDbTag->getParamSvcName())};
 
@@ -84,7 +94,7 @@ namespace MuonGM {
       IRDBRecordset_ptr nswPars   = accessSvc->getRecordsetPtr("NSWPARS","","");
 
       PVConstLink parent = getMaterialGeom()->getParent();
-      unsigned int index=parent->indexOf(getMaterialGeom());
+      unsigned int index=parent->indexOf(getMaterialGeom()).value();
       std::string pVName=parent->getNameOfChildVol(index);
       float yCutoutCathode(0);
       if (nswPars->size()==0) {
@@ -93,29 +103,26 @@ namespace MuonGM {
         yCutoutCathode=(*nswPars)[0]->getFloat("NSW_sTGC_yCutoutCathode");
       }
 
-      for (unsigned int ind = 0; ind < wstgcRec->size(); ind++) {
-            std::string WSTGC_TYPE       = (*wstgcRec)[ind]->getString("WSTGC_TYPE");               
-    
-            if (getStationName()[2] != WSTGC_TYPE[6])            continue;
-            if (std::abs(getStationEta())!=(int) (WSTGC_TYPE[7]-'0')) continue;
-            if (m_ml != (int) (pVName[7]-'0'))                   continue;
-            const IRDBRecord *nswdim{nullptr};
-            std::string logVolSubName=getMaterialGeom()->getLogVol()->getName().substr(7,4);
-            
-            size_t w{0};
-            for (w=0;w<nswdimRec->size();w++) {
-                nswdim = (*nswdimRec)[w];
-                const std::string type = nswdim->getString("NSW_TYPE").substr(5,4);
-                if (type==logVolSubName) {
-                    break;
-                }
-            }
-    
+      for (size_t w=0;w<nswdimRec->size();w++) {
+        const IRDBRecord *nswdim = (*nswdimRec)[w];
+        const std::string type = nswdim->getString("NSW_TYPE").substr(5,4);
+        std::string logVolSubName=getMaterialGeom()->getLogVol()->getName().substr(7,4);
+        if (type==logVolSubName) {
             setSsize(nswdim->getDouble("BASE_WIDTH"));        // bottom base length (full chamber)
             setLongSsize(nswdim->getDouble("TOP_WIDTH"));     // top base length (full chamber)
             setRsize(nswdim->getDouble("LENGTH"));            // height of the trapezoid (full chamber)
+            break;
+        }
+    }
+
+      for (unsigned int ind = 0; ind < wstgcRec->size(); ind++) {
+            std::string WSTGC_TYPE       = (*wstgcRec)[ind]->getString("WSTGC_TYPE");               
     
-        
+            if (getStationName()[2] != WSTGC_TYPE[6]) continue;
+            if (std::abs(getStationEta())!=(int) (WSTGC_TYPE[7]-'0')) continue;
+            if (getStationName()[2] == 'S' &&  WSTGC_TYPE[8] != (m_ml ==2 ?'P' : 'C')) continue;
+            if (getStationName()[2] == 'L' &&  WSTGC_TYPE[8] != (m_ml ==2 ?'C' : 'P')) continue;
+
             const double gasTck = (*wstgcRec)[ind]->getDouble("gasTck");
             const double Tck = (*wstgcRec)[ind]->getDouble("Tck");
             const double xFrame = (*wstgcRec)[ind]->getDouble("xFrame");
@@ -132,31 +139,20 @@ namespace MuonGM {
             const int wireGroupWidth = (*wstgcRec)[ind]->getInt("wireGroupWidth");
             const int nStrips = (*wstgcRec)[ind]->getInt("nStrips");
             const std::vector<double> padH = tokenizeDouble((*wstgcRec)[ind]->getString("padH"),";");                   
-            const std::vector<double> rankPadPhi = tokenizeDouble((*wstgcRec)[ind]->getString("rankPadPhi"),";");             
             const std::vector<int> nPadPhi = tokenizeInt((*wstgcRec)[ind]->getString("nPadPhi"),";");                
-            const std::vector<double> firstPadPhiDivision_C = tokenizeDouble((*wstgcRec)[ind]->getString("firstPadPhiDivision_C"),";");  
-            const std::vector<double> PadPhiShift_C = tokenizeDouble((*wstgcRec)[ind]->getString("PadPhiShift_C"),";");          
             const std::vector<double> firstPadPhiDivision_A  = tokenizeDouble((*wstgcRec)[ind]->getString("firstPadPhiDivision_A"),";");  
             const std::vector<double> PadPhiShift_A  = tokenizeDouble((*wstgcRec)[ind]->getString("PadPhiShift_A"),";");          
-            const std::vector<double> rankPadH = tokenizeDouble((*wstgcRec)[ind]->getString("rankPadH"),";");               
             const std::vector<int> nPadH = tokenizeInt((*wstgcRec)[ind]->getString("nPadH"),";");                  
             const std::vector<double> firstPadH = tokenizeDouble((*wstgcRec)[ind]->getString("firstPadH"),";");              
             const std::vector<double> firstPadRow = tokenizeDouble((*wstgcRec)[ind]->getString("firstPadRow"),";");            
             const std::vector<double> wireCutout = tokenizeDouble((*wstgcRec)[ind]->getString("wireCutout"),";");             
             const std::vector<int> nWires = tokenizeInt((*wstgcRec)[ind]->getString("nWires"),";");                 
             const std::vector<int> firstWire = tokenizeInt((*wstgcRec)[ind]->getString("firstWire"),";");              
-            const std::vector<double> firstTriggerBand = tokenizeDouble((*wstgcRec)[ind]->getString("firstTriggerBand"),";");       
-            const std::vector<int> nTriggerBands = tokenizeInt((*wstgcRec)[ind]->getString("nTriggerBands"),";");          
-            const std::vector<double> firstStripInTrigger = tokenizeDouble((*wstgcRec)[ind]->getString("firstStripInTrigger"),";");    
             const std::vector<double> firstStripWidth = tokenizeDouble((*wstgcRec)[ind]->getString("firstStripWidth"),";");        
-            const std::vector<double> StripsInBandsLayer1 = tokenizeDouble((*wstgcRec)[ind]->getString("StripsInBandsLayer1"),";");    
-            const std::vector<double> StripsInBandsLayer2 = tokenizeDouble((*wstgcRec)[ind]->getString("StripsInBandsLayer2"),";");    
-            const std::vector<double> StripsInBandsLayer3 = tokenizeDouble((*wstgcRec)[ind]->getString("StripsInBandsLayer3"),";");    
-            const std::vector<double> StripsInBandsLayer4 = tokenizeDouble((*wstgcRec)[ind]->getString("StripsInBandsLayer4"),";");    
             const std::vector<int> nWireGroups = tokenizeInt((*wstgcRec)[ind]->getString("nWireGroups"),";");            
             const std::vector<double> firstWireGroup = tokenizeDouble((*wstgcRec)[ind]->getString("firstWireGroup"),";");         
     
-            char sector_l  = getStationName().substr(2, 1) == "L" ? 'L' : 'S';
+            char sector_l  = getStationName()[2];
             int  stEta     = std::abs(getStationEta());
             int  Etasign   = getStationEta() / stEta;
             std::string side = (Etasign > 0) ? "A" : "C";
@@ -267,11 +263,43 @@ namespace MuonGM {
                   m_padDesign[il].sectorOpeningAngle = m_padDesign[il].smallSectorOpeningAngle;
                 }
                 m_padDesign[il].thickness = thickness;
-            }      
+                ATH_MSG_DEBUG("initDesign: " << idHelperSvc()->toStringDetEl(identify()) << " layer " << il << ", pad phi angular width "
+                    << m_padDesign[il].inputPhiPitch << ", eta pad size " << m_padDesign[il].inputRowPitch
+                    << "  Length: " << m_padDesign[il].Length << " sWidth: " << m_padDesign[il].sWidth
+                    << " lWidth: " << m_padDesign[il].lWidth << " firstPhiPos:" << m_padDesign[il].firstPhiPos
+                    << " padEtaMin:" << m_padDesign[il].padEtaMin << " padEtaMax:" << m_padDesign[il].padEtaMax
+                    << " firstRowPos:" << m_padDesign[il].firstRowPos << " inputRowPitch:" << m_padDesign[il].inputRowPitch
+                    << " thickness:" << m_padDesign[il].thickness << " sPadWidth: " << m_padDesign[il].sPadWidth
+                    << " lPadWidth: " << m_padDesign[il].lPadWidth << " xFrame: " << m_padDesign[il].xFrame
+                    << " ysFrame: " << m_padDesign[il].ysFrame << " ylFrame: " << m_padDesign[il].ylFrame
+                    << " yCutout: " << m_padDesign[il].yCutout );
+            }
         }
     }
     void sTgcReadoutElement::initDesignFromAGDD(double thickness) {
         
+        if (manager()->MinimalGeoFlag() == 0) {
+            PVConstLink pvc {getMaterialGeom()};
+            unsigned int nchildvol = pvc->getNChildVols();
+            int llay = 0;
+            std::string::size_type npos;
+            for (unsigned ich = 0; ich < nchildvol; ++ich) {
+                PVConstLink pc = pvc->getChildVol(ich);
+                std::string childname = (pc->getLogVol())->getName();
+
+                ATH_MSG_DEBUG("Volume Type: " << pc->getLogVol()->getShape()->type());
+                if ((npos = childname.find("Sensitive")) == std::string::npos) {
+                    continue;
+                }
+                ++llay;
+                if (llay > 4) {
+                    ATH_MSG_DEBUG("number of sTGC layers > 4: increase transform array size");
+                    continue;
+                }
+                m_Xlg[llay - 1] = pvc->getXToChildVol(ich);
+            }
+            assert(m_nlayers ==  llay);
+        }
         char sector_l  = getStationName().substr(2, 1) == "L" ? 'L' : 'S';
         int  stEta     = std::abs(getStationEta());
         int  Etasign   = getStationEta() / stEta;
@@ -408,7 +436,8 @@ namespace MuonGM {
 
             m_padDesign[il].thickness = thickness;
 
-            ATH_MSG_DEBUG( "initDesign stationname " << getStationName() << " layer " << il << ",pad phi angular width "
+            ATH_MSG_DEBUG( "initDesign: " << idHelperSvc()->toStringDetEl(identify()) 
+                    << " layer " << il<< ", pad phi angular width "
                     << m_padDesign[il].inputPhiPitch << ", eta pad size " << m_padDesign[il].inputRowPitch
                     << "  Length: " << m_padDesign[il].Length << " sWidth: " << m_padDesign[il].sWidth
                     << " lWidth: " << m_padDesign[il].lWidth << " firstPhiPos:" << m_padDesign[il].firstPhiPos
@@ -417,33 +446,13 @@ namespace MuonGM {
                     << " thickness:" << m_padDesign[il].thickness << " sPadWidth: " << m_padDesign[il].sPadWidth
                     << " lPadWidth: " << m_padDesign[il].lPadWidth << " xFrame: " << m_padDesign[il].xFrame
                     << " ysFrame: " << m_padDesign[il].ysFrame << " ylFrame: " << m_padDesign[il].ylFrame
-                    << " yCutout: " << m_padDesign[il].yCutout );       
+                    << " yCutout: " << m_padDesign[il].yCutout );
         }    
     }
     
     void sTgcReadoutElement::initDesign(double thickness) {
         
-        if (manager()->MinimalGeoFlag() == 0) {
-            PVConstLink pvc {getMaterialGeom()};
-            unsigned int nchildvol = pvc->getNChildVols();
-            int llay = 0;
-            std::string::size_type npos;
-            for (unsigned ich = 0; ich < nchildvol; ++ich) {
-                PVConstLink pc = pvc->getChildVol(ich);
-                std::string childname = (pc->getLogVol())->getName();
 
-                ATH_MSG_DEBUG("Volume Type: " << pc->getLogVol()->getShape()->type());
-                if ((npos = childname.find("Sensitive")) != std::string::npos) {
-                    ++llay;
-                    if (llay > 4) {
-                        ATH_MSG_DEBUG("number of sTGC layers > 4: increase transform array size");
-                        continue;
-                    }
-                    m_Xlg[llay - 1] = pvc->getXToChildVol(ich);
-                }
-            }
-            assert(m_nlayers ==  llay);             
-        }
 
         SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
         if (!geoDbTag) THROW_EXCEPTION_RE( "Could not locate GeoDbTagSvc" );

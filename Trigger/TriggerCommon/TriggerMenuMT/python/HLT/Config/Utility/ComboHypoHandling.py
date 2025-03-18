@@ -13,6 +13,7 @@ from TrigConfHLTUtils.HLTUtils import string2hash
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 topoLegIndices = "ABCDEF"
+anomdetWPIndices = "LMT"
 
 #the list of the variables reported below must match the one specified                                
 # here: Trigger/TrigHypothesis/TrigHypoCommonTools/src/TrigComboHypoTool.cxx::fillVarMap()
@@ -52,6 +53,7 @@ allowed_obs = {
 
 from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import TrigAFPDijetComboHypoToolCfg
 from TriggerMenuMT.HLT.Muon.MuonChainConfiguration import TrigMuonEFIdtpInvMassHypoToolCfg
+from TriggerMenuMT.HLT.AnomalyDetection.AnomalyDetectionChainConfiguration import TrigADComboHypoToolCfg
 
 def TrigComboHypoToolFromDict(flags, chainDict):
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -206,6 +208,7 @@ comboConfigurator = {
     'invm':TrigComboHypoToolFromDict,
     'mT':TrigComboHypoToolFromDict,
     'afpdijet':TrigAFPDijetComboHypoToolCfg,
+    'anomdet':TrigADComboHypoToolCfg,
     'idZmumu':TrigMuonEFIdtpInvMassHypoToolCfg,
     'idJpsimumu':TrigMuonEFIdtpInvMassHypoToolCfg,
 }

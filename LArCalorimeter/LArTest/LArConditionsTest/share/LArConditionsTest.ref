@@ -39,12 +39,8 @@ IdDictDetDescrCnv    INFO Dictionary LArHighVoltage       version fullAtlas     
 IdDictDetDescrCnv    INFO Dictionary MuonSpectrometer     version R.03                 DetDescr tag MuonIdentifier-08         file IdDictParser/IdDictMuonSpectrometer_R.03.xml
 IdDictDetDescrCnv    INFO Dictionary TileCalorimeter      version fullAtlasAndTestBeam DetDescr tag TileIdentifier-00         file IdDictParser/IdDictTileCalorimeter.xml
 LArElectrodeID       INFO  => initialize_from_dictionary()
-AtlasDetectorID      INFO initialize_from_dictionary - OK
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 LArHVLineIDDetD...   INFO in createObj: creating a LArHVLineID helper object in the detector store
 LArHVLineID          INFO  => initialize_from_dictionary()
-AtlasDetectorID      INFO initialize_from_dictionary - OK
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 LArHVLineID          INFO  => initialize_from_dictionary(dict_mgr) =0
 LArHVLineID          INFO Register_dict_tag of LArHighVoltage is OK
 LArHVLineID          INFO setDictVersion of LArHighVoltage is OK
@@ -60,7 +56,6 @@ EMECConstruction     INFO activating LAr::EMEC::Pos::InnerWheel
 EMECConstruction     INFO activating LAr::EMEC::Pos::OuterWheel
 CaloIDHelper_ID...   INFO in createObj: creating a TileTBID helper object in the detector store
 TileTBID             INFO initialize_from_dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 EndcapDMConstru...   INFO Start building EC electronics geometry
 EMECConstruction     INFO multi-layered version of absorbers activated, parameter value is 1
 EMECConstruction     INFO activating LAr::EMEC::Neg::InnerWheel
@@ -73,21 +68,14 @@ TileDddbManager      INFO n_saddle = 1
 TileDddbManager      INFO n_tilb = 21
 TileDddbManager      INFO n_tileSwitches = 1
 CaloIDHelper_ID...   INFO in createObj: creating a TileID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 TileHWIDDetDesc...   INFO in createObj: creating a TileHWID helper object in the detector store
 TileHWID             INFO initialize_from_dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a CaloCell_ID helper object in the detector store
 CaloIDHelper_ID...   INFO in createObj: creating a LArEM_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a LArHEC_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a LArFCAL_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a LArMiniFCAL_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 LArMiniFCAL_ID       INFO  initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 TileDetDescrMan...   INFO Entering create_elements()
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 CondInputLoader      INFO Adding base classes:
@@ -112,7 +100,6 @@ LArConditionsTe...  DEBUG  TestReadDBDirect flag     =  'TestReadDBDirect':False
 LArConditionsTe...  DEBUG  Testbeam flag             =  'Testbeam':False
 LArOnlineIDDetD...   INFO in createObj: creating a LArOnlineID helper object in the detector store
 LArOnlineID          INFO initialize_from_dictionary
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 LArConditionsTe...  DEBUG initialize done
 EventSelector        INFO  Enter McEventSelector Initialization 
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
@@ -129,23 +116,15 @@ LArAlignCondAlg      INFO recorded new GeoAlignmentStore object for LAr with key
 CaloIdMgrDetDes...   INFO in createObj: creating a CaloDescrManager object in the detector store
 CaloIDHelper_ID...   INFO in createObj: creating a CaloDM_ID helper object in the detector store
 CaloDM_ID            INFO initialize_from_dictionary
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a CaloLVL1_ID helper object in the detector store
 CaloLVL1_ID          INFO initialize_from_dictionary
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a TTOnlineID helper object in the detector store
 TTOnlineID           INFO initialize_from_dictionary
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a CaloCell_SuperCell_ID helper object in the detector store
 CaloIDHelper_ID...   INFO in createObj: creating a LArEM_SuperCell_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a LArHEC_SuperCell_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a LArFCAL_SuperCell_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a Tile_SuperCell_ID helper object in the detector store
-AtlasDetectorID      INFO initialize_from_dictionary - OK
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIdMgrDetDes...   INFO  Finished 
 CaloIdMgrDetDes...   INFO Initializing CaloIdMgr from values in CaloIdMgrDetDescrCnv 
 CaloAlignCondAlg     INFO recorded new CaloDetDescr Manager condition object with key CaloDetDescrManager and range {[0,l:0] - [INVALID]}

@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-/*! \file AlgorithmHelper.cpp does basic functions to get dqm_core::Results from algorithms 
+/*! \file AlgorithmHelper.cxx does basic functions to get dqm_core::Results from algorithms 
  * \author Haleh Hadavand
  */
 #ifndef DQM_ALGORITHMS_TOOLS_ALGORITHMHELPER_CXX
@@ -141,7 +141,7 @@ dqm_algorithms::tools::MakeComparisons(	const std::map<std::string,double> & alg
     } 
     else {
       ERS_DEBUG(0, "red threshold (" << rtvalue << ") same as green threshold "<< gtvalue <<") for parameter " << name << ": can't evaluate result"); 
-      throw dqm_core::BadConfig( ERS_HERE, "None", name );
+      throw dqm_core::BadConfig( ERS_HERE, "None", std::move(name) );
     }	    
     
   }
@@ -275,7 +275,7 @@ dqm_algorithms::tools::CompareWithErrors( const std::map<std::string,double> & a
     } 
     else {
       ERS_DEBUG(0, "red threshold same as green threshold: can't evaluate result"); 
-      throw dqm_core::BadConfig( ERS_HERE, "None", name );
+      throw dqm_core::BadConfig( ERS_HERE, "None", std::move(name) );
     }
      
   }
@@ -326,7 +326,7 @@ dqm_algorithms::tools::GetFitResult (const TF1 * func, const dqm_core::Algorithm
     result = CompareWithErrors( params, paramErrors, config.getGreenThresholds(), config.getRedThresholds(), minSig );
   }
   
-  result->tags_ = params;
+  result->tags_ = std::move(params);
   for ( std::map<std::string,double>::const_iterator peItr = paramErrors.begin(); peItr != paramErrors.end(); ++peItr ) {
     std::string errorName =  peItr->first;
     errorName += " Error";
@@ -1152,7 +1152,7 @@ dqm_algorithms::tools::buildCluster( binContainer& seed, const std::vector<std::
     //Remove repeated references to the same bin:
     newNeighbors.unique();
     //Perpare to check the cluster's new neighbors:
-    binsToCheck = newNeighbors;
+    binsToCheck = std::move(newNeighbors);
 
     cluster.x = pvpX / cluster.value;
     cluster.y = pvpY / cluster.value;

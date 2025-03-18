@@ -213,7 +213,6 @@ namespace ST {
     StatusCode prepareLRTElectrons(const xAOD::ElectronContainer* inMuons, xAOD::ElectronContainer* copy) const override final;
 
     StatusCode SetBtagWeightDecorations(const xAOD::Jet& input, const asg::AnaToolHandle<IBTaggingSelectionTool>& btagSelTool, const std::string& btagTagger) const override final;
-    bool IsPFlowCrackVetoCleaning(const xAOD::ElectronContainer* elec = nullptr, const xAOD::PhotonContainer* gamma = nullptr) const override final;
 
     bool IsSignalJet(const xAOD::Jet& input, const float ptcut, const float etacut) const override final;
 
@@ -326,7 +325,7 @@ namespace ST {
 
     //Trigger
     bool IsMETTrigPassed(unsigned int runnumber = 0, bool j400_OR = false) const override final;
-    bool IsMETTrigPassed(const std::string& triggerName, bool j400_OR = false) const override final;
+    bool IsMETTrigPassed(const std::string& triggerName, bool j400_OR = false, const std::string& L1_name = "L1_XE50") const override final;
 
     bool IsTrigPassed(const std::string&, unsigned int condition=TrigDefs::Physics) const override final;
 
@@ -664,6 +663,8 @@ namespace ST {
     double      m_muIsoHighPtThresh;
     bool        m_muHighPtExtraSmear;
     bool        m_muEffCorrForce1D;
+    std::string m_muTriggerSFCalibRelease;
+    std::string m_muTriggerSFCalibFilename;
     std::string m_BtagWP;
     std::string m_BtagTagger;
     double m_BtagMinPt;
@@ -1031,7 +1032,6 @@ namespace ST {
   const static SG::ConstAccessor<int> acc_bkgTruthOrigin("bkgTruthOrigin");
   const static SG::ConstAccessor<char> acc_passPhCleaning("DFCommonPhotonsCleaning");
   const static SG::ConstAccessor<char> acc_passPhCleaningNoTime("DFCommonPhotonsCleaningNoTime");
-  const static SG::ConstAccessor<char> acc_passCrackVetoCleaning("DFCommonCrackVetoCleaning");
   const static SG::ConstAccessor<unsigned int> randomrunnumber("RandomRunNumber");
   const static SG::ConstAccessor<float> acc_DetEta("DetectorEta");
 

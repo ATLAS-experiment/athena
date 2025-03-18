@@ -14,9 +14,10 @@
 #define EFTRACKING_FPGA_INTEGRATION_DATAPREPARATIONPIPELINE_H
 
 // EFTracking include
-#include "EFTrackingDataFormats.h"
+#include "EFTrackingTransient.h"
 #include "IntegrationBase.h"
-#include "xAODContainerMaker.h"
+#include "xAODClusterMaker.h"
+#include "xAODSpacePointMaker.h"
 #include "PassThroughTool.h"
 #include "TestVectorTool.h"
 
@@ -73,7 +74,7 @@ private:
                                                       "Path to pixel cluster test vector"}; //!< Pixel cluster test vector
     Gaudi::Property<std::string> m_pixelClusterRefTVPath{this, "PixelClusterRefTV", "",
                                                          "Path to pixel cluster reference test vector"}; //!< Pixel cluster reference test vector
-                                                         
+
     Gaudi::Property<std::string> m_spacepointTVPath{this, "SpacepointTV", "",
                                                     "Path to spacepoint test vector"}; //!< Spacepoint test vector
     Gaudi::Property<std::string> m_spacepointRefTVPath{this, "SpacepointRefTV", "",
@@ -85,10 +86,14 @@ private:
         "Use the passthrough tool instead of data prep pipeline"};          //!< Use the pass through tool instead of data prep pipeline. It can be either sw or hw, setting in the tool
     Gaudi::Property<bool> m_useTV{this, "UseTV", false, "Use test vector"}; //!< Use test vector
 
-    // Tool handles
-    ToolHandle<xAODContainerMaker> m_xAODContainerMaker{
-        this, "xAODMaker", "xAODContainerMaker",
-        "tool to make cluster"}; //!< Tool handle for xAODContainerMaker
+        // Tool handles
+    ToolHandle<xAODClusterMaker> m_xAODClusterMaker{
+        this, "xAODClusterMaker", "xAODClusterMaker",
+        "tool to make cluster"}; //!< Tool handle for xAODClusterMaker
+
+    ToolHandle<xAODSpacePointMaker> m_xAODSpacePointMaker{
+        this, "xAODSpacePointMaker", "xAODSpacePointMaker",
+        "tool to make space point"}; //!< Tool handle for xAODSpacePointMaker
 
     ToolHandle<PassThroughTool> m_passThroughTool{
         this, "PassThroughTool", "PassThroughTool",

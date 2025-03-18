@@ -21,10 +21,7 @@ ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 TileCablingService_test
 TileHWID             INFO initialize_from_dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 TileTBID             INFO initialize_from_dictionary 
-AtlasDetectorID      INFO initialize_from_dictionary - OK
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 test1
 SW MAX CELLS: 5184
 SW MAX PMT: 9856

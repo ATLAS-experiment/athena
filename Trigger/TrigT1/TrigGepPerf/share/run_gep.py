@@ -44,12 +44,43 @@ if __name__ == '__main__':
                         default='Cone',
                         help='commma separated list of stategies for GepJetAlg:[Cone, ModAntikT]')
 
+    p.add_argument('-ett', '--enableTopoTower',
+                         action='store_true',
+                         help='Enable GepTopoTower algorithm'
+    )
+
+    p.add_argument('-ect', '--enableCellTower',
+                         action='store_true',
+                         help='Enable GepCellTower algorithm'
+    )
+
+    p.add_argument('-etct', '--enableTCTower',
+                         action='store_true',
+                         help='Enable GepTCTower algorithm'
+    )
+
+    p.add_argument('-cell', '--cellCollection',
+                        default='GepCells',
+                        help='commma separated list of input cell Collection for CellTower algorithm: [GepCells,CaloCells]')
+
     args = p.parse_args()
 
     clusterAlgNames = args.clusterAlgs.split(',')
     jetAlgNames = args.jetAlgs.split(',')
+    enable_topo_tower = args.enableTopoTower  # Boolean flag
+    enable_tc_tower = args.enableTCTower  # Boolean flag
+    enable_cell_tower = args.enableCellTower  # Boolean flag
+    cellCollectionName = args.cellCollection
     info('GEP clusterAlgs: ' + str(clusterAlgNames))
     info('GEP jetAlgs: ' + str(jetAlgNames))
+
+    # Print Tower statuses
+    info(f'GEP TopoTower enabled: {"Yes" if enable_topo_tower else "No"}')
+    info(f'GEP TCTower enabled: {"Yes" if enable_tc_tower else "No"}')
+    info(f'GEP CellTower enabled: {"Yes" if enable_cell_tower else "No"}')
+
+    # Print which cell collection is being used
+    info(f'GEP CellTower collection: {cellCollectionName}')
 
     ##################################################
     # Configure all the flags
@@ -288,7 +319,26 @@ if __name__ == '__main__':
                         ('Calo422', False) : 'CaloTopoClusters422',
                         ('Calo422', True) : 'CaloCalTopoClusters422'}
 
-                    
+    # Add CellTower creation using GepCellTowerAlg
+    from TrigGepPerf.GepCellTowerAlgConfig import GepCellTowerAlgCfg
+
+    if enable_cell_tower:
+        cell_tower_key = 'GEPCellTower'
+        alg_name = 'GepCellTowerAlg'
+
+        # Configure GepCellTowerAlg
+        gep_cell_tower_cfg = GepCellTowerAlgCfg(
+            flags,
+            outputCellTowerKey=cell_tower_key,
+            gepCellMapKey=cellCollectionName,
+            OutputLevel=gepAlgs_output_level)
+
+        info('Configuring GepCellTowerAlg')
+        gep_cell_tower_cfg.printConfig(withDetails=True, summariseProps=True)
+
+        # Merge the configuration
+        acc.merge(gep_cell_tower_cfg)
+
     for cluster_alg in clusterAlgNames:
         caloClustersKey = caloclustercolls.get((cluster_alg, doLCCalib), None)
         if caloClustersKey is None:
@@ -299,7 +349,7 @@ if __name__ == '__main__':
                 flags,
                 TopoClAlg=cluster_alg,
                 gepCellMapKey="GepCells",
-                outputCaloClusterisKey=caloClustersKey,
+                outputCaloClustersKey=caloClustersKey,
                 OutputLevel=gepAlgs_output_level)
 
 
@@ -307,7 +357,28 @@ if __name__ == '__main__':
             gepclustering_cfg.printConfig(withDetails=True,
                                           summariseProps=True)
 
-            acc.merge(gepclustering_cfg) 
+            acc.merge(gepclustering_cfg)
+
+        if enable_topo_tower:
+            from TrigGepPerf.GepTopoTowerAlgConfig import GepTopoTowerAlgCfg
+            alg_name='GepTopoTower'+ cluster_alg +'Alg'
+            acc.merge(GepTopoTowerAlgCfg(
+                flags,
+                name=alg_name,
+                caloClustersKey=caloClustersKey,
+                outputCaloClustersKey='GEP'+ cluster_alg +'TopoTower',
+                gepCellMapKey="GepCells",
+                OutputLevel=gepAlgs_output_level))
+
+        if enable_tc_tower:
+            from TrigGepPerf.GepTCTowerAlgConfig import GepTCTowerAlgCfg
+            alg_name='GepTCTower'+ cluster_alg +'Alg'
+            acc.merge(GepTCTowerAlgCfg(
+                flags,
+                name=alg_name,
+                caloClustersKey=caloClustersKey,
+                outputCaloClustersKey='GEP'+ cluster_alg +'TCTower',
+                OutputLevel=gepAlgs_output_level))
 
         puSuppressionAlgs = ['']
 
@@ -329,7 +400,51 @@ if __name__ == '__main__':
                 
                 info('\nGepJetAlg properties dump\n')
                 info(str(acc.getEventAlgo(alg_name)._properties))
-        
+
+                # Custom jets for TopoTowers using the correct key
+                if enable_topo_tower:
+                    topoTowerKey = 'GEP' + cluster_alg + 'TopoTower'
+                    ttalg_name = 'Gep' + cluster_alg + 'TopoTower' + jetAlg + 'JetAlg'
+                    acc.merge(GepJetAlgCfg(
+                        flags,
+                        name=ttalg_name,
+                        jetAlgName=jetAlg,
+                        caloClustersKey=topoTowerKey,
+                        outputJetsKey='GEP' + cluster_alg + 'TopoTower' + jetAlg + 'Jets',
+                        OutputLevel=gepAlgs_output_level))
+
+                    info('\nGepJetAlg properties dump for TopoTowers\n')
+                    info(str(acc.getEventAlgo(ttalg_name)._properties))
+
+                # Custom jets for TCTowers using the correct key
+                if enable_tc_tower:
+                    tcTowerKey = 'GEP' + cluster_alg + 'TCTower'
+                    tctalg_name = 'Gep' + cluster_alg + 'TCTower' + jetAlg + 'JetAlg'
+                    acc.merge(GepJetAlgCfg(
+                        flags,
+                        name=tctalg_name,
+                        jetAlgName=jetAlg,
+                        caloClustersKey=tcTowerKey,
+                        outputJetsKey='GEP' + cluster_alg + 'TCTower' + jetAlg + 'Jets',
+                        OutputLevel=gepAlgs_output_level))
+
+                    info('\nGepJetAlg properties dump for TCTowers\n')
+                    info(str(acc.getEventAlgo(tctalg_name)._properties))
+
+                # CellTowers
+                if enable_cell_tower:
+                    ctalg_name = 'GepCellTower' + jetAlg + 'JetAlg'
+                    acc.merge(GepJetAlgCfg(
+                        flags,
+                        name=ctalg_name,
+                        jetAlgName=jetAlg,
+                        caloClustersKey=cell_tower_key,
+                        outputJetsKey='GEPCellTower' + jetAlg + 'Jets',
+                        OutputLevel=gepAlgs_output_level))
+
+                    info('\nGepJetAlg properties dump for CellTower\n')
+                    info(str(acc.getEventAlgo(ctalg_name)._properties))
+
             from TrigGepPerf.GepMETAlgConfig import GepMETAlgCfg 
             alg_name='GepMET'+ cluster_alg +'Alg'
             acc.merge(GepMETAlgCfg(
@@ -339,6 +454,37 @@ if __name__ == '__main__':
                 outputMETKey='GEP'+ cluster_alg +'MET',
                 OutputLevel=gepAlgs_output_level))
 
+            # MET for TopoTowers using the correct key
+            if enable_topo_tower:
+                topoTowerMETKey = 'GEP' + cluster_alg + 'TopoTower'
+                ttMETalg_name = 'GepMET' + cluster_alg + 'TopoTower' + 'Alg'
+                acc.merge(GepMETAlgCfg(
+                    flags,
+                    name=ttMETalg_name,
+                    caloClustersKey=topoTowerMETKey,
+                    outputMETKey='GEP' + cluster_alg + 'TopoTower' + 'MET',
+                    OutputLevel=gepAlgs_output_level))
+
+            # MET for TCTowers using the correct key
+            if enable_tc_tower:
+                tcTowerMETKey = 'GEP' + cluster_alg + 'TCTower'
+                tctMETalg_name = 'GepMET' + cluster_alg + 'TCTower' + 'Alg'
+                acc.merge(GepMETAlgCfg(
+                    flags,
+                    name=tctMETalg_name,
+                    caloClustersKey=tcTowerMETKey,
+                    outputMETKey='GEP' + cluster_alg + 'TCTower' + 'MET',
+                    OutputLevel=gepAlgs_output_level))
+
+            # MET for CellTower using the correct key
+            if enable_cell_tower:
+                ctMETalg_name = 'GepMETCellTowerAlg'
+                acc.merge(GepMETAlgCfg(
+                    flags,
+                    name=ctMETalg_name,
+                    caloClustersKey=cell_tower_key,
+                    outputMETKey='GEPCellTowerMET',
+                    OutputLevel=gepAlgs_output_level))
                     
             from TrigGepPerf.GepMETPufitAlgConfig import GepMETPufitAlgCfg 
             alg_name='GepMET' + cluster_alg + 'PufitAlg'
@@ -348,6 +494,34 @@ if __name__ == '__main__':
                 caloClustersKey=caloClustersKey,
                 outputMETPufitKey='GEP'+ cluster_alg + 'METPufit',
                 OutputLevel=gepAlgs_output_level))
+
+            if enable_topo_tower: 
+                ttPufitMETalg_name = 'GepMET' + cluster_alg + 'TopoTower' + 'PufitAlg'
+                acc.merge(GepMETPufitAlgCfg(
+                    flags,
+                    name=ttPufitMETalg_name,
+                    caloClustersKey=topoTowerMETKey,
+                    outputMETKey='GEP' + cluster_alg + 'TopoTower' + 'METPufit',
+                    OutputLevel=gepAlgs_output_level))
+
+            if enable_tc_tower:
+                tctPufitMETalg_name = 'GepMET' + cluster_alg + 'TCTower' + 'PufitAlg'
+                acc.merge(GepMETPufitAlgCfg(
+                    flags,
+                    name=tctPufitMETalg_name,
+                    caloClustersKey=tcTowerMETKey,
+                    outputMETKey='GEP' + cluster_alg + 'TCTower' + 'METPufit',
+                    OutputLevel=gepAlgs_output_level))
+
+            if enable_cell_tower:
+                ctPufitMETalg_name = 'GepMETCellTowerPufitAlg'
+                acc.merge(GepMETPufitAlgCfg(
+                    flags,
+                    name=ctPufitMETalg_name,
+                    caloClustersKey=cell_tower_key,
+                    outputMETKey='GEPCellTowerMETPufit',
+                    OutputLevel=gepAlgs_output_level))
+
     ##################################################
     # Save and optionally run the configuration
     ##################################################

@@ -40,13 +40,15 @@ StatusCode LockDecorations::execute (const EventContext& ctx) const
   const auto& r = SG::AuxTypeRegistry::instance();
   for (const SG::WriteDecorHandleKey<SG::AuxVectorBase>& k : m_decorations) {
     SG::ReadHandle<SG::AuxVectorBase> h (k.contHandleKey(), ctx);
-    SG::auxid_t auxid = r.findAuxID (SG::decorKeyFromKey (k.key()));
-    if (auxid == SG::null_auxid) {
-      ATH_MSG_ERROR( "Cannot find decoration " << k.key() );
-      return StatusCode::FAILURE;
+    if (h->size_v() > 0) {
+      SG::auxid_t auxid = r.findAuxID (SG::decorKeyFromKey (k.key()));
+      if (auxid == SG::null_auxid) {
+        ATH_MSG_ERROR( "Cannot find decoration " << k.key() );
+        return StatusCode::FAILURE;
+      }
+      SG::AuxVectorBase& avd ATLAS_THREAD_SAFE = const_cast<SG::AuxVectorBase&> (*h);
+      avd.lockDecoration (auxid);
     }
-    SG::AuxVectorBase& avd ATLAS_THREAD_SAFE = const_cast<SG::AuxVectorBase&> (*h);
-    avd.lockDecoration (auxid);
   }
   return StatusCode::SUCCESS;
 }

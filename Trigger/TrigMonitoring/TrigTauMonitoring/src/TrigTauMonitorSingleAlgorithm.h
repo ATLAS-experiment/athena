@@ -28,11 +28,11 @@ private:
 
     // HLT TauID score monitoring
     Gaudi::Property<std::map<std::string, std::map<std::string, std::pair<std::string, std::string>>>> m_monitoredHLTIdScores {this, "HLTTauIDScores", {}, "Pairs of the TauID score and signal-transformed scores for each HLT TauID algorithm to be monitored, for each reconstruction sequence (type, e.g. tracktwoMVA, tracktwoLLP, etc...)"};
-    std::map<std::string, std::map<std::string, std::pair<SG::AuxElement::ConstAccessor<float>, SG::AuxElement::ConstAccessor<float>>>> m_monitoredHLTIdAccessors;
+    std::map<std::string, std::map<std::string, std::pair<SG::ConstAccessor<float>, SG::ConstAccessor<float>>>> m_monitoredHLTIdAccessors;
 
     // Offline TauID score monitoring
     Gaudi::Property<std::map<std::string, std::pair<std::string, std::string>>> m_monitoredOfflineIdScores {this, "OfflineTauIDScores", {}, "Pairs of the TauID score and signal-transformed scores for each Offline TauID algorithm to be monitored"};
-    std::map<std::string, std::pair<SG::AuxElement::ConstAccessor<float>, SG::AuxElement::ConstAccessor<float>>> m_monitoredOfflineIdAccessors;
+    std::map<std::string, std::pair<SG::ConstAccessor<float>, SG::ConstAccessor<float>>> m_monitoredOfflineIdAccessors;
 
     virtual StatusCode processEvent(const EventContext& ctx) const override;
 

@@ -15,7 +15,6 @@ def SCT_GeoModelCfg(flags):
     sctDetectorTool.GeometryDBSvc = db.getPrimary()
     sctDetectorTool.useDynamicAlignFolders = flags.GeoModel.Align.Dynamic
     sctDetectorTool.Alignable = True # make this a flag?
-    sctDetectorTool.DetectorName = "SCT"
     geoModelSvc.DetectorTools += [ sctDetectorTool ]
     acc.merge(db)
     return acc

@@ -1,3 +1,17 @@
 LArRawConditions/LArMCSym_test
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
 LArMiniFCAL_ID       INFO  initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
 test1

@@ -41,6 +41,15 @@ def TileDigitsFromPulseCfg(flags, **kwargs):
         AmpDistLowerLimit             -- Set all bins lower than this to zero. Default = 135
         InTimeAmpDistHistogramName    -- Name of the histogram to use for in-time amplitude distribution
         OutOfTimeAmpDistHistogramName -- Name of the histogram to use for out-of-time amplitude distribution
+        PedestalValueHG               -- Pedestal in HG if not taken from database
+        PedestalValueLG               -- Pedestal in LG if not taken from database
+        SimulatePileUpWithPoiss       -- Simulate pile-up overlaying signals from distribution
+        AvgMuForPileUpSimulation      -- Average number of pp collisions for pile-up simulation with SimulatePileUpWithPoiss
+        PileUpAmpDistFileName         -- Distribution to simulate pile-up with SimulatePileUpWithPoiss
+        RandomSeed                    -- Random seed for random number generator
+        SimulatePulseChain            -- Simulate continuous output from readout cosidering HL-LHC paradigm
+        Bigain                        -- Save two gains in ntuple
+        NPulses                       -- The number of neighboring bunch crossings (before and after the in-time crossing) whose signals are accounted for when simulating the total contribution to a given bunch crossing
     """
 
     kwargs.setdefault('InTimeAmp', 1000)
@@ -48,8 +57,13 @@ def TileDigitsFromPulseCfg(flags, **kwargs):
     kwargs.setdefault('ImperfectionRms', 0)
     kwargs.setdefault('TilePhaseII', False)
     kwargs.setdefault('NSamples', 7)
+    kwargs.setdefault('NPulses', 21)
+    kwargs.setdefault('Bigain', False)
+    kwargs.setdefault('SimulatePulseChain', False)
 
     PhaseII = kwargs['TilePhaseII']
+    PulseChain = kwargs['SimulatePulseChain']
+
     # PhaseII parameters
     if PhaseII:
         kwargs.setdefault('PedestalValueHG', 100)
@@ -62,6 +76,7 @@ def TileDigitsFromPulseCfg(flags, **kwargs):
 
     kwargs.setdefault('PileUpFraction', 0)
     kwargs.setdefault('AmpDistLowerLimit', 0)
+    kwargs.setdefault('SimulatePileUpWithPoiss', False)
     kwargs.setdefault('AvgMuForPileUpSimulation', 80)
 
     from TileGeoModel.TileGMConfig import TileGMCfg
@@ -77,7 +92,7 @@ def TileDigitsFromPulseCfg(flags, **kwargs):
     kwargs['RndmSvc'] = acc.getPrimaryAndMerge( AthRNGSvcCfg(flags) ).name
 
     # Configure TileInfoLoader to set up number of samples
-    nSamples = kwargs['NSamples']
+    nSamples = kwargs['NSamples'] if not PulseChain else 1
     ADCmax = 4095 if PhaseII else 1023
     ADCmaskValue = 4800 if PhaseII else 2047
     from TileConditions.TileInfoLoaderConfig import TileInfoLoaderCfg
@@ -118,16 +133,23 @@ if __name__ == '__main__':
     parser.add_argument('--phaseII', type=bool, default=False, help='Use parameters of TilePhaseII')
     parser.add_argument('--run', type=int, default=410000, help='Run number')
     parser.add_argument('--save-true-amplitude', action='store_true', help='Save true Tile raw channel amplitude into h2000')
+    parser.add_argument('--pulseChain', type=bool, default=False, help='Simulate continuous output of readout across bunch crossings')
     parser.add_argument('--acr-db', action='store_true', help='Use auto correlation matrix from DB')
 
     args, _ = parser.parse_known_args()
 
     flags.Tile.RunType = TileRunType.PHY
+
     # Set up Tile reconstuction methods
-    flags.Tile.doOpt2 = True
-    flags.Tile.doOptATLAS = True
-    if args.nsamples != 7:
+    if(args.pulseChain): # no reconstruction ran for continuous readout simulation
+        flags.Tile.doOpt2 = False
+        flags.Tile.doOptATLAS = False
         flags.Tile.OfcFromCOOL = False
+    else:
+        flags.Tile.doOpt2 = True
+        flags.Tile.doOptATLAS = True
+        if args.nsamples != 7:
+            flags.Tile.OfcFromCOOL = False
 
     flags.Input.isMC = True
     flags.Input.Files = []
@@ -162,7 +184,7 @@ if __name__ == '__main__':
         cfg.merge(PoolReadCfg(flags))
 
     # =======>>> Configure Tile digits from pulse algorithm
-    cfg.merge( TileDigitsFromPulseCfg(flags, NSamples=args.nsamples, TilePhaseII=args.phaseII) )
+    cfg.merge( TileDigitsFromPulseCfg(flags, NSamples=args.nsamples, TilePhaseII=args.phaseII, SimulatePulseChain=args.pulseChain) )
 
     # =======>>> Configure Tile raw channel maker
     from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
@@ -178,20 +200,27 @@ if __name__ == '__main__':
     # =======>>> Configure Tile h2000 ntuple production
     ntupleFile = f'{args.outputDirectory}/tile_{runNumber}_{args.outputVersion}.aan.root'
     from TileRec.TileAANtupleConfig import TileAANtupleCfg
+
     cfg.merge( TileAANtupleCfg(flags,
-                               saveTMDB=False,
-                               NSamples=args.nsamples,
-                               TileL2Cnt='',
-                               TileDigitsContainerFlt='',
-                               TileDigitsContainer='TileDigitsCnt',
-                               TileRawChannelContainer='TileRawChannelCnt',
-                               TileRawChannelContainerOpt='TileRawChannelOpt2',
-                               CalibrateEnergy=False,
-                               OfflineUnits=0,
-                               CalibMode=True,
-                               outputFile=ntupleFile) )
-    if args.save_true_amplitude:
-        cfg.getEventAlgo('TileNtuple').TileRawChannelContainerFit = 'TrueAmp'
+                            saveTMDB=False,
+                            TileL2Cnt='',
+                            TileDigitsContainerFlt='',
+                            TileDigitsContainer='TileDigitsCnt',
+                            CalibrateEnergy=False,
+                            OfflineUnits=0,
+                            CalibMode=True,
+                            outputFile=ntupleFile) )
+
+    if args.pulseChain:
+        cfg.getEventAlgo('TileNtuple').NSamples = 1
+        cfg.getEventAlgo('TileNtuple').TileRawChannelContainer = 'TrueAmp'
+    else:
+        cfg.getEventAlgo('TileNtuple').NSamples = args.nsamples
+        cfg.getEventAlgo('TileNtuple').TileRawChannelContainer='TileRawChannelCnt'
+        cfg.getEventAlgo('TileNtuple').TileRawChannelContainerOpt='TileRawChannelOpt2'
+
+        if args.save_true_amplitude:
+            cfg.getEventAlgo('TileNtuple').TileRawChannelContainerFit = 'TrueAmp'
 
     # =======>>> Any last things to do?
     if args.postExec:

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 def MdtCalibTestAlgCfg(flags, name="MdtCalibDbTestAlg", **kwargs):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -8,9 +8,8 @@ def MdtCalibTestAlgCfg(flags, name="MdtCalibDbTestAlg", **kwargs):
     return result
 
 if __name__ == "__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, geoModelFileDefault
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
     parser = SetupArgParser()
-    parser.add_argument("--setupRun4", default=False, action="store_true")
     parser.add_argument("--rtJSON", help="Location of the RT json file", default="")
     parser.add_argument("--t0JSON", help="Location of the T0 json file", default="")
     parser.set_defaults(nEvents = 1)
@@ -24,7 +23,6 @@ if __name__ == "__main__":
     flags.Muon.Calib.readMdtJSON = True
 
     args = parser.parse_args()
-    args.geoModelFile = geoModelFileDefault(args.setupRun4)
     flags, cfg = setupGeoR4TestCfg(args, flags)
     from MuonConfig.MuonCalibrationConfig import MdtCalibDbAlgCfg
     cfg.merge(MdtCalibDbAlgCfg(flags,RtJSON = args.rtJSON,  TubeT0JSON = args.t0JSON))

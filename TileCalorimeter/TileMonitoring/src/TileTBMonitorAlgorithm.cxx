@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileTBMonitorAlgorithm.h"
@@ -282,12 +282,12 @@ StatusCode TileTBMonitorAlgorithm::fillHistograms( const EventContext& ctx ) con
           fill(m_tools[m_timeGroups.at(moduleName2)], monTime, monChannel);
         }
 
-        if ((m_maskedChannels[drawerIdx1][chan1] >> gain1) & 1U) {
-          if (!((m_maskedChannels[drawerIdx2][chan2] >> gain2) & 1U)) {
+        if (gain1 < 0 || ((m_maskedChannels[drawerIdx1][chan1] >> gain1) & 1U)) {
+          if (gain2 >= 0 && !((m_maskedChannels[drawerIdx2][chan2] >> gain2) & 1U)) {
             energy = tile_cell->ene2() * 2;
           }
-        } else if ((m_maskedChannels[drawerIdx2][chan2] >> gain2) & 1U) {
-          if (!((m_maskedChannels[drawerIdx1][chan1] >> gain1) & 1U)) {
+        } else if (gain2 >= 0 && ((m_maskedChannels[drawerIdx2][chan2] >> gain2) & 1U)) {
+          if (gain1 >= 0 && !((m_maskedChannels[drawerIdx1][chan1] >> gain1) & 1U)) {
             energy =tile_cell->ene1() * 2;
           }
         } else {

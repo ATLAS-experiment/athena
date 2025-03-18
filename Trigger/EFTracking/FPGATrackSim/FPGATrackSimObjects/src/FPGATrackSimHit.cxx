@@ -76,7 +76,7 @@ unsigned FPGATrackSimHit::getPhysLayer() const
 
 unsigned FPGATrackSimHit::getLayer() const
 {
-    if (isMapped()) return m_layer;
+    if (isMapped() || (m_hitType == HitType::guessed)) return m_layer;
     throw std::domain_error("FPGATrackSimHit::getLayer() called on a hit with invalid type: " + to_string(m_hitType));
 }
 
@@ -113,8 +113,7 @@ void FPGATrackSimHit::makeSpacepoint(float x, float y, float z, float window, FP
     
     m_pairedDetZone = inner->getDetectorZone();
     m_pairedDetType = inner->getDetType();
-    m_pairedPhysLayer = inner->getPhysLayer();
-    
+    m_pairedPhysLayer = inner->getPhysLayer();    
 
     // Update the type.
     setHitType(HitType::spacepoint);

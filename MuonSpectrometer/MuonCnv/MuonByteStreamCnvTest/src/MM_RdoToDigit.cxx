@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MM_RdoToDigit.h"
 
-MM_RdoToDigit::MM_RdoToDigit(const std::string& name, ISvcLocator* pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode MM_RdoToDigit::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());

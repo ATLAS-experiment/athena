@@ -19,7 +19,7 @@ MAPS_9L_GNN="maps_9L/GNN/${MAP_9L_GNN_VERSION}/"
 BANKS_9L="banks_9L/${BANK_9L_VERSION}/"
 BANKS_5L="banks_5L/${BANK_5L_VERSION}/"
 
-COMBINED_MATRIX="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/${BANKS_9L}/combined_matrix.root"
+COMBINED_MATRIX="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/${BANKS_5L}/combined_matrix.root"
 
 ONNX_INPUT_FAKE="${BANKS_9L}ClassificationHT_v5.onnx"
 ONNX_INPUT_PARAM="${BANKS_9L}ParamEstimationHT_v5.onnx"
@@ -35,6 +35,7 @@ RDO_EVT_ANALYSIS=-1
 SKIP_EVENTS=0
 RDO_ANALYSIS=$RDO_SINGLE_MUON
 SAMPLE_TYPE='singleMuons'
+WRITE_UPSTREAM_OUTPUT_DATA=True
 
 # arg parser
 while [[ $# -gt 0 ]]; do
@@ -49,17 +50,29 @@ while [[ $# -gt 0 ]]; do
             RDO_ANALYSIS=$RDO_SINGLE_MUON
             RUN_CKF=True
             shift ;;
-        -n|--events) RDO_EVT_ANALYSIS="$2"; shift 2 ;;
+        -i|--inputFile)
+            RDO_ANALYSIS="$2"
+            shift 2 ;;
+        -n|--events)
+            RDO_EVT_ANALYSIS="$2";
+            if [ "$RDO_EVT_ANALYSIS" -gt 10 ] || [ "$RDO_EVT_ANALYSIS" -eq -1 ]; then
+                RUN_CKF=False
+            fi
+            shift 2 ;;
         -s|--skip-events) SKIP_EVENTS="$2"; shift 2 ;;
+        -q|--noDataOutput) WRITE_UPSTREAM_OUTPUT_DATA=False; shift ;;
         --) shift; break ;;
         *) echo "Unknown option: $1"; return 1 ;;
     esac
 done
 
+RDO_ANALYSIS="${RDO_ANALYSIS// /, }"
+
 # Print final configuration
 echo "Configuration:"
-echo "  RDO_ANALYSIS = $RDO_ANALYSIS"
-echo "  SAMPLE_TYPE = $SAMPLE_TYPE"
-echo "  RDO_EVT_ANALYSIS = $RDO_EVT_ANALYSIS"
-echo "  SKIP_EVENTS = $SKIP_EVENTS"
-echo "  RUN_CKF = $RUN_CKF"
+echo "  RDO File(s) = $RDO_ANALYSIS"
+echo "  sampleType = $SAMPLE_TYPE"
+echo "  Events to run = $RDO_EVT_ANALYSIS"
+echo "  Events to skip = $SKIP_EVENTS"
+echo "  Run CKF = $RUN_CKF"
+echo "  WRITE_OUTPUT_DATA = $WRITE_UPSTREAM_OUTPUT_DATA"

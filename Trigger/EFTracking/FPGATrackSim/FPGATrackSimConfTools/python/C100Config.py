@@ -47,7 +47,7 @@ if __name__ == "__main__":
         acc.merge(InDetTrackRecoCfg(flags))
         
     from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimDataPrepConnectToFastTracking
-    acc.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks="ActsFast"))
+    acc.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks=f"{TrackParticlePrefix}"))
     
     # IDTPM running
     from InDetTrackPerfMon.InDetTrackPerfMonConfig import InDetTrackPerfMonCfg

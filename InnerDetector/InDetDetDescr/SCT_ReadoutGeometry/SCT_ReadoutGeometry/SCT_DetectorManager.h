@@ -145,7 +145,9 @@ namespace InDetDD {
 
     // Used by initNeighbours() to deal with strip encap eta overlap. 
     // This can only be done when all elements are built.
-    int getStripEndcapEtaNeighbour(const SiDetectorElement* element, IdentifierHash& idHashNeighbour) const;
+    int getStripEndcapEtaNeighbour(const SiDetectorElement* element, 
+                                   IdentifierHash& idHashNeighbour,
+                                   const bool phi_plus_one=false) const;
 
     /**
      * implements the main alignment update for delta transforms in different frames,

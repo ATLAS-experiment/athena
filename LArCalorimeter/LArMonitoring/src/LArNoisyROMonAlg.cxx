@@ -23,7 +23,7 @@ StatusCode LArNoisyROMonAlg::initialize()
   ATH_CHECK(m_inputKey.initialize());
   ATH_CHECK(m_badFebKey.initialize());
   ATH_CHECK(m_MNBFebKey.initialize());
-  ATH_CHECK(m_hvMapKey.initialize());
+  ATH_CHECK(m_hvMapKey.initialize(!m_hvMapKey.empty()));
   ATH_CHECK( m_eventInfoDecorKey.initialize() );
   
   m_histoGroups.reserve(m_SubDetNames.size());
@@ -103,10 +103,13 @@ StatusCode LArNoisyROMonAlg::fillHistograms(const EventContext& ctx) const {
     ATH_MSG_WARNING( "Can't retrieve LArNoisyROSummary " );
     return StatusCode::SUCCESS;
   }
-  SG::ReadCondHandle<LArHVIdMapping> hvidHdl(m_hvMapKey, ctx);
-  const LArHVIdMapping* hvid{*hvidHdl};
-  if(!hvid) {
-    ATH_MSG_WARNING( "Can't retrieve LArHVIdMapping, no per partition HVlines histograms ! " );
+  const LArHVIdMapping* hvid=nullptr;
+  if(!m_hvMapKey.empty()){
+     SG::ReadCondHandle<LArHVIdMapping> hvidHdl(m_hvMapKey, ctx);
+     hvid = *hvidHdl;
+     if(!hvid) {
+       ATH_MSG_WARNING( "Can't retrieve LArHVIdMapping, no per partition HVlines histograms ! " );
+     }
   }
   
   unsigned int LBN = eventInfo->lumiBlock();

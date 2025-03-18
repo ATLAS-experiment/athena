@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include "../ITkStripsRawContByteStreamCnv.h"
-DECLARE_CONVERTER( ITkStripsRawContByteStreamCnv )
+// Temporarily disabled due to ATLASRECTS-8177
+//#include "../ITkStripsRawContByteStreamCnv.h"
+//DECLARE_CONVERTER( ITkStripsRawContByteStreamCnv )
 
 #include "../ITkStripsRawContByteStreamTool.h"
 DECLARE_COMPONENT( ITkStripsRawContByteStreamTool )

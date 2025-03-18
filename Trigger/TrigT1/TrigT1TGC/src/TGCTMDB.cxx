@@ -1,8 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCTMDB.h"
+
+#include "AthenaBaseComps/AthCheckMacros.h"
 
 namespace LVL1TGC {
 
@@ -11,28 +13,25 @@ TGCTMDB::TGCTMDB()
 {
   for (size_t side=0; side < TGCSide::kNSide; side++) {
     for (size_t mod=0; mod < kNTileModule; mod++) {
-      m_buffer[side][mod].reset(new TGCTMDBOut(side, mod));
+      m_buffer[side][mod] = std::make_shared<TGCTMDBOut>(side, mod);
     }
   }
 }
 
 
-StatusCode TGCTMDB::retrieve(SG::ReadHandleKey<TileMuonReceiverContainer> key)
+StatusCode TGCTMDB::retrieve(const SG::ReadHandleKey<TileMuonReceiverContainer>& key,
+                             const EventContext& ctx)
 {
   ATH_MSG_DEBUG("fillTMDB");
 
   // clear TMDB
   this->eraseOutput();
 
-  SG::ReadHandle<TileMuonReceiverContainer> readTileMuonReceiverContainer(key);
-  if(!readTileMuonReceiverContainer.isValid()){
-      ATH_MSG_ERROR("Cannot retrieve Tile Muon Receiver Container.");
-      return StatusCode::FAILURE;
-  }
-  const TileMuonReceiverContainer* tileMuRecCont = readTileMuonReceiverContainer.cptr();
+  SG::ReadHandle<TileMuonReceiverContainer> readTileMuonReceiverContainer(key, ctx);
+  ATH_CHECK( readTileMuonReceiverContainer.isValid() );
 
   // loop over all TileMuonReceiverObj in container
-  TileMuonReceiverContainer::const_iterator tmItr = tileMuRecCont->begin();
+  TileMuonReceiverContainer::const_iterator tmItr = readTileMuonReceiverContainer->begin();
 
   const TileMuonReceiverObj * tmObj_Thresholds = *tmItr;
   if ( (tmObj_Thresholds->GetThresholds()).size() == 4) {
@@ -52,7 +51,7 @@ StatusCode TGCTMDB::retrieve(SG::ReadHandleKey<TileMuonReceiverContainer> key)
   // m_id and decision , etc ... from
   ++tmItr;
 
-  for ( ; tmItr != tileMuRecCont->end(); ++tmItr) {
+  for ( ; tmItr != readTileMuonReceiverContainer->end(); ++tmItr) {
 
       const TileMuonReceiverObj * tmObj = *tmItr;
       // Tile Module

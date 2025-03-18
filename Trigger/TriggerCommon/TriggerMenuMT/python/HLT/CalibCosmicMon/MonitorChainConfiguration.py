@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -115,13 +115,11 @@ def MistimeMonSequenceCfg(flags):
                 HypoToolGen = TrigGenericHypoToolFromDict)
 
 def CaloClusterMonitorCfg(flags, suffix = ""):
-   from TrigT2CaloCommon.CaloDef import clusterFSInputMaker
-   
-   from TrigCaloRec.TrigCaloRecConfig import ( hltCaloTopoClusteringCfg )
+   from TrigCaloRec.TrigCaloRecConfig import hltCaloTopoClusteringCfg
    
    reco = InEventRecoCA('CaloClusterMonitoring' + suffix)
    
-   reco.merge( hltCaloTopoClusteringCfg(flags, namePrefix="CaloMon", nameSuffix="FS" + suffix, CellsName="CaloCellsFS" + suffix, monitorCells=True, clustersKey="HLT_MonitoringCaloClusters" + suffix) )
+   reco.merge( hltCaloTopoClusteringCfg(flags, namePrefix="CaloMon", nameSuffix="FS" + suffix, CellsName="CaloCellsFS" + suffix, monitorCells=False, clustersKey="HLT_MonitoringCaloClusters" + suffix) )
       
    selAcc = SelectionCA('CaloClusterMonitoringSequence' + suffix)
    

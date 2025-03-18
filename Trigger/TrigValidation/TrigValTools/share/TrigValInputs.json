@@ -242,7 +242,7 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675668._000016.pool.root.1"
+            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-01/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128_tid41864949_00/RDO.41864949._000217.pool.root.1"
         ]
     },
     "Bphys_JpsiPhi": {
@@ -305,7 +305,7 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900497.PG_single_epm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675664._000001.pool.root.1"
+            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-01/mc21_14TeV.900497.PG_single_epm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128_tid41864936_00/RDO.41864936._000339.pool.root.1"
         ]
     },
     "Ztautau": {

@@ -23,7 +23,7 @@ Reco_tf.py \
 rc1=$?
 echo "art-result: ${rc1} Reco_tf_q454_phys_physlite_mt_mp" 
 
-Derivation_tf.py \
+stdbuf -i0 -o0 -e0 Derivation_tf.py \
   --inputAODFile myAOD.pool.root \
   --outputDAODFile art.pool.root \
   --sharedWriter True \
@@ -71,7 +71,7 @@ echo "art-result: ${rc4} xAODHistSize"
 
 # dcube references
 echo "============ dcube references"
-dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q454/v11/hist_physlite_25023.root"
+dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q454/v12/hist_physlite_25026.root"
 dcubeXML="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q454/v0/dcube_config_hist_physlite_24024.xml"
 echo ${dcubeRef}
 echo ${dcubeXML}
@@ -85,7 +85,7 @@ echo "art-result: ${rc5} dcube_physlite"
 # Run trf_getVariables.py to extract variables from DAOD_PHYSLITE.art.pool.root
 echo "============ trf_getVariables.py"
 get_files trf_getVariables.py
-source /cvmfs/sft.cern.ch/lcg/releases/LCG_106/uproot/5.3.7/`arch`-el9-gcc13-opt/uproot-env.sh
+source /cvmfs/sft.cern.ch/lcg/releases/LCG_107a/uproot/5.3.11/`arch`-el9-gcc13-opt/uproot-env.sh
 trf_getVariables.py --inputFile DAOD_PHYSLITE.art.pool.root
 rccsv=$?
 tar czf generated_csv_files.tar.gz generated_csv_files/

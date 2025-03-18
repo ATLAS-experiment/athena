@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,6 +12,8 @@
 #include "ITkStripCabling/ITkStripCablingData.h"
 #include <iostream>
 
+const IdentifierHash ITkStripCablingData::s_invalidHash{};
+const ITkStripOnlineId ITkStripCablingData::s_invalidId{};
 
 bool 
 ITkStripCablingData::empty() const{
@@ -35,11 +37,30 @@ ITkStripCablingData::onlineId(const Identifier & id) const{
 std::istream& 
 operator>>(std::istream & is, ITkStripCablingData & cabling){
   unsigned int onlineInt{}, offlineInt{};
+  std::string extendedId{};
   //very primitive, should refine with regex and value range checking
-  while(is>>offlineInt>>onlineInt){
+  std::string line{};
+  int indx=0;
+  while(getline(is,line)){
+    std::stringstream ss(line);
+    std::string t{};
+    std::vector<std::string> words;
+    std::string offIdShort = "";
+    if(line[0] == '#') continue;
+    while(getline(ss,t,' ')){
+      words.push_back(t);
+    }
+    if(words[0].size()>10) offIdShort=words[0].erase(10);
+    else offIdShort=words[0];
+    offlineInt=static_cast<unsigned int>(std::strtoul(offIdShort.c_str(),NULL,0));
+    onlineInt=static_cast<unsigned int>(std::strtoul(words[2].c_str(),NULL,0));
     const Identifier offlineId(offlineInt);
     const ITkStripOnlineId onlineId(onlineInt);
     cabling.m_offline2OnlineMap[offlineId] = onlineId;
+    cabling.m_hash2OnlineIdArray[indx] = onlineId;
+    words.clear();
+    indx++;
+    
   }
   return is;
 }
@@ -52,4 +73,12 @@ operator<<(std::ostream & os, const ITkStripCablingData & cabling){
   }
   os<<std::endl;
   return os;
+}
+
+ITkStripOnlineId ITkStripCablingData::getOnlineIdFromHash(const IdentifierHash& hash) const {
+  return hash.is_valid()? m_hash2OnlineIdArray[hash] : s_invalidId;
+}
+
+void ITkStripCablingData::getRods(std::vector<std::uint32_t>& usersVector) const {
+  std::copy(m_rodIdSet.begin(), m_rodIdSet.end(), std::back_inserter(usersVector));
 }

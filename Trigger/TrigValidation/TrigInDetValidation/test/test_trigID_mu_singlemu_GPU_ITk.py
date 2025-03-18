@@ -5,7 +5,7 @@
 # art-type: grid
 # art-include: main/Athena
 # art-architecture: '#&nvidia'
-# art-input: mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697
+# art-input: mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128
 # art-input-nfiles: 20
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
@@ -37,7 +37,7 @@ Input   = 'Single_mu_Run4'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 useCA_Reco = True
 
-preexec_trig = "flags.Tracking.doTruth=False;flags.Trigger.enableL1CaloPhase1=False;flags.Trigger.InDetTracking.doGPU=True;"
+preexec_trig = "flags.Tracking.doTruth=False;flags.Trigger.InDetTracking.doGPU=True;"
 
 Jobs = [ ( "Truth",       " TIDAdata-run4.dat                    -o data-hists.root -p 13",   "Test_bin.dat" ),
          ( "Offline",     " TIDAdata-run4-offline.dat -r Offline -o data-hists-offline.root", "Test_bin.dat" ) ]

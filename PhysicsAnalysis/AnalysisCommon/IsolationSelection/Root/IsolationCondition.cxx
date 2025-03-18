@@ -16,6 +16,9 @@ namespace CP {
         for (const xAOD::Iso::IsolationType& iso_type : m_isolationType) { 
             std::string accName = std::string(toCString(iso_type)) + (isoDecSuffix.empty() ? "" : "_") + isoDecSuffix; 
             m_acc.emplace_back(accName); 
+            // Save accessor to iso type without suffix as fallback protection - missing for events w/o PV 2025/02
+            std::string accName_noCloseBy = std::string(toCString(iso_type));
+            m_acc_noCloseBy.emplace_back(accName_noCloseBy); 
     }
     }
     IsolationCondition::IsolationCondition(const std::string& name, const std::vector<std::string>& isoTypes, const std::string& isoDecSuffix) : 
@@ -25,6 +28,9 @@ namespace CP {
             m_isolationType.push_back(xAOD::Iso::IsolationType(0));
             std::string accName = iso_type + (isoDecSuffix.empty() ? "" : "_") + isoDecSuffix;
             m_acc.emplace_back(accName);
+            // Save accessor to iso type without suffix as fallback protection - missing for events w/o PV 2025/02
+            std::string accName_noCloseBy = iso_type;
+            m_acc_noCloseBy.emplace_back(accName_noCloseBy);
         }
     }
     IsolationCondition::IsolationCondition(const std::string& name, xAOD::Iso::IsolationType isoType, const std::string& isoDecSuffix) :
@@ -36,4 +42,5 @@ namespace CP {
     const std::string& IsolationCondition::name() const { return m_name; }
     xAOD::Iso::IsolationType IsolationCondition::type(unsigned int n) const { return m_isolationType[n]; }
     const SG::AuxElement::ConstAccessor<float>& IsolationCondition::accessor(unsigned int n) const { return m_acc.at(n); }
+    const SG::AuxElement::ConstAccessor<float>& IsolationCondition::accessor_noCloseBy(unsigned int n) const { return m_acc_noCloseBy.at(n); }
 }  // namespace CP

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
   Contact: Xin Chen <xin.chen@cern.ch>
 */
 #ifndef JPSIXPLUS2V0_H
@@ -62,6 +62,7 @@ namespace DerivationFramework {
     SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers;
     std::string m_hypoName;
 
+    bool   m_useImprovedMass{};
     double m_jxMassLower{};
     double m_jxMassUpper{};
     double m_jpsiMassLower{};
@@ -69,12 +70,12 @@ namespace DerivationFramework {
     double m_diTrackMassLower{};
     double m_diTrackMassUpper{};
     std::string m_V01Hypothesis{};
-    double m_V01MassLower{};
-    double m_V01MassUpper{};
-    double m_lxyV01_cut{};
     std::string m_V02Hypothesis{};
-    double m_V02MassLower{};
-    double m_V02MassUpper{};
+    double m_LambdaMassLower{};
+    double m_LambdaMassUpper{};
+    double m_KsMassLower{};
+    double m_KsMassUpper{};
+    double m_lxyV01_cut{};
     double m_lxyV02_cut{};
     double m_minMass_gamma{};
     double m_chi2cut_gamma{};
@@ -90,8 +91,8 @@ namespace DerivationFramework {
     double m_massJX{};
     double m_massJpsi{};
     double m_massX{};
-    double m_massV01{};
-    double m_massV02{};
+    double m_massLd{};
+    double m_massKs{};
     double m_massJXV02{};
     double m_massMainV{};
     bool   m_constrJX{};
@@ -123,6 +124,7 @@ namespace DerivationFramework {
     ToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
     ToolHandle < InDet::VertexPointEstimator >       m_vertexEstimator;
     ToolHandle < Trk::IExtrapolator >                m_extrapolator;
+
     ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
     bool   m_refitPV{};
@@ -135,9 +137,10 @@ namespace DerivationFramework {
     double m_mass_pion{};
     double m_mass_proton{};
     double m_mass_Lambda{};
-    double m_mass_Lambda_b{};
+    double m_mass_Lambdab{};
     double m_mass_Ks{};
     double m_mass_Bpm{};
+    double m_mass_phi{};
 
     std::vector<double> m_massesV0_ppi;
     std::vector<double> m_massesV0_pip;

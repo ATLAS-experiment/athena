@@ -1,37 +1,34 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 
 #include "TrigT1TGC/TGCBIS78.h"
 #include "TrigT1TGC/BIS78TrigOut.h"
-#include <iostream> // will be removed
+
+#include "AthenaBaseComps/AthCheckMacros.h"
+
 
 namespace LVL1TGC {
 
 TGCBIS78::TGCBIS78()
 : AthMessaging("LVL1TGC::TGCBIS78") {
-  for (size_t PadBoard=0; PadBoard < kNPadBoards; PadBoard++) {
-    std::vector<int> vecPadBoard;
-    vecPadBoard.push_back(PadBoard);
-    m_buffer[PadBoard].reset(new BIS78TrigOut(vecPadBoard)); 
+  for (int PadBoard=0; PadBoard < kNPadBoards; PadBoard++) {
+    m_buffer[PadBoard] = std::make_shared<BIS78TrigOut>(std::vector<int>{PadBoard});
   }
 }
 
 
-StatusCode TGCBIS78::retrieve(SG::ReadHandleKey<Muon::RpcBis78_TrigRawDataContainer> key) {
+StatusCode TGCBIS78::retrieve(const SG::ReadHandleKey<Muon::RpcBis78_TrigRawDataContainer>& key,
+                              const EventContext& ctx) {
   ATH_MSG_DEBUG("retrieve");
 
   this->eraseOutput();
 
   //The following part will be available when RPC BIS78 Trigger Output is available.
-  SG::ReadHandle<Muon::RpcBis78_TrigRawDataContainer> readBIS78_TrigRawDataContainer(key);
-  if(!readBIS78_TrigRawDataContainer.isValid()){
-    ATH_MSG_ERROR("Cannot retrieve RPC BIS78 TrigRawData Container.");
-    return StatusCode::FAILURE;
-  }
-  const Muon::RpcBis78_TrigRawDataContainer* bis78_TrigRawDataContainer = readBIS78_TrigRawDataContainer.cptr();
-  for(const Muon::RpcBis78_TrigRawData* bis78_sector : *bis78_TrigRawDataContainer){
+  SG::ReadHandle<Muon::RpcBis78_TrigRawDataContainer> readBIS78_TrigRawDataContainer(key, ctx);
+  ATH_CHECK( readBIS78_TrigRawDataContainer.isValid() );
+
+  for(const Muon::RpcBis78_TrigRawData* bis78_sector : *readBIS78_TrigRawDataContainer){
     if ( bis78_sector->sideId() != 1 ) continue; // BIS78 is only in A side!
     for(const Muon::RpcBis78_TrigRawDataSegment* bis78_hit : *bis78_sector){
       this->setOutput(bis78_sector->sectorId(),
@@ -50,9 +47,7 @@ StatusCode TGCBIS78::retrieve(SG::ReadHandleKey<Muon::RpcBis78_TrigRawDataContai
 
 std::shared_ptr<const BIS78TrigOut> TGCBIS78::getOutput(int TGC_TriggerSector) const
 {
-  std::shared_ptr<BIS78TrigOut> trigBIS78_output;
-  trigBIS78_output.reset(new BIS78TrigOut());
-  trigBIS78_output->clear();
+  auto trigBIS78_output = std::make_shared<BIS78TrigOut>();
   if ( TGC_TriggerSector<0 || TGC_TriggerSector>47 ) return 0;
   int BIS78_TriggerSect = (TGC_TriggerSector - 2)/6;
   if(TGC_TriggerSector < 2) BIS78_TriggerSect=7;

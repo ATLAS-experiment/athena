@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
 # Dev_HI_run3_v1.py menu for Run 3 development
@@ -9,24 +9,13 @@ from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from .SignatureDicts import ChainStore
 
 from .Physics_pp_run3_v1 import (
-    #SingleMuonGroup,
     MinBiasGroup,
-    #MultiMuonGroup,
-    #SinglePhotonGroup,
-    #SingleElectronGroup,
-    #MultiElectronGroup,
-    PrimaryLegGroup,
     PrimaryPhIGroup,
-    #PrimaryL1MuGroup,
     SupportGroup,
-    SupportLegGroup,
     SupportPhIGroup,
     SingleJetGroup,
-    #SingleBjetGroup,
-    #TagAndProbeGroup,
-    #ZeroBiasGroup
 )
-from .PhysicsP1_HI_run3_v1 import HardProbesStream,MinBiasStream,UPCStream,MinBiasOverlayStream,UCCStream
+from .PhysicsP1_HI_run3_v1 import HardProbesStream, MinBiasStream, UPCStream
 from . import MC_HI_run3_v1 as mc_menu
 
 
@@ -56,6 +45,15 @@ def getDevHISignatures():
         ChainProp(name='HLT_j30a_pf_jes_ftf_L1jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_j40a_pf_jes_ftf_L1jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1gTE5_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L12jJ5_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1eTAU1_jJ5_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1jJ5_TRT_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L12jJ5_TRT_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1eTAU1_jJ5_TRT_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1jJ5p30ETA49_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1jJ10p30ETA49_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L12jJ5p30ETA49_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L12jJ10p30ETA49_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
     ]
 
 
@@ -132,10 +130,6 @@ def getDevHISignatures():
 
 
         #----Physics streamer for 2022 Nov HI test run, ATR-26405
-        ChainProp(name='HLT_noalg_L1gTE3',        l1SeedThresholds=['FSNOSEED'], stream=[UPCStream]   , groups=['PS:NoBulkMCProd']+SupportPhIGroup),
-        ChainProp(name='HLT_noalg_L1gTE5',        l1SeedThresholds=['FSNOSEED'], stream=[UPCStream]   , groups=['PS:NoBulkMCProd']+SupportPhIGroup),
-        ChainProp(name='HLT_noalg_L1gTE10',        l1SeedThresholds=['FSNOSEED'], stream=[UPCStream]   , groups=['PS:NoBulkMCProd']+SupportPhIGroup),
-
         ChainProp(name='HLT_noalg_L1eTAU1',           l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1jTAU1',           l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
     ]

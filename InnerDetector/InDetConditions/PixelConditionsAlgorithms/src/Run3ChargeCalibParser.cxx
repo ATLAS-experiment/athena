@@ -41,8 +41,8 @@ namespace PixelChargeCalib{
         b.threshold.emplace_back(getInt(0), getInt(1), getInt(2), getInt(3));
         b.thresholdLong.emplace_back(getInt(4), getInt(5), getInt(6), getInt(7));
         b.thresholdGanged.emplace_back(getInt(8), getInt(9), getInt(10), getInt(11));
-        b.params.emplace_back(getFloat(12), getFloat(13), getFloat(14));
-        b.paramsGanged.emplace_back(getFloat(15), getFloat(16), getFloat(17));
+        b.params.emplace_back(getFloat(12), getFloat(13), getFloat(14), LegacyFitParameters::defaultOverflow);
+        b.paramsGanged.emplace_back(getFloat(15), getFloat(16), getFloat(17), LegacyFitParameters::defaultOverflow);
         b.totRes.emplace_back(getFloat(18), getFloat(19));
 
         // Linear extrapolation above large charge

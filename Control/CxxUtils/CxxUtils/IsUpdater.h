@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/IsUpdater.h
@@ -16,9 +16,6 @@
 
 #include "CxxUtils/concepts.h"
 #include <memory>
-
-
-#if HAVE_CONCEPTS
 
 
 namespace CxxUtils {
@@ -64,9 +61,6 @@ concept IsUpdater = requires(UPDATER<int> x,
 
 } // namespace detail
 } // namespace CxxUtils
-
-
-#endif
 
 
 #endif // not CXXUTILS_ISUPDATER_H

@@ -84,12 +84,12 @@ def checkNTupleEventWise(ntuple, printInterval = 150000):
 
     msg.debug('Checking %s entries ...', reader.GetNEntries())
 
+    try:
+        entry = reader.CreateEntry()
+    except AttributeError:
+        entry = reader.GetModel().CreateEntry()
     for i in reader:
         try:
-            try:
-                entry = reader.CreateEntry()
-            except AttributeError:
-                entry = reader.GetModel().CreateEntry()
             reader.LoadEntry(i, entry)
         except Exception as err:
             msg.warning('Event %s of ntuple %s is corrupted: %s', i, reader.GetDescriptor().GetName(), err)
@@ -121,7 +121,11 @@ def checkNTupleFieldWise(ntuple):
         msg.debug(f"ntupleName={descriptor.GetName()}")
 
         model = reader.GetModel()
-        fieldZero = model.GetFieldZero()
+        try:
+            fieldZero = model.GetFieldZero()
+        except AttributeError:
+            # ROOT Version: 6.35.01
+            fieldZero = model.GetConstFieldZero()
         subFields = fieldZero.GetSubFields()
         msg.debug(f"Top level fields number {subFields.size()}")
         for field in subFields:
@@ -129,7 +133,11 @@ def checkNTupleFieldWise(ntuple):
             bulk = model.CreateBulk(field.GetFieldName())
 
             for clusterDescriptor in descriptor.GetClusterIterable():
-                clusterIndex = ROOT.Experimental.RClusterIndex(clusterDescriptor.GetId(), 0)
+                try:
+                    clusterIndex = ROOT.Experimental.RClusterIndex(clusterDescriptor.GetId(), 0)
+                except AttributeError:
+                    # ROOT Version: 6.35.01
+                    clusterIndex = ROOT.RNTupleLocalIndex(clusterDescriptor.GetId(), 0)
                 size = int(clusterDescriptor.GetNEntries())
                 maskReq = array('b', (True for i in range(size)))
                 msg.debug(f"    cluster #{clusterIndex.GetClusterId()}"

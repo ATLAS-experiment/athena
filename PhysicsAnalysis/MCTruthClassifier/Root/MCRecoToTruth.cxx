@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATIONBASE
@@ -230,7 +230,7 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, MCTruthPartClassif
     ATH_MSG_DEBUG("track matched to the truth with status " << theGenParticle->status());
   }
 
-  if (MC::isDecayed(theGenParticle) && (std::abs(theGenParticle->pdgId()) == 11 || std::abs(theGenParticle->pdgId()) == 13)) {
+  if (MC::isDecayed(theGenParticle) && (MC::isElectron(theGenParticle) || MC::isMuon(theGenParticle))) {
     const xAOD::TruthVertex* EndVrtx = theGenParticle->decayVtx();
     const xAOD::TruthParticle* theGenPartTmp(nullptr);
 

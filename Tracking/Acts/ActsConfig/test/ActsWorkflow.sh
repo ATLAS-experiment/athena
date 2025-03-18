@@ -18,6 +18,8 @@ Reco_tf.py \
 	     flags.Detector.EnableCalo=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
+  --outputDAOD_IDTRKVALIDFile DAOD.IDTRKVALID.pool.root \
+  --outputDAOD_IDTIDEFile DAOD.CTIDE.pool.root \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
   --maxEvents ${n_events}

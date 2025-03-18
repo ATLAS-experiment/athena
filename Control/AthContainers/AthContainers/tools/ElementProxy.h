@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/ElementProxy.h
@@ -15,7 +15,6 @@
 
 
 #include "AthContainers/OwnershipPolicy.h"
-#include "CxxUtils/concepts.h"
 #include <memory>
 #include <RootMetaSelection.h>
 
@@ -93,7 +92,9 @@ public:
    */
   // Disable this method if the container must own its elements.
   // In that case, only the unique_ptr overload is relevant.
-  ATH_MEMBER_REQUIRES(!DVL::must_own, ElementProxy&)
+  template <bool = true>
+  requires(!DVL::must_own)
+  ElementProxy<DVL>&
   operator= (typename DVL::value_type rhs);
 
 

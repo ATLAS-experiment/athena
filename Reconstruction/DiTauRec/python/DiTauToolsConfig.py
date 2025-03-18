@@ -77,7 +77,6 @@ def ClusterFinderCfg(flags, name="DiTauRec_ClusterFinder", **kwargs):
     """Configure the cluster finder"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("ClusterContainer", "CaloCalTopoClusters")
     kwargs.setdefault("Rsubjet", 0.2)
 
     ClusterFinder = CompFactory.ClusterFinder(name, **kwargs)
@@ -88,8 +87,6 @@ def CellFinderCfg(flags, name="DiTauRec_CellFinder", **kwargs):
     """Configure the cell finder"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("ClusterContainer", "CaloCalTopoClusters")
-    kwargs.setdefault("CellContainer", "AllCalo")
     kwargs.setdefault("Rsubjet", 0.2)
 
     CellFinder = CompFactory.CellFinder(name, **kwargs)

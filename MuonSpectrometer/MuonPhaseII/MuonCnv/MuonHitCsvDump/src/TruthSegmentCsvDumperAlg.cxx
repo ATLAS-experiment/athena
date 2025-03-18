@@ -10,6 +10,7 @@
 
 #include "MuonPatternHelpers/MatrixUtils.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
+#include "MuonSegment/MuonSegment.h"
 
 #include <fstream>
 #include <TString.h>
@@ -32,18 +33,29 @@ StatusCode TruthSegmentCsvDumperAlg::initialize() {
   ATH_CHECK(m_inSegmentKey.initialize());
   ATH_CHECK(m_geoCtxKey.initialize());
   ATH_CHECK(m_idHelperSvc.retrieve());
+  ATH_CHECK(m_edmHelperSvc.retrieve());
   ATH_CHECK(detStore()->retrieve(m_detMgr));
   return StatusCode::SUCCESS;
+}
+
+const MuonGMR4::SpectrometerSector* TruthSegmentCsvDumperAlg::msSector(const xAOD::MuonSegment& segment) const {
+  const auto truthHits = getMatchingSimHits(segment);
+  if (truthHits.size()) {
+     return m_detMgr->getSectorEnvelope((*truthHits.begin())->identify());
+  }
+  if (segment.muonSegment().isValid()) {
+      return m_detMgr->getSectorEnvelope(m_edmHelperSvc->chamberId(static_cast<const Muon::MuonSegment&>(**segment.muonSegment())));
+  }
+  ATH_MSG_WARNING("No matching hits were found. Neither the simulated ones or the reconstructed");
+  return nullptr;
 }
 
 StatusCode TruthSegmentCsvDumperAlg::execute(){
   const EventContext & ctx = Gaudi::Hive::currentContext();
   std::ofstream file{std::string(Form("event%09zu-",++m_event))+"MuonTruthSegment.csv"};
   constexpr std::string_view delim = ",";
-
-  
+ 
   file<<"sectorId"<<delim;
-
   file<<"globalPositionX"<<delim;
   file<<"globalPositionY"<<delim;
   file<<"globalPositionZ"<<delim;
@@ -68,7 +80,7 @@ StatusCode TruthSegmentCsvDumperAlg::execute(){
   file<<"precisionHits"<<delim;
   file<<"phiLayers"<<delim;
   file<<"trigEtaLayers"<<delim;
-
+  file<<std::endl;
   SG::ReadHandle readTruthSegment{m_inSegmentKey, ctx};
   ATH_CHECK(readTruthSegment.isPresent());
 
@@ -76,12 +88,10 @@ StatusCode TruthSegmentCsvDumperAlg::execute(){
   ATH_CHECK(gctxHandle.isPresent());
 
   for (const xAOD::MuonSegment* segment : *readTruthSegment) {
-    const auto truthHits = getMatchingSimHits(*segment);
-    if (truthHits.empty()) {
-       ATH_MSG_WARNING("No truth matched hit available...");
-       continue;
+    const MuonGMR4::SpectrometerSector* sector = msSector(*segment);
+    if (!sector) {
+      continue;
     }
-    const MuonGMR4::SpectrometerSector* sector = m_detMgr->getSectorEnvelope((*truthHits.begin())->identify());
     const Amg::Transform3D globToLoc{sector->globalToLocalTrans(*gctxHandle)};
     /// Segment information
     const Amg::Vector3D globPos = segment->position();

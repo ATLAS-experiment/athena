@@ -1,23 +1,23 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SCT_GeoModel/SCT_Forward.h"
+#include "SCT_Forward.h"
 
-#include "SCT_GeoModel/SCT_MaterialManager.h"
+#include "SCT_MaterialManager.h"
 
-#include "SCT_GeoModel/SCT_GeometryManager.h"
-#include "SCT_GeoModel/SCT_ForwardParameters.h"
-#include "SCT_GeoModel/SCT_ForwardModuleParameters.h"
+#include "SCT_GeometryManager.h"
+#include "SCT_ForwardParameters.h"
+#include "SCT_ForwardModuleParameters.h"
 
-#include "SCT_GeoModel/SCT_FwdWheel.h"
-#include "SCT_GeoModel/SCT_FwdModule.h"
-#include "SCT_GeoModel/SCT_FwdRing.h"
-#include "SCT_GeoModel/SCT_FwdSupportFrame.h"
-#include "SCT_GeoModel/SCT_FwdCoolingPipe.h"
-#include "SCT_GeoModel/SCT_FwdPowerTape.h"
-#include "SCT_GeoModel/SCT_FwdCylinderServices.h"
-#include "SCT_GeoModel/SCT_FwdThermalShieldElement.h"
+#include "SCT_FwdWheel.h"
+#include "SCT_FwdModule.h"
+#include "SCT_FwdRing.h"
+#include "SCT_FwdSupportFrame.h"
+#include "SCT_FwdCoolingPipe.h"
+#include "SCT_FwdPowerTape.h"
+#include "SCT_FwdCylinderServices.h"
+#include "SCT_FwdThermalShieldElement.h"
 
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 

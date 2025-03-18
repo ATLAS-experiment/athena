@@ -39,6 +39,13 @@ print()
 # Configure
 flags = initConfigFlags()
 flags.Input.Files = [args.input]
+flags.Concurrency.NumThreads = 1
+flags.Concurrency.NumConcurrentEvents = 1
+flags.Scheduler.CheckDependencies = True
+flags.Scheduler.ShowDataDeps = True
+flags.Scheduler.ShowDataFlow = True
+flags.Scheduler.ShowControlFlow = True
+
 if args.localgeo:
     flags.ITk.Geometry.AllLocal = True
 if args.presampling:

@@ -1,6 +1,11 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include "TruthParentDecoratorAlg.h"
 
 #include "StoreGate/WriteDecorHandle.h"
+
+#include "TruthUtils/HepMCHelpers.h"
 
 #include <format>
 
@@ -38,10 +43,7 @@ namespace {
   }
 
   // debugging functions
-  std::string join(
-    const std::vector<std::string>& v,
-    const std::string& sep = ", ")
-  {
+  std::string join(const std::vector<std::string>& v, const std::string& sep = ", ") {
     std::string out;
     for (unsigned int pos = 0; pos < v.size(); pos++) {
       out.append(v.at(pos));
@@ -68,12 +70,7 @@ namespace {
 
 
   // debugging functions using MsgStream
-  void logInputs(
-    MsgStream& msg,
-    SG::ReadHandle<JC>& targets,
-    SG::ReadHandle<TPC>& truth,
-    std::vector<SG::ReadHandle<TPC>>& cascades_raw,
-    const MSG::Level level = MSG::DEBUG)
+  void logInputs(MsgStream& msg,SG::ReadHandle<JC>& targets,SG::ReadHandle<TPC>& truth,std::vector<SG::ReadHandle<TPC>>& cascades_raw,const MSG::Level level = MSG::DEBUG)
   {
     if (msg.level() > level) return;
     unsigned int n_cascade_candidates = 0;
@@ -86,10 +83,7 @@ namespace {
       "n_cascade_candidates: " << n_cascade_candidates <<
       endmsg;
   }
-  void logIPMap(
-    MsgStream& msg,
-    const IPMap& ipmap,
-    const MSG::Level level = MSG::VERBOSE)
+  void logIPMap(MsgStream& msg,const IPMap& ipmap,const MSG::Level level = MSG::VERBOSE)
   {
     if (msg.level() > level) return;
     for (const auto& [barcode, children]: ipmap) {
@@ -103,9 +97,7 @@ namespace {
 
   // functions to traverse barcodex and disambiguate the selected
   // child
-  std::map<int, std::set<int>> findAllDescendants(
-    int parent, const Barcodex& barcodex,
-    std::set<int> history = {})
+  std::map<int, std::set<int>> findAllDescendants(int parent, const Barcodex& barcodex, std::set<int> history = {})
   {
     using return_t = std::map<int,std::set<int>>;
     auto itr = barcodex.find(parent);
@@ -119,9 +111,7 @@ namespace {
     if (children.empty()) return return_t{{parent, history}};
     if (!history.insert(parent).second) {
       auto hist = stringify(history);
-      throw std::runtime_error(
-        "found cycle, tried to add " + std::to_string(parent) + " to "
-        "{" + join(hist) + "}");
+      throw std::runtime_error("found cycle, tried to add " + std::to_string(parent) + " to {" + join(hist) + "}");
     }
     return_t all_children;
     for (int child: children) {
@@ -136,8 +126,7 @@ namespace {
   }
 
 
-  const xAOD::TruthParticle* selectChild(
-    const IPMap::mapped_type& barkids)
+  const xAOD::TruthParticle* selectChild(const IPMap::mapped_type& barkids)
   {
     const xAOD::TruthParticle* child = *barkids.begin();
     if (barkids.size() > 1) {
@@ -150,15 +139,10 @@ namespace {
         if (dupkid->nChildren() > child->nChildren()) child = dupkid;
       }
       if (pdg_ids.size() != 1) {
-        throw std::runtime_error(
-          "same barcode, different pdgid: [" + join(stringify(pdg_ids)) + "]");
+        throw std::runtime_error("same barcode, different pdgid: [" + join(stringify(pdg_ids)) + "]");
       }
       if (float dr = child->p4().DeltaR(sum_p4); dr > 0.001) {
-        throw std::runtime_error(
-          "Same barcode, different vector: "
-          "{"
-          "deltaR: " + std::to_string(dr) + ", "
-          "pdgid: " + std::to_string(child->pdgId()) + "}"
+        throw std::runtime_error( "Same barcode, different vector: { deltaR: " + std::to_string(dr) + ", pdgid: " + std::to_string(child->pdgId()) + "}"
           );
       }
     }
@@ -177,19 +161,16 @@ namespace {
 
 
   // these functions are for dealing with specific vertices
-  bool isHeavyFlavor(const xAOD::TruthParticle* p) {
-    return p->hasCharm() || p->hasBottom();
-  }
+
   const xAOD::TruthParticle* getParent(const xAOD::TruthParticle* p) {
     if (int n_parents = p->nParents(); n_parents != 1) {
-      throw std::logic_error(
-        "can't get parent [n_parents: " + std::to_string(n_parents) + "]");
+      throw std::logic_error("can't get parent [n_parents: " + std::to_string(n_parents) + "]");
     }
     return p->parent(0);
   }
   bool isSoftLepton(const xAOD::TruthParticle* p) {
     const xAOD::TruthParticle* parent = getParent(p);
-    return isHeavyFlavor(parent) && p->isChLepton();
+    return (parent->hasCharm() || parent->hasBottom()) && p->isChLepton();
   }
   bool isSoftCharm(const xAOD::TruthParticle* p) {
     const xAOD::TruthParticle* parent = getParent(p);
@@ -200,18 +181,14 @@ namespace {
 
 
 // cascade count decorator
-CascadeCountDecorator::CascadeCountDecorator(
-  const std::string& name,
-  const std::vector<int>& pids):
+CascadeCountDecorator::CascadeCountDecorator( const std::string& name, const std::vector<int>& pids):
   m_pids(pids.begin(), pids.end()),
   m_dec(name),
   // also hang on to the auxid so we can lock it later
   m_auxid(SG::AuxTypeRegistry::instance().findAuxID(name))
 {
 }
-void CascadeCountDecorator::decorate(
-  const SG::AuxElement& target,
-  const std::vector<MatchedParent>& parents) const
+void CascadeCountDecorator::decorate(const SG::AuxElement& target,const std::vector<MatchedParent>& parents) const
 {
   unsigned char n_match = 0;
   for (const auto& parent: parents) {
@@ -221,13 +198,11 @@ void CascadeCountDecorator::decorate(
   }
   m_dec(target) = n_match;
 }
-void CascadeCountDecorator::decorateDefault(
-  const SG::AuxElement& target) const
+void CascadeCountDecorator::decorateDefault(const SG::AuxElement& target) const
 {
   m_dec(target) = 0;
 }
-void CascadeCountDecorator::lock(
-  const xAOD::IParticleContainer* target) const
+void CascadeCountDecorator::lock(const xAOD::IParticleContainer* target) const
 {
   // We're locking a decoration on a const container, which would be a
   // problem if they were made by anyone else since someone else might
@@ -239,9 +214,7 @@ void CascadeCountDecorator::lock(
 
 
 // main algorithm
-TruthParentDecoratorAlg::TruthParentDecoratorAlg(
-  const std::string& name,
-  ISvcLocator* loc):
+TruthParentDecoratorAlg::TruthParentDecoratorAlg(const std::string& name, ISvcLocator* loc):
   AthReentrantAlgorithm(name, loc)
 {
   // these aren't user configurable
@@ -327,10 +300,7 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
     psort.push_back(p);
   }
   // for lack of a better idea, store truth parents sorted by mass
-  std::sort(
-    psort.begin(), psort.end(),
-    [](const auto* p1, const auto* p2) {return p1->m() > p2->m();}
-    );
+  std::sort(psort.begin(), psort.end(),[](const auto* p1, const auto* p2) {return p1->m() > p2->m();});
   // check to make sure we don't overflow the match mask
   constexpr size_t max_idx = std::numeric_limits<parent_mask_t>::digits;
   if (psort.size() > max_idx) {
@@ -368,8 +338,8 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
   unsigned int n_parents = 0;
   for (const auto* p: psort) {
     unsigned int parent_index = n_parents++;
-    ATH_MSG_VERBOSE("pdgid: " << p->pdgId() << ", barcode: " << p->barcode());
-    for (auto& [cbar, histbars]: findAllDescendants(p->barcode(), barcodex)) {
+    ATH_MSG_VERBOSE("pdgid: " << p->pdgId() << ", barcode: " << HepMC::barcode(p));
+    for (auto& [cbar, histbars]: findAllDescendants(HepMC::barcode(p), barcodex)) {
       IPMap::mapped_type& barkids = ipmap.at(cbar);
       const xAOD::TruthParticle* child = selectChild(barkids);
       std::vector<std::pair<float, const J*>> drs;
@@ -456,11 +426,7 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
 StatusCode TruthParentDecoratorAlg::finalize() {
   if (!m_allow_missing_children_pdgids.empty()) {
     float missing_fraction = double(m_missing_n_ignored) / m_total_children;
-    auto msg = std::format(
-      "ignored {} missing children out of {} ({:.2}%)",
-      m_missing_n_ignored.load(),
-      m_total_children.load(),
-      missing_fraction * 100);
+    auto msg = std::format("ignored {} missing children out of {} ({:.2}%)",m_missing_n_ignored.load(),m_total_children.load(),missing_fraction * 100);
     if (missing_fraction > m_missing_children_fraction_warning_threshold) {
       ATH_MSG_WARNING(msg);
     } else {
@@ -468,9 +434,7 @@ StatusCode TruthParentDecoratorAlg::finalize() {
     }
   }
   if (!m_warn_missing_children_pdgids.empty()) {
-    auto msg = std::format(
-      "warned of {} missing children out of {}",
-      m_missing_n_warned.load(), m_total_children.load());
+    auto msg = std::format("warned of {} missing children out of {}", m_missing_n_warned.load(), m_total_children.load());
     if (m_missing_n_warned > 0) {
       ATH_MSG_WARNING(msg);
     } else {
@@ -480,10 +444,7 @@ StatusCode TruthParentDecoratorAlg::finalize() {
   return StatusCode::SUCCESS;
 }
 
-void TruthParentDecoratorAlg::addTruthContainer(
-  Barcodex& barcodex,
-  IPMap& ipmap,
-  const xAOD::TruthParticleContainer& container) const {
+void TruthParentDecoratorAlg::addTruthContainer(Barcodex& barcodex,IPMap& ipmap,const xAOD::TruthParticleContainer& container) const {
 
   std::set<int> targid(m_cascade_pdgids.begin(), m_cascade_pdgids.end());
   // we allow decays through any of the parent pdgids
@@ -509,8 +470,8 @@ void TruthParentDecoratorAlg::addTruthContainer(
 
   // insert a particle into the record, return the child set
   auto insert = [&barcodex, &ipmap](const xAOD::TruthParticle* p) -> auto& {
-    ipmap[p->barcode()].insert(p);
-    return barcodex[p->barcode()];
+    ipmap[HepMC::barcode(p)].insert(p);
+    return barcodex[HepMC::barcode(p)];
   };
 
   for (const xAOD::TruthParticle* p: container) {
@@ -532,7 +493,7 @@ void TruthParentDecoratorAlg::addTruthContainer(
           } else {
             auto problem = std::format(
               "null truth child [barcode={},pdg_id={},child={}of{}]",
-              p->barcode(), p->pdgId(), child_n, p->nChildren());
+              HepMC::barcode(p), p->pdgId(), child_n, p->nChildren());
             const auto& warn_missing = m_warn_missing_children_pdgids.value();
             if (warn_missing.contains(p->pdgId())) {
               m_missing_n_warned++;
@@ -543,7 +504,7 @@ void TruthParentDecoratorAlg::addTruthContainer(
           }
         } else if (cascadeWants(c)) {
           insert(c);
-          child_set.insert(c->barcode());
+          child_set.insert(HepMC::barcode(c));
         }
       };
     }

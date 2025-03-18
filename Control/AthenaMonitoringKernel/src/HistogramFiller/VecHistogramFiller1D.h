@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */  
   
 #ifndef AthenaMonitoringKernel_HistogramFiller_VecHistogramFiller1D_h
@@ -11,7 +11,7 @@ namespace Monitored {
   class VecHistogramFiller1D : public HistogramFiller1D {
   public:
     VecHistogramFiller1D(const HistogramDef& definition, std::shared_ptr<IHistogramProvider> provider)
-      : HistogramFiller1D(definition, provider) {}
+      : HistogramFiller1D(definition, std::move(provider)) {}
 
 
     virtual unsigned fill(const HistogramFiller::VariablesPack& vars) const override {

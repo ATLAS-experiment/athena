@@ -9,30 +9,7 @@
 # ['name', 'L1chainParts'=[], 'stream', 'groups', 'merging'=[], 'topoStartFrom'=False],
 
 import TriggerMenuMT.HLT.Menu.MC_pp_run4_v1 as mc_menu
-from ..Config.Utility.ChainDefInMenu import ChainProp
 
-# this is not the best option, due to flake violation, this list has to be changed when some groups are removed
-from TriggerMenuMT.HLT.Menu.Physics_pp_run4_v1 import ( 
-    PhysicsStream, 
-    SingleMuonGroup,
-    #MultiMuonGroup,
-    #SingleElectronGroup,MultiElectronGroup,
-    #SinglePhotonGroup,MultiPhotonGroup,
-    #SingleTauGroup,MultiTauGroup,
-    #SingleJetGroup,MultiJetGroup,SingleBjetGroup,MultiBjetGroup,
-    #METGroup,  
-    #BphysicsGroup, BphysElectronGroup,
-    #UnconvTrkGroup,
-    #MinBiasGroup,
-    #EgammaMETGroup,EgammaMuonGroup,EgammaBjetGroup,EgammaJetGroup,
-    #MuonJetGroup,MuonMETGroup,
-    #PrimaryLegGroup,PrimaryPhIGroup,
-    SupportGroup, 
-    #SupportLegGroup,SupportPhIGroup,
-    #TagAndProbeLegGroup,
-    #LegacyTopoGroup,Topo2Group,Topo3Group,
-    #EOFL1MuGroup, EOFTLALegGroup,
-)
 
 DevGroup = ['Development']
 

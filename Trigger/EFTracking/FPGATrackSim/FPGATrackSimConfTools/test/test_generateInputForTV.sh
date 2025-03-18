@@ -21,12 +21,24 @@ run () {
 
 LABEL="F100_ttbar_wholeDetector"
 run "${LABEL}" \
-    FPGATrackSimDataPrepOnRDO.sh -o "${LABEL}.root" --ttbar --events 3
+    FPGATrackSim_F100.sh -o "${LABEL}.root" --ttbar --events 3
 ls -ltr
 mv dataprep.root "TVinput_${LABEL}.root"
 
 LABEL="F100_singleMu_region0"
 run "${LABEL}" \
-    FPGATrackSimDataPrepOnRDO.sh -o "${LABEL}.root" --single-muon --events 10
+    FPGATrackSim_F100.sh -o "${LABEL}.root" --single-muon --events 10
 ls -ltr
 mv dataprep.root "TVinput_${LABEL}.root"
+
+LABEL="F600_ttbar"
+run "${LABEL}" \
+    FPGATrackSim_F600.sh -o "${LABEL}.root" --ttbar --events 3
+ls -ltr
+mv test.root "TVinput_${LABEL}.root"
+
+LABEL="F600_singleMu"
+run "${LABEL}" \
+    FPGATrackSim_F600.sh -o "${LABEL}.root" --single-muon --events 3
+ls -ltr
+mv test.root "TVinput_${LABEL}.root"

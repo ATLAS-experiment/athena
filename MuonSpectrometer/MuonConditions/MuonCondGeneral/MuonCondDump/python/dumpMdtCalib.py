@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -15,7 +15,6 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from MuonGeoModelTestR4.testGeoModel import SetupArgParser
     parser = SetupArgParser()
-    parser.add_argument("--setupRun4", default=False, action="store_true")
     parser.add_argument("--outRtJSON" , default="RtConstants.json")
     parser.add_argument("--outT0JSON" , default="T0Constants.json")
     parser.set_defaults(outRootFile="MdtCalib.root")
@@ -23,9 +22,7 @@ if __name__ == "__main__":
     #parser.set_defaults(inputFile = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/ESD/data23_cos.00448208.express_express.recon.ESD.x721/73events.data23_cos.00448208.express_express.recon.ESD.x721._lb0003._SFO-ALL._0001.1"])
     #parser.set_defaults(condTag="CONDBR2-BLKPA-2023-02")
     args = parser.parse_args()
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, executeTest, setupHistSvcCfg, geoModelFileDefault
-    args.geoModelFile = geoModelFileDefault(args.setupRun4)
-
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, executeTest, setupHistSvcCfg
     flags = initConfigFlags()
     flags.Muon.Calib.fitAnalyticRt = True
 

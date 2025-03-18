@@ -18,7 +18,7 @@ Derivation_tf.py \
 --formats PHYSVAL \
 --maxEvents -1 \
 --sharedWriter True \
---multiprocess True \
+--multiprocess True
 
 echo "art-result: $? reco"
 

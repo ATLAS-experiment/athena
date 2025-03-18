@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 '''
 @file TileClusterMonitorAlgorithm.py
@@ -161,7 +161,8 @@ def TileClusterMonitoringConfig(flags, **kwargs):
         addTile1DHistogramsArray(helper, tileClusterMonAlg, name = 'TilePartitionTimeLB', opt = 'kAddBinsDynamically',
                                  xvalue = 'lumiBlock', value = 'time', title = titlePartitionTime, path = 'Tile/Cluster',
                                  xbins = 1000, xmin = -0.5, xmax = 999.5, type='TProfile', run = run, triggers = [],
-                                 subDirectory = False, perPartition = True, perSample = False, perGain = False, allPartitions = True)
+                                 subDirectory = False, perPartition = True, perSample = False, perGain = False,
+                                 allPartitions = True, merge='merge')
 
 
     accumalator = helper.result()

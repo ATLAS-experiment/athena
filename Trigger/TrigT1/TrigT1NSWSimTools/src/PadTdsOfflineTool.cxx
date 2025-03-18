@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -45,35 +45,9 @@ namespace NSWL1 {
         ATH_MSG_DEBUG(" " << std::setw(32) << std::setfill('.') << std::setiosflags(std::ios::left) << m_vmmTimeOverThreshold.name() << m_vmmTimeOverThreshold.value());
         ATH_MSG_DEBUG(" " << std::setw(32) << std::setfill('.') << std::setiosflags(std::ios::left) << m_vmmShapingTime.name() << m_vmmShapingTime.value());
         ATH_MSG_DEBUG(" " << std::setw(32) << std::setfill('.') << std::setiosflags(std::ios::left) << m_vmmDeadTime.name() << m_vmmDeadTime.value());
-        ATH_MSG_DEBUG(" " << std::setw(32) << std::setfill('.') << std::setiosflags(std::ios::left) << m_doNtuple.name() << ((m_doNtuple)? "[True]":"[False]")<< std::setfill(' ') << std::setiosflags(std::ios::right) );
 
         ATH_CHECK(m_sTgcDigitContainer.initialize());
         ATH_CHECK(m_sTgcSdoContainer.initialize(m_isMC));
-
-        const IInterface* parent = this->parent();
-        const INamedInterface* pnamed = dynamic_cast<const INamedInterface*>(parent);
-        const std::string& algo_name = pnamed->name();
-
-        if ( m_doNtuple ) {
-            if (Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 1) {
-                ATH_MSG_ERROR("DoNtuple is not possible in multi-threaded mode");
-                return StatusCode::FAILURE;
-            }
-            m_validation_tree = std::make_unique<PadTdsValidationTree>();
-
-            ATH_CHECK( m_incidentSvc.retrieve() );
-            m_incidentSvc->addListener(this,IncidentType::BeginEvent);
-
-            if ( algo_name=="NSWL1Simulation" ) {
-                SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
-                ATH_CHECK( tHistSvc.isValid() );
-
-                TTree *tree = nullptr;
-                std::string treename = algo_name+"Tree";
-                ATH_CHECK(tHistSvc->getTree(treename, tree));
-                m_validation_tree->init_tree(tree);
-            }
-        }
 
         //  retrieve the MuonDetectormanager
         ATH_CHECK(m_detManagerKey.initialize());
@@ -86,74 +60,7 @@ namespace NSWL1 {
 
         return StatusCode::SUCCESS;
     }
-    //------------------------------------------------------------------------------
-    void PadTdsOfflineTool::handle(const Incident& inc) {
-        if( inc.type()==IncidentType::BeginEvent ) {
-            if( m_doNtuple ) {
-                // Ntuple can only be enabled in single-threaded mode (see initialize)
-                [[maybe_unused]] bool success ATLAS_THREAD_SAFE = m_validation_tree->reset_ntuple_variables();
-            }
-        }
-    }
-    //------------------------------------------------------------------------------
-    /// convert the local position of a simhit to a global position
-    /**
-    Relies on the transformation provided by the pad PlaneSurface.
-    Used in PadTdsOfflineTool::fill_pad_validation_id().
-    */
-    Amg::Vector3D local_position_to_global_position(const MuonSimData::Deposit &d, const Trk::PlaneSurface& s)
-    {
-        double localPosX(d.second.firstEntry()), localPosY(d.second.secondEntry());
-        Amg::Vector2D localPos(localPosX, localPosY);
-        Amg::Vector3D globalPos{Amg::Vector3D::Zero()};
-        s.localToGlobal(localPos, globalPos, globalPos);
-        return globalPos;
-    }
-    //------------------------------------------------------------------------------
-    StatusCode PadTdsOfflineTool::fill_pad_validation_id ATLAS_NOT_THREAD_SAFE (std::vector< std::vector<std::shared_ptr<PadData>> > &pad_cache) const {
-        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detManager{m_detManagerKey, Gaudi::Hive::currentContext()};
-        float bin_offset = +0.; // used to center the bin on the value of the Pad Id
-        for (const std::vector<std::shared_ptr<PadData>>& pad : pad_cache) {
-            m_validation_tree->fill_num_pad_hits(pad.size());
-            for (const std::shared_ptr<PadData> &pd : pad) {
-                Identifier Id( pd->id() );
-                const MuonGM::sTgcReadoutElement* rdoEl = detManager->getsTgcReadoutElement(Id);
-                const Trk::PlaneSurface &surface = rdoEl->surface(Id);
-                // gathers the readout element associated to this PAD + the PAD Local/Global psoition
-                Amg::Vector2D pad_lpos{Amg::Vector2D::Zero()};
-                Amg::Vector3D pad_gpos{Amg::Vector3D::Zero()};
-                rdoEl->stripPosition(Id,pad_lpos); // shouldn't this be padPosition? DG 2014-01-17
-                surface.localToGlobal(pad_lpos, pad_gpos, pad_gpos);
-                ATH_MSG_DEBUG("Pad at GposX " << pad_gpos.x() << " GposY " << pad_gpos.y() << " GposZ " << pad_gpos.z()
-                                              <<" from multiplet "<< pd->multipletId()<<" and gasGapId "<<pd->gasGapId() );
 
-                std::vector<MuonSimData::Deposit> deposits;
-                if(get_truth_hits_this_pad(Id, deposits)){
-                    for(const auto& d : deposits) {
-                        m_validation_tree->fill_truth_hit_global_pos(local_position_to_global_position(d, surface));
-                    }
-                }
-
-                // Fill Pad Corners
-                std::array<Amg::Vector2D, 4> local_pad_corners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
-                rdoEl->padCorners(Id,local_pad_corners);
-                std::vector<Amg::Vector3D> global_pad_corners;
-                for(const auto& local_corner : local_pad_corners) {
-                    Amg::Vector3D global_corner{Amg::Vector3D::Zero()};
-                    surface.localToGlobal(local_corner, global_corner, global_corner);
-                    global_pad_corners.push_back(global_corner);
-                }
-                m_validation_tree->fill_hit_global_corner_pos(global_pad_corners);
-
-                // gathers the Offline PAD EDM from the interface
-                PadOfflineData* pad_offline = dynamic_cast<PadOfflineData*>( pd.get() );
-                m_validation_tree->fill_hit_global_pos(pad_gpos);
-                m_validation_tree->fill_offlineid_info(*pad_offline, bin_offset);
-            }
-        }
-        return StatusCode::SUCCESS;
-    }
-    //------------------------------------------------------------------------------
     StatusCode PadTdsOfflineTool::gather_pad_data(std::vector<std::shared_ptr<PadData>>& pads, int side, int sector) const {
         ATH_MSG_DEBUG( "gather_pad_data: start gathering the PAD hits for side " << side << ", sector " << sector );
         // check side and sector parameters
@@ -169,11 +76,6 @@ namespace NSWL1 {
 
         std::vector< std::vector<std::shared_ptr<PadData>> > pad_cache(PadTdsOfflineTool::numberOfSectors());
         ATH_CHECK(fill_pad_cache(pad_cache));
-        if(m_doNtuple) {
-            // Ntuple can only be enabled in single-threaded mode (see initialize)
-            StatusCode sc ATLAS_THREAD_SAFE = this->fill_pad_validation_id(pad_cache);
-            ATH_CHECK( sc );
-        }
 
         // delivering the required collection
         const bool anySide = (side==-1);

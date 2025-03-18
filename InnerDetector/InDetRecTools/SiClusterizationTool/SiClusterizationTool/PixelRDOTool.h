@@ -73,11 +73,19 @@ public:
 
      // Determines if a pixel cell is in a good state, either using
      // the detector element status or the module-map-based summary tool
-     bool isGoodRDO(const InDet::SiDetectorElementStatus *pixelDetElStatus,
+  bool isGoodRDO(const InDet::SiDetectorElementStatus *pixelDetElStatus,
 		    const IdentifierHash& moduleHash,
 		    const Identifier& rdoID,
                     const EventContext& ctx,
                     const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const;
+
+  // Same method to check for a pixel in a good state, but with less id look-ups 
+  bool isGoodRDO(const InDet::SiDetectorElementStatus *pixelDetElStatus,
+		    const IdentifierHash& moduleHash,
+		    const InDetDD::SiDetectorElement* element,
+		    const Identifier& rdoID,
+		    const EventContext& ctx,
+		    const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const;
 
     // Method to check if an RDO is duplicated.
     // If it is, update lvl1 value.
@@ -145,7 +153,7 @@ private:
 	true,
 	"Check for ganged pixels when unpacking the RDOs"
     };
-
+  
 
     BooleanProperty m_useModuleMap {
 	this,
@@ -153,7 +161,14 @@ private:
 	true,
 	"Use bad modules map"
     };
-    
+
+    BooleanProperty m_isITk {
+        this,
+	"isITk",
+	false,
+	"Toggle specific checks for ITk RDO data"
+    };
+  
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey {
 	this,
 	"PixelDetEleCollKey",

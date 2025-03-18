@@ -1,6 +1,8 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
+
+
 def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
     # Main Job Option for ACTS Track Reconstruction with ITk
     print("Scheduling the ACTS Job Option for ITk Track Reconstruction")
@@ -57,28 +59,65 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
     for trackCollection in InputCombinedITkTracks:
         print(f'- {trackCollection}')
 
+    # In case perigee expression is Vertex we have a situation where
+    # there is a first temporary track particle creation wrt BeamLine
+    # followed, after vertex reco, of a second particle creation wrt vertex
+    #
+    # The final track particle collection will still be the one defined in trackParticleContainerName
+    persistifyCollection = True
+    particleCollection = trackParticleContainerName
+    perigeeExpression = flags.Tracking.perigeeExpression
+    if flags.Tracking.perigeeExpression == "Vertex":
+        # We do not want to persistify this temporary collection
+        persistifyCollection = False
+        particleCollection = f"{trackParticleContainerName}Temporary"
+        perigeeExpression = "BeamLine"
+        
+    # Track particles wrt BeamLine
     from InDetConfig.ITkActsParticleCreationConfig import ITkActsTrackParticleCreationCfg
     acc.merge(ITkActsTrackParticleCreationCfg(flags,
                                               TrackContainers = InputCombinedITkTracks,
-                                              TrackParticleContainer = trackParticleContainerName))
+                                              TrackParticleContainer = particleCollection,
+                                              persistifyCollection = persistifyCollection,
+                                              PerigeeExpression = perigeeExpression))
         
     # Vertex reconstruction
     if flags.Tracking.doVertexFinding:
-        from InDetConfig.InDetPriVxFinderConfig import primaryVertexFindingCfg
+        from InDetConfig.ActsPriVxFinderConfig import primaryVertexFindingCfg
         acc.merge(primaryVertexFindingCfg(flags,
                                           name = "ActsPriVxFinderAlg",
-                                          TracksName = trackParticleContainerName,
+                                          TracksName = particleCollection,
                                           vxCandidatesOutputName = primaryVertices))
+
+    # Track particles wrt Vertex
+    #
+    # In case perigee expression is Vertex we need to schedule the final
+    # track particle creation using the vertex
+    # The track collection(s) unchanged, only the final track particle container
+    # has a different name
+    if flags.Tracking.perigeeExpression == "Vertex":
+        assert flags.Tracking.doVertexFinding, \
+            f"Requested the computation of track particles wrt but flags.Tracking.doVertexFinding is set to {flags.Tracking.doVertexFinding}"
+        print('Requesting to compute the track particle collection wrt the Vertex')
+        acc.merge(ITkActsTrackParticleCreationCfg(flags,
+                                                  TrackContainers = InputCombinedITkTracks,
+                                                  TrackParticleContainer = trackParticleContainerName))
         
     # Post-Processing
+    print('Starting Post-Processing')
+    for currentFlags in scheduledTrackingPasses:
+        # Particle persistification for tracking pass
+        from InDetConfig.ITkActsParticleCreationConfig import ITkActsTrackParticlePersistificationCfg
+        acc.merge(ITkActsTrackParticlePersistificationCfg(currentFlags))
+
     ## ACTS Specific write PRDInfo
     if flags.Tracking.writeExtendedSi_PRDInfo:
         # Add the truth origin to the truth particles
-        # Despite the name if the Cfg function, this handles:
+        # This handles:
         # - Pixel detector
         # - Strip detector
-        from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPixelPrepDataToxAODCfg
-        acc.merge(ITkActsPixelPrepDataToxAODCfg(flags))
+        from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
+        acc.merge(ITkActsPrepDataToxAODCfg(flags))
 
     acc.printConfig(withDetails = False, summariseProps = False)
     return acc

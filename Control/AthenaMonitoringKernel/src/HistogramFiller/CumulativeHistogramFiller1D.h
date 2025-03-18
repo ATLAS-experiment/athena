@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */  
   
 #ifndef AthenaMonitoringKernel_HistogramFiller_CumulativeHistogramFiller1D_h
@@ -14,7 +14,7 @@ namespace Monitored {
   class CumulativeHistogramFiller1D : public HistogramFiller1D {
   public:
     CumulativeHistogramFiller1D(const HistogramDef& definition, std::shared_ptr<IHistogramProvider> provider)
-      : HistogramFiller1D(definition, provider) {}
+      : HistogramFiller1D(definition, std::move(provider)) {}
 
 
     
@@ -33,7 +33,7 @@ namespace Monitored {
         log << MSG::ERROR << "CutMask does not match the size of plotted variable: " 
             << cutMaskValuePair.first << " " << varVecSize << endmsg;
       }
-      auto cutMaskValue = cutMaskValuePair.second;
+      const auto & cutMaskValue = cutMaskValuePair.second;
       unsigned i{0};
       auto histogram = this->histogram<TH1>();
       for (; i < varVecSize; i++) {

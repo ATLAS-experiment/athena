@@ -24,17 +24,12 @@
 
 #include "GaudiKernel/IEventProcessor.h"
 
+constexpr bool enableBenchmark = 
 #ifdef BENCHMARK_LOGICALHITSALG
-#define TIME(name) \
-    t_1 = std::chrono::steady_clock::now(); \
-    (name) += std::chrono::duration_cast<std::chrono::microseconds>(t_1 - t_0).count(); \
-    t_0 = t_1;
-
-size_t m_tread = 0, m_tprocess = 0, m_troads = 0, m_troad_filter = 0, m_tlrt = 0, m_ttracks = 0, m_tOR = 0, m_t2ndStage = 0, m_tmon = 0, m_tfin = 0;
+    true;
 #else
-#define TIME(name)
+    false;
 #endif
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Initialize
@@ -58,7 +53,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK(m_roadFinderTool.retrieve());
     ATH_CHECK(m_LRTRoadFilterTool.retrieve(EnableTool{m_doLRT}));
     ATH_CHECK(m_LRTRoadFinderTool.retrieve(EnableTool{m_doLRT}));
-    ATH_CHECK(m_houghRootOutputTool.retrieve(EnableTool{m_doHoughRootOutput}));
+    ATH_CHECK(m_houghRootOutputTool.retrieve(EnableTool{m_doHoughRootOutput1st}));
     ATH_CHECK(m_NNTrackTool.retrieve(EnableTool{m_doNNTrack}));
     ATH_CHECK(m_roadFilterTool.retrieve(EnableTool{m_filterRoads}));
     ATH_CHECK(m_roadFilterTool2.retrieve(EnableTool{m_filterRoads2}));
@@ -87,12 +82,12 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK( m_FPGAHitFilteredKey.initialize() );
     ATH_CHECK( m_FPGARoadKey.initialize() );
     ATH_CHECK( m_FPGATrackKey.initialize() );
-    ATH_CHECK( m_inputTruthParticleContainerKey.initialize(m_runOnRDO) );
     ATH_CHECK( m_FPGAHitKey.initialize() );
-    ATH_CHECK( m_FPGAHitKey_2nd.initialize(m_doHoughRootOutput) );
+    ATH_CHECK( m_FPGAHitKey_2nd.initialize() );
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );
     ATH_CHECK( m_FPGAOfflineTrackKey.initialize() );
 
+    ATH_CHECK( m_chrono.retrieve() );
     ATH_MSG_DEBUG("initialize() Finished");
 
     return StatusCode::SUCCESS;
@@ -105,19 +100,13 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
 
 StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 {
-#ifdef BENCHMARK_LOGICALHITSALG
-    std::chrono::time_point<std::chrono::steady_clock> t_0, t_1;
-    t_0 = std::chrono::steady_clock::now();
-#endif
     const EventContext& ctx = getContext();
 
     // Get reference to hits from StoreGate.
-    // Hits have been procesed by the DataPrep algorithm. Now, we need to read them.
-    // If they aren't passed, assume this means we are done.
-    SG::ReadHandle<FPGATrackSimHitCollection> FPGAHits(m_FPGAHitKey.at(0), ctx);
+    SG::ReadHandle<FPGATrackSimHitCollection> FPGAHits(m_FPGAHitKey, ctx);
     if (!FPGAHits.isValid()) {
         if (m_evt == 0) {
-            ATH_MSG_WARNING("Didn't receive FPGAHits_1st on first event; assuming no input events.");
+            ATH_MSG_WARNING("Didn't receive " << FPGAHits.key() << " on first event; assuming no input events.");
         }
         SmartIF<IEventProcessor> appMgr{service("ApplicationMgr")};
         if (!appMgr) {
@@ -128,9 +117,11 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
 
     // Set up write handles.
+    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_2nd (m_FPGAHitKey_2nd,ctx);
     SG::WriteHandle<FPGATrackSimRoadCollection> FPGARoads_1st (m_FPGARoadKey, ctx);
     SG::WriteHandle<FPGATrackSimHitContainer> FPGAHitsInRoads_1st (m_FPGAHitInRoadsKey, ctx);
 
+    ATH_CHECK( FPGAHits_2nd.record (std::make_unique<FPGATrackSimHitCollection>()));
     ATH_CHECK( FPGARoads_1st.record (std::make_unique<FPGATrackSimRoadCollection>()));
     ATH_CHECK( FPGAHitsInRoads_1st.record (std::make_unique<FPGATrackSimHitContainer>()));
 
@@ -149,12 +140,23 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // Event passes cuts, count it. technically, DataPrep does this now.
     m_evt++;
 
-    // If we get here, FPGAHits_1st is valid, copy it over.
-    std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_1st;
+    if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Split hits to 1st and 2nd stage");
+    
+    std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_1st, phits_2nd;
+    const FPGATrackSimRegionMap* rmap_1st = m_FPGATrackSimMapping->SubRegionMap();
     phits_1st.reserve(FPGAHits->size());
-    for (const auto& hit : *FPGAHits) {
-        phits_1st.push_back(std::make_shared<const FPGATrackSimHit>(hit));
+    phits_2nd.reserve(FPGAHits->size());
+    for (const FPGATrackSimHit& hit : *(FPGAHits.cptr())) {
+        // If the hit falls within the boundaries of ANY subregion in the first stage, it's 1st stage.
+        if (rmap_1st->getRegions(hit).size() > 0) {
+            phits_1st.emplace_back(&hit, [](const FPGATrackSimHit*){});
+        }
+        else {
+            phits_2nd.emplace_back(&hit, [](const FPGATrackSimHit*){});
+            FPGAHits_2nd->push_back(hit);
+        }
     }
+    if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: Split hits to 1st and 2nd stage");
 
     // Get truth tracks from DataPrep as well.
     SG::ReadHandle<FPGATrackSimTruthTrackCollection> FPGATruthTracks(m_FPGATruthTrackKey, ctx);
@@ -169,7 +171,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         ATH_MSG_ERROR("Could not find FPGA Offline Track Collection with key " << FPGAOfflineTracks.key());
         return StatusCode::FAILURE;
     }
-
+    if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: GetRoads");
     // Get roads
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> prefilter_roads;
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st =
@@ -187,8 +189,8 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
       }
     }
     Monitored::Group(m_monTool, mon_nroads_1st);
-
-    TIME(m_troads);
+    if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: GetRoads");
+    if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: RoadFiltering");
     // Standard road Filter
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> postfilter_roads;
     if (m_filterRoads)
@@ -206,8 +208,9 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     auto mon_nroads_1st_postfilter = Monitored::Scalar<unsigned>("nroads_1st_postfilter", roads_1st.size());
     Monitored::Group(m_monTool, mon_nroads_1st_postfilter);
-
-    TIME(m_troad_filter);
+    if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: RoadFiltering");
+    if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Tracking");
+    
     // Get tracks
     std::vector<FPGATrackSimTrack> tracks_1st;
     if (m_doTracking) {
@@ -287,12 +290,12 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         FPGAHitsInRoads_1st->push_back(road_hits);
         FPGARoads_1st->push_back(*road);
     }
-
+    if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: Tracking");
+    
     // Monitor the number of tracks
     auto mon_ntracks_1st = Monitored::Scalar<unsigned>("ntrack_1st", tracks_1st.size());
     Monitored::Group(m_monTool, mon_ntracks_1st);
-    TIME(m_ttracks);
-
+    if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: OverlapRemoval");
     // Overlap removal
     if (m_doOverlapRemoval)  ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(tracks_1st));
     unsigned ntrackOLRChi2 = 0;
@@ -310,6 +313,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             }
         }
     }
+    if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: OverlapRemoval");
     auto mon_ntracks_1st_olr = Monitored::Scalar<unsigned>("ntrack_1st_afterOLR", ntrackOLRChi2);
     Monitored::Group(m_monTool,mon_ntracks_1st_olr);
 
@@ -356,8 +360,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     for (const FPGATrackSimTrack& track : tracks_1st) FPGATracks_1stHandle->push_back(track);
 
-    TIME(m_tOR);
-
     // Now, we may want to do large-radius tracking on the hits not used by the first stage tracking.
     // This follows overlap removal.
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roadsLRT;
@@ -382,8 +384,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         ATH_CHECK(m_LRTRoadFinderTool->getRoads( remainingHits, roadsLRT ));
     }
 
-    TIME(m_tlrt);
-
     auto dataFlowInfo = std::make_unique<FPGATrackSimDataFlowInfo>();
 
     // Write the output and reset
@@ -392,39 +392,23 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
 
     // This one we can do-- by passing in truth and offline tracks via storegate above.
-    if (m_doHoughRootOutput) {
-        SG::ReadHandle<FPGATrackSimHitCollection> FPGAHits_2nd(m_FPGAHitKey_2nd.at(0), ctx);
+    if (m_doHoughRootOutput1st) {
+        ATH_MSG_DEBUG("Running HoughRootOutputTool in 1st stage.");
 
-        if (!FPGAHits_2nd.isValid()) {
-            if (m_evt == 0) {
-                ATH_MSG_WARNING("Didn't receive FPGAHits_2nd on first event; assuming no input events. (Used in HoughRootOutputTool)");
-            }
-            SmartIF<IEventProcessor> appMgr{service("ApplicationMgr")};
-            if (!appMgr) {
-                ATH_MSG_ERROR("Failed to retrieve ApplicationMgr as IEventProcessor");
-                return StatusCode::FAILURE;
-            }
-            return appMgr->stopRun();
+        SmartIF<IEventProcessor> appMgr{service("ApplicationMgr")};
+        if (!appMgr) {
+            ATH_MSG_ERROR("Failed to retrieve ApplicationMgr as IEventProcessor");
+            return StatusCode::FAILURE;
         }
-
-        // Get 2nd stage hits here in order to access all hits for the RootOutputTool.
-        std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_2nd;
-        phits_2nd.reserve(FPGAHits_2nd->size());
-        for (const auto& hit : *FPGAHits_2nd) {
-            phits_2nd.push_back(std::make_shared<const FPGATrackSimHit>(hit));
-        }
-
         // Concatenate 1st and 2nd stage hits vectors to access both in the OutputTool
         phits_2nd.insert(phits_2nd.end(), std::make_move_iterator(phits_1st.begin()), std::make_move_iterator(phits_1st.end()));
         // Create output ROOT file
-        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut, m_NumOfHitPerGrouping));
+        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut, m_NumOfHitPerGrouping, false));
     }
 
     // Reset data pointers
     m_slicedHitHeader->reset();
     m_logicEventOutputHeader->reset();
-
-    TIME(m_tfin);
 
     return StatusCode::SUCCESS;
 }
@@ -469,22 +453,9 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::writeOutputData(  const std::vecto
 
 StatusCode FPGATrackSimLogicalHitsProcessAlg::finalize()
 {
-#ifdef BENCHMARK_LOGICALHITSALG
-    ATH_MSG_INFO("Timings:" <<
-            "\nroads:        " << std::setw(10) << m_troads <<
-            "\nroad filter:  " << std::setw(10) << m_troad_filter <<
-            "\nllp:          " << std::setw(10) << m_tlrt <<
-            "\ntracks:       " << std::setw(10) << m_ttracks <<
-            "\nOR:           " << std::setw(10) << m_tOR <<
-            (m_runSecondStage ? : ("\n2ndStage:           " << std::setw(10) << m_t2ndStage) : "") <<
-            "\nmon:          " << std::setw(10) << m_tmon <<
-            "\nfin:          " << std::setw(10) << m_tfin
-    );
-#endif
-
-
     ATH_MSG_INFO("PRINTING FPGATRACKSIM SIMPLE STATS");
-    ATH_MSG_INFO("========================================================================================");
+    ATH_MSG_INFO("========================================================================================");    
+    ATH_MSG_INFO("Ran on events = " << m_evt);
     ATH_MSG_INFO("Inclusive efficiency to find a road = " << m_nRoadsFound/m_evt_truth);
     ATH_MSG_INFO("Inclusive efficiency to find a track = " << m_nTracksFound/m_evt_truth);
     ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 = " << m_nTracksChi2Found/m_evt_truth);

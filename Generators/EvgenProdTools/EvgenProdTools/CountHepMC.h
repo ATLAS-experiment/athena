@@ -10,6 +10,7 @@
 #include "GeneratorModules/GenBase.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadDecorHandleKey.h"
+#include "GaudiKernel/IIncidentListener.h"
 
 #include <cstdint>
 
@@ -21,7 +22,8 @@
  * when the requested number of events are produced.
  */
 
-class CountHepMC : public GenBase {
+class CountHepMC : public GenBase,
+                   public virtual IIncidentListener {
 public:
 
   CountHepMC(const std::string& name, ISvcLocator* pSvcLocator);
@@ -29,6 +31,8 @@ public:
   virtual StatusCode initialize() override;
   virtual StatusCode execute() override;
   virtual StatusCode finalize() override;
+
+  virtual void handle(const Incident& inc) override;
 
 private:
 

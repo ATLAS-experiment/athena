@@ -28,7 +28,7 @@ class L0MuonSmearingAlg: public ::AthReentrantAlgorithm {
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_inputTruthParticleKey{this, "InputTruthParticle", "TruthParticles",
                                                                           "key for retrieval of input Truth particle"};
 
-  SG::WriteHandleKey<xAOD::MuonRoIContainer> m_outputMuonRoIKey{this, "OutputMuonRoI", "LVL0EmulatedMuonRoI",
+  SG::WriteHandleKey<xAOD::MuonRoIContainer> m_outputMuonRoIKey{this, "OutputMuonRoI", "LVL1MuonRoIs",
                                                                 "key for LVL0 emulated muon RoIs" };
 
   ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring Tool"};

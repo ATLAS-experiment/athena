@@ -14,7 +14,8 @@ def createTrigEgammaConfigFlags():
     flags.addFlag('Trigger.egamma.photonPidVersion'            , 'ElectronPhotonSelectorTools/trigger/rel22_20210611/')
     flags.addFlag('Trigger.egamma.dnnVersion'                  , 'ElectronPhotonSelectorTools/trigger/rel22_20230405_LHinput/')
     flags.addFlag('Trigger.egamma.ringerVersion'               , 'RingerSelectorTools/trigger/Run3_20230316_v1')
-    flags.addFlag('Trigger.egamma.photonRingerVersion'         , 'ElectronPhotonSelectorTools/trigger/rel23_20241003')
+    flags.addFlag('Trigger.egamma.photonRingerVersion'         , 'ElectronPhotonSelectorTools/trigger/rel23_20241210')
+    flags.addFlag('Trigger.egamma.electronRingerFastElectronVersion'         , 'ElectronPhotonSelectorTools/trigger/rel24_20250205')
 
 
     # cluster correction version, allowed value is: None or v12phiflip_noecorrnogap
@@ -41,6 +42,9 @@ def createTrigEgammaConfigFlags():
 
     # Precision Electron Isolation Validation 
     flags.addFlag('Trigger.egamma.isoValidation', False)
+    
+    # Fast Electron Ringer Validation
+    flags.addFlag('Trigger.egamma.enableFastElectronRinger', False)
 
     return flags
 

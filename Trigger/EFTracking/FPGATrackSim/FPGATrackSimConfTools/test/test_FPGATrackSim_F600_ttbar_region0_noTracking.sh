@@ -46,7 +46,7 @@ run () {
 }
 
 run "${PREFIX} pipeline" \
-    source FPGATrackSim_CommonEnv.sh --ttbar -n -1 -s 2
+    source FPGATrackSim_CommonEnv.sh --ttbar -n -1 -s 2 -q
     python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
         --evtMax=${RDO_EVT_ANALYSIS} \
         --skipEvents=${SKIP_EVENTS} \
@@ -63,6 +63,7 @@ run "${PREFIX} pipeline" \
         Trigger.FPGATrackSim.doOverlapRemoval=True \
         Trigger.FPGATrackSim.Hough.secondStage=False \
         Trigger.FPGATrackSim.writeToAOD=True \
+        Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
         Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
         Output.AODFileName=${INPUT_AOD_FILE}
 

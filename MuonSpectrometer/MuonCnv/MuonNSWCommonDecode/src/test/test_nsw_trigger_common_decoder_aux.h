@@ -93,7 +93,8 @@ struct outBranches
   std::vector<std::vector<uint32_t>> b_MML1A_art_fiberID = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_art_layers = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_art_channels = {} ;
-  std::vector<std::vector<uint32_t>> b_MML1A_trig_padding = {} ;
+  std::vector<std::vector<uint32_t>> b_MML1A_trig_globalX = {} ;
+  std::vector<std::vector<uint32_t>> b_MML1A_trig_globalU = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_trig_BCID = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_trig_dTheta = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_trig_phiBin = {} ;
@@ -329,7 +330,8 @@ int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data
     outtree.Branch( "MML1A_art_fiberID", &data.b_MML1A_art_fiberID);
     outtree.Branch( "MML1A_art_layers", &data.b_MML1A_art_layers);
     outtree.Branch( "MML1A_art_channels", &data.b_MML1A_art_channels);
-    outtree.Branch( "MML1A_trig_padding", &data.b_MML1A_trig_padding);
+    outtree.Branch( "MML1A_trig_globalX", &data.b_MML1A_trig_globalX);
+    outtree.Branch( "MML1A_trig_globalU", &data.b_MML1A_trig_globalU);
     outtree.Branch( "MML1A_trig_BCID", &data.b_MML1A_trig_BCID);
     outtree.Branch( "MML1A_trig_dTheta", &data.b_MML1A_trig_dTheta);
     outtree.Branch( "MML1A_trig_phiBin", &data.b_MML1A_trig_phiBin);
@@ -559,28 +561,6 @@ class CRCMonHelper {
     uint tmp = (crc >> 8) ^ cc;
     crc = (crc << 8) ^ m_tab[tmp & 0xff];
     crc = crc & 0xffff;
-    return crc;
-  }
-
-};
-
-class CRCL1AHelper {
- public:
-  CRCL1AHelper() {} 
-
-  template <typename Source>
-    uint getCRC(const std::span<const Source> words) {
-    uint crc = 0;
-    uint N = sizeof(Source)/2; //N 16b subwords per word
-
-    double pad = 1;
-    if (words[std::size(words)-1] & 0x0000FFFF) {pad = 0;}
-
-    for (uint i = 0; i<std::size(words); ++i) {
-      for (uint j = 0; j<N-(i==(std::size(words)-1) && pad == 0 ? 2 : 0 ); ++j) {
-        crc = crc ^ ((words[i] >> (N*16-(j+1)*16)) & 0xFFFF);
-      }
-    }
     return crc;
   }
 

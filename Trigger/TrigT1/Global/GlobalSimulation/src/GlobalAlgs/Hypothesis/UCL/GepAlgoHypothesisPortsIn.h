@@ -68,6 +68,9 @@ namespace GlobalSim {
   // containers for that. Here, GepAlgoHypothesisFIFO is simply
   // a collection of GepAlgoHypothesisPortsIn objects.
   using GepAlgoHypothesisFIFO = std::vector<GepAlgoHypothesisPortsIn>;
+
+  std::string eEmInputTOBToString(const std::bitset<72>&);
+
 }
 
 std::ostream&

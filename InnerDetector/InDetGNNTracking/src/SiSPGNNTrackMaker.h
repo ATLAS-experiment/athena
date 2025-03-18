@@ -111,16 +111,18 @@ namespace InDet {
       ServiceHandle<IInDetEtaDependentCutsSvc> m_etaDependentCutsSvc{
           this, "InDetEtaDependentCutsSvc", "InDetEtaDependentCutsSvc"};
 
-      IntegerProperty m_minClusters{this, "minClusters", 6, "Min number clusters"};
-      IntegerProperty m_minPixelClusters{this, "minPixelClusters", 1, "min pixel clusters"};
-      IntegerProperty m_minStripClusters{this, "minStripClusters", 0,
-                                    "Minimum number of strip clusters"};
+      UnsignedIntegerProperty m_minClusters{this, "minClusters", 6, "Min number clusters"};
+      UnsignedIntegerProperty m_minPixelClusters{this, "minPixelClusters", 1, "min pixel clusters"};
+      UnsignedIntegerProperty m_minStripClusters{this, "minStripClusters", 0, "Minimum number of strip clusters"};
       DoubleProperty m_pTmin{this, "pTmin", 400., "min pT"};
       DoubleProperty m_etamax{this, "etamax", 4., "max reco eta"};
       
       int passEtaDepCuts(const Trk::Track& track) const;
 
-          
+      BooleanProperty m_doRecoverFailedFits{this, "doRecoverFailedFits", true,
+	"Try to recover failed track fits by removing hits, at the end of the track"};
+
+  
       std::tuple<bool, int, std::unique_ptr<Trk::Track>> doFitAndCut(
         const EventContext& ctx,
         std::vector<const Trk::SpacePoint*>& spacePoints,
@@ -128,10 +130,7 @@ namespace InDet {
         int& trackCounter
       ) const;
 
-      int passEtaDepCuts(const Trk::Track* track, int nClusters,
-                                int nFreeClusters, int nPixels) const;
-
-      bool prefitCheck(int nPix, int nStrip, int nClusters, int nSpacePoints) const;
+      bool prefitCheck(unsigned int nPix, unsigned int nStrip, unsigned int nClusters, unsigned int nSpacePoints) const;
 
       std::unique_ptr<Trk::Track> fitTrack(
         const EventContext& ctx,

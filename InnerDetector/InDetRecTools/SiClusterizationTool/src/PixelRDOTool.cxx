@@ -13,6 +13,8 @@
 #include "InDetIdentifier/PixelID.h"
 #include "TrkSurfaces/RectangleBounds.h"
 
+#include <boost/container/flat_set.hpp>
+
 namespace InDet
 {
 
@@ -55,8 +57,7 @@ namespace InDet
     } 
     return {};
   }
-
-
+  
   bool PixelRDOTool::isGoodRDO(const InDet::SiDetectorElementStatus *pixelDetElStatus,
 		 const IdentifierHash& moduleHash,
 		 const Identifier& rdoID, const EventContext& ctx,
@@ -64,15 +65,50 @@ namespace InDet
   {
     VALIDATE_STATUS_ARRAY(
       m_useModuleMap && pixelDetElStatus,
-      pixelDetElStatus->isChipGood(moduleHash,m_pixelReadout->getFE(rdoID, m_pixelId->wafer_id(rdoID))),
+      pixelDetElStatus ? pixelDetElStatus->isChipGood(moduleHash,m_pixelReadout->getFE(rdoID, m_pixelId->wafer_id(rdoID))) : false,
       m_summaryTool->isGood(moduleHash, rdoID, ctx, cacheEntry));
 
-    return !m_useModuleMap ||
-      (pixelDetElStatus ?
-         pixelDetElStatus->isChipGood(moduleHash, m_pixelReadout->getFE(rdoID, m_pixelId->wafer_id(rdoID)))
-       : m_summaryTool->isGood(moduleHash, rdoID, ctx, cacheEntry));
+    if (!m_useModuleMap) {
+      return true;
+    }
+    
+    if (pixelDetElStatus) {
+      const auto waferId = m_pixelId->wafer_id(rdoID);
+      const auto fe = m_pixelReadout->getFE(rdoID, waferId);
+      return pixelDetElStatus->isChipGood(moduleHash, fe);
+    } else {
+      return m_summaryTool->isGood(moduleHash, rdoID, ctx, cacheEntry);
+    }
   }
 
+  
+  bool PixelRDOTool::isGoodRDO(const InDet::SiDetectorElementStatus *pixelDetElStatus,
+		 const IdentifierHash& moduleHash,
+		 const InDetDD::SiDetectorElement* element,
+		 const Identifier& rdoID, const EventContext& ctx,
+                 const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const
+  {
+
+    
+    VALIDATE_STATUS_ARRAY(
+      m_useModuleMap && pixelDetElStatus,
+      pixelDetElStatus ? pixelDetElStatus->isChipGood(moduleHash,m_pixelReadout->getFE(rdoID, m_pixelId->wafer_id(rdoID))) : false,
+      m_summaryTool->isGood(moduleHash, rdoID, ctx, cacheEntry));
+
+    if (!m_useModuleMap) {
+      return true;
+    }
+    
+    if (pixelDetElStatus) {
+      const auto waferId = element->identify();
+      const auto fe = m_pixelReadout->getFE(rdoID, waferId, element);
+      
+      return pixelDetElStatus->isChipGood(moduleHash, fe);
+    } else {
+      return m_summaryTool->isGood(moduleHash, rdoID, ctx, cacheEntry);
+    }
+  }
+  
   
   bool PixelRDOTool::checkDuplication(const PixelID& pixelID,
 				      const Identifier& rdoID, 
@@ -165,27 +201,44 @@ namespace InDet
   {
     std::vector<UnpackedPixelRDO> unpacked;
     unpacked.reserve(collection.size());
-    std::unordered_set<Identifier> idset;
-    const IdentifierHash idHash = collection.identifyHash();
-
-    const InDet::SiDetectorElementStatus *pixelDetElStatus = getPixelDetElStatus(ctx);
     
+    const IdentifierHash idHash = collection.identifyHash();
+    const InDet::SiDetectorElementStatus *pixelDetElStatus = getPixelDetElStatus(ctx);
     IInDetConditionsTool::IDCCacheEntry* cacheEntry = (pixelDetElStatus ? nullptr : m_summaryTool->getCacheEntryOut(ctx));
+
+    // For ttbar200 we have ~70 RDO in average per element, with a max of ~1000.
+    // A flat set brings marginal improvements wrt unordered set for those sizes.
+    //std::unordered_set<Identifier> > idset;
+
+    // This is not used for ITk, still we are creating it for the moment and could be optimized away in the future
+    boost::container::flat_set<Identifier> idset;
+
     for(const auto *const rdo : collection) {
       const Identifier rdoID = rdo->identify();
-
-      if (!isGoodRDO(pixelDetElStatus, idHash, rdoID, ctx, cacheEntry))
+      
+      if (!isGoodRDO(pixelDetElStatus,
+		     idHash,
+		     element,
+		     rdoID,
+		     ctx,
+		     cacheEntry))
 	continue;
-
-      if (not idset.insert(rdoID).second) {
-	if (m_printDuplicate) ATH_MSG_WARNING("Discarded a duplicated RDO");
-	continue;
-      }
-
+      
       const int lvl1 = rdo->getLVL1A();
-      if (checkDuplication(pixelID, rdoID, lvl1, unpacked))
-	continue;
-
+      
+      if (!m_isITk) {
+	
+	if (not idset.insert(rdoID).second) {
+	  if (m_printDuplicate) ATH_MSG_WARNING("Discarded a duplicated RDO");
+	  continue;
+	}
+	
+	if (m_checkDuplicatedRDO) {
+	  if (checkDuplication(pixelID, rdoID, lvl1, unpacked))
+	    continue;
+	}
+      }
+      
       const int tot = rdo->getToT();
 
       unpacked.emplace_back(

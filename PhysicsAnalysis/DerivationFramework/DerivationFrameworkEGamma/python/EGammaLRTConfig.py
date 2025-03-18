@@ -71,19 +71,6 @@ def EGammaLRTCfg(ConfigFlags):
             )
         )
 
-    # decorate central electrons and photons with a flag to tell the the
-    # candidates are affected by the crack bug in mc16a and data 2015+2016
-    from DerivationFrameworkEGamma.EGammaToolsConfig import EGCrackVetoCleaningToolCfg
-
-    LRTElectronPassCrackVeto = acc.getPrimaryAndMerge(
-        EGCrackVetoCleaningToolCfg(
-            ConfigFlags,
-            name="LRTElectronPassCrackVeto",
-            StoreGateEntryName="DFCommonCrackVetoCleaning",
-            ContainerName="LRTElectrons",
-        )
-    )
-
     # decorate some electrons with an additional ambiguity flag
     # against internal and early material conversion
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronAmbiguityToolCfg
@@ -99,7 +86,7 @@ def EGammaLRTCfg(ConfigFlags):
     )
 
     # list of all the decorators so far
-    LRTEGAugmentationTools = [LRTElectronPassCrackVeto, LRTElectronAmbiguity]
+    LRTEGAugmentationTools = [LRTElectronAmbiguity]
     if ConfigFlags.Derivation.Egamma.addECIDS:
         LRTEGAugmentationTools.extend([LRTElectronPassECIDS])
 

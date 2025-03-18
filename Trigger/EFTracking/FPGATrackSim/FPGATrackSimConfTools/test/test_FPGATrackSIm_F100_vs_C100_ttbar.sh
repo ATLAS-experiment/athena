@@ -49,7 +49,7 @@ run () {
 
 # Run F100 and produce IDTPM output
 run "${PREFIX_F100} pipeline" \
-    FPGATrackSimDataPrepOnRDO.sh -o $INPUT_AOD_FILE_F100 -t -n -1
+    FPGATrackSim_F100.sh -o $INPUT_AOD_FILE_F100 -t -n -1 --noDataOutput
 
 
 

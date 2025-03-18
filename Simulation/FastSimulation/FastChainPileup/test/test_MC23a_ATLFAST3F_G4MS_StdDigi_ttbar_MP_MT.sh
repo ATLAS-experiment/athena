@@ -22,6 +22,9 @@ LowPtMinbiasHitsFiles="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Campaig
 RDO_File='RDO.pool.root'
 AOD_File='AOD.pool.root'
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 FastChain_tf.py \
    --CA \
    --multiprocess True \
@@ -40,8 +43,8 @@ FastChain_tf.py \
    --digiSeedOffset2 727 \
    --preInclude 'EVNTtoRDO:Campaigns.MC23aSimulationMultipleIoV' 'EVNTtoRDO:Campaigns.MC23a' \
    --postInclude 'PyJobTransforms.UseFrontier' 'DigitizationConfig.DigitizationSteering.DigitizationTestingPostInclude' \
-   --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-07' \
-   --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
+   --conditionsTag "default:${conditions}" \
+   --geometryVersion "default:${geometry}" \
    --postExec 'with open("Config.pkl", "wb") as f: cfg.store(f)' \
    --sharedWriter True \
    --parallelCompression False \
@@ -64,8 +67,8 @@ then
       --steering 'doRDO_TRIG' 'doTRIGtoALL' \
       --maxEvents '-1' \
       --autoConfiguration=everything \
-      --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-07' \
-      --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
+      --conditionsTag "default:${conditions}" \
+      --geometryVersion "default:${geometry}" \
       --postExec 'RAWtoALL:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoALL_config.txt")' \
       --imf False
      rec=$?

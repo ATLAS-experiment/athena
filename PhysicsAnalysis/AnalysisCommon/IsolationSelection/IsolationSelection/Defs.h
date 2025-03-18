@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_DEFS_H
@@ -13,6 +13,7 @@
 #include <xAODTracking/TrackParticle.h>
 
 #include <set>
+#include <unordered_set>
 namespace CP {
 
     using CharAccessor = SG::AuxElement::ConstAccessor<char>;
@@ -72,6 +73,8 @@ namespace CP {
     using TrackSet = std::set<TrackPtr>;
     using ClusterSet = std::set<CaloClusterPtr>;
     using PflowSet = std::set<FlowElementPtr>;
+
+    using UnorderedClusterSet = std::unordered_set<const xAOD::CaloCluster*>;
 }  // namespace CP
 
 #endif

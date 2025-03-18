@@ -11,18 +11,21 @@
 # art-output: log.*
 # art-output: Config*.pkl
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 Sim_tf.py \
---CA \
---conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' \
---simulator 'FullG4MT_QS' \
---postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
---preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
---geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
---inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1' \
---outputHITSFile 'test.HITS.pool.root' \
---maxEvents '10' \
---postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
---imf False
+    --CA \
+    --conditionsTag "default:${conditions}" \
+    --geometryVersion "default:${geometry}" \
+    --simulator 'FullG4MT_QS' \
+    --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
+    --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
+    --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1' \
+    --outputHITSFile 'test.HITS.pool.root' \
+    --maxEvents '10' \
+    --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
+    --imf False
 
 rc=$?
 status=$rc

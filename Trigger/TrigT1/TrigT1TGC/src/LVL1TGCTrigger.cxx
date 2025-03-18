@@ -193,17 +193,17 @@ StatusCode LVL1TGCTrigger::execute()
       
       // Use TileMu only if BC_CURRENT
       if (doTileMu && bc == m_CurrentBunchTag) {
-        ATH_CHECK(m_system->getTMDB()->retrieve(m_keyTileMu));
+        ATH_CHECK(m_system->getTMDB()->retrieve(m_keyTileMu, ctx));
       }
 
       // Use NSW trigger output 
       if(doNSW && bc==m_CurrentBunchTag){  // To implement BC-calculation
-	ATH_CHECK(m_system->getNSW()->retrieve(m_keyNSWTrigOut));
+        ATH_CHECK(m_system->getNSW()->retrieve(m_keyNSWTrigOut, ctx));
       }
 
       // Use RPC BIS78 trigger output
       if(doBIS78 && bc == m_CurrentBunchTag){  // Todo: implement BC-calculation
-	ATH_CHECK(m_system->getBIS78()->retrieve(m_keyBIS78TrigOut));
+        ATH_CHECK(m_system->getBIS78()->retrieve(m_keyBIS78TrigOut, ctx));
       }
 
       if (m_ProcessAllBunches || bc == m_CurrentBunchTag) {

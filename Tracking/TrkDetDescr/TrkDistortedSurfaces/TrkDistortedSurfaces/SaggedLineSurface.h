@@ -12,7 +12,6 @@
 // Geo & Maths
 #include "GeoPrimitives/GeoPrimitives.h"
 // Trk
-#include "TrkDistortedSurfaces/DistortedSurface.h"
 #include "TrkDistortedSurfaces/LineSaggingDescriptor.h"
 #include "TrkSurfaces/StraightLineSurface.h"
 #include "CxxUtils/CachedValue.h"
@@ -20,25 +19,24 @@ namespace Trk {
 
   class TrkDetElementBase;
 
-  /** 
+  /**
    @class SaggedLineSurface
 
    The distorted surface itself is the nominal surface
    + a distortion description.
 
-   @author Andreas.Salzburger@cern.ch 
+   @author Andreas.Salzburger@cern.ch
   */
-  
+
   class SaggedLineSurface final
     : public StraightLineSurface
-    , virtual public DistortedSurface
   {
     public:
      /** Default Constructor - needed for pool and inherited classes */
      SaggedLineSurface();
 
      /** Constructor for private surface */
-     SaggedLineSurface(const Amg::Transform3D& htrans, 
+     SaggedLineSurface(const Amg::Transform3D& htrans,
                        double radius,
                        double halez,
                        LineSaggingDescriptor* lsd);
@@ -65,20 +63,16 @@ namespace Trk {
      Trk::SaggedLineSurface& operator=(const Trk::SaggedLineSurface& sls);
 
      /** Get the Surface representation */
-     virtual const StraightLineSurface& surfaceRepresentation() const override final;
+     const StraightLineSurface& surfaceRepresentation() const;
 
      /** Get the Distortion descriptor  */
-     virtual const LineSaggingDescriptor& distortionDescriptor() const override final;
-   
-     /** Get the NEW corrected surface - this is a factory (the user has to delete the surface) */
-     virtual StraightLineSurface* correctedSurface(const Amg::Vector2D& lp) const override final;
-
+     const LineSaggingDescriptor& distortionDescriptor() const;
 
    protected:
      LineSaggingDescriptor*                         m_saggingDescriptor; //!< the distortion descriptor
-     CxxUtils::CachedValue<Amg::Vector3D>           m_saggedLineDirection;     //!< nominal end position 
+     CxxUtils::CachedValue<Amg::Vector3D>           m_saggedLineDirection;     //!< nominal end position
   };
- 
+
 /** provide the Surface interface */
 inline const StraightLineSurface& SaggedLineSurface::surfaceRepresentation() const
 { return (*this); }
@@ -86,7 +80,7 @@ inline const StraightLineSurface& SaggedLineSurface::surfaceRepresentation() con
 /** provide the distortion descriptor for the outside world */
 inline const LineSaggingDescriptor& SaggedLineSurface::distortionDescriptor() const
 { return (*m_saggingDescriptor); }
-                          
+
 } // end of namespace Trk
 
 #endif // TRKDISTORTEDSURFACES_SAGGEDLINESURFACE_H

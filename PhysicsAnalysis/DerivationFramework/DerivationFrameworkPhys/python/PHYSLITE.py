@@ -121,7 +121,8 @@ def CPAlgorithmsCfg(flags):
     logPLCPAlgCfg.info('Do Photons')
 
     subConfig = factory.makeConfig ('Photons', containerName='AnalysisPhotons')
-    subConfig.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
+    subConfig.setOptionValue ('.forceFullSimConfigForP4', forceEGammaFullSimConfig)
+    subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.recomputeIsEM', False)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.decorateEmva', True)
@@ -132,7 +133,8 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.isolationWP', 'NonIso')
     subConfig.setOptionValue ('.doFSRSelection', True)
     subConfig.setOptionValue ('.recomputeIsEM', False)
-    subConfig.setOptionValue ('.noEffSF', True)
+    subConfig.setOptionValue ('.noEffSFForID', True)
+    subConfig.setOptionValue ('.noEffSFForIso', True)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Thinning', containerName='AnalysisPhotons')
     subConfig.setOptionValue ('.selectionName', 'loose')

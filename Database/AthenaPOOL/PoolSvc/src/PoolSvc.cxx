@@ -356,6 +356,10 @@ unsigned int PoolSvc::getOutputContext(const std::string& label) {
       policy.setWriteModeForExisting(pool::DatabaseConnectionPolicy::UPDATE);
    }
    m_persistencySvcVec[id]->session().setDefaultConnectionPolicy(policy);
+   if (!m_persistencySvcVec[id]->session().technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultROOTContainerType).type())) {
+      ATH_MSG_WARNING("Failed to set ROOT default container type via PersistencySvc for id " << id);
+      return(IPoolSvc::kOutputStream);
+   }
    m_outputContextLabel.insert(std::pair<std::string, unsigned int>(label, id));
    return(id);
 }

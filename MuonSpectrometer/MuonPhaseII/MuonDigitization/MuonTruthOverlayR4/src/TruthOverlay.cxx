@@ -8,6 +8,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
 #include "xAODMuonViews/ChamberViewer.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace MuonR4{
 
@@ -73,7 +74,7 @@ namespace MuonR4{
                     }
                     if(mergeMe->globalTime() - primHit->globalTime() < m_mergeTime) {
                         /// If a background hit overlays with a signal hit, take the signal
-                        if (std::abs(mergeMe->pdgId()) == 13 || (mergeMe->genParticleLink() && !merged->genParticleLink())){
+                      if (MC::isMuon(mergeMe) || (mergeMe->genParticleLink() && !merged->genParticleLink())){
                             (*merged) =  (*mergeMe);
                         }
                         merged->setEnergyDeposit(mergeMe->energyDeposit() + primHit->energyDeposit());

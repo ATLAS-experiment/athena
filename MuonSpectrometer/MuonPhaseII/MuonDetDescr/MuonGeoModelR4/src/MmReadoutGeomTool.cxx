@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MmReadoutGeomTool.h"
@@ -33,10 +33,6 @@ namespace MuonGMR4 {
 
 using physVolWithTrans = IMuonGeoUtilityTool::physVolWithTrans;
 
-MmReadoutGeomTool::MmReadoutGeomTool(const std::string& type,
-                                       const std::string& name,
-                                       const IInterface* parent)
-    : base_class{type, name, parent} {}
 StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& define,
                                               FactoryCache& factoryCache) {    
     
@@ -87,21 +83,7 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
     
     define.readoutSide = paramBook.readoutSide;
 
-    /*Sort Gas Gaps in a module quadruplet based on their Z position
-      On side A the gas gap have local x axis translations : -24.975 , -8.175 , 8.175, 24.975
-      This order refers to the gap closest to the origin  to the outermost gap of the experiement.
-      On side C the order is reversed : 24.975 , 8.175 , -8.175, -24.975.
-      I'm sorting the gas gap with the first one being closest to the experiment's origin.
-      I doing this in case the gaps aren't sorted in that way within the Full Phys Vol Quadruplet.
-      Also, now the stereoAngles and totalActiveStrips vectors will match the sequence of the allGasGaps vector.*/
 
-    std::sort(allGasGaps.begin(), allGasGaps.end(),
-              [](const physVolWithTrans&gapI, const physVolWithTrans & gapJ) {
-                const Amg::Vector3D posGapI = gapI.transform.translation();
-                const Amg::Vector3D posGapJ = gapJ.transform.translation();                
-                return posGapI.x() < posGapJ.x();                      
-              });
-        ATH_MSG_DEBUG("**************************************");
     for (std::size_t gap = 0; gap < allGasGaps.size(); ++gap) {
 
         auto& gapVol = allGasGaps[gap];
@@ -129,14 +111,11 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
         int firstActiveStrip{0};
         if (isStereo) {
             firstActiveStrip = paramBook.nMissedBottomStereo + 1;
-            firstStripPos = -gapHalfHeight + (1.*(firstActiveStrip - paramBook.nMissedTopEta) + 2.5)* paramBook.stripPitch;
+            firstStripPos = -gapHalfHeight + (1.*(firstActiveStrip - paramBook.nMissedBottomEta) -0.5)* paramBook.stripPitch;
         } else {
             firstActiveStrip = paramBook.nMissedBottomEta + 1;
-            firstStripPos = -gapHalfHeight + 1.5 *paramBook.stripPitch;
+            firstStripPos = -gapHalfHeight +  0.5*paramBook.stripPitch;
         }
-            
-
-
         /*The origin of the chamber/gasGap axes system is located at the center of the chamber.
         We subtract the HalfLength across the Z axis to transform from the center to the origin of the trapezoid
         The we add the strip pitch to reach the position of the first strip.*/
@@ -154,8 +133,7 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
         //Necessary strip layer rotation to match the alignment coordinate system
         Amg::Transform3D stripLayerRotation{gapVol.transform
                                     * Amg::getRotateY3D(-90.*Gaudi::Units::deg)
-                                    * Amg::getRotateX3D(180.* Gaudi::Units::deg)
-                                    * Amg::getRotateZ3D(-stripDesign->stereoAngle())};
+                                    * Amg::getRotateZ3D(stripDesign->stereoAngle())};
 
 
         stripDesign = (*factoryCache.stripDesigns.emplace(stripDesign).first);

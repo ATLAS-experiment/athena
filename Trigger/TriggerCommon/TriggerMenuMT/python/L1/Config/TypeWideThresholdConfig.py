@@ -246,6 +246,7 @@ def getConfig_eEM(do_HI_tob_thresholds):
     confObj["ptMinToTopo"] = 0.6 if do_HI_tob_thresholds else 3
     confObj["maxEt"] = 60
     confObj["resolutionMeV"] = 100
+    confObj["algoVersion"] = 1
 
     # Add any eta-dependent cuts that are defined for specific working points
     # with higher priority than the low-granularity values above
@@ -288,15 +289,15 @@ def getConfig_eEM(do_HI_tob_thresholds):
 
 def getConfig_jEM():
 
-    iso_loose_float = 0.2 # PLACEHOLDER
-    iso_medium_float = 0.14 # PLACEHOLDER
-    iso_tight_float = 0.08 # PLACEHOLDER    
-    frac_loose_float = 0.14 # PLACEHOLDER
-    frac_medium_float = 0.1 # PLACEHOLDER
-    frac_tight_float = 0.06 # PLACEHOLDER
-    frac2_loose_float = 0.12 # PLACEHOLDER
-    frac2_medium_float = 0.08 # PLACEHOLDER
-    frac2_tight_float = 0.04 # PLACEHOLDER
+    iso_loose_float = 1 
+    iso_medium_float = 0.9 
+    iso_tight_float = 0.08 
+    frac_loose_float = 0.14 
+    frac_medium_float = 0.1 
+    frac_tight_float = 0.06
+    frac2_loose_float = 0.12
+    frac2_medium_float = 0.08
+    frac2_tight_float = 0.04
 
     confObj = odict()
     confObj["workingPoints"] = odict()
@@ -362,11 +363,12 @@ class L1Config_eTAU:
     rCore_fw_tight = 32
 
     # BDT eTAU score cuts
-    # 12 bits (0 - 4095), BDT > 4 * threshold -> pass
-    # CAREFUL!! THE THRESHOLDS HERE ARE MULTIPLIED BY 4 IN THE eFEX FIRMWARE!
-    BDT_fw_loose = 221
-    BDT_fw_medium = 224
-    BDT_fw_tight = 225
+    # 8 bits (0 - 255)
+    # The actual BDT score is larger (11 bits for 2025), so it's bit-shifted by the remaining bits (3 for 2025) in the eFEX firmware
+    # For 2025: BDT > 2^3 * threshold -> pass
+    BDT_fw_loose = 168
+    BDT_fw_medium = 175
+    BDT_fw_tight = 182
 
     # RHad isolation cuts
     # 8 bits (0 - 255), rHad > threshold -> pass
@@ -404,9 +406,9 @@ class L1Config_eTAU:
                    ("rHad", eFEXfwToFloatConversion(self.rHad_fw_tight, self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_tight), 
                  ]),
         ]
-        confObj["ptMinToTopo"] = 0.6 if do_HI_tob_thresholds else 5 # PLACEHOLDER
+        confObj["ptMinToTopo"] = 0.6 if do_HI_tob_thresholds else 5
         confObj["resolutionMeV"] = 100
-        confObj["minIsoEt"] = 13.0 # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
+        confObj["minIsoEt"] = 12 # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
         confObj["maxEt"] = 50 # Maximum Et for the RCore/BDT/RHad cuts, in units of GeV
         confObj["algoVersion"] = 2 if do_eFex_BDT_Tau else 0 # For BDT based selection, algoVersion 1 corresponds to the 2024 v16 BDT and algoVersion 2 corresponds to the 2025 v17 BDT.
 
@@ -415,15 +417,13 @@ class L1Config_eTAU:
             for ssthr in confObj["workingPoints"][wp]:
                 for ssthr_i in ssthr:
                     if "_fw" in ssthr_i:
-                         if not isinstance(ssthr[ssthr_i], int):
-                              raise RuntimeError("Threshold %s in eTAU configuration is not an integer!", ssthr_i )
-                         elif ssthr[ssthr_i] < 0:
-                            raise RuntimeError("Threshold %s in eTAU configuration is negative!", ssthr_i )
+                         if not isinstance(ssthr[ssthr_i], int) or ssthr[ssthr_i] < 0 or ssthr[ssthr_i] > 255:
+                              raise RuntimeError(f'Threshold {ssthr_i} in eTAU configuration must be an 8-bit integer (between 0 and 255)!')
                          
         # Check that T >= M >= L [ATR-27796]
-        for var in ["rCore_fw","rHad_fw"]:
-            validate_ordering(var,"Loose","Medium",confObj["workingPoints"])
-            validate_ordering(var,"Medium","Tight",confObj["workingPoints"])
+        for var in ["rCore_fw", "rHad_fw"]:
+            validate_ordering(var, "Loose", "Medium", confObj["workingPoints"])
+            validate_ordering(var, "Medium", "Tight", confObj["workingPoints"])
 
         return confObj
 
@@ -474,30 +474,42 @@ class L1Config_cTAU:
     #cTAU12M (Medium12)
     isolation_fw_medium12: int = 400
     isolation_jTAUCoreScale_fw_medium12: int = 0
-    eTAU_rCoreMin_WP_fw_medium12: eTAUWP = eTAUWP.NoSelection
+    eTAU_rCoreMin_WP_fw_medium12: eTAUWP = eTAUWP.Loose
     eTAU_rHadMin_WP_fw_medium12: eTAUWP = eTAUWP.NoSelection
 
     #cTAU20M (Medium20)
-    isolation_fw_medium20: int = 600 + 550
-    isolation_jTAUCoreScale_fw_medium20: int = 550
-    eTAU_rCoreMin_WP_fw_medium20: eTAUWP = eTAUWP.NoSelection
+    isolation_fw_medium20: int = 620 + 520
+    isolation_jTAUCoreScale_fw_medium20: int = 520
+    eTAU_rCoreMin_WP_fw_medium20: eTAUWP = eTAUWP.Loose
     eTAU_rHadMin_WP_fw_medium20: eTAUWP = eTAUWP.NoSelection
 
     #cTAU30M (Medium30)
     isolation_fw_medium30: int = 600 + 550
     isolation_jTAUCoreScale_fw_medium30: int = 550
-    eTAU_rCoreMin_WP_fw_medium30: eTAUWP = eTAUWP.NoSelection
+    eTAU_rCoreMin_WP_fw_medium30: eTAUWP = eTAUWP.Medium
     eTAU_rHadMin_WP_fw_medium30: eTAUWP = eTAUWP.NoSelection
 
     #cTAU35M (Medium35)
-    isolation_fw_medium35: int = 600 + 550
-    isolation_jTAUCoreScale_fw_medium35: int = 550
-    eTAU_rCoreMin_WP_fw_medium35: eTAUWP = eTAUWP.NoSelection
+    isolation_fw_medium35: int = 550 + 500
+    isolation_jTAUCoreScale_fw_medium35: int = 500
+    eTAU_rCoreMin_WP_fw_medium35: eTAUWP = eTAUWP.Medium
     eTAU_rHadMin_WP_fw_medium35: eTAUWP = eTAUWP.NoSelection
+
+    #cTAU50M (Medium50)
+    isolation_fw_medium50: int = 650 + 550
+    isolation_jTAUCoreScale_fw_medium50: int = 550
+    eTAU_rCoreMin_WP_fw_medium50: eTAUWP = eTAUWP.Tight
+    eTAU_rHadMin_WP_fw_medium50: eTAUWP = eTAUWP.NoSelection
+
+    #cTAU55M (Medium55)
+    isolation_fw_medium55: int = 650 + 550
+    isolation_jTAUCoreScale_fw_medium55: int = 550
+    eTAU_rCoreMin_WP_fw_medium55: eTAUWP = eTAUWP.Tight
+    eTAU_rHadMin_WP_fw_medium55: eTAUWP = eTAUWP.NoSelection
 
     def __post_init__(self):
         # By default, duplicate the configs of isolation_fw_loose and isolation_fw_tight:
-        for default_wp, wp_list in {'Loose': ['Loose12', 'Loose20', 'Loose30', 'Loose35'], 'Tight': ['Tight12', 'Tight20', 'Tight30', 'Tight35']}.items():
+        for default_wp, wp_list in {'Loose': ['Loose12', 'Loose20', 'Loose30', 'Loose35', 'Loose50', 'Loose55'], 'Tight': ['Tight12', 'Tight20', 'Tight30', 'Tight35', 'Tight50', 'Tight55']}.items():
             for wp in wp_list:
                 setattr(self, f'isolation_fw_{wp.lower()}', getattr(self, f'isolation_fw_{default_wp.lower()}'))
                 setattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}', getattr(self, f'isolation_jTAUCoreScale_fw_{default_wp.lower()}'))
@@ -508,13 +520,17 @@ class L1Config_cTAU:
         confObj = odict()
         confObj['workingPoints'] = odict()
 
-        for wp in ['Loose', 'Medium', 'Tight', 'Loose12', 'Loose20', 'Loose30', 'Loose35', 'Medium12', 'Medium20', 'Medium30', 'Medium35', 'Tight12', 'Tight20', 'Tight30', 'Tight35']:
-            confObj['workingPoints'][wp] = [
-                odict([('isolation', cTAUfwToFlowConversion(getattr(self, f'isolation_fw_{wp.lower()}'))), ('isolation_fw', getattr(self, f'isolation_fw_{wp.lower()}')),
-                       ('isolation_jTAUCoreScale', cTAUfwToFlowConversion(getattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}'))), ('isolation_jTAUCoreScale_fw', getattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}')),
-                       ('eTAU_rCoreMin', getattr(self, f'eTAU_rCoreMin_WP_fw_{wp.lower()}').rCoreMinCut(do_eFex_BDT_Tau)), ('eTAU_rCoreMin_WP_fw', getattr(self, f'eTAU_rCoreMin_WP_fw_{wp.lower()}').value),
-                       ('eTAU_rHadMin', getattr(self, f'eTAU_rHadMin_WP_fw_{wp.lower()}').rHadMinCut(do_eFex_BDT_Tau)), ('eTAU_rHadMin_WP_fw', getattr(self, f'eTAU_rHadMin_WP_fw_{wp.lower()}').value)]),
-            ]
+        for wp in [f'{wp}{thr}' for wp in ('Loose', 'Medium', 'Tight') for thr in ('', 12, 20, 30, 35, 50, 55)]:
+            confObj['workingPoints'][wp] = [{
+                'isolation': cTAUfwToFlowConversion(getattr(self, f'isolation_fw_{wp.lower()}')),
+                'isolation_fw': getattr(self, f'isolation_fw_{wp.lower()}'),
+                'isolation_jTAUCoreScale': cTAUfwToFlowConversion(getattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}')),
+                'isolation_jTAUCoreScale_fw': getattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}'),
+                'eTAU_rCoreMin': getattr(self, f'eTAU_rCoreMin_WP_fw_{wp.lower()}').rCoreMinCut(do_eFex_BDT_Tau),
+                'eTAU_rCoreMin_WP_fw': getattr(self, f'eTAU_rCoreMin_WP_fw_{wp.lower()}').value,
+                'eTAU_rHadMin': getattr(self, f'eTAU_rHadMin_WP_fw_{wp.lower()}').rHadMinCut(do_eFex_BDT_Tau),
+                'eTAU_rHadMin_WP_fw': getattr(self, f'eTAU_rHadMin_WP_fw_{wp.lower()}').value,
+            }]
 
         confObj['resolutionMeV'] = 100
 
@@ -522,11 +538,8 @@ class L1Config_cTAU:
         for wp in confObj['workingPoints']:
             for ssthr in confObj['workingPoints'][wp]:
                 for ssthr_i in ssthr:
-                    if '_fw' in ssthr_i:
-                         if not isinstance(ssthr[ssthr_i], int):
-                              raise RuntimeError(f'Threshold {ssthr_i} in cTAU configuration is not an integer!')
-                         elif ssthr[ssthr_i] < 0:
-                            raise RuntimeError('Threshold {ssthr_i} in cTAU configuration is negative!')
+                    if '_fw' in ssthr_i and (not isinstance(ssthr[ssthr_i], int) or ssthr[ssthr_i] < 0):
+                        raise RuntimeError(f'Threshold {ssthr_i} in cTAU configuration must be a non-negative integer!')
 
         return confObj
 
@@ -597,9 +610,9 @@ def getConfig_jJ(do_HI_tob_thresholds):
     confObj["ptMinxTOB2"] = 5 if do_HI_tob_thresholds else 15
     confObj["ptMinxTOB3"] = 5 if do_HI_tob_thresholds else 15
     confObj["resolutionMeV"] = 200  
-    confObj["seedThreshold1"] = -1 # signed, in GeV, negative values in practice mean no seed threshold. 
-    confObj["seedThreshold2"] = -1 # Max value (HW constraint): (2^20)-1 * 25MeV = 26214.375 (GeV)
-    confObj["seedThreshold3"] = -1 
+    confObj["seedThreshold1"] = 3 # signed, in GeV, negative values in practice mean no seed threshold. 
+    confObj["seedThreshold2"] = 3 # Max value (HW constraint): (2^20)-1 * 25MeV = 26214.375 (GeV)
+    confObj["seedThreshold3"] = 3 
     return confObj
 
 def getConfig_jLJ():

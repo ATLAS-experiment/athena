@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
@@ -167,7 +167,7 @@ def PFRun3ConfigTest(flags=None):
   
   from eflowRec.PFRun3Remaps import ListRemaps
 
-  list_remaps=ListRemaps()
+  list_remaps=ListRemaps(cfg, 'AOD')
   for mapping in list_remaps:
       cfg.merge(mapping)    
 

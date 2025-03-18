@@ -8,6 +8,7 @@
 #include "InDetRawData/PixelRDO_Container.h"
 #include "PixelEmulatedDefects.h"
 #include "InDetIdentifier/PixelID.h"
+#include "PixelReadoutGeometry/PixelModuleDesign.h"
 
 namespace InDet {
    template <>
@@ -20,6 +21,15 @@ namespace InDet {
          int row_index(const Identifier &rdoID) const { return m_idHelper->phi_index(rdoID); }
          int col_index(const Identifier &rdoID) const { return m_idHelper->eta_index(rdoID); }
 
+         template <typename T_ModuleHelper>
+         std::unique_ptr<Pixel1RawData> createNoiseHit(const T_ModuleHelper &helper, const Identifier &identifier, unsigned int cell_idx, unsigned int tot) {
+            unsigned int row_aka_phi=cell_idx % helper.rows();
+            unsigned int col_aka_eta=cell_idx / helper.rows();
+            return std::make_unique<Pixel1RawData>( m_idHelper->pixel_id(identifier,row_aka_phi, col_aka_eta),
+                                                    tot,
+                                                    0 /*BCID*/,
+                                                    0 /*LVL1*/);
+         }
          unsigned int cloneOrRejectHit( const PixelModuleHelper &module_helper,
                                         const PixelEmulatedDefects &emulated_defects,
                                         unsigned int idHash,
@@ -39,6 +49,9 @@ namespace InDet {
       using DefectsData = PixelEmulatedDefects;
       using RDORawData =  PixelRDORawData;
       using ModuleHelper = PixelModuleHelper;
+      using ModuleDesign = InDetDD::PixelModuleDesign;
+
+      static constexpr ActsTrk::DetectorType DETECTOR_TYPE = ActsTrk::DetectorType::Pixel;
    };
 
    /** Algorithm which selectively copies hits from an input PixelRDO_Container.

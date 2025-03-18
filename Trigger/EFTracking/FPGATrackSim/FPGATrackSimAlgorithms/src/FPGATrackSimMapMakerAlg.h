@@ -14,6 +14,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h" //enum classes (e.g. SiliconTech, DetectorZone) in global namespace :-(
 #include "FPGATrackSimObjects/FPGATrackSimEventInputHeader.h" //member
 #include "FPGATrackSimInput/IFPGATrackSimEventInputHeaderTool.h" //tool handle template param
+#include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 
 #include <fstream> //ofstream members
 #include <tuple> //typedef
@@ -43,6 +44,7 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
     private:
         // Handles
         ToolHandle<IFPGATrackSimEventInputHeaderTool>    m_hitInputTool { this, "InputTool", "FPGATrackSimSGToRawHitsTool/FPGATrackSimInputTool", "HitInput Tool" };
+        ServiceHandle<IFPGATrackSimEventSelectionSvc>    m_evtSel {this, "eventSelector", "FPGATrackSimEventSelectionSvc", "Event selection Svc"};
 
         FPGATrackSimEventInputHeader         m_eventHeader;
 
@@ -73,21 +75,19 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
             }
         };
 
-	// Flags
-	Gaudi::Property<int> m_maxEvents {this, "maxEvents", 10000, "Max Events"};
-	Gaudi::Property<int> m_region {this, "region", 0, "Region"};
-	Gaudi::Property<float> m_trim {this, "trim", 0.1, "trim modules with less than given percent of tracks"};
-	Gaudi::Property<std::string> m_outFileName {this, "OutFileName", "", "naming convention for maps"};
-	Gaudi::Property<std::string> m_keystring {this, "KeyString", "strip,barrel,2", "key layer to use for subrmap"};
-	Gaudi::Property<std::string> m_keystring2 {this, "KeyString2", "", "second key layer for 2D slicing"};
-	Gaudi::Property<int> m_nSlices {this, "nSlices", -1, "default is full granularity/maximum number of slices possible"};
-	Gaudi::Property<bool> m_doSpacePoints {this, "doSpacePoints", false, "Use 9L instead of 8L configuration for first stage (for example)"};
-	Gaudi::Property<float> m_globalTrim {this, "globalTrim", 0.1, "Trimming applied globally to the key layer before determining slice boundaries"};
-	Gaudi::Property<std::string> m_description {this, "description", "", "tag description"};
-	Gaudi::Property<std::string> m_geoTag {this, "GeometryVersion", "ATLAS-P2-ITK-22-02-00", "Geometry tag that this set of maps is for. TODO can we store/read from wrappers?"};
-	Gaudi::Property<bool> m_remapModules {this, "remapModules", false, "Allow maps to be drawn that slice modules more finely, by remapping module indices"};
-	Gaudi::Property<bool> m_drawSlices {this, "drawSlices", false, "Draw the huge 2D slice histograms"};
-    Gaudi::Property<bool> m_insideout {this, "doInsideOut", false, "5 layers pixel-only configuration"};
+        // Flags
+        Gaudi::Property<int> m_maxEvents {this, "maxEvents", 10000, "Max Events"};
+        Gaudi::Property<int> m_region {this, "region", 0, "Region"};
+        Gaudi::Property<float> m_trim {this, "trim", 0.1, "trim modules with less than given percent of tracks"};
+        Gaudi::Property<std::string> m_outFileName {this, "OutFileName", "", "naming convention for maps"};
+        Gaudi::Property<std::string> m_keystring {this, "KeyString", "strip,barrel,2", "key layer to use for subrmap"};
+        Gaudi::Property<std::string> m_keystring2 {this, "KeyString2", "", "second key layer for 2D slicing"};
+        Gaudi::Property<int> m_nSlices {this, "nSlices", -1, "default is full granularity/maximum number of slices possible"};
+        Gaudi::Property<float> m_globalTrim {this, "globalTrim", 0.1, "Trimming applied globally to the key layer before determining slice boundaries"};
+        Gaudi::Property<std::string> m_description {this, "description", "", "tag description"};
+        Gaudi::Property<std::string> m_geoTag {this, "GeometryVersion", "ATLAS-P2-ITK-22-02-00", "Geometry tag that this set of maps is for. TODO can we store/read from wrappers?"};
+        Gaudi::Property<bool> m_remapModules {this, "remapModules", false, "Allow maps to be drawn that slice modules more finely, by remapping module indices"};
+        Gaudi::Property<bool> m_drawSlices {this, "drawSlices", false, "Draw the huge 2D slice histograms"};
 
         // Instance of the module remap object.
         FPGATrackSimModuleRelabel* m_moduleRelabel = nullptr;
@@ -112,141 +112,46 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
         -> -1 means the layer is not used
         -> Example: se67+ = Strip Positve Endcap layer 67
         */
-        const std::vector<std::vector<std::vector<std::string>>>* m_planes{};
-        const std::vector< std::vector< std::vector<std::string> > > m_planes_default = //first stage
-        {
-            { // region 0
-                {"pb4"},{"sb0"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"} // layers that make up each plane.
-                //{"pb0","pe0+","pe1+","pe2+"},{"pb1","pe17+","pe18+"},{"pb2"},{"pb3"},{"pb4"} // pixel only
-            },
-            { // region 1
-                {"pb4"},{"sb0"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"}
-            },
-            { // region 2
-                {"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"}
-            },
-            { // region 3
-	            {"pb4","pe83+","pe84+","pe85+","pe86+","pe87+","pe88+","pe89+"},{"se5+"},{"se6+"},{"se7+"},{"se8+"},{"se9+"},{"se10+"},{"se11+"}
-            },
-            { // region 4
-                {"pe34+","pe12+"},{"pe36+","pe29+"},{"pe8+","pe40+","pe30+"},{"pe56+","pe65+"},{"pe10+","pe6+"},{"pe11+","pe7+"},{"pe31+","pe32+"},{"pe9+","pe53+"}
-            },
-            { // region 5 - same eta as region 0, different phi
-                {"pb4"},{"sb0"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"}
-            },
-            { // region 6 - same eta as region 0, different phi
-                {"pb4"},{"sb0"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"}
-            },
-            { // region 7 - same eta as region 0, different phi
-                {"pb4"},{"sb0"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"}
-            },
-        };
+        const std::vector<std::vector<std::string>>* m_planes{};
+        const std::vector<std::vector<std::string>>* m_planes2{};
 
-
-        // 9L version of the above for spacepoints. There must be a better way to implement this without
-        // needing to duplicate the entire structure, but I'm not sure how without using the pmap files...
-        const std::vector< std::vector< std::vector<std::string> > > m_planes_sp = //first stage
-        {
-            { // region 0
-                {"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"} // layers that make up each plane.
-                //{"pb0","pe0+","pe1+","pe2+"},{"pb1","pe17+","pe18+"},{"pb2"},{"pb3"},{"pb4"} // pixel only
-            },
-            { // region 1
-                {"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"}
-            },
-            { // region 2
-                {"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"}
-            },
-            { // region 3
-                {"pb4","pe83+","pe84+","pe85+","pe86+","pe87+","pe88+","pe89+"},{"se4+"},{"se5+"},{"se6+"},{"se7+"},{"se8+"},{"se9+"},{"se10+"},{"se11+"}
-            },
-            { // region 4
-                //{"pe34+","pe12+"},{"pe36+","pe29+"},{"pe8+","pe40+","pe30+"},{"pe56+","pe65+"},{"pe10+","pe6+"},{"pe11+","pe7+"},{"pe31+","pe32+"},{"pe9+","pe53+"},{"pe30+"}
-                {"pe4+", "pe5+", "pe6+"},
-                {"pe7+", "pe8+", "pe9+"},
-                {"pe10+", "pe11+", "pe12+", "pe29+"},
-                {"pe30+", "pe31+", "pe32+", "pe33+"},
-                {"pe34+"},
-                {"pe36+"},
-                {"pe38+", "pe40+", "pe42+", "pe53+"},
-                {"pe54+", "pe55+"},
-                {"pe56+", "pe57+", "pe65+"}
-            },
-            { // region 5 - same eta as region 0, different phi
-                {"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"}
-            },
-            { // region 6 - same eta as region 0, different phi
-                {"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"}
-            },
-            { // region 7 - same eta as region 0, different phi
-                {"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"}
-            },
-        };
-
-        const std::vector <std::vector <std::vector <std::string> > > m_planes2 = // second stage
-        {
-            { // region 0
-                {"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"},{"pb0"},{"pb1"},{"pb2"},{"pb3"}
-            },
-            { // region 1
-                {"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"},{"pb0"},{"pb1"},{"pb2"},{"pb3"}
-            },
-            { // region 2
-                {"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"},{"-1"}
-            },
-            { // region 3
-            	{"pb4","pe83+","pe84+","pe85+","pe86+","pe87+","pe88+","pe89+"},{"se4+"},{"se5+"},{"se6+"},{"se7+"},{"se8+"},{"se9+"},{"se10+"},{"se11+"},{"pb2"},{"pb3","pe58+"},{"se2+"},{"se3+"},
-            },
-            { // region 4
-                {"pe0+"},{"pe1+"},{"pe2+"},{"pe3+"},{"pe4+"},{"pe5+"},{"pe6+"},{"pe7+"},{"pe8+"},{"pe9+"},{"pe10+"},{"pe11+"},{"pe12+"} // dummy values to avoid "vector::_M_range_check:"
-            },
-            { // region 5 - same eta as region 0, different phi
-                {"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"},{"pb0"},{"pb1"},{"pb2"},{"pb3"}
-            },
-            { // region 6 - same eta as region 0, different phi
-                {"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"},{"pb0"},{"pb1"},{"pb2"},{"pb3"}
-            },
-            { // region 7 - same eta as region 0, different phi
-                {"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"},{"pb0"},{"pb1"},{"pb2"},{"pb3"}
-            },
-        };
-
-        const std::vector <std::vector <std::vector <std::string> > > m_planes_insideout = // inside-out 5 layers pixel only
-         {
-             { // region 0
-                 {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"}
-             },
-             { // region 1
-                 {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"}                
-             },
-             { // region 2
-                 {"-1"},{"-1"},{"-1"},{"-1"},{"-1"}
-             },
-             { // region 3
-                 {"pb0", "pe0+","pe1+","pe2+","pe3+","pe4+","pe5+", "pe6+", "pe7+", "pe8+", "pe9+","pe10+","pe11+", "pe12+", "pe13+", "pe14+", "pe15+", "pe16+", },
-                                      {"pb1",   "pe19+",  "pe23+",  "pe25+", },         
-                   {"pb2",  
-                    "pe31+", "pe32+", "pe33+", "pe34+", "pe35+", "pe36+", "pe37+", "pe38+", "pe39+", "pe40+",
-                    "pe41+", "pe42+", "pe43+", "pe44+", "pe45+", "pe46+", 
-                  "pe47+", "pe48+", "pe49+", "pe50+", "pe51+", "pe52+", "pe53+", "pe54+", "pe55+", "pe56+", },
-                   {"pb3",
-                  "pe57+","pe58+","pe59+", "pe60+", "pe61+", "pe62+", "pe63+", "pe64+", "pe65+", "pe66+","pe67+","pe68+","pe69+"},
-                   {"pb4","pe70+","pe71+","pe72+", "pe73+", "pe74+", "pe75+", "pe76+", "pe77+", "pe78+", "pe79+",
+        // Fully generic "logical layers". these assign all pixel layers -> first stage and all strip layers -> second stage.
+        // This won't scale well for the parts of the forward region that actually need to extrapolate into the second stage, but
+        // it's good enough for now.
+        const std::vector<std::vector<std::string>> m_planes_generic = {
+            {"pb0", "pe0+","pe1+","pe2+","pe3+","pe4+","pe5+", "pe6+", "pe7+", "pe8+", "pe9+","pe10+","pe11+", "pe12+", "pe13+", "pe14+", "pe15+", "pe16+", },
+            {"pb1", "pe19+", "pe23+", "pe25+", },
+            {"pb2", "pe31+", "pe32+", "pe33+", "pe34+", "pe35+", "pe36+", "pe37+", "pe38+", "pe39+", "pe40+",
+                    "pe41+", "pe42+", "pe43+", "pe44+", "pe45+", "pe46+",
+                    "pe47+", "pe48+", "pe49+", "pe50+", "pe51+", "pe52+", "pe53+", "pe54+", "pe55+", "pe56+", },
+            {"pb3", "pe57+","pe58+","pe59+", "pe60+", "pe61+", "pe62+", "pe63+", "pe64+", "pe65+", "pe66+","pe67+","pe68+","pe69+"},
+            {"pb4", "pe70+","pe71+","pe72+", "pe73+", "pe74+", "pe75+", "pe76+", "pe77+", "pe78+", "pe79+",
                     "pe80+","pe81+","pe82+", "pe83+", "pe84+", "pe85+", "pe86+", "pe87+", "pe88+", "pe89+",}
-             },
-             { // region 4
-                 {"pe0+"},{"pe1+"},{"pe2+"},{"pe3+"},{"pe4+"}
-             },
-             { // region 5 - same eta as region 0, different phi
-                 {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"}
-             },
-             { // region 6 - same eta as region 0, different phi
-                 {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"}
-             },
-             { // region 7 - same eta as region 0, different phi
-                 {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"}
-             },
-         };
+        };
+
+        // This is the second stage version.
+        const std::vector<std::vector<std::string>> m_planes2_generic = {
+            {"pb0", "pe0+","pe1+","pe2+","pe3+","pe4+","pe5+", "pe6+", "pe7+", "pe8+", "pe9+","pe10+","pe11+", "pe12+", "pe13+", "pe14+", "pe15+", "pe16+", },
+            {"pb1", "pe19+",  "pe23+",  "pe25+", },
+            {"pb2", "pe31+", "pe32+", "pe33+", "pe34+", "pe35+", "pe36+", "pe37+", "pe38+", "pe39+", "pe40+",
+                    "pe41+", "pe42+", "pe43+", "pe44+", "pe45+", "pe46+",
+                    "pe47+", "pe48+", "pe49+", "pe50+", "pe51+", "pe52+", "pe53+", "pe54+", "pe55+", "pe56+", },
+            {"pb3", "pe57+","pe58+","pe59+", "pe60+", "pe61+", "pe62+", "pe63+", "pe64+", "pe65+", "pe66+","pe67+","pe68+","pe69+"},
+            {"pb4", "pe70+","pe71+","pe72+", "pe73+", "pe74+", "pe75+", "pe76+", "pe77+", "pe78+", "pe79+",
+                    "pe80+","pe81+","pe82+", "pe83+", "pe84+", "pe85+", "pe86+", "pe87+", "pe88+", "pe89+",},
+            {"sb0", "se4+", "se0+"},
+            {"sb1", "se5+", "se1+"},
+            {"sb2", "se6+", "se2+"},
+            {"sb3", "se7+", "se3+"},
+            {"sb4", "se8+"},
+            {"sb5", "se9+"},
+            {"sb6", "se10+"},
+            {"sb7", "se11+"}
+        };
+
+        // The generic assignments are the defaults-- but these are actually controlled from python.
+        Gaudi::Property<std::vector<std::vector<std::string>>> m_overridePlanes {this, "planes", m_planes_generic, "Logical layer assignments" };
+        Gaudi::Property<std::vector<std::vector<std::string>>> m_overridePlanes2 {this, "planes2", m_planes2_generic, "Logical layer assignments" };
 
         std::map <std::string, std::set<int>> m_keylayer; // key layer used in z-slicing, defined by user with KeyString run arg and set using parseKeyString()
         std::map <std::string, std::set<int>> m_keylayer2; // for 2D slicing
@@ -277,7 +182,7 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
         std::map <std::string, SiliconTech> m_det2tech = { {"pixel",SiliconTech::pixel},  {"strip",SiliconTech::strip} }; // for parsing KeyString
         std::map <std::string, DetectorZone> m_bec2zone = { {"barrel",DetectorZone::barrel},  {"posEndcap",DetectorZone::posEndcap}, {"negEndcap",DetectorZone::negEndcap} };
         bool isOnKeyLayer(int keynum, SiliconTech det, DetectorZone bec, int lyr); // returns if hit is on a key layer or not. keynum is either 1 or 2 for the first or second keylayer (if using 2D slicing)
-        int findPlane(const std::vector<std::vector<std::string>>& planes, const std::string& test);
+        int findPlane(const std::vector<std::vector<std::string>>* planes, const std::string& test);
         std::string makeRmapLines(std::vector<FPGATrackSimHit> const & hits, SiliconTech det, DetectorZone bec, int max);
         std::string makeSubrmapLines(std::vector<Module*> const & allmods, SiliconTech det, DetectorZone bec, int max);
         void parseKeyString(); // sets m_keylayer and m_keylayer2 based on the Keystring and Keystring2 run args

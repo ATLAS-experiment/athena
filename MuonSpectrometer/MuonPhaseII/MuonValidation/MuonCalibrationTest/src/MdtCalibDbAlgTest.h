@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONVALR4_MDTCALIBDBALGTEST_H
@@ -24,7 +24,7 @@ class TH2D;
 namespace MuonValR4{
     class MdtCalibDbAlgTest : public AthHistogramAlgorithm {
         public:
-            MdtCalibDbAlgTest(const std::string& name, ISvcLocator* pSvcLocator);
+            using AthHistogramAlgorithm::AthHistogramAlgorithm; 
             virtual ~MdtCalibDbAlgTest() = default;
 
             virtual StatusCode initialize() override;
@@ -43,9 +43,17 @@ namespace MuonValR4{
             MuonVal::ScalarBranch<float>& m_out_tdcAdj{m_tree.newScalar<float>("tdcAdj")};
             MuonVal::ScalarBranch<float>& m_out_tdc{m_tree.newScalar<float>("tdc")};
             MuonVal::ScalarBranch<float>& m_out_driftRadius{m_tree.newScalar<float>("driftRadius")};
-            MuonVal::ScalarBranch<float>& m_out_driftdRdt{m_tree.newScalar<float>("driftdRdt")};
+            MuonVal::ScalarBranch<float>& m_out_driftVelocity{m_tree.newScalar<float>("driftVelocity")};
             MuonVal::ScalarBranch<float>& m_out_driftTime{m_tree.newScalar<float>("driftTime")};
-            MuonVal::ScalarBranch<Identifier>& m_out_identifier{m_tree.newScalar<Identifier>("identifier")};
+
+            MuonVal::ScalarBranch<uint8_t>& m_out_stIndex{m_tree.newScalar<uint8_t>("stationIndex")};
+            MuonVal::ScalarBranch<int16_t>&  m_out_stEta{m_tree.newScalar<int16_t>("stationEta")};
+            MuonVal::ScalarBranch<uint8_t>& m_out_stPhi{m_tree.newScalar<uint8_t>("stationPhi")};
+            MuonVal::ScalarBranch<uint8_t>& m_out_ml{m_tree.newScalar<uint8_t>("multiLayer")};
+            MuonVal::ScalarBranch<uint8_t>& m_out_tl{m_tree.newScalar<uint8_t>("tubeLayer")};
+            MuonVal::ScalarBranch<uint8_t>& m_out_tube{m_tree.newScalar<uint8_t>("tube")};
+
+
             MuonVal::ScalarBranch<float>& m_out_globalPos{m_tree.newScalar<float>("globalPos")};
             MuonVal::ScalarBranch<float>& m_out_globalPosX{m_tree.newScalar<float>("globalPosX")};
             MuonVal::ScalarBranch<float>& m_out_globalPosY{m_tree.newScalar<float>("globalPosY")};

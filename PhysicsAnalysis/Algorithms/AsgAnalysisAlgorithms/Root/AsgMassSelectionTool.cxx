@@ -55,7 +55,7 @@ namespace CP
       float m = particle->m();
 
       if (m_minMassCutIndex >= 0) {
-        if (!std::isfinite(m) || m < 0.)
+        if (!std::isfinite(m))
         {
           ANA_MSG_WARNING ("invalid mass value, setting object to fail mass-cut: " << m);
           accept.setCutResult (m_minMassCutIndex, false);

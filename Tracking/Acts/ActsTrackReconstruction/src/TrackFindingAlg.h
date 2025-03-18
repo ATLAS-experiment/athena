@@ -22,6 +22,7 @@
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/EventData/TrackContainer.hpp"
 #include "Acts/EventData/ProxyAccessor.hpp"
+#include "Acts/TrackFinding/TrackStateCreator.hpp"
 
 // ActsTrk
 #include "ActsEvent/Seed.h"
@@ -34,6 +35,8 @@
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
 #include "IMeasurementSelector.h"
+#include "src/detail/AtlasUncalibSourceLinkAccessor.h"
+#include "src/detail/OnTrackCalibrator.h"
 
 // Athena
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
@@ -59,9 +62,21 @@
 
 namespace ActsTrk
 {
+  using AtlUncalibSourceLinkAccessor = detail::UncalibSourceLinkAccessor;
+  using DefaultTrackStateCreator = Acts::TrackStateCreator<ActsTrk::detail::UncalibSourceLinkAccessor::Iterator,detail::RecoTrackContainer>;
+
   namespace detail {
     class TrackFindingMeasurements;
     class SharedHitCounter;
+
+    /// Struct holding objects required by the measurement selector
+    struct [[nodiscard]] MeasurementSelectorData {
+      AtlUncalibSourceLinkAccessor slAccessor;
+      DefaultTrackStateCreator::SourceLinkAccessor slAccessorDelegate;
+      DefaultTrackStateCreator trackStateCreator;
+      detail::OnTrackCalibrator<detail::RecoTrackStateContainer> calibrator;
+      std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector;
+    };
   }
 
   class TrackFindingAlg : public AthReentrantAlgorithm
@@ -161,6 +176,8 @@ namespace ActsTrk
 
     Gaudi::Property<bool> m_useDefaultMeasurementSelector{this, "UseDefaultActsMeasurementSelector", true, ""};
 
+    Gaudi::Property<std::vector<std::uint32_t>> m_endOfWorldVolumeIds {this, "EndOfTheWorldVolumeIds", {}, ""};
+    
     struct MeasurementSelectorConfig {
        std::vector<std::pair<float, float> > m_chi2CutOffOutlier;
        std::vector<float>                    m_etaBins;
@@ -189,6 +206,43 @@ namespace ActsTrk
 
     // initialize measurement selector to be called during initialize
     StatusCode initializeMeasurementSelector();
+
+    /**
+     * @brief Take the array of handle keys and for each key retrieve containers, then append them to the output vector.
+     *
+     * @tparam HandleArrayKeyType Type of the list of handle keys
+     * @tparam ContainerType Type of the output container
+     * @param ctx Event context
+     * @param handleKeyArray List of handle keys
+     * @param outputContainers Vector of output containers
+     * @param sum Number of total elements in all retrieved containers
+     * @return Status code
+     */
+    template <class HandleArrayKeyType, class ContainerType>
+    StatusCode getContainersFromKeys(
+        const EventContext &ctx,
+        HandleArrayKeyType &handleKeyArray,
+        std::vector<const ContainerType *> &outputContainers,
+        std::size_t &sum) const;
+
+    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
+
+    /**
+     * @brief Setup and attach measurement selector to KF options
+     *
+     * Common code with TrackExtendAlg – to be moved to the base class
+     *
+     * @param trackingGeometry Acts tracking geometry
+     * @param detectorElementToGeoId map Trk detector element to Acts Geometry id
+     * @param measurements measurements container used in MeasurementSelector
+     * @param options Kalman filter options
+     * @return Struct with all objects needed by the measurement selector
+     */
+    detail::MeasurementSelectorData setMeasurementSelector(
+        const Acts::TrackingGeometry &trackingGeometry,
+        const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
+        const detail::TrackFindingMeasurements &measurements,
+        TrackFinderOptions &options) const;
 
     /**
      * @brief invoke track finding procedure
@@ -289,5 +343,7 @@ namespace ActsTrk
   };
 
 } // namespace
+
+#include "src/TrackFindingAlg.icc"
 
 #endif

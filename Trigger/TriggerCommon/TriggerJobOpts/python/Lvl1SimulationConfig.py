@@ -27,8 +27,11 @@ def Lvl1SimulationCfg(flags, seqName = None):
         from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
         acc.merge(L1CaloFEXSimCfg(flags), sequenceName = 'L1CaloSimSeq')
 
-
-    if flags.Trigger.enableL1MuonPhase1:
+    if flags.Trigger.enableL0Muon:
+        acc.addSequence(seqAND('L0MuonSimSeq'), parentName='L1SimSeq')
+        from TriggerJobOpts.L0MuonSimulationConfig import L0MuonSimulationCfg
+        acc.merge(L0MuonSimulationCfg(flags), sequenceName='L0MuonSimSeq')
+    elif flags.Trigger.enableL1MuonPhase1:
         acc.addSequence(seqAND('L1MuonSimSeq'), parentName='L1SimSeq')
         from TriggerJobOpts.Lvl1MuonSimulationConfig import Lvl1MuonSimulationCfg
         acc.merge(Lvl1MuonSimulationCfg(flags), sequenceName='L1MuonSimSeq')

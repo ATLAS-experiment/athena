@@ -204,28 +204,35 @@ bool MuonPadDesign::channelCorners(const std::pair<int, int>& pad, CornerArray& 
     xTopRight += 1.*PadPhiShift*cosRight;
     xTopLeft += 1.*PadPhiShift*cosLeft;
 
+    // For the R3 geometry converted from Phase II, we are shifting the gasgap center
+    // to the center of the gap for L3, originally defined at the cutout base.
+    // Hence, we are defining an offset, yCutoutOffset to be used in the pad corner calculations.
+    double yCutoutOffset{0.};
+    if(isConvertedFromPhaseII) {
+        yCutoutOffset = 24.74;
+    }
     // Adjust outer columns
     // No staggering from fuziness in the outer edges
     if (iPhi == 1) {
-        double yLength = yCutout ? Size - yCutout : Size;
+        double yLength = yCutout ? Size - yCutout + yCutoutOffset: Size;
         xBotRight = 0.5 * (sPadWidth + (lPadWidth - sPadWidth) * (yBot - minY) / yLength);
         xTopRight = 0.5 * (sPadWidth + (lPadWidth - sPadWidth) * (yTop - minY) / yLength);
     }
     if (iPhi == nPadColumns) {
-        double yLength = yCutout ? Size - yCutout : Size;
+        double yLength = yCutout ? Size - yCutout + yCutoutOffset: Size;
         xBotLeft = -0.5 * (sPadWidth + (lPadWidth - sPadWidth) * (yBot - minY) / yLength);
         xTopLeft = -0.5 * (sPadWidth + (lPadWidth - sPadWidth) * (yTop - minY) / yLength);
     }
 
     // Adjust for cutout region
-    if (yCutout && yTop > 0) {
+    if (yCutout && (yTop - yCutoutOffset) > 0) {
         float cutoutXpos = 0.5 * lPadWidth;
         if (iPhi == 1) {
             xTopRight = cutoutXpos;
-            if (yBot > 0) xBotRight = cutoutXpos;
+            if (yBot - yCutoutOffset > 0) xBotRight = cutoutXpos;
         } else if (iPhi == nPadColumns) {
             xTopLeft = -1.0 * cutoutXpos;
-            if (yBot > 0) xBotLeft = -1.0 * cutoutXpos;
+            if (yBot - yCutoutOffset > 0) xBotLeft = -1.0 * cutoutXpos;
         }
     }
     if (yBot > yTop) {

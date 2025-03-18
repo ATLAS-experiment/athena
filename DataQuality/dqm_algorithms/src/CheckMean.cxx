@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -134,7 +134,7 @@ getWarningLimit( const dqm_core::AlgorithmConfig& config, std::string limitName 
   std::map<std::string,double> grmap = config.getGreenThresholds();
   std::map<std::string,double>::const_iterator i = grmap.find( limitName );
   if( i == grmap.end() ) {
-    throw dqm_core::BadConfig( ERS_HERE, limitName, "Cannot find green threshold" );
+    throw dqm_core::BadConfig( ERS_HERE, std::move(limitName), "Cannot find green threshold" );
   }
   
   return i->second;
@@ -148,7 +148,7 @@ getErrorLimit( const dqm_core::AlgorithmConfig& config, std::string limitName )
   std::map<std::string,double> rdmap = config.getRedThresholds();
   std::map<std::string,double>::const_iterator i = rdmap.find( limitName );
   if( i == rdmap.end() ) {
-    throw dqm_core::BadConfig( ERS_HERE, limitName, "Cannot find red threshold" );
+    throw dqm_core::BadConfig( ERS_HERE, std::move(limitName), "Cannot find red threshold" );
   }
   
   return i->second;

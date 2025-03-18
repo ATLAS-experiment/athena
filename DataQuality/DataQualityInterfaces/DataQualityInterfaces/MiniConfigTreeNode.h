@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiMiniConfigTreeNode_h
@@ -67,14 +67,14 @@ public:
   * is returned.  If any part of the path is invalid before reaching the end of the tree, 0 is returned.
   */
 
-  virtual const MiniConfigTreeNode*  GetNode( std::string name_ ) const;
+  virtual const MiniConfigTreeNode*  GetNode( const std::string & name_ ) const;
 
 
-  virtual void                   SetAttribute( std::string attName, std::string attValue, bool isAttribKeyword = false );
+  virtual void                   SetAttribute( const std::string & attName, const std::string & attValue, bool isAttribKeyword = false );
 
-  virtual std::string            GetAttribute( std::string attName, bool calledFromDaughter = false ) const;
+  virtual std::string            GetAttribute( const std::string & attName, bool calledFromDaughter = false ) const;
 
-  virtual std::string            GetAttributeLocal( std::string attName ) const;
+  virtual std::string            GetAttributeLocal( const std::string & attName ) const;
 
   virtual void                   GetAttributeNames( std::set<std::string>& attSet, bool calledFromDaughter = false ) const;
 
@@ -98,12 +98,12 @@ protected:
   typedef AttMap_t::const_iterator               AttIter_t;
 
   const std::string  m_name;
-  MiniConfigTreeNode*    m_parent;
+  MiniConfigTreeNode*    m_parent{};
 
   NodeMap_t          m_daughters;
   AttMap_t           m_attributes;
 
-  bool m_propagateDown;
+  bool m_propagateDown{};
 
 private:
 

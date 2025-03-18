@@ -5,6 +5,7 @@
 
 #include "eEmSortSelectCountContainerAlgTool.h"
 #include "AlgoDataTypes.h"  // bitSetToInt()
+#include "GenericTob.h"  // bitSetToInt()
 #include "DataCollector.h"
 
 #include "../../../dump.h"
@@ -17,6 +18,7 @@
 #include <algorithm>
 
 namespace GlobalSim {
+  
 
   std::vector<eEmTobPtr>
   make_eEmTobs(const GlobalSim::GepAlgoHypothesisFIFO& fifo);
@@ -35,10 +37,11 @@ namespace GlobalSim {
 
     // Cut values for Select part of Algorithm. Not yet provided in VHDL
 
-    m_EtMin = std::vector(AlgoConstants::NumSelect, 0);
-    m_REtaMin = std::vector(AlgoConstants::NumSelect, 0);
-    m_RHadMin = std::vector(AlgoConstants::NumSelect, 0);
-    m_WsTotMin = std::vector(AlgoConstants::NumSelect, 0);
+    
+    m_EtMin = std::vector(s_NumSelect, 0U);
+    m_REtaMin = std::vector(s_NumSelect, 0U);
+    m_RHadMin = std::vector(s_NumSelect, 0U);
+    m_WsTotMin = std::vector(s_NumSelect, 0U);
 
     // Cut values for the Count part of Algorithm.
     // All values set to EM5 for now
@@ -52,8 +55,9 @@ namespace GlobalSim {
     // Eta min is tricky:
     // It has been set to 0x100000000 in a 9 bit word. So it is negative.
     // But our words have > 9 bits.
-    m_count_EtaMin = std::vector<std::vector<int>>(s_NumCnt,
-					 std::vector<int>(s_NumEtaRanges, -0b011111111));
+    m_count_EtaMin =
+      std::vector<std::vector<int>>(s_NumCnt,
+				    std::vector<int>(s_NumEtaRanges, -0b011111111));
     
     m_count_EtaMax = std::vector<std::vector<int>>(s_NumCnt,
 						   std::vector<int>(s_NumEtaRanges, 0b011111111));
@@ -76,12 +80,24 @@ namespace GlobalSim {
      
     ATH_MSG_DEBUG("read in GepAlgoHypothesis fifo ");
 
+    {
+      std::stringstream ss;
+      ss <<'\n';
+      for (const auto& p : *fifo) {
+	ss  << eEmInputTOBToString(*(p.m_I_eEmTobs)) << '\n';
+      }
+      ATH_MSG_DEBUG(ss.str());
+    }
+      
+    
     auto eEmTobs = make_eEmTobs(*fifo);
 
     auto collector = std::make_unique<DataCollector>();
     collector->collect("eEmTobs in", eEmTobs);
     
-    // Select
+    // Select. In the VHDL, ech TOB is treated indiviually. Here
+    // we split the TOBs into vectors of selected TOBs, where
+    // each selection has a set of associated cuts.
     auto selected_eEmTobs = std::vector<std::vector<eEmTobPtr>>();
     CHECK(make_selectedTobs(eEmTobs, selected_eEmTobs));
 
@@ -109,18 +125,21 @@ namespace GlobalSim {
 		       selected_genericTobs);
     // Sort
     auto EtGreater = [] (const GenTobPtr& l, const GenTobPtr& r) {
-      return l->m_Et > r->m_Et;
+      return l->Et() > r->Et();
     };
 
 
     auto ports_out = std::make_unique<eEmSortSelectCountContainerPortsOut>();
 
-    //sort selected tobs, and copy to output port
-    for (std::size_t i = 0; i != AlgoConstants::eEmNumSort; ++i) {
+    // sort selected tobs, and copy to the appropriate location in the
+    // output port
+
+    auto& outputTobs = ports_out->m_O_eEmGenTob;
+    for (std::size_t i = 0; i != s_NumSort; ++i) {
 
       auto& sel =  selected_genericTobs[i];
-      auto divider = std::begin(sel) +
-	std::min(sel.size(), AlgoConstants::eEmSortOutWidth[i]);
+      auto divider = std::begin(sel) + std::min(sel.size(),
+						s_SortOutWidths[i]);
 
 
       std::partial_sort(std::begin(sel),
@@ -128,9 +147,8 @@ namespace GlobalSim {
 			std::end(sel),
 			EtGreater);
 
-      auto& outputTobs = ports_out->m_O_eEmGenTob;
       auto start_iter =
-	std::begin(outputTobs) + AlgoConstants::eEmSortOutStart[i];
+	std::begin(outputTobs) + s_SortOutStart[i];
 
       std::copy(std::begin(sel),
 		divider,
@@ -140,7 +158,17 @@ namespace GlobalSim {
     collector->collect("Sorted generic tob containers",
 		       selected_genericTobs);
 
-    
+
+    // write unsorted generic TOBs to the output port
+    std::size_t numToCopy = std::min(outputTobs.size()-s_SortOutWidth,
+				     eEmTobs.size());
+
+    std::transform(std::cbegin(eEmTobs),
+		   std::cbegin(eEmTobs)+numToCopy,
+		   std::begin(outputTobs) + s_SortOutWidth,
+		   make_genericTob);
+		   
+		   
 
     // count the tobs according to various criteria.
     // limit the counts so that the number of output bits are not exeeded.
@@ -154,10 +182,11 @@ namespace GlobalSim {
     // limit the count values
     std::vector<std::pair<std::size_t, unsigned>> bounded_counts;
     bounded_counts.reserve(ntobs.size());
+
     for(std::size_t i = 0; i != ntobs.size(); ++i) {
       bounded_counts.push_back({
-	  std::min(ntobs[i], AlgoConstants::max_counts[i]),
-	  AlgoConstants::eEmCountOutWidth[i]});
+	  std::min(ntobs[i], s_max_counts[i]),
+	  s_CountOutWidth[i]});
     };
 
     // convert each limited count value to 0, 1 (type: short)
@@ -189,10 +218,11 @@ namespace GlobalSim {
     }
 
     // sanity check
-    if (int_bits.size() != AlgoConstants::eEmNumTotalCountWidth or
+ 
+    if (int_bits.size() != s_NumTotalCountWidth or
 	int_bits.size() != (ports_out->m_O_Multiplicity)->size()) {
       ATH_MSG_ERROR("incorrect number of count bits. Expected "
-		    << AlgoConstants::eEmNumTotalCountWidth
+		    << s_NumTotalCountWidth
 		    << " obtained " << int_bits.size()
 		    << " number bits in output ports "
 		    << (ports_out->m_O_Multiplicity)->size());
@@ -231,62 +261,7 @@ namespace GlobalSim {
     CHECK(h_write.record(std::move(ports_out)));
     return StatusCode::SUCCESS;
   }
-    
-
-  eEmTobPtr to_eEmTob(const GepAlgoHypothesisPortsIn& ports_in) {
-
-    auto tob = std::make_shared<eEmTob>();
-    const auto& w_tob = ports_in.m_I_eEmTobs;
-
-    std::size_t i;
-    std::size_t j;
-
-    for (i = 0; i != AlgoConstants::eFexEtBitWidth; ++i) {
-      tob->Et[i] = (*w_tob)[i];
-    }
-
-    for (i = 16, j=0;
-	 i != 16+ AlgoConstants::eFexPhiBitWidth;
-	 ++i, ++j) {
-      tob->Phi[j] = (*w_tob)[i];
-    }
-
-    for (i = 32, j=0;
-	 i != 32+ AlgoConstants::eFexEtaBitWidth;
-	 ++i, ++j) {
-      tob->Eta[j] = (*w_tob)[i];
-    }
-
-
-    for (i = 48, j=0;
-	 i != 48+ AlgoConstants::eFexDiscriminantBitWidth;
-	 ++i, ++j)
-      {
-	tob->REta[j] = (*w_tob)[i];
-      }
-    
-
-    for (i = 48+ AlgoConstants::eFexDiscriminantBitWidth, j=0;
-	 i != 48 + 2*AlgoConstants::eFexDiscriminantBitWidth;
-	 ++i, ++j)
-      {
-	tob->RHad[j] = (*w_tob)[i];
-      }
-
-    
-    for (i = 48+ 2*AlgoConstants::eFexDiscriminantBitWidth, j=0;
-	 i != 48 + 3*AlgoConstants::eFexDiscriminantBitWidth;
-	 ++i, ++j)
-      {
-	tob->WsTot[j] = (*w_tob)[i];
-      }
-
-    tob->Overflow[0] = (*w_tob)[63];
-
-    return tob;
-  }
-
-  
+ 
   std::vector<eEmTobPtr>
   make_eEmTobs(const GlobalSim::GepAlgoHypothesisFIFO& fifo) {
 
@@ -296,7 +271,9 @@ namespace GlobalSim {
     std::transform(fifo.cbegin(),
 		   fifo.cend(),
 		   std::back_inserter(eEmTobs),
-		   to_eEmTob);
+		   [](const auto& f) {
+		     return std::make_shared<eEmTob>(f);
+		   });
 
     return eEmTobs;
   }
@@ -306,18 +283,19 @@ namespace GlobalSim {
   eEmSortSelectCountContainerAlgTool::make_selectedTobs(const std::vector<eEmTobPtr>& eEmTobs,
 							std::vector<std::vector<eEmTobPtr>>& selectedTobs) const {
   
-    selectedTobs.reserve(AlgoConstants::NumSelect);
+    selectedTobs.reserve(s_NumSelect);
     
-    for(std::size_t i = 0; i != AlgoConstants::NumSelect; ++i) {
+    for(std::size_t i = 0; i != s_NumSelect; ++i) {
       auto selector = [etMin = m_EtMin[i],
 		       rEtaMin= m_REtaMin[i],
 		       rHadMin = m_RHadMin[i],
 		       wsTotMin = m_WsTotMin[i]](const auto& tob){
+
 	return
-	  bitSetToInt(tob->Et) >= etMin and
-	  bitSetToInt(tob->REta) >= rEtaMin and
-	  bitSetToInt(tob->RHad) >= rHadMin and
-	  bitSetToInt(tob->WsTot) >= wsTotMin;
+	  (tob->Et_bits()).to_ulong() >= etMin and
+	  (tob->REta_bits()).to_ulong() >= rEtaMin and
+	  (tob->RHad_bits()).to_ulong() >= rHadMin and
+	  (tob->WsTot_bits()).to_ulong() >= wsTotMin;
       };
    
       std::vector<eEmTobPtr> s_tobs;
@@ -351,9 +329,9 @@ namespace GlobalSim {
 
 				  // loop over eta regions
 				  for(std::size_t j{0}; j != etMin_etaRegs.size(); ++j) {
-				    if (tob->m_Et > etMin_etaRegs[j] and
-					tob->m_Eta > etaMin_etaRegs[j] and
-					tob->m_Eta <= etaMax_etaRegs[j]) {return true;}
+				    if (tob->Et() > etMin_etaRegs[j] and
+					tob->Eta() > etaMin_etaRegs[j] and
+					tob->Eta() <= etaMax_etaRegs[j]) {return true;}
 				  }
 				  return false;
 				});

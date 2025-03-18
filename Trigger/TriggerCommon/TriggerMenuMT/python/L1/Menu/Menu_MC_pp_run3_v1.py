@@ -70,6 +70,18 @@ def defineMenu():
         'L1_BTAG-MU3VFjJ30_2jJ30p0ETA25',
         'L1_BTAG-MU3VFjJ30_2jJ40p0ETA25', 
         'L1_BTAG-MU3VFjJ30_2jJ30p0ETA25_jJ40p0ETA25', 
+        #ATR-30824
+        'L1_BTAG-MU3VFjJ20',
+        'L1_BTAG-MU3VFjJ20_2jJ30p0ETA25',
+        'L1_BTAG-MU3VFjJ20_2jJ30p0ETA25_jJ50p0ETA25',
+        'L1_BTAG-MU3VFjJ20_2jJ40p0ETA25',
+        'L1_BTAG-MU3VFjJ20_2jJ40p0ETA25_jJ50p0ETA25',
+
+        'L1_BTAG-MU5VFjJ20',
+        'L1_BTAG-MU5VFjJ20_2jJ30p0ETA25',
+        'L1_BTAG-MU5VFjJ20_2jJ30p0ETA25_jJ50p0ETA25',
+        'L1_BTAG-MU5VFjJ20_2jJ40p0ETA25',
+        'L1_BTAG-MU5VFjJ20_2jJ40p0ETA25_jJ50p0ETA25',
 
         #ATR-26902
         'L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU20',
@@ -84,8 +96,6 @@ def defineMenu():
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ40',
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ30',
         'L1_cTAU30M_2cTAU20M_3jJ30p0ETA25',
-        #ATR-29523
-        'L1_3jJ40p0ETA25',
         
         # ATR-29651 - Tau+X chains using eTAU20M seeds
         'L1_eEM18M_2eTAU20M_4jJ30', 'L1_eTAU60_2eTAU20M_jXE80', 'L1_eEM18M_2eTAU20M_jXE70', 
@@ -270,7 +280,7 @@ def defineMenu():
         'L1_jLJ180':'',
 
         # other non-primary
-        'L1_jEM20':'',
+        'L1_jEM25':'',
         'L1_jEM20M':'',
 
         # combined non-primary

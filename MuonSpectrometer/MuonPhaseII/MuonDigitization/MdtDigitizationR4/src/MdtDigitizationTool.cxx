@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MdtDigitizationTool.h"
 #include "StoreGate/WriteHandle.h"
 #include "MDT_Digitization/MdtDigiToolInput.h"
 #include "MdtCalibInterfaces/IMdtCalibrationTool.h"
 #include "xAODMuonViews/ChamberViewer.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 namespace{
     constexpr double timeToTdcCnv = 1. / IMdtCalibrationTool::tdcBinSize;
@@ -64,7 +65,7 @@ namespace MuonR4 {
                             <<" [eV], genLink: "<<simHit->genParticleLink());
                 const MuonGMR4::MdtReadoutElement* readOutEle = m_detMgr->getMdtReadoutElement(hitId);
                 const IdentifierHash measHash{readOutEle->measurementHash(hitId)};
-                if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13) {
+                if (m_digitizeMuonOnly && !MC::isMuon(simHit)) {
                     ATH_MSG_VERBOSE("Hit is not from a muon");
                     continue;
                 }

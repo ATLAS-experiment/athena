@@ -71,6 +71,7 @@ public:
   virtual StatusCode deReg(const std::string& name) override; //<! use this instead
 
   virtual std::vector<std::string> getHists() const override;
+  std::set<std::string> getSet(boost::regex) const;
 
   virtual StatusCode regShared( const std::string&, std::unique_ptr<TH1>, LockedHandle<TH1>& ) override;
   virtual StatusCode regShared( const std::string&, std::unique_ptr<TH2>, LockedHandle<TH2>& ) override;
@@ -142,17 +143,24 @@ private:
   /// Flag to stop the monitoring task
   std::atomic<bool> m_stopFlag{false};
   /// The actual publication Task
-  void monitoringTask();
+  void monitoringTask(int, int, std::atomic<bool>&, boost::regex);
   /// Sync the publication to a multiple of the interval
   void syncPublish(long int, boost::posix_time::ptime);
+  /// Sleep for a duration or until the stop flag is set
+  void conditionedSleep(std::chrono::milliseconds, const std::atomic<bool>&);
   /// Publication thread
   std::thread m_thread;
+  std::thread m_threadFast;
   /// The partition to publish to
   std::string m_partition;
   /// Webdaq configuration variable, see https://gitlab.cern.ch/atlas-tdaq-software/webdaq
   std::string m_tdaqWebdaqBase;
   /// The OH server name (TDAQ_OH_SERVER if defined, m_OHServerName otherwise)
   std::string m_tdaqOHServerName;
+  /// Flag to indicate when the histogram map is updated
+  std::atomic<bool> m_histoMapUpdated{false};
+  /// Flag to indicate when the histogram map is updated for the fast publication  
+  std::atomic<bool> m_histoMapUpdatedFast{false};
 
   /// joboptions service
   ServiceHandle<Gaudi::Interfaces::IOptionsSvc> m_jobOptionsSvc{this, "JobOptionsSvc", "JobOptionsSvc"};
@@ -180,9 +188,13 @@ private:
                                              "^/((run_[0-9]+/lb_[0-9]+/LB)|(SHIFT)|(EXPERT)|(DEBUG)|(EXPRESS)|(RUNSTAT))/.+/.+"};
   
   //New properties for the monitoring task
-  Gaudi::Property<int> m_numSlots{this, "NumSlots", 8, "Number of slots for the monitoring task"};
+  Gaudi::Property<int> m_numSlots{this, "NumSlots", 8, "Number of slots for the main monitoring task"};
+  Gaudi::Property<int> m_numSlotsFast{this, "NumSlotsFast", 1, "Number of slots for the fast monitoring task"};
   Gaudi::Property<int> m_intervalSeconds{this, "IntervalSeconds", 80, "Interval between histogram publications periods in seconds"};
+  Gaudi::Property<int> m_intervalSecondsFast{this, "IntervalSecondsFast", 10, "Interval between histogram publications periods in seconds for the fast publication"};
   Gaudi::Property<std::string> m_OHServerName{this, "OHServerName", "Histogramming", "Name of the OH server to publish histograms into"};
+  Gaudi::Property<std::string> m_PublicationIncludeName{this, "PublicationIncludeName",".*","Regex to select histograms for publication"};
+  Gaudi::Property<std::string> m_fastPublicationIncludeName{this, "FastPublicationIncludeName","^.EXPERT.HLTFramework.TrigSignatureMoni.*","Regex to select histograms for fast publication"};
 
   // Dummy properties for compatibility with THistSvc
   Gaudi::Property<int> m_autoSave{this, "AutoSave", 0, "Not supported by WebdaqHistSvc"};
@@ -197,6 +209,8 @@ private:
   boost::regex m_includeTypeRegex;
   boost::regex m_excludeNameRegex;
   boost::regex m_includeNameRegex;
+  boost::regex m_PublicationIncludeNameRegex;
+  boost::regex m_fastPublicationIncludeNameRegex;
 
 };
 

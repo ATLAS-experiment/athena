@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # *** IMPORTANT ***
 # Menu parameter ordering must match that in the L1Topo
@@ -1072,7 +1072,9 @@ class TopoAlgoDef:
             {"minDr": 0, "maxDr": 4, "otype1" : "MU3Vab" , "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"}, #0DR04-MU3Vab-CjJ40ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 80, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ80ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 90, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ90ab
-            {"minDr": 0, "maxDr": 4, "otype1" : "MU3VFab", "otype2" : "CjJ", "ocut2": 30, "olist2" : "ab"}  #0DR04_MU3VFab_CjJ30ab
+            {"minDr": 0, "maxDr": 4, "otype1" : "MU3VFab", "otype2" : "CjJ", "ocut2": 30, "olist2" : "ab"}, #0DR04_MU3VFab_CjJ30ab
+            {"minDr": 0, "maxDr": 4, "otype1" : "MU3VFab", "otype2" : "CjJ", "ocut2": 20, "olist2" : "ab"}, #0DR04_MU3VFab_CjJ20ab
+            {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 20, "olist2" : "ab"}, #0DR04_MU5VFab_CjJ20ab
         ]
         for x in algoList:
             class d:
@@ -1784,7 +1786,7 @@ class TopoAlgoDef:
               "MinET2" : 0, # eTaus
               "MinET3" : 0, # muons
               "MinET4" : 0, # jXE
-              "AnomalyScoreThresh" : [3875, 3875], #corresponds to Tight and Loose WPs
+              "AnomalyScoreThresh" : [1521991, 1333204], #corresponds to Tight and Loose WPs (500Hz,1kHz est.)
         }
         class d:
             pass
@@ -2136,7 +2138,7 @@ class TopoAlgoDef:
         ZAFBDphimap = [
             { "minInvm": 60 , "minDphiList": [4, 25], "maxDphi": 32, "minEta2": 25, "maxEta2": 49,
               "inputwidth1": HW.eEmOutputWidthSelect, "otype1" : "eEM", "ocut1" : 18, "olist1" : "abm",
-              "nleading1" : HW.eEmOutputWidthSelect, "inputwidth2": HW.jEmOutputWidthSort,  "ocut2" : 20, "nleading2" : 6 }
+              "nleading1" : HW.eEmOutputWidthSelect, "inputwidth2": HW.jEmOutputWidthSort,  "ocut2" : 20, "ocut3" : 25, "nleading2" : 6 }
         ]
         for x in ZAFBDphimap:
             class d:
@@ -2148,7 +2150,7 @@ class TopoAlgoDef:
             for minDphi in d.minDphiList:
                 toponames.append ("%iINVM-%02dDPHI%i-%s%s%s%s-jEM%ss%s%iETA%i"  % (d.minInvm, minDphi, d.maxDphi,
                                                                                      d.otype1, str(d.ocut1) , d.olist1, str(d.nleading1) if d.olist1=="s" else "",
-                                                                                     str(d.ocut2) , str(d.nleading2) , d.minEta2, d.maxEta2))
+                                                                                     str(d.ocut3) , str(d.nleading2) , d.minEta2, d.maxEta2))
             alg = AlgConf.InvariantMassDeltaPhiInclusive2( name = 'ZAFB_DPHI', inputs = inputList, outputs = toponames)
             alg.addgeneric('InputWidth1', d.inputwidth1)
             alg.addgeneric('InputWidth2', d.inputwidth2)
@@ -2158,7 +2160,7 @@ class TopoAlgoDef:
             alg.addgeneric('ApplyEtaCut', 1)
             for bitid,minDphi in enumerate(d.minDphiList):
                 alg.addvariable('MinET1',  get_threshold_cut(d.otype1, d.ocut1)*_et_conversion, bitid)
-                alg.addvariable('MinET2',  get_threshold_cut('jEM', d.ocut2)*_et_conversion, bitid)
+                alg.addvariable('MinET2',  get_threshold_cut('jEM', d.ocut3)*_et_conversion, bitid)
                 alg.addvariable('MinMSqr', d.minInvm*d.minInvm*_et_conversion*_et_conversion, bitid)
                 alg.addvariable('MaxMSqr', _no_m_upper_threshold, bitid)
                 alg.addvariable('MinEta1',  0*_eta_conversion, bitid)
@@ -2461,7 +2463,7 @@ class TopoAlgoDef:
         # g-2 tau (ATR-30638)
         Algo = namedtuple('Algo', ['dPhiMin', 'dPhiMax', 'otype', 'olist', 'ocut1', 'ocut2', 'nTOB'])
         algolist=[
-            Algo(dPhiMin=30, dPhiMax=32, otype='eTAU', olist='s', ocut1=60, ocut2=60, nTOB=HW.eTauOutputWidthSort), #30DPHI32-2eTAU60s
+            Algo(dPhiMin=30, dPhiMax=32, otype='eTAU', olist='s', ocut1=50, ocut2=50, nTOB=HW.eTauOutputWidthSort), #30DPHI32-2eTAU50s
         ]
         for x in algolist:
             name = f'{x.dPhiMin}DPHI{x.dPhiMax}-'

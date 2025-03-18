@@ -38,20 +38,23 @@ namespace GlobalSim {
   StatusCode HypoTestBenchAlg::initialize () {
     ATH_MSG_DEBUG("initialising");
     CHECK(m_hypothesisFIFO_WriteKey.initialize());
+    CHECK( m_eEmSortSelectCountExpectations_WriteKey.initialize());
 
     // initialisation is either from a file of test vectors
     // or by filling in values by hand in this Algorithm
 
-    if (m_eEmFileName.empty()){
+    if (m_testsFileName.empty()){
+      ATH_MSG_INFO("Initialisation is manual");
       CHECK(init_manual());
     } else {
+      ATH_MSG_INFO("Initialisation is from file " <<  m_testsFileName);
       CHECK(init_from_file());
     }
 
     ATH_MSG_INFO("Number of fifos " << m_fifos.size());
-    if (m_fifos.empty()) {
-      ATH_MSG_ERROR("No FIFOS created");
-      return StatusCode::FAILURE;
+    for(const auto& fifo : m_fifos) {
+          ATH_MSG_INFO("Fifo size " <<
+		       fifo->size());
     }
 	
     return StatusCode::SUCCESS;
@@ -73,6 +76,16 @@ namespace GlobalSim {
       SG::WriteHandle<GepAlgoHypothesisFIFO>(m_hypothesisFIFO_WriteKey);
     
     CHECK(h_write.record(std::move(m_fifos[m_fifo_ptr])));
+
+    auto expectations = std::make_unique<eEmSortSelectCountExpectations>(
+	m_expected_tobs[m_fifo_ptr],
+	m_expected_mults[m_fifo_ptr]);
+    
+    auto h_write_exp =
+      SG::WriteHandle<eEmSortSelectCountExpectations>(m_eEmSortSelectCountExpectations_WriteKey);
+    
+    CHECK(h_write_exp.record(std::move(expectations)));
+
     ++m_fifo_ptr;
     
     return StatusCode::SUCCESS;
@@ -82,31 +95,32 @@ namespace GlobalSim {
   HypoTestBenchAlg::init_manual() {
 
 
-    // build a single  GepAlgoHypothesisFIFO  that contains five
+    // build a single  GepAlgoHypothesisFIFO  that contains
     // GepAlgoHypothesisPortsIn objects. The PortsIn objects contain
     // data only for eEmTobs.
 
-
-    auto fifo = std::make_unique<GepAlgoHypothesisFIFO>();
-    for(int i = 0; i < 5; ++i) {
- 
-      auto ports_in = GepAlgoHypothesisPortsIn();
-
-      // set bottom bits of I_eEmTob - this is Et
-      *(ports_in.m_I_eEmTobs) = i;
-    
-      std::bitset<AlgoConstants::eFexEtaBitWidth> bit_eta = 80+10*i;
-      for (std::size_t i = 0; i != AlgoConstants::eFexEtaBitWidth; ++i){
-	if (bit_eta.test(i)) {
-	  (ports_in.m_I_eEmTobs)->set(32+i);
-	}
-      }
-
-      fifo->push_back(ports_in);
+    if (m_testRepeat < 1) {
+      ATH_MSG_ERROR("Invalid repeat of input data requested: " << m_testRepeat);
+      return StatusCode::FAILURE;
     }
 
+    for(int i = 0; i != m_testRepeat; ++i) {
+      m_testVecs.insert(std::begin(m_testVecs),
+			std::cbegin(m_testVecs_in),
+			std::cend(m_testVecs_in));
+    }
+
+    auto fifo = std::make_unique<GepAlgoHypothesisFIFO>();
+    for (const auto& tv : m_testVecs) {
+      auto ports_in = GepAlgoHypothesisPortsIn();
+      CHECK(hexTOB2bitsetTOB(tv, *(ports_in.m_I_eEmTobs)));
+      fifo->push_back(ports_in);
+    }
     m_fifos.push_back(std::move(fifo));
-		      
+
+    m_expected_mults.push_back(m_expMults_in);
+    m_expected_tobs.push_back(m_expTobs_in);
+
     return StatusCode::SUCCESS;
   }
 
@@ -133,12 +147,46 @@ namespace GlobalSim {
 
   StatusCode
   HypoTestBenchAlg::init_from_file() {
+    CHECK(init_tests_from_file());
+    CHECK(init_expected_mults_from_file());
+    CHECK(init_expected_tobs_from_file());
+
+    if (m_fifos.empty()) {
+      ATH_MSG_ERROR("no fifo data read in");
+      return StatusCode::FAILURE;
+    }
+
+    
+    if (m_fifos.size() != m_expected_mults.size()) {
+      ATH_MSG_ERROR("no fifo data objs read in "
+		    << m_fifos.size()
+		    << " !=  no of expected mults "
+		    << m_expected_mults.size());
+      return StatusCode::FAILURE;
+    }
+
+    
+    if (m_fifos.size() != m_expected_mults.size()) {
+      ATH_MSG_ERROR("no fifo data objs read in "
+		    << m_fifos.size()
+		    << " !=  no of expected tobs "
+		    << m_expected_tobs.size());
+      
+      return StatusCode::FAILURE;
+    }
 
 
-    std::ifstream tob_stream(m_eEmFileName);
+    return StatusCode::SUCCESS;
+  }
+  
+  StatusCode
+  HypoTestBenchAlg::init_tests_from_file() {
+
+
+    std::ifstream tob_stream(m_testsFileName);
     if(!tob_stream) {
       std::stringstream ss;
-      ATH_MSG_FATAL("Failure to open tob file " << m_eEmFileName);
+      ATH_MSG_FATAL("Failure to open tob file " << m_testsFileName);
       return StatusCode::FAILURE;
     }
 
@@ -166,5 +214,45 @@ namespace GlobalSim {
     return StatusCode::SUCCESS;
   }
 
+   
+  StatusCode
+  HypoTestBenchAlg::init_expected_mults_from_file() {
+    
+    CHECK(init_expected_from_file(m_expected_mults,
+				  m_expectedMults_FileName));    
+    return StatusCode::SUCCESS;
+  }
+    
+  StatusCode
+  HypoTestBenchAlg::init_expected_tobs_from_file() {
+    
+    CHECK(init_expected_from_file(m_expected_tobs,
+				  m_expectedTobs_FileName));    
+    return StatusCode::SUCCESS;
+  }
+
+     
+  StatusCode
+  HypoTestBenchAlg::init_expected_from_file(std::vector<std::string>& dest,
+					    const std::string& fn) {
+    
+
+    std::ifstream in_stream(fn);
+    if(!in_stream) {
+      std::stringstream ss;
+      ATH_MSG_FATAL("Failure to open expected  file " << fn);
+      return StatusCode::FAILURE;
+    }
+
+    auto padded_line = std::string();
+    
+    while (std::getline(in_stream, padded_line)) {
+      auto line = trim(padded_line);
+      dest.push_back(line);
+    }
+    
+    return StatusCode::SUCCESS;
+  }
+  
   
 }

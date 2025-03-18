@@ -6,10 +6,13 @@
 #include "../TruthSegmentMaker.h"
 #include "../PrepDataToSimHitAssocAlg.h"
 #include "../PrdMultiTruthMaker.h"
+#include "../SdoMultiTruthMaker.h"
+
 #include "../TruthSegToTruthPartAssocAlg.h"
 #include "../TrackToTruthPartAssocAlg.h"
 DECLARE_COMPONENT(MuonR4::TruthSegmentMaker)
 DECLARE_COMPONENT(MuonR4::PrepDataToSimHitAssocAlg)
 DECLARE_COMPONENT(MuonR4::PrdMultiTruthMaker)
+DECLARE_COMPONENT(MuonR4::SdoMultiTruthMaker)
 DECLARE_COMPONENT(MuonR4::TruthSegToTruthPartAssocAlg)
 DECLARE_COMPONENT(MuonR4::TrackToTruthPartAssocAlg)

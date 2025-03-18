@@ -27,3 +27,10 @@ endif()
 atlas_install_python_modules( python/*.py )
 
 atlas_install_data( data/*.conf )
+atlas_install_data( data/* )
+
+atlas_add_test( TestCPRunTaus
+   SCRIPT CPRun.py --work-dir cmake_test_tausDir --text-config TauAnalysisAlgorithms/test_configuration_Run2_Taus.yaml -e 30 --input-file $ASG_TEST_FILE_MC
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES TIMEOUT 400 
+)

@@ -19,6 +19,9 @@
 #include "ActsInterop/Logger.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 
+#include "src/detail/MeasurementIndex.h"
+#include "src/detail/SharedHitCounter.h"
+
 namespace {
    std::size_t sourceLinkHash(const Acts::SourceLink& slink) {
       const ActsTrk::ATLASUncalibSourceLink &atlasSourceLink = slink.get<ActsTrk::ATLASUncalibSourceLink>();
@@ -82,10 +85,23 @@ namespace ActsTrk
     ActsTrk::MutableTrackContainer solvedTracks;
     solvedTracks.ensureDynamicColumns(*trackHandle);
 
+    detail::MeasurementIndex measurementIndex;
+    detail::SharedHitCounter sharedHits;
+
+    std::size_t totalShared = 0;
     for (auto iTrack : state.selectedTracks) {
        auto destProxy = solvedTracks.getTrack(solvedTracks.addTrack());
        destProxy.copyFrom(trackHandle->getTrack(state.trackTips.at(iTrack)));
+       if (m_countSharedHits) {
+        auto [nShared, nBadTrackMeasurements] = sharedHits.computeSharedHitsDynamic(destProxy, solvedTracks, measurementIndex);
+        if (nBadTrackMeasurements > 0)
+          ATH_MSG_ERROR("computeSharedHits: " << nBadTrackMeasurements << " track measurements not found in input track");
+        totalShared += nShared;
+      }
     }
+    if (m_countSharedHits)
+      ATH_MSG_DEBUG("total number of shared hits = " << totalShared);
+
     std::unique_ptr<ActsTrk::TrackContainer> outputTracks = m_resolvedTracksBackendHandles.moveToConst(std::move(solvedTracks), 
        m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);
     SG::WriteHandle<ActsTrk::TrackContainer> resolvedTrackHandle(m_resolvedTracksKey, ctx);

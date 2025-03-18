@@ -63,6 +63,9 @@ class GeoModelMmTest : public AthHistogramAlgorithm {
 
     MuonVal::ScalarBranch<float>& m_stStripPitch{m_tree.newScalar<float>("stripPitch")};
 
+    MuonVal::ScalarBranch<float>& m_moduleHeight{m_tree.newScalar<float>("moduleHeight")};
+    MuonVal::ScalarBranch<float>& m_moduleWidthS{m_tree.newScalar<float>("moduleWidthS")};
+    MuonVal::ScalarBranch<float>& m_moduleWidthL{m_tree.newScalar<float>("moduleWidthL")};
     
     MuonVal::VectorBranch<bool>& m_isStereo{m_tree.newVector<bool>("isStereo")};
     MuonVal::VectorBranch<short>& m_gasGap{m_tree.newVector<short>("gasGap")};
@@ -93,7 +96,10 @@ class GeoModelMmTest : public AthHistogramAlgorithm {
     MuonVal::VectorBranch<uint8_t>& m_stripRotGasGap{m_tree.newVector<uint8_t>("stripRotGasGap")};
     MuonVal::TwoVectorBranch m_firstStripPos{m_tree, "firstStripPos"};
     MuonVal::VectorBranch<int>& m_readoutSide{m_tree.newVector<int>("stripReadoutSide")};
-    MuonVal::VectorBranch<unsigned>& m_readoutFirstStrip{m_tree.newVector<unsigned int>("stripFirstStrip")};
+
+    MuonVal::VectorBranch<unsigned>& m_firstStrip{m_tree.newVector<unsigned>("firstStrip")};
+    MuonVal::VectorBranch<unsigned>& m_nStrips{m_tree.newVector<unsigned>("nStrips")};
+
     
 };
 

@@ -19,8 +19,8 @@ def check_CDI_campaign(MCCampaign, CDIFile):
 
     run3_campaigns = ["MC21", "MC23"]
     if MCCampaign == "MC20":
-        if MCCampaign not in CDIFile and "noSF" not in CDIFile:
+        if MCCampaign not in CDIFile and "nosf" not in CDIFile.lower():
             raise ValueError("Mismatch of MC Campaign and CDI file. CDI file %s being used for %s campaign" % (CDIFile, MCCampaign))
-    elif not any (campaign in CDIFile for campaign in run3_campaigns) and "noSF" not in CDIFile:
+    elif not any (campaign in CDIFile for campaign in run3_campaigns) and "nosf" not in CDIFile.lower():
         raise ValueError("Mismatch of MC Campaign and CDI file. CDI file %s being used for %s campaign" % (CDIFile, MCCampaign))
 

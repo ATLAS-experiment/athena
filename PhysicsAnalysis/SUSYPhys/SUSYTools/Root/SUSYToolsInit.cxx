@@ -874,6 +874,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       //ATH_CHECK( m_muonTriggerSFTool.setProperty("Isolation", m_muIso_WP)); This property has been depreacted long time ago
       ATH_CHECK( m_muonTriggerSFTool.setProperty("AllowZeroSF", true) );
       ATH_CHECK( m_muonTriggerSFTool.setProperty("OutputLevel", this->msg().level()) );
+      if(!m_muTriggerSFCalibRelease.empty() ) ATH_CHECK(  m_muonTriggerSFTool.setProperty("CalibrationRelease",m_muTriggerSFCalibRelease) );
+      if(!m_muTriggerSFCalibFilename.empty()) ATH_CHECK(  m_muonTriggerSFTool.setProperty("filename",          m_muTriggerSFCalibFilename) );
       ATH_CHECK( m_muonTriggerSFTool.retrieve() );
       m_muonTrigSFTools.push_back(m_muonTriggerSFTool.getHandle());
     } else if (m_muonTriggerSFTool.isUserConfigured()) {
@@ -1342,7 +1344,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
        ATH_MSG_WARNING( "No Photon efficiency available for " << m_photonIso_WP);
      }
 
-     ATH_CHECK( m_photonIsolationSFTool.setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map0.txt") );
+     ATH_CHECK( m_photonIsolationSFTool.setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map1.txt") );
      ATH_CHECK( m_photonIsolationSFTool.setProperty("IsoKey", m_photonIso_WP != "TightCaloOnly" ? m_photonIso_WP.substr(8) : m_photonIso_WP ));    // Set isolation WP: Loose,Tight,TightCaloOnly
      ATH_CHECK( m_photonIsolationSFTool.setProperty("ForceDataType", 1) ); // Set data type: 1 for FULLSIM, 3 for AF2
      ATH_CHECK( m_photonIsolationSFTool.setProperty("OutputLevel", this->msg().level()) );

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -18,7 +18,6 @@
 #include <TFile.h>
 #include <TGraph.h>
 #include <TKey.h>
-//#include <TEfficiency.h>
 
 
 namespace dqi{
@@ -66,7 +65,6 @@ CompositeAlgorithm( HanConfigCompAlg& compAlgConfig )
     catch( dqm_core::Exception& ex ) {
     	throw dqm_core::BadConfig( ERS_HERE, m_name, ex.what(), ex );
     }
-    //std::cout << "  --> using component algorithm: \"" << algStr->GetString().Data() << "\"\n";
     m_subAlgs.push_back( AlgVec_t::value_type(alg, algName) );
   }
   dqm_core::AlgorithmManager::instance().registerAlgorithm( m_name, this );
@@ -134,12 +132,11 @@ execute( const std::string& name, const TObject& data, const dqm_core::Algorithm
       std::map<std::string,double>::value_type tagVal( subAlgsIter->second + std::string("|") + tagsIter->first, tagsIter->second );
       tags.insert( tagVal );
     }
-    //delete subConfig;
     delete subResult;
   }
   
   dqm_core::Result* result = new dqm_core::Result( status );
-  result->tags_ = tags;
+  result->tags_ = std::move(tags);
   
   return result;
 }

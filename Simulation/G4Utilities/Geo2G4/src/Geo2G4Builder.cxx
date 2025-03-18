@@ -123,18 +123,18 @@ G4LogicalVolume* Geo2G4Builder::BuildTree()
       for(unsigned int i=0; i<m_treeTops.size(); i++) {
         // Current Tree Top and its index
         PVConstLink pv = m_treeTops[i];
-        Query<unsigned int> childIndx = world->indexOf(pv);
+	std::optional<unsigned int> childIndx = world->indexOf(pv);
 
         // Tree Top transformation
-        G4Transform3D theG4Position(Amg::EigenTransformToCLHEP(world->getXToChildVol(childIndx)));
+        G4Transform3D theG4Position(Amg::EigenTransformToCLHEP(world->getXToChildVol(*childIndx)));
 
         // Copy number
         int id = 16969;
-        Query<int> Qint = world->getIdOfChildVol(childIndx);
-        if(Qint.isValid()) id = Qint;
+	std::optional<int> Qint = world->getIdOfChildVol(*childIndx);
+        if(Qint) id = *Qint;
 
         // PV Tree Top name
-        std::string nameTT =  world->getNameOfChildVol(childIndx);
+        std::string nameTT =  world->getNameOfChildVol(*childIndx);
         if (nameTT == "ANON") nameTT = pv->getLogVol()->getName();
 
 

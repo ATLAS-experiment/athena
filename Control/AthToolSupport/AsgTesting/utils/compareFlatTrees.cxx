@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <ROOT/RDataFrame.hxx>
 #include <ROOT/RLogger.hxx>
@@ -40,7 +40,7 @@ std::vector<std::string> intersection(std::vector<std::string> &v1,
   return v3;
 }
 
-/// list of entries in a vector that are not in another
+// List of entries in a vector that are not in another
 std::vector<std::string> remainder (const std::vector<std::string>& v1,
                                     const std::vector<std::string>& v2)
 {
@@ -166,16 +166,17 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
   std::cout << "Will attempt to plot the following columns:" << std::endl;
   for (auto &&colName : colNames)
   {
-    if ((baseBranchName.empty() || colName.find(baseBranchName) != std::string::npos) && // include
-        (colName.find("Trig") == std::string::npos) &&                                   // exclude, not meaningful
-        (colName.find("Link") == std::string::npos) &&                                   // exclude, elementlinks
-        (colName.find("m_persIndex") == std::string::npos) &&                            // exclude, elementlinks
-        (colName.find("m_persKey") == std::string::npos) &&                              // exclude, elementlinks
-        (colName.find("Parent") == std::string::npos) &&                                 // exclude, elementlinks
-        (colName.find("original") == std::string::npos) &&                               // exclude, elementlinks
-        (colName.find("EventInfoAuxDyn.detDescrTags") == std::string::npos) &&           // exclude, std::pair
-        (dataFrameRefr.GetColumnType(colName).find("xAOD") == std::string::npos) &&      // exclude, needs ATLAS s/w
-        (dataFrameRefr.GetColumnType(colName) != "ROOT::VecOps::RVec<string>") &&        // exclude, needs ATLAS s/w
+    if ((baseBranchName.empty() || colName.find(baseBranchName) != std::string::npos) &&  // include
+        (colName.find("Trig") == std::string::npos) &&                                    // exclude, not meaningful
+        (colName.find("Link") == std::string::npos) &&                                    // exclude, elementlinks
+        (colName.find("m_persIndex") == std::string::npos) &&                             // exclude, elementlinks
+        (colName.find("m_persKey") == std::string::npos) &&                               // exclude, elementlinks
+        (colName.find("Parent") == std::string::npos) &&                                  // exclude, elementlinks
+        (colName.find("original") == std::string::npos) &&                                // exclude, elementlinks
+        (colName.find("EventInfoAuxDyn.detDescrTags") == std::string::npos) &&            // exclude, std::pair
+        (dataFrameRefr.GetColumnType(colName).find("xAOD") == std::string::npos) &&       // exclude, needs ATLAS s/w
+        (dataFrameRefr.GetColumnType(colName) != "ROOT::VecOps::RVec<string>") &&         // exclude, needs ATLAS s/w
+        (!dataFrameRefr.GetColumnType(colName).starts_with("ROOT::VecOps::RVec<pair")) && // exclude, std::pair
         (dataFrameRefr.GetColumnType(colName).find("vector") == std::string::npos))
     { // exclude, needs unwrapping
       requiredColumns.push_back(colName);

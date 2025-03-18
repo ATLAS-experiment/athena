@@ -218,7 +218,7 @@ void ActsTrk::MutableMultiTrajectory::addTrackStateComponents_impl(
     ActsTrk::IndexType istate,
     Acts::TrackStatePropMask mask) {
   using namespace Acts::HashedStringLiteral;
-  INSPECTCALL( this << " " <<  mask << " " << m_trackStatesIface.size() << " " << previous);
+  INSPECTCALL( this << " " <<  mask << " " << m_trackStatesIface.size() << " " << istate);
 
   assert(m_trackStatesAux && "Missing Track States backend");
 
@@ -575,22 +575,25 @@ const Acts::Surface* ActsTrk::MutableMultiTrajectory::referenceSurface_impl(Inde
   return toSurfacePtr(m_surfaces[istate]);
 }
 
-void ActsTrk::MutableMultiTrajectory::copyDynamicFrom_impl (ActsTrk::IndexType istate,
+void ActsTrk::MutableMultiTrajectory::copyDynamicFrom_impl(ActsTrk::IndexType istate,
                             Acts::HashedString key,
                             const std::any& src_ptr) {
+  INSPECTCALL("copy dynamic decoration of key " << key << " destination MTJ has " << m_decorations.size() << " decorations");
   for (const ActsTrk::detail::Decoration& d : m_decorations) {
+    INSPECTCALL("checking for destination of dynamic decoration " << d.name << " hash " << d.hash << " while looking for the key " << key);
     if (d.hash == key) {
       d.copier(m_trackStatesAux.get(), istate, d.auxid, src_ptr);
       return;
     }
   }
-  throw std::runtime_error("MultiTrajectory::copyDynamicFrom_impl no such decoration in destination MTJ " + std::to_string(key));
+  throw std::invalid_argument("MultiTrajectory::copyDynamicFrom_impl no such decoration in destination MTJ " + std::to_string(key));
 }
 
 std::vector<Acts::HashedString> ActsTrk::MutableMultiTrajectory::dynamicKeys_impl() const {
   std::vector<Acts::HashedString> keys;
   for ( const ActsTrk::detail::Decoration& d: m_decorations) {
     keys.push_back(d.hash);
+    INSPECTCALL("collecting dynamic decoration " << d.name << " hash " << d.hash);
   }
   return keys;
 }
@@ -620,20 +623,21 @@ ActsTrk::MultiTrajectory::MultiTrajectory(
       m_trackJacobiansAux(trackJacobians),
       m_trackMeasurementsAux(trackMeasurements), 
       m_trackSurfacesAux(trackSurfaces),
-      m_trackStatesIface (trackStates->size())
-{
+      m_trackStatesIface (trackStates->size()) {
       m_trackStatesIface.setStore (trackStates.cptr());
-      INSPECTCALL("ctor " << this << " " << m_trackStatesIface.size());
-      m_decorations = ActsTrk::detail::restoreDecorations(m_trackStatesAux, ActsTrk::MutableMultiTrajectory::s_staticVariables);
+  INSPECTCALL("ctor from backends" << this << " " << m_trackStatesIface.size());
+  m_decorations = ActsTrk::detail::restoreDecorations(m_trackStatesAux, ActsTrk::MutableMultiTrajectory::s_staticVariables);
 }
 
-ActsTrk::MultiTrajectory::MultiTrajectory(const ActsTrk::MutableMultiTrajectory& other)
+ActsTrk::MultiTrajectory::MultiTrajectory(ActsTrk::MutableMultiTrajectory& other)
   : m_trackStatesAux(other.m_trackStatesAux.get()),
-  m_trackParametersAux(other.m_trackParametersAux.get()),
-  m_trackJacobiansAux(other.m_trackJacobiansAux.get()),
-  m_trackMeasurementsAux(other.m_trackMeasurementsAux.get()), 
-  m_trackSurfacesAux(other.m_surfacesBackendAux.get()) {
-  INSPECTCALL("ctor " << this << " " << m_trackStatesAux->size());
+    m_trackParametersAux(other.m_trackParametersAux.get()),
+    m_trackJacobiansAux(other.m_trackJacobiansAux.get()),
+    m_trackMeasurementsAux(other.m_trackMeasurementsAux.get()), 
+    m_trackSurfacesAux(other.m_surfacesBackendAux.get()),
+    m_surfaces(other.m_surfaces) {
+  other.trim();
+  INSPECTCALL("ctor from MutableMTJ" << this << " " << m_trackStatesAux->size());
   m_decorations = ActsTrk::detail::restoreDecorations(m_trackStatesAux, ActsTrk::MutableMultiTrajectory::s_staticVariables);
 }
 
@@ -746,6 +750,15 @@ void ActsTrk::MultiTrajectory::moveLinks(const ActsTrk::MutableMultiTrajectory* 
   m_calibratedSourceLinks = std::move(mtj->m_calibratedSourceLinks);
   m_uncalibratedSourceLinks = std::move(mtj->m_uncalibratedSourceLinks);
 }
+
+std::vector<Acts::HashedString> ActsTrk::MultiTrajectory::dynamicKeys_impl() const {
+  std::vector<Acts::HashedString> keys;
+  for ( const ActsTrk::detail::Decoration& d: m_decorations) {
+    keys.push_back(d.hash);
+  }
+  return keys;
+}
+
 
 void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, const Acts::GeometryContext& geoContext ) {
   if ( not m_surfaces.empty() )

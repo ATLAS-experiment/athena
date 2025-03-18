@@ -49,9 +49,16 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('ExtensionNNHitonnxFile', 'banks_9L/v0.20/Ath_Extrap_v51_6_superBig_0_outsideIN.onnx')
     cf.addFlag('ParamNNonnxFile', 'banks_9L/v0.20/ParamEstimationHT_v5.onnx')
     cf.addFlag('doNNPathFinder', False)
-    cf.addFlag('windowR', 20)
-    cf.addFlag('windowZ', 20)
+    cf.addFlag('windowR', [20])
+    cf.addFlag('windowZ', [20])
+    cf.addFlag('lowPtvalueR', -1)
+    cf.addFlag('lowPtvalueZ', -1)
+    cf.addFlag('lowPtWindowRScaling', 1.0)
+    cf.addFlag('lowPtWindowZScaling', 1.0)
+    cf.addFlag('missedHitRScaling', -1.0)
+    cf.addFlag('missedHitZScaling', -1.0)    
     cf.addFlag('maxBranches', -1)
+    cf.addFlag('hitThreshold', 10)
     
     def __httHough1DFlags():
         """Additional function delays import"""
@@ -87,9 +94,13 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('doEDMConversion', False)
     cf.addFlag('convertUnmappedHits', False)
     cf.addFlag('writeToAOD', False)
-
+    
+    # Monitoring
+    cf.addFlag('writeAdditionalOutputData', True)
+    
     # ACTS Tracking
     cf.addFlag('runCKF',True)
+    cf.addFlag('useFPGATruthTrackMatching',False)
     return cf
 
 
@@ -105,10 +116,11 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('realHitsOverlay', False)
     cf.addFlag('hitFiltering', False)
     cf.addFlag('spacePointFiltering', False)
-    cf.addFlag('writeOutputData', True)
+    cf.addFlag('writeTestOutput', True)
 
     # road finding selection
-    cf.addFlag('houghRootoutput', False)
+    cf.addFlag('houghRootoutput1st', False)
+    cf.addFlag('houghRootoutput2nd', False)
     cf.addFlag('hough', True)
     cf.addFlag('hough1D', False)
     cf.addFlag('genScan', False)
@@ -167,11 +179,11 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('doMissingHitsChecks', False)
     cf.addFlag('idealCoordFitType', 2)
     cf.addFlag('doDeltaGPhis', False)
-    cf.addFlag('chi2cut', 5)
+    cf.addFlag('chi2cut', 9)
 
     # second stage fitting
     cf.addFlag('secondStage', False)
-    cf.addFlag('secondChi2Cut', 50)
+    cf.addFlag('secondChi2Cut', 36)
 
     # fast monitoring
     cf.addFlag('fastMon', False)

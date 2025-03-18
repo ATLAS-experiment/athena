@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsDetectorElement.h"
@@ -50,8 +50,11 @@ constexpr double length_unit = 1_mm;
 
 ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detElem) :
   GeoVDetectorElement{detElem.getMaterialGeom()},
+  m_idHash(detElem.identifyHash()),
   m_type{detElem.isPixel() ? DetectorType::Pixel : DetectorType::Sct},
-  m_detElement{&detElem} {
+  m_detElement{&detElem},
+  m_explicitIdentifier(detElem.identify())
+{
 
 
   auto boundsType = detElem.bounds().type();
@@ -126,10 +129,13 @@ ActsDetectorElement::ActsDetectorElement(const Acts::Transform3 &trf,
                                          const InDetDD::TRT_BaseElement &detElem, 
                                          const Identifier &id) :
     GeoVDetectorElement{detElem.getMaterialGeom()},
-    m_type{DetectorType::Trt}, 
+    m_idHash(detElem.identifyHash()),
+    m_type{DetectorType::Trt},
     m_detElement{&detElem}, 
     m_trtTrf{std::make_unique<Amg::Transform3D>(trf)},
-    m_explicitIdentifier(id) {
+    m_explicitIdentifier(id)
+{
+
 
   // we know this is a straw
   double length = detElem.strawLength() * 0.5 * length_unit;
@@ -158,10 +164,12 @@ ActsDetectorElement::ActsDetectorElement(const Acts::Transform3 &trf,
 
 ActsDetectorElement::ActsDetectorElement(const InDetDD::HGTD_DetectorElement &detElem, const Identifier &id) :
     GeoVDetectorElement{detElem.getMaterialGeom()},
-    m_type{DetectorType::Hgtd}, 
+    m_idHash(detElem.identifyHash()),
+    m_type{DetectorType::Hgtd},
     m_detElement{&detElem}, 
     m_thickness{detElem.thickness()}, 
-    m_explicitIdentifier{id} {
+    m_explicitIdentifier{id}
+{
 
   auto boundsType = detElem.bounds().type();
 
@@ -269,19 +277,7 @@ const Trk::Surface &ActsDetectorElement::atlasSurface() const {
 double ActsDetectorElement::thickness() const { return m_thickness; }
 
 Identifier ActsDetectorElement::identify() const {
-  if (const auto *detElem =
-          dynamic_cast<const InDetDD::SiDetectorElement *>(m_detElement);
-      detElem != nullptr) {
-    return detElem->identify();
-  } else if (dynamic_cast<const InDetDD::TRT_BaseElement *>(m_detElement) !=
-             nullptr) {
-    return m_explicitIdentifier;
-  } else if (dynamic_cast<const InDetDD::HGTD_DetectorElement *>(m_detElement) !=
-             nullptr) {
-    return m_explicitIdentifier;
-  } else {
-    THROW_EXCEPTION("Unknown detector element type");
-  }
+   return m_explicitIdentifier;
 }
 
 const GeoVDetectorElement *

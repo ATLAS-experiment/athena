@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           CMMJetHits.cpp  -  description
@@ -19,17 +19,7 @@
 
 namespace LVL1 {
 
-CMMJetHits::CMMJetHits():
-  m_crate(0),
-  m_dataID(0),
-  m_peak(0),
-  m_hits(1),
-  m_errors(1)
-{
-}
 
-CMMJetHits::~CMMJetHits(){
-}
 
 /** constructs a CMMJetHits object, specifying crate, data ID. */
 CMMJetHits::CMMJetHits(int crate, int dataID):

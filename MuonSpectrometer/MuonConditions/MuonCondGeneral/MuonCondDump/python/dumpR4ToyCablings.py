@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -14,16 +14,14 @@ def MdtToyCablingJsonDumpAlgCfg(flags, name="MdtToyCablingJsonDumpAlg", **kwargs
     result.addEventAlgo(the_alg, primary = True)
     return result
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, geoModelFileDefault
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
     parser = SetupArgParser()
     parser.set_defaults(nEvents = 1)
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
     parser.set_defaults(noTgc=True)
-    parser.add_argument("--setupRun4", default=False, action="store_true")
 
     args = parser.parse_args()
-    args.geoModelFile = geoModelFileDefault(args.setupRun4)
     flags, cfg = setupGeoR4TestCfg(args)
     
     cfg.merge(RpcToyCablingJsonDumpAlgCfg(flags))

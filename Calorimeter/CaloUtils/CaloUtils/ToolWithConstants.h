@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CaloUtils/ToolWithConstants.h
@@ -26,7 +26,6 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "AthenaKernel/errorcheck.h"
-#include "CxxUtils/concepts.h"
 #include "Gaudi/Property.h"
 #include <string>
 #include <sstream>
@@ -192,11 +191,10 @@ public:
  *
  * See @c ToolWithContants below for usage information.
  */
-template <class T>
+template <CxxUtils::FromArrayrep T>
   // Must be able to initialize a T with fromArrayrep
   // Doesn't actaully work like this, though, as there's a conflict
   // with the friend declaration below.
-  //ATH_REQUIRES( requires (T t, const CxxUtils::Arrayrep& rep) { { CxxUtils::fromArrayrep (rep, t); } } )
 class ToolConstant
   : public IToolConstant
 {
@@ -358,6 +356,17 @@ private:
 
 
 /**
+ * @brief Concept to test if a class has Gaudi properties.
+ */
+template <class T>
+concept HasProperties = 
+  requires (T& c, Gaudi::Property<int>& p)
+  {
+    { c.declareProperty(p) };
+  };
+
+
+/**
  * @brief Hold constants for a tool.
  *
  * Certain tools, such as correction tools, have a large number of constants
@@ -432,9 +441,7 @@ private:
  * Settings from COOL may be overridden with settings from job options.
  * For values that are arrays, the value should be set as a string.
  */
-#define ATH_TWC_REQUIRES ATH_REQUIRES( requires (BASE& b, Gaudi::Property<int>& p) { { b.declareProperty(p) }; } )
-template <class BASE>
-  ATH_TWC_REQUIRES
+template <HasProperties BASE>
 class ToolWithConstants
   : public extends<BASE, IToolWithConstants>
 {
@@ -452,7 +459,7 @@ public:
 
 
   /// Alias for the Constant type.
-  template <class T>
+  template <CxxUtils::FromArrayrep T>
   using Constant = ToolConstant<T>;
 
 
@@ -520,7 +527,7 @@ public:
 
 private:
   // Make this a friend so it can access m_impl.
-  template <class T>
+  template <CxxUtils::FromArrayrep T>
   friend class CaloUtils::ToolConstant;
 
   /// Handle to a ToolConstants conditions object.

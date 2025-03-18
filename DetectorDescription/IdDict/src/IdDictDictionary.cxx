@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IdDict/IdDictDictionary.h"
@@ -30,17 +30,8 @@ static bool isNumber(const std::string& str) {
   return(result);
 }
 
-IdDictDictionary::IdDictDictionary ()
-  :
-  m_parent_dict(0),
-  //m_resolved_references(false),
-  m_generated_implementation(false),
-  m_do_checks(false),
-  m_do_neighbours(true)
-{}
-
-IdDictDictionary::~IdDictDictionary () {
-}
+IdDictDictionary::IdDictDictionary () = default;
+IdDictDictionary::~IdDictDictionary () = default;
 
 IdDictField* IdDictDictionary::find_field(const std::string& name) const {
   std::map <std::string, IdDictField*>::const_iterator it;
@@ -687,7 +678,7 @@ IdDictDictionary::unpack(const Identifier& id,
   ExpandedIdentifier localPrefix(prefix);
 
   unpackedId.clear();
-  if (0 < localPrefix.fields()) unpackedId = localPrefix;
+  if (localPrefix.isValid()) unpackedId = localPrefix;
 
   /**
    *   First we need to check whether the specified identifier prefix
@@ -706,7 +697,6 @@ IdDictDictionary::unpack(const Identifier& id,
     // empty region
     if (region.m_is_empty) continue;
 
-//      for (size_t i = index1; i < region.m_implementation.size (); ++i)
     for (size_t i = 0; i < region.m_implementation.size(); ++i) {
       if (i >= localPrefix.fields()) {
         /**
@@ -724,23 +714,20 @@ IdDictDictionary::unpack(const Identifier& id,
         break;
       }
     }
+    if (!selected) {
+      continue;
+    }
 
-    if (selected) {
       /**
        *   We have one region that matches the prefix.
        *   Let's now try to expand the bits32 from the fields of the region
        *   that are beyond the prefix.
        */
-
-
-
       for (size_t i = index1; i < region.m_implementation.size(); ++i) {
         const IdDictFieldImplementation& impl = region.m_implementation[i];
 
         if (impl.bits() == 0) continue;
-
         Identifier::value_type mask = (static_cast<Identifier::value_type>(1) << impl.bits()) - 1;
-
         if (position < impl.bits()) break;                                                 // Nothing more to get
         size_t index = id.extract(position - impl.bits(), mask);
 
@@ -785,7 +772,6 @@ IdDictDictionary::unpack(const Identifier& id,
       }
 
       if (selected) break;
-    }
   }
 
   return(0);

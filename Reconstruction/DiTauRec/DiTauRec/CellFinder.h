@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DITAUREC_CELLFINDER_H
@@ -26,8 +26,6 @@ class CellFinder : public DiTauToolBase {
 
 
  private:
-  std::string m_ClusterContainerName;
-  std::string m_CellContainerName;
   float m_Rsubjet;
 
 };

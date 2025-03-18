@@ -20,6 +20,11 @@ atlas_add_test( propertyHandling_test
    LINK_LIBRARIES StoreGateLib TestTools AthenaBaseComps 
    ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
 
+atlas_add_test( AthAsynchronousAlgorithm_test
+   SOURCES test/AthAsynchronousAlgorithm_test.cxx
+   LINK_LIBRARIES StoreGateLib GaudiKernel TestTools AthenaBaseComps
+   ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
+
 atlas_add_test( AthReentrantAlgorithm_test
    SOURCES test/AthReentrantAlgorithm_test.cxx
    LINK_LIBRARIES StoreGateLib GaudiKernel TestTools AthenaBaseComps 

@@ -863,17 +863,19 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
 
                 if (it == sensitive.end()) {
                     std::vector<std::pair<Amg::Transform3D, int>> cloneList;
-                    cloneList.push_back(std::make_pair(transform, vol.getId()));
+                    cloneList.push_back(std::make_pair(transform, vol.getId().value()));
                     sensitive.push_back(std::make_pair(tv, cloneList));
                 } else {
                     Amg::Transform3D transf = transform;
                     // order transforms to position prototype at phi=0/ 0.125 pi
                     double phiTr = transf.translation().phi();
-                    if (phiTr > -0.001 && phiTr < 0.4)
-                        (*it).second.insert((*it).second.begin(),
-                                            std::make_pair(transform, vol.getId()));
-                    else
-                        (*it).second.push_back(std::make_pair(transform, vol.getId()));
+                    if (phiTr > -0.001 && phiTr < 0.4) {
+		      (*it).second.insert((*it).second.begin(),
+					  std::make_pair(transform, vol.getId().value()));
+		    }
+                    else {
+		      (*it).second.push_back(std::make_pair(transform, vol.getId().value()));
+		    }
                 }
 
             }  // end loop over TGC
@@ -892,17 +894,19 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
 
             if (it == sensitive.end()) {
                 std::vector<std::pair<Amg::Transform3D, int>> cloneList;
-                cloneList.push_back(std::make_pair(vol.getTransform(), vol.getId()));
+                cloneList.push_back(std::make_pair(vol.getTransform(), vol.getId().value()));
                 sensitive.push_back(std::make_pair(cv, cloneList));
             } else {
                 Amg::Transform3D transf = vol.getTransform();
                 // order transforms to position prototype at phi=0/ 0.125 pi
                 double phiTr = transf.translation().phi();
-                if (phiTr > -0.001 && phiTr < 0.4)
-                    (*it).second.insert((*it).second.begin(),
-                                        std::make_pair(vol.getTransform(), vol.getId()));
-                else
-                    (*it).second.push_back(std::make_pair(vol.getTransform(), vol.getId()));
+                if (phiTr > -0.001 && phiTr < 0.4) {
+		  (*it).second.insert((*it).second.begin(),
+				      std::make_pair(vol.getTransform(), vol.getId().value()));
+		}
+                else {
+		  (*it).second.push_back(std::make_pair(vol.getTransform(), vol.getId().value()));
+		}
             }
         }  // end non-TGC
         vol.next();

@@ -424,6 +424,8 @@ class TrigMufastHypoToolConfig:
             self.tool().PtThresholdForECWeakBRegionB = [ 3. * GeV ]
 
         else:
+            if(nt==0): # for zero multiplicity
+                nt = 1
             self.log().debug('Set %d thresholds', nt)
             self.tool().AcceptAll = False
             self.tool().PtBins = [ [ 0.0, 2.5 ] ] * nt
@@ -480,6 +482,8 @@ def TrigmuCombHypoToolFromDict( flags, chainDict ):
 
     if 'idperf' in chainDict['chainParts'][0]['addInfo'] or 'idtp' in chainDict['chainParts'][0]['addInfo'] :
         thresholds = ['passthrough']
+    elif chainDict['chainParts'][0]['multiplicity']=="0":
+        thresholds = [chainDict['chainParts'][0]['threshold']]
     else:
         thresholds = getThresholdsFromDict( chainDict )
 
@@ -521,6 +525,8 @@ def TrigmuCombHypoToolwORFromDict( flags, chainDict ):
 
     if 'idperf' in chainDict['chainParts'][0]['addInfo'] or 'idtp' in chainDict['chainParts'][0]['addInfo'] :
        thresholds = ['passthrough']
+    elif chainDict['chainParts'][0]['multiplicity']=="0":
+        thresholds = [chainDict['chainParts'][0]['threshold']]
     else:
        thresholds = getThresholdsFromDict( chainDict )
 
@@ -560,7 +566,9 @@ def TrigmuCombHypoToolwORFromDict( flags, chainDict ):
 def Trigl2IOHypoToolwORFromDict( chainDict ):
 
     thresholds = getThresholdsFromDict( chainDict )
-
+    if chainDict['chainParts'][0]['multiplicity']=="0":
+        thresholds = [chainDict['chainParts'][0]['threshold']]
+    
     config = TrigmuCombHypoConfig()
 
     tight = False # can be probably decoded from some of the proprties of the chain, expert work
@@ -589,6 +597,8 @@ def Trigl2mtCBHypoToolwORFromDict( chainDict ):
 
     if 'idperf' in chainDict['chainParts'][0]['addInfo'] or 'idtp' in chainDict['chainParts'][0]['addInfo'] :
        thresholds = ['passthrough']
+    elif chainDict['chainParts'][0]['multiplicity']=="0":
+        thresholds = [chainDict['chainParts'][0]['threshold']]
     else:
        thresholds = getThresholdsFromDict( chainDict )
 
@@ -668,6 +678,8 @@ def TrigMuonEFHypoAlgCfg(flags, name="UNSPECIFIED", **kwargs):
 
 def TrigMuonEFMSonlyHypoToolFromDict( flags, chainDict ) :
     thresholds = getThresholdsFromDict( chainDict )
+    if chainDict['chainParts'][0]['multiplicity']=="0":
+        thresholds = [chainDict['chainParts'][0]['threshold']]
     kwargs={}
     kwargs.setdefault("RequireSAMuons",True)
     if 'msonly' in chainDict['chainParts'][0]['msonlyInfo'] and 'noL1' not in chainDict['chainParts'][0]['extra']:
@@ -809,6 +821,8 @@ def TrigMuonEFHypoToolCfg(name, thresholds, doSA=False, **kwargs):
 def TrigMuonEFCombinerHypoToolFromDict( flags, chainDict ) :
     if 'idperf' in chainDict['chainParts'][0]['addInfo'] or 'idtp' in chainDict['chainParts'][0]['addInfo']:
        thresholds = ['passthrough']
+    elif chainDict['chainParts'][0]['multiplicity']=="0":
+        thresholds = [chainDict['chainParts'][0]['threshold']]
     else:
        thresholds = getThresholdsFromDict( chainDict )
 

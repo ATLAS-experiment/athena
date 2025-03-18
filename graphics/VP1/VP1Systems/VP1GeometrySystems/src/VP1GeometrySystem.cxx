@@ -1066,15 +1066,15 @@ void VP1GeometrySystem::userPickedNode(SoNode* , SoPath *pickedPath)
     parentVH = parentVH->parent();
     PVConstLink parentPVLink = parentVH ? parentVH->geoPVConstLink() : childVH->geoPVConstLink()->getParent();
     if (parentPVLink) {
-      int indexOfChild = parentVH ? childVH->childNumber() : (int)parentPVLink->indexOf(childVH->geoPVConstLink());
+      int indexOfChild = parentVH ? childVH->childNumber() : parentPVLink->indexOf(childVH->geoPVConstLink()).value();
       
       std::string childPVName = parentPVLink->getNameOfChildVol(indexOfChild);
       QString pathEntry = childPVName=="ANON" ? detFactoryName+childVH->getName() : QString(childPVName.c_str());
       
-      Query<int> childCopyNo = parentPVLink->getIdOfChildVol(indexOfChild);
-      if(childCopyNo.isValid()) {
+      std::optional<int> childCopyNo = parentPVLink->getIdOfChildVol(indexOfChild);
+      if(childCopyNo) {
 	    QString strCopyNo;
-	    strCopyNo.setNum(childCopyNo);
+	    strCopyNo.setNum(*childCopyNo);
 	    pathEntry += ("::"+strCopyNo);
       }
       partspectPath.push(pathEntry);

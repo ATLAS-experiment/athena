@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloEvent/CMMRoI.h"
@@ -32,12 +32,7 @@ const int CMMRoI::s_missingEtHitsMask;
 const int CMMRoI::s_missingEtSigHitsMask;
 const int CMMRoI::s_energyMask;
 
-CMMRoI::CMMRoI() : m_jetEtRoiWord(0),
-                   m_energyRoiWord0(0),
-		   m_energyRoiWord1(0),
-		   m_energyRoiWord2(0)
-{
-}
+
 
 CMMRoI::CMMRoI(uint32_t jetEtRoiWord,   uint32_t energyRoiWord0,
                uint32_t energyRoiWord1, uint32_t energyRoiWord2)
@@ -81,9 +76,6 @@ CMMRoI::CMMRoI(int jetEtHits, int sumEtHits, int missingEtHits,
   m_energyRoiWord2 |= ((missingEtError>>1) & 0x1)   << s_parityBit;
 }
 
-CMMRoI::~CMMRoI()
-{
-}
 
 // Set RoI word with ID check
 

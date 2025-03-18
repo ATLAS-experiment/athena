@@ -28,8 +28,8 @@ def FPGATrackSimWindowExtensionToolCfg(flags):
 
     # These MUST be of size equal to the full number of layers (13), though only the "new" layers
     # in the second stage are actually used.
-    FPGATrackSimWindowExtensionTool.zWindow =   [0, 0, 0, 0, 0, 20,20,30,30,40,40,50,50]
-    FPGATrackSimWindowExtensionTool.phiWindow = [0, 0, 0, 0, 0, 0.01, 0.01, 0.02, 0.02, 0.04, 0.04, 0.05, 0.05]
+    FPGATrackSimWindowExtensionTool.zWindow =   [0, 0, 0, 0, 0, 21.45, 21.45, 36.45, 36.45, 46.575, 46.575, 84., 84.]
+    FPGATrackSimWindowExtensionTool.phiWindow = [0, 0, 0, 0, 0, 0.0075, 0.0075, 0.015, 0.015, 0.0324, 0.0324, 0.045, 0.045]
 
     # Other settings, shared with the first stage mostly. disable 2nd stage tracking for now.
     FPGATrackSimWindowExtensionTool.fieldCorrection =flags.Trigger.FPGATrackSim.ActiveConfig.fieldCorrection
@@ -47,12 +47,20 @@ def FPGATrackSimNNPathfinderExtensionToolCfg(flags):
     FPGATrackSimNNPathfinderExtensionTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
 
     # Hardcoded settings for now, hook up to flags later...
-    FPGATrackSimNNPathfinderExtensionTool.threshold = 11
+    FPGATrackSimNNPathfinderExtensionTool.threshold = flags.Trigger.FPGATrackSim.hitThreshold
     FPGATrackSimNNPathfinderExtensionTool.windowR = flags.Trigger.FPGATrackSim.windowR
     FPGATrackSimNNPathfinderExtensionTool.windowZ = flags.Trigger.FPGATrackSim.windowZ
+    FPGATrackSimNNPathfinderExtensionTool.lowPtValueWindowR = flags.Trigger.FPGATrackSim.lowPtvalueR
+    FPGATrackSimNNPathfinderExtensionTool.lowPtRScaling = flags.Trigger.FPGATrackSim.lowPtWindowRScaling
+    FPGATrackSimNNPathfinderExtensionTool.lowPtValueWindowZ = flags.Trigger.FPGATrackSim.lowPtvalueZ
+    FPGATrackSimNNPathfinderExtensionTool.lowPtZScaling = flags.Trigger.FPGATrackSim.lowPtWindowZScaling
+    FPGATrackSimNNPathfinderExtensionTool.missedHitRScaling = flags.Trigger.FPGATrackSim.missedHitRScaling
+    FPGATrackSimNNPathfinderExtensionTool.missedHitZScaling = flags.Trigger.FPGATrackSim.missedHitZScaling    
     FPGATrackSimNNPathfinderExtensionTool.maxBranches = flags.Trigger.FPGATrackSim.maxBranches
     FPGATrackSimNNPathfinderExtensionTool.doOutsideIn = True
-    if (flags.Trigger.FPGATrackSim.ActiveConfig.genScan): FPGATrackSimNNPathfinderExtensionTool.doOutsideIn = False
+    if (flags.Trigger.FPGATrackSim.ActiveConfig.genScan):
+        FPGATrackSimNNPathfinderExtensionTool.doOutsideIn = False
+        FPGATrackSimNNPathfinderExtensionTool.predictionWindowLength = 4
     
     # Other settings
     FPGATrackSimNNPathfinderExtensionTool.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
@@ -144,10 +152,10 @@ def FPGATrackSimSecondStageAlgCfg(inputFlags):
     result=ComponentAccumulator()
 
     theFPGATrackSimSecondStageAlg=CompFactory.FPGATrackSimSecondStageAlg()
-    theFPGATrackSimSecondStageAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
+    theFPGATrackSimSecondStageAlg.writeOutputData = flags.Trigger.FPGATrackSim.writeAdditionalOutputData
     theFPGATrackSimSecondStageAlg.tracking = flags.Trigger.FPGATrackSim.tracking
     theFPGATrackSimSecondStageAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
-    theFPGATrackSimSecondStageAlg.DoHoughRootOutput = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput
+    theFPGATrackSimSecondStageAlg.DoHoughRootOutput2nd = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput2nd
     theFPGATrackSimSecondStageAlg.DoNNTrack = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis
     theFPGATrackSimSecondStageAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))
     theFPGATrackSimSecondStageAlg.TrackScoreCut = flags.Trigger.FPGATrackSim.ActiveConfig.secondChi2Cut

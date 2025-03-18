@@ -19,7 +19,6 @@ EventLoopMgr      WARNING No events will be processed from external input.
 HistogramPersis...WARNING Histograms saving not required.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 decode index and bit fields for each level: 
 lar  decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 em   decode 1 vals -3,-2,-1,1,2,3,4,5 mask/zero mask/shift/bits/offset 7   e3ffffffffffffff 58 3  3  indexes 0 1 2 0 3 4 5 6 7   mode  enumerated  
@@ -32,7 +31,6 @@ is-slar  decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   ffff
  LArEM_Base_ID::initialize_from_dict : 
  region range -> 4/1/-1,1/0/0 | 4/1/-1,1/1/0 | 4/1/-1,1/1/1 | 4/1/-1,1/2/0 | 4/1/-1,1/2/1 | 4/1/-1,1/3/0 | 4/1/-2,2/0/0 | 4/1/-2,2/1/0 | 4/1/-2,2/1/1 | 4/1/-2,2/1/2 | 4/1/-2,2/1/3 | 4/1/-2,2/1/4 | 4/1/-2,2/1/5 | 4/1/-2,2/2/0 | 4/1/-2,2/2/1 | 4/1/-2,2/3/0 | 4/1/-3,3/1/0 | 4/1/-3,3/2/0
  channel range -> 4/1/-1,1/0/0/0:60/0:63/0 | 4/1/-1,1/1/0/1:447/0:63/0 | 4/1/-1,1/1/1/0:2/0:255/0 | 4/1/-1,1/2/0/0:55/0:255/0 | 4/1/-1,1/2/1/0/0:255/0 | 4/1/-1,1/3/0/0:26/0:255/0 | 4/1/-2,2/0/0/0:11/0:63/0 | 4/1/-2,2/1/0/0/0:63/0 | 4/1/-2,2/1/1/0:2/0:63/0 | 4/1/-2,2/1/2/0:95/0:63/0 | 4/1/-2,2/1/3/0:47/0:63/0 | 4/1/-2,2/1/4/0:63/0:63/0 | 4/1/-2,2/1/5/0:3/0:63/0 | 4/1/-2,2/2/0/0/0:255/0 | 4/1/-2,2/2/1/0:42/0:255/0 | 4/1/-2,2/3/0/0:19/0:255/0 | 4/1/-3,3/1/0/0:6/0:63/0 | 4/1/-3,3/2/0/0:6/0:63/0
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 decode index and bit fields for each level: 
 lar  decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 hec  decode 1 vals -3,-2,-1,1,2,3,4,5 mask/zero mask/shift/bits/offset 7   e3ffffffffffffff 58 3  3  indexes 0 1 2 0 3 4 5 6 7   mode  enumerated  
@@ -45,7 +43,6 @@ is-slar  decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   ffff
 initialize_from_dict : 
  channel range -> 4/2/-2,2/0/0/0:9/0:63/0 | 4/2/-2,2/1/0/0:9/0:63/0 | 4/2/-2,2/2/0/1:9/0:63/0 | 4/2/-2,2/3/0/2:9/0:63/0 | 4/2/-2,2/0/1/0:3/0:31/0 | 4/2/-2,2/1/1/0:2/0:31/0 | 4/2/-2,2/2/1/0:2/0:31/0 | 4/2/-2,2/3/1/0:3/0:31/0
  region range -> 4/2/-2,2/0/0 | 4/2/-2,2/1/0 | 4/2/-2,2/2/0 | 4/2/-2,2/3/0 | 4/2/-2,2/0/1 | 4/2/-2,2/1/1 | 4/2/-2,2/2/1 | 4/2/-2,2/3/1
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 decode index and bit fields for each level: 
 lar  decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 fcal decode 1 vals -3,-2,-1,1,2,3,4,5 mask/zero mask/shift/bits/offset 7   e3ffffffffffffff 58 3  3  indexes 0 1 2 0 3 4 5 6 7   mode  enumerated  
@@ -57,8 +54,5 @@ is-slar  decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   ffff
  initialize_from_dict : 
  channel range -> 4/3/-2,2/1/0:62/0:15/0 | 4/3/-2,2/2/0:29/0,7,8,15/0 | 4/3/-2,2/2/0:30/3,4,11,12/0 | 4/3/-2,2/2/0:31/1,2,5,6,9,10,13,14/0 | 4/3/-2,2/3/0:14/2,10/0 | 4/3/-2,2/3/0:14/0,1,3,4,5,6,7,8,9,11,12,13,14,15/0 | 4/3/-2,2/3/15/0,1,2,3,4,6,7,8,9,10,11,12,14,15/0
  module range -> 4/3/-2,2/1 | 4/3/-2,2/2 | 4/3/-2,2/3
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 LArMiniFCAL_ID       INFO  initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
-AtlasDetectorID      INFO initialize_from_dictionary - OK
-AtlasDetectorID      INFO initialize_from_dictionary - OK
 test1

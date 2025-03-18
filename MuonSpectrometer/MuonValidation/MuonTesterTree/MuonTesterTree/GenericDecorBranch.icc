@@ -1,0 +1,54 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONTESTER_GENERICDECORBRANCH_ICC
+#define MUONTESTER_GENERICDECORBRANCH_ICC
+
+namespace MuonVal {
+
+    template<class AuxType, class dType>
+        GenericAuxEleBranch<AuxType, dType>::GenericAuxEleBranch(TTree* t, const std::string& var_name, Filler_t fill) :
+            VectorBranch<dType>{t, var_name}, m_fillFunc{fill}{}
+
+    template<class AuxType, class dType>
+        GenericAuxEleBranch<AuxType, dType>::GenericAuxEleBranch(MuonTesterTree& t, const std::string& var_name, Filler_t fill) :
+            VectorBranch<dType>{t, var_name}, m_fillFunc{fill}{}
+
+    template<class AuxType, class dType>
+        void GenericAuxEleBranch<AuxType, dType>::push_back(const SG::AuxElement& p) {
+            VectorBranch<dType>::push_back(m_fillFunc(static_cast<const AuxType&>(p)));
+        }
+    template<class AuxType, class dType>
+        void GenericAuxEleBranch<AuxType, dType>::operator+=(const SG::AuxElement* p){
+            push_back(p);   
+        }
+    template<class AuxType, class dType>
+        void GenericAuxEleBranch<AuxType, dType>::operator+=(const SG::AuxElement& p){
+            push_back(p);
+        }
+    template<class AuxType, class dType>
+        void GenericAuxEleBranch<AuxType, dType>::push_back(const SG::AuxElement* p) {
+            push_back(*p);
+        }
+  
+    template <class PartType, class dType> 
+        void GenericPartDecorBranch<PartType, dType>::push_back(const xAOD::IParticle* p) {
+            push_back(*p);
+        }
+
+    template <class PartType, class dType> 
+        void GenericPartDecorBranch<PartType, dType>::operator+=(const xAOD::IParticle& p) {
+            push_back(p);
+        }
+    template <class PartType, class dType> 
+        void GenericPartDecorBranch<PartType, dType>::operator+=(const xAOD::IParticle* p) {
+            push_back(p);
+        }
+   template <class PartType, class dType> 
+        void GenericPartDecorBranch<PartType, dType>::push_back(const xAOD::IParticle& p) {
+            GenericAuxEleBranch<PartType, dType>::push_back(p);
+        }
+}
+
+
+#endif

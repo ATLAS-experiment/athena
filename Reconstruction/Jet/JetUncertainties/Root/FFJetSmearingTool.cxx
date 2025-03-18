@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*************************************************************************************\
@@ -277,6 +277,10 @@ namespace CP {
             if (filteredSysts.size() > 1){
                 ATH_MSG_ERROR("No support for more than one JMS/JMR sys at a time: " << filteredSysts.name());
                 return StatusCode::FAILURE;
+            }
+            if (filteredSysts.size() == 0) {
+              ATH_MSG_VERBOSE("Found zero systematics!");
+              return StatusCode::SUCCESS;
             }
 
             // Insert the new systematic data onto our map
@@ -669,6 +673,10 @@ namespace CP {
         }
         if (jet_reco.pt() > m_MaxPt){
             ATH_MSG_DEBUG("This jet exceeds the maximum pt that the tool allows jet_pt <" << m_MaxPt << " MeV)");
+            return CP::CorrectionCode::OutOfValidityRange;
+        }
+        if (jet_reco.m() <= 0){
+            ATH_MSG_DEBUG("This jet has negative mass");
             return CP::CorrectionCode::OutOfValidityRange;
         }
 

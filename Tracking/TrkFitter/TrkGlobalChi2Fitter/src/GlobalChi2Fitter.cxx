@@ -177,6 +177,24 @@ ATH_FLATTEN
     out(4, 4) = jac(4, 4);
   }
 
+  /*
+   * Analyse a 2x2 covariance matrix and find
+   * - the smaller eigenvalue
+   * - the stereo angle
+   * This assumes, that the covariance matrix is valid, i.e. symmetric.
+   * TODO: Find a source for the stereo angle calculation
+   */
+  std::pair<double, double> principalComponentAnalysis2x2(const Amg::MatrixX & mat) {
+    const double trace = mat(0, 0) + mat(1, 1);
+    const double diagonalProduct = mat(0, 0) * mat(1, 1);
+    const double mat01Sq = mat(0, 1) * mat(0, 1);
+    const double discriminant = std::sqrt(trace * trace - 4. * (diagonalProduct - mat01Sq));
+
+    const double eigenValueSmall = 0.5 * (trace - discriminant);
+    const double stereoAngle = 0.5 * std::asin(2 * mat(0, 1) / (-discriminant));
+
+    return std::make_pair(eigenValueSmall, stereoAngle);
+  }
 } //end of anonymous namespace
 
 namespace Trk {
@@ -447,17 +465,9 @@ namespace Trk {
     int nfits = cache.m_fit_status[S_FITS];
     bool firstfitwasattempted = false;
 
-    if (cache.m_caloEntrance == nullptr) {
-       const TrackingGeometry *geometry = trackingGeometry(cache,ctx);
-
-      if (geometry != nullptr) {
-        cache.m_caloEntrance = geometry->trackingVolume("InDet::Containers::InnerDetector");
-      }
-
-      if (cache.m_caloEntrance == nullptr) {
-        ATH_MSG_ERROR("calo entrance not available");
-        return nullptr;
-      }
+    const bool caloEntranceIsValid = ensureValidEntranceCalo(ctx, cache);
+    if (!caloEntranceIsValid) {
+      return nullptr;
     }
 
     if (
@@ -594,14 +604,14 @@ namespace Trk {
       return nullptr;
     }
 
+    if (muontrack->trackStateOnSurfaces()->empty()) {
+      return nullptr;
+    }
+
     Trk::TrackStates::const_iterator tsosit =
       firstismuon ?
-      muontrack->trackStateOnSurfaces()->end() :
+      muontrack->trackStateOnSurfaces()->end() - 1 :
       muontrack->trackStateOnSurfaces()->begin();
-
-    if (firstismuon) {
-     -- tsosit;
-    }
 
     const MeasurementBase *closestmuonmeas = nullptr;
     std::unique_ptr<const TrackParameters> tp_closestmuon = nullptr;
@@ -632,19 +642,8 @@ namespace Trk {
     PropDirection propdir = firstismuon ? Trk::alongMomentum : oppositeMomentum;
     std::unique_ptr<const TrackParameters> tmppar;
 
-    if (cache.m_msEntrance == nullptr) {
-      const TrackingGeometry *geometry = trackingGeometry(cache,ctx);
-
-      if (geometry != nullptr) {
-        cache.m_msEntrance = geometry->trackingVolume("MuonSpectrometerEntrance");
-      }
-
-      if (cache.m_msEntrance == nullptr) {
-        ATH_MSG_ERROR("MS entrance not available");
-      }
-    }
-
-    if ((tp_closestmuon != nullptr) && (cache.m_msEntrance != nullptr)) {
+    const bool msEntranceIsValid = ensureValidEntranceMuonSpectrometer(ctx, cache);
+    if ((tp_closestmuon != nullptr) && msEntranceIsValid) {
       tmppar = m_extrapolator->extrapolateToVolume(
         ctx, *tp_closestmuon, *cache.m_msEntrance, propdir, nonInteracting);
     }
@@ -1250,12 +1249,8 @@ namespace Trk {
   ) const {
     ATH_MSG_DEBUG("--> entering GlobalChi2Fitter::backupCombinationStrategy");
 
-    bool firstismuon = false;
-    const Track *indettrack = &intrk1;
-    if(isMuonTrack(intrk1)) {
-      firstismuon = true;
-      indettrack = &intrk2;
-    }
+    const bool firstismuon = isMuonTrack(intrk1);
+    const Track *indettrack = firstismuon ? &intrk2 : &intrk1;
 
     Trk::TrackStates::const_iterator beginStates = intrk1.trackStateOnSurfaces()->begin();
     Trk::TrackStates::const_iterator itStates = beginStates;
@@ -1494,13 +1489,11 @@ namespace Trk {
           m_DetID->is_stgc(rot->identify())
         )
       ) {
-        bool measphi = true;
         Amg::Vector3D measdir = surf->transform().rotation().col(0);
         double dotprod1 = measdir.dot(Amg::Vector3D(0, 0, 1));
         double dotprod2 = measdir.dot(Amg::Vector3D(surf->center().x(), surf->center().y(), 0) / surf->center().perp());
-        if (std::abs(dotprod1) > .5 || std::abs(dotprod2) > .5) {
-          measphi = false;
-        }
+
+        bool measphi = std::abs(dotprod1) <= .5 && std::abs(dotprod2) <= .5;
         if (measphi) {
           nphi++;
           Amg::Vector3D thispos =
@@ -2314,15 +2307,14 @@ namespace Trk {
     }
 
     cache.m_reintoutl = old_reintoutl;
-    MeasurementSet::const_iterator itSet = addMeasColl.begin();
-    MeasurementSet::const_iterator itSetEnd = addMeasColl.end();
 
-    for (; itSet != itSetEnd; ++itSet) {
-      if ((*itSet) == nullptr) {
+    for (const auto & measBase : addMeasColl) {
+      if (measBase == nullptr) {
         ATH_MSG_WARNING("There is an empty MeasurementBase object in the track! Skip this object..");
-      } else {
-        makeProtoStateFromMeasurement(cache, trajectory, *itSet);
+        continue;
       }
+
+      makeProtoStateFromMeasurement(cache, trajectory, measBase);
     }
 
     // fit set of MeasurementBase using main method, start with first TrkParameter in inputTrack
@@ -2652,11 +2644,7 @@ namespace Trk {
       tsos->type(TrackStateOnSurface::Measurement) ||
       tsos->type(TrackStateOnSurface::Outlier)
     ) {
-      bool isoutlier = false;
-
-      if (tsos->type(TrackStateOnSurface::Outlier) && !cache.m_reintoutl) {
-        isoutlier = true;
-      }
+      bool isoutlier = tsos->type(TrackStateOnSurface::Outlier) && !cache.m_reintoutl;
 
       makeProtoStateFromMeasurement(
         cache,
@@ -2752,18 +2740,9 @@ namespace Trk {
         }
 
         if (rotated) {
-          const double traceCov = covmat(0, 0) + covmat(1, 1);
-          const double diagonalProduct = covmat(0, 0) * covmat(1, 1);
-          const double element01Sq = covmat(0, 1) * covmat(0, 1);
-          const double sqrtTerm = std::sqrt(
-              (traceCov) * (traceCov) - 4. * (diagonalProduct - element01Sq)
-            );
-
-          double v0 = 0.5 * (
-            traceCov - sqrtTerm
-          );
-          sinstereo = std::sin(0.5 * std::asin(2 * covmat(0, 1) / (-sqrtTerm)));
-          errors[0] = std::sqrt(v0);
+          const auto [covEigenValueSmall, covStereoAngle] = principalComponentAnalysis2x2(covmat);
+          errors[0] = std::sqrt(covEigenValueSmall);
+          sinstereo = std::sin(covStereoAngle);
         } else {
           errors[0] = std::sqrt(covmat(0, 0));
           if (hittype == TrackState::Pixel) {
@@ -2863,29 +2842,27 @@ namespace Trk {
 
     // loop over confined layers
     if (confinedLayers != nullptr) {
-      Trk::BinnedArraySpan<Trk::Layer const * const >layerVector = confinedLayers->arrayObjects();
-      Trk::BinnedArraySpan<Trk::Layer const * const >::iterator layerIter = layerVector.begin();
-
       // loop over layers
-      for (; layerIter != layerVector.end(); ++layerIter) {
+      for (const auto & layer : confinedLayers->arrayObjects()) {
         // push_back the layer
-        if (*layerIter != nullptr) {
+        if (layer != nullptr) {
           // get the layerIndex
-          const Trk::LayerIndex & layIndex = (*layerIter)->layerIndex();
+          const Trk::LayerIndex & layIndex = layer->layerIndex();
           // skip navigaion layers for the moment
 
-          if ((layIndex.value() == 0) || ((*layerIter)->layerMaterialProperties() == nullptr)) {
+          if ((layIndex.value() == 0) || (layer->layerMaterialProperties() == nullptr)) {
             continue;
           }
 
           const CylinderLayer *cyllay = nullptr;
-          if ((*layerIter)->surfaceRepresentation().type() == Trk::SurfaceType::Cylinder)
-            cyllay = static_cast<const CylinderLayer *>((*layerIter));
+          if (layer->surfaceRepresentation().type() == Trk::SurfaceType::Cylinder) {
+            cyllay = static_cast<const CylinderLayer *>(layer);
+          }
 
           const DiscLayer *disclay = nullptr;
-
-          if ((*layerIter)->surfaceRepresentation().type() == Trk::SurfaceType::Disc)
-            disclay = static_cast<const DiscLayer *>((*layerIter));
+          if (layer->surfaceRepresentation().type() == Trk::SurfaceType::Disc) {
+            disclay = static_cast<const DiscLayer *>(layer);
+          }
 
           if (disclay != nullptr) {
             if (disclay->center().z() < 0) {
@@ -2952,14 +2929,9 @@ namespace Trk {
     const TrackingVolumeArray* confinedVolumes = tvol->confinedVolumes();
     // get the confined volumes and loop over it -> call recursively
     if (confinedVolumes != nullptr) {
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
-
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const >::iterator volIter = volumes.begin();
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::iterator volIterEnd = volumes.end();
-
-      for (; volIter != volIterEnd; ++volIter) {
-        if (*volIter != nullptr) {
-          bool ok = processTrkVolume(cache, *volIter);
+      for (const auto & volume : confinedVolumes->arrayObjects()) {
+        if (volume != nullptr) {
+          const bool ok = processTrkVolume(cache, volume);
           if (!ok) {
             return false;
           }
@@ -3501,19 +3473,9 @@ namespace Trk {
      * Ensure that the cache contains a valid tracking geometry that we can
      * use.
      */
-    if (cache.m_caloEntrance == nullptr) {
-      const TrackingGeometry *geometry = trackingGeometry(cache,ctx);
-
-      if (geometry != nullptr) {
-        cache.m_caloEntrance = geometry->trackingVolume("InDet::Containers::InnerDetector");
-      } else {
-        ATH_MSG_ERROR("Tracking Geometry not available");
-      }
-
-      if (cache.m_caloEntrance == nullptr) {
-        ATH_MSG_ERROR("calo entrance not available");
-        return;
-      }
+    const bool caloEntranceIsValid = ensureValidEntranceCalo(ctx, cache);
+    if (!caloEntranceIsValid) {
+      return;
     }
 
     /*
@@ -3868,19 +3830,8 @@ namespace Trk {
         std::unique_ptr<const TrackParameters> tmppar;
 
         if (firstmuonhit != nullptr) {
-          if (cache.m_caloEntrance == nullptr) {
-            const TrackingGeometry *geometry = trackingGeometry(cache,ctx);
-
-            if (geometry != nullptr) {
-              cache.m_caloEntrance = geometry->trackingVolume("InDet::Containers::InnerDetector");
-            } else {
-              ATH_MSG_ERROR("Tracking Geometry not available");
-            }
-          }
-
-          if (cache.m_caloEntrance == nullptr) {
-            ATH_MSG_ERROR("calo entrance not available");
-          } else {
+          const bool caloEntranceIsValid = ensureValidEntranceCalo(ctx, cache);
+          if (caloEntranceIsValid) {
             tmppar = m_extrapolator->extrapolateToVolume(ctx,
                                                          *startmatpar1,
                                                          *cache.m_caloEntrance,
@@ -3936,19 +3887,8 @@ namespace Trk {
         std::unique_ptr<const TrackParameters> tmppar;
         std::unique_ptr<Surface> calosurf;
         if (firstmuonhit != nullptr) {
-          if (cache.m_caloEntrance == nullptr) {
-            const TrackingGeometry *geometry = trackingGeometry(cache,ctx);
-
-            if (geometry != nullptr) {
-              cache.m_caloEntrance = geometry->trackingVolume("InDet::Containers::InnerDetector");
-            } else {
-              ATH_MSG_ERROR("Tracking Geometry not available");
-            }
-          }
-
-          if (cache.m_caloEntrance == nullptr) {
-            ATH_MSG_ERROR("calo entrance not available");
-          } else {
+          const bool caloEntranceIsValid = ensureValidEntranceCalo(ctx, cache);
+          if (caloEntranceIsValid) {
             tmppar = m_extrapolator->extrapolateToVolume(ctx,
                                                          *startmatpar2,
                                                          *cache.m_caloEntrance,
@@ -4177,53 +4117,44 @@ namespace Trk {
       std::unique_ptr<const Trk::TrackParameters> muonpar1;
 
       if (lastcalopar != nullptr) {
-        if (cache.m_msEntrance == nullptr) {
-          const TrackingGeometry *geometry = trackingGeometry(cache,ctx);
+        const bool msEntranceIsValid = ensureValidEntranceMuonSpectrometer(ctx, cache);
+        if (msEntranceIsValid) {
+          if (cache.m_msEntrance->inside(lastcalopar->position())) {
+            muonpar1 = m_extrapolator->extrapolateToVolume(ctx,
+                                                           *lastcalopar,
+                                                           *cache.m_msEntrance,
+                                                           Trk::alongMomentum,
+                                                           Trk::nonInteracting);
 
-          if (geometry != nullptr) {
-            cache.m_msEntrance = geometry->trackingVolume("MuonSpectrometerEntrance");
-          } else {
-            ATH_MSG_ERROR("Tracking Geometry not available");
-          }
-        }
+            if (muonpar1 != nullptr) {
+              Amg::Vector3D trackdir = muonpar1->momentum().unit();
+              Amg::Vector3D curvZcrossT = -(trackdir.cross(Amg::Vector3D(0, 0, 1)));
+              Amg::Vector3D curvU = curvZcrossT.unit();
+              Amg::Vector3D curvV = trackdir.cross(curvU);
+              Amg::RotationMatrix3D rot = Amg::RotationMatrix3D::Identity();
+              rot.col(0) = curvU;
+              rot.col(1) = curvV;
+              rot.col(2) = trackdir;
+              Amg::Transform3D trans;
+              trans.linear().matrix() << rot;
+              trans.translation() << muonpar1->position() - .1 * trackdir;
+              PlaneSurface curvlinsurf(trans);
 
-        if (cache.m_msEntrance == nullptr) {
-          ATH_MSG_ERROR("MS entrance not available");
-        } else if (cache.m_msEntrance->inside(lastcalopar->position())) {
-          muonpar1 = m_extrapolator->extrapolateToVolume(ctx,
-                                                         *lastcalopar,
-                                                         *cache.m_msEntrance,
-                                                         Trk::alongMomentum,
-                                                         Trk::nonInteracting);
+              std::unique_ptr<const TrackParameters> curvlinpar(m_extrapolator->extrapolateDirectly(
+                ctx,
+                *muonpar1,
+                curvlinsurf,
+                Trk::alongMomentum,
+                Trk::nonInteracting != 0u
+              ));
 
-          if (muonpar1 != nullptr) {
-            Amg::Vector3D trackdir = muonpar1->momentum().unit();
-            Amg::Vector3D curvZcrossT = -(trackdir.cross(Amg::Vector3D(0, 0, 1)));
-            Amg::Vector3D curvU = curvZcrossT.unit();
-            Amg::Vector3D curvV = trackdir.cross(curvU);
-            Amg::RotationMatrix3D rot = Amg::RotationMatrix3D::Identity();
-            rot.col(0) = curvU;
-            rot.col(1) = curvV;
-            rot.col(2) = trackdir;
-            Amg::Transform3D trans;
-            trans.linear().matrix() << rot;
-            trans.translation() << muonpar1->position() - .1 * trackdir;
-            PlaneSurface curvlinsurf(trans);
-
-            std::unique_ptr<const TrackParameters> curvlinpar(m_extrapolator->extrapolateDirectly(
-              ctx,
-              *muonpar1,
-              curvlinsurf,
-              Trk::alongMomentum,
-              Trk::nonInteracting != 0u
-            ));
-
-            if (curvlinpar != nullptr) {
-              muonpar1 = std::move(curvlinpar);
+              if (curvlinpar != nullptr) {
+                muonpar1 = std::move(curvlinpar);
+              }
             }
+          } else {
+            muonpar1 = std::unique_ptr<TrackParameters>(lastcalopar->clone());
           }
-        } else {
-          muonpar1 = std::unique_ptr<TrackParameters>(lastcalopar->clone());
         }
       } else {
         muonpar1 = std::unique_ptr<TrackParameters>(refpar->clone());
@@ -4338,55 +4269,45 @@ namespace Trk {
     if (firsthit == firstmuonhit && cache.m_extmat && (firstcalopar != nullptr)) {
       std::unique_ptr<const Trk::TrackParameters> muonpar1;
 
-      if (cache.m_msEntrance == nullptr) {
-        const TrackingGeometry *geometry = trackingGeometry(cache,ctx);
+      const bool msEntranceIsValid = ensureValidEntranceMuonSpectrometer(ctx, cache);
+      if (msEntranceIsValid) {
+        if (cache.m_msEntrance->inside(firstcalopar->position())) {
+          muonpar1 = m_extrapolator->extrapolateToVolume(ctx,
+                                                         *firstcalopar,
+                                                         *cache.m_msEntrance,
+                                                         Trk::oppositeMomentum,
+                                                         Trk::nonInteracting);
 
-        if (geometry != nullptr) {
-          cache.m_msEntrance = geometry->trackingVolume("MuonSpectrometerEntrance");
-        } else {
-          ATH_MSG_ERROR("Tracking Geometry not available");
-        }
-      }
+          if (muonpar1 != nullptr) {
+            Amg::Vector3D trackdir = muonpar1->momentum().unit();
+            Amg::Vector3D curvZcrossT = -(trackdir.cross(Amg::Vector3D(0, 0, 1)));
+            Amg::Vector3D curvU = curvZcrossT.unit();
+            Amg::Vector3D curvV = trackdir.cross(curvU);
+            Amg::RotationMatrix3D rot = Amg::RotationMatrix3D::Identity();
+            rot.col(0) = curvU;
+            rot.col(1) = curvV;
+            rot.col(2) = trackdir;
+            Amg::Transform3D trans;
+            trans.linear().matrix() << rot;
+            trans.translation() << muonpar1->position() - .1 * trackdir;
+            PlaneSurface curvlinsurf(trans);
 
-      if (cache.m_msEntrance == nullptr) {
-        ATH_MSG_ERROR("MS entrance not available");
-      } else if (cache.m_msEntrance->inside(firstcalopar->position())) {
-        muonpar1 = m_extrapolator->extrapolateToVolume(ctx,
-                                                       *firstcalopar,
-                                                       *cache.m_msEntrance,
-                                                       Trk::oppositeMomentum,
-                                                       Trk::nonInteracting);
+            std::unique_ptr<const TrackParameters> curvlinpar(m_extrapolator->extrapolateDirectly(
+              ctx,
+              *muonpar1,
+              curvlinsurf,
+              Trk::oppositeMomentum,
+              Trk::nonInteracting != 0u
+            ));
 
-        if (muonpar1 != nullptr) {
-          Amg::Vector3D trackdir = muonpar1->momentum().unit();
-          Amg::Vector3D curvZcrossT = -(trackdir.cross(Amg::Vector3D(0, 0, 1)));
-          Amg::Vector3D curvU = curvZcrossT.unit();
-          Amg::Vector3D curvV = trackdir.cross(curvU);
-          Amg::RotationMatrix3D rot = Amg::RotationMatrix3D::Identity();
-          rot.col(0) = curvU;
-          rot.col(1) = curvV;
-          rot.col(2) = trackdir;
-          Amg::Transform3D trans;
-          trans.linear().matrix() << rot;
-          trans.translation() << muonpar1->position() - .1 * trackdir;
-          PlaneSurface curvlinsurf(trans);
-
-          std::unique_ptr<const TrackParameters> curvlinpar(m_extrapolator->extrapolateDirectly(
-            ctx,
-            *muonpar1,
-            curvlinsurf,
-            Trk::oppositeMomentum,
-            Trk::nonInteracting != 0u
-          ));
-
-          if (curvlinpar != nullptr) {
-            muonpar1 = std::move(curvlinpar);
+            if (curvlinpar != nullptr) {
+              muonpar1 = std::move(curvlinpar);
+            }
           }
+        } else {
+          muonpar1 = std::unique_ptr<const TrackParameters>(firstcalopar->clone());
         }
-      } else {
-        muonpar1 = std::unique_ptr<const TrackParameters>(firstcalopar->clone());
       }
-
 
       DistanceSolution distsol;
 
@@ -4686,21 +4607,18 @@ namespace Trk {
         GXFTrackState *scatstate2 = nullptr;
         int scatindex = 0;
 
-        for (std::vector<std::unique_ptr<GXFTrackState>>::iterator it =
-               trajectory.trackStates().begin();
-             it != trajectory.trackStates().end();
-             ++it) {
-          if ((**it).getStateType(TrackStateOnSurface::Scatterer)) {
+        for (const auto & state : trajectory.trackStates()) {
+          if (state->getStateType(TrackStateOnSurface::Scatterer)) {
             if (
               scatindex == trajectory.numberOfScatterers() / 2 ||
-              (**it).materialEffects()->deltaE() == 0
+              state->materialEffects()->deltaE() == 0
             ) {
-              scatstate2 = (*it).get();
+              scatstate2 = state.get();
               break;
             }
 
             scatindex++;
-            scatstate = (*it).get();
+            scatstate = state.get();
           }
         }
 
@@ -4929,10 +4847,9 @@ namespace Trk {
     }
 
     bool doderiv = true;
-    int it = 0;
     int tmpminiter = cache.m_miniter;
 
-    for (; it < m_maxit; ++it) {
+    for (int it = 0; it < m_maxit; ++it) {
       cache.m_lastiter = it;
 
       if (it >= m_maxit - 1) {
@@ -5152,58 +5069,98 @@ namespace Trk {
     return track.release();
   }
 
-  void GlobalChi2Fitter::fillResiduals(
+  void GlobalChi2Fitter::fillResidualsAndErrors(
     const EventContext& ctx,
-    Cache & cache,
+    const Cache & cache,
     GXFTrajectory & trajectory,
-    int it,
-    Amg::SymMatrixX & a,
+    const int it,
     Amg::VectorX & b,
-    Amg::SymMatrixX & lu_m,
-    bool &doderiv
+    int & bremno_maxbrempull,
+    GXFTrackState* & state_maxbrempull
   ) const {
-    ATH_MSG_DEBUG("fillResiduals");
+    ATH_MSG_DEBUG("fillResidualsAndErrors");
 
     std::vector<std::unique_ptr<GXFTrackState>> & states = trajectory.trackStates();
-    double chi2 = 0;
+
+    /*
+     * The residual and error vectors, we want to fill in this function.
+     */
+    Amg::VectorX & res = trajectory.residuals();
+    Amg::VectorX & error = trajectory.errors();
+
+    /*
+     * These variables are used inside the preprocessing loop for counting and
+     * managing some quantities.
+     */
     int scatno = 0;
     int bremno = 0;
     int measno = 0;
-    int nbrem = trajectory.numberOfBrems();
-    int nperpars = trajectory.numberOfPerigeeParameters();
-    int nfitpars = trajectory.numberOfFitParameters();
 
-    Amg::VectorX & res = trajectory.residuals();
-    Amg::MatrixX & weightderiv = trajectory.weightedResidualDerivatives();
-    int nidhits = trajectory.numberOfSiliconHits() + trajectory.numberOfTRTHits();
-    int nsihits = trajectory.numberOfSiliconHits();
-    int ntrthits = trajectory.numberOfTRTHits();
-    int nhits = trajectory.numberOfHits();
-    int nmeas = (int) res.size();
-    Amg::VectorX & error = trajectory.errors();
+    /*
+     * Total number of measurements, and brems and perigee parameters. This is
+     * used later to fill the residual and error vector to find the offsets.
+     */
+    const int nmeas = (int) res.size();
+    const int nbrem = trajectory.numberOfBrems();
+    const int nperpars = trajectory.numberOfPerigeeParameters();
+
+    /*
+     * Under certain circumstances, we create new pseudo measurements. Here are
+     * the static conditions. Later, we have also for each state a more
+     * confining check.
+     */
+    const int nidhits = trajectory.numberOfSiliconHits() + trajectory.numberOfTRTHits();
+    const int nDOF = trajectory.nDOF();
+    const bool doNewPseudoMeasurements = (
+          1 < it &&
+          it <= 100 &&
+          nDOF != 0 &&
+          std::abs((trajectory.prevchi2() - trajectory.chi2()) / nDOF) < 15 &&
+          nidhits < trajectory.numberOfHits() &&
+          (nperpars == 0 || nidhits > 0)
+      );
+
+    /*
+     * Temporary quantities.
+     * - chi2 will be used later to set the new chi2.
+     * - maxbrempull collects the elosspull for the kink with the largest
+     *   brems. It is initised to -0.2 to consider only definitely negative
+     *   pulls.
+     */
+    double chi2 = 0;
+    double maxbrempull = -0.2;
+
+    /*
+     * Helper parameter accessor.
+     */
     ParamDefsAccessor paraccessor;
 
-    GXFTrackState *state_maxbrempull = nullptr;
-    int bremno_maxbrempull = 0;
-    double maxbrempull = 0;
-
+    /*
+     * Loop over all hits and do some preprocessing. In this step, we do:
+     * - Get residuals
+     * - Get errors
+     * - Get scattering angles
+     * - Fill b-vector and chi2 with scattering effects (others fill later)
+     */
     for (int hitno = 0; hitno < (int) states.size(); hitno++) {
       std::unique_ptr<GXFTrackState> & state = states[hitno];
       const TrackParameters *currenttrackpar = state->trackParameters();
       TrackState::MeasurementType hittype = state->measurementType();
       const MeasurementBase *measbase = state->measurement();
 
+      /*
+       * Measurements and outliers.
+       */
       if (state->getStateType(TrackStateOnSurface::Measurement)) {
+        /*
+         * Create new pseudo measurements when the static check (evaluated
+         * outside the loop) and the dynamic checks both pass
+         */
         if (
+          doNewPseudoMeasurements &&
           hittype == TrackState::Pseudo &&
-          it <= 100 &&
-          it > 1 &&
-          trajectory.nDOF() != 0 &&
-          std::abs((trajectory.prevchi2() - trajectory.chi2()) / trajectory.nDOF()) < 15 &&
           !state->associatedSurface().isFree() &&
-          nidhits < trajectory.numberOfHits() &&
-          (nperpars == 0 || nidhits > 0) &&
-          (!state->isRecalibrated())
+          !state->isRecalibrated()
         ) {
           Amg::MatrixX covMatrix(1, 1);
           covMatrix(0, 0) = 100;
@@ -5218,15 +5175,24 @@ namespace Trk {
           measbase = state->measurement();
         }
 
+        /*
+         * Separate all parameters in the residuals and errors. We will handle
+         * them separately, asuming them uncorrelated.
+         */
         double *errors = state->measurementErrors();
-
         std::array<double,5> residuals = m_residualPullCalculator->residuals(measbase, currenttrackpar, ResidualPull::Biased, hittype);
-
         for (int i = 0; i < 5; i++) {
-          if (
-            !measbase->localParameters().contains(paraccessor.pardef[i]) ||
-            (i > 0 && (hittype == TrackState::SCT || hittype == TrackState::TGC))
-          ) {
+          /*
+           * Skip the parameter, if there is no accessor for it.
+           */
+          if (!measbase->localParameters().contains(paraccessor.pardef[i])) {
+            continue;
+          }
+
+          /*
+           * SCT and TGC are 1-dimensional, so we can skip the other parameters.
+           */
+          if (i > 0 && (hittype == TrackState::SCT || hittype == TrackState::TGC)) {
             continue;
           }
 
@@ -5237,12 +5203,19 @@ namespace Trk {
 
           res[measno] = residuals[i];
 
+          /*
+           * Ensure, that the phi-residual is mapped into the correct period.
+           */
           if (i == 2) {
             res[measno] = -std::remainder(-res[measno], 2 * M_PI);
           }
+
           measno++;
         }
       } else if (state->getStateType(TrackStateOnSurface::Outlier)) {
+        /*
+         * NOTE: It seems the residuals are not set in this step. Why?
+         */
         double *errors = state->measurementErrors();
         for (int i = 0; i < 5; i++) {
           if (errors[i] > 0) {
@@ -5252,31 +5225,37 @@ namespace Trk {
         }
       }
 
+      /*
+       * Scattering angles contribute to the b-vector and the chi2.
+       */
       if (
         state->getStateType(TrackStateOnSurface::Scatterer) &&
         ((trajectory.prefit() == 0) || state->materialEffects()->deltaE() == 0)
       ) {
-        double deltaphi = state->materialEffects()->deltaPhi();
-        double measdeltaphi = state->materialEffects()->measuredDeltaPhi();
-        double sigmadeltaphi = state->materialEffects()->sigmaDeltaPhi();
-        double deltatheta = state->materialEffects()->deltaTheta();
-        double sigmadeltatheta = state->materialEffects()->sigmaDeltaTheta();
+        const double deltaPhi = state->materialEffects()->deltaPhi();
+        const double measDeltaPhi = state->materialEffects()->measuredDeltaPhi();
+        const double sigma2deltaPhi = std::pow(state->materialEffects()->sigmaDeltaPhi(), 2);
+        const double deltaTheta = state->materialEffects()->deltaTheta();
+        const double sigma2deltaTheta = std::pow(state->materialEffects()->sigmaDeltaTheta(), 2);
 
         if (trajectory.prefit() != 1) {
-          b[nperpars + 2 * scatno] -= (deltaphi - measdeltaphi) / (sigmadeltaphi * sigmadeltaphi);
-          b[nperpars + 2 * scatno + 1] -= deltatheta / (sigmadeltatheta * sigmadeltatheta);
+          b[nperpars + 2 * scatno] -= (deltaPhi - measDeltaPhi) / sigma2deltaPhi;
+          b[nperpars + 2 * scatno + 1] -= deltaTheta / sigma2deltaTheta;
         } else {
-          b[nperpars + scatno] -= deltatheta / (sigmadeltatheta * sigmadeltatheta);
+          b[nperpars + scatno] -= deltaTheta / sigma2deltaTheta;
         }
 
         chi2 += (
-          deltaphi * deltaphi / (sigmadeltaphi * sigmadeltaphi) +
-          deltatheta * deltatheta / (sigmadeltatheta * sigmadeltatheta)
+          deltaPhi * deltaPhi / sigma2deltaPhi +
+          deltaTheta * deltaTheta / sigma2deltaTheta
         );
 
         scatno++;
       }
 
+      /*
+       * Energy loss will be considered in the form of a kink.
+       */
       if ((state->materialEffects() != nullptr) && state->materialEffects()->sigmaDeltaE() > 0) {
         double averagenergyloss = std::abs(state->materialEffects()->deltaE());
         const double qoverpbrem = limitInversePValue(1000 * states[hitno]->trackParameters()->parameters()[Trk::qOverP]);
@@ -5287,14 +5266,25 @@ namespace Trk {
         const double energy = std::sqrt(p * p + mass * mass);
         const double bremEnergy = std::sqrt(pbrem * pbrem + mass * mass);
 
-        res[nmeas - nbrem + bremno] = .001 * averagenergyloss - energy + bremEnergy;
+        const double resMaterial = .001 * averagenergyloss - energy + bremEnergy;
+        res[nmeas - nbrem + bremno] = resMaterial;
 
-        double sigde = state->materialEffects()->sigmaDeltaE();
-        double sigdepos = state->materialEffects()->sigmaDeltaEPos();
-        double sigdeneg = state->materialEffects()->sigmaDeltaENeg();
+        const double sigde = state->materialEffects()->sigmaDeltaE();
+        const double sigdepos = state->materialEffects()->sigmaDeltaEPos();
+        const double sigdeneg = state->materialEffects()->sigmaDeltaENeg();
 
-        error[nmeas - nbrem + bremno] = .001 * state->materialEffects()->sigmaDeltaE();
+        double errorMaterial = .001 * state->materialEffects()->sigmaDeltaE();
+        error[nmeas - nbrem + bremno] = errorMaterial;
 
+        /*
+         * There is already a kink in the trajectory. No need to look for more.
+         * - Set the maxbrempull to a small value, so no future candidate can
+         *   be found.
+         * - Reset the pointer to the state, in case we have set one before.
+         *
+         * NOTE: I think, the new value of maxbrempull should be -inf since it
+         *       allows for some edge case pulls. Not sure if bug or feature.
+         */
         if (state->materialEffects()->isKink()) {
           maxbrempull = -999999999;
           state_maxbrempull = nullptr;
@@ -5303,25 +5293,40 @@ namespace Trk {
         if (
           cache.m_asymeloss &&
           it > 0 &&
-          (trajectory.prefit() == 0) &&
+          trajectory.prefit() == 0 &&
           sigde > 0 &&
           sigde != sigdepos &&
           sigde != sigdeneg
         ) {
-          double elosspull = res[nmeas - nbrem + bremno] / (.001 * sigde);
+          const double elosspull = resMaterial / errorMaterial;
 
           if (trajectory.mass() > 100) {
-            if (elosspull < -1) {
-              state->materialEffects()->setSigmaDeltaE(sigdepos);
-            } else if (elosspull > 1) {
-              state->materialEffects()->setSigmaDeltaE(sigdeneg);
-            }
+            /*
+             * If the absolute energy loss pull is too large, update the
+             * sigmaDeltaE of the state and also update the error/
+             */
+            if (std::abs(elosspull) > 1) {
+              if (elosspull < -1) {
+                state->materialEffects()->setSigmaDeltaE(sigdepos);
+              } else {
+                state->materialEffects()->setSigmaDeltaE(sigdeneg);
+              }
 
-            error[nmeas - nbrem + bremno] = .001 * state->materialEffects()->sigmaDeltaE();
+              errorMaterial = .001 * state->materialEffects()->sigmaDeltaE();
+              error[nmeas - nbrem + bremno] = errorMaterial;
+            }
           } else if ((trajectory.numberOfTRTHits() == 0) || it >= 3) {
+            /*
+             * In case the state is not yet marked as a kink, we might want to
+             * do so later. For this, we propose a maxbrempull state if either
+             * - we did not provide an external kink with Gaudi and we want a
+             *   definitely negative elosspull.
+             * or
+             * - an external kink is given with Gaudi and we are on it now.
+             */
             if (
               !state->materialEffects()->isKink() && (
-                (elosspull < -.2 && m_fixbrem == -1 && elosspull < maxbrempull) ||
+                (m_fixbrem == -1 && elosspull < maxbrempull) ||
                 (m_fixbrem >= 0 && bremno == m_fixbrem)
               )
             ) {
@@ -5336,14 +5341,12 @@ namespace Trk {
           it > 0 &&
           hitno >= 2 &&
           !m_calotoolparam.empty() &&
-          (trajectory.prefit() == 0) &&
+          trajectory.prefit() == 0 &&
           state->materialEffects()->sigmaDeltaPhi() == 0 &&
           state->materialEffects()->isMeasuredEloss() &&
-          res[nmeas - nbrem + bremno] / (.001 * state->materialEffects()->sigmaDeltaEAve()) > 2.5
+          resMaterial / (.001 * state->materialEffects()->sigmaDeltaEAve()) > 2.5
         ) {
-          const TrackParameters* parforcalo =
-            trajectory.prefit() != 0 ? trajectory.referenceParameters()
-                                     : states[hitno - 2]->trackParameters();
+          const TrackParameters* parforcalo = states[hitno - 2]->trackParameters();
           const IPropagator* prop = &*m_propagator;
 
           std::vector<MaterialEffectsOnTrack> calomeots =
@@ -5355,12 +5358,19 @@ namespace Trk {
               Trk::anyDirection,
               Trk::muon);
 
+          /*
+           * Update energyLoss, sigma, residual, and error if the parametrised
+           * energy loss results in a absolute smaller pull.
+           */
           if (calomeots.size() == 3) {
             averagenergyloss = std::abs(calomeots[1].energyLoss()->deltaE());
-            double newres = .001 * averagenergyloss - energy + bremEnergy;
-            double newerr = .001 * calomeots[1].energyLoss()->sigmaDeltaE();
+            const double newres = .001 * averagenergyloss - energy + bremEnergy;
+            const double newerr = .001 * calomeots[1].energyLoss()->sigmaDeltaE();
 
-            if (std::abs(newres / newerr) < std::abs(res[nmeas - nbrem + bremno] / error[nmeas - nbrem + bremno])) {
+            const double oldPull = resMaterial / errorMaterial;
+            const double newPull = newres / newerr;
+
+            if (std::abs(newPull) < std::abs(oldPull)) {
               ATH_MSG_DEBUG("Changing from measured to parametrized energy loss");
 
               state->materialEffects()->setEloss(std::unique_ptr<EnergyLoss>(calomeots[1].energyLoss()->clone()));
@@ -5372,91 +5382,124 @@ namespace Trk {
 
           state->materialEffects()->setMeasuredEloss(false);
         }
+
         bremno++;
       }
     }
 
-    measno = 0;
-
-    for (; measno < nmeas; measno++) {
-      if (error[measno] == 0) {
+    /*
+     * Sum up the chi2 contributions from all measurements.
+     */
+    for (int imeas = 0; imeas < nmeas; imeas++) {
+      if (error[imeas] == 0) {
         continue;
       }
 
-      chi2 += res[measno] * (1. / (error[measno] * error[measno])) * res[measno];
-
+      chi2 += std::pow(res[imeas] / error[imeas], 2);
     }
 
-    double oldchi2 = trajectory.chi2();
-    trajectory.setPrevChi2(oldchi2);
+    /*
+     * Update trajectory with previous and current chi2
+     */
+    trajectory.setPrevChi2(trajectory.chi2());
     trajectory.setChi2(chi2);
+  }
 
-    double oldredchi2 = (trajectory.nDOF() > 0) ? oldchi2 / trajectory.nDOF() : 0;
-    double newredchi2 = (trajectory.nDOF() > 0) ? chi2 / trajectory.nDOF() : 0;
+  void GlobalChi2Fitter::tryToConverge(
+    const Cache & cache,
+    GXFTrajectory & trajectory,
+    const int it
+  ) const {
+    ATH_MSG_DEBUG("tryToConverge");
+
+    const double oldChi2 = trajectory.prevchi2();
+    const double newChi2 = trajectory.chi2();
+
+    /*
+     * First convergence check
+     */
+    const double nDOF = trajectory.nDOF();
+    const double oldRedChi2 = (nDOF > 0) ? oldChi2 / nDOF : 0;
+    const double newRedChi2 = (nDOF > 0) ? newChi2 / nDOF : 0;
 
     if (
       trajectory.prefit() > 0 && (
-        (newredchi2 < 2 && it != 0) ||
-        (newredchi2 < oldredchi2 + .1 && std::abs(newredchi2 - oldredchi2) < 1 && it != 1)
+        (newRedChi2 < 2 && it != 0) ||
+        (newRedChi2 < oldRedChi2 + .1 && std::abs(newRedChi2 - oldRedChi2) < 1 && it != 1)
       )
     ) {
       trajectory.setConverged(true);
     }
 
-    double maxdiff = (nsihits != 0 && nsihits + ntrthits == nhits && chi2 < oldchi2) ? 200 : 1.;
-    maxdiff = 1;
+    /*
+     * Second convergence check
+     */
+    const int nsihits = trajectory.numberOfSiliconHits();
+    const int ntrthits = trajectory.numberOfTRTHits();
+    const int nhits = trajectory.numberOfHits();
+
     int miniter = (nsihits != 0 && nsihits + ntrthits == nhits) ? 1 : 2;
+    miniter = std::max(miniter, cache.m_miniter);
 
-    if (miniter < cache.m_miniter) {
-      miniter = cache.m_miniter;
-    }
-
-    if (it >= miniter && std::abs(oldchi2 - chi2) < maxdiff) {
+    if (it >= miniter && std::abs(oldChi2 - newChi2) < 1) {
       trajectory.setConverged(true);
     }
+  }
 
-    if ((state_maxbrempull != nullptr) && trajectory.converged()) {
-      state_maxbrempull->materialEffects()->setSigmaDeltaE(
-        10 * state_maxbrempull->materialEffects()->sigmaDeltaEPos()
-      );
+  void GlobalChi2Fitter::updateSystemWithMaxBremPull(
+    GXFTrajectory & trajectory,
+    const int bremno_maxbrempull,
+    GXFTrackState* state_maxbrempull,
+    Amg::SymMatrixX & a
+  ) const {
+    ATH_MSG_DEBUG("updateSystemWithMaxBremPull");
 
-      state_maxbrempull->materialEffects()->setKink(true);
-      trajectory.setConverged(false);
+    if (state_maxbrempull == nullptr) {
+        return;
+    }
 
-      double olderror = error[nmeas - nbrem + bremno_maxbrempull];
-      double newerror = .001 * state_maxbrempull->materialEffects()->sigmaDeltaE();
-      error[nmeas - nbrem + bremno_maxbrempull] = .001 * state_maxbrempull->materialEffects()->sigmaDeltaE();
+    state_maxbrempull->materialEffects()->setSigmaDeltaE(
+      10 * state_maxbrempull->materialEffects()->sigmaDeltaEPos()
+    );
 
-      if (a.cols() != nfitpars) {
-        ATH_MSG_ERROR("Your assumption is wrong!!!!");
+    state_maxbrempull->materialEffects()->setKink(true);
+
+    const int nbrem = trajectory.numberOfBrems();
+    const Amg::VectorX & res = trajectory.residuals();
+    const int nmeas = (int) res.size();
+
+    Amg::VectorX & error = trajectory.errors();
+    const double oldError = error[nmeas - nbrem + bremno_maxbrempull];
+    const double newError = .001 * state_maxbrempull->materialEffects()->sigmaDeltaE();
+    error[nmeas - nbrem + bremno_maxbrempull] = newError;
+
+    const int nFitPars = trajectory.numberOfFitParameters();
+    if (a.cols() != nFitPars) {
+      ATH_MSG_ERROR("Your assumption is wrong!!!!");
+    }
+
+    const double errorRatio = oldError / newError;
+    const double errorReductionRatio = 1 - std::pow(errorRatio, 2);
+
+    Amg::MatrixX & weightderiv = trajectory.weightedResidualDerivatives();
+    for (int i = 0; i < nFitPars; i++) {
+      if (weightderiv(nmeas - nbrem + bremno_maxbrempull, i) == 0) {
+        continue;
       }
 
-      for (int i = 0; i < nfitpars; i++) {
-        if (weightderiv(nmeas - nbrem + bremno_maxbrempull, i) == 0) {
-          continue;
-        }
+      for (int j = i; j < nFitPars; j++) {
+        const double newaij = a(i, j) - errorReductionRatio *
+          weightderiv(nmeas - nbrem + bremno_maxbrempull, i) *
+          weightderiv(nmeas - nbrem + bremno_maxbrempull, j);
 
-        for (int j = i; j < nfitpars; j++) {
-          a.fillSymmetric(
-            i, j,
-            a(i, j) - (
-              weightderiv(nmeas - nbrem + bremno_maxbrempull, i) *
-              weightderiv(nmeas - nbrem + bremno_maxbrempull, j) *
-              (1 - olderror * olderror / (newerror * newerror))
-            )
-          );
-        }
-        weightderiv(nmeas - nbrem + bremno_maxbrempull, i) *= olderror / newerror;
+        a.fillSymmetric(i, j, newaij);
       }
-      lu_m = a;
-      trajectory.setChi2(1e15);
-      doderiv = true;
+      weightderiv(nmeas - nbrem + bremno_maxbrempull, i) *= errorRatio;
     }
   }
 
   void GlobalChi2Fitter::fillDerivatives(
-    GXFTrajectory & trajectory,
-    bool onlybrem
+    GXFTrajectory & trajectory
   ) const {
     ATH_MSG_DEBUG("fillDerivatives");
 
@@ -5478,42 +5521,58 @@ namespace Trk {
     ParamDefsAccessor paraccessor;
 
     for (std::unique_ptr<GXFTrackState> & state : states) {
-      if (
-        onlybrem &&
-        ((state->materialEffects() == nullptr) || state->materialEffects()->sigmaDeltaE() <= 0)
-      ) {
-        continue;
-      }
-
-      TrackState::MeasurementType hittype = state->measurementType();
-      const MeasurementBase *measbase = state->measurement();
-      const auto [scatmin, scatmax] = std::minmax(scatno, nscatupstream);
-      const auto [bremmin, bremmax] = std::minmax(bremno, nbremupstream);
       if (state->getStateType(TrackStateOnSurface::Measurement)) {
+        TrackState::MeasurementType hittype = state->measurementType();
+        const MeasurementBase *measbase = state->measurement();
+        const auto [scatmin, scatmax] = std::minmax(scatno, nscatupstream);
+        const auto [bremmin, bremmax] = std::minmax(bremno, nbremupstream);
+
         Amg::MatrixX & derivatives = state->derivatives();
-        double sinstereo = 0;
 
-        if (hittype == TrackState::SCT || hittype == TrackState::TGC) {
-          sinstereo = state->sinStereo();
-        }
+        /*
+         * Get the stereo angles for SCT and TGC.
+         */
+        const double sinStereo =
+          hittype == TrackState::SCT || hittype == TrackState::TGC ?
+          state->sinStereo() :
+          0;
+        const double cosStereo =
+          sinStereo != 0 ?
+          std::sqrt(1 - std::pow(sinStereo, 2)) :
+          1.;
 
-        double cosstereo = (sinstereo == 0) ? 1. : std::sqrt(1 - sinstereo * sinstereo);
+        /*
+         * For SCT and TGC we need modified derivatives, taking into account
+         * the orientation.This lambda chooses the correct accessor and rotates
+         * the derivative accordingly.
+         */
+        auto getThisDeriv = [sinStereo, cosStereo, &derivatives](int i, int j) -> double {
+          if (i == 0 && sinStereo != 0) {
+            return derivatives(0, j) * cosStereo + sinStereo * derivatives(1, j);
+          } else {
+            return derivatives(i, j);
+          }
+        };
 
         for (int i = 0; i < 5; i++) {
-          if (
-            !measbase->localParameters().contains(paraccessor.pardef[i]) ||
-            (i > 0 && (hittype == TrackState::SCT || hittype == TrackState::TGC))
-          ) {
+          if (!measbase->localParameters().contains(paraccessor.pardef[i])) {
             continue;
           }
 
-          if (trajectory.numberOfPerigeeParameters() > 0) {
-            int cols = trajectory.m_straightline ? 4 : 5;
+          /*
+           * SCT and TGC have all information stored in the first parameter.
+           */
+          if ((hittype == TrackState::SCT || hittype == TrackState::TGC) && i > 0) {
+            break;
+          }
 
-            if (i == 0) {
+          if (trajectory.numberOfPerigeeParameters() > 0) {
+            const int cols = trajectory.m_straightline ? 4 : 5;
+
+            if (i == 0 && sinStereo != 0) {
               weightderiv.row(measno).head(cols) =
-                (derivatives.row(0).head(cols) * cosstereo +
-                 sinstereo * derivatives.row(1).head(cols)) /
+                (derivatives.row(0).head(cols) * cosStereo +
+                 sinStereo * derivatives.row(1).head(cols)) /
                 error[measno];
             } else {
               weightderiv.row(measno).head(cols) = derivatives.row(i).head(cols) / error[measno];
@@ -5521,41 +5580,19 @@ namespace Trk {
           }
 
           for (int j = scatmin; j < scatmax; j++) {
-            int index = nperparams + ((trajectory.prefit() != 1) ? 2 * j : j);
-            double thisderiv = 0;
-            double sign = 1;
-            //
-
-            if (i == 0 && sinstereo != 0) {
-              thisderiv = sign * (derivatives(0, index) * cosstereo + sinstereo * derivatives(1, index));
+            if (trajectory.prefit() == 1) {
+              const int index = nperparams + j;
+              weightderiv(measno, index) = getThisDeriv(i, index) / error[measno];
             } else {
-              thisderiv = sign * derivatives(i, index);
-            }
-
-            weightderiv(measno, index) = thisderiv / error[measno];
-
-            if (trajectory.prefit() != 1) {
-              index++;
-
-              if (i == 0 && sinstereo != 0) {
-                thisderiv = sign * (derivatives(0, index) * cosstereo + sinstereo * derivatives(1, index));
-              } else {
-                thisderiv = sign * derivatives(i, index);
-              }
-
-              weightderiv(measno, index) = thisderiv / error[measno];
+              const int index = nperparams + 2 * j;
+              weightderiv(measno, index) = getThisDeriv(i, index) / error[measno];
+              weightderiv(measno, index + 1) = getThisDeriv(i, index + 1) / error[measno];
             }
           }
 
           for (int j = bremmin; j < bremmax; j++) {
-            double thisderiv = 0;
-            int index = j + nperparams + 2 * nscat;
-            if (i == 0 && sinstereo != 0) {
-              thisderiv = derivatives(0, index) * cosstereo + sinstereo * derivatives(1, index);
-            } else {
-              thisderiv = derivatives(i, index);
-            }
-            weightderiv(measno, index) = thisderiv / error[measno];
+            const int index = j + nperparams + 2 * nscat;
+            weightderiv(measno, index) = getThisDeriv(i, index) / error[measno];
           }
 
           measno++;
@@ -5612,306 +5649,481 @@ namespace Trk {
     }
   }
 
+  void GlobalChi2Fitter::fillFirstLastMeasurement(
+    Cache & cache,
+    GXFTrajectory & trajectory
+  ) const {
+    const int nFitPars = trajectory.numberOfFitParameters();
+    const int nPerPars = trajectory.numberOfPerigeeParameters();
+    const int nScatPars = 2 * trajectory.numberOfScatterers();
+    const int nBrem = trajectory.numberOfBrems();
+    const int nUpstreamStates = trajectory.numberOfUpstreamStates();
+
+    const Amg::VectorX & res = trajectory.residuals();
+    const int nMeas = (int) res.size();
+
+    cache.m_firstmeasurement.resize(nFitPars);
+    cache.m_lastmeasurement.resize(nFitPars);
+
+    for (int i = 0; i < nPerPars; i++) {
+      cache.m_firstmeasurement[i] = 0;
+      cache.m_lastmeasurement[i] = nMeas - nBrem;
+    }
+
+    int measno = 0;
+    int scatno = 0;
+    int bremno = 0;
+    for (int i = 0; i < (int) trajectory.trackStates().size(); i++) {
+      const std::unique_ptr<GXFTrackState> & state = trajectory.trackStates()[i];
+      const GXFMaterialEffects *meff = state->materialEffects();
+
+      if (meff == nullptr) {
+        measno += state->numberOfMeasuredParameters();
+        continue;
+      }
+
+      const int firstMeasurement = i < nUpstreamStates ? 0 : measno;
+      const int lastMeasurement = i < nUpstreamStates ? measno : nMeas - nBrem;
+
+      if (meff->sigmaDeltaTheta() != 0
+          && (trajectory.prefit() == 0 || meff->deltaE() == 0)) {
+        const int scatterPos = nPerPars + 2 * scatno;
+
+        cache.m_firstmeasurement[scatterPos] = firstMeasurement;
+        cache.m_lastmeasurement[scatterPos] = lastMeasurement;
+
+        cache.m_firstmeasurement[scatterPos + 1] = firstMeasurement;
+        cache.m_lastmeasurement[scatterPos + 1] = lastMeasurement;
+
+        scatno++;
+      }
+
+      if (meff->sigmaDeltaE() > 0) {
+        const int bremPos = nPerPars + nScatPars + bremno;
+
+        cache.m_firstmeasurement[bremPos] = firstMeasurement;
+        cache.m_lastmeasurement[bremPos] = lastMeasurement;
+
+        bremno++;
+      }
+    }
+  }
+
+  void GlobalChi2Fitter::fillBfromMeasurements(
+    const Cache & cache,
+    GXFTrajectory & trajectory,
+    Amg::VectorX & b
+  ) const {
+    const int nFitPars = trajectory.numberOfFitParameters();
+    const int nPerPars = trajectory.numberOfPerigeeParameters();
+    const int nScatPars = 2 * trajectory.numberOfScatterers();
+    const int nBrem = trajectory.numberOfBrems();
+    const Amg::MatrixX & weightDeriv = trajectory.weightedResidualDerivatives();
+
+    const Amg::VectorX & res = trajectory.residuals();
+    const Amg::VectorX & error = trajectory.errors();
+
+    const int nMeas = (int) res.size();
+
+    for (int k = 0; k < nFitPars; k++) {
+      const int minMeasK = cache.m_firstmeasurement[k];
+      const int maxMeasK = cache.m_lastmeasurement[k];
+
+      /*
+       * NOTE: It is necessary to do r * invError * weight instead of doing
+       *       r / error * w. Otherwise, the implementation tests fail do to
+       *       numerical reasons.
+       */
+      for (int measno = minMeasK; measno < maxMeasK; measno++) {
+        b[k] += res[measno] * (1. / error[measno]) * weightDeriv(measno, k);
+      }
+
+      /*
+       * For qOverP and brems, we also have a contribution to brems elements.
+       *
+       * NOTE: It is necessary to do r * invError * weight instead of doing
+       *       r / error * w. Otherwise, the implementation tests fail do to
+       *       numerical reasons.
+       */
+      if (k == 4 || k >= nPerPars + nScatPars) {
+        for (int measno = nMeas - nBrem; measno < nMeas; measno++) {
+          b[k] += res[measno] * (1. / error[measno]) * weightDeriv(measno, k);
+        }
+      }
+    }
+  }
+
+  void GlobalChi2Fitter::fillAfromMeasurements(
+    const Cache & cache,
+    GXFTrajectory & trajectory,
+    Amg::SymMatrixX & a
+  ) const {
+    const int nFitPars = trajectory.numberOfFitParameters();
+    const Amg::MatrixX & weightDeriv = trajectory.weightedResidualDerivatives();
+
+    for (int k = 0; k < nFitPars; k++) {
+      for (int l = k; l < nFitPars; l++) {
+        const int minMeas = std::max(cache.m_firstmeasurement[k], cache.m_firstmeasurement[l]);
+        const int maxMeas = std::min(cache.m_lastmeasurement[k], cache.m_lastmeasurement[l]);
+
+        double a_kl = 0;
+        for (int measno = minMeas; measno < maxMeas; measno++) {
+          a_kl += weightDeriv(measno, k) * weightDeriv(measno, l);
+        }
+
+        a.fillSymmetric(l, k, a_kl);
+      }
+    }
+  }
+
+  void GlobalChi2Fitter::fillAfromScatterers(
+    GXFTrajectory & trajectory,
+    Amg::SymMatrixX & a
+  ) const {
+    const int nFitPars = trajectory.numberOfFitParameters();
+    const int nPerPars = trajectory.numberOfPerigeeParameters();
+    const int nScatPars = 2 * trajectory.numberOfScatterers();
+    const int nBrem = trajectory.numberOfBrems();
+    const Amg::MatrixX & weightDeriv = trajectory.weightedResidualDerivatives();
+
+    const Amg::VectorX & res = trajectory.residuals();
+    const auto & scatSigmas = trajectory.scatteringSigmas();
+
+    const int nMeas = (int) res.size();
+
+    int scatno = 0;
+
+    /*
+     * Direct contribution on the diagonal from the scatterer itself.
+     */
+    for (int k = nPerPars; k < nPerPars + nScatPars; k += 2) {
+      a(k, k) += 1. / std::pow(scatSigmas[scatno].first, 2);
+      a(k + 1, k + 1) += 1. / std::pow(scatSigmas[scatno].second, 2);
+
+      scatno++;
+    }
+
+    /*
+     * Indirect contribution on the qOverP and brems derivatives.
+     */
+    for (int measno = nMeas - nBrem; measno < nMeas; measno++) {
+      for (int k = 4; k < nFitPars; k++) {
+        if (k == 5) {
+          k = nPerPars + nScatPars;
+        }
+
+        for (int l = k; l < nFitPars; l++) {
+          if (l == 5) {
+            l = nPerPars + nScatPars;
+          }
+
+          const double a_kl = a(l, k) + weightDeriv(measno, k) * weightDeriv(measno, l);
+          a.fillSymmetric(l, k, a_kl);
+        }
+      }
+    }
+  }
+
+  bool GlobalChi2Fitter::tryToWeightAfromMaterial(
+    Cache & cache,
+    GXFTrajectory & trajectory,
+    Amg::SymMatrixX & a,
+    const bool doDeriv,
+    const int it,
+    const double oldRedChi2,
+    const double newRedChi2
+  ) const {
+    const int nPerPars = trajectory.numberOfPerigeeParameters();
+
+    /*
+     * The return value collects, if any weights changed while looping over all
+     * material states.
+     */
+    bool weightChanged = false;
+
+    /*
+     * The weights for the diagonal material components in the [a]-matrix
+     * depend on how far we are in the iteration process (iteration number or
+     * chi2 convergence).
+     */
+    double newPhiWeight = 1.1;
+    double newThetaWeight = 1.001;
+    if (trajectory.prefit() == 0) {
+      /*
+       * We do not consider theta at all in the prefit 0 case. Therefore, we do
+       * not need to adjust the theta weights.
+       */
+      if (it == 0) {
+        newPhiWeight = 1.00000001;
+      } else if (it == 1) {
+        newPhiWeight = 1.0000001;
+      } else if (it <= 3) {
+        newPhiWeight = 1.0001;
+      } else if (it <= 6) {
+        newPhiWeight = 1.01;
+      }
+    } else {
+      if (newRedChi2 > oldRedChi2 - 1 && newRedChi2 < oldRedChi2) {
+        newPhiWeight = 1.0001;
+        newThetaWeight = 1.0001;
+      } else if (newRedChi2 > oldRedChi2 - 25 && newRedChi2 < oldRedChi2) {
+        newPhiWeight = 1.001;
+        newThetaWeight = 1.0001;
+      }
+    }
+
+    /*
+     * Counter for the scattering states. We cannot directly loop over them.
+     */
+    std::size_t scatno = 0;
+
+    /*
+     * Loop over all track states. Skip states without material effects.
+     */
+    for (const auto & state : trajectory.trackStates()) {
+      const GXFMaterialEffects *meff = state->materialEffects();
+
+      if (meff == nullptr) {
+        continue;
+      }
+
+      const bool isValidPlaneSurface =
+        state->associatedSurface().type() == Trk::SurfaceType::Plane &&
+        static_cast<const PlaneSurface *>(&state->associatedSurface()) != nullptr;
+
+      /*
+       * Modify the diagonal material elements in the [a]-matrix.
+       */
+      if (meff->deltaE() == 0 || (trajectory.prefit() == 0 && isValidPlaneSurface)) {
+        weightChanged = true;
+
+        const int scatNoIndex = 2 * scatno + nPerPars;
+
+        if (trajectory.prefit() == 0 && meff->sigmaDeltaPhi() != 0) {
+          if (scatno >= cache.m_phiweight.size()) {
+            std::stringstream message;
+            message << "scatno is out of range " << scatno << " !< " << cache.m_phiweight.size();
+            throw std::range_error(message.str());
+          }
+
+          /*
+           * In case, no derivative is necessary, the weight will be
+           * effectively replaced by the relative weight change
+           */
+          if (!doDeriv) {
+            a(scatNoIndex, scatNoIndex) /= cache.m_phiweight[scatno];
+          }
+
+          cache.m_phiweight[scatno] = newPhiWeight;
+          a(scatNoIndex, scatNoIndex) *= newPhiWeight;
+        } else if (trajectory.prefit() >= 2) {
+          a(scatNoIndex, scatNoIndex) *= newPhiWeight;
+          a(scatNoIndex + 1, scatNoIndex + 1) *= newThetaWeight;
+        }
+      }
+
+      /*
+       * The state is a valid scatterer even, if not considered in the
+       * modification of the weights before. Therefore increment the count.
+       *
+       * NOTE: It is not clear, why this check is not at the beginning of the
+       *       loop. This way, a mismatch in the state counting could happen.
+       */
+      if (
+        meff->sigmaDeltaPhi() != 0 &&
+        (trajectory.prefit() == 0 || meff->deltaE() == 0)
+      ) {
+        scatno++;
+      }
+    }
+
+    /*
+     * Add a weight to the qOverP component of the [a]-matrix if a set of
+     * pre-conditions are met and the reduced chi2 either
+     * - converges very fast (e.g. at the beginning of the fit)
+     * OR
+     * - gets larger (e.g. moving away from minimum or overshooting by a lot)
+     */
+    if (
+      trajectory.prefit() == 2 &&
+      doDeriv &&
+      trajectory.numberOfBrems() > 0 &&
+      (newRedChi2 < oldRedChi2 - 25 || newRedChi2 > oldRedChi2)
+    ) {
+      a(4, 4) *= 1.001;
+    }
+
+    return weightChanged;
+  }
+
+  void GlobalChi2Fitter::compensatePhiWeights(
+    Cache & cache,
+    GXFTrajectory & trajectory,
+    Amg::SymMatrixX & a
+  ) const {
+    const int nPerPars = trajectory.numberOfPerigeeParameters();
+    std::size_t scatno = 0;
+
+    for (auto & state : trajectory.trackStates()) {
+      const GXFMaterialEffects *meff = state->materialEffects();
+
+      if (meff == nullptr || meff->sigmaDeltaPhi() == 0) {
+        continue;
+      }
+
+      if (scatno >= cache.m_phiweight.size()) {
+        std::stringstream message;
+        message << "scatno is out of range " << scatno << " !< " << cache.m_phiweight.size();
+        throw std::range_error(message.str());
+      }
+
+      const bool isValidPlaneSurface =
+        state->associatedSurface().type() == Trk::SurfaceType::Plane &&
+        static_cast<const PlaneSurface *>(&state->associatedSurface()) != nullptr;
+
+      if (meff->deltaE() == 0 || isValidPlaneSurface) {
+        const int scatNoIndex = 2 * scatno + nPerPars;
+        a(scatNoIndex, scatNoIndex) /= cache.m_phiweight[scatno];
+        cache.m_phiweight[scatno] = 1;
+      }
+
+      /*
+       * NOTE: We already check for this in the beginning of the loop. Is
+       *       there any way, this can change?
+       */
+      if (meff->sigmaDeltaPhi() != 0) {
+        scatno++;
+      }
+    }
+  }
+
   FitterStatusCode GlobalChi2Fitter::runIteration(
     const EventContext& ctx,
     Cache & cache,
     GXFTrajectory & trajectory,
-    int it,
+    const int it,
     Amg::SymMatrixX & a,
     Amg::VectorX & b,
     Amg::SymMatrixX & lu,
-    bool &doderiv
+    bool & doDeriv
   ) const {
-    int measno = 0;
-    int nfitpars = trajectory.numberOfFitParameters();
-    int nperpars = trajectory.numberOfPerigeeParameters();
-    int scatpars = 2 * trajectory.numberOfScatterers();
-    int nupstreamstates = trajectory.numberOfUpstreamStates();
-    int nbrem = trajectory.numberOfBrems();
-    double oldchi2 = trajectory.chi2();
-    double oldredchi2 = (trajectory.nDOF() > 0) ? oldchi2 / trajectory.nDOF() : 0;
-    int nsihits = trajectory.numberOfSiliconHits();
-    int ntrthits = trajectory.numberOfTRTHits();
-    int nhits = trajectory.numberOfHits();
+    const int nDOFold = trajectory.nDOF();
+    const double oldChi2 = trajectory.chi2();
+    const double oldRedChi2 = nDOFold > 0 ? oldChi2 / nDOFold : 0;
 
     if (cache.m_phiweight.empty()) {
       cache.m_phiweight.assign(trajectory.trackStates().size(), 1);
     }
 
-    FitterStatusCode fsc = calculateTrackParameters(ctx,trajectory, doderiv);
+    FitterStatusCode fsc = calculateTrackParameters(ctx, trajectory, doDeriv);
 
     if (fsc != FitterStatusCode::Success) {
       return fsc;
     }
 
+    /*
+     * Reset the b-vector. We want to add to the components later.
+     */
     b.setZero();
 
-    fillResiduals(ctx, cache, trajectory, it, a, b, lu, doderiv);
+    /*
+     * Here we store the information on where to find the maxbrempull, in case
+     * we find any large ones during the residual calculation. We might need it
+     * later to update our errors.
+     */
+    int bremno_maxbrempull = 0;
+    GXFTrackState* state_maxbrempull = nullptr;
 
-    double newredchi2 = (trajectory.nDOF() > 0) ? trajectory.chi2() / trajectory.nDOF() : 0;
+    fillResidualsAndErrors(ctx, cache, trajectory, it, b, bremno_maxbrempull, state_maxbrempull);
 
-    ATH_MSG_DEBUG("old chi2: " << oldchi2 << "/" << trajectory.nDOF() <<
-    "=" << oldredchi2 << " new chi2: " << trajectory.chi2() << "/" <<
-    trajectory.nDOF() << "=" << newredchi2);
+    /*
+     * Check if we hit any convergence conditions.
+     */
+    tryToConverge(cache, trajectory, it);
+
+    /*
+     * In case we converged but have a state with maxbrempull (a kink) we want
+     * to do more iterations. Therefore, reset the convergence flag and inflate
+     * the chi2. Then update the error estimates using the state with the
+     * maxbrempull.
+     */
+    if ((state_maxbrempull != nullptr) && trajectory.converged()) {
+      trajectory.setConverged(false);
+      trajectory.setChi2(1e15);
+      doDeriv = true;
+
+      updateSystemWithMaxBremPull(trajectory, bremno_maxbrempull, state_maxbrempull, a);
+      lu = a;
+    }
+
+    const int nDOFnew = trajectory.nDOF();
+    const double newChi2 = trajectory.chi2();
+    const double newRedChi2 = nDOFnew > 0 ? newChi2 / nDOFnew : 0;
+
+    ATH_MSG_DEBUG("old chi2: " << oldChi2 << "/" << nDOFold << "=" << oldRedChi2 <<
+                  ", new chi2: " << newChi2 << "/" << nDOFnew << "=" << newRedChi2);
 
     if (trajectory.prefit() > 0 && trajectory.converged()) {
       return FitterStatusCode::Success;
     }
 
-    Amg::VectorX & res = trajectory.residuals();
-    Amg::VectorX & error = trajectory.errors();
-    std::vector < std::pair < double, double >>&scatsigmas = trajectory.scatteringSigmas();
-
-    int nmeas = (int) res.size();
-
-    const Amg::MatrixX & weight_deriv = trajectory.weightedResidualDerivatives();
-
-    if (doderiv) {
+    if (doDeriv) {
       calculateDerivatives(trajectory);
-      fillDerivatives(trajectory, !doderiv);
+      fillDerivatives(trajectory);
     }
 
     if (cache.m_firstmeasurement.empty()) {
-      cache.m_firstmeasurement.resize(nfitpars);
-      cache.m_lastmeasurement.resize(nfitpars);
-      for (int i = 0; i < nperpars; i++) {
-        cache.m_firstmeasurement[i] = 0;
-        cache.m_lastmeasurement[i] = nmeas - nbrem;
-      }
-      measno = 0;
-      int scatno = 0;
-      int bremno = 0;
-      for (int i = 0; i < (int) trajectory.trackStates().size(); i++) {
-        std::unique_ptr<GXFTrackState> & state = trajectory.trackStates()[i];
-        GXFMaterialEffects *meff = state->materialEffects();
-        if (meff == nullptr) {
-          measno += state->numberOfMeasuredParameters();
-        }
-        if (meff != nullptr) {
-          if (meff->sigmaDeltaTheta() != 0
-              && ((trajectory.prefit() == 0) || meff->deltaE() == 0)) {
-            int scatterPos = nperpars + 2 * scatno;
-            if (i < nupstreamstates) {
-              cache.m_lastmeasurement[scatterPos] =
-                cache.m_lastmeasurement[scatterPos + 1] = measno;
-              cache.m_firstmeasurement[scatterPos] =
-                cache.m_firstmeasurement[scatterPos + 1] = 0;
-            } else {
-              cache.m_lastmeasurement[scatterPos] =
-                cache.m_lastmeasurement[scatterPos + 1] = nmeas - nbrem;
-              cache.m_firstmeasurement[scatterPos] =
-                cache.m_firstmeasurement[scatterPos + 1] = measno;
-            }
-            scatno++;
-          }
-          if (meff->sigmaDeltaE() > 0) {
-            if (i < nupstreamstates) {
-              cache.m_firstmeasurement[nperpars + scatpars + bremno] = 0;
-              cache.m_lastmeasurement[nperpars + scatpars + bremno] = measno;
-            } else {
-              cache.m_firstmeasurement[nperpars + scatpars + bremno] = measno;
-              cache.m_lastmeasurement[nperpars + scatpars + bremno] =
-                nmeas - nbrem;
-            }
-
-            bremno++;
-          }
-        }
-      }
+      fillFirstLastMeasurement(cache, trajectory);
     }
 
-    if (a.cols() != nfitpars) {
+    if (a.cols() != trajectory.numberOfFitParameters()) {
       ATH_MSG_ERROR("Your assumption is wrong!!!!");
     }
 
-    for (int k = 0; k < nfitpars; k++) {
-      int minmeas = 0;
-      int maxmeas = nmeas - nbrem;
-      maxmeas = cache.m_lastmeasurement[k];
-      minmeas = cache.m_firstmeasurement[k];
+    fillBfromMeasurements(cache, trajectory, b);
 
-      for (measno = minmeas; measno < maxmeas; measno++) {
-        double tmp =
-          res[measno] * (1. / error[measno]) * weight_deriv(measno, k);
-        b[k] += tmp;
-      }
-
-      if (k == 4 || k >= nperpars + scatpars) {
-        for (measno = nmeas - nbrem; measno < nmeas; measno++) {
-          b[k] += res[measno] * (1. / error[measno]) * weight_deriv(measno, k);
-        }
-      }
-
-      if (doderiv) {
-        for (int l = k; l < nfitpars; l++) {
-          maxmeas =
-            std::min(cache.m_lastmeasurement[k], cache.m_lastmeasurement[l]);
-          minmeas =
-            std::max(cache.m_firstmeasurement[k],
-                     cache.m_firstmeasurement[l]);
-          double tmp = 0;
-          for (measno = minmeas; measno < maxmeas; measno++) {
-            tmp += weight_deriv(measno, k) * weight_deriv(measno, l);
-          }
-          a.fillSymmetric(l, k, tmp);
-        }
-      }
+    /*
+     * The [a]-matrix does not depend on the residuals. We only need to change
+     * it, if the derivatives have changed.
+     */
+    if (doDeriv) {
+      fillAfromMeasurements(cache, trajectory, a);
+      fillAfromScatterers(trajectory, a);
     }
 
-    if (doderiv) {
-      int scatno = 0;
+    const bool weightChanged = tryToWeightAfromMaterial(cache, trajectory, a, doDeriv, it, oldRedChi2, newRedChi2);
 
-      for (int k = nperpars; k < nperpars + scatpars; k += 2) {
-        a(k, k) += 1. / (scatsigmas[scatno].first * scatsigmas[scatno].first);
-        a(k + 1, k + 1) += 1. / (scatsigmas[scatno].second * scatsigmas[scatno].second);
-        scatno++;
-      }
-
-      for (int measno = nmeas - nbrem; measno < nmeas; measno++) {
-        for (int k = 4; k < nfitpars; k++) {
-          if (k == 5) {
-            k = nperpars + scatpars;
-          }
-
-          for (int l = k; l < nfitpars; l++) {
-            if (l == 5) {
-              l = nperpars + scatpars;
-            }
-            double tmp = a(l, k) + weight_deriv(measno, k) * weight_deriv(measno, l);
-            a.fillSymmetric(l, k, tmp);
-          }
-        }
-      }
-    }
-
-    unsigned int scatno = 0;
-    bool weightchanged = false;
-
-    for (std::unique_ptr<GXFTrackState> & thisstate : trajectory.trackStates()) {
-      GXFMaterialEffects *meff = thisstate->materialEffects();
-
-      if (meff != nullptr) {
-        const PlaneSurface *plsurf = nullptr;
-
-        if (thisstate->associatedSurface().type() == Trk::SurfaceType::Plane)
-          plsurf = static_cast < const PlaneSurface *>(&thisstate->associatedSurface());
-        if (meff->deltaE() == 0 || ((trajectory.prefit() == 0) && (plsurf != nullptr))) {
-          weightchanged = true;
-
-          if (a.cols() != nfitpars) {
-            ATH_MSG_ERROR("Your assumption is wrong!!!!");
-          }
-
-          int scatNoIndex = 2 * scatno + nperpars;
-
-          if (trajectory.prefit() == 0) {
-            if (thisstate->materialEffects()->sigmaDeltaPhi() != 0) {
-              if (scatno >= cache.m_phiweight.size()) {
-                std::stringstream message;
-                message << "scatno is out of range " << scatno << " !< " << cache.m_phiweight.size();
-                throw std::range_error(message.str());
-              }
-
-              if (!doderiv) {
-                a(scatNoIndex, scatNoIndex) /= cache.m_phiweight[scatno];
-              }
-
-              if (it == 0) {
-                cache.m_phiweight[scatno] = 1.00000001;
-              } else if (it == 1) {
-                cache.m_phiweight[scatno] = 1.0000001;
-              } else if (it <= 3) {
-                cache.m_phiweight[scatno] = 1.0001;
-              } else if (it <= 6) {
-                cache.m_phiweight[scatno] = 1.01;
-              } else {
-                cache.m_phiweight[scatno] = 1.1;
-              }
-
-              a(scatNoIndex, scatNoIndex) *= cache.m_phiweight[scatno];
-            }
-          }
-
-          else if (trajectory.prefit() >= 2) {
-            if (newredchi2 > oldredchi2 - 1 && newredchi2 < oldredchi2) {
-              a(scatNoIndex, scatNoIndex) *= 1.0001;
-              a(scatNoIndex + 1, scatNoIndex + 1) *= 1.0001;
-            } else if (newredchi2 > oldredchi2 - 25 && newredchi2 < oldredchi2) {
-              a(scatNoIndex, scatNoIndex) *= 1.001;
-              a(scatNoIndex + 1, scatNoIndex + 1) *= 1.0001;
-            } else {
-              a(scatNoIndex, scatNoIndex) *= 1.1;
-              a(scatNoIndex + 1, scatNoIndex + 1) *= 1.001;
-            }
-          }
-        }
-
-        if (
-          thisstate->materialEffects()->sigmaDeltaPhi() != 0 &&
-          ((trajectory.prefit() == 0) || thisstate->materialEffects()->deltaE() == 0)
-        ) {
-          scatno++;
-        }
-      }
-    }
-
-    if (
-      (trajectory.prefit() == 2) &&
-      doderiv &&
-      trajectory.numberOfBrems() > 0 &&
-      (newredchi2 < oldredchi2 - 25 || newredchi2 > oldredchi2)
-    ) {
-      a(4, 4) *= 1.001;
-    }
-
-    if (doderiv || weightchanged) {
+    /*
+     * Update the [lu]-matrix if we modified the [a]-matrix.
+     */
+    if (doDeriv || weightChanged) {
       lu = a;
     }
 
-    if (trajectory.converged()) {
-      if ((trajectory.prefit() == 0) && nsihits + ntrthits != nhits) {
-        unsigned int scatno = 0;
+    /*
+     * Special handling for prefit == 0:
+     * - If we already converged, but there are hits apart from Si and TRT or
+     *   the numbers don't match, the applied phi weights need to be reset.
+     * - If we got in an early iteration to a low reduced chi2 or converged
+     *   with the reduced chi2, we don't need to redo derivatives.
+     */
+    if (trajectory.prefit() == 0) {
+      if (trajectory.converged()) {
+        const int nSiHits = trajectory.numberOfSiliconHits();
+        const int nTrtHits = trajectory.numberOfTRTHits();
+        const int nHits = trajectory.numberOfHits();
 
-        if (a.cols() != nfitpars) {
-          ATH_MSG_ERROR("Your assumption is wrong!!!!");
+        if (nSiHits + nTrtHits != nHits) {
+          compensatePhiWeights(cache, trajectory, a);
+          lu = a;
         }
-
-        for (std::unique_ptr<GXFTrackState> & thisstate : trajectory.trackStates()) {
-          if ((thisstate->materialEffects() != nullptr) && thisstate->materialEffects()->sigmaDeltaPhi() != 0) {
-            if (scatno >= cache.m_phiweight.size()) {
-              std::stringstream message;
-              message << "scatno is out of range " << scatno << " !< " << cache.m_phiweight.size();
-              throw std::range_error(message.str());
-            }
-
-            const PlaneSurface *plsurf = nullptr;
-
-            if (thisstate->associatedSurface().type() == Trk::SurfaceType::Plane)
-              plsurf = static_cast<const PlaneSurface *>(&thisstate->associatedSurface());
-
-            if (thisstate->materialEffects()->deltaE() == 0 || (plsurf != nullptr)) {
-              int scatNoIndex = 2 * scatno + nperpars;
-              a(scatNoIndex, scatNoIndex) /= cache.m_phiweight[scatno];
-              cache.m_phiweight[scatno] = 1;
-            }
-
-            if (thisstate->materialEffects()->sigmaDeltaPhi() != 0) {
-              scatno++;
-            }
-          }
-        }
-        lu = a;
+      } else if (
+        !m_redoderivs &&
+        it < 5 &&
+        (newRedChi2 < 2 || (newRedChi2 < oldRedChi2 && newRedChi2 > oldRedChi2 - .5))
+      ) {
+        doDeriv = false;
       }
-      return FitterStatusCode::Success;
-    }
-
-    if (
-      !m_redoderivs &&
-      it < 5 &&
-      (newredchi2 < 2 || (newredchi2 < oldredchi2 && newredchi2 > oldredchi2 - .5)) &&
-      (trajectory.prefit() == 0)
-    ) {
-      doderiv = false;
     }
 
     return FitterStatusCode::Success;
@@ -5919,36 +6131,55 @@ namespace Trk {
 
   FitterStatusCode GlobalChi2Fitter::updateFitParameters(
     GXFTrajectory & trajectory,
-    Amg::VectorX & b,
+    const Amg::VectorX & b,
     const Amg::SymMatrixX & lu_m
   ) const {
     ATH_MSG_DEBUG("UpdateFitParameters");
 
+    /*
+     * Compute the parameter update from [llt] * deltaParameters = b.
+     * In case we cannot do a Cholesky decomposition, we do not update and
+     * use an early return.
+     * TODO: Investigate, if it is really Success, if we do not update.
+     */
+    Eigen::LLT<Eigen::MatrixXd> llt(lu_m);
+
+    if (llt.info() != Eigen::Success) {
+        return FitterStatusCode::Success;
+    }
+
+    const Amg::VectorX deltaParameters = llt.solve(b);
+
+    /*
+     * Collect the number of each parameter type for the offsets in the
+     * deltaParameters vector.
+     */
+    const int nscat = trajectory.numberOfScatterers();
+    const int nbrem = trajectory.numberOfBrems();
+    const int nperparams = trajectory.numberOfPerigeeParameters();
+
+    /*
+     * Update the perigee parameters.
+     * The parameters are not modified in place. In case the angles are pushed
+     * too far and cannot be corrected anymore, the parameters should not be
+     * updated and the fit should fail.
+     *
+     * NOTE: It is not clear if the fit should fail for fitter reasons or
+     * because the angle correction is not stable enough.
+     */
     const TrackParameters *refpar = trajectory.referenceParameters();
     double d0 = refpar->parameters()[Trk::d0];
     double z0 = refpar->parameters()[Trk::z0];
     double phi = refpar->parameters()[Trk::phi0];
     double theta = refpar->parameters()[Trk::theta];
     double qoverp = refpar->parameters()[Trk::qOverP];
-    int nscat = trajectory.numberOfScatterers();
-    int nbrem = trajectory.numberOfBrems();
-    int nperparams = trajectory.numberOfPerigeeParameters();
 
-    Eigen::LLT<Eigen::MatrixXd> llt(lu_m);
-    Amg::VectorX result;
-
-    if (llt.info() == Eigen::Success) {
-      result = llt.solve(b);
-    } else {
-      result = Eigen::VectorXd::Zero(b.size());
-    }
-
-    if (trajectory.numberOfPerigeeParameters() > 0) {
-      d0 += result[0];
-      z0 += result[1];
-      phi += result[2];
-      theta += result[3];
-      qoverp = (trajectory.m_straightline) ? 0 : .001 * result[4] + qoverp;
+    if (nperparams > 0) {
+      d0 += deltaParameters[0];
+      z0 += deltaParameters[1];
+      phi += deltaParameters[2];
+      theta += deltaParameters[3];
+      qoverp = (trajectory.m_straightline) ? 0 : .001 * deltaParameters[4] + qoverp;
     }
 
     if (!correctAngles(phi, theta)) {
@@ -5957,24 +6188,35 @@ namespace Trk {
       return FitterStatusCode::InvalidAngles;
     }
 
+    /*
+     * Update the scattering angles.
+     */
     std::vector < std::pair < double, double >>&scatangles = trajectory.scatteringAngles();
-    std::vector < double >&delta_ps = trajectory.brems();
-
     for (int i = 0; i < nscat; i++) {
-      scatangles[i].first += result[2 * i + nperparams];
-      scatangles[i].second += result[2 * i + nperparams + 1];
+      scatangles[i].first += deltaParameters[2 * i + nperparams];
+      scatangles[i].second += deltaParameters[2 * i + nperparams + 1];
     }
 
+    /*
+     * Update the brems.
+     */
+    std::vector < double >&delta_ps = trajectory.brems();
     for (int i = 0; i < nbrem; i++) {
-      delta_ps[i] += result[nperparams + 2 * nscat + i];
+      delta_ps[i] += deltaParameters[nperparams + 2 * nscat + i];
     }
 
+    /*
+     * Create new peregee parameters from the updated ones.
+     */
     std::unique_ptr<const TrackParameters> newper(
       trajectory.referenceParameters()->associatedSurface().createUniqueTrackParameters(
         d0, z0, phi, theta, qoverp, std::nullopt
       )
     );
 
+    /*
+     * Apply all changes.
+     */
     trajectory.setReferenceParameters(std::move(newper));
     trajectory.setScatteringAngles(scatangles);
     trajectory.setBrems(delta_ps);
@@ -6439,27 +6681,13 @@ namespace Trk {
 
         if (broadrot) {
           const Amg::MatrixX & covmat = broadrot->localCovariance();
-          newerror[0] = std::sqrt(covmat(0, 0));
 
           if (state_maxsipull->sinStereo() != 0) {
-            double v0 = 0.5 * (
-              covmat(0, 0) + covmat(1, 1) -
-              std::sqrt(
-                (covmat(0, 0) + covmat(1, 1)) * (covmat(0, 0) + covmat(1, 1)) -
-                4 * (covmat(0, 0) * covmat(1, 1) - covmat(0, 1) * covmat(0, 1))
-              )
-            );
-
-            double v1 = 0.5 * (
-              covmat(0, 0) + covmat(1, 1) +
-              std::sqrt(
-                (covmat(0, 0) + covmat(1, 1)) * (covmat(0, 0) + covmat(1, 1)) -
-                4 * (covmat(0, 0) * covmat(1, 1) - covmat(0, 1) * covmat(0, 1))
-              )
-            );
-
-            newsinstereo = std::sin(0.5 * std::asin(2 * covmat(0, 1) / (v0 - v1)));
-            newerror[0] = std::sqrt(v0);
+            const auto [covEigenValueSmall, covStereoAngle] = principalComponentAnalysis2x2(covmat);
+            newerror[0] = std::sqrt(covEigenValueSmall);
+            newsinstereo = std::sin(covStereoAngle);
+          } else {
+            newerror[0] = std::sqrt(covmat(0, 0));
           }
 
           double cosstereo = (newsinstereo == 0) ? 1. : std::sqrt(1 - newsinstereo * newsinstereo);
@@ -6476,8 +6704,7 @@ namespace Trk {
           if (newerror[0] == 0.0) {
             ATH_MSG_WARNING("Measurement error is zero or negative, treating as outlier");
             newpull1 = 9999.;
-          }
-          else {
+          } else {
             newpull1 = std::abs(newres1 / newerror[0]);
           }
 
@@ -6834,17 +7061,13 @@ namespace Trk {
       std::vector<std::pair<const Layer *, const Layer *>> & upstreamlayers = oldtrajectory.upstreamMaterialLayers();
       bool first = true;
 
-      for (int i = (int)upstreamlayers.size() - 1; i >= 0; i--) {
+      for (const auto & [layer1, layer2] : upstreamlayers | std::views::reverse) {
         if (prevpar == nullptr) {
           break;
         }
 
         PropDirection propdir = oppositeMomentum;
-        const Layer *layer = upstreamlayers[i].first;
-
-        if (layer == nullptr) {
-          layer = upstreamlayers[i].second;
-        }
+        const Layer *layer = layer1 != nullptr ? layer1 : layer2;
 
         DistanceSolution distsol = layer->surfaceRepresentation().straightLineDistanceEstimate(
           prevpar->position(), prevpar->momentum().unit()
@@ -8303,5 +8526,47 @@ namespace Trk {
      std::stringstream msg;
      msg << "Failed to get conditions data " << m_trackingGeometryReadKey.key() << ".";
      throw std::runtime_error(msg.str());
+  }
+
+  bool GlobalChi2Fitter::ensureValidEntranceCalo(const EventContext& ctx, Cache& cache) const {
+    if (cache.m_caloEntrance == nullptr) {
+      const TrackingGeometry *geometry = trackingGeometry(cache, ctx);
+
+      if (geometry != nullptr) {
+        cache.m_caloEntrance = geometry->trackingVolume("InDet::Containers::InnerDetector");
+      } else {
+        ATH_MSG_ERROR("Tracking Geometry not available");
+      }
+
+      /*
+       * Check, if we managed to find an entrance.
+       */
+      if (cache.m_caloEntrance == nullptr) {
+        ATH_MSG_ERROR("calo entrance not available");
+      }
+    }
+
+    return cache.m_caloEntrance != nullptr;
+  }
+
+  bool GlobalChi2Fitter::ensureValidEntranceMuonSpectrometer(const EventContext& ctx, Cache& cache) const {
+    if (cache.m_msEntrance == nullptr) {
+      const TrackingGeometry *geometry = trackingGeometry(cache, ctx);
+
+      if (geometry != nullptr) {
+        cache.m_msEntrance = geometry->trackingVolume("MuonSpectrometerEntrance");
+      } else {
+        ATH_MSG_ERROR("Tracking Geometry not available");
+      }
+
+      /*
+       * Check, if we managed to find an entrance.
+       */
+      if (cache.m_msEntrance == nullptr) {
+        ATH_MSG_ERROR("MS entrance not available");
+      }
+    }
+
+    return cache.m_msEntrance != nullptr;
   }
 }

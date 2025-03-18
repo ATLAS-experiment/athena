@@ -164,12 +164,8 @@ BOOST_AUTO_TEST_CASE(TrackStateProxyCopy) {
 }
 
 BOOST_AUTO_TEST_CASE(TrackStateCopyDynamicColumns) {
-  // This is currently not implemented in the xAOD backend!
-  // Let's compile this but not run it.
   CommonTests ct;
-  if (false) {
-    ct.testTrackStateCopyDynamicColumns();
-  }
+  ct.testTrackStateCopyDynamicColumns();
 }
 
 BOOST_AUTO_TEST_CASE(TrackStateProxyCopyDiffMTJ) {

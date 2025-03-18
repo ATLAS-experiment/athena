@@ -46,7 +46,8 @@ class FPGATrackSimHoughRootOutputTool : public AthAlgTool
         FPGATrackSimHoughRootOutputTool(const std::string&, const std::string&, const IInterface*);
 
         virtual StatusCode initialize() override;
-        StatusCode fillTree(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, const std::vector<FPGATrackSimTruthTrack> &truthTracks, const std::vector<FPGATrackSimOfflineTrack> &offlineTracks, const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits_2nd, const bool writeOutNonSPStripHits, const float minChi2, const int maxOverlappingHits);
+        StatusCode fillTree(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, const std::vector<FPGATrackSimTruthTrack> &truthTracks, const std::vector<FPGATrackSimOfflineTrack> &offlineTracks, const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits_2nd, const bool writeOutNonSPStripHits, const float minChi2, const int maxOverlappingHits, const bool roadsAreSecondStage);
+        StatusCode fillTree(const std::vector<FPGATrackSimTrack> &track_cands, const std::vector<FPGATrackSimTruthTrack> &truthTracks, const std::vector<FPGATrackSimOfflineTrack> &offlineTracks, const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits_2nd, const bool writeOutNonSPStripHits, const bool roadsAreSecondStage);
 
 
 

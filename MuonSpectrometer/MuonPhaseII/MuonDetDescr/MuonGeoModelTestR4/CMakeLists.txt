@@ -27,12 +27,12 @@ endif()
 
 #### Standard geometry dumping test R3 (MC)
 atlas_add_test( testR3Geometry
-                SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers BML1A3 T1E1A01 MML1A1 --noSTGC 
+                SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers STL1A1 BML1A3 T1E1A01 MML1A1
                 PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
-#### Standard geometry dumping test R3-MTEch (MC)
+#### Standard geometry dumping test R3-MTech (MC)
 atlas_add_test( testR3Geometry_MTech
                 SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers BML1A3 T1E1A01 MML1A1 STS1A1 --geoModelFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00_MTech.db
                 PROPERTIES TIMEOUT 600
@@ -40,7 +40,7 @@ atlas_add_test( testR3Geometry_MTech
                 POST_EXEC_SCRIPT nopost.sh)
 #### Standard geometry dumping test R3 (data)
 atlas_add_test( testR3GeometryData
-                SCRIPT python -m MuonGeoModelTestR4.testGeoModel --noSTGC --condTag CONDBR2-BLKPA-2024-03 --chambers BML1A3 T1E1A01 MML1A1 --inputFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data
+                SCRIPT python -m MuonGeoModelTestR4.testGeoModel --condTag CONDBR2-BLKPA-2024-03 --chambers BML1A3 T1E1A01 MML1A1 STL1A1 --inputFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data
                 PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
@@ -49,7 +49,7 @@ atlas_add_test( testR3GeometryData
 
 #### Standard geometry dumping test R4 (MC)
 atlas_add_test( testR4Geometry
-                SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers BML1A3 T1E1A01 MML1A1 --noSTGC --geoModelFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R4-MUONTEST.db --condTag OFLCOND-MC21-SDR-RUN4-01 --geoTag ATLAS-P2-RUN4-01-00-00
+                SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers BML1A3 T1E1A01 MML1A1 STL1A1 --defaultGeoFile RUN4 --condTag OFLCOND-MC21-SDR-RUN4-01 --geoTag ATLAS-P2-RUN4-01-00-00
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
@@ -70,7 +70,7 @@ atlas_add_test( testR3SensitiveDetectors
 
 ##### Simulation test R4
 atlas_add_test( testR4SensitiveDetectors
-                SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 2 --geoModelFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R4-MUONTEST.db
+                SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 2 --defaultGeoFile RUN4
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
@@ -82,7 +82,7 @@ atlas_add_test( testChamberBuilding
                 POST_EXEC_SCRIPT nopost.sh)
 #### Test that the sector envelopes fully enclose the particular chambers (R4)
 atlas_add_test( testChamberBuildingR4
-                SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --noSTGC --geoModelFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R4-MUONTEST.db
+                SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --noSTGC --defaultGeoFile RUN4
                 PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)

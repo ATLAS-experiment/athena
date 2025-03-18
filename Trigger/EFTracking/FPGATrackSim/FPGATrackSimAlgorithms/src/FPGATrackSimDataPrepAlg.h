@@ -79,7 +79,9 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         ToolHandle<FPGATrackSimOutputHeaderTool>         m_writeOutputTool {this, "OutputTool", "FPGATrackSimOutputHeaderTool/FPGATrackSimOutputHeaderTool", "Output tool"};
         ServiceHandle<IFPGATrackSimMappingSvc>           m_FPGATrackSimMapping {this, "FPGATrackSimMapping", "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<IFPGATrackSimEventSelectionSvc>    m_evtSel {this, "eventSelector", "FPGATrackSimEventSelectionSvc", "Event selection Svc"};
-        
+        // chrono service
+        ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
+
         // Flags
         Gaudi::Property<int> m_firstInputToolN {this, "FirstInputToolN", 1, "number of times to use event from first input tool"};
         Gaudi::Property<int> m_secondInputToolN {this, "SecondInputToolN", 0, "number of times to use event from second input tool"};
@@ -88,7 +90,7 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         Gaudi::Property<bool> m_doSpacepoints {this, "Spacepoints", false, "flag to enable the spacepoint formation"};
         Gaudi::Property<bool> m_writeOutputData  {this, "writeOutputData", true,"write the output TTree"};
         Gaudi::Property<bool> m_doEvtSel {this, "doEvtSel", true, "do event selection"};
-        Gaudi::Property<bool> m_runOnRDO {this,"runOnRDO", false, "case when runnin on RDO file (and not or wrapper)"};
+        Gaudi::Property<bool> m_useInternalTruthTracks {this,"useInternalTruthTracks", false, "case when runnin on RDO file (and not or wrapper)"};
 
         // Properties for the output header tool.
         Gaudi::Property<std::string> m_preClusterBranch      {this, "preClusterBranch", "LogicalEventInputHeader_PreCluster", "Name of the branch for pre-cluster input data in output ROOT file." };
@@ -129,7 +131,7 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         SG::WriteHandleKeyArray<FPGATrackSimClusterCollection> m_FPGAClusterKey{this, "FPGATrackSimClusterKey",{"FPGAClusters_1st"},"FPGATrackSim Clusters key"};
         SG::WriteHandleKey<FPGATrackSimClusterCollection> m_FPGAClusterFilteredKey{this, "FPGATrackSimClusterFilteredKey","FPGAClustersFiltered","FPGATrackSim Filtered Clusters key"};
         SG::WriteHandleKeyArray<FPGATrackSimClusterCollection> m_FPGASpacePointsKey{this, "FPGATrackSimSpacePoints1stKey",{"FPGASpacePoints_1st","FPGASpacePoints_2nd"},"FPGATrackSim SpacePoints key"};
-        SG::WriteHandleKeyArray<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey",{"FPGAHits_1st", "FPGAHits_2nd"},"FPGATrackSim Hits key"};
+        SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey","FPGAHits", "FPGATrackSim Hits key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitUnmappedKey{this, "FPGATrackSimHitUnmappedKey","FPGAHitsUnmapped_1st","FPGATrackSim Unmapped Hits 1st stage key"};
         
         SG::ReadHandleKey<xAOD::TruthParticleContainer> m_inputTruthParticleContainerKey{this, "TruthTrackContainer", "TruthParticles", "Truth Particle Container"};

@@ -8,6 +8,7 @@
 #include "InDetRawData/SCT_RDO_Container.h"
 #include "StripEmulatedDefects.h"
 #include "InDetIdentifier/SCT_ID.h"
+#include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
 
 namespace InDet {
 
@@ -25,6 +26,16 @@ namespace InDet {
          IDAdapter(ID_Helper helper) : m_idHelper(helper) {}
          int row_index(const Identifier &rdoID) const { return m_idHelper->strip(rdoID); }
          int col_index(const Identifier &rdoID) const { return m_idHelper->row(rdoID); }
+         template <typename T_ModuleHelper>
+         std::unique_ptr<SCT3_RawData> createNoiseHit(const T_ModuleHelper &helper, const Identifier &identifier, unsigned int cell_idx, unsigned int tot) {
+            unsigned int row_aka_phi=cell_idx % helper.rows();
+            unsigned int col_aka_eta=cell_idx / helper.rows();
+            constexpr unsigned int group_size =1u;
+            constexpr unsigned int errors=0u;
+            return std::make_unique<SCT3_RawData>( m_idHelper->strip_id(identifier,row_aka_phi, col_aka_eta),
+                                                   makeStripWord( /*time bin */ tot, /*stripIn11bits*/ row_aka_phi, group_size, errors ),
+                                                   &s_dummyvector);
+         }
 
          /** Clone, reject or split strip RDOs depending on overlaps with defects.
           */
@@ -153,6 +164,8 @@ namespace InDet {
       using DefectsData = StripEmulatedDefects;
       using RDORawData =  SCT_RDORawData;
       using ModuleHelper = StripModuleHelper;
+      using ModuleDesign = InDetDD::SCT_ModuleSideDesign;
+      static constexpr ActsTrk::DetectorType DETECTOR_TYPE = ActsTrk::DetectorType::Sct;
    };
 
    /** Algorithm which selectively copies hits from an input SCT_RDO_Container.

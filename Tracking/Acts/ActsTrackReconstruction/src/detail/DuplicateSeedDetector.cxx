@@ -38,7 +38,7 @@ namespace ActsTrk::detail {
         for (const xAOD::UncalibratedMeasurement *meas : els) {
           std::size_t hitIndex = measurementIndex.index(*meas);
           if (!(hitIndex < m_seedIndex.size())) {
-            std::cout << "ERROR hit index " << hitIndex << " past end of " << measurementIndex.size() << " hit indices\n";
+            // std::cout << "ERROR hit index " << hitIndex << " past end of " << m_seedIndex.size() << " hit indices\n";
             continue;
           }
           m_seedIndex[hitIndex].push_back(m_numSeeds);

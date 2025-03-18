@@ -58,9 +58,26 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.TrackingGeometry.MaterialSource', 'Default')
     actscf.addFlag('Acts.TrackingGeometry.MaterialCalibrationFolder', 'ACTS/MaterialMaps/ITk')
 
+    ## Enable Tracking geometry with additional passive layers
+    actscf.addFlag('Acts.TrackingGeometry.InsertITkPassiveMaterialLayers', False)
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkInnerPixelBarrelLayerRadii', [70.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkInnerPixelBarrelLayerHalflengthZ', [240.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkInnerPixelBarrelLayerThickness', [1.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkOuterPixelBarrelLayerRadii', [195., 260.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkOuterPixelBarrelLayerHalflengthZ', [370., 370.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkOuterPixelBarrelLayerThickness', [1., 1.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerRadii', [480., 665., 880.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerHalflengthZ', [1370., 1370., 1370.])
+    actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerThickness', [1., 1., 1.])
+
     # Monitoring
     actscf.addFlag('Acts.doMonitoring', False)
     actscf.addFlag('Acts.doAnalysis', False)
+    actscf.addFlag('Acts.Clusters.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
+    actscf.addFlag('Acts.SpacePoints.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
+    actscf.addFlag('Acts.Seeds.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
+    actscf.addFlag('Acts.Tracks.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
+    actscf.addFlag('Acts.Particles.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.storeTrackStateInfo', False)
 
     # SpacePoint
@@ -83,18 +100,25 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.doAmbiguityResolution', True)
     actscf.addFlag('Acts.AmbiguitySolverStrategy', AmbiguitySolverStrategy.Greedy, type=AmbiguitySolverStrategy)  # Define Ambiguity Solver Strategy
 
+    # Calibrations
+    actscf.addFlag('Acts.OnTrackCalibration.performCovarianceCalibration', True) # perform calibration of covariance during on track analogue cluster calibration
+    
     # Track fitting
     actscf.addFlag('Acts.writeTrackCollection', False) # save to file (ESD, AOD) the Resolved and Refitted track collections
     actscf.addFlag('Acts.fitFromPRD', False) # Acts.writeTrackCollection needs to be True for either cases. If Acts.fitFromPRD is False, fit from ROT; else, fit from PRD
     actscf.addFlag('Acts.trackFitterType', TrackFitterType.KalmanFitter, type=TrackFitterType) # Define Tracking algorithm for refitting
 
     # GSF specific flags
-    actscf.addFlag("Acts.useActsGsfInEgamma", False)
+    actscf.addFlag("Acts.GsfRefitLegacyTrk", False) # Refit Legacy tracks using ACTS GSF
+    actscf.addFlag("Acts.GsfRefitActs", False) # Refit ACTS tracks using ACTS GSF
     actscf.addFlag("Acts.GsfMaxComponents", 12)
-    actscf.addFlag("Acts.GsfComponentMergeMethod", 'eMaxWeight')
+    actscf.addFlag("Acts.GsfComponentMergeMethod", 'MaxWeight')
     actscf.addFlag("Acts.GsfDirectNavigation", False)
     actscf.addFlag("Acts.GsfOutlierChi2Cut", 20.0)
 
     actscf.addFlag('Acts.useDefaultActsMeasurementSelector', False) # if True, uses no outlier chi2 cut as before (chi2<25,inf)
 
+    # Decorations
+    actscf.addFlag('Acts.decoratePRD.sdoSiHit', lambda pcf: pcf.Tracking.doTIDE_AmbiTrackMonitoring)
+    
     return actscf

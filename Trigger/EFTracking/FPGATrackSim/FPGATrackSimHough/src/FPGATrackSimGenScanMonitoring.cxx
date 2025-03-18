@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimGenScanBinning.cxx
@@ -12,6 +12,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TTree.h"
+#include <bit>
 
 
 FPGATrackSimGenScanMonitoring::FPGATrackSimGenScanMonitoring(const std::string& algname, const std::string &name, const IInterface *ifc) :
@@ -557,7 +558,7 @@ unsigned FPGATrackSimGenScanMonitoring::pairpairCategory(
        (1 << pair.first->layer) | (1 << pair.second->layer));
   hitbits = hitbits >> minlyr;  // now bit list starts with lowest hit layer
 
-  int hitlyrs = __builtin_popcount(hitbits);
+  int hitlyrs = std::popcount(hitbits);
 
   assert(hitbits & 0x1);
 

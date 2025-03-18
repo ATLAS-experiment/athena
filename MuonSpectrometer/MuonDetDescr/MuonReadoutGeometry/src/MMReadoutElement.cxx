@@ -181,6 +181,7 @@ namespace MuonGM {
             m_minHalfY      = activeBottomLength / 2;           // 0.5*bottom length (active area)
             m_maxHalfY      = activeTopLength / 2;              // 0.5*top length (active area)
             m_offset        = -0.5*(ylFrame - ysFrame);         // radial dist. of active area center w.r.t. chamber center
+            ATH_MSG_DEBUG(idHelperSvc()->toStringDetEl(identify())<<", ylFrame: "<<ylFrame<<", ysFrame: "<<ysFrame<<", offset: "<<m_offset);
             for (int il = 0; il < m_nlayers; il++) {
                 // identifier of the first channel to retrieve max number of strips
                 Identifier id = m_idHelper.channelID(identify(), m_ml, il + 1, 1);
@@ -200,7 +201,7 @@ namespace MuonGM {
                 design.nMissedBottomStereo = nMissedBottomStereo;
                 design.totalStrips = totalStrips;   
                 /// The stereo angle is defined clock-wise from the y-axis
-                design.defineTrapezoid(m_minHalfY, m_maxHalfY,m_halfX, -stereoAngle[il]);
+                design.defineTrapezoid(m_minHalfY, m_maxHalfY,m_halfX, stereoAngle[il]);
                 /// Input width is defined as the distance between two channels
                 design.inputWidth = stripPitch * std::cos(design.stereoAngle());
           
@@ -211,9 +212,11 @@ namespace MuonGM {
                     design.nch = design.totalStrips - design.nMissedBottomStereo - design.nMissedTopStereo;
                     design.setFirstPos( -0.5 * design.xSize() + (1 + design.nMissedBottomStereo - design.nMissedBottomEta) * stripPitch);
                 }
-                ATH_MSG_DEBUG("initDesign:" << getStationName() << " layer " << il 
+                ATH_MSG_DEBUG("initDesign:" <<idHelperSvc()->toStringDetEl(identify())<< " layer " << il 
                            << ", strip pitch " << design.inputPitch << ", nstrips " << design.nch 
-                           << " stereo " << design.stereoAngle() / Gaudi::Units::degree );
+                           << " stereo " << design.stereoAngle() / Gaudi::Units::degree
+                        <<", "<<design.xSize()<<", "<<design.maxYSize()<<" "<<design.minYSize()
+                        <<", firstPos: "<<design.firstPos()<<", first pitch: "<<design.firstPitch);
             }
         }
     }
@@ -256,6 +259,7 @@ namespace MuonGM {
        m_minHalfY      = roParam.activeBottomLength / 2; // 0.5*bottom length (active area)
        m_maxHalfY      = roParam.activeTopLength / 2;    // 0.5*top length (active area)
        m_offset        = -0.5*(ylFrame - ysFrame);       // radial dist. of active area center w.r.t. chamber center
+       ATH_MSG_DEBUG(idHelperSvc()->toStringDetEl(identify())<<", ylFrame: "<<ylFrame<<", ysFrame: "<<ysFrame<<", offset: "<<m_offset);
        assign(roParam.readoutSide, m_readoutSide);
       
        for (int il = 0; il < m_nlayers; il++) {
@@ -289,9 +293,11 @@ namespace MuonGM {
                 design.setFirstPos( -0.5 * design.xSize() + 
                                    (1 + design.nMissedBottomStereo - design.nMissedBottomEta) * pitch);
             }
-        
-            ATH_MSG_DEBUG("initDesign:" << getStationName() << " layer " << il << ", strip pitch " << design.inputPitch
-                       << ", nstrips " << design.nch << " stereo " << design.stereoAngle() / Gaudi::Units::degree );
+            ATH_MSG_DEBUG("initDesign:" <<idHelperSvc()->toStringDetEl(identify())<< " layer " << il 
+            << ", strip pitch " << design.inputPitch << ", nstrips " << design.nch 
+            << " stereo " << design.stereoAngle() / Gaudi::Units::degree
+            <<", "<<design.xSize()<<", "<<design.maxYSize()<<" "<<design.minYSize()
+            <<", firstPos: "<<design.firstPos()<<", first pitch: "<<design.firstPitch);
         }
     }
 

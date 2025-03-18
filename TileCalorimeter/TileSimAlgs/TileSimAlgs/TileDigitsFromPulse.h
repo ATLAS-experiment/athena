@@ -80,6 +80,7 @@ class IAthRNGSvc;
 
 class TH1F;
 class TFile;
+class TRandom3;
 
 /** 
 @class TileDigitsFromPulse
@@ -154,13 +155,14 @@ private:
     std::string m_ootADistHistName; //!< Name of  histogram for out-of-time amplitude distribution
     
     bool m_simQIE; //!<Raw PMT pulses are generated if the option is set to true. The option is intended to simulate the QIE FEB.
+    bool m_simPulseChain; //!< Simulate continous output of readout for HL-LHC paradigm
 
     int m_seed;
     int m_BunchSpacing; //!< Time between pulses in ms 25, 50 or 75
     int m_nSamples;  //!< number of read out samples
     int m_nPul;  //!< number of pileup pulses 
     int m_nPul_eff{};  //Used for symetrization of PU in computation
-    std::vector<float> m_PUAmp;
+    std::vector<std::vector<std::vector<std::vector<float>>>> m_PUAmp; // Used to store PU amplitudes
     bool m_PhaseII; //Use parameters of TilePhaseII if the option is set to true
     bool m_bigain; //If true, save the two gains in the ntuples
 
@@ -188,6 +190,12 @@ private:
     bool makeDist(TFile*& file, TH1F*& hist, const std::string& fileName, const std::string& histName="h_Eopt_hi"); //!< Method to read distribution from file
     bool makeDist(TFile*& file, std::vector<std::vector<TH1F*>>& hists, const std::string& fileName);
 
+    void addPileUp(double &n_inTimeAmp, int gain, int ros, int drawer, int channel); //!< Fill vector with pile-up amplitudes
+    void addPileUpSample(int gain, int ros, int drawer, int channel); //!< Fill only a BC with pile-up amplitude
+
+    float m_sample_tru = 0;
+
+    std::unique_ptr<TRandom3> m_random;
 };
 
 #endif // TILESIMALGS_TILEDIGITSFROMPULSE_H

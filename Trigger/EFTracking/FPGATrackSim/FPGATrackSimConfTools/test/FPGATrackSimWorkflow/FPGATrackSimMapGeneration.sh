@@ -4,6 +4,8 @@ set -e
 GEO_TAG="ATLAS-P2-RUN4-03-00-00"
 WRAPPER="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/Wrappers/v0.10/FPGATrackSimWrapper.root"
 
+export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
+
 STD_PREFIX="MyMaps_std"
 run_map_maker() {
     python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
@@ -18,10 +20,11 @@ run_map_maker_for_insideOut() {
     python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
     --filesInput=${WRAPPER} \
     OutFileName=${INSIDEOUT_PREFIX} \
-    Trigger.FPGATrackSim.region=0 \
+    Trigger.FPGATrackSim.region=33 \
     doInsideOut=True \
     Trigger.FPGATrackSim.spacePoints=False \
-    KeyString="pixel,end,2" \
+    Trigger.FPGATrackSim.oldRegionDefs=False \
+    KeyString="plane 0" \
     GeoModel.AtlasVersion=${GEO_TAG}
 }
 

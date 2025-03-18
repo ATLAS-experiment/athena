@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MM_DigitizationTool.h"
 #include "xAODMuonViews/ChamberViewer.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Random/RandFlat.h"
 
 #include <fstream>
@@ -224,7 +225,7 @@ namespace MuonR4 {
 
             for (const TimedHit &simHit : viewer) {
                 // ignore radiation if you want
-                if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13) {
+              if (m_digitizeMuonOnly && !MC::isMuon(simHit)) {
                     ATH_MSG_VERBOSE("Hit is not from a muon - skipping ");
                     continue;
                 }
@@ -235,7 +236,7 @@ namespace MuonR4 {
                 // Don't consider electron hits below m_energyThreshold.
                 // Electrons aren't consider for now in any case due to the cut above.
                 // But this may change.
-                if (hitKineticEnergy < m_energyThreshold && std::abs(simHit->pdgId()) == 11) {
+                if (hitKineticEnergy < m_energyThreshold && MC::isElectron(simHit)) {
                     continue;
                 }
                 const MuonGMR4::MmReadoutElement *readOutEle = m_detMgr->getMmReadoutElement(hitId);

@@ -131,9 +131,10 @@ def ZdcRecOutputCfg(flags):
     acc.merge(addToESD(flags,ZDC_ItemList))
     acc.merge(addToAOD(flags,ZDC_ItemList))
 
-    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    acc.merge(SetupMetaDataForStreamCfg(flags,streamName="AOD"))
-    
+    # In case running standalone (i.e. not within RecoSteering)
+    if flags.Output.doWriteAOD:
+        from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+        acc.merge(SetupMetaDataForStreamCfg(flags,streamName="AOD"))
 
     return acc
 
@@ -280,7 +281,7 @@ def ZdcRecRun3Cfg(flags):
         elif flags.Input.ProjectName == "data24_hi": # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
             doCalib = True
             doTimeCalib = True
-            doFADCCorr = True
+            doFADCCorr = False
             doNonLinCorr = False
 
     # No calibration required (or exists) for MC
@@ -431,7 +432,7 @@ def ZdcLEDRecCfg(flags):
         doFADCCorr = False
 
         if (flags.GeoModel.Run == LHCPeriod.Run3):
-            doFADCCorr = True
+            doFADCCorr = False
         
         acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
         acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())

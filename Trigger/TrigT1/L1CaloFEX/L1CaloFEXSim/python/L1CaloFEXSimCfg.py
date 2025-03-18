@@ -73,18 +73,6 @@ def TriggerTowersInputCfg(flags):
         from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
         return LVL1CaloRun2ReadBSCfg(flags)
 
-def Get_eTAU_BDTAlgoConfigFile(flags):
-    from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
-    L1_menu = getL1MenuAccess(flags)
-    algoVersion = L1_menu.thresholdExtraInfo("eTAU").get("algoVersion", 0) 
-
-
-    configFName = "bdt_config_v16.json"
-    if algoVersion == 2:
-        configFName = "bdt_config_v17.json"
-
-    return configFName
-
 def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulatedTowers"],deadMaterialCorrections=True, outputSuffix="", simulateAltTau=False):
     from AthenaConfiguration.Enums import Format
 
@@ -146,17 +134,27 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         eFEX.eFEXSysSimTool = CompFactory.LVL1.eFEXSysSim('eFEXSysSimTool')
         eFEX.eFEXSysSimTool.eFEXSimTool = CompFactory.LVL1.eFEXSim('eFEXSimTool')
         eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool = CompFactory.LVL1.eFEXFPGA('eFEXFPGATool')
-        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool = CompFactory.LVL1.eFEXegAlgo('eFEXegAlgoTool',dmCorr=deadMaterialCorrections) # only dmCorrections in data for now
-        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauAlgoTool = CompFactory.LVL1.eFEXtauAlgo("eFEXtauAlgo")
+
+        # read algoVersions from menu and configure the algo tools
+        from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
+        L1_menu = getL1MenuAccess(flags)
+
+        em_algoVersion = L1_menu.thresholdExtraInfo("eEM").get("algoVersion", 0)
+        tau_algoVersion = L1_menu.thresholdExtraInfo("eTAU").get("algoVersion", 0)
+
+        from PathResolver import PathResolver
+        bdtConfigJsonPath = PathResolver.FindCalibFile("Run3L1CaloSimulation/L1CaloFEXSim/eTAU/" + ("bdt_config_v17.json" if tau_algoVersion==2 else "bdt_config_v16.json"))
+
+        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool = CompFactory.LVL1.eFEXegAlgo('eFEXegAlgoTool',algoVersion=em_algoVersion,dmCorr=deadMaterialCorrections) # only dmCorrections in data for now
+        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauAlgoTool = CompFactory.LVL1.eFEXtauAlgo("eFEXtauAlgo") # heuristic algorithm
+        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauBDTAlgoTool = CompFactory.LVL1.eFEXtauBDTAlgo("eFEXtauBDTAlgo", BDTJsonConfigPath=bdtConfigJsonPath)
         # To dump supercells as a decorator to the tau TOB, set 
         #     eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauAlgoTool.DumpSuperCells = True
         #       and/or
         #     eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauBDTAlgoTool.DumpSuperCells = True
 
-        from PathResolver import PathResolver
-        bdtConfigJsonPath = PathResolver.FindCalibFile("Run3L1CaloSimulation/L1CaloFEXSim/eTAU/" + Get_eTAU_BDTAlgoConfigFile(flags))
-        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauBDTAlgoTool = \
-                CompFactory.LVL1.eFEXtauBDTAlgo("eFEXtauBDTAlgo", BDTJsonConfigPath=bdtConfigJsonPath)
+
+
 
         # load noise cuts and dm corrections when running on data
         from IOVDbSvc.IOVDbSvcConfig import addFolders#, addFoldersSplitOnline

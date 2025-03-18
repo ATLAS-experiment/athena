@@ -29,7 +29,6 @@
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
 #include "Acts/TrackFitting/MbfSmoother.hpp"
-#include "Acts/TrackFinding/TrackStateCreator.hpp"
 
 // ActsTrk
 #include "ActsEvent/TrackContainer.h"
@@ -38,7 +37,6 @@
 #include "ActsInterop/Logger.h"
 #include "ActsInterop/TableUtils.h"
 #include "src/detail/AtlasMeasurementSelector.h"
-#include "src/detail/OnTrackCalibrator.h"
 #include "src/detail/TrackFindingMeasurements.h"
 #include "src/detail/SharedHitCounter.h"
 
@@ -275,29 +273,13 @@ namespace ActsTrk
 
     // SEED TRIPLETS
     std::vector<const ActsTrk::SeedContainer *> seedContainers;
-    seedContainers.reserve(m_seedContainerKeys.size());
     std::size_t total_seeds = 0;
-    for (const auto &seedContainerKey : m_seedContainerKeys)
-    {
-      ATH_MSG_DEBUG("Reading input collection with key " << seedContainerKey.key());
-      SG::ReadHandle<ActsTrk::SeedContainer> seedsHandle = SG::makeHandle(seedContainerKey, ctx);
-      ATH_CHECK(seedsHandle.isValid());
-      seedContainers.push_back(seedsHandle.cptr());
-      ATH_MSG_DEBUG("Retrieved " << seedContainers.back()->size() << " input elements from key " << seedContainerKey.key());
-      total_seeds += seedContainers.back()->size();
-    }
+    ATH_CHECK(getContainersFromKeys(ctx, m_seedContainerKeys, seedContainers, total_seeds));
 
     // MEASUREMENTS
     std::vector<const xAOD::UncalibratedMeasurementContainer *> uncalibratedMeasurementContainers;
-    uncalibratedMeasurementContainers.reserve(m_uncalibratedMeasurementContainerKeys.size());
-    for (const auto &uncalibratedMeasurementContainerKey : m_uncalibratedMeasurementContainerKeys)
-    {
-      ATH_MSG_DEBUG("Reading input collection with key " << uncalibratedMeasurementContainerKey.key());
-      SG::ReadHandle<xAOD::UncalibratedMeasurementContainer> uncalibratedMeasurementContainerHandle = SG::makeHandle(uncalibratedMeasurementContainerKey, ctx);
-      ATH_CHECK(uncalibratedMeasurementContainerHandle.isValid());
-      uncalibratedMeasurementContainers.push_back(uncalibratedMeasurementContainerHandle.cptr());
-      ATH_MSG_DEBUG("Retrieved " << uncalibratedMeasurementContainers.back()->size() << " input elements from key " << uncalibratedMeasurementContainerKey.key());
-    }
+    std::size_t total_measurements = 0;
+    ATH_CHECK(getContainersFromKeys(ctx, m_uncalibratedMeasurementContainerKeys, uncalibratedMeasurementContainers, total_measurements));
 
     SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
        detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, ctx};
@@ -336,14 +318,8 @@ namespace ActsTrk
     // ================================================== //
 
     std::vector<const InDetDD::SiDetectorElementCollection*> detElementsCollections;
-    detElementsCollections.reserve(m_detEleCollKeys.size());
-    for (const auto &detEleCollKey : m_detEleCollKeys)
-    {
-      ATH_MSG_DEBUG("Reading input collection with key " << detEleCollKey.key());
-      SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> detEleHandle = SG::makeHandle(detEleCollKey, ctx);
-      ATH_CHECK(detEleHandle.isValid());
-      detElementsCollections.push_back(detEleHandle.cptr());
-    }
+    std::size_t total_detElems = 0;
+    ATH_CHECK(getContainersFromKeys(ctx, m_detEleCollKeys, detElementsCollections, total_detElems));
 
     // ================================================== //
     // ===================== COMPUTATION ================ //
@@ -394,6 +370,47 @@ namespace ActsTrk
     return StatusCode::SUCCESS;
   }
 
+  detail::MeasurementSelectorData TrackFindingAlg::setMeasurementSelector(
+      const Acts::TrackingGeometry &trackingGeometry,
+      const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
+      const detail::TrackFindingMeasurements &measurements,
+      TrackFinderOptions &options) const {
+    ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
+
+    detail::MeasurementSelectorData state {
+        .slAccessor{measurements.measurementRanges()},
+        .slAccessorDelegate{},
+        .trackStateCreator{},
+        // Measurement calibration
+        // N.B. OnTrackCalibrator expects disabled tool handles when no calibration is requested.
+        // Therefore, passing them without checking if they are enabled is safe.
+        .calibrator{trackingGeometry, detectorElementToGeoId, m_pixelCalibTool, m_stripCalibTool, m_hgtdCalibTool},
+        .measurementSelector{}
+    };
+
+    state.slAccessorDelegate.connect<&detail::UncalibSourceLinkAccessor::range>(&state.slAccessor);
+
+    if (m_useDefaultMeasurementSelector.value()) {
+       state.trackStateCreator.sourceLinkAccessor = state.slAccessorDelegate;
+       state.trackStateCreator.calibrator.template connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&state.calibrator);
+       state.trackStateCreator.measurementSelector.template connect<&Acts::MeasurementSelector::select<detail::RecoTrackContainer>>(&trackFinder().measurementSelector);
+
+       // for default measurement selector need connect calibrator
+       options.extensions.createTrackStates.template connect<&DefaultTrackStateCreator::createTrackStates>(&state.trackStateCreator);
+    } else {
+      state.measurementSelector = ActsTrk::detail::getMeasurementSelector(
+          m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
+          measurements.measurementRanges(),
+          m_measurementSelectorConfig.m_etaBins,
+          m_measurementSelectorConfig.m_chi2CutOffOutlier,
+          m_numMeasurementsCutOff.value());
+
+      state.measurementSelector->connect(&options.extensions.createTrackStates);
+    }
+
+    return state;
+  }
+
   // === findTracks ==========================================================
 
   StatusCode
@@ -421,14 +438,8 @@ namespace ActsTrk
     // CalibrationContext converter not implemented yet.
     Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
-    using AtlUncalibSourceLinkAccessor = detail::UncalibSourceLinkAccessor;
-    using DefaultTrackStateCreator = Acts::TrackStateCreator<ActsTrk::detail::UncalibSourceLinkAccessor::Iterator,detail::RecoTrackContainer>;
-
-    AtlUncalibSourceLinkAccessor slAccessor(measurements.measurementRanges());
-    DefaultTrackStateCreator::SourceLinkAccessor slAccessorDelegate;
-    slAccessorDelegate.connect<&detail::UncalibSourceLinkAccessor::range>(&slAccessor);
-
     Acts::PropagatorPlainOptions plainOptions{tgContext, mfContext};
+    plainOptions.endOfWorldVolumeIds = m_endOfWorldVolumeIds;
     Acts::PropagatorPlainOptions plainSecondOptions{tgContext, mfContext};
 
     plainOptions.maxSteps = m_maxPropagationStep;
@@ -437,7 +448,6 @@ namespace ActsTrk
     plainSecondOptions.direction = plainOptions.direction.invert();
 
     // Set the CombinatorialKalmanFilter options
-    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
     TrackFinderOptions options(tgContext,
                                mfContext,
                                calContext,
@@ -445,38 +455,7 @@ namespace ActsTrk
                                plainOptions,
                                pSurface.get());
 
-    DefaultTrackStateCreator defaultTrackStateCreator;
-    // Measurement calibration
-    // N.B. OnTrackCalibrator expects disabled tool handles when no calibration is requested.
-    // Therefore, passing them without checking if they are enabled is safe.
-
-    auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(trackingGeometry,
-                                                                                 detectorElementToGeoId,
-                                                                                 m_pixelCalibTool,
-                                                                                 m_stripCalibTool,
-                                                                                 m_hgtdCalibTool);
-
-    std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector;
-    if (m_useDefaultMeasurementSelector.value()) {
-       defaultTrackStateCreator = DefaultTrackStateCreator {};
-       defaultTrackStateCreator.sourceLinkAccessor = slAccessorDelegate;
-       defaultTrackStateCreator.calibrator.template connect< &detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
-       defaultTrackStateCreator.measurementSelector.template connect<&Acts::MeasurementSelector::select<detail::RecoTrackContainer>>(&trackFinder().measurementSelector);
-       // for default measurement selector need connect calibrator
-
-       options.extensions.createTrackStates.template connect<
-          &DefaultTrackStateCreator
-            ::createTrackStates>(&defaultTrackStateCreator);
-    }
-    else {
-       measurementSelector = ActsTrk::detail::getMeasurementSelector(m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
-                                                                     measurements.measurementRanges(),
-                                                                     m_measurementSelectorConfig.m_etaBins,
-                                                                     m_measurementSelectorConfig.m_chi2CutOffOutlier,
-                                                                     m_numMeasurementsCutOff.value());
-
-       measurementSelector->connect( &options.extensions.createTrackStates );
-    }
+    const detail::MeasurementSelectorData measurementSelectorData = setMeasurementSelector(trackingGeometry, detectorElementToGeoId, measurements, options);
 
     TrackFinderOptions secondOptions(tgContext,
                                      mfContext,

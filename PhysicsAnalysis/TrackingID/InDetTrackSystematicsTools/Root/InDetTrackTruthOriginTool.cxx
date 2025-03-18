@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginTool.h"
@@ -7,7 +7,7 @@
 
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthEventContainer.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "AthContainers/ConstAccessor.h"
 
 #include <math.h>
@@ -71,19 +71,19 @@ namespace InDet {
     bool isFragmentation = true;
 
     // from B decay chain?
-    if(isFrom(truth, 5)) {
+    if(isFrom(truth, MC::BQUARK)) {
       origin = origin | (0x1 << InDet::TrkOrigin::BHadronDecay);
       isFragmentation = false;
     }
 
     // from D decay chain?
-    if(isFrom(truth, 4)) {
+    if(isFrom(truth, MC::CQUARK)) {
       origin = origin | (0x1 << InDet::TrkOrigin::DHadronDecay);
       isFragmentation = false;
     }
 
     // from tau decay chain?
-    if(isFrom(truth, 15)) {
+    if(isFrom(truth, MC::TAU)) {
       origin = origin | (0x1 << InDet::TrkOrigin::TauDecay);
       isFragmentation = false;
     }
@@ -127,7 +127,7 @@ namespace InDet {
           else if(parent->isStrangeBaryon() && parent->nChildren() == 2) {
             origin = origin | (0x1 << InDet::TrkOrigin::StrangeBaryonDecay);
             // specifically Lambdas
-            if ((abs(pdgId) == 211 || abs(pdgId) == 2212) && abs(parentId) == 3122) {
+            if ((abs(pdgId) == MC::PIPLUS || abs(pdgId) == MC::PROTON) && abs(parentId) == MC::LAMBDA0) {
               origin = origin | (0x1 << InDet::TrkOrigin::LambdaDecay);
             }
           }
@@ -222,13 +222,13 @@ namespace InDet {
 
     if ( depth > 30 ) return false;
 
-    if( flav != 5 && flav != 4 && flav != 15 ) return false;
+    if( flav != MC::BQUARK && flav != MC::CQUARK && flav != MC::TAU ) return false;
 
-    if( flav == 5 && truth->isBottomHadron() ) return true;
+    if( flav == MC::BQUARK && truth->isBottomHadron() ) return true;
 
-    if( flav == 4 && truth->isCharmHadron() ) return true;
+    if( flav == MC::CQUARK && truth->isCharmHadron() ) return true;
 
-    if( flav == 15 && abs(truth->pdgId()) == 15 ) return true;
+    if( flav == MC::TAU && MC::isTau(truth) ) return true;
 
 
     for(unsigned int p=0; p<truth->nParents(); p++) {

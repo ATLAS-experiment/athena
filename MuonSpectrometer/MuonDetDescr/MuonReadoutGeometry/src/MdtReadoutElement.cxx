@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -53,7 +53,6 @@
 namespace {
     // the tube number of a tube in a tubeLayer in encoded in the GeoSerialIdentifier (modulo maxNTubesPerLayer)
     constexpr unsigned int const maxNTubesPerLayer = MdtIdHelper::maxNTubesPerLayer;
-    constexpr double linearDensity = 378.954;
 }  // namespace
 
 namespace MuonGM {
@@ -827,7 +826,7 @@ namespace MuonGM {
         return geoInfo(tubeLayer, tube).m_transform;
     }
 
-    const Trk::SaggedLineSurface& MdtReadoutElement::surface(const int tubeLayer, const int tube) const {
+    const Trk::StraightLineSurface& MdtReadoutElement::surface(const int tubeLayer, const int tube) const {
 
         int ntot_tubes = m_nlayers * m_ntubesperlayer;
         int itube = (tubeLayer - 1) * m_ntubesperlayer + tube - 1;
@@ -840,12 +839,10 @@ namespace MuonGM {
             itube = 0;
         }
 
-        const CxxUtils::CachedUniquePtr<Trk::SaggedLineSurface>& ptr = m_tubeSurfaces.at(itube);
+        const CxxUtils::CachedUniquePtr<Trk::StraightLineSurface>& ptr = m_tubeSurfaces.at(itube);
         if (!ptr) {
-            double wireTension = 350;
-            if (getStationIndex() == m_stIdx_BOL) wireTension = 285;
             Identifier id = m_idHelper.channelID(identify(), getMultilayer(), tubeLayer, tube);
-            ptr.set(std::make_unique<Trk::SaggedLineSurface>(*this, id, getWireLength(tubeLayer, tube), wireTension, linearDensity));
+            ptr.set(std::make_unique<Trk::StraightLineSurface>(*this, id));
             if (!m_haveTubeSurfaces) m_haveTubeSurfaces = true;
         }
         return *ptr;
@@ -974,7 +971,7 @@ namespace MuonGM {
         ATH_MSG_VERBOSE( "global Normal " << normal() );
 
         const Trk::CylinderBounds* tmpCil = nullptr;
-        const Trk::SaggedLineSurface* tmpSaggL = nullptr;
+        const Trk::StraightLineSurface* tmpSaggL = nullptr;
         Amg::Vector3D myPoint{Amg::Vector3D::Zero()};
         Amg::Transform3D myTransform{Amg::Transform3D::Identity()};
         for (int tl = 1; tl <= getNLayers(); ++tl) {
@@ -995,7 +992,7 @@ namespace MuonGM {
                                 myTransform = transform(tl, tube);                                           //<! filling m_tubeTransf
                                 myPoint = center(tl, tube);                                                  //<! filling m_tubeCenter
                                 tmpCil = dynamic_cast<const Trk::CylinderBounds*>(&bounds(tl, tube));        //<! filling m_tubeBounds
-                                tmpSaggL = dynamic_cast<const Trk::SaggedLineSurface*>(&surface(tl, tube));  //<! filling m_tubeSurfaces
+                                tmpSaggL = dynamic_cast<const Trk::StraightLineSurface*>(&surface(tl, tube));  //<! filling m_tubeSurfaces
                                 found = true;
                             }
                         },
@@ -1012,7 +1009,7 @@ namespace MuonGM {
                     myTransform = transform(tl, tube);                                           //<! filling m_tubeTransf
                     myPoint = center(tl, tube);                                                  //<! filling m_tubeCenter
                     tmpCil = dynamic_cast<const Trk::CylinderBounds*>(&bounds(tl, tube));        //<! filling m_tubeBounds
-                    tmpSaggL = dynamic_cast<const Trk::SaggedLineSurface*>(&surface(tl, tube));  //<! filling m_tubeSurfaces
+                    tmpSaggL = dynamic_cast<const Trk::StraightLineSurface*>(&surface(tl, tube));  //<! filling m_tubeSurfaces
                     ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " transform at origin  "
                                     << Amg::toString(myTransform.translation()) );
                     ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube center          " << myPoint );

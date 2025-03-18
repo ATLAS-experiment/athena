@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -369,7 +369,7 @@ void VP1CollectionWidget::ensureFirst(const QString& wildcard,QList<QString>& st
     strs.removeAll(str);
   for (const QString& str : strs)
     l << str;
-  strs = l;
+  strs = std::move(l);
 
 }
 

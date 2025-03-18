@@ -56,7 +56,9 @@ def defineMenu():
         'L1_eTAU30', 'L1_cTAU30M', 
         'L1_eTAU35', 'L1_cTAU35M', 
         'L1_eTAU40HM', 'L1_eTAU40HT', 
+        'L1_cTAU50M',
         'L1_eTAU60', 'L1_eTAU60HM', 'L1_eTAU60_EMPTY', 'L1_eTAU60_UNPAIRED_ISO',
+        'L1_eTAU70', 
         'L1_eTAU80', 'L1_eTAU140',
 
 
@@ -153,7 +155,7 @@ def defineMenu():
         'L1_jLJ80', 'L1_jLJ120', 'L1_jLJ140', 'L1_jLJ180',
 
         # jEM
-        'L1_jEM20', 'L1_jEM20M',   
+        'L1_jEM25', 'L1_jEM20M',   
 
         # gJ
         'L1_gJ20p0ETA25', 'L1_gJ20p0ETA25_EMPTY', 'L1_gJ20p25ETA49', 'L1_gJ50p0ETA25', 'L1_gJ100p0ETA25', 'L1_gJ400p0ETA25',
@@ -172,6 +174,8 @@ def defineMenu():
         'L1_2jJ40_jXE110',
         'L1_3jJ40p0ETA25_jXE80',
         
+        #ATR-29523
+        'L1_3jJ40p0ETA25',
         # new calo
         #'L1_gXERHO70', 'L1_gXERHO100',
         'L1_gXENC70', 'L1_gXENC100',
@@ -266,7 +270,8 @@ def defineMenu():
         'L1_cTAU20M_cTAU12M_4jJ30p0ETA24_0DETA24-eTAU30eTAU12',
         'L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU12',
         # ATR-30638 (g-2 tau measurement)
-        'L1_DPHI-2eTAU60',
+        'L1_eTAU70_2cTAU50M_DPHI-2eTAU50',
+        'L1_2cTAU50M_DPHI-2eTAU50',
         
         'L1_DY-BOX-2MU5VF', 'L1_DY-BOX-MU5VFMU3V', 'L1_DY-BOX-2MU3VF',
 
@@ -331,6 +336,9 @@ def defineMenu():
         #ATR-30666
         'L1_ZAFB-04DPHIM-eEM18M',
         'L1_ZAFB-25DPHIM-eEM18M',
+        #ATR-30822
+        'L1_eEM18M_jEM25',
+
         #ATR-22109
         #'L1_ZAFB-25DPHI-eEM18M',
 

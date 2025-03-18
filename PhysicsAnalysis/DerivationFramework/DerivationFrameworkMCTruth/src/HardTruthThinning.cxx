@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -306,10 +306,10 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
         const xAOD::TruthParticle* pp = 
         dynamic_cast<const xAOD::TruthParticle*>(aipraw);
         if( pp ) {
-          if( pp->pt()>m_jetConstPtCut && pp->pdgId()!=22 ){
+          if( pp->pt()>m_jetConstPtCut && !MC::isPhoton(pp) ){
             uidJetConst.push_back( HepMC::uniqueID(pp) );
           }
-          if( pp->pt()>m_jetPhotonPtCut && pp->pdgId()==22 ){
+          if( pp->pt()>m_jetPhotonPtCut && !MC::isPhoton(pp) ){
             uidJetConst.push_back( HepMC::uniqueID(pp) );
           }
         } else {

@@ -1,0 +1,44 @@
+CommonServices:
+  systematicsHistogram: systematicsList
+
+PileupReweighting: {}
+
+EventCleaning:
+  runEventCleaning: True
+
+Electrons:
+- containerName: AnaElectrons
+  forceFullSimConfig: True
+  recalibratePhyslite: False
+  decorateTruth: true
+  decorateCaloClusterEta: true
+  writeTrackD0Z0: True
+  WorkingPoint:
+  - selectionName: loose
+    forceFullSimConfig: True
+    noEffSF: True
+    identificationWP: LooseBLayerLH
+    isolationWP: Loose_VarRad
+  PtEtaSelection:
+    minPt: 10000.0
+  TriggerSF:
+    triggerChainsPerYear:
+      '2015':
+      - 'HLT_e24_lhmedium_L1EM20VH || HLT_e60_lhmedium || HLT_e120_lhloose'
+      '2016':
+      - 'HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0'
+      '2017':
+      - 'HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0'
+      '2018':
+      - 'HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0'
+      '2022':
+      - 'HLT_e26_lhtight_ivarloose_L1EM22VHI || HLT_e60_lhmedium_L1EM22VHI || HLT_e140_lhloose_L1EM22VHI'
+    electronID: 'Tight'
+    electronIsol: 'Tight_VarRad'
+  IFFClassification: {}
+  MCTCClassification:
+    prefix: truth_
+
+GeneratorLevelAnalysis: {}
+
+PrintConfiguration: {}

@@ -372,6 +372,12 @@ else:
     postSeq.CountHepMC.RequestedOutput = evgenConfig.nEventsPerJob if runArgs.maxEvents == -1  else runArgs.maxEvents
     evgenLog.info('Requested output events = '+str(postSeq.CountHepMC.RequestedOutput))
 
+    # Special case of N<100: adjust TestHepMC. We will allow _one_ event to fail the checks.
+    # This means the minimum efficiency is N/N+1 for N generated events. Note that if N<100,
+    # each failed event costs us more than 1% of efficiency.
+    if hasattr(testSeq, "TestHepMC") and postSeq.CountHepMC.RequestedOutput<100:
+        testSeq.TestHepMC.EffFailThreshold = postSeq.CountHepMC.RequestedOutput/(postSeq.CountHepMC.RequestedOutput+1) - 0.01
+
 ## Check that the keywords are in the list of allowed words (and exit if processing an official JO)
 if evgenConfig.keywords:
     from GeneratorConfig.GenConfigHelpers import checkKeywords
@@ -487,6 +493,12 @@ AMITagHelper.SetAMITag(runArgs=runArgs)
 ## Handle beam info
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"beam_energy": str(int(runArgs.ecmEnergy*Units.GeV/2.0))})
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"beam_type": 'collisions'})
+
+## Propagete EventStreamInfo metadata
+from OutputStreamAthenaPool.OutputStreamAthenaPoolConf import CopyEventStreamInfo
+streamInfoTool = CopyEventStreamInfo( "StreamEVGEN_CopyEventStreamInfo" )
+ToolSvc += streamInfoTool
+svcMgr.MetaDataSvc.MetaDataTools += [ streamInfoTool ]
 
 ## Propagate energy argument to the generators
 # TODO: Standardise energy setting in the GenModule interface

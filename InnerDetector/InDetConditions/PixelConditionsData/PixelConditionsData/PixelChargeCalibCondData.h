@@ -82,6 +82,12 @@ class PixelChargeCalibCondData
     //
     float 
     getCharge(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE, float ToT) const;
+
+    // Avoids looking for Calibration Strategy multiple times
+    float
+    getCharge(InDetDD::PixelDiodeType type,
+	      const CalibrationStrategy calibStrategy,
+	      unsigned int moduleHash, unsigned int FE, float ToT) const;
     //
     // new IBL calibration
     void 

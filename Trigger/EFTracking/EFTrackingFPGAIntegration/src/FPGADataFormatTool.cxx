@@ -60,7 +60,6 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
     const EventContext &/*ctx*/
     ) const {
 
-  int pixelCounter = 0;
   bool filledHeader = false;
   for (const InDetRawDataCollection<PixelRDORawData>* pixel_rdoCollection : pixelRDO) 
   {
@@ -87,10 +86,8 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
             m_pixelId->phi_index(rdoId), // COL
             pixelRawData->getToT(), // TOT
             pixelRawData->getLVL1A(),  // Lvl!
-            pixelCounter,  // id
             0 // Spare
             );
-            pixelCounter++;
 
           // Push the word into the vector
           encodedData.push_back(FPGADataFormatUtilities::get_dataformat_PIXEL_EF_RDO(pixelWord));
@@ -105,140 +102,126 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
   return StatusCode::SUCCESS;
 }
 
-
 StatusCode FPGADataFormatTool::convertStripRDO(
     const SCT_RDO_Container &stripRDO,
     std::vector<uint64_t> &encodedData,
     const EventContext &/*ctx*/
-    ) const {
+) const {
+    constexpr int MaxChannelinStripRow = 128;
+    long unsigned int stripNumber = 0;
+    bool filledHeader = false;
 
-  constexpr int MaxChannelinStripRow = 128;
-  int stripNumber = 0;
+    uint64_t packedWord = 0;
+    bool firstClusterFilled = false;
 
-  bool filledHeader = false;
+    for (const InDetRawDataCollection<SCT_RDORawData>* SCT_Collection : stripRDO) {
+        if (SCT_Collection == nullptr) { continue; }
 
-  for (const InDetRawDataCollection<SCT_RDORawData>* SCT_Collection : stripRDO) {
-    if (SCT_Collection == nullptr) { continue; }
+        std::map<int, bool> firedStrips;
 
-    std::map<int, bool> firedStrips;
-    // Preprocess the SCT collection hits to get information for encoding strip in ITK format
-    // All strips fired read into a map to an overview of full module that should be used to encode
-    // the data into the ITk formatl
-    for (const SCT_RDORawData* sctRawData : *SCT_Collection) 
-    {
-      const Identifier rdoId = sctRawData->identify();
-      const int baseLineStrip{m_sctId->strip(rdoId)};
-
-      for(int i = 0; i < sctRawData->getGroupSize(); i++) {
-        firedStrips[baseLineStrip+ i] = true;
-      }
-    }
-
-    // Loop over the fired hits and encode them in the ITk strips hit map
-    // It find unique hits in the list that can be encoded and don't overlap
-    std::map<int, int> stripEncodingForITK;
-    for(auto& [stripID, fired]: firedStrips)
-    {
-      // Don't use the strip that has been set false. 
-      // This will be the case where neighbouring strip will "used up in the cluster"
-      // And then we don't want to re use them 
-      if(!fired) continue;
-
-      // Check the next 3 hits if they are there and have a hit in them
-      std::bitset<3> hitMap;
-
-      // Get the current chip id of the strip
-      int currChipID = stripID / MaxChannelinStripRow;
-      // Compute the maximum stripID this chip can have
-      int maxStripIDForCurrChip = (currChipID + 1) * MaxChannelinStripRow;
-
-      for(int i = 0; i < 3; i++)
-      {    
-        // We don't want to "cluster" strips that are outside the range of this chip
-        if((stripID + 1 + i) >= maxStripIDForCurrChip) continue;
-
-        if(firedStrips.find(stripID + 1 + i) != firedStrips.end())
-        {
-          if(firedStrips.at(stripID + 1 + i))
-          {
-            hitMap[2 - i] = 1;
-            firedStrips[stripID + 1 + i] = false;
-          }
-          else
-          {
-            hitMap[2 - i] = 0;
-          }
-        }
-      }
-      // Encode the hit map into a int
-      stripEncodingForITK[stripID] = (int)(hitMap.to_ulong());
-    }
-
-    // count number of strip we need to encode for figuring if we are at the last strip
-    int stripToEncode = 0;
-    int stripAlreadyEncoded = 0;
-    for(const auto& [stripID, fired]: firedStrips)
-    {
-      if(fired) stripToEncode += 1;
-    }
-
-    // Actual creation of the FPGAHit objects
-    for (const SCT_RDORawData* sctRawData : *SCT_Collection) 
-    {
-      const Identifier rdoId = sctRawData->identify();
-      // get the det element from the det element collection
-      const InDetDD::SiDetectorElement* sielement = m_SCT_mgr->getDetectorElement(rdoId);
-
-      // If the strip has been identified by the previous for loop as a valid hit that can be encoded into ITk Strip format
-      int stripID   = m_sctId->strip(rdoId);
-      if(stripEncodingForITK.find(stripID) != stripEncodingForITK.end())
-      { 
-        // Fill the module header
-        if(!filledHeader)
-        {
-          if(!fillModuleHeader(sielement, encodedData)) return StatusCode::FAILURE;
-          filledHeader = true;
+        // Preprocess the SCT collection hits to get information for encoding strip in ITK format
+        // All fired strips are stored in a map to get an overview of the full module that should be 
+        // used to encode the data into the ITk format.
+        for (const SCT_RDORawData* sctRawData : *SCT_Collection) {
+            const Identifier rdoId = sctRawData->identify();
+            const int baseLineStrip{m_sctId->strip(rdoId)};
+            for (int i = 0; i < sctRawData->getGroupSize(); i++) {
+                firedStrips[baseLineStrip + i] = true;
+            }
         }
 
-        // Each ITK ABC chip reads 128 channels in one row, so we just need to divide the current strip with 128 to get the chip index
-        // for the Strip ID, it is the remainder left after dividing by 128
-        int chipID = stripID / MaxChannelinStripRow;
-        int ITkStripID = stripID % MaxChannelinStripRow;
+        // Loop over the fired hits and encode them in the ITk strips hit map
+        // Finds unique hits in the list that can be encoded and don't overlap
+        std::map<int, int> stripEncodingForITK;
+        for (auto& [stripID, fired] : firedStrips) {
+            // Skip strips that have already been used in a cluster
+            if (!fired) continue;
 
-        // for each ABC chip readout, each reads 256 channels actually. 0-127 corresponds to lower row and then 128-255 corresponds to the 
-        // upper. This can be simulated in the code by using the eta module index. Even index are not offest, while odd index, the 
-        // strip id is offest by 128
-        // One point to not is that for barrel, the eta module index start at 1, and not zero. Hence a shift of 1 is needed
-        int offset = m_sctId->eta_module(rdoId) % 2;
-        if(m_sctId->barrel_ec(rdoId) == 0) offset = (std::abs(m_sctId->eta_module(rdoId)) - 1) % 2;
+            // Check the next 3 hits if they exist and have a hit in them
+            std::bitset<3> hitMap;
+            int currChipID = stripID / MaxChannelinStripRow;
+            int maxStripIDForCurrChip = (currChipID + 1) * MaxChannelinStripRow;
 
-        ITkStripID += offset * MaxChannelinStripRow;
+            for (int i = 0; i < 3; i++) {
+                // Do not cluster strips that are outside the range of this chip
+                if ((stripID + 1 + i) >= maxStripIDForCurrChip) continue;
+                if (firedStrips.find(stripID + 1 + i) != firedStrips.end()) {
+                    if (firedStrips.at(stripID + 1 + i)) {
+                        hitMap[2 - i] = 1;
+                        firedStrips[stripID + 1 + i] = false;
+                    } else {
+                        hitMap[2 - i] = 0;
+                    }
+                }
+            }
 
-        stripAlreadyEncoded++;
-        auto stripWord = FPGADataFormatUtilities::fill_STRIP_EF_RDO (
-          (stripAlreadyEncoded == stripToEncode), //last
-          chipID, //chip ID 
-          ITkStripID, //strip ID 
-          stripEncodingForITK.at(stripID), // cluster map 
-          stripNumber, // id 
-          0 // spare
-          );
-        stripNumber++;
-        // Push the word into the vector
-        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_STRIP_EF_RDO(stripWord));
-      }
+            // Encode the hit map into an integer
+            stripEncodingForITK[stripID] = static_cast<int>(hitMap.to_ulong());
+        }
+
+        // Process each fired strip and encode it
+        for (const SCT_RDORawData* sctRawData : *SCT_Collection) {
+            const Identifier rdoId = sctRawData->identify();
+            const InDetDD::SiDetectorElement* sielement = m_SCT_mgr->getDetectorElement(rdoId);
+
+            int stripID = m_sctId->strip(rdoId);
+            if (stripEncodingForITK.find(stripID) != stripEncodingForITK.end()) {
+                // Fill the module header if not already filled
+                if (!filledHeader) {
+                    if (!fillModuleHeader(sielement, encodedData)) return StatusCode::FAILURE;
+                    filledHeader = true;
+                }
+
+                // Compute chip ID and ITk strip ID
+                int chipID = stripID / MaxChannelinStripRow;
+                int ITkStripID = stripID % MaxChannelinStripRow;
+
+                // Adjust for row offset based on the eta module index
+                int offset = m_sctId->eta_module(rdoId) % 2;
+                if (m_sctId->barrel_ec(rdoId) == 0) {
+                    offset = (std::abs(m_sctId->eta_module(rdoId)) - 1) % 2;
+                }
+                ITkStripID += offset * MaxChannelinStripRow;
+
+                // Determine if this is the last cluster in the module
+                bool lastBit = (++stripNumber == stripEncodingForITK.size());
+
+                // Create the encoded strip word
+                auto stripWord = FPGADataFormatUtilities::fill_STRIP_EF_RDO(
+                    lastBit,          // last bit indicating module boundary
+                    chipID,           // chip ID
+                    ITkStripID,      // cluster number
+                    stripEncodingForITK.at(stripID), // cluster map
+                    0                // spare bits
+                );
+
+                uint32_t encodedCluster = FPGADataFormatUtilities::get_dataformat_STRIP_EF_RDO(stripWord);
+
+                // **Pack two clusters into a single 64-bit word**
+                if (!firstClusterFilled) {
+                    packedWord = (static_cast<uint64_t>(encodedCluster) << 32); // Store first cluster in upper 32 bits
+                    firstClusterFilled = true;
+                } else {
+                    packedWord |= static_cast<uint64_t>(encodedCluster); // Store second cluster in lower 32 bits
+                    encodedData.push_back(packedWord);  // Push the full packed word
+                    firstClusterFilled = false;  // Reset flag
+                    packedWord = 0;  // Clear for the next pair
+                }
+
+                // If this is the last cluster in the module and a single cluster is left, push it
+                if (lastBit && firstClusterFilled) {
+                    encodedData.push_back(packedWord);
+                }
+            }
+        }
 
     } // end for each RDO in the strip collection
 
-    // reset the header 
+    // Reset the header flag for the next module
     filledHeader = false;
 
-  } // end for each strip RDO collection
-  // dump all RDO's and SDO's for a given event, for debugging purposes
-
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
-
 
 // Helper function for common header and Footer info
 StatusCode FPGADataFormatTool::fillHeader(std::vector<uint64_t> &encodedData) const

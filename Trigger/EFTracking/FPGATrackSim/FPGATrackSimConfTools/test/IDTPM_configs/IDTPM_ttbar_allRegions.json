@@ -1,4 +1,6 @@
+
 {
+
     "TrkAnaEF" : {
         "enabled" : true,
         "TestType"  : "EFTrigger",
@@ -6,6 +8,7 @@
         "TrigTrkKey": "FPGATrackParticles",
         "MatchingType"  : "TruthMatch",
         "plotHitsOnMatchedTracks" : true,
+        "plotTechnicalEfficiencies" : true,
         "truthMinD0"    : -2.0,
         "truthMaxD0"    : 2.0,
         "truthMinZ0"    : -150.0,
@@ -20,6 +23,7 @@
         "RefType"   : "Truth",
         "MatchingType"  : "TruthMatch",
         "plotHitsOnMatchedTracks" : true,
+        "plotTechnicalEfficiencies" : true,
         "truthMinD0"    : -2.0,
         "truthMaxD0"    : 2.0,
         "truthMinZ0"    : -150.0,

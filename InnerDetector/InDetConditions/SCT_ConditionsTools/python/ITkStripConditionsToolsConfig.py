@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
@@ -180,7 +180,7 @@ def ITkStripReadCalibDataToolCfg(flags, name="ITkStripReadCalibDataTool", cond_k
                                                          ReadKeyGain=cond_kwargs["GainFolder"],
                                                          ReadKeyNoise=cond_kwargs["NoiseFolder"]))
 
-    from SCT_Cabling.ITkStripCablingConfig import ITkStripCablingToolCfg
+    from ITkStripCabling.ITkStripCablingConfig import ITkStripCablingToolCfg
     kwargs.setdefault("SCT_CablingTool", acc.popToolsAndMerge(ITkStripCablingToolCfg(flags)))
 
     acc.setPrivateTools(CompFactory.SCT_ReadCalibDataTool(name, **kwargs))
@@ -188,7 +188,7 @@ def ITkStripReadCalibDataToolCfg(flags, name="ITkStripReadCalibDataTool", cond_k
 
 
 def ITkStripReadoutToolCfg(flags, name="ITkStripReadoutTool", **kwargs):
-    from SCT_Cabling.ITkStripCablingConfig import ITkStripCablingToolCfg
+    from ITkStripCabling.ITkStripCablingConfig import ITkStripCablingToolCfg
     acc = ITkStripCablingToolCfg(flags)
     kwargs.setdefault("SCT_CablingTool", acc.popPrivateTools())
     acc.setPrivateTools(CompFactory.SCT_ReadoutTool(name, **kwargs))
@@ -216,7 +216,7 @@ def ITkStripTdaqEnabledToolCfg(flags, name="ITkStripTdaqEnabledTool", **kwargs):
     acc.merge(addFolders(flags, [folder], detDb="TDAQ", className="CondAttrListCollection"))
 
     # Algorithm
-    from SCT_Cabling.ITkStripCablingConfig import ITkStripCablingToolCfg
+    from ITkStripCabling.ITkStripCablingConfig import ITkStripCablingToolCfg
     kwargs.setdefault("SCT_CablingTool", acc.popToolsAndMerge(ITkStripCablingToolCfg(flags)))
     acc.addCondAlgo(CompFactory.SCT_TdaqEnabledCondAlg(**kwargs))
 

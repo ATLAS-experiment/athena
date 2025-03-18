@@ -50,5 +50,6 @@ def createIDPVMConfigFlags():
     icf.addFlag("jetCollection", "AntiKt4EMPflowJets")
     icf.addFlag('JetPtMin', 100.*Units.GeV)
     icf.addFlag('JetPtMax', 5000.*Units.GeV)
+    icf.addFlag('setCSVName', "")
     return icf
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,22 +13,7 @@
 
 namespace LVL1 {
 
-CMXCPTob::CMXCPTob():
-  m_crate(0),
-  m_cmx(0),
-  m_cpm(0),
-  m_chip(0),
-  m_location(0),
-  m_peak(0),
-  m_energy(1),
-  m_isolation(1),
-  m_error(1),
-  m_presenceMap(1)
-{
-}
 
-CMXCPTob::~CMXCPTob(){
-}
 
 /** constructs a CMXCPTob object, specifying crate, cmx, cpm etc. */
 CMXCPTob::CMXCPTob(int crate, int cmx, int cpm, int chip, int loc):
@@ -36,12 +21,7 @@ CMXCPTob::CMXCPTob(int crate, int cmx, int cpm, int chip, int loc):
   m_cmx(cmx),
   m_cpm(cpm),
   m_chip(chip),
-  m_location(loc),
-  m_peak(0),
-  m_energy(1),
-  m_isolation(1),
-  m_error(1),
-  m_presenceMap(1)
+  m_location(loc)
 {
 }
 

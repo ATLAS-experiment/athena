@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_READMETAHANDLEKEY_H
@@ -18,7 +18,7 @@ namespace SG {
     public:
       friend class ReadMetaHandle<T>;
         
-      ReadMetaHandleKey (const std::string& key
+      explicit ReadMetaHandleKey (const std::string& key
 			 , const std::string& dbKey="")
 	: MetaHandleKey<T>(key, dbKey, Gaudi::DataHandle::Reader)
 	{}   
@@ -34,6 +34,11 @@ namespace SG {
 	auto p = owner->declareProperty(std::move(name), *this, std::move(doc));
 	p->template setOwnerType<OWNER>();
       }
+
+    inline ReadMetaHandleKey& operator= (const std::string& sgkey) {
+      VarHandleKey::operator= (sgkey);
+      return *this;
+    }
 
     };
 

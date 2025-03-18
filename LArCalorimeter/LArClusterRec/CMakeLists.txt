@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArClusterRec )
@@ -7,7 +7,7 @@ atlas_subdir( LArClusterRec )
 atlas_add_component( LArClusterRec
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES CaloEvent AthenaBaseComps xAODCaloEvent LArIdentifier LArRecEvent LArCablingLib AthContainers Identifier LArRawEvent )
+                     LINK_LIBRARIES CaloEvent AthenaBaseComps xAODCaloEvent LArIdentifier LArRecEvent LArCablingLib AthContainers Identifier LArRawEvent CxxUtils )
 
 
 # Install files from the package:

@@ -312,15 +312,15 @@ def IDTRKVALIDCfg(flags):
     if flags.Detector.GeometryITk:
         if flags.ITk.DAODStorePixel:
             IDTRKVALIDSlimmingHelper.AppendToDictionary.update({
-                "ITkPixelClusters": "xAOD::TrackMeasurementValidationContainer",
-                "ITkPixelClustersAux": "xAOD::TrackMeasurementValidationAuxContainer",
+                "ITkPixelMeasurements": "xAOD::TrackMeasurementValidationContainer",
+                "ITkPixelMeasurementsAux": "xAOD::TrackMeasurementValidationAuxContainer",
                 "ITkPixelMSOSs": "xAOD::TrackStateValidationContainer",
                 "ITkPixelMSOSsAux": "xAOD::TrackStateValidationAuxContainer"
             })
         if flags.ITk.DAODStoreStrip:
             IDTRKVALIDSlimmingHelper.AppendToDictionary.update({
-                "ITkStripClusters": "xAOD::TrackMeasurementValidationContainer",
-                "ITkStripClustersAux": "xAOD::TrackMeasurementValidationAuxContainer",
+                "ITkStripMeasurements": "xAOD::TrackMeasurementValidationContainer",
+                "ITkStripMeasurementsAux": "xAOD::TrackMeasurementValidationAuxContainer",
                 "ITkStripMSOSs": "xAOD::TrackStateValidationContainer",
                 "ITkStripMSOSsAux": "xAOD::TrackStateValidationAuxContainer"
             })
@@ -346,9 +346,9 @@ def IDTRKVALIDCfg(flags):
             AllVariables += ["SCT_Clusters","SCT_MSOSs"]
     if flags.Detector.GeometryITk:
         if flags.ITk.DAODStorePixel:
-            AllVariables += ["ITkPixelClusters","ITkPixelMSOSs"]
+            AllVariables += ["ITkPixelMeasurements","ITkPixelMSOSs"]
         if flags.ITk.DAODStoreStrip:
-            AllVariables += ["ITkStripClusters","ITkStripMSOSs"]
+            AllVariables += ["ITkStripMeasurements","ITkStripMSOSs"]
 
     IDTRKVALIDSlimmingHelper.AppendToDictionary.update({
         "TauJets": "xAOD::TauJetContainer",

@@ -22,7 +22,7 @@ if __name__=="__main__":
    # make logging more verbose
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import DEBUG, INFO
-   log.setLevel(INFO)
+   log.setLevel(DEBUG)
    
    # --- set flags
    # the input file
@@ -50,17 +50,12 @@ if __name__=="__main__":
    from ITkPixelByteStreamCnv.ITkPixelEncodingAlgConfig import ITkPixelEncodingAlgCfg
    cfg.merge( ITkPixelEncodingAlgCfg(flags) )
 
-   from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg
-   
    cfg.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
  
    #dump what's in SG
    #sg = cfg.getService("StoreGateSvc")
    #sg.Dump = True
 
-   #try and write it in a BS file
-   cfg.merge(ByteStreamWriteCfg(flags, ['std::vector<uint32_t>#ITkEncodedStream']))
-
    # loop over 10 events
-   cfg.run(1)
+   cfg.run(10)
 

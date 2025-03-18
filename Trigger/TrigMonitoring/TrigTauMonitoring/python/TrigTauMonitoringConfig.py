@@ -496,7 +496,7 @@ class TrigTauMonAlgBuilder:
     mon_group = self.helper.addGroup(mon_alg, mon_group_name, mon_group_path)
  
     for tau_id, (score, score_sig_trans) in variables.items():
-      if tau_id in ['RNN', 'DeepSet', 'RNNLLP']: xbins, xmax = 20, 1
+      if tau_id in ['RNN', 'DeepSet', 'RNNLLP', 'GNTau']: xbins, xmax = 20, 1
       else: xbins, xmax = 100, 5
 
       mon_group.defineHistogram(f'{tau_id}_TauIDScore', title=f'{type_str} {tau_id} TauID score; TauID score; Events', xbins=xbins, xmin=0, xmax=xmax, opt='kAlwaysCreate')
@@ -568,7 +568,7 @@ class TrigTauMonAlgBuilder:
                               xbins=50, xmin=0, xmax=250, ybins=50, ymin=0, ymax=250, opt='kAlwaysCreate')
     mon_group.defineHistogram('leadHLTEta,subleadHLTEta', type='TH2F', title='#eta_{lead} vs #eta_{sublead}; #eta_{lead}; #eta_{sublead}',
                               xbins=26, xmin=-2.6, xmax=2.6, ybins=26, ymin=-2.6, ymax=2.6, opt='kAlwaysCreate')
-    mon_group.defineHistogram('leadHLTPhi,subleadHLTPhi', type='TH2F', title='#phi_{lead} vs #phi_{sublead}; #phi_{lead}; #phi{sublead}',
+    mon_group.defineHistogram('leadHLTPhi,subleadHLTPhi', type='TH2F', title='#phi_{lead} vs #phi_{sublead}; #phi_{lead}; #phi_{sublead}',
                               xbins=16, xmin=-3.2, xmax=3.2, ybins=16, ymin=-3.2, ymax=3.2, opt='kAlwaysCreate') 
     mon_group.defineHistogram('dR', title='#Delta R(#tau,#tau); #Delta R(#tau,#tau); Events', xbins=40, xmin=0, xmax=4, opt='kAlwaysCreate')
     mon_group.defineHistogram('dEta', title='#Delta#eta(#tau,#tau); #Delta#eta(#tau,#tau); Events', xbins=40, xmin=0, xmax=4, opt='kAlwaysCreate')
@@ -752,15 +752,6 @@ class TrigTauMonAlgBuilder:
 
     elif 'jTAU' in trigger:
         mon_group.defineHistogram('L1jFexRoIIso', title='L1 jTAU RoI Isolation; jTAU Isolation [GeV]; N RoI', xbins=25, xmin=0, xmax=50, opt='kAlwaysCreate')
-
-    else: # Legacy
-        mon_group.defineHistogram('L1RoIEMIsol', title='L1 Legacy RoI EM Isol; E_{T}^{EM Iso} [GeV]; RoIs', xbins=16, xmin=-2, xmax=30, opt='kAlwaysCreate')
-        mon_group.defineHistogram('L1RoIHadCore', title='L1 Legacy RoI Had Core; E_{T}^{Had} [GeV]; RoIs', xbins=16, xmin=-2, xmax=30, opt='kAlwaysCreate')
-        mon_group.defineHistogram('L1RoIHadIsol', title='L1 Legacy RoI Had Isol; E_{T}^{Had Iso} [GeV]; RoIs', xbins=16, xmin=-2, xmax=30, opt='kAlwaysCreate')
-        mon_group.defineHistogram('L1RoITauClus', title='L1 Legacy RoI E_{T}; E_{T} [GeV]; RoIs', xbins=260, xmin=0, xmax=130, opt='kAlwaysCreate')
-        mon_group.defineHistogram('L1RoITauClus,L1RoIEMIsol', type='TH2F', title='L1 RoI E_{T} vs EM Isol; E_{T} [GeV]; E_{T}^{EM Iso} [GeV]',
-                                  xbins=140, xmin=10, xmax=80, ybins=42, ymin=-1, ymax=20, opt='kAlwaysCreate')
-
 
   def getCustomPtBinning(self, trigger, fine=False):
     info = self.getTriggerInfo(trigger)

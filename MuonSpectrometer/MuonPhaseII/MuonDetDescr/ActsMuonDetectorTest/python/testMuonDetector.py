@@ -15,8 +15,24 @@ def MuonDetectorNavTestCfg(flags, name = "MuonDetectorNavTest", **kwargs):
     if flags.Detector.EnableTGC:
         containerNames+=["xTgcSimHits"]
     if flags.Detector.EnablesTGC:
-        containerNames+=["xStgcSimHits"] 
-    kwargs.setdefault("SimHitKeys", containerNames)
+        containerNames+=["xStgcSimHits"]
+    
+    from MuonTruthAlgsR4.MuonTruthAlgsConfig import TruthSegmentMakerCfg, TruthSegmentToTruthPartAssocCfg, SdoMultiTruthMakerCfg
+
+    from MuonConfig.MuonTruthAlgsConfig import MuonTruthClassificationAlgCfg, MuonTruthHitCountsAlgCfg
+
+    result.merge(MuonTruthClassificationAlgCfg(flags, pdgIds=[13,998,999]))
+    result.merge(MuonTruthHitCountsAlgCfg(flags))
+    result.merge(TruthSegmentToTruthPartAssocCfg(flags))
+    result.merge(SdoMultiTruthMakerCfg(flags))
+
+    result.merge(TruthSegmentMakerCfg(flags, SimHitKeys=containerNames, useOnlyMuonHits = False))
+    kwargs.setdefault("StartFromFirstHit", True)
+    
+    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+    extp = result.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
+    extp.ApplyMaterialEffects = False
+    kwargs.setdefault("Extrapolator", extp)
 
     the_alg = CompFactory.ActsTrk.MuonDetectorNavTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
@@ -26,14 +42,13 @@ if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
     parser = SetupArgParser()
     parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"])
-    parser.set_defaults(outRootFile="MuonNavigationTestR4.root")
+    parser.set_defaults(outRootFile="MuonNavigationTestR4_NewMaterial_Passive.root")
     parser.set_defaults(nEvents=10)
     parser.add_argument("--dumpDetector", help="Save dump detector visualization", action='store_true', default=False )
     parser.add_argument("--dumpPassive", help="Save  detector visualization", action='store_true', default=False )
     parser.add_argument("--dumpDetectorVolumes", help="Save detector visualization", action='store_true', default=False )
     parser.add_argument("--noSensitives", help="Do not use sensitive detectors", action='store_true', default=False )
     parser.add_argument("--dumpMaterialSurfaces", help="Save material surfaces visualization", action='store_true', default=False )
-
 
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -52,4 +67,5 @@ if __name__=="__main__":
     cfg.getPublicTool("MuonDetectorBuilderTool").dumpDetectorVolumes = args.dumpDetectorVolumes
     cfg.getPublicTool("MuonDetectorBuilderTool").BuildSensitives = not args.noSensitives
     cfg.getPublicTool("MuonDetectorBuilderTool").dumpMaterialSurfaces = args.dumpMaterialSurfaces
+
     executeTest(cfg)

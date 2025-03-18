@@ -69,12 +69,6 @@ namespace Prompt
       const std::vector<const xAOD::TrackParticle* > &tracks
     );
 
-    std::vector<std::unique_ptr<xAOD::Vertex>> prepLepWithMergedSVVec(
-      const FittingInput &input,
-      const xAOD::TrackParticle* tracklep,
-      std::vector<std::unique_ptr<xAOD::Vertex>> &twoTrkVertices
-    );
-
     void makeVertexCluster(
       std::vector<std::unique_ptr<xAOD::Vertex>> &clusterVtxs,
       std::vector<std::unique_ptr<xAOD::Vertex>> &inputVtxs

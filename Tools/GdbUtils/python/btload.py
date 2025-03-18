@@ -19,8 +19,9 @@ def btload (limit = 100):
         retry = False
         while frame and frame.is_valid() and iframe < limit:
             if frame.name() is None:
-                findlib (frame.pc())
-                retry = True
+                lib = findlib (frame.pc())
+                if lib and lib != 'libubsan.so' and lib != 'libasan.so':
+                    retry = True
                 break
             if frame.name() == 'ApplicationMgr::executeRun':
                 break

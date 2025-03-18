@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -52,11 +52,9 @@ def IsoCloseByCorrSkimmingAlgCfg(flags, suff = "", name="IsoCloseByCorrSkimmingA
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], useSelTools = False, **kwargs):
+def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], useSelTools = False, isoDecSuffix = "CloseByCorr", hasLRT = False, **kwargs):
 
     result = ComponentAccumulator()
-    # Check for LLP1 to use different selection decorators
-    isLLP1 = suff == "_LLP1"
 
     # Configure the CloseBy isolation correction alg - only need two WPs each for all iso variables
     elIsoWPs   = [ "Loose_VarRad", "TightTrackOnly_FixedRad" ]
@@ -68,7 +66,6 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite 
                                                                     MuonWPVec     = muIsoWPs,
                                                                     PhotonWPVec   = phIsoWPs))
     # Set suffix for writing corrected isolation values
-    isoDecSuffix = "CloseByCorr"
     selectionDecorator = "isoSelIsOK"
     kwargs.setdefault("IsoCloseByCorrectionTool", 
                        result.popToolsAndMerge(IsoCloseByCorrectionToolCfg(flags, 
@@ -85,15 +82,15 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite 
                                                                 MaxEta        = 2.7,
                                                                 DisablePtCuts = True,
                                                                 MuQuality     = 2, ### Select the loose working point
+                                                                UseLRT        = hasLRT,
                                                                 )))  
 
     # Define selectors for electron and photon - different for LLP1 as compared to PHYS and PHYSLITE
-    if isLLP1:
+    kwargs.setdefault("PhotSelectionKey",  "Photons.DFCommonPhotonsIsEMLoose")
+    if hasLRT:
         kwargs.setdefault("ElecSelectionKey",  "Electrons.DFCommonElectronsLHVeryLooseNoPix")
-        kwargs.setdefault("PhotSelectionKey",  "Photons.DFCommonPhotonsIsEMMedium")
     else:
         kwargs.setdefault("ElecSelectionKey",  "Electrons.DFCommonElectronsLHVeryLoose")
-        kwargs.setdefault("PhotSelectionKey",  "Photons.DFCommonPhotonsIsEMLoose")
 
     # Set selection for muons, electrons and photons to contribute to overlap
     kwargs.setdefault("ParticleContainerKeys",    containerNames)
@@ -143,7 +140,7 @@ def TestIsoCloseByCorrectionCfg(flags, name="TestIsoCloseByAlg", suff = "", **kw
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], stream_name="", ttva_wp = "Nonprompt_All_MaxWeight", useSelTools = False):
+def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], stream_name="", ttva_wp = "Nonprompt_All_MaxWeight", useSelTools = False, isoDecSuffix = "CloseByCorr", hasLRT = False):
 
     # Add in two ways to do IsoCloseBy correction:
     #   - use IsoCloseByCorrAlg to modify the <iso_value>s for close by lepton/photon. 
@@ -170,7 +167,7 @@ def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "
 
     # Setup the isolation close-by correction algorithm sequence to correct the isolation of near-by el, mu, ph
     from IsolationSelection.IsolationSelectionConfig import IsoCloseByCorrAlgCfg
-    acc.merge(IsoCloseByCorrAlgCfg(flags, suff = suff, isPhysLite = isPhysLite, containerNames = containerNames, useSelTools = useSelTools))
+    acc.merge(IsoCloseByCorrAlgCfg(flags, suff = suff, isPhysLite = isPhysLite, containerNames = containerNames, useSelTools = useSelTools, isoDecSuffix = isoDecSuffix, hasLRT = hasLRT))
 
 
     return acc

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef SIMULATIONBASE
 #ifndef MUONGEOMODELR4_MUONCHAMBERASSMBLETOOL_H
@@ -26,9 +26,7 @@ class MuonReadoutElement;
 class ChamberAssembleTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
    public:
       /** @brief Standard constructor of the tool */
-      ChamberAssembleTool(const std::string &type, const std::string &name,
-                          const IInterface *parent);
-
+      using base_class::base_class;
 
       virtual StatusCode buildReadOutElements(MuonDetectorManager &mgr) override final;
 

@@ -161,7 +161,7 @@ def AddMuonRemovalTauAODReRecoAlgCfg(flags, **kwargs):
     tools_after.append( acc.popToolsAndMerge(tauTools.Pi0ScoreCalculatorCfg(flags)) )
     tools_after.append( acc.popToolsAndMerge(tauTools.Pi0SelectorCfg(flags)) )
     tools_after.append( acc.popToolsAndMerge(tauTools.TauVertexVariablesCfg(flags)) )
-    import PanTauAlgs.JobOptions_Main_PanTau_New as pantau
+    import PanTauAlgs.JobOptions_Main_PanTau as pantau
     tools_after.append( acc.popToolsAndMerge(pantau.PanTauCfg(flags)) )
     tools_after.append( acc.popToolsAndMerge(tauTools.TauCombinedTESCfg(flags)) )
     tools_after.append( acc.popToolsAndMerge(tauTools.MvaTESVariableDecoratorCfg(flags)) )

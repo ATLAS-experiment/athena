@@ -50,8 +50,10 @@ FastCaloSim::FastCaloSim(const std::string& name,
                          const Gaudi::Property<bool>& doHadrons,
                          const Gaudi::Property<float>& AbsEtaMin,
                          const Gaudi::Property<float>& AbsEtaMax,
-                         const Gaudi::Property<float>& EkinMin,
-                         const Gaudi::Property<float>& EkinMax,
+                         const Gaudi::Property<float>& EkinMinPhotons,
+                         const Gaudi::Property<float>& EkinMaxPhotons,
+                         const Gaudi::Property<float>& EkinMinElectrons,
+                         const Gaudi::Property<float>& EkinMaxElectrons,
                          const Gaudi::Property<bool>& doEMECFCS,
                          const Gaudi::Property<bool>& doPunchThrough,
                          FastCaloSimTool * FastCaloSimTool)
@@ -70,8 +72,10 @@ FastCaloSim::FastCaloSim(const std::string& name,
   m_doHadrons(doHadrons),
   m_AbsEtaMin(AbsEtaMin),
   m_AbsEtaMax(AbsEtaMax),
-  m_EkinMin(EkinMin),
-  m_EkinMax(EkinMax),
+  m_EkinMinPhotons(EkinMinPhotons),
+  m_EkinMaxPhotons(EkinMaxPhotons),
+  m_EkinMinElectrons(EkinMinElectrons),
+  m_EkinMaxElectrons(EkinMaxElectrons),
   m_doEMECFCS(doEMECFCS),
   m_doPunchThrough(doPunchThrough),
   m_FastCaloSimTool(FastCaloSimTool)
@@ -94,7 +98,7 @@ void FastCaloSim::EndOfAthenaEvent(const EventContext&){
 
 
 G4bool FastCaloSim::IsApplicable(const G4ParticleDefinition& particleType)
-{   
+{
   // Check whether we can simulate the particle with FastCaloSim
   bool isPhoton   = &particleType == G4Gamma::GammaDefinition();
   bool isElectron = &particleType == G4Electron::ElectronDefinition();
@@ -149,9 +153,11 @@ G4bool FastCaloSim::ModelTrigger(const G4FastTrack& fastTrack)
 
   // Check if there is a configuration for this PID
   bool withinEtaRange = (std::abs(eta_pos) > m_AbsEtaMin) && (std::abs(eta_pos) < m_AbsEtaMax);
-  bool withinEkinRange = (Ekin > m_EkinMin) && (Ekin < m_EkinMax);
+  bool withinEkinRangePhotons = isPhoton && (Ekin > m_EkinMinPhotons) && (Ekin < m_EkinMaxPhotons);
+  bool withinEkinRangeElectrons = (isElectron || isPositron) && (Ekin > m_EkinMinElectrons) && (Ekin < m_EkinMaxElectrons);
+
   
-  if (!(withinEtaRange && withinEkinRange)) {
+  if (!(withinEtaRange && (withinEkinRangePhotons || withinEkinRangeElectrons))) {
     #ifdef FCS_DEBUG
       G4cout<<"[FastCaloSim::ModelTrigger] Model not triggered"<<G4endl;
     #endif

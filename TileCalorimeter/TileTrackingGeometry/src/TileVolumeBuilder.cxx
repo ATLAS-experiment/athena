@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -126,7 +126,8 @@ StatusCode Tile::TileVolumeBuilder::initialize()
 }
 
 std::vector<Trk::TrackingVolume*>*
-Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
+Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
+					 , const GeoAlignmentStore* /*geoAlign*/) const
 {
   // the return vector
   std::vector<Trk::TrackingVolume*>* tileTrackingVolumes = new std::vector<Trk::TrackingVolume*>;

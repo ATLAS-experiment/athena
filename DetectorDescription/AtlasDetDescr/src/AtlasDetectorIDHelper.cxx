@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "AtlasDetectorIDHelper.h"
@@ -7,284 +7,140 @@
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include <iostream>
 
-AtlasDetectorIDHelper::AtlasDetectorIDHelper(IMessageSvc* msgSvc) :
-  AthMessaging(msgSvc, "AtlasDetectorIDHelper") {
+AtlasDetectorIDHelper::AtlasDetectorIDHelper() :
+  AthMessaging("AtlasDetectorIDHelper") {
 }
 
 int
-AtlasDetectorIDHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr,
-                                                  bool quiet) {
+AtlasDetectorIDHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   if (m_initialized) return(0);
 
   m_initialized = true;
 
   AtlasDetectorID atlas_id;
-  ExpandedIdentifier id;
 
   const IdDictDictionary* dict = dict_mgr.find_dictionary("InnerDetector");
+  
+  auto assignRegionFromAtlasID = [this, &dict](const ExpandedIdentifier& id, 
+                                               size_type& regionIdx,
+                                               const std::string& techType) {
+      if (dict->find_region(id, regionIdx)) {
+        ATH_MSG_WARNING("initialize_from_dictionary - unable to find "<<techType<<" region index: id, reg "
+          << id << " " << regionIdx);
+      }
+  };
+
+  auto assignRegionIdxFromGrp = [this, &dict](const std::string& grp, size_type& regionIdx) {
+    IdDictGroup* group = dict->find_group(grp);
+    if (!group || !group->regions().size()) {
+        ATH_MSG_VERBOSE("The group "<<grp<<" is not present.");
+        regionIdx = UNDEFINED;
+        return;
+    }
+    regionIdx = group->regions().front()->m_index;
+    ATH_MSG_VERBOSE("Region index for "<<grp<<" will be assigned to "<<regionIdx);
+
+  };
+
+  auto assignRegionIdxFromRegion = [this, &dict](const std::string& grp, size_type& regionIdx) {
+    IdDictRegion* region = dict->find_region(grp);
+    if (!region) {
+        ATH_MSG_VERBOSE("The group "<<grp<<" is not present.");
+        regionIdx = UNDEFINED;
+        return;
+    }
+    regionIdx = region->m_index;
+    ATH_MSG_VERBOSE("Region index for "<<grp<<" will be assigned to "<<regionIdx);
+  };
+  
+
   if (!dict) {
-    ATH_MSG_WARNING("initialize_from_dictionary - cannot access InnerDetector dictionary");
+    ATH_MSG_ERROR("initialize_from_dictionary - cannot access InnerDetector dictionary");
     return 1;
-  } else {
-    // Check if this is High Luminosity LHC layout
-    if (dict->m_version == "ITkHGTD" || dict->m_version == "ITkHGTDPLR" || dict->m_version == "P2-RUN4") {
-      m_isHighLuminosityLHC = true;
-    }
+  } 
 
-    // Save index to a PIXEL region for unpacking
-    id = atlas_id.pixel_exp();
-    if (dict->find_region(id, m_pixel_region_index)) {
-      ATH_MSG_WARNING("initialize_from_dictionary - unable to find pixel region index: id, reg "
-                      << (std::string) id << " " << m_pixel_region_index);
-    }
-
-    // for High Luminosity LHC layout one cannot get the sct region as below, nor
-    // is there any trt regions
-    if (!m_isHighLuminosityLHC) {
-      // Save index to a SCT region for unpacking
-      id = atlas_id.sct_exp();
-      if (dict->find_region(id, m_sct_region_index)) {
-        ATH_MSG_WARNING("initialize_from_dictionary - unable to find sct region index: id, reg "
-                        << (std::string) id << " " << m_sct_region_index);
-      }
-
-      // Save index to a TRT region for unpacking
-      id = atlas_id.trt_exp();
-      if (dict->find_region(id, m_trt_region_index)) {
-        ATH_MSG_WARNING("initialize_from_dictionary - unable to find trt region index: id, reg "
-                        << (std::string) id << " " << m_trt_region_index);
-      }
-    }
-
-    dict = dict_mgr.find_dictionary("LArCalorimeter");
-    if (!dict) {
-      ATH_MSG_WARNING("initialize_from_dictionary - cannot access LArCalorimeter dictionary");
-      return 1;
-    } else {
-      // Save index to a LAR_EM region for unpacking
-      id = atlas_id.lar_em_exp();
-      if (dict->find_region(id, m_lar_em_region_index)) {
-        ATH_MSG_WARNING("initialize_from_dictionary - unable to find lar_em region index: id, reg "
-                        << (std::string) id << " " << m_lar_em_region_index);
-      }
-
-      // Save index to a LAR_HEC region for unpacking
-      id = atlas_id.lar_hec_exp();
-      if (dict->find_region(id, m_lar_hec_region_index)) {
-        ATH_MSG_WARNING("initialize_from_dictionary - unable to find lar_hec region index: id, reg "
-                        << (std::string) id << " " << m_lar_hec_region_index);
-      }
-
-      // Save index to a LAR_FCAL region for unpacking
-      id = atlas_id.lar_fcal_exp();
-      if (dict->find_region(id, m_lar_fcal_region_index)) {
-        ATH_MSG_WARNING("initialize_from_dictionary - unable to find lar_fcal region index: id, reg "
-                        << (std::string) id << " " << m_lar_fcal_region_index);
-      }
-    }
-
-    // Get Calorimetry dictionary for both LVL1 and Dead material
-    dict = dict_mgr.find_dictionary("Calorimeter");
-    if (!dict) {
-      ATH_MSG_WARNING("initialize_from_dictionary - cannot access Calorimeter dictionary");
-      return 1;
-    } else {
-      // Save index to a LVL1 region for unpacking
-      IdDictRegion* reg = dict->find_region("Lvl1_0");
-      if (reg) {
-        m_lvl1_region_index = reg->m_index;
-      } else {
-        ATH_MSG_WARNING("initialize_from_dictionary - unable to find lvl1 region");
-      }
-
-      // Save index to a Dead Material region for unpacking
-      reg = dict->find_region("DM_4_1_0_0");
-      if (reg) {
-        m_dm_region_index = reg->m_index;
-      } else {
-        ATH_MSG_WARNING("initialize_from_dictionary - unable to find dead material region");
-      }
-    }
-
-    dict = dict_mgr.find_dictionary("TileCalorimeter");
-    if (!dict) {
-      ATH_MSG_WARNING("initialize_from_dictionary - cannot access TileCalorimeter dictionary");
-      return 1;
-    } else {
-      // Save index to a TILE region for unpacking
-      id = atlas_id.tile_exp();
-      if (dict->find_region(id, m_tile_region_index)) {
-        ATH_MSG_WARNING("initialize_from_dictionary - unable to find tile region index: id, reg");
-      }
-    }
-
-    dict = dict_mgr.find_dictionary("MuonSpectrometer");
-    if (!dict) {
-      ATH_MSG_WARNING("initialize_from_dictionary - cannot access MuonSpectrometer dictionary");
-      return 1;
-    } else {
-      m_station_field = dict->find_field("stationName");
-      if (!m_station_field) {
-        ATH_MSG_WARNING("initialize_from_dictionary - cannot access stationName field");
-      } else {
-        m_muon_station_index = m_station_field->m_index;
-      }
-    }
-
-
-    // Save index to a MDT region for unpacking
-    IdDictGroup* group = dict->find_group("mdt");
-    if (group) {
-      const std::vector<IdDictRegion*>& regions = group->regions();
-      if (regions.size() > 0) {
-        m_mdt_region_index = regions[0]->m_index;
-      }
-    }
-
-
-    if (UNDEFINED == m_mdt_region_index) {
-      int size = 0;
-      if (group) {
-        size = group->regions().size();
-      }
-      ATH_MSG_WARNING("initialize_from_dictionary - unable to find mdt region index: group, region size "
-                      << group << " " << size);
-    }
-
-    // Save index to a CSC region for unpacking
-    group = dict->find_group("csc");
-    if (group) {
-      if (group->regions().size() > 0) {
-        m_csc_region_index = group->regions()[0]->m_index;
-      }
-    }
-    if (UNDEFINED == m_csc_region_index) {
-      int size = 0;
-      if (group) {
-        size = group->regions().size();
-      }
-      ATH_MSG_DEBUG("initialize_from_dictionary - unable to find csc region index: group, region size "
-                    << group << " " << size);
-    }
-
-    // Save index to a RPC region for unpacking
-    group = dict->find_group("rpc");
-    if (group) {
-      if (group->regions().size() > 0) {
-        m_rpc_region_index = group->regions()[0]->m_index;
-      }
-    }
-    if (UNDEFINED == m_rpc_region_index) {
-      int size = 0;
-      if (group) {
-        size = group->regions().size();
-      }
-      ATH_MSG_WARNING("initialize_from_dictionary - unable to find rpc region index: group, region size "
-                      << group << " " << size);
-    }
-
-    // Save index to a TGC region for unpacking
-    group = dict->find_group("tgc");
-    if (group) {
-      if (group->regions().size() > 0) {
-        m_tgc_region_index = group->regions()[0]->m_index;
-      }
-    }
-    if (UNDEFINED == m_tgc_region_index) {
-      int size = 0;
-      if (group) {
-        size = group->regions().size();
-      }
-      ATH_MSG_WARNING("initialize_from_dictionary - unable to find tgc region index: group, region size "
-                      << group << " " << size);
-    }
-
-    // Save index to a MM region for unpacking
-    group = dict->find_group("mm");
-    if (group) {
-      if (group->regions().size() > 0) {
-        m_mm_region_index = group->regions()[0]->m_index;
-      }
-    }
-    if (UNDEFINED == m_mm_region_index) {
-      int size = 0;
-      if (group) {
-        size = group->regions().size();
-      }
-      if (!quiet) {
-        ATH_MSG_DEBUG("initialize_from_dictionary - unable to find mm region index: group, region size "
-                      << group << " " << size);
-      }
-    }
-
-    // Save index to a sTGC region for unpacking
-    group = dict->find_group("stgc");
-    if (group) {
-      if (group->regions().size() > 0) {
-        m_stgc_region_index = group->regions()[0]->m_index;
-      }
-    }
-    if (UNDEFINED == m_stgc_region_index) {
-      int size = 0;
-      if (group) {
-        size = group->regions().size();
-      }
-      if (!quiet) {
-        ATH_MSG_DEBUG("initialize_from_dictionary - unable to find stgc region index: group, region size "
-                      << group << " " << size);
-      }
-    }
+  // Check if this is High Luminosity LHC layout
+  if (dict->m_version == "ITkHGTD" || dict->m_version == "ITkHGTDPLR" || dict->m_version == "P2-RUN4") {
+    m_isHighLuminosityLHC = true;
+  }
+  assignRegionFromAtlasID(atlas_id.pixel_exp(), m_pixel_region_index, "pixel");
+  // for High Luminosity LHC layout one cannot get the sct region as below, nor
+  // is there any trt regions
+  if (!m_isHighLuminosityLHC) {
+    assignRegionFromAtlasID(atlas_id.sct_exp(), m_sct_region_index, "sct");
+    assignRegionFromAtlasID(atlas_id.trt_exp(), m_trt_region_index, "trt");
   }
 
+  dict = dict_mgr.find_dictionary("LArCalorimeter");
+  if (!dict) {
+    ATH_MSG_WARNING("initialize_from_dictionary - cannot access LArCalorimeter dictionary");
+    return 1;
+  } 
+  assignRegionFromAtlasID(atlas_id.lar_em_exp(), m_lar_em_region_index, "lar_em");
+  assignRegionFromAtlasID(atlas_id.lar_hec_exp(), m_lar_hec_region_index, "lar_hec");
+  assignRegionFromAtlasID(atlas_id.lar_fcal_exp(), m_lar_fcal_region_index, "lar_fcal");
+  // Get Calorimetry dictionary for both LVL1 and Dead material
+  dict = dict_mgr.find_dictionary("Calorimeter");
+  if (!dict) {
+    ATH_MSG_WARNING("initialize_from_dictionary - cannot access Calorimeter dictionary");
+    return 1;
+  }
+  // Save index to a LVL1 region for unpacking
+  assignRegionIdxFromRegion("Lvl1_0", m_lvl1_region_index);
+  // Save index to a Dead Material region for unpacking
+  assignRegionIdxFromRegion("DM_4_1_0_0", m_dm_region_index);
+
+  dict = dict_mgr.find_dictionary("TileCalorimeter");
+  if (!dict) {
+    ATH_MSG_WARNING("initialize_from_dictionary - cannot access TileCalorimeter dictionary");
+    return 1;
+  } 
+  
+  assignRegionFromAtlasID(atlas_id.tile_exp(), m_tile_region_index, "tile");
+
+  dict = dict_mgr.find_dictionary("MuonSpectrometer");
+  if (!dict) {
+    ATH_MSG_WARNING("initialize_from_dictionary - cannot access MuonSpectrometer dictionary");
+    return 1;
+  } 
+  m_station_field = dict->find_field("stationName");
+  if (!m_station_field) {
+    ATH_MSG_WARNING("initialize_from_dictionary - cannot access stationName field");
+    return 1;
+  } else {
+    m_muon_station_index = m_station_field->m_index;
+  }
+  assignRegionIdxFromGrp("mdt", m_mdt_region_index);
+  assignRegionIdxFromGrp("csc", m_csc_region_index);
+  assignRegionIdxFromGrp("rpc", m_rpc_region_index);
+  assignRegionIdxFromGrp("tgc", m_tgc_region_index);
+  assignRegionIdxFromGrp("mm", m_mm_region_index);
+  assignRegionIdxFromGrp("stgc", m_stgc_region_index);
 
   dict = dict_mgr.find_dictionary("ForwardDetectors");
   if (!dict) {
     ATH_MSG_WARNING("initialize_from_dictionary - cannot access ForwardDetectors dictionary");
     return 1;
-  } else {
-    // Save index to a ALFA region for unpacking
-    id = atlas_id.alfa_exp();
-    if (dict->find_region(id, m_alfa_region_index)) {
-      ATH_MSG_WARNING("initialize_from_dictionary - unable to find alfa region index: id, reg "
-                      << (std::string) id << " " << m_alfa_region_index);
-    }
+  } 
+  
+  assignRegionFromAtlasID(atlas_id.alfa_exp(), m_alfa_region_index, "alfa");
+  assignRegionFromAtlasID(atlas_id.bcm_exp(), m_bcm_region_index, "bcm");
+  assignRegionFromAtlasID(atlas_id.lucid_exp(), m_lucid_region_index, "lucid");
+  assignRegionFromAtlasID(atlas_id.zdc_exp(), m_zdc_region_index, "zdc");
 
-    // Save index to a BCM region for unpacking
-    id = atlas_id.bcm_exp();
-    if (dict->find_region(id, m_bcm_region_index)) {
-      ATH_MSG_WARNING("initialize_from_dictionary - unable to find bcm region index: id, reg "
-                      << (std::string) id << " " << m_bcm_region_index);
-    }
-
-    // Save index to a LUCID region for unpacking
-    id = atlas_id.lucid_exp();
-    if (dict->find_region(id, m_lucid_region_index)) {
-      ATH_MSG_WARNING("initialize_from_dictionary - unable to find lucid region index: id, reg "
-                      << (std::string) id << " " << m_lucid_region_index);
-    }
-
-    // Save index to a ZDC region for unpacking
-    id = atlas_id.zdc_exp();
-    if (dict->find_region(id, m_zdc_region_index)) {
-      ATH_MSG_WARNING("initialize_from_dictionary - unable to find zdc region index: id, reg "
-                      << (std::string) id << " " << m_zdc_region_index);
-    }
-  }
-
-//      std::cout << "AtlasDetectorIDHelper::initialize_from_dictionary " << std::endl;
-//      std::cout << " pixel_region_index     " << m_pixel_region_index      << std::endl;
-//      std::cout << " sct_region_index       " << m_sct_region_index        << std::endl;
-//      std::cout << " trt_region_index       " << m_trt_region_index        << std::endl;
-//      std::cout << " lar_em_region_index    " << m_lar_em_region_index     << std::endl;
-//      std::cout << " lar_hec_region_index   " << m_lar_hec_region_index    << std::endl;
-//      std::cout << " lar_fcal_region_index  " << m_lar_fcal_region_index   << std::endl;
-//      std::cout << " lvl1_region_index      " << m_lvl1_region_index       << std::endl;
-//      std::cout << " tile_region_index      " << m_tile_region_index       << std::endl;
-//      std::cout << " mdt_region_index       " << m_mdt_region_index        << std::endl;
-//      std::cout << " csc_region_index       " << m_csc_region_index        << std::endl;
-//      std::cout << " rpc_region_index       " << m_rpc_region_index        << std::endl;
-//      std::cout << " tgc_region_index   " << m_tgc_region_index        << std::endl;
-//      std::cout << " muon_station_index   " << m_muon_station_index      << std::endl;
-
-  return(0);
+  ATH_MSG_VERBOSE( "AtlasDetectorIDHelper::initialize_from_dictionary ");
+  ATH_MSG_VERBOSE( " pixel_region_index     " << m_pixel_region_index);
+  ATH_MSG_VERBOSE( " sct_region_index       " << m_sct_region_index);
+  ATH_MSG_VERBOSE( " trt_region_index       " << m_trt_region_index);
+  ATH_MSG_VERBOSE( " lar_em_region_index    " << m_lar_em_region_index);
+  ATH_MSG_VERBOSE( " lar_hec_region_index   " << m_lar_hec_region_index);
+  ATH_MSG_VERBOSE( " lar_fcal_region_index  " << m_lar_fcal_region_index);
+  ATH_MSG_VERBOSE( " lvl1_region_index      " << m_lvl1_region_index);
+  ATH_MSG_VERBOSE( " tile_region_index      " << m_tile_region_index);
+  ATH_MSG_VERBOSE( " mdt_region_index       " << m_mdt_region_index);
+  ATH_MSG_VERBOSE( " csc_region_index       " << m_csc_region_index);
+  ATH_MSG_VERBOSE( " rpc_region_index       " << m_rpc_region_index);
+  ATH_MSG_VERBOSE( " tgc_region_index       " << m_tgc_region_index);
+  ATH_MSG_VERBOSE( " muon_station_index     " << m_muon_station_index);
+  return 0;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -24,8 +24,8 @@ class LArDetectorManager;
  * @class LArDetectorToolNV
  *
  * @brief LArDetectorToolNV is a standard GeoModel tool, which calls LArDetectorFactory::create(),
- * stores LArDetectorManager to the Detector Store and also registers a callback function
- * align() which applies misalignments on top of the 'regular' geometry.
+ * stores LArDetectorManager to the Detector Store and also implements the
+ * align() function which applies misalignments on top of the 'regular' geometry.
  *
  **/
 
@@ -43,10 +43,7 @@ class LArDetectorToolNV final : public GeoModelTool {
   // Clear Method
   virtual StatusCode clear() override;
   
-  // Register callback function on ConDB object
-  virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override;
-  
-  // Callback function itself
+  // Apply alignments (for simulation only)
   virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override;
 
  private:

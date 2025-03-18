@@ -15,6 +15,7 @@
 #include "xAODMuon/MuonAuxContainer.h"
 #include <AthContainers/ConstDataVector.h>
 #include <AsgTools/AsgToolConfig.h>
+#include <AsgDataHandles/WriteDecorHandle.h>
 #include "xAODBase/IParticleHelpers.h"
 
 namespace CP{
@@ -32,6 +33,8 @@ namespace CP{
         ATH_CHECK( m_promptMuonLocation.initialize() );
         ATH_CHECK( m_lrtMuonLocation.initialize() );
         ATH_CHECK( m_outMuonLocation.initialize() );
+        ATH_CHECK( m_promptIsLRTKey.initialize() );
+        ATH_CHECK( m_lrtIsLRTKey.initialize() );
 
         /// if the tool is not user-set, configure the automatic instance via our overlap flag
         if (m_overlapRemovalTool.empty()){
@@ -77,9 +80,11 @@ namespace CP{
         m_overlapRemovalTool->checkOverlap(*promptCol, *lrtCol, writePromptMuon, writeLRTMuon);
 
         // Decorate the muons with their locations.
-        static const SG::AuxElement::Decorator<char> isLRT("isLRT"); //0 if prompt, 1 if LRT
-        for (const xAOD::Muon* mu : *promptCol) isLRT(*mu) = 0;
-        for (const xAOD::Muon* mu : *lrtCol) isLRT(*mu) = 1;
+        // 0 if prompt, 1 if LRT
+        SG::WriteDecorHandle<xAOD::MuonContainer, char> promptIsLRT(m_promptIsLRTKey, ctx);
+        SG::WriteDecorHandle<xAOD::MuonContainer, char> lrtIsLRT(m_lrtIsLRTKey, ctx);
+        for (const xAOD::Muon* mu : *promptCol) promptIsLRT(*mu) = 0;
+        for (const xAOD::Muon* mu : *lrtCol) lrtIsLRT(*mu) = 1;
 
         // and merge
         if (m_createViewCollection) {

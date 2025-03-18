@@ -101,23 +101,7 @@ StatusCode sTgcReadoutElement::initElement() {
 }
 
 Amg::Transform3D sTgcReadoutElement::fromGapToChamOrigin(const IdentifierHash& measHash) const{
-   unsigned int layIdx = static_cast<unsigned int>(measHash);
-   unsigned int gasGap = gasGapNumber(measHash);
-   if(chType(measHash) == ReadoutChannelType::Strip && gasGap < m_pars.stripLayers.size()) {
-      return m_pars.stripLayers[gasGap].toOrigin();
-   }
-   else if (chType(measHash) == ReadoutChannelType::Wire && gasGap < m_pars.wireGroupLayers.size()) {
-      return m_pars.wireGroupLayers[gasGap].toOrigin();
-   }
-   else if (chType(measHash) == ReadoutChannelType::Pad && gasGap < m_pars.padLayers.size()) {
-      return m_pars.padLayers[gasGap].toOrigin();
-   }
-   else {
-      unsigned int maxReadoutLayers =  m_pars.stripLayers.size() + m_pars.wireGroupLayers.size() + m_pars.padLayers.size();
-      ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
-                 <<" is out of range. Maximum range "<< maxReadoutLayers);
-      return Amg::Transform3D::Identity();
-   }
+   return stripLayer(measHash).toOrigin();  
 }
 
 Amg::Vector2D sTgcReadoutElement::localChannelPosition(const IdentifierHash& measHash) const {
@@ -143,40 +127,35 @@ Amg::Vector2D sTgcReadoutElement::localChannelPosition(const IdentifierHash& mea
       return stripCenter;
    } else if (chType(measHash) == ReadoutChannelType::Wire) {
       Amg::Vector2D wireGroupCenter{Amg::Vector2D::Zero()};
-      std::optional<Amg::Vector2D> wireGroupCenterOpt = wireDesign(measHash).center(channelNumber(measHash));
+      const WireGroupDesign& design{wireDesign(measHash)};
+      const int ch = channelNumber(measHash);
+      std::optional<Amg::Vector2D> wireGroupCenterOpt = design.center(ch);
       if (!wireGroupCenterOpt) {
-         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The wireGroup" << channelNumber(measHash) << "doesn't intersect with the edges of the trapezoid.");
+         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The wireGroup" << ch << "doesn't intersect with the edges of the trapezoid.");
          return wireGroupCenter;
       }
       wireGroupCenter = std::move(*wireGroupCenterOpt);
-      const WireGroupDesign& design{wireDesign(measHash)};
-      const int ch = channelNumber(measHash);
-      ATH_MSG_VERBOSE("Fetch local wrie position "<<idHelperSvc()->toString(measurementId(measHash))<<" "
-      <<" "<<Amg::toString(wireGroupCenter)<<" "<<design);
+      ATH_MSG_VERBOSE("Fetch local wire position "<<idHelperSvc()->toString(measurementId(measHash))<<" "
+                     <<" "<<Amg::toString(wireGroupCenter)<<" "<<design);
       if (ch == 1) {
-         ATH_MSG_DEBUG("The first wiregroup width is " <<design.numWiresInGroup(ch));
-         ATH_MSG_DEBUG("The last wire pos is: " << wireGroupCenter.x() + ((design.numWiresInGroup(ch) + 1) / 2 - 1) * design.stripPitch() );
+         ATH_MSG_DEBUG("The first wiregroup width is " <<design.numWiresInGroup(ch) << " firstWirePos: " << design.firstStripPos());
+         ATH_MSG_DEBUG("The last wire pos is: " << wireGroupCenter.x() + (0.5 * (design.numWiresInGroup(ch) + 1) - 1) * design.stripPitch() );
          /// Shifting the first wireGroup center to the last wire of the first wireGroup
-         wireGroupCenter.x() = wireGroupCenter.x() + ((design.numWiresInGroup(ch) + 1) / 2 - 1) * design.stripPitch();
+         wireGroupCenter.x() = wireGroupCenter.x() + (0.5 * (design.numWiresInGroup(ch) + 1) - 1) * design.stripPitch();
          /// Defining the wireGroup center as the mean of the position of the last wire in the first group
          /// and the left edge of the active area defined for pads to match the R3 description
          wireGroupCenter.x() = 0.5 * (wireGroupCenter.x() - design.longHalfHeight());
       } else if (ch == design.numStrips()) {
-         ATH_MSG_VERBOSE("The last wire center before modification is: " << wireGroupCenter.x());
-         unsigned int lastWireGroupWidth = ch - design.numWiresInGroup(ch) - (design.numStrips() - 2) * design.numWiresInGroup(ch);
-         ATH_MSG_VERBOSE("The last wire group width is: " << lastWireGroupWidth << " and half of that is: "<< lastWireGroupWidth / 2);
+         ATH_MSG_VERBOSE("The actual center of the last wire group is: " << wireGroupCenter.x());
          /// Shifting the last wireGroup center to the last wire of the second-last wireGroup
-         wireGroupCenter.x() = wireGroupCenter.x() - (lastWireGroupWidth / 2 + 1) * design.stripPitch();
+         wireGroupCenter.x() = wireGroupCenter.x() - 0.5 * (design.numWiresInGroup(ch) + 1) * design.stripPitch();
          ATH_MSG_VERBOSE("The last wire of the last second group is at: " << wireGroupCenter.x());
          /// Defining the wireGroup center as the mean of the position of the last wire in the second last group
          /// and the right edge of the active area defined for pads to match the R3 description
          wireGroupCenter.x() = 0.5 * (wireGroupCenter.x() + design.longHalfHeight());
       }
-      else {
-         /// In R3, the center of the normal wireGroup is defined on the 10th wire, whereas, in R4
-         /// the center is defined on the 11th wire. So shifting by a wirePitch to match R3
-         wireGroupCenter.x() = wireGroupCenter.x() - design.stripPitch();
-      }
+      /// In R3, the center of the normal wireGroup is defined on the 10th wire, whereas, in R4
+      /// the center is at the center of the wireGroup (between 10th and 11th wire). 
       return wireGroupCenter;
    }
    else if (chType(measHash) == ReadoutChannelType::Pad) {

@@ -62,6 +62,13 @@ def ActsMainTrackFindingAlgCfg(flags,
     acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
     kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
 
+    # Remove HGTD Volumes from the propagation unless we need it
+    if not flags.Acts.useHGTDClusterInTrackFinding:
+        # HGTD has volume id:
+        # 2 for negative endcap
+        # 25 for positive endcap
+        kwargs.setdefault('EndOfTheWorldVolumeIds', [2, 25])
+    
     # Seed labels and collections.
     # These 3 lists must match element for element, reversed if flags.Acts.useStripSeedsFirst is True.
     # Maybe it is best to start with strips where the occupancy is lower.
@@ -94,16 +101,19 @@ def ActsMainTrackFindingAlgCfg(flags,
         kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2max))
         # clusters with chi2 above this value will be discarded.
         kwargs.setdefault("chi2OutlierCutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
-    else:
+    else:        
         # new default chi2 cuts optimise efficiency vs speed. Set same value as Athena's Xi2maxNoAdd.
-        kwargs.setdefault("chi2CutOff", [25])
-        kwargs.setdefault("chi2OutlierCutOff", [25])
+        if flags.Tracking.doITkFastTracking:
+            kwargs.setdefault("chi2CutOff", [100])
+            kwargs.setdefault("chi2OutlierCutOff", [100])
+        else:
+            kwargs.setdefault("chi2CutOff", [25])
+            kwargs.setdefault("chi2OutlierCutOff", [25])
     if flags.Acts.trackFindingTrackSelectorConfig > 0 and flags.Acts.trackFindingTrackSelectorConfig != 3:
         kwargs.setdefault("branchStopperPtMinFactor", 0.9)
         kwargs.setdefault("branchStopperAbsEtaMaxExtra", 0.1)
 
     kwargs.setdefault("numMeasurementsCutOff", [1])
-
 
     # there is always an over and underflow bin so the first bin will be 0. - 0.5 the last bin 3.5 - inf.
     # if all eta bins are >=0. the counter will be categorized by abs(eta) otherwise eta
@@ -249,7 +259,7 @@ def ActsTrackFindingCfg(flags,
                                          **kwargs))
 
     # Analysis extensions
-    if flags.Acts.doAnalysis:
+    if flags.Acts.Tracks.doAnalysis:
         from ActsConfig.ActsAnalysisConfig import ActsTrackAnalysisAlgCfg
         acc.merge(ActsTrackAnalysisAlgCfg(flags,
                                           name=f"{flags.Tracking.ActiveConfig.extension}TrackAnalysisAlg",
@@ -361,7 +371,7 @@ def ActsAmbiguityResolutionCfg(flags,
                                                     name=f"{flags.Tracking.ActiveConfig.extension}AmbiguityResolutionAlg",
                                                     **kwargs))
     # Analysis extensions
-    if flags.Acts.doAnalysis:
+    if flags.Acts.Tracks.doAnalysis:
         from ActsConfig.ActsAnalysisConfig import ActsTrackAnalysisAlgCfg
         acc.merge(ActsTrackAnalysisAlgCfg(flags,
                                           name=f"{flags.Tracking.ActiveConfig.extension}ResolvedTrackAnalysisAlg",
@@ -413,13 +423,10 @@ def ActsTrackToTrackParticleCnvAlgCfg(flags,
 
     kwargs.setdefault('SiDetectorElementCollections',det_elements)
     kwargs.setdefault('SiDetEleCollToMeasurementType',element_types)
+    kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression)
+    kwargs.setdefault('VertexContainerKey', 'PrimaryVertices')
     acc.addEventAlgo(
         CompFactory.ActsTrk.TrackToTrackParticleCnvAlg(name, **kwargs))
-
-    if flags.Acts.storeTrackStateInfo:
-        from ActsConfig.ActsObjectDecorationConfig import ActsMeasurementToTrackParticleDecorationCfg
-
-        acc.merge(ActsMeasurementToTrackParticleDecorationCfg(flags))
 
     return acc
 

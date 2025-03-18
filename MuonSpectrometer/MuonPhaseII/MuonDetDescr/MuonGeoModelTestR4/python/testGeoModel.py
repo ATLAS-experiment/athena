@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -6,7 +6,7 @@ def geoModelFileDefault(useR4Layout = False):
     # If this is changed, remember to also test with other dependent tests 
     # e.g. run ctest with ActsEventCnv
     if useR4Layout: 
-        return  "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R4-MUONTEST.db"
+        return  "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00.db"
     return "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00.db"
 
 def SetupArgParser():
@@ -24,6 +24,7 @@ def SetupArgParser():
                                                       ], 
                         help="Input file to run on ", nargs="+")
     parser.add_argument("--geoModelFile", default = geoModelFileDefault(), help="GeoModel SqLite file containing the muon geometry.")
+    parser.add_argument("--defaultGeoFile", help="Use the  predefined GeoModel files on cvmfs", choices=["NONE", "RUN3", "RUN4" ], default="NONE")
     parser.add_argument("--chambers", default=["all"], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
     parser.add_argument("--excludedChambers", default=[], nargs="+", help="Chambers to exclude. If string contains 'none', all chambers will be checked. Note: adding a chamber to --excludedChambers will overwrite it being in --chambers.")
     parser.add_argument("--outRootFile", default="NewGeoModelDump.root", help="Output ROOT file to dump the geomerty")
@@ -117,7 +118,11 @@ def setupGeoR4TestCfg(args,  flags = None):
     flags.Exec.FPE= 500
     flags.Exec.EventPrintoutInterval = args.eventPrintoutLevel
     
-    if args.geoModelFile.startswith("root://"):
+    if args.defaultGeoFile == "RUN3":
+          flags.GeoModel.SQLiteDBFullPath = geoModelFileDefault(useR4Layout = False)
+    elif  args.defaultGeoFile == "RUN4":
+          flags.GeoModel.SQLiteDBFullPath = geoModelFileDefault(useR4Layout = True)
+    elif args.geoModelFile.startswith("root://"):
         if not path.exists("Geometry/{geoTag}.db".format(geoTag=args.geoTag)):
             print ("Copy geometry file from EOS {source}".format(source = args.geoModelFile))
             system("mkdir Geometry/")
@@ -125,11 +130,14 @@ def setupGeoR4TestCfg(args,  flags = None):
                                                                 geoTag=args.geoTag))
                                 
         args.geoModelFile = "Geometry/{geoTag}.db".format(geoTag=args.geoTag)
-    print ("Use geometry file: {geoFile}".format(geoFile = args.geoModelFile))
+    else:
+        flags.GeoModel.SQLiteDBFullPath = args.geoModelFile
+    
+    print ("Use geometry file: {geoFile}".format(geoFile = flags.GeoModel.SQLiteDBFullPath))
     flags.GeoModel.AtlasVersion = args.geoTag
     flags.IOVDb.GlobalTag = args.condTag
     flags.GeoModel.SQLiteDB = True
-    flags.GeoModel.SQLiteDBFullPath = args.geoModelFile
+    
     
     flags.Detector.GeometryBpipe = False
     ### Inner detector

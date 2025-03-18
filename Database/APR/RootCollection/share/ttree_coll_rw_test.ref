@@ -1,0 +1,81 @@
+Read test starting...
+Creating CollectionService
+Creating Collection Description
+CollectionDescription: name=test_collection, type=RootCollection, connection=
+ Event Reference column=Token
+   Attributes: 5
+    Attribute 1, name=attr1, type=int, maxSize=0, isFixed=1, annotation=integer test attribute
+    Attribute 2, name=attr2, type=string, maxSize=0, isFixed=1, annotation=some string
+    Attribute 3, name=attr3, type=double, maxSize=0, isFixed=1, annotation=floating point attribute
+    Attribute 4, name=attr4, type=bool, maxSize=0, isFixed=1, annotation=
+    Attribute 5, name=attr64bit, type=unsigned long long, maxSize=0, isFixed=1, annotation=
+   Tokens: 1
+    Token 1, name=Token, type=Token, annotation=
+
+Creating Collection
+Adding 10 elements to the collection.
+>>  writing uint64: 0  0   0
+>>  writing uint64: 1  1   1
+>>  writing uint64: 65536  65536   65536
+>>  writing uint64: 65537  65537   65537
+>>  writing uint64: 8070450532247994369  8.07045e+18   8070450532247994368
+>>  writing uint64: 9223372036854775808  9.22337e+18   9223372036854775808
+>>  writing uint64: 9223372036854775809  9.22337e+18   9223372036854775808
+>>  writing uint64: 9223372036854841344  9.22337e+18   9223372036854841344
+>>  writing uint64: 9223372036854841345  9.22337e+18   9223372036854841344
+>>  writing uint64: 17293822569102770177  1.72938e+19   17293822569102770176
+Done.
+Commiting the collection.
+Closing the collection.
+[OVAL] finished hopefully
+
+Creating CollectionService
+Getting handle to existing collection ( opened for read-only transactions by default )
+Executing query that only selects event reference column (the default)
+Iterating over query results...
+Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
+Meta data : 
+Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
+Meta data : 
+Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
+Meta data : 
+Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
+Meta data : 
+Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
+Meta data : 
+Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
+Meta data : 
+Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
+Meta data : 
+Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
+Meta data : 
+Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
+Meta data : 
+Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
+Meta data : 
+10 records read back
+
+Executing query that selects 2 meta data columns.
+Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
+Meta data : [attr1 (int) : 6], [attr2 (string) : testString_6]
+Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
+Meta data : [attr1 (int) : 7], [attr2 (string) : testString_7]
+Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
+Meta data : [attr1 (int) : 8], [attr2 (string) : testString_8]
+Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
+Meta data : [attr1 (int) : 9], [attr2 (string) : testString_9]
+4 records read back
+
+Executing query on 64bit unsigned int attribute:
+Meta data : [attr64bit (unsigned long long) : 0]
+Meta data : [attr64bit (unsigned long long) : 1]
+Meta data : [attr64bit (unsigned long long) : 65536]
+Meta data : [attr64bit (unsigned long long) : 65537]
+Meta data : [attr64bit (unsigned long long) : 8070450532247994369]
+Meta data : [attr64bit (unsigned long long) : 9223372036854775808]
+Meta data : [attr64bit (unsigned long long) : 9223372036854775809]
+Meta data : [attr64bit (unsigned long long) : 9223372036854841344]
+Meta data : [attr64bit (unsigned long long) : 9223372036854841345]
+Meta data : [attr64bit (unsigned long long) : 17293822569102770177]
+10 records read back
+

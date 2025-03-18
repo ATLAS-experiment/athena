@@ -10,7 +10,7 @@
 
 export ATHENA_CORE_NUMBER=8
 AODFILE=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/input/v0/1000events_mc21_ttbar.AOD.pool.root 
-Derivation_tf.py \
+stdbuf -i0 -o0 -e0 Derivation_tf.py \
   --inputAODFile $AODFILE \
   --outputDAODFile art.pool.root \
   --formats PHYS PHYSLITE \
@@ -58,7 +58,7 @@ echo "art-result: ${rc4} xAODHistSize"
 
 # dcube references
 echo "============ dcube references"
-dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/mc21/v11/hist_physlite_25023.root"
+dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/mc21/v12/hist_physlite_25026.root"
 dcubeXML="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/mc21/v4/dcube_config_hist_physlite_2402.xml"
 echo ${dcubeRef}
 echo ${dcubeXML}

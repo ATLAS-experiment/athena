@@ -1,9 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 /**
  * @file  Array.h
  * @author scott snyder <snyder@bnl.gov>
@@ -39,7 +37,6 @@
 
 
 #include "CxxUtils/Arrayrep.h"
-#include "CxxUtils/concepts.h"
 #include <iterator>
 
 
@@ -803,7 +800,7 @@ public:
  * @param x[out] Result of the conversion.
  */
 template <class T>
-  ATH_REQUIRES(std::assignable_from<T&, float>)
+  requires std::assignable_from<T&, float>
 void fromArrayrep (const CaloRec::Arrayrep& rep, T& x);
 
 
@@ -814,6 +811,17 @@ void fromArrayrep (const CaloRec::Arrayrep& rep, T& x);
  */
 template <unsigned int N>
 void fromArrayrep (const CaloRec::Arrayrep& rep, CxxUtils::Array<N>& x);
+
+
+/**
+ * @brief Concept testing whether a type may be used with @c FromArrayrep.
+ */
+template <class T>
+concept FromArrayrep =
+  requires (T t, const CxxUtils::Arrayrep& rep)
+  {
+    { CxxUtils::fromArrayrep (rep, t) };
+  };
 
 
 } // namespace CxxUtils

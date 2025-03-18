@@ -303,6 +303,9 @@ namespace ActsTrk {
 
                     for(auto& stripInfo : stripInfos) {
                         double diff = currentLocalPos(0, 0)-stripInfo.locX();
+                        // In negative endcap, local z is opposite of positive endcap
+                        // need to invert the difference for proper comparison
+                        if( m_stripId->barrel_ec(currentElement->identify())<0 ) diff = -diff;
 
                         if(diff < min || diff > max) continue;
 

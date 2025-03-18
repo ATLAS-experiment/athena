@@ -113,10 +113,8 @@ def getHltEventLoopMgr(flags, name='HltEventLoopMgr'):
    # Rewrite LVL1 result if L1 simulation and BS-writing is enabled
    if flags.Trigger.doLVL1 and flags.Trigger.writeBS:
       svc.RewriteLVL1 = True
-      if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1:
-         svc.L1TriggerResultRHKey = 'L1TriggerResult'
-      if flags.Trigger.enableL1CaloLegacy or not flags.Trigger.enableL1MuonPhase1:
-         svc.RoIBResultRHKey = 'RoIBResult'
+      svc.L1TriggerResultRHKey = 'L1TriggerResult'
+      svc.RoIBResultRHKey = 'RoIBResult'
 
    # Monitoring
    svc.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
