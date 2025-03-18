@@ -568,7 +568,7 @@ class TrigTauMonAlgBuilder:
                               xbins=50, xmin=0, xmax=250, ybins=50, ymin=0, ymax=250, opt='kAlwaysCreate')
     mon_group.defineHistogram('leadHLTEta,subleadHLTEta', type='TH2F', title='#eta_{lead} vs #eta_{sublead}; #eta_{lead}; #eta_{sublead}',
                               xbins=26, xmin=-2.6, xmax=2.6, ybins=26, ymin=-2.6, ymax=2.6, opt='kAlwaysCreate')
-    mon_group.defineHistogram('leadHLTPhi,subleadHLTPhi', type='TH2F', title='#phi_{lead} vs #phi_{sublead}; #phi_{lead}; #phi{sublead}',
+    mon_group.defineHistogram('leadHLTPhi,subleadHLTPhi', type='TH2F', title='#phi_{lead} vs #phi_{sublead}; #phi_{lead}; #phi_{sublead}',
                               xbins=16, xmin=-3.2, xmax=3.2, ybins=16, ymin=-3.2, ymax=3.2, opt='kAlwaysCreate') 
     mon_group.defineHistogram('dR', title='#Delta R(#tau,#tau); #Delta R(#tau,#tau); Events', xbins=40, xmin=0, xmax=4, opt='kAlwaysCreate')
     mon_group.defineHistogram('dEta', title='#Delta#eta(#tau,#tau); #Delta#eta(#tau,#tau); Events', xbins=40, xmin=0, xmax=4, opt='kAlwaysCreate')
