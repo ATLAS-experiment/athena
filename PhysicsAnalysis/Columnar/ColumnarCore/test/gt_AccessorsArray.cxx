@@ -16,6 +16,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <AsgTesting/UnitTest.h>
 #include <ColumnarCore/ColumnAccessor.h>
 #include <ColumnarCore/ObjectColumn.h>
+#include <ColumnarCore/VectorColumn.h>
 #include <ColumnarEventInfo/EventInfoDef.h>
 #include <ColumnarCore/ParticleDef.h>
 
@@ -132,6 +133,52 @@ namespace columnar
       EXPECT_EQ (objectRange.beginIndex(), 1);
       EXPECT_EQ (objectRange.endIndex(), 6);
     }
+  }
+
+
+  TEST (AccessorTest, vectorEventAccessor)
+  {
+    MyTool tool;
+    MyAccessor<std::vector<uint32_t>,ContainerId::eventInfo> eventAccessor {tool, "var1"};
+    MyAccessor<std::vector<RetypeColumn<uint64_t,uint32_t>>,ContainerId::eventInfo> eventRetypeAccessor {tool, "var1"};
+    {
+      auto columns = tool.getColumnInfo();
+      EXPECT_EQ (columns.size(), 3);
+      auto& columnOffset = columns[1];
+      EXPECT_EQ (columnOffset.name, "EventInfo.var1.data");
+      EXPECT_EQ (columnOffset.index, 0);
+      EXPECT_EQ (columnOffset.type, &typeid (uint32_t));
+      EXPECT_EQ (columnOffset.accessMode, ColumnAccessMode::input);
+      EXPECT_EQ (columnOffset.offsetName, "EventInfo.var1.offset");
+      auto& columnData = columns[2];
+      EXPECT_EQ (columnData.name, "EventInfo.var1.offset");
+      EXPECT_EQ (columnData.index, 0);
+      EXPECT_EQ (columnData.type, &typeid (ColumnarOffsetType));
+      EXPECT_EQ (columnData.accessMode, ColumnAccessMode::input);
+      EXPECT_EQ (columnData.offsetName, numberOfEventsName);
+    }
+    tool.setColumnIndex ("EventInfo.var1.offset", 1);
+    tool.setColumnIndex ("EventInfo.var1.data", 2);
+    std::vector<void*> data (3, nullptr);
+    std::vector<ColumnarOffsetType> var1Offsets = {0, 1, 3, 6, 7};
+    std::vector<uint32_t> var1Data = {0, 1, 2, 3, 4, 5, 6};
+    data[1] = var1Offsets.data();
+    data[2] = var1Data.data();
+    MyId<ContainerId::eventInfo> id1 {data.data(), 1};
+    MyId<ContainerId::eventInfo> id2 {data.data(), 2};
+    EXPECT_EQ (eventAccessor (id1).size(), 2);
+    EXPECT_EQ (eventAccessor (id2).size(), 3);
+    EXPECT_EQ (eventAccessor(id1)[0],1);
+    EXPECT_EQ (eventAccessor(id1)[1],2);
+    EXPECT_EQ (eventAccessor(id2)[0],3);
+    EXPECT_EQ (eventAccessor(id2)[2],5);
+
+    EXPECT_EQ (eventRetypeAccessor (id1).size(), 2);
+    EXPECT_EQ (eventRetypeAccessor (id2).size(), 3);
+    EXPECT_EQ (eventRetypeAccessor(id1)[0],1);
+    EXPECT_EQ (eventRetypeAccessor(id1)[1],2);
+    EXPECT_EQ (eventRetypeAccessor(id2)[0],3);
+    EXPECT_EQ (eventRetypeAccessor(id2)[2],5);
   }
 }
 

@@ -49,7 +49,7 @@ namespace columnar
   /// specialize this template to provide support for the specific types
   /// and modes they support.  The primary way in which users specify
   /// alternate accessors is by wrapping the column type, e.g.
-  /// `VectorColumn<float>` for a column that contains a vector of
+  /// `std::vector<float>` for a column that contains a vector of
   /// floats per object.
   ///
   /// Originally all accessor classes were separate and unique
@@ -61,7 +61,7 @@ namespace columnar
   ///   that covers what before where multiple classes.
   /// * There are some accessor configuration that are supported now and
   ///   would have required a separate template class before, e.g.
-  ///   something like `VectorColumn<RetypeColumn<...>>` wasn't
+  ///   something like `std::vector<RetypeColumn<...>>` wasn't
   ///   supported before, but now it is.
   /// * Overall I find it easier to ensure consistency across
   ///   specializations with this approach, as well as making it easier
