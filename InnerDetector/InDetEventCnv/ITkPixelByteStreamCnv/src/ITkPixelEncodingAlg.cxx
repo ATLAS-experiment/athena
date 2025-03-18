@@ -41,9 +41,9 @@ StatusCode ITkPixelEncodingAlg::initialize()
 StatusCode ITkPixelEncodingAlg::execute(const EventContext& ctx) const
 {
 
-  SG::ReadHandle<PixelRDO_Container> rdoContainer(m_pixelRDOKey, ctx);
+  SG::ReadHandle<ITkPixelRDO_Container> rdoContainer(m_pixelRDOKey, ctx);
 
-  const std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> EventHitMaps = m_hitSortingTool->sortRDOHits(rdoContainer);
+  const std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> EventHitMaps = m_hitSortingTool->sortRDOHits(rdoContainer.get());
 
   SG::WriteHandle<std::vector<uint32_t>> EncodedStreamCollection = SG::makeHandle(m_EncodedStreamKey, ctx);
 

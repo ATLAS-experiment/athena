@@ -16,7 +16,7 @@ class ITkPixelDataPackingTool: public AthAlgTool {
         
         virtual StatusCode initialize() override;
 
-        ITkPixelDataPackingTool(const std::string& type,const std::string& name,const IInterface* parent);
+        ITkPixelDataPackingTool(const std::string& type, const std::string& name, const IInterface* parent);
 
         void pack(const ITkPixelOnlineId *onlineID, std::vector<uint32_t> *encodedStream) const;
 

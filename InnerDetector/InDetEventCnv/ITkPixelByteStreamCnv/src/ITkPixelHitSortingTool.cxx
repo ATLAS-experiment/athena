@@ -9,6 +9,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include "ReadoutGeometryBase/SiLocalPosition.h"
 #include "ReadoutGeometryBase/SiCellId.h"
 #include "ITkPixLayout.h"
+#include "ITkPixel1RawData.h"
 #include <map>
 
 
@@ -26,15 +27,11 @@ StatusCode ITkPixelHitSortingTool::initialize(){
     return StatusCode::SUCCESS;
 }
 
-std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> ITkPixelHitSortingTool::sortRDOHits(SG::ReadHandle<PixelRDO_Container> &rdoContainer) const {
+std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> ITkPixelHitSortingTool::sortRDOHits(const ITkPixelRDO_Container* rdoContainer) const {
 
     std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> EventHitMaps; 
 
-    PixelRDO_Container::const_iterator rdoCollections      = rdoContainer->begin();
-    PixelRDO_Container::const_iterator rdoCollectionsEnd   = rdoContainer->end();
-
-    for(; rdoCollections!=rdoCollectionsEnd; ++rdoCollections){
-      const InDetRawDataCollection<PixelRDORawData>* RDO_Collection(*rdoCollections);
+    for(const auto& RDO_Collection : *rdoContainer){
 
       for(const auto *const rdo : *RDO_Collection) {
 
@@ -80,15 +77,15 @@ std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> ITkPixelHitSortingTool::sortR
 }
 
 //PixelRODdecoder used IPixelRDO_Container* rdoIdc, as the container -- unsure why
-StatusCode ITkPixelHitSortingTool::createRDO(std::map<ITkPixelOnlineId, HitMap> &EventHitMaps, PixelRDO_Container *rdoContainer) const  {
+StatusCode ITkPixelHitSortingTool::createRDO(std::map<ITkPixelOnlineId, HitMap> &EventHitMaps, ITkPixelRDO_Container *rdoContainer) const  {
   //this is VERY preliminary/experimental.
   //Testing purposes only at this point, will certainly change.
   //Using current ID inspiration, adapted so that no compilation
   //warnings arise. All values are dummy and no functionality is expected
   //at this point.
 
-  typedef InDetRawDataCollection< PixelRDORawData > PixelRawCollection;
-  typedef Pixel1RawData RDO;
+  typedef InDetRawDataCollection< ITkPixelRDORawData > PixelRawCollection;
+  typedef ITkPixel1RawData RDO;
 
   for (const auto& entry : EventHitMaps) {
 
