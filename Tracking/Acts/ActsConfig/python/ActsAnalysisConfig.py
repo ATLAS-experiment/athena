@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -735,24 +735,25 @@ def ActsResidualAnalysisAlgCfg(flags,
 
     acc = ComponentAccumulator()
     
-    kwargs.setdefault('InDetTrackParticles', 'InDetTrackParticles')
-    kwargs.setdefault("MonGroupName", kwargs['InDetTrackParticles'])
+    kwargs.setdefault('TrackParticles', 'InDetTrackParticles')
+    kwargs.setdefault("MonGroupName", kwargs['TrackParticles'])
 
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags, kwargs['InDetTrackParticles'] + 'AnalysisAlgCfg')
+    helper = AthMonitorCfgHelper(flags, kwargs['TrackParticles'] + 'AnalysisAlgCfg')
 
     ResidualMonitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.ITkAlignMonResidualsAlg, name, **kwargs)
     
     layersPix = ['0', '1', '2', '3', '4']
 
-    residualXArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixResidualX', topPath = '/ActsAnalysis/Residuals')
-    residualYArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixResidualY', topPath = '/ActsAnalysis/Residuals')
-    pullXArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixPullX', topPath = '/ActsAnalysis/Residuals')
-    pullYArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixPullY', topPath = '/ActsAnalysis/Residuals')
+    path = f'/ActsAnalysis/{kwargs["TrackParticles"]}/Residuals'
+    residualXArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixResidualX', topPath = path)
+    residualYArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixResidualY', topPath = path)
+    pullXArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixPullX', topPath = path)
+    pullYArray = helper.addArray([len(layersPix)], ResidualMonitoringAlgorithm, 'PixPullY', topPath = path)
 
     layersStrip = ['0','1','2','3','4','5','6','7','8']
-    stripResidualXArray  = helper.addArray([len(layersStrip)], ResidualMonitoringAlgorithm, 'StripResidualX', topPath = '/ActsAnalysis/Residuals')
-    stripPullXArray  = helper.addArray([len(layersStrip)], ResidualMonitoringAlgorithm, 'StripPullX', topPath = '/ActsAnalysis/Residuals')
+    stripResidualXArray  = helper.addArray([len(layersStrip)], ResidualMonitoringAlgorithm, 'StripResidualX', topPath = path)
+    stripPullXArray  = helper.addArray([len(layersStrip)], ResidualMonitoringAlgorithm, 'StripPullX', topPath = path)
     
     
     xminX  = -100

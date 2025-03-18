@@ -3,9 +3,9 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def ActsMeasurementToTrackParticleDecorationCfg(flags,
-                                                name: str = "ActsMeasurementToTrackParticleDecoration",
-                                                **kwargs) -> ComponentAccumulator:
+def ActsMeasurementToTrackParticleDecorationAlgCfg(flags,
+                                                   name: str = "ActsMeasurementToTrackParticleDecorationAlg",
+                                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault("TrackParticleKey", "InDetTrackParticles")
 
@@ -19,21 +19,19 @@ def ActsMeasurementToTrackParticleDecorationCfg(flags,
             acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
         )
     
-
-    acc.addEventAlgo(CompFactory.ActsTrk.MeasurementToTrackParticleDecoration(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.MeasurementToTrackParticleDecorationAlg(name, **kwargs))
     return acc
 
 
-def ActsPixelClusterTruthDecorator(flags,
-                                   name: str = "ActsPixelClusterTruthDecorator",
-                                   **kwargs) -> ComponentAccumulator:
+def ActsPixelClusterTruthDecoratorAlgCfg(flags,
+                                         name: str = "ActsPixelClusterTruthDecoratorAlg",
+                                         **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    kwargs.setdefault("SiClusterContainer","ITkPixelClusters")
+    kwargs.setdefault("ClusterContainer","ITkPixelClusters")
     kwargs.setdefault("AssociationMapOut","ITkPixelClustersToTruthParticles")
-
-    #Using the same name of the xAOD::SiCluster causes bunch of warnings
-    kwargs.setdefault("OutputClusterContainer","ITkPixelMeasurements")
-    acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterTruthDecorator(name,**kwargs))
+    kwargs.setdefault("MeasurementContainer","ITkPixelMeasurements")
+    kwargs.setdefault("UseTruthInfo", flags.Tracking.doTruth)
+    acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterTruthDecoratorAlg(name,**kwargs))
 
     # add SDO and SiHit info
     if flags.Acts.decoratePRD.sdoSiHit:
@@ -42,8 +40,8 @@ def ActsPixelClusterTruthDecorator(flags,
     # Persistification
     if flags.Tracking.writeExtendedSi_PRDInfo:
         toAOD = [
-            f'xAOD::TrackMeasurementValidationContainer#{kwargs["OutputClusterContainer"]}',
-            f'xAOD::TrackMeasurementValidationAuxContainer#{kwargs["OutputClusterContainer"]}Aux.'
+            f'xAOD::TrackMeasurementValidationContainer#{kwargs["MeasurementContainer"]}',
+            f'xAOD::TrackMeasurementValidationAuxContainer#{kwargs["MeasurementContainer"]}Aux.'
         ]        
         from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
         acc.merge(addToAOD(flags, toAOD))
@@ -51,14 +49,14 @@ def ActsPixelClusterTruthDecorator(flags,
     return acc
 
 
-def ActsStripClusterTruthDecorator(flags,
-                                   name: str = "ActsStripClusterTruthDecorator",
-                                   **kwargs) -> ComponentAccumulator:
+def ActsStripClusterTruthDecoratorAlgCfg(flags,
+                                         name: str = "ActsStripClusterTruthDecoratorAlg",
+                                         **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    kwargs.setdefault("SiClusterContainer","ITkStripClusters")
+    kwargs.setdefault("ClusterContainer","ITkStripClusters")
     kwargs.setdefault("AssociationMapOut","ITkStripClustersToTruthParticles")
-    kwargs.setdefault("OutputClusterContainer","ITkStripMeasurements")
-    acc.addEventAlgo(CompFactory.ActsTrk.StripClusterTruthDecorator(name,**kwargs))
+    kwargs.setdefault("MeasurementContainer","ITkStripMeasurements")
+    acc.addEventAlgo(CompFactory.ActsTrk.StripClusterTruthDecoratorAlg(name,**kwargs))
 
     if flags.Acts.decoratePRD.sdoSiHit:
         acc.merge(ActsStripClusterSiHitDecoratorAlgCfg(flags))
@@ -66,8 +64,8 @@ def ActsStripClusterTruthDecorator(flags,
     # Persistification
     if flags.Tracking.writeExtendedSi_PRDInfo:
         toAOD = [
-            f'xAOD::TrackMeasurementValidationContainer#{kwargs["OutputClusterContainer"]}',
-            f'xAOD::TrackMeasurementValidationAuxContainer#{kwargs["OutputClusterContainer"]}Aux.'
+            f'xAOD::TrackMeasurementValidationContainer#{kwargs["MeasurementContainer"]}',
+            f'xAOD::TrackMeasurementValidationAuxContainer#{kwargs["MeasurementContainer"]}Aux.'
         ]        
         from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
         acc.merge(addToAOD(flags, toAOD))
