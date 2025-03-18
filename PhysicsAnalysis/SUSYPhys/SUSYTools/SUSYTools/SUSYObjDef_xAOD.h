@@ -325,7 +325,7 @@ namespace ST {
 
     //Trigger
     bool IsMETTrigPassed(unsigned int runnumber = 0, bool j400_OR = false) const override final;
-    bool IsMETTrigPassed(const std::string& triggerName, bool j400_OR = false) const override final;
+    bool IsMETTrigPassed(const std::string& triggerName, bool j400_OR = false, const std::string& L1_name = "L1_XE50") const override final;
 
     bool IsTrigPassed(const std::string&, unsigned int condition=TrigDefs::Physics) const override final;
 
