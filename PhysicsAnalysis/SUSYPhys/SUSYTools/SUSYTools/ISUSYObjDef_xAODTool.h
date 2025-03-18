@@ -391,7 +391,7 @@ namespace ST {
     virtual double GetTotalJetSFsys(const xAOD::JetContainer* jets, const CP::SystematicSet& systConfig, const bool btagSF = true, const bool jvtSF = true, const bool fjvtSF = false) = 0;
 
     virtual bool IsMETTrigPassed(unsigned int runnumber = 0, bool j400_OR = false) const = 0;
-    virtual bool IsMETTrigPassed(const std::string& triggerName, bool j400_OR = false) const = 0;
+    virtual bool IsMETTrigPassed(const std::string& triggerName, bool j400_OR = false, const std::string& L1_name = "L1_XE50") const = 0;
 
     virtual bool IsTrigPassed(const std::string&, unsigned int condition=TrigDefs::Physics) const = 0;
 
