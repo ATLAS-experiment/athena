@@ -14,7 +14,7 @@
 
 // EFTracking include
 #include "IntegrationBase.h"
-#include "xAODContainerMaker.h"
+#include "xAODClusterMaker.h"
 #include "TestVectorTool.h"
 
 #include "GaudiKernel/ServiceHandle.h"
@@ -49,11 +49,11 @@ namespace EFTrackingFPGAIntegration
         ServiceHandle<IChronoSvc> m_chronoSvc{
             "ChronoStatSvc", name()}; //!< Service for timing the algorithm
 
-        ToolHandle<xAODContainerMaker> m_xaodContainerMaker{
+        ToolHandle<xAODClusterMaker> m_xaodClusterMaker{
             this,
-            "xAODContainerMaker",
-            "xAODContainerMaker",
-            "Tool for creating xAOD containers"}; //!< Tool for creating xAOD containers
+            "xAODClusterMaker",
+            "xAODClusterMaker",
+            "Tool for creating xAOD cluster containers"}; //!< Tool for creating xAOD containers
 
         ToolHandle<TestVectorTool> m_testVectorTool{
             this, "TestVectorTool", "TestVectorTool", "Tool for preparing test vectors"}; //!< Tool for preparing test vectors

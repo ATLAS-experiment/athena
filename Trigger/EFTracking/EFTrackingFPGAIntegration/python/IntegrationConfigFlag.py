@@ -1,11 +1,9 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # @author: Zhaoyuan.Cui@cern.ch
 # @date: Nov. 22, 2024
 # @brief: Customized flags for FPGA data preparation pipeline
 
-def addFPGADataPrepFlags():
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
+def addFPGADataPrepFlags(flags):
     
     flags.addFlag("FPGADataPrep.DoActs", True)
     flags.addFlag("FPGADataPrep.FPGA.RunPixelClustering", True)
@@ -17,5 +15,6 @@ def addFPGADataPrepFlags():
     flags.addFlag("FPGADataPrep.PassThrough.ClusterOnly", False)
     flags.addFlag("FPGADataPrep.PassThrough.MaxClusterNum", 500000)
     flags.addFlag("FPGADataPrep.PassThrough.MaxSpacePointNum", 500000)
+    
     
     return flags
