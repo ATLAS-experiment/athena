@@ -8,15 +8,16 @@
 #include "TrkSpacePoint/SpacePoint.h"
 #include "TrkSpacePoint/SpacePointCollection.h"
 #include "TrkSpacePoint/SpacePointContainer.h"
+#include "InDetPrepRawData/PixelCluster.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 
 #include "PathResolver/PathResolver.h"
 
-#include "GNN_TrackingFilter.h"
-
 #include "IRegionSelector/IRegSelTool.h"
 
 #include "TrigInDetTrackSeedingTool.h"
+
+#include "GNN_TrackingFilter.h"
 
 //for GPU offloading
 
@@ -25,14 +26,14 @@
 
 TrigInDetTrackSeedingTool::TrigInDetTrackSeedingTool(const std::string& t, 
 					     const std::string& n,
-					     const IInterface*  p ) : 
-  SeedingToolBase(t,n,p)
+					     const IInterface*  p ) : SeedingToolBase(t,n,p)
 {
 
 }
 
 StatusCode TrigInDetTrackSeedingTool::initialize() {
-  ATH_CHECK(SeedingToolBase<const Trk::SpacePoint*>::initialize());
+
+  ATH_CHECK(SeedingToolBase::initialize());
   
   ATH_CHECK(m_regsel_pix.retrieve());
   ATH_CHECK(m_regsel_sct.retrieve());
@@ -65,7 +66,7 @@ StatusCode TrigInDetTrackSeedingTool::initialize() {
 }
 
 StatusCode TrigInDetTrackSeedingTool::finalize() {
-  return SeedingToolBase<const Trk::SpacePoint*>::finalize();
+  return SeedingToolBase::finalize();
 }
 
 
@@ -153,7 +154,11 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
   if(!m_useGPU) {
 
     std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo);
-  
+
+    std::vector<const Trk::SpacePoint*> vSP;
+
+    vSP.reserve(m_nMaxEdges);
+    
     std::vector<std::vector<GNN_Node> > trigSpStorage[2];
     
     trigSpStorage[1].resize(m_layerNumberTool->sctLayers()->size());
@@ -182,7 +187,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 
         if(input_coll == nullptr) continue;
 
-        createGraphNodes(input_coll, tmpColl, layerIndex, shift_x, shift_y);//TO-DO: if(m_useBeamTilt) SP full transform functor
+        createGraphNodes(input_coll, tmpColl, vSP, layerIndex, shift_x, shift_y);//TO-DO: if(m_useBeamTilt) SP full transform functor
 
         nNewNodes += (isPixel) ? storage->loadPixelGraphNodes(layerIndex, tmpColl, m_useML) : storage->loadStripGraphNodes(layerIndex, tmpColl);
       }
@@ -239,7 +244,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 
     //backtracking
 
-    TrigFTF_GNN_TrackingFilter<const Trk::SpacePoint*> tFilter(m_layerGeometry, edgeStorage);
+    TrigFTF_GNN_TrackingFilter tFilter(m_layerGeometry, edgeStorage);
 
     output.reserve(vSeeds.size());
   
@@ -247,7 +252,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
       
       if(pS->m_level == -1) continue;
       
-      TrigFTF_GNN_EdgeState<const Trk::SpacePoint*> rs(false);
+      TrigFTF_GNN_EdgeState rs(false);
       
       tFilter.followTrack(pS, rs);
       
@@ -275,7 +280,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
       output.emplace_back(rs.m_J);
       
       for(const auto& n : vN) {
-	output[lastIdx].addSpacePoint(n->m_pSP);
+	output[lastIdx].addSpacePoint(vSP[n->m_idx]);
       }
     }
   
@@ -470,7 +475,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 
     nodes.reserve(vSP.size());
 
-    for(unsigned int idx=0;idx<vSP.size();idx++) {
+    for(unsigned int idx = 0;idx < vSP.size(); idx++) {
 
       nodes.emplace_back(vL[idx]);
       
@@ -484,7 +489,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
       nodes[idx].m_z = zs;
       nodes[idx].m_r = std::sqrt(xs*xs + ys*ys);
 
-      nodes[idx].m_pSP = vSP[idx];
+      nodes[idx].m_idx = idx;
 
     }
     
@@ -557,7 +562,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 
     //backtracking
 
-    TrigFTF_GNN_TrackingFilter<const Trk::SpacePoint*> tFilter(m_layerGeometry, edgeStorage);
+    TrigFTF_GNN_TrackingFilter tFilter(m_layerGeometry, edgeStorage);
 
     output.reserve(vSeeds.size());
   
@@ -565,7 +570,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
       
       if(pS->m_level == -1) continue;
       
-      TrigFTF_GNN_EdgeState<const Trk::SpacePoint*> rs(false);
+      TrigFTF_GNN_EdgeState rs(false);
       
       tFilter.followTrack(pS, rs);
       
@@ -593,7 +598,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
       output.emplace_back(rs.m_J);
       
       for(const auto& n : vN) {
-	output[lastIdx].addSpacePoint(n->m_pSP);
+	output[lastIdx].addSpacePoint(vSP[n->m_idx]);
       }
     }
   
@@ -604,13 +609,15 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
   
 }
 
-void TrigInDetTrackSeedingTool::createGraphNodes(const SpacePointCollection* spColl, std::vector<GNN_Node>& tmpColl, unsigned short layer, float shift_x, float shift_y) const {
+void TrigInDetTrackSeedingTool::createGraphNodes(const SpacePointCollection* spColl, std::vector<GNN_Node>& tmpColl, std::vector<const Trk::SpacePoint*>& vSP, unsigned short layer, float shift_x, float shift_y) const {
   
   tmpColl.resize(spColl->size(), GNN_Node(layer));//all nodes belong to the same layer
   
   int idx = 0;
+  int init_size = vSP.size();
   for(const auto sp : *spColl) {
     const auto& pos = sp->globalPosition();
+    vSP.emplace_back(sp);
     float xs = pos.x() - shift_x;
     float ys = pos.y() - shift_y;
     float zs = pos.z();
@@ -619,7 +626,7 @@ void TrigInDetTrackSeedingTool::createGraphNodes(const SpacePointCollection* spC
     tmpColl[idx].m_z = zs;
     tmpColl[idx].m_r = std::sqrt(xs*xs + ys*ys);
     tmpColl[idx].m_phi = std::atan2(ys,xs);
-    tmpColl[idx].m_pSP = sp;
+    tmpColl[idx].m_idx = init_size + idx;
 
     const InDet::PixelCluster* pCL = dynamic_cast<const InDet::PixelCluster*>(sp->clusterList().first);
     if(pCL != nullptr){
