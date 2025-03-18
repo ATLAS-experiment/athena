@@ -19,8 +19,7 @@ class MuonGeoUtilityTool final :  public extends<AthAlgTool, IMuonGeoUtilityTool
 
    public:
     // Constructor
-    MuonGeoUtilityTool(const std::string &type, const std::string &name,
-                     const IInterface *parent);
+    using base_class::base_class;
 
     // Destructor
     virtual ~MuonGeoUtilityTool() override final;
@@ -51,7 +50,6 @@ class MuonGeoUtilityTool final :  public extends<AthAlgTool, IMuonGeoUtilityTool
                                           const Amg::Transform3D& refTrf) const override;
 
    private:
-    std::string dumpVolume(const PVConstLink& physVol, const std::string& childDelim) const;
 
 };
 }  // namespace MuonGMR4

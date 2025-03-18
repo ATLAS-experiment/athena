@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcReadoutGeomTool.h"
@@ -38,11 +38,11 @@ using defineArgs = RpcReadoutElement::defineArgs;
 
 /// Helper struct to attribute the Identifier fields with the
 /// gas gap volumes
-struct gapVolume: public physVolWithTrans {
-    gapVolume(physVolWithTrans&& physVol,
+struct gapVolume: public GeoChildNodeWithTrf {
+    gapVolume(GeoChildNodeWithTrf&& physVol,
               unsigned int gap,
               unsigned int phi):
-        physVolWithTrans{std::move(physVol)},
+              GeoChildNodeWithTrf{std::move(physVol)},
         gasGap{gap},
         doubPhi{phi} {}
     unsigned int gasGap{0};
@@ -50,18 +50,7 @@ struct gapVolume: public physVolWithTrans {
     
 };
 
-inline bool layerSorter(const physVolWithTrans&a, const physVolWithTrans & b){
-    const Amg::Vector3D cA = a.transform.translation();
-    const Amg::Vector3D cB = b.transform.translation();
-    if (std::abs(cA.x() - cB.x()) > tolerance) return (cA.x() < cB.x());
-    return (cA.y() < cB.y());
-}
 
-
-RpcReadoutGeomTool::RpcReadoutGeomTool(const std::string& type,
-                                       const std::string& name,
-                                       const IInterface* parent)
-    : base_class{type, name, parent} {}
 
 StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& define,
                                               FactoryCache& factoryCache) {    
@@ -95,62 +84,55 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
      *          | Strip layer  |  Strip layer |    |  Strip layer  |  Strip layer |
      *   
     */
-    std::vector<physVolWithTrans> stripLayers = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "bottomStripLayer");
-    if (stripLayers.empty()) {
-        ATH_MSG_FATAL("The volume "<<m_idHelperSvc->toStringDetEl(define.detElId)<<" does not have any childern 'bottomStripLayer'"
-            <<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
-        return StatusCode::FAILURE;
-    }   
-    std::vector<physVolWithTrans> allGasGaps = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "RpcGasGap");
-    if (allGasGaps.empty()) {
-        ATH_MSG_FATAL("The volume "<<m_idHelperSvc->toStringDetEl(define.detElId)<<" does not have any childern 'RpcGasGap'"
-            <<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
-        return StatusCode::FAILURE;
-    }
-    /// In the GeoModel world, the x-axis points in radial direction & y axis along the phi direction
-    std::stable_sort(allGasGaps.begin(), allGasGaps.end(), layerSorter);
-    std::stable_sort(stripLayers.begin(),stripLayers.end(), layerSorter);
-    /// The strip layers are used to express the dimensions of the strip layer. However, that's projected into the 
-    /// Center of the gasgap which may or maybe not be split into two --> Find the closest gas gap in x for each
-    /// strip layer and overwrite the x coordinate of the strip layerof that one.
-    for (physVolWithTrans& stripLayer : stripLayers){
-        /// Find the closest gas Gap
-        const Amg::Vector3D stripTrans = stripLayer.transform.translation();
-        std::vector<physVolWithTrans>::iterator closestGap =  std::min_element(allGasGaps.begin(), allGasGaps.end(), 
-                             [&stripTrans](const physVolWithTrans& a, const physVolWithTrans& b){
-                                return std::abs(stripTrans.x() - a.transform.translation().x()) <
-                                       std::abs(stripTrans.x() - b.transform.translation().x());                                
-                             });
-        stripLayer.transform.translation().x() = closestGap->transform.translation().x();
-    }
-
-    /// Now we need to associate the gasGap volumes with the gas gap number &
-    /// the doublet Phi
-    Amg::Vector3D prevGap{stripLayers[0].transform.translation()};
-    unsigned int gasGap{1}, doubletPhi{0};
+    std::vector<GeoChildNodeWithTrf> rpcLayers = getChildrenWithRef(define.physVol, false);
+    /// Fetch all volumes with Identifiers from the tree
+    rpcLayers.erase(std::remove_if(rpcLayers.begin(), rpcLayers.end(),
+                     [](const GeoChildNodeWithTrf& subVol){ return !subVol.volumeId; }), rpcLayers.end());
+    /// Next sort them by Identifier
+    std::ranges::sort(rpcLayers, [](const GeoChildNodeWithTrf& a, const GeoChildNodeWithTrf& b){ 
+                                  return a.volumeId.value_or(0) < b.volumeId.value_or(0);});
     
-    unsigned int modulePhi = m_idHelperSvc->rpcIdHelper().doubletPhi(define.detElId);
-    std::vector<gapVolume> allGapsWithIdx{};
-    const bool isAside{m_idHelperSvc->stationEta(define.detElId) > 0};
-    for (physVolWithTrans& gapVol : stripLayers) {
-        Amg::Vector3D gCen = gapVol.transform.translation();
-        /// The volume points to a new gasgap
-        if (std::abs(gCen.x() - prevGap.x()) > tolerance) {
-            ++gasGap;
-            doubletPhi = 1;
-        } else ++doubletPhi;
-        ATH_MSG_DEBUG("Gas gap at "<<Amg::toString(gCen, 2)<<" is associated with gasGap: "<<gasGap<<", doubletPhi: "<<doubletPhi);
-        prevGap = std::move(gCen);
-        /// Rpc volumes with doubletZ = 3 have two gas gaps along phi but they're split into two
-        /// distnict modules with doublePhi = 1, 2. 
-        doubletPhi = std::max (doubletPhi, modulePhi);
-        allGapsWithIdx.emplace_back(std::move(gapVol), gasGap, doubletPhi);
+    if (rpcLayers.empty()) {
+        ATH_MSG_FATAL("The volume "<<m_idHelperSvc->toStringDetEl(define.detElId)<<" does not have any childern with Identifiers "
+            <<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
+        return StatusCode::FAILURE;
     }
+    /// Fetch for each rpc layer the gasGaps
+    unsigned int gasGap{0};
+    const unsigned int modulePhi = m_idHelperSvc->rpcIdHelper().doubletPhi(define.detElId);
+
+    std::vector<gapVolume> allGapsWithIdx{};
+    for (const GeoChildNodeWithTrf& rpcSinglet : rpcLayers) {
+        auto fetchNodes = [this, &rpcSinglet] (const std::string& leafName) {
+            std::vector<GeoChildNodeWithTrf> nodes = m_geoUtilTool->findAllLeafNodesByName(rpcSinglet.volume, leafName);
+            std::ranges::for_each(nodes,[&rpcSinglet](GeoChildNodeWithTrf& node){ node.transform = rpcSinglet.transform * node.transform; });
+            return nodes;
+        };
+        std::vector<GeoChildNodeWithTrf> gasGaps = fetchNodes("RpcGasGap");
+        if (gasGaps.empty()) {
+            ATH_MSG_FATAL("The child "<<m_geoUtilTool->dumpVolume(rpcSinglet.volume)<<" has "<<gasGaps.size()<<" gasGaps. ");
+            return StatusCode::FAILURE;
+        }
+        std::vector<GeoChildNodeWithTrf> stripLayers = fetchNodes("bottomStripLayer");
+        if (stripLayers.empty()) {
+            ATH_MSG_FATAL("The child "<<m_geoUtilTool->dumpVolume(rpcSinglet.volume)<<" does not have a strip layer ");
+            return StatusCode::FAILURE;
+        }
+        ++gasGap;
+        for (GeoChildNodeWithTrf& stripPanel : stripLayers) {
+            /// Adjust the height of the strip panel to be in the centre of the gasGap
+            stripPanel.transform.translation().x() = gasGaps.front().transform.translation().x();
+            const int doubPhi = std::max(modulePhi, 1u*stripPanel.volumeId.value_or(999));
+            allGapsWithIdx.emplace_back(std::move(stripPanel), gasGap, doubPhi);
+        }
+    }
+   
+    const bool isAside{m_idHelperSvc->stationEta(define.detElId) > 0};
     /// We know now whether we had 2 or 3 gasgaps and also whether there 2 or 1 panels in phi
     define.nGasGaps = gasGap;
     /// Special case for the BML4 DBZ = 3 chambers. The doubletPhi is incorporated 
     /// into the detector element but there's only one strip panel
-    define.nPanelsInPhi = modulePhi == 2 ? 1 : doubletPhi;    
+    define.nPanelsInPhi = modulePhi == 2 ? 1 : allGapsWithIdx.size () / gasGap;    
     FactoryCache::ParamBookTable::const_iterator parBookItr = factoryCache.parameterBook.find(define.chambDesign);
     if (parBookItr == factoryCache.parameterBook.end()) {
         ATH_MSG_FATAL("The chamber "<<define.chambDesign<<" is not part of the WRPC table");
