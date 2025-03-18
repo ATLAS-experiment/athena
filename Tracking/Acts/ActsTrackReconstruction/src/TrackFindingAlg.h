@@ -176,6 +176,8 @@ namespace ActsTrk
 
     Gaudi::Property<bool> m_useDefaultMeasurementSelector{this, "UseDefaultActsMeasurementSelector", true, ""};
 
+    Gaudi::Property<std::vector<std::uint32_t>> m_endOfWorldVolumeIds {this, "EndOfTheWorldVolumeIds", {}, ""};
+    
     struct MeasurementSelectorConfig {
        std::vector<std::pair<float, float> > m_chi2CutOffOutlier;
        std::vector<float>                    m_etaBins;

@@ -439,6 +439,7 @@ namespace ActsTrk
     Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
     Acts::PropagatorPlainOptions plainOptions{tgContext, mfContext};
+    plainOptions.endOfWorldVolumeIds = m_endOfWorldVolumeIds;
     Acts::PropagatorPlainOptions plainSecondOptions{tgContext, mfContext};
 
     plainOptions.maxSteps = m_maxPropagationStep;
