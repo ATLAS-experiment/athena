@@ -22,8 +22,8 @@
 #include <cmath>
 
 namespace {
-  const float cellEtaSize = 0.25;
-  const float cellPhiSize = 0.25;
+  const float cellEtaSize = 0.1;
+  const float cellPhiSize = 0.1;
 }
 
 egammaForwardBuilder::egammaForwardBuilder(const std::string& name,
