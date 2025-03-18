@@ -9,12 +9,25 @@
 
 #include "FPGATrackSimBinning/FPGATrackSimBinTool.h"
 
+FPGATrackSimBinTool::FPGATrackSimBinTool(const std::string &algname, const std::string &name,
+  const IInterface *ifc)
+: AthAlgTool(algname, name, ifc) {
+}
+
 
 // ----------------------------------------------------------------------------------------
 //  AthTool Methods
 // ----------------------------------------------------------------------------------------
 
 StatusCode FPGATrackSimBinTool::initialize() {
+  // Dump the configuration to make sure it propagated through right
+  const std::vector<Gaudi::Details::PropertyBase*> props = this->getProperties();
+  for( Gaudi::Details::PropertyBase* prop : props ) {
+    if (prop->ownerTypeName()==this->type()) {      
+      ATH_MSG_DEBUG("Property:\t" << prop->name() << "\t : \t" << prop->toString());
+    }
+  }
+
   // Retrieve
   ATH_MSG_INFO("Using " << m_steps.size() << " steps");
   ATH_CHECK(m_steps.retrieve());
@@ -24,11 +37,14 @@ StatusCode FPGATrackSimBinTool::initialize() {
     return StatusCode::FAILURE;
   }
 
+  m_parMin = std::vector<double>(m_parMinConfig);
+  m_parMax = std::vector<double>(m_parMaxConfig);
+
   FPGATrackSimBinStep* prev = 0;
   for (auto &step : m_steps) {
     ATH_MSG_INFO("Got Binning Step " << step->stepName());
     m_stepNames.push_back(step->stepName());
-    if (step->setRanges(prev, m_parMin, m_parMax)) {
+    if (!step->setRanges(prev, m_parMin, m_parMax)) {
       ATH_MSG_FATAL("Failed to setRange on step");
       return StatusCode::FAILURE;
     }

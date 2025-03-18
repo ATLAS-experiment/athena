@@ -9,9 +9,24 @@
  */
 
 #include "FPGATrackSimKeyLayerBinDesc.h"
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "FPGATrackSimBinning/FPGATrackSimBinStep.h"
 
+StatusCode FPGATrackSimKeyLayerBinDesc::initialize()
+{
+  // Dump the configuration to make sure it propagated through right
+  const std::vector<Gaudi::Details::PropertyBase*> props = this->getProperties();
+  for( Gaudi::Details::PropertyBase* prop : props ) {
+    if (prop->ownerTypeName()==this->type()) {      
+      ATH_MSG_DEBUG("Property:\t" << prop->name() << "\t : \t" << prop->toString());
+    }
+  }
 
+  m_keylyrtool.setR1(m_rin);
+  m_keylyrtool.setR2(m_rout);
+
+  return StatusCode::SUCCESS;
+}
 
 bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
                                            const IdxSet &idx,
@@ -26,8 +41,9 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
 
     if (stepIsRPhi(step)) {
         // distance of hit from bin center
-        storedhit.phiShift = phiResidual(step.binCenter(idx),storedhit.hitptr.get());
-
+        storedhit.phiShift =
+            phiResidual(step.binCenter(idx), storedhit.hitptr.get());
+        
         // Get expected curvature shift from bin center    
         auto half_xm_bin_pars = parSetToKeyPars(step.binCenter(idx));
         half_xm_bin_pars.xm = step.binWidth(4)/2.0; // 4 = xm par
@@ -43,8 +59,8 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
         // distance of hit from bin center
         storedhit.etaShift = etaResidual(step.binCenter(idx),storedhit.hitptr.get());
     
-        double width_z_in  = step.binWidth(0);
-        double width_z_out = step.binWidth(1);
+        double width_z_in  = step.binWidth(0)/2.0;
+        double width_z_out = step.binWidth(1)/2.0;
         double zrange = width_z_in + (width_z_out-width_z_in) * (hitr-r1)/(r2-r1);
         
         passesEta = std::abs(storedhit.etaShift) < zrange;

@@ -9,7 +9,7 @@
  */
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
-#include "FPGATrackSimBinning/FPGATrackSimBinTool.h"
+#include "FPGATrackSimBinning/IFPGATrackSimBinDesc.h"
 #include <GaudiKernel/StatusCode.h>
 #include "FPGATrackSimBinning/FPGATrackSimBinStep.h"
 
@@ -26,16 +26,15 @@ StatusCode FPGATrackSimBinStep::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode FPGATrackSimBinStep::setRanges(const FPGATrackSimBinStep *prev,
+StatusCode FPGATrackSimBinStep::setRanges(FPGATrackSimBinStep *prev,
                                           const ParSet &parMin,
                                           const ParSet &parMax) {
+
   m_prev = prev;
   if (prev) {
     m_stepNum = prev->m_stepNum+1;
   } else {
-    m_stepNum = 0;
-    //prev is dereferenced in several places after this; better to exit than crash
-    return StatusCode::FAILURE;
+    m_stepNum = 0;    
   }
   m_parMin = parMin;
   m_parMax = parMax;
@@ -46,22 +45,28 @@ StatusCode FPGATrackSimBinStep::setRanges(const FPGATrackSimBinStep *prev,
       return StatusCode::FAILURE;
     }
     m_parStep[par] = (m_parMax[par] - m_parMin[par]) / m_parBins[par];
-
     if (m_parBins[par] <= 0)
     {
       ATH_MSG_FATAL("Every dimension must be at least one bin (set #bins=1 for not binning in that parameter)");
     }
-    if (m_parBins[par] < prev->m_parBins[par]) {
-      ATH_MSG_FATAL("Number of bins can only increase with each step");
-      return StatusCode::FAILURE;
-    }
-    if (m_parBins[par] % prev->m_parBins[par] !=0) {
-      ATH_MSG_FATAL("Number of bins must be integer multiple of bins in previous step");
-      return StatusCode::FAILURE;
-    }
-    if (m_parBins[par] != prev->m_parBins[par]) {
-      // This step involves this parameter
-      m_pars.push_back(par);      
+    if (prev) {
+      if (m_parBins[par] < prev->m_parBins[par]) {
+        ATH_MSG_FATAL("Number of bins can only increase with each step");
+        return StatusCode::FAILURE;
+      }
+      if (m_parBins[par] % prev->m_parBins[par] !=0) {
+        ATH_MSG_FATAL("Number of bins must be integer multiple of bins in previous step");
+        return StatusCode::FAILURE;
+      }
+      if (m_parBins[par] != prev->m_parBins[par]) {
+        // This step involves this parameter
+        m_pars.push_back(par);
+      }
+    } else {
+      if (m_parBins[par] != 1) {
+        // This step involves this parameter
+        m_pars.push_back(par);
+      }
     }
   }
 
@@ -105,7 +110,7 @@ IdxSet FPGATrackSimBinStep::convertToPrev(const IdxSet &cur) const {
   IdxSet retv{};
   if (m_prev) {
     for (unsigned par =0; par < FPGATrackSimTrackPars::NPARS; par++) {
-      retv[par] = (cur[par]*m_prev->m_parBins[par]/m_parBins[par]);
+      retv[par] = int(cur[par]*((const FPGATrackSimBinStep*)m_prev)->m_parBins[par]/m_parBins[par]);
     }
   } else {
     ATH_MSG_FATAL("convertToPrev called, but no previous");
@@ -123,12 +128,12 @@ const std::vector<unsigned> FPGATrackSimBinStep::stepBins() const {
 void FPGATrackSimBinStep::setValidBin(const std::vector<unsigned>& idx) {
   m_validBinFull[idx] = true;
   m_validBinLocal[stepIdx(idx)] = true;
-  if (m_prev) setValidBin(convertToPrev(idx));
+  if (m_prev) m_prev->setValidBin(convertToPrev(idx));
 }
 
 void FPGATrackSimBinStep::initValidBins() {
   m_validBinFull.setsize(m_parBins, false);
-  m_validBinLocal[stepBins()] = true;
+  m_validBinLocal.setsize(stepBins(), false);
 }
 
 void FPGATrackSimBinStep::printValidBin() const {
@@ -139,7 +144,7 @@ void FPGATrackSimBinStep::printValidBin() const {
     if (bin.data())
       validBinsFull++;
   }
-  ATH_MSG_INFO("Step" << m_name<< "Valid Bins Full: " << validBinsFull);
+  ATH_MSG_INFO("Step" << name() << "Valid Bins Full: " << validBinsFull);
 
   // count valid bins
   int validBinsLocal = 0;
@@ -147,7 +152,7 @@ void FPGATrackSimBinStep::printValidBin() const {
   if (bin.data())
     validBinsLocal++;
   }
-  ATH_MSG_INFO("Step" << m_name<<  "Valid Bins Local: " << validBinsLocal);
+  ATH_MSG_INFO("Step" << name() <<  "Valid Bins Local: " << validBinsLocal);
   
 }
 

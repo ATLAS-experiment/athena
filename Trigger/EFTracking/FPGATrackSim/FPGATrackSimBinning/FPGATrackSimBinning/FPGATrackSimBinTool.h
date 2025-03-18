@@ -45,9 +45,7 @@ class FPGATrackSimBinTool : virtual public AthAlgTool {
 public:
   friend FPGATrackSimBinStep;
 
-  FPGATrackSimBinTool(const std::string &algname, const std::string &name,
-                      const IInterface *ifc)
-      : AthAlgTool(algname, name, ifc) {}
+  FPGATrackSimBinTool(const std::string &algname, const std::string &name, const IInterface *ifc);
   
   virtual StatusCode initialize() override;
 
@@ -101,19 +99,19 @@ private:
   Gaudi::Property<double> m_etaFractionalPadding{this, "etaFractionalPadding", {}, "Fractional padding used when calculating the valid range of bins"};
   Gaudi::Property<double> m_phiFractionalPadding{this, "phiFractionalPadding", {}, "Fractional padding used when calculating the valid range of bins"};
   Gaudi::Property<double> m_qOverPtFractionalPadding{this, "qOverPtFractionalPadding", {}, "Fractional padding used when calculating the valid range of bins"};
-  Gaudi::Property<std::vector<float>> m_parMinConfig{this, "parMin", {}, "Vector of minimum bounds of parameters (expect 5"};
-  Gaudi::Property<std::vector<float>> m_parMaxConfig{this, "parMax", {}, "Vector of maximum bounds of parameters (expect 5"};
+  Gaudi::Property<std::vector<double>> m_parMinConfig{this, "parMin", {}, "Vector of minimum bounds of parameters (expect 5"};
+  Gaudi::Property<std::vector<double>> m_parMaxConfig{this, "parMax", {}, "Vector of maximum bounds of parameters (expect 5"};
 
-  ToolHandleArray<FPGATrackSimBinStep> m_steps;
-  ToolHandle<IFPGATrackSimBinDesc> m_binDesc;
-
+  ToolHandleArray<FPGATrackSimBinStep> m_steps{this, "Steps", {}, "Array of FPGATrackSimBinStep: describes which parameters are binned at each step"};
+  ToolHandle<IFPGATrackSimBinDesc> m_binDesc{this, "BinDesc", "FPGATrackSimBinDescBase", "FPGATrackSimBinDescBase: describes binning track parameters"};
+  
   //
   // Internal data
   //
 
   // These indicate the range of the full binning
-  ParSet m_parMin;
-  ParSet m_parMax;
+  ParSet m_parMin{};
+  ParSet m_parMax{};
 
   // A list of the step names for convienience
   std::vector<std::string> m_stepNames;

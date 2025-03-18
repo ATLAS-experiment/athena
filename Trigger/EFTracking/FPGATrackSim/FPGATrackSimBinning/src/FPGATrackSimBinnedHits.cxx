@@ -9,6 +9,8 @@
 
 #include "FPGATrackSimBinning/FPGATrackSimBinnedHits.h"
 #include "FPGATrackSimBinning/IFPGATrackSimBinDesc.h"
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "FPGATrackSimBinning/IFPGATrackSimBinDesc.h"
 #include "FPGATrackSimBinning/FPGATrackSimBinStep.h"
 #include "FPGATrackSimBinning/FPGATrackSimBinUtil.h"
 #include <GaudiKernel/StatusCode.h>
@@ -16,9 +18,19 @@
 
 
 StatusCode FPGATrackSimBinnedHits::initialize() {
-  ATH_CHECK(m_bintool.retrieve());
-  ATH_CHECK(m_EvtSel.retrieve());
+  // Dump the configuration to make sure it propagated through right
+  const std::vector<Gaudi::Details::PropertyBase*> props = this->getProperties();
+  for( Gaudi::Details::PropertyBase* prop : props ) {
+    if (prop->ownerTypeName()==this->type()) {      
+      ATH_MSG_DEBUG("Property:\t" << prop->name() << "\t : \t" << prop->toString());
+    }
+  }
 
+
+  ATH_MSG_DEBUG("Retrieving BinTool");
+  ATH_CHECK(m_bintool.retrieve());
+  ATH_MSG_DEBUG("Retrieving EvtSel");
+  ATH_CHECK(m_EvtSel.retrieve());
   // Compute which bins correspond to track parameters that are in the region
   // i.e. the pT, eta, phi, z0 and d0 bounds
   // list of valid bins is extracted from the layer map if its loaded
@@ -30,9 +42,8 @@ StatusCode FPGATrackSimBinnedHits::initialize() {
     readLayerMap(m_lyrmapFile);
   }
   m_bintool->printValidBin(); // also dumps firmware constants
-
   initBinnedDataArrays();
-  
+
   return StatusCode::SUCCESS;
 }
 
@@ -60,54 +71,57 @@ void FPGATrackSimBinnedHits::resetBins() {
 // by m_binning object)
 StatusCode FPGATrackSimBinnedHits::fill(
     const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits) {
-  ATH_MSG_DEBUG("In fillImage");
+  ATH_MSG_DEBUG("In fill");
 
   for (const auto &step : m_bintool->steps()) {
     int stepnum = 0;
 
+    ATH_MSG_DEBUG("fill binning: step num " << stepnum << " " << step->stepName());
     for (auto &bin : step->validBinsFull()) {
 
       // skip bin if it is invalid
       if (!bin.data())
         continue;
 
+      //ATH_MSG_DEBUG("valid bin");
       if (stepnum == 0) {
 
         // first step, hits from input stream
         for (const std::shared_ptr<const FPGATrackSimHit> &hit : hits) {
           StoredHit storedhit(hit);
           if (m_bintool->binDesc()->hitInBin(*step.get(), bin.idx(),
-                                            storedhit)) {
+                                             storedhit)) {
             m_binnedHitsStep[stepnum][bin.idx()].addHit(storedhit);
           }
         }
 
-      } else {
-
+      } else {        
         // subsequent steps, use hits from previous step
         for (const auto &hit :
              m_binnedHitsStep[stepnum - 1][step->convertToPrev(bin.idx())].hits) {
           StoredHit storedhit(hit);
           if (m_bintool->binDesc()->hitInBin(*step.get(), bin.idx(),
-                                            storedhit)) {
+                                             storedhit)) {
+            
             // One last step, set layer based on layerMap or use default from pmap
             if (step.get() == m_bintool->lastStep()) {
               if (m_mod_to_lyr_map.size() != 0) {
                 if (m_mod_to_lyr_map[bin.idx()].contains(hit.hitptr->getIdentifierHash())) {
                   storedhit.layer = m_mod_to_lyr_map[bin.idx()][hit.hitptr->getIdentifierHash()];
-                }
+                  m_binnedHitsStep[stepnum][bin.idx()].addHit(storedhit);
+                } 
               } else {
                 storedhit.layer = hit.hitptr->getLayer();
+                m_binnedHitsStep[stepnum][bin.idx()].addHit(storedhit);
               }
-            }
-
-            m_binnedHitsStep[stepnum][bin.idx()].addHit(storedhit);
-
+            }            
           }
         }
       }
 
     } //  end loop over bins
+      
+    stepnum++;
   } // end loop over stepsd
 
   return StatusCode::SUCCESS;

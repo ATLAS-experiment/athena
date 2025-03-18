@@ -164,10 +164,8 @@ double GeomHelpers::zFromPars(double r, const FPGATrackSimTrackPars &pars)
     return zhit;
 }
 
-double GeomHelpers::phiFromPars(double r, const FPGATrackSimTrackPars &pars)
-{
+double GeomHelpers::phiFromPars(double r, const FPGATrackSimTrackPars &pars) {
     double phi_hit = xAOD::P4Helpers::deltaPhi(pars.phi,asin(r * CurvatureConstant * pars.qOverPt - pars.d0 / r));
-
     return phi_hit;
 }
 
