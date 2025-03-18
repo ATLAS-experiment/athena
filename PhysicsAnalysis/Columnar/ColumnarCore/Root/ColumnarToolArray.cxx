@@ -319,6 +319,7 @@ namespace columnar
     remapName (m_info.name);
     remapName (m_info.offsetName);
     remapName (m_info.replacesColumn);
+    remapName (m_info.linkToName);
   }
 
 
