@@ -507,7 +507,7 @@ def getDevSignatures():
         ChainProp(name="HLT_j40c_020jvt_j28c_020jvt_j20c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2jJ40_jJ50", l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup + DevGroup),
         ChainProp(name="HLT_j75c_020jvt_j50c_020jvt_j20c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2jJ40_jJ50", l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup + DevGroup),
         ChainProp(name="HLT_j75c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2jJ40_jJ50", l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup + DevGroup),
-
+        
         # TEST CHAINS WITH ROIFTF PRESEL
 
         # ATR-28352: HH4b test chains with DIPZ
@@ -737,6 +737,14 @@ def getDevSignatures():
         #ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_probe_L1eTAU12_j15_pf_ftf_03dRAB_L1RD0_FILLED', l1SeedThresholds=['PROBEeTAU12','FSNOSEED'], groups=TagAndProbeGroup+TauJetGroup),
         #ChainProp(name='HLT_tau20_mediumGNTau_probe_L1eTAU12_j15_pf_ftf_03dRAB_L1RD0_FILLED', l1SeedThresholds=['PROBEeTAU12','FSNOSEED'], groups=TagAndProbeGroup+TauJetGroup),
         # *** Temporarily commented because counts are fluctuating in CI and causing confusion ***
+
+        #ATR-30799
+        ChainProp(name="HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_SHARED_j20c_020jvt_bgn277_j20c_020jvt_bgn277_pf_ftf_presel1c20XX2c20bgtwo85_L1BTAG-MU5VFjJ20_2jJ30p0ETA25", l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup + DevGroup),
+        ChainProp(name="HLT_mu6_j75c_020jvt_j50c_020jvt_j25c_020jvt_SHARED_j20c_020jvt_bgn277_j20c_020jvt_bgn277_pf_ftf_presel1c20XX2c20bgtwo85_L1BTAG-MU5VFjJ20_2jJ30p0ETA25", l1SeedThresholds=['MU5VF']+['FSNOSEED']*5, groups=SupportPhIGroup+MultiBjetGroup),
+        ChainProp(name="HLT_mu6_j75c_020jvt_j50c_020jvt_j25c_020jvt_SHARED_j20c_020jvt_bgn277_j20c_020jvt_bgn277_pf_ftf_presel1c20XX2c20bgtwo85_dRAF04_L1BTAG-MU5VFjJ20_2jJ30p0ETA25", l1SeedThresholds=['MU5VF']+['FSNOSEED']*5, groups=SupportPhIGroup+MultiBjetGroup),
+        ChainProp(name="HLT_j55c_020jvt_j40c_020jvt_j25c_020jvt_SHARED_j20c_020jvt_bgn277_j20c_020jvt_bgn277_pf_ftf_presel1c20XX2c20bgtwo85_L1BTAG-MU5VFjJ20_2jJ30p0ETA25", l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup + DevGroup),
+        ChainProp(name="HLT_mu6_j55c_020jvt_j40c_020jvt_j25c_020jvt_SHARED_j20c_020jvt_bgn277_j20c_020jvt_bgn277_pf_ftf_presel1c20XX2c20bgtwo85_L1BTAG-MU5VFjJ20_2jJ30p0ETA25", l1SeedThresholds=['MU5VF']+['FSNOSEED']*5, groups=SupportPhIGroup+MultiBjetGroup),
+        ChainProp(name="HLT_mu6_j55c_020jvt_j40c_020jvt_j25c_020jvt_SHARED_j20c_020jvt_bgn277_j20c_020jvt_bgn277_pf_ftf_presel1c20XX2c20bgtwo85_dRAF04_L1BTAG-MU5VFjJ20_2jJ30p0ETA25", l1SeedThresholds=['MU5VF']+['FSNOSEED']*5, groups=SupportPhIGroup+MultiBjetGroup),
 
 
         #Photon+MET new NN without isolation ATR-26410
