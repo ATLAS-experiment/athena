@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MeasurementToTrackParticleDecoration.h"
+#include "src/MeasurementToTrackParticleDecorationAlg.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
@@ -18,14 +18,42 @@ using namespace Acts::UnitLiterals;
 
 namespace ActsTrk {
 
-    MeasurementToTrackParticleDecoration::MeasurementToTrackParticleDecoration(const std::string &name, ISvcLocator *pSvcLocator) :
+    MeasurementToTrackParticleDecorationAlg::MeasurementToTrackParticleDecorationAlg(const std::string &name,
+										     ISvcLocator *pSvcLocator) :
       AthReentrantAlgorithm(name,pSvcLocator)
     {}
 
-    StatusCode MeasurementToTrackParticleDecoration::initialize()
+    StatusCode MeasurementToTrackParticleDecorationAlg::initialize()
     {
+        ATH_MSG_DEBUG("Initializing " << name() << " ...");
+	
         ATH_CHECK(m_trackParticlesKey.initialize());
-        ATH_CHECK(m_measurementRegionKey.initialize());
+
+	m_measurementRegionKey = m_trackParticlesKey.key() + "." + m_measurementRegionKey.key();
+	m_measurementDetectorKey = m_trackParticlesKey.key() + "." + m_measurementDetectorKey.key();
+	m_measurementLayerKey = m_trackParticlesKey.key() + "." + m_measurementLayerKey.key();
+	m_chi2HitPredictedKey = m_trackParticlesKey.key() + "." + m_chi2HitPredictedKey.key();
+	m_chi2HitFilteredKey = m_trackParticlesKey.key() + "." + m_chi2HitFilteredKey.key();
+	m_measurementTypeKey = m_trackParticlesKey.key() + "." + m_measurementTypeKey.key();
+	m_measurementPhiWidthKey = m_trackParticlesKey.key() + "." + m_measurementPhiWidthKey.key();
+	m_measurementEtaWidthKey = m_trackParticlesKey.key() + "." + m_measurementEtaWidthKey.key();
+
+	m_residualLocXkey = m_trackParticlesKey.key() + "." + m_residualLocXkey.key();
+	m_pullLocXkey = m_trackParticlesKey.key() + "." + m_pullLocXkey.key();
+	m_measurementLocXkey = m_trackParticlesKey.key() + "." + m_measurementLocXkey.key();
+	m_trackParameterLocXkey = m_trackParticlesKey.key() + "." + m_trackParameterLocXkey.key();
+	m_measurementLocCovXkey = m_trackParticlesKey.key() + "." + m_measurementLocCovXkey.key();
+	m_trackParameterLocCovXkey = m_trackParticlesKey.key() + "." + m_trackParameterLocCovXkey.key();
+
+	m_residualLocYkey = m_trackParticlesKey.key() + "." + m_residualLocYkey.key();
+	m_pullLocYkey = m_trackParticlesKey.key() + "." + m_pullLocYkey.key();
+	m_measurementLocYkey = m_trackParticlesKey.key() + "." + m_measurementLocYkey.key();
+	m_trackParameterLocYkey = m_trackParticlesKey.key() + "." + m_trackParameterLocYkey.key();
+	m_measurementLocCovYkey = m_trackParticlesKey.key() + "." + m_measurementLocCovYkey.key();
+	m_trackParameterLocCovYkey = m_trackParticlesKey.key() + "." + m_trackParameterLocCovYkey.key();
+	
+	// Decorations
+	ATH_CHECK(m_measurementRegionKey.initialize());
 	ATH_CHECK(m_measurementDetectorKey.initialize());
         ATH_CHECK(m_measurementLayerKey.initialize());
 	ATH_CHECK(m_chi2HitPredictedKey.initialize());
@@ -51,9 +79,9 @@ namespace ActsTrk {
         return StatusCode::SUCCESS;
     }
 
-  StatusCode MeasurementToTrackParticleDecoration::execute(const EventContext& ctx) const
+  StatusCode MeasurementToTrackParticleDecorationAlg::execute(const EventContext& ctx) const
     {
-        ATH_MSG_DEBUG("Executing MeasurementToTrackParticleDecoration...");
+        ATH_MSG_DEBUG("Executing " << name() << " ...");
 
 	auto tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
 
@@ -367,7 +395,7 @@ namespace ActsTrk {
         return StatusCode::SUCCESS;
     }
   
-  float MeasurementToTrackParticleDecoration::getChi2Contribution(const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) const {
+  float MeasurementToTrackParticleDecorationAlg::getChi2Contribution(const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) const {
     
     auto pred  = state.predicted();
     auto predC = state.predictedCovariance();
@@ -395,10 +423,10 @@ namespace ActsTrk {
   }
 
   
-  float MeasurementToTrackParticleDecoration::evaluatePull(const float residual,
-							   const float measurementCovariance,
-							   const float trackParameterCovariance,
-							   const bool evaluateUnbiased) const {
+  float MeasurementToTrackParticleDecorationAlg::evaluatePull(const float residual,
+							      const float measurementCovariance,
+							      const float trackParameterCovariance,
+							      const bool evaluateUnbiased) const {
     float correlation = evaluateUnbiased ? 1. : -1.;
     float residualCovariance = measurementCovariance + correlation*trackParameterCovariance;
     if (residualCovariance<=0.) {

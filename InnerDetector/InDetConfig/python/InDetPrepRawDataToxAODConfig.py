@@ -51,9 +51,9 @@ def ITkActsPrepDataToxAODCfg(flags) -> ComponentAccumulator:
     if flags.Input.isMC:        
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
 
-        from ActsConfig.ActsObjectDecorationConfig import ActsPixelClusterTruthDecorator,ActsStripClusterTruthDecorator
-        acc.merge(ActsPixelClusterTruthDecorator(flags))
-        acc.merge(ActsStripClusterTruthDecorator(flags))
+        from ActsConfig.ActsObjectDecorationConfig import ActsPixelClusterTruthDecoratorAlgCfg,ActsStripClusterTruthDecoratorAlgCfg
+        acc.merge(ActsPixelClusterTruthDecoratorAlgCfg(flags))
+        acc.merge(ActsStripClusterTruthDecoratorAlgCfg(flags))
 
     return acc
 

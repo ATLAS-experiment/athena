@@ -68,8 +68,9 @@ activate_all_flags="flags.Acts.doITkConversion=True; \
         	    flags.Acts.EDM.PersistifySpacePoints=True; \
 		    flags.Detector.EnableCalo=True; \
 		    flags.Tracking.writeExtendedSi_PRDInfo=True; \
+		    flags.Acts.storeTrackStateInfo=True; \
 		    flags.Tracking.doTruth=True;"
-
+		   
 activate_all_collections="\"InDet\" \
         \"InDetActs\" \
         \"InDetActsConversion\" \

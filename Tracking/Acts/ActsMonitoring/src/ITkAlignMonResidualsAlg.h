@@ -20,12 +20,20 @@ namespace ActsTrk {
     virtual StatusCode fillHistograms(const EventContext& ctx) const override;
 
   private:
-    
-    SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksKey{this, "ActsTracks","","Input Acts::Track Collection"};
-    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticlesKey{this, "InDetTrackParticles","InDetTrackParticles","Input xAOD::TrackParticles"};
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticlesKey{this, "TrackParticles", "", "Input xAOD::TrackParticles"};
 
-    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_acc_measurement_regionAcc {this, "measurement_region", m_trackParticlesKey, "measurement_region"};
-    
+    // Decorators
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_measurement_det {this, "measurement_det", "measurement_det"};
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_measurement_region {this, "measurement_region", "measurement_region"};
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_measurement_type {this, "measurement_type", "measurement_type"};
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_measurement_layer {this, "measurement_iLayer", "measurement_iLayer"};
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_hitResiduals_residualLocX {this, "hitResiduals_residualLocX", "hitResiduals_residualLocX"};
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_hitResiduals_pullLocX {this, "hitResiduals_pullLocX", "hitResiduals_pullLocX"};
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_hitResiduals_residualLocY {this, "hitResiduals_residualLocY", "hitResiduals_residualLocY"};
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_hitResiduals_pullLocY {this, "hitResiduals_pullLocY", "hitResiduals_pullLocY"};
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_hitResiduals_phiWidth {this, "hitResiduals_phiWidth", "hitResiduals_phiWidth"};
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_hitResiduals_etaWidth {this, "hitResiduals_etaWidth", "hitResiduals_etaWidth"};
+
     Gaudi::Property< std::string > m_monGroupName
       {this, "MonGroupName", "ActsResAnalysisAlg"};
 

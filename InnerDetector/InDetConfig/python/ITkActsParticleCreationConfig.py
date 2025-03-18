@@ -53,6 +53,19 @@ def ITkActsTrackParticleCreationCfg(flags,
                                                              OutputLevel = WARNING              if len(TrackContainers)==1 else INFO,
                                                              ComputeTrackRecoEfficiency = False if len(TrackContainers)==1 else True))
 
+    # Additional decorations
+    if flags.Acts.storeTrackStateInfo:
+        from ActsConfig.ActsObjectDecorationConfig import ActsMeasurementToTrackParticleDecorationAlgCfg
+        acc.merge(ActsMeasurementToTrackParticleDecorationAlgCfg(flags,
+                                                                 name = f"ActsMeasurementTo{TrackParticleContainer}DecorationAlg",
+                                                                 TrackParticleKey = TrackParticleContainer))
+        
+        if flags.Acts.Particles.doAnalysis:
+            from ActsConfig.ActsAnalysisConfig import ActsResidualAnalysisAlgCfg
+            acc.merge(ActsResidualAnalysisAlgCfg(flags,
+                                                 name = f"Acts{TrackParticleContainer}ResidualAnalysisAlg",
+                                                 TrackParticles = TrackParticleContainer))
+            
     # Persistification
     # By default this is always happening, but in the case the perigee strategy is set
     # to Vertex we need to create a temporary track particle collection wrt the BeamLine
