@@ -111,6 +111,23 @@ namespace columnar
     /// or we need to add more meta-information for that case, or the
     /// user needs to do something smart (i.e. manual) in their code.
     bool isOptional = false;
+
+
+    /// @brief the name of the column we link to (or empty string if we
+    /// don't link to a column)
+    ///
+    /// Some of our columns contain an index of an object in another
+    /// column.  This is the name of that other column.  This can then
+    /// be used for consistency checks, and could potentially also be
+    /// used to aid in thinning operations to keep the link indices
+    /// consistent.
+    ///
+    /// So far we only have links that link to one specific column.  If
+    /// we need columns that link to multiple columns I will need to
+    /// revisit how I do this.  I'd probably turn this into a vector,
+    /// and then have a separate column that contains the index in that
+    /// vector for each index.
+    std::string linkToName {};
   };
 }
 
