@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonGeoUtilityTool.h"
 
@@ -20,7 +20,9 @@
 #include <GeoModelKernel/GeoVolumeCursor.h>
 
 #include <GeoModelHelpers/GeoShapeUtils.h>
+#include <GeoModelHelpers/printVolume.h>
 #include <GeoModelHelpers/TransformToStringConverter.h>
+
 
 #include <set>
 #include <sstream>
@@ -31,9 +33,6 @@ using namespace ActsTrk;
 namespace MuonGMR4{
 
 MuonGeoUtilityTool::~MuonGeoUtilityTool() = default;
-MuonGeoUtilityTool::MuonGeoUtilityTool(const std::string &type, const std::string &name,
-                                       const IInterface *parent):
-    base_class(type,name,parent) {}
 
 const GeoShape* MuonGeoUtilityTool::extractShape(const PVConstLink& physVol) const {
     const GeoLogVol* logVol = physVol->getLogVol();
@@ -88,48 +87,7 @@ Amg::Transform3D MuonGeoUtilityTool::extractShifts(const GeoShape* inShape) cons
     return sumTrans;
 }
 std::string MuonGeoUtilityTool::dumpShape(const GeoShape* shape) const { return printGeoShape(shape); }
-std::string MuonGeoUtilityTool::dumpVolume(const PVConstLink& physVol) const {
-   return dumpVolume(physVol, "");
-}
-std::string MuonGeoUtilityTool::dumpVolume(const PVConstLink& physVol, const std::string& childDelim) const { 
-  std::stringstream sstr{};
-  if (!physVol || !physVol->getLogVol()){
-    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" "<<__func__<<" No logical volume attached ");
-    return sstr.str();        
-  }
-  const GeoShape* shape = extractShape(physVol);
-  if (!shape) {
-      ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" "<<__func__
-                      <<" Failed to extract shape from phys volume "
-                      << physVol->getLogVol()->getName());
-      return sstr.str();
-  }
-  sstr<<"logical volume "<<physVol->getLogVol()->getName()<<", ";
-  if (physVol->isShared() || !physVol->getParent()){
-    sstr<<"shared volume, ";
-  } else {
-    const GeoVPhysVol* pv = physVol;
-    if (typeid(*pv) == typeid(GeoFullPhysVol)){
-      const Amg::Transform3D absTrans = static_cast<const GeoFullPhysVol&>(*physVol).getAbsoluteTransform();
-      sstr<<"absolute pos: "<<GeoTrf::toString(absTrans,true) << ", ";
-    } else{
-        sstr<<"relative pos: "<<GeoTrf::toString(physVol->getX(), true)<<", ";  
-    }
-  }
-  sstr<<dumpShape(shape)<<", ";
-  const Amg::Transform3D shift = extractShifts(physVol);
-  if (!Amg::isIdentity(shift)) {
-    sstr<<" shape shifted by "<<GeoTrf::toString(shift, true);
-  } 
-  sstr<<"number of children "<<physVol->getNChildVols()<<", "<<std::endl;
-  std::vector<GeoChildNodeWithTrf> children = getChildrenWithRef(physVol, false);
-  for (unsigned int child = 0; child < children.size(); ++child) {
-    sstr<<childDelim<<(child+1)<<": "<<GeoTrf::toString(children[child].transform, true)
-        <<", "<< dumpVolume(children[child].volume, childDelim + "    ");
-  }
-  return sstr.str();
-}
-
+std::string MuonGeoUtilityTool::dumpVolume(const PVConstLink& physVol) const { return printVolume(physVol); }
 const GeoAlignableTransform* MuonGeoUtilityTool::findAlignableTransform(const PVConstLink& physVol) const {
     PVConstLink parent{physVol->getParent()}, child{physVol};
     while (parent) {
@@ -148,26 +106,9 @@ const GeoAlignableTransform* MuonGeoUtilityTool::findAlignableTransform(const PV
 }
 
 std::vector<MuonGeoUtilityTool::physVolWithTrans> MuonGeoUtilityTool::findAllLeafNodesByName(const PVConstLink& physVol, const std::string& volumeName) const {
-  const std::vector<physVolWithTrans> children = getChildrenWithRef(physVol, false);
-  std::vector<physVolWithTrans> foundVols{};
-  for (const physVolWithTrans& child : children) {    
-    /// The logical volume has precisely the name for what we're searching for
-    if (child.volume->getLogVol()->getName() == volumeName || child.nodeName == volumeName) {
-        foundVols.push_back(child);
-    }
-    /// There are no grand children of this volume. We're at a leaf node
-    if (!child.volume->getNChildVols()) {
-      continue;
-    }    
-    std::vector<physVolWithTrans> grandChildren = findAllLeafNodesByName(child.volume, volumeName);
-    std::transform(std::make_move_iterator(grandChildren.begin()),
-                   std::make_move_iterator(grandChildren.end()), std::back_inserter(foundVols),
-                   [&child](physVolWithTrans&& vol){
-                      vol.transform = child.transform * vol.transform;
-                      return vol;
-                  });
-  }
-  return foundVols;
+  return getAllSubVolumes(physVol,[&volumeName](const physVolWithTrans& child){
+                                                 return child.volume->getLogVol()->getName() == volumeName || child.nodeName == volumeName;
+                                  });
 }
 std::vector<const GeoShape*> MuonGeoUtilityTool::getComponents(const GeoShape* booleanShape) const {
    return getBooleanComponents(booleanShape);

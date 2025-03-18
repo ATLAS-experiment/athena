@@ -6,7 +6,7 @@ def geoModelFileDefault(useR4Layout = False):
     # If this is changed, remember to also test with other dependent tests 
     # e.g. run ctest with ActsEventCnv
     if useR4Layout: 
-        return  "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R4-MUONTEST.db"
+        return  "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00.db"
     return "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00.db"
 
 def SetupArgParser():
