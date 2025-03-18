@@ -44,7 +44,7 @@ namespace EFTrackingFPGAIntegration
         ATH_CHECK(m_inputPixelClusterKey.initialize());
         ATH_CHECK(m_inputStripClusterKey.initialize());
 
-        ATH_CHECK(m_xaodContainerMaker.retrieve());
+        ATH_CHECK(m_xaodClusterMaker.retrieve());
         ATH_CHECK(m_testVectorTool.retrieve());
         return StatusCode::SUCCESS;
     }
@@ -98,9 +98,9 @@ namespace EFTrackingFPGAIntegration
             acc_queue.finish();
         }
 
-        // use 32-bit point to access output
-        uint32_t *stripClusters = (uint32_t *)stripOutput.data();
-        uint32_t *pixelClusters = (uint32_t *)pixelOutput.data();
+        // use 64-bit pointer to access output
+        uint64_t *stripClusters = stripOutput.data();
+        uint64_t *pixelClusters = pixelOutput.data();
 
         unsigned int numStripClusters = stripClusters[0];
         ATH_MSG_DEBUG("numStripClusters: " << numStripClusters);
@@ -131,53 +131,53 @@ namespace EFTrackingFPGAIntegration
             {
                 rdoCounter = 0;
                 row = 0; // idhash
-                scAux.idHash.push_back(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                scAux.idHash.push_back(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
                 row = 1; // id
-                scAux.id.push_back(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                scAux.id.push_back(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
                 row = 2; // rdo w1
-                rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
+                rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
                 if (rdo)
                 {
-                    scAux.rdoList.push_back(rdo << 32);
+                    scAux.rdoList.push_back(rdo);
                     rdoCounter++;
                 }
                 row = 3; // rdo w2
-                rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
+                rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
                 if (rdo)
                 {
-                    scAux.rdoList.push_back(rdo << 32);
+                    scAux.rdoList.push_back(rdo);
                     rdoCounter++;
                 }
                 row = 4; // rdo w3
-                rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
+                rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
                 if (rdo)
                 {
-                    scAux.rdoList.push_back(rdo << 32);
+                    scAux.rdoList.push_back(rdo);
                     rdoCounter++;
                 }
                 row = 5; // rdo w4
-                rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
+                rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
                 if (rdo)
                 {
-                    scAux.rdoList.push_back(rdo << 32);
+                    scAux.rdoList.push_back(rdo);
                     rdoCounter++;
                 }
                 row = 6; // local x
-                scAux.localPosition.push_back(*(float *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                scAux.localPosition.push_back(*(double *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
                 row = 8; // local covariance xx
-                scAux.localCovariance.push_back(*(float *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                scAux.localCovariance.push_back(*(double *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
                 row = 9; // global x
-                scAux.globalPosition.push_back(*(float *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                scAux.globalPosition.push_back(*(double *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
                 row = 10; // global y
-                scAux.globalPosition.push_back(*(float *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                scAux.globalPosition.push_back(*(double *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
                 row = 11; // global z
-                scAux.globalPosition.push_back(*(float *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                scAux.globalPosition.push_back(*(double *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
                 row = 12; // channels in phi
-                scAux.channelsInPhi.push_back(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                scAux.channelsInPhi.push_back(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 metadata->scRdoIndex[i] = rdoCounter;
             }
-            ATH_CHECK(m_xaodContainerMaker->makeStripClusterContainer(scAux, metadata.get(), ctx));
+            ATH_CHECK(m_xaodClusterMaker->makeStripClusterContainer(scAux, metadata.get(), ctx));
             // print out the strip cluster aux input
             if (msgLvl(MSG::DEBUG))
             {
@@ -203,86 +203,86 @@ namespace EFTrackingFPGAIntegration
             {
                 rdoCounter = 0;
                 row = 0; // id hash
-                pcAux.idHash.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                pcAux.idHash.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 row = 1; // id
-                pcAux.id.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                pcAux.id.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 row = 2; // rdo w1
-                rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
+                rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
                 if (rdo)
                 {
-                    pcAux.rdoList.push_back(rdo << 32);
+                    pcAux.rdoList.push_back(rdo);
                     rdoCounter++;
                 }
 
                 row = 3; // rdo w2
-                rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
+                rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
                 if (rdo)
                 {
-                    pcAux.rdoList.push_back(rdo << 32);
+                    pcAux.rdoList.push_back(rdo);
                     rdoCounter++;
                 }
 
                 row = 4; // rdo w3
-                rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
+                rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
                 if (rdo)
                 {
-                    pcAux.rdoList.push_back(rdo << 32);
+                    pcAux.rdoList.push_back(rdo);
                     rdoCounter++;
                 }
 
                 row = 5; // rdo w4
-                rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1];
+                rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
                 if (rdo)
                 {
-                    pcAux.rdoList.push_back(rdo << 32);
+                    pcAux.rdoList.push_back(rdo);
                     rdoCounter++;
                 }
 
                 row = 6; // local x
-                pcAux.localPosition.push_back(*(float *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                pcAux.localPosition.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 row = 7; // local y
-                pcAux.localPosition.push_back(*(float *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                pcAux.localPosition.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 row = 8; // local covariance xx
-                pcAux.localCovariance.push_back(*(float *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                pcAux.localCovariance.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 row = 9; // local covariance yy
-                pcAux.localCovariance.push_back(*(float *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                pcAux.localCovariance.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 row = 10; // global x
-                pcAux.globalPosition.push_back(*(float *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                pcAux.globalPosition.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 row = 11; // global y
-                pcAux.globalPosition.push_back(*(float *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                pcAux.globalPosition.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 row = 12; // global z
-                pcAux.globalPosition.push_back(*(float *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                pcAux.globalPosition.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 row = 13; // channels in phi
-                pcAux.channelsInPhi.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                pcAux.channelsInPhi.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 row = 14; // channels in eta
-                pcAux.channelsInEta.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                pcAux.channelsInEta.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 row = 15; // width in eta
-                pcAux.widthInEta.push_back(*(float *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                pcAux.widthInEta.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 row = 16; // omega x
-                pcAux.omegaX.push_back(*(float *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                pcAux.omegaX.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 row = 17; // omega y
-                pcAux.omegaY.push_back(*(float *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                pcAux.omegaY.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 row = 18; // total ToT
-                pcAux.totalToT.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 1]);
+                pcAux.totalToT.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 
                 metadata->pcRdoIndex[i] = rdoCounter;
             }
 
-            ATH_CHECK(m_xaodContainerMaker->makePixelClusterContainer(pcAux, metadata.get(), ctx));
+            ATH_CHECK(m_xaodClusterMaker->makePixelClusterContainer(pcAux, metadata.get(), ctx));
 
             // print out pixel cluster aux input
             if (msgLvl(MSG::DEBUG))

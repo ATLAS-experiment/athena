@@ -19,6 +19,12 @@ def BenchmarkCfg(flags, name = 'BenckmarkAlg', **kwarg):
     testVectorTool = acc.popToolsAndMerge(FPGATestVectorToolCfg(flags))
     kwarg.setdefault('TestVectorTool', testVectorTool)
 
+    acc.addService(CompFactory.ChronoStatSvc(
+        PrintUserTime = True,
+        PrintSystemTime = True,
+        PrintEllapsedTime = True
+    ))
+
     acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.BenchmarkAlg(**kwarg))
 
     return acc
@@ -26,25 +32,85 @@ def BenchmarkCfg(flags, name = 'BenckmarkAlg', **kwarg):
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-
     flags = initConfigFlags()
+    
+    # Add FPGA Integration flags
+    from EFTrackingFPGAIntegration.IntegrationConfigFlag import addFPGADataPrepFlags
+    addFPGADataPrepFlags(flags)
+    
+    flags.Detector.EnableCalo = False
+    flags.FPGADataPrep.DoActs = True
+    
+    # DataPreparation Pipeline doesn't do spacepoint fomration, we need ACTS to do it
+    flags.FPGADataPrep.PassThrough.ClusterOnly = True
+    # For Spacepoint formation
+    if flags.FPGADataPrep.PassThrough.ClusterOnly:
+        flags.Detector.EnableITkPixel = True
+        flags.Detector.EnableITkStrip = True
+        flags.Acts.useCache = False
+        flags.Tracking.ITkMainPass.doActsSeed = True
+    
+    flags.Tracking.ITkMainPass.doAthenaToActsCluster = True
+    flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint = True
+    flags.Tracking.ITkMainPass.doAthenaSpacePoint = True
+    
     flags.Concurrency.NumThreads = 1
     # dummy input to retrieve EventInfo
-    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675668._000016.pool.root.1"]
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root"]
     flags.Output.AODFileName = "PassthroughAOD.pool.root"
     
     flags.lock()
+    flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass", keepOriginal=True)
 
     kwarg = {}
     
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
     
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
+    
+    # Check if the input file is RDO or AOD by instepecting if the file contains "RDO" or "AOD"
+    isRDO = False
+    if "RDO" in flags.Input.Files[0] or isRDO:
+        print("The input is an RDO, running the ITk Reco chain") 
+            
+        #Truth
+        if flags.Input.isMC:
+            from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+            cfg.merge(GEN_AOD2xAODCfg(flags))
+            
+        # Standard reco
+        from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
+        cfg.merge(ITkTrackRecoCfg(flags))
+        
+        from InDetConfig.InDetPrepRawDataToxAODConfig import TruthParticleIndexDecoratorAlgCfg
+        cfg.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
+    
+    elif "AOD" in flags.Input.Files[0]:
+        print("The input is an AOD, skipping the ITk Reco chain")
+    
+    else:
+        print("Cannot determine the input file type. Assuming it's an AOD. Set the isRDO option manully if it's not.")
 
     acc = BenchmarkCfg(flags, **kwarg)
     cfg.merge(acc)
+    
+    OutputItemList = [
+                    "xAOD::StripClusterContainer#FPGAStripClusters",
+                    "xAOD::StripClusterAuxContainer#FPGAStripClustersAux.",
+                    "xAOD::PixelClusterContainer#FPGAPixelClusters",
+                    "xAOD::PixelClusterAuxContainer#FPGAPixelClustersAux.",
+                    ]
+    
+    # Connection to ACTS
+    if flags.FPGADataPrep.DoActs:
+        from EFTrackingFPGAIntegration.DataPrepToActsConfig import DataPrepToActsCfg
+        cfg.merge(DataPrepToActsCfg(flags))
+        OutputItemList += [
+                    "xAOD::TrackParticleContainer#FPGATrackParticles",
+                    "xAOD::TrackParticleAuxContainer#FPGATrackParticlesAux."
+                    ]
     
     from EFTrackingFPGAIntegration.FPGAOutputValidationConfig import FPGAOutputValidationCfg
     cfg.merge(FPGAOutputValidationCfg(flags, **{
@@ -63,13 +129,6 @@ if __name__ == "__main__":
                                         MetadataCategory.IOVMetaData,],))
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
-    OutputItemList = [
-                    "xAOD::StripClusterContainer#FPGAStripClusters",
-                    "xAOD::StripClusterAuxContainer#FPGAStripClustersAux.",
-                    "xAOD::PixelClusterContainer#FPGAPixelClusters",
-                    "xAOD::PixelClusterAuxContainer#FPGAPixelClustersAux.",
-                    ]
-   
     cfg.merge(addToAOD(flags, OutputItemList))
 
     cfg.run(1)

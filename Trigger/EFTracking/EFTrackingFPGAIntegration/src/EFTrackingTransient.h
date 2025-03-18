@@ -6,6 +6,7 @@
  * @file src/EFTrackingTransient.h
  * @author zhaoyuan.cui@cern.ch
  * @author yuan-tang.chou@cern.ch
+ * @author zhidong.zhang@cern.ch
  * @date Apr. 22, 2024
  * @brief Temporary data struct design for the EF tracking FPGA integration
  * development
@@ -24,14 +25,14 @@ namespace EFTrackingTransient
   // They might be aligned in the future for efficient device memory usage
 
   constexpr unsigned int MAX_NUM_CLUSTERS = 409600;
-  constexpr unsigned int NUM_PIXEL_WORD = 7;
-  constexpr unsigned int NUM_STRIP_WORD = 6;
+  constexpr unsigned int NUM_PIXEL_WORD = 10;
+  constexpr unsigned int NUM_STRIP_WORD = 9;
   constexpr unsigned int NUM_PIXEL_ROW = 19;
   constexpr unsigned int NUM_STRIP_ROW = 14;
   constexpr unsigned long PIXEL_BLOCK_BUF_SIZE = NUM_PIXEL_WORD * MAX_NUM_CLUSTERS;
   constexpr unsigned long STRIP_BLOCK_BUF_SIZE = NUM_STRIP_WORD * MAX_NUM_CLUSTERS;
-  constexpr unsigned long PIXEL_CONTAINER_BUF_SIZE = (NUM_PIXEL_ROW + 1) / 2 * MAX_NUM_CLUSTERS;
-  constexpr unsigned long STRIP_CONTAINER_BUF_SIZE = (NUM_STRIP_ROW + 1) / 2 * MAX_NUM_CLUSTERS;
+  constexpr unsigned long PIXEL_CONTAINER_BUF_SIZE = (NUM_PIXEL_ROW * MAX_NUM_CLUSTERS + 4096); //+4096 for numClusters with alignment
+  constexpr unsigned long STRIP_CONTAINER_BUF_SIZE = (NUM_STRIP_ROW * MAX_NUM_CLUSTERS + 4096);
 
   /**
    * @brief The StripClusters struct contains all xAOD::StripCluster data members
