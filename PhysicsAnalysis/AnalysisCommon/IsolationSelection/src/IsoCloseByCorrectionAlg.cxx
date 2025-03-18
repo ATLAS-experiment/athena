@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "IsoCloseByCorrectionAlg.h"
 
@@ -50,10 +50,6 @@ namespace CP {
         // There may be more than one container for each.
         // Then apply selections of objects, decorating with "isoSelIsOK" for the IsoCloseByTool, and then pass the ConstDataVectors to the tool.
 
-        // Use isLRT decoration for LLP particles to avoid looking for tracks from the primary vertex in the closeBy tool
-        SG::AuxElement::Decorator<char> isLRT("isLRT");
-
-
         ConstDataVector<xAOD::MuonContainer>     muons{SG::VIEW_ELEMENTS};
         ConstDataVector<xAOD::ElectronContainer> electrons{SG::VIEW_ELEMENTS};
         ConstDataVector<xAOD::PhotonContainer>   photons{SG::VIEW_ELEMENTS};
@@ -61,9 +57,6 @@ namespace CP {
         for (const SG::ReadHandleKey<xAOD::IParticleContainer>& contKey : m_contKeys) {
             SG::ReadHandle<xAOD::IParticleContainer> parts (contKey, ctx);
             for ( const xAOD::IParticle* part : *parts ) {
-
-                // flag LLP particles
-                isLRT(*part) = (contKey.key().find("LRT")  != std::string::npos);
 
                 // Check type of container and apply selection as appropriate
                 if (part->type() == xAOD::Type::Muon) {
@@ -120,7 +113,7 @@ namespace CP {
     StatusCode IsoCloseByCorrectionAlg::applySelection(const EventContext& ctx, const xAOD::Muon* muon) const {
 
         // outgoing selection decorator
-        SG::AuxElement::Decorator<char> isOK("isoSelIsOK");
+        static const SG::Decorator<char> isOK("isoSelIsOK");
 
         // Check incoming selection decorator
         if (!m_muonSelKey.empty()) {
@@ -156,7 +149,7 @@ namespace CP {
     StatusCode IsoCloseByCorrectionAlg::applySelection(const EventContext& ctx, const xAOD::Electron* elec) const {
 
         // outgoing selection decorator
-        SG::AuxElement::Decorator<char> isOK("isoSelIsOK");
+        static const SG::Decorator<char> isOK("isoSelIsOK");
 
         // Check incoming selection decorator
         if (!m_elecSelKey.empty()) {
@@ -191,7 +184,7 @@ namespace CP {
     StatusCode IsoCloseByCorrectionAlg::applySelection(const EventContext& ctx, const xAOD::Photon* phot) const {
 
         // outgoing selection decorator
-        SG::AuxElement::Decorator<char> isOK("isoSelIsOK");
+        static const SG::Decorator<char> isOK("isoSelIsOK");
 
         // Check incoming selection decorator
         if (!m_photSelKey.empty()) {

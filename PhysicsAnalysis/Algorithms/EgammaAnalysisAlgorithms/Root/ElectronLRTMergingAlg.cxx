@@ -16,6 +16,7 @@
 #include "xAODEgamma/ElectronAuxContainer.h"
 #include "AsgTools/AsgToolConfig.h"
 #include "xAODBase/IParticleHelpers.h"
+#include <AsgDataHandles/WriteDecorHandle.h>
 
 namespace CP
 {
@@ -32,6 +33,8 @@ namespace CP
         ATH_CHECK(m_promptElectronLocation.initialize());
         ATH_CHECK(m_lrtElectronLocation.initialize());
         ATH_CHECK(m_outElectronLocation.initialize());
+        ATH_CHECK(m_lrtIsLRTKey.initialize());
+        ATH_CHECK(m_promptIsLRTKey.initialize());
 
         /// if the tool is not user-set, configure the automatic instance via our overlap flag
         if (m_overlapRemovalTool.empty())
@@ -88,11 +91,13 @@ namespace CP
         ATH_MSG_DEBUG("Size of overlapping electrons to remove: " << ElectronsToRemove.size());
 
         // Decorate the electrons with their track type
-        static const SG::AuxElement::Decorator<char> isLRT("isLRT"); // false if prompt, true if LRT
+        // 0 if prompt, 1 if LRT
+        SG::WriteDecorHandle<xAOD::ElectronContainer, char> promptIsLRT(m_promptIsLRTKey, ctx);
+        SG::WriteDecorHandle<xAOD::ElectronContainer, char> lrtIsLRT(m_lrtIsLRTKey, ctx);
         for (const xAOD::Electron *el : *promptCol)
-            isLRT(*el) = 0;
+            promptIsLRT(*el) = 0;
         for (const xAOD::Electron *el : *lrtCol)
-            isLRT(*el) = 1;
+            lrtIsLRT(*el) = 1;
 
         // merging loop over containers
         if (m_createViewCollection)

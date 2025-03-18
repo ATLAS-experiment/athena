@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Max Goblirsch
@@ -20,6 +20,7 @@
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/WriteHandle.h>
 #include <AsgDataHandles/ReadHandle.h>
+#include <AsgDataHandles/WriteDecorHandleKey.h>
 
 namespace CP
 {
@@ -70,6 +71,10 @@ namespace CP
                            xAOD::MuonContainer* outputCol) const;
 
 
+      SG::WriteDecorHandleKey<xAOD::MuonContainer> m_promptIsLRTKey
+      { this, "PromptIsLRTKey", m_promptMuonLocation, "isLRT" };
+      SG::WriteDecorHandleKey<xAOD::MuonContainer> m_lrtIsLRTKey
+      { this, "LRTIsLRTKey", m_lrtMuonLocation, "isLRT" };
   };
 }
 

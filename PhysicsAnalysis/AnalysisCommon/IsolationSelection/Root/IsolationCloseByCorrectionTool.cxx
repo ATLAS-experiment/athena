@@ -162,7 +162,7 @@ namespace CP {
     void IsolationCloseByCorrectionTool::loadAssociatedObjects(const EventContext& ctx, ObjectCache& cache) const {
 
         // Use isLRT decoration for LLP particles to avoid looking for tracks from the primary vertex
-        const CharAccessor isLRT("isLRT");
+        static const CharAccessor isLRT("isLRT");
 
         cache.prim_vtx = retrieveIDBestPrimaryVertex(ctx);
         for (const xAOD::IParticle* prim : cache.prim_parts) {
