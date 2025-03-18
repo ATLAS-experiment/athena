@@ -262,6 +262,9 @@ def L1TriggerResultMakerCfg(flags):
         l1trMaker.MuRoIKey = "LVL1MuonRoIs"
         from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Config import TrigThresholdDecisionToolCfg
         l1trMaker.ThresholdPatternTools += [acc.popToolsAndMerge(TrigThresholdDecisionToolCfg(flags))]
+    elif flags.Trigger.L1.doMuon and flags.Trigger.enableL0Muon:   # Run-4+
+        l1trMaker.MuRoIKey = "LVL1MuonRoIs"
+        l1trMaker.ThresholdPatternTools += [CompFactory.MURoIThresholdsTool()]
 
     # L1Calo RoIs
     if flags.Trigger.L1.doCalo and flags.Trigger.enableL1CaloPhase1:
