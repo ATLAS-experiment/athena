@@ -27,8 +27,17 @@ def MuonRecoChainTesterCfg(flags,name="MuonRecoChainTester", **kwargs):
 
 def MuonHoughTransformTesterCfg(flags, name = "MuonHoughTransformTester", **kwargs):
     result = ComponentAccumulator()
-    if not flags.Input.isMC:
-        kwargs.setdefault("TruthSegmentKey", "")
+    kwargs.setdefault("isMC", flags.Input.isMC)
+    seedKeys = []
+    segmentKeys = []
+    if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
+        seedKeys+=["MuonHoughStationSegmentSeeds"]
+        segmentKeys+=["R4MuonSegments"]
+    if flags.Detector.GeometryMM or flags.Detector.GeometrysTGC:
+        seedKeys+=["MuonHoughNswSegmentSeeds"]
+    kwargs.setdefault("SegmentSeedKeys", seedKeys)
+    kwargs.setdefault("SegmentKeys", segmentKeys)
+
     theAlg = CompFactory.MuonValR4.MuonHoughTransformTester(name, **kwargs) 
     result.addEventAlgo(theAlg, primary=True)
     return result
