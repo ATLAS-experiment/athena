@@ -745,15 +745,85 @@ namespace Trk {
       Amg::SymMatrixX & a
     ) const;
 
+    /*
+     * @brief Update [a]-matrix with material effects by weighting some elements.
+     *
+     * Applies weights to the diagonal material elements in the [a]-matrix.
+     * The weights depend on the progress of the iteration and can vary on the
+     * absolute iteration number as well as on the convergence of the chi2.
+     *
+     * @param[in, out] cache General cache object for the phi weights.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in, out] a The [a]-matrix of the system.
+     * @param[in] doDeriv If we redid derivatives in this iteration
+     * @param[in] it The current iteration, we are in.
+     * @param[in] oldRedChi2 Old reduced chi2 for convergence analysis.
+     * @param[in] newdRedChi2 New reduced chi2 for convergence analysis.
+     *
+     * @return a bool if any weights have been applied.
+     *
+     * @note prefit == 1 does not do a lot, maybe changes weightChanged. Could be wrong behaviour?
+     */
+    bool tryToWeightAfromMaterial(
+      Cache & cache,
+      GXFTrajectory & trajectory,
+      Amg::SymMatrixX & a,
+      const bool doDeriv,
+      const int it,
+      const double oldRedChi2,
+      const double newRedChi2
+    ) const;
+
+    /*
+     * @brief Effectively removes the phi weights from the [a]-matrix.
+     *
+     * Removes the phi weights added by tryToWeightAfromMaterial() from the
+     * diagonal material elements in the [a]-matrix. Then sets the stored
+     * weights to 1.
+     *
+     * @param[in, out] cache General cache object for the phi weights.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in, out] a The [a]-matrix of the system.
+     */
+    void compensatePhiWeights(
+      Cache & cache,
+      GXFTrajectory & trajectory,
+      Amg::SymMatrixX & a
+    ) const;
+
+    /*
+     * @brief Performs the main work of the GX2F iteration.
+     *
+     * The main parts are:
+     * - calculate parameters
+     * - calculate residuals
+     * - (opt) redo derivatives
+     * - fill b-vector
+     * - (opt) update [a]-matrix
+     * - (opt) update [lu]-matrix
+     * - check for convergence
+     *
+     * @param[in] ctx An event context for extrapolation.
+     * @param[in, out] cache General cache object for.
+     * @param[in, out] trajectory The trajectory, we want to analyse.
+     * @param[in] it The current iteration, we are in.
+     * @param[in, out] a The [a]-matrix of the system.
+     * @param[in, out] b The b-vector of the system.
+     * @param[in, out] lu The [lu]-matrix of the system.
+     * @param[in, out] doDeriv Toggle if we need to do now and return if we need to do again.
+     *
+     * @return a status code with success or a detailed error.
+     */
+
     FitterStatusCode runIteration(
       const EventContext& ctx,
-      Cache &,
-      GXFTrajectory &,
-      int,
-      Amg::SymMatrixX &,
-      Amg::VectorX &,
-      Amg::SymMatrixX &,
-      bool &
+      Cache & cache,
+      GXFTrajectory & trajectory,
+      const int it,
+      Amg::SymMatrixX & a,
+      Amg::VectorX & b,
+      Amg::SymMatrixX & lu,
+      bool & doDeriv
     ) const;
 
     /**
