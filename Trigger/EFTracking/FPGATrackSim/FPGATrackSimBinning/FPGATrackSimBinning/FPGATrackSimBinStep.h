@@ -52,14 +52,14 @@ public:
                       const IInterface * ifc) : AthAlgTool(algname, name, ifc) {}
 
   virtual StatusCode initialize() override;
-  StatusCode setRanges(const FPGATrackSimBinStep* prev,const ParSet& parMin, const ParSet& parMax);
+  StatusCode setRanges(FPGATrackSimBinStep* prev,const ParSet& parMin, const ParSet& parMax);
 
   // property of step
   const std::vector<unsigned> stepIdx(IdxSet idx) const; // index for only the pars used in this step
   const std::vector<unsigned> stepBins() const;   // bin sizes for only the pars used in this step
   const std::vector<unsigned>& stepPars() const {return m_pars;}  // parameters used for this step
   const std::vector<unsigned> nBins() const {return m_parBins;}   // bin sizes for only the pars used in this step
-  const std::string& stepName() const {return m_name;}
+  const std::string stepName() const {return this->name().substr(this->name().find_last_of(".")+1);}
   unsigned stepNum() const {return m_stepNum;}
 
   // Calculation of bin boundaries
@@ -78,8 +78,8 @@ public:
   IdxSet binIdx(const ParSet &pars) const;
 
   // Convert to previous steps idx
-  IdxSet convertToPrev(const IdxSet& cur) const;  
-
+  IdxSet convertToPrev(const IdxSet& cur) const;
+  
   //--------------------------------------------------------------------------------------------------
   //
   //  Set which bins are valid
@@ -95,7 +95,6 @@ public:
   const FPGATrackSimBinArray<int>& validBinsLocal() const { return m_validBinLocal;}
 
 private:
-  Gaudi::Property<std::string> m_name{this, "name", {}, "String name assigned to Binning Step"};
   Gaudi::Property<std::vector<unsigned>> m_parBinsConfig{this,"parBins",{},"Vector of number of bins for each parameter (expect 5)"};
 
   // pars used in this step
@@ -108,7 +107,7 @@ private:
   FPGATrackSimBinArray<int> m_validBinLocal; // this is for the pars used at this step
 
   // pointer to FPGATrackSimBinStep of previous step
-  const FPGATrackSimBinStep *m_prev{0};
+  FPGATrackSimBinStep *m_prev{0};
   unsigned m_stepNum{}; // number of step
   
   // the bins for this step

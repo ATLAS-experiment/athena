@@ -54,7 +54,7 @@ public:
                          const IInterface *ifc)
       : AthAlgTool(algname, name, ifc) {}
 
-  StatusCode initialize() override;
+  virtual StatusCode initialize() override;
   void initBinnedDataArrays();
 
   StatusCode fill(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits);
@@ -105,8 +105,10 @@ private:
   std::vector<FPGATrackSimBinArray<BinEntry>> m_binnedHitsStep;
 
   // The tool where the steps are defined
-  ToolHandle<FPGATrackSimBinTool> m_bintool;
-
+  ToolHandle<FPGATrackSimBinTool> m_bintool {
+    this, "BinTool", "FPGATrackSimBinTool",
+        "FPGATrackSimBinTool: contains tools describe which parameters are used and each step of binning"};
+  
   // The number of layers, either set externally from pmap or set by the layerMap
   unsigned m_nLayers{0}; 
 };

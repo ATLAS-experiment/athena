@@ -94,6 +94,7 @@ struct StoredHit {
   double etaShift;  // shift in r-z plane as  quantified by BinDesc
   unsigned layer;
   double rzrad() const;
+  static const unsigned invalidLayer = std::numeric_limits<unsigned>::max();
 };
 std::ostream &operator<<(std::ostream &os, const StoredHit &hit);
 

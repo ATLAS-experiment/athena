@@ -24,6 +24,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "FPGATrackSimBinning/IFPGATrackSimBinDesc.h"
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "FPGATrackSimBinning/IFPGATrackSimBinDesc.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 
@@ -48,10 +50,13 @@ public:
       declareInterface<IFPGATrackSimBinDesc>(this);
     }
 
+    virtual StatusCode initialize() override;
+
     virtual const std::string &parNames(unsigned i) const override { return m_parNames[i]; }
 
     // convert back and forth from pT, eta, phi, d0, z0 and internal paramater set
-    virtual const ParSet trackParsToParSet(const FPGATrackSimTrackPars &pars) const override {
+    virtual const ParSet
+    trackParsToParSet(const FPGATrackSimTrackPars &pars) const override {
       return keyparsToParSet(m_keylyrtool.trackParsToKeyPars(pars));
     }
     virtual const FPGATrackSimTrackPars parSetToTrackPars(const ParSet &parset) const override {
