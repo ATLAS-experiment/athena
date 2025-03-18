@@ -1,17 +1,14 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
 #ifndef TRIGINDETPATTRECOTOOLS_SEEDINGTOOLBASE_IPP
 #define TRIGINDETPATTRECOTOOLS_SEEDINGTOOLBASE_IPP
 
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetIdentifier/PixelID.h" 
 
-#include "TrkSpacePoint/SpacePoint.h"
-#include "TrkSpacePoint/SpacePointCollection.h"
-#include "TrkSpacePoint/SpacePointContainer.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
-
 
 #include "PathResolver/PathResolver.h"
 
@@ -19,9 +16,10 @@
 
 #include "IRegionSelector/IRegSelTool.h"
 
+#include "SeedingToolBase.h"
 
-template<typename externalSP>
-StatusCode SeedingToolBase<externalSP>::initialize() {
+
+StatusCode SeedingToolBase::initialize() {
   ATH_CHECK(AthAlgTool::initialize());
 
   ATH_CHECK(m_layerNumberTool.retrieve());
@@ -64,14 +62,12 @@ StatusCode SeedingToolBase<externalSP>::initialize() {
   return StatusCode::SUCCESS;
 }
 
-template<typename externalSP>
-StatusCode SeedingToolBase<externalSP>::finalize() {
+StatusCode SeedingToolBase::finalize() {
   StatusCode sc = AthAlgTool::finalize(); 
   return sc;
 }
 
-template<typename externalSP>
-std::pair<int, int> SeedingToolBase<externalSP>::buildTheGraph(const IRoiDescriptor& roi, const std::unique_ptr<TrigFTF_GNN_DataStorage<externalSP>>& storage, std::vector<TrigFTF_GNN_Edge<externalSP>>& edgeStorage) const {
+std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, const std::unique_ptr<TrigFTF_GNN_DataStorage>& storage, std::vector<TrigFTF_GNN_Edge>& edgeStorage) const {
 
   const float M_2PI = 2.0*M_PI;
   
@@ -109,7 +105,7 @@ std::pair<int, int> SeedingToolBase<externalSP>::buildTheGraph(const IRoiDescrip
 
   for(const auto& bg : m_geo->bin_groups()) {//loop over bin groups
     
-    TrigFTF_GNN_EtaBin<externalSP>& B1 = storage->getEtaBin(bg.first);
+    TrigFTF_GNN_EtaBin& B1 = storage->getEtaBin(bg.first);
 
     if(B1.empty()) continue;
 
@@ -117,7 +113,7 @@ std::pair<int, int> SeedingToolBase<externalSP>::buildTheGraph(const IRoiDescrip
  
     for(const auto& b2_idx : bg.second) {
 
-      const TrigFTF_GNN_EtaBin<externalSP>& B2 = storage->getEtaBin(b2_idx);
+      const TrigFTF_GNN_EtaBin& B2 = storage->getEtaBin(b2_idx);
 
       if(B2.empty()) continue;
       
@@ -256,7 +252,7 @@ std::pair<int, int> SeedingToolBase<externalSP>::buildTheGraph(const IRoiDescrip
 	    
 	    for(const auto& inEdgeIdx : v2In) {//looking for neighbours of the new edge
 	    
-	      TrigFTF_GNN_Edge<externalSP>* pS = &(edgeStorage.at(inEdgeIdx));
+	      TrigFTF_GNN_Edge* pS = &(edgeStorage.at(inEdgeIdx));
 	      
 	      if(pS->m_nNei >= N_SEG_CONNS) continue;
 	    
@@ -296,8 +292,7 @@ std::pair<int, int> SeedingToolBase<externalSP>::buildTheGraph(const IRoiDescrip
   return std::make_pair(nEdges, nConnections);
 }
 
-template<typename externalSP>
-int SeedingToolBase<externalSP>::runCCA(int nEdges, std::vector<TrigFTF_GNN_Edge<externalSP>>& edgeStorage) const {
+int SeedingToolBase::runCCA(int nEdges, std::vector<TrigFTF_GNN_Edge>& edgeStorage) const {
 
   const int maxIter = 15;
 
@@ -305,11 +300,11 @@ int SeedingToolBase<externalSP>::runCCA(int nEdges, std::vector<TrigFTF_GNN_Edge
 
   int iter = 0;
   
-  std::vector<TrigFTF_GNN_Edge<externalSP>*> v_old;
+  std::vector<TrigFTF_GNN_Edge*> v_old;
   
   for(int edgeIndex=0;edgeIndex<nEdges;edgeIndex++) {
 
-    TrigFTF_GNN_Edge<externalSP>* pS = &(edgeStorage[edgeIndex]);
+    TrigFTF_GNN_Edge* pS = &(edgeStorage[edgeIndex]);
     if(pS->m_nNei == 0) continue;
     
     v_old.push_back(pS);//TO-DO: increment level for segments as they already have at least one neighbour
@@ -318,7 +313,7 @@ int SeedingToolBase<externalSP>::runCCA(int nEdges, std::vector<TrigFTF_GNN_Edge
   for(;iter<maxIter;iter++) {
 
     //generate proposals
-    std::vector<TrigFTF_GNN_Edge<externalSP>*> v_new;
+    std::vector<TrigFTF_GNN_Edge*> v_new;
     v_new.clear();
     v_new.reserve(v_old.size());
     
@@ -330,7 +325,7 @@ int SeedingToolBase<externalSP>::runCCA(int nEdges, std::vector<TrigFTF_GNN_Edge
 	
         unsigned int nextEdgeIdx = pS->m_vNei[nIdx];
             
-        TrigFTF_GNN_Edge<externalSP>* pN = &(edgeStorage[nextEdgeIdx]);
+        TrigFTF_GNN_Edge* pN = &(edgeStorage[nextEdgeIdx]);
             
         if(pS->m_level == pN->m_level) {
           next_level = pS->m_level + 1;

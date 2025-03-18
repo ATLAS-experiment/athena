@@ -7,12 +7,13 @@
 
 #include "ActsToolInterfaces/ISeedingTool.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
 
 #include "SeedingToolBase.h"
 
-class Gbts2ActsSeedingTool: public SeedingToolBase<const xAOD::SpacePoint*>, public ActsTrk::ISeedingTool{
+class Gbts2ActsSeedingTool: public SeedingToolBase, public ActsTrk::ISeedingTool {
     public:
 
     // standard AlgTool methods
@@ -35,4 +36,5 @@ class Gbts2ActsSeedingTool: public SeedingToolBase<const xAOD::SpacePoint*>, pub
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey{this, "StripDetectorElements", "ITkStripDetectorElementCollection", "Key of input SiDetectorElementCollection for Strip"};
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 };
+
 #endif

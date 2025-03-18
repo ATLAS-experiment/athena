@@ -6,7 +6,9 @@
 #define TRIGINDETPATTRECOTOOLS_TRIGINDETTRACKSEEDINGTOOL_H
 
 #include "GaudiKernel/ToolHandle.h"
+
 #include "TrigInDetToolInterfaces/ITrigInDetTrackSeedingTool.h"
+
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "StoreGate/ReadHandleKey.h"
 #include <string>
@@ -32,7 +34,7 @@ class AtlasDetectorID;
 class SCT_ID;
 class PixelID;
 
-class TrigInDetTrackSeedingTool: public SeedingToolBase<const Trk::SpacePoint*>, public ITrigInDetTrackSeedingTool {
+class TrigInDetTrackSeedingTool:  public SeedingToolBase, public ITrigInDetTrackSeedingTool {
  public:
 
   // standard AlgTool methods
@@ -48,7 +50,7 @@ class TrigInDetTrackSeedingTool: public SeedingToolBase<const Trk::SpacePoint*>,
 
  protected:
 
-  void createGraphNodes(const SpacePointCollection*, std::vector<GNN_Node>&, unsigned short, float, float) const;
+  void createGraphNodes(const SpacePointCollection*, std::vector<GNN_Node>&, std::vector<const Trk::SpacePoint*>&, unsigned short, float, float) const;
 
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 

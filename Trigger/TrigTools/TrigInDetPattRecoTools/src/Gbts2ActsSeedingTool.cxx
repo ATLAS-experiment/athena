@@ -2,10 +2,13 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "Gbts2ActsSeedingTool.h"
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "xAODInDetMeasurement/PixelCluster.h"
+
+#include "Gbts2ActsSeedingTool.h"
+#include "GNN_TrackingFilter.h"
+
 #include <optional>
 
 Gbts2ActsSeedingTool::Gbts2ActsSeedingTool(const std::string& t,
@@ -15,7 +18,7 @@ Gbts2ActsSeedingTool::Gbts2ActsSeedingTool(const std::string& t,
 }
 
 StatusCode Gbts2ActsSeedingTool::initialize(){
-    ATH_CHECK(SeedingToolBase<const xAOD::SpacePoint*>::initialize());
+    ATH_CHECK(SeedingToolBase::initialize());
     ATH_CHECK( m_pixelDetEleCollKey.initialize() );
     ATH_CHECK(m_stripDetEleCollKey.initialize());
     ATH_CHECK(m_beamSpotKey.initialize());
@@ -24,22 +27,29 @@ StatusCode Gbts2ActsSeedingTool::initialize(){
 }
 
 StatusCode Gbts2ActsSeedingTool::finalize() {
-  return SeedingToolBase<const xAOD::SpacePoint*>::finalize();
+  return SeedingToolBase::finalize();
 }
 
-StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer, const Acts::Vector3&, const Acts::Vector3&, ActsTrk::SeedContainer& seedContainer) const{
+StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer, const Acts::Vector3&, const Acts::Vector3&, ActsTrk::SeedContainer& seedContainer) const {
+  
     std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo);
 
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle = SG::makeHandle(m_pixelDetEleCollKey, ctx);
-    ATH_CHECK(pixelDetEleHandle.isValid()) ;
+    
+    ATH_CHECK(pixelDetEleHandle.isValid());
+    
     const InDetDD::SiDetectorElementCollection* pixelElements = pixelDetEleHandle.cptr();
 
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> stripDetEleHandle = SG::makeHandle(m_stripDetEleCollKey, ctx);
-    ATH_CHECK(stripDetEleHandle.isValid()) ;
+    
+    ATH_CHECK(stripDetEleHandle.isValid());
+    
     const InDetDD::SiDetectorElementCollection* stripElements = stripDetEleHandle.cptr();
 
-    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };  
+    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
+    
     const Amg::Vector3D &vertex = beamSpotHandle->beamPos();
+    
     float shift_x = vertex.x() - beamSpotHandle->beamTilt(0)*vertex.z();
     float shift_y = vertex.y() - beamSpotHandle->beamTilt(1)*vertex.z();
 
@@ -79,10 +89,11 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
         node.m_z = pos.z();
         node.m_r = std::sqrt(node.m_x*node.m_x + node.m_y*node.m_y);
         node.m_phi = std::atan2(node.m_y,node.m_x);
-        node.m_pSP = &extSP;
+	node.m_idx = idx;
 
-        if(isPixel){
-            const xAOD::PixelCluster* pCL = dynamic_cast<const xAOD::PixelCluster*>(extSP.measurements().front());
+        if(isPixel && m_useML){
+	    const auto& lm = extSP.measurements();
+            const xAOD::PixelCluster* pCL = dynamic_cast<const xAOD::PixelCluster*>(lm.front());
             if(pCL != nullptr){
                 node.m_pcw = pCL->widthInEta();
             }
@@ -154,12 +165,12 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
 
     //backtracking
 
-    TrigFTF_GNN_TrackingFilter<const xAOD::SpacePoint*> tFilter(m_layerGeometry, edgeStorage);
+    TrigFTF_GNN_TrackingFilter tFilter(m_layerGeometry, edgeStorage);
 
     for(auto pS : vSeeds) {
         if(pS->m_level == -1) continue;
 
-        TrigFTF_GNN_EdgeState<const xAOD::SpacePoint*> rs(false);
+        TrigFTF_GNN_EdgeState rs(false);
 
         tFilter.followTrack(pS, rs);
 
@@ -182,9 +193,15 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
         }
 
         if(vN.size()<3) continue;
+	
+	const auto & sp1 = spContainer.at(vN[0]->sp_idx()).externalSpacePoint();
+	const auto & sp2 = spContainer.at(vN[1]->sp_idx()).externalSpacePoint();
+	const auto & sp3 = spContainer.at(vN[2]->sp_idx()).externalSpacePoint();
+	
+	//add seed to output
 
-        //add seed to output
-        std::unique_ptr<ActsTrk::Seed> to_add = std::make_unique<ActsTrk::Seed>(*(vN[0]->sp()), *(vN[1]->sp()), *(vN[2]->sp()));
+	std::unique_ptr<ActsTrk::Seed> to_add = std::make_unique<ActsTrk::Seed>(sp1, sp2, sp3);
+	
         seedContainer.push_back(std::move(to_add));
     }
 

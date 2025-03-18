@@ -1,22 +1,19 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
 #ifndef TRIGINDETPATTRECOTOOLS_GNN_DATA_STORAGE_IPP
 #define TRIGINDETPATTRECOTOOLS_GNN_DATA_STORAGE_IPP
 
-#include "InDetPrepRawData/PixelCluster.h"
-#include "TrkSpacePoint/SpacePoint.h"
-#include "TrkSpacePoint/SpacePointCollection.h"
-
 #include "TrigInDetPattRecoEvent/TrigInDetSiLayer.h"
 #include "GNN_Geometry.h"
+#include "GNN_DataStorage.h"
 
 #include<cmath>
 #include<cstring>
 #include<algorithm>
 
-template<typename externalSP>
-TrigFTF_GNN_EtaBin<externalSP>::TrigFTF_GNN_EtaBin(): m_minRadius(0), m_maxRadius(0) {
+TrigFTF_GNN_EtaBin::TrigFTF_GNN_EtaBin(): m_minRadius(0), m_maxRadius(0) {
 
   m_in.clear();
   m_vn.clear();
@@ -24,17 +21,15 @@ TrigFTF_GNN_EtaBin<externalSP>::TrigFTF_GNN_EtaBin(): m_minRadius(0), m_maxRadiu
   m_vn.reserve(1000);
 }
 
-template<typename externalSP>
-TrigFTF_GNN_EtaBin<externalSP>::~TrigFTF_GNN_EtaBin() {
+TrigFTF_GNN_EtaBin::~TrigFTF_GNN_EtaBin() {
   m_in.clear();
   m_vn.clear();
   m_params.clear();
 }
 
-template<typename externalSP>
-void TrigFTF_GNN_EtaBin<externalSP>::sortByPhi() {
+void TrigFTF_GNN_EtaBin::sortByPhi() {
   
-  std::vector<std::pair<float, const TrigFTF_GNN_Node<externalSP>*> > phiBuckets[32];
+  std::vector<std::pair<float, const TrigFTF_GNN_Node*> > phiBuckets[32];
 
   int nBuckets = 31;
 
@@ -56,8 +51,8 @@ void TrigFTF_GNN_EtaBin<externalSP>::sortByPhi() {
 
 }
 
-template<typename externalSP>
-void TrigFTF_GNN_EtaBin<externalSP>::initializeNodes() {
+
+void TrigFTF_GNN_EtaBin::initializeNodes() {
   if(m_vn.size() ==0) return;
   
   m_params.resize(m_vn.size());
@@ -66,16 +61,15 @@ void TrigFTF_GNN_EtaBin<externalSP>::initializeNodes() {
   for(auto& v : m_in) v.reserve(50);//reasonably high number of incoming edges per node
   
   std::transform(m_vn.begin(), m_vn.end(), m_params.begin(),
-                   [](const TrigFTF_GNN_Node<externalSP>* pN) { std::array<float,5> a = {-100.0, 100.0, pN->phi(), pN->r(), pN->z()}; return a;});
+                   [](const TrigFTF_GNN_Node* pN) { std::array<float,5> a = {-100.0, 100.0, pN->phi(), pN->r(), pN->z()}; return a;});
     
   auto [min_iter, max_iter] = std::minmax_element(m_vn.begin(), m_vn.end(),
-						  [](const TrigFTF_GNN_Node<externalSP>* s, const TrigFTF_GNN_Node<externalSP>* s1) { return (s->r() < s1->r()); });
+						  [](const TrigFTF_GNN_Node* s, const TrigFTF_GNN_Node* s1) { return (s->r() < s1->r()); });
   m_maxRadius = (*max_iter)->r();
   m_minRadius = (*min_iter)->r();
 }
 
-template<typename externalSP>
-void TrigFTF_GNN_EtaBin<externalSP>::generatePhiIndexing(float dphi) {
+void TrigFTF_GNN_EtaBin::generatePhiIndexing(float dphi) {
 
   for(unsigned int nIdx=0;nIdx<m_vn.size();nIdx++) {
 
@@ -99,18 +93,16 @@ void TrigFTF_GNN_EtaBin<externalSP>::generatePhiIndexing(float dphi) {
   
 }
 
-template<typename externalSP>
-TrigFTF_GNN_DataStorage<externalSP>::TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry& g) : m_geo(g) {
+TrigFTF_GNN_DataStorage::TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry& g) : m_geo(g) {
   m_etaBins.resize(g.num_bins());
 }
 
-template<typename externalSP>
-TrigFTF_GNN_DataStorage<externalSP>::~TrigFTF_GNN_DataStorage() {
+
+TrigFTF_GNN_DataStorage::~TrigFTF_GNN_DataStorage() {
 
 }
 
-template<typename externalSP>
-int TrigFTF_GNN_DataStorage<externalSP>::loadPixelGraphNodes(short layerIndex, const std::vector<TrigFTF_GNN_Node<externalSP>>& coll, bool useML) {
+int TrigFTF_GNN_DataStorage::loadPixelGraphNodes(short layerIndex, const std::vector<TrigFTF_GNN_Node>& coll, bool useML) {
 
   int nLoaded = 0;
 
@@ -148,8 +140,7 @@ int TrigFTF_GNN_DataStorage<externalSP>::loadPixelGraphNodes(short layerIndex, c
   return nLoaded;
 }
 
-template<typename externalSP>
-int TrigFTF_GNN_DataStorage<externalSP>::loadStripGraphNodes(short layerIndex, const std::vector<TrigFTF_GNN_Node<externalSP>>& coll) {
+int TrigFTF_GNN_DataStorage::loadStripGraphNodes(short layerIndex, const std::vector<TrigFTF_GNN_Node>& coll) {
 
   int nLoaded = 0;
 
@@ -174,8 +165,7 @@ int TrigFTF_GNN_DataStorage<externalSP>::loadStripGraphNodes(short layerIndex, c
   return nLoaded;
 }
 
-template<typename externalSP>
-unsigned int TrigFTF_GNN_DataStorage<externalSP>::numberOfNodes() const {
+unsigned int TrigFTF_GNN_DataStorage::numberOfNodes() const {
 
   unsigned int n=0;
   
@@ -185,14 +175,12 @@ unsigned int TrigFTF_GNN_DataStorage<externalSP>::numberOfNodes() const {
   return n;
 }
 
-template<typename externalSP>
-void TrigFTF_GNN_DataStorage<externalSP>::sortByPhi() {
+void TrigFTF_GNN_DataStorage::sortByPhi() {
     
   for(auto& b : m_etaBins) b.sortByPhi();
 }
 
-template<typename externalSP>
-void TrigFTF_GNN_DataStorage<externalSP>::initializeNodes(bool useML) {
+void TrigFTF_GNN_DataStorage::initializeNodes(bool useML) {
   
   for(auto& b : m_etaBins) {
     b.initializeNodes();
@@ -218,7 +206,7 @@ void TrigFTF_GNN_DataStorage<externalSP>::initializeNodes(bool useML) {
 
     for(int b=0;b<nBins;b++) {//loop over eta-bins in Layer
 
-      TrigFTF_GNN_EtaBin<externalSP>& B = m_etaBins.at(pL->m_bins.at(b));
+      TrigFTF_GNN_EtaBin& B = m_etaBins.at(pL->m_bins.at(b));
 
       if(B.empty()) continue;
       
@@ -236,8 +224,7 @@ void TrigFTF_GNN_DataStorage<externalSP>::initializeNodes(bool useML) {
   }
 }
 
-template<typename externalSP>
-void TrigFTF_GNN_DataStorage<externalSP>::generatePhiIndexing(float dphi) {
+void TrigFTF_GNN_DataStorage::generatePhiIndexing(float dphi) {
   for(auto& b : m_etaBins) b.generatePhiIndexing(dphi);
 }
 

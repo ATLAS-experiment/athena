@@ -4,14 +4,13 @@
 
 #ifndef TRIGINDETPATTRECOTOOLS_SEEDINGTOOLBASE_H
 #define TRIGINDETPATTRECOTOOLS_SEEDINGTOOLBASE_H
+
 #include "GaudiKernel/ToolHandle.h"
-#include "TrigInDetToolInterfaces/ITrigInDetTrackSeedingTool.h"
+//#include "TrigInDetToolInterfaces/ITrigInDetTrackSeedingTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "StoreGate/ReadHandleKey.h"
 #include <string>
 #include <vector>
-
-
 
 #include "IRegionSelector/IRegSelTool.h"
 #include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
@@ -24,16 +23,15 @@ class AtlasDetectorID;
 class SCT_ID;
 class PixelID;
 
-template<typename externalSP>
 class SeedingToolBase: public AthAlgTool {
   public:
   SeedingToolBase(const std::string& t,const std::string& n,const IInterface* p): AthAlgTool(t,n,p){}
   
  protected:
 
-  typedef TrigFTF_GNN_Node<externalSP> GNN_Node;
-  typedef TrigFTF_GNN_DataStorage<externalSP> GNN_DataStorage;
-  typedef TrigFTF_GNN_Edge<externalSP> GNN_Edge;
+  typedef TrigFTF_GNN_Node GNN_Node;
+  typedef TrigFTF_GNN_DataStorage GNN_DataStorage;
+  typedef TrigFTF_GNN_Edge GNN_Edge;
 
   virtual StatusCode initialize();
   virtual StatusCode finalize();
@@ -68,5 +66,3 @@ class SeedingToolBase: public AthAlgTool {
 };
 
 #endif
-
-#include "SeedingToolBase.ipp"

@@ -13,6 +13,7 @@ atlas_add_library( TrigInDetPattRecoToolsLib
 
 # Component(s) in the package:
 atlas_add_component( TrigInDetPattRecoToolsComp
+                     src/SeedingToolBase.cxx
                      src/TrigInDetTrackSeedingTool.cxx
                      src/Gbts2ActsSeedingTool.cxx
 		     src/GNN_*.cxx
