@@ -10,6 +10,7 @@
 #include "Identifier/Identifier.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include <unordered_set>
 
@@ -58,7 +59,7 @@ namespace MuonR4{
             segLinkDecor(*truthMuon).clear();
             IdSet_t assocIds{};
             ATH_MSG_DEBUG("Truth muon "<<truthMuon->pt()<<", eta: "<<truthMuon->eta()<<", "<<truthMuon->phi()
-                         <<", barcode: "<<truthMuon->barcode());
+                         <<", barcode: "<<HepMC::barcode(truthMuon));
             for (const IdDecorHandle_t& hitDecor : idDecorHandles) {
                 std::ranges::transform(hitDecor(*truthMuon), std::inserter(assocIds, assocIds.begin()),
                                        [this](unsigned long long rawId){
@@ -121,7 +122,7 @@ namespace MuonR4{
                         }
                         if (!counts) continue;
                         ATH_MSG_VERBOSE("Truth muon "<<truthMuon->pt()<<", eta: "<<truthMuon->eta()<<", "<<truthMuon->phi()
-                             <<", barcode: "<<truthMuon->barcode()<<", matched hits: "<<counts<<", unmatched: "<<std::endl<<unMatchedStr.str());
+                             <<", barcode: "<<HepMC::barcode(truthMuon)<<", matched hits: "<<counts<<", unmatched: "<<std::endl<<unMatchedStr.str());
                     }
                 }
                 continue;
