@@ -1,9 +1,14 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+#include "PixelClusterTruthDecorator.h"
 #include "StripClusterTruthDecorator.h"
 
 //output
 #include "xAODTracking/TrackMeasurementValidation.h"
 #include "xAODTracking/TrackMeasurementValidationContainer.h"
 #include "xAODTracking/TrackMeasurementValidationAuxContainer.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #define AUXDATA(OBJ, TYP, NAME) \
   static const SG::AuxElement::Accessor<TYP> acc_##NAME (#NAME);  acc_##NAME(*(OBJ))
@@ -109,7 +114,7 @@ namespace ActsTrk {
 	std::vector<unsigned int> tp_barcodes;
 	for (auto tp : tps) {
 	  tp_indices.push_back(tp->index());
-	  tp_barcodes.push_back(tp->barcode());
+	  tp_barcodes.push_back(HepMC::barcode(tp));
 	}
 	
 	//TODO move vectors
