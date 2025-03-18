@@ -5824,34 +5824,206 @@ namespace Trk {
     }
   }
 
+  bool GlobalChi2Fitter::tryToWeightAfromMaterial(
+    Cache & cache,
+    GXFTrajectory & trajectory,
+    Amg::SymMatrixX & a,
+    const bool doDeriv,
+    const int it,
+    const double oldRedChi2,
+    const double newRedChi2
+  ) const {
+    const int nPerPars = trajectory.numberOfPerigeeParameters();
+
+    /*
+     * The return value collects, if any weights changed while looping over all
+     * material states.
+     */
+    bool weightChanged = false;
+
+    /*
+     * The weights for the diagonal material components in the [a]-matrix
+     * depend on how far we are in the iteration process (iteration number or
+     * chi2 convergence).
+     */
+    double newPhiWeight = 1.1;
+    double newThetaWeight = 1.001;
+    if (trajectory.prefit() == 0) {
+      /*
+       * We do not consider theta at all in the prefit 0 case. Therefore, we do
+       * not need to adjust the theta weights.
+       */
+      if (it == 0) {
+        newPhiWeight = 1.00000001;
+      } else if (it == 1) {
+        newPhiWeight = 1.0000001;
+      } else if (it <= 3) {
+        newPhiWeight = 1.0001;
+      } else if (it <= 6) {
+        newPhiWeight = 1.01;
+      }
+    } else {
+      if (newRedChi2 > oldRedChi2 - 1 && newRedChi2 < oldRedChi2) {
+        newPhiWeight = 1.0001;
+        newThetaWeight = 1.0001;
+      } else if (newRedChi2 > oldRedChi2 - 25 && newRedChi2 < oldRedChi2) {
+        newPhiWeight = 1.001;
+        newThetaWeight = 1.0001;
+      }
+    }
+
+    /*
+     * Counter for the scattering states. We cannot directly loop over them.
+     */
+    std::size_t scatno = 0;
+
+    /*
+     * Loop over all track states. Skip states without material effects.
+     */
+    for (const auto & state : trajectory.trackStates()) {
+      const GXFMaterialEffects *meff = state->materialEffects();
+
+      if (meff == nullptr) {
+        continue;
+      }
+
+      const bool isValidPlaneSurface =
+        state->associatedSurface().type() == Trk::SurfaceType::Plane &&
+        static_cast<const PlaneSurface *>(&state->associatedSurface()) != nullptr;
+
+      /*
+       * Modify the diagonal material elements in the [a]-matrix.
+       */
+      if (meff->deltaE() == 0 || (trajectory.prefit() == 0 && isValidPlaneSurface)) {
+        weightChanged = true;
+
+        const int scatNoIndex = 2 * scatno + nPerPars;
+
+        if (trajectory.prefit() == 0 && meff->sigmaDeltaPhi() != 0) {
+          if (scatno >= cache.m_phiweight.size()) {
+            std::stringstream message;
+            message << "scatno is out of range " << scatno << " !< " << cache.m_phiweight.size();
+            throw std::range_error(message.str());
+          }
+
+          /*
+           * In case, no derivative is necessary, the weight will be
+           * effectively replaced by the relative weight change
+           */
+          if (!doDeriv) {
+            a(scatNoIndex, scatNoIndex) /= cache.m_phiweight[scatno];
+          }
+
+          cache.m_phiweight[scatno] = newPhiWeight;
+          a(scatNoIndex, scatNoIndex) *= newPhiWeight;
+        } else if (trajectory.prefit() >= 2) {
+          a(scatNoIndex, scatNoIndex) *= newPhiWeight;
+          a(scatNoIndex + 1, scatNoIndex + 1) *= newThetaWeight;
+        }
+      }
+
+      /*
+       * The state is a valid scatterer even, if not considered in the
+       * modification of the weights before. Therefore increment the count.
+       *
+       * NOTE: It is not clear, why this check is not at the beginning of the
+       *       loop. This way, a mismatch in the state counting could happen.
+       */
+      if (
+        meff->sigmaDeltaPhi() != 0 &&
+        (trajectory.prefit() == 0 || meff->deltaE() == 0)
+      ) {
+        scatno++;
+      }
+    }
+
+    /*
+     * Add a weight to the qOverP component of the [a]-matrix if a set of
+     * pre-conditions are met and the reduced chi2 either
+     * - converges very fast (e.g. at the beginning of the fit)
+     * OR
+     * - gets larger (e.g. moving away from minimum or overshooting by a lot)
+     */
+    if (
+      trajectory.prefit() == 2 &&
+      doDeriv &&
+      trajectory.numberOfBrems() > 0 &&
+      (newRedChi2 < oldRedChi2 - 25 || newRedChi2 > oldRedChi2)
+    ) {
+      a(4, 4) *= 1.001;
+    }
+
+    return weightChanged;
+  }
+
+  void GlobalChi2Fitter::compensatePhiWeights(
+    Cache & cache,
+    GXFTrajectory & trajectory,
+    Amg::SymMatrixX & a
+  ) const {
+    const int nPerPars = trajectory.numberOfPerigeeParameters();
+    std::size_t scatno = 0;
+
+    for (auto & state : trajectory.trackStates()) {
+      const GXFMaterialEffects *meff = state->materialEffects();
+
+      if (meff == nullptr || meff->sigmaDeltaPhi() == 0) {
+        continue;
+      }
+
+      if (scatno >= cache.m_phiweight.size()) {
+        std::stringstream message;
+        message << "scatno is out of range " << scatno << " !< " << cache.m_phiweight.size();
+        throw std::range_error(message.str());
+      }
+
+      const bool isValidPlaneSurface =
+        state->associatedSurface().type() == Trk::SurfaceType::Plane &&
+        static_cast<const PlaneSurface *>(&state->associatedSurface()) != nullptr;
+
+      if (meff->deltaE() == 0 || isValidPlaneSurface) {
+        const int scatNoIndex = 2 * scatno + nPerPars;
+        a(scatNoIndex, scatNoIndex) /= cache.m_phiweight[scatno];
+        cache.m_phiweight[scatno] = 1;
+      }
+
+      /*
+       * NOTE: We already check for this in the beginning of the loop. Is
+       *       there any way, this can change?
+       */
+      if (meff->sigmaDeltaPhi() != 0) {
+        scatno++;
+      }
+    }
+  }
+
   FitterStatusCode GlobalChi2Fitter::runIteration(
     const EventContext& ctx,
     Cache & cache,
     GXFTrajectory & trajectory,
-    int it,
+    const int it,
     Amg::SymMatrixX & a,
     Amg::VectorX & b,
     Amg::SymMatrixX & lu,
-    bool &doderiv
+    bool & doDeriv
   ) const {
-    int nfitpars = trajectory.numberOfFitParameters();
-    int nperpars = trajectory.numberOfPerigeeParameters();
-    double oldchi2 = trajectory.chi2();
-    double oldredchi2 = (trajectory.nDOF() > 0) ? oldchi2 / trajectory.nDOF() : 0;
-    int nsihits = trajectory.numberOfSiliconHits();
-    int ntrthits = trajectory.numberOfTRTHits();
-    int nhits = trajectory.numberOfHits();
+    const int nDOFold = trajectory.nDOF();
+    const double oldChi2 = trajectory.chi2();
+    const double oldRedChi2 = nDOFold > 0 ? oldChi2 / nDOFold : 0;
 
     if (cache.m_phiweight.empty()) {
       cache.m_phiweight.assign(trajectory.trackStates().size(), 1);
     }
 
-    FitterStatusCode fsc = calculateTrackParameters(ctx,trajectory, doderiv);
+    FitterStatusCode fsc = calculateTrackParameters(ctx, trajectory, doDeriv);
 
     if (fsc != FitterStatusCode::Success) {
       return fsc;
     }
 
+    /*
+     * Reset the b-vector. We want to add to the components later.
+     */
     b.setZero();
 
     /*
@@ -5878,24 +6050,24 @@ namespace Trk {
     if ((state_maxbrempull != nullptr) && trajectory.converged()) {
       trajectory.setConverged(false);
       trajectory.setChi2(1e15);
-      doderiv = true;
+      doDeriv = true;
 
       updateSystemWithMaxBremPull(trajectory, bremno_maxbrempull, state_maxbrempull, a);
       lu = a;
     }
 
+    const int nDOFnew = trajectory.nDOF();
+    const double newChi2 = trajectory.chi2();
+    const double newRedChi2 = nDOFnew > 0 ? newChi2 / nDOFnew : 0;
 
-    double newredchi2 = (trajectory.nDOF() > 0) ? trajectory.chi2() / trajectory.nDOF() : 0;
-
-    ATH_MSG_DEBUG("old chi2: " << oldchi2 << "/" << trajectory.nDOF() <<
-    "=" << oldredchi2 << " new chi2: " << trajectory.chi2() << "/" <<
-    trajectory.nDOF() << "=" << newredchi2);
+    ATH_MSG_DEBUG("old chi2: " << oldChi2 << "/" << nDOFold << "=" << oldRedChi2 <<
+                  ", new chi2: " << newChi2 << "/" << nDOFnew << "=" << newRedChi2);
 
     if (trajectory.prefit() > 0 && trajectory.converged()) {
       return FitterStatusCode::Success;
     }
 
-    if (doderiv) {
+    if (doDeriv) {
       calculateDerivatives(trajectory);
       fillDerivatives(trajectory);
     }
@@ -5904,7 +6076,7 @@ namespace Trk {
       fillFirstLastMeasurement(cache, trajectory);
     }
 
-    if (a.cols() != nfitpars) {
+    if (a.cols() != trajectory.numberOfFitParameters()) {
       ATH_MSG_ERROR("Your assumption is wrong!!!!");
     }
 
@@ -5914,139 +6086,44 @@ namespace Trk {
      * The [a]-matrix does not depend on the residuals. We only need to change
      * it, if the derivatives have changed.
      */
-    if (doderiv) {
+    if (doDeriv) {
       fillAfromMeasurements(cache, trajectory, a);
       fillAfromScatterers(trajectory, a);
     }
 
-    unsigned int scatno = 0;
-    bool weightchanged = false;
+    const bool weightChanged = tryToWeightAfromMaterial(cache, trajectory, a, doDeriv, it, oldRedChi2, newRedChi2);
 
-    for (std::unique_ptr<GXFTrackState> & thisstate : trajectory.trackStates()) {
-      GXFMaterialEffects *meff = thisstate->materialEffects();
-
-      if (meff != nullptr) {
-        const PlaneSurface *plsurf = nullptr;
-
-        if (thisstate->associatedSurface().type() == Trk::SurfaceType::Plane)
-          plsurf = static_cast < const PlaneSurface *>(&thisstate->associatedSurface());
-        if (meff->deltaE() == 0 || ((trajectory.prefit() == 0) && (plsurf != nullptr))) {
-          weightchanged = true;
-
-          if (a.cols() != nfitpars) {
-            ATH_MSG_ERROR("Your assumption is wrong!!!!");
-          }
-
-          int scatNoIndex = 2 * scatno + nperpars;
-
-          if (trajectory.prefit() == 0) {
-            if (thisstate->materialEffects()->sigmaDeltaPhi() != 0) {
-              if (scatno >= cache.m_phiweight.size()) {
-                std::stringstream message;
-                message << "scatno is out of range " << scatno << " !< " << cache.m_phiweight.size();
-                throw std::range_error(message.str());
-              }
-
-              if (!doderiv) {
-                a(scatNoIndex, scatNoIndex) /= cache.m_phiweight[scatno];
-              }
-
-              if (it == 0) {
-                cache.m_phiweight[scatno] = 1.00000001;
-              } else if (it == 1) {
-                cache.m_phiweight[scatno] = 1.0000001;
-              } else if (it <= 3) {
-                cache.m_phiweight[scatno] = 1.0001;
-              } else if (it <= 6) {
-                cache.m_phiweight[scatno] = 1.01;
-              } else {
-                cache.m_phiweight[scatno] = 1.1;
-              }
-
-              a(scatNoIndex, scatNoIndex) *= cache.m_phiweight[scatno];
-            }
-          }
-
-          else if (trajectory.prefit() >= 2) {
-            if (newredchi2 > oldredchi2 - 1 && newredchi2 < oldredchi2) {
-              a(scatNoIndex, scatNoIndex) *= 1.0001;
-              a(scatNoIndex + 1, scatNoIndex + 1) *= 1.0001;
-            } else if (newredchi2 > oldredchi2 - 25 && newredchi2 < oldredchi2) {
-              a(scatNoIndex, scatNoIndex) *= 1.001;
-              a(scatNoIndex + 1, scatNoIndex + 1) *= 1.0001;
-            } else {
-              a(scatNoIndex, scatNoIndex) *= 1.1;
-              a(scatNoIndex + 1, scatNoIndex + 1) *= 1.001;
-            }
-          }
-        }
-
-        if (
-          thisstate->materialEffects()->sigmaDeltaPhi() != 0 &&
-          ((trajectory.prefit() == 0) || thisstate->materialEffects()->deltaE() == 0)
-        ) {
-          scatno++;
-        }
-      }
-    }
-
-    if (
-      (trajectory.prefit() == 2) &&
-      doderiv &&
-      trajectory.numberOfBrems() > 0 &&
-      (newredchi2 < oldredchi2 - 25 || newredchi2 > oldredchi2)
-    ) {
-      a(4, 4) *= 1.001;
-    }
-
-    if (doderiv || weightchanged) {
+    /*
+     * Update the [lu]-matrix if we modified the [a]-matrix.
+     */
+    if (doDeriv || weightChanged) {
       lu = a;
     }
 
-    if (trajectory.converged()) {
-      if ((trajectory.prefit() == 0) && nsihits + ntrthits != nhits) {
-        unsigned int scatno = 0;
+    /*
+     * Special handling for prefit == 0:
+     * - If we already converged, but there are hits apart from Si and TRT or
+     *   the numbers don't match, the applied phi weights need to be reset.
+     * - If we got in an early iteration to a low reduced chi2 or converged
+     *   with the reduced chi2, we don't need to redo derivatives.
+     */
+    if (trajectory.prefit() == 0) {
+      if (trajectory.converged()) {
+        const int nSiHits = trajectory.numberOfSiliconHits();
+        const int nTrtHits = trajectory.numberOfTRTHits();
+        const int nHits = trajectory.numberOfHits();
 
-        if (a.cols() != nfitpars) {
-          ATH_MSG_ERROR("Your assumption is wrong!!!!");
+        if (nSiHits + nTrtHits != nHits) {
+          compensatePhiWeights(cache, trajectory, a);
+          lu = a;
         }
-
-        for (std::unique_ptr<GXFTrackState> & thisstate : trajectory.trackStates()) {
-          if ((thisstate->materialEffects() != nullptr) && thisstate->materialEffects()->sigmaDeltaPhi() != 0) {
-            if (scatno >= cache.m_phiweight.size()) {
-              std::stringstream message;
-              message << "scatno is out of range " << scatno << " !< " << cache.m_phiweight.size();
-              throw std::range_error(message.str());
-            }
-
-            const PlaneSurface *plsurf = nullptr;
-
-            if (thisstate->associatedSurface().type() == Trk::SurfaceType::Plane)
-              plsurf = static_cast<const PlaneSurface *>(&thisstate->associatedSurface());
-
-            if (thisstate->materialEffects()->deltaE() == 0 || (plsurf != nullptr)) {
-              int scatNoIndex = 2 * scatno + nperpars;
-              a(scatNoIndex, scatNoIndex) /= cache.m_phiweight[scatno];
-              cache.m_phiweight[scatno] = 1;
-            }
-
-            if (thisstate->materialEffects()->sigmaDeltaPhi() != 0) {
-              scatno++;
-            }
-          }
-        }
-        lu = a;
+      } else if (
+        !m_redoderivs &&
+        it < 5 &&
+        (newRedChi2 < 2 || (newRedChi2 < oldRedChi2 && newRedChi2 > oldRedChi2 - .5))
+      ) {
+        doDeriv = false;
       }
-      return FitterStatusCode::Success;
-    }
-
-    if (
-      !m_redoderivs &&
-      it < 5 &&
-      (newredchi2 < 2 || (newredchi2 < oldredchi2 && newredchi2 > oldredchi2 - .5)) &&
-      (trajectory.prefit() == 0)
-    ) {
-      doderiv = false;
     }
 
     return FitterStatusCode::Success;
