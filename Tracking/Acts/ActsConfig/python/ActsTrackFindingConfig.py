@@ -62,6 +62,13 @@ def ActsMainTrackFindingAlgCfg(flags,
     acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
     kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
 
+    # Remove HGTD Volumes from the propagation unless we need it
+    if not flags.Acts.useHGTDClusterInTrackFinding:
+        # HGTD has volume id:
+        # 2 for negative endcap
+        # 25 for positive endcap
+        kwargs.setdefault('EndOfTheWorldVolumeIds', [2, 25])
+    
     # Seed labels and collections.
     # These 3 lists must match element for element, reversed if flags.Acts.useStripSeedsFirst is True.
     # Maybe it is best to start with strips where the occupancy is lower.
