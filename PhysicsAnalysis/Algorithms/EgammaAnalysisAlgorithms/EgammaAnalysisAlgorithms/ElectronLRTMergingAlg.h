@@ -24,6 +24,7 @@
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/WriteHandle.h>
 #include <AsgDataHandles/ReadHandle.h>
+#include <AsgDataHandles/WriteDecorHandleKey.h>
 
 namespace CP
 {
@@ -79,6 +80,11 @@ namespace CP
         void mergeElectron(const xAOD::ElectronContainer &electronCol,
                            ConstDataVector<xAOD::ElectronContainer> *outputCol,
                            const std::set<const xAOD::Electron *> &LRTElectronsToRemove) const;
+
+      SG::WriteDecorHandleKey<xAOD::ElectronContainer> m_promptIsLRTKey
+      { this, "PromptIsLRTKey", m_promptElectronLocation, "isLRT" };
+      SG::WriteDecorHandleKey<xAOD::ElectronContainer> m_lrtIsLRTKey
+      { this, "LRTIsLRTKey", m_lrtElectronLocation, "isLRT" };
     };
 }
 #endif
