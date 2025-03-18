@@ -7,14 +7,14 @@ from AthenaCommon.Logging import logging
 _log = logging.getLogger('AnalysisTriggerAlgsConfig.py')
 
 def RoIBResultToxAODCfg(flags):
-    if flags.Trigger.enableL1MuonPhase1 and not flags.Trigger.enableL1CaloLegacy:
+    if (flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL0Muon) and not flags.Trigger.enableL1CaloLegacy:
         # No Run-2 L1 RoIs -> nothing to covert to xAOD -> don't add RoIBResultToxAOD
         _log.debug('Not adding RoIBResultToxAOD because no Run-2 L1 system is enabled by flags')
         return ComponentAccumulator(), []
 
     acc = ComponentAccumulator()
     alg = CompFactory.RoIBResultToxAOD('RoIBResultToxAOD')
-    alg.DoMuon = flags.Detector.EnableMuon and not flags.Trigger.enableL1MuonPhase1
+    alg.DoMuon = flags.Detector.EnableMuon and not (flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL0Muon)
     alg.DoCalo = flags.Detector.EnableCalo and flags.Trigger.enableL1CaloLegacy
 
     if flags.Input.Format is Format.POOL:
