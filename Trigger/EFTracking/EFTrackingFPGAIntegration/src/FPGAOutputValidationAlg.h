@@ -13,6 +13,8 @@
 #include "xAODMeasurementBase/MeasurementDefs.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/PixelCluster.h"
+#include "xAODInDetMeasurement/StripCluster.h"
 
 class FPGAOutputValidationAlg : public AthReentrantAlgorithm
 {
@@ -32,6 +34,9 @@ class FPGAOutputValidationAlg : public AthReentrantAlgorithm
   FPGAOutputValidationAlg(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
+
+ private:
+  std::vector<const xAOD::PixelCluster*> findMatchingCluster(const xAOD::PixelCluster* cluster0, const xAOD::PixelClusterContainer& pixelClusters1) const;
 };
 
 #endif

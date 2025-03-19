@@ -10,7 +10,26 @@ def FPGAOutputValidationCfg(flags, **kwargs):
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monitoringTool = GenericMonitoringTool(flags, 'FPGAOutputValidationMonitoringTool')
     monitoringTool.HistPath = "/"
-    
+
+    if len(kwargs["pixelKeys"]) == 2:
+        key0 = kwargs["pixelKeys"][0]
+        key1 = kwargs["pixelKeys"][1]
+        name = f"{key0} - {key1}"
+        monitoringTool.defineHistogram("diff_locx",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:locx;Local position x;", xbins = 200, xmin = -0.2, xmax = 0.2)
+        monitoringTool.defineHistogram("diff_locy",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:locy;Local position y;", xbins = 200, xmin = -0.2, xmax = 0.2)
+        monitoringTool.defineHistogram("diff_covxx",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:covxx;Local covariance xx;", xbins = 100, xmin = -0.1, xmax = 0.1)
+        monitoringTool.defineHistogram("diff_covyy",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:covyy;Local covariance yy;", xbins = 100, xmin = -0.1, xmax = 0.1)                        
+        monitoringTool.defineHistogram("diff_globalx",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:globalx;Global position x;", xbins = 200, xmin = -0.05, xmax = 0.05)
+        monitoringTool.defineHistogram("diff_globaly",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:globaly;Global position y;", xbins = 200, xmin = -0.05, xmax = 0.05)
+        monitoringTool.defineHistogram("diff_globalz",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:globalz;Global position z;", xbins = 200, xmin = -0.05, xmax = 0.05)        
+        monitoringTool.defineHistogram("diff_omegax",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:omegax;Omega x;", xbins = 200, xmin = -1, xmax = 1)
+        monitoringTool.defineHistogram("diff_omegay",path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:omegay;Omega y;", xbins = 200, xmin = -1, xmax = 1)
+        monitoringTool.defineHistogram("diff_channelsphi", path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:channels in phi;Channels in #phi;", xbins = 10, xmin = -5, xmax = 5)
+        monitoringTool.defineHistogram("diff_channelseta", path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:channels in eta;Channels in #eta;", xbins = 10, xmin = -5, xmax = 5)        
+        monitoringTool.defineHistogram("diff_widtheta", path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:width in eta;Channels in #phi;", xbins = 10, xmin = -5, xmax = 5)
+        monitoringTool.defineHistogram("diff_tot", path = "FPGAOutputValidation", type = "TH1F", title = f"{name}:tot;Total TOT;", xbins = 200, xmin = -1, xmax = 1)
+        monitoringTool.defineHistogram("nmatched_clusters", path = "FPGAOutputValidation", type = "TH1I", title = f"{name}: number of matched clusters", xbins = 100, xmin=0, xmax = 100)
+
     for key in kwargs["pixelKeys"]:
         monitoringTool.defineHistogram(f"{key}_LOCALPOSITION_X", path = "FPGAOutputValidation", type = "TH1F", title = f"{key}_LOCALPOSITION_X;Local position x;", xbins = 200, xmin = -40, xmax = 40)
         monitoringTool.defineHistogram(f"{key}_LOCALPOSITION_Y", path = "FPGAOutputValidation", type = "TH1F", title = f"{key}_LOCALPOSITION_Y;Local position y;", xbins = 200, xmin = -40, xmax = 40)
