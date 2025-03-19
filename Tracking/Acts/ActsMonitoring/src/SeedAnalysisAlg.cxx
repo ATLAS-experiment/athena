@@ -474,6 +474,7 @@ namespace ActsTrk {
     float S2 = 1. + A * A;
     float B = Vb - A * Ub;
     float B2 = B * B;
+    if (B2 == 0) B2 = 1e-8;
 
     // dzdr
     float dzdr_b = (zM - zB) / (rM - rB);
