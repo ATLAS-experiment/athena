@@ -24,4 +24,5 @@ endif()
 # Unit tests for InitGaudiGoogleTest:
 atlas_add_test( GoogleTestToolsTests
   SOURCES test/gt_GoogleTestTools.cxx
-  LINK_LIBRARIES GoogleTestTools )
+  LINK_LIBRARIES GoogleTestTools
+  POST_EXEC_SCRIPT noerror.sh )
