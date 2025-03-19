@@ -1,7 +1,7 @@
 // This is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NONPROMPTLEPTONVERTEXINGALG_H
@@ -25,6 +25,7 @@
 
 // Athena
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include "xAODTracking/TrackParticleContainer.h"
@@ -115,9 +116,6 @@ namespace Prompt
     Gaudi::Property<double> m_mergeMinVtxDist {this, "MergeMinVtxDist", 1.0};
     Gaudi::Property<double> m_mergeChi2OverDoF {this, "MergeChi2OverDoF", 5.0};
 
-    Gaudi::Property<std::string> m_decoratorNameSecVtxLinks {this, "SecVtxLinksName", "default"};
-    Gaudi::Property<std::string> m_decoratorNameDeepMergedSecVtxLinks {this, "DeepMergedSecVtxLinksName", "default"};
-    Gaudi::Property<std::string> m_decoratorNameIndexVector {this, "IndexVectorName"};
     Gaudi::Property<std::string> m_linkNameRefittedPriVtxWithoutLepton {this, "NoLeptonPriVtxLinkName"};
 
     Gaudi::Property<std::string> m_refittedVertexTypeName{
@@ -165,10 +163,15 @@ namespace Prompt
     //
     // Decorators
     //
-    std::unique_ptr<decoratorVecInt_t>                     m_indexVectorDec;
-    std::unique_ptr<decoratorVecInt_t>                     m_indexVectorDecDeepMerge;
-    std::unique_ptr<decoratorVecElemVtx_t>                 m_lepSVElementLinksDec;
-    std::unique_ptr<decoratorVecElemVtx_t>                 m_lepDeepMergedSVElementLinksDec;
+
+    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_decoratorNameSecVtxLinks
+      { this, "SecVtxLinksName", m_leptonContainerKey, "default", };
+    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_decoratorNameDeepMergedSecVtxLinks
+      { this, "DeepMergedSecVtxLinksName", m_leptonContainerKey, "default", };
+    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_decoratorNameIndexVector
+      { this, "IndexVectorName", m_leptonContainerKey, "", };
+    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_decoratorNameIndexVectorDeepMerge
+      { this, "IndexVectorNameDeepMerge", m_leptonContainerKey, "", };
   };
 }
 
