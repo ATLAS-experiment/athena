@@ -48,12 +48,14 @@ def ITkActsPrepDataToxAODCfg(flags) -> ComponentAccumulator:
 
     # need to decorate truth particles and clusters with same unique identified
     # which is the origin truth particle index
-    if flags.Input.isMC:        
-        acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
+    if not flags.Input.isMC:
+        return acc
 
-        from ActsConfig.ActsObjectDecorationConfig import ActsPixelClusterTruthDecoratorAlgCfg,ActsStripClusterTruthDecoratorAlgCfg
-        acc.merge(ActsPixelClusterTruthDecoratorAlgCfg(flags))
-        acc.merge(ActsStripClusterTruthDecoratorAlgCfg(flags))
+    acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
+
+    from ActsConfig.ActsObjectDecorationConfig import ActsPixelClusterTruthDecoratorAlgCfg,ActsStripClusterTruthDecoratorAlgCfg
+    acc.merge(ActsPixelClusterTruthDecoratorAlgCfg(flags))
+    acc.merge(ActsStripClusterTruthDecoratorAlgCfg(flags))
 
     return acc
 
