@@ -55,7 +55,7 @@ namespace ActsTrk {
       bool useTopSp = false;
 
       auto retrieveSurfaceFunction = 
-        [this, &detElements, useTopSp] (const ActsTrk::Seed& seed) -> const Acts::Surface& { 
+        [this, &detElements] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& { 
           const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
           const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(
                 useTopSp ? sp->elementIdList().back() : sp->elementIdList().front());
@@ -64,15 +64,16 @@ namespace ActsTrk {
         };
 
       std::optional<Acts::BoundTrackParameters> optTrackParams =
-        m_paramEstimationTool->estimateTrackParameters(ctx,
+        m_paramEstimationTool->estimateTrackParameters(
 						       seed,
+						       useTopSp,
 						       tgContext,
 						       mfContext,
-						       retrieveSurfaceFunction,
-                   useTopSp);
+						       retrieveSurfaceFunction);
 
       if (!optTrackParams.has_value()) {
         ATH_MSG_DEBUG("Failed to estimate track parameters for seed " << iseed);
+        trackParams->push_back(std::unique_ptr<Acts::BoundTrackParameters>());
         continue;
       }
 

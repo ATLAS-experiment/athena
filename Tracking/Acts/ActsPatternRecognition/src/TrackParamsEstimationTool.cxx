@@ -27,16 +27,20 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "   " << m_sigmaT0 );
     ATH_MSG_DEBUG( "   " << m_initialVarInflation );
 
+    m_logger = makeActsAthenaLogger(this, "Acts");
+
+    m_extrapolator = Extrapolator(Stepper(std::make_shared<ATLASMagneticFieldWrapper>()), Navigator(), logger().cloneWithSuffix("Prop"));
+
     return StatusCode::SUCCESS;
   }
 
   std::optional<Acts::BoundTrackParameters>
-  TrackParamsEstimationTool::estimateTrackParameters(const EventContext& ctx,
+  TrackParamsEstimationTool::estimateTrackParameters(
 						     const ActsTrk::Seed& seed,
+						     bool useTopSp,
 						     const Acts::GeometryContext& geoContext,
 						     const Acts::MagneticFieldContext& magFieldContext,
-						     std::function<const Acts::Surface&(const ActsTrk::Seed&)> retrieveSurface,
-						     bool useTopSp) const 
+						     std::function<const Acts::Surface&(const ActsTrk::Seed& seed, bool useTopSp)> retrieveSurface) const 
   {
     const auto& sp_collection = seed.sp();
     if ( sp_collection.size() < 3 ) return std::nullopt;
@@ -49,64 +53,81 @@ namespace ActsTrk {
                                                     magFieldCache );
 
     // Get the surface
-    const Acts::Surface& surface = retrieveSurface(seed);
+    const Acts::Surface& surface = retrieveSurface(seed, useTopSp);
 
-    return estimateTrackParameters(ctx,
+    return estimateTrackParameters(
 				   seed,
+				   useTopSp,
 				   geoContext,
+				   magFieldContext,
 				   surface,
-				   bField,
-           useTopSp);
+				   bField);
   }
 
   std::optional<Acts::BoundTrackParameters>
-  TrackParamsEstimationTool::estimateTrackParameters(const EventContext& /*ctx*/,
+  TrackParamsEstimationTool::estimateTrackParameters(
 						     const ActsTrk::Seed& seed,
+						     bool useTopSp,
 						     const Acts::GeometryContext& geoContext,
+						     const Acts::MagneticFieldContext& magFieldContext,
 						     const Acts::Surface& surface,
-						     const Acts::Vector3& bField,
-						     bool useTopSp) const 
+						     const Acts::Vector3& bField) const 
   {
     // Get SPs
     const auto& sp_collection = seed.sp();
     if ( sp_collection.size() < 3 ) return std::nullopt;
-    
-    // Compute Bound parameters at surface
-    auto params_result = useTopSp ?
-      Acts::estimateTrackParamsFromSeed(geoContext,
-                                        std::ranges::views::reverse(sp_collection),
-                                        surface,
-                                        bField) :
-      Acts::estimateTrackParamsFromSeed(geoContext,
-                                        sp_collection,
-                                        surface,
-                                        bField);
-    
-    if ( not params_result.ok() ) {
-      return std::nullopt;
-    }
 
-    auto& params = params_result.value();
+    // Compute free parameters
+    Acts::FreeVector freeParams = useTopSp ?
+      Acts::estimateTrackParamsFromSeed(std::ranges::views::reverse(sp_collection),
+                                        bField) :
+      Acts::estimateTrackParamsFromSeed(sp_collection,
+                                        bField);
 
     if (useTopSp) {
       // reverse direction so momentum vector pointing outwards
-      params = Acts::reflectBoundParameters(params);
+      freeParams = Acts::reflectFreeParameters(freeParams);
     }
 
+    // Convert free params to curvilinear params for extrapolation
+    Acts::CurvilinearTrackParameters curvilinearParams(
+      freeParams.segment<4>(Acts::eFreePos0),
+      freeParams.segment<3>(Acts::eFreeDir0),
+      freeParams[Acts::eFreeQOverP],
+      std::nullopt,
+      Acts::ParticleHypothesis::pion());
+
+    // Extrapolate to surface
+    Acts::PropagatorPlainOptions propOptions(geoContext, magFieldContext);
+    propOptions.direction = Acts::Direction::fromScalarZeroAsPositive(
+        surface.intersect(
+          geoContext,
+          freeParams.segment<3>(Acts::eFreePos0),
+          freeParams.segment<3>(Acts::eFreeDir0)
+        ).closest().pathLength());
+    auto boundParamsResult = m_extrapolator->propagateToSurface(curvilinearParams, surface, propOptions);
+    if (!boundParamsResult.ok()) {
+      ATH_MSG_DEBUG("Extrapolation failed");
+      return std::nullopt;
+    }
+
+    // Get extrapolated parameters
+    Acts::BoundTrackParameters boundParams = *boundParamsResult;
+
+    // Estimate covariance
     Acts::EstimateTrackParamCovarianceConfig covarianceEstimationConfig = {
       .initialSigmas = {m_sigmaLoc0, m_sigmaLoc1, m_sigmaPhi, m_sigmaTheta, m_sigmaQOverP, m_sigmaT0},
       .initialSigmaPtRel = m_initialSigmaPtRel,
       .initialVarInflation = Eigen::Map<const Acts::BoundVector>(m_initialVarInflation.value().data()),
       .noTimeVarInflation = 1.0,
     };
-    Acts::BoundMatrix covariance = Acts::estimateTrackParamCovariance(covarianceEstimationConfig, params, false);
+    boundParams.covariance() = Acts::estimateTrackParamCovariance(
+      covarianceEstimationConfig,
+      boundParams.parameters(),
+      false);
 
-    // Create BoundTrackParameters
-    return Acts::BoundTrackParameters(surface.getSharedPtr(),
-                                      params,
-                                      covariance,
-                                      Acts::ParticleHypothesis::pion());
+    return boundParams;
   }
-  
+
 }
 // namespace ActsTrk

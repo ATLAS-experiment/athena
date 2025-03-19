@@ -84,8 +84,7 @@ def ActsMainTrackFindingAlgCfg(flags,
     kwargs.setdefault("skipDuplicateSeeds", flags.Acts.skipDuplicateSeeds)
     kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=[False], strip=[False]))
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
-    if flags.Acts.reverseTrackFindingForStrips:
-        kwargs.setdefault("reverseSearch", seedOrder(flags, pixel=[False], strip=[True]))
+    kwargs.setdefault("autoReverseSearch", flags.Acts.autoReverseSearchCKF)
 
     # Borrow many settings from flags.Tracking.ActiveConfig, normally initialised in createITkTrackingPassFlags() at
     # https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkConfig/python/TrackingPassFlags.py#L121

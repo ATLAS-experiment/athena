@@ -2,8 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "src/TrackFindingAlg.h"
-#include "Acts/Propagator/PropagatorOptions.hpp"
-#include "src/detail/FitterHelperFunctions.h"
 
 // Athena
 #include "AsgTools/ToolStore.h"
@@ -32,6 +30,7 @@
 
 // ActsTrk
 #include "ActsEvent/TrackContainer.h"
+#include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsInterop/Logger.h"
@@ -39,6 +38,7 @@
 #include "src/detail/AtlasMeasurementSelector.h"
 #include "src/detail/TrackFindingMeasurements.h"
 #include "src/detail/SharedHitCounter.h"
+#include "src/detail/FitterHelperFunctions.h"
 
 // STL
 #include <sstream>
@@ -82,7 +82,8 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_doBranchStopper);
     ATH_MSG_DEBUG("   " << m_addPixelStripCounts);
     ATH_MSG_DEBUG("   " << m_doTwoWay);
-    ATH_MSG_DEBUG("   " << m_reverseSearch);
+    ATH_MSG_DEBUG("   " << m_autoReverseSearch);
+    ATH_MSG_DEBUG("   " << m_useTopSpRZboundary);
     ATH_MSG_DEBUG("   " << m_countSharedHits);
     ATH_MSG_DEBUG("   " << m_phiMin);
     ATH_MSG_DEBUG("   " << m_phiMax);
@@ -128,6 +129,12 @@ namespace ActsTrk
     if (m_detEleCollKeys.size() != m_seedLabels.size())
     {
       ATH_MSG_FATAL("There are " << m_seedLabels.size() << " SeedLabels, but " << m_detEleCollKeys.size() << " DetectorElementsKeys");
+      return StatusCode::FAILURE;
+    }
+
+    if (m_useTopSpRZboundary.size() != 2)
+    {
+      ATH_MSG_FATAL("useTopSpRZboundary must have 2 elements, but has " << m_useTopSpRZboundary.size());
       return StatusCode::FAILURE;
     }
 
@@ -370,6 +377,18 @@ namespace ActsTrk
     return StatusCode::SUCCESS;
   }
 
+  bool TrackFindingAlg::shouldReverseSearch(const ActsTrk::Seed& seed) const {
+    const auto& bottom_sp = seed.sp().front();
+
+    const double r = bottom_sp->radius();
+    const double z = std::abs(bottom_sp->z());
+
+    const double rBoundary = m_useTopSpRZboundary.value()[0];
+    const double zBoundary = m_useTopSpRZboundary.value()[1];
+
+    return r > rBoundary || z > zBoundary;
+  }
+
   detail::MeasurementSelectorData TrackFindingAlg::setMeasurementSelector(
       const Acts::TrackingGeometry &trackingGeometry,
       const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
@@ -595,11 +614,13 @@ namespace ActsTrk
     // Loop over the track finding results for all initial parameters
     for (unsigned int iseed = 0; iseed < seeds.size(); ++iseed)
     {
+      const ActsTrk::Seed& seed = *seeds[iseed];
+
       category_i = typeIndex * (m_statEtaBins.size() + 1);
       tracksContainerTemp.clear();
 
-      const bool reverseSearch = (typeIndex < m_reverseSearch.size() && m_reverseSearch[typeIndex]);
-      const bool refitSeeds = (typeIndex < m_refitSeeds.size() && m_refitSeeds[typeIndex]);
+      const bool reverseSearch = m_autoReverseSearch && shouldReverseSearch(seed);
+      const bool refitSeeds = typeIndex < m_refitSeeds.size() && m_refitSeeds[typeIndex];
       const bool useTopSp = reverseSearch && !refitSeeds;
 
       auto getSeedCategory = [this, useTopSp](std::size_t typeIndex, const ActsTrk::Seed& seed) -> std::size_t {
@@ -612,23 +633,21 @@ namespace ActsTrk
       const bool isDupSeed = duplicateSeedDetector.isDuplicate(typeIndex, iseed);
       if (isDupSeed) {
         ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
-        category_i = getSeedCategory(typeIndex, *seeds[iseed]);
+        category_i = getSeedCategory(typeIndex, seed);
         ++event_stat[category_i][kNTotalSeeds];
         ++event_stat[category_i][kNDuplicateSeeds];
         if (!m_trackStatePrinter.isSet()) continue;  // delay continue to estimate track parms for TrackStatePrinter?
       }
 
-      plainOptions.direction = reverseSearch ? Acts::Direction::Backward() : Acts::Direction::Forward();
-      plainSecondOptions.direction = plainOptions.direction.invert();
+      options.propagatorPlainOptions.direction = reverseSearch ? Acts::Direction::Backward() : Acts::Direction::Forward();
+      secondOptions.propagatorPlainOptions.direction = options.propagatorPlainOptions.direction.invert();
       options.targetSurface = reverseSearch ? pSurface.get() : nullptr;
       secondOptions.targetSurface = reverseSearch ? nullptr : pSurface.get();
       // TODO since the second pass is strictly an extension we should have a separate branch stopper which never drops and always extrapolates to the target surface
 
-      const ActsTrk::Seed& seed = *seeds[iseed];
-
       // Estimate Track Parameters
       auto retrieveSurfaceFunction = 
-        [this, &detElements, useTopSp] (const ActsTrk::Seed& seed) -> const Acts::Surface& { 
+        [this, &detElements] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& { 
           const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
           const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(
                 useTopSp ? sp->elementIdList().back()
@@ -638,17 +657,18 @@ namespace ActsTrk
         };
 
       std::optional<Acts::BoundTrackParameters> optTrackParams =
-        m_paramEstimationTool->estimateTrackParameters(ctx,
+        m_paramEstimationTool->estimateTrackParameters(
 						       seed,
+						       useTopSp,
 						       tgContext,
 						       mfContext,
-						       retrieveSurfaceFunction,
-                   useTopSp);
+						       retrieveSurfaceFunction);
 
       if (!optTrackParams) {
         ATH_MSG_DEBUG("Failed to estimate track parameters for seed " << iseed);
         if (!isDupSeed) {
           category_i = getSeedCategory(typeIndex, seed);
+          ++event_stat[category_i][kNTotalSeeds];
           ++event_stat[category_i][kNNoEstimatedParams];
         }
         continue;
@@ -667,7 +687,7 @@ namespace ActsTrk
       if (refitSeeds)
       {
         // Perform KF before CKF
-        const auto fittedSeedCollection = m_fitterTool->fit(ctx, *seeds[iseed], *initialParameters,
+        const auto fittedSeedCollection = m_fitterTool->fit(ctx, seed, *initialParameters,
                                                             tgContext, mfContext, calContext,
                                                             detectorElementToGeoId);
         if (not fittedSeedCollection)

@@ -25,21 +25,22 @@ namespace ActsTrk {
 
     virtual 
       std::optional<Acts::BoundTrackParameters>
-      estimateTrackParameters(const EventContext& ctx,
+      estimateTrackParameters(
 			      const ActsTrk::Seed& seed,
+			      bool useTopSp,
 			      const Acts::GeometryContext& geoContext,
 			      const Acts::MagneticFieldContext& magFieldContext,
-			      std::function<const Acts::Surface&(const ActsTrk::Seed&)> retrieveSurface,
-			      bool useTopSp) const = 0;
+			      std::function<const Acts::Surface&(const ActsTrk::Seed& seed, bool useTopSp)> retrieveSurface) const = 0;
 
     virtual
       std::optional<Acts::BoundTrackParameters>
-      estimateTrackParameters(const EventContext& ctx,
-                              const ActsTrk::Seed& seed,
-                              const Acts::GeometryContext& geoContext,
-                              const Acts::Surface& surface,
-                              const Acts::Vector3& bField,
-                              bool useTopSp) const = 0;
+      estimateTrackParameters(
+            const ActsTrk::Seed& seed,
+            bool useTopSp,
+            const Acts::GeometryContext& geoContext,
+            const Acts::MagneticFieldContext& magFieldContext,
+            const Acts::Surface& surface,
+            const Acts::Vector3& bField) const = 0;
   };
   
 } // namespace 
