@@ -55,7 +55,7 @@ atlas_add_test( PixelMapping_test
 atlas_add_test( HitMapCalibLoop_test
    SCRIPT share/HitMapBuilderCalibLoop_test.sh
    POST_EXEC_SCRIPT noerror.sh 
-   PROPERTIES_TIMEOUT 300 )
+   PROPERTIES TIMEOUT 900 )
 
 
 atlas_install_runtime ( share/HashVSdcsID.dat share/table_Run2.txt share/PixelMapping_Run2.dat )
