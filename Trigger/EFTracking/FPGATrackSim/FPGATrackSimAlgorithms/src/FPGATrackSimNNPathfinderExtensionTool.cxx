@@ -300,13 +300,13 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             // Get the last layer in the road. And only check layers above that
             unsigned lastLayerInRoad = 0;
             std::shared_ptr<const FPGATrackSimHit> lastHit;
-            if(!getLastLayer(currentRoad, lastLayerInRoad, lastHit))
+            if(!getLastLayer(currentRoad, lastLayerInRoad, lastHit) or !lastHit)
             {
                 ATH_MSG_WARNING("Failed to find last layer this road");
                 continue;
             }
 
-	    bool lastHitWasReal = lastHit->isReal();
+	          bool lastHitWasReal = lastHit->isReal();
 	    
             //  if the last layer is m_nLayers_1stStage + m_nLayers_2ndStage, then we have hit the end already
             if((lastLayerInRoad + 1) >= m_nLayers_1stStage + m_nLayers_2ndStage)
