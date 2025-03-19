@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """Script / jobOptions to test PhotonVertexSelectionTool using
 Athena"""
@@ -87,6 +87,7 @@ if __name__ == "__main__":
 
     flags.Input.Files = defaultTestFiles.AOD_RUN2_MC
     flags.Exec.MaxEvents = 5
+    flags.fillFromArgs()
     flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg

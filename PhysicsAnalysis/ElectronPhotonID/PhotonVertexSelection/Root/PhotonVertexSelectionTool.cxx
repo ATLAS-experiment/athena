@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -17,6 +17,7 @@
 #include "PathResolver/PathResolver.h"
 #include "egammaUtils/ShowerDepthTool.h"
 #include "AsgDataHandles/ReadHandle.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
 
 // ROOT includes
 #include "TMVA/Reader.h"
@@ -92,6 +93,19 @@ namespace CP {
     ATH_CHECK( m_eventInfo.initialize() );
     ATH_CHECK( m_vertexContainer.initialize() );
 
+    m_deltaPhiKey = m_derivationPrefix + SG::decorKeyFromKey (m_deltaPhiKey.key());
+    m_deltaZKey = m_derivationPrefix + SG::decorKeyFromKey (m_deltaZKey.key());
+    m_sumPt2Key = m_derivationPrefix + SG::decorKeyFromKey (m_sumPt2Key.key());
+    m_sumPtKey = m_derivationPrefix + SG::decorKeyFromKey (m_sumPtKey.key());
+    ATH_CHECK( m_deltaPhiKey.initialize() );
+    ATH_CHECK( m_deltaZKey.initialize() );
+    ATH_CHECK( m_sumPt2Key.initialize() );
+    ATH_CHECK( m_sumPtKey.initialize() );
+#ifndef XAOD_STANDALONE
+    renounce (m_sumPt2Key);
+    renounce (m_sumPtKey);
+#endif
+
     return StatusCode::SUCCESS;
   }
 
@@ -99,13 +113,14 @@ namespace CP {
   StatusCode PhotonVertexSelectionTool::decorateInputs(const xAOD::EgammaContainer &egammas, FailType* failType) const{
     auto fail = FailType::NoFail;
 
-    static const SG::AuxElement::Decorator<float> sumPt2(m_derivationPrefix + "sumPt2");
-    static const SG::AuxElement::Decorator<float> sumPt(m_derivationPrefix + "sumPt");
-    static const SG::AuxElement::Decorator<float> deltaPhi(m_derivationPrefix + "deltaPhi");
-    static const SG::AuxElement::Decorator<float> deltaZ(m_derivationPrefix + "deltaZ");
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> deltaPhi (m_deltaPhiKey, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> deltaZ (m_deltaZKey, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> sumPt2 (m_sumPt2Key, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> sumPt (m_sumPtKey, ctx);
 
     // Get the EventInfo
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo, ctx);
 
     // Find the common z-position from beam / photon pointing information
     std::pair<float, float> zCommon = xAOD::PVHelpers::getZCommonAndError(&*eventInfo, &egammas, m_convPtCut);
@@ -113,7 +128,10 @@ namespace CP {
     TLorentzVector vegamma = getEgammaVector(&egammas, fail);
 
     // Retrieve PV collection from TEvent
-    SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexContainer);
+    SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexContainer, ctx);
+
+    bool writeSumPt2 = !sumPt2.isAvailable();
+    bool writeSumPt = !sumPt.isAvailable();
 
     for (const xAOD::Vertex* vertex: *vertices) {
 
@@ -123,11 +141,11 @@ namespace CP {
 
       // Set input variables for MVA
 
-      if (not sumPt.isAvailable(*vertex)) {
+      if (writeSumPt) {
 	sumPt(*vertex) = xAOD::PVHelpers::getVertexSumPt(vertex, 1, false);
       }
 
-      if (not sumPt2.isAvailable(*vertex)) {
+      if (writeSumPt2) {
         sumPt2(*vertex) = xAOD::PVHelpers::getVertexSumPt(vertex, 2);
       }
 

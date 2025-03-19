@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PhotonVertexSelection_PhotonVertexSelectionTool_h
@@ -8,7 +8,9 @@
 // Framework includes
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
+#include "AsgTools/CurrentContext.h"
 #include "AsgDataHandles/ReadHandleKey.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
 
 // EDM includes
 #include "xAODEventInfo/EventInfo.h"
@@ -97,6 +99,15 @@ namespace CP {
     const xAOD::Vertex* getPrimaryVertexFromConv(const xAOD::PhotonContainer *photons) const;
 
     /// @}
+
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_deltaPhiKey
+      { this, "DeltaPhiKey", m_vertexContainer, "deltaPhi" };
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_deltaZKey
+      { this, "DeltaZKey", m_vertexContainer, "deltaZ" };
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_sumPt2Key
+      { this, "SumPt2Key", m_vertexContainer, "sumPt2" };
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_sumPtKey
+      { this, "SumPtKey", m_vertexContainer, "sumPt" };
 
   }; // class PhotonVertexSelectionTool
 
