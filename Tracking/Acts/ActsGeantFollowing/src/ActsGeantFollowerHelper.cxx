@@ -221,7 +221,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
                                         mass, 
                                         Acts::AnyCharge{static_cast<float>(charge)}};
     m_actsParameterCache = Acts::GenericBoundTrackParameters<Acts::ParticleHypothesis>::create(
-        surface, gctx.context(), actsStart, dir, charge/(mom.mag()/1000), std::nullopt, hypothesis)
+        gctx.context(), surface, actsStart, dir, charge/(mom.mag()/1000), std::nullopt, hypothesis)
       .value();
   }
 

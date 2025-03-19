@@ -309,12 +309,12 @@ ActsMaterialTrackWriterSvc::doWrite(const Acts::RecordedMaterialTrack& mTrack)
           m_sur_range_max.push_back(0);
         }
       } else {
-        layerID.setVolume(0);
-        layerID.setBoundary(0);
-        layerID.setLayer(0);
-        layerID.setApproach(0);
-        layerID.setSensitive(0);
-        m_sur_id.push_back(layerID.value());
+        m_sur_id.push_back(layerID.withVolume(0)
+                           .withBoundary(0)
+                           .withLayer(0)
+                           .withApproach(0)
+                           .withSensitive(0)
+                           .value());
         m_sur_type.push_back(-1);
 
         m_sur_x.push_back(0);
@@ -332,12 +332,12 @@ ActsMaterialTrackWriterSvc::doWrite(const Acts::RecordedMaterialTrack& mTrack)
         vlayerID = volume.geometryId();
         m_vol_id.push_back(vlayerID.value());
       } else {
-        vlayerID.setVolume(0);
-        vlayerID.setBoundary(0);
-        vlayerID.setLayer(0);
-        vlayerID.setApproach(0);
-        vlayerID.setSensitive(0);
-        m_vol_id.push_back(vlayerID.value());
+        m_vol_id.push_back(vlayerID.withVolume(0)
+                           .withBoundary(0)
+                           .withLayer(0)
+                           .withApproach(0)
+                           .withSensitive(0)
+                           .value());
       }
     }
     // the material information

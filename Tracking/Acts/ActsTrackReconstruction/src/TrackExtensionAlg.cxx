@@ -105,10 +105,10 @@ namespace ActsTrk{
 
     detail::CKF_config ckfConfig{
         std::move(extrapolator),
-        {std::move(propagator), m_logger->cloneWithSuffix("CKF")},
+        detail::CKF{std::move(propagator), m_logger->cloneWithSuffix("CKF")},
         measurementSelector,
         {},
-        trackSelectorCfg};
+        Acts::TrackSelector{trackSelectorCfg}};
 
     m_ckfConfig = std::make_unique<detail::CKF_config>(std::move(ckfConfig));
     return StatusCode::SUCCESS;

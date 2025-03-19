@@ -485,7 +485,7 @@ ATH_FLATTEN
     m_gridCfg = m_gridCfg.toInternalUnits();
 
     // Seed Finder
-    m_finder = {m_finderCfg, logger().cloneWithSuffix("Finder")};
+    m_finder = decltype(m_finder){m_finderCfg, logger().cloneWithSuffix("Finder")};
  
     return StatusCode::SUCCESS;
   }

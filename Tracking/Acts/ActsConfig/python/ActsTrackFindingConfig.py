@@ -4,7 +4,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 import AthenaCommon.SystemOfUnits as Units
 from ActsInterop import UnitConstants
-from math import pi as M_PI
 
 # Tools
 
@@ -295,25 +294,13 @@ def ActsMainScoreBasedAmbiguityResolutionAlgCfg(flags,
 
     kwargs.setdefault('TracksLocation', 'ActsTracks')
     kwargs.setdefault('ResolvedTracksLocation', 'ActsResolvedTracks')
-    kwargs.setdefault('MinScore', 0.0)
-    kwargs.setdefault('MinScoreSharedTracks', 0.0)
-    kwargs.setdefault('MaxSharedTracksPerMeasurement', 7)
+    kwargs.setdefault('MinScore',1.0)
+    kwargs.setdefault('MinScoreSharedTracks', 1.0)
+    kwargs.setdefault('MaxSharedTracksPerMeasurement', 20)
     kwargs.setdefault('MaxShared', 5)
-    kwargs.setdefault('PTMin', 0.0)
-    kwargs.setdefault('PTMax', 100000.0)
-    kwargs.setdefault('PhiMin', -M_PI)
-    kwargs.setdefault('PhiMax', M_PI)
-    kwargs.setdefault('EtaMin', -5.0)
-    kwargs.setdefault('EtaMax', 5.0)
-    kwargs.setdefault('UseAmbiguityFunction', True)
+    kwargs.setdefault('MinUnshared', 5)
+    kwargs.setdefault('UseAmbiguityScoring', True)
     kwargs.setdefault('jsonFileName', 'ActsAmbiguityConfig.json')
-
-    if 'InDetEtaDependentCutsSvc' not in kwargs:
-        from InDetConfig.InDetEtaDependentCutsConfig import (
-            ITkEtaDependentCutsSvcCfg)
-        acc.merge(ITkEtaDependentCutsSvcCfg(flags))
-        kwargs.setdefault("InDetEtaDependentCutsSvc", acc.getService(
-            "ITkEtaDependentCutsSvc"+flags.Tracking.ActiveConfig.extension))
 
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsAmbiguityResolutionMonitoringToolCfg

@@ -24,6 +24,7 @@ namespace ActsTrk::detail {
   using RecoTrackContainerProxy = RecoTrackContainer::TrackProxy;
   using RecoTrackStateContainer = Acts::VectorMultiTrajectory;
   using RecoTrackStateContainerProxy = RecoTrackStateContainer::TrackStateProxy;
+  using RecoConstTrackStateContainerProxy = RecoTrackStateContainer::ConstTrackStateProxy;
 
   /// Adapted from Acts Examples/Algorithms/TrackFinding/src/TrackFindingAlgorithmFunction.cpp
 
