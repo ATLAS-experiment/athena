@@ -21,7 +21,6 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                  MultiBjetGroup,
                                  SingleTauGroup,
                                  MultiTauGroup,
-                                 SinglePhotonGroup,
                                  MultiPhotonGroup,
                                  TauPhotonGroup,
                                  TauJetGroup,
@@ -171,8 +170,6 @@ def getDevSignatures():
         ChainProp(name='HLT_g50_medium_g20_medium_L12eEM18M', l1SeedThresholds=['eEM18M','eEM18M'], groups=SupportPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_g50_medium_g20_medium_L12eEM18L', l1SeedThresholds=['eEM18L','eEM18L'], groups=SupportPhIGroup+MultiPhotonGroup),
 
-        # ATR-29062      
-        ChainProp(name='HLT_g15_tight_ringer_L1eEM12L', groups=SinglePhotonGroup+DevGroup, monGroups=['egammaMon:shifter']),
 
     ]
 
