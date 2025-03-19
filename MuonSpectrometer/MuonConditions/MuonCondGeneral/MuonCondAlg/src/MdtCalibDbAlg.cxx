@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondAlg/MdtCalibDbAlg.h"
@@ -497,7 +497,7 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
             tr_point.set_error(1.0);
             if (tr_point.x2() < -99) {  // if radius is < -99 then treat time as ML Tmax difference
                 multilayer_tmax_diff = tr_point.x1();
-            } else if (k == 0 || (tr_points[k - 1].x1() < tr_point.x1() && tr_points[k - 1].x2() < tr_point.x2())) {
+            } else if (tr_points.empty() || (tr_points.back().x1() < tr_point.x1() && tr_points.back().x2() < tr_point.x2())) {
                 tr_points.push_back(tr_point);
                 ts_points.push_back(ts_point);
             }
