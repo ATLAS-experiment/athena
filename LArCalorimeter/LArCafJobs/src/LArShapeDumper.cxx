@@ -48,6 +48,7 @@ LArShapeDumper::LArShapeDumper(const std::string & name, ISvcLocator * pSvcLocat
   m_nNoDigits(0),
   m_nNoDigitsSC(0),
   m_onlineHelper(nullptr),
+  m_onlineHelperSC(nullptr),
   m_doEM(false),
   m_doHEC(false),
   m_doFCAL(false),
