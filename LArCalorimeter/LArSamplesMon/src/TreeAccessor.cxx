@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/TreeAccessor.h"
@@ -34,10 +34,12 @@ TreeAccessor* TreeAccessor::open(const TString& fileName)
   if (!file->IsOpen()) { delete file; return nullptr; }
   TTree* cellTree = (TTree*)file->Get("cells");
   if (!cellTree) return nullptr;
+  TTree* scTree = (TTree*)file->Get("SC");
+  if (!scTree) return nullptr;
   TTree* eventTree = (TTree*)file->Get("events");
   if (!eventTree) return nullptr;
   TTree* runTree = (TTree*)file->Get("runs");
-  TreeAccessor* accessor = new TreeAccessor(*cellTree, *eventTree, runTree, file);
+  TreeAccessor* accessor = new TreeAccessor(*cellTree, *scTree, *eventTree, runTree, file);
   return accessor;
 }
 
@@ -49,16 +51,19 @@ const CellInfo* TreeAccessor::getCellInfo(unsigned int i) const
   return new CellInfo(*cont->cellInfo());
 }
 
+const CellInfo* TreeAccessor::getSCInfo(unsigned int i) const 
+{ 
+  const HistoryContainer* cont = historyContainerSC(i);
+  if (!cont || !cont->cellInfo()) return nullptr;
+  return new CellInfo(*cont->cellInfo());
+}
+
 
 const History* TreeAccessor::getCellHistory(unsigned int i) const 
 { 
-  //cout << "A" << endl;
   if (i >= cellTree().GetEntries()) return nullptr;
-  //cout << "---> TTree::GetEntry " << i << endl;
   getCellEntry(i);
-  //cout << "---> done TTree::GetEntry" << endl;
 
-  //cout << "B " << currentContainer()->nDataContainers() << endl;
   std::vector<const EventData*> eventDatas;
   
   for (unsigned int k = 0; k < currentContainer()->nDataContainers(); k++) {
@@ -66,11 +71,23 @@ const History* TreeAccessor::getCellHistory(unsigned int i) const
     EventData* newEvtData = (evtData ? new EventData(*evtData) : nullptr);
     eventDatas.push_back(newEvtData);
   }
-  //cout << "C" << endl;
-  //cout << "---> TreeAcc : make new hist" << endl;
   return (currentContainer()->cellInfo() ? new History(*currentContainer(), eventDatas, i) : nullptr);
 }
 
+const History* TreeAccessor::getSCHistory(unsigned int i) const 
+{ 
+  if (i >= SCTree().GetEntries()) return nullptr;
+  getSCEntry(i);
+
+  std::vector<const EventData*> eventDatas;
+  
+  for (unsigned int k = 0; k < currentContainerSC()->nDataContainers(); k++) {
+    const EventData* evtData = eventData(currentContainerSC()->dataContainer(k)->eventIndex());
+    EventData* newEvtData = (evtData ? new EventData(*evtData) : nullptr);
+    eventDatas.push_back(newEvtData);
+  }
+  return (currentContainerSC()->cellInfo() ? new History(*currentContainerSC(), eventDatas, i) : nullptr);
+}
 
 TreeAccessor* TreeAccessor::merge(const std::vector<const Accessor*>& accessors,
                                                           const TString& fileName)

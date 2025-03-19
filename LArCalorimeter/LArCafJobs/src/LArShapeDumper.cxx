@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCafJobs/LArShapeDumper.h"
@@ -8,7 +8,6 @@
 #include "GaudiKernel/INTupleSvc.h"
 #include "LArRawEvent/LArOFIterResultsContainer.h"
 #include "LArRawEvent/LArFebErrorSummary.h"
-#include "LArElecCalib/ILArPedestal.h"
 #include "LArElecCalib/ILArShape.h"
 
 #include "LArRawConditions/LArPhysWave.h"
@@ -47,21 +46,23 @@ LArShapeDumper::LArShapeDumper(const std::string & name, ISvcLocator * pSvcLocat
   m_nPrescaledAway(0),
   m_nLArError(0),
   m_nNoDigits(0),
+  m_nNoDigitsSC(0),
   m_onlineHelper(nullptr),
   m_doEM(false),
   m_doHEC(false),
   m_doFCAL(false),
+  m_doSC(false),
   m_samples(nullptr)
 {
   declareProperty("FileName", m_fileName = "samples.root");
   declareProperty("MaxChannels", m_maxChannels = 200000);
-  declareProperty("DigitsKey", m_digitsKey = "FREE");
-  declareProperty("ChannelsKey", m_channelsKey = "LArRawChannels");
   declareProperty("Prescale", m_prescale = 1);
-  declareProperty("CaloType", m_caloType = "EMHECFCAL");
+  declareProperty("CaloType", m_caloType = "EMHECFCALSC");
   declareProperty("EnergyCut", m_energyCut = -1);
+  declareProperty("EnergyCutSC", m_energyCutSC = -1);
   declareProperty("NoiseSignifCut", m_noiseSignifCut = 3);
   declareProperty("MinADCMax", m_minADCMax = -1);
+  declareProperty("MinADCMaxSC", m_minADCMaxSC = -1);
   declareProperty("Gains", m_gainSpec = "HIGH,MEDIUM,LOW");
   declareProperty("DumpDisconnected", m_dumpDisc = false);
   declareProperty("DoStream", m_doStream = false);
@@ -87,18 +88,36 @@ StatusCode LArShapeDumper::initialize()
 
   m_samples = new DataStore();
 
+  std::transform(m_caloType.begin(), m_caloType.end(), m_caloType.begin(), toupper);
+  m_doEM   = (m_caloType.find("EM")   != std::string::npos);
+  m_doHEC  = (m_caloType.find("HEC")  != std::string::npos);
+  m_doFCAL = (m_caloType.find("FCAL") != std::string::npos);
+  m_doSC   = (m_caloType.find("SC") != std::string::npos);
+
   ATH_CHECK( m_cablingKey.initialize() );
   ATH_CHECK( m_BCKey.initialize() );
+  ATH_CHECK( m_BCKeySC.initialize(m_doSC) );
   ATH_CHECK( m_noiseCDOKey.initialize() );
   ATH_CHECK( m_adc2mevKey.initialize() );
   ATH_CHECK( m_pedestalKey.initialize() );
   ATH_CHECK( m_bcDataKey.initialize() );
 
+  ATH_CHECK( m_digitsKey.initialize() );
+  ATH_CHECK( m_channelsKey.initialize() );
+
+  ATH_CHECK( m_digitsKeySC.initialize(m_doSC) );
+  ATH_CHECK( m_rawscKey.initialize(m_doSC) );
+  ATH_CHECK( m_cablingKeySC.initialize(m_doSC) );
+  ATH_CHECK( m_pedestalKeySC.initialize(m_doSC) );
+
   ATH_CHECK( detStore()->retrieve(m_onlineHelper, "LArOnlineID") );
   ATH_CHECK(m_caloMgrKey.initialize());
+  ATH_CHECK(m_caloSuperCellMgrKey.initialize(m_doSC));
+  if(m_doSC) ATH_CHECK( detStore()->retrieve(m_onlineHelperSC, "LArOnline_SuperCellID") );
 
   /** Get bad-channel mask (only if jO IgnoreBadChannels is true)*/
   ATH_CHECK(m_bcMask.buildBitMask(m_problemsToMask,msg()));
+  if(m_doSC) ATH_CHECK(m_bcMaskSC.buildBitMask(m_problemsToMaskSC,msg()));
 
 
   if (m_doTrigger) {
@@ -107,15 +126,8 @@ StatusCode LArShapeDumper::initialize()
 
   ATH_CHECK( m_dumperTool.retrieve() );
 
-  if (m_dumperTool->doShape()) {
-    ATH_CHECK( detStore()->regHandle(m_autoCorr, "LArAutoCorr") );
-  }
+  ATH_CHECK(m_acorrKey.initialize(m_dumperTool->doShape()) );
   
-  std::transform(m_caloType.begin(), m_caloType.end(), m_caloType.begin(), toupper);
-  m_doEM   = (m_caloType.find("EM")   != std::string::npos);
-  m_doHEC  = (m_caloType.find("HEC")  != std::string::npos);
-  m_doFCAL = (m_caloType.find("FCAL") != std::string::npos);
-
   std::transform(m_gainSpec.begin(), m_gainSpec.end(), m_gainSpec.begin(), toupper);
   m_gains[CaloGain::LARHIGHGAIN]   = (m_gainSpec.find("HIGH")   != std::string::npos);
   m_gains[CaloGain::LARMEDIUMGAIN] = (m_gainSpec.find("MEDIUM") != std::string::npos);
@@ -254,20 +266,34 @@ StatusCode LArShapeDumper::execute()
     if (eventIndex < 0) return StatusCode::FAILURE;
   }
 
-  const LArDigitContainer* larDigitContainer;
-  if (!m_digitsKey.empty())
-    ATH_CHECK( evtStore()->retrieve(larDigitContainer, m_digitsKey) );
-  else
-    ATH_CHECK( evtStore()->retrieve(larDigitContainer) );
+  SG::ReadHandle<LArDigitContainer> hdlDigit(m_digitsKey, ctx);
+  if(!hdlDigit.isValid()) {
+     ATH_MSG_WARNING( "Unable to retrieve LArDigitContainer with key " << m_digitsKey << " from DetectorStore. " );
+     return StatusCode::SUCCESS;
+  } else
+      ATH_MSG_DEBUG( "Got LArDigitContainer with key " << m_digitsKey.key() );
+  const LArDigitContainer* larDigitContainer = &(*hdlDigit);
 
   if (larDigitContainer->empty()) {
-    ATH_MSG_WARNING ( "LArDigitContainer with key=" << m_digitsKey << " is empty!" );
+    ATH_MSG_WARNING ( "LArDigitContainer with key=" << m_digitsKey.key() << " is empty!" );
     m_nNoDigits++;
     return StatusCode::SUCCESS;
   }
 
-  const LArRawChannelContainer* rawChannelContainer = nullptr;
-  ATH_CHECK( evtStore()->retrieve(rawChannelContainer, m_channelsKey) );
+  SG::ReadHandle<LArRawChannelContainer> hdlRaw(m_channelsKey, ctx);
+  if(!hdlRaw.isValid()) {
+     ATH_MSG_WARNING( "Unable to retrieve LArRawChannelsContainer with key " << m_channelsKey.key() << " from DetectorStore. " );
+     return StatusCode::SUCCESS;
+  } else
+      ATH_MSG_DEBUG( "Got LArRawChannelsContainer with key " << m_channelsKey.key() );
+  const LArRawChannelContainer* rawChannelContainer = &(*hdlRaw);;
+
+  if (rawChannelContainer->empty()) {
+    ATH_MSG_WARNING ( "LArRawChannelContainer with key=" << m_channelsKey << " is empty!" );
+    m_nNoDigits++;
+    return StatusCode::SUCCESS;
+  }
+
   
   
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
@@ -289,6 +315,16 @@ StatusCode LArShapeDumper::execute()
   if (!pedestals) {
     ATH_MSG_ERROR("Failed to retrieve pedestal cond obj");
      return StatusCode::FAILURE;
+  }
+
+  const ILArAutoCorr* aCorr=nullptr;
+  if(m_dumperTool->doShape()) {
+     SG::ReadCondHandle<ILArAutoCorr> acorrHdl(m_acorrKey, ctx);
+     aCorr=*acorrHdl;
+     if (!aCorr) {
+        ATH_MSG_ERROR("Failed to retrieve AutoCorr cond obj");
+        return StatusCode::FAILURE;
+     }
   }
 
   SG::ReadCondHandle<LArBadChannelCont> readHandle{m_BCKey};
@@ -346,7 +382,7 @@ StatusCode LArShapeDumper::execute()
          ofResult != ofIterResult->end(); ++ofResult) 
       ofcResultPosition[ofResult->getChannelID()] = ofResult;
   
-    ATH_MSG_INFO ( "njpbSizes : " << larDigitContainer->size()
+    ATH_MSG_DEBUG ( "njpbSizes : " << larDigitContainer->size()
                  << " " << (ofIterResult ? ofIterResult->size() : 0) << " " 
                  << rawChannelContainer->size() << " " << channelsToKeep.size() );
   }
@@ -420,7 +456,7 @@ StatusCode LArShapeDumper::execute()
     //std::vector<float> autoCorr;
     ILArAutoCorr::AutoCorrRef_t autoCorr;
     if (m_dumperTool->doShape()) {
-      const LArAutoCorrComplete* autoCorrObj = dynamic_cast<const LArAutoCorrComplete*>(m_autoCorr.cptr());
+      const LArAutoCorrComplete* autoCorrObj = dynamic_cast<const LArAutoCorrComplete*>(aCorr);
       if (!autoCorrObj)
         ATH_MSG_WARNING ( "AutoCorr object is not of type LArAutoCorrComplete!" );
       else
@@ -462,7 +498,157 @@ StatusCode LArShapeDumper::execute()
     histCont->add(data);
   }
   
-  //msg() << MSG::INFO << "Current footprint = " << m_samples->footprint() << ", size = " << m_samples->size() << endmsg;
+  if(m_doSC) {
+    std::map<unsigned int, const LArRawSC*> scToKeep;
+    
+    SG::ReadHandle<LArRawSCContainer> hdlSC(m_rawscKey, ctx);
+    if(!hdlSC.isValid()) {
+       ATH_MSG_WARNING( "Unable to retrieve LArRawSCContainer with key " << m_rawscKey << " from EventStore. " );
+       return StatusCode::SUCCESS;
+    } else
+        ATH_MSG_DEBUG( "Got LArRawSCContainer with key " << m_rawscKey.key() );
+    const LArRawSCContainer*  etcontainer = &(*hdlSC);
+ 
+    if (etcontainer->empty()) {
+      ATH_MSG_WARNING ( "LArRawSCContainer with key=" << m_rawscKey.key() << " is empty!" );
+      return StatusCode::SUCCESS;
+    }
+
+    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKeySC, ctx};
+    const LArOnOffIdMapping* cablingSC=*cablingHdl;
+    if(!cablingSC) {
+       ATH_MSG_ERROR( "Do not have cabling object LArOnOffIdMapping" );
+       return StatusCode::FAILURE;
+    }
+
+    SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloMgrHandle{m_caloSuperCellMgrKey};
+    ATH_CHECK(caloMgrHandle.isValid());
+    const CaloSuperCellDetDescrManager* caloMgrSC = *caloMgrHandle;  
+
+    SG::ReadCondHandle<ILArPedestal> pedHdl(m_pedestalKeySC, ctx);
+    const ILArPedestal* pedestalsSC=*pedHdl;
+    if (!pedestals) {
+      ATH_MSG_ERROR("Failed to retrieve pedestal cond obj for SC");
+       return StatusCode::FAILURE;
+    }
+
+    std::map<unsigned int, std::pair<float,float> > channelsToKeepSC;
+
+    for (const LArRawSC* rawSC : *hdlSC) {
+
+      const std::vector<unsigned short>& bcids = rawSC->bcids();
+      const std::vector<int>& energies = rawSC->energies();
+      const std::vector<int>& tauenergies = rawSC->tauEnergies();
+      const std::vector<bool>& satur = rawSC->satur();
+  
+      // Look for bcid:
+      float scEne = 0;
+      float scTim = -99999999.;
+  
+      const size_t nBCIDs = bcids.size();
+      size_t i = 0;
+      for (i = 0; i < nBCIDs && bcids[i] != bunchId; i++)
+        ;
+      if(i==nBCIDs) continue;
+      if (satur[i]) continue;
+  
+      scEne = energies[i]; 
+      if (m_energyCutSC > 0 && TMath::Abs(scEne) < m_energyCut) continue;
+      if (m_bcMaskSC.cellShouldBeMasked(bcCont,rawSC->hardwareID())) continue;
+ 
+      IdentifierHash hash = m_onlineHelperSC->channel_Hash(rawSC->hardwareID());
+      
+      if (!hash.is_valid()) {
+        ATH_MSG_FATAL ( "Found a LArRawSC whose HWIdentifier (" << rawSC->hardwareID()
+                        << ") does not correspond to a valid hash -- returning StatusCode::FAILURE." );
+        return StatusCode::FAILURE;
+      }    
+
+      if(tauenergies.size() && scEne != 0) scTim = tauenergies[i] / scEne;
+      channelsToKeepSC[hash] = std::make_pair(scEne, scTim);
+
+      if (m_dumpChannelInfos) {
+        HistoryContainer* histCont = m_samples->hist_cont_sc(hash);
+        CellInfo* info = nullptr;
+        if (!histCont) {
+          HWIdentifier channelID = rawSC->hardwareID();
+          const Identifier id = cablingSC->cnvToIdentifier(channelID);
+          const CaloDetDescrElement* caloDetElement = caloMgrSC->get_element(id);
+          info = m_dumperToolSC->makeCellInfo(channelID, id, caloDetElement);
+          if (!info) continue;
+          m_samples->makeNewHistorySC(hash, info);
+        }      
+      }
+    }
+
+    
+    SG::ReadHandle<LArDigitContainer> hdlSCDigit(m_digitsKeySC, ctx);
+    if(!hdlSCDigit.isValid()) {
+       ATH_MSG_WARNING( "Unable to retrieve LArDigitContainer with key " << m_digitsKeySC << " from DetectorStore. " );
+       return StatusCode::SUCCESS;
+    } else
+        ATH_MSG_DEBUG( "Got LArDigitContainer with key " << m_digitsKeySC.key() );
+    const LArDigitContainer* larSCDigitContainer = &(*hdlSCDigit);
+ 
+    if (larSCDigitContainer->empty()) {
+      ATH_MSG_WARNING ( "LArDigitContainer with key=" << m_digitsKeySC.key() << " is empty!" );
+      m_nNoDigitsSC++;
+      return StatusCode::SUCCESS;
+    }
+
+    for (LArDigitContainer::const_iterator digit = larSCDigitContainer->begin();
+         digit != larSCDigitContainer->end(); ++digit) 
+    {    
+      //Check Energy selection
+      IdentifierHash hash = m_onlineHelperSC->channel_Hash((*digit)->channelID());
+      
+      std::map<unsigned int, std::pair<float,float> >::const_iterator findChannel = channelsToKeepSC.find(hash);
+      if (findChannel == channelsToKeepSC.end()) continue;
+ 
+      // Check ADCMax selection
+      float pedestal = pedestalsSC->pedestal((*digit)->channelID(), 0);
+      if (m_minADCMaxSC > 0 ) {
+        const std::vector<short>& samples = (*digit)->samples();
+        double maxValue = -1;
+        for (short sample : samples)
+          if (sample - pedestal > maxValue) maxValue = sample - pedestal;
+        if (fabs(maxValue) < m_minADCMax) continue;
+      }
+     
+      const Identifier id = cablingSC->cnvToIdentifier((*digit)->channelID());
+      const CaloDetDescrElement* caloDetElement = nullptr;
+    
+      HistoryContainer* histCont = m_samples->hist_cont_sc(hash);
+      CellInfo* info = nullptr;
+      if (!histCont) {
+        if (!caloDetElement) caloDetElement = caloMgrSC->get_element(id);
+        info = m_dumperToolSC->makeCellInfo((*digit)->channelID(), id, caloDetElement);
+        if (!info) continue;
+        histCont = m_samples->makeNewHistorySC(hash, info);
+      }
+      else 
+        info = histCont->cell_info();
+ 
+      if (!eventData) {
+        eventIndex = makeEvent(eventData, run, event, lumiBlock, bunchId); // this happens if doAllEvents is off
+        if (eventIndex < 0) return StatusCode::FAILURE;
+      }
+      
+      DataContainer* data = 
+          new DataContainer((*digit)->gain(), (*digit)->samples(),
+                               findChannel->second.first,
+                               findChannel->second.second/double(1000),
+                               -1,    
+                               eventIndex,
+                               LArVectorProxy(), 
+          		     -1, pedestal);
+      
+     
+      histCont->add(data);
+    }
+    
+  } //m_doSC
+  
   return StatusCode::SUCCESS;
 }
 

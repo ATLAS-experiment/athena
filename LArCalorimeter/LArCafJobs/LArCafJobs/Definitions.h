@@ -12,6 +12,7 @@ namespace LArSamples {
 
   struct Definitions {
     static const unsigned int nChannels;
+    static const unsigned int nChannelsSC;
     static const unsigned int samplingInterval;
     static double samplingTime(unsigned int i) { return samplingInterval*i; }
     static const double none;
