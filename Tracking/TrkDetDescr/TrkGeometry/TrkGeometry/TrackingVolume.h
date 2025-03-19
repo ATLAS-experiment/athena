@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -66,8 +66,8 @@ template<class T>
 class ConstSharedPtrSpan
 {
 public:
-  ConstSharedPtrSpan(const std::vector<std::shared_ptr<T>>& m_var)
-    : m_span(&*(m_var.begin()), &*(m_var.end()))
+  ConstSharedPtrSpan(const std::vector<std::shared_ptr<T>>& var)
+    : m_span(var)
   {
   }
   // access the ptr
