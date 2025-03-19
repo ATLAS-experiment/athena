@@ -184,8 +184,24 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
     result=ComponentAccumulator()
 
     # read the cuts from a seperate python file specified by FPGATrackSim.GenScan.genScanCuts
-    cutset = importlib.import_module(flags.Trigger.FPGATrackSim.GenScan.genScanCuts).cuts[flags.Trigger.FPGATrackSim.region]
-    
+    cutset=None
+    if flags.Trigger.FPGATrackSim.oldRegionDefs:
+        toload=flags.Trigger.FPGATrackSim.GenScan.genScanCuts
+        if toload == 'FPGATrackSimGenScanCuts': # its on the newRegion default so it hasn't been set
+            toload = 'FPGATrackSimHough.FPGATrackSimGenScanCuts_incr'
+        cutset = importlib.import_module(toload).cuts[flags.Trigger.FPGATrackSim.region]
+    else:
+        # this allows the cut file defined in python to be loaded from the map directory
+        print("Cut File = ", flags.Trigger.FPGATrackSim.GenScan.genScanCuts,
+                                                    flags.Trigger.FPGATrackSim.mapsDir+"/{}.py".format(flags.Trigger.FPGATrackSim.GenScan.genScanCuts))
+        spec=importlib.util.spec_from_file_location(flags.Trigger.FPGATrackSim.GenScan.genScanCuts,
+                                                    flags.Trigger.FPGATrackSim.mapsDir+"/{}.py".format(flags.Trigger.FPGATrackSim.GenScan.genScanCuts))
+        if spec is None:
+            print("Failed to find Cut File")
+        cutmodule = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cutmodule)
+        cutset=cutmodule.cuts[flags.Trigger.FPGATrackSim.region]
+
     # make the binning class
     Binning = None
     if (cutset["parSet"]=="PhiSlicedKeyLyrPars") :
@@ -214,8 +230,8 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
     # configure which filers and thresholds to apply
     tool.binFilter=flags.Trigger.FPGATrackSim.GenScan.binFilter
     tool.reversePairDir=flags.Trigger.FPGATrackSim.GenScan.reverse
-    tool.applyPairFilter=True
-    tool.applyPairSetFilter=True
+    tool.applyPairFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
+    tool.applyPairSetFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
     tool.threshold = 4
 
     # configure the padding around the nominal region
@@ -230,7 +246,12 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
         setattr(tool,cut,val)
 
     # set layer map
-    tool.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
+    if not flags.Trigger.FPGATrackSim.GenScan.layerStudy:
+        if flags.Trigger.FPGATrackSim.oldRegionDefs:
+            tool.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
+        else:
+            # now assumed to be in the map directory with name = basename for region + _lyrmap.json
+            tool.layerMapFile = flags.Trigger.FPGATrackSim.mapsDir+"/"+FPGATrackSimDataPrepConfig.getBaseName(flags)+"_lyrmap.json"
 
     # even though we are not actually doing a Union, we need the 
     # RoadUnionTool because mapping is now there

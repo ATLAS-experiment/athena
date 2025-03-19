@@ -59,9 +59,8 @@ StatusCode FPGATrackSimGenScanMonitoring::registerHistograms(
   for (unsigned i = 0; i < FPGATrackSimGenScanBinningBase::NPars; i++) {
     ATH_CHECK(makeAndRegHist(
         m_truthpars_hists[i], ("truth" + m_binning->parNames(i)).c_str(),
-        (";" + m_binning->parNames(i) + ";").c_str(), 200,
-        2 * m_binning->m_parMin[i] - m_binning->m_parMax[i],
-        2 * m_binning->m_parMax[i] - m_binning->m_parMin[i]));
+        (";" + m_binning->parNames(i) + ";").c_str(), 20000,
+        m_binning->m_parMin[i], m_binning->m_parMax[i]));
   }
 
   // All Hit level histograms
@@ -308,6 +307,7 @@ void FPGATrackSimGenScanMonitoring::fillBinLevelOutput(const FPGATrackSimGenScan
       m_tree_dettype.push_back((int)hit.hitptr->getDetType());
       m_tree_detzone.push_back((int)hit.hitptr->getDetectorZone());
     }
+    ATH_MSG_DEBUG("For tree, bin=" << idx << " mods=" << m_tree_hash);
     m_bin_module_tree->Fill();
   }
 }
