@@ -352,6 +352,7 @@ namespace dqutils {
     const TH1* b1 = dynamic_cast<const TH1*>(b);
     if (!a1 || !b1) {
       std::cout << "ERROR, in merge_rebinned: Object not of type TH1";
+      return;
     }
     TH1* b2 = const_cast<TH1*>(b1);
     dqutils::MonitoringFile::merge_Rebinned(*a1, *b2);
@@ -363,6 +364,7 @@ namespace dqutils {
     const TH2* b1 = dynamic_cast<const TH2*>(b);
     if (!a1 || !b1) {
       std::cout << "ERROR in merge_eventSample: Object not of type TH2" << std::endl;
+      return;
     }
     dqutils::MonitoringFile::merge_eventSample(*a1, *b1);
   }
@@ -373,6 +375,7 @@ namespace dqutils {
     TEfficiency* b2 = const_cast<TEfficiency*>(b1);
     if (!a1 || !b1) {
       std::cout << "ERROR in merge_TEfficiency: Object not of type TEfficiency" << std::endl;
+      return;
     }
     TList listE;
     listE.Add(b2);
