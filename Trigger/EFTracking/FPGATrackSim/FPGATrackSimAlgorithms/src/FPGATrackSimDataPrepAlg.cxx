@@ -164,9 +164,9 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
                 {
                     for (const FPGATrackSimTruthTrack& fpgaTruthTrack : truthtracks) // loop over FPGA truth tracks
                     {
-                        if (fpgaTruthTrack.getBarcode() == static_cast<HepMcParticleLink::barcode_type>(truthParticle->barcode()))
+                        if (fpgaTruthTrack.getBarcode() == static_cast<HepMcParticleLink::barcode_type>(HepMC::barcode(truthParticle)))
                         {
-                            truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(truthParticle->barcode(), 0,
+                            truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(HepMC::barcode(truthParticle), 0,
                                 HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE), eltp));
                             ATH_MSG_VERBOSE("Truth link added");
                             break;
