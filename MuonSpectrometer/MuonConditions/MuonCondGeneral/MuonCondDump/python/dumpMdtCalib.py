@@ -20,7 +20,6 @@ if __name__ == "__main__":
     parser.set_defaults(outRootFile="MdtCalib.root")
     
     #parser.set_defaults(inputFile = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/ESD/data23_cos.00448208.express_express.recon.ESD.x721/73events.data23_cos.00448208.express_express.recon.ESD.x721._lb0003._SFO-ALL._0001.1"])
-    #parser.set_defaults(condTag="CONDBR2-BLKPA-2023-02")
     args = parser.parse_args()
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, executeTest, setupHistSvcCfg
     flags = initConfigFlags()

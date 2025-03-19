@@ -40,7 +40,7 @@ atlas_add_test( testR3Geometry_MTech
                 POST_EXEC_SCRIPT nopost.sh)
 #### Standard geometry dumping test R3 (data)
 atlas_add_test( testR3GeometryData
-                SCRIPT python -m MuonGeoModelTestR4.testGeoModel --condTag CONDBR2-BLKPA-2024-03 --chambers BML1A3 T1E1A01 MML1A1 STL1A1 --inputFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data
+                SCRIPT python -m MuonGeoModelTestR4.testGeoModel  --chambers BML1A3 T1E1A01 MML1A1 STL1A1 --inputFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data
                 PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
@@ -49,7 +49,7 @@ atlas_add_test( testR3GeometryData
 
 #### Standard geometry dumping test R4 (MC)
 atlas_add_test( testR4Geometry
-                SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers BML1A3 T1E1A01 MML1A1 STL1A1 --defaultGeoFile RUN4 --condTag OFLCOND-MC21-SDR-RUN4-01 --geoTag ATLAS-P2-RUN4-01-00-00
+                SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers BML1A3 T1E1A01 MML1A1 STL1A1 --defaultGeoFile RUN4
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)

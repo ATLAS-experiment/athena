@@ -14,10 +14,6 @@ def SetupArgParser():
 
     parser = ArgumentParser()
     parser.add_argument("--threads", type=int, help="number of threads", default=1)
-    parser.add_argument("--geoTag", default="ATLAS-R3S-2021-03-02-00", help="Geometry tag to use", choices=["ATLAS-R3S-2021-03-02-00",
-                                                                                                            "ATLAS-P2-RUN4-01-00-00"])
-    parser.add_argument("--condTag", default="OFLCOND-MC23-SDR-RUN3-09", help="Conditions tag to use",
-                                                                         choices= ["OFLCOND-MC23-SDR-RUN3-09", "CONDBR2-BLKPA-2024-03", "OFLCOND-MC21-SDR-RUN4-01"])
     parser.add_argument("--inputFile", "-i", default=[
                                                       #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
                                                       "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"
@@ -101,6 +97,28 @@ def NswGeoPlottingAlgCfg(flags, name="NswGeoPlotting", **kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+def configureDefaultTagsCfg(flags):    
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger('GeometryConfiguration')
+
+    if not flags.GeoModel.SQLiteDB:
+        raise ValueError("Default tag configuration only works for SQLite")
+    ### For dummy purposes configure the R2 geometry tag such that the job does not crash
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2    
+    from AthenaConfiguration.Enums import LHCPeriod
+    if flags.GeoModel.Run == LHCPeriod.Run3:   
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC if flags.Input.isMC else defaultConditionsTags.RUN3_DATA
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    elif flags.GeoModel.Run == LHCPeriod.Run4:
+          flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
+          flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
+    else:
+        raise ValueError(f"Invalid run period {flags.GeoModel.Run}")
+    log.info(f"Setup {flags.GeoModel.AtlasVersion} geometry loading {flags.GeoModel.SQLiteDBFullPath}")
+    log.info(f"Use conditions tag {flags.IOVDb.GlobalTag}")
+    
+
 def setupGeoR4TestCfg(args,  flags = None):
     
     if flags is None:
@@ -110,13 +128,13 @@ def setupGeoR4TestCfg(args,  flags = None):
     flags.Concurrency.NumConcurrentEvents = args.threads
     flags.Exec.MaxEvents = args.nEvents
     flags.Exec.SkipEvents = args.skipEvents
-    flags.Input.isMC = args.condTag.find("OFLCOND") != -1
     from os import path, system, listdir
     inFiles = [x for x in args.inputFile if not path.isdir(x)] + \
               [ "{dir}/{file}".format(dir=x, file=y)  for x in args.inputFile if path.isdir(x) for y in listdir(x) ]
     flags.Input.Files = inFiles 
+
     flags.Exec.FPE= 500
-    flags.Exec.EventPrintoutInterval = args.eventPrintoutLevel
+    flags.Exec.EventPrintoutInterval = 500
     
     if args.defaultGeoFile == "RUN3":
           flags.GeoModel.SQLiteDBFullPath = geoModelFileDefault(useR4Layout = False)
@@ -132,12 +150,9 @@ def setupGeoR4TestCfg(args,  flags = None):
         args.geoModelFile = "Geometry/{geoTag}.db".format(geoTag=args.geoTag)
     else:
         flags.GeoModel.SQLiteDBFullPath = args.geoModelFile
-    
-    print ("Use geometry file: {geoFile}".format(geoFile = flags.GeoModel.SQLiteDBFullPath))
-    flags.GeoModel.AtlasVersion = args.geoTag
-    flags.IOVDb.GlobalTag = args.condTag
+
     flags.GeoModel.SQLiteDB = True
-    
+    configureDefaultTagsCfg(flags)
     
     flags.Detector.GeometryBpipe = False
     ### Inner detector
@@ -216,8 +231,6 @@ if __name__=="__main__":
     
     
     cfg.getService("MessageSvc").setVerbose = []
-
-    
 
     if flags.Detector.GeometryMDT:
         if not flags.Muon.usePhaseIIGeoSetup:
