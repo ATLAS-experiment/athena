@@ -165,7 +165,9 @@ StatusCode MuonDetectorNavTest::execute() {
         std::vector<std::pair<Identifier, Amg::Vector3D>> truthHits;
         
         //the particle hypothesis
-        Acts::ParticleHypothesis particleHypothesis(static_cast<Acts::PdgParticle>(truthParticle->absPdgId()), truthParticle->m(), truthParticle->charge());
+        Acts::ParticleHypothesis particleHypothesis(static_cast<Acts::PdgParticle>(truthParticle->absPdgId()),
+						    truthParticle->m(),
+						    Acts::AnyCharge(truthParticle->charge()));
         
         std::vector<std::pair<const xAOD::MuonSegment*, std::vector<const xAOD::MuonSimHit*>>> muonSegmentWithSimHits;
         for (const auto& truthSegLink : segAcc(*truthParticle)){
@@ -244,7 +246,7 @@ StatusCode MuonDetectorNavTest::execute() {
                         <<Amg::toString(startPropDir)<<" and momentum "<<startPropP);   	
 
 
-        Acts::CurvilinearTrackParameters start(
+	Acts::BoundTrackParameters start = Acts::BoundTrackParameters::createCurvilinear(
             Acts::VectorHelpers::makeVector4(startPropPos, 0.), startPropDir,
             truthParticle->charge() / startPropP,
             std::nullopt,

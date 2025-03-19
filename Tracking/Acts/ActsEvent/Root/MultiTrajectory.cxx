@@ -2,6 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsEvent/MultiTrajectory.h"
+#include <Acts/Geometry/GeometryIdentifier.hpp>
 #include "ActsEvent/SurfaceEncoding.h"
 #include "xAODTracking/TrackMeasurementAuxContainer.h"
 #include "xAODCore/AuxContainerBase.h"
@@ -771,7 +772,7 @@ void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, c
         continue;
       }
       if ( geoID != 0 ) {
-        m_surfaces[i] = geo->findSurface(geoID);
+        m_surfaces[i] = geo->findSurface(Acts::GeometryIdentifier{geoID});
       } else {
         unsigned int backendIndex = m_trackStatesAux->surfaceIndex[i];
         std::shared_ptr<const Acts::Surface> surface = decodeSurface( m_trackSurfacesAux, backendIndex, geoContext);

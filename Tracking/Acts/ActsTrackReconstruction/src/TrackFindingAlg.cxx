@@ -236,10 +236,10 @@ namespace ActsTrk
 
     detail::CKF_config ckfConfig{
         std::move(extrapolator),
-        {std::move(propagator), logger().cloneWithSuffix("CKF")},
+        detail::CKF{std::move(propagator), logger().cloneWithSuffix("CKF")},
         measurementSelector,
         {},
-        trackSelectorCfg};
+        Acts::TrackSelector{trackSelectorCfg}};
 
     m_trackFinder = std::make_unique<CKF_pimpl>(std::move(ckfConfig));
 
@@ -812,7 +812,7 @@ namespace ActsTrk
           }
 
           if (firstMeasurement.has_value()) {
-            Acts::BoundTrackParameters secondInitialParameters = firstTrack.createParametersFromState(*firstMeasurement);
+            Acts::BoundTrackParameters secondInitialParameters = firstTrack.createParametersFromState(detail::RecoConstTrackStateContainerProxy{*firstMeasurement});
 
             if (!secondInitialParameters.referenceSurface().insideBounds(secondInitialParameters.localPosition())) {  // #3751
               ATH_MSG_DEBUG("Smoothing of first pass fit produced out-of-bounds parameters relative to the surface, '"
