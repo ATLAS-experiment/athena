@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -15,7 +15,6 @@ if __name__=="__main__":
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(outRootFile="MdtCalibDbAlgTest.root")
     parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R4SimHits.pool.root"])
-    parser.set_defaults(eventPrintoutLevel = 1000)
     parser.set_defaults(defaultGeoFile="RUN4")
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
