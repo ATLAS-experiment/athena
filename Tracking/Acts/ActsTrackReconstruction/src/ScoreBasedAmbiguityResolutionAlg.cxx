@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ScoreBasedAmbiguityResolutionAlg.h"
@@ -145,15 +145,14 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::execute(
   detail::MeasurementIndex measurementIndex;
   detail::SharedHitCounter sharedHits;
 
-  std::size_t totalShared = 0;
   for (auto iTrack : goodTracks) {
     auto destProxy = solvedTracks.getTrack(solvedTracks.addTrack());
     destProxy.copyFrom(updatedTracks.getTrack(iTrack));
     if (m_countSharedHits) {
       auto [nShared, nBadTrackMeasurements] = sharedHits.computeSharedHitsDynamic(destProxy, solvedTracks, measurementIndex);
-      if (nBadTrackMeasurements > 0)
+      if (nBadTrackMeasurements > 0) {
         ATH_MSG_ERROR("computeSharedHits: " << nBadTrackMeasurements << " track measurements not found in input track");
-      totalShared += nShared;
+      }
     }
   }
 

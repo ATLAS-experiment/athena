@@ -86,7 +86,7 @@ namespace ActsTrk {
       // loop on track states
       track.container().trackStateContainer()
 	.visitBackwards(track.tipIndex(),
-			[this, &tsos]
+			[&tsos]
 			(const typename ActsTrk::TrackContainer::ConstTrackStateProxy& state)
 			{
 			  auto flags = state.typeFlags();
