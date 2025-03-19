@@ -1,5 +1,5 @@
 #!/bin/bash
-# art-description: Nightly test to compare G-200 vs C-000 (Full-scan) for EFTrack studies using ttbar pu200 sample
+# art-description: Nightly test to compare G-400 vs C-000 (Full-scan) for EFTrack studies using ttbar pu200 sample
 # art-type: grid
 # art-include: main/Athena
 # art-architecture: '#&nvidia'
@@ -13,7 +13,7 @@
 
 
 ## Input parameters
-pipelineName='G200'
+pipelineName='G400'
 SampleName='ttbar_pu200'  # as defined in samplesDict of InDetTrackPerfMon/scripts/getEFTrackSample.py
 OutSampleName="${pipelineName}_FS.${SampleName}"
 TrkCollName='InDetTrackParticles'
@@ -21,7 +21,7 @@ referencePath='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetTrackPerfM
 referenceName="C000_FS.${SampleName}"
 referenceName_absPath="${referencePath}/IDTPM.${referenceName}.HIST.root"
 refLabel="C-000"
-testLabel="G-200"
+testLabel="G-400"
 
 ## search in $DATAPATH for matching files
 IDTPMjsonConfig='EFTrack_base_FS_noDoubleRatio_IDTPMconfig.json'
@@ -59,10 +59,10 @@ fi
 
 ## Track reconstruction step
 run "${pipelineName}" \
-  runReco_G200_FS.sh \
+  runReco_G400_FS.sh \
     -i ${InputRDOfiles} \
-    -o "${OutSampleName}.AOD.pool.root"
-    #-n 10
+    -o "${OutSampleName}.AOD.pool.root" \
+    -n 50
 
 ## Don't run if IDTPM json config is not found
 if [ ! -f "$IDTPMjsonConfig_absPath" ]; then
