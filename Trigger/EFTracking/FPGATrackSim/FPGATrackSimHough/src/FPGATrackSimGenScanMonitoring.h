@@ -102,6 +102,10 @@ class TH2D;
         const std::vector<FPGATrackSimGenScanTool::HitPairSet> &pairsets,
         unsigned threshold);
 
+    bool isTruthBin(FPGATrackSimGenScanBinningBase::IdxSet idx) const {
+      return idx==m_truthbin;
+    }
+
    private:
     ///////////////////////////////////////////////////////////////////////
     // Handles

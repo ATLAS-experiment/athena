@@ -61,7 +61,7 @@ def getBaseName(flags):
     else:
         if (flags.Trigger.FPGATrackSim.region >= 1280 or flags.Trigger.FPGATrackSim.region < 0): return 'default'
         else:
-            return str(flags.Trigger.FPGATrackSim.region)
+            return "region"+str(flags.Trigger.FPGATrackSim.region)
 
 def getPhiRange(flags):
     if (flags.Trigger.FPGATrackSim.oldRegionDefs):

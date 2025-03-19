@@ -301,13 +301,13 @@ def createGenScanFPGATrackSimConfigFlags():
     cf = createBasicFPGATrackSimConfigFlags()
 
     cf.name = 'genScan'
-    cf.addFlag('genScanCuts','FPGATrackSimHough.FPGATrackSimGenScanCuts_incr')
+    cf.addFlag('genScanCuts','FPGATrackSimGenScanCuts')    
     cf.addFlag('reverse','True')
     cf.addFlag('binFilter','IncrementalBuild')
     cf.addFlag('layerStudy',False)
     cf.addFlag('layerMapFile','')
-
-
+    cf.addFlag('noCuts',False)
+    
     return cf
 
 class graphTool(FlagEnum):
