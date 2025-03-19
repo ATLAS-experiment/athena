@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/MMT_struct.h"
@@ -42,64 +42,6 @@ MMT_Parameters::MMT_Parameters(const std::string& layerSetup, char wedgeSize, co
     ATH_MSG_WARNING("Number of planes in setup is "<< layerSetup.size() << ", but we have a nominal " << z_nominal.size() << " planes.");
     throw std::runtime_error("MMT_Parameters: Invalid number of planes");
   }
-
-  float stereo_degree = design->stereoAngle();
-
-  // MM_firststrip_positions returns the position for phi sector 1.
-  // => for the small sectors, rotate this by -1/16 of a rotation to make our lives easier.
-  // in this coordinate basis, x is up/down the wedge (radial), and y is left/right (phi).
-  float cos_rotation = std::cos(-2*M_PI / 16.0);
-  float sin_rotation = std::sin(-2*M_PI / 16.0);
-  float x_rotated = 0.0;
-  float y_rotated = 0.0;
-
-  float st_angle = 0.0;
-
-  float radial_pos      = 0;
-  float radial_pos_xx_1 = 0, radial_pos_xx_2 = 0;
-  float radial_pos_uv_1 = 0, radial_pos_uv_2 = 0;
-
-  for (unsigned int eta = 1; eta <= 2; eta++){
-    unsigned int layer = 1;
-    for (const auto& pos: MM_firststrip_positions(detManager, wedgeString, eta)){
-
-      if (wedgeString=="MMS"){
-        x_rotated = pos.X()*cos_rotation - pos.Y()*sin_rotation;
-        y_rotated = pos.X()*sin_rotation + pos.Y()*cos_rotation;
-      }
-      else{
-        x_rotated = pos.X();
-        y_rotated = pos.Y();
-      }
-
-      if      (is_u(layer)) st_angle = -1*std::abs(stereo_degree);
-      else if (is_v(layer)) st_angle =    std::abs(stereo_degree);
-      else                  st_angle = 0;
-
-      // walk from the center of the strip to the position of the strip at the center of the wedge.
-      // NB: for X-planes, this is simply the center of the strip: tan(0) = 0.
-      radial_pos = std::abs(x_rotated - y_rotated*std::tan(st_angle * M_PI/180.0));
-
-      if (is_x(layer) && eta==1) radial_pos_xx_1 = radial_pos;
-      else if (is_x(layer) && eta==2) radial_pos_xx_2 = radial_pos;
-      if (is_u(layer) && eta==1) radial_pos_uv_1 = radial_pos;
-      else if (is_u(layer) && eta==2) radial_pos_uv_2 = radial_pos;
-
-      layer++;
-    }
-  }
-
-  // store radial positions as fixed point
-  std::array<float, 2> radial_pos_xx = {radial_pos_xx_1, radial_pos_xx_2};
-  std::array<float, 2> radial_pos_uv = {radial_pos_uv_1, radial_pos_uv_2};
-  m_ybases[0] = radial_pos_xx;
-  m_ybases[1] = radial_pos_xx;
-  m_ybases[2] = radial_pos_uv;
-  m_ybases[3] = radial_pos_uv;
-  m_ybases[4] = radial_pos_uv;
-  m_ybases[5] = radial_pos_uv;
-  m_ybases[6] = radial_pos_xx;
-  m_ybases[7] = radial_pos_xx;
 }
 
 std::vector<ROOT::Math::XYZVector> MMT_Parameters::MM_firststrip_positions(const MuonGM::MuonDetectorManager* detManager, const std::string& wedge, int eta) const {
@@ -135,13 +77,13 @@ std::vector<ROOT::Math::XYZVector> MMT_Parameters::MM_firststrip_positions(const
    return positions;
 }
 
-evInf_entry::evInf_entry(int event,int pdg,double e,double p,double ieta,double peta,double eeta,double iphi,double pphi,double ephi,double ithe,double pthe,double ethe,double dth,
+evInf_entry::evInf_entry(uint64_t event,int pdg,double e,double p,double ieta,double peta,double eeta,double iphi,double pphi,double ephi,double ithe,double pthe,double ethe,double dth,
                          int trn,int mun,const ROOT::Math::XYZVector& tex):
    athena_event(event),pdg_id(pdg),E(e),pt(p),eta_ip(ieta),eta_pos(peta),eta_ent(eeta),phi_ip(iphi),phi_pos(pphi),phi_ent(ephi),theta_ip(ithe),theta_pos(pthe),theta_ent(ethe),
    dtheta(dth),truth_n(trn),mu_n(mun),vertex(tex) {}
 
 
-hitData_entry::hitData_entry(int ev, double gt, double q, int vmm, int mmfe, int pl, int st, int est, int phi, int mult, int gg, double locX, double tr_the, double tru_phi,
+hitData_entry::hitData_entry(uint64_t ev, double gt, double q, int vmm, int mmfe, int pl, int st, int est, int phi, int mult, int gg, double locX, double tr_the, double tru_phi,
                              bool q_tbg, int bct, const ROOT::Math::XYZVector& tru, const ROOT::Math::XYZVector& rec):
   event(ev),gtime(gt),charge(q),VMM_chip(vmm),MMFE_VMM(mmfe),plane(pl),strip(st),station_eta(est),station_phi(phi),multiplet(mult),gasgap(gg),localX(locX),tru_theta_ip(tr_the),tru_phi_ip(tru_phi),truth_nbg(q_tbg),BC_time(bct),truth(tru),recon(rec) {}
 
