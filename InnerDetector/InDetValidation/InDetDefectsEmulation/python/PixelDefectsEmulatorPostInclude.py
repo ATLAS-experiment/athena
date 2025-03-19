@@ -9,7 +9,8 @@
 
 import math
 from InDetDefectsEmulation.StripDefectsEmulatorConfig import (moduleDefect,
-                                                              combineModuleDefects
+                                                              combineModuleDefects,
+                                                              makeRadialDefectParam
                                                               )
 
 def emulateITkPixelDefects(flags,
@@ -19,6 +20,8 @@ def emulateITkPixelDefects(flags,
                            NDefectFractionsPerPattern=[[1.,-1, 1.]],
                            NoiseProbability=[],
                            NoiseShape=[],
+                           RadialDefectParamsPerPattern=[],
+                           NRadialCornerDefectFractionsPerPattern=[],
                            FillHistogramsPerPattern=False,
                            FillEtaPhiHistogramsPerPattern=False,
                            MaxRandomPositionAttempts: int=10,
@@ -37,6 +40,14 @@ def emulateITkPixelDefects(flags,
                                 n-tuple must contain for each group defect probability a non empty set of fractions of exactly 1, ... n defects.
                                 Fractions for different group defects are separated by -1. There should be two sequences of
                                 positive fractions separated by -1.
+    NoiseProbability: Empty or probabilities of a pixel to produce a spurious hit.
+    NoiseShape: binned PDF (i.e. list of fractions) to create tot values for spurious hits.
+    RadialDefectParamsPerPattern: parameters for radial defects per pattern can be created with e.g. makeRadialDefectParam
+    NRadialCornerDefectFractionsPerPattern: fractions of 1,..4 corner defects
+    FillHistogramsPerPattern: if True histograms are filled per module pattern
+    FillEtaPhiHistogramsPerPattern: if True also fill xy, and rz histograms of defects per module.
+    HistogramGroupName: None (disables histogramming) or the histogram group name must be unique
+    HistogramFileName: None (disables histogramming) or a file name for writing the histograms.
     """
 
     from InDetDefectsEmulation.PixelDefectsEmulatorConfig import (
@@ -60,6 +71,8 @@ def emulateITkPixelDefects(flags,
                                                  DefectProbabilities = DefectProbabilities,
                                                  NDefectFractionsPerPattern = NDefectFractionsPerPattern,
                                                  MaxRandomPositionAttempts=MaxRandomPositionAttempts,
+                                                 RadialDefectParamsPerPattern=RadialDefectParamsPerPattern,
+                                                 NRadialCornerDefectFractionsPerPattern=NRadialCornerDefectFractionsPerPattern,
                                                  FillHistogramsPerPattern=FillHistogramsPerPattern,
                                                  FillEtaPhiHistogramsPerPattern=FillEtaPhiHistogramsPerPattern,
                                                  CheckerBoardDefects=False,
@@ -113,7 +126,7 @@ def emulatePixelDefects(flags,
         cfg.merge( DefectsHistSvcCfg(flags, HistogramGroup=HistogramGroupName, FileName=HistogramFileName))
 
     if ModulePatterns is None and DefectProbabilities is None and NDefectFractionsPerPattern is None:
-        a_module_pattern_list, a_prob_list,fractions = combineModuleDefects([
+        a_module_pattern_list, a_prob_list,fractions,ignore_NoiseProbability,ignore_NoiseShape, radialDefectParam, radialDefectFractions = combineModuleDefects([
                                          moduleDefect(bec=[-2,-2],layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all modules
                                                       columns_or_strips=[0,9999], # sensors with all kind of numbers of columns
                                                       side_range=[0,0],     # there is only a single side
@@ -133,6 +146,8 @@ def emulatePixelDefects(flags,
                                               ModulePatterns = ModulePatterns,
                                               DefectProbabilities = DefectProbabilities,
                                               NDefectFractionsPerPattern = NDefectFractionsPerPattern,
+                                              RadialDefectParamsPerPattern=radialDefectParam,
+                                              NRadialCornerDefectFractionsPerPattern=radialDefectFractions,
                                               FillHistogramsPerPattern=FillHistogramsPerPattern,
                                               FillEtaPhiHistogramsPerPattern=FillEtaPhiHistogramsPerPattern,
                                               # to enable histogramming:
@@ -150,9 +165,9 @@ def emulatePixelDefects(flags,
                                              OutputLevel=INFO))
 
 
-def poissonFractions(cc_defect_prob=1e-1) :
+def poissonFractions(cc_defect_prob=1e-1, max_n=5) :
     """
-    Create fractions for exactly 1..6 defects, under the condition that
+    Create fractions for exactly 1..max_n defects, under the condition that
     the probability for at least one such defects is cc_defect_prob, and
     assuming that the fractions are Poisson distributed.
     """
@@ -163,7 +178,7 @@ def poissonFractions(cc_defect_prob=1e-1) :
             Norm = 1./sum (fractions)
             return [Norm*elm for elm in fractions ]
         expectation=-math.log(1-cc_defect_prob)
-        return norm([ PoissonProb(expectation,i) for i in range(1,6) ])
+        return norm([ PoissonProb(expectation,i) for i in range(1,max_n+1) ])
     else :
         return [1.]
 
@@ -188,6 +203,18 @@ def makeITkDefectsParams( quad_cc_defect_prob, quad_fractions, circuit_cc_defect
     Create different defects for quads and single chip modules, where the corresponding modules are selected by
     the number of offline columns
     """
+    # radial defects 50% of ~30% of the 3D modules have disconnected corners
+    # area 2-4mm x 2-2.5mm
+    # roughly circular shape with a sagitta (defined by circle crossing sensor edges) of ~0-1mm?
+    # impact on all 3D sensors which are all single chip modules i.e. modules with 384 or 400 columns
+    radial_defects=makeRadialDefectParam(probability=15e-2,
+                                         min_rx=2.,max_rx=4.,
+                                         min_ry=2.,max_ry=2.5,
+                                         min_sagitta=0.,max_sagitta=1.)
+    # assume each corner has equal probability to suffer corner defects
+    # Assume number of corners with defects Poisson distributed
+    radial_defect_n_defect_corner=poissonFractions(cc_defect_prob=15e-2, max_n=4)
+
     return combineModuleDefects([
             moduleDefect(bec=[-2,2],layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all modules
                          columns_or_strips=[800,800], # but only quads
@@ -200,7 +227,10 @@ def makeITkDefectsParams( quad_cc_defect_prob, quad_fractions, circuit_cc_defect
                                       ],
                          fractionsOfNDefects=[quad_fractions,[1.]], # dummy fractions for circuit defects
                          noiseProbability=noiseProbability,
-                         noiseShape=noiseShape),
+                         noiseShape=noiseShape,
+                         radialDefectParam=[], # need empty lists here
+                         radialDefectNCornerFractions=[] # and here, otherwise resulting property will be non-conform,
+                         ),
             moduleDefect(bec=[-2,2],layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all modules
                          columns_or_strips=[384,384], # but only ring triplet modules
                          side_range=[0,0],     # there is only a single side
@@ -212,7 +242,10 @@ def makeITkDefectsParams( quad_cc_defect_prob, quad_fractions, circuit_cc_defect
                                       ],
                          fractionsOfNDefects=[circuit_fractions,[1.]], # dummy fractions for circuit defects
                          noiseProbability=noiseProbability,
-                         noiseShape=noiseShape),
+                         noiseShape=noiseShape,
+                         radialDefectParam=radial_defects,
+                         radialDefectNCornerFractions=radial_defect_n_defect_corner,
+                         ),
             moduleDefect(bec=[-2,2],layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all modules
                          columns_or_strips=[200,200], # but only barrel triplet modules
                          side_range=[0,0],     # there is only a single side
@@ -224,7 +257,10 @@ def makeITkDefectsParams( quad_cc_defect_prob, quad_fractions, circuit_cc_defect
                                     ],
                          fractionsOfNDefects=[circuit_fractions,[1.]], # dummy fractions for circuit defects
                          noiseProbability=noiseProbability,
-                         noiseShape=noiseShape)
+                         noiseShape=noiseShape,
+                         radialDefectParam=radial_defects,
+                         radialDefectNCornerFractions=radial_defect_n_defect_corner,
+                         )
         ])
 
 def makeITkPixelNoise(noiseProb=0.) :
@@ -264,7 +300,7 @@ def emulateITkPixelDefectsOneCC(flags,
     """
     noiseProbabilitySingle,noiseShapeSingle = makeITkPixelNoise(NoiseProb)
     fractions=fractionsForExactlyNCoreColumnDefects(NumberOfCCDefcts)
-    ModulePatterns, DefectProbabilities, NDefectFractionsPerPattern, NoiseProbability, NoiseShape = makeITkDefectsParams(
+    ModulePatterns, DefectProbabilities, NDefectFractionsPerPattern, NoiseProbability, NoiseShape,radialDefectParam,radialDefectFractions = makeITkDefectsParams(
         quadProb(FrontEndCCDefectProb),
         fractions,    # same fractions for quads and other modules
         FrontEndCCDefectProb,
@@ -281,6 +317,8 @@ def emulateITkPixelDefectsOneCC(flags,
                                   NDefectFractionsPerPattern=NDefectFractionsPerPattern,
                                   NoiseProbability=NoiseProbability,
                                   NoiseShape=NoiseShape,
+                                  RadialDefectParamsPerPattern=radialDefectParam,
+                                  NRadialCornerDefectFractionsPerPattern=radialDefectFractions,
                                   FillHistogramsPerPattern=True,
                                   FillEtaPhiHistogramsPerPattern=True,
                                   PropagateDefectsToStatus=PropagateDefectsToStatus,
@@ -302,7 +340,7 @@ def emulateITkPixelDefectsPoisson(flags,
     """
     noiseProbabilitySingle,noiseShapeSingle = makeITkPixelNoise(NoiseProb)
     quad_prob=quadProb(FrontEndCCDefectProb)
-    ModulePatterns, DefectProbabilities, NDefectFractionsPerPattern, NoiseProbability, NoiseShape = makeITkDefectsParams(
+    ModulePatterns, DefectProbabilities, NDefectFractionsPerPattern, NoiseProbability, NoiseShape,radialDefectParam,radialDefectFractions = makeITkDefectsParams(
         quad_prob,
         poissonFractions(quad_prob),
         FrontEndCCDefectProb,
@@ -319,6 +357,8 @@ def emulateITkPixelDefectsPoisson(flags,
                                   NDefectFractionsPerPattern=NDefectFractionsPerPattern,
                                   NoiseProbability=NoiseProbability,
                                   NoiseShape=NoiseShape,
+                                  RadialDefectParamsPerPattern=radialDefectParam,
+                                  NRadialCornerDefectFractionsPerPattern=radialDefectFractions,
                                   FillHistogramsPerPattern=True,
                                   FillEtaPhiHistogramsPerPattern=True,
                                   PropagateDefectsToStatus=PropagateDefectsToStatus,
