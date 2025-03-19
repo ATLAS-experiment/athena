@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeader.cxx
@@ -15,19 +15,15 @@
 #include "AthenaKernel/IStringPool.h"
 
 //______________________________________________________________________________
-DataHeaderElement::DataHeaderElement() : m_pClid(0), m_clids(), m_key(), m_alias(), m_token(0), m_ownToken(false), m_hashes() {
+DataHeaderElement::DataHeaderElement() : m_pClid(0), m_clids(), m_key(), m_alias(), m_hashes() {
 }
 //______________________________________________________________________________
 DataHeaderElement::DataHeaderElement(const DataHeaderElement& rhs) : m_pClid(rhs.m_pClid),
 	m_clids(rhs.m_clids),
 	m_key(rhs.m_key),
 	m_alias(rhs.m_alias),
-	m_token(0),
-	m_ownToken(false),
+        m_token(rhs.getToken()),
 	m_hashes(rhs.m_hashes) {
-   if (rhs.getToken() != 0) {
-      m_token = new Token(rhs.getToken()); m_ownToken = true;
-   }
 }
 //______________________________________________________________________________
 DataHeaderElement::DataHeaderElement(const SG::TransientAddress* sgAddress, IOpaqueAddress* tokAddress,
@@ -63,35 +59,30 @@ DataHeaderElement::DataHeaderElement(CLID clid,
     m_clids(tClids.begin(), tClids.end()),
     m_key((pTag.empty()) ? name : pTag),
     m_alias(std::move(alias)),
-    m_token(0), m_ownToken(false), m_hashes()
+    m_hashes()
 {
   m_clids.erase(m_pClid);
   TokenAddress* tokAddr = dynamic_cast<TokenAddress*>(tokAddress);
   if (tokAddr != 0 && tokAddr->getToken() != 0) {
-    m_token = new Token(tokAddr->getToken()); m_ownToken = true;
+    tokAddr->getToken()->setData (&m_token);
   } else {
     tokAddr = dynamic_cast<TokenAddress*>(tadAddress);
     if (tokAddr != 0 && tokAddr->getToken() != 0) {
-      m_token = tokAddr->getToken();
+      tokAddr->getToken()->setData (&m_token);
     } else if (tokAddress != 0) {
-      Token* token = new Token;
-      m_token = token; m_ownToken = true;
-      token->fromString(*(tokAddress->par()));
+      m_token.fromString(*(tokAddress->par()));
     } else if (tadAddress != 0) {
-      Token* token = new Token;
-      m_token = token; m_ownToken = true;
-      token->fromString(*(tadAddress->par()));
+      m_token.fromString(*(tadAddress->par()));
     }
   }
 }
 //______________________________________________________________________________
 DataHeaderElement::DataHeaderElement(const CLID classID,
-	const std::string& key, const Token* token)
-	: m_pClid(classID), m_clids(), m_key(key), m_alias(), m_token(token), m_ownToken(true), m_hashes() {
+	const std::string& key, Token&& token)
+	: m_pClid(classID), m_clids(), m_key(key), m_alias(), m_token(std::move(token)), m_hashes() {
 }
 //______________________________________________________________________________
 DataHeaderElement::~DataHeaderElement() {
-   if (m_ownToken) { delete m_token; m_token = 0; }
 }
 //______________________________________________________________________________
 DataHeaderElement& DataHeaderElement::operator=(const DataHeaderElement& rhs) {
@@ -100,12 +91,7 @@ DataHeaderElement& DataHeaderElement::operator=(const DataHeaderElement& rhs) {
       m_clids = rhs.m_clids;
       m_key = rhs.m_key;
       m_alias = rhs.m_alias;
-      if (m_ownToken) { delete m_token; m_token = 0; m_ownToken = false; }
-      if (rhs.getToken() != 0) {
-         Token* newtok = new Token;
-         m_token = newtok; m_ownToken = true;
-         rhs.getToken()->setData(newtok);
-      }
+      rhs.getToken()->setData(&m_token);
       m_hashes = rhs.m_hashes;
    }
    return(*this);
@@ -133,7 +119,7 @@ const std::set<std::string>& DataHeaderElement::getAlias() const {
 }
 //_____________________________________________________________________________
 const Token* DataHeaderElement::getToken() const {
-   return(m_token);
+   return(&m_token);
 }
 //_____________________________________________________________________________
 long DataHeaderElement::getStorageType() const {
@@ -162,7 +148,7 @@ SG::TransientAddress* DataHeaderElement::getAddress(unsigned long contextId) con
 SG::TransientAddress* DataHeaderElement::getAddress(const std::string& key,
 	unsigned long contextId) const {
    CLID primaryClID = getPrimaryClassID();
-   Token* token = new Token(m_token);
+   Token* token = new Token(&m_token);
    TokenAddress* tokAdd = new TokenAddress(this->getStorageType(), primaryClID, "", m_key, contextId , token);
    SG::TransientAddress* sgAddress = new SG::TransientAddress(primaryClID, key, tokAdd);
    for (std::set<CLID>::const_iterator iter = m_clids.begin(), last = m_clids.end();
@@ -188,11 +174,7 @@ void DataHeaderElement::dump(std::ostream& ostr) const
       for( auto& a : getAlias() ) ostr << " " << a;
       ostr << endl;
    }
-   if( m_token ) {
-      ostr << "Token: " << m_token->toString();
-      if( m_ownToken ) ostr << " owned";
-      ostr << endl;
-   }
+   ostr << "Token: " << m_token.toString() << endl;
    if( m_hashes.size() ) {
       ostr << "Hashes:";
       for( auto h : m_hashes ) ostr <<  " " << h;

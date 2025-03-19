@@ -565,8 +565,7 @@ DataHeader* DataHeaderCnv::createTransient() {
       DataHeader* dh = new DataHeader();
       std::string bestPfn, fileType;
       m_athenaPoolCnvSvc->getPoolSvc()->lookupBestPfn(this->m_i_poolToken->dbID().toString(), bestPfn, fileType);
-      const Token* copy = new Token(this->m_i_poolToken);
-      DataHeaderElement dhe(ClassID_traits<DataHeader>::ID(), bestPfn, copy);
+      DataHeaderElement dhe(ClassID_traits<DataHeader>::ID(), bestPfn, Token(this->m_i_poolToken));
       dh->insert(dhe);
       return(dh);
    }

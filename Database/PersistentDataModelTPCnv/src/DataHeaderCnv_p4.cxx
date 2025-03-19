@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv_p4.cxx
@@ -82,9 +82,7 @@ void DataHeaderElementCnv_p4::persToTrans(const DataHeaderElement_p4* pers,
       snprintf(text, length, "][TECH=%08X][OID=%08X-%08X]", pers->m_technology, pers->m_oid1, pers->m_oid2);
       tokenStr.append(text);
    }
-   Token* token = new Token;
-   token->fromString(tokenStr);
-   delete trans->m_token; trans->m_token = token;
+   trans->m_token.fromString(tokenStr);
 }
 //______________________________________________________________________________
 void DataHeaderElementCnv_p4::transToPers(const DataHeaderElement* /*trans*/,
