@@ -19,12 +19,12 @@
 
 
 namespace {
-  union SectorId{
-      int8_t fields[4];
-      int hash;
-  };
-}
+  int encodeId(const int8_t stName, const int8_t stEta,
+               const int8_t sector) {
+      return (sector <<16 |stEta << 8| stName);
+  }
 
+}
 
 namespace MuonR4{
 
@@ -54,7 +54,6 @@ StatusCode TruthSegmentCsvDumperAlg::execute(){
   const EventContext & ctx = Gaudi::Hive::currentContext();
   std::ofstream file{std::string(Form("event%09zu-",++m_event))+"MuonTruthSegment.csv"};
   constexpr std::string_view delim = ",";
- 
   file<<"sectorId"<<delim;
   file<<"globalPositionX"<<delim;
   file<<"globalPositionY"<<delim;
@@ -100,11 +99,9 @@ StatusCode TruthSegmentCsvDumperAlg::execute(){
     const Amg::Vector3D locPos = globToLoc * globPos;
     const Amg::Vector3D locDir = globToLoc.linear() * globDir;
 
-    SectorId secId{};
-    secId.fields[0] = static_cast<int>(segment->chamberIndex());
-    secId.fields[1] = sign(segment->etaIndex());
-    secId.fields[2] = segment->sector();
-
+    const int secId = encodeId(static_cast<int8_t>(sector->chamberIndex()),
+                               sector->side(),
+                               sector->sector());
     // time information
     float seg_t0      = segment->t0();
     float seg_t0error = segment->t0error();
@@ -129,7 +126,7 @@ StatusCode TruthSegmentCsvDumperAlg::execute(){
     ATH_MSG_VERBOSE("nPrecisionHits: "<<seg_PrecisionHits<<" nPhiLayers: "<<seg_PhiLayers<<" nTrigEtaLayers: "<<seg_TrigEtaLayers);
 
     // save the segment information to the csv file 
-    file<<secId.hash<<delim;
+    file<<secId<<delim;
     file<<globPos.x()<<delim;
     file<<globPos.y()<<delim;
     file<<globPos.z()<<delim;

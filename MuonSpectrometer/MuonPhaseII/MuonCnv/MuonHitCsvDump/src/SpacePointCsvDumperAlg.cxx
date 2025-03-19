@@ -11,10 +11,10 @@
 #include <TString.h>
 
 namespace {
-    union SectorId{
-        int8_t fields[4];
-        int hash;
-    };
+    int encodeId(const int8_t stName, const int8_t stEta,
+                 const int8_t sector, const int8_t tech) {
+        return ( tech <<24 | sector <<16 |stEta << 8| stName);
+    }
 }
 
 
@@ -59,7 +59,8 @@ StatusCode SpacePointCsvDumperAlg::execute(){
     /// Properties of the space point Identifier
     file<<"gasGap"<<delim;
     file<<"primaryCh"<<delim;
-    file<<"secondaryCh"<<delim;
+    file<<"measuresEta"<<delim;
+    file<<"measuresPhi"<<delim;
     file<<std::endl;
 
 
@@ -71,7 +72,7 @@ StatusCode SpacePointCsvDumperAlg::execute(){
                          const unsigned gasGap) {
         
         const Identifier measId = spacePoint.identify();
-        int primaryCh{0}, secondCh{-1};
+        int primaryCh{0};
         using TechIndex = Muon::MuonStationIndex::TechnologyIndex; 
         const TechIndex techIdx = m_idHelperSvc->technologyIndex(measId);
         switch (techIdx) {
@@ -83,45 +84,33 @@ StatusCode SpacePointCsvDumperAlg::execute(){
             case TechIndex::RPC: {
                 const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
                 primaryCh = idHelper.channel(measId);
-                if (spacePoint.secondaryMeasurement()){
-                    secondCh = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
-                }
                 break;
             }
             case TechIndex::TGC: {
                 const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
                 primaryCh = idHelper.channel(measId);
-                if (spacePoint.secondaryMeasurement()){
-                    secondCh = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
-                }
                 break;
             }
             case TechIndex::STGC: {
                 const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
                 primaryCh = idHelper.channel(measId);
-                if (spacePoint.secondaryMeasurement()){
-                    secondCh = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
-                }
                 break;
             }
             case TechIndex::MM: {
                 const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
                 primaryCh = idHelper.channel(measId);
-                if (spacePoint.secondaryMeasurement()){
-                    secondCh = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
-                }
                 break;
             }
             default:
                 ATH_MSG_WARNING("Dude you can't have CSCs in R4 "<<m_idHelperSvc->toString(measId));
         };
-                            
-        SectorId secId{};
-        secId.fields[0] = static_cast<int>(spacePoint.msSector()->chamberIndex());
-        secId.fields[1] = spacePoint.msSector()->side();
-        secId.fields[2] = spacePoint.msSector()->sector();
-        secId.fields[3] = static_cast<int>(techIdx);
-        file<<secId.hash<<delim;
+
+        const int secId = encodeId(static_cast<int8_t>(spacePoint.msSector()->chamberIndex()),
+                                   spacePoint.msSector()->side(),
+                                   spacePoint.msSector()->sector(),
+                                   static_cast<int8_t>(techIdx));
+
+        file<<secId<<delim;
         file<<bucketId<<delim;
         file<<spacePoint.positionInChamber().x()<<delim;
         file<<spacePoint.positionInChamber().y()<<delim;
@@ -142,7 +131,8 @@ StatusCode SpacePointCsvDumperAlg::execute(){
         file<<spacePoint.driftRadius()<<delim;
         file<<gasGap<<delim;
         file<<primaryCh<<delim;
-        file<<secondCh<<delim;
+        file<<spacePoint.measuresEta()<<delim;
+        file<<spacePoint.measuresPhi()<<delim;
         file<<std::endl;
    };
 
