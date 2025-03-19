@@ -121,7 +121,7 @@ void MonitoringFile::merge_effAsPerCent( TH2& a, const TH2& b )
       float efficiencyErrTot = 0.;
 
       if (denTot != 0.) efficiencyTot = numTot/denTot*100.;
-      if (denTot != 0.) efficiencyErrTot = sqrt(numTot*denTot*(denTot-numTot))/denTot/denTot*100.;      
+      if (denTot != 0.) efficiencyErrTot = std::sqrt(numTot*denTot*(denTot-numTot))/denTot/denTot*100.;      
 
       a.SetBinContent(ix,iy,efficiencyTot);
       a.SetBinError(ix,iy,efficiencyErrTot);
@@ -289,7 +289,7 @@ void MonitoringFile::merge_effAsPerCentAlt( TH1& a, const TH1& b )
     float efficiencyErrTot = 0.;
 
     if (denTot != 0.) efficiencyTot = numTot/denTot*100.;
-    if (denTot != 0.) efficiencyErrTot = sqrt(numTot*denTot*(denTot-numTot))/denTot/denTot*100.;
+    if (denTot != 0.) efficiencyErrTot = std::sqrt(numTot*denTot*(denTot-numTot))/denTot/denTot*100.;
 
     a.SetBinContent(bin,efficiencyTot);
     a.SetBinError(bin,efficiencyErrTot);
@@ -334,7 +334,7 @@ void MonitoringFile::merge_weightedAverage( TH1& a, const TH1& b )
     // case 1:
     if (e1 > 0 && e2 > 0){
       a.SetBinContent(bin, (w1*y1 + w2*y2)/(w1 + w2));
-      a.SetBinError(bin, 1./sqrt(w1 + w2));
+      a.SetBinError(bin, 1./std::sqrt(w1 + w2));
     }
     // case 2:
     else if (e2 > 0){
@@ -394,7 +394,7 @@ void MonitoringFile::merge_weightedAverage2D( TH2& a, const TH2& b )
       // case 1:
       if (e1 > 0 && e2 > 0){
 	a.SetBinContent(bin, (w1*y1 + w2*y2)/(w1 + w2));
-	a.SetBinError(bin, 1./sqrt(w1 + w2));
+	a.SetBinError(bin, 1./std::sqrt(w1 + w2));
       }
       // case 2:
       else if (e2 > 0){
@@ -482,7 +482,7 @@ void MonitoringFile::merge_weightedEff( TH1& a, const TH1& b )
       a.SetBinContent(bin, weightedEff);
 
       //Set Errors:
-      float weightedError = sqrt( pow(binError_a * weight_a,2) + pow(binError_b * weight_b,2) );
+      float weightedError = std::sqrt( std::pow(binError_a * weight_a,2) + std::pow(binError_b * weight_b,2) );
       a.SetBinError(bin, weightedError);
     }
   }
@@ -589,21 +589,21 @@ void MonitoringFile::merge_RMS( TH1& a, const TH1& b ) {
     double n2 = 0;
 
     if( e1 != 0 ) {
-      n1 = pow( rms1 / e1, 2) / 2;
+      n1 = std::pow( rms1 / e1, 2) / 2;
     }
     if( e2 != 0 ) {
-      n2 = pow( rms2 / e2, 2) / 2;
+      n2 = std::pow( rms2 / e2, 2) / 2;
     }
 
     double ntot = n1 + n2;
     if( ntot <= 0 ) {
-      a.SetBinContent( bin, sqrt( (rms1*rms1) + (rms2*rms2) ) );
-      a.SetBinError( bin, sqrt( (e1*e1) + (e2*e2) ) );
+      a.SetBinContent( bin, std::sqrt( (rms1*rms1) + (rms2*rms2) ) );
+      a.SetBinError( bin, std::sqrt( (e1*e1) + (e2*e2) ) );
     }
     else {
-      double rmstot = sqrt( ( (pow(n1 * rms1,2) / (n1 - 1)) + (pow(n2 * rms2, 2) / (n2 - 1)) ) * (ntot - 1) / pow(ntot,2) );
+      double rmstot = std::sqrt( ( (std::pow(n1 * rms1,2) / (n1 - 1)) + (std::pow(n2 * rms2, 2) / (n2 - 1)) ) * (ntot - 1) / std::pow(ntot,2) );
       a.SetBinContent( bin, rmstot );
-      a.SetBinError( bin, rmstot / sqrt( 2 * ntot ) );
+      a.SetBinError( bin, rmstot / std::sqrt( 2 * ntot ) );
     }
   }
 
@@ -657,13 +657,13 @@ void MonitoringFile::merge_RMSpercentDeviation( TH1& a, const TH1& b ) {
 
     double ntot = n1 + n2;
     if( ntot <= 0 ) {
-      a.SetBinContent( bin, sqrt( (y1*y1) + (y2*y2) ) - 100 );
-      a.SetBinError( bin, sqrt( (e1*e1) + (e2*e2) ) );
+      a.SetBinContent( bin, std::sqrt( (y1*y1) + (y2*y2) ) - 100 );
+      a.SetBinError( bin, std::sqrt( (e1*e1) + (e2*e2) ) );
     }
     else {
-      double ytot = sqrt( ( (pow(n1 * y1,2) / (n1 - 1)) + (pow(n2 * y2, 2) / (n2 - 1)) ) * (ntot - 1) / pow(ntot,2) );
+      double ytot = std::sqrt( ( (std::pow(n1 * y1,2) / (n1 - 1)) + (std::pow(n2 * y2, 2) / (n2 - 1)) ) * (ntot - 1) / std::pow(ntot,2) );
       a.SetBinContent( bin, ytot - 100);
-      a.SetBinError( bin, ytot / sqrt( 2 * ntot ) );
+      a.SetBinError( bin, ytot / std::sqrt( 2 * ntot ) );
     }
   }
 

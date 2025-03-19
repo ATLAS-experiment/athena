@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-import os
+import os,sys
 ## Needed to correct ROOT behavior; see below
 CWD = os.getcwd()
 
@@ -36,8 +36,10 @@ def DQHistogramMerge( listFileName, outFileName, runPostProcessing, directoryReg
     mf.setCompressionLevel(compressionLevel)
     if (doTiming): mf.doTiming()
     
-    mf.mergeFiles( outFileName, listFileName )
+    stat=mf.mergeFiles( outFileName, listFileName )
+    if stat: sys.exit(stat)
     mf.mergeLBintervals( outFileName )
+    if stat: sys.exit(stat)
   
     if runPostProcessing:
         from . import DQPostProcessMod
