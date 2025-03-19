@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENTDATAMODEL_TOKEN_H
@@ -37,6 +37,8 @@ public:
    Token();
    /// Constructor with data assignment
    explicit Token(const Token* source);
+   /// Allow move.
+   explicit Token(Token&& source);
    /// Standard destructor: release all allocated resources.
    virtual ~Token();
    /// Operator < to allow ordering

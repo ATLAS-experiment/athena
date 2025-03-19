@@ -56,7 +56,7 @@ public: // Constructor and Destructor
    /// @param classID [IN] Primary ClassID of the DataObject for which a DataHeaderElement is created.
    /// @param key [IN] SG Key of the DataObject for which a DataHeaderElement is created.
    /// @param token [IN] Token of the DataObject for which a DataHeaderElement is created.
-   DataHeaderElement(const CLID classID, const std::string& key, const Token* token);
+   DataHeaderElement(const CLID classID, const std::string& key, Token&& token);
    /// Destructor
    virtual ~DataHeaderElement();
 
@@ -111,9 +111,8 @@ private:
    std::string m_key;
    /// set of StoreGate alias string.
    std::set<std::string> m_alias;
-   /// pointer to transient address
-   const Token* m_token;
-   bool m_ownToken;
+   /// Transient address token.
+   Token m_token;
    /// hash table for ElementLink host container keys.
    std::vector<sgkey_t> m_hashes;
 };
