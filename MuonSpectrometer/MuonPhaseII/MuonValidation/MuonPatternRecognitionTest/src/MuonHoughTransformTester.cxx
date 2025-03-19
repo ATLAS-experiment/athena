@@ -458,9 +458,7 @@ namespace MuonValR4 {
         using namespace SegmentFit;
 
         m_out_segment_n = obj.matchedSegments.size(); 
-        int iSegment = -1;
         for (auto & segment : obj.matchedSegments){
-            ++iSegment; 
             m_out_segment_hasPhi.push_back(std::ranges::find_if(segment->measurements(), [](const auto& meas){  return meas->measuresPhi();}) 
                                 !=segment->measurements().end());
             m_out_segment_fitIter.push_back(segment->nFitIterations());
@@ -552,7 +550,7 @@ namespace MuonValR4 {
             m_out_segment_nsTgcPadpHits.push_back(nStgcPadHits);
         
 
-
+	    m_out_segment_nTrueHits.push_back(nTrueHits);
             m_out_segment_nTruePrecHits.push_back(nTruePrecHits);
             m_out_segment_nTruePhiHits.push_back(nTruePhiHits);
             m_out_segment_nTrueEtaHits.push_back(nTrueEtaHits);
