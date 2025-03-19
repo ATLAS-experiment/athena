@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -78,10 +78,21 @@ namespace{
     auto pDir = pFile->Get(prefix.substr(0,prefix.size()-1).c_str());
     return bool(pDir);
   }
+
+  unsigned
+  getNKeys (TFile* pFile, const std::string & path)
+  {
+    auto pDir = pFile->Get(path.c_str());
+    if (not pDir){
+      std::cout<<"Directory pointer is invalid; looking for "<<path<<std::endl;
+      return 0;
+    }
+    return (static_cast<TDirectory*>(pDir))->GetListOfKeys()->GetSize();
+  }
   
   //get the histoName from a root file and path, variable value ; this will be key in the maps
   std::string 
-  getHistoName(TFile* pFile, const std::string & path, const int var ){
+  getHistoName(TFile* pFile, const std::string & path, const unsigned var ){
     auto pDir = pFile->Get(path.c_str());
     if (not pDir){
       std::cout<<"Directory pointer is invalid; looking for "<<path<<std::endl;
@@ -91,9 +102,23 @@ namespace{
   };
   
   //get the histoPtr from a root file and path, variable value ; this will be value in the maps
-  TH1D*
-  getHistoPtr(TFile* pFile, const std::string & path, const int var ){
-    return static_cast<TH1D*>((static_cast<TKey*>(((static_cast<TDirectory*>(pFile->Get( path.c_str() ) ))->GetListOfKeys() )->At(var) ))->ReadObj());
+  TH1*
+  getHistoPtr(TFile* pFile, const std::string & path, const unsigned var ){
+    auto h = dynamic_cast<TH1*>((static_cast<TKey*>(((static_cast<TDirectory*>(pFile->Get( path.c_str() ) ))->GetListOfKeys() )->At(var) ))->ReadObj());
+    if (!h) {
+      std::cout << "Error: Cannot read hist number " << var << " under " << path << " as a TH1\n";
+      std::exit(1);
+    }
+    return h;
+  };
+  TH2*
+  getHistoPtr2D(TFile* pFile, const std::string & path, const unsigned var ){
+    auto h = dynamic_cast<TH2*>((static_cast<TKey*>(((static_cast<TDirectory*>(pFile->Get( path.c_str() ) ))->GetListOfKeys() )->At(var) ))->ReadObj());
+    if (!h) {
+      std::cout << "Error: Cannot read hist number " << var << " under " << path << " as a TH2\n";
+      std::exit(1);
+    }
+    return h;
   };
   
   std::vector<std::string> 
@@ -195,7 +220,7 @@ namespace{
     // Initialization
     //-------------------------------
 
-    std::map<std::string, TH1D*> lbdep;
+    std::map<std::string, TH1*> lbdep;
     //------------------------------------
     // read hit maps from input file
     //
@@ -216,9 +241,10 @@ namespace{
     }
     for(const auto & d: globalDiskNames){
       std::string lbdepPath =  prefix + d;
-      for(int phi = 0; phi < 48; phi++){
+      unsigned nkeys = getNKeys(hitMapFile,lbdepPath);
+      for(unsigned phi = 0; phi < nkeys; phi++){
         const std::string & name = getHistoName(hitMapFile,lbdepPath, phi);
-        char invalidCharacter = getHistoName(hitMapFile, lbdepPath, phi)[0]; //has to be L or D to be a proper module ID
+        char invalidCharacter = name[0]; //has to be L or D to be a proper module ID
         if(invalidCharacter=='O'){continue;} //Sometimes the function grabs the directory name, propagating this needs to be avoided
         lbdep[name] = getHistoPtr(hitMapFile,lbdepPath, phi);
         lbdep[name]->SetName(name.c_str());
@@ -239,12 +265,13 @@ namespace{
   
     for(unsigned int layer = 0; layer < staves.size(); layer++){
       std::string lbdepPath = prefix + layers[layer];
-      int nModulesPerStave = 13;
-      if (isIBL && layer == 0) nModulesPerStave = 32; // --- IBL --- //
-      const int nModulesTotal = staves[layer] * nModulesPerStave;
-      for(int module = 0; module < nModulesTotal; module++){ // loop on modules
+      //int nModulesPerStave = 13;
+      //if (isIBL && layer == 0) nModulesPerStave = 32; // --- IBL --- //
+      //const int nModulesTotal = staves[layer] * nModulesPerStave;
+      unsigned nkeys = getNKeys(hitMapFile,lbdepPath);
+      for(unsigned module = 0; module < nkeys; module++){ // loop on modules
         const std::string & name =  getHistoName(hitMapFile,lbdepPath, module);
-        char invalidCharacter = getHistoName(hitMapFile, lbdepPath, module)[0]; //has to be L or D to be a proper module ID
+        char invalidCharacter = name[0]; //has to be L or D to be a proper module ID
         if(invalidCharacter=='O'){continue;} //Sometimes the function grabs the directory name, propagating this needs to be avoided
         lbdep[name] = getHistoPtr(hitMapFile,lbdepPath, module);
         lbdep[name]->SetName(name.c_str());
@@ -434,7 +461,7 @@ namespace{
     // Initialization
     //-------------------------------
 
-    std::map<std::string, TH1D*> hitMaps;
+    std::map<std::string, TH2*> hitMaps;
     //------------------------------------
     // read hit maps from input file
     //
@@ -456,11 +483,12 @@ namespace{
   
     for(const auto & component: globalDiskNames){
       const std::string hitMapsPath = hitMapsDirName + component;
-      for(int phi = 0; phi < 48; phi++){
-        char invalidCharacter = getHistoName(hitMapFile, hitMapsPath, phi)[0]; //has to be L or D to be a proper module ID
-        if(invalidCharacter=='O'){continue;} //Sometimes the function grabs the directory name, propagating this needs to be avoided
+      unsigned nkeys = getNKeys(hitMapFile,hitMapsPath);
+      for(unsigned phi = 0; phi < nkeys; phi++){
         const std::string & name = getHistoName(hitMapFile, hitMapsPath, phi);
-        hitMaps[name] = getHistoPtr(hitMapFile, hitMapsPath, phi);
+        char invalidCharacter = name[0]; //has to be L or D to be a proper module ID
+        if(invalidCharacter=='O'){continue;} //Sometimes the function grabs the directory name, propagating this needs to be avoided
+        hitMaps[name] = getHistoPtr2D(hitMapFile, hitMapsPath, phi);
       }
     } // loop over k
   
@@ -481,14 +509,15 @@ namespace{
 
     for(unsigned int layer = 0; layer < staves.size(); layer++){
       const std::string hitMapsPath = hitMapsDirName + layers[layer];
-      int nModulesPerStave = 13;
-      if (isIBL && layer == 0) nModulesPerStave = 32; // --- IBL --- //
+      //int nModulesPerStave = 13;
+      //if (isIBL && layer == 0) nModulesPerStave = 32; // --- IBL --- //
       if (layer !=0){						//IBL ignored,because treated in function for LB information
-        for(int module = 0; module < staves[layer] * nModulesPerStave; module++){ // loop on modules
-          char invalidCharacter = getHistoName(hitMapFile, hitMapsPath, module)[0]; //has to be L or D to be a proper module ID
-          if(invalidCharacter=='O'){continue;} //Sometimes the function grabs the directory name, propagating this needs to be avoided
+        unsigned nkeys = getNKeys(hitMapFile,hitMapsPath);
+        for(unsigned module = 0; module < nkeys; module++){ // loop on modules
           const std::string & name = getHistoName(hitMapFile, hitMapsPath, module);
-          hitMaps[name] = getHistoPtr(hitMapFile, hitMapsPath, module);
+          char invalidCharacter = name[0]; //has to be L or D to be a proper module ID
+          if(invalidCharacter=='O'){continue;} //Sometimes the function grabs the directory name, propagating this needs to be avoided
+          hitMaps[name] = getHistoPtr2D(hitMapFile, hitMapsPath, module);
           hitMaps[name]->SetName(name.c_str());
         }
       }
@@ -548,7 +577,7 @@ namespace{
       for(int k=1; k<=nbinx; k++){
         const auto & relevantPair = findIndices(k);
         for(int l=1; l<=nbiny; l++){
-          const bool hitExists = hitMaps[moduleID]->GetBinContent(k,l)!=0;
+          const bool hitExists = pHisto->GetBinContent(k,l)!=0;
           if (not hitExists) continue;
           const int i = returnIndex(relevantPair, found, l);
           ++FE[i];
