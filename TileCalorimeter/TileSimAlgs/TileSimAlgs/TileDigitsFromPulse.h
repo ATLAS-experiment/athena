@@ -139,6 +139,7 @@ private:
     double m_GNAmpTwo; //!< Amplitude of second gaussian of double gaussian noise.
     double m_GNSigmaTwo; //!< Standard deviation of second gaussian of double gaussian noise.    
     bool m_useItADist; //!< Set to TRUE in order to use a distribution for the in-time amplitude instead of a constant value
+    double m_itAPulseProb; //!< Probability to add an in-time pulse
     bool m_useOotADist; //!< Set to TRUE in order to use a distribution for the out-of-time amplitude instead of a constant value
     float m_pileUpFraction; //!< Probability that an out-of-time component will be added
     float m_gausC2C; //!< RMS for the in-time pulse offset (channel-to-channel phase variation)
