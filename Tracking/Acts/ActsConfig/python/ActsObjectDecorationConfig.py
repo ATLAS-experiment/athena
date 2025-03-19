@@ -31,6 +31,11 @@ def ActsPixelClusterTruthDecoratorAlgCfg(flags,
     kwargs.setdefault("AssociationMapOut","ITkPixelClustersToTruthParticles")
     kwargs.setdefault("MeasurementContainer","ITkPixelMeasurements")
     kwargs.setdefault("UseTruthInfo", flags.Tracking.doTruth)
+
+    if "LorentzAngleTool" not in kwargs:
+        from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
+        kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge( ITkPixelLorentzAngleToolCfg(flags) ))
+        
     acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterTruthDecoratorAlg(name,**kwargs))
 
     # add SDO and SiHit info
