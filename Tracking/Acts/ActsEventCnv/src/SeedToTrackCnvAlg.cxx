@@ -67,6 +67,11 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const
     for (std::size_t seedIndex = 0 ;  seedIndex < seedsHandle->size() ;++seedIndex){
       const ActsTrk::Seed* seedPointer = seedsHandle->at(seedIndex);
       const Acts::BoundTrackParameters* paramsPointer = parameterHandle->at(seedIndex);
+
+      if (seedPointer == nullptr || paramsPointer == nullptr) {
+        ATH_MSG_DEBUG("Seed or Track Parameters is nullptr");
+        continue;
+      }
       
       auto actsTrack =  tracksContainer.makeTrack();
       ActsTrk::MutableMultiTrajectory& trackStateContainer = tracksContainer.trackStateContainer();

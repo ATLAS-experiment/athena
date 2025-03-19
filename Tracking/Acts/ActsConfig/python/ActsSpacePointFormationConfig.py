@@ -26,7 +26,6 @@ def ActsStripSpacePointToolCfg(flags,
                                **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("useTopSp", flags.Acts.reverseTrackFindingForStrips)
     kwargs.setdefault("useSCTLayerDep_OverlapCuts", False)
     
     if 'LorentzAngleTool' not in kwargs:
