@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # ------------------------------------------------------------
 # Definition of trigger EDM for Run 3
@@ -47,6 +47,8 @@ JetCopyVarsToKeep = ['pt', 'eta', 'phi', 'm',
                      # additional variables also stored in TLA stream for jet cleaning studies
                      # stored for calibrated HLT container in the same way as in the TLA streams
                      "N90Constituents", "LArQuality", "FracSamplingMax", "NegativeE", "HECQuality", "AverageLArQF", "BchCorrCell",
+                     # NN JVT -- TrkAug version
+                     'NNJvt','NNJvtPass', 'RPtTrkPt500', 'DTrackWidthPt1000', 'DNumTrkPt1000', 'DRPtTrkPt500', 'SumPtTrkOrderedTrackWidthPt1000', 'SumPtTrkOrderedNumTrkPt1000',
                     ]
 
 FastFtagPFlowVarsToKeep = [f'dips20211116_p{x}' for x in 'cub']
@@ -90,6 +92,7 @@ TLAJetVarsToKeep = [
                    'JetEtaJESScaleMomentum_eta', 'JetEtaJESScaleMomentum_m', 'JetEtaJESScaleMomentum_phi', 'JetEtaJESScaleMomentum_pt',
                    'JetGSCScaleMomentum_eta', 'JetGSCScaleMomentum_m', 'JetGSCScaleMomentum_phi', 'JetGSCScaleMomentum_pt',
                    'Jvt', 'JVFCorr', 'JvtRpt',
+                   'NNJvt','NNJvtPass',
                    'SumPtChargedPFOPt500', 'NumTrkPt1000', 'SumPtTrkPt500', 'TrackWidthPt1000', 'N90Constituents',
                    'LArQuality','FracSamplingMax',  'NegativeE', 'Timing', 'HECQuality','AverageLArQF', 'BchCorrCell',
                    ]
@@ -242,6 +245,9 @@ varToRemoveFromAODSLIM = [
     ('GhostTrack_ftf', 'HLT_AntiKt4EMTopoJets_nojcalib_ftfAux', 'HLT_AntiKt4EMPFlowJets_nojcalib_ftfAux', 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftfAux'),
     ('TracksForMinimalJetTag', 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftfAux'),
     ]
+# Detailed NNJvt input variables
+for var in ['RPtTrkPt500', 'DTrackWidthPt1000', 'DNumTrkPt1000', 'DRPtTrkPt500', 'SumPtTrkOrderedTrackWidthPt1000', 'SumPtTrkOrderedNumTrkPt1000']:
+    varToRemoveFromAODSLIM.append((var, 'HLT_AntiKt4EMPFlowJets_subresgscIS_ftfAux', ''))
 
 
 

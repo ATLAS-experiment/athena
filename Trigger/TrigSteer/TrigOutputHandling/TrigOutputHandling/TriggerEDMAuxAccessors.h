@@ -34,7 +34,8 @@ auto charAccessors = initAccessors<char>(
   "muonCaloTag", "tagFakeTrack", "tagIsoTrack", "tagMuonTrack",
   "vsi_isFake", "vsi_isPassMMV", "vsi_trkd0cut", "vsi_twoCircErrcut", "vsi_twoCircRcut", "vsi_fastErrcut", "vsi_fastRcut", "vsi_fitErrcut", "vsi_chi2cut",
   "overflow",
-  "GNTau_VeryLoose", "GNTau_Loose", "GNTau_Medium", "GNTau_Tight"
+  "GNTau_VeryLoose", "GNTau_Loose", "GNTau_Medium", "GNTau_Tight",
+  "NNJvtPass"
   );
 
 auto intAccessors = initAccessors<int>(
@@ -72,7 +73,7 @@ auto uint64Accessors = initAccessors<uint64_t>("start", "stop", "thresholdPatter
 auto sizeAccessors = initAccessors<size_t>("alg_idx");
 
 auto floatAccessors = initAccessors<float>(
-  "EBWeight", "Jvt", "JvtRpt", "IP2D_bc", "IP2D_bu", "IP2D_cu", "IP3D_bc", "IP3D_bu", "IP3D_cu",
+  "EBWeight", "Jvt", "JvtRpt", "NNJvt", "IP2D_bc", "IP2D_bu", "IP2D_cu", "IP3D_bc", "IP3D_bu", "IP3D_cu",
   "ActiveArea", "ActiveArea4vec_eta", "ActiveArea4vec_m", "ActiveArea4vec_phi", "ActiveArea4vec_pt",
   "JetEtaJESScaleMomentum_eta", "JetEtaJESScaleMomentum_m", "JetEtaJESScaleMomentum_phi", "JetEtaJESScaleMomentum_pt",
   "JetGSCScaleMomentum_eta", "JetGSCScaleMomentum_m", "JetGSCScaleMomentum_phi", "JetGSCScaleMomentum_pt",
@@ -195,7 +196,7 @@ auto doubleAccessors = initAccessors<double>("ptcone02", "ptcone03", "JetDensity
 auto vboolAccessors = initAccessors<std::vector<bool>>("IP2D_flagFromV0ofTracks", "IP3D_flagFromV0ofTracks");
 
 auto vintAccessors = initAccessors<std::vector<int>>(
-  "counts", "IP2D_gradeOfTracks", "IP3D_gradeOfTracks", "NumTrkPt1000", "NumTrkPt500");
+  "counts", "IP2D_gradeOfTracks", "IP3D_gradeOfTracks", "NumTrkPt1000", "NumTrkPt500", "DNumTrkPt1000", "SumPtTrkOrderedNumTrkPt1000");
 
 auto vushortAccessors = initAccessors<std::vector<unsigned short>>("robs_status");
 
@@ -212,7 +213,8 @@ auto vfloatAccessors = initAccessors<std::vector<float>>(
   "JetFitter_fittedCov", "JetFitter_fittedPosition", "JetFitter_tracksAtPVchi2", "JetFitter_tracksAtPVndf",
   "EnergyPerSampling", "EnergyPerSamplingCaloBased", "SumPtChargedPFOPt500", "SumPtTrkPt1000", "SumPtTrkPt500", "TrackWidthPt1000",
   "pTcuts", "z0cuts", "vertexZcuts", "btagIp_trackMomentum", "btagIp_trackDisplacement",
-  "vsi_vrtFast_trkd0", "vsi_vrtFast_trkz0", "parameterPX", "parameterPY", "parameterPZ");
+  "vsi_vrtFast_trkd0", "vsi_vrtFast_trkz0", "parameterPX", "parameterPY", "parameterPZ",
+  "RPtTrkPt500", "DTrackWidthPt1000", "DRPtTrkPt500", "SumPtTrkOrderedTrackWidthPt1000");
 
 auto elroiAccessors = initAccessors<ElementLink<TrigRoiDescriptorCollection>>("viewIndex");
 
