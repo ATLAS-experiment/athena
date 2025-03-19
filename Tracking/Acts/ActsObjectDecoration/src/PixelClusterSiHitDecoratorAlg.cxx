@@ -162,7 +162,7 @@ namespace ActsTrk {
       for (auto itr = startRange; itr != stopRange; ++itr) {
 	const xAOD::PixelCluster* cluster = *startRange;
 	const xAOD::TrackMeasurementValidation* measurement = measurements->at(cluster->index());
-	ATH_CHECK(measurement->identifier() == Identifier(static_cast<int>(cluster->identifier())).get_compact() );
+	ATH_CHECK(measurement->identifier() == cluster->identifier() );
 
 	auto [word, depositsBarcode, depositsEnergy] = ActsTrk::detail::getSDOInformation(cluster->rdoList(), *sdos);
 	std::vector<SiHit> compatibleSiHits = findAllHitsCompatibleWithCluster(*cluster, *element, siHitsWithCurrentHash, depositsBarcode);
