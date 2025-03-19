@@ -3,6 +3,30 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+
+def ActsTrackStateOnSurfaceDecoratorAlgCfg(flags,
+                                           name: str = "ActsTrackStateOnSurfaceDecoratorAlg",
+                                           **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault('TrackParticles', 'InDetTrackParticles')
+    kwargs.setdefault('PixelMeasurements', 'ITkPixelMeasurements')
+    kwargs.setdefault('StripMeasurements', 'ITkStripMeasurements')
+    kwargs.setdefault('PixelMSOSs', 'ITkPixelMSOSs')
+    kwargs.setdefault('StripMSOSs', 'ITkStripMSOSs')
+    acc.addEventAlgo(CompFactory.ActsTrk.ActsTrackStateOnSurfaceDecoratorAlg(name, **kwargs))
+
+    toAOD = []
+    toAOD += [f'xAOD::TrackStateValidationContainer#{kwargs["PixelMSOSs"]}',
+              f'xAOD::TrackStateValidationAuxContainer#{kwargs["PixelMSOSs"]}Aux.',
+              f'xAOD::TrackStateValidationContainer#{kwargs["StripMSOSs"]}',
+              f'xAOD::TrackStateValidationAuxContainer#{kwargs["StripMSOSs"]}Aux.']
+
+    from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+    acc.merge(addToAOD(flags, toAOD))
+    return acc
+
+
 def ActsMeasurementToTrackParticleDecorationAlgCfg(flags,
                                                    name: str = "ActsMeasurementToTrackParticleDecorationAlg",
                                                    **kwargs) -> ComponentAccumulator:

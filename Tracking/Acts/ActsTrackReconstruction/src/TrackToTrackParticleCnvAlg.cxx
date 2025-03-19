@@ -151,6 +151,9 @@ namespace ActsTrk
      ATH_CHECK( m_vertexHandle.initialize(m_expression_strategy == expressionStrategy::Vertex) );
      ATH_CHECK( m_fieldCacheCondObjInputKey.initialize() );
 
+     m_decorator_actsTracks = m_trackParticlesOutKey.key() + "." + m_decorator_actsTracks.key();
+     ATH_CHECK(m_decorator_actsTracks.initialize());
+     
      ATH_CHECK( m_extrapolationTool.retrieve() ); // for extrapolation to beamline
 
      // propagator for conversion to curvilnear parameters
@@ -200,6 +203,8 @@ namespace ActsTrk
        ATH_MSG_ERROR("Failed to record track particle container with key " << m_trackParticlesOutKey.key() );
        return StatusCode::FAILURE;
     }
+
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, ElementLink<ActsTrk::TrackContainer>> trackLink(m_decorator_actsTracks, ctx);
 
     xAOD::TrackParticleContainer *track_particles = wh_track_particles.ptr();
 
@@ -281,8 +286,6 @@ namespace ActsTrk
 
     unsigned int converted_track_states=0;
 
-    static const SG::AuxElement::Decorator<ElementLink<ActsTrk::TrackContainer> > trackLink("actsTrack");
-    
     using namespace Acts::UnitLiterals;
     for (const ActsTrk::TrackContainer *tracksContainer : trackContainers) {
       for (const typename ActsTrk::TrackContainer::ConstTrackProxy track : *tracksContainer) {
