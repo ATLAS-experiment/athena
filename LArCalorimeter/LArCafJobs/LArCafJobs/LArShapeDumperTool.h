@@ -15,7 +15,7 @@
 #include "CaloIdentifier/LArFCAL_ID.h"
 
 class ILArShape;
-class LArOnlineID;
+class LArOnlineID_Base;
 
 class ATLAS_NOT_THREAD_SAFE LArShapeDumperTool : public AthAlgTool, public virtual ILArShapeDumperTool
 {
@@ -36,12 +36,12 @@ class ATLAS_NOT_THREAD_SAFE LArShapeDumperTool : public AthAlgTool, public virtu
   
  private:
   
-  bool m_doShape, m_doAllShapes;
+  bool m_doShape, m_doAllShapes, m_isSC;
   std::string m_shapeKey;
    
-  const LArOnlineID* m_onlineHelper{nullptr};
-  const LArEM_ID* m_emId{nullptr};
-  const LArHEC_ID* m_hecId{nullptr};
-  const LArFCAL_ID* m_fcalId{nullptr};
+  const LArOnlineID_Base* m_onlineHelper{nullptr};
+  const LArEM_Base_ID* m_emId{nullptr};
+  const LArHEC_Base_ID* m_hecId{nullptr};
+  const LArFCAL_Base_ID* m_fcalId{nullptr};
 };
 #endif
