@@ -107,6 +107,7 @@ if (NOT XAOD_STANDALONE)
     src/SoftElectronDecoratorAlg.cxx
     src/SoftElectronTruthDecoratorAlg.cxx
     src/FoldDecoratorAlg.cxx
+    src/GNNAuxTaskDecoratorAlg.cxx
     src/CountIParticleAlg.cxx
     src/CountTrackParticleAlg.cxx
     src/FTagGhostElectronAssociationAlg.cxx
