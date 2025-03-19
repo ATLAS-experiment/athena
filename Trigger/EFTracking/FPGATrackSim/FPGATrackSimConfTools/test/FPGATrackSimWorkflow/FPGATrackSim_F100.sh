@@ -25,6 +25,7 @@ echo "... analysis on RDO"
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     --evtMax=$RDO_EVT_ANALYSIS \
     --filesInput=$RDO_ANALYSIS \
+    --skipEvents=${SKIP_EVENTS} \
     Output.AODFileName=$xAODOutput \
     Trigger.FPGATrackSim.doEDMConversion=True \
     Trigger.FPGATrackSim.pipeline='F-100' \
