@@ -175,14 +175,21 @@ set /Herwig/Samplers/Sampler:Verbose Yes
 
        return("""
 ## Masses and widths: PDG 2010 values (except TOP mass; kept at PDG2007)
+
+## top-quark
 set /Herwig/Particles/t:NominalMass 172.5*GeV
 set /Herwig/Particles/tbar:NominalMass 172.5*GeV
+## W boson
 set /Herwig/Particles/W+:NominalMass 80.399*GeV
 set /Herwig/Particles/W-:NominalMass 80.399*GeV
-set /Herwig/Particles/Z0:NominalMass 91.1876*GeV
 set /Herwig/Particles/W+:Width 2.085*GeV
 set /Herwig/Particles/W-:Width 2.085*GeV
+## Z boson
+set /Herwig/Particles/Z0:NominalMass 91.1876*GeV
 set /Herwig/Particles/Z0:Width 2.4952*GeV
+## b quark
+set /Herwig/Particles/b:NominalMass 4.95*GeV
+set /Herwig/Particles/bbar:NominalMass 4.95*GeV
 
 ## Weinberg angle
 set /Herwig/Model:EW/Sin2ThetaW 0.23113
