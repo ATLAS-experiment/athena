@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration */
 #include "CaloTopoClusterFromTowerHelpers.h"
 
 #include "CaloEvent/CaloCell.h"
@@ -7,6 +7,7 @@
 
 #include "CaloGeoHelpers/CaloPhiRange.h"
 #include "CaloGeoHelpers/proxim.h"
+#include "CxxUtils/trapping_fp.h"
 
 #include <cmath>
 
@@ -117,6 +118,9 @@ bool CaloRec::Helpers::cellAccumulator(const CaloCell& rcell,CaloClusterSignalAc
 
 bool CaloRec::Helpers::calculateKine(xAOD::CaloCluster* pClus,bool onlyKine)
 {
+  // Tell clang to optimize assuming that FP operations may trap.
+  CXXUTILS_TRAPPING_FP;
+
   // input
   if ( pClus == nullptr ) { return false; }
 
@@ -147,7 +151,7 @@ bool CaloRec::Helpers::calculateKine(xAOD::CaloCluster* pClus,bool onlyKine)
     pClus->setPhi(0.);
   }
 
-  // bail out if only global kinematice to be updated
+  // bail out if only global kinematics to be updated
   if ( onlyKine ) { return true; }
 
   // set cluster kinematics: time
