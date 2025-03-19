@@ -557,49 +557,27 @@ int TSU::Trigo::atan2(TSU::L1TopoDataTypes<16,0> x, TSU::L1TopoDataTypes<16,0> y
      "01100000001010000" // tan(1.55)=48.07848247921907 rounded to 48.078125
     };
   
-  unsigned int flag = 0;
+  unsigned int thresholdsPassed = atan2_thresholds.size();
   for(size_t j=0;j<atan2_thresholds.size(); ++j){
     auto thresh =  TSU::L1TopoDataTypes<17,10>(atan2_thresholds.at(j));
     auto yy = signed_y_f*thresh;
-    if(signed_x_f.to_float() > yy.to_float()) flag = (flag | (1<<j));
+    if(! (signed_x_f.to_float() > yy.to_float()) ) {
+      //if the current threshold is not passed, then the previous one must have been the last one passed 
+      //(no) off-by-one consideration: j starts at 0, so if the first threshold is already failed, that's just the number we're looking for
+      thresholdsPassed = j;
+      break;
+    }
   }
-  unsigned int octant_fine = 0;
-  if(flag==0) octant_fine = 15;
-  else if(flag==1) octant_fine = 14;
-  else if(flag==3) octant_fine = 13;
-  else if(flag==7) octant_fine = 12;
-  else if(flag==15) octant_fine = 11;
-  else if(flag==31) octant_fine = 10;
-  else if(flag==63) octant_fine = 9;
-  else if(flag==127) octant_fine = 8;
-  else if(flag==255) octant_fine = 7;
-  else if(flag==511) octant_fine = 6;
-  else if(flag==1023) octant_fine = 5;
-  else if(flag==2047) octant_fine = 4;
-  else if(flag==3071) octant_fine = 3;
-  else if(flag==5119) octant_fine = 2;
-  else if(flag==9215) octant_fine = 1;
-  else if(flag==17407) octant_fine = 0;
+  
+  //for first half of a quadrant fine steps are counted in downward 
+  // (range: 15 downto 0)
+  unsigned int octant_fine = 16 - (thresholdsPassed + 1);
 
-  unsigned int octant_fine2 = 0;
-  if(flag==0) octant_fine2 = 0;
-  else if(flag==1) octant_fine2 = 1;
-  else if(flag==3) octant_fine2 = 2;
-  else if(flag==7) octant_fine2 = 3;
-  else if(flag==15) octant_fine2 = 4;
-  else if(flag==31) octant_fine2 = 5;
-  else if(flag==63) octant_fine2 = 6;
-  else if(flag==127) octant_fine2 = 7;
-  else if(flag==255) octant_fine2 = 8;
-  else if(flag==511) octant_fine2 = 9;
-  else if(flag==1023) octant_fine2 = 10;
-  else if(flag==2047) octant_fine2 = 11;
-  else if(flag==3071) octant_fine2 = 12;
-  else if(flag==5119) octant_fine2 = 13;
-  else if(flag==9215) octant_fine2 = 14;
-  else if(flag==17407) octant_fine2 = 15;
+  //for second half of a quadrant count fine steps upwards
+  // (range: 0 to 15)
+  unsigned int octant_fine2 = thresholdsPassed;
 
-  int intphi = octant << 3;
+  int intphi = octant << 4;
   if(octant==0||octant==2||octant==4||octant==6){
     intphi |= octant_fine;
   } else {

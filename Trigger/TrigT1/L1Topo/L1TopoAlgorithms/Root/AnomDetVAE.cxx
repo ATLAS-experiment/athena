@@ -133,7 +133,27 @@ TCS::ADVAE_2A::processBitCorrect( const std::vector<TCS::TOBArray const *> & inp
          met_pt[i] = (*met)[i].Et();
          met_phi[i] = (*met)[i].phi();
       }
-
+      
+      
+       TRG_MSG_DEBUG("Jet0: " << jet_pt[0] << ", " << jet_eta[0] << ", " << jet_phi[0] );
+       TRG_MSG_DEBUG("Jet1: " << jet_pt[1] << ", " << jet_eta[1] << ", " << jet_phi[1] );
+       TRG_MSG_DEBUG("Jet2: " << jet_pt[2] << ", " << jet_eta[2] << ", " << jet_phi[2] );
+       TRG_MSG_DEBUG("Jet3: " << jet_pt[3] << ", " << jet_eta[3] << ", " << jet_phi[3] );
+       TRG_MSG_DEBUG("Jet4: " << jet_pt[4] << ", " << jet_eta[4] << ", " << jet_phi[4] );
+       TRG_MSG_DEBUG("Jet5: " << jet_pt[5] << ", " << jet_eta[5] << ", " << jet_phi[5] );
+      
+       TRG_MSG_DEBUG("Tau0: " << tau_pt[0] << ", " << tau_eta[0] << ", " << tau_phi[0] );
+       TRG_MSG_DEBUG("Tau1: " << tau_pt[1] << ", " << tau_eta[1] << ", " << tau_phi[1] );
+       TRG_MSG_DEBUG("Tau2: " << tau_pt[2] << ", " << tau_eta[2] << ", " << tau_phi[2] );
+       TRG_MSG_DEBUG("Tau3: " << tau_pt[3] << ", " << tau_eta[3] << ", " << tau_phi[3] );
+       
+       TRG_MSG_DEBUG("Mu0: " << mu_pt[0] << ", " << mu_eta[0] << ", " << mu_phi[0] );
+       TRG_MSG_DEBUG("Mu1: " << mu_pt[1] << ", " << mu_eta[1] << ", " << mu_phi[1] );
+       TRG_MSG_DEBUG("Mu2: " << mu_pt[2] << ", " << mu_eta[2] << ", " << mu_phi[2] );
+       TRG_MSG_DEBUG("Mu3: " << mu_pt[3] << ", " << mu_eta[3] << ", " << mu_phi[3] );
+       
+       TRG_MSG_DEBUG("MET: " << met_pt[0] << ", " << met_phi[0] << std::endl);
+       
       ADVAE2A::VAENetwork AD_Network( jet_pt[0], jet_eta[0], jet_phi[0],
                               jet_pt[1], jet_eta[1], jet_phi[1],
                               jet_pt[2], jet_eta[2], jet_phi[2],
