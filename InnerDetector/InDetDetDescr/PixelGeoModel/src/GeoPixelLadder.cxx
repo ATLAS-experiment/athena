@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -27,14 +27,14 @@
 
 using std::max;
 
-GeoPixelLadder::GeoPixelLadder(InDetDD::PixelDetectorManager* m_DDmgr,
+GeoPixelLadder::GeoPixelLadder(InDetDD::PixelDetectorManager* ddmgr,
                                PixelGeometryManager* mgr,
 			       GeoModelIO::ReadGeoModel* sqliteReader,
                                std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                                std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
                                GeoPixelSiCrystal& theSensor,
 			       GeoPixelStaveSupport* staveSupport)
-  : GeoVPixelFactory (m_DDmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX))
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX))
   , m_theLadder(nullptr)
   , m_theSensor(theSensor)
   , m_staveSupport(staveSupport)
