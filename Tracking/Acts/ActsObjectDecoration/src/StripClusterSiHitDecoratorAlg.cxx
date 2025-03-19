@@ -150,12 +150,12 @@ namespace ActsTrk {
           rdos[i].set_literal( rdoIdentifierList[i] );
         }
 	
-	auto [word, depositsBarcode, depositsEnergy] = ActsTrk::detail::getSDOInformation(rdos, *sdos);
+	auto [word, depositsBarcode, depositsEnergy] = ActsTrk::detail::getSDOInformation(rdos, *sdos); // FIXME barcode-based
 	std::vector<SiHit> compatibleSiHits = findAllHitsCompatibleWithCluster(rdos, *element, siHitsWithCurrentHash);
 
 	auto [energyDeposit, meanTime, barcode, pdgid,
 	      startPosX, startPosY, startPosZ,
-	      endPosX, endPosY, endPosZ] = ActsTrk::detail::getSiHitInformation(*element, compatibleSiHits);
+	      endPosX, endPosY, endPosZ] = ActsTrk::detail::getSiHitInformation(*element, compatibleSiHits); // FIXME barcode-based
 	
 	// attach SDO decorations
 	decor_sdo_words(*measurement) = std::move(word);
@@ -271,7 +271,7 @@ namespace ActsTrk {
 				  highestXPos->localEndPosition(),
 				  energyDep,
 				  time,
-				  HepMC::barcode((*siHitIter)->particleLink()),
+				  HepMC::barcode((*siHitIter)->particleLink()), // FIXME barcode-based
 				  1, // 0 for pixel 1 for strip
 				  (*siHitIter)->getBarrelEndcap(),
 				  (*siHitIter)->getLayerDisk(),
