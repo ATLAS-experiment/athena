@@ -1,2358 +1,1744 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityUtils/MonitoringFile.h"
-#include "DataQualityInterfaces/HanApp.h"
-#include "DataQualityInterfaces/HanUtils.h"
-
-#include <cmath>
-#include <cstdio>
-#include <exception>
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <set>
-#include <sstream>
-#include <vector>
-#include <map>
-#include <ctime>
-#include <format>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/lexical_cast.hpp>
-#include <regex>
-#include <TObject.h>
-#include <TSystem.h>
 
 #include <TDirectory.h>
+#include <TEfficiency.h>
 #include <TFile.h>
 #include <TGraph.h>
 #include <TH1.h>
 #include <TH2.h>
 #include <TIterator.h>
 #include <TKey.h>
+#include <TObject.h>
 #include <TROOT.h>
+#include <TSystem.h>
 #include <TTree.h>
-#include <TEfficiency.h>
+
+#include <cmath>
+#include <cstdio>
+#include <ctime>
+#include <exception>
+#include <filesystem>
+#include <format>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <set>
+#include <sstream>
+#include <vector>
+
+#include "DataQualityInterfaces/HanApp.h"
+#include "DataQualityInterfaces/HanUtils.h"
 #include "TTreeReader.h"
 #include "TTreeReaderArray.h"
 
-ClassImp(dqutils::MonitoringFile)
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
+ClassImp(dqutils::MonitoringFile)
 
 namespace dqutils {
 
-bool histOKToMerge(TH1* h) {
-  Long_t arrsize, computedsize;
-  switch (h->GetDimension()) {
-  case 1:
-    computedsize = h->GetNbinsX()+2;
-    break;
-  case 2:
-    computedsize = (h->GetNbinsX()+2)*(h->GetNbinsY()+2);
-    break;
-  case 3:
-    computedsize = (h->GetNbinsX()+2)*(h->GetNbinsY()+2)*(h->GetNbinsZ()+2);
-    break;
-  default:
-    std::cerr << "Unable to handle dimension of " << h->GetName() << "; refusing to merge";
+  class dbgPrint {
+
+   public:
+    dbgPrint(const debugLevel_t setLvl = none) : m_currLvl(setLvl) {};
+    inline void operator()(const debugLevel_t level, const std::string& msg) const {
+      if (level <= m_currLvl)
+        std::cout << msg << std::endl;
+    }
+    void setLvl(const debugLevel_t lvl) { m_currLvl = lvl; }
+    debugLevel_t getLvl() const { return m_currLvl; }
+
+   private:
+    debugLevel_t m_currLvl;
+  };
+
+  static dbgPrint s_dbg;
+  static bool s_checkEquality=false;
+
+  std::optional<std::regex> checkRegEx(const std::string& re) {
+    if (re.empty())
+      return std::nullopt;
+
+    std::regex reNew(re);
+    try {
+      // this should fail if there are any problems with re!
+      std::string test("Test String");
+      std::regex_match(test, reNew);
+    } catch (std::exception& e) {
+      std::cout << "ERROR: Invalid RegEx string \"" << re << "\"." << std::endl;
+      std::cout << "See http://www.boost.org/doc/libs/1_42_0/libs/regex/doc/html/boost_regex/syntax.html for allowed regular expression syntax" << std::endl;
+      return std::nullopt;
+    }
+    return reNew;
+  }
+
+  // Internally used data-structures:
+
+  class histCollection {
+
+   public:
+    typedef std::map<std::string, std::vector<std::string>> fileLBMap_t;
+    explicit histCollection(TFile* out, bool skipExisting = false) : m_out{out}, m_skipExisting(skipExisting) {};
+    histCollection() = delete;
+
+    ~histCollection();
+
+    void addDirectory(TDirectory* dir, const std::string& dirName, const std::string& filename = "");
+    size_t size() { return m_data.size(); };
+    void print();
+    void write();  // Destructive method, will delete internal data after writing
+
+    void addDirExclusion(const std::optional<std::regex>& dirEx);
+    void addHistExclusion(const std::optional<std::regex>& histEx);
+
+    unsigned size() const;
+    void clear();
+
+    fileLBMap_t getFileLBMapAndClear() {
+      m_data.clear();
+      return std::move(m_fileLBMap);
+    }
+
+    void printTiming();
+
+   private:
+    class histPerDir_t {
+     public:
+      histPerDir_t(const std::string& nameIn, std::unique_ptr<TObject>&& objIn, TTree* md);
+      histPerDir_t(dqutils::histCollection::histPerDir_t&& other)
+          : name(std::move(other.name)), obj(std::move(other.obj)), metadata(std::move(other.metadata)), mergeMethod(other.mergeMethod) {}
+    
+      std::string name;
+      std::unique_ptr<TObject> obj;
+      std::array<std::string, 3> metadata;
+      std::clock_t cpuSum = 0;
+      void (*mergeMethod)(TObject* a, const TObject* b) = nullptr;
+      void merge(TObject* other); 
+
+     private:
+      bool fillMD(TTree* mdTree);
+    };
+
+    struct histDir_t {
+      std::unordered_map<std::string, histPerDir_t> histos;
+      void writeMD(TDirectory* outDir) const;
+    };
+
+   private:
+    TFile* m_out;
+    bool m_skipExisting;
+    std::unordered_map<std::string, histDir_t> m_data;
+    std::optional<std::regex> m_dirExclusion;
+    std::optional<std::regex> m_histExclusion;
+    fileLBMap_t m_fileLBMap;
+  };
+
+  void histCollection::clear() {
+    m_data.clear();
+    m_fileLBMap.clear();
+  }
+
+  void histCollection::printTiming() {
+    std::vector<std::pair<std::string, clock_t>> cpuPerHistVec;
+    for (auto& [dirname, histDir] : m_data) {
+      for (auto& [histname, histo] : histDir.histos) {
+        cpuPerHistVec.emplace_back(dirname + "/" + histname, histo.cpuSum);
+      }
+    }
+    auto ordering = [](std::pair<std::string, clock_t> a, std::pair<std::string, clock_t> b) { return a.second < b.second; };
+    std::sort(cpuPerHistVec.begin(), cpuPerHistVec.end(), ordering);
+    for (const auto& [name, time] : cpuPerHistVec) {
+      const double tSec = double(time) / CLOCKS_PER_SEC;
+      std::cout << std::format("{:<30} : {:10.3f}", name, tSec) << std::endl;
+    }
+    return;
+  }
+
+  bool histCollection::histPerDir_t::fillMD(TTree * md) {
+    TTreeReader reader(md);
+    TTreeReaderArray<char> i_name(reader, "Name");
+    TTreeReaderArray<char> i_interval(reader, "Interval");
+    TTreeReaderArray<char> i_chain(reader, "TriggerChain");
+    TTreeReaderArray<char> i_merge(reader, "MergeMethod");
+
+    bool found = false;
+    while (reader.Next()) {
+      const std::string nameStr(static_cast<char*>(i_name.GetAddress()));
+      if (name == nameStr) {
+        metadata = {static_cast<char*>(i_interval.GetAddress()), static_cast<char*>(i_chain.GetAddress()), static_cast<char*>(i_merge.GetAddress())};
+        found = true;
+        break;
+      }
+    }
+    return found;
+  }
+
+  void histCollection::histPerDir_t::merge(TObject * other) {
+    if (obj && other) {
+      const std::clock_t cpuStart = std::clock();
+      this->mergeMethod(obj.get(), other);
+      cpuSum += std::clock() - cpuStart;
+    }
+    return;
+  }
+
+  void histCollection::histDir_t::writeMD(TDirectory * out) const {
+
+    // Check if there is already a metadata-tree. Merge content if necessary
+    std::map<std::string, std::array<std::string, 3>> metadatamap;
+    std::unique_ptr<TTree> oldMD((TTree*)out->Get("metadata"));
+    if (oldMD) {
+      TTreeReader reader(oldMD.get());
+      TTreeReaderArray<char> i_name(reader, "Name");
+      TTreeReaderArray<char> i_interval(reader, "Interval");
+      TTreeReaderArray<char> i_chain(reader, "TriggerChain");
+      TTreeReaderArray<char> i_merge(reader, "MergeMethod");
+
+      while (reader.Next()) {
+        const std::string name(static_cast<char*>(i_name.GetAddress()));
+        metadatamap[name] = {static_cast<char*>(i_interval.GetAddress()), static_cast<char*>(i_chain.GetAddress()), static_cast<char*>(i_merge.GetAddress())};
+      }
+    }
+
+    for (const auto& [key, h] : histos) {
+      metadatamap[key] = h.metadata;
+    }
+
+    std::string interval, chain, merge;
+    char histname[1024];  // FIXME, no idea why this works only in this old-fashioned way
+    std::unique_ptr<TTree> mdTree = std::make_unique<TTree>("metadata", "Monitoring Metadata");
+    mdTree->SetDirectory(out);
+
+    mdTree->Branch("Name", (void*)nullptr, "Name/C");
+    mdTree->Branch("Interval", interval.data(), "Interval/C");
+    mdTree->Branch("TriggerChain", chain.data(), "TriggerChain/C");
+    mdTree->Branch("MergeMethod", merge.data(), "MergeMethod/C");
+
+    mdTree->SetBranchAddress("Name", histname);
+
+    for (auto& [key, h] : metadatamap) {
+      strncpy(histname, key.c_str(), 1023);
+      interval = h[0];
+      chain = h[1];
+      merge = h[2];
+      mdTree->Fill();
+    }
+    mdTree->Write(0, TObject::kOverwrite);
+  }
+
+  histCollection::~histCollection() {}
+
+  void histCollection::addDirExclusion(const std::optional<std::regex>& dir) {
+    m_dirExclusion = dir;
+    return;
+  }
+
+  void histCollection::addHistExclusion(const std::optional<std::regex>& dir) {
+    m_histExclusion = dir;
+    return;
+  }
+
+  unsigned histCollection::size() const {
+    unsigned s = 0;
+    for (const auto& it : m_data) {
+      s += it.second.histos.size();
+    }
+    return s;
+  }
+
+  void histCollection::print() {
+    for (const auto& it : m_data) {
+      const histDir_t& hd = it.second;
+      std::cout << "Dir: " << it.first << " has " << hd.histos.size() << " histos" << std::endl;
+      for (const auto& it1 : hd.histos)
+        std::cout << "\t" << it1.second.name << std::endl;
+    }
+    return;
+  }
+
+  template <class HIST>
+  void defaultMerge(TObject * a, const TObject* b) {
+    ((HIST*)a)->Add((HIST*)b);
+    return;
+  }
+
+  void weightedAverage ATLAS_NOT_THREAD_SAFE(TObject * a, const TObject* b) {
+    TH1* a1 = (dynamic_cast<TH1*>(a));
+    const TH1* b1 = dynamic_cast<const TH1*>(b);
+    if (!b1 || !a1)
+      std::cout << "ERROR in weightedAverageTH1: Object not of type TH1" << std::endl;
+    else {
+      if (b1->GetEntries()==0) return;
+      dqutils::MonitoringFile::merge_weightedAverage(*a1, *b1);
+    }
+    return;
+  }
+
+  void weightedEff ATLAS_NOT_THREAD_SAFE(TObject * a, const TObject* b) {
+    TH1* a1 = (dynamic_cast<TH1*>(a));
+    const TH1* b1 = (dynamic_cast<const TH1*>(b));
+    if (!b1 || !a1)
+      std::cout << "ERROR in weightedEff: Object not of type TH1" << std::endl;
+    else {
+      if (b1->GetEntries()==0) return;
+      dqutils::MonitoringFile::merge_weightedEff(*a1, *b1);
+    }
+    return;
+  }
+
+  void mergeRMS ATLAS_NOT_THREAD_SAFE(TObject * a, const TObject* b) {
+    TH1* a1 = (dynamic_cast<TH1*>(a));
+    const TH1* b1 = dynamic_cast<const TH1*>(b);
+    if (!b1 || !a1)
+      std::cout << "ERROR in mergeRMS: Object not of type TH1" << std::endl;
+    else {
+      if (b1->GetEntries()==0) return;
+      dqutils::MonitoringFile::merge_RMS(*a1, *b1);
+    }
+    return;
+  }
+
+  void RMSpercentDeviation ATLAS_NOT_THREAD_SAFE(TObject * a, const TObject* b) {
+    TH1* a1 = (dynamic_cast<TH1*>(a));
+    const TH1* b1 = dynamic_cast<const TH1*>(b);
+    if (!b1 || !a1)
+      std::cout << "ERROR in RMSpercentDeviation: Object not of type TH1" << std::endl;
+    else {
+      if (b1->GetEntries()==0) return;
+      dqutils::MonitoringFile::merge_RMSpercentDeviation(*a1, *b1);
+    }
+    return;
+  }
+
+  void perBinEffPerCent ATLAS_NOT_THREAD_SAFE(TObject * a, const TObject* b) {
+    TH1* a1 = (dynamic_cast<TH1*>(a));
+    const TH1* b1 = dynamic_cast<const TH1*>(b);
+    if (!b1 || !a1)
+      std::cout << "ERROR in getBinEffPerCent: Object not of type TH1" << std::endl;
+    else {
+      if (b1->GetEntries()==0) return;
+      dqutils::MonitoringFile::merge_perBinEffPerCent(*a1, *b1);
+    }
+    return;
+  }
+
+  void lowerLB ATLAS_NOT_THREAD_SAFE(TObject * a, const TObject* b) {
+    TH1* a1 = (dynamic_cast<TH1*>(a));
+    const TH1* b1 = dynamic_cast<const TH1*>(b);
+    if (!b1 || !a1)
+      std::cout << "ERROR in lowerLB: Object not of type TH1" << std::endl;
+    else
+      dqutils::MonitoringFile::merge_lowerLB(*a1, *b1);
+    return;
+  }
+
+  template <class HIST>
+  void identical(TObject * a, const TObject* b) {
+    if (!s_checkEquality)
+      return; //quasi null-operation
+    HIST* a1 = (dynamic_cast<HIST*>(a));
+    const HIST* b1 = dynamic_cast<const HIST*>(b);
+    dqutils::MonitoringFile::merge_identical(*a1, *b1);
+    return;
+  }
+
+  void merge_rebinned(TObject * a, const TObject* b) {
+    TH1* a1 = (dynamic_cast<TH1*>(a));
+    const TH1* b1 = dynamic_cast<const TH1*>(b);
+    if (!a1 || !b1) {
+      std::cout << "ERROR, in merge_rebinned: Object not of type TH1";
+    }
+    TH1* b2 = const_cast<TH1*>(b1);
+    dqutils::MonitoringFile::merge_Rebinned(*a1, *b2);
+    return;
+  }
+
+  void merge_eventSample(TObject * a, const TObject* b) {
+    TH2* a1 = (dynamic_cast<TH2*>(a));
+    const TH2* b1 = dynamic_cast<const TH2*>(b);
+    if (!a1 || !b1) {
+      std::cout << "ERROR in merge_eventSample: Object not of type TH2" << std::endl;
+    }
+    dqutils::MonitoringFile::merge_eventSample(*a1, *b1);
+  }
+
+  void merge_TEfficency(TObject * a, const TObject* b) {
+    TEfficiency* a1 = dynamic_cast<TEfficiency*>(a);
+    const TEfficiency* b1 = dynamic_cast<const TEfficiency*>(b);
+    TEfficiency* b2 = const_cast<TEfficiency*>(b1);
+    if (!a1 || !b1) {
+      std::cout << "ERROR in merge_TEfficiency: Object not of type TEfficiency" << std::endl;
+    }
+    TList listE;
+    listE.Add(b2);
+    a1->Merge(&listE);
+    listE.Clear();
+  }
+
+  void merge_TTree(TObject * a, const TObject* b) {
+    TTree* a1 = dynamic_cast<TTree*>(a);
+    const TTree* b1 = dynamic_cast<const TTree*>(b);
+    TTree* b2 = const_cast<TTree*>(b1);
+    TList listT;
+    listT.Add(b2);
+    a1->Merge(&listT);
+    listT.Clear();
+  }
+
+  histCollection::histPerDir_t::histPerDir_t(const std::string& nameIn, std::unique_ptr<TObject>&& objIn, TTree* mdTree)
+      : name(nameIn), obj(std::move(objIn)), mergeMethod(nullptr) {
+    // Some sanity checks:
+    if (!obj) {
+      std::cout << "ERROR while adding " << nameIn << ": Histogram pointer is NULL" << std::endl;
+      return;
+    }
+
+    if (!fillMD(mdTree)) {
+      std::cout << "ERROR while adding " << nameIn << ", no metadata found" << std::endl;
+      obj = nullptr;
+      return;
+    }
+
+    const std::string& howToMerge = metadata[2];
+    s_dbg(VERBOSE, "Name: " + name + " mergeMethod=" + howToMerge);
+
+    TH1* th1 = dynamic_cast<TH1*>(obj.get());
+    TH2* th2 = dynamic_cast<TH2*>(obj.get());
+    TEfficiency* teff = dynamic_cast<TEfficiency*>(obj.get());
+    if (th1) {
+      th1->SetDirectory(nullptr);  // Get ownership of this hist
+      if (howToMerge == "<default>") {
+        if (th2) {
+          mergeMethod = &defaultMerge<TH2>;
+        } else { //TH1 case
+          mergeMethod = &defaultMerge<TH1>;
+        }
+      }
+      else if (howToMerge == "weightedAverage" ||  howToMerge=="weightedAverage2D")
+        mergeMethod = &weightedAverage;
+      else if (howToMerge == "weightedEff")
+        mergeMethod = &weightedEff;
+      else if (howToMerge == "mergeRMS")
+        mergeMethod = &mergeRMS;
+      else if (howToMerge == "RMSpercentDeviation")
+        mergeMethod = &RMSpercentDeviation;
+      else if (howToMerge == "perBinEffPerCent")
+        mergeMethod = &perBinEffPerCent;
+      else if (howToMerge == "lowerLB")
+        mergeMethod = &lowerLB;
+      else if (howToMerge == "identical")
+        if (th2) {
+          mergeMethod = &identical<TH2>;
+        } else { //TH1 case
+          mergeMethod = &identical<TH1>;
+        }
+      else if ((howToMerge == "mergeRebinned") || (howToMerge == "merge"))
+        mergeMethod = &merge_rebinned;
+      else {
+        std::cout << "ERROR: Unknown merging method (" << howToMerge << ") for object of type TH1 named " << nameIn << std::endl;
+        obj.reset(nullptr);
+      }
+    }  // end if TH1
+    else if (teff) {
+      teff->SetDirectory(nullptr);
+      if (howToMerge == "<default>")
+        mergeMethod = &merge_TEfficency;
+      else
+        std::cout << "ERROR: Unknown merging method (" << howToMerge << ") for object of type TEfficiency named " << nameIn << std::endl;
+    }  // end if TEfficiency
+    else if (nullptr != dynamic_cast<TTree*>(obj.get())) {
+      mergeMethod = &merge_TTree;
+    } else {
+      std::cout << "ERROR Object " << name << " has unkown type" << std::endl;
+      obj.reset(nullptr);
+    }
+  }
+
+  void histCollection::addDirectory(TDirectory * dir, const std::string& dirName, const std::string& filename) {
+
+    s_dbg(VERBOSE, "Working on directory " + dirName);
+    if (m_dirExclusion && !std::regex_search(dirName, *m_dirExclusion)) {
+      s_dbg(DEBUG, "Path " + dirName + " is excluded");
+      return;
+    }
+
+    for (TObject* oKey : *dir->GetListOfKeys()) {
+      TKey* key = static_cast<TKey*>(oKey);
+      const std::string name = key->GetName();
+      const std::string classname = key->GetClassName();
+      if ((classname == "TTree") && (name == "metadata")) {
+        continue;
+      }
+
+      s_dbg(VERBOSE, "Found name " + name + ", classname=" + classname);
+
+      const std::string newName = dirName + "/" + name;
+      auto itDir = m_data.find(dirName);
+
+      if (classname.starts_with("TH") || classname.starts_with("TProfile") || classname.starts_with("TEfficiency") || classname == "TTree") {
+        if (m_histExclusion && !std::regex_search(name, *m_histExclusion)) {
+          s_dbg(DEBUG, "Histogram with name " + name + " is excluded");
+          continue;
+        }
+
+        // arrive here if we have at least one histogram in this directory
+        if (m_skipExisting) {
+          // Check if this object exists already in the output-file
+          std::unique_ptr<TObject> existingObj(m_out->Get(newName.c_str()));
+          if (existingObj)
+            continue;
+        }
+
+        std::unique_ptr<TTree> md;
+        if (itDir == m_data.end()) {
+          // Have not seen this dirName yet
+          itDir = m_data.emplace(dirName, histDir_t()).first;
+          s_dbg(VERBOSE, "Registering new directory " + dirName);
+        }
+
+        // Check if we already have this histogram in the list
+        auto itH = itDir->second.histos.find(name);
+        if (itH == itDir->second.histos.end()) {
+          // New histogram (or Tree):
+          if (!md) {
+            // Metadata tree not yet read in this directory
+            md.reset((TTree*)dir->Get("metadata"));
+          }
+          if (!md) {
+            std::cout << "ERROR: Did not find metadata tree in directory " << dir->GetPath() << std::endl;
+            continue;
+          }
+          std::unique_ptr<TObject> obj{key->ReadObj()};
+          TTree* treeObj = dynamic_cast<TTree*>(obj.get());
+          if (treeObj) {
+            TDirectory* outDir = m_out->GetDirectory(dirName.c_str());
+            if (!outDir)
+              outDir = m_out->mkdir(dirName.c_str());
+            // TTree need special treatment ...
+            TDirectory* currentDir = gDirectory;
+            outDir->cd();
+            TTree* cloneTree = treeObj->CloneTree();
+            // this disconnects parent tree
+            obj.reset(cloneTree);
+            currentDir->cd();
+          }
+          histPerDir_t histo(name, std::move(obj), md.get());
+          itH = itDir->second.histos.emplace(name, std::move(histo)).first;  //Take owernship of object here!
+          s_dbg(VERBOSE, "Cloning histogram " + name + " in dir " + dirName);
+        } else {
+          // Histogram already known .. merge it
+          std::unique_ptr<TObject> other(key->ReadObj());
+          if (!other) {
+            std::cout << "ERROR, got NULL key";
+          } else {
+            itH->second.merge(other.get());  // Release object in this case
+            s_dbg(VERBOSE, "Merging histogram " + name + " in dir " + dirName);
+          }
+        }
+      } else if (classname.starts_with("TDirectory")) {
+        std::unique_ptr<TObject> obj(key->ReadObj());
+        TDirectory* subdir = dynamic_cast<TDirectory*>(obj.get());
+        if (subdir) {
+          if (filename.empty()) {
+            this->addDirectory(subdir, newName, filename);
+          } else {
+            if (!name.starts_with("lb_") && !name.starts_with("lowStat_LB")) {
+              this->addDirectory(subdir, newName, filename);
+            } else {
+              m_fileLBMap[newName].push_back(filename);
+            }
+          }
+        }
+      } else {
+        std::cout << "Ignored objects '" << name << "' of type " << classname << std::endl;
+      }
+    }
+    return;
+  }
+
+  void histCollection::write() {
+    unsigned nWritten = 0;
+    unsigned nIgnored = 0;
+    unsigned nDirs = 0;
+    for (auto& it : m_data) {
+      const std::string fulldir = it.first;
+      TDirectory* histDir = m_out->GetDirectory(fulldir.c_str());
+      if (histDir == nullptr) {  // Create the directory if it doesn't exist yet
+        histDir = m_out->mkdir(fulldir.c_str());
+        if (histDir == nullptr) {
+          std::cout << "ERROR, failed to create directory " << fulldir << std::endl;
+          break;
+        } else {
+          s_dbg(VERBOSE, "Created directory " + fulldir + " in file " + m_out->GetName());
+        }
+      }
+      m_out->cd(fulldir.c_str());
+      ++nDirs;
+      for (auto& [name, histo] : it.second.histos) {
+        if (histo.obj) {
+          histo.obj->Write();
+          ++nWritten;
+        } else {
+          std::cout << "NOT writing " << name << ". Invalid." << std::endl;
+          ++nIgnored;
+        }
+      }  // End loop over histograms in one directory
+      it.second.writeMD(histDir);
+    }  // End loop over directories;
+    std::cout << "Wrote " << nWritten << " histograms to " << nDirs << " directories in output file " << m_out->GetName() << std::endl;
+    if (nIgnored)
+      std::cout << " Omitting " << nIgnored << " histograms." << std::endl;
+  }
+
+  // *********************************************************************
+  // Public Methods
+  // *********************************************************************
+
+  MonitoringFile::OutputMetadata::OutputMetadata(TTree * metadata) : m_metadata(metadata) {
+    makeBranch("Name", "Name/C");
+    makeBranch("Interval", "Interval/C");
+    makeBranch("TriggerChain", "TriggerChain/C");
+    makeBranch("MergeMethod", "MergeMethod/C");
+  }
+
+  void MonitoringFile::OutputMetadata::makeBranch(const char* branchName, const char* branchstr) {
+    if (!m_metadata->GetBranch(branchName)) {
+      m_metadata->Branch(branchName, (void*)nullptr, branchstr);
+    }
+  }
+
+  void MonitoringFile::OutputMetadata::fill(const std::string& theName, const std::string& theInterval, const std::string& theChain,
+                                            const std::string& theMerge) {
+    std::string name = theName;
+    std::string interval = theInterval;
+    std::string chain = theChain;
+    std::string merge = theMerge;
+    m_metadata->SetBranchAddress("Name", name.data());
+    m_metadata->SetBranchAddress("Interval", interval.data());
+    m_metadata->SetBranchAddress("TriggerChain", chain.data());
+    m_metadata->SetBranchAddress("MergeMethod", merge.data());
+    m_metadata->Fill();
+  }
+
+  MonitoringFile::MonitoringFile() : m_file(0) {
+    m_fileCompressionLevel = 1;
+    m_doTiming = false;
+    MonitoringFile::clearData();
+  }
+
+  bool MonitoringFile::setFile(const std::string& fileName) {
+    clearData();
+    m_file = TFile::Open(fileName.c_str());
+    if (m_file != 0)
+      return true;
     return false;
   }
-  TArray* arrptr = dynamic_cast<TArray*>(h);
-  if (! arrptr) {
-    std::cerr << "Unable to cast TH1 to TArray for " << h->GetName() << " - saying it's OK and hoping for the best" << std::endl;
+
+  MonitoringFile::MonitoringFile(const std::string& fileName) : m_file(0) {
+    m_fileCompressionLevel = 1;
+    m_doTiming = false;
+    MonitoringFile::clearData();
+    MonitoringFile::setFile(fileName);
+  }
+
+  MonitoringFile::~MonitoringFile() {
+    dqi::DisableMustClean disabled;
+
+    delete m_file;
+  }
+
+  bool MonitoringFile::setHistogramRegEx(const std::string& re) {
+    m_mergeMatchHistoRE = checkRegEx(re);
+    return m_mergeMatchHistoRE.has_value();
+  }
+
+  bool MonitoringFile::setDirectoryRegEx(const std::string& re) {
+    m_mergeMatchDirRE = checkRegEx(re);
+    return m_mergeMatchDirRE.has_value();
+  }
+
+  void MonitoringFile::getAllDirs(DirMap_t & dirmap, TDirectory * dir, const std::string& dirName) {
+    if (dir == 0)
+      return;
+
+    if (dirName != "") {
+      DirMap_t::value_type dirmapVal(dirName, dir);
+      dirmap.insert(dirmapVal);
+    }
+
+    TIter next(dir->GetListOfKeys());
+    TKey* key;
+    while ((key = dynamic_cast<TKey*>(next())) != 0) {
+      // don't delete TDirectories
+      TObject* obj = key->ReadObj();
+      TDirectory* subdir = dynamic_cast<TDirectory*>(obj);
+      if (subdir != 0) {
+        std::string subdirName(subdir->GetName());
+        std::string fName("");
+        if (dirName != "") {
+          fName += dirName;
+          fName += '/';
+        }
+        fName += subdirName;
+        getAllDirs(dirmap, subdir, fName);
+      } else {
+        delete obj;
+      }
+    }
+  }
+
+  TDirectory* MonitoringFile::createDir(DirMap_t & dirmap, TDirectory * dir, const std::string& parent, const std::string& path) {
+    if (dir == 0)
+      return 0;
+
+    TDirectory* subdir(0);
+    DirMap_t::const_iterator diter;
+    std::string::size_type i = path.find_first_of('/');
+    std::string fName("");
+    if (parent != "") {
+      fName += parent;
+      fName += '/';
+    }
+
+    if (i != std::string::npos) {
+      std::string dName(path, 0, i);
+      std::string pName(path, i + 1, std::string::npos);
+      fName += dName;
+      if (dName != "") {
+        diter = dirmap.find(fName);
+        if (diter != dirmap.end()) {
+          subdir = diter->second;
+        } else {
+          subdir = dir->mkdir(dName.c_str());
+          DirMap_t::value_type dirmapVal(fName, subdir);
+          dirmap.insert(dirmapVal);
+        }
+      } else {
+        subdir = dir;
+      }
+      return createDir(dirmap, subdir, fName, pName);
+    }
+
+    fName += path;
+
+    diter = dirmap.find(fName);
+    if (diter != dirmap.end()) {
+      return diter->second;
+    }
+
+    subdir = dir->mkdir(path.c_str());
+    DirMap_t::value_type dirmapVal(fName, subdir);
+    dirmap.insert(dirmapVal);
+    return subdir;
+  }
+
+  TKey* MonitoringFile::getObjKey(TDirectory * dir, const std::string& path) {
+    if (dir == 0)
+      return 0;
+
+    TKey* key(0);
+
+    std::string::size_type i = path.find_first_of('/');
+    if (i != std::string::npos) {
+      std::string dName(path, 0, i);
+      std::string pName(path, i + 1, std::string::npos);
+      if (dName != "") {
+        key = dir->FindKey(dName.c_str());
+        if (key != 0) {
+          TDirectory* subDir = dynamic_cast<TDirectory*>(key->ReadObj());
+          if (subDir) {
+            return getObjKey(subDir, pName);
+          }  // else fall through
+        }
+        return 0;
+      }
+      return getObjKey(dir, pName);
+    }
+
+    return dir->FindKey(path.c_str());
+  }
+
+  void MonitoringFile::fillMetaDataMap(std::map<std::string, dqutils::MonitoringFile::MetaData> & mdMap, TDirectory * dir) {
+    if (dir == 0)
+      return;
+    TTree* md = dynamic_cast<TTree*>(dir->Get("metadata"));
+    if (md == 0)
+      return;
+
+    TTreeReader reader(md);
+    TTreeReaderArray<char> i_name(reader, "Name");
+    TTreeReaderArray<char> i_interval(reader, "Interval");
+    TTreeReaderArray<char> i_chain(reader, "TriggerChain");
+    TTreeReaderArray<char> i_merge(reader, "MergeMethod");
+
+    while (reader.Next()) {
+      const std::string nameStr(static_cast<char*>(i_name.GetAddress()));
+      if (mdMap.find(nameStr) == mdMap.end()) {
+        MetaData md(nameStr, static_cast<char*>(i_interval.GetAddress()), static_cast<char*>(i_chain.GetAddress()), static_cast<char*>(i_merge.GetAddress()));
+        std::map<std::string, MetaData>::value_type mdVal(nameStr, md);
+        mdMap.insert(mdVal);
+      }
+    }
+
+    delete md;
+  }
+
+  int MonitoringFile::mergeFiles(const std::string& outFileName, const std::vector<std::string>& files) {
+    std::cout << "Writing file: " << outFileName << std::endl;
+    std::cout << "Start merging [" << files.size() << "] histogram files" << std::endl;
+    dqi::DisableMustClean disabled;
+    TH1::AddDirectory(false);
+    if (m_mergeMatchDirRE.has_value() || m_mergeMatchHistoRE.has_value()) {
+      std::cout << " ========== Using regular expressions for selective merging ========== " << std::endl;
+    }
+    if (m_doTiming) {
+      std::cout << "CPU time measurement activated " << std::endl;
+    }
+
+    const size_t nFiles = files.size();
+
+    if (nFiles < 1)
+      return -1;
+
+    if (nFiles == 1) {
+      std::cout << "Got exactly one input file. Will copy input -> output" << std::endl;
+      if (m_mergeMatchDirRE.has_value() || m_mergeMatchHistoRE.has_value()) {
+        std::cout << "regular expressions for selective merging will have no effect!" << std::endl;
+      }
+
+      std::filesystem::path inPath(files[0]);
+      std::filesystem::path outPath(outFileName);
+      std::filesystem::copy_file(inPath, outPath, std::filesystem::copy_options::overwrite_existing);
+      return 0;
+    }
+
+    std::unique_ptr<TFile> outfile(TFile::Open(outFileName.c_str(), "RECREATE", outFileName.c_str(), m_fileCompressionLevel));
+    if (outfile.get() == 0) {
+      std::cout << " ERROR, cound not open output file " << outFileName << std::endl;
+      return -1;
+    }
+    std::cout << "Opened/created output file " << outFileName << std::endl;
+
+    histCollection hc(outfile.get());
+    hc.addDirExclusion(m_mergeMatchDirRE);
+    hc.addHistExclusion(m_mergeMatchHistoRE);
+
+    // Open first input file, mostly to get the run-directory
+    std::unique_ptr<TFile> in1(TFile::Open(files[0].c_str()));
+    if (!in1) {
+      std::cout << "ERROR, could not open input file " << files[0] << std::endl;
+      return -1;
+    }
+    std::cout << "Working on file 1/" << nFiles << ": " << files[0] << std::endl;
+    std::string runDir;
+    const std::regex runDirPattern("run_[0-9]*");
+    TIter next(in1->GetListOfKeys());
+    TKey* key;
+    while ((key = (TKey*)next())) {
+      const char* name = key->GetName();
+      if (std::regex_match(name, runDirPattern)) {
+        if (runDir.size() > 0) {
+          std::cout << "ERROR More than one run_XXX directory found! Ignoring " << name << std::endl;
+        } else
+          runDir = name;
+      }
+    }
+    std::cout << "Found run directory " << runDir << std::endl;
+
+    TDirectory* dir(dynamic_cast<TDirectory*>(in1->Get(runDir.c_str())));
+    if (!dir) {
+      std::cout << "ERROR, can't access directory  " << runDir;
+      return -1;
+    }
+
+    hc.addDirectory(dir, runDir, files[0]);
+
+    // Close first input file
+    in1->Delete("");
+    in1->Close();
+    in1.reset(nullptr);
+
+    for (size_t i = 1; i < files.size(); ++i) {
+      std::cout << "Working on file " << 1+i << "/" << nFiles << ": " << files[i] << std::endl;
+      std::unique_ptr<TFile> in(TFile::Open(files[i].c_str()));
+      if (!in) {
+        std::cout << "ERROR, could not open input file " << files[i] << std::endl;
+        return -1;
+      }
+      TDirectory* dir(dynamic_cast<TDirectory*>(in->Get(runDir.c_str())));
+      hc.addDirectory(dir, runDir, files[i]);
+      in->Delete("");
+      in->Close();
+    }
+
+    std::cout << "Accumulated a total of " << hc.size() << " histograms." << std::endl;
+
+    std::cout << "Start writing output ..." << std::endl;
+    hc.write();
+
+    if (m_doTiming) {
+      std::cout << "CPU time for histogram merging: (regular histograms)" << std::endl;
+      hc.printTiming();
+    }
+    const auto lbmap = hc.getFileLBMapAndClear();
+    if (!lbmap.empty()) {
+      std::cout << "Start merging lb_nnn and lowStat_LB directories (" << lbmap.size() << " in total)" << std::endl;
+      histCollection hclb(outfile.get());
+      hc.addDirExclusion(m_mergeMatchDirRE);
+      hc.addHistExclusion(m_mergeMatchHistoRE);
+
+      for (const auto& [dir, filenames] : lbmap) {
+        std::cout << "Merging/copying directory " << dir << std::endl;
+        for (const std::string& fName : filenames) {
+          std::unique_ptr<TFile> in(TFile::Open(fName.c_str()));
+          if (in1) {
+            std::cout << "ERROR, could not open input file " << fName << std::endl;
+            return -1;
+          }
+          TDirectory* tDir = (dynamic_cast<TDirectory*>(in->Get(dir.c_str())));
+          if (!tDir) {
+            std::cout << "ERROR, failed to get directory " << dir << " from file " << fName << std::endl;
+          } else {
+            hclb.addDirectory(tDir, dir);
+          }
+          in->Delete("");
+          in->Close();
+        }
+        hclb.write();
+        if (m_doTiming) {
+          std::cout << "CPU time for histogram merging: (lumiblock-histograms)" << std::endl;
+          hclb.printTiming();
+        }
+        hclb.clear();
+      }
+    }
+    outfile->Close();
+    return 0;
+  }
+
+  int MonitoringFile::mergeFiles(const std::string& outFileName, const std::string& listFileName) {
+    typedef std::vector<std::string> FileList_t;
+
+    const unsigned int nFilesAtOnce = 50;
+
+    FileList_t allFiles;
+    bool success = setListFromFile(allFiles, listFileName);
+    if (!success) {
+      std::cout << "ERROR Failed ot read list of input files" << std::endl;
+      return -1;
+    }
+
+    if (allFiles.size() <= nFilesAtOnce) {
+      return mergeFiles(outFileName, allFiles);
+    }
+
+    FileList_t procFiles, tmpIntermediateFiles;
+
+    FileList_t::const_iterator filesEnd = allFiles.end();
+    FileList_t::const_iterator fi = allFiles.begin();
+
+    unsigned int counter = 0;
+    std::string tmpInputFile("");
+    std::string tmpOutputFile("");
+
+    // new logic: merge intermediately, then merge intermediate files
+    while (fi != filesEnd) {
+
+      procFiles.push_back(*fi);
+      ++counter;
+      ++fi;
+      if (counter % nFilesAtOnce == 0 || fi == filesEnd) {
+        std::ostringstream nameStream;
+        nameStream << "tmp_merge_" << counter << ".root";
+        tmpOutputFile = nameStream.str();
+        tmpIntermediateFiles.push_back(tmpOutputFile);
+        int stat=mergeFiles(tmpOutputFile, procFiles);
+        if (stat) return stat;
+        procFiles.clear();
+      }
+    }
+
+    int stat=mergeFiles(outFileName, tmpIntermediateFiles);
+    if (stat) return stat;
+
+    for (const auto& tmpFile : tmpIntermediateFiles) {
+      std::remove(tmpFile.c_str());
+    }
+    return 0;
+  }
+
+  void MonitoringFile::printStatistics() {
+    if (m_file == 0) {
+      std::cerr << "MonitoringFile::printStatistics(): "
+                << "No input file is open\n";
+      return;
+    }
+
+    DirMap_t indirmap;
+
+    getAllDirs(indirmap, m_file, "");
+
+    DirMap_t::const_iterator idirend = indirmap.end();
+    for (DirMap_t::const_iterator idir = indirmap.begin(); idir != idirend; ++idir) {
+      std::string idirName = idir->first;
+
+      GatherStatistics stat_shift(idirName);
+      GatherStatistics stat_all(idirName);
+
+      loopOnHistogramsInMetadata(stat_shift, idir->second);
+      loopOnHistograms(stat_all, idir->second);
+
+      std::cout.setf(std::ios_base::left, std::ios_base::adjustfield);
+      std::cout.width(80);
+      std::cout << idirName << "  ";
+
+      std::cout.setf(std::ios_base::right, std::ios_base::adjustfield);
+      std::cout << "  shift: ";
+      std::cout.width(3);
+      std::cout << stat_shift.m_nHist1D << " ";
+      std::cout.width(5);
+      std::cout << stat_shift.m_nHist1DBins << " ";
+      std::cout.width(3);
+      std::cout << stat_shift.m_nHist2D << " ";
+      std::cout.width(7);
+      std::cout << stat_shift.m_nHist2DBins << " ";
+      std::cout.width(3);
+      std::cout << stat_shift.m_nGraph << " ";
+      std::cout.width(5);
+      std::cout << stat_shift.m_nGraphPoints << "   ";
+
+      std::cout << "  all: ";
+      std::cout << stat_all.m_nHist1D << " ";
+      std::cout.width(5);
+      std::cout << stat_all.m_nHist1DBins << " ";
+      std::cout.width(3);
+      std::cout << stat_all.m_nHist2D << " ";
+      std::cout.width(7);
+      std::cout << stat_all.m_nHist2DBins << " ";
+      std::cout.width(3);
+      std::cout << stat_all.m_nGraph << " ";
+      std::cout.width(5);
+      std::cout << stat_all.m_nGraphPoints << "\n";
+
+      std::cout << std::flush;
+    }
+  }
+
+  bool MonitoringFile::copyHistograms(const std::string& outFileName, const std::string& dirName) {
+    dqi::DisableMustClean disabled;
+    //  bool useRecursiveDelete = gROOT->MustClean();
+    //  gROOT->SetMustClean(false);
+
+    if (m_file == 0) {
+      std::cerr << "MonitoringFile::copyHistograms(): "
+                << "No input file is open\n";
+      return false;
+    }
+
+    DirMap_t indirmap;
+    DirMap_t reducedmap;
+    DirMap_t outdirmap;
+
+    if (dirName != "all") {
+      TKey* dkey = getObjKey(m_file, dirName);
+      if (dkey == 0) {
+        std::cerr << "MonitoringFile::copyHistograms(): "
+                  << "Directory \'" << dirName << "\' not found in input file\n";
+        return false;
+      }
+
+      TDirectory* fromDir = dynamic_cast<TDirectory*>(dkey->ReadObj());
+
+      DirMap_t::value_type dirmapVal(dirName, fromDir);
+      indirmap.insert(dirmapVal);
+    } else {
+      std::cout << "Building list of all TDirectories in file...\n" << std::flush;
+      getAllDirs(indirmap, m_file, "");
+    }
+
+    DirMap_t::const_iterator idirend = indirmap.end();
+    for (DirMap_t::const_iterator idir = indirmap.begin(); idir != idirend; ++idir) {
+
+      std::string idirName = idir->first;
+      std::cout << "Checking " << idirName << "\n" << std::flush;
+      // std::string::size_type j = idirName.find( "L1Calo/1_PPr_EmFADCTiming" );
+      // if( j != std::string::npos ) {
+      //   std::cerr << "Skipping directory \"" << idirName << "\"\n";
+      //   std::cerr << std::flush;
+      //   continue;
+      // }
+
+      if (!dirHasHistogramsInMetadata(idir->second)) {
+        continue;
+      }
+
+      reducedmap.insert(*idir);
+    }
+
+    std::unique_ptr<TFile> outfile(TFile::Open(outFileName.c_str(), "RECREATE", outFileName.c_str(), m_fileCompressionLevel));
+    if (outfile.get() == 0) {
+      std::cerr << "MonitoringFile::copyHistograms(): "
+                << "Output file not opened\n";
+      return false;
+    }
+
+    idirend = reducedmap.end();
+    for (DirMap_t::const_iterator idir = reducedmap.begin(); idir != idirend; ++idir) {
+
+      std::string idirName = idir->first;
+      std::cout << "Processing " << idirName << "\n" << std::flush;
+
+      TDirectory* toDir = createDir(outdirmap, outfile.get(), "", idirName);
+      if (toDir == 0) {
+        std::cerr << "MonitoringFile::copyHistograms(): "
+                  << "Directory \'" << idirName << "\' not created in output file\n";
+        return false;
+      }
+
+      CopyHistogram copyFcn(toDir, idirName);
+
+      loopOnHistogramsInMetadata(copyFcn, idir->second);
+    }
+
+    outfile->Write();
+    outfile->Close();
+
+    //  gROOT->SetMustClean(useRecursiveDelete);
     return true;
   }
-  arrsize = arrptr->GetSize();
-  if (computedsize != arrsize) {
-    std::cout << "Sizes: computed " << computedsize << " array " << arrsize << std::endl;
-  }
-  return computedsize == arrsize;
-}
 
-// *********************************************************************
-// Public Methods
-// *********************************************************************
+  std::string MonitoringFile::getHanResults(const std::string& hanResultsDir, const std::string& input, const std::string& hcfg,
+                                            const std::string& hcfg_lowStat, const std::string& hcfg_medStat) {
+    // DisableMustClean disabled;
 
-MonitoringFile::OutputMetadata::
-OutputMetadata( TTree* metadata )
-  : m_metadata(metadata)
-{
-  makeBranch( "Name", "Name/C" );
-  makeBranch( "Interval", "Interval/C" );
-  makeBranch( "TriggerChain", "TriggerChain/C" );
-  makeBranch( "MergeMethod", "MergeMethod/C" );
-}
+    std::cout << "\nUsing han configurations:\n"
+              << "  entire run: " << hcfg << "\n"
+              << "  low stat interval: " << hcfg_lowStat << "\n"
+              << "  medium stat interval: " << hcfg_medStat << "\n\n"
+              << std::flush;
 
-void
-MonitoringFile::OutputMetadata::
-makeBranch(const char* branchName, const char* branchstr) 
-{
-  if (!m_metadata->GetBranch(branchName)) {
-    m_metadata->Branch(branchName, (void*) nullptr, branchstr);
-  }
-}
-
-void
-MonitoringFile::OutputMetadata::
-fill( const std::string & theName,
-      const std::string & theInterval,
-      const std::string & theChain,
-      const std::string & theMerge )
-{
-  std::string name=theName;
-  std::string interval = theInterval;
-  std::string chain = theChain;
-  std::string merge = theMerge;
-  m_metadata->SetBranchAddress("Name", name.data());
-  m_metadata->SetBranchAddress("Interval", interval.data());
-  m_metadata->SetBranchAddress("TriggerChain", chain.data());
-  m_metadata->SetBranchAddress("MergeMethod", merge.data());
-  m_metadata->Fill();
-}
-
-
-MonitoringFile::
-MonitoringFile()
-  : m_file(0),m_mergeMatchHistoRE(0),m_mergeMatchDirRE(0),
-    m_mergeMatchHistoREString(".*"),m_mergeMatchDirREString(".*")
-{
-  m_debugLevel=0;
-  m_fileCompressionLevel=1;
-  m_doTiming=false;
-  MonitoringFile::clearData();
-}
-
-
-MonitoringFile::
-MonitoringFile( const std::string & fileName )
-  : m_file(0),m_mergeMatchHistoRE(0),m_mergeMatchDirRE(0),
-    m_mergeMatchHistoREString(".*"),m_mergeMatchDirREString(".*")
-{
-  m_debugLevel=0;
-  m_fileCompressionLevel=1;
-  m_doTiming=false;
-  MonitoringFile::clearData();
-  MonitoringFile::setFile( fileName );
-}
-
-
-MonitoringFile::
-~MonitoringFile()
-{
-  dqi::DisableMustClean disabled;
-  
-  delete m_file;
-  delete m_mergeMatchDirRE;
-  delete m_mergeMatchHistoRE;
-}
-
-bool MonitoringFile::setHistogramRegEx(const std::string& re){
-  if(re.empty()){
-    std::cerr<<__PRETTY_FUNCTION__<<"Warning empty regular expression string is given. Old RegEx \""<<m_mergeMatchHistoREString<<"\" is not changed"<<std::endl;
-    std::cerr<<__PRETTY_FUNCTION__<<"See http://www.boost.org/doc/libs/1_42_0/libs/regex/doc/html/boost_regex/syntax.html for allowed regular expression syntax"<<std::endl;
-    return false;
-  }
-  std::regex *reNew=0;
-  try{
-    reNew=new std::regex(re);
-    // this should fail if there are any problems with re!
-    std::string test("Test String");
-    std::regex_match(test,*reNew);
-  }catch(std::exception& e){
-    std::cerr<<__PRETTY_FUNCTION__<<"Invalid RegEx string \""<<re<<"\". Old RegEx \""<<m_mergeMatchHistoREString<<"\" is not changed"<<std::endl;
-    std::cerr<<__PRETTY_FUNCTION__<<"See http://www.boost.org/doc/libs/1_42_0/libs/regex/doc/html/boost_regex/syntax.html for allowed regular expression syntax"<<std::endl;
-    delete reNew;
-    return false;
-  }
-  delete m_mergeMatchHistoRE;
-  m_mergeMatchHistoREString=re;
-  m_mergeMatchHistoRE=reNew;
-  //delete reNew;
-  m_useRE=true;
-  return true;
-}
-
-bool MonitoringFile::setDirectoryRegEx(const std::string& re){
-  if(re.empty()){
-    std::cerr<<__PRETTY_FUNCTION__<<"Warning empty regular expression string is given. Old RegEx \""<<m_mergeMatchDirREString<<"\" is not changed"<<std::endl;
-    std::cerr<<__PRETTY_FUNCTION__<<"See http://www.boost.org/doc/libs/1_42_0/libs/regex/doc/html/boost_regex/syntax.html for allowed regular expression syntax"<<std::endl;
-    return false;
-  }
-  std::regex *reNew=0;
-  try{
-    reNew=new std::regex(re);
-    std::regex_match("Test string",*reNew);
-  }catch(std::exception& e){
-    std::cerr<<__PRETTY_FUNCTION__<<"Invalid RegEx string \""<<re<<"\". Old RegEx \""<<m_mergeMatchDirREString<<"\" is not changed"<<std::endl;
-    std::cerr<<__PRETTY_FUNCTION__<<"See http://www.boost.org/doc/libs/1_42_0/libs/regex/doc/html/boost_regex/syntax.html for allowed regular expression syntax"<<std::endl;
-    delete reNew;
-    return false;
-  }
-  delete m_mergeMatchDirRE;
-  m_mergeMatchDirREString=re;
-  m_mergeMatchDirRE=reNew;
-  //delete reNew;
-  m_useRE=true;
-  return true;
-}
-
-void
-MonitoringFile::
-getAllDirs( DirMap_t& dirmap, TDirectory* dir, const std::string & dirName )
-{
-  if( dir == 0 )
-    return;
-  
-  if( dirName != "" ) {
-    DirMap_t::value_type dirmapVal( dirName, dir );
-    dirmap.insert( dirmapVal );
-  }
-  
-  TIter next( dir->GetListOfKeys() );
-  TKey* key;
-  while( (key = dynamic_cast<TKey*>( next() )) != 0 ) {
-    // don't delete TDirectories
-    TObject* obj = key->ReadObj();
-    TDirectory* subdir = dynamic_cast<TDirectory*>( obj );
-    if( subdir != 0 ) {
-      std::string subdirName( subdir->GetName() );
-      std::string fName("");
-      if( dirName != "" ) {
-        fName += dirName;
-        fName += '/';
-      }
-      fName += subdirName;
-      getAllDirs( dirmap, subdir, fName );
+    TFile* infile = TFile::Open(input.c_str());
+    if (infile == 0) {
+      std::cerr << "MonitoringFile::getHanResults(): "
+                << "Cannot open input file \"" << input << "\"\n";
+      return "";
     }
-    else {
+
+    std::vector<std::string> run_dirs;
+    std::vector<std::string> lowStat_dirs;
+    std::vector<std::string> medStat_dirs;
+
+    TIter next_run(infile->GetListOfKeys());
+    TKey* key_run(0);
+    while ((key_run = dynamic_cast<TKey*>(next_run())) != 0) {
+      TObject* obj_run = key_run->ReadObj();
+      TDirectory* tdir_run = dynamic_cast<TDirectory*>(obj_run);
+      if (tdir_run != 0) {
+        std::string tdir_run_name(tdir_run->GetName());
+        if (tdir_run_name.find("run") != std::string::npos) {
+          run_dirs.push_back(tdir_run_name);
+          TIter next_minutes(tdir_run->GetListOfKeys());
+          TKey* key_minutes(0);
+          while ((key_minutes = dynamic_cast<TKey*>(next_minutes())) != 0) {
+            TObject* obj_minutes = key_minutes->ReadObj();
+            TDirectory* tdir_minutes = dynamic_cast<TDirectory*>(obj_minutes);
+            if (tdir_minutes != 0) {
+              std::string tdir_minutes_name(tdir_minutes->GetName());
+              if (tdir_minutes_name.find("lowStat") != std::string::npos) {
+                lowStat_dirs.push_back(tdir_run_name + '/' + tdir_minutes_name);
+              } else if (tdir_minutes_name.find("medStat") != std::string::npos) {
+                medStat_dirs.push_back(tdir_run_name + '/' + tdir_minutes_name);
+              }
+            }
+            delete obj_minutes;
+          }
+        }
+      }
+      delete obj_run;
+    }
+
+    delete infile;
+
+    dqi::HanApp han;
+
+    std::string fileList = " ";
+    std::vector<std::string>::const_iterator dirs_end;
+    std::vector<std::string>::const_iterator dir;
+
+    dirs_end = run_dirs.end();
+    for (dir = run_dirs.begin(); dir != dirs_end; ++dir) {
+      const std::string& tdir_run_name = *dir;
+      std::string han_output_run = hanResultsDir + '/' + tdir_run_name + "_han.root";
+      std::cout << "Calling han( " << hcfg << ", " << input << ", " << tdir_run_name << ", " << han_output_run << " ):\n" << std::flush;
+      han.Analyze(hcfg, input, han_output_run, tdir_run_name);
+      std::cout << "\n";
+      fileList += han_output_run + " " + tdir_run_name + "\n";
+    }
+
+    dirs_end = lowStat_dirs.end();
+    for (dir = lowStat_dirs.begin(); dir != dirs_end; ++dir) {
+      const std::string& tdir_minutes_path = *dir;
+
+      std::string tdir_minutes_underscore = tdir_minutes_path;
+      std::string::size_type tdir_minutes_i = tdir_minutes_underscore.find('/');
+      tdir_minutes_underscore.replace(tdir_minutes_i, 1, "_");
+
+      std::string han_output_lowStat = hanResultsDir + '/' + tdir_minutes_underscore + "_han.root";
+      std::cout << "Running han, writing to " << han_output_lowStat << ":\n" << std::flush;
+      han.Analyze(hcfg_lowStat, input, han_output_lowStat, tdir_minutes_path);
+      std::cout << "\n";
+      std::string subdirname(tdir_minutes_path, tdir_minutes_i + 1, std::string::npos);
+      std::string dirname(tdir_minutes_path, 0, tdir_minutes_i);
+      fileList += han_output_lowStat + " " + subdirname + " " + dirname + " " + subdirname + "\n";
+    }
+
+    dirs_end = medStat_dirs.end();
+    for (dir = medStat_dirs.begin(); dir != dirs_end; ++dir) {
+      const std::string& tdir_minutes_path = *dir;
+
+      std::string tdir_minutes_underscore = tdir_minutes_path;
+      std::string::size_type tdir_minutes_i = tdir_minutes_underscore.find('/');
+      tdir_minutes_underscore.replace(tdir_minutes_i, 1, "_");
+
+      std::string han_output_medStat = hanResultsDir + '/' + tdir_minutes_underscore + "_han.root";
+      std::cout << "Running han, writing to " << han_output_medStat << ":\n" << std::flush;
+      han.Analyze(hcfg_medStat, input, han_output_medStat, tdir_minutes_path);
+      std::cout << "\n";
+      std::string subdirname(tdir_minutes_path, tdir_minutes_i + 1, std::string::npos);
+      std::string dirname(tdir_minutes_path, 0, tdir_minutes_i);
+      fileList += han_output_medStat + " " + subdirname + " " + dirname + " " + subdirname + "\n";
+    }
+
+    return fileList;
+  }
+
+  void MonitoringFile::printHanConfig() {
+    if (m_file == 0) {
+      std::cerr << "MonitoringFile::printHanConfig(): "
+                << "No input file is open\n";
+      return;
+    }
+
+    DirMap_t indirmap;
+
+    getAllDirs(indirmap, m_file, "");
+
+    std::string indent, indent_p, indent_c;
+    std::string idirName_p;
+    DirMap_t::const_iterator idirend = indirmap.end();
+    for (DirMap_t::const_iterator idir = indirmap.begin(); idir != idirend; ++idir) {
+      std::string idirName = idir->first;
+      std::string::size_type shortNameIndex = idirName.rfind('/');
+      std::string shortName = idirName.substr(shortNameIndex + 1, std::string::npos);
+
+      std::string::size_type fsIndex = idirName.find('/');
+      std::string shortPath;
+      if (fsIndex != shortNameIndex)
+        shortPath = idirName.substr(fsIndex + 1, shortNameIndex);
+      else
+        shortPath = idirName.substr(fsIndex + 1, std::string::npos);
+
+      std::cout << idirName << "\n";
+      std::cout << shortPath << ", " << shortName << "\n";
+      /*
+      indent = getIndentation(idirName,"");
+      if(int(indent.size())==in_p){
+        std::cout << indent << "} \n";
+        std::cout << indent << "dir "  << shortName << "  { \n";
+        std::cout << indent << "  output " << idirName << "\n";
+        std::cout << indent << "  hist all_in_dir  { \n " << indent << " } \n";
+      }
+      else if (int(indent.size()) > in_p){
+        std::cout << indent << "dir "  << shortName << "  { \n";
+        std::cout << indent << "  output " << idirName << "\n";
+        std::cout << indent << "  hist all_in_dir  { \n " << indent << " } \n";
+      }
+      else{
+        //find common part + number of common '/'
+        std::string common = FindCommon(idirName,idirName_p);
+        indent_c = getIndentation(common,"");
+        int counter = (indent_p.size() - indent_c.size())/2;
+        for (int i = counter; i>0; i--){
+    std::string temp = indent_c;
+    for (int j = 0; j< i; j++){
+      temp+="  ";
+    }
+    std::cout << temp << "} \n" ;
+        }
+        std::cout << indent << "} \n";
+        std::cout << indent << "dir "  << shortName << "  { \n";
+        std::cout << indent << "  output " << idirName << "\n";
+        std::cout << indent << "  hist all_in_dir  { \n " << indent << " } \n";
+      }
+      indent_p = indent;
+      in_p = indent_p.size();
+      idirName_p = idirName;
+      */
+    }
+  }
+
+  std::string MonitoringFile::getIndentation(const std::string& pathName, const std::string& leadingSpace) {
+    std::string space = leadingSpace;
+    std::string::size_type i = pathName.find_first_of('/');
+    if (i != std::string::npos) {
+      std::string subPath(pathName, i + 1, std::string::npos);
+      space += "  ";
+      return getIndentation(subPath, space);
+    }
+    return space;
+  }
+
+  std::string MonitoringFile::FindCommon(const std::string& name1, const std::string& name2) const {
+    int length = (name1.size() < name2.size()) ? name1.size() : name2.size();
+    bool found = true;
+    int count = 0;
+    while (found == true && count < length) {
+      if (name1[count] == name2[count]) {
+        count++;
+      } else {
+        found = false;
+      }
+    }
+    return (name1.substr(0, count));
+  }
+
+  // *********************************************************************
+  // Protected Methods
+  // *********************************************************************
+
+  MonitoringFile::CopyHistogram::CopyHistogram(TDirectory * target, const std::string& dirName) : m_target(target), m_dirName(dirName), m_metadata(0) {
+    m_metadata = new TTree("metadata", "Monitoring Metadata");
+    m_metadata->SetDirectory(0);
+    m_metadata->Branch("Name", (void*)nullptr, "Name/C");
+    m_metadata->Branch("Interval", (void*)nullptr, "Interval/C");
+    m_metadata->Branch("TriggerChain", (void*)nullptr, "TriggerChain/C");
+    m_metadata->Branch("MergeMethod", (void*)nullptr, "MergeMethod/C");
+  }
+
+  MonitoringFile::CopyHistogram::~CopyHistogram() {
+    m_target->cd();
+    m_metadata->SetDirectory(m_target);
+    m_metadata->Write();
+    delete m_metadata;
+  }
+
+  bool MonitoringFile::CopyHistogram::execute(TH1 * hist) {
+    m_target->cd();
+    hist->SetDirectory(m_target);
+    hist->Write();
+
+    return true;
+  }
+
+  bool MonitoringFile::CopyHistogram::execute(TGraph * graph) {
+    m_target->cd();
+    graph->Write();
+
+    return true;
+  }
+
+  bool MonitoringFile::CopyHistogram::execute(TEfficiency * eff) {
+    m_target->cd();
+    eff->Write();
+    return true;
+  }
+
+  void MonitoringFile::CopyHistogram::fillMD(const MetaData& md) {
+    std::string name(md.name);
+    std::string interval(md.interval);
+    std::string chain(md.chain);
+    std::string merge(md.merge);
+    m_metadata->SetBranchAddress("Name", name.data());
+    m_metadata->SetBranchAddress("Interval", interval.data());
+    m_metadata->SetBranchAddress("TriggerChain", chain.data());
+    m_metadata->SetBranchAddress("MergeMethod", merge.data());
+    m_metadata->Fill();
+  }
+
+  bool MonitoringFile::CopyHistogram::executeMD(TH1 * hist, const MetaData& md) {
+    m_target->cd();
+    hist->SetDirectory(m_target);
+    hist->Write();
+
+    fillMD(md);
+
+    return true;
+  }
+
+  bool MonitoringFile::CopyHistogram::executeMD(TGraph * graph, const MetaData& md) {
+    m_target->cd();
+    graph->Write();
+
+    fillMD(md);
+
+    return true;
+  }
+
+  bool MonitoringFile::CopyHistogram::executeMD(TEfficiency * eff, const MetaData& md) {
+    m_target->cd();
+    eff->Write();
+    fillMD(md);
+    return true;
+  }
+
+  MonitoringFile::GatherStatistics::GatherStatistics(const std::string& dirName)
+      : m_dirName(dirName), m_nHist1D(0), m_nHist1DBins(0), m_nGraph(0), m_nGraphPoints(0), m_nHist2D(0), m_nHist2DBins(0) {}
+
+  bool MonitoringFile::GatherStatistics::execute(TH1 * hist) {
+    TH2* hist2d = dynamic_cast<TH2*>(hist);
+    if (hist2d != 0) {
+      ++m_nHist2D;
+      m_nHist2DBins += (hist2d->GetNbinsX() * hist2d->GetNbinsY());
+      return true;
+    }
+    ++m_nHist1D;
+    m_nHist1DBins += hist->GetNbinsX();
+    return true;
+  }
+
+  bool MonitoringFile::GatherStatistics::execute(TGraph * graph) {
+    ++m_nGraph;
+    m_nGraphPoints += graph->GetMaxSize();
+    return true;
+  }
+
+  bool MonitoringFile::GatherStatistics::execute(TEfficiency * eff) {
+    ++m_nEfficiency;
+
+    TH1* h_total = eff->GetCopyPassedHisto();
+    TH2* h_total2D = dynamic_cast<TH2*>(h_total);
+
+    if (h_total2D != 0) {
+      m_nEfficiencyBins += (h_total2D->GetNbinsX() * h_total2D->GetNbinsY());
+      return true;
+    } else {
+      m_nEfficiencyBins += h_total->GetNbinsX();
+      return true;
+    }
+  }
+
+  MonitoringFile::GatherNames::GatherNames() {}
+
+  bool MonitoringFile::GatherNames::execute(TH1 * hist) {
+    m_names.push_back(std::string(hist->GetName()));
+    return true;
+  }
+
+  bool MonitoringFile::GatherNames::execute(TGraph * graph) {
+    m_names.push_back(std::string(graph->GetName()));
+    return true;
+  }
+
+  bool MonitoringFile::GatherNames::execute(TEfficiency * eff) {
+    m_names.push_back(std::string(eff->GetName()));
+    return true;
+  }
+
+  void MonitoringFile::clearData() {
+    dqi::DisableMustClean disabled;
+
+    delete m_file;
+    m_file = 0;
+    m_fileCompressionLevel = 1;
+    m_doTiming = false;
+  }
+
+  bool MonitoringFile::dirHasHistogramsInMetadata(TDirectory * dir) {
+    dir->cd();
+
+    TKey* mdKey = dir->FindKey("metadata");
+    if (mdKey == 0) {
+      return false;
+    }
+
+    TTree* md = dynamic_cast<TTree*>(mdKey->ReadObj());
+    if (md == 0) {
+      return false;
+    }
+
+    int counter = 0;
+    int nEntries = int(md->GetEntries());
+
+    while (counter < nEntries) {
+      try {
+        md->GetEntry(counter);
+      } catch (const std::exception& e) {
+        std::cerr << "Exception: \"" << e.what() << "\" in directory \"" << dir->GetName() << "\"\n" << std::flush;
+        return false;
+      }
+
+      return true;
+      ++counter;
+    }
+
+    return false;
+  }
+
+  void MonitoringFile::loopOnHistograms(HistogramOperation & fcn, TDirectory * dir) {
+    TIter next(dir->GetListOfKeys());
+    TKey* key;
+    while ((key = dynamic_cast<TKey*>(next())) != 0) {
+      TObject* obj = key->ReadObj();
+      TH1* h(0);
+      TGraph* g(0);
+      TEfficiency* e(0);
+      if ((h = dynamic_cast<TH1*>(obj))) {
+        fcn.execute(h);
+      } else if ((g = dynamic_cast<TGraph*>(obj))) {
+        fcn.execute(g);
+      } else if ((e = dynamic_cast<TEfficiency*>(obj))) {
+        fcn.execute(e);
+      }
       delete obj;
     }
   }
-}
 
-
-TDirectory*
-MonitoringFile::
-createDir( DirMap_t& dirmap, TDirectory* dir, const std::string &parent, const std::string & path )
-{
-  if( dir == 0 )
-    return 0;
-  
-  TDirectory* subdir(0);
-  DirMap_t::const_iterator diter;
-  std::string::size_type i = path.find_first_of('/');
-  std::string fName("");
-  if( parent != "" ) {
-    fName += parent;
-    fName += '/';
-  }
-  
-  if( i != std::string::npos ) {
-    std::string dName( path, 0, i );
-    std::string pName( path, i+1, std::string::npos );
-    fName += dName;
-    if( dName != "" ) {
-      diter = dirmap.find( fName );
-      if( diter != dirmap.end() ) {
-        subdir = diter->second;
-      }
-      else {
-        subdir = dir->mkdir( dName.c_str() );
-        DirMap_t::value_type dirmapVal( fName, subdir );
-        dirmap.insert( dirmapVal );
-      }
-    }
-    else {
-      subdir = dir;
-    }
-    return createDir( dirmap, subdir, fName, pName );
-  }
-  
-  fName += path;
-    
-  diter = dirmap.find( fName );
-  if( diter != dirmap.end() ) {
-    return diter->second;
-  }
-  
-  subdir = dir->mkdir( path.c_str() );
-  DirMap_t::value_type dirmapVal( fName, subdir );
-  dirmap.insert( dirmapVal );
-  return subdir;
-}
-
-
-TKey*
-MonitoringFile::
-getObjKey( TDirectory* dir, const std::string & path )
-{
-  if( dir == 0 )
-    return 0;
-  
-  TKey* key(0);
-  
-  std::string::size_type i = path.find_first_of('/');
-  if( i != std::string::npos ) {
-    std::string dName( path, 0, i );
-    std::string pName( path, i+1, std::string::npos );
-    if( dName != "" ) {
-      key = dir->FindKey( dName.c_str() );
-      if( key != 0 ) {
-        TDirectory* subDir = dynamic_cast<TDirectory*>( key->ReadObj() );
-        if (subDir) {
-          return getObjKey( subDir, pName );
-        } // else fall through
-      }
-      return 0;
-    }
-    return getObjKey( dir, pName );
-  }
-  
-  return dir->FindKey( path.c_str() );
-
-}
-
-std::string getInputDirectory(const std::string & outputDirName, TFile* input, bool has_multiple_runs, std::map< TFile*, std::string >* prefixes) {
-  if (! has_multiple_runs) {
-    return outputDirName;
-  } else {
-    std::string retval(outputDirName);
-    std::string::size_type sepi = retval.find("run_multiple");
-    if (sepi != std::string::npos && prefixes->find(input) != prefixes->end()) {
-      retval.replace(sepi, 12, (*prefixes)[input]);
-    }
-    return retval;
-  }
-}
-
-std::string getOutputDirectory(const std::string & inputDirName, TFile* input, bool has_multiple_runs, std::map< TFile*, std::string >* prefixes) {
-  if (! has_multiple_runs) {
-    return inputDirName;
-  } else {
-    std::string retval(inputDirName);
-    if (prefixes->find(input) == prefixes->end()) {
-      return retval;
-    }
-    std::string::size_type sepi = retval.find((*prefixes)[input]);
-    if (sepi != std::string::npos) {
-      retval.replace(sepi, (*prefixes)[input].length(), "run_multiple");
-    }
-    return retval;
-  }
-}
-
-std::string getOutputDirectory(TKey* key, TFile* input, bool has_multiple_runs, std::map< TFile*, std::string >* prefixes) {
-  if (TClass::GetClass(key->GetClassName())->InheritsFrom("TDirectory")) {
-    return getOutputDirectory(key->GetName(), input, has_multiple_runs, prefixes);
-  } else {
-    return key->GetName();
-  }
-}
-  
-// This function will populate a mapping between key names and vectors of cycles
-void populateKeyMapping(TDirectory* dir, keycyclemap& kcmap) {
-   TIter nextKey( dir->GetListOfKeys() );
-   TKey* key;
-   std::string keyName("");
-   while( (key = dynamic_cast<TKey*>( nextKey() )) != 0 ) {
-      kcmap[key->GetName()].push_back(key->GetCycle());
-   }
-}
-
-// This function will merge objects given a name, a vector of cycles, 
-// a directory, a merge type, and optionally an object to merge into.  
-// Return value is a merged object.
-void MonitoringFile::mergeObjsMultiCycles(const std::string& keyname, 
-                const std::vector<int>& cycles,
-                TDirectory* dir,
-                const std::string & mergeType,
-                std::unique_ptr<TObject>& obj) {
-   if (cycles.size() == 0) {
-      return;
-   }
-   int start_idx = 0;
-   if (obj == nullptr) {
-      TKey* key(dir->GetKey(keyname.c_str(), cycles[0]));
-      obj.reset(key->ReadObj());
-      start_idx = 1;
-      TH1* h = dynamic_cast<TH1*>(obj.get());
-      if (h && !histOKToMerge(h)) {
-  // histogram is damaged goods
-  std::cerr << "WARNING: HISTOGRAM " << h->GetName() << " IS INTERNALLY INCONSISTENT, NOT MERGING" << std::endl;
-  return;
-      }
-   }
-   for (std::vector<int>::size_type idx = start_idx; 
-  idx < cycles.size(); ++idx) {
-      TKey* nextKey = dir->GetKey(keyname.c_str(), cycles[idx]);
-      if (nextKey != 0) {
-   std::unique_ptr<TObject> nextObj(nextKey->ReadObj());
-   if (nextObj.get() == 0) {
-      std::cerr << "MonitoringFile::mergeObjsMultiCycles(): "
-          << "In directory \"" << dir->GetPath() << "\",\n"
-          << "  Object \"" << keyname << "\" cannot be read from file: skipping\n";
-      continue;
-   }
-   TH1* h = dynamic_cast<TH1*>(nextObj.get());
-   if (h && !histOKToMerge(h)) {
-     // histogram is damaged goods; even deleting it may be dangerous
-     std::cerr << "WARNING: HISTOGRAM " << h->GetName() << " IS INTERNALLY INCONSISTENT, NOT MERGING" << std::endl;
-     (void)nextObj.release();
-     continue;
-   }
-   // next: if current "target" histogram exists, but is empty, reset it to the next object.
-   // works around 
-  h = dynamic_cast<TH1*>(obj.get());
-  if (h && h->GetEntries() == 0 && h->GetSumOfWeights() == 0) {
-    // just take over nextObj as obj
-    obj.reset(nextObj.release());
-    continue;
-  }
-         if (h && (obj->IsA() !=  h->IsA())) {
-           // problem: class types have changed ...
-     std::cerr << "WARNING: CHANGE OF CLASS TYPES FOR " << h->GetName() << ", NOT MERGING" << std::endl;
-     continue;
-   }
-	 MonitoringFile::mergeObjs(obj.get(), nextObj.get(), mergeType,m_debugLevel>VERBOSE?VERBOSE: (dqutils::MonitoringFile::debugLevel_t)m_debugLevel.load(),std::string(dir->GetPath()));
-      } else {
-   std::cerr << "MonitoringFile::mergeObjsMultiCycles(): NULL KEY; corrupt file?" << std::endl;
-      }
-   }
-   return;
-}
-
-
-void getListOfKeysWithName(TDirectory* dir, const std::string& keyname,
-         TCollection* target) 
-{
-   target->Clear();
-   TIter keyit(dir->GetListOfKeys());
-   TKey* key;
-   while ( (key = dynamic_cast<TKey*>(keyit())) != 0 ) {
-      if (keyname == key->GetName()) {
-   target->Add(key);
-      }
-   }
-}
-
-void populateCycleVector(const TCollection& source, std::vector<int>& target)
-{
-   TKey* key;
-   TIter keyit(&source);
-   while ( (key = dynamic_cast<TKey*>(keyit())) != 0 ) {
-      target.push_back(key->GetCycle());
-   }
-}
-
-
-// 'mergeDirectory(...)' is based on 'MergeRootfile(...)' in the hadd.cxx utility in ROOT, using
-// the same algorithm for looping over files, directories and histograms.
-
-void
-MonitoringFile::
-mergeDirectory( TDirectory* outputDir, const std::vector<TFile*>& inputFiles, bool has_multiple_runs, std::map< TFile*, std::string >* prefixes )
-{
-   typedef std::set< std::string >            ObjNameSet_t;
-   typedef std::map< std::string, MetaData >  MetaDataMap_t;
-
-   if( outputDir == 0 ) {
-     return;
-   }
-
-   gROOT->cd();
-
-   std::string outputDirPath( outputDir->GetPath() );
-   std::string outputDirName( outputDirPath );
-   std::string::size_type sepi = outputDirPath.find_last_of(':');
-   if( sepi != std::string::npos ) {
-      outputDirName = std::string( outputDirPath, sepi+2, std::string::npos );
-   }
-   //std::cout << outputDirName << std::endl;
-   bool metadataInDir = false;
-   bool targetDir=!m_useRE;
-   if(m_useRE && (std::regex_search(outputDirName,*m_mergeMatchDirRE))){
-     //std::cout<<"Found target dir \""<<outputDirName<<"\""<<std::endl;
-     targetDir=true;
-   }
-   TTree* mdTree = new TTree( "metadata", "Monitoring Metadata" );
-   mdTree->SetDirectory(0);
-   OutputMetadata outputmd( mdTree );
-
-   ObjNameSet_t  mergedObjs;
-   MetaDataMap_t mdMap;
-
-   std::vector<TFile*>::const_iterator inputFilesEnd = inputFiles.end();
-   for( std::vector<TFile*>::const_iterator i = inputFiles.begin(); i != inputFilesEnd; ++i ) {
-      TFile* inputFile = *i;
-      TDirectory* inputDir = inputFile->GetDirectory( getInputDirectory(outputDirName, inputFile, has_multiple_runs, prefixes).c_str() );
-      if( inputDir == 0 ) {
-         // Directory is not present in this file; try next file
-         continue;
-      }
-      //std::cout<<"inputdir=\""<<inputDir->GetPath()<<"\""<<std::endl;
-      if( inputDir == outputDir ) {
-         continue;
-      }
-
-      inputDir->cd();
-      fillMetaDataMap( mdMap, inputDir );
-      gROOT->cd();
-
-      TIter nextKey( inputDir->GetListOfKeys() );
-      TKey* key;
-      std::string keyName("");
-      keycyclemap kcmap;
-      populateKeyMapping(inputDir, kcmap);
-                
-      for (keycyclemap::iterator kcit = kcmap.begin();
-     kcit != kcmap.end();
-     ++kcit) {
-  key = inputDir->GetKey(kcit->first.c_str(), kcit->second.back());
-  if (! key) {
-    std::cout << "Key " << kcit->first.c_str() << ";" << kcit->second.back() << " not readable" << std::endl;
-    continue;
-  }
-  kcit->second.pop_back();
-  keyName = getOutputDirectory(key, inputFile, has_multiple_runs, prefixes);
-         ObjNameSet_t::iterator obji = mergedObjs.find( keyName );
-         if( obji != mergedObjs.end() ) {
-            // Object has already been processed
-            continue;
-         }
-   // we only need to read the non-dir objects below target directory. skip the rest
-   bool isDir=false;
-   if(m_useRE && key->IsFolder()){
-     //std::cout<<"Key "<<keyName<<" is a folder"<<std::endl;
-     if(keyName!="metadata")isDir=true; //metadata is not going to be merged, treat it as a regular obj
-   }
-   if(!targetDir && !isDir){
-     //std::cerr<<"Skipping keyname "<keyname<<std::endl;
-     continue; //skip everything except directories 
-   }
-   std::unique_ptr<TObject> obj(key->ReadObj());
-         if (obj.get() == 0) {
-            std::cerr << "MonitoringFile::mergeDirectory(): "
-               << "In directory \"" << inputDir->GetPath() << "\",\n"
-                  << "  Object \"" << key->GetName() << "\" cannot be read from file: skipping\n";
-            continue;
-         }
-
-   // we actually have an object, and it hasn't been done before 
-         mergedObjs.insert( keyName );
-
-         TH1* h(0);
-         TGraph* g(0);
-         TEfficiency* e(0);
-         TDirectory* d(0);
-         TTree* t(0);
-   //moved inside if to speedup
-//          h = dynamic_cast<TH1*>( obj.get() );
-//          d = dynamic_cast<TDirectory*>( obj.get() );
-//          g = dynamic_cast<TGraph*>( obj.get() );
-//          t = dynamic_cast<TTree*>( obj.get() );
-
-         //merge only objects below target directory
-         if ( (targetDir) && (  (h = dynamic_cast<TH1*>(obj.get()))
-                             || (g = dynamic_cast<TGraph*>(obj.get()))
-                             ||((t = dynamic_cast<TTree*>(obj.get())) && (keyName!="metadata"))
-                             || (e = dynamic_cast<TEfficiency*>(obj.get()))
-                             ) 
-            ) {
-     //skip cases where regexp doesn't match object name, all directories are processed by default
-     if(m_useRE){
-       if(!std::regex_search(keyName,*m_mergeMatchHistoRE)){
-         //std::cerr<<" skipping   keyName=\""<<outputDirName+'/'+keyName<<"\""<<std::endl;
-         continue; // not the histogram we want
-       }
-     }
-     std::string mergeType("<default>");
-     MetaDataMap_t::iterator mdi = mdMap.find( keyName );
-     if( mdi != mdMap.end() ) {
-               metadataInDir = true;
-               const MetaData& md = mdi->second;
-               if (has_multiple_runs && 
-       (md.interval != "run" && 
-        md.interval != "fill" && 
-        md.interval != "all" && 
-        md.interval != "file")){
-     continue;
-               }
-               outputmd.fill( md.name, md.interval, md.chain, md.merge );
-               mergeType = md.merge;
-               if( g && (md.merge != "<default>") ) {
-                  std::cerr << "MonitoringFile::mergeDirectory(): "
-                     << "In directory \"" << inputDir->GetPath() << "\",\n"
-                        << "  TGraph \"" << keyName << "\" requests merging type " << mergeType
-                        << " but only default merging implemented for TGraphs\n";
-               }
-               if( t && (md.merge != "<default>") ) {
-                  std::cerr << "MonitoringFile::mergeDirectory(): "
-                     << "In directory \"" << inputDir->GetPath() << "\",\n"
-                        << "  TTree \"" << keyName << "\" requests merging type " << mergeType
-                        << " but only default merging implemented for TTrees\n";
-               }
-               if( e && (md.merge != "<default>") ) {
-                  std::cerr << "MonitoringFile::mergeDirectory(): "
-                        << "In directory \"" << inputDir->GetPath() << "\",\n"
-                        << "  TEfficiency \"" << keyName << "\" requests merging type " << mergeType
-                        << " but only default merging implemented for TEfficiency\n";
-               }
-            }else {
-               std::cerr << "MonitoringFile::mergeDirectory(): "
-                  << "In directory \"" << inputDir->GetPath() << "\",\n"
-                     << "  object \"" << keyName << "\" has no metadata\n";
-            }
-       if(t){
-        TDirectory* currentDir = gDirectory;
-        outputDir->cd();
-        TTree* t2 = t->CloneTree();
-        // this disconnects parent tree
-        obj.reset(t2);
-        currentDir->cd();
-      }
-      mergeObjsMultiCycles(keyName, kcit->second, inputDir,
-         mergeType, obj);
-            for( std::vector<TFile*>::const_iterator j = i+1; j!= inputFilesEnd; ++j ) {
-               TFile* nextInputFile = *j;
-               TDirectory* nextInputDir = nextInputFile->GetDirectory( getInputDirectory(outputDirName, *j, has_multiple_runs, prefixes).c_str() );
-               if( nextInputDir == 0 ) {
-                  // Directory is not present in this file; try next file
-                  continue;
-               }
-
-         TObjArray tl; std::vector<int> nextCycles;
-         getListOfKeysWithName(nextInputDir, kcit->first, &tl);
-         populateCycleVector(tl, nextCycles);
-     
-         mergeObjsMultiCycles(kcit->first, nextCycles, 
-                   nextInputDir, mergeType, obj);
-
-            }
-            outputDir->cd();
-      if ((h = dynamic_cast<TH1*>(obj.get()))) {
-        h->SetDirectory(outputDir);
-      }
-
-      obj->Write();
-         }else if( (targetDir) && (t = dynamic_cast<TTree*>(obj.get())) ) {
-      // do not merge metadata
-   }else if((d = dynamic_cast<TDirectory*>( obj.get() ))) {
-     // Do not run the multicycle merge on directories;
-     // haven't seen one yet that has multiple keys...
-     // Merge TDirectory
-     outputDir->cd();
-     std::string outputSubDirName(getOutputDirectory(d->GetName(), inputFile, has_multiple_runs, prefixes));
-     TDirectory* outputSubDir = outputDir->mkdir( outputSubDirName.c_str(), d->GetTitle() );
-     mergeDirectory( outputSubDir, inputFiles, has_multiple_runs, prefixes );
-         }else {
-     std::cout << "MonitoringFile::mergeDirectory(): "
-         << "In directory \"" << inputDir->GetPath() << "\",\n"
-         << "  Object \"" << key->GetName() << "\" will not be merged\n";
-         }
-
-      }
-   }
-
-   // Write metadata TTree to output directory
-   if( metadataInDir ) {
-      outputDir->cd();
-      mdTree->SetDirectory(outputDir);
-      mdTree->Write();
-   }
-   delete mdTree;
-}
-
-
-void
-MonitoringFile::
-fillMetaDataMap( std::map<std::string,dqutils::MonitoringFile::MetaData>& mdMap, TDirectory* dir )
-{
-  if (dir == 0) return;
-  TTree *md = dynamic_cast<TTree*>(dir->Get("metadata"));
-  if (md == 0) return;
-
-  TTreeReader reader(md);
-  TTreeReaderArray<char> i_name(reader, "Name");
-  TTreeReaderArray<char> i_interval(reader, "Interval");
-  TTreeReaderArray<char> i_chain(reader, "TriggerChain");
-  TTreeReaderArray<char> i_merge(reader, "MergeMethod");
-
-  while (reader.Next()) {
-    const std::string nameStr(static_cast<char*>(i_name.GetAddress()));
-    if( mdMap.find(nameStr) == mdMap.end() ) {
-      MetaData md( nameStr, 
-                   static_cast<char*>(i_interval.GetAddress()),
-                   static_cast<char*>(i_chain.GetAddress()),
-                   static_cast<char*>(i_merge.GetAddress()) );
-      std::map<std::string,MetaData>::value_type mdVal( nameStr, md );
-      mdMap.insert( mdVal );
-    }
-  }
-
-  delete md;
-}
-
-
-// 'mergeFiles(...)' is based on the hadd.cxx utility distributed with ROOT
-
-void
-MonitoringFile::
-mergeFiles( const std::string & outFileName, const std::vector<std::string>& files )
-{
-  dqi::DisableMustClean disabled;
-  TH1::AddDirectory(false);
-  if(m_useRE){
-    std::cout<<" ========== Using regular expressions for selective merging ========== "<<std::endl;
-    std::cout<<" Directory selection RE=\""<<m_mergeMatchDirREString<<"\""<<std::endl;
-    std::cout<<" Object selection RE=\""<<m_mergeMatchHistoREString<<"\""<<std::endl;
-  }
-  if (m_doTiming) {
-    std::cout << "CPU time measurement activated " << std::endl;
-  }
-  typedef std::vector<TFile*>  TFileList_t;
-  typedef std::map<TFile*, std::string> PrefixIgnore_t;
-  
-  std::unique_ptr<TFile> outfile( TFile::Open(outFileName.c_str(),"RECREATE",outFileName.c_str(),m_fileCompressionLevel) );
-  if( outfile.get() == 0 ) {
-    std::cerr << "MonitoringFile::mergeFiles(): "
-              << "Output file not opened\n";
-    return;
-  }
-  
-  TFileList_t tfiles;
-  PrefixIgnore_t prefix_ignore;
-  
-  std::vector< std::string >::const_iterator filesEnd = files.end();
-  std::vector< std::string >::const_iterator fi;
-  for( fi = files.begin(); fi != filesEnd; ++fi ) {
-    std::cout << "Opening file: " << *fi << "\n";
-    TFile* f = TFile::Open( fi->c_str() );
-    if( f == 0 || ! f->IsOpen()) {
-      std::cerr << "MonitoringFile::mergeFiles(): "
-                << "Input file not opened\n";
-      delete f;
-      continue;
-    }
-    TList* keys = f->GetListOfKeys();
-    if (keys->GetSize() == 0) {
-      std::cerr << "MonitoringFile::mergeFiles(): "
-    << "Input file " << *fi << " has no keys!" 
-    << std::endl;
-      delete f;
-      continue;
-    } 
-    std::vector< std::string > runkeys;
-    TIter keyitr(keys);
-    TKey* key;
-    
-    while ( (key = dynamic_cast<TKey*>(keyitr())) != 0 ) {
-      std::string keyname(key->GetName());
-      if (keyname.substr(0,4) == "run_") {
-  runkeys.push_back(keyname);
-      }
-    }
-    if (runkeys.size() > 1) {
-      std::cerr << "MonitoringFile::mergeFiles():\n"
-    << "   Input root file " << *fi << " has multiple top-level run_* keys\n"
-    << "   Assuming " << runkeys[0] << " is the run key" 
-    << std::endl;
-    }
-    if (runkeys.size() > 0) {
-      prefix_ignore[f] = runkeys[0];
-    }
-    tfiles.push_back(f);
-  }
-
-  // check to see if all run keys are the same
-  bool has_multiple_runs = false;
-  std::string prev_key_name("");
-
-  for (PrefixIgnore_t::const_iterator pi_it = prefix_ignore.begin();
-       pi_it != prefix_ignore.end();
-       ++pi_it) {
-    if (prev_key_name != pi_it->second) {
-      if (prev_key_name == "") {
-  prev_key_name = pi_it->second;
-      } else {
-  has_multiple_runs = true;
-  break;
-      }
-    }
-  }
-
-  if (has_multiple_runs) {
-    std::cout << "Multiple runs detected in input files.\n"
-        << "Will merge ONLY RUN, FILL, FILE, or ALL histograms to run_multiple directory.\n"
-        << "(That is, no event block, lumi block, lowStat, medStat,\n"
-        << "or higStat histograms will be in the output.)"
-        << std::endl;
-  }
-  
-  std::cout << "Writing file: " << outFileName << "\n";
-  std::cout << "\nWarning messages from merging follow:\n\n";
-  std::cout.flush(); 
-  mergeDirectory( outfile.get(), tfiles, has_multiple_runs, &prefix_ignore );
-  
-  outfile->Close();
-  
-  TFileList_t::const_iterator tfilesEnd = tfiles.end();
-  TFileList_t::const_iterator tfi;
-  for( tfi = tfiles.begin(); tfi != tfilesEnd; ++tfi ) {
-    TFile* tf = *tfi;
-    tf->Delete("");
-    tf->Close();
-    delete tf;
-  }
-
-  if (m_doTiming) {
-    std::vector<std::pair<std::string,clock_t> > cpuPerHistVec;
-    std::cout << "CPU time (seconds) for histogram merging:" << std::endl;
-    for ( const auto& [name,time] : m_cpuPerHistogram) {
-      cpuPerHistVec.emplace_back(name,time);
-    }
-    auto ordering=[](const std::pair<std::string,clock_t>& a, const std::pair<std::string,clock_t>& b) {return a.second<b.second;};
-    std::sort(cpuPerHistVec.begin(),cpuPerHistVec.end(),ordering);
-
-    for (const auto& [name,time] : cpuPerHistVec) {
-      const double tSec= double(time)/CLOCKS_PER_SEC;
-      std::cout << std::format("{:<30} : {:10.3f}",name,tSec) << std::endl;
-    }
-  }
-  std::cout << "\n";
-  std::cout << "****************************************\n\n";
-}
-
-
-void
-MonitoringFile::
-mergeFiles( const std::string & outFileName, const std::string & listFileName )
-{
-  typedef std::vector< std::string >  FileList_t;
-  
-  const unsigned int nFilesAtOnce = 50;
-  
-  FileList_t allFiles;
-  bool success = setListFromFile( allFiles, listFileName );
-  if( !success ) {
-    std::cerr << "MonitoringFile::mergeFiles(): Cannot merge files\n";
-    return;
-  }
-  
-  if( allFiles.size() <= nFilesAtOnce ) {
-    mergeFiles( outFileName, allFiles );
-    return;
-  }
-  
-  FileList_t procFiles, tmpIntermediateFiles;
-
-  
-  FileList_t::const_iterator filesEnd = allFiles.end();
-  FileList_t::const_iterator fi       = allFiles.begin();
-  
-  unsigned int counter = 0;
-  std::string tmpInputFile("");
-  std::string tmpOutputFile("");
-  
-  // new logic: merge intermediately, then merge intermediate files
-  while( fi != filesEnd ) {
-    
-    procFiles.push_back(*fi);
-    ++counter; ++fi;
-    if ( counter % nFilesAtOnce == 0 || fi == filesEnd ) {
-      std::ostringstream nameStream;
-      nameStream << "tmp_merge_" << counter << ".root";
-      tmpOutputFile = nameStream.str();
-      tmpIntermediateFiles.push_back(tmpOutputFile);
-      mergeFiles( tmpOutputFile, procFiles );
-      procFiles.clear();
-      }
-    /*    
-    if( counter == 0 ) {
-      tmpOutputFile = *fi;
-    }
-    
-    ++counter;
-    ++fi;
-    
-    if( counter % nFilesAtOnce == 0 || fi == filesEnd ) {
-      tmpInputFile = tmpOutputFile;
-      procFiles.push_back( tmpInputFile );
-      std::ostringstream nameStream;
-      nameStream << "tmp_merge_" << counter << ".root";
-      tmpOutputFile = nameStream.str();
-      mergeFiles( tmpOutputFile, procFiles );
-      if( counter > nFilesAtOnce ) {
-        std::remove( tmpInputFile.c_str() );
-      }
-      procFiles.clear();
-    }
-    
-    if( fi != filesEnd ) {
-      procFiles.push_back( *fi );
-    }
-    */ 
-  }
-
-  /*  
-  if( std::rename(tmpOutputFile.c_str(),outFileName.c_str()) == 0 ) {
-    std::cout << "Renaming " << tmpOutputFile << " as " << outFileName << "\n";
-  }
-  else {
-    std::cerr << "Cannot rename " << tmpOutputFile << " as " << outFileName << "\n";
-  }
-  */
-  mergeFiles(outFileName, tmpIntermediateFiles);
-  for (const auto& tmpFile : tmpIntermediateFiles) {
-    const bool deleteSuccessful = (std::remove(tmpFile.c_str()) == 0);
-    if (not deleteSuccessful){
-      std::cerr<<"Temporary file "<<tmpFile<<" could not be deleted.";
-    }
-  }
-}
-
-
-
-bool
-MonitoringFile::
-setFile( const std::string & fileName )
-{
-  clearData();
-  m_file = TFile::Open( fileName.c_str() );
-  if( m_file != 0 )
-    return true;
-  
-  return false;
-}
-
-
-void
-MonitoringFile::
-printDirectories()
-{
-  if( m_file == 0 ) {
-    std::cerr << "MonitoringFile::printDirectories(): "
-              << "No input file is open\n";
-    return;
-  }
-  
-  DirMap_t indirmap;
-  
-  getAllDirs( indirmap, m_file, "" );
-  
-  DirMap_t::const_iterator idirend = indirmap.end();
-  for( DirMap_t::const_iterator idir = indirmap.begin(); idir != idirend; ++idir ) {
-    std::string idirName = idir->first;
-    std::cout << idirName << "\n";
-  }
-}
-
-
-void
-MonitoringFile::
-printStatistics()
-{
-  if( m_file == 0 ) {
-    std::cerr << "MonitoringFile::printStatistics(): "
-              << "No input file is open\n";
-    return;
-  }
-  
-  DirMap_t indirmap;
-  
-  getAllDirs( indirmap, m_file, "" );
-  
-  DirMap_t::const_iterator idirend = indirmap.end();
-  for( DirMap_t::const_iterator idir = indirmap.begin(); idir != idirend; ++idir ) {
-    std::string idirName = idir->first;
-    
-    GatherStatistics stat_shift( idirName );
-    GatherStatistics stat_all( idirName );
-    
-    loopOnHistogramsInMetadata( stat_shift, idir->second );
-    loopOnHistograms( stat_all, idir->second );
-    
-    std::cout.setf(std::ios_base::left,std::ios_base::adjustfield);
-    std::cout.width(80);
-    std::cout << idirName << "  ";
-    
-    std::cout.setf(std::ios_base::right,std::ios_base::adjustfield);
-    std::cout << "  shift: ";
-    std::cout.width(3);
-    std::cout << stat_shift.m_nHist1D << " ";
-    std::cout.width(5);
-    std::cout << stat_shift.m_nHist1DBins << " ";
-    std::cout.width(3);
-    std::cout << stat_shift.m_nHist2D << " ";
-    std::cout.width(7);
-    std::cout << stat_shift.m_nHist2DBins << " ";
-    std::cout.width(3);
-    std::cout << stat_shift.m_nGraph  << " ";
-    std::cout.width(5);
-    std::cout << stat_shift.m_nGraphPoints << "   ";
-    
-    
-    std::cout << "  all: ";
-    std::cout.width(3);
-    std::cout << stat_all.m_nHist1D << " ";
-    std::cout.width(5);
-    std::cout << stat_all.m_nHist1DBins << " ";
-    std::cout.width(3);
-    std::cout << stat_all.m_nHist2D << " ";
-    std::cout.width(7);
-    std::cout << stat_all.m_nHist2DBins << " ";
-    std::cout.width(3);
-    std::cout << stat_all.m_nGraph  << " ";
-    std::cout.width(5);
-    std::cout << stat_all.m_nGraphPoints << "\n";
-    
-    std::cout << std::flush;
-  }
-}
-
-
-bool
-MonitoringFile::
-copyHistograms( const std::string & outFileName, const std::string & dirName )
-{
-  dqi::DisableMustClean disabled;
-  //  bool useRecursiveDelete = gROOT->MustClean();
-  //  gROOT->SetMustClean(false);
-  
-  if( m_file == 0 ) {
-    std::cerr << "MonitoringFile::copyHistograms(): "
-              << "No input file is open\n";
-    return false;
-  }
-  
-  DirMap_t indirmap;
-  DirMap_t reducedmap;
-  DirMap_t outdirmap;
-  
-  if( dirName != "all" ) {
-    TKey* dkey = getObjKey( m_file, dirName );
-    if( dkey == 0 ) {
-      std::cerr << "MonitoringFile::copyHistograms(): "
-                << "Directory \'" << dirName << "\' not found in input file\n";
-      return false;
-    }
-    
-    TDirectory* fromDir = dynamic_cast<TDirectory*>(dkey->ReadObj());
-    
-    DirMap_t::value_type dirmapVal( dirName, fromDir );
-    indirmap.insert( dirmapVal );
-  }
-  else {
-    std::cout << "Building list of all TDirectories in file...\n" << std::flush;
-    getAllDirs( indirmap, m_file, "" );
-  }
-  
-  DirMap_t::const_iterator idirend = indirmap.end();
-  for( DirMap_t::const_iterator idir = indirmap.begin(); idir != idirend; ++idir ) {
-    
-    std::string idirName = idir->first;
-    std::cout << "Checking " << idirName << "\n" << std::flush;
-    //std::string::size_type j = idirName.find( "L1Calo/1_PPr_EmFADCTiming" );
-    //if( j != std::string::npos ) {
-    //  std::cerr << "Skipping directory \"" << idirName << "\"\n";
-    //  std::cerr << std::flush;
-    //  continue;
-    //}
-    
-    if( !dirHasHistogramsInMetadata(idir->second) ) {
-        continue;
-    }
-    
-    reducedmap.insert( *idir );
-  }
-  
-  std::unique_ptr<TFile> outfile( TFile::Open(outFileName.c_str(),"RECREATE",outFileName.c_str(),m_fileCompressionLevel) );
-  if( outfile.get() == 0 ) {
-    std::cerr << "MonitoringFile::copyHistograms(): "
-              << "Output file not opened\n";
-    return false;
-  }
-  
-  idirend = reducedmap.end();
-  for( DirMap_t::const_iterator idir = reducedmap.begin(); idir != idirend; ++idir ) {
-  
-    std::string idirName = idir->first;
-    std::cout << "Processing " << idirName << "\n" << std::flush;
-    
-    TDirectory* toDir = createDir( outdirmap, outfile.get(), "", idirName );
-    if( toDir == 0 ) {
-      std::cerr << "MonitoringFile::copyHistograms(): "
-                << "Directory \'" << idirName << "\' not created in output file\n";
-      return false;
-    }
-    
-    CopyHistogram copyFcn( toDir, idirName );    
-    
-    loopOnHistogramsInMetadata( copyFcn, idir->second );
-  }
-  
-  outfile->Write();
-  outfile->Close();
-  
-  //  gROOT->SetMustClean(useRecursiveDelete);
-  return true;
-}
-
-
-
-std::string
-MonitoringFile::
-getHanResults( const std::string & hanResultsDir, const std::string & input,
-               const std::string & hcfg, const std::string & hcfg_lowStat, const std::string & hcfg_medStat )
-{
-  //DisableMustClean disabled;
-  
-  std::cout << "\nUsing han configurations:\n"
-            << "  entire run: " << hcfg << "\n"
-            << "  low stat interval: " << hcfg_lowStat << "\n"
-            << "  medium stat interval: " << hcfg_medStat << "\n\n" << std::flush;
-  
-  
-  TFile* infile = TFile::Open( input.c_str() );
-  if( infile == 0 ) {
-    std::cerr << "MonitoringFile::getHanResults(): "
-              << "Cannot open input file \"" << input << "\"\n";
-    return "";
-  }
-  
-  std::vector<std::string> run_dirs;
-  std::vector<std::string> lowStat_dirs;
-  std::vector<std::string> medStat_dirs;
-  
-  TIter next_run( infile->GetListOfKeys() );
-  TKey* key_run(0);
-  while( (key_run = dynamic_cast<TKey*>( next_run() )) != 0 ) {
-    TObject* obj_run = key_run->ReadObj();
-    TDirectory* tdir_run = dynamic_cast<TDirectory*>( obj_run );
-    if( tdir_run != 0 ) {
-      std::string tdir_run_name( tdir_run->GetName() );
-      if( tdir_run_name.find("run") != std::string::npos ) {
-        run_dirs.push_back( tdir_run_name );
-        TIter next_minutes( tdir_run->GetListOfKeys() );
-        TKey* key_minutes(0);
-        while( (key_minutes = dynamic_cast<TKey*>( next_minutes() )) != 0 ) {
-          TObject* obj_minutes = key_minutes->ReadObj();
-          TDirectory* tdir_minutes = dynamic_cast<TDirectory*>( obj_minutes );
-          if( tdir_minutes != 0 ) {
-            std::string tdir_minutes_name( tdir_minutes->GetName() );
-            if( tdir_minutes_name.find("lowStat") != std::string::npos ) {
-              lowStat_dirs.push_back( tdir_run_name + '/' + tdir_minutes_name );
-            }
-            else if( tdir_minutes_name.find("medStat") != std::string::npos ) {
-              medStat_dirs.push_back( tdir_run_name + '/' + tdir_minutes_name );
-            }
-          }
-          delete obj_minutes;
-        }
-      }
-    }
-    delete obj_run;
-  }
-  
-  delete infile;
-  
-  dqi::HanApp han;
-  
-  std::string fileList =" ";
-  std::vector<std::string>::const_iterator dirs_end;
-  std::vector<std::string>::const_iterator dir;
-  
-  dirs_end = run_dirs.end();
-  for( dir = run_dirs.begin(); dir != dirs_end; ++dir ) {
-    const std::string& tdir_run_name = *dir;
-    std::string han_output_run = hanResultsDir+'/'+tdir_run_name+"_han.root";
-    std::cout << "Calling han( " << hcfg << ", " << input << ", " << tdir_run_name
-              << ", " << han_output_run << " ):\n" << std::flush;
-    han.Analyze( hcfg, input, han_output_run, tdir_run_name );
-    std::cout << "\n";
-    fileList += han_output_run + " " + tdir_run_name + "\n" ;
-  }
-  
-  dirs_end = lowStat_dirs.end();
-  for( dir = lowStat_dirs.begin(); dir != dirs_end; ++dir ) {
-    const std::string& tdir_minutes_path = *dir;
-    
-    std::string tdir_minutes_underscore = tdir_minutes_path;
-    std::string::size_type tdir_minutes_i = tdir_minutes_underscore.find('/');
-    tdir_minutes_underscore.replace( tdir_minutes_i, 1, "_" );
-    
-    std::string han_output_lowStat = hanResultsDir+'/'+tdir_minutes_underscore+"_han.root";
-    std::cout << "Running han, writing to " << han_output_lowStat << ":\n" << std::flush;
-    han.Analyze( hcfg_lowStat, input, han_output_lowStat, tdir_minutes_path );
-    std::cout << "\n";
-    std::string subdirname( tdir_minutes_path, tdir_minutes_i+1, std::string::npos );
-    std::string dirname( tdir_minutes_path, 0, tdir_minutes_i );
-    fileList += han_output_lowStat + " " + subdirname + " " + dirname + " " + subdirname +"\n" ;
-  }
-  
-  dirs_end = medStat_dirs.end();
-  for( dir = medStat_dirs.begin(); dir != dirs_end; ++dir ) {
-    const std::string& tdir_minutes_path = *dir;
-    
-    std::string tdir_minutes_underscore = tdir_minutes_path;
-    std::string::size_type tdir_minutes_i = tdir_minutes_underscore.find('/');
-    tdir_minutes_underscore.replace( tdir_minutes_i, 1, "_" );
-    
-    std::string han_output_medStat = hanResultsDir+'/'+tdir_minutes_underscore+"_han.root";
-    std::cout << "Running han, writing to " << han_output_medStat << ":\n" << std::flush;
-    han.Analyze( hcfg_medStat, input, han_output_medStat, tdir_minutes_path );
-    std::cout << "\n";
-    std::string subdirname( tdir_minutes_path, tdir_minutes_i+1, std::string::npos );
-    std::string dirname( tdir_minutes_path, 0, tdir_minutes_i );
-    fileList += han_output_medStat + " " + subdirname + " " + dirname + " " + subdirname +"\n" ;
-  }
-  
-  return fileList;
-}
-
-
-void
-MonitoringFile::
-printHanConfig()
-{
-  if( m_file == 0 ) {
-    std::cerr << "MonitoringFile::printHanConfig(): "
-              << "No input file is open\n";
-    return;
-  }
-  
-  DirMap_t indirmap;
-  
-  getAllDirs( indirmap, m_file, "" );
-
-  std::string indent, indent_p,indent_c;
-  std::string idirName_p;
-  DirMap_t::const_iterator idirend = indirmap.end();
-  for( DirMap_t::const_iterator idir = indirmap.begin(); idir != idirend; ++idir ) {
-    std::string idirName = idir->first;
-    std::string::size_type shortNameIndex = idirName.rfind( '/' );
-    std::string shortName = idirName.substr( shortNameIndex+1, std::string::npos );
-    
-    std::string::size_type fsIndex = idirName.find( '/' );
-    std::string shortPath;
-    if( fsIndex != shortNameIndex ) 
-      shortPath = idirName.substr( fsIndex+1, shortNameIndex );
-    else
-      shortPath = idirName.substr( fsIndex+1, std::string::npos );
-    
-    std::cout << idirName << "\n";
-    std::cout << shortPath << ", " << shortName << "\n";
-    /*
-    indent = getIndentation(idirName,"");
-    if(int(indent.size())==in_p){
-      std::cout << indent << "} \n";
-      std::cout << indent << "dir "  << shortName << "  { \n";
-      std::cout << indent << "  output " << idirName << "\n";
-      std::cout << indent << "  hist all_in_dir  { \n " << indent << " } \n";
-    }
-    else if (int(indent.size()) > in_p){
-      std::cout << indent << "dir "  << shortName << "  { \n";
-      std::cout << indent << "  output " << idirName << "\n";
-      std::cout << indent << "  hist all_in_dir  { \n " << indent << " } \n";
-    }
-    else{
-      //find common part + number of common '/'
-      std::string common = FindCommon(idirName,idirName_p);
-      indent_c = getIndentation(common,"");
-      int counter = (indent_p.size() - indent_c.size())/2;
-      for (int i = counter; i>0; i--){
-  std::string temp = indent_c;
-  for (int j = 0; j< i; j++){
-    temp+="  ";
-  }
-  std::cout << temp << "} \n" ;
-      }
-      std::cout << indent << "} \n";
-      std::cout << indent << "dir "  << shortName << "  { \n";
-      std::cout << indent << "  output " << idirName << "\n";
-      std::cout << indent << "  hist all_in_dir  { \n " << indent << " } \n";
-    }
-    indent_p = indent;
-    in_p = indent_p.size();
-    idirName_p = idirName;  
-    */
-  }  
-}
-
-
-
-std::string
-MonitoringFile:: 
-getIndentation( const std::string & pathName, const std::string & leadingSpace )
-{
-  std::string space = leadingSpace;
-  std::string::size_type i = pathName.find_first_of('/');
-  if( i != std::string::npos ) {
-    std::string subPath( pathName, i+1, std::string::npos );
-    space += "  ";
-    return getIndentation( subPath, space );
-  }
-  return space;
-}
-
-std::string 
-MonitoringFile::
-FindCommon(const std::string & name1,const std::string & name2) const
-{
-  int length = ( name1.size() < name2.size() ) ? name1.size() : name2.size();
-  bool found = true;
-  int count = 0;
-  while (found==true && count < length){
-    if (name1[count]==name2[count]){
-      count++;
-    }
-    else {
-      found = false;
-    }
-  }
-  return (name1.substr(0,count));
-}
-
-
-
-// *********************************************************************
-// Protected Methods
-// *********************************************************************
-
-MonitoringFile::CopyHistogram::
-CopyHistogram( TDirectory* target, const std::string & dirName )
-  : m_target(target)
-  , m_dirName(dirName)
-  , m_metadata(0)
-{
-  m_metadata = new TTree( "metadata", "Monitoring Metadata" );
-  m_metadata->SetDirectory(0);
-  m_metadata->Branch( "Name", (void*) nullptr, "Name/C" );
-  m_metadata->Branch( "Interval", (void*) nullptr, "Interval/C" );
-  m_metadata->Branch( "TriggerChain", (void*) nullptr, "TriggerChain/C" );
-  m_metadata->Branch( "MergeMethod", (void*) nullptr, "MergeMethod/C" );
-}
-
-
-MonitoringFile::CopyHistogram::
-~CopyHistogram()
-{
-  m_target->cd();
-  m_metadata->SetDirectory(m_target);
-  m_metadata->Write();
-  delete m_metadata;
-}
-
-
-bool
-MonitoringFile::CopyHistogram::
-execute( TH1* hist )
-{
-  m_target->cd();
-  hist->SetDirectory(m_target);
-  hist->Write();
-  
-  return true;
-}
-
-
-bool
-MonitoringFile::CopyHistogram::
-execute( TGraph* graph )
-{
-  m_target->cd();
-  graph->Write();
-  
-  return true;
-}
-
-bool MonitoringFile::CopyHistogram::execute( TEfficiency* eff ) {
-  m_target->cd();
-  eff->Write();
-  return true;
-}
-
-void
-MonitoringFile::CopyHistogram::
-fillMD( const MetaData& md )
-{
-  std::string name(md.name);
-  std::string interval(md.interval);
-  std::string chain(md.chain);
-  std::string merge(md.merge);
-  m_metadata->SetBranchAddress( "Name", name.data() );
-  m_metadata->SetBranchAddress( "Interval", interval.data() );
-  m_metadata->SetBranchAddress( "TriggerChain", chain.data() );
-  m_metadata->SetBranchAddress( "MergeMethod", merge.data() );
-  m_metadata->Fill();
-}
-
-bool
-MonitoringFile::CopyHistogram::
-executeMD( TH1* hist, const MetaData& md )
-{
-  m_target->cd();
-  hist->SetDirectory(m_target);
-  hist->Write();
-  
-  fillMD( md );
-  
-  return true;
-}
-
-
-bool
-MonitoringFile::CopyHistogram::
-executeMD( TGraph* graph, const MetaData& md )
-{
-  m_target->cd();
-  graph->Write();
-  
-  fillMD( md );
-  
-  return true;
-}
-
-
-bool MonitoringFile::CopyHistogram::executeMD( TEfficiency* eff, const MetaData& md ) {
-  m_target->cd();
-  eff->Write();
-  fillMD( md );
-  return true;
-}
-
-
-MonitoringFile::GatherStatistics::
-GatherStatistics( const std::string & dirName )
-  : m_dirName(dirName)
-  , m_nHist1D(0)
-  , m_nHist1DBins(0)
-  , m_nGraph(0)
-  , m_nGraphPoints(0)
-  , m_nHist2D(0)
-  , m_nHist2DBins(0)
-{
-}
-
-
-bool
-MonitoringFile::GatherStatistics::
-execute( TH1* hist )
-{
-  TH2* hist2d = dynamic_cast<TH2*>( hist );
-  if( hist2d != 0 ) {
-    ++m_nHist2D;
-    m_nHist2DBins += (hist2d->GetNbinsX() * hist2d->GetNbinsY());
-    return true;
-  }
-  ++m_nHist1D;
-  m_nHist1DBins += hist->GetNbinsX();
-  return true;
-}
-
-
-bool
-MonitoringFile::GatherStatistics::
-execute( TGraph* graph )
-{
-  ++m_nGraph;
-  m_nGraphPoints += graph->GetMaxSize();
-  return true;
-}
-
-
-bool MonitoringFile::GatherStatistics::execute( TEfficiency* eff ) {
-  ++m_nEfficiency;
-  
-  TH1* h_total = eff->GetCopyPassedHisto();
-  TH2* h_total2D = dynamic_cast<TH2*>( h_total );
-
-  if( h_total2D != 0 ) {
-    m_nEfficiencyBins += (h_total2D->GetNbinsX() * h_total2D->GetNbinsY());
-    return true;
-  } else {
-    m_nEfficiencyBins += h_total->GetNbinsX();
-    return true;
-  }
-}
-
-
-MonitoringFile::GatherNames::
-GatherNames()
-{
-}
-
-
-bool
-MonitoringFile::GatherNames::
-execute( TH1* hist )
-{
-  m_names.push_back( std::string(hist->GetName()) );
-  return true;
-}
-
-
-bool
-MonitoringFile::GatherNames::
-execute( TGraph* graph )
-{
-  m_names.push_back( std::string(graph->GetName()) );
-  return true;
-}
-
-
-bool MonitoringFile::GatherNames::execute( TEfficiency* eff ) {
-  m_names.push_back( std::string(eff->GetName()) );
-  return true;
-}
-
-
-void
-MonitoringFile::
-clearData()
-{
-  dqi::DisableMustClean disabled;
-
-  delete m_file;
-  m_file = 0;
-  m_debugLevel=0;
-  m_fileCompressionLevel=1;
-  m_doTiming=false;
-  delete m_mergeMatchHistoRE;
-  delete m_mergeMatchDirRE;
-  m_mergeMatchHistoREString=".*";
-  m_mergeMatchDirREString=".*";
-  m_mergeMatchHistoRE=new std::regex(m_mergeMatchHistoREString);
-  m_mergeMatchDirRE=new std::regex(m_mergeMatchDirREString);
-  m_useRE=false;
-}
-
-
-bool
-MonitoringFile::
-dirHasHistogramsInMetadata( TDirectory* dir )
-{
-  dir->cd();
-  
-  TKey* mdKey = dir->FindKey( "metadata" );
-  if( mdKey == 0 ) {
-    return false;
-  }
-  
-  TTree* md = dynamic_cast<TTree*>( mdKey->ReadObj() );
-  if ( md == 0 ) {
-    return false;
-  }
-  
-  int counter = 0;
-  int nEntries = int( md->GetEntries() );
-  
-  while( counter < nEntries ) {
-    try {
-      md->GetEntry(counter);
-    }
-    catch( const std::exception& e ) {
-      std::cerr << "Exception: \"" << e.what() << "\" in directory \""
-                << dir->GetName() << "\"\n" << std::flush;
-      return false;
-    }
-    
-    return true;
-    ++counter;
-  }
-  
-  return false;
-}
-
-
-void
-MonitoringFile::
-loopOnHistograms( HistogramOperation& fcn, TDirectory* dir )
-{
-  TIter next( dir->GetListOfKeys() );
-  TKey* key;
-  while( (key = dynamic_cast<TKey*>( next() )) != 0 ) {
-    TObject* obj = key->ReadObj();
-    TH1* h(0);
-    TGraph* g(0);
-    TEfficiency* e(0);
-    if ((h = dynamic_cast<TH1*>(obj))) {
-      fcn.execute( h );
-    } else if ((g = dynamic_cast<TGraph*>(obj))) {
-      fcn.execute( g );
-    } else if ((e = dynamic_cast<TEfficiency*>(obj))) {
-      fcn.execute( e );
-    }
-    delete obj;
-  }
-}
-
-
-bool
-MonitoringFile::
-loopOnHistogramsInMetadata( HistogramOperation& fcn, TDirectory* dir )
-{
-  dir->cd();
-  TKey* mdKey = dir->FindKey( "metadata" );
-  if( mdKey == 0 ) {
-    return false;
-  }
-  
-  TTree* md = dynamic_cast<TTree*>( mdKey->ReadObj() );
-  if ( md == 0 ) {
-    return false;
-  }
-  
-  TKey* i_key;
-  
-  TTreeReader reader(md);
-  TTreeReaderArray<char> i_name(reader, "Name");
-  TTreeReaderArray<char> i_interval(reader, "Interval");
-  TTreeReaderArray<char> i_chain(reader, "TriggerChain");
-  TTreeReaderArray<char> i_merge(reader, "MergeMethod");
-
-  while (reader.Next()) {
-    const std::string nameStr(static_cast<char*>(i_name.GetAddress()));
+  bool MonitoringFile::loopOnHistogramsInMetadata(HistogramOperation & fcn, TDirectory * dir) {
     dir->cd();
-    i_key = dir->FindKey( static_cast<char*>(i_name.GetAddress()) );
-    if( i_key == 0 ) {
-      std::cerr << "MonitoringFile::loopOnHistogramsInMetadata(): "
-                << "No \'" << nameStr << "\' object found\n";
+    TKey* mdKey = dir->FindKey("metadata");
+    if (mdKey == 0) {
       return false;
     }
-      MetaData md( nameStr, 
-                   static_cast<char*>(i_interval.GetAddress()),
-                   static_cast<char*>(i_chain.GetAddress()),
-                   static_cast<char*>(i_merge.GetAddress()) );
-    TObject* obj = i_key->ReadObj();
-    TH1* h = dynamic_cast<TH1*>( obj );
-    if( h != 0 ) {
-      fcn.executeMD( h, md );
+
+    TTree* md = dynamic_cast<TTree*>(mdKey->ReadObj());
+    if (md == 0) {
+      return false;
     }
-    else {
-      TGraph* g = dynamic_cast<TGraph*>( obj );
-      if( g != 0 ) {
-        fcn.executeMD( g, md );
+
+    TKey* i_key;
+
+    TTreeReader reader(md);
+    TTreeReaderArray<char> i_name(reader, "Name");
+    TTreeReaderArray<char> i_interval(reader, "Interval");
+    TTreeReaderArray<char> i_chain(reader, "TriggerChain");
+    TTreeReaderArray<char> i_merge(reader, "MergeMethod");
+
+    while (reader.Next()) {
+      const std::string nameStr(static_cast<char*>(i_name.GetAddress()));
+      dir->cd();
+      i_key = dir->FindKey(static_cast<char*>(i_name.GetAddress()));
+      if (i_key == 0) {
+        std::cerr << "MonitoringFile::loopOnHistogramsInMetadata(): "
+                  << "No \'" << nameStr << "\' object found\n";
+        return false;
       }
-    }
-    delete obj; 
-  }
-  
-  delete md;
-  
-  return true;
-}
-
-
-bool
-MonitoringFile::
-setListFromFile( std::vector<std::string>& filelist, const std::string& listFileName )
-{
-  using namespace std;
-  
-  filelist.clear();
-  
-  ifstream listfile( listFileName.c_str() );
-  if(!listfile) {
-    cerr << "MonitoringFile::setListFromFile(): "
-         << "cannot read from file: " << listFileName << "\n";
-    return false;
-  }
-  
-  string line;
-  char c;
-  string filename;
-  while( getline(listfile,line) ) {
-    istringstream linestream(line);
-    while(linestream.get(c)) {
-      if(!isspace(c)) {
-        // ignore comments
-        if(c == '#') {
-          break;
+      MetaData md(nameStr, static_cast<char*>(i_interval.GetAddress()), static_cast<char*>(i_chain.GetAddress()), static_cast<char*>(i_merge.GetAddress()));
+      TObject* obj = i_key->ReadObj();
+      TH1* h = dynamic_cast<TH1*>(obj);
+      if (h != 0) {
+        fcn.executeMD(h, md);
+      } else {
+        TGraph* g = dynamic_cast<TGraph*>(obj);
+        if (g != 0) {
+          fcn.executeMD(g, md);
         }
-        
-        linestream.putback(c);
-        linestream >> filename;
-        if(!linestream) {
-          cerr << "MonitoringFile::setListFromFile(): "
-               << "badly formatted line: " << line << "\n";
-          break;
+      }
+      delete obj;
+    }
+
+    delete md;
+
+    return true;
+  }
+
+  bool MonitoringFile::setListFromFile(std::vector<std::string> & filelist, const std::string& listFileName) {
+    using namespace std;
+
+    filelist.clear();
+
+    ifstream listfile(listFileName.c_str());
+    if (!listfile) {
+      cerr << "MonitoringFile::setListFromFile(): "
+           << "cannot read from file: " << listFileName << "\n";
+      return false;
+    }
+
+    string line;
+    char c;
+    string filename;
+    while (getline(listfile, line)) {
+      istringstream linestream(line);
+      while (linestream.get(c)) {
+        if (!isspace(c)) {
+          // ignore comments
+          if (c == '#') {
+            break;
+          }
+
+          linestream.putback(c);
+          linestream >> filename;
+          if (!linestream) {
+            cerr << "MonitoringFile::setListFromFile(): "
+                 << "badly formatted line: " << line << "\n";
+            break;
+          }
+
+          filelist.push_back(filename);
         }
-        
-        filelist.push_back(filename);
       }
     }
+
+    return true;
   }
-  
-  return true;
-}
 
-int MonitoringFile::mergeObjs(TObject *objTarget, TObject *obj, const std::string & mergeType, debugLevel_t debugLevel, const std::string& objPath) {
-   // merge obj into objTarget based on method specified in mergeType
-   // copied in large parts from mergeDirectory 
-   std::string name("mergeObjs");
-   if( ! objTarget ) {
-      std::cerr << name << ": empty target object pointer" << std::endl;
+  int MonitoringFile::mergeLBintervals(const std::string& inFilename) {
+
+    std::cout << "Running mergeLBintervals on " << inFilename << std::endl;
+
+    std::unique_ptr<TFile> f(TFile::Open(inFilename.c_str(), "UPDATE"));
+    if (!f) {
+      std::cout << "ERROR, could not open file " << inFilename << " for update" << std::endl;
       return -1;
-   }
-   if( ! obj ) {
-      std::cerr << name << ": empty object pointer" << std::endl;
-      return -1;
-   }
-
-   if( debugLevel >= VERBOSE )
-     std::cout << name << ": obj->GetName() = " << obj->GetName() << ", mergeType = " << mergeType << ", class = " << obj->IsA()->GetName() << std::endl;
-
-   const std::clock_t cpuStart=std::clock();
-   TH1 *h=0, *nextH=0;
-   TH2 *h2=0, *nextH2=0;
-   TGraph *g=0; 
-   TTree *t=0;
-   TEfficiency *e=0;
-
-//    h = dynamic_cast<TH1*>( objTarget );
-//    g = dynamic_cast<TGraph*>( objTarget );
-//    t = dynamic_cast<TTree*>( objTarget );
-   if((h = dynamic_cast<TH1*>( objTarget ))  ) {  // we are dealing with histograms
-     /*     if ( debugLevel >= DEBUG )
-      std::cout << " --> " << name << " is a histogram */
-     nextH = dynamic_cast<TH1*>( obj );
-     if (!nextH) {
-       std::cerr << objTarget->GetName() << " is a TH1, but " << obj->GetName() << " is not: skip merging" << std::endl;
-       return -1;
-     }
-     if( mergeType == "effAsPerCent" ) {
-       if((h2 = dynamic_cast<TH2*>( objTarget )) && (nextH2 = dynamic_cast<TH2*>( nextH ))){
-   merge_effAsPerCent( *h2, *nextH2 );
-       }else{
-   merge_effAsPerCentAlt( *h, *nextH );
-       }
-     }else if( mergeType == "perBinEffPerCent" ) {
-       merge_perBinEffPerCent( *h, *nextH );
-     }else if( mergeType == "weightedAverage" ) {
-       merge_weightedAverage( *h, *nextH );
-     }else if( mergeType == "weightedAverage2D" ) {
-       //if( h2 && nextH2 ) merge_weightedAverage( *h2, *nextH2 );
-       merge_weightedAverage( *h, *nextH );
-     }else if( mergeType == "weightedEff" ) {
-       merge_weightedEff( *h, *nextH );
-     }else if( mergeType == "mergeRebinned" ) {
-       merge_Rebinned( *h, *nextH );
-     }else if( mergeType == "eventSample" ) {
-       if((h2 = dynamic_cast<TH2*>( objTarget ))&& (nextH2 = dynamic_cast<TH2*>( nextH ))){
-   merge_eventSample( *h2, *nextH2 );
-       }
-     }else if( mergeType == "mergeRMS" ) {
-       merge_RMS( *h, *nextH );
-     }else if( mergeType == "RMSpercentDeviation" ) {
-       merge_RMSpercentDeviation( *h, *nextH );
-     }else if( mergeType == "lowerLB" ) {
-       merge_lowerLB( *h, *nextH );
-     }else if( mergeType == "identical" ) {
-       merge_identical( *h, *nextH );
-     }else if( mergeType == "merge" ) {
-       TList tl; tl.Add(nextH); h->Merge(&tl);
-     } else {
-       if (!h->Add( nextH )) {
-   std::cerr << "Histogram " << h->GetName() << " should NOT be using Add: needs to specify a merge method (e.g. merge) in its metadata\n";
-       }
-     }
-   }else if( (g = dynamic_cast<TGraph*>( objTarget )) ) {  // TGraphs
-     if( mergeType != "<default>" ) {
-       std::cerr << name << ": TGraph " << obj->GetName() << " request mergeType = " << mergeType
-     << " but only default merging implemented for TGraphs\n";              
-     }
-     TGraph *nextG = dynamic_cast<TGraph*>( obj );
-     TList listG;
-     listG.Add( nextG );
-     g->Merge( &listG );
-     listG.Clear();
-   }else if( (e = dynamic_cast<TEfficiency*>( objTarget )) ) {  // TEfficiencies
-     if( mergeType != "<default>" ) {
-       std::cerr << name << ": TEfficiency " << obj->GetName() << " request mergeType = " << mergeType
-     << " but only default merging implemented for TEfficiencies.\n";              
-     }
-     TEfficiency *nextE = dynamic_cast<TEfficiency*>( obj );
-     TList listE;
-     listE.Add( nextE );
-     e->Merge( &listE );
-     listE.Clear();
-   }else if ((t = dynamic_cast<TTree*>( objTarget ))) { // TTrees
-     if ( debugLevel >= VERBOSE) {
-       std::cout << "Merging Tree " << obj->GetName() << std::endl;
-     }
-     if( mergeType != "<default>" ) {
-       std::cerr << name << ": TTree " << obj->GetName() << " request mergeType = " << mergeType
-     << " but only default merging implemented for TTrees\n";            
-     }
-     TTree *nextT = dynamic_cast<TTree*>( obj );
-     TList listT;
-     listT.Add( nextT );
-     t->Merge( &listT );
-     listT.Clear();
-   } else {
-     std::cerr << name << ": object is not a histogram or graph, merging not implemented" << std::endl;
-   }
-   if (m_doTiming) {
-     const std::clock_t duration=std::clock()-cpuStart;
-     std::string name;
-     if (!objPath.empty()) {
-       size_t pSlash=0;
-       //Ignore the first two /xx/yy/zz/ sub-strings (filename, run_NNNNNN)
-       for (unsigned i=0;i<3 && pSlash!=std::string::npos;++i) {
-	 pSlash=objPath.find_first_of('/',pSlash+1);
-       }
-       if (pSlash != std::string::npos) {
-	 name=objPath.substr(pSlash+1);
-       }
-       else {
-	 name=objPath;
-       }
-       name+="/";
-     }
-     name+=obj->GetName();
-     m_cpuPerHistogram[name]+=duration;
-   }
-   return 0;
-}
-
-int MonitoringFile::mergeLB_recursiveDirCopy(TDirectory *dir_top_out, TDirectory *dir_out, TDirectory *cwd, 
-                                             std::vector<std::string>& v_dirsSub, debugLevel_t& debugLevel) {
-   // store in v_dirsSub the paths (relative to dir_top_out) of all subdirectories of cwd
-   // copy the subfolder structure from cwd to dir_out 
-   std::string name("mergeLB_recursiveDirCopy");
-   if( ! cwd ) {
-      std::cerr << name << ": empty directory pointer cwd" << std::endl;
-      return -1;
-   }
-   if( ! dir_top_out ) {
-      std::cerr << name << ": empty directory pointer dir_top_out" << std::endl;
-      return -1;
-   }
-   if( ! dir_out ) {
-      std::cerr << name << ": empty directory pointer dir_out" << std::endl;
-      return -1;
-   }
-
-   TIter next(cwd->GetListOfKeys());
-   TKey *key; 
-   while( ( key=(TKey*) next() ) ) {
-      std::string keyClassName(key->GetClassName());
-      if( (keyClassName.size() > 9) && (keyClassName.substr(0,10) == "TDirectory") ) {
-         TDirectory *dir = (TDirectory*) cwd->Get(key->GetName());
-         if( !dir ) {
-            std::cerr << name << ": could not retrieve directory " << key->GetName() << 
-               " from " << cwd->GetPath() << std::endl;
-            continue;
-         }
-         dir_out->cd();
-         std::string p_top(dir_top_out->GetPath());
-         std::string p(gDirectory->GetPath());
-         if( p_top.size() < p.size() ) {
-            p = p.substr(p_top.size()+1, p.size()-p_top.size()-1); // strip off the top directory part
-            p = p + '/';
-         }
-         else p = "";
-
-         // is this directory already in the list of subdirectories?
-         std::vector<std::string>::iterator it;
-         for( it = v_dirsSub.begin(); it != v_dirsSub.end(); ++it ) {
-            if( *it == (p + dir->GetName()) ) break;
-         }
-         if( it == v_dirsSub.end() ) {
-            // no
-            v_dirsSub.push_back(p + dir->GetName());
-         }
-
-         TKey *test_key = dir_out->FindKey(dir->GetName());
-         TDirectory *dir_out_new(0);
-         if( !test_key ) {   
-            if( debugLevel >= DEBUG ) {
-               std::cout << name << ": creating subdirectory " << dir->GetName();
-               if( p.size() != 0 ) std::cout << " in " << p << std::endl;
-               else std::cout << std::endl;
-            }
-            dir_out_new = (TDirectory*) gDirectory->mkdir(dir->GetName());
-            if( ! dir_out_new ) {
-               std::cerr << name << ": could not create directory " << dir->GetName() 
-                  << " in " << gDirectory->GetPath() << std::endl;
-            }
-         }
-         else {
-            if( debugLevel >= DEBUG ) 
-               std::cout << name << ": " << dir_out->GetPath() << '/' << dir->GetName() << " exists already" << std::endl;
-
-            dir_out_new = (TDirectory*) dir_out->Get(test_key->GetName()); 
-            if( ! dir_out_new ) {
-               std::cerr << name << ": could not retrieve directory " << test_key->GetName() 
-                  << " from " << dir_out->GetPath() << std::endl;
-            }
-         }
-         // go one level deeper in the directory tree
-         if( dir_out_new )
-            mergeLB_recursiveDirCopy(dir_top_out, dir_out_new, dir, v_dirsSub, debugLevel);
-
+    }
+    std::string runDirName;
+    const std::regex runDirPattern("run_[0-9]*");
+    TIter next(f->GetListOfKeys());
+    TKey* key;
+    while ((key = (TKey*)next())) {
+      const char* name = key->GetName();
+      if (std::regex_match(name, runDirPattern)) {
+        if (runDirName.size() > 0) {
+          std::cout << "ERROR More than one run_XXX directory found! Ignoring " << name << std::endl;
+        } else
+          runDirName = name;
       }
-   }
-   return 0;
-}
+      break;
+    }
 
-int MonitoringFile::mergeLB_createListOfHistos(TDirectory *dir_top, TDirectory *cwd, std::vector<std::string>& v_histos, debugLevel_t& debugLevel) {
-   // get paths relative to dir_top of all histograms and graphs in cwd
-   std::string name("mergeLB_createListOfHistos");
-   if( ! cwd ) {
-      std::cerr << name << ": empty directory pointer" << std::endl;
-      return -1;
-   }
+    TDirectory* runDir = f->GetDirectory(runDirName.c_str());
+    const auto mapping = buildLBToIntervalMap(runDir);
 
-   TIter next(cwd->GetListOfKeys());
-   TKey *key; 
-   while( ( key=(TKey*) next() ) ) {
-      std::string keyClassName(key->GetClassName());
-      if( ( (keyClassName.size() > 2) && ( (keyClassName.substr(0,3) == "TH1") || (keyClassName.substr(0,3) == "TH2")  ) ) ||
-          ( (keyClassName.size() > 7) && ( (keyClassName.substr(0,8) == "TProfile") ) ) || 
-          ( (keyClassName.size() > 5) && ( (keyClassName.substr(0,6) == "TGraph") ) ) ||
-          ( (keyClassName.size() > 10) && ( (keyClassName.substr(0,11) == "TEfficiency") ) ) ) {
-         if( debugLevel >= VERBOSE )
-            std::cout << name << ": found object: " << key->GetName();  
-
-         // add to v_histos if not already in it
-         std::string p_top(dir_top->GetPath());
-         std::string p(cwd->GetPath());
-         if( p_top.size() < p.size() ) {
-            p = p.substr(p_top.size()+1, p.size()-p_top.size()-1); // strip off the top directory part
-            p = p + '/';
-         }
-         else p = "";
-
-         std::vector<std::string>::iterator it;
-         for( it = v_histos.begin(); it != v_histos.end(); ++it ) {
-            if( *it == (p + key->GetName()) ) break;
-         }
-
-         if( it == v_histos.end() ) {
-            std::string objName(p + key->GetName());
-            v_histos.push_back(objName);
-            if( debugLevel >= VERBOSE )
-               std::cout << ", added to list: " << p + key->GetName() << std::endl;
-         }
-         else {
-            if( debugLevel >= VERBOSE )
-               std::cout << ", already in list" << std::endl; 
-         }
+    if (s_dbg.getLvl() == VERBOSE) {
+      std::cout << "LB directory mapping:" << std::endl;
+      for (const auto& i1 : mapping) {
+        std::cout << i1.first;
+        for (const auto& i2 : i1.second) {
+          std::cout << "\t" << i2 << std::endl;
+        }
       }
-   }
-   return 0;
-}
+    }
 
-int MonitoringFile::mergeLB_processLBinterval(std::vector<TDirectory*>& v_dirsStat, TDirectory *dir_run, debugLevel_t& debugLevel) {
-   // create a directory for merged histograms in dir_run
-   // loop over v_dirsStat directories (=different LB intervals) 
-   // and merge all histograms and graphs (preserving the subdirectory structure)
-   std::string name("mergeLB_processLBinterval");
+    for (const auto& [outDir, inDIrs] : mapping) {
+      int stat=mergeLB_processLBinterval(f.get(), inDIrs, outDir);
+      if (stat) return stat;
+     }
 
-   if( v_dirsStat.size() == 0 ) return 0;
+    f->Close();
+    f.reset(TFile::Open(inFilename.c_str(), "UPDATE"));
+    runDir = f->GetDirectory(runDirName.c_str());
 
-   if( ! dir_run ) {
-      std::cerr << name << ": empty pointer dir_run" << std::endl;
-      return -1;
-   }
-
-   if( ! v_dirsStat[0] ) {
-      std::cerr << name << ": empty first directory pointer" << std::endl;
-      return -1;
-   }
-
-/*
-   // create top-level merged directory
-   std::string label((v_dirsStat[0])->GetName());
-   label = label.substr(0,3);
-   std::string dirMergedName("merged_" + label + "Stat");
-   TDirectory *dir_merged = dir_run->mkdir(dirMergedName.c_str());
-   if( !dir_merged ) {
-      std::cerr << name << ": could not create directory " << dirMergedName << std::endl;
-      return -1;
-   }
-   if( debugLevel >= DEBUG )
-      std::cout << name << ": created new directory " << dir_merged->GetPath() << std::endl;
-*/
-   TDirectory *dir_merged = dir_run;
-
-   // Histograms can be booked on demand in AthenaMonitoring.
-   // So a histogram might be present in lowStat_LB21-30 but not
-   // in lowStat_LB1-10. Also entire directories might be missing
-   // in certain LB intervals.
-   // Hence, to cope with on-demand-booking have to loop over all
-   // LB intervals to identify all histograms.
-
-   // To limit memory usage, instead of holding all merged histograms in
-   // memory, build a list of histogram names (including full path because 
-   // can have same name in different subfolders, like Jets/Topo/JetP and
-   // Jets/Tower/JetP). 
-
-   // Build this list only per subfolder. Then loop over list, merge the
-   // histograms, write them to ROOT file, and delete them from memory.
-
-   // instead of a list, create a map which also holds the merging type
-   // (whether simply TH1F::Add() or more complicated function) from metadata.
-
-   std::vector<TDirectory*>::const_iterator i;
-   // loop over LB intervals:
-   //    - get list of subdirectories
-   //    - and create subdirectory structure in merged directory
-   std::vector<std::string> v_dirsSub;
-   for( i = v_dirsStat.begin(); i != v_dirsStat.end(); ++i ) {
-      TDirectory *dirStat = *i;
-      if( debugLevel >= DEBUG )
-         if( dirStat ) 
-            std::cout << name << ": getting input from directory " << dirStat->GetPath() << std::endl;
-      mergeLB_recursiveDirCopy(dir_merged, dir_merged, dirStat, v_dirsSub, debugLevel); 
-      // v_dirsSub are paths relative to dir_merged
-   }
-
-   // loop over subdirectories:
-   if( v_dirsSub.size() == 0 ) {
-      if( debugLevel >= DEBUG )
-         std::cout << name << ": no subdirectories found" << std::endl;
-      return 0;
-   }
-   //   - create list of histograms 
-   //        - loop over all LB intervals because of on-demand-booking
-   //   - loop over histogram list
-   //        - loop over LB intervals
-   //            - merge histograms
-   //        - write merged histogram to file and delete it from memory
-   std::vector<std::string>::const_iterator it_string;
-   for( it_string = v_dirsSub.begin(); it_string != v_dirsSub.end(); ++it_string ) {
-      std::string dirFullName = *it_string;
-      std::vector<std::string> v_histos;
-      if( debugLevel >= DEBUG )
-         std::cout << name << ": processing " << dirFullName << std::endl;
-      for( i = v_dirsStat.begin(); i != v_dirsStat.end(); ++i ) {
-         TDirectory *dirStat = *i;
-         TDirectory *dir = (TDirectory*) dirStat->Get(dirFullName.c_str());
-         if( !dir ) {
-            std::cerr << name << ": could not retrieve directory " << dirFullName << 
-               " from " << dirStat->GetPath() << std::endl;
-            continue;
-         }
-         if( debugLevel >= DEBUG )
-            std::cout << name << ": processing LB folder " << dir->GetPath() << std::endl;
-         mergeLB_createListOfHistos(dirStat, dir, v_histos, debugLevel); 
+    std::cout << "merging lowStat_LB dirs into run-dir" << std::endl;
+    std::vector<std::string> lowStatDirs;
+    for (TObject* oKey : *runDir->GetListOfKeys()) {
+      TKey* key = static_cast<TKey*>(oKey);
+      const std::string name = key->GetName();
+      const std::string classname = key->GetClassName();
+      if (classname.starts_with("TDirectory") and name.starts_with("lowStat_LB")) {
+        lowStatDirs.push_back(runDirName + "/" + name);
+        s_dbg(VERBOSE, "Found input: " + runDirName + "/" + name);
       }
+    }
 
-      if( v_histos.size() == 0 ) {
-         if( debugLevel >= DEBUG )
-            std::cout << name << ": no objects found" << std::endl;
+    int stat=mergeLB_processLBinterval(f.get(), lowStatDirs, runDirName);
+
+    f->Close();
+    return stat;
+  }
+
+  std::map<std::string, std::vector<std::string>> MonitoringFile::buildLBToIntervalMap(TDirectory * runDir) {
+
+    std::map<std::string, std::vector<std::string>> ranges;
+
+    // No recusion here, everything we care out is run_NNNNN/lb_nnnn (and run_NNNNN/lowStat_nn-mm)
+    const std::string runDirName = runDir->GetName();
+    for (TObject* oKey : *runDir->GetListOfKeys()) {
+      TKey* key = static_cast<TKey*>(oKey);
+      const std::string name = key->GetName();
+      const std::string classname = key->GetClassName();
+      if (!classname.starts_with("TDirectory"))
+        continue;
+      if (name.starts_with("lb_")) {
+        unsigned lumiBlock = 0;
+        try {
+          lumiBlock = std::stol(name.substr(3));
+        } catch (std::invalid_argument& e) {
+          std::cout << "ERROR, unexpected directory name " << name << ". Can't parse lb number" << std::endl;
+          std::cout << e.what() << std::endl;
           continue;
-      }
+        }
+        // Copied from Control/AthenaMonitoringKernel/src/HistogramFiller/OfflineHistogramProvider.h
+        const unsigned lbBase = lumiBlock - (((int64_t)lumiBlock - 1) % 20);
+        const std::string lbString = runDirName + "/lowStat_LB" + std::to_string(lbBase) + "-" + std::to_string(lbBase + 19);
+        ranges[lbString].push_back(runDirName + "/" + name);
+      }  // end if lb_NNNN dir
+    }  // end loop over directories under run_NNNNN
+    return ranges;
+  }
 
-      TDirectory *dir_out = (TDirectory*) dir_merged->Get(dirFullName.c_str()); 
-      if( !dir_out ) {
-         std::cerr << name << ": could not retrieve directory " << dirFullName << 
-            " from " << dir_merged->GetPath() << std::endl;
-         continue;
-      }
+  int MonitoringFile::mergeLB_processLBinterval(TFile * file, const std::vector<std::string>& inputDirNames, const std::string& outputDirName) {
 
-      // create new metadata tree for current merged directory if not already extant
-      typedef std::map< std::string, MetaData >  MetaDataMap_t;
-      TTree* mdTree = dynamic_cast<TTree*>(dir_out->Get("metadata"));
-      if (!mdTree) {
-  mdTree = new TTree( "metadata", "Monitoring Metadata" );
-      }
-      mdTree->SetDirectory(0);
-      OutputMetadata outputmd( mdTree );
- 
-      // get metadata from one of the input directories
-      // this is for caching, could also read the metadata directly from tree in the
-      // current directory when accessing the histogram
-      MetaDataMap_t mdMap;
-      TDirectory *dir_in = (TDirectory*) v_dirsStat[0]->Get(dirFullName.c_str()); 
-      if( !dir_in ) {
-         std::cerr << name << ": could not retrieve directory " << dirFullName << 
-            " from " << v_dirsStat[0]->GetPath() << std::endl;
-         continue;
-      }
-      fillMetaDataMap( mdMap, dir_in);
-
-      // histogram loop
-      std::vector<std::string>::const_iterator it_string2;
-      for( it_string2 = v_histos.begin(); it_string2 != v_histos.end(); ++it_string2 ) {
-         std::string histFullName = *it_string2;  // something like Jets/Tower/JetP
- 
-         TObject *objMerged(0);
-         std::string mergeType("<default>");
-          // LB interval loop
-   bool key_checked = false;
-         for( i = v_dirsStat.begin(); i != v_dirsStat.end(); ++i ) {
-            // retrieve histogram for current LB interval
-            TDirectory *dir_current = (*i);
-      std::unique_ptr<TObject> objThis((TObject*) dir_current->Get(histFullName.c_str()));
-
-            if( ! objThis.get() ) { // histogram does not exist in this LB interval
-               continue;
-            }
-
-     // test if histogram exists already in dir_out
-     if (! key_checked) {
-       TKey *test_key = dir_out->FindKey(objThis->GetName());
-       if( test_key ) {
-         if( debugLevel >= DEBUG )
-     std::cout << name << ": " << dir_out->GetPath() << '/' << objThis->GetName()
-         << " exists already, not written" << std::endl;
-         break;
-       }
-       key_checked = true;
-     }
-
-            if( ! objMerged ) {
-              // clone the current histogram
-               objMerged = objThis->Clone();
-               // retrieve metadata
-               MetaDataMap_t::iterator mdi = mdMap.find(objThis->GetName());
-               const MetaData *md(0);                  
-               if( mdi != mdMap.end() ) {
-                  md = &(mdi->second);
-               }
-               else {
-                  // it could be that we had just been unlucky (on-demand-booking)
-                  // and this histogram was not available in v_dirsStat[0]
-                  // (or the directory for which we created the map last here).
-                  // remake metadatamap
-                  mdMap.clear();
-                  fillMetaDataMap( mdMap, dir_current );
-                  mdi = mdMap.find(objThis->GetName());
-                  if( mdi != mdMap.end() ) {
-                     md = &(mdi->second);
-                  }
-               }
-
-               if( ! md ) {
-                  std::cerr << name << ": no metadata for " << histFullName << std::endl;
-                  std::cerr << name << ": => using default merging" << std::endl;
-               }
-               else {
-                  outputmd.fill( md->name, md->interval, md->chain, md->merge );
-                  mergeType = md->merge;
-               }
-            }
-            else {
-               // objMerged already exists, merge with objThis
-               // but only if objMerged isn't empty ... otherwise swap
-               TH1* h = dynamic_cast<TH1*>(objMerged);
-               if (h && h->GetEntries() == 0 && h->GetSumOfWeights() == 0) {
-                delete objMerged;
-                objMerged = objThis->Clone();
-               } else {
-		 mergeObjs(objMerged, objThis.get(), mergeType, debugLevel, std::string(dir_out->GetPath()));
-               }
-            }
-      //delete objThis;
-         }
-
-         dir_out->cd();
-         // write histogram to file and delete it from memory
-         if( objMerged ) {
-     objMerged->Write();
-     if( debugLevel >= DEBUG )
-       std::cout << name << ": wrote " << dir_out->GetPath() << '/' << objMerged->GetName() << std::endl;
-     delete objMerged;
-         }
-      }
-      // write metadata tree
-      dir_out->cd();
-      mdTree->SetDirectory(dir_out);
-      mdTree->Write(0, kOverwrite);
-      delete mdTree;
-
-   } 
-
-   return 0;
-}
-
-void MonitoringFile::buildLBToIntervalMap(std::vector<TDirectory*>& v_dirLBs, std::vector<TDirectory*>& v_dirsInterval, map_dir_vdir& mapping, debugLevel_t& debugLevel) {
-  std::vector<std::string> v_splits;
-  typedef std::vector<std::pair<TDirectory*, std::pair<int, int> > > range_t;
-  range_t v_ranges;
-  for (std::vector<TDirectory*>::const_iterator dirit = v_dirsInterval.begin();
-       dirit != v_dirsInterval.end();
-       ++dirit) {
-    std::string dirname((*dirit)->GetName());
-    std::string corename(dirname.substr(10, std::string::npos));
-    boost::split(v_splits, corename, boost::algorithm::is_any_of(std::string("-")));
-    if (v_splits.size() != 2) {
-      std::cerr << "Unable to properly parse " << (*dirit)->GetName() << std::endl;
-      continue;
+    TDirectory* outDir = file->GetDirectory(outputDirName.c_str());
+    if (!outDir) {
+      outDir = file->mkdir(outputDirName.c_str());
     }
-    if( debugLevel >= DEBUG ) std::cout << "Found " << dirname << " " 
-          << v_splits[0] << " " 
-          << v_splits[1] << std::endl;
-    try {
-      v_ranges.push_back(std::make_pair(*dirit, std::make_pair(boost::lexical_cast<int>(v_splits[0]), boost::lexical_cast<int>(v_splits[1]))));
-    } catch (boost::bad_lexical_cast& e) {
-      std::cerr << "Unable to cast to integers: " << v_splits[0] << " " 
-    << v_splits[1] << std::endl;
-    }
-  }
-  for (std::vector<TDirectory*>::const_iterator dirit = v_dirLBs.begin();
-       dirit != v_dirLBs.end();
-       ++dirit) {
-    std::string dirname((*dirit)->GetName());
-    int lbnum = boost::lexical_cast<int>(dirname.substr(3, std::string::npos));
-    for (range_t::const_iterator rangeit = v_ranges.begin(); 
-   rangeit != v_ranges.end(); ++rangeit) {
-      if ((*rangeit).second.first <= lbnum && 
-    lbnum <= (*rangeit).second.second) {
-  map_dir_vdir::iterator mapit = mapping.find((*rangeit).first);
-  (*mapit).second.push_back(*dirit);
-      }
-    }
-  }
-}
-
-int MonitoringFile::mergeLB_processLB(std::vector<TDirectory*>& v_dirLBs, std::vector<TDirectory*>& v_dirsInterval, debugLevel_t& debugLevel) {
-  std::map<TDirectory*,std::vector<TDirectory*> > mapping;
-  for (std::vector<TDirectory*>::const_iterator dirit = v_dirsInterval.begin();
-       dirit != v_dirsInterval.end(); ++dirit) {
-    mapping[*dirit] = std::vector<TDirectory*>();
-  }
-  buildLBToIntervalMap(v_dirLBs, v_dirsInterval, mapping, debugLevel);
-
-  for (map_dir_vdir::iterator mapit = mapping.begin();
-       mapit != mapping.end(); ++mapit) {
-    mergeLB_processLBinterval((*mapit).second, (*mapit).first, debugLevel);
-  }
-
-  return 0;
-}
-
-int MonitoringFile::mergeLB_processRun(TDirectory *dir_run, debugLevel_t& debugLevel) {
-   // get lists of "lowStat_", "medStat_", "higStat_" subdirectories in dir_run
-   // call mergeLB_processLBinterval for each of these lists
-   std::string name("mergeLB_processRun");
-   if( ! dir_run ) {
-      std::cerr << name << ": empty pointer to run directory" << std::endl;
+    if (!outDir) {
+      std::cout << "ERROR, can't obtain nor create directory " << outputDirName << " in file " << file->GetName() << std::endl;
       return -1;
-   }
+    }
 
-   if( debugLevel >= DEBUG )
-      std::cout << name << ": processing dir " << dir_run->GetName() << std::endl;
-   
-   std::vector<TDirectory*> v_dirsLowStat, v_dirsMedStat, v_dirsHigStat,
-     v_dirsLB;
+    histCollection hc(file, true);
+    hc.addDirExclusion(m_mergeMatchDirRE);
+    hc.addHistExclusion(m_mergeMatchHistoRE);
 
-   TIter next(dir_run->GetListOfKeys());
-   TKey *key; 
-   while( ( key=(TKey*) next() ) ) {
-      std::string keyClassName(key->GetClassName());
-      if( (keyClassName.size() > 9) && (keyClassName.substr(0,10) == "TDirectory") ) {
-         TDirectory *dir = (TDirectory*) dir_run->Get(key->GetName());
-         if( !dir ) {
-            std::cerr << name << ": could not retrieve " << key->GetName() << " from " << dir_run->GetPath() << std::endl;
-            continue;
-         }
-         std::string dirName(dir->GetName()); 
-   if ( dirName.substr(0,3) == "lb_" ) {
-     v_dirsLB.push_back(dir);
-   } else if( dirName.size() > 7 )  {  
-            if( dirName.substr(0,8) == "lowStat_" ) {
-               v_dirsLowStat.push_back(dir);
-            }
-            else if( dirName.substr(0,8) == "medStat_" ) {
-               v_dirsMedStat.push_back(dir);
-            }
-            else if( dirName.substr(0,8) == "higStat_" ) {
-               v_dirsHigStat.push_back(dir);
-            }
-         }
-      }
-   }
-
-   if( debugLevel >= DEBUG ) std::cout << "\n" << name << ": processing LB directories" << std::endl;
-   if( v_dirsLB.size() > 0 ) mergeLB_processLB(v_dirsLB, v_dirsLowStat, debugLevel);
-   
-   if( debugLevel >= DEBUG ) std::cout << "\n" << name << ": processing lowStat directories" << std::endl;
-   if( v_dirsLowStat.size() > 0 ) mergeLB_processLBinterval(v_dirsLowStat, dir_run, debugLevel);
-
-   if( debugLevel >= DEBUG ) std::cout << "\n" << name << ": processing medStat directories" << std::endl;
-   if( v_dirsMedStat.size() > 0 ) mergeLB_processLBinterval(v_dirsMedStat, dir_run, debugLevel);
-
-   if( debugLevel >= DEBUG ) std::cout << "\n" << name << ": processing higStat directories" << std::endl;
-   if( v_dirsHigStat.size() > 0 ) mergeLB_processLBinterval(v_dirsHigStat, dir_run, debugLevel);
-
-   return 0;
-}
-
-int MonitoringFile::mergeLBintervals(const std::string& inFilename, const std::string& inDebugLevel) {
-   // open merged file, call mergeLB_processRun for each "run_" directory
-   // in file, close file
-   std::string name("mergeLBintervals");
-
-   debugLevel_t debugLevel = none;
-   if(inDebugLevel.empty()){
-     debugLevel=m_debugLevel>(int)VERBOSE?VERBOSE:(debugLevel_t)m_debugLevel.load();
-   }else{
-     if( inDebugLevel == "DEBUG" ) debugLevel = DEBUG;
-     else if( inDebugLevel == "VERBOSE" ) debugLevel = VERBOSE;
-   }
-   
-   //TFile &f = *(TFile::Open(inFilename.c_str(), "UPDATE")); // does a copy and leaks memory
-   TFile *f = (TFile::Open(inFilename.c_str(), "UPDATE",inFilename.c_str(),m_fileCompressionLevel));
-
-   TIter next(f->GetListOfKeys());
-   TKey *key; 
-   while( ( key=(TKey*) next() ) ) {
-      std::string keyClassName(key->GetClassName());
-      if( (keyClassName.size() > 9) && (keyClassName.substr(0,10) == "TDirectory") ) {
-         TDirectory *dir = (TDirectory*) f->Get(key->GetName());
-         if( !dir ) {
-            std::cerr << name << ": could not retrieve " << key->GetName() 
-            << " from top level directory of " << inFilename << std::endl;
-            continue;
-         }
-         std::string dirName(dir->GetName()); 
-         if( (dirName.size() > 3) && (dirName.substr(0,4) == "run_") ) {
-            if( debugLevel == DEBUG )
-               std::cout << name << ": found run dir " << dirName << std::endl;
-            // process this run
-            mergeLB_processRun(dir, debugLevel);
-         }
-      }
-   }
-
-   f->Close();
-   return 0;
-}
-
-bool
-MonitoringFile::
-CheckHistogram(TFile* f,const char* HistoName)
-{
-  std::unique_ptr<TObject> obj(f->Get(HistoName));
-  if (! obj.get()) {
-    //std::cerr<<"No such histogram \""<< HistoName << "\"\n";
-    return false;
+    for (const std::string& inDirName : inputDirNames) {
+      TDirectory* inDir = file->GetDirectory(inDirName.c_str());
+      hc.addDirectory(inDir, outputDirName);
+    }
+    if (hc.size() == 0) {
+      std::cout << "mergeLB_processLBinterval: No new objects found for " << outputDirName << std::endl;
+    } else {
+      hc.write();
+    }
+    return 0;
   }
-  else return true;
-}
 
-int MonitoringFile::getDebugLevel(){return m_debugLevel;}
-void MonitoringFile::setDebugLevel(int level){m_debugLevel=level;}
-void MonitoringFile::doTiming() {m_doTiming=true;}
-std::atomic<int> MonitoringFile::m_fileCompressionLevel=1;
-std::atomic<int> MonitoringFile::m_debugLevel=0;
-bool MonitoringFile::m_doTiming=false;
-std::unordered_map<std::string,std::clock_t> MonitoringFile::m_cpuPerHistogram;
+  bool MonitoringFile::CheckHistogram(TFile * f, const char* HistoName) {
+    std::unique_ptr<TObject> obj(f->Get(HistoName));
+    if (!obj.get()) {
+      // std::cerr<<"No such histogram \""<< HistoName << "\"\n";
+      return false;
+    } else
+      return true;
+  }
 
-std::string MonitoringFile::getPath(TDirectory *dir){
-  
-  std::string path = dir->GetPath();
-  if ( path.find(':') != std::string::npos )
-    path = path.substr(path.rfind(':')+1);    
-  
-  return path;
-}
+  int MonitoringFile::getDebugLevel() {
+    return s_dbg.getLvl();
+  }
+  void MonitoringFile::setDebugLevel(int level) {
+    s_dbg.setLvl((debugLevel_t)(level));
+  }
+  void MonitoringFile::doTiming() {
+    m_doTiming = true;
+  }
 
-} // namespace dqutils
+ 
+  void MonitoringFile::setCheckEquality(bool value) {dqutils::s_checkEquality=value;}
+  std::atomic<int> MonitoringFile::m_fileCompressionLevel = 1;
+  bool MonitoringFile::m_doTiming = false;
+  std::unordered_map<std::string, std::clock_t> MonitoringFile::m_cpuPerHistogram;
+ 
+  std::string MonitoringFile::getPath(TDirectory * dir) {
 
+    std::string path = dir->GetPath();
+    if (path.find(':') != std::string::npos)
+      path = path.substr(path.rfind(':') + 1);
+
+    return path;
+  }
+
+}  // namespace dqutils

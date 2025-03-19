@@ -35,33 +35,27 @@ TCS::jXESort::initialize() {
 
 TCS::StatusCode
 TCS::jXESort::sortBitCorrect(const InputTOBArray & input, TOBArray & output) {
-
+    
    if(input.size()!=1) {
       TCS_EXCEPTION("jXE sort alg expects exactly single jXE TOB, got " << input.size());
    }
 
-   const jXETOBArray & jxes = dynamic_cast<const jXETOBArray&>(input);
+   const jXETOBArray & mets = dynamic_cast<const jXETOBArray&>(input);
+   int missingET = quadraticSumBW(mets[0].Ex(), mets[0].Ey());
+   
+   int metphi = TSU::Trigo::atan2(mets[0].Ex(),mets[0].Ey());
+    
+   TRG_MSG_DEBUG("MET phi values " << metphi << " from x/y = " << mets[0].Ex() << "/" << mets[0].Ey() << "( ET = " << missingET << ")"  );
+   output.push_back( GenericTOB( missingET, 0, metphi ) );
 
-   for(jXETOBArray::const_iterator jxe = jxes.begin(); jxe!= jxes.end(); ++jxe ) { 
-     output.push_back( GenericTOB(**jxe) );
-   }
-	
    return TCS::StatusCode::SUCCESS;
+
 }
 
 TCS::StatusCode
 TCS::jXESort::sort(const InputTOBArray & input, TOBArray & output) {
-
-   if(input.size()!=1) {
-      TCS_EXCEPTION("jXE sort alg expects exactly single jXE TOB, got " << input.size());
-   }
-
-   const jXETOBArray & jxes = dynamic_cast<const jXETOBArray&>(input);
-
-   for(jXETOBArray::const_iterator jxe = jxes.begin(); jxe!= jxes.end(); ++jxe ) { 
-     output.push_back( GenericTOB(**jxe) );
-   }
-	
-   return TCS::StatusCode::SUCCESS;
+    //we have a bitCorrect version, so use it
+    return this->sortBitCorrect(input, output);
+    
 }
 

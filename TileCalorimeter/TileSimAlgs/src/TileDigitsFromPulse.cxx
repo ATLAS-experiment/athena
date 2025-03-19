@@ -78,6 +78,7 @@ TileDigitsFromPulse::TileDigitsFromPulse(const std::string& name, ISvcLocator* p
 	declareProperty("UseInTimeAmpDist", m_useItADist = kFALSE);
 	declareProperty("UseOutOfTimeAmpDist", m_useOotADist = kFALSE);
 	declareProperty("InTimeAmpDistFileName", m_itADistFileName = "");
+	declareProperty("InTimeAmpPulseProb", m_itAPulseProb = 0);
 	declareProperty("OutOfTimeAmpDistFileName", m_ootADistFileName = "");
 	declareProperty("PileUpFraction", m_pileUpFraction = 1);
 	declareProperty("GaussianC2CPhaseVariation", m_gausC2C = 0);
@@ -185,7 +186,6 @@ StatusCode TileDigitsFromPulse::initialize() {
 
 		if (m_pileupAmpDistFileName.size() == 0) {
 			m_pileupAmpDistFileName = PathResolver::find_file("Distributions_MB_minbias_inelastic_lowjetphoton_e8314_e7400_s3508.root", "DATAPATH");
-			//m_pileupAmpDistFileName = PathResolver::find_file("Distributions_small_h2000_177531_ZeroBias.root", "DATAPATH");
 			if (m_pileupAmpDistFileName.size() == 0 ) {
 				ATH_MSG_FATAL("Could not find input file Distributions_MB_minbias_inelastic_lowjetphoton_e8314_e7400_s3508.root");
 				return StatusCode::FAILURE;
@@ -515,9 +515,15 @@ StatusCode TileDigitsFromPulse::execute() {
 
 					for (int igain = 1; igain >= 0; --igain) {
 					          gain = igain;
-					          n_inTimeAmp = 0.0; // no in-time amplitude, everything is pulses
+					          n_inTimeAmp = 0.0;
 					          m_ootAmp = 0.0;
 					          m_ootOffset = 0.0;
+
+						  if (m_random->Rndm() < m_itAPulseProb){
+						    n_inTimeAmp = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp;
+						  } else{
+						    n_inTimeAmp = 0;
+						  }
 
 						  // PDF logic for noise
 						  if (m_gaussNoise) {
@@ -542,11 +548,12 @@ StatusCode TileDigitsFromPulse::execute() {
 						    m_PUAmp[ros-1][drawer][channel].pop_back();
 						    m_PUAmp[ros-1][drawer][channel].insert(m_PUAmp[ros-1][drawer][channel].begin(), 0);
 
-						    // m_sample_tru is the amplitude for the "center" BC
+						    // m_sample_tru is the amplitude for the central BC
 						    m_sample_tru = m_PUAmp[ros-1][drawer][channel][(m_nPul - 1) / 2];
 
 						    // Fill the new BC at the front
 						    addPileUpSample(gain, ros, drawer, channel);
+						    m_PUAmp[ros-1][drawer][channel].front() += n_inTimeAmp; // Add amplitude from in-time pulse to true-amp vector
 
 						    sample = m_tsg->fillSample(tFit, ped,
 									       m_PUAmp[ros-1][drawer][channel],
@@ -750,6 +757,28 @@ void TileDigitsFromPulse::addPileUp(double &n_inTimeAmp, int gain, int ros, int 
                                         m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] = m_useOotADist ? m_ootDist->GetRandom() : m_ootAmp;
                                         m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i] = m_useOotADist ? m_ootDist->GetRandom() : m_ootAmp;
                                 }
+
+				if(m_simPulseChain){ // Special treatment for pulse-chain simulation, add in-time pulses when initializing true-amp vector
+				  if (m_random->Rndm() < m_itAPulseProb){
+				    amp_1 = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp;
+				  } else{
+				    amp_1 = 0;
+				  }
+
+				  if (m_random->Rndm() < m_itAPulseProb){
+				    amp_2 = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp;
+				  } else{
+				    amp_2 = 0;
+				  }
+
+				  if(i==0){
+				    m_PUAmp[ros-1][drawer][channel][m_nPul_eff] += amp_1;
+				  }
+				  else{
+				    m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] += amp_1;
+				    m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i] += amp_2;
+				  }
+				}
                         } else {
                                 m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] = 0;
                                 m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i] = 0;

@@ -16,16 +16,16 @@ REGISTER_ALG_TCS(MuonSort)
 
 bool SortByEtLargestM(TCS::GenericTOB* tob1, TCS::GenericTOB* tob2)
 {
-  //Order the TOBs according to Et (high to low) or side (first A, then C) or octant index (low to high), geometry here /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/TrigConfMuctpi/TestMioctGeometry2016.dat.  
-  //Handling cases where two muon TOBs have pT>10
-  if( (tob1->Et() != tob2->Et()) && ((tob1->Et()<10) || (tob2->Et()<10))  ) return tob1->Et() > tob2->Et();    
-  else if( tob1->etaDouble() != tob2->etaDouble() ) return tob1->etaDouble() > tob2->etaDouble();            
-  else 
-    {  
-      if( tob1->phiDouble() * tob2->phiDouble() >=0. ) return tob1->phiDouble() < tob2->phiDouble();             
-      else  if( tob1->phiDouble() >=0. && tob2->phiDouble() <=0. ) return true;                                                              
-      else return false;                                                                                                                   
-    }                                                                                                                                       
+  //Order the TOBs according to Et (high to low), then (in case of equal ET) side (first A, then C). Further ambiguity resolution depends on details of MUCTPI and are currently not taken into account (to be seen if necessary).
+  
+  //highest priority: ET
+  if (tob1->Et() > tob2->Et()) return true;
+  if (tob1->Et() < tob2->Et()) return false;
+  //second criterion: A side before C side (here: emulated via signed eta coordinate)
+  if (tob1->eta() > tob2->eta()) return true;
+  if (tob1->eta() < tob2->eta()) return false; //explicitly indicate tob1 < tob2 in case additional criteria are added
+  return false;
+  
 }
 
 

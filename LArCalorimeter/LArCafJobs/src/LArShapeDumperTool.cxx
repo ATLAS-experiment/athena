@@ -6,6 +6,7 @@
 #include "LArRawEvent/LArDigit.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "LArElecCalib/ILArShape.h"
+#include "LArIdentifier/LArOnline_SuperCellID.h"
 
 #include "LArRawConditions/LArPhysWave.h"
 #include "LArRawConditions/LArShapeComplete.h"
@@ -30,6 +31,7 @@ LArShapeDumperTool::LArShapeDumperTool(const std::string& type
   declareProperty("DoShape", m_doShape = true);
   declareProperty("DoAllShapes", m_doAllShapes = false);
   declareProperty("ShapeKey",m_shapeKey="LArShape17phases");
+  declareProperty("IsSC", m_isSC = false);
 }
 
 
@@ -40,13 +42,24 @@ LArShapeDumperTool::~LArShapeDumperTool()
 
 StatusCode LArShapeDumperTool::initialize() {
 
-  const CaloCell_ID* idHelper = nullptr;
-  ATH_CHECK( detStore()->retrieve (idHelper, "CaloCell_ID") );
+  const CaloCell_Base_ID* idHelper = nullptr;
+  if(m_isSC)
+     ATH_CHECK( detStore()->retrieve (idHelper, "CaloCell_SuperCell_ID") );
+  else   
+     ATH_CHECK( detStore()->retrieve (idHelper, "CaloCell_ID") );
   m_emId   = idHelper->em_idHelper();
   m_hecId  = idHelper->hec_idHelper();
   m_fcalId = idHelper->fcal_idHelper();
 
-  ATH_CHECK(detStore()->retrieve(m_onlineHelper, "LArOnlineID"));
+  if(m_isSC) {
+     const LArOnline_SuperCellID *onlHSC;
+     ATH_CHECK(detStore()->retrieve(onlHSC, "LArOnline_SuperCellID"));
+     m_onlineHelper=onlHSC;
+  } else {   
+     const LArOnlineID *onlH;
+     ATH_CHECK(detStore()->retrieve(onlH, "LArOnlineID"));
+     m_onlineHelper=onlH;
+  }
   
   return StatusCode::SUCCESS; 
 }

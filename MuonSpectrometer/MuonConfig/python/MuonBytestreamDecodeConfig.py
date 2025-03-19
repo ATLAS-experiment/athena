@@ -227,6 +227,16 @@ def sTgcRODDecoderCfg(flags, name = "sTgcROD_Decoder", **kwargs):
         result.merge(NswDcsDbAlgCfg(flags))
     else:
         kwargs.setdefault("DcsKey", "")
+
+    if flags.Input.isMC:
+        kwargs.setdefault("CablingMap","")
+    else:
+        # We need the sTGC cabling to be setup
+        from MuonConfig.MuonCablingConfig import sTgcCablingCfg
+        result.merge( sTgcCablingCfg(flags) )
+        kwargs.setdefault("CablingMap","stgcCablingMap")
+
+
     # Setup the sTGC ROD decoder
     STGCRodDecoder = CompFactory.Muon.STGC_ROD_Decoder(name = name, **kwargs)
     result.setPrivateTools(STGCRodDecoder)
@@ -236,9 +246,6 @@ def sTgcBytestreamDecodeCfg(flags, name="sTgcRawDataProvider", **kwargs):
 
     acc = ComponentAccumulator()
 
-    # We need the sTGC cabling to be setup
-    #from MuonConfig.MuonCablingConfig import STGCCablingConfigCfg
-    #acc.merge( STGCCablingConfigCfg(flags) )
 
     # Make sure muon geometry is configured
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
@@ -328,8 +335,8 @@ def MmRDODDecoderCfg(flags, name="MmROD_Decoder", **kwargs):
     if not flags.Muon.MuonTrigger and not flags.Input.isMC:        
         from MuonConfig.MuonCondAlgConfig import NswDcsDbAlgCfg
         if False: result.merge(NswDcsDbAlgCfg(flags))
-        from MuonConfig.MuonCablingConfig import NswCablingCfg
-        result.merge(NswCablingCfg(flags))
+        from MuonConfig.MuonCablingConfig import MmCablingCfg
+        result.merge(MmCablingCfg(flags))
     else:
         kwargs.setdefault("CablingMap", "")
     

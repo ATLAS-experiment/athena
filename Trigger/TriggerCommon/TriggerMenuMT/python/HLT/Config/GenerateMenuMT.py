@@ -8,6 +8,8 @@ from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
+# _maxAllowedCustomCH: this variable keeps track of the number of custom ComboHypo that are named differently as expected from the ControlFlow rule (which sets one ComboHypo per step, both named the same). These violations are already investigated and allowed because the ComboHypos are able to handle the decisions internally. Any change of this parameter needs to be discussed with experts
+_maxAllowedCustomCH = 10
 
 def calibCosmicMonSignatures():
     return ['Streaming','Monitor','Beamspot','Cosmic', 'Calib', 'EnhancedBias']
@@ -454,11 +456,12 @@ class GenerateMenuMT(metaclass=Singleton):
                     theChainConfig = listOfChainConfigs[0]
                 
                 for topoID in range(len(mainChainDict['extraComboHypos'])):
-                    thetopo = mainChainDict['extraComboHypos'][topoID].strip(string.digits).rstrip(topoLegIndices)
-
+                    thetopo = mainChainDict['extraComboHypos'][topoID].strip(string.digits).rstrip(topoLegIndices)  
+                    
+                    
                     if "anomdet" in thetopo:
                         thetopo = thetopo.rstrip(anomdetWPIndices)
-                    
+                                      
                     theChainConfig.addTopo((comboConfigurator[thetopo],thetopo))
                                     
                 # Now we know where the topos should go, we can insert them in the right steps
@@ -577,8 +580,11 @@ def generateMenuMT(flags):
 
     # Generate all chains configuration
     finalListOfChainConfigs = menu.generateAllChainConfigs(flags)
-    log.info('Number of configured chains: %d', len(finalListOfChainConfigs))
 
+    log.info('Number of configured chains: %d', len(finalListOfChainConfigs))
+    from TriggerMenuMT.HLT.Config import MenuComponents
+    if len(MenuComponents._CustomComboHypoAllowed)> _maxAllowedCustomCH:
+        log.error(f'Found {len(MenuComponents._CustomComboHypoAllowed)} ComboHypo algorithms  violating the one-CH-per-step rule, only {_maxAllowedCustomCH} are allowed (which are BLS ComboHypos). This is the list of current violations: {MenuComponents._CustomComboHypoAllowed}. Please consolidate your choice of ComboHypo, by checking that it is able to handle decisions internally; if yes eventually increase the limit set by _maxAllowedCustomCH, after discussing with experts')
     # Generate and apply the automatic prescale sets (e.g. for disabling items in an MC production)
     menu.generatePrescales(flags)
     
@@ -613,6 +619,7 @@ def generateMenuMT(flags):
     GenerateMenuMT.clear()
     from TriggerMenuMT.HLT.Config import MenuComponents
     MenuComponents._ComboHypoPool.clear() 
+    MenuComponents._CustomComboHypoAllowed.clear()
 
     return menuAcc
     
