@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONSYSTEMEXTENSIONTOOL_H
@@ -12,6 +12,7 @@
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 #include "MuonLayerEvent/MuonLayerSurface.h"
 #include "MuonRecToolInterfaces/IMuonSystemExtensionTool.h"
+#include "MuonRecHelperTools/MuonEDMPrinterTool.h"
 #include "MuonStationIndex/MuonStationIndex.h"
 #include "RecoToolInterfaces/IParticleCaloExtensionTool.h"
 #include "TrkExInterfaces/IExtrapolator.h"
@@ -47,32 +48,30 @@ namespace Muon {
     private:
         /** initialize geometry */
         bool initializeGeometry();
-        bool initializeGeometryBarrel(int sector, const Amg::AngleAxis3D& sectorRotation);
+        bool initializeGeometryBarrel(int sector, const Amg::Transform3D& sectorRotation);
         bool initializeGeometryEndcap(int sector, MuonStationIndex::DetectorRegionIndex regionIndex,
-                                      const Amg::AngleAxis3D& sectorRotation);
+                                      const Amg::Transform3D& sectorRotation);
 
         /** get surfaces to be intersected for a given start parameters */
         SurfaceVec getSurfacesForIntersection(const Trk::TrackParameters& muonEntryPars, const SystemExtensionCache& cache) const;
-
-        MuonSystemExtension::Intersection makeInterSection(const std::shared_ptr<const Trk::TrackParameters>& pars, const MuonLayerSurface& surf) const;
-
         
         ToolHandle<Trk::IParticleCaloExtensionTool> m_caloExtensionTool{
             this,
             "ParticleCaloExtensionTool",
             "Trk::ParticleCaloExtensionTool/ParticleCaloExtensionTool",
         };
-        ToolHandle<Trk::IExtrapolator> m_extrapolator{
-            this,
-            "Extrapolator",
-            "Trk::Extrapolator/AtlasExtrapolator",
-        };
+        ToolHandle<Trk::IExtrapolator> m_extrapolator{this,"Extrapolator",""};
+        
+        PublicToolHandle<MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
         
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-      
+        ServiceHandle<IMuonEDMHelperSvc> m_edmHelperSvc{this,"edmHelper","Muon::MuonEDMHelperSvc/MuonEDMHelperSvc",
+                                                        "Handle to the service providing the IMuonEDMHelperSvc interface"};
+
         /** reference surfaces per region and sector */
-        std::vector<std::vector<SurfaceVec> > m_referenceSurfaces;
+        std::array<std::array<SurfaceVec, 16> , 
+                   MuonStationIndex::DetectorRegionIndexMax > m_referenceSurfaces{};
 
         /** sector mapping helper */
         MuonSectorMapping m_sectorMapping;

@@ -75,14 +75,12 @@ namespace Muon {
   }
 
 
-  const MdtDriftCircleOnTrack* MuonPRDSelectionTool::calibrateAndSelect( const MuonSystemExtension::Intersection& intersection, const MdtPrepData& mdt ) const {
+  const MdtDriftCircleOnTrack* MuonPRDSelectionTool::calibrateAndSelect( const MuonSystemExtension::Intersection& intersection, const MdtPrepData& mdt, double beta) const {
 
     // calculate intersection with tube
     const Amg::Vector3D& direction = intersection.trackParameters->momentum();
     Amg::Vector3D intersect = intersectMDT(mdt,intersection.trackParameters->position(),direction,true);
 
-    // get the error in the precision plane
-    double err_precision = Amg::error(*intersection.trackParameters->covariance(),Trk::locX);
 
     // calculate local position of the intersection in tube frame
     const Identifier& id = mdt.identify();
@@ -99,7 +97,7 @@ namespace Muon {
     double distanceAlongTube = localPosition[Trk::locZ];
 
     if( msgLvl(MSG::VERBOSE) ) msg(MSG::VERBOSE) << " Intersected " << m_idHelperSvc->toString(id) << " distance to wire " << localPosition[Trk::locR] 
-                                                 << " error " << err_precision << " along tube (%) " << distanceAlongTube/tubeHalfLen;
+                                                 << " error " << Amg::error(*intersection.trackParameters->covariance(),Trk::locX) << " along tube (%) " << distanceAlongTube/tubeHalfLen;
 
     if( std::abs(distanceAlongTube) > tubeHalfLen + m_secondCoordinateCut ) {
       if( msgLvl(MSG::VERBOSE) ) msg(MSG::VERBOSE) << " outside tube second coordinate range, dropping " << endmsg;
@@ -120,7 +118,7 @@ namespace Muon {
     if( msgLvl(MSG::VERBOSE) ) msg(MSG::VERBOSE) << endmsg;
 
     // calibrate hit
-    const MdtDriftCircleOnTrack* mdtROT = m_mdtCreator->createRIO_OnTrack( mdt, intersect,  &direction ); 
+    const MdtDriftCircleOnTrack* mdtROT = m_mdtCreator->createRIO_OnTrack( mdt, intersect,  &direction, 0., nullptr, beta, 0.); 
     if( !mdtROT ) ATH_MSG_VERBOSE(" Failed to calibrate " << m_idHelperSvc->toString(id));
     return mdtROT;    
   }

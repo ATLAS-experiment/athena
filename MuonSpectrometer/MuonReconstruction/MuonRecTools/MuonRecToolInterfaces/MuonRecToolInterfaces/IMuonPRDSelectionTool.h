@@ -37,7 +37,7 @@ namespace Muon {
 
         /** IMuonPRDSelectionTool interface:  calibrate and select single MDT */
         virtual const MdtDriftCircleOnTrack* calibrateAndSelect(const MuonSystemExtension::Intersection& intersection,
-                                                                const MdtPrepData& mdt) const = 0;
+                                                                const MdtPrepData& mdt, double beta = 1.) const = 0;
 
         /** IMuonPRDSelectionTool interface:  calibrate and select single cluster */
         virtual const MuonClusterOnTrack* calibrateAndSelect(const Trk::TrackParameters& pars, const MuonCluster& clus) const = 0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonInDetToMuonSystemExtensionAlg.h"
@@ -368,6 +368,9 @@ StatusCode MuonInDetToMuonSystemExtensionAlg::createStaus(const EventContext& ct
     }
 
     SG::WriteHandle<InDetCandidateCollection> indetCandidateCollection(m_stauInDetCandKey, ctx);
+    // sort candidates beofre storing, otherwise ordering in container of stau segments can be inconsistent
+    std::sort(stau_cache.outputContainer->begin(),stau_cache.outputContainer->end(),[](const MuonCombined::InDetCandidate*a, const MuonCombined::InDetCandidate*b){
+        return a->indetTrackParticle().pt() < b->indetTrackParticle().pt();});
     ATH_CHECK(indetCandidateCollection.record(std::move(stau_cache.outputContainer)));
     return StatusCode::SUCCESS;
 }

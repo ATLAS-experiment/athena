@@ -246,7 +246,7 @@ namespace Muon {
         */
         void find(const Amg::Vector3D& gpos, const Amg::Vector3D& gdir, const std::vector<const MdtDriftCircleOnTrack*>& mdts,
                   const std::vector<const MuonClusterOnTrack*>& clusters, bool hasPhiMeasurements = false,
-                  Trk::SegmentCollection* segColl = nullptr, double momentum = 1e9, double sinAngleCut = 0) const;
+                  Trk::SegmentCollection* segColl = nullptr, double momentum = 1e9, double sinAngleCut = 0, double beta = 1. ) const;
 
         /** find segments starting from:
             - a track prediction
@@ -296,7 +296,7 @@ namespace Muon {
             const Amg::Vector3D& gdir, TrkDriftCircleMath::Segment& segment, const std::vector<const MdtDriftCircleOnTrack*>& mdts,
             const TrkDriftCircleMath::ChamberGeometry* multiGeo, const Amg::Transform3D& gToStation, const Amg::Transform3D& amdbToGlobal,
             std::set<Identifier>& deltaVec, std::set<Identifier>& outoftimeVec,
-            std::vector<std::pair<double,  std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) const;
+            std::vector<std::pair<double,  std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec, double beta = 1. ) const;
         std::pair<std::pair<int, int>, bool> associateClustersToSegment(
             const TrkDriftCircleMath::Segment& segment, const Identifier& chid, const Amg::Transform3D& gToStation, ClusterVecPair& spVecs,
             double phimin, double phimax, std::vector<std::pair<double, std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) const;
@@ -336,7 +336,7 @@ namespace Muon {
 
         std::unique_ptr<MuonSegment> createSegment(const EventContext& ctx, TrkDriftCircleMath::Segment& segment, const Identifier& chid, const Amg::Vector3D& roadpos,
                                    const Amg::Vector3D& roaddir2, const std::vector<const MdtDriftCircleOnTrack*>& mdts,
-                                   bool hasPhiMeasurements, segmentCreationInfo& sInfo) const;
+                                   bool hasPhiMeasurements, segmentCreationInfo& sInfo, double beta = 1. ) const;
 
         const MdtPrepData* findMdt(const EventContext& ctx, const Identifier& id) const;
 

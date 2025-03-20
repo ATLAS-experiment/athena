@@ -106,11 +106,10 @@ def MuonMaterialProviderToolCfg(flags,  name="MuonTrkMaterialProviderTool", **kw
 
 
 def MuonSegmentHitSummaryToolCfg(flags, name="MuonSegmentHitSummaryTool", **kwargs):
-    from MuonConfig.MuonGeometryConfig import MuonDetectorCondAlgCfg
-
-    result = MuonEDMPrinterToolCfg(flags)
-    kwargs.setdefault("Printer", result.getPrimary())
-    result.merge(MuonDetectorCondAlgCfg(flags))
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    result = ComponentAccumulator()
+    kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)))
+    result.merge(MuonGeoModelCfg(flags))
     kwargs.setdefault("DetectorManagerKey", "MuonDetectorManager")
     tool = CompFactory.Muon.MuonSegmentHitSummaryTool(name, **kwargs)
     result.setPrivateTools(tool)
@@ -1165,14 +1164,15 @@ def MuonSystemExtensionToolCfg(flags, **kwargs):
     result = ComponentAccumulator()
 
     from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
-    particle_calo_extension_tool = result.popToolsAndMerge(
-        ParticleCaloExtensionToolCfg(flags, name='MuonParticleCaloExtensionTool'))
+    from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
 
-    atlas_extrapolator = result.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
+    kwargs.setdefault("Extrapolator", result.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    kwargs.setdefault("Printer", result.addPublicTool(result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags))) )
+    kwargs.setdefault("ParticleCaloExtensionTool",
+                        result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags, 
+                                                                             name='MuonParticleCaloExtensionTool')))
 
-    muon_ext_tool = CompFactory.Muon.MuonSystemExtensionTool("MuonSystemExtensionTool",
-                                                             ParticleCaloExtensionTool=particle_calo_extension_tool,
-                                                             Extrapolator=atlas_extrapolator)
+    muon_ext_tool = CompFactory.Muon.MuonSystemExtensionTool("MuonSystemExtensionTool", **kwargs)
     result.setPrivateTools(muon_ext_tool)
     return result
 
