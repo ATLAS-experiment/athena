@@ -11292,7 +11292,7 @@ HLT_mu4_j20_0eta290_nnJvtv1_boffperf_pf_ftf_dRAB03_L1MU3V_jJ40:
 HLT_mu4_j20_0eta290_nnJvtv1_boffperf_pf_ftf_dRAB04_L1MU3V:
   eventCount: 3
   stepCounts:
-    0: 6
+    0: 7
     1: 4
     2: 3
     3: 3
@@ -11300,7 +11300,7 @@ HLT_mu4_j20_0eta290_nnJvtv1_boffperf_pf_ftf_dRAB04_L1MU3V:
     5: 3
     6: 3
   stepFeatures:
-    0: 7
+    0: 8
     1: 4
     2: 3
     3: 3
