@@ -57,6 +57,8 @@ namespace InDet {
             m_rowsPerCircuit = pixelModuleDesign->columnsPerCircuit();
             m_circuitsPerColumn = pixelModuleDesign->numberOfCircuitsPerRow();
             m_circuitsPerRow = pixelModuleDesign->numberOfCircuitsPerColumn();
+            m_columnPitch = pixelModuleDesign->phiPitch();
+            m_rowPitch = pixelModuleDesign->etaPitch();
          }
          else {
             m_swapOfflineRowsColumns=false;
@@ -66,6 +68,8 @@ namespace InDet {
             m_columnsPerCircuit = pixelModuleDesign->columnsPerCircuit();
             m_circuitsPerRow = pixelModuleDesign->numberOfCircuitsPerRow();
             m_circuitsPerColumn = pixelModuleDesign->numberOfCircuitsPerColumn();
+            m_columnPitch = pixelModuleDesign->etaPitch();
+            m_rowPitch = pixelModuleDesign->phiPitch();
          }
          m_rectangularPixels = (m_columns==200);
          }
@@ -81,6 +85,9 @@ namespace InDet {
       unsigned int rowsPerCircuit() const { return m_rowsPerCircuit; }
       unsigned int circuitsPerColumn() const { return m_circuitsPerColumn; }
       unsigned int circuitsPerRow() const { return m_circuitsPerRow; }
+
+      float columnPitch() const { return m_columnPitch; }
+      float rowPitch() const { return m_rowPitch; }
 
       /** compute "hardware" coordinates from offline coordinates.
        * @param row offline row aka. phi index
@@ -209,9 +216,9 @@ namespace InDet {
             }
          }
       }
+      bool swapOfflineRowsColumns() const { return m_swapOfflineRowsColumns; }
 
    private:
-      bool swapOfflineRowsColumns() const { return m_swapOfflineRowsColumns; }
 
       unsigned short m_sensorRows=0;
       unsigned short m_sensorColumns=0;
@@ -221,6 +228,10 @@ namespace InDet {
       unsigned short m_columnsPerCircuit = 0;
       unsigned char m_circuitsPerRow = 0;
       unsigned char m_circuitsPerColumn = 0;
+
+      float m_columnPitch = 0;
+      float m_rowPitch = 0;
+
       bool m_rectangularPixels = false;
       bool m_swapOfflineRowsColumns=false;
    };

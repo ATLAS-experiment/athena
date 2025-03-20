@@ -22,6 +22,7 @@ namespace InDet{
     ATH_CHECK(m_rndmSvc.retrieve());
     m_rngName = name()+"RandomEngine";
     ATH_CHECK( initializeProbabilities(n_masks) );
+    ATH_CHECK( initializeRadialDefects() );
 
     if (!m_histSvc.name().empty() && !m_histogramGroupName.value().empty()) {
        ATH_CHECK(m_histSvc.retrieve());
@@ -409,6 +410,53 @@ namespace InDet{
      }
      return checkProbabilities(kCellDefectProb+n_masks);
    }
+
+   StatusCode DefectsEmulatorCondAlgBase::initializeRadialDefects() {
+      if (!m_radialDefectParamsPerPattern.empty()) {
+        if (m_radialDefectParamsPerPattern.size() != m_modulePattern.size()) {
+           ATH_MSG_ERROR("Expected exactly one set of radial defect parameters per module pattern but the numbers disagree "
+                         << m_radialDefectParamsPerPattern.size() << " != " << m_modulePattern.size());
+           return StatusCode::FAILURE;
+        }
+        if (m_radialDefectParamsPerPattern.size() != m_radialDefectNCornerFractionsPerPattern.size()) {
+           ATH_MSG_ERROR("Expected exactly one set of n corner fractions per module pattern but the numbers disagree "
+                         << m_radialDefectParamsPerPattern.size() << " != " << m_radialDefectNCornerFractionsPerPattern.size());
+           return StatusCode::FAILURE;
+        }
+        m_perPatternRadialDefectNCornerCummulativeProb.resize( m_radialDefectParamsPerPattern.size() );
+        for (unsigned int pattern_i=0; pattern_i < m_radialDefectParamsPerPattern.size(); ++pattern_i) {
+           if (m_radialDefectParamsPerPattern[pattern_i].empty()) continue;
+           if (m_radialDefectParamsPerPattern[pattern_i].size() != kNRadialDefectParams) {
+              ATH_MSG_ERROR("Mismatch in number of radial defect parameters for pattern " << pattern_i << ". Expected " << kNRadialDefectParams
+                            <<  " but got " << m_radialDefectParamsPerPattern[pattern_i].size() );
+              return StatusCode::FAILURE;
+           }
+           if (m_radialDefectNCornerFractionsPerPattern[pattern_i].size()>4) {
+              ATH_MSG_ERROR("Too many Fractions for radial defects for pattern " << pattern_i <<
+                            ". Expected fractions for at most 4 corners but got " << m_radialDefectNCornerFractionsPerPattern[pattern_i].size()
+                            << ".");
+              return StatusCode::FAILURE;
+           }
+           double scale = std::accumulate( m_radialDefectNCornerFractionsPerPattern.value()[pattern_i].begin(),
+                                           m_radialDefectNCornerFractionsPerPattern.value()[pattern_i].end(),
+                                           0.);
+           if (std::abs(scale-1.)>1e-3) {
+              ATH_MSG_ERROR("The fractions for radial defects in 1.." << m_radialDefectNCornerFractionsPerPattern[pattern_i].size()
+                            << " corner(s) for pattern " << pattern_i << " do not add up to ~1 but " << scale);
+              return StatusCode::FAILURE;
+           }
+           m_perPatternRadialDefectNCornerCummulativeProb[pattern_i].reserve( m_radialDefectNCornerFractionsPerPattern[pattern_i].size());
+           scale = m_radialDefectParamsPerPattern[pattern_i][kRadialDefectProb]/scale;
+           double total = 0.;
+           for (double fraction : m_radialDefectNCornerFractionsPerPattern[pattern_i]) {
+              total += fraction * scale;
+              m_perPatternRadialDefectNCornerCummulativeProb[pattern_i].push_back( static_cast<float>(total) );
+           }
+        }
+      }
+      return StatusCode::SUCCESS;
+   }
+
 
    void DefectsEmulatorCondAlgBase::histogramDefectModule(unsigned int module_pattern_i,
                                                           unsigned int hist_pattern_i,

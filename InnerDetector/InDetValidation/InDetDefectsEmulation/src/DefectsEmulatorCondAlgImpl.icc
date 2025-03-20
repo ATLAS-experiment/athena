@@ -10,6 +10,9 @@
 #include "StoreGate/WriteHandle.h"
 #include <ranges>
 #include <type_traits>
+#include <array>
+#include <span>
+#include <algorithm>
 
 #include "CLHEP/Random/RandFlat.h"
 
@@ -76,6 +79,71 @@ namespace {
          }
       }
    }
+
+   // create an array containing all possible combinations of M-tuples of numbers of 1 to N
+   // The M numbers are unique per M-tuple, and the order has no significance.
+   template <typename T, std::size_t N_MAX, std::size_t M>
+   constexpr std::array<T, N_MAX> packCombinations(unsigned int N) {
+      std::array<T, N_MAX> packed_permutations{};
+      unsigned int idx=0;
+      std::array<unsigned int,M> last_val;
+      for (unsigned int i=0; i<N; ++i) {
+         last_val[i]=i;
+      }
+      for (;;) {
+         for (unsigned int i=0; i<N; ++i) {
+            packed_permutations[idx]|= static_cast<T>(1u<<last_val[i]);
+         }
+         ++idx;
+         unsigned int i=N;
+         for(; i-->0; ) {
+            if (++last_val[i]<=M-(N-i)) {
+               for (;++i<N;) {
+                  last_val[i]=last_val[i-1]+1;
+               }
+               i=0;
+               break;
+            }
+         }
+         if (i>=N) break;
+      }
+      return packed_permutations;
+   }
+
+   // count the number of elements up the first which is zero if it is not the first element.
+   template <typename T, std::size_t N_MAX>
+   constexpr unsigned int findLastNonEmpty(const std::array<T, N_MAX> &arr) {
+      unsigned int i=0;
+      while (++i<arr.size() && arr[i]!=0);
+      return i;
+   }
+
+   // create an arry which contains the number of combinations for the array of combinations.
+   template <typename T, typename T2, std::size_t N_MAX, std::size_t N>
+   constexpr std::array<unsigned char,N> makeCombinationCounts(const std::array<std::array<T2, N_MAX>, N> &arr) {
+      std::array<unsigned char,N> ret;
+      unsigned int idx=0;
+      for (const std::array<T2, N_MAX> &sub_arr : arr) {
+         ret[idx++]=static_cast<T>(findLastNonEmpty(sub_arr));
+      }
+      return ret;
+   }
+
+   // create the possible combinations of defect corners for 1 to 4 defect corners
+   static constexpr std::array< std::array<unsigned char,6>, 4> corner_combinations {
+      packCombinations<unsigned char,6,4>(1),
+      packCombinations<unsigned char,6,4>(2),
+      packCombinations<unsigned char,6,4>(3),
+      packCombinations<unsigned char,6,4>(4),
+   };
+
+   // count the number of possible combinations;
+   static constexpr std::array<unsigned char,4> n_corner_combinations (makeCombinationCounts<unsigned char>(corner_combinations) );
+
+   template <typename T>
+   inline T sqr(T a) {
+      return a*a;
+   }
 }
 
 namespace InDet{
@@ -86,6 +154,13 @@ namespace InDet{
     ATH_CHECK(m_detEleCollKey.initialize());
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(detStore()->retrieve(m_idHelper,derived().IDName()));
+    if constexpr( T_ModuleHelper::ROW_BITS==0 || T_ModuleHelper::COL_BITS==0) {
+       if (!m_radialDefectParamsPerPattern.empty() || !m_radialDefectNCornerFractionsPerPattern.empty()) {
+          ATH_MSG_ERROR("Radial defects are not supported in this instance but are configured.");
+          return StatusCode::FAILURE;
+       }
+    }
+
     return initializeBase(T_ModuleHelper::nMasks(), m_idHelper->wafer_hash_max());
   }
 
@@ -186,7 +261,8 @@ namespace InDet{
                               << " layer_disk=" << m_idHelper->layer_disk(det_ele->identify())
                               << " phi_module=" << m_idHelper->phi_module(det_ele->identify())
                               << " eta_module=" << m_idHelper->eta_module(det_ele->identify())
-                              << " side=" << ModuleIdentifierMatchUtil::detail::getZeroOrSide(*m_idHelper,det_ele->identify()));
+                              << " side=" << ModuleIdentifierMatchUtil::detail::getZeroOrSide(*m_idHelper,det_ele->identify())
+                              << " columns_strips=" << module_data[4]);
 
              // if histogramming is enabled lock also for the connected modules
              // to avoid frequent lock/unlocks.
@@ -322,6 +398,136 @@ namespace InDet{
                    ++(counts[mask_i][kNModulesWithDefects]);
                 }
              }
+          }
+
+          // Create corner defects only for modules with columns and rows.
+          if constexpr( T_ModuleHelper::ROW_BITS>0 && T_ModuleHelper::COL_BITS>0) {
+          if (!m_radialDefectParamsPerPattern.empty() && !m_radialDefectParamsPerPattern[module_pattern_idx.front()].empty()) {
+             if (module_pattern_idx.size()!=1) {
+                ATH_MSG_WARNING("Multiple module pattern match module " << module_i
+                                << ", but for radial defects only the parameters are used which are associated to the first pattern" );
+             }
+             // create defects at certain corners outside of a circle which crosses the sensor edges at certain positions
+             // chosen in a random range. The edge crossing at the particular corner defines a sagitta of a certain value
+             // chosen in a random range
+
+             // throw the number of corners with corner defects.
+             float defect_prob=CLHEP::RandFlat::shoot(rndmEngine,1.);
+             unsigned int n_corners=m_perPatternRadialDefectNCornerCummulativeProb[module_pattern_idx.front() ].size();
+             for (;
+                  n_corners>0 && defect_prob<m_perPatternRadialDefectNCornerCummulativeProb[module_pattern_idx.front() ][n_corners-1];
+                  --n_corners);
+             unsigned int n_current_defects =module_defects.size();
+             if (n_corners<m_perPatternRadialDefectNCornerCummulativeProb[module_pattern_idx.front() ].size()) {
+                assert( !m_histogrammingEnabled || ( hist_pattern_i < m_hist.size() && matrix_histogram_index < m_hist[hist_pattern_i].size()) );
+                TH2 *h2 = (m_histogrammingEnabled ? m_hist.at(hist_pattern_i).at(matrix_histogram_index) : nullptr);
+
+                assert( n_corners < n_corner_combinations.size() );
+                // chose the corners which have defects randomly
+                unsigned int the_combination =CLHEP::RandFlat::shoot(rndmEngine,n_corner_combinations[n_corners] );
+                unsigned char corner_mask = corner_combinations[n_corners][the_combination];
+                for (unsigned int corner_i=0; corner_i<4; ++corner_i) {
+                   if (corner_mask & (1u << corner_i)) {
+                      // chose random positions at which the circle crosses the edges at the particular corner
+                      // and chose a random sagitta defined by the corssings.
+                      assert( m_radialDefectParamsPerPattern[module_pattern_idx.front()].size()==kNRadialDefectParams);
+                      float rx=m_radialDefectParamsPerPattern[module_pattern_idx.front()][kRadialDefectWidthColumnDirectionOffset]
+                         +CLHEP::RandFlat::shoot(rndmEngine,m_radialDefectParamsPerPattern[module_pattern_idx.front() ][kRadialDefectWidthColumnDirection]);
+                      float ry=m_radialDefectParamsPerPattern[module_pattern_idx.front() ][kRadialDefectkWidthRowDirectionOffset]
+                         +CLHEP::RandFlat::shoot(rndmEngine,m_radialDefectParamsPerPattern[module_pattern_idx.front() ][kRadialDefectkWidthRowDirection]);
+                      float sagitta=m_radialDefectParamsPerPattern[module_pattern_idx.front() ][kRadialDefectkSagittaOffset]
+                         +CLHEP::RandFlat::shoot(rndmEngine,m_radialDefectParamsPerPattern[module_pattern_idx.front() ][kRadialDefectkSagitta]);
+
+                      // compute column range with defects
+                      double scale_rx=(corner_i==1 || corner_i==2) ? -1.f : 1.f;
+                      double scale_ry=(corner_i<=1) ? -1.f : 1.f;
+                      std::array<unsigned int,2>  row_range{0,helper.rows()};
+                      unsigned int row_var_idx=(corner_i<=1) ? 0 : 1;
+                      unsigned int col_start=(corner_i==1 || corner_i==2) ? helper.columns() : 0;
+
+                      Amg::Vector2D corner_pos{col_start*helper.columnPitch(),row_range[row_var_idx^1]*helper.rowPitch()};
+
+                      unsigned int col_end = std::min(static_cast<unsigned int>(std::max(0,static_cast<int>(col_start)
+                                                                                         + static_cast<int>(rx*scale_rx / helper.columnPitch() +.5))),
+                                                      helper.columns());
+                      if (col_end < col_start) {
+                         std::swap(col_start, col_end);
+                      }
+
+                      // compute circle parameters
+                      Amg::Vector2D c0 = corner_pos + Amg::Vector2D{0.f,ry*scale_ry};
+                      Amg::Vector2D c1 = corner_pos + Amg::Vector2D{rx*scale_rx,0.f};
+
+                      double radius = (rx*rx+ry*ry)/(8*sagitta)+0.5*sagitta;
+                      Amg::Vector2D Rc = c0+(c1-c0)*.5 - (scale_ry*scale_rx) * (radius-sagitta)/(sqrt(rx*rx+ry*ry))*Amg::Vector2D{-ry*scale_ry,-rx*scale_rx};
+
+                      double ymin=std::min(c0[1],c1[1]);
+                      double  ymax=std::max(c0[1],c1[1]);
+                      for (unsigned int col_i=col_start; col_i< col_end; ++col_i) {
+                         //compute row range with defects per column i.e. the row at which the circle crosses the column
+                         // and the corresponding edge row (top or bottom)
+                         double q = sqr(col_i*helper.columnPitch()-Rc[0]) + sqr(Rc[1]) - sqr(radius);
+                         double ph = -Rc[1];
+                         double Q=sqr(ph)-q;
+                         if (Q>=0.) {
+                            double sQ=sqrt(Q);
+                            double cx = (-ph+sQ );
+                            if (cx<ymin || cx>=ymax) {
+                               double cx2=(-ph-sQ );
+                               // pick the physical solution and make sure that
+                               // that the solution remains in the allowed range despite
+                               // limited precision
+                               if (cx2<ymin || cx2 >=ymax) {
+                                  double d1=std::min(std::abs(cx-ymin),std::abs(cx-ymax));
+                                  double d2=std::min(std::abs(cx2-ymin),std::abs(cx2-ymax));
+                                  if (d2<d1) {
+                                     cx=cx2;
+                                  }
+                                  cx = std::clamp( cx, ymin, ymax - helper.rowPitch()*.25);
+                               }
+                               else {
+                                  cx=cx2;
+                               }
+                            }
+                            if (cx>=ymin && cx<ymax) {
+                               row_range[row_var_idx]=static_cast<unsigned int>( std::max(0.,cx / helper.rowPitch() + .5));
+                               // create corner defects for one column
+                               for (unsigned int row_i=row_range[0]; row_i<row_range[1]; ++row_i) {
+                                  // create a key which identifies the particular defect
+                                  // @TODO should store as range instead e.g. mark that a key is the beginning of a range
+                                  //       up the the next key 
+                                  typename T_ModuleHelper::KEY_TYPE
+                                     key = helper.maskedKey( 0u,
+                                                             helper.swapOfflineRowsColumns()
+                                                             ? helper.hardwareCoordinates(col_i,row_i)
+                                                             : helper.hardwareCoordinates(row_i,col_i));
+
+                                  // ... and insert the defect in the list of defects registered for this module
+                                  auto [insert_iter,end_iter] = T_EmulatedDefects::lower_bound( module_defects, key);
+                                  if (insert_iter == end_iter) {
+                                     module_defects.push_back(key);
+                                     if (h2) {
+                                        histogramDefects(helper,key,h2);
+                                     }
+                                  }
+                                  else {
+                                     if (!helper.isMatchingDefect(*insert_iter, key)) {
+                                        module_defects.insert( insert_iter, key);
+                                        if (h2) {
+                                           histogramDefects(helper,key,h2);
+                                        }
+                                     }
+                                  }
+                               }
+                            }
+                         }
+                      }
+                   }
+                }
+                // add radial defects to random pixel defects for histogramming
+                n_mask_defects[0] += module_defects.size() - n_current_defects;
+             }
+          }
           }
           if (m_histogrammingEnabled) {
              fillPerModuleHistograms(module_pattern_idx.front(),hist_pattern_i,matrix_histogram_index, matrix_index, module_i,

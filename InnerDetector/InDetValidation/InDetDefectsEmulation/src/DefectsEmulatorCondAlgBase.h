@@ -39,6 +39,7 @@ namespace InDet {
    protected:
       StatusCode initializeBase(unsigned int n_masks, unsigned int wafer_hash_max);
       StatusCode initializeProbabilities(unsigned int n_masks);
+      StatusCode initializeRadialDefects();
 
       ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};
 
@@ -48,13 +49,21 @@ namespace InDet {
           "(8-9) module number of columns or strips, (10) both sides (0,1), (11) all rows (0,1)" };
       Gaudi::Property<std::vector<std::vector<double> > > m_defectProbability
          {this,"DefectProbabilities", {},
-         "Defect probabilities per module pattern: defect module, defect strip," };
+         "Defect probabilities per module pattern: defect module, defect strip." };
       Gaudi::Property<std::vector<std::vector<double> > > m_nDefectFractionsPerPattern
          {this,"NDefectFractionsPerPattern", {},
          "List of fractions per pattern for exactly 1 to n  defects under the codition that there is a defect, where -1. marks the"
          "end of this lists, before the fractions for the next mask start." };
+      Gaudi::Property<std::vector<std::vector<double> > > m_radialDefectParamsPerPattern
+         {this,"RadialDefectParamsPerPattern", {},
+         "Set of radial defect parameters (probability, x-intersection pos min, max, y-intersection pos min, max, sagitta minm max). "
+         "per module pattern.  " };
+      Gaudi::Property<std::vector<std::vector<double> > > m_radialDefectNCornerFractionsPerPattern
+         {this,"NRadialCornerDefectFractionsPerPattern", {},
+         "List of fractions per pattern for exactly 1 to 4 radial corner defects under the codition that there is a defect." };
 
       std::vector<std::vector<std::vector<float> > > m_perPatternAndMaskFractions;
+      std::vector<std::vector<float> > m_perPatternRadialDefectNCornerCummulativeProb;
 
       // Properties to add a checker board like pattern to the defects
       // for debugging
@@ -81,6 +90,17 @@ namespace InDet {
          kModuleDefectProb,
          kCellDefectProb,
          kNProb
+      };
+
+      enum ERadialDefectParams {
+         kRadialDefectProb,
+         kRadialDefectWidthColumnDirectionOffset,
+         kRadialDefectWidthColumnDirection,
+         kRadialDefectkWidthRowDirectionOffset,
+         kRadialDefectkWidthRowDirection,
+         kRadialDefectkSagittaOffset,
+         kRadialDefectkSagitta,
+         kNRadialDefectParams
       };
 
       /** Consistency check of module patterns, probabilities.
