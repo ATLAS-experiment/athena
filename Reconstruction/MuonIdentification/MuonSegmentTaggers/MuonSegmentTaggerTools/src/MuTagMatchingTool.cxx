@@ -773,6 +773,8 @@ void MuTagMatchingTool::calculateLocalAngleErrors(const Muon::MuonSegment& segme
 
 void MuTagMatchingTool::calculateLocalAngleErrors(const Trk::AtaPlane& exTrack, double& angleXZerror, double& angleYZerror,
                                                   double& covLocYYZ) const {
+                                                    
+    if (!exTrack.covariance()) return;
     // Parameters are described as Trk::LocX, Trk::locY, Trk::phi, Trk::theta
     // So the errormatrix of the track 'localErrorMatrix' still holds global angle representation!!!!
     // retrieve Jabcobian to transform the global errors err_phi,err_theta to local errors err_alphaXZ, err_alphaYZ

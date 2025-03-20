@@ -193,6 +193,8 @@ namespace MuonCombined {
                                                         << " layerDataVec size" << candidate->layerDataVec.size() << " hits size"
                                                         << candidate->hits.size());
 
+            float beta = candidate->betaFitResult.beta;
+        
             // loop over layers and perform segment finding, collect segments per layer
             for (const auto& layerData : candidate->layerDataVec) {
                 // store segments in layer
@@ -201,7 +203,7 @@ namespace MuonCombined {
                 // loop over maxima
                 for (const auto& maximumData : layerData.maximumDataVec) {
                     // find segments for intersection
-                    findSegments(layerData.intersection, *maximumData, segments, m_muonPRDSelectionToolStau, m_segmentMaker);
+                    findSegments(layerData.intersection, *maximumData, segments, m_muonPRDSelectionToolStau, m_segmentMaker, beta);
                 }
 
                 // skip if no segment were found
@@ -1136,14 +1138,17 @@ namespace MuonCombined {
     void MuonStauRecoTool::findSegments(const Muon::MuonSystemExtension::Intersection& intersection, MaximumData& maximumData,
                                         std::vector<std::shared_ptr<const Muon::MuonSegment>>& segments,
                                         const ToolHandle<Muon::IMuonPRDSelectionTool>& muonPRDSelectionTool,
-                                        const ToolHandle<Muon::IMuonSegmentMaker>& segmentMaker) const {
+                                        const ToolHandle<Muon::IMuonSegmentMaker>& segmentMaker,
+                                        float beta) const {
+
         const MuonHough::MuonLayerHough::Maximum& maximum = *maximumData.maximum;
         const std::vector<std::shared_ptr<const Muon::MuonClusterOnTrack>>& phiClusterOnTracks = maximumData.phiClusterOnTracks;
 
         // lambda to handle calibration and selection of MDTs
         auto handleMdt = [intersection, muonPRDSelectionTool](const Muon::MdtPrepData& prd,
-                                                              std::vector<const Muon::MdtDriftCircleOnTrack*>& mdts) {
-            const Muon::MdtDriftCircleOnTrack* mdt = muonPRDSelectionTool->calibrateAndSelect(intersection, prd);
+                                                             std::vector<const Muon::MdtDriftCircleOnTrack*>& mdts,
+                                                              float beta) {
+            const Muon::MdtDriftCircleOnTrack* mdt = muonPRDSelectionTool->calibrateAndSelect(intersection, prd, beta);
             if (mdt) mdts.push_back(mdt);
         };
 
@@ -1175,7 +1180,7 @@ namespace MuonCombined {
             } else if ((*hit)->prd) {
                 Identifier id = (*hit)->prd->identify();
                 if (m_idHelperSvc->isMdt(id))
-                    handleMdt(static_cast<const Muon::MdtPrepData&>(*(*hit)->prd), mdts);
+                    handleMdt(static_cast<const Muon::MdtPrepData&>(*(*hit)->prd), mdts, beta);
                 else
                     handleCluster(static_cast<const Muon::MuonCluster&>(*(*hit)->prd), clusters);
             }
@@ -1194,7 +1199,7 @@ namespace MuonCombined {
             // run segment finder
             std::unique_ptr<Trk::SegmentCollection> segColl(new Trk::SegmentCollection(SG::VIEW_ELEMENTS));
             segmentMaker->find(intersection.trackParameters->position(), intersection.trackParameters->momentum(), mdts, clusters,
-                               !clusters.empty(), segColl.get(), intersection.trackParameters->momentum().mag());
+                               !clusters.empty(), segColl.get(), intersection.trackParameters->momentum().mag(), 0, beta);
             if (segColl) {
                 Trk::SegmentCollection::iterator sit = segColl->begin();
                 Trk::SegmentCollection::iterator sit_end = segColl->end();
@@ -1344,7 +1349,9 @@ namespace MuonCombined {
                              : intersection.trackParameters->parameters()[Trk::locX];
 
         float z = intersection.trackParameters->position().z();
-        float errx = Amg::error(*intersection.trackParameters->covariance(), Trk::locX);
+        float errx = intersection.trackParameters->covariance() ?
+                     Amg::error(*intersection.trackParameters->covariance(), Trk::locX) : 0.;
+
         float x = barrelLike ? z : r;
         float y = barrelLike ? r : z;
         float theta = std::atan2(y, x);
@@ -1356,8 +1363,8 @@ namespace MuonCombined {
         // lambda to handle calibration and selection of clusters
         auto handleCluster = [intersection, this](const Muon::MuonCluster& prd,
                                                   std::vector<std::shared_ptr<const Muon::MuonClusterOnTrack>>& clusters) {
-            const Muon::MuonClusterOnTrack* cluster = m_muonPRDSelectionTool->calibrateAndSelect(intersection, prd);
-            if (cluster) clusters.push_back(std::shared_ptr<const Muon::MuonClusterOnTrack>(cluster));
+            std::unique_ptr<const Muon::MuonClusterOnTrack> cluster{m_muonPRDSelectionTool->calibrateAndSelect(intersection, prd)};
+            if (cluster) clusters.push_back(std::move(cluster));
         };
 
         // loop over maxima and associate phi hits with the extrapolation, should optimize this but calculating the residual with the phi
@@ -1373,7 +1380,8 @@ namespace MuonCombined {
                     Identifier id = hit->tgc->phiCluster.hitList.front()->identify();
                     if (m_idHelperSvc->layerIndex(id) != intersection.layerSurface.layerIndex) continue;
                     for (const Muon::MuonCluster* prd : hit->tgc->phiCluster.hitList) handleCluster(*prd, phiClusterOnTracks);
-                } else if (hit->prd && !(hit->prd->type(Trk::PrepRawDataType::sTgcPrepData) || hit->prd->type(Trk::PrepRawDataType::MMPrepData))) {
+                } else if (hit->prd && !(hit->prd->type(Trk::PrepRawDataType::sTgcPrepData) || 
+                                         hit->prd->type(Trk::PrepRawDataType::MMPrepData))) {
                     const Identifier id = hit->prd->identify();
                     if (m_idHelperSvc->layerIndex(id) != intersection.layerSurface.layerIndex) continue;
                     handleCluster(static_cast<const Muon::MuonCluster&>(*hit->prd), phiClusterOnTracks);
@@ -1386,20 +1394,22 @@ namespace MuonCombined {
                                                 << " angle " << theta);
 
         // loop over maxima and associate them to the extrapolation
-        Muon::MuonLayerHoughTool::MaximumVec::const_iterator mit = maxVec.begin();
-        Muon::MuonLayerHoughTool::MaximumVec::const_iterator mit_end = maxVec.end();
-        for (; mit != mit_end; ++mit) {
-            const MuonHough::MuonLayerHough::Maximum& maximum = **mit;
-            if (std::find_if(maximum.hits.begin(),maximum.hits.end(),[](const std::shared_ptr<MuonHough::Hit>& hit){
-                return hit->prd && (hit->prd->type(Trk::PrepRawDataType::sTgcPrepData) || hit->prd->type(Trk::PrepRawDataType::MMPrepData));
-            }) != maximum.hits.end()) continue;
+        for (const auto& mit : maxVec) {
+            const MuonHough::MuonLayerHough::Maximum& maximum = *mit;
+            if (std::find_if(maximum.hits.begin(),maximum.hits.end(),
+                             [](const std::shared_ptr<MuonHough::Hit>& hit){
+                                return hit->prd && (hit->prd->type(Trk::PrepRawDataType::sTgcPrepData) || 
+                                                    hit->prd->type(Trk::PrepRawDataType::MMPrepData));
+                            }) != maximum.hits.end()) continue;
             float residual = maximum.pos - x;
             float residualTheta = maximum.theta - theta;
             float refPos = (maximum.hough != nullptr) ? maximum.hough->m_descriptor.referencePosition : 0;
             float maxwidth = (maximum.binposmax - maximum.binposmin);
-            if (maximum.hough) maxwidth *= maximum.hough->m_binsize;
-
-            float pull = residual / std::sqrt(errx * errx + maxwidth * maxwidth / 12.);
+            if (maximum.hough){
+                maxwidth *= maximum.hough->m_binsize;
+            }
+            const float pullUncert = std::sqrt(errx * errx + maxwidth * maxwidth / 12.);  
+            float pull = residual / (pullUncert > std::numeric_limits<float>::epsilon() ? pullUncert : 1.) ;
 
             ATH_MSG_DEBUG("   Hough maximum " << maximum.max << " position (" << refPos << "," << maximum.pos << ") residual " << residual
                                               << " pull " << pull << " angle " << maximum.theta << " residual " << residualTheta);

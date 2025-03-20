@@ -36,7 +36,7 @@ namespace Muon {
     bool calibrateAndSelect( const MuonSystemExtension::Intersection& intersection, const MuonLayerPrepRawData& layerPrepRawData, MuonLayerROTs& layerROTs ) const;
 
     /** calibrate and select MDTs in a collection */
-    bool calibrateAndSelectMdt( const MuonSystemExtension::Intersection& intersection, const MdtPrepDataCollection& prds, std::vector<const MdtDriftCircleOnTrack*>& rots ) const {
+    bool calibrateAndSelectMdt( const MuonSystemExtension::Intersection& intersection, const MdtPrepDataCollection& prds, std::vector<const MdtDriftCircleOnTrack*>& rots) const {
       for( MdtPrepDataCollection::const_iterator it = prds.begin(); it != prds.end();++it ){
         const MdtDriftCircleOnTrack* rot = calibrateAndSelect(intersection,**it);
         if( rot ) rots.push_back(rot);
@@ -55,7 +55,7 @@ namespace Muon {
     }
     
     /** IMuonPRDSelectionTool interface: calibrate and select single MDT */
-    const MdtDriftCircleOnTrack* calibrateAndSelect( const MuonSystemExtension::Intersection& intersection, const MdtPrepData& mdt ) const;
+    const MdtDriftCircleOnTrack* calibrateAndSelect( const MuonSystemExtension::Intersection& intersection, const MdtPrepData& mdt, double beta = 1.) const;
 
     /** IMuonPRDSelectionTool interface: calibrate and select single cluster */
     const MuonClusterOnTrack* calibrateAndSelect( const Trk::TrackParameters& pars, const MuonCluster& clus ) const;
