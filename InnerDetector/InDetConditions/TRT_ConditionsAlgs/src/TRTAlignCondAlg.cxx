@@ -10,7 +10,6 @@
 TRTAlignCondAlg::TRTAlignCondAlg(const std::string& name
 				 , ISvcLocator* pSvcLocator )
   : ::AthAlgorithm(name,pSvcLocator)
-  , m_detManager(nullptr)
 {
 }
 
@@ -25,7 +24,8 @@ StatusCode TRTAlignCondAlg::initialize()
   ATH_CHECK( m_readKeyRegular.initialize(!m_useDynamicFolders.value()) );
   ATH_CHECK( m_readKeyDynamicGlobal.initialize(m_useDynamicFolders.value()) );
   ATH_CHECK( m_readKeyDynamicRegular.initialize(m_useDynamicFolders.value()) );
-
+  ATH_CHECK( m_readKeySpecial.initialize() );
+  
   // Write condition handles initialize
   ATH_CHECK( m_writeKeyAlignStore.initialize(!m_writeKeyAlignStore.empty()) );
   ATH_CHECK( m_writeKeyDetElCont.initialize() );
@@ -117,6 +117,21 @@ StatusCode TRTAlignCondAlg::execute()
     writeHandleDetElCont.addDependency(readHandleRegular);
   }
 
+  {
+    // Special folder
+    SG::ReadCondHandle<TRTCond::StrawDxContainer> readHandleSpecial{m_readKeySpecial,ctx};
+    // Get CDO and store it into container
+    const TRTCond::StrawDxContainer* readCdoSpecial{*readHandleSpecial};
+    if(!readCdoSpecial) {
+      ATH_MSG_ERROR("Null pointer to the read conditions object: Special");
+      return StatusCode::FAILURE;
+    }
+    readCdoContainer.emplace(m_readKeySpecial.key(),readCdoSpecial);
+    //Add dependency for IOV-intersection
+    if (writeHandleAlignStore) writeHandleAlignStore->addDependency(readHandleSpecial);
+    writeHandleDetElCont.addDependency(readHandleSpecial);    
+  }
+  
   // ____________ Apply alignments to TRT GeoModel ____________
   if(m_detManager->align(readCdoContainer, writeCdoAlignStore.get()).isFailure()) {
     ATH_MSG_ERROR("Failed to apply alignments to TRT");
