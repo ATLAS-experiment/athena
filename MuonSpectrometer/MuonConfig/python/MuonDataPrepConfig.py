@@ -37,8 +37,6 @@ def xAODUncalibMeasPrepCfg(flags):
     else:
         from MuonConfig.MuonBytestreamDecodeConfig import MuonByteStreamDecodersCfg
         result.merge(MuonByteStreamDecodersCfg(flags))
-
- 
     from MuonConfig.MuonRdoDecodeConfig import MuonRDOtoPRDConvertorsCfg
     result.merge(MuonRDOtoPRDConvertorsCfg(flags))
 
@@ -48,20 +46,4 @@ def xAODUncalibMeasPrepCfg(flags):
         result.merge(MuonTruthAlgsCfg(flags))
         from MuonObjectMarker.ObjectMarkerConfig import TruthMeasMarkerAlgCfg
         result.merge(TruthMeasMarkerAlgCfg(flags))
-    
-        ### In simulated events the Rpc -> rdo converter alg does not provide legacy prds
-        if flags.Detector.GeometryRPC:
-            from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xRpcToRpcPrepDataCnvAlgCfg
-            result.merge(xRpcToRpcPrepDataCnvAlgCfg(flags))
-    ### View algorithms for the technologies where we write out multiple measurement container
-    from AthenaConfiguration.Enums import LHCPeriod
-    if flags.Detector.GeometryRPC and flags.GeoModel.Run >= LHCPeriod.Run4:
-        from xAODMuonViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
-        result.merge(RpcMeasViewAlgCfg(flags))
-    if flags.Detector.GeometryMDT:
-        from xAODMuonViewAlgs.ViewAlgsConfig import MdtMeasViewAlgCfg
-        result.merge(MdtMeasViewAlgCfg(flags))
-    if flags.Detector.GeometrysTGC:
-        from xAODMuonViewAlgs.ViewAlgsConfig import sTgcMeasViewAlgCfg
-        result.merge(sTgcMeasViewAlgCfg(flags))
     return result
