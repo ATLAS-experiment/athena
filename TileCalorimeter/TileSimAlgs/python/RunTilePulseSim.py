@@ -31,7 +31,10 @@ def TileDigitsFromPulseCfg(flags, **kwargs):
         UseInTimeAmpDist              -- Set to TRUE in order to use a distribution for the in-time amplitude instead of a const.
         UseOutOfTimeAmpDist           -- Set to TRUE in order to use a distribution for the out-of-time amplitude instead of a const
         InTimeAmpDistFileName         -- Filename of file to use for amplitude distribution of in-time pulses
+        InTimeAmpDistHistogramName    -- Name of the histogram to use for in-time amplitude distribution
+        InTimeAmpPulseProb            -- Probability to add an in-time pulse
         OutOfTimeAmpDistFileName      -- Filename of file to use for amplitude distribution of out-of-time pulses
+        InTimeAmpPulseProb            -- Probability to add an in-time pulse
         PileUpFraction                -- Probability that an out-of-time component will be added
         GaussianC2CPhaseVariation     -- RMS for the in-time pulse offset (channel-to-channel phase variation)
         ChannelSpecificPedestal       -- Set to TRUE in order to use a channel specific value for the pedestal
@@ -39,8 +42,6 @@ def TileDigitsFromPulseCfg(flags, **kwargs):
         OutOfTimeOffsetHistogramFile  -- Filename of file containing histogram of pile-up timing distribution
         OutOfTimeOffsetHistogramName  -- Name of the histogram to use for pile-up timing distribution
         AmpDistLowerLimit             -- Set all bins lower than this to zero. Default = 135
-        InTimeAmpDistHistogramName    -- Name of the histogram to use for in-time amplitude distribution
-        OutOfTimeAmpDistHistogramName -- Name of the histogram to use for out-of-time amplitude distribution
         PedestalValueHG               -- Pedestal in HG if not taken from database
         PedestalValueLG               -- Pedestal in LG if not taken from database
         SimulatePileUpWithPoiss       -- Simulate pile-up overlaying signals from distribution
@@ -53,11 +54,11 @@ def TileDigitsFromPulseCfg(flags, **kwargs):
     """
 
     kwargs.setdefault('InTimeAmp', 1000)
+    kwargs.setdefault('InTimeAmpPulseProb', 1)
     kwargs.setdefault('ImperfectionMean', 1)
     kwargs.setdefault('ImperfectionRms', 0)
     kwargs.setdefault('TilePhaseII', False)
     kwargs.setdefault('NSamples', 7)
-    kwargs.setdefault('NPulses', 21)
     kwargs.setdefault('Bigain', False)
     kwargs.setdefault('SimulatePulseChain', False)
 

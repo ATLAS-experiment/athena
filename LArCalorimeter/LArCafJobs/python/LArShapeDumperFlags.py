@@ -14,10 +14,14 @@ def addShapeDumpFlags(flags):
     flags.addFlag("LArShapeDump.doOFCIter",lambda prev: prev.LAr.ROD.forceIter)
     flags.addFlag("LArShapeDump.prescale",1)
     flags.addFlag("LArShapeDump.triggerNames",_triggersToCheck)
-    flags.addFlag("LArShapeDump.caloType","EMHECFCAL")
+    flags.addFlag("LArShapeDump.caloType","EMHECFCALSC")
     flags.addFlag("LArShapeDump.dumpChannelInfos",False)
     flags.addFlag("LArShapeDump.outputNtup","out.root")
     flags.addFlag("LArShapeDump.HECNoiseNtup","")
+    flags.addFlag("LArShapeDump.digitsKeySC","SC_ADC_BAS")
+    flags.addFlag("LArShapeDump.rawSCKey","SC_ET_ID")
+    flags.addFlag("LArShapeDump.energySCCut",1000.)
+    flags.addFlag("LArShapeDump.adcSCCut",100)
     
 
 
