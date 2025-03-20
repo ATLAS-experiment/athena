@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/TrackParamsEstimationTool.h"
@@ -90,7 +90,7 @@ namespace ActsTrk {
     }
 
     // Convert free params to curvilinear params for extrapolation
-    Acts::CurvilinearTrackParameters curvilinearParams(
+    Acts::BoundTrackParameters curvilinearParams = Acts::BoundTrackParameters::createCurvilinear(
       freeParams.segment<4>(Acts::eFreePos0),
       freeParams.segment<3>(Acts::eFreeDir0),
       freeParams[Acts::eFreeQOverP],
