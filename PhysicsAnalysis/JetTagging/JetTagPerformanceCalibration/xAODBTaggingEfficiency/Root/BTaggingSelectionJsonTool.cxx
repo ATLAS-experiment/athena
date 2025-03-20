@@ -127,6 +127,7 @@ int BTaggingSelectionJsonTool::accept( double pt, double eta, double mass, doubl
   }
 
   float cutvalue = m_OPCutValues[pt_bin_index][mass_bin_index];
+  ATH_MSG_DEBUG ("Corresponding cut value: " << cutvalue );
   index = (tagger_discriminant > cutvalue) ? 1 : 0;
   return index;
 
