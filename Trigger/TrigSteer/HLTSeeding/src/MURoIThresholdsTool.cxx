@@ -1,7 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MURoIThresholdsTool.h"
+#include <memory>
 
 uint64_t MURoIThresholdsTool::getPattern(const xAOD::MuonRoI& roi,
                                          const RoIThresholdsTool::ThrVec& menuThresholds,
@@ -23,7 +24,7 @@ uint64_t MURoIThresholdsTool::getPattern(const xAOD::MuonRoI& roi,
 
     if (passed) {
       // set the corresponding bit in the pattern
-      thresholdsPattern |= (1 << thr->mapping());
+      thresholdsPattern |= (static_cast<uint64_t>(1) << thr->mapping());
     }
 
   } // loop over thresholds
