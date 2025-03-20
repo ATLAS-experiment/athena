@@ -68,6 +68,7 @@ private:
   std::vector<float> m_rdo_module_x;     // global position in mm
   std::vector<float> m_rdo_module_y;     // global position in mm
   std::vector<float> m_rdo_module_z;     // global position in mm
+  std::vector<unsigned long long> m_rdo_module_ID; //module ID (get compact)
   std::vector<float> m_rdo_hit_x;        // global position in mm
   std::vector<float> m_rdo_hit_y;        // global position in mm
   std::vector<float> m_rdo_hit_z;        // global position in mm
