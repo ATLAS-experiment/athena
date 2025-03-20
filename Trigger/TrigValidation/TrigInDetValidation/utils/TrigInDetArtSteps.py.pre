@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -16,6 +16,7 @@ from TrigValTools.TrigValSteering.Step import Step
 from TrigValTools.TrigValSteering.CheckSteps import RefComparisonStep
 from TrigValTools.TrigValSteering.Common import find_file
 from AthenaCommon.Utils.unixtools import FindFile
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 ##################################################
 # Exec (athena) steps for Reco_tf
@@ -262,7 +263,7 @@ class TrigTZReco(ExecStep):
         self.max_events = -1
         self.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
         self.args += ' --outputAODFile=AOD.pool.root'
-        self.args += ' --conditionsTag=\'CONDBR2-BLKPA-2023-05\' --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
+        self.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA23}" --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
         self.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
         self.args += ' --CA'
 
