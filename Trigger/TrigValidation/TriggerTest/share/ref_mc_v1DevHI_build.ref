@@ -993,11 +993,11 @@ HLT_j75_ion_L1jJ50:
   stepFeatures:
     0: 29
 HLT_j75_ion_L1jJ60:
-  eventCount: 14
+  eventCount: 15
   stepCounts:
-    0: 14
+    0: 15
   stepFeatures:
-    0: 28
+    0: 29
 HLT_j80f_ion_L1jJ60p30ETA49:
   eventCount: 0
 HLT_j85_ion_L1jJ50:
@@ -2380,9 +2380,9 @@ HLT_noalg_L1gXEJWOJ100:
 HLT_noalg_L1jJ40:
   eventCount: 20
 HLT_noalg_L1jJ50:
-  eventCount: 19
+  eventCount: 20
 HLT_noalg_L1jJ60:
-  eventCount: 16
+  eventCount: 17
 HLT_noalg_L1jTAU1:
   eventCount: 20
 HLT_noalg_L1jTE10:
