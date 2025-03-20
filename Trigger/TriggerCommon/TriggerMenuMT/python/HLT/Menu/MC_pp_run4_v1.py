@@ -145,6 +145,10 @@ def addMCSignatures(chains):
         # low-mass diphoton
         ChainProp(name='HLT_2g15_tight_25dphiAA_invmAA80_L1DPHI-M70-2eEM15M', l1SeedThresholds=['eEM15'], groups=PrimaryPhIGroup+MultiPhotonGroup+Topo2Group),
 
+        # No PID e/gamma chains for Ringer NN studies # ATR-30937 
+        ChainProp(name='HLT_e5_nopid_L1eEM5', l1SeedThresholds=['eEM5'], groups=SingleElectronGroup+SupportPhIGroup+['RATE:CPS_eEM5']+['PS:NoBulkMCProd']),
+        ChainProp(name='HLT_g5_nopid_L1eEM5', l1SeedThresholds=['eEM5'], groups=SinglePhotonGroup+SupportPhIGroup+['RATE:CPS_eEM5']+['PS:NoBulkMCProd']),
+
         # T&P chains for displaced electrons
         ChainProp(name='HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L',l1SeedThresholds=['PROBEeEM5','eEM24L'],groups=SupportPhIGroup+SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM26M',l1SeedThresholds=['eEM26M','PROBEeEM5'],groups=TagAndProbePhIGroup+SingleElectronGroup),
