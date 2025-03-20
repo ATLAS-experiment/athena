@@ -154,15 +154,13 @@ def NswAsBuiltCondAlgCfg(flags, name = "NswAsBuiltCondAlg", **kwargs):
 
     kwargs.setdefault("ReadMmAsBuiltParamsKey","/MUONALIGN/ASBUILTPARAMS/MM")
     #kwargs.setdefault("ReadSTgcAsBuiltParamsKey","/MUONALIGN/ASBUILTPARAMS/STGC") # This is the folder that sould be used once the as builts are validated, so keep it here but commented out
-    kwargs.setdefault("ReadSTgcAsBuiltParamsKey","") # for now diable the reading of sTGC as build from the conditions database
-    
+    kwargs.setdefault("ReadSTgcAsBuiltParamsKey","") # disable the stgc part of NswAsBuilt, proper code cleanup will follow
+
+
     ##TODO: remove hard-coded tag once the global tag is ready
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     if(not (kwargs["MicroMegaJSON"] or not kwargs["ReadMmAsBuiltParamsKey"]) ) : # no need to add the folder if we are reading a json file anyhow
         result.merge(addFolders( flags, kwargs["ReadMmAsBuiltParamsKey"]  , 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MuonAlignAsBuiltParamsMm-RUN3-01-00'))
-    ### Disable the STGC as-built parameters (Keep the path if we want to add later fully validated As-built)
-    if(not (kwargs["sTgcJSON"] or not kwargs["ReadSTgcAsBuiltParamsKey"])): # no need to add the folder if we are reading a json file anyhow
-        result.merge(addFolders( flags, kwargs["ReadSTgcAsBuiltParamsKey"], 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MUONALIGN_STG_ASBUILT-001-03'))
     the_alg = CompFactory.NswAsBuiltCondAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)     
     return result
@@ -173,10 +171,10 @@ def sTGCAsBuiltCondAlg2Cfg(flags, name = "sTGCAsBuiltCondAlg2", **kwargs):
     if flags.GeoModel.Run < LHCPeriod.Run3 or not flags.Muon.Align.UsesTGCAsBuild2:
         return result
     kwargs.setdefault("readFromJSON","")
-    if not kwargs["readFromJSON"] and False: # for now only allow reading from json since there is no database content available
-        kwargs.setdefault("ReadKey","/MUONALIGN/ASBUILTPARAMS/STGC") # This is the folder that sould be used once the as builts are validated, so keep it here but commented out
+    if not kwargs["readFromJSON"]:
+        kwargs.setdefault("ReadKey","/MUONALIGN/ASBUILTPARAMS/STGC")
         from IOVDbSvc.IOVDbSvcConfig import addFolders
-        result.merge(addFolders( flags, kwargs["ReadKey"], 'MUONALIGN_OFL', className='CondAttrListCollection', tag=''))
+        result.merge(addFolders( flags, kwargs["ReadKey"], 'MUONALIGN_OFL', className='CondAttrListCollection'))
     the_alg = CompFactory.sTGCAsBuiltCondAlg2(name,**kwargs)
     result.addCondAlgo(the_alg, primary=True)
     return result
