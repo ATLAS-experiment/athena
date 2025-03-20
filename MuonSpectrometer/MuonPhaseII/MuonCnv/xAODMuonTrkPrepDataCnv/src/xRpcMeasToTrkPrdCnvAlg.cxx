@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */  
 
 #include "xRpcMeasToTrkPrdCnvAlg.h"
@@ -19,22 +19,22 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     StatusCode xRpcMeasToRpcTrkPrdCnvAlg::execute(const EventContext& ctx) const {
-        SG::ReadHandle<xAOD::RpcMeasurementContainer> readHandle{m_readKey, ctx};
+        SG::ReadHandle readHandle{m_readKey, ctx};
         ATH_CHECK(readHandle.isPresent());
 
-        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_detMgrKey, ctx};
+        SG::ReadCondHandle detMgr{m_detMgrKey, ctx};
         ATH_CHECK(detMgr.isValid());
 
         std::vector<std::unique_ptr<Muon::RpcPrepDataCollection>> prdCollections{};
         const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
         prdCollections.resize(idHelper.module_hash_max());
         for (const xAOD::RpcMeasurement* meas : *readHandle) {
-            const MuonGMR4::RpcReadoutElement* reEle = meas->readoutElement();
-            const Identifier measId = reEle->measurementId(meas->measurementHash());
+            const Identifier measId = meas->identify();
+            const IdentifierHash modHash{m_idHelperSvc->moduleHash(measId)};
             
-            std::unique_ptr<Muon::RpcPrepDataCollection>& coll = prdCollections[m_idHelperSvc->moduleHash(measId)];
+            std::unique_ptr<Muon::RpcPrepDataCollection>& coll = prdCollections[modHash];
             if (!coll) {
-                coll = std::make_unique<Muon::RpcPrepDataCollection>(m_idHelperSvc->moduleHash(measId));
+                coll = std::make_unique<Muon::RpcPrepDataCollection>(modHash);
                 coll->setIdentifier(m_idHelperSvc->chamberId(measId));
             }
             const MuonGM::RpcReadoutElement* outEle = detMgr->getRpcReadoutElement(measId);
@@ -57,6 +57,7 @@ namespace MuonR4{
                                                            outEle, meas->time(), meas->timeOverThreshold(), 0, 0);
             
             }
+            prd->setHashAndIndex(coll->identifyHash(), coll->size());
             coll->push_back(std::move(prd));
         }
         /// Write everything to disk in the end
@@ -66,7 +67,7 @@ namespace MuonR4{
             const IdentifierHash hash = coll->identifyHash();
             ATH_CHECK(outContainer->addCollection(coll.release(), hash));
         }
-        SG::WriteHandle<Muon::RpcPrepDataContainer> writeHandle{m_writeKey, ctx};
+        SG::WriteHandle writeHandle{m_writeKey, ctx};
         ATH_CHECK(writeHandle.record(std::move(outContainer))); 
         
         return StatusCode::SUCCESS;
