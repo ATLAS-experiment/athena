@@ -24,6 +24,7 @@
 
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
 #include "xAODMuon/MuonSegmentContainer.h"
+#include "MuonRecToolInterfacesR4/IPatternVisualizationTool.h"
 
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "CLHEP/Random/RandomEngine.h"
@@ -52,9 +53,12 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
     
     Gaudi::Property<bool> m_isMC{this, "isMC", true};
-    Gaudi::Property<double> m_fracToKeep{this,"dataFracToKeep", 1}; // 0.055 to balanced dataset without MC
+    Gaudi::Property<double> m_fracToKeep{this,"dataFracToKeep", 1.}; // 0.055 to balanced dataset without MC
     Gaudi::Property<std::string> m_streamName{this, "StreamName", ""};
     ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};
+
+    /// Pattern visualization tool
+    ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
     CLHEP::HepRandomEngine* getRandomEngine(const EventContext&ctx) const;
 
     MuonVal::MuonTesterTree m_tree{"MuonBucketDump","MuonBucketDump"};
@@ -70,8 +74,8 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
 
     MuonVal::MuonIdentifierBranch           m_spoint_id{m_tree, "id"};
     MuonVal::VectorBranch<uint16_t>&        m_spoint_layer{m_tree.newVector<uint16_t>("Layer")};
-    MuonVal::VectorBranch<bool>&            m_spoint_isStrip{m_tree.newVector<bool>("isStrip", false)};
-    MuonVal::VectorBranch<bool>&            m_spoint_isMdt{m_tree.newVector<bool>("isMdt", false)};
+    MuonVal::VectorBranch<unsigned short>&            m_spoint_isStrip{m_tree.newVector<unsigned short>("isStrip", false)};
+    MuonVal::VectorBranch<unsigned short>&            m_spoint_isMdt{m_tree.newVector<unsigned short>("isMdt", false)};
     MuonVal::ScalarBranch<short>&           m_spoint_mdtLayer{m_tree.newScalar<short>("mdtLayer", 0)};
     MuonVal::ScalarBranch<short>&           m_spoint_mdtTube{m_tree.newScalar<short>("mdtTube", 0)};  
 
@@ -84,8 +88,9 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     MuonVal::VectorBranch<float>&           m_spoint_covY{m_tree.newVector<float>("covY")};
     MuonVal::VectorBranch<float>&           m_spoint_driftR{m_tree.newVector<float>("driftR")};
 
-    MuonVal::VectorBranch<bool>&            m_spoint_measuresEta{m_tree.newVector<bool>("measuresEta")};
-    MuonVal::VectorBranch<bool>&            m_spoint_measuresPhi{m_tree.newVector<bool>("measuresPhi")};
+    MuonVal::VectorBranch<unsigned short>&  m_spoint_measuresEta{m_tree.newVector<unsigned short>("measuresEta")};
+    MuonVal::VectorBranch<unsigned short>&  m_spoint_measuresPhi{m_tree.newVector<unsigned short>("measuresPhi")};
+    MuonVal::VectorBranch<unsigned short>&  m_spoint_trueLabel{m_tree.newVector<unsigned short>("trueLabel")};
     MuonVal::VectorBranch<unsigned int>&    m_spoint_nEtaInstances{m_tree.newVector<unsigned int>("nEtaInUse")};
     MuonVal::VectorBranch<unsigned int>&    m_spoint_nPhiInstances{m_tree.newVector<unsigned int>("nPhiInUse")};
     MuonVal::VectorBranch<unsigned int>&    m_spoint_dimension{m_tree.newVector<unsigned int>("dimension")};
