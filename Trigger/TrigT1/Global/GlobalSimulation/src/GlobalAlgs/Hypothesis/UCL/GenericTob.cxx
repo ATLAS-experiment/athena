@@ -46,10 +46,11 @@ namespace GlobalSim {
     }
 
     auto bitstream = std::stringstream(bit_string);
-    bitstream >> m_Et_bits;
-    bitstream >> m_Eta_bits;
-    bitstream >> m_Phi_bits;
+    bitstream >> m_Overflow_bits;
     bitstream >> m_Charge_bits;
+    bitstream >> m_Phi_bits;
+    bitstream >> m_Eta_bits;
+    bitstream >> m_Et_bits;
 
   }
 
@@ -77,6 +78,21 @@ namespace GlobalSim {
     
     for(std::size_t i = 0; i != GenericPhiBitWidth; ++i) {
       result[begin+i] = m_Phi_bits[i];
+    }
+
+    
+    begin = end;
+    end = begin + GenericMuonFlagBitWidth;
+    
+    for(std::size_t i = 0; i != GenericMuonFlagBitWidth; ++i) {
+      result[begin+i] = m_Phi_bits[i];
+    }
+
+    begin = end;
+    end = begin + GenericOverflowWidth;
+    
+    for(std::size_t i = 0; i != GenericOverflowWidth; ++i) {
+      result[begin+i] = m_Overflow_bits[i];
     }
 
     

@@ -1,4 +1,3 @@
-
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
@@ -26,18 +25,38 @@ namespace GlobalSim {
   
   StatusCode InvariantMassDeltaPhiInclusive2AlgTool::initialize() {
        
-    CHECK(m_portsInReadKey.initialize());
-    CHECK(m_portsOutWriteKey.initialize());
+    CHECK(m_tobsInReadKey1.initialize());
+    CHECK(m_tobsInReadKey2.initialize());
 
 
     return StatusCode::SUCCESS;
   }
 
   StatusCode
-  InvariantMassDeltaPhiInclusive2AlgTool::run(const EventContext&) const {
+  InvariantMassDeltaPhiInclusive2AlgTool::run(const EventContext& ctx) const {
     ATH_MSG_DEBUG("run()");
 
-     return StatusCode::SUCCESS;
+    auto tobs1 =
+      SG::ReadHandle<GenericTobContainer>(m_tobsInReadKey1,
+					  ctx);
+
+    auto tobs2 =
+      SG::ReadHandle<GenericTobContainer>(m_tobsInReadKey2,
+					  ctx);
+
+    auto ss = std::stringstream();
+    ss << "Tobs 1 in\n";
+    for (const auto& tob: *tobs1) {
+      ss << *tob << '\n';
+    }
+
+    ss << "Tobs 2 in\n";
+    for (const auto& tob: *tobs1) {
+      ss << *tob << '\n';
+    }
+    ATH_MSG_DEBUG(ss.str());
+
+    return StatusCode::SUCCESS;
   }
 
   std::string
@@ -45,8 +64,8 @@ namespace GlobalSim {
 
     std::stringstream ss;
     ss << "name: " << name() << '\n'
-       << " read key " <<m_portsInReadKey
-       << " write key " << m_portsOutWriteKey
+       << " tobs in 1 read key " << m_tobsInReadKey1
+       << " tobs in 2 read key " << m_tobsInReadKey2
        << '\n';
     
     return ss.str();
