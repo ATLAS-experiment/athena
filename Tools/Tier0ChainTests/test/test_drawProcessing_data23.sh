@@ -9,24 +9,25 @@
 
 # TODO update following ATLASRECTS-8054
 
-Reco_tf.py --CA \
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA23)")
+Reco_tf.py \
 --AMI f1350  \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/DRAW_EGZ/data23_13p6TeV.00456714.physics_Main.merge.DRAW_EGZ.f1370_m2193/312events.data23_13p6TeV.00456714.physics_Main.merge.DRAW_EGZ.f1370_m2193._0602.1" \
 --outputDESDM_ALLCELLSFile="myDESDM_EGZ.pool.root" \
 --outputDAOD_L1CALO1File="myDAOD_L1CALO1EGZ.pool.root" \
 --maxEvents 75 \
---conditionsTag="CONDBR2-BLKPA-2022-15" \
+--conditionsTag=$conditionsTag \
 --imf False
 rc1=$?
 echo "art-result: $rc1 Reco DRAW_EGZ"
 
-Reco_tf.py --CA \
+Reco_tf.py \
 --AMI f1350  \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/DRAW_ZMUMU/data23_13p6TeV.00456386.physics_Main.merge.DRAW_ZMUMU.f1369_m2193/540events.data23_13p6TeV.00456386.physics_Main.merge.DRAW_ZMUMU.f1369_m2193._0042.1" \
 --outputAODFile="myDAOD_ZMUMU.pool.root" \
 --outputDAOD_L1CALO1File="myDAOD_L1CALO1ZMM.pool.root" \
 --maxEvents 75 \
---conditionsTag="CONDBR2-BLKPA-2022-15" \
+--conditionsTag=$conditionsTag \
 --imf False
 rc2=$?
 echo "art-result: $rc2 Reco DRAW_ZMUMU"
