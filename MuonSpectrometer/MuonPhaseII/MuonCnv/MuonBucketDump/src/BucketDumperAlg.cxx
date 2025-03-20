@@ -14,14 +14,6 @@
 #include <AthenaKernel/RNGWrapper.h>
 #include "CLHEP/Random/RandFlat.h"
 
-namespace {
-    union bucketId{
-        int8_t fields[4];
-        int hash;
-    };
-
-}
-
 namespace MuonR4{
     StatusCode BucketDumperAlg::initialize() {
         ATH_CHECK(m_readKey.initialize());
@@ -29,6 +21,10 @@ namespace MuonR4{
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(m_inSegmentKey.initialize(!m_inSegmentKey.empty()));
         m_tree.addBranch(std::make_shared<MuonVal::EventHashBranch>(m_tree.tree()));
+        ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));        
+        if (m_visionTool.empty()) {
+            m_tree.disableBranch(m_spoint_trueLabel.name());
+        }
         ATH_CHECK(m_tree.init(this));
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_MSG_DEBUG("Successfully initialized");
@@ -62,11 +58,10 @@ namespace MuonR4{
 
         for(const SpacePointBucket* bucket : *readHandle) {
 
-            if ( !m_isMC && segmentMap[bucket].size() == 0) {
-                if (CLHEP::RandFlat::shoot(rndEngine,0.,1.) > m_fracToKeep) {
-                    ATH_MSG_VERBOSE("Skipping bucket without segment");
-                    continue;
-                }
+            if (!m_isMC && segmentMap[bucket].size() && m_fracToKeep < 1. &&
+                CLHEP::RandFlat::shoot(rndEngine,0.,1.) > m_fracToKeep) {
+                ATH_MSG_VERBOSE("Skipping bucket without segment");
+                continue;
             }            
 
             m_bucket_min      = bucket->coveredMin();
@@ -81,7 +76,9 @@ namespace MuonR4{
                 unsigned int segIdx{0};
                 for (const MuonR4::Segment* segment : match_itr->second) {
                     for (const auto& meas : segment->measurements()) {
-                        spacePointToSegment[meas->spacePoint()].push_back(segIdx);
+                        if (meas->fitState() == CalibratedSpacePoint::State::Valid) {
+                            spacePointToSegment[meas->spacePoint()].push_back(segIdx);
+                        }
                     }
                     ++segIdx;
                 }
@@ -136,6 +133,9 @@ namespace MuonR4{
                     m_spoint_layer.push_back(layer);
                     m_spoint_isMdt.push_back(true);
                     m_spoint_isStrip.push_back(false);
+                    if (m_visionTool.isEnabled()) {
+                        m_spoint_trueLabel.push_back(m_visionTool->isLabeled(*sp));
+                    }
 
                     Amg::Vector3D globalPos = sp->msSector()->localToGlobalTrans(*gctx) * sp->positionInChamber();
                     m_spoint_globalPosition.push_back( globalPos );
@@ -171,6 +171,9 @@ namespace MuonR4{
                     m_spoint_layer.push_back(layer);
                     m_spoint_isStrip.push_back(true);
                     m_spoint_isMdt.push_back(false);
+                    if (m_visionTool.isEnabled()) {
+                        m_spoint_trueLabel.push_back(m_visionTool->isLabeled(*sp));
+                    }
 
                     Amg::Vector3D globalPos = sp->msSector()->localToGlobalTrans(*gctx) * sp->positionInChamber();
                     m_spoint_globalPosition.push_back( globalPos );
@@ -178,7 +181,6 @@ namespace MuonR4{
                     // check the technology to fill channel, adc and tdc... pushing back 0 for now
                     m_spoint_adc.push_back(0); 
                     m_spoint_tdc.push_back(0);
-
                 }
                 ++layer;
             }

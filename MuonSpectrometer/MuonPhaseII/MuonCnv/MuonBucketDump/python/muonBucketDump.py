@@ -24,7 +24,9 @@ def main(args):
     cfg.merge(MuonSegmentFittingAlgCfg(flags))
 
     from MuonBucketDump.MuonBucketDumpConfig import MuonBucketDumpCfg
-    cfg.merge(MuonBucketDumpCfg(flags))
+    from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg
+    cfg.merge(MuonBucketDumpCfg(flags,
+                                VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
 
     executeTest(cfg)
 
