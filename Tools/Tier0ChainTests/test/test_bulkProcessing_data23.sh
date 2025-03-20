@@ -9,7 +9,8 @@
 
 # TODO update following ATLASRECTS-8054
 
-Reco_tf.py --CA \
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA23)")
+Reco_tf.py \
 --AMI f1350  \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/RAW/data23_13p6TeV.00452463.physics_Main.daq.RAW/540events.data23_13p6TeV.00452463.physics_Main.daq.RAW._lb0514._SFO-16._0004.data" \
 --outputAODFile="AOD.pool.root" \
@@ -23,7 +24,7 @@ Reco_tf.py --CA \
 --outputDAOD_L1CALO1File="myDAOD_L1CALO1.pool.root" \
 --outputDESDM_PHOJETFile="myDESDM_PHOJET.pool.root" \
 --outputDRAW_TAULHFile="myDRAW_TAULH.data" \
---conditionsTag="CONDBR2-BLKPA-2023-05" \
+--conditionsTag=$conditionsTag \
 --imf False
 
 rc1=$?
