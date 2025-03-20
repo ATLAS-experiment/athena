@@ -9,9 +9,7 @@
  * Algtool to run the Global InvariantMassDeltaPhiInclusive2
  */
 
-#include "GepAlgoHypothesisPortsIn.h"
-#include "InvariantMassDeltaPhiInclusive2ContainerPortsIn.h"
-#include "InvariantMassDeltaPhiInclusive2ContainerPortsOut.h"
+#include "GenericTob.h"
 
 #include "../../../IGlobalSimAlgTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -21,8 +19,6 @@ namespace GlobalSim {
 							   IGlobalSimAlgTool> {
     
   public:
-    using PortsOut = InvariantMassDeltaPhiInclusive2ContainerPortsOut;
-    using GenTobPtr = PortsOut::GenTobPtr;
     
     InvariantMassDeltaPhiInclusive2AlgTool(const std::string& type,
 					   const std::string& name,
@@ -35,6 +31,9 @@ namespace GlobalSim {
     virtual StatusCode run(const EventContext& ctx) const override;
     
     virtual std::string toString() const override;
+
+    using TobContainer = std::vector<std::string>;
+    using TobContainerPtr = std::unique_ptr<TobContainer>;
     
   private:
  
@@ -45,22 +44,21 @@ namespace GlobalSim {
 	"flag to enable dumps"};
 
 
-    SG::ReadHandleKey<InvariantMassDeltaPhiInclusive2ContainerPortsIn>
-    m_portsInReadKey {
+    SG::ReadHandleKey<GenericTobContainer>
+    m_tobsInReadKey1 {
       this,
-      "HypoFIFOReadKey",
-      "hypoFIFO",
-      "key to read input port data for the hypo block"};
+      "GenericTobContainerReadKey1",
+      "genericTobContainer1",
+      "key to read a container of Generic TOBS"};
 
     
 
-    SG::WriteHandleKey<InvariantMassDeltaPhiInclusive2ContainerPortsOut>
-    m_portsOutWriteKey {
+    SG::ReadHandleKey<GenericTobContainer>
+    m_tobsInReadKey2 {
       this,
-      "PortsOutKey",
-      "eEmSortSelectCount",
-      "key to write output ports data"};
-
+      "GenericTobContainerReadKey2",
+      "genericTobContainer2",
+      "key to read a container of Generic TOBS"};
 
   };
 }

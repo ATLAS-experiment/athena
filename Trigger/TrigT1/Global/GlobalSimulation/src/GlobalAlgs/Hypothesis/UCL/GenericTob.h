@@ -10,6 +10,7 @@
 #include "eEmTob.h"
 
 #include <bitset>
+#include <vector>
 #include <ostream>
 
 namespace GlobalSim {
@@ -27,10 +28,12 @@ namespace GlobalSim {
     
     constexpr static std::size_t GenericPhiBitWidth{7};
     constexpr static std::size_t GenericMuonFlagBitWidth{2};
+    constexpr static std::size_t GenericOverflowWidth{1};
 
     constexpr static std::size_t GenericTobWidth =
       GenericEtBitWidth + GenericEtaBitWidth +
-      GenericPhiBitWidth + GenericMuonFlagBitWidth;
+      GenericPhiBitWidth + GenericMuonFlagBitWidth +
+      GenericOverflowWidth;
     
     GenericTob(){};
     GenericTob(const eEmTobPtr& in_tob);
@@ -62,7 +65,11 @@ namespace GlobalSim {
     
   };
 
+  using GenericTobContainer = std::vector<std::shared_ptr<GenericTob>>;
+
 }
+
+CLASS_DEF( GlobalSim::GenericTobContainer , 1078282199 , 1 )
 
 std::ostream& operator << (std::ostream&, const GlobalSim::GenericTob&);
 

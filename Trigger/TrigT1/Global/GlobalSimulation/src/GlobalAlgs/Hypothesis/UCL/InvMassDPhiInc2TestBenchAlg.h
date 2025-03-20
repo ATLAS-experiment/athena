@@ -12,6 +12,7 @@
  */
  
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "GenericTob.h"
 
 #include <string>
 #include <memory>
@@ -29,26 +30,24 @@ namespace GlobalSim {
     virtual StatusCode initialize () override;
     virtual StatusCode execute () override;
 
-    using TobContainer = std::vector<std::string>;
-    using TobContainerPtr = std::unique_ptr<TobContainer>;
     using Result = std::string;
     using ResultPtr = std::unique_ptr<Result>;
 
   private:
 
-    SG::WriteHandleKey<TobContainer>
+    SG::WriteHandleKey<GenericTobContainer>
     m_tobs1_WriteKey {
       this,
-	"genericTobBitContainer1WriteKey",
-	"genericTobBitContainer1",
+	"genericTobContainer1WriteKey",
+	"genericTobContainer1",
 	"key to write out a GenericTob bit string Container (1/2"};
 
 
-    SG::WriteHandleKey<TobContainer>
+    SG::WriteHandleKey<GenericTobContainer>
     m_tobs2_WriteKey {
       this,
-      "genericTobBitContainer2WriteKey",
-      "genericTobBitContainer2",
+      "genericTobContainer2WriteKey",
+      "genericTobContainer2",
       "key to write out a GenericTob bit string Container (2/2"};
 
     SG::WriteHandleKey<Result>
@@ -83,7 +82,7 @@ namespace GlobalSim {
     // filename used when expected results  from files.
     Gaudi::Property<std::string>
     m_expectedResults_FileName{this,
-      "expectedResultsFileName",
+      "expectedResults_FileName",
       {},
       "name of file with expected generic tob values from HW Sim"};
 
@@ -98,7 +97,7 @@ namespace GlobalSim {
 
      
     // test Tobs after repeat has been applied to testVecs_in
-    std::vector<TobContainer> m_testTobs1{};
+    std::vector<GlobalSim::GenericTobContainer> m_testTobs1{};
 
     
     // Manually written test data (used when not reading data from files)
@@ -112,7 +111,7 @@ namespace GlobalSim {
 
      
     // test Tobs after repeat has been applied to testVecs_in
-    std::vector<std::vector<std::string>> m_testTobs2{};
+    std::vector<GlobalSim::GenericTobContainer> m_testTobs2{};
 
   
     // expected results for manual testing
