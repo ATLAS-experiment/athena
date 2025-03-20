@@ -59,6 +59,9 @@ def ActsFatrasSimToolCfg(flags, name="ISF_ActsFatrasSimTool", **kwargs):
     kwargs.setdefault("RNGService", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
     kwargs.setdefault("ActsFatrasWriteHandler", acc.popToolsAndMerge(ActsFatrasWriteHandlerCfg(flags)))
-
+    writtenContainers =[]
+    writtenContainers += [("SiHitCollection", "PixelHits_Fatras")]
+    writtenContainers += [("SiHitCollection", "SCT_Hits_Fatras")]
+    kwargs.setdefault("ExtraOutputs", writtenContainers)
     acc.setPrivateTools(CompFactory.ISF.ActsFatrasSimTool(name, **kwargs))
     return acc
