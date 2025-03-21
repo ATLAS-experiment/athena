@@ -61,7 +61,7 @@ if __name__=="__main__":
 
     from EFTrackingFPGAIntegration.FPGAOutputValidationConfig import FPGAOutputValidationCfg
     cfg.merge(FPGAOutputValidationCfg(flags, **{
-        "pixelKeys": ["fpgaPixelClusters", "ITkPixelClusters"],
+        "pixelKeys": ["FPGAPixelClusters", "ITkPixelClusters"],
     }))
 
     #Truth
