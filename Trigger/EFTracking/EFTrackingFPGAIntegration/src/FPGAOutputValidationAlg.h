@@ -25,6 +25,12 @@ class FPGAOutputValidationAlg : public AthReentrantAlgorithm
     "Path to output root file containing histograms."
   };
 
+  Gaudi::Property<bool> m_doDiffHistograms{
+    this,
+    "doDiffHistograms", 
+    false, 
+    "Create extra histograms for cluster parameter diffs between matched clusters."
+  };
   SG::ReadHandleKeyArray<xAOD::PixelClusterContainer> m_pixelKeys{this, "pixelKeys", {}};
   SG::ReadHandleKeyArray<xAOD::StripClusterContainer> m_stripKeys{this, "stripKeys", {}};
 
@@ -34,9 +40,6 @@ class FPGAOutputValidationAlg : public AthReentrantAlgorithm
   FPGAOutputValidationAlg(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
-
- private:
-  std::vector<const xAOD::PixelCluster*> findMatchingCluster(const xAOD::PixelCluster* cluster0, const xAOD::PixelClusterContainer& pixelClusters1) const;
 };
 
 #endif
