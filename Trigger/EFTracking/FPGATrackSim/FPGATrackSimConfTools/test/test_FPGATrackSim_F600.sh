@@ -46,7 +46,7 @@ run () {
 }
 # 
 run "${PREFIX} pipeline" \
-    FPGATrackSim_F600.sh -o ${INPUT_AOD_FILE} --single-muon -n -1
+    FPGATrackSim_F600.sh -o ${INPUT_AOD_FILE} --single-muon -n -1 -q
 
 run "IDTPM" \
     runIDTPM.py --inputFileNames=$INPUT_AOD_FILE \

@@ -49,7 +49,7 @@ run () {
 
 
 run "${PREFIX} pipeline" \
-    FPGATrackSim_F410.sh -o $INPUT_AOD_FILE -m
+    FPGATrackSim_F410.sh -o $INPUT_AOD_FILE -m -q
 
 run "IDTPM" \
     runIDTPM.py --inputFileNames=$INPUT_AOD_FILE \
