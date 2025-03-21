@@ -22,9 +22,9 @@
 
 namespace FPGATrackSimCLUSTERING {
   void attachTruth(std::vector<FPGATrackSimHit> &);
-  bool updatePixelCluster(FPGATrackSimCluster &currentCluster, FPGATrackSimHit &incomingHit, bool newCluster);
-  bool updateStripCluster(FPGATrackSimCluster &currentCluster, FPGATrackSimHit &incomingHit, bool newCluster);
-  bool updateClusterContents(FPGATrackSimCluster &currentCluster, int &clusterRow, int &clusterRowWidth, int &clusterCol, int &clusterColWidth, FPGATrackSimHit &incomingHit);
+  bool updatePixelCluster(FPGATrackSimCluster &currentCluster, FPGATrackSimHit &incomingHit, bool newCluster, bool digitalClustering);
+  bool updateStripCluster(FPGATrackSimCluster &currentCluster, FPGATrackSimHit &incomingHit, bool newCluster, bool digitalClustering);
+  bool updateClusterContents(FPGATrackSimCluster &currentCluster, int &clusterRow, int &clusterRowWidth, int &clusterCol, int &clusterColWidth, FPGATrackSimHit &incomingHit, bool digitalClustering);
   bool sortITkInputEta(const FPGATrackSimHit& hitA, const FPGATrackSimHit& hitB);
   bool sortITkInputPhi(const FPGATrackSimHit& hitA, const FPGATrackSimHit& HitB);
 }
@@ -40,6 +40,7 @@ public:
 
  private:
 
+  Gaudi::Property<bool> m_digitalClustering {this, "DigitalClustering", false, "flag to enable digital clustering instead of ToT weighted position calculation" };
   Gaudi::Property<bool> m_reduceCoordPrecision {this, "ReduceCoordPrecision", false, "flag to enable reducing the precision of global coordinates" };
   Gaudi::Property<float> m_coordRPrecision {this, "CoordRPrecision", 1./64., "fixed point precision of r coordinate" };
   Gaudi::Property<float> m_coordPhiPrecision {this, "CoordPhiPrecision", 1./8192., "fixed point precision of phi coordinate" };
