@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -247,7 +247,7 @@ StatusCode SCT_PrepDataToxAOD::execute(const EventContext& ctx) const
           auto range{prdmtColl->equal_range(clusterId)};
           if (truth_particle_links) {
              std::vector<unsigned int> tp_indices;
-             for (auto& i{range.first}; i!=range.second; ++i) {
+             for (auto i{range.first}; i!=range.second; ++i) {
                 ElementLink<xAOD::TruthParticleContainer> a_truth_particle_link = truth_particle_links->find(i->second);
                 if (a_truth_particle_link) {
                    const xAOD::TruthParticle *truth_particle = *a_truth_particle_link;
