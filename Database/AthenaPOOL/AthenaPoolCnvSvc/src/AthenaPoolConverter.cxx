@@ -64,16 +64,15 @@ StatusCode AthenaPoolConverter::createObj(IOpaqueAddress* pAddr, DataObject*& pO
    bool ownTokAddr = false;
    if (tokAddr == nullptr || tokAddr->getToken() == nullptr) {
       ownTokAddr = true;
-      Token* token = new Token;
+      auto token = std::make_unique<Token>();
       token->fromString(*(pAddr->par()));
       GenericAddress* genAddr = dynamic_cast<GenericAddress*>(pAddr);
       if (not genAddr){
         ATH_MSG_ERROR("Dynamic cast failed in AthenaPoolConverter::createObj");
         //clean up
-        delete token;
         return StatusCode::FAILURE;
       }
-      tokAddr = new TokenAddress(*genAddr, token);
+      tokAddr = new TokenAddress(*genAddr, std::move(token));
    }
    if( tokAddr->ipar()[0] > 0 and tokAddr->getToken()->auxString().empty() ) {
       char text[32];

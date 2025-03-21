@@ -316,7 +316,7 @@ StatusCode DataHeaderCnv::DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pO
       return(StatusCode::FAILURE);
    }
    // Queue the DH for write
-   Token* dh_token = m_athenaPoolCnvSvc->registerForWrite(&dh_placement, persObj, m_classDesc);
+   std::unique_ptr<Token> dh_token (m_athenaPoolCnvSvc->registerForWrite(&dh_placement, persObj, m_classDesc));
    if (dh_token == nullptr) {
       ATH_MSG_FATAL("Failed to write DataHeader");
       return(StatusCode::FAILURE);
@@ -383,9 +383,8 @@ StatusCode DataHeaderCnv::DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pO
    }
    TokenAddress* tokAddr = dynamic_cast<TokenAddress*>(pAddr);
    if (tokAddr != nullptr) {
-      tokAddr->setToken(dh_token); dh_token = nullptr;
+      tokAddr->setToken(std::move(dh_token));
    } else {
-      delete dh_token; dh_token = nullptr;
       return(StatusCode::FAILURE);
    }
    return(StatusCode::SUCCESS);

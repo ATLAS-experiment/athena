@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENACONVERTER_TP_EXT_H
@@ -10,9 +10,9 @@
  *  @author Marcin.Nowak@cern.ch
  **/
 
+#include "PersistentDataModel/Token.h"
 class TopLevelTPCnvBase;
 class IConverter;
-class Token;
 #include <vector>
 #include <string>
 #include <map>
@@ -55,9 +55,9 @@ public:
       Called from the EXTENDED (principal) Athena converter
       Implemented only in EXTENDING Athena converters
       @param key [in] StoreGet object key (in APR used to determine storage container placement)
-      Retursn Token for the written object
+      Returns Token for the written object
   */
-  virtual const Token*	writeObject( const std::string& /*key*/, const std::string& /*output*/ ) { return 0; }
+  virtual std::unique_ptr<const Token>	writeObject( const std::string& /*key*/, const std::string& /*output*/ ) { return 0; }
 
   /** Read the extending object
       @param token [IN] Token of the object to read

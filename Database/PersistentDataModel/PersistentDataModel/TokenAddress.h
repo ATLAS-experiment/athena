@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENTDATAMODEL_TOKENADDRESS_H
@@ -36,23 +36,40 @@ public:
 	   const std::string& p1 = "",
 	   const std::string& p2 = "",
 	   unsigned long ip = 0,
-	   Token* pt = 0) : GenericAddress(svc, clid, p1, p2, ip), m_token(pt) {
+	   const Token* pt = 0) : GenericAddress(svc, clid, p1, p2, ip), m_token(pt) {
    }
-   TokenAddress(const GenericAddress& genAddr, Token* pt = 0) : GenericAddress(genAddr), m_token(pt) {
+   TokenAddress(long svc,
+	   const CLID& clid,
+	   const std::string& p1,
+	   const std::string& p2,
+	   unsigned long ip,
+           std::unique_ptr<Token> pt) :
+     GenericAddress(svc, clid, p1, p2, ip),
+     m_ownedToken (std::move (pt)),
+     m_token(m_ownedToken.get()) {
+   }
+   TokenAddress(const GenericAddress& genAddr, const Token* pt = 0) : GenericAddress(genAddr), m_token(pt) {
+   }
+   TokenAddress(const GenericAddress& genAddr,
+                std::unique_ptr<Token> pt) :
+     GenericAddress(genAddr),
+     m_ownedToken (std::move(pt)),
+     m_token(m_ownedToken.get()) {
    }
 
    virtual ~TokenAddress() = default;
 
-   Token* getToken() { return m_token.get(); }
-   const Token* getToken() const { return m_token.get(); }
-   void setToken(Token* token);
+   Token* getToken();
+   const Token* getToken() const { return m_token; }
+   void setToken(std::unique_ptr<Token> token);
    virtual const std::string* par() const override;
 
 private:
    struct Pars {
      std::string par[3];
    };
-   std::unique_ptr<Token> m_token;
+   std::unique_ptr<Token> m_ownedToken;
+   const Token* m_token = nullptr;
    /// The parameter array.  We create it lazily in par().
    CxxUtils::CachedValue<Pars> m_par;
 };
