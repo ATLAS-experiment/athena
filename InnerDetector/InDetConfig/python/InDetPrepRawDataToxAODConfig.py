@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetPrepRawDataToxAOD package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -43,7 +43,9 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
     return acc
 
 
-def ITkActsPrepDataToxAODCfg(flags) -> ComponentAccumulator:
+def ITkActsPrepDataToxAODCfg(
+        flags, PixelMeasurementContainer="ITkPixelMeasurements",
+        StripMeasurementContainer="ITkStripMeasurements") -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # need to decorate truth particles and clusters with same unique identified
@@ -54,8 +56,10 @@ def ITkActsPrepDataToxAODCfg(flags) -> ComponentAccumulator:
     acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
 
     from ActsConfig.ActsObjectDecorationConfig import ActsPixelClusterTruthDecoratorAlgCfg,ActsStripClusterTruthDecoratorAlgCfg
-    acc.merge(ActsPixelClusterTruthDecoratorAlgCfg(flags))
-    acc.merge(ActsStripClusterTruthDecoratorAlgCfg(flags))
+    acc.merge(ActsPixelClusterTruthDecoratorAlgCfg(
+        flags, MeasurementContainer=PixelMeasurementContainer))
+    acc.merge(ActsStripClusterTruthDecoratorAlgCfg(
+        flags, MeasurementContainer=StripMeasurementContainer))
 
     return acc
 
