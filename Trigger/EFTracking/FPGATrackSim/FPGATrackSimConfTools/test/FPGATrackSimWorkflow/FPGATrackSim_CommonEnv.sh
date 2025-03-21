@@ -21,10 +21,10 @@ BANKS_5L="banks_5L/${BANK_5L_VERSION}/"
 
 COMBINED_MATRIX="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/${BANKS_5L}/combined_matrix.root"
 
-ONNX_INPUT_FAKE="${BANKS_9L}ClassificationHT_v5.onnx"
-ONNX_INPUT_PARAM="${BANKS_9L}ParamEstimationHT_v5.onnx"
-ONNX_INPUT_HIT="${BANKS_9L}Ath_Extrap_v51_6_superBig_0_outsideIN.onnx"
-ONNX_INPUT_VOL="${BANKS_9L}HT_detector_v6_3.onnx"
+ONNX_INPUT_FAKE="${BANKS_5L}HT_class_v7_longer_training_pruned_0.5.onnx"
+ONNX_INPUT_PARAM="${BANKS_5L}HT_param_v7_long_training_400_epochs_pruned_0.5.onnx"
+ONNX_INPUT_HIT="${BANKS_5L}NNPathfinderHit_4Hits_V005_200e.onnx"
+ONNX_INPUT_VOL="${BANKS_5L}NNPathfinderVol_4Hits_V005_200e.onnx"
 
 GNN_MODULE_MAP="GNN/v0.10/FPGATrackSim_DoubletModuleMap_v1.root" # New training will be done later
 GNN_ONNX_MODEL="GNN/v0.10/edge_classifier-InteractionGNN2-v1.onnx" # New training will be done later
