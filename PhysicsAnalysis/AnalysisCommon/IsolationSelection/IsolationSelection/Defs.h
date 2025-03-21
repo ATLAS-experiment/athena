@@ -75,6 +75,7 @@ namespace CP {
     using PflowSet = std::set<FlowElementPtr>;
 
     using UnorderedClusterSet = std::unordered_set<const xAOD::CaloCluster*>;
+    using UnorderedContainerSet = std::unordered_set<const SG::AuxVectorData*>;
 }  // namespace CP
 
 #endif

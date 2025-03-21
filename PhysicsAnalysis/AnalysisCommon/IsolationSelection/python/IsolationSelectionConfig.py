@@ -66,7 +66,7 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite 
                                                                     MuonWPVec     = muIsoWPs,
                                                                     PhotonWPVec   = phIsoWPs))
     # Set suffix for writing corrected isolation values
-    selectionDecorator = "isoSelIsOK"
+    selectionDecorator = "isoSelIsOK" + suff
     kwargs.setdefault("IsoCloseByCorrectionTool", 
                        result.popToolsAndMerge(IsoCloseByCorrectionToolCfg(flags, 
                                                                            IsolationSelectionTool = isoTool,
@@ -101,7 +101,9 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite 
     kwargs.setdefault("MinPhotPt", 0.)
 
       
-    the_alg = CompFactory.CP.IsoCloseByCorrectionAlg(name + suff, **kwargs)
+    the_alg = CompFactory.CP.IsoCloseByCorrectionAlg(name + suff,
+                                                     SelectionDecorator     = selectionDecorator,
+                                                     **kwargs)
     result.addEventAlgo(the_alg)
     return result
 
