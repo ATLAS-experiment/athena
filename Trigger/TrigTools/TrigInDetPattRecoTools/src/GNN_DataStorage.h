@@ -13,8 +13,6 @@
 #define MAX_SEG_PER_NODE 1000 //was 30
 #define N_SEG_CONNS  6 //was 6
 
-//#include "TrkSpacePoint/SpacePoint.h"
-
 class TrigFTF_GNN_Geometry;
 
 struct TrigFTF_GNN_Node {

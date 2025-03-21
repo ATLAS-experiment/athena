@@ -2,9 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETPATTRECOTOOLS_SEEDINGTOOLBASE_IPP
-#define TRIGINDETPATTRECOTOOLS_SEEDINGTOOLBASE_IPP
-
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetIdentifier/PixelID.h" 
 
@@ -57,8 +54,9 @@ StatusCode SeedingToolBase::initialize() {
 
   ATH_MSG_DEBUG("Property useML "<< m_useML);
   ATH_MSG_DEBUG("Property DoPhiFiltering "<<m_filter_phi);
-  ATH_MSG_DEBUG("Property pTmin"<<m_minPt);
-
+  ATH_MSG_DEBUG("Property pTmin "<<m_minPt);
+  ATH_MSG_DEBUG("Property LRTmode "<<m_LRTmode);
+ 
   return StatusCode::SUCCESS;
 }
 
@@ -359,5 +357,3 @@ int SeedingToolBase::runCCA(int nEdges, std::vector<TrigFTF_GNN_Edge>& edgeStora
   return maxLevel;  
 }
 
-
-#endif
