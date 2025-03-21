@@ -2,8 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETPATTRECOTOOLS_GNN_TRACKING_FILTER_IPP
-#define TRIGINDETPATTRECOTOOLS_GNN_TRACKING_FILTER_IPP
 
 #include<iostream>
 #include<cmath>
@@ -320,4 +318,3 @@ int TrigFTF_GNN_TrackingFilter::getLayerType(int l) {
   return m_geo.at(l).m_type;
 }
 
-#endif
