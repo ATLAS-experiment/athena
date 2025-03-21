@@ -236,10 +236,10 @@ StatusCode FPGATrackSimHitFilteringTool::DoHitFiltering(FPGATrackSimLogicalEvent
       // make FPGATrackSimCluster for monitoring
       FPGATrackSimCluster cluster;
       if(hit.isPixel()){
-	      FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, true);
+	      FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, true, m_digitalClustering);
       }
       if(hit.isStrip()){
-	      FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, true);
+	      FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, true, m_digitalClustering);
       }
       filteredClusters.push_back(cluster);
     }

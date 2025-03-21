@@ -109,11 +109,11 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
         //Loop over the clusters we have already made, check if this hit should be added to them?
         for( auto& cluster: tempClusters){
             if(hit.isPixel()){
-                if (FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, false))
+                if (FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, false, m_digitalClustering))
                     is_clustered_hit = true;
             }
             if(hit.isStrip()){
-                if (FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, false))
+                if (FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, false, m_digitalClustering))
                     is_clustered_hit = true;
             }
         }
@@ -123,9 +123,9 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
             FPGATrackSimCluster cluster;
             if(hit.isPixel()){
                 // No need to check the return code here
-                FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, true);
+                FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, true, m_digitalClustering);
             } else if(hit.isStrip()){
-                FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, true);
+                FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, true, m_digitalClustering);
             }
             //Put this cluster into the output hits. Will update it in place.
             tempClusters.push_back(cluster);
@@ -234,15 +234,28 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
                     float xEtaNew = hit.getEtaCoord();
                     float cPhiNew = hit.getPhiIndex() + 0.5;
                     float cEtaNew = hit.getEtaIndex() + 0.5;
-                    int n = finalCluster.getHitList().size();
-                    // n+1 because that is old + new now
-                    clusterEquiv.setX((xOld*n + xNew) / (n+1));
-                    clusterEquiv.setY((yOld*n + yNew) / (n+1));
-                    clusterEquiv.setZ((zOld*n + zNew) / (n+1));
-                    clusterEquiv.setPhiCoord((xPhiOld*n + xPhiNew) / (n+1));
-                    clusterEquiv.setEtaCoord((xEtaOld*n + xEtaNew) / (n+1));
-                    clusterEquiv.setCentroidPhiIndex((cPhiOld*n + cPhiNew) / (n+1));
-                    clusterEquiv.setCentroidEtaIndex((cEtaOld*n + cEtaNew) / (n+1));
+                    int tot = clusterEquiv.getToT();
+                    int totNew = hit.getToT();
+                    if (m_digitalClustering) {
+                        // n+1 because that is old + new now
+                        int n = finalCluster.getHitList().size();
+                        clusterEquiv.setX((xOld*n + xNew) / (n+1));
+                        clusterEquiv.setY((yOld*n + yNew) / (n+1));
+                        clusterEquiv.setZ((zOld*n + zNew) / (n+1));
+                        clusterEquiv.setPhiCoord((xPhiOld*n + xPhiNew) / (n+1));
+                        clusterEquiv.setEtaCoord((xEtaOld*n + xEtaNew) / (n+1));
+                        clusterEquiv.setCentroidPhiIndex((cPhiOld*n + cPhiNew) / (n+1));
+                        clusterEquiv.setCentroidEtaIndex((cEtaOld*n + cEtaNew) / (n+1));
+                    } else {
+                        clusterEquiv.setX((xOld*tot + xNew*totNew) / (tot+totNew));
+                        clusterEquiv.setY((yOld*tot + yNew*totNew) / (tot+totNew));
+                        clusterEquiv.setZ((zOld*tot + zNew*totNew) / (tot+totNew));
+                        clusterEquiv.setPhiCoord((xPhiOld*tot + xPhiNew*totNew) / (tot+totNew));
+                        clusterEquiv.setEtaCoord((xEtaOld*tot + xEtaNew*totNew) / (tot+totNew));
+                        clusterEquiv.setCentroidPhiIndex((cPhiOld*tot + cPhiNew*totNew) / (tot+totNew));
+                        clusterEquiv.setCentroidEtaIndex((cEtaOld*tot + cEtaNew*totNew) / (tot+totNew));
+                    }
+                    clusterEquiv.setToT(tot + totNew);
                     finalCluster.setClusterEquiv(clusterEquiv);
                     finalCluster.push_backHitList(hit);
                 }
@@ -442,7 +455,7 @@ void FPGATrackSimCLUSTERING::attachTruth(std::vector<FPGATrackSimHit> &hits){
  * This function is used in the FPGATrackSimClusteringTools to see if a new hit should be added to the current cluster under construction.
  * It checks if the hit is in a number of positions w.r.t. the cluster being formed: up/right, down/right, above, right, or inside a cluster that has formed a horseshoe.
  */
-bool FPGATrackSimCLUSTERING::updatePixelCluster(FPGATrackSimCluster &currentCluster, FPGATrackSimHit &incomingHit, bool newCluster){
+bool FPGATrackSimCLUSTERING::updatePixelCluster(FPGATrackSimCluster &currentCluster, FPGATrackSimHit &incomingHit, bool newCluster, bool digitalClustering){
 
     if(newCluster){
         FPGATrackSimHit newHit = incomingHit;
@@ -474,46 +487,46 @@ bool FPGATrackSimCLUSTERING::updatePixelCluster(FPGATrackSimCluster &currentClus
             clusterColWidth++;
             clusterRowWidth++;
 
-            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit, digitalClustering);
         } else if ((hitCol == clusterCol + clusterColWidth) && (hitRow == clusterRow - 1)) {
             clusterColWidth++;
             clusterRow--;
             clusterRowWidth++;
 
-            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit, digitalClustering);
         } else if ((hitCol >= clusterCol) && (hitCol < clusterCol + clusterColWidth) && (hitRow == clusterRow + clusterRowWidth)) {
             clusterRowWidth++;
 
-            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit, digitalClustering);
         } else if ((hitCol == clusterCol + clusterColWidth) && (hitRow >= clusterRow) && (hitRow < clusterRow + clusterRowWidth)) {
             clusterColWidth++;
 
-            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit, digitalClustering);
         } else if ((hitCol >= clusterCol) && (hitCol < clusterCol + clusterColWidth) && (hitRow == clusterRow - 1)) {
             clusterRow--;
             clusterRowWidth++;
 
-            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit, digitalClustering);
         } else if ((hitCol == clusterCol - 1) && (hitRow == clusterRow - 1)) {
             clusterCol--;
             clusterColWidth++;
             clusterRow--;
             clusterRowWidth++;
 
-            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit, digitalClustering);
         } else if ((hitCol == clusterCol - 1) && (hitRow >= clusterRow) && (hitRow < clusterRow + clusterRowWidth)) {
             clusterCol--;
             clusterColWidth++;
 
-            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit, digitalClustering);
         } else if ((hitCol == clusterCol - 1) && (hitRow == clusterRow + clusterRowWidth)) {
             clusterCol--;
             clusterColWidth++;
             clusterRowWidth++;
 
-            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit, digitalClustering);
         } else if ((hitCol >= clusterCol) && (hitCol < clusterCol + clusterColWidth) && (hitRow >= clusterRow) && (hitRow < clusterRow + clusterRowWidth)) {
-            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+            return FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit, digitalClustering);
         } else {
             return false;
         }
@@ -524,7 +537,7 @@ bool FPGATrackSimCLUSTERING::updatePixelCluster(FPGATrackSimCluster &currentClus
  * This function is used in the FPGATrackSimClusteringTools to see if a new hit should be added to the current cluster under construction. It assumes double precision hits.
  * It checks if the hit is in a number of positions w.r.t. the cluster being formed: up/right, down/right, above, right, or inside a cluster that has formed a horseshoe.
  */
-bool FPGATrackSimCLUSTERING::updateStripCluster(FPGATrackSimCluster &currentCluster, FPGATrackSimHit &incomingHit, bool newCluster){
+bool FPGATrackSimCLUSTERING::updateStripCluster(FPGATrackSimCluster &currentCluster, FPGATrackSimHit &incomingHit, bool newCluster, bool digitalClustering){
 
     CXXUTILS_TRAPPING_FP;
 
@@ -566,14 +579,14 @@ bool FPGATrackSimCLUSTERING::updateStripCluster(FPGATrackSimCluster &currentClus
             clusterColWidth = clusterColWidth+tempWidth+1;
             //And add on the new width
             clusterCol = clusterCol + clusterColWidth;
-            FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit);
+            FPGATrackSimCLUSTERING::updateClusterContents(currentCluster, clusterRow, clusterRowWidth, clusterCol, clusterColWidth, incomingHit, digitalClustering);
             return true;
         } else return false;
     }
 }
 
 
-bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentCluster, int &clusterRow, int &clusterRowWidth, int &clusterCol, int &clusterColWidth, FPGATrackSimHit &incomingHit) {
+bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentCluster, int &clusterRow, int &clusterRowWidth, int &clusterCol, int &clusterColWidth, FPGATrackSimHit &incomingHit, bool digitalClustering) {
     //Grab the cluster equiv
     FPGATrackSimHit clusterEquiv = currentCluster.getClusterEquiv();
     bool isConnected = false;
@@ -623,18 +636,30 @@ bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentC
     float xEtaNew = incomingHit.getEtaCoord();
     float cPhiNew = incomingHit.getPhiIndex() + 0.5;
     float cEtaNew = incomingHit.getEtaIndex() + 0.5;
+    int tot = clusterEquiv.getToT();
+    int totNew = incomingHit.getToT();
     //As strips arrive pre-clustered, this is different for pixels/strips
     if(incomingHit.isPixel()){
         CXXUTILS_TRAPPING_FP;
-        int n = currentCluster.getHitList().size();
-        // n+1 because that is old + new now
-        clusterEquiv.setX((xOld*n + xNew) / (n+1));
-        clusterEquiv.setY((yOld*n + yNew) / (n+1));
-        clusterEquiv.setZ((zOld*n + zNew) / (n+1));
-        clusterEquiv.setPhiCoord((xPhiOld*n + xPhiNew) / (n+1));
-        clusterEquiv.setEtaCoord((xEtaOld*n + xEtaNew) / (n+1));
-        clusterEquiv.setCentroidPhiIndex((cPhiOld*n + cPhiNew) / (n+1));
-        clusterEquiv.setCentroidEtaIndex((cEtaOld*n + cEtaNew) / (n+1));
+        if (digitalClustering) {
+            // n+1 because that is old + new now
+            int n = currentCluster.getHitList().size();
+            clusterEquiv.setX((xOld*n + xNew) / (n+1));
+            clusterEquiv.setY((yOld*n + yNew) / (n+1));
+            clusterEquiv.setZ((zOld*n + zNew) / (n+1));
+            clusterEquiv.setPhiCoord((xPhiOld*n + xPhiNew) / (n+1));
+            clusterEquiv.setEtaCoord((xEtaOld*n + xEtaNew) / (n+1));
+            clusterEquiv.setCentroidPhiIndex((cPhiOld*n + cPhiNew) / (n+1));
+            clusterEquiv.setCentroidEtaIndex((cEtaOld*n + cEtaNew) / (n+1));
+        } else {
+            clusterEquiv.setX((xOld*tot + xNew*totNew) / (tot+totNew));
+            clusterEquiv.setY((yOld*tot + yNew*totNew) / (tot+totNew));
+            clusterEquiv.setZ((zOld*tot + zNew*totNew) / (tot+totNew));
+            clusterEquiv.setPhiCoord((xPhiOld*tot + xPhiNew*totNew) / (tot+totNew));
+            clusterEquiv.setEtaCoord((xEtaOld*tot + xEtaNew*totNew) / (tot+totNew));
+            clusterEquiv.setCentroidPhiIndex((cPhiOld*tot + cPhiNew*totNew) / (tot+totNew));
+            clusterEquiv.setCentroidEtaIndex((cEtaOld*tot + cEtaNew*totNew) / (tot+totNew));
+        }
     } else {
         //Phi width + 1 for the seed is the width of the current cluster
         int N = currentCluster.getClusterEquiv().getPhiWidth()+1;
@@ -645,6 +670,8 @@ bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentC
         clusterEquiv.setY((yOld*N + yNew*newN) / (N+newN));
         clusterEquiv.setZ((zOld*N + zNew*newN) / (N+newN));
     }
+    clusterEquiv.setToT(tot + totNew);
+
     //Put it back
     currentCluster.setClusterEquiv(clusterEquiv);
 
