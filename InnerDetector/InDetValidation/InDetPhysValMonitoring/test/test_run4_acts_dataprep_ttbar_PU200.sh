@@ -106,6 +106,7 @@ ls -la "$lastref_dir"
 run "dcube-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_shifter_last \
+    --plotopts=ratio \
     -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/idpvm.acts.root \
     idpvm.acts.root
@@ -113,6 +114,7 @@ run "dcube-last" \
 run "dcube-trk" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_trk \
+    --plotopts=ratio \
     -c ${dcubeXmlAbsPath} \
     -r idpvm.athena.root \
     -M "acts" \

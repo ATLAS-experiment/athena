@@ -90,11 +90,29 @@ namespace ActsTrk {
     TH1* m_widthY_barrel {};
     TH1* m_widthY_endcap {};
 
+    TH1* m_charge_barrel {};
+    TH1* m_charge_endcap {};
+    
+    TH1* m_tot_barrel {};
+    TH1* m_tot_endcap {};
+
+    TH2* m_charge_vs_tot_barrel {};
+    TH2* m_charge_vs_tot_endcap {};
+    
     TH2* m_global_xy_barrel {};
     TH2* m_global_xy_endcap {};
 
     TH2* m_global_zr_barrel {};
     TH2* m_global_zr_endcap {};
+
+    TH2* m_sizeX_vs_eta_barrel {};
+    TH2* m_sizeX_vs_eta_endcap {};
+
+    TH2* m_sizeY_vs_eta_barrel {};
+    TH2* m_sizeY_vs_eta_endcap {};
+
+    TH2* m_sizeX_vs_sizeY_barrel {};
+    TH2* m_sizeX_vs_sizeY_endcap {};
   };
 
 }
