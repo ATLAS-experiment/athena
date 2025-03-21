@@ -12,6 +12,7 @@
 
 #include <AsgTools/AsgComponentFactories.h>
 #include <AsgTools/MessageCheckAsgTools.h>
+#include <mutex>
 
 #include <AsgAnalysisAlgorithms/AsgClassificationDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgCutBookkeeperAlg.h>
@@ -203,7 +204,10 @@
 
 namespace CP
 {
-  bool preloadComponentFactories ()
+  // this function gets called once by the function below.  calling it
+  // once avoids any errors if setup happens multiple times, e.g. in
+  // test fixtures
+  static bool doPreloadComponentFactories ()
   {
     using namespace asg::msgComponentConfig;
     ANA_CHECK_SET_TYPE (bool);
@@ -397,5 +401,13 @@ namespace CP
     ANA_CHECK (asg::registerServiceFactory<CP::SelectionNameSvc> ("CP::SelectionNameSvc"));
 
     return true;
+  }
+
+  bool preloadComponentFactories ()
+  {
+    static bool result = false;
+    static std::once_flag flag;
+    std::call_once (flag, [&] () { result = doPreloadComponentFactories (); });
+    return result;
   }
 }
