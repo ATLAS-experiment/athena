@@ -126,7 +126,10 @@ def checkNTupleFieldWise(ntuple):
         except AttributeError:
             # ROOT Version: 6.35.01
             fieldZero = model.GetConstFieldZero()
-        subFields = fieldZero.GetSubFields()
+        try:
+            subFields = fieldZero.GetSubFields()
+        except AttributeError:
+            subFields = fieldZero.GetConstSubfields()
         msg.debug(f"Top level fields number {subFields.size()}")
         for field in subFields:
             msg.debug(f"fieldName={field.GetFieldName()} typeName={field.GetTypeName()}")
