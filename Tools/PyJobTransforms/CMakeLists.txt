@@ -33,7 +33,7 @@ foreach( test Echo_tf Sleep_tf
          trfExceptions trfExe trfExitCodes trfGraph trfJobOptions trfLogger
          trfMPTools trfReports trfReportsSignaledExit trfSignatures
          trfUtils trfUtilsDBRelease trfUtilsParallelJobProcessor trfUtilsParallelJobProcessorData
-         trfValidation trfArgClasses )
+         trfValidation trfArgClasses trfValidateRootFile )
       _add_test( ${test} py 300 )
 endforeach()
 
