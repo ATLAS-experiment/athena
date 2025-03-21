@@ -46,7 +46,7 @@ run () {
 }
 
 run "${PREFIX} pipeline" \
-    source FPGATrackSim_CommonEnv.sh --ttbar -n -1 -s 2 -q
+    source FPGATrackSim_CommonEnv.sh --ttbar -n -1 -q
     python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
         --evtMax=${RDO_EVT_ANALYSIS} \
         --skipEvents=${SKIP_EVENTS} \

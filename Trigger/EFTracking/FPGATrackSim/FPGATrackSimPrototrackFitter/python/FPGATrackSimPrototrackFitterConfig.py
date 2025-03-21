@@ -68,7 +68,7 @@ def FPGATruthDecorationCfg(flags, FinalProtoTrackChainxAODTracksKey="xAODFPGAPro
     FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey
 
     acc = ComponentAccumulator()
-    truthLinkVector="xAODFPGATruthLinks" if flags.Trigger.FPGATrackSim.writeAdditionalOutputData else "xAODTruthLinks"
+    truthLinkVector="xAODFPGATruthLinks" if flags.Trigger.FPGATrackSim.useFPGATruthTrackMatching else "xAODTruthLinks"
     acc.merge(ActsPixelClusterToTruthAssociationAlgCfg(flags,
                                                        name="ActsFPGAPixelClusterToTruthAssociationAlg",
                                                        InputTruthParticleLinks=truthLinkVector,
