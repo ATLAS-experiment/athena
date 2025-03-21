@@ -164,6 +164,20 @@ namespace PixelDigitization{
     }
     return;
   }
+  
+  int 
+  generateToT(CLHEP::HepRandomEngine* rndmEngine, double mean, double sd, const std::pair<int, int>& range){
+    int nToT = static_cast<int>(CLHEP::RandGaussZiggurat::shoot(rndmEngine, mean, sd));
+    const auto &[lo,hi] = range;
+    //
+    if (nToT < lo) {
+      nToT = lo;
+    }
+    if (nToT >= hi) {
+      nToT = hi;
+    }
+    return nToT;
+  }
 
   double 
   getG4Time(const SiTotalCharge& totalCharge) {
