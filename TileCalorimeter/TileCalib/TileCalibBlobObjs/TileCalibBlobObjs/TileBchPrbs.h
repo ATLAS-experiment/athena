@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECALIBBLOBOBJS_TILEBCHPRBS_H
@@ -45,6 +45,7 @@ class TileBchPrbs
     NoCis                      = 1103,
     BadCis                     = 1104,
     IgnoredByDQV               = 1105,
+    HalfGain                   = 1106,
 
     //=============================
     //=== Channel
