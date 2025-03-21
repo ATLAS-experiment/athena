@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger athenaHLT test of DB upload (inlcuding duplicate), download and running.
 # art-type: build
@@ -14,7 +14,7 @@ genJSON = ExecStep.ExecStep("GenJSON")
 genJSON.type = 'athenaHLT'
 genJSON.job_options = 'TriggerJobOpts.runHLT'
 genJSON.input = 'data'
-genJSON.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1_HLTReprocessing_prescale"','Trigger.L1.errorOnMissingTOB=False','Trigger.Offline.SA.Muon.runCommissioningChain=True']
+genJSON.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1_HLTReprocessing_prescale"','Trigger.L1.errorOnMissingTOB=False']
 genJSON.args = ' -M --dump-config-exit'
 genJSON.perfmon = False
 genJSON.fpe_auditor = False
