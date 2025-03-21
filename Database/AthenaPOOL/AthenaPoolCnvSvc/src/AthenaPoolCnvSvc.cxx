@@ -957,9 +957,9 @@ StatusCode AthenaPoolCnvSvc::createAddress(long svcType,
          return(StatusCode::FAILURE);
       }
    }
-   Token* token = nullptr;
+   std::unique_ptr<Token> token;
    if (par[0].compare(0, 3, "SHM") == 0) {
-      token = new Token();
+      token = std::make_unique<Token>();
       token->setOid(Token::OID_t(ip[0], ip[1]));
       token->setAuxString("[PNAME=" + par[2] + "]");
       RootType classDesc = RootType::ByNameNoQuiet(par[2]);
@@ -984,19 +984,19 @@ StatusCode AthenaPoolCnvSvc::createAddress(long svcType,
          ATH_MSG_WARNING("Failed to get Address Token: " << addressToken.toString());
          return(StatusCode::FAILURE);
       }
-      token = new Token();
+      token = std::make_unique<Token>();
       token->fromString(static_cast<const char*>(buffer)); buffer = nullptr;
       if (token->classID() == Guid::null()) {
-         delete token; token = nullptr;
+         token.reset();
       }
       m_inputStreamingTool->getObject(&buffer, nbytes).ignore();
    } else {
-      token = m_poolSvc->getToken(par[0], par[1], ip[0]);
+      token.reset (m_poolSvc->getToken(par[0], par[1], ip[0]));
    }
    if (token == nullptr) {
       return(StatusCode::RECOVERABLE);
    }
-   refpAddress = new TokenAddress(POOL_StorageType, clid, "", par[1], IPoolSvc::kInputStream, token);
+   refpAddress = new TokenAddress(POOL_StorageType, clid, "", par[1], IPoolSvc::kInputStream, std::move(token));
    return(StatusCode::SUCCESS);
 }
 //______________________________________________________________________________

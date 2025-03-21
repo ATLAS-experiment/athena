@@ -6,9 +6,19 @@
 #include "PersistentDataModel/TokenAddress.h"
 
 
-void TokenAddress::setToken(Token* token) {
-  m_token = std::unique_ptr<Token> (token);
+void TokenAddress::setToken(std::unique_ptr<Token> token) {
+  m_ownedToken = std::move (token);
+  m_token = m_ownedToken.get();
   m_par.reset();
+}
+
+Token* TokenAddress::getToken()
+{
+  if (!m_ownedToken && m_token) {
+    m_ownedToken = std::make_unique<Token> (m_token);
+    m_token = m_ownedToken.get();
+  }
+  return m_ownedToken.get();
 }
 
 const std::string* TokenAddress::par() const

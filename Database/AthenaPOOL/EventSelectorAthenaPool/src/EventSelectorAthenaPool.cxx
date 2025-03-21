@@ -765,9 +765,9 @@ StatusCode EventSelectorAthenaPool::createAddress(const IEvtSelector::Context& /
       ATH_MSG_WARNING("Cannot find AthenaAttribute, key = " << m_attrListKey.value());
       tokenStr = m_poolCollectionConverter->retrieveToken(m_headerIterator, "");
    }
-   Token* token = new Token;
+   auto token = std::make_unique<Token>();
    token->fromString(tokenStr);
-   iop = new TokenAddress(POOL_StorageType, ClassID_traits<DataHeader>::ID(), "", "EventSelector", IPoolSvc::kInputStream, token);
+   iop = new TokenAddress(POOL_StorageType, ClassID_traits<DataHeader>::ID(), "", "EventSelector", IPoolSvc::kInputStream, std::move(token));
    return(StatusCode::SUCCESS);
 }
 //________________________________________________________________________________

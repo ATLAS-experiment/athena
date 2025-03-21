@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeader.cxx
@@ -148,8 +148,7 @@ SG::TransientAddress* DataHeaderElement::getAddress(unsigned long contextId) con
 SG::TransientAddress* DataHeaderElement::getAddress(const std::string& key,
 	unsigned long contextId) const {
    CLID primaryClID = getPrimaryClassID();
-   Token* token = new Token(&m_token);
-   TokenAddress* tokAdd = new TokenAddress(this->getStorageType(), primaryClID, "", m_key, contextId , token);
+   TokenAddress* tokAdd = new TokenAddress(this->getStorageType(), primaryClID, "", m_key, contextId , &m_token);
    SG::TransientAddress* sgAddress = new SG::TransientAddress(primaryClID, key, tokAdd);
    for (std::set<CLID>::const_iterator iter = m_clids.begin(), last = m_clids.end();
 	   iter != last; ++iter) {
