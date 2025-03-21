@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 #ifndef PixelNoiseFunctions_h
 #define PixelNoiseFunctions_h
@@ -7,6 +7,7 @@
 
 #include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include <vector>
+#include <utility> //for std::pair
 
 class SiChargedDiodeCollection;
 class SiTotalCharge;
@@ -36,15 +37,22 @@ namespace PixelDigitization{
     InDetDD::IPixelReadoutManager * pixelReadout);
   
   //randomly disables certain elements, using moduleData to get probability
-  void randomDisable(SiChargedDiodeCollection& chargedDiodes,
+  void 
+  randomDisable(SiChargedDiodeCollection& chargedDiodes,
     const PixelModuleData *moduleData,
     CLHEP::HepRandomEngine* rndmEngine);
   
   //randomly disables certain elements, probability as a parameter          
-  void randomDisable(SiChargedDiodeCollection& chargedDiodes,
+  void 
+  randomDisable(SiChargedDiodeCollection& chargedDiodes,
     double disableProbability, CLHEP::HepRandomEngine* rndmEngine);
-                     
-  double getG4Time(const SiTotalCharge& totalCharge) ;
+    
+  //generate Time-Over-Threshold int values with mean, rms, and valid range
+  int 
+  generateToT(CLHEP::HepRandomEngine* rndmEngine, double mean, double sd, const std::pair<int, int>& range);
+  //
+  double 
+  getG4Time(const SiTotalCharge& totalCharge);
 }//namespace
   
   #endif
