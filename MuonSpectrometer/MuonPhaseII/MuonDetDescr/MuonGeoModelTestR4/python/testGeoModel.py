@@ -129,9 +129,18 @@ def setupGeoR4TestCfg(args,  flags = None):
     flags.Exec.MaxEvents = args.nEvents
     flags.Exec.SkipEvents = args.skipEvents
     from os import path, system, listdir
-    inFiles = [x for x in args.inputFile if not path.isdir(x)] + \
-              [ "{dir}/{file}".format(dir=x, file=y)  for x in args.inputFile if path.isdir(x) for y in listdir(x) ]
-    flags.Input.Files = inFiles 
+    flags.Input.Files = []
+    ### Assemble all files in a directory or all files not having the suffix txt conf. 
+    ### The latter are interpreted as file lists
+    for fileArg in args.inputFile:
+        if path.isdir(fileArg):
+            flags.Input.Files += [ "{dir}/{file}".format(dir=fileArg, file=y) for y in listdir(fileArg) ]
+        else:
+            if fileArg[fileArg.rfind(".")+1 :]not in ["txt", "conf"]:
+                 flags.Input.Files+=[fileArg]
+            else:
+                with open(fileArg) as inStream:
+                   flags.Input.Files+=[ line.strip() for line in inStream if line[0]!='#'] 
 
     flags.Exec.FPE= 500
     flags.Exec.EventPrintoutInterval = 500
