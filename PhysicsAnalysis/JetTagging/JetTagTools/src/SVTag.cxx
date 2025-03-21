@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -18,6 +18,7 @@
 #include <string>
 
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
+#include "CxxUtils/trapping_fp.h"
 
 namespace Analysis
 {
@@ -307,6 +308,8 @@ namespace Analysis
     ATH_MSG_VERBOSE("#BTAG# SV mode = " << m_SVmode);
 
     if (m_SVmode != "SV0" ) {
+      // Tell clang to optimize assuming that FP operations may trap.
+      CXXUTILS_TRAPPING_FP;
       float ambtotp = ambtot > 0. ? ambtot/(1.+ambtot) : 0.;
       float xratiop = xratio > 0. ? (float)pow(xratio,m_expos) : 0.;
       float trfJetPt = log(jetToTag.pt()/20000.);
