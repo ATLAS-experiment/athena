@@ -57,6 +57,7 @@ def createActsConfigFlags():
     # 'None'    : no material map is provided
     actscf.addFlag('Acts.TrackingGeometry.MaterialSource', 'Default')
     actscf.addFlag('Acts.TrackingGeometry.MaterialCalibrationFolder', 'ACTS/MaterialMaps/ITk')
+    actscf.addFlag('Acts.TrackingGeometry.MaterialFileExtension', '')
 
     ## Enable Tracking geometry with additional passive layers
     actscf.addFlag('Acts.TrackingGeometry.InsertITkPassiveMaterialLayers', False)
