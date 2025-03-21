@@ -402,12 +402,12 @@ namespace InDetDD {
                 msg(MSG::ERROR) << "global frame specified, but child == 0" << endmsg;
             } else {
                 const GeoTrf::Transform3D & childXF = child->getDefAbsoluteTransform(alignStore);
-                extXF->alignableTransform()->setDelta(childXF.inverse() * delta * childXF);
+                extXF->alignableTransform()->setDelta(childXF.inverse() * delta * childXF, alignStore);
             }
 
         } else if (frame == InDetDD::local) { // Local
             // if its a local frame then no transform necessary. We set it directly.
-            extXF->alignableTransform()->setDelta(delta);
+	    extXF->alignableTransform()->setDelta(delta, alignStore);
 
         } else { // Other frame
             // if child or frame is zero it will have been set to local or global above
@@ -418,7 +418,7 @@ namespace InDetDD {
             } else {
 	            const GeoTrf::Transform3D & xfChild = child->getDefAbsoluteTransform(alignStore);
 	            const GeoTrf::Transform3D & xfFrame = frameVol->getDefAbsoluteTransform(alignStore);
-	            extXF->alignableTransform()->setDelta(xfChild.inverse() * xfFrame * delta * xfFrame.inverse() * xfChild);
+	            extXF->alignableTransform()->setDelta(xfChild.inverse() * xfFrame * delta * xfFrame.inverse() * xfChild, alignStore);
             }
         }
 
