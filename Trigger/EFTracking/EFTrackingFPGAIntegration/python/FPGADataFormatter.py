@@ -31,19 +31,30 @@ def FPGAOutputConversionToolCfg(flags, name = 'FPGAOutputConversionTool', **kwar
 
     return acc
 
-def xAODContainerMakerCfg(flags, name = 'xAODContainerMaker', **kwarg):
+def xAODClusterMakerCfg(flags, name = 'xAODClusterMaker', **kwarg):
+    """Configure the xAODClusterMaker tool"""
     
     acc = ComponentAccumulator()
     
-    kwarg.setdefault('name', name)
-    kwarg.setdefault('OutputStripName', 'FPGAStripClusters')
-    kwarg.setdefault('OutputPixelName', 'FPGAPixelClusters')
-        
-    # Update space point container names to match what ACTS expects
-    kwarg.setdefault('OutputStripSpacePointName', 'FPGAStripSpacePoints')
-    kwarg.setdefault('OutputPixelSpacePointName', 'FPGAPixelSpacePoints')
+    kwarg.setdefault('PixelClusterContainerKey', 'FPGAPixelClusters')
+    kwarg.setdefault('StripClusterContainerKey', 'FPGAStripClusters')
     
-    acc.setPrivateTools(CompFactory.xAODContainerMaker(**kwarg))
+    acc.setPrivateTools(CompFactory.xAODClusterMaker(name, **kwarg))
+    return acc
+
+def xAODSpacePointMakerCfg(flags, name = 'xAODSpacePointMaker', **kwarg):
+    """Configure the xAODSpacePointMaker tool"""
+    
+    acc = ComponentAccumulator()
+    
+    # Input clusters to read from
+    kwarg.setdefault('PixelClusterContainerKey', 'FPGAPixelClusters')
+    kwarg.setdefault('StripClusterContainerKey', 'FPGAStripClusters')
+    # Output space points to create
+    kwarg.setdefault('PixelSpacePointContainerKey', 'FPGAPixelSpacePoints')
+    kwarg.setdefault('StripSpacePointContainerKey', 'FPGAStripSpacePoints')
+    
+    acc.setPrivateTools(CompFactory.xAODSpacePointMaker(name, **kwarg))
     return acc
 
 def FPGAFormatterPrepCfg(flags, name = "FPGAFormatterPrep", **kwarg):
@@ -53,13 +64,15 @@ def FPGAFormatterPrepCfg(flags, name = "FPGAFormatterPrep", **kwarg):
     tool = acc.popToolsAndMerge(FPGADataFormatToolCfg(flags))
     tvTool = acc.popToolsAndMerge(FPGATestVectorToolCfg(flags))
     outputTool = acc.popToolsAndMerge(FPGAOutputConversionToolCfg(flags))
-    containerMakerTool = acc.popToolsAndMerge(xAODContainerMakerCfg(flags))
+    clusterMakerTool = acc.popToolsAndMerge(xAODClusterMakerCfg(flags))
+    spacePointMakerTool = acc.popToolsAndMerge(xAODSpacePointMakerCfg(flags))
     
     kwarg.setdefault('name', name)
     kwarg.setdefault('FPGADataFormatTool', tool)
     kwarg.setdefault('TestVectorTool', tvTool)
     kwarg.setdefault('OutputConversionTool', outputTool)
-    kwarg.setdefault('xAODContainerMaker', containerMakerTool)
+    kwarg.setdefault('xAODClusterMaker', clusterMakerTool)
+    kwarg.setdefault('xAODSpacePointMaker', spacePointMakerTool)
     
     kwarg.setdefault('PixelEDMRefTV', '')
     kwarg.setdefault('StripEDMRefTV', '')
