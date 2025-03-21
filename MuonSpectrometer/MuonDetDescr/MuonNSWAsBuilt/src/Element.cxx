@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonNSWAsBuilt/Element.h"
@@ -105,8 +105,8 @@ void Element::traverseTree(const std::function<void(Element&)>& callback)
 {
   struct tree_t {
     using iter = daughterVec_t::iterator;
-    tree_t(iter _it, iter _end):
-      it{_it},end{_end}{}
+    tree_t(iter it_, iter end_):
+      it{it_},end{end_}{}
     iter it;
     iter end;
   };

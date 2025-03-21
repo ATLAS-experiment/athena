@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDEVENT_MUONTAGTOSEGMAP_H
@@ -42,8 +42,8 @@ namespace MuonCombined {
         /// container
         struct SegmentLink {
             SegmentLink() = default;
-            SegmentLink(const Muon::MuonSegment* _gate, const Muon::MuonSegment* _pers, unsigned int idx) :
-                storegate{_gate}, persistent{_pers}, index{idx} {}
+            SegmentLink(const Muon::MuonSegment* gate, const Muon::MuonSegment* pers, unsigned int idx) :
+                storegate{gate}, persistent{pers}, index{idx} {}
 
             const Trk::Segment* storegate{nullptr};
             const Trk::Segment* persistent{nullptr};

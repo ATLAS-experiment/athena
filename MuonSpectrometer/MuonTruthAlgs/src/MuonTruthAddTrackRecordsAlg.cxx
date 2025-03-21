@@ -19,12 +19,12 @@ namespace {
 
     struct RecordPars {
         RecordPars() = default;
-        RecordPars(Amg::Vector3D&& _pos, Amg::Vector3D&&_mom):
-            pos{std::move(_pos)},
-            mom{std::move(_mom)}{}
-        RecordPars(const CLHEP::Hep3Vector& _pos, const CLHEP::Hep3Vector& _mom):
-            pos{_pos.x(), _pos.y(), _pos.z()},
-            mom{_mom.x(), _mom.y(), _mom.z()}{
+        RecordPars(Amg::Vector3D&& pos_, Amg::Vector3D&& mom_):
+            pos{std::move(pos_)},
+            mom{std::move(mom_)}{}
+        RecordPars(const CLHEP::Hep3Vector& pos_, const CLHEP::Hep3Vector& mom_):
+            pos{pos_.x(), pos_.y(), pos_.z()},
+            mom{mom_.x(), mom_.y(), mom_.z()}{
         }
         const Amg::Vector3D pos{Amg::Vector3D::Zero()};
         const Amg::Vector3D mom{Amg::Vector3D::Zero()};
