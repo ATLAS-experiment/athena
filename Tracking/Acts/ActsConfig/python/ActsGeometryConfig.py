@@ -78,6 +78,8 @@ def ActsTrackingGeometrySvcCfg(flags,
         extension += "-HGTD"
       if flags.Acts.TrackingGeometry.InsertITkPassiveMaterialLayers:
         extension += "-passiveLayers"
+      if flags.Acts.TrackingGeometry.MaterialFileExtension:
+        extension += "-"+flags.Acts.TrackingGeometry.MaterialFileExtension
       actsTrackingGeometrySvc.UseMaterialMap = True
       actsTrackingGeometrySvc.MaterialMapCalibFolder = flags.Acts.TrackingGeometry.MaterialCalibrationFolder
       actsTrackingGeometrySvc.MaterialMapInputFile = \
