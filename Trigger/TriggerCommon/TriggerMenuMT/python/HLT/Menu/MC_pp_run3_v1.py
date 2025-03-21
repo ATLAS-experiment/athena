@@ -39,6 +39,8 @@ from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import ( PhysicsStream,
                                                         LegacyTopoGroup,
                                                         BjetMETGroup,
                                                         MuonJetGroup,
+                                                        MuonTauGroup,
+
 )
 
 
@@ -362,7 +364,6 @@ def getMCSignatures():
 
         # ATR-27780
         
-        #ChainProp(name='HLT_g5_nopid_L1eEM5', groups=SinglePhotonGroup+['PS:NoBulkMCProd']),
 
         #ATR-25764 - adding Photon chains with different isolation WPs
         ChainProp(name='HLT_g25_tight_icaloloose_L1eEM26M', groups=SinglePhotonGroup, monGroups=['egammaMon:shifter']),
@@ -530,6 +531,7 @@ def getMCSignatures():
         ChainProp(name='HLT_e7_lhmedium_L1eEM5_mu22_L1MU18VFCH',l1SeedThresholds=['eEM5','MU18VFCH'],  stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMuonGroup),
         ChainProp(name='HLT_e7_lhmedium_L1eEM5_mu20_L1MU18VFCH',l1SeedThresholds=['eEM5','MU18VFCH'],  stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMuonGroup),
 
+        ChainProp(name='HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_cTAU30M', l1SeedThresholds=['MU8F','cTAU30M'], stream=[PhysicsStream], groups=PrimaryPhIGroup+MuonTauGroup),
     ]
 
 

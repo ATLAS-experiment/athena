@@ -577,7 +577,7 @@ ChainProp(name='HLT_e140_dnnloose_L1eEM26M', groups=PrimaryPhIGroup+SingleElectr
         ChainProp(name='HLT_2g50_loose_L12eEM24L', groups=PrimaryPhIGroup+MultiPhotonGroup),
 
         #ATR_30971
-        ChainProp(name='HLT_g5_nopid_L1eEM5', groups=SingleElectronGroup+SupportPhIGroup+['RATE:CPS_eEM5']+['PS:NoBulkMCProd']),
+        ChainProp(name='HLT_g5_nopid_L1eEM5', groups=SinglePhotonGroup+SupportPhIGroup+['RATE:CPS_eEM5']+['PS:NoBulkMCProd']),
         ChainProp(name='HLT_g25_loose_noringer_L1eEM24L', groups=SupportPhIGroup+SinglePhotonGroup+['RATE:CPS_eEM24L']),
         ChainProp(name='HLT_g35_medium_noringer_L1eEM24L', groups=SupportPhIGroup+SinglePhotonGroup+['RATE:CPS_eEM24L'], monGroups=['egammaMon:shifter']),
         ChainProp(name='HLT_2g22_tight_noringer_L12eEM18M', groups=PrimaryPhIGroup+MultiPhotonGroup),
@@ -2036,11 +2036,12 @@ ChainProp(name='HLT_e140_dnnloose_L1eEM26M', groups=PrimaryPhIGroup+SingleElectr
         ChainProp(name='HLT_g15_loose_L1eEM10L_2mu10_msonly_L1MU3V_UNPAIRED_ISO', l1SeedThresholds=['eEM10L','MU3V'], stream=['Late'], groups=PrimaryPhIGroup+EgammaMuonGroup),
 
         # tau + muon triggers
+
+        ChainProp(name='HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_3DR35-MU8F-eTAU30', l1SeedThresholds=['MU8F','cTAU30M'], stream=[PhysicsStream], groups=PrimaryPhIGroup+MuonTauGroup+Topo3Group),
         ChainProp(name='HLT_mu20_ivarloose_tau20_mediumRNN_tracktwoMVA_L1eTAU12_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH', 'eTAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+MuonTauGroup),
         # ATR 25512
         ChainProp(name='HLT_mu23_ivarloose_tau20_mediumRNN_tracktwoMVA_L1eTAU12_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH', 'eTAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+MuonTauGroup),
 
-        ChainProp(name='HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_cTAU30M', l1SeedThresholds=['MU8F','cTAU30M'], stream=[PhysicsStream], groups=PrimaryPhIGroup+MuonTauGroup),
         ChainProp(name='HLT_mu14_ivarloose_tau25_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_cTAU20M_3jJ30', l1SeedThresholds=['MU8F','cTAU20M'], stream=[PhysicsStream], groups=PrimaryPhIGroup+MuonTauGroup),
 
         # ATR-27546

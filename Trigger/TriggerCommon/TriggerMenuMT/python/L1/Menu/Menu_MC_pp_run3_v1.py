@@ -99,7 +99,7 @@ def defineMenu():
         
         # ATR-29651 - Tau+X chains using eTAU20M seeds
         'L1_eEM18M_2eTAU20M_4jJ30', 'L1_eTAU60_2eTAU20M_jXE80', 'L1_eEM18M_2eTAU20M_jXE70', 
-
+        'L1_MU8F_cTAU30M',
         # ART-28443  test eEMX{} + {{3,4jJY{}}} L1 seeds
         'L1_eEM22M_3jJ40p0ETA25',
         'L1_eEM22M_4jJ30p0ETA25',
