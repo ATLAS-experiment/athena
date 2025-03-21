@@ -129,7 +129,6 @@ StatusCode FPGADataFormatTool::convertStripRDO(
                 firedStrips[baseLineStrip + i] = true;
             }
         }
-
         // Loop over the fired hits and encode them in the ITk strips hit map
         // Finds unique hits in the list that can be encoded and don't overlap
         std::map<int, int> stripEncodingForITK;
@@ -159,12 +158,14 @@ StatusCode FPGADataFormatTool::convertStripRDO(
             stripEncodingForITK[stripID] = static_cast<int>(hitMap.to_ulong());
         }
 
+        stripNumber = 0;
+        firstClusterFilled = false;
         // Process each fired strip and encode it
         for (const SCT_RDORawData* sctRawData : *SCT_Collection) {
             const Identifier rdoId = sctRawData->identify();
             const InDetDD::SiDetectorElement* sielement = m_SCT_mgr->getDetectorElement(rdoId);
-
             int stripID = m_sctId->strip(rdoId);
+
             if (stripEncodingForITK.find(stripID) != stripEncodingForITK.end()) {
                 // Fill the module header if not already filled
                 if (!filledHeader) {
@@ -182,9 +183,9 @@ StatusCode FPGADataFormatTool::convertStripRDO(
                     offset = (std::abs(m_sctId->eta_module(rdoId)) - 1) % 2;
                 }
                 ITkStripID += offset * MaxChannelinStripRow;
-
+                stripNumber++;
                 // Determine if this is the last cluster in the module
-                bool lastBit = (++stripNumber == stripEncodingForITK.size());
+                bool lastBit = (stripNumber == stripEncodingForITK.size());
 
                 // Create the encoded strip word
                 auto stripWord = FPGADataFormatUtilities::fill_STRIP_EF_RDO(
@@ -214,11 +215,9 @@ StatusCode FPGADataFormatTool::convertStripRDO(
                 }
             }
         }
-
+      // Reset the header flag for the next module
+      filledHeader = false;
     } // end for each RDO in the strip collection
-
-    // Reset the header flag for the next module
-    filledHeader = false;
 
     return StatusCode::SUCCESS;
 }

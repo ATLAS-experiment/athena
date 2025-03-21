@@ -15,8 +15,9 @@ def StripClusteringCfg(flags, name='FPGAStripClustering', **kwargs):
     tool = acc.popToolsAndMerge(FPGADataFormatToolCfg(flags))
 
     kwargs.setdefault('name', name)
-    kwargs.setdefault('xclbin', 'StripClustering.xclbin')  # Path to the strip clustering xclbin
-    kwargs.setdefault('KernelName', 'strip_clustering_tool')  # Kernel name
+    # kwargs.setdefault('xclbin', 'StripClustering.xclbin')  # Path to the strip clustering xclbin
+    kwargs.setdefault('xclbin', 'F110.sw_emu.xclbin')  # Path to the strip clustering xclbin
+    kwargs.setdefault('KernelName', 'processHits')  # Kernel name
     kwargs.setdefault('InputTV', '')  # Input TestVector file (set as needed)
     kwargs.setdefault('RefTV', '')  # Reference TestVector file (set as needed)
     kwargs.setdefault('FPGADataFormatTool', tool)
@@ -33,7 +34,7 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     flags.Concurrency.NumThreads = 1
     flags.Input.Files = [
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900495.PG_single_muonpm_Pt10_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675641._000037.pool.root.1"
     ]
 
     # Disable calo for this test
