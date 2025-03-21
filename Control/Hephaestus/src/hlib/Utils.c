@@ -107,11 +107,13 @@ const char* hhh_getSymbolE( void *addr ) {
 
       if ( dbg ) {
          cname = (char*)malloc( nlen + strlen( dbg ) + 3 );
+         if (cname == NULL) return (const char*)NULL; //keeping pure c-style
          strcpy( cname, name );
          strcpy( cname + nlen, " @" );
          strcpy( cname + nlen + 2, dbg );
       } else {
          cname = (char*)malloc( nlen + 1 );
+         if (cname == NULL) return (const char*)NULL;
          strcpy( cname, name );
       }
 
