@@ -19,8 +19,7 @@ def PixelClusteringCfg(flags, name = 'PixelClustering', **kwarg):
     tool = acc.popToolsAndMerge(FPGADataFormatToolCfg(flags))
 
     kwarg.setdefault('name', name)
-    kwarg.setdefault('xclbin', 'dataprepPipeline.xclbin')
-    #kwarg.setdefault('KernelName', 'clustering')
+    kwarg.setdefault('xclbin', 'F110.hw.xclbin')
     kwarg.setdefault('KernelName', 'pixel_clustering_tool')
     kwarg.setdefault('InputTV', '')
     kwarg.setdefault('RefTV', '')
@@ -59,6 +58,11 @@ if __name__=="__main__":
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
+
+    from EFTrackingFPGAIntegration.FPGAOutputValidationConfig import FPGAOutputValidationCfg
+    cfg.merge(FPGAOutputValidationCfg(flags, **{
+        "pixelKeys": ["FPGAPixelClusters", "ITkPixelClusters"],
+    }))
 
     #Truth
     if flags.Input.isMC:

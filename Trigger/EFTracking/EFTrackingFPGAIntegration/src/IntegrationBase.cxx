@@ -29,6 +29,7 @@ StatusCode IntegrationBase::initialize()
     }
 
     std::vector<cl::Device> allDevices;
+    int device_id = 0;
 
     // Print platform information
     for (cl::Platform pf : platforms)
@@ -54,6 +55,8 @@ StatusCode IntegrationBase::initialize()
                 foundAccelerator = true;
                 break;
             }
+
+	    device_id++;
         }
 
         // If there is no accelerator card, print error and return
@@ -64,7 +67,7 @@ StatusCode IntegrationBase::initialize()
         }
     }
 
-    ATH_MSG_INFO("Using FPGA accelerator card: " << m_accelerator.getInfo<CL_DEVICE_NAME>());
+    ATH_MSG_INFO("Using device number " << device_id << " which is a FPGA accelerator card: " << m_accelerator.getInfo<CL_DEVICE_NAME>());
 
     // Create context
     m_context = cl::Context({m_accelerator});

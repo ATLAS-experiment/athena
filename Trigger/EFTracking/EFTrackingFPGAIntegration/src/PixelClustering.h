@@ -16,8 +16,8 @@
 #include "IntegrationBase.h"
 
 #include "InDetRawData/PixelRDO_Container.h"
-#include "InDetRawData/SCT_RDO_Container.h"
 #include "FPGADataFormatTool.h"
+#include "xAODClusterMaker.h"
 
 // STL include
 #include <string>
@@ -37,7 +37,8 @@ private:
 
     SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey  { this, "PixelRDO", "ITkPixelRDOs" };
 
-    ToolHandle<FPGADataFormatTool> m_FPGADataFormatTool{this, "FPGADataFormatTool", "FPGADataFormatTool", "tool to convert RDOs into FPGA data format"};
+    ToolHandle<FPGADataFormatTool> m_FPGADataFormatTool{this, "FPGADataFormatTool", "FPGADataFormatTool", "Tool to convert RDOs into FPGA data format"};
+    ToolHandle<xAODClusterMaker> m_xAODClusterMaker{this, "xAODClusterMaker", "xAODClusterMaker", "Tool for creating xAOD containers"};
 };
 
 #endif // EFTRACKING_FPGA_INTEGRATION_PIXELCLUSTERING_H
