@@ -8,6 +8,7 @@
 // System include(s).
 #include <filesystem>
 #include <fstream>
+#include <CL/cl_ext_xilinx.h>
 
 namespace AthXRT {
 

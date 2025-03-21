@@ -31,8 +31,8 @@ namespace EFTrackingTransient
   constexpr unsigned int NUM_STRIP_ROW = 14;
   constexpr unsigned long PIXEL_BLOCK_BUF_SIZE = NUM_PIXEL_WORD * MAX_NUM_CLUSTERS;
   constexpr unsigned long STRIP_BLOCK_BUF_SIZE = NUM_STRIP_WORD * MAX_NUM_CLUSTERS;
-  constexpr unsigned long PIXEL_CONTAINER_BUF_SIZE = (NUM_PIXEL_ROW * MAX_NUM_CLUSTERS + 4096); //+4096 for numClusters with alignment
-  constexpr unsigned long STRIP_CONTAINER_BUF_SIZE = (NUM_STRIP_ROW * MAX_NUM_CLUSTERS + 4096);
+  constexpr unsigned long PIXEL_CONTAINER_BUF_SIZE = (NUM_PIXEL_ROW*MAX_NUM_CLUSTERS + 4096);
+  constexpr unsigned long STRIP_CONTAINER_BUF_SIZE = (NUM_STRIP_ROW*MAX_NUM_CLUSTERS + 4096);
 
   /**
    * @brief The StripClusters struct contains all xAOD::StripCluster data members
@@ -184,20 +184,19 @@ namespace EFTrackingTransient
   struct SpacePointOutput
   {
 
-  unsigned int *spIdHash;
-  float *spGlobalPosition;
-  float *spRadius;
-  float *spVarianceR;
-  float *spVarianceZ;
-  int *spMeasurementIndexes;
-  unsigned int *spElementIdList;
-  float *spTopHalfStripLength;
-  float *spBottomHalfStripLength;
-  float *spTopStripDirection;
-  float *spBottomStripDirection;
-  float *spStripCenterDistance;
-  float *spTopStripCenter;
-};
+    unsigned int *spIdHash;
+    float *spGlobalPosition;
+    float *spRadius;
+    float *spVarianceR;
+    float *spVarianceZ;
+    int *spMeasurementIndexes;
+    float *spTopHalfStripLength;
+    float *spBottomHalfStripLength;
+    float *spTopStripDirection;
+    float *spBottomStripDirection;
+    float *spStripCenterDistance;
+    float *spTopStripCenter;
+  };
 
   /**
    * @brief The StripClusterAuxInput struct is used to simplify the creaction of
