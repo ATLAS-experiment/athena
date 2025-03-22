@@ -53,6 +53,11 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
                     ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map'),]
         acc.merge(SGInputLoaderCfg(self.flags, Load=sgil_load))
 
+    ViewDataVerifier.DataObjects |= {
+      ('InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkPixelDetectorElementStatus' ),
+      ('InDet::SiDetectorElementStatus' , 'StoreGateSvc+ITkStripDetectorElementStatus' ),
+    }
+
     acc.addEventAlgo(ViewDataVerifier)
     return acc
 
@@ -71,9 +76,18 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
     #Clusterisation
     from ActsConfig.ActsClusterizationConfig import ActsPixelClusterizationAlgCfg,ActsStripClusterizationAlgCfg,ActsPixelClusterPreparationAlgCfg,ActsStripClusterPreparationAlgCfg
 
-    acc.merge(ActsPixelClusterizationAlgCfg(self.flags, name="ActsPixelClusterizationAlg_"+self.signature,useCache=True, RoIs=self.rois,ClustersKey="ITkPixelClusters_"+self.signature))
-    acc.merge(ActsStripClusterizationAlgCfg(self.flags, name="ActsStripClusterizationAlg_"+self.signature,useCache=True, RoIs=self.rois,ClustersKey="ITkStripClusters_"+self.signature))
+    acc.merge(ActsPixelClusterizationAlgCfg(self.flags, 
+                                            name="ActsPixelClusterizationAlg_"+self.signature,
+                                            useCache=True, 
+                                            RoIs=self.rois,
+                                            ClustersKey="ITkPixelClusters_"+self.signature))
+    acc.merge(ActsStripClusterizationAlgCfg(self.flags, 
+                                            name="ActsStripClusterizationAlg_"+self.signature,
+                                            useCache=True, 
+                                            RoIs=self.rois,
+                                            ClustersKey="ITkStripClusters_"+self.signature))
 
+    
     if self.flags.Acts.useCache:
       acc.merge(ActsPixelClusterPreparationAlgCfg(self.flags, "ActsPixelClusterViewFiller_"+self.signature, True,OutputCollection="ITkPixelClusters_Cached", InputIDC="ActsPixelClustersCache", RoIs=self.rois))
       acc.merge(ActsStripClusterPreparationAlgCfg(self.flags, "ActsStripClusterViewFiller_"+self.signature, True,OutputCollection="ITkStripClusters_Cached", InputIDC="ActsStripClustersCache", RoIs=self.rois))
@@ -89,7 +103,9 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
             name = viewVerifier + "_" + self.signature,
             DataObjects = {
                 ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map'),
-                ( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' )
+                ( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' ),
+                ( 'InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkPixelDetectorElementStatus' ),
+                ( 'InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkStripDetectorElementStatus' ),
             }
         )
 
