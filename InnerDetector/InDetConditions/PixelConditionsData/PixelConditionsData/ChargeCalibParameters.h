@@ -39,7 +39,7 @@ namespace PixelChargeCalib{
     }
     //return Charge, given time-over-Threshold
     float Q(float tot) const{
-      if (tot >= maxToT)  return 1e5;    
+      if (tot >= maxToT)  return 1.81e5;    
       if (std::fabs(A) != 0.0f && std::fabs(tot / A - 1.f) != 0.0f) {
         return  (C * tot / A - E) / (1.f - tot / A);
       }
