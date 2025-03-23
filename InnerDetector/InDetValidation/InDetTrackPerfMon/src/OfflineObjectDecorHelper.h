@@ -82,11 +82,6 @@ namespace IDTPM {
   inline const xAOD::TruthParticle* getLinkedTruth(
       const xAOD::TruthParticle&, const float ) { return nullptr; }; // dummy - to avoid compilation errors
 
-  bool isFakeTruth( const xAOD::TrackParticle& track,
-                    const float truthProbCut=0., const bool unlinkedAsFakes=false );
-  inline bool isFakeTruth( const xAOD::TruthParticle&,
-                           const float, const bool ) { return false; }; // dummy - to avoid compilation errors
-
   bool isReconstructable( const xAOD::TruthParticle& truth,
                           const std::vector< unsigned int >& minSilHits,
                           const std::vector< float >& etaBins);
