@@ -58,6 +58,7 @@ Reco_tf.py --CA \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
         flags.Tracking.useITkFTF=True; \
         flags.Tracking.doITkFastTracking=True; \
+        flags.Tracking.ITkFTFPass.useTracklets=True; \
         flags.Detector.GeometryHGTD=False; \
         flags.Trigger.InDetTracking.doGPU=True"
 
