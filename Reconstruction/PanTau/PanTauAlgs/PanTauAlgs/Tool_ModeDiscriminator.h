@@ -59,7 +59,6 @@ namespace PanTau {
     std::vector<std::unique_ptr<MVAUtils::BDT> > m_MVABDT_List;
         
     std::vector<double>                         m_BinEdges_Pt;
-    std::string                                 m_ReaderOption;
     std::string                                 m_MethodName;
     std::vector<std::string>                    m_List_BDTVariableNames;
     std::vector<double>                         m_List_BDTVariableDefaultValues;

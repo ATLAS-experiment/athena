@@ -60,17 +60,13 @@ class InformationHandler:
     def setupInfo_Int(self, flags):
         self.m_Infos_Int["TauConstituents_UsePionMass"]     = int(flags.Tau.PanTau.TauConstituents_UsePionMass)
         self.m_Infos_Int["FeatureExtractor_UseEmptySeeds"]  = int(flags.Tau.PanTau.FeatureExtractor_UseEmptySeeds)
-        self.m_Infos_Int["TauConstituents_eflowRec_UseMomentumAsEnergy"]  = int(flags.Tau.PanTau.TauConstituents_eflowRec_UseMomentumAsEnergy)
-        self.m_Infos_Int["TauConstituents_UseShrinkingCone"]              = int(flags.Tau.PanTau.TauConstituents_UseShrinkingCone)
         #nothing to do here yet (no integer infos...)
 
 
     def setupInfo_Double(self, flags):
-        self.m_Infos_Double["eflowRec_Assoc_DeltaR"]                            = flags.Tau.PanTau.eflowRec_Assoc_DeltaR
         self.m_Infos_Double["TauConstituents_Types_DeltaRCore"]                 = flags.Tau.PanTau.TauConstituents_Types_DeltaRCore
         self.m_Infos_Double["TauConstituents_MaxEta"]                           = flags.Tau.PanTau.TauConstituents_MaxEta
         self.m_Infos_Double["TauConstituents_PreselectionMinEnergy"]            = flags.Tau.PanTau.TauConstituents_PreselectionMinEnergy
-        self.m_Infos_Double["TauConstituents_eflowRec_BDTThreshold_Pi0Neut"]    = flags.Tau.PanTau.TauConstituents_eflowRec_BDTThreshold_Pi0Neut
         
         self.m_Infos_Double["DecayModeDeterminator_BDTCutValue_R10X_CellBased"] = flags.Tau.PanTau.DecayModeDeterminator_BDTCutValue_R10X_CellBased
         self.m_Infos_Double["DecayModeDeterminator_BDTCutValue_R11X_CellBased"] = flags.Tau.PanTau.DecayModeDeterminator_BDTCutValue_R11X_CellBased
@@ -79,20 +75,9 @@ class InformationHandler:
         self.m_Infos_Double["DecayModeDeterminator_BDTCutValue_R30X_CellBased"] = flags.Tau.PanTau.DecayModeDeterminator_BDTCutValue_R30X_CellBased
         self.m_Infos_Double["DecayModeDeterminator_BDTCutValue_R3XX_CellBased"] = flags.Tau.PanTau.DecayModeDeterminator_BDTCutValue_R3XX_CellBased
 
-        self.m_Infos_Double["DecayModeDeterminator_BDTCutValue_R10X_eflowRec"]  = flags.Tau.PanTau.DecayModeDeterminator_BDTCutValue_R10X_eflowRec
-        self.m_Infos_Double["DecayModeDeterminator_BDTCutValue_R11X_eflowRec"]  = flags.Tau.PanTau.DecayModeDeterminator_BDTCutValue_R11X_eflowRec
-        self.m_Infos_Double["DecayModeDeterminator_BDTCutValue_R110_eflowRec"]  = flags.Tau.PanTau.DecayModeDeterminator_BDTCutValue_R110_eflowRec
-        self.m_Infos_Double["DecayModeDeterminator_BDTCutValue_R1XX_eflowRec"]  = flags.Tau.PanTau.DecayModeDeterminator_BDTCutValue_R1XX_eflowRec
-        self.m_Infos_Double["DecayModeDeterminator_BDTCutValue_R30X_eflowRec"]  = flags.Tau.PanTau.DecayModeDeterminator_BDTCutValue_R30X_eflowRec
-        self.m_Infos_Double["DecayModeDeterminator_BDTCutValue_R3XX_eflowRec"]  = flags.Tau.PanTau.DecayModeDeterminator_BDTCutValue_R3XX_eflowRec
-
-
     def setupInfo_String(self, flags):
         self.m_Infos_String["Name_TauRecContainer"]             = flags.Tau.PanTau.Name_TauRecContainer
-        self.m_Infos_String["Name_eflowRecContainer"]           = flags.Tau.PanTau.Name_eflowRecContainer
         self.m_Infos_String["Name_TrackParticleContainer"]      = flags.Tau.PanTau.Name_TrackParticleContainer
-        self.m_Infos_String["Name_PanTauSeedsContainer"]        = flags.Tau.PanTau.Name_PanTauSeedsContainer
-        self.m_Infos_String["ModeDiscriminator_ReaderOption"]   = flags.Tau.PanTau.ModeDiscriminator_ReaderOption
         self.m_Infos_String["ModeDiscriminator_TMVAMethod"]     = flags.Tau.PanTau.ModeDiscriminator_TMVAMethod
 
 
@@ -105,21 +90,13 @@ class InformationHandler:
         self.m_Infos_VecDouble["TauConstituents_Selection_OutChrg_EtaBinned_EtCut"]  = flags.Tau.PanTau.TauConstituents_Selection_OutChrg_EtaBinned_EtCut
         self.m_Infos_VecDouble["TauConstituents_Selection_NeutLowA_EtaBinned_EtCut"] = flags.Tau.PanTau.TauConstituents_Selection_NeutLowA_EtaBinned_EtCut
         self.m_Infos_VecDouble["TauConstituents_Selection_NeutLowB_EtaBinned_EtCut"] = flags.Tau.PanTau.TauConstituents_Selection_NeutLowB_EtaBinned_EtCut
-        self.m_Infos_VecDouble["eflowRec_Selection_Pi0Neut_EtaBinned_EtCut_1prong"]  = flags.Tau.PanTau.eflowRec_Selection_Pi0Neut_EtaBinned_EtCut_1prong
-        self.m_Infos_VecDouble["eflowRec_Selection_Pi0Neut_EtaBinned_EtCut_3prong"]  = flags.Tau.PanTau.eflowRec_Selection_Pi0Neut_EtaBinned_EtCut_3prong
         self.m_Infos_VecDouble["CellBased_BinEdges_Eta"]                             = flags.Tau.PanTau.CellBased_BinEdges_Eta
         self.m_Infos_VecDouble["CellBased_EtaBinned_Pi0MVACut_1prong"]               = flags.Tau.PanTau.CellBased_EtaBinned_Pi0MVACut_1prong
         self.m_Infos_VecDouble["CellBased_EtaBinned_Pi0MVACut_3prong"]               = flags.Tau.PanTau.CellBased_EtaBinned_Pi0MVACut_3prong
-        self.m_Infos_VecDouble["eflowRec_BinEdges_Eta"]                              = flags.Tau.PanTau.eflowRec_BinEdges_Eta
-        self.m_Infos_VecDouble["eflowRec_EtaBinned_Pi0MVACut_1prong"]                = flags.Tau.PanTau.eflowRec_EtaBinned_Pi0MVACut_1prong
-        self.m_Infos_VecDouble["eflowRec_EtaBinned_Pi0MVACut_3prong"]                = flags.Tau.PanTau.eflowRec_EtaBinned_Pi0MVACut_3prong
         self.m_Infos_VecDouble["ModeDiscriminator_BinEdges_Pt"]                      = flags.Tau.PanTau.ModeDiscriminator_BinEdges_Pt
 
 
     def setupInfo_VecString(self, flags):
-        self.m_Infos_VecString["ModeDiscriminator_BDTVariableNames_eflowRec_1p0n_vs_1p1n"] = flags.Tau.PanTau.ModeDiscriminator_BDTVariableNames_eflowRec_1p0n_vs_1p1n
-        self.m_Infos_VecString["ModeDiscriminator_BDTVariableNames_eflowRec_1p1n_vs_1pXn"] = flags.Tau.PanTau.ModeDiscriminator_BDTVariableNames_eflowRec_1p1n_vs_1pXn
-        self.m_Infos_VecString["ModeDiscriminator_BDTVariableNames_eflowRec_3p0n_vs_3pXn"] = flags.Tau.PanTau.ModeDiscriminator_BDTVariableNames_eflowRec_3p0n_vs_3pXn
         self.m_Infos_VecString["ModeDiscriminator_BDTVariableNames_CellBased_1p0n_vs_1p1n"] = flags.Tau.PanTau.ModeDiscriminator_BDTVariableNames_CellBased_1p0n_vs_1p1n
         self.m_Infos_VecString["ModeDiscriminator_BDTVariableNames_CellBased_1p1n_vs_1pXn"] = flags.Tau.PanTau.ModeDiscriminator_BDTVariableNames_CellBased_1p1n_vs_1pXn
         self.m_Infos_VecString["ModeDiscriminator_BDTVariableNames_CellBased_3p0n_vs_3pXn"] = flags.Tau.PanTau.ModeDiscriminator_BDTVariableNames_CellBased_3p0n_vs_3pXn

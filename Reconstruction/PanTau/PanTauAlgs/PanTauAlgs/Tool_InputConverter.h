@@ -54,7 +54,6 @@ namespace PanTau {
         virtual bool passesPreselectionEnergy(double energy) const;
         
         int     m_Config_UsePionMass = 0;
-        int     m_Config_TauConstituents_UseShrinkingCone = 0;
         
         double  m_Config_TauConstituents_Types_DeltaRCore = 0.0;
         double  m_Config_TauConstituents_PreselectionMinEnergy = 0.0;

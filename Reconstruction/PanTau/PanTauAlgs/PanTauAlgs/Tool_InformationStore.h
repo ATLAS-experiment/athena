@@ -60,7 +60,6 @@ namespace PanTau {
         
     //!other information
     // input containers
-    std::string  m_Name_Container_eflowRec;
     std::string  m_Name_Container_TauRec;
     std::string  m_Name_Container_Tracks;
 
