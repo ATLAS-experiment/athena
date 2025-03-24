@@ -247,7 +247,7 @@ varToRemoveFromAODSLIM = [
     ]
 # Detailed NNJvt input variables
 for var in ['RPtTrkPt500', 'DTrackWidthPt1000', 'DNumTrkPt1000', 'DRPtTrkPt500', 'SumPtTrkOrderedTrackWidthPt1000', 'SumPtTrkOrderedNumTrkPt1000']:
-    varToRemoveFromAODSLIM.append((var, 'HLT_AntiKt4EMPFlowJets_subresgscIS_ftfAux', ''))
+    varToRemoveFromAODSLIM.append((var, 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftfAux', 'HLT_AntiKt4EMTopoJets_subresjesgscIS_ftfAux'))
 
 
 

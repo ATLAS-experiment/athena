@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileCalibBlobObjs/TileBchDecoder.h"
@@ -105,6 +105,7 @@ TileBchDecoder::init_BitPat_ofl01()
   m_bitToPrbAdc[12] = TileBchPrbs::SevereStuckBit;
   m_bitToPrbAdc[13] = TileBchPrbs::SevereDataCorruption;
   m_bitToPrbAdc[14] = TileBchPrbs::IgnoredByDQV;
+  m_bitToPrbAdc[15] = TileBchPrbs::HalfGain;
 
   //=== initialize problem to word/bit map
   initPrbToBit();

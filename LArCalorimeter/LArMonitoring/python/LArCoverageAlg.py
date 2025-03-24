@@ -58,7 +58,7 @@ def LArCoverageConfigCore(helper, algoinstance,flags):
 
     #Configure the CaloNoise
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
-    helper.resobj.merge(CaloNoiseCondAlgCfg(flags, noisetype="electronicNoise"))
+    helper.resobj.merge(CaloNoiseCondAlgCfg(flags, noisetype="electronicNoiseNoHV"))
 
     #-- caloNoise groups --
     caloNoiseToolArrayEM = helper.addArray([nLayers],larCoverageAlg,caloNoiseToolGroupName+"EM",topPath='/')

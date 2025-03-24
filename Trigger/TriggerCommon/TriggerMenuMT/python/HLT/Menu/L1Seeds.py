@@ -116,7 +116,7 @@ def getEBnoL1PSSeed(l1items, l1seedname):
             'L1_eEM24L_3eEM12L',
             'L1_4jJ40', 'L1_jJ160', 'L1_jXE100', 'L1_2jJ40_jXE110',
             'L1_eTAU140',
-            'L1_MU8F_cTAU30M', 'L1_MU14FCH', 'L1_MU18VFCH', 'L1_MU10BOM',
+            'L1_cTAU30M_3DR35-MU8F-eTAU30', 'L1_MU14FCH', 'L1_MU18VFCH', 'L1_MU10BOM',
             'L1_5jJ40p0ETA25',
             'L1_3MU5VF','L1_MU8F_2jJ40_jJ50',
             'L1_jJ55p0ETA23_2jJ40p30ETA49', 'L1_jJ125p30ETA49', 'L1_jJ80p0ETA25_2jJ55_jJ50p30ETA49',
@@ -189,7 +189,7 @@ def getL1BKeePrimary():
         'L1_MU14FCH',
         'L1_MU8F_2MU5VF',
         'L1_MU8F_eTAU30M', # legacy 'L1_MU8F_TAU20IM'
-        'L1_MU8F_cTAU30M',
+        'L1_cTAU30M_3DR35-MU8F-eTAU30',
         'L1_MU8F_eTAU20M_3jJ30', # legacy 'L1_MU8F_TAU12IM_3J12'
         'L1_MU8F_cTAU20M_3jJ30',
         'L1_jXE100', # legacy 'L1_XE50',

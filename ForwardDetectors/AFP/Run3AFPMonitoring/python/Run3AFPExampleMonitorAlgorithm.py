@@ -234,10 +234,10 @@ if __name__=='__main__':
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    #flags.Input.Files = ['/eos/user/v/vlysenko/DQ/testing/data24_13p6TeV/data24_13p6TeV.00484780.physics_Main.merge.AOD.f1514_m2248._lb0793._0003.1']
-    flags.Input.Files = ['/eos/user/l/lvicenik/afp_data/data24_13p6TeV/data24_13p6TeV.00484780.physics_Main.merge.AOD.f1514_m2248._lb0793._0003.1']
+    flags.Input.Files = ['/eos/user/v/vlysenko/DQ/testing/data24_13p6TeV/data24_13p6TeV.00484780.physics_Main.merge.AOD.f1514_m2248._lb0793._0003.1']
+    #flags.Input.Files = ['/eos/user/l/lvicenik/afp_data/data24_13p6TeV/data24_13p6TeV.00484780.physics_Main.merge.AOD.f1514_m2248._lb0793._0003.1']
     flags.Input.isMC = False
-    flags.Output.HISTFileName = 'clean-AFPTest-24.root'
+    flags.Output.HISTFileName = 'dqm-AFPTest-24.root'
     
 
     flags.Concurrency.NumThreads=10

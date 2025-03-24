@@ -60,7 +60,7 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
         throw dqm_core::BadConfig( ERS_HERE, name, "does not inherit from TH1" );
     }
 
-    const double minstat = dqm_algorithms::tools::GetFirstFromMap( "MinStat", config.getParameters(), -1);
+    const double minstat = dqm_algorithms::tools::GetFirstFromMap( "MinStat", config.getParameters(), 100);
     const double ignoreBelow = dqm_algorithms::tools::GetFirstFromMap( "IgnoreBelow", config.getParameters(), 0);
     const double probThreshold = dqm_algorithms::tools::GetFirstFromMap( "ProbThreshold", config.getParameters(), 0.01);
     const int publishDetail = dqm_algorithms::tools::GetFirstFromMap( "PublishDetail", config.getParameters(), 0x10/*publish status code - since saw some inconsistencies in webdisplay on local testing. Should plan to set to 0 in future*/);
@@ -102,12 +102,15 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
 
     if ( histogram->GetEntries() < minstat ) {
         dqm_core::Result *result = new dqm_core::Result(dqm_core::Result::Undefined);
+        result->status_ = dqm_core::Result::Yellow; // will treat almost-empty histograms as a warning .... shifter should think if this is expected
         result->tags_["InsufficientEntries"] = histogram->GetEntries();
         return result;
     }
 
 
     std::vector<int> range=dqm_algorithms::tools::GetBinRange(histogram, config.getParameters());
+
+    std::set<int> filledRows; // will only look for dead strips once all rows are filled
 
     // compute medians, means, variances, k-test probabilities
     std::vector<double> stripsMedian;
@@ -122,6 +125,7 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
         for ( int j = range[2]; j <= range[3]; ++j ) {
             if (histogram->GetBinContent(i,j) < ignoreBelow) continue;
             float binvalue = histogram->GetBinContent(i,j);
+            if(binvalue>0) filledRows.insert(j); // used to veto running deadstrip tests on sparsely populated plots
             onestrip.push_back(binvalue);
             stripSum += binvalue;
             //stripSum2 += binvalue*binvalue;
@@ -140,8 +144,15 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
         // also compute Kolmogorov test probability vs a same-size dataset generated from a gaussian with the strip mean and variance
         if(stripsVariance.back() > 0) {
             std::vector<double> stripRef;
-            for (size_t i = 0; i < onestrip.size(); i++)
-                stripRef.push_back(r.Gaus(stripsAvg.back(), std::sqrt(stripsVariance.back())));
+            for (size_t i = 0; i < onestrip.size(); i++) {
+                // use possion for variances less than 100 (corresponding ~ to averages fewer than 100)
+                // otherwise switch to gaussian
+                double nextVal = 0;
+                do {
+                    nextVal = (stripsVariance.back()>=100) ? r.Gaus(stripsAvg.back(), std::sqrt(stripsVariance.back())) : r.Poisson(stripsAvg.back());
+                } while(nextVal<ignoreBelow);
+                stripRef.push_back(nextVal);
+            }
             std::sort(stripRef.begin(),stripRef.end());
             stripsProb.push_back(  TMath::KolmogorovTest(onestrip.size(),&onestrip[0],stripRef.size(),&stripRef[0],"")  );
         } else {
@@ -164,10 +175,12 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
     }
 
 
+    bool testDeadStrips = (filledRows.size() == size_t(range[3]-range[2]+1));
+
 
     std::map<std::string,int> counts;
     // ensure all counts defined, even if will end up being 0
-    counts["NDeadStrip"]=0;
+    counts["NDeadStrip"]= (testDeadStrips) ? 0 : -1; // use -1 to flag not running this test
     counts["NDead"]=0;
     counts["NWrongKnown"]=0;
     counts["NConsecUnlikelyStrip"]=0;
@@ -178,12 +191,16 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
     // publish deadstrips (whole strip is 0), and unlikely strips
     int nUnlikelyStrips = 0;
     for(size_t i = 0;i<stripsVariance.size();i++) {
-        if (stripsN.at(i) > 0 && stripsVariance.at(i) == 0 && stripsAvg.at(i) == 0) {
-            result->tags_[TString::Format("_DeadStrip%02ld", i+1).Data()] = histogram->GetXaxis()->GetBinCenter(range[0] + i);
-            counts["NDeadStrip"]++;
+        if (testDeadStrips && stripsVariance.at(i) == 0 && stripsAvg.at(i) == 0) {
+            // only dead if at least one of the neighbour strips has enough entries in it
+            if( (i>0 && (stripsAvg.at(i-1)*stripsN.at(i-1))>=minstat) || (i<stripsVariance.size()-1 && (stripsAvg.at(i+1)*stripsN.at(i+1))>=minstat)) {
+                result->tags_[TString::Format("_DeadStrip%02ld", i+1).Data()] = histogram->GetXaxis()->GetBinCenter(range[0] + i);
+                counts["NDeadStrip"]++;
+            }
+
         }
         if (stripsProb.at(i) < probThreshold) {
-            result->tags_[TString::Format("_UnlikelyStrip%02ld", i+1).Data()] = stripsProb.at(i);
+            result->tags_[TString::Format("_UnlikelyStrip%02ld", i+1).Data()] = -log(stripsProb.at(i));
             nUnlikelyStrips++;
             if(nUnlikelyStrips > counts["NConsecUnlikelyStrip"]) counts["NConsecUnlikelyStrip"] = nUnlikelyStrips;
         } else {
@@ -220,7 +237,7 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
             // loop through cuts, assign bin to one of the ranges, and report if not a known bin
             double classCut = 0;
             for(auto& [cut,k] : orderedCuts) {
-                if( (cut < 0 && bin.m_outstandingRatio < cut) || (cut > 0 && bin.m_outstandingRatio > cut) ) {
+                if( (cut < 0 && bin.m_outstandingRatio < cut) || (cut > 0 && bin.m_outstandingRatio > cut && bin.m_value>=minstat) ) {
                     classCut = cut;
                     if(knownBins[k].find({bin.m_ix,bin.m_iy})==knownBins[k].end()) {
                         result->tags_[TString::Format("_%s(%d,%d)", k.c_str(), bin.m_ix,
@@ -291,10 +308,10 @@ void dqm_algorithms::L1Calo_BinsDiffFromStripMedian::printDescription(std::ostre
   out<<"L1Calo_BinsDiffFromStripMedian: Calculates strip median and then find out bins which are aliens "<<std::endl;
   out<<"Specify cuts with parameters named <cutName>Cut will generate a result of form Nxxx" << std::endl;
   out<<"Specify known anomalies with Known<cutName> string argument - note any leading non-numeric char will be stripped" << std::endl;
-  out<<"Special results are: NDead (number of 0 bins below most negative cut), NDeadStrip (strips that are all 0), NConsecUnlikelyStrip (most consecutive strips that are below ProbThreshold)" << std::endl;
+  out<<"Special results are: NDead (number of 0 bins below most negative cut), NDeadStrip (strips that are all 0 .. will be -1 if not got an entry in every row of plot), NConsecUnlikelyStrip (most consecutive strips that are below ProbThreshold)" << std::endl;
   out<<"Thresholds can be set on any of the results\n"<<std::endl;
   
-  out<<"Optional Parameter: MinStat: Minimum histogram statistics needed to perform Algorithm"<<std::endl;
+  out<<"Optional Parameter: MinStat: Minimum histogram statistics needed to perform Algorithm, also min entries for warm/hot spots (cuts > 0), and min entries in neighbour strip to declare a strip dead"<<std::endl;
   out<<"Optional Parameter: IgnoreBelow: values below which the bins wont be considered (default 0)"<<std::endl;
   out<<"Optional Parameter: ProbThreshold: cutoff for strip k-test probabilities for strip to be considered unlikely (default 0.05)"<<std::endl;
   out<<"Optional Parameter: PublishDetail: Bitmask of what extra info to publish about strips. Starting with MSB: AlgStatusCode,Zeros,Noise,Prob,StdDev,Median (default 000000)"<<std::endl;

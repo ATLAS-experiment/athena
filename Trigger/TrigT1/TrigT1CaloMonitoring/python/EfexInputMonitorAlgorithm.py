@@ -95,7 +95,7 @@ def EfexInputMonitoringConfig(flags):
     for layer in ["ecal","hcal"]:
         helper.defineHistogram(f'TowerEta,TowerPhi;h_dataTowers_{layer}_hot_EtaPhiMap',title=f'{layer.upper()} SuperCells >= 500MeV;#eta;#phi',
                                cutmask="AboveCut",
-                               path="Expert/Inputs/eFEX",
+                               paths=["Expert/Inputs/eFEX","Shifter/Inputs/eFEX"],
                                hanConfig={"algorithm":f"Efex_{layer}_hot_etaPhiMapOutliers","description":f"Check <a href='./detail/h_dataTowers_{layer}_hot_posVsLBN'>detail plot</a> to get timeseries for each location"},
                                fillGroup=layer,
                                type='TH2I',

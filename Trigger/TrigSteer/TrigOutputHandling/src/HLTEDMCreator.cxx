@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -263,7 +263,7 @@ StatusCode  HLTEDMCreator::viewsMerge( ViewContainer const& views, const SG::Rea
 }
 
  
-StatusCode HLTEDMCreator::fixLinks() const {
+StatusCode HLTEDMCreator::fixLinks( EventContext const& context ) const {
   if ( m_fixLinks.value().empty() ) {
     ATH_MSG_DEBUG("fixLinks: No collections defined for this tool");
     return StatusCode::SUCCESS;
@@ -273,6 +273,11 @@ StatusCode HLTEDMCreator::fixLinks() const {
 
   // Do the remapping
   int writeHandleArrayIndex = -1;
+
+  // Create a HandleKey that we can re-use during the loop (slightly better performance)
+  SG::ReadHandleKey<xAOD::TrigCompositeContainer> readHandleKey("temp");
+  ATH_CHECK( readHandleKey.initialize() );
+
   for ( const auto& writeHandleKey: m_TrigCompositeContainer ) {
     // Check if we are re-mapping this handle
     const bool doFixLinks = std::any_of(m_fixLinks.begin(), m_fixLinks.end(), [&](const std::string& s) { return s == writeHandleKey.key(); } );
@@ -285,17 +290,21 @@ StatusCode HLTEDMCreator::fixLinks() const {
     ++writeHandleArrayIndex;
 
     ATH_MSG_DEBUG("Fixing links: confirm collection is there: " << writeHandleKey.key() << ", write handle array index: " << writeHandleArrayIndex);
-    SG::ReadHandle<xAOD::TrigCompositeContainer> readHandle( writeHandleKey.key() );
+    // Update key name
+    readHandleKey = writeHandleKey.key();
+    auto readHandle = SG::makeHandle(readHandleKey, context);
     if ( not readHandle.isValid() ) { // object missing, this is now an error as we should have literally just created it
-      ATH_MSG_ERROR("  Collection is not present. " << writeHandleKey.key() << " should have been created by createIfMissing.");
+      ATH_MSG_ERROR("Collection is not present. " << readHandleKey.key() << " should have been created by createIfMissing.");
       return StatusCode::FAILURE;
     }
 
     ATH_MSG_DEBUG("Collection exists with size " << readHandle->size() << " Decision objects" );
     ATH_MSG_DEBUG("Adding decorations: " << m_remapLinkColKeys.at( writeHandleArrayIndex ).key() << " and " << m_remapLinkColIndices.at( writeHandleArrayIndex ).key() );
     
-    SG::WriteDecorHandle<xAOD::TrigCompositeContainer, std::vector<SG::sgkey_t> > keyDecor( m_remapLinkColKeys.at( writeHandleArrayIndex ) );
-    SG::WriteDecorHandle<xAOD::TrigCompositeContainer, std::vector<xAOD::TrigComposite::index_type> > indexDecor( m_remapLinkColIndices.at( writeHandleArrayIndex ) );
+    SG::WriteDecorHandle<xAOD::TrigCompositeContainer, std::vector<SG::sgkey_t> >
+      keyDecor(m_remapLinkColKeys.at( writeHandleArrayIndex ), context );
+    SG::WriteDecorHandle<xAOD::TrigCompositeContainer, std::vector<xAOD::TrigComposite::index_type> >
+      indexDecor( m_remapLinkColIndices.at( writeHandleArrayIndex ), context );
 
     // Examine each input TC
     int decisionObjectIndex = -1;
@@ -349,15 +358,26 @@ StatusCode HLTEDMCreator::fixLinks() const {
 template<typename T, typename STORE, typename G, typename M>
 StatusCode HLTEDMCreator::createIfMissing( const EventContext& context, const ConstHandlesGroup<T>& handles, G& generator, M merger ) const {
 
+  // Declare a ReadHandleKey that we can re-use during the loop for reading.
+  SG::ReadHandleKey<T> rhk("temp");
+
+  // Same for the Aux store. If there is none (void) this would not compile
+  // so we just define a dummy RHK, which will never be used, of type T again.
+  using AuxType = std::conditional_t<std::is_void_v<STORE>, T, STORE>;
+  SG::ReadHandleKey<AuxType> rhkAux("temp");
+
+  ATH_CHECK( rhk.initialize() && rhkAux.initialize() );
+
   for (size_t i = 0; i < handles.out.size(); ++i) {
-    SG::WriteHandleKey<T> writeHandleKey = handles.out.at(i);
+    const SG::WriteHandleKey<T>& whk = handles.out.at(i);
+    rhk = whk.key();  // set the RHK to the same key as the WHK
 
     if ( handles.views.empty() ) { // no merging will be needed
       // Note: This is correct. We are testing if we can read, and if we cannot then we write.
       // What we write will either be a dummy (empty) container, or be populated from N in-View collections.
-      SG::ReadHandle<T> readHandle( writeHandleKey.key() );
+      auto readHandle = SG::makeHandle( rhk, context );
       if ( readHandle.isValid() ) {
-        ATH_MSG_VERBOSE( writeHandleKey.key() << " is already present" );
+        ATH_MSG_VERBOSE( rhk.key() << " is already present" );
         generator.create(false, false);
 
         // For xAOD types we need to ensure there is an Aux store. This can happen if the
@@ -365,15 +385,17 @@ StatusCode HLTEDMCreator::createIfMissing( const EventContext& context, const Co
         // The TriggerEDMDeserialiserAlg will already have created a DataLink to the Aux store
         // for the interface container. Now we just need to create an empty Aux store.
         if constexpr (!std::is_void_v<STORE>) {
-          SG::ReadHandle<STORE> readAuxHandle( writeHandleKey.key() + "Aux." );
+          rhkAux = rhk.key() + "Aux.";
+          auto readAuxHandle = SG::makeHandle(rhkAux, context);
           if ( !readAuxHandle.isValid() ) {
-            SG::WriteHandle<STORE> writeAuxHandle( writeHandleKey.key() + "Aux." );
-            ATH_MSG_DEBUG("Creating missing Aux store for " << writeHandleKey.key());
+            // This is rare so we just create a WH as needed:
+            SG::WriteHandle<STORE> writeAuxHandle( rhkAux.key(), context );
+            ATH_MSG_DEBUG("Creating missing Aux store for " << rhk.key());
             ATH_CHECK( writeAuxHandle.record(std::make_unique<STORE>()) );
           }
         }
       } else {
-        ATH_MSG_DEBUG( writeHandleKey.key() << " is missing, creating it" );
+        ATH_MSG_DEBUG( rhk.key() << " is missing, creating it" );
         generator.create(true, true);
       }
 
@@ -388,28 +410,27 @@ StatusCode HLTEDMCreator::createIfMissing( const EventContext& context, const Co
       if ( handles.out.size() == 1  ) {
       	generator.create(true, true);
       } else  {
-        const bool doCreate = i == 0 or handles.out.at(i-1).key() != handles.out.at(i).key();
-        const bool doRecord = i == handles.out.size()-1 or handles.out.at(i+1).key() != handles.out.at(i).key();
+        const bool doCreate = i == 0 or handles.out.at(i-1).key() != whk.key();
+        const bool doRecord = i == handles.out.size()-1 or handles.out.at(i+1).key() != whk.key();
         ATH_MSG_DEBUG( "Instructing generator " <<  (doCreate ? "to" : "NOT TO") <<  " create collection and " << (doRecord ? "to" : "NOT TO") << " record collection in this iteration");
         generator.create(doCreate, doRecord);
       }
 
-      SG::ReadHandleKey<ViewContainer> viewsReadHandleKey = handles.views.at(i);
+      const SG::ReadHandleKey<ViewContainer>& viewsReadHandleKey = handles.views.at(i);
       ATH_MSG_DEBUG("Will be trying to merge from the " << viewsReadHandleKey.key() << " view container into that output");
 
       auto viewsHandle = SG::makeHandle( viewsReadHandleKey, context );
       if ( viewsHandle.isValid() ) {
-        SG::ReadHandleKey<T> inViewReadHandleKey = handles.in.at(i);
+        const SG::ReadHandleKey<T>& inViewReadHandleKey = handles.in.at(i);
         ATH_MSG_DEBUG("Will be merging from " << viewsHandle->size() << " views using in-view key " << inViewReadHandleKey.key() );
         ATH_CHECK( (this->*merger)( *viewsHandle, inViewReadHandleKey , context, *generator.data.get() ) );
       } else {
-        ATH_MSG_DEBUG("Views " << viewsReadHandleKey.key() << " are missing. Will leave " << writeHandleKey.key() << " output collection empty.");
+        ATH_MSG_DEBUG("Views " << viewsReadHandleKey.key() << " are missing. Will leave " << whk.key() << " output collection empty.");
       }
 
       // Also consider probe variants of each EventView.
       // Not every container will have a corresponding set of (typically) lower-pT probe ROIs, but it's safer to always test.
-      static const std::string probe_suffix = "_probe";
-      const std::string viewsReadHandleKeyProbe = viewsReadHandleKey.key() + probe_suffix;
+      const std::string viewsReadHandleKeyProbe = viewsReadHandleKey.key() + "_probe";
       ATH_MSG_VERBOSE("Will try to merge from the " << viewsReadHandleKeyProbe <<  " view container into that output");
 
       // Falling back to direct SG access here to avoid uninitiated key errors. This is safe to do in the context of the Trigger ControlFlow.
@@ -419,7 +440,7 @@ StatusCode HLTEDMCreator::createIfMissing( const EventContext& context, const Co
         ATH_CHECK(evtStore()->retrieve(viewsContainer_probe, viewsReadHandleKeyProbe));
       }
       if ( viewsContainer_probe ) {
-        SG::ReadHandleKey<T> inViewReadHandleKey = handles.in.at(i);
+        const SG::ReadHandleKey<T>& inViewReadHandleKey = handles.in.at(i);
         ATH_MSG_DEBUG("Will be merging from " << viewsContainer_probe->size() << " probe views using in-view key " << inViewReadHandleKey.key() );
         ATH_CHECK( (this->*merger)( *viewsContainer_probe, inViewReadHandleKey , context, *generator.data.get() ) );
       } else {
@@ -428,7 +449,7 @@ StatusCode HLTEDMCreator::createIfMissing( const EventContext& context, const Co
 
     }
 
-    auto writeHandle = SG::makeHandle( writeHandleKey, context );
+    auto writeHandle = SG::makeHandle( whk, context );
     ATH_CHECK( generator.record( writeHandle ) );
   }
 
@@ -505,7 +526,7 @@ StatusCode HLTEDMCreator::createOutput(const EventContext& context) const {
   CREATE_XAOD( MuonRoIContainer, MuonRoIAuxContainer );
 
   // After view collections are merged, need to update collection links
-  ATH_CHECK( fixLinks() );
+  ATH_CHECK( fixLinks(context) );
   
 #undef CREATE_XAOD
 

@@ -95,7 +95,7 @@ parser.add_argument('--lumiBlock',default=None,help="specify to select a lumiBlo
 parser.add_argument('--evtNumber',default=None,nargs="+",type=int,help="specify to select an evtNumber")
 parser.add_argument('--stream',default="*",help="stream to lookup files in")
 parser.add_argument('--fexReadoutFilter',action='store_true',help="If specified, will skip events without fexReadout")
-parser.add_argument('--dbOverrides',default=None,nargs="+",type=str,help="specify overrides of COOL database folders in form <folder>=<dbPath>, example: /TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib=mytest.db ")
+parser.add_argument('--dbOverrides',default=None,nargs="+",type=str,help="specify overrides of COOL database folders in form <folder>=<dbPath> or <folder>:<tag>[=<dbPath>] to override a tag, example: /TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib=mytest.db ")
 parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify component properties to apply at the end of the config")
 args = flags.fillFromArgs(parser=parser)
 if args.runNumber is not None:
@@ -399,14 +399,23 @@ if type(args.dbOverrides)==list:
   #cfg.merge( addOverride(flags, folder="/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts", db="sqlite://;schema=/afs/cern.ch/user/w/will/calib.sqlite;dbname=L1CALO",tag="" ) )
   for override in args.dbOverrides:
     print(override)
-    folderName,dbPath = override.split("=",1)
+    folderName,dbPath = override.split("=",1) if "=" in override else (override,"")
     if folderName == "": raise ValueError("Cannot parse dbOverride: " + override)
-    if ";dbname=" not in dbPath: dbPath += ";dbname=CONDBR2"
-    dbPath,dbInst = dbPath.split(";dbname=")
-    if not os.path.exists(dbPath): raise ValueError("dbOverride file doesn't exist: " + dbPath)
+    db = ""
+    if dbPath != "":
+      if ";dbname=" not in dbPath: dbPath += ";dbname=CONDBR2"
+      dbPath,dbInst = dbPath.split(";dbname=")
+      if not os.path.exists(dbPath): raise ValueError("dbOverride file doesn't exist: " + dbPath)
+      db = f"sqlite://;schema={dbPath};dbname={dbInst}"
+    tag = ""
+    if ":" in folderName:
+      folderName,tag = folderName.split(":",1)
     if folderName[0] != "/": folderName = "/TRIGGER/L1Calo/V1/Calibration/" + folderName
-    log.info(" ".join(("Overriding COOL folder:",folderName,dbPath,dbInst)))
-    cfg.merge( addOverride(flags,folder=folderName,db=f"sqlite://;schema={dbPath};dbname={dbInst}",tag=""))
+    log.info(" ".join(("Overriding COOL folder:",folderName,db,tag)))
+    if db=="":
+      cfg.merge( addOverride(flags,folder=folderName,tag=tag))
+    else:
+      cfg.merge( addOverride(flags,folder=folderName,db=db,tag=tag))
 
 
 # configure output AOD if requested

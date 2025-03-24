@@ -115,7 +115,7 @@ namespace dqutils {
     
       std::string name;
       std::unique_ptr<TObject> obj;
-      std::array<std::string, 3> metadata;
+      std::array<std::string, 3> metadata{"unset","","<default>"};
       std::clock_t cpuSum = 0;
       void (*mergeMethod)(TObject* a, const TObject* b) = nullptr;
       void merge(TObject* other); 
@@ -206,9 +206,11 @@ namespace dqutils {
     }
 
     for (const auto& [key, h] : histos) {
-      metadatamap[key] = h.metadata;
+      if (h.metadata[0]!="unset") //Ignore dummy-metadata (eg HLTMon use-case)
+	  metadatamap[key] = h.metadata;
     }
 
+    if (metadatamap.empty()) return; //Do not write empty metadata tree
     std::string interval, chain, merge;
     char histname[1024];  // FIXME, no idea why this works only in this old-fashioned way
     std::unique_ptr<TTree> mdTree = std::make_unique<TTree>("metadata", "Monitoring Metadata");
@@ -343,10 +345,6 @@ namespace dqutils {
       return; //quasi null-operation
     HIST* a1 = (dynamic_cast<HIST*>(a));
     const HIST* b1 = dynamic_cast<const HIST*>(b);
-    if ((!b1) or (!a1)){
-      std::cout << "ERROR in identical: Objects not of type HIST" << std::endl;
-      return;
-    }
     dqutils::MonitoringFile::merge_identical(*a1, *b1);
     return;
   }
@@ -389,10 +387,6 @@ namespace dqutils {
 
   void merge_TTree(TObject * a, const TObject* b) {
     TTree* a1 = dynamic_cast<TTree*>(a);
-    if (!a1){
-      std::cout << "ERROR in merge_TTree: Object not of type TTree" << std::endl;
-      return;
-    }
     const TTree* b1 = dynamic_cast<const TTree*>(b);
     TTree* b2 = const_cast<TTree*>(b1);
     TList listT;
@@ -409,12 +403,12 @@ namespace dqutils {
       return;
     }
 
-    if (!fillMD(mdTree)) {
-      std::cout << "ERROR while adding " << nameIn << ", no metadata found" << std::endl;
-      obj = nullptr;
-      return;
+    if (mdTree) {
+      fillMD(mdTree);
     }
-
+    else {
+      s_dbg(VERBOSE,"No matadata found for " + name +", use defaults");
+    }
     const std::string& howToMerge = metadata[2];
     s_dbg(VERBOSE, "Name: " + name + " mergeMethod=" + howToMerge);
 
@@ -488,7 +482,7 @@ namespace dqutils {
 
       s_dbg(VERBOSE, "Found name " + name + ", classname=" + classname);
 
-      const std::string newName = dirName + "/" + name;
+      const std::string newName = dirName.empty() ? name : dirName + "/" + name;
       auto itDir = m_data.find(dirName);
 
       if (classname.starts_with("TH") || classname.starts_with("TProfile") || classname.starts_with("TEfficiency") || classname == "TTree") {
@@ -520,10 +514,7 @@ namespace dqutils {
             // Metadata tree not yet read in this directory
             md.reset((TTree*)dir->Get("metadata"));
           }
-          if (!md) {
-            std::cout << "ERROR: Did not find metadata tree in directory " << dir->GetPath() << std::endl;
-            continue;
-          }
+	  
           std::unique_ptr<TObject> obj{key->ReadObj()};
           TTree* treeObj = dynamic_cast<TTree*>(obj.get());
           if (treeObj) {
@@ -846,7 +837,7 @@ namespace dqutils {
       return -1;
     }
     std::cout << "Working on file 1/" << nFiles << ": " << files[0] << std::endl;
-    std::string runDir;
+    std::string runDir, runDirFwd;
     const std::regex runDirPattern("run_[0-9]*");
     TIter next(in1->GetListOfKeys());
     TKey* key;
@@ -859,15 +850,24 @@ namespace dqutils {
           runDir = name;
       }
     }
-    std::cout << "Found run directory " << runDir << std::endl;
+    if (runDir.empty()) {
+      std::cout << "No run-directory found, start with '/'" << std::endl;
+      runDir="/";
+      runDirFwd="";
+    }
+    else {
+      std::cout << "Found run directory " << runDir << std::endl;
+      runDirFwd=runDir;
+    }
 
-    TDirectory* dir(dynamic_cast<TDirectory*>(in1->Get(runDir.c_str())));
+    
+    TDirectory* dir(dynamic_cast<TDirectory*>(in1->GetDirectory(runDir.c_str())));
     if (!dir) {
       std::cout << "ERROR, can't access directory  " << runDir;
       return -1;
     }
 
-    hc.addDirectory(dir, runDir, files[0]);
+    hc.addDirectory(dir, runDirFwd, files[0]);
 
     // Close first input file
     in1->Delete("");
@@ -881,13 +881,8 @@ namespace dqutils {
         std::cout << "ERROR, could not open input file " << files[i] << std::endl;
         return -1;
       }
-      auto pDir = dynamic_cast<TDirectory*>(in->Get(runDir.c_str()));
-      if (!pDir){
-        std::cout << "ERROR, could not cast ptr to TDirectory " << std::endl;
-        return -1;
-      }
-      TDirectory* dir(dynamic_cast<TDirectory*>(in->Get(runDir.c_str())));
-      hc.addDirectory(dir, runDir, files[i]);
+      TDirectory* dir(dynamic_cast<TDirectory*>(in->GetDirectory(runDir.c_str())));
+      hc.addDirectory(dir, runDirFwd, files[i]);
       in->Delete("");
       in->Close();
     }
@@ -912,7 +907,7 @@ namespace dqutils {
         std::cout << "Merging/copying directory " << dir << std::endl;
         for (const std::string& fName : filenames) {
           std::unique_ptr<TFile> in(TFile::Open(fName.c_str()));
-          if (!in1) {
+          if (in1) {
             std::cout << "ERROR, could not open input file " << fName << std::endl;
             return -1;
           }
