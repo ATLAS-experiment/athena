@@ -459,7 +459,7 @@ JetChainParts = {
      'PTRANGE2r3',
      'MAXMULT20c',
      'MAXMULT6c',],
-    'bsel': ['95bdips','90bdips','85bdips','80bdips','77bdips','95bgnone','90bgnone','85bgnone','80bgnone','77bgnone', '60bgntwox', '70bgntwox', '80bgntwox', '90bgntwox','95bgntwo','90bgntwo','85bgntwo','80bgntwo','82bgntwo','77bgntwo','75bgntwo','60bgntwo'],
+    'bsel': ['95bdips','90bdips','85bdips','80bdips','77bdips','95bgnone','90bgnone','85bgnone','80bgnone','77bgnone', '79bgntwox', '86bgntwox', '91bgntwox', '96bgntwox','95bgntwo','90bgntwo','85bgntwo','80bgntwo','82bgntwo','77bgntwo','75bgntwo','60bgntwo'],
     'tausel': [ '75gntau' , '80gntau', '85gntau' , '90gntau' ],
     'smc'           : # "Single mass condition" -- rename?
       ['30smcINF', '35smcINF', '40smcINF', '50smcINF', '60smcINF', 'nosmc'],
