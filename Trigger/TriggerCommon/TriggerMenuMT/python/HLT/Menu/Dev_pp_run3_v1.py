@@ -632,11 +632,8 @@ def getDevSignatures():
 
 
         # g-2 tau triggers (ATR-30638)
-        ChainProp(name='HLT_2tau50_mediumRNN_29dphiAA_L12cTAU50M_DPHI-2eTAU50', l1SeedThresholds=['cTAU50M'], groups=MultiTauGroup+DevGroup, monGroups=['tauMon:t0']),
-        ChainProp(name='HLT_2tau50_mediumGNTau_29dphiAA_L12cTAU50M_DPHI-2eTAU50', l1SeedThresholds=['cTAU50M'], groups=MultiTauGroup+DevGroup, monGroups=['tauMon:t0']),
-        ChainProp(name='HLT_tau70_mediumRNN_tau50_mediumRNN_29dphiAB_L1eTAU70_2cTAU50M_DPHI-2eTAU50', l1SeedThresholds=['eTAU70', 'cTAU50M'], groups=MultiTauGroup+DevGroup, monGroups=['tauMon:t0']),
         ChainProp(name='HLT_tau70_mediumGNTau_tau50_mediumGNTau_29dphiAB_L1eTAU70_2cTAU50M_DPHI-2eTAU50', l1SeedThresholds=['eTAU70', 'cTAU50M'], groups=MultiTauGroup+DevGroup, monGroups=['tauMon:t0']),
-
+        ChainProp(name='HLT_2tau50_mediumGNTau_29dphiAA_L12cTAU50M_DPHI-2eTAU50', l1SeedThresholds=['cTAU50M'], groups=MultiTauGroup+DevGroup, monGroups=['tauMon:t0']),
 
 
 
