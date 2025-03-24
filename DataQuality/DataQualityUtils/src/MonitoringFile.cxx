@@ -343,6 +343,10 @@ namespace dqutils {
       return; //quasi null-operation
     HIST* a1 = (dynamic_cast<HIST*>(a));
     const HIST* b1 = dynamic_cast<const HIST*>(b);
+    if ((!b1) or (!a1)){
+      std::cout << "ERROR in identical: Objects not of type HIST" << std::endl;
+      return;
+    }
     dqutils::MonitoringFile::merge_identical(*a1, *b1);
     return;
   }
@@ -385,6 +389,10 @@ namespace dqutils {
 
   void merge_TTree(TObject * a, const TObject* b) {
     TTree* a1 = dynamic_cast<TTree*>(a);
+    if (!a1){
+      std::cout << "ERROR in merge_TTree: Object not of type TTree" << std::endl;
+      return;
+    }
     const TTree* b1 = dynamic_cast<const TTree*>(b);
     TTree* b2 = const_cast<TTree*>(b1);
     TList listT;
@@ -873,6 +881,11 @@ namespace dqutils {
         std::cout << "ERROR, could not open input file " << files[i] << std::endl;
         return -1;
       }
+      auto pDir = dynamic_cast<TDirectory*>(in->Get(runDir.c_str()));
+      if (!pDir){
+        std::cout << "ERROR, could not cast ptr to TDirectory " << std::endl;
+        return -1;
+      }
       TDirectory* dir(dynamic_cast<TDirectory*>(in->Get(runDir.c_str())));
       hc.addDirectory(dir, runDir, files[i]);
       in->Delete("");
@@ -899,7 +912,7 @@ namespace dqutils {
         std::cout << "Merging/copying directory " << dir << std::endl;
         for (const std::string& fName : filenames) {
           std::unique_ptr<TFile> in(TFile::Open(fName.c_str()));
-          if (in1) {
+          if (!in1) {
             std::cout << "ERROR, could not open input file " << fName << std::endl;
             return -1;
           }
