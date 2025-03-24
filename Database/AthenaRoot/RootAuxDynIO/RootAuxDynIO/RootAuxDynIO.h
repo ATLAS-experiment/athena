@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ROOTAUXDYN_IO_H
@@ -19,17 +19,25 @@ class TTree;
 class TFile;
 class TClass;
 
-namespace ROOT::Experimental {
-  class RNTupleReader;
-  class RFieldBase;
-}
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+   namespace ROOT { class RFieldBase; }
+#else
+   namespace ROOT::Experimental { class RFieldBase; }
+#endif
+namespace ROOT::Experimental { class RNTupleReader; }
+
 namespace SG { class IAuxStoreIO;  class auxid_set_t; }
 
 
 namespace RootAuxDynIO
 {
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+   using ROOT::RFieldBase;
+#else
    using ROOT::Experimental::RFieldBase;
+#endif
    using ROOT::Experimental::RNTupleReader;
+
    class IRootAuxDynReader;
    class IRootAuxDynWriter;
    class IRNTupleAuxDynWriter;
