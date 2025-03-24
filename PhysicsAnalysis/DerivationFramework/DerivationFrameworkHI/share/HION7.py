@@ -55,7 +55,9 @@ if not HIDerivationFlags.isSimulation():
     for i, key in enumerate(TriggerDict):
         #Event selection based on DF jets for HI
         expression = expression + '(' + key + ' && count(' + MainJetCollection + 'AntiKt4HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) ' + '|| (' + key + ' && count(' + MainJetCollection + 'AntiKt2HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) '
-        if HIDerivationFlags.ptCutOn(): expression = '(HLT_j100_ion_L1J20 && count(AntiKt4HIJets.pt >99.5*GeV) >=1 ) '
+        if HIDerivationFlags.ptCutOn():
+            expression = '(HLT_j100_ion_L1J20 && count(AntiKt4HIJets.pt >99.5*GeV) >=1 ) '
+            if project_tag=='data15_hi': expression = '(HLT_j75_ion_L1TE50 && count(AntiKt4HIJets.pt >99.5*GeV) >=1 )'
         #Event selection based also on non-DF jets for pp
         if HIDerivationFlags.isPP and BookDFJetCollection:
             expression = expression + '|| (' + key + ' && count(AntiKt4HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) ' + '|| (' + key + ' && count(AntiKt2HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) '
