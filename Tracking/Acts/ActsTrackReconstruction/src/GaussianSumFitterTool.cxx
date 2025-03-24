@@ -434,7 +434,7 @@ StatusCode GaussianSumFitterTool::fit(
   std::vector<Acts::SourceLink> sourceLinks;
   std::vector<const Acts::Surface*> surfSequence;
 
-  for (auto ts : track.trackStatesReversed()) {
+  for (auto ts : track.trackStates()){
     surfSequence.push_back(&ts.referenceSurface());
     if (!ts.hasCalibrated()) {
       continue;
