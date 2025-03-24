@@ -15,7 +15,7 @@ def setupTestOutputCfg(flags,**kwargs):
                        "xAOD::TruthParticleAuxContainer#",
                        "xAOD::TruthEventContainer#",
                        "xAOD::TruthEventAuxContainer#",
-                       "McEventCollection#"] + OutputSimContainersCfg(flags)
+                       "McEventCollection#TruthEvent"] + OutputSimContainersCfg(flags)
 
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     result.merge(SetupMetaDataForStreamCfg(flags, kwargs["streamName"]))

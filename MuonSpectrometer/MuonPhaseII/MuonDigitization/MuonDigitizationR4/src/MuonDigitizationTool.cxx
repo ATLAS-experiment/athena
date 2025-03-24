@@ -155,7 +155,8 @@ namespace MuonR4{
             ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hit->identify())<<" is a pile-up truth link");
             return nullptr; 
         }
-        
+        ATH_MSG_VERBOSE(m_idHelperSvc->toString(hit->identify())<<", pdgID: "<<hit->pdgId()<< " genParticleLink :"<<hit->genParticleLink());
+        ATH_MSG_VERBOSE("Genparticle: "<<hit->genParticleLink());        
         xAOD::MuonSimHit* sdoHit = sdoContainer->push_back(std::make_unique<xAOD::MuonSimHit>());
         (*sdoHit) = (*hit);
         static const SG::Accessor<float> acc_eventTime{"MuSim_evtTime"};

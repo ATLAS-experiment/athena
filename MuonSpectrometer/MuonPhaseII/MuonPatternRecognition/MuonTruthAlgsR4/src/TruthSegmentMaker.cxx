@@ -36,11 +36,14 @@ namespace MuonR4{
                                                         const ContainerType*& contToPush) const {
         contToPush = nullptr;
         if (key.empty()) {
-            ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
+            ATH_MSG_DEBUG("No key has been parsed for object "<< typeid(ContainerType).name());
             return StatusCode::SUCCESS;
         }
         SG::ReadHandle readHandle{key, ctx};
-        ATH_CHECK(readHandle.isPresent());
+        if (!readHandle.isPresent()) {
+            ATH_MSG_FATAL("Failed to retrieve "<<key.fullKey());
+            return StatusCode::FAILURE;
+        }
         contToPush = readHandle.cptr();
         return StatusCode::SUCCESS;
     }
@@ -94,7 +97,8 @@ namespace MuonR4{
                 /// skip empty truth matches for now
                 if (!genParticle || (m_useOnlyMuonHits && !MC::isMuon(simHit))) {
                     ATH_MSG_VERBOSE("Skip hit "<<m_idHelperSvc->toString(simHit->identify())<<
-                                  " pdgId: "<<simHit->pdgId()<<", energy: "<<simHit->kineticEnergy());
+                                  " pdgId: "<<simHit->pdgId()<<", energy: "<<simHit->kineticEnergy()
+                                <<", genParticle: "<<genParticle);
                     continue;
                 }
                 hitCollector[id][genParticle].push_back(simHit); 
@@ -105,8 +109,9 @@ namespace MuonR4{
         ATH_CHECK(writeHandle.record(std::make_unique<xAOD::MuonSegmentContainer>(),
                                      std::make_unique<xAOD::MuonSegmentAuxContainer>()));
         
-        using HitLinkVec = std::vector<ElementLink<xAOD::MuonSimHitContainer>>;
-        SG::WriteDecorHandle<xAOD::MuonSegmentContainer, HitLinkVec> hitDecor{m_eleLinkKey, ctx};
+        using EleLink_t = ElementLink<xAOD::MuonSimHitContainer>;
+        using HitLinkVec_t = std::vector<EleLink_t>;
+        SG::WriteDecorHandle<xAOD::MuonSegmentContainer, HitLinkVec_t> hitDecor{m_eleLinkKey, ctx};
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, float> ptDecor{m_ptKey, ctx};
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, float> qDecor{m_qKey, ctx};
         using SegPars = xAOD::MeasVector<toInt(ParamDefs::nPars)>;
@@ -115,13 +120,15 @@ namespace MuonR4{
             const Amg::Transform3D& locToGlob{chamber->localToGlobalTrans(*gctx)};
             
             for (auto& [particle, simHits]: collectedParts) {
-
                 /* Take the hit that's closest to the chamber centre as reference */
                 std::ranges::stable_sort(simHits,[gctx,this](const xAOD::MuonSimHit*a, const xAOD::MuonSimHit*b){
                     return std::abs((toChamber(*gctx, a->identify())* xAOD::toEigen(a->localPosition())).z()) <
                            std::abs((toChamber(*gctx, b->identify())* xAOD::toEigen(b->localPosition())).z());
                 });
                 const xAOD::MuonSimHit* simHit = simHits.front(); 
+                ATH_MSG_VERBOSE("Create segement from hit: "<<m_idHelperSvc->toString(simHit->identify())<<
+                                 " pdgId: "<<simHit->pdgId()<<", energy: "<<simHit->kineticEnergy()
+                                    <<", genParticle: "<<simHit->genParticleLink().cptr());
                 const Identifier segId{simHit->identify()};
                 
                 const Amg::Transform3D inChamb = toChamber(*gctx, segId);
@@ -134,7 +141,7 @@ namespace MuonR4{
                 
                 const Amg::Vector3D globPos = locToGlob * chamberPos;
                 const Amg::Vector3D globDir = locToGlob.linear() * chamberDir;
-                HitLinkVec associatedHits{};
+                HitLinkVec_t associatedHits{};
                 unsigned int nMdt{0}, nRpcEta{0}, nRpcPhi{0}, nTgcEta{0}, nTgcPhi{0};
                 unsigned int nMm{0}, nStgcEta{0}, nStgcPhi{0};
                 for (const xAOD::MuonSimHit* assocMe : simHits) {
@@ -165,8 +172,10 @@ namespace MuonR4{
                         default:
                             ATH_MSG_WARNING("Csc are not defined "<<m_idHelperSvc->toString(simHit->identify()));
                     }
-                    ElementLink<xAOD::MuonSimHitContainer> link{*static_cast<const xAOD::MuonSimHitContainer*>(assocMe->container()), 
-                                                                assocMe->index()};
+                    ATH_MSG_VERBOSE("Associate hit "<<m_idHelperSvc->toString(assocMe->identify())
+                                    <<" pdgId: "<<assocMe->pdgId()<<", energy: "<<assocMe->kineticEnergy()
+                                    <<", genParticle: "<<assocMe->genParticleLink().cptr());
+                    EleLink_t link{*static_cast<const xAOD::MuonSimHitContainer*>(assocMe->container()), assocMe->index()};
                     associatedHits.push_back(std::move(link));
                 }
                 int nPrecisionHits = nMdt + nMm + nStgcEta;
@@ -198,6 +207,11 @@ namespace MuonR4{
                 } else {
                     truthSegment->setFitQuality(0, (nPrecisionHits + nPhiLayers + nTgcEta + nRpcEta - 5));
                 }
+                /// Sort the associated hits by local Z
+                std::ranges::stable_sort(associatedHits,[&gctx, this](const  EleLink_t& a, const EleLink_t&b) {
+                    return (toChamber(*gctx, (*a)->identify())* xAOD::toEigen((*a)->localPosition())).z() <
+                           (toChamber(*gctx, (*b)->identify())* xAOD::toEigen((*b)->localPosition())).z();
+                    });
                 hitDecor(*truthSegment) = std::move(associatedHits);
             }
         }
