@@ -3,8 +3,6 @@
  */
 
 #include "TrigT1NSWSimTools/MMT_Hit.h"
-#include "MuonAGDDDescription/MMDetectorDescription.h"
-#include "MuonAGDDDescription/MMDetectorHelper.h"
 #include "MuonReadoutGeometry/MuonChannelDesign.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/MMReadoutElement.h"
@@ -82,19 +80,14 @@ MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* 
   Amg::Vector3D globalPos(0.0, 0.0, 0.0);
   if(readout->stripGlobalPosition(strip_id, globalPos)) {
 
-    MMDetectorHelper aHelper;
-    char side = (globalPos.z() > 0.) ? 'A' : 'C';
-    MMDetectorDescription* mm = aHelper.Get_MMDetector(m_sector, std::abs(m_station_eta), m_station_phi, m_multiplet, side);
-    MMReadoutParameters roP   = mm->GetReadoutParameters();
-
     m_R = globalPos.perp();
     m_Z = globalPos.z();
-    m_PitchOverZ = roP.stripPitch/m_Z;
+    m_PitchOverZ = (readout->getDesign(strip_id))->inputPitch/m_Z;
     m_RZslope = m_R / m_Z;
 
     double index = std::round((std::abs(m_RZslope)-0.1)/5e-04); // 0.0005 is approx. the step in slope achievable with a road size of 8 strips
-    double roundedSlope = 0.1 + index*((0.6 - 0.1)/1000.);
-    m_Rp = roP.distanceFromZAxis + roundedSlope*(planeCoordinates[m_plane].Z() - planeCoordinates[0].Z());
+    const double distanceFromZAxis = readout->absTransform().translation().perp() - 0.5*readout->getRsize();
+    m_Rp = distanceFromZAxis + (0.1 + index*((0.6 - 0.1)/1000.))*(planeCoordinates[m_plane].Z() - planeCoordinates[0].Z());
     m_shift = m_Rp / m_Z;
   }
 }

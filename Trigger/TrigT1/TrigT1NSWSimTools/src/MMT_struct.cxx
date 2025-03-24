@@ -3,8 +3,6 @@
 */
 
 #include "TrigT1NSWSimTools/MMT_struct.h"
-#include "MuonAGDDDescription/MMDetectorDescription.h"
-#include "MuonAGDDDescription/MMDetectorHelper.h"
 #include "MuonReadoutGeometry/MuonChannelDesign.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 
@@ -13,68 +11,27 @@ MMT_Parameters::MMT_Parameters(std::string layerSetup, char wedgeSize, const Muo
 
   // Get the modules for each multiplet, the sector and side arguement (third and fifth argument, respectively) shouldn't matter
   // since the algorithm computes locally
-  char side   = 'A';
+  std::string wedgeString = (wedgeSize=='L' ? "MML" : "MMS");
   m_sector = wedgeSize;
-  MMDetectorHelper aHelper;
-  MMDetectorDescription* mm_top_mult1    = aHelper.Get_MMDetector(m_sector, 2, 5, 1, side); // Parameters: sector, eta, phi, layer/multiplet
-  MMDetectorDescription* mm_top_mult2    = aHelper.Get_MMDetector(m_sector, 2, 5, 2, side);
-  MMDetectorDescription* mm_bottom_mult1 = aHelper.Get_MMDetector(m_sector, 1, 5, 1, side);
-  MMDetectorDescription* mm_bottom_mult2 = aHelper.Get_MMDetector(m_sector, 1, 5, 2, side);
 
-  MMReadoutParameters roParam_top_mult1    = mm_top_mult1->GetReadoutParameters();
-  MMReadoutParameters roParam_top_mult2    = mm_top_mult2->GetReadoutParameters();
-  MMReadoutParameters roParam_bottom_mult1 = mm_bottom_mult1->GetReadoutParameters();
-  MMReadoutParameters roParam_bottom_mult2 = mm_bottom_mult2->GetReadoutParameters();
+  Identifier mm_top_ele_id = detManager->mmIdHelper()->elementID(wedgeString, 2, 5);
+  Identifier mm_bottom_ele_id = detManager->mmIdHelper()->elementID(wedgeString, 1, 5);
+
+  const MuonGM::MMReadoutElement* mm_ReadOut_top = detManager->getMMReadoutElement(mm_top_ele_id);
+  const MuonGM::MMReadoutElement* mm_ReadOut_bottom = detManager->getMMReadoutElement(mm_bottom_ele_id);
+
+  m_lWidth = mm_ReadOut_top->getLongSsize();
+  m_pitch = mm_ReadOut_top->getDesign(mm_top_ele_id)->inputPitch;
 
   //Needed to get the max channels for the deadZone in the x planes... a little annoying...
   //Only changes for small or large and per module. Phi, layer, etc don't matter (just set to 1)
-  std::string wedgeString = (wedgeSize=='L' ? "MML" : "MMS");
 
-  m_pitch = roParam_bottom_mult1.stripPitch;
-  m_lWidth = mm_top_mult1->lWidth();
-  m_innerRadiusEta1 = roParam_bottom_mult1.distanceFromZAxis;
-  m_innerRadiusEta2 = roParam_top_mult1.distanceFromZAxis;
-  m_missedBottomEta = roParam_bottom_mult1.nMissedBottomEta;
-  m_missedBottomStereo = roParam_bottom_mult1.nMissedBottomStereo;
-  if (m_sector == 'L') {
-    ATH_MSG_DEBUG("LM1 \n" <<
-                 "\t\t\t\t Total Strips: " << roParam_bottom_mult1.tStrips << " with pitch: " << roParam_bottom_mult1.stripPitch << "\n" <<
-                 "\t\t\t\t KO strips TopEta: " << roParam_bottom_mult1.nMissedTopEta << " - BottomEta: " << roParam_bottom_mult1.nMissedBottomEta << "\n" <<
-                 "\t\t\t\t KO strips TopStereo: " << roParam_bottom_mult1.nMissedTopStereo << " - BottomStereo: " << roParam_bottom_mult1.nMissedBottomStereo << "\n" <<
-                 "\t\t\t\t (Top, Bottom, Length): (" << mm_bottom_mult1->lWidth() << ", " << mm_bottom_mult1->sWidth() << ", " << mm_bottom_mult1->Length() << ")\n" <<
-                 "\t\t\t\t Zpos - Distance from ZAxis: " << roParam_bottom_mult1.zpos << " - " << roParam_bottom_mult1.distanceFromZAxis << "\n" <<
-                 "\t\t\t\t dlStereoTop/Bottom: " << roParam_bottom_mult1.dlStereoTop << " " << roParam_bottom_mult1.dlStereoBottom << "\n" <<
-                 "\t\t\t\t Active area --> (Bottom, Top, Height) : (" << roParam_bottom_mult1.activeBottomLength << ", " << roParam_bottom_mult1.activeTopLength << ", " << roParam_bottom_mult1.activeH << ")");
-  } else if (m_sector == 'S') {
-    ATH_MSG_DEBUG("SM1 \n" <<
-                 "\t\t\t\t KO strips TopEta: " << roParam_bottom_mult1.nMissedTopEta << " - BottomEta: " << roParam_bottom_mult1.nMissedBottomEta << "\n" <<
-                 "\t\t\t\t KO strips TopStereo: " << roParam_bottom_mult1.nMissedTopStereo << " - BottomStereo: " << roParam_bottom_mult1.nMissedBottomStereo << "\n" <<
-                 "\t\t\t\t Total Strips: " << roParam_bottom_mult1.tStrips << " with pitch: " << roParam_bottom_mult1.stripPitch << "\n" <<
-                 "\t\t\t\t (Top, Bottom, Length): (" << mm_bottom_mult1->lWidth() << ", " << mm_bottom_mult1->sWidth() << ", " << mm_bottom_mult1->Length() << ")\n" <<
-                 "\t\t\t\t Zpos - Distance from ZAxis: " << roParam_bottom_mult1.zpos << " - " << roParam_bottom_mult1.distanceFromZAxis << "\n" <<
-                 "\t\t\t\t dlStereoTop/Bottom: " << roParam_bottom_mult1.dlStereoTop << " " << roParam_bottom_mult1.dlStereoBottom << "\n" <<
-                 "\t\t\t\t Active area --> (Bottom, Top, Height) : (" << roParam_bottom_mult1.activeBottomLength << ", " << roParam_bottom_mult1.activeTopLength << ", " << roParam_bottom_mult1.activeH << ")");
-  }
+  m_innerRadiusEta1 = mm_ReadOut_bottom->absTransform().translation().perp() - 0.5*mm_ReadOut_bottom->getRsize();
+  m_innerRadiusEta2 = mm_ReadOut_top->absTransform().translation().perp() - 0.5*mm_ReadOut_top->getRsize();
 
-  if (m_sector == 'L') {
-    ATH_MSG_DEBUG("LM2 \n" <<
-                 "\t\t\t\t Total Strips: " << roParam_top_mult1.tStrips << " with pitch: " << roParam_top_mult1.stripPitch << "\n" <<
-                 "\t\t\t\t KO strips TopEta: " << roParam_top_mult1.nMissedTopEta << " - BottomEta: " << roParam_top_mult1.nMissedBottomEta << "\n" <<
-                 "\t\t\t\t KO strips TopStereo: " << roParam_top_mult1.nMissedTopStereo << " - BottomStereo: " << roParam_top_mult1.nMissedBottomStereo << "\n" <<
-                 "\t\t\t\t (Top, Bottom, Length): (" << mm_top_mult1->lWidth() << ", " << mm_top_mult1->sWidth() << ", " << mm_top_mult1->Length() << ")\n" <<
-                 "\t\t\t\t Zpos - Distance from ZAxis: " << roParam_top_mult1.zpos << " - " << roParam_top_mult1.distanceFromZAxis << "\n" <<
-                 "\t\t\t\t dlStereoTop/Bottom: " << roParam_top_mult1.dlStereoTop << " " << roParam_top_mult1.dlStereoBottom << "\n" <<
-                 "\t\t\t\t Active area --> (Top, Bottom, Height) : (" << roParam_top_mult1.activeTopLength << ", " << roParam_top_mult1.activeBottomLength << ", " << roParam_top_mult1.activeH << ")");
-  } else if (m_sector == 'S') {
-    ATH_MSG_DEBUG("SM2 \n" <<
-                 "\t\t\t\t KO strips TopEta: " << roParam_top_mult1.nMissedTopEta << " - BottomEta: " << roParam_top_mult1.nMissedBottomEta << "\n" <<
-                 "\t\t\t\t KO strips TopStereo: " << roParam_top_mult1.nMissedTopStereo << " - BottomStereo: " << roParam_top_mult1.nMissedBottomStereo << "\n" <<
-                 "\t\t\t\t (Top, Bottom, Length): (" << mm_top_mult1->lWidth() << ", " << mm_top_mult1->sWidth() << ", " << mm_top_mult1->Length() << ")\n" <<
-                 "\t\t\t\t Zpos - Distance from ZAxis: " << roParam_top_mult1.zpos << " - " << roParam_top_mult1.distanceFromZAxis << "\n" <<
-                 "\t\t\t\t dlStereoTop/Bottom: " << roParam_top_mult1.dlStereoTop << " " << roParam_top_mult1.dlStereoBottom << "\n" <<
-                 "\t\t\t\t Active area --> (Top, Bottom, Height) : (" << roParam_top_mult1.activeTopLength << ", " << roParam_top_mult1.activeBottomLength << ", " << roParam_top_mult1.activeH << ")");
-    for (const auto &angle : roParam_top_mult1.stereoAngle) ATH_MSG_DEBUG("Stereo angle: " << angle);
-  }
+  const auto design = mm_ReadOut_bottom->getDesign(mm_bottom_ele_id);
+  m_missedBottomEta = design->nMissedBottomEta;
+  m_missedBottomStereo = design->nMissedBottomStereo;
 
   // retrieve the z-position of the planes
   std::vector<double> z_nominal;
