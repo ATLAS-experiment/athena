@@ -174,10 +174,13 @@ void ZDC_DetFactory::buildMaterials(StoredMaterialManager *materialManager){
 
     // Absorption length index of fused silica derrived from 
     // https://www.heraeus.com/media/media/hca/doc_hca/products_and_solutions_8/optics/Data_and_Properties_Optics_fused_silica_EN.pdf
-    double silica_ABSL[nEntries];
-    for(int i=0; i<nEntries-2; ++i)
-        silica_ABSL[i] = 302.163 * cm;
-    silica_ABSL[nEntries - 1] = silica_ABSL[nEntries - 2] = 204.542 * cm;
+    double silica_ABSL[] = {1.786e+04 * cm, 1.556e+04 * cm, 1.982e+04 * cm, 2.369e+04 * cm, 2.046e+04 * cm, 1.595e+04 * cm, 1.582e+04 * cm,
+        1.420e+04 * cm, 1.279e+04 * cm, 1.545e+04 * cm, 1.498e+04 * cm, 1.358e+04 * cm, 1.824e+04 * cm, 2.320e+04 * cm,
+        3.736e+04 * cm, 2.155e+04 * cm, 1.718e+04 * cm, 1.871e+04 * cm, 2.286e+04 * cm, 3.597e+04 * cm, 4.358e+04 * cm,
+        2.751e+04 * cm, 1.967e+04 * cm, 1.743e+04 * cm, 1.425e+04 * cm, 1.198e+04 * cm, 1.371e+04 * cm, 1.911e+04 * cm,
+        4.413e+04 * cm, 4.002e+04 * cm, 2.621e+04 * cm, 1.420e+04 * cm, 1.085e+04 * cm, 1.020e+04 * cm, 1.090e+04 * cm,
+        1.267e+04 * cm, 1.369e+04 * cm, 1.427e+04 * cm, 1.484e+04 * cm, 1.480e+04 * cm, 1.443e+04 * cm, 1.274e+04 * cm,
+        1.242e+04 * cm, 1.212e+04 * cm, 1.232e+04 * cm, 1.251e+04 * cm, 1.168e+04 * cm, 1.052e+04 * cm, 1.197e+04 * cm, 8.355e+03 * cm};
 
     GeoMaterialPropertiesTable *silicaCoreMPT = new GeoMaterialPropertiesTable();
     silicaCoreMPT->AddProperty("RINDEX"   , photonEnergy, silica_RIND, nEntries); // index of refraction
