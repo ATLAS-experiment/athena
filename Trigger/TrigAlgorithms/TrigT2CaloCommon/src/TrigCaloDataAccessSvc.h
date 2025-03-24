@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT2CaloCommon_TrigCaloDataAccessSvc_h
@@ -140,6 +140,8 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
     unsigned int lastFSEvent;
   };
 
+  // cells created in lateInit which must be deleted in finalize
+  std::vector<unsigned int> m_insertedCells;
   
   SG::SlotSpecificObj< HLTCaloEventCache > m_hLTCaloSlot;
 
@@ -199,5 +201,3 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
 
 
 #endif
-
-
