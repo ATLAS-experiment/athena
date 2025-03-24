@@ -11,13 +11,14 @@
 # art-html: ecube
 
 export ATHENA_CORE_NUMBER=8
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA22)")
 Reco_tf.py \
   --AMI q449 \
   --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data \
   --outputAODFile myAOD.pool.root \
   --athenaopts "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "AODtoDAOD:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" \
   --preExec 'flags.Exec.FPE=10' \
-  --conditionsTag "CONDBR2-BLKPA-2022-15" \
+  --conditionsTag "${conditions}" \
   --maxEvents -1
 
 rc1=$?
