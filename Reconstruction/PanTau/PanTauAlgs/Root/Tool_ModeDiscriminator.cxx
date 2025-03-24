@@ -42,7 +42,6 @@ StatusCode PanTau::Tool_ModeDiscriminator::initialize() {
     
   // get the required information from the informationstore tool
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("ModeDiscriminator_BinEdges_Pt", m_BinEdges_Pt));
-  ATH_CHECK( m_Tool_InformationStore->getInfo_String("ModeDiscriminator_ReaderOption", m_ReaderOption) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("ModeDiscriminator_TMVAMethod", m_MethodName) );
     
   // build the name of the variable that contains the variable list for this discri tool

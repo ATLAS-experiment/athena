@@ -32,7 +32,6 @@ StatusCode PanTau::Tool_InputConverter::initialize() {
   ATH_CHECK( m_Tool_InformationStore.retrieve() );
     
   ATH_CHECK( m_Tool_InformationStore->getInfo_Int("TauConstituents_UsePionMass", m_Config_UsePionMass) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_Int("TauConstituents_UseShrinkingCone", m_Config_TauConstituents_UseShrinkingCone) );        
   ATH_CHECK( m_Tool_InformationStore->getInfo_Double("TauConstituents_Types_DeltaRCore", m_Config_TauConstituents_Types_DeltaRCore) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_Double("TauConstituents_PreselectionMinEnergy", m_Config_TauConstituents_PreselectionMinEnergy) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("CellBased_BinEdges_Eta", m_Config_CellBased_BinEdges_Eta) );
