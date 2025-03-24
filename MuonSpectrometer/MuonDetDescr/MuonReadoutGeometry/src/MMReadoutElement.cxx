@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -58,6 +58,17 @@ namespace MuonGM {
         Identifier id = mgr->mmIdHelper()->channelID(fixName, zi, fi, mL, 1, 1);
         setIdentifier(id);
         bool foundShape = false;
+
+        const PVConstLink pvc {getMaterialGeom()};
+        const GeoTrd* trd=dynamic_cast<const GeoTrd *> (pvc->getLogVol()->getShape());
+        if (trd) {
+            setSsize(2*trd->getYHalfLength1());
+            setLongSsize( 2*trd->getYHalfLength2());
+            setRsize(2*trd->getZHalfLength());
+            setZsize(trd->getXHalfLength1());
+        } else {
+            ATH_MSG_DEBUG("Not a valid GeoTrd");
+        }
 
         if (!mgr->MinimalGeoFlag()) {
             if (GeoFullPhysVol* pvc = dynamic_cast<GeoFullPhysVol*>(pv)) {
