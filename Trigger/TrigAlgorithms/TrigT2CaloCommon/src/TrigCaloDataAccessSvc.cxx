@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "TrigCaloDataAccessSvc.h"
@@ -63,6 +63,7 @@ StatusCode TrigCaloDataAccessSvc::finalize() {
       cache->d0cells->clear();
       delete cache->d0cells;
       cache->lastFSEvent = 0xFFFFFFFF;
+      for (unsigned int i : m_insertedCells) delete cache->fullcont->at(i);
       delete cache->fullcont;
   } // end of for slots
   } // end of m_lateInitDone
@@ -155,7 +156,7 @@ StatusCode TrigCaloDataAccessSvc::loadCollections ( const EventContext& context,
           const std::vector<TileCellCollection*>::const_iterator it =
                   (tilecell->find(requestHashIDs[i]));
           TileCellCollection* col = *it;
-          if ( col == NULL ) continue;
+          if ( col == nullptr ) continue;
           TileCellCollection::const_iterator itt = (*it)->begin();
           TileCellCollection::const_iterator End = (*it)->end();
           for (;itt!=End;++itt){
@@ -475,6 +476,8 @@ unsigned int TrigCaloDataAccessSvc::lateInit(const EventContext& context) { // n
 		  } else {
 			 cachefullcont->at(i) = new LArCell(el,0,0,0,(CaloGain::CaloGain)0);
 		  }
+
+		  if (slot==0) m_insertedCells.push_back(i);
                 }
         }
 
@@ -596,7 +599,7 @@ unsigned int TrigCaloDataAccessSvc::convertROBs( const EventContext& context,
           const std::vector<TileCellCollection*>::const_iterator it =
                   (tilecell->find(rIds[i]));
           TileCellCollection* col = *it;
-          if ( robFrags1.size()!=0 && col != NULL ) {
+          if ( robFrags1.size()!=0 && col != nullptr ) {
             size_t roddatasize = robFrags1[0]->rod_ndata();
             // insert data into vector (to be removed soon)
             if (roddatasize < 3) {
