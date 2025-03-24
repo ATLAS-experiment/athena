@@ -69,7 +69,7 @@ const HepMcParticleLink& MuonSimHit_v1::genParticleLink() const {
    if (!m_hepMCLink) {
       auto link = std::make_unique<HepMcParticleLink>(acc_uniqueID(*this),
                                                       acc_mcEventIndex(*this),
-                                                      HepMcParticleLink::IS_POSITION, 
+                                                      HepMcParticleLink::IS_EVENTNUM, 
                                                       HepMcParticleLink::IS_ID);
       return *m_hepMCLink.set(std::move(link));
    }
