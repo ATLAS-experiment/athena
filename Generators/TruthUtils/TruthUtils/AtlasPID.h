@@ -408,9 +408,13 @@ template<class T> inline bool isResonance(const T& p) { return isZ(p) || isW(p) 
 template<class T> inline bool isLeptoQuark(const T& p){return isLeptoQuark(p->pdg_id());}
 template<> inline bool isLeptoQuark(const int& p){ return std::abs(p) == LEPTOQUARK; }
 
-template<class T> inline bool isPythia8Specific(const T& p){return isPythia8Specific(p->pdg_id());}
-template<> inline bool isPythia8Specific(const DecodedPID& p){ return (p.ndigits() == 7 && p(0) == 9 && p(1) == 9);}
-template<> inline bool isPythia8Specific(const int& p){ auto value_digits = DecodedPID(p); return isPythia8Specific(value_digits);}
+/// PDG rule 12:
+/// Occasionally program authors add their own states. To avoid
+/// confusion, these should be ﬂagged by setting nn_r = 99.
+/// APID: Noting that Pythia8 often defines PDG IDs in this range.
+template<class T> inline bool isGeneratorDefined(const T& p){return isGeneratorDefined(p->pdg_id());}
+template<> inline bool isGeneratorDefined(const DecodedPID& p){ return (p.ndigits() == 7 && p(0) == 9 && p(1) == 9);}
+template<> inline bool isGeneratorDefined(const int& p){ auto value_digits = DecodedPID(p); return isGeneratorDefined(value_digits);}
 
 /// PDG Rule 12:
 /// APID: Helper function for right-handed neutrino states
@@ -422,8 +426,8 @@ template<> inline bool isNeutrinoRH(const int& p){ return (std::abs(p) ==  RH_NU
 
 /// Main Table
 /// for MC internal use 81–100,901–930,998-999,1901–1930,2901–2930, and 3901–3930
-template<class T> inline bool isGenSpecific(const T& p){return isGenSpecific(p->pdg_id());}
-template<> inline bool isGenSpecific(const int& p){
+template<class T> inline bool isGenInternal(const T& p){return isGenInternal(p->pdg_id());}
+template<> inline bool isGenInternal(const int& p){
   int ap = std::abs(p);
   if (ap >= 81 && ap <= 100) return true;
   if (ap >= 901 && ap <= 930) return true;
@@ -878,11 +882,11 @@ template<> inline bool isTransportable(const int& p){ auto value_digits = Decode
 template<class T> inline bool isValid(const T& p){return isValid(p->pdg_id());}
 template<> inline bool isValid(const DecodedPID& p){
   return p.pid() !=0 && ( isQuark(p) || isLepton(p) || isBoson(p) || isGlueball(p) ||
-                         isTrajectory(p.pid()) || isGenSpecific(p.pid()) || isDiquark(p) ||
+                         isTrajectory(p.pid()) || isGenInternal(p.pid()) || isDiquark(p) ||
                          isBSM(p) || isHadron(p) || isNucleus(p) || isGeantino(p.pid()) ||
-                         isPythia8Specific(p) ); }
+                         isGeneratorDefined(p) ); }
 template<> inline bool isValid(const int& p){ if (!p) return false; if (std::abs(p) < 42) return true;
-  if (isGenSpecific(p)) return true;
+  if (isGenInternal(p)) return true;
   auto value_digits = DecodedPID(p); return isValid(value_digits);
 }
 

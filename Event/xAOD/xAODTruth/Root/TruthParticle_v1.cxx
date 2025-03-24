@@ -303,7 +303,7 @@ namespace xAOD {
    MC_PID_HELPER( bool, isZ )
    MC_PID_HELPER( bool, isHiggs )
    MC_PID_HELPER( bool, isResonance )
-   MC_PID_HELPER( bool, isGenSpecific )
+   MC_PID_HELPER( bool, isGenInternal )
    MC_PID_HELPER( bool, isBSM )
 
 // Forget about this macro:

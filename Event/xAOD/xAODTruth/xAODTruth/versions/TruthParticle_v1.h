@@ -297,7 +297,7 @@ namespace xAOD {
       /// Check if this particle is a resonant state
       bool isResonance() const;
       /// Check if this is a generator specific (non-physical) particle
-      bool isGenSpecific() const;
+      bool isGenInternal() const;
       /// Check if this is a BSM particle
       bool isBSM() const;
       /// Check if this is generator stable particle
