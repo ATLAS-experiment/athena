@@ -116,7 +116,7 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.GsfMaxComponents", 12)
     actscf.addFlag("Acts.GsfComponentMergeMethod", 'MaxWeight')
     actscf.addFlag("Acts.GsfDirectNavigation", False)
-    actscf.addFlag("Acts.GsfOutlierChi2Cut", 20.0)
+    actscf.addFlag("Acts.GsfOutlierChi2Cut", 1e4) # Effectively no cut. Compatible with legacy
 
     actscf.addFlag('Acts.useDefaultActsMeasurementSelector', False) # if True, uses no outlier chi2 cut as before (chi2<25,inf)
 
