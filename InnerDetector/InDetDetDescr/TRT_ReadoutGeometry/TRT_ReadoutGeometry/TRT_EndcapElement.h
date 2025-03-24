@@ -1,15 +1,14 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// TRT_EndcapElement.h
-///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
+/**
+ * @file TRT_EndcapElement.h
+ */
 
-#ifndef TRT_EndcapElement_h
-#define TRT_EndcapElement_h 1
+#ifndef TRT_READOUTGEOMETRY_TRT_ENDCAPELEMENT_H
+#define TRT_READOUTGEOMETRY_TRT_ENDCAPELEMENT_H
+
 #include "TRT_ReadoutGeometry/TRT_EndcapCode.h"
 #include "TRT_ReadoutGeometry/TRT_BaseElement.h"
 #include "TRT_ReadoutGeometry/TRT_EndcapDescriptor.h"
@@ -99,15 +98,15 @@ namespace InDetDD {
     private:
       /** These transforms are effectively to the local coord
         system of a straw derived from GeoModel -> hence CLHEP */
-      virtual HepGeom::Transform3D calculateStrawTransform(int straw) const override;
+      virtual HepGeom::Transform3D calculateStrawTransform(int straw, GeoAlignmentStore* alignStore) const override;
       HepGeom::Transform3D calculateLocalStrawTransform(int straw) const;
 
       /** return the surface of the element */
       virtual const Trk::Surface & elementSurface() const override;
 
       /** create the cache for the element */
-      virtual void createSurfaceCache() const override;
-      SurfaceCache createSurfaceCacheHelper() const;
+      virtual void createSurfaceCache(GeoAlignmentStore* alignStore) const override;
+      SurfaceCache createSurfaceCacheHelper(GeoAlignmentStore* alignStore) const;
       /** create the cache for the straw of identifier id */
       void createSurfaceCache(Identifier id) const;
 
