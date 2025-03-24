@@ -5,7 +5,7 @@
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_ckf_shifter_last
+# art-html: dcube_athena_acts
 # art-athena-mt: 4
 
 lastref_dir=last_results
