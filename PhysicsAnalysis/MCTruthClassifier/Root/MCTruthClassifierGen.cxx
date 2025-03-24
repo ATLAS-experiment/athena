@@ -299,9 +299,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     } while ((MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)));
 
     if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
-        abs(pPDG) == 35 || abs(pPDG) == 36 || abs(pPDG) == 37 || // MSSM Higgs bosons
-        abs(pPDG) == 32 || abs(pPDG) == 33 || abs(pPDG) == 34 || // Heavy Bosons (Z' Z'' W'+)
-        MC::isTop(pPDG) ||
+        MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
         abs(pPDG) == 9900024 || abs(pPDG) == 9900012 || abs(pPDG) == 9900014 || abs(pPDG) == 9900016 || // Left-right symmetric model WBoson || Right-handed NU_E || Right-handed NU_MU || Right-handed NU_TAU
         (abs(pPDG) < 2000040 && abs(pPDG) > 1000001)) // FIXME This is nearly MC::isSUSY(pPDG), but slightly stricter.
       mother = MotherParent;
@@ -506,9 +504,9 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
 
   if (MC::isHiggs(motherPDG)) return Higgs;
 
-  if (abs(motherPDG) == 35 || abs(motherPDG) == 36 || abs(motherPDG) == 37) return HiggsMSSM;  // MSSM Higgs bosons.
+  if (MC::isMSSMHiggs(motherPDG)) return HiggsMSSM; // MSSM Higgs bosons
 
-  if (abs(motherPDG) == 32 || abs(motherPDG) == 33 || abs(motherPDG) == 34) return HeavyBoson;  // Heavy Bosons (Z' Z'' W'+).
+  if (MC::isHeavyBoson(motherPDG)) return HeavyBoson;  // Heavy bosons( Z', Z'', W'+)
 
   if (MC::isMuon(motherPDG)) return Mu;
   if (MC::isTau(motherPDG)) {
@@ -604,9 +602,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     } while ((MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)));
 
     if (MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
-        abs(pPDG) == 35 || abs(pPDG) == 36 || abs(pPDG) == 37 || // MSSM Higgs bosons
-        abs(pPDG) == 32 || abs(pPDG) == 33 || abs(pPDG) == 34 || // Heavy Bosons (Z' Z'' W'+)
-        MC::isTop(pPDG) ||
+        MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
         abs(pPDG) == 9900024 || abs(pPDG) == 9900012 || abs(pPDG) == 9900014 || abs(pPDG) == 9900016 ||  // Left-right symmetric model WBoson || Right-handed NU_E || Right-handed NU_MU || Right-handed NU_TAU
         (abs(pPDG) < 2000040 && abs(pPDG) > 1000001)) { // FIXME This is nearly MC::isSUSY(pPDG), but slightly stricter.
       if (info) info->setMotherProperties(mother);
@@ -750,9 +746,9 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
 
   if (MC::isHiggs(motherPDG)) return Higgs;
 
-  if (abs(motherPDG) == 35 || abs(motherPDG) == 36 || abs(motherPDG) == 37) return HiggsMSSM; // MSSM Higgs bosons
+  if (MC::isMSSMHiggs(motherPDG)) return HiggsMSSM; // MSSM Higgs bosons
 
-  if (abs(motherPDG) == 32 || abs(motherPDG) == 33 || abs(motherPDG) == 34)  return HeavyBoson; // Heavy Bosons (Z' Z'' W'+)
+  if (MC::isHeavyBoson(motherPDG))  return HeavyBoson;  // Heavy bosons( Z', Z'', W'+)
 
   if (abs(motherPDG) == 9900024) return WBosonLRSM; // Left-right symmetric model WBoson
   if (abs(motherPDG) == 9900012) return NuREle; // Right-handed NU_E
@@ -933,8 +929,8 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
   }
 
   if (MC::isHiggs(motherPDG)) return Higgs;
-  if (abs(motherPDG) == 35 || abs(motherPDG) == 36 || abs(motherPDG) == 37) return HiggsMSSM;  // MSSM Higgs bosons.
-  if (abs(motherPDG) == 32 || abs(motherPDG) == 33 || abs(motherPDG) == 34) return HeavyBoson; // Heavy Bosons (Z' Z'' W'+)
+  if (MC::isMSSMHiggs(motherPDG)) return HiggsMSSM; // MSSM Higgs bosons
+  if (MC::isHeavyBoson(motherPDG)) return HeavyBoson; // Heavy bosons( Z', Z'', W'+)
   if (abs(motherPDG) == 9900024) return WBosonLRSM; // Left-right symmetric model WBoson
   if (abs(motherPDG) == 9900016) return NuRTau; // Right-handed NU_TAU
   if (MC::isSUSY(motherPDG)) return SUSY;
@@ -1189,8 +1185,8 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
 
   if (MC::isHiggs(motherPDG)) return Higgs;
   if (abs(motherPDG) == MC::PI0) return PiZero;
-  if (abs(motherPDG) == 35 || abs(motherPDG) == 36 || abs(motherPDG) == 37) return HiggsMSSM;  // MSSM Higgs bosons.
-  if (abs(motherPDG) == 32 || abs(motherPDG) == 33 || abs(motherPDG) == 34 || abs(motherPDG) == 5100039 ) return HeavyBoson; // Heavy Bosons (Z' Z'' W'+) + KK excited graviton
+  if (MC::isMSSMHiggs(motherPDG)) return HiggsMSSM; // MSSM Higgs bosons
+  if (MC::isHeavyBoson(motherPDG) || std::abs(motherPDG) == 5100039 ) return HeavyBoson; // Heavy Bosons (Z' Z'' W'+) + KK excited graviton
 
   if (MC::isSUSY(motherPDG)) return SUSY;
   if (MC::isBSM(motherPDG)) return OtherBSM;
@@ -1280,9 +1276,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
     } while ((std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG)));
 
     if (std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
-        std::abs(pPDG) == 35 || std::abs(pPDG) == 36 || std::abs(pPDG) == 37 || // MSSM Higgs bosons.
-        std::abs(pPDG) == 32 || std::abs(pPDG) == 33 || std::abs(pPDG) == 34 || // Heavy Bosons (Z' Z'' W'+)
-        MC::isTop(pPDG) ||
+        MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) ||  // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
         std::abs(pPDG) == 9900024 || std::abs(pPDG) == 9900012 || std::abs(pPDG) == 9900014 || std::abs(pPDG) == 9900016 || // Left-right symmetric model WBoson || Right-handed NU_E || Right-handed NU_MU || Right-handed NU_TAU
         (std::abs(pPDG) < 2000040 && std::abs(pPDG) > 1000001)) { // FIXME This is nearly MC::isSUSY(pPDG), but slightly stricter.
       mother = MotherParent;
@@ -1448,8 +1442,8 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   //-- McAtNLo
 
   if (MC::isHiggs(motherPDG)) return Higgs;
-  if (abs(motherPDG) == 35 || abs(motherPDG) == 36 || abs(motherPDG) == 37) return HiggsMSSM;  // MSSM Higgs bosons.
-  if (abs(motherPDG) == 32 || abs(motherPDG) == 33 || abs(motherPDG) == 34) return HeavyBoson; // Heavy Bosons (Z' Z'' W'+)
+  if (MC::isMSSMHiggs(motherPDG)) return HiggsMSSM; // MSSM Higgs bosons
+  if (MC::isHeavyBoson(motherPDG)) return HeavyBoson; // Heavy bosons( Z', Z'', W'+)
 
   if (MC::isTau(motherPDG)) {
     ParticleOrigin tauOrig = defOrigOfTau(mcTruthTES, mother, motherPDG, info);
