@@ -30,9 +30,11 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
                       ('IDCInDetBSErrContainer_Cache' ,     self.flags.Trigger.ITkTracking.SCTFlaggedCondCacheKey ),
                       ('SpacePointCache',                   self.flags.Trigger.ITkTracking.SpacePointCachePix),
                       ('SpacePointCache',                   self.flags.Trigger.ITkTracking.SpacePointCacheSCT),
+                      ('InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkPixelDetectorElementStatus' ),
+                      ('InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkStripDetectorElementStatus' ),
                       ('xAOD::EventInfo',                   'EventInfo'),
                       ('TrigRoiDescriptorCollection',       str(self.rois)),
-                      ( 'TagInfo' ,                         'DetectorStore+ProcessingTags' )} )
+                      ('TagInfo' ,                          'DetectorStore+ProcessingTags' )} )
 
     if self.flags.Input.isMC:
         ViewDataVerifier.DataObjects |= {( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
@@ -66,8 +68,6 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
     from InDetConfig.InDetPrepRawDataFormationConfig import ITkTrigPixelClusterizationCfg, ITkTrigStripClusterizationCfg
     acc.merge(ITkTrigPixelClusterizationCfg(self.flags, roisKey=self.rois, signature=signature))
     acc.merge(ITkTrigStripClusterizationCfg(self.flags, roisKey=self.rois, signature=signature))
-    from InDetConfig.TrackRecoConfig import SiDetectorElementStatusCfg
-    acc.merge(SiDetectorElementStatusCfg(self.flags,f"_{signature}"))
     return acc
         
   def viewDataVerifierAfterPattern(self, viewVerifier='IDViewDataVerifierForAmbi') -> ComponentAccumulator:
