@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
@@ -23,6 +23,18 @@
 #include "ROOT/RField.hxx"
 
 using std::string;
+
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+   using ROOT::RNTupleDescriptor;
+   using ROOT::RFieldDescriptor;
+   using ROOT::DescriptorId_t;
+   using ROOT::kInvalidDescriptorId;
+#else
+   using ROOT::Experimental::RNTupleDescriptor;
+   using ROOT::Experimental::RFieldDescriptor;
+   using ROOT::Experimental::DescriptorId_t;
+   using ROOT::Experimental::kInvalidDescriptorId;
+#endif
 
 namespace {
 
@@ -87,7 +99,7 @@ getAuxElementType( bool standalone, std::string& elementTypeName, const std::str
 
 SG::auxid_t
 getAuxIdForAttribute(const SG::AuxTypeRegistry& r,
-                     const ROOT::Experimental::RNTupleDescriptor& desc,
+                     const RNTupleDescriptor& desc,
                      const std::string& field_prefix,
                      const std::string& attr_name,
                      const std::string& attr_type,
@@ -96,7 +108,7 @@ getAuxIdForAttribute(const SG::AuxTypeRegistry& r,
 
 SG::auxid_t
 getLinkedAuxId (const SG::AuxTypeRegistry& r,
-                const ROOT::Experimental::RNTupleDescriptor& desc,
+                const RNTupleDescriptor& desc,
                 const std::string& field_prefix,
                 const std::string& attr_name,
                 const std::string& attr_type,
@@ -104,15 +116,6 @@ getLinkedAuxId (const SG::AuxTypeRegistry& r,
 {
   SG::auxid_t linked_auxid = SG::null_auxid;
   if (SG::AuxTypeRegistry::classNameHasLink (attr_type)) {
-    using ROOT::Experimental::RFieldDescriptor;
-    using ROOT::Experimental::RNTupleDescriptor;
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-    using ROOT::DescriptorId_t;
-    using ROOT::kInvalidDescriptorId;
-#else
-    using ROOT::Experimental::DescriptorId_t;
-    using ROOT::Experimental::kInvalidDescriptorId;
-#endif
     std::string linked_attr = SG::AuxTypeRegistry::linkedName (attr_name);
     DescriptorId_t did = desc.FindFieldId (field_prefix + linked_attr);
     if (did != kInvalidDescriptorId) {
@@ -132,7 +135,7 @@ getLinkedAuxId (const SG::AuxTypeRegistry& r,
 
 SG::auxid_t
 getAuxIdForAttribute(const SG::AuxTypeRegistry& r,
-                     const ROOT::Experimental::RNTupleDescriptor& desc,
+                     const RNTupleDescriptor& desc,
                      const std::string& field_prefix,
                      const std::string& attr_name,
                      const std::string& attr_type,
