@@ -147,7 +147,7 @@ def FTAG_PUCoreCfg(flags, name_tag='FTAG_PU', extra_SmartCollections=None, extra
     
     # Flavour tagging (Mario)
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
-    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowByVertexJets"], ByVertex=True))
+    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowByVertexJets"], ByVertex=True, dzCut_vec=[5], useMinZ0Vertex_vec=[True,False]))
   
     # Output stream    
     FTAG_PUItemList = FTAG_PUSlimmingHelper.GetItemList()
