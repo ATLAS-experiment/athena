@@ -202,7 +202,26 @@ TrigJetHypoTool::decide(const xAOD::JetContainer* jets,
     j->getAttribute("dipz20231122_negLogSigma2", this_negLogSigma2);
     auto mon_dipz_z = Monitored::Scalar( "dipz_z", this_z);
     auto mon_dipz_negLogSigma2 = Monitored::Scalar( "dipz_negLogSigma2", this_negLogSigma2);    
-    auto monitor_group_passingjets = Monitored::Group( m_monTool, mon_jetEt, mon_jetEta, mon_jetPhi , mon_dipz_z, mon_dipz_negLogSigma2);
+    float this_GN2X_phbb{999.}, this_GN2X_phcc{999.}, this_GN2X_pqcd{999.}, this_GN2X_ptop{999.};
+    j->getAttribute("GN2Xv01_phbb", this_GN2X_phbb);
+    j->getAttribute("GN2Xv01_phcc", this_GN2X_phcc);
+    j->getAttribute("GN2Xv01_ptop", this_GN2X_ptop);
+    j->getAttribute("GN2Xv01_pqcd", this_GN2X_pqcd);
+    auto mon_GN2X_phbb = Monitored::Scalar("GN2Xv01_phbb", this_GN2X_phbb);
+    auto mon_GN2X_phcc = Monitored::Scalar("GN2Xv01_phcc", this_GN2X_phcc);
+    auto mon_GN2X_ptop = Monitored::Scalar("GN2Xv01_ptop", this_GN2X_ptop);
+    auto mon_GN2X_pqcd = Monitored::Scalar("GN2Xv01_pqcd", this_GN2X_pqcd);
+    float this_GN2X_discriminant{999.};
+    if (this_GN2X_phbb > 0.){
+        float top_frac{0.25};
+        float denom = this_GN2X_pqcd*(1. - top_frac) + this_GN2X_ptop * top_frac;
+        if (denom > 0.){
+            this_GN2X_discriminant = log(this_GN2X_phbb/denom);
+        }
+    }
+    auto mon_GN2X_discriminant = Monitored::Scalar("GN2Xv01_discriminant", this_GN2X_discriminant);
+    auto monitor_group_passingjets = Monitored::Group( m_monTool, mon_jetEt, mon_jetEta, mon_jetPhi , mon_dipz_z, mon_dipz_negLogSigma2, mon_jetMass, mon_GN2X_phbb, mon_GN2X_phcc, mon_GN2X_ptop, mon_GN2X_pqcd, mon_GN2X_discriminant);
+
   }
   //monitor the passing jets for each leg (there should only be one per chain!)
   auto legInds = jetCollector.legInds();

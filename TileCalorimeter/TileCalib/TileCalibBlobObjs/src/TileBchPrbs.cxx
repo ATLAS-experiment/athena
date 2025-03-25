@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -41,6 +41,7 @@ TileBchPrbs::initPrbDesc()
   prbNames[TileBchPrbs::NoCis                  ] = "No CIS calibration";
   prbNames[TileBchPrbs::BadCis                 ] = "Bad CIS calibration";
   prbNames[TileBchPrbs::IgnoredByDQV           ] = "Ignored by DQV";
+  prbNames[TileBchPrbs::HalfGain               ] = "Half gain";
 
   //=== channel
   prbNames[TileBchPrbs::GeneralMaskChannel     ] = "Channel masked (unspecified)";

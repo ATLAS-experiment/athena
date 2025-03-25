@@ -33,23 +33,28 @@ StatusCode CaloNoiseCondAlg::initialize() {
     ATH_MSG_INFO("Will compute electronic noise");
     m_noiseType=CaloNoise::ELEC;
   }
-  else if (noiseKey=="pileupNoise") {
+  else if (noiseKey == "electronicNoiseNoHV") {
+    ATH_MSG_INFO("Will compute electronic noise without HV corrections");
+    m_noiseType = CaloNoise::ELEC;
+    if (m_useHVCorr) {
+        ATH_MSG_WARNING("Inconsistent configuration, set useHVCorr=False");
+        m_useHVCorr=false;
+    }
+  } 
+  else if (noiseKey == "pileupNoise") {
     ATH_MSG_INFO("Will compute pileup noise");
     m_noiseType=CaloNoise::PILEUP;
     if (m_useHVCorr) {
       ATH_MSG_INFO("Disabling HV correction, only pile-up noise");
     }
     m_useHVCorr=false;
-  }
-  else if (noiseKey=="totalNoise") {
+  } else if (noiseKey == "totalNoise") {
     m_noiseType=CaloNoise::TOTAL;
     ATH_MSG_INFO("Will compute total (electronic + pileup)  noise");
-  }
-  else {
+  } else {
     ATH_MSG_ERROR("Unexpected noise key given: " <<  noiseKey << ". Expeced 'electronicNoise' or 'pileupNoise' or 'totalNoise'.");
     return StatusCode::FAILURE;
   }
-
 
   ATH_CHECK( m_hvCorrKey.initialize(m_useHVCorr) );
 

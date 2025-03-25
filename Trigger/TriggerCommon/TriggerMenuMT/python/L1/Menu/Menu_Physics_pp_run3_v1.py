@@ -81,7 +81,6 @@ def defineMenu():
         'L1_MU8F_cTAU20M_3jJ30',
         'L1_eEM18M_2eTAU20M_jJ55_3jJ30',
         'L1_MU8F_eTAU30M',
-        'L1_MU8F_cTAU30M',
         'L1_eEM18M_2cTAU20M_4jJ30',
         
         # combined tau - xe

@@ -9,7 +9,7 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 @AccumulatorCache
 def CaloNoiseCondAlgCfg(flags, noisetype="totalNoise"):
-    if noisetype not in ("electronicNoise","pileupNoise","totalNoise"):
+    if noisetype not in ("electronicNoise","pileupNoise","totalNoise","electronicNoiseNoHV"):
         raise RuntimeError("Requested noise of unknown type %s" % noisetype)
 
     noiseAlgName="Calo_"+noisetype+"Alg"
@@ -109,12 +109,14 @@ def CaloNoiseCondAlgCfg(flags, noisetype="totalNoise"):
             result.merge(addFolders(flags,"/TILE/OFL02/NOISE/CELL","TILE_OFL",className="CondAttrListCollection"))
 
 
-            if flags.LAr.doHVCorr:
-                log.info("Run2 & doLArHVCorr=True: Will rescale noise automatically for HV trips")
+            if flags.LAr.doHVCorr and noisetype != "electronicNoiseNoHV":
+                log.info("Run 2/3 & doLArHVCorr=True: Will rescale noise automatically for HV trips")
                 theCaloNoiseAlg.useHVCorr=True
                 from LArCalibUtils.LArHVScaleConfig import LArHVScaleCfg
                 result.merge(LArHVScaleCfg(flags))
                 pass
+            else:
+                theCaloNoiseAlg.useHVCorr=False        
             pass
         else: #COMP200 case:
             log.info("Configuring CaloNoiseCondAlg for Run1 real data processing")

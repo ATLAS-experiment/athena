@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef EFLOWREC_PFTRACKPRESELALG_H
 #define EFLOWREC_PFTRACKPRESELALG_H
@@ -7,6 +7,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
@@ -31,6 +32,8 @@ class PFTrackPreselAlg : public AthReentrantAlgorithm {
       this, "InputTracks", "", "The input track selection"};
     SG::WriteHandleKey<xAOD::TrackParticleContainer> m_outputTracksKey{
       this, "OutputTracks", "", "The output preselected track collection"};
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_outputDecorKey{
+      this, "OutputDecor" , "passPFTrackPresel", "Output decoration"};
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelTool{
       this, "TrackSelTool", "", "The track selection tool"};
     Gaudi::Property<float> m_upperPtCut{

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //
 //   @file    RoiWriter.cxx
@@ -30,7 +30,7 @@ RoiWriter::RoiWriter( const std::string& name, ISvcLocator* pSvcLocator )
    : AthReentrantAlgorithm( name, pSvcLocator ) {
 }
 
-StatusCode RoiWriter::execute(const EventContext& /*ctx*/) const {
+StatusCode RoiWriter::execute(const EventContext& ctx) const {
 
    ATH_MSG_DEBUG( "In execute()..." );
 
@@ -43,16 +43,23 @@ StatusCode RoiWriter::execute(const EventContext& /*ctx*/) const {
 
    bool just_dandy = true;
 
+   // Create handle keys for use in the loop:
+   SG::ReadHandleKey< TrigRoiDescriptorCollection > rhk("temp");
+   SG::WriteHandleKey< xAOD::RoiDescriptorStore >   whk("temp");
+   ATH_CHECK( rhk.initialize() && whk.initialize() );
+
    // Loop over these container(s):
    for( const std::string& key : keys ) {
+      // Update key to read from:
+      rhk = key;
 
       // Construct the key of the new container:
-      const std::string newKey = ( ( key.find( prefix ) == 0 ) ?
-                                   ( newPrefix + key.substr( prefix.size() ) ) :
-                                   key );
+      whk = ( ( key.find( prefix ) == 0 ) ?
+              ( newPrefix + key.substr( prefix.size() ) ) :
+              key );
 
-      SG::ReadHandle< TrigRoiDescriptorCollection > rh(key);
-      SG::WriteHandle< xAOD::RoiDescriptorStore >   wh(newKey);
+      auto rh = SG::makeHandle(rhk, ctx);
+      auto wh = SG::makeHandle(whk, ctx);
 
       /// check object actually points to something - make sure that we do all
       /// collections that we can, and not barf on the first one that might fail  

@@ -208,7 +208,9 @@ public:
   std::vector< float > t_ZdcTruthParticlePy;
   std::vector< float > t_ZdcTruthParticlePz;
   std::vector< float > t_ZdcTruthParticleEnergy;
-
+  std::vector< int > t_ZdcTruthParticlePid;
+  std::vector< int > t_ZdcTruthParticleStatus;
+  
   float t_ZdcModuleAmp[2][4];
   float t_ZdcModuleTime[2][4];
   float t_ZdcModuleFitAmp[2][4];

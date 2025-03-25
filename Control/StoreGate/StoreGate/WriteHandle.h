@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: WriteHandle.h 797637 2017-02-17 02:32:11Z ssnyder $
 /**
  * @file StoreGate/WriteHandle.h
  * @author S. Binet, P. Calafiura, scott snyder <snyder@bnl.gov>
@@ -95,12 +92,32 @@ public:
 
 
   /**
-   * @brief Constructor with full arguments.
+   * @brief Constructor specifying the key as a string.
    * @param sgkey StoreGate key of the referenced object.
    * @param storename Name of the referenced event store.
    */
   explicit WriteHandle(const std::string& sgkey, 
                        const std::string& storename = StoreID::storeName(StoreID::EVENT_STORE));
+
+
+  /**
+   * @brief Constructor specifying the key as a string, with context.
+   * @param sgkey StoreGate key of the referenced object.
+   * @param ctx The event context.
+   */
+  explicit WriteHandle(const std::string& sgkey,
+                       const EventContext& ctx);
+
+
+  /**
+   * @brief Constructor specifying the key as a string, with context.
+   * @param sgkey StoreGate key of the referenced object.
+   * @param storename Name of the referenced event store.
+   * @param ctx The event context.
+   */
+  explicit WriteHandle(const std::string& sgkey,
+                       const std::string& storename,
+                       const EventContext& ctx);
 
 
   /**
@@ -127,6 +144,12 @@ public:
   explicit WriteHandle (const WriteHandleKey<T>& key, const EventContext& ctx);
 
   
+  // Disallow initialization from a temporary Key object.
+  explicit WriteHandle (SG::WriteHandleKey<T>&& key) = delete; // Not allowed from a temporary.
+  explicit WriteHandle (SG::WriteHandleKey<T>&& key, 
+                        const EventContext& ctx) = delete; // Not allowed from a temporary.
+
+
   /**
    * @brief Copy constructor.
    */
