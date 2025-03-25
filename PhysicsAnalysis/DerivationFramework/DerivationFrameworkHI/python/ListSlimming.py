@@ -88,6 +88,7 @@ def HION4AllVariablesGeneral():
     variables += ["InDetPixelTrackParticles"]
     variables += ["Photons"]
     variables += ["Electrons"]
+    variables += ["ForwardElectrons"]
     variables += ["AntiKt4HIJets"]
     
     return variables
