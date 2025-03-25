@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -248,23 +248,23 @@ std::shared_ptr<const PixelDiodeMatrix> DBM_Module::makeMatrix(double phiPitch, 
     
     std::shared_ptr<const PixelDiodeMatrix> singleChipRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
 							    bigCell, 
-							    normalCell, 
+							    std::move(normalCell), 
 							    diodeColPerCirc-2,
 							    bigCell);
 
     std::shared_ptr<const PixelDiodeMatrix> singleRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
-                                                                                                 nullptr, singleChipRow, circuitsEta, nullptr);
+                                                                                                 nullptr, std::move(singleChipRow), circuitsEta, nullptr);
 
     fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir,
-				      nullptr, singleRow, circuitsPhi*diodeRowPerCirc, nullptr);
+				      nullptr, std::move(singleRow), circuitsPhi*diodeRowPerCirc, nullptr);
   } else if (etaPitchLongEnd == etaPitchLong && (etaPitchLong == etaPitch || circuitsEta == 1)) {
     // normal:normal:normal
     if (m_gmt_mgr->msgLvl(MSG::DEBUG)) m_gmt_mgr->msg(MSG::DEBUG) <<  "DBMModule: Making matrix (normal:normal:normal)" << endmsg;
     std::shared_ptr<const PixelDiodeMatrix> normalCell = PixelDiodeMatrix::construct(phiPitch, etaPitch); 
     std::shared_ptr<const PixelDiodeMatrix> singleRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
-							nullptr, normalCell, circuitsEta*diodeColPerCirc, nullptr);
+							nullptr, std::move(normalCell), circuitsEta*diodeColPerCirc, nullptr);
     fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir,
-				      nullptr, singleRow, circuitsPhi*diodeRowPerCirc, nullptr);
+				      nullptr, std::move(singleRow), circuitsPhi*diodeRowPerCirc, nullptr);
   } else if (etaPitchLongEnd == etaPitch &&  etaPitchLong != etaPitch && circuitsEta > 2) {
     if (m_gmt_mgr->msgLvl(MSG::DEBUG)) m_gmt_mgr->msg(MSG::DEBUG) <<  "DBMModule: Making matrix (normal:normal:long, > 2 chips)" << endmsg;
     // normal:normal:long: > 2 chips
@@ -282,14 +282,14 @@ std::shared_ptr<const PixelDiodeMatrix> DBM_Module::makeMatrix(double phiPitch, 
 								  diodeColPerCirc-2,
 								  bigCell);
     std::shared_ptr<const PixelDiodeMatrix> upperSingleChipRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
-								 bigCell, 
-								 normalCell, 
+								 std::move(bigCell), 
+								 std::move(normalCell), 
 								 diodeColPerCirc-1,
 								 nullptr);
     std::shared_ptr<const PixelDiodeMatrix> singleRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
-							lowerSingleChipRow, middleSingleChipRow, circuitsEta-2, upperSingleChipRow);
+							std::move(lowerSingleChipRow), std::move(middleSingleChipRow), circuitsEta-2, std::move(upperSingleChipRow));
     fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir,
-				      nullptr, singleRow, circuitsPhi*diodeRowPerCirc, nullptr);
+				      nullptr, std::move(singleRow), circuitsPhi*diodeRowPerCirc, nullptr);
   } else if (etaPitchLongEnd == etaPitch &&  etaPitchLong != etaPitch && circuitsEta == 2) {
     // normal:normal:long: 2 chips (current SLHC case)
     if (m_gmt_mgr->msgLvl(MSG::DEBUG)) m_gmt_mgr->msg(MSG::DEBUG) <<  "DBMModule: Making matrix (normal:normal:long, 2 chips)" << endmsg;
@@ -302,14 +302,14 @@ std::shared_ptr<const PixelDiodeMatrix> DBM_Module::makeMatrix(double phiPitch, 
 								 diodeColPerCirc-1,
 								 bigCell);
     std::shared_ptr<const PixelDiodeMatrix> upperSingleChipRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
-								 bigCell, 
-								 normalCell, 
+								 std::move(bigCell), 
+								 std::move(normalCell), 
 								 diodeColPerCirc-1,
 								 nullptr);
     std::shared_ptr<const PixelDiodeMatrix> singleRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
-							lowerSingleChipRow, upperSingleChipRow, 1, nullptr);
+							std::move(lowerSingleChipRow), std::move(upperSingleChipRow), 1, nullptr);
     fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir,
-				      nullptr, singleRow, circuitsPhi*diodeRowPerCirc, nullptr);
+				      nullptr, std::move(singleRow), circuitsPhi*diodeRowPerCirc, nullptr);
   } else if (circuitsEta == 1 ||  (etaPitchLongEnd != etaPitch &&  etaPitchLong == etaPitch )){ // etaPitchLongEnd != etaPitch at this stage
     // end:normal:end  (for single chip)
     // end:normal:normal  (not likely)
@@ -319,11 +319,11 @@ std::shared_ptr<const PixelDiodeMatrix> DBM_Module::makeMatrix(double phiPitch, 
     
     std::shared_ptr<const PixelDiodeMatrix> singleRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
 							    bigCell, 
-							    normalCell, 
+							    std::move(normalCell), 
 							    circuitsEta*diodeColPerCirc-2,
 							    bigCell);
     fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir,
-				      nullptr, singleRow, circuitsPhi*diodeRowPerCirc, nullptr);
+				      nullptr, std::move(singleRow), circuitsPhi*diodeRowPerCirc, nullptr);
   } else {
     // end:normal:long    (not likely)
     if (m_gmt_mgr->msgLvl(MSG::DEBUG)) m_gmt_mgr->msg(MSG::DEBUG)<<  "DBMModule: Making matrix (end:normal:long)" << endmsg;
@@ -342,14 +342,14 @@ std::shared_ptr<const PixelDiodeMatrix> DBM_Module::makeMatrix(double phiPitch, 
 								  diodeColPerCirc-2,
 								  bigCell);
     std::shared_ptr<const PixelDiodeMatrix> upperSingleChipRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
-								 bigCell, 
-								 normalCell, 
+								 std::move(bigCell), 
+								 std::move(normalCell), 
 								 diodeColPerCirc-2,
-								 endCell);
+								 std::move(endCell));
     std::shared_ptr<const PixelDiodeMatrix> singleRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
-							lowerSingleChipRow, middleSingleChipRow, circuitsEta-2, upperSingleChipRow);
+							std::move(lowerSingleChipRow), std::move(middleSingleChipRow), circuitsEta-2, std::move(upperSingleChipRow));
     fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir,
-				      nullptr, singleRow, circuitsPhi*diodeRowPerCirc, nullptr);
+				      nullptr, std::move(singleRow), circuitsPhi*diodeRowPerCirc, nullptr);
     
   }
 

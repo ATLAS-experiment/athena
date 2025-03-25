@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -237,14 +237,14 @@ std::shared_ptr<const PixelDiodeMatrix>  GeoPixelSiCrystal::makeMatrix(double ph
 								  diodeColPerCirc-2,
 								  bigCell);
     std::shared_ptr<const PixelDiodeMatrix> upperSingleChipRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
-								 bigCell, 
-								 normalCell, 
+								 std::move(bigCell), 
+								 std::move(normalCell), 
 								 diodeColPerCirc-1,
 								 nullptr);
     std::shared_ptr<const PixelDiodeMatrix> singleRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
 							std::move(lowerSingleChipRow), std::move(middleSingleChipRow), circuitsEta-2, std::move(upperSingleChipRow));
     fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir,
-				      nullptr, singleRow, circuitsPhi*diodeRowPerCirc, nullptr);
+				      nullptr, std::move(singleRow), circuitsPhi*diodeRowPerCirc, nullptr);
   } else if (etaPitchLongEnd == etaPitch &&  etaPitchLong != etaPitch && circuitsEta == 2) {
     // normal:normal:long: 2 chips (current SLHC case)
     if (m_gmt_mgr->msgLvl(MSG::DEBUG)) m_gmt_mgr->msg(MSG::DEBUG) <<  "GeoPixelSiCrystal: Making matrix (normal:normal:long, 2 chips)" << endmsg;
@@ -257,14 +257,14 @@ std::shared_ptr<const PixelDiodeMatrix>  GeoPixelSiCrystal::makeMatrix(double ph
 								 diodeColPerCirc-1,
 								 bigCell);
     std::shared_ptr<const PixelDiodeMatrix> upperSingleChipRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
-								 bigCell, 
-								 normalCell, 
+								 std::move(bigCell), 
+								 std::move(normalCell), 
 								 diodeColPerCirc-1,
 								 nullptr);
     std::shared_ptr<const PixelDiodeMatrix> singleRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
 							std::move(lowerSingleChipRow), std::move(upperSingleChipRow), 1, nullptr);
     fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir,
-				      nullptr, singleRow, circuitsPhi*diodeRowPerCirc, nullptr);
+				      nullptr, std::move(singleRow), circuitsPhi*diodeRowPerCirc, nullptr);
   } else if (circuitsEta == 1 ||  (etaPitchLongEnd != etaPitch &&  etaPitchLong == etaPitch )){ // etaPitchLongEnd != etaPitch at this stage
     // end:normal:end  (for single chip)
     // end:normal:normal  (not likely)
@@ -278,7 +278,7 @@ std::shared_ptr<const PixelDiodeMatrix>  GeoPixelSiCrystal::makeMatrix(double ph
 							    circuitsEta*diodeColPerCirc-2,
 							    bigCell);
     fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir,
-				      nullptr, singleRow, circuitsPhi*diodeRowPerCirc, nullptr);
+				      nullptr, std::move(singleRow), circuitsPhi*diodeRowPerCirc, nullptr);
   } else {
     // end:normal:long    (not likely)
     if (m_gmt_mgr->msgLvl(MSG::DEBUG)) m_gmt_mgr->msg(MSG::DEBUG) <<  "GeoPixelSiCrystal: Making matrix (end:normal:long)" << endmsg;
@@ -297,14 +297,14 @@ std::shared_ptr<const PixelDiodeMatrix>  GeoPixelSiCrystal::makeMatrix(double ph
 								  diodeColPerCirc-2,
 								  bigCell);
     std::shared_ptr<const PixelDiodeMatrix> upperSingleChipRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
-								 bigCell, 
-								 normalCell, 
+								 std::move(bigCell), 
+								 std::move(normalCell), 
 								 diodeColPerCirc-2,
-								 endCell);
+								 std::move(endCell));
     std::shared_ptr<const PixelDiodeMatrix> singleRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
 							std::move(lowerSingleChipRow), std::move(middleSingleChipRow), circuitsEta-2, std::move(upperSingleChipRow));
     fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir,
-				      nullptr, singleRow, circuitsPhi*diodeRowPerCirc, nullptr);
+				      nullptr, std::move(singleRow), circuitsPhi*diodeRowPerCirc, nullptr);
     
   }
 
