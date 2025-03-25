@@ -355,7 +355,7 @@ StatusCode MuonDetectorNavTest::execute() {
                 ATH_MSG_VERBOSE("Identify truth hit at local position in 1st measurement plane" << Amg::toString(localPos));
 
                 auto it_begin = std::ranges::find_if(propagatedHits,
-                                        [this, ID, &localPos](const auto& propagatedHit) {
+                                        [this, ID](const auto& propagatedHit) {
                                         return  m_idHelperSvc->detElId(ID) == m_idHelperSvc->detElId(propagatedHit.id) &&
                                                 layerHash(ID) == layerHash(propagatedHit.id);
                 });
@@ -374,7 +374,7 @@ StatusCode MuonDetectorNavTest::execute() {
                     continue;
                 }
                 auto it_end = std::find_if(it_begin, propagatedHits.end(),
-                [this, ID, &localPos](const auto& propagatedHit) {
+                [this, ID](const auto& propagatedHit) {
                     return  m_idHelperSvc->detElId(ID) != m_idHelperSvc->detElId(propagatedHit.id) ||
                             layerHash(ID) != layerHash(propagatedHit.id);
                 });
