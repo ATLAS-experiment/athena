@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkGaussianSumFilterUtils/KLGaussianMixtureReduction.h"
@@ -215,6 +215,9 @@ struct triangularToIJ
 inline triangularToIJ
 convert(int idx)
 {
+  if (idx<0){
+    throw std::out_of_range("KLGaussianMixtureReduction.cxx::convert : idx is negative");
+  }
   // We prefer to preMap the maximum 2556 elements.
   // Alternatively one can use the following
   // if pre-mapping becomes an issue
