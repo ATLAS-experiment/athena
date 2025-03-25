@@ -248,6 +248,7 @@ class ConfigFactory():
                                alg=FlavourTaggingEventSF,
                                defaults={'selectionName': ''},
                                superBlocks="Jets")
+        print("Ian using yours.")
         from FTagAnalysisAlgorithms.XbbAnalysisConfig import XbbConfig
         self.addAlgConfigBlock(algName="XbbTagging", alg=XbbConfig,
                                superBlocks="Jets")
@@ -424,4 +425,8 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.PrintToolConfigAlgConfig import PrintToolConfigAlgBlock
         self.addAlgConfigBlock(algName="PrintConfiguration", alg=PrintToolConfigAlgBlock)
 
+        # Pixel ToT PID tool
+        from TrackingAnalysisAlgorithms.TrackingAnalysisConfig import PixelToTPIDBlock
+        self.addAlgConfigBlock(algName="PixelToTPID", alg=PixelToTPIDBlock)
+        
         return

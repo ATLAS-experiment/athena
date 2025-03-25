@@ -7,41 +7,43 @@
 
 namespace CP {
 
+  /* //Reentrant 
   PixelDEdxEqualizationAlg::PixelDEdxEqualizationAlg( const std::string& name,
                                                   ISvcLocator* svcLoc )
     : EL::AnaReentrantAlgorithm( name, svcLoc ) {
   }
+  */
 
   StatusCode PixelDEdxEqualizationAlg::initialize() {
 
     ATH_MSG_DEBUG("Initializing PixelDEdxEqualizationAlg");
 
-    /// containers
     ANA_CHECK ( m_trackContainerName.initialize () );
 
     ANA_CHECK ( m_pixelToTPIDDualTool.retrieve() );
-    // ANA_CHECK ( m_pixelToTPIDDualTool->initialize() ); // Not defined in interface.  But in header.
-    // ANA_CHECK ( m_pixelToTPIDDualTool->setProperty("EqualizeClusterMeasurements",true) ); // done through python config?
       
     ATH_CHECK ( m_trackContainerName.initialize() );
+
+    std::string trackContainer = m_trackContainerName.key();
+    m_dEdxEqKey = SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>{
+      this, "dEdxEqName", trackContainer + ".dEdxEq", "SG key for the equalized pixel dE/dx attribute"};
     
     ANA_CHECK ( m_dEdxEqKey.initialize() );
+    ATH_MSG_INFO("Will decorate track container " << m_trackContainerName << " with variable " << m_dEdxEqKey);
     
     return StatusCode::SUCCESS;
   }
 
-  StatusCode PixelDEdxEqualizationAlg::execute(const EventContext& ctx) const {
+  //StatusCode PixelDEdxEqualizationAlg::execute(const EventContext& ctx) const {  //Reentrant
+  StatusCode PixelDEdxEqualizationAlg::execute() {
 
     // Increase the event counter
     m_nEventsProcessed.fetch_add(1, std::memory_order_relaxed);
 
-    SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_trackContainerName, ctx);
+    //SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_trackContainerName, ctx); //Reentrant
+    SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_trackContainerName);
     ATH_CHECK( tracks.isValid() );
     
-    /*// Create decoration handles
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> pixeldEdxEqualDecor(m_pixeldEdxEqual, ctx);
-    ATH_CHECK( pixeldEdxEqualDecor.isValid() );*/
-
     // Increase the track counter
     unsigned int nTracks = tracks->size();
     m_nTracksProcessed.fetch_add(nTracks, std::memory_order_relaxed);
@@ -76,6 +78,7 @@ namespace CP {
       ///    If a cluster is too close to a sensor edge, it is ignored in the calculation.
       ///    So some clusters included in the truncated mean during reco (ESD) may not be included here (xAOD).  And vice versa. 
 
+      ATH_MSG_INFO("Will decorate  variable " << m_dEdxEqKey << " with value " << pixeldEdxEqual);
       SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > dEdxEqHandle(m_dEdxEqKey);
       dEdxEqHandle(*trk) = pixeldEdxEqual;
 

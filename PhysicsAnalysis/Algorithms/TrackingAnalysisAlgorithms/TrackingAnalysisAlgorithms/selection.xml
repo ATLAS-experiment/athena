@@ -4,5 +4,6 @@
   <class name="CP::VertexSelectionAlg" />
   <class name="CP::TrackParticleMergerAlg" />
   <class name="CP::SecVertexTruthMatchAlg" />
+  <class name="CP::PixelDEdxEqualizationAlg" />
 
 </lcgdict>

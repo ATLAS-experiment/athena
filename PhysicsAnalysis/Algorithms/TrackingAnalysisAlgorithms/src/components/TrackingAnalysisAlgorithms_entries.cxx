@@ -12,4 +12,5 @@
 DECLARE_COMPONENT( CP::VertexSelectionAlg )
 DECLARE_COMPONENT( CP::TrackParticleMergerAlg )
 DECLARE_COMPONENT( CP::SecVertexTruthMatchAlg )
+DECLARE_COMPONENT( CP::PixelDEdxEqualizationAlg )
 

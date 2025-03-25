@@ -94,7 +94,8 @@ namespace CP {
     }
 
     //// For testing
-    filename = "../athena/InnerDetector/InDetRecTools//PixelToTPIDDualTool/share/nTuple_data_lowMu_flat.root";
+    filename = "../src/athena/InnerDetector/InDetRecTools//PixelToTPIDDualTool/share/nTuple_data_lowMu_flat.root"; // FIXME!!!!
+    //filename = "../athena/InnerDetector/InDetRecTools//PixelToTPIDDualTool/share/nTuple_data_lowMu_flat.root";
 
     if (filename.empty()) {
       ATH_MSG_ERROR("Could not find file: " << filename);

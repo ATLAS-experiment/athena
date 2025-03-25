@@ -5,7 +5,8 @@
 #ifndef TRACKINGANALYSISALGORITHMS_PIXELDEDXEQUALIZATIONALG_H
 #define TRACKINGANALYSISALGORITHMS_PIXELDEDXEQUALIZATIONALG_H
 
-#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
+//#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
+#include <AnaAlgorithm/AnaAlgorithm.h>
 #include <xAODTracking/TrackParticleContainer.h>
 #include <xAODTracking/TrackParticleAuxContainer.h>
 
@@ -42,6 +43,7 @@ namespace CP {
   /// @author Ian Dyckes
   /// @author Simone Pagan Griso
   ///
+  /*
   class PixelDEdxEqualizationAlg final : public EL::AnaReentrantAlgorithm {
 
   public:
@@ -53,10 +55,19 @@ namespace CP {
 
     /// Function executing the algorithm
     StatusCode execute(const EventContext& ctx) const override;
+  */
+
+  class PixelDEdxEqualizationAlg final : public EL::AnaAlgorithm {
+    using EL::AnaAlgorithm::AnaAlgorithm;
+    StatusCode initialize () override;
+    StatusCode execute () override;
+
+
 
   private:
 
-    ToolHandle<CP::IPixelToTPIDDualTool> m_pixelToTPIDDualTool{this, "pixelToTPIDDualTool", "", "tool for pixel dE/dx"};
+    ToolHandle<CP::IPixelToTPIDDualTool> m_pixelToTPIDDualTool{this, "PixelToTPIDDualTool", "", "tool for pixel dE/dx"};
+    //ToolHandle<CP::IPixelToTPIDDualTool> m_pixelToTPIDDualTool{this, "PixelToTPIDDualTool", "CP::PixelToTPIDDualTool/PixelToTPIDDualTool", "tool for pixel dE/dx"}; // ?
 
     /// @name Algorithm properties
     /// @{
@@ -66,12 +77,10 @@ namespace CP {
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackContainerName {
     this, "TrackContainerName", "InDetTrackParticles", "Input track collection to decorate with corrected dE/dx measurements."};
 
-    // Gaudi::Property<std::string> m_trackContainerName{this, "TrackContainer", "InDetTrackParticles", "SG key for the input jet container"};
-  
     /// Decorators
-    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dEdxEqKey{this, "dEdxEqName", "dEdxEq", "SG key for the equalized pixel dE/dx attribute"};
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dEdxEqKey{this, "dEdxEqName", "", "SG key for the equalized pixel dE/dx attribute"}; //set dynamically in initialize.
 
-    /// Counters
+    /// Counters.  Maybe drop?  No longer Reentrant
     mutable std::atomic<unsigned long> m_nEventsProcessed{};
     mutable std::atomic<unsigned long> m_nTracksProcessed{};
 
