@@ -56,12 +56,14 @@ if __name__ == '__main__':
     ## would be os.path.join(base_data, 'tests_00.dat')
 
     # run from  file.
-    hypoTestBench_alg.testsFileName=os.path.join(base_data, 'tests_00.dat')
+    hypoTestBench_alg.testsFileName=os.path.join(base_data,
+                                                 '2025-03-24_tests.dat')
     
-    exp_mults_data =  os.path.join(base_data, 'expected_multiplicity_00.dat')
+    exp_mults_data =  os.path.join(base_data,
+                                   '2025-03-24_expected_multiplicity.dat')
     hypoTestBench_alg.expectedMultsFileName = exp_mults_data
 
-    exp_tobs_data =  os.path.join(base_data, 'expected_tobs_00.dat')
+    exp_tobs_data =  os.path.join(base_data, '2025-03-24_expected_tobs.dat')
     hypoTestBench_alg.expectedTobsFileName = exp_tobs_data
 
     # values for manual testing.

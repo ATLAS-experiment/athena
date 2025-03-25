@@ -195,9 +195,18 @@ namespace GlobalSim {
     
     while (std::getline(tob_stream, padded_line)) {
       auto line = trim(padded_line);
+      // filter out entries with only '0' entries.nThis are used
+      // in VHDL to handle special conditions
+      if (std::all_of(std::cbegin(line),
+		       std::cend(line),
+		      [](const auto& c) {return c == '0';})){
+	continue;
+      }
+
       auto ports_in = GepAlgoHypothesisPortsIn();
       CHECK(hexTOB2bitsetTOB(line, *(ports_in.m_I_eEmTobs)));
 
+ 		       
       fifo->push_back(ports_in);
       
       // the end of the fifo data is signaled by having the top bit
