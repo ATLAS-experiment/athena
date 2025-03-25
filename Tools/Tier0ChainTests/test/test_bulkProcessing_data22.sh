@@ -7,8 +7,6 @@
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 
-conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA22)")
-
 Reco_tf.py \
 --AMI f1328  \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00437548.physics_Main.daq.RAW._lb1044._SFO-15._0002.data" \
@@ -24,7 +22,7 @@ Reco_tf.py \
 --outputDAOD_L1CALO1File="myDAOD_L1CALO1.pool.root" \
 --outputDESDM_PHOJETFile="myDESDM_PHOJET.pool.root" \
 --outputDRAW_TAULHFile="myDRAW_TAULH.data" \
---conditionsTag="${conditions}" \
+--conditionsTag="CONDBR2-BLKPA-2022-15" \
 --imf False
 
 rc1=$?
