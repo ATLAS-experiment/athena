@@ -124,6 +124,7 @@ def RpcRdoToPrepDataToolCfg(flags, suffix ="", RDOContainer = None, **kwargs):
         if flags.Muon.MuonTrigger:
             kwargs["RdoDecoderTool"] = CompFactory.Muon.RpcRDO_Decoder("RpcRDO_Decoder", BCZERO=flags.Trigger.L1MuonSim.RPCNBCZ)
         
+        kwargs.setdefault("isMC", flags.Input.isMC)
         the_tool =  CompFactory.Muon.RpcRdoToPrepDataToolMT(name="RpcPrepDataProviderTool",**kwargs)
         result.setPrivateTools(the_tool)
 
