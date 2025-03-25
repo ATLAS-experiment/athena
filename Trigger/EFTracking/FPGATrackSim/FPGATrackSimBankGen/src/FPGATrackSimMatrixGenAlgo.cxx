@@ -226,133 +226,142 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
     int nSlices = m_FPGATrackSimMapping->SubRegionMap()->getNRegions();
 
     // Get list of hits associated to the current truth track
-    std::vector<FPGATrackSimHit> & track_hits = barcode_hits[track.getBarcode()];
+    std::vector<FPGATrackSimHit> & sector_hits = barcode_hits[track.getBarcode()];
 
     const FPGATrackSimPlaneMap *t_pmap = nullptr;
 
     // Get the hits that will form the actual sector
 
     for (int iSlice = 0; iSlice<nSlices; iSlice++){
-      t_pmap = m_FPGATrackSimMapping->PlaneMap_1st(iSlice);
+      t_pmap = m_FPGATrackSimMapping->PlaneMap_2nd(iSlice);
       
-      for (auto & iHit : track_hits) {
+      for (auto & iHit : sector_hits) {
         t_pmap->map(iHit);
       }
       
-      
+      /* For now, don't do this. If we need regionalized/binned fit constants it needs to come from the road.
       std::vector<FPGATrackSimHit> sector_hits;
       bool success = filterSectorHits(track_hits, sector_hits, track, true, iSlice);
       if (!success) continue; // Skip this track if it has bad hits (not complete, etc.)
+      */
+
       m_h_trackQoP_okHits->Fill(track.getQOverPt());
+      bool success;
       
       // Get the region of this sector
-      int region = getRegion(sector_hits, true);
-      if (region < 0 || region >= m_nRegions) continue;
+      // TODO: do we need this the pattern recognition should deal with it.
+      int region = 0; //sgetRegion(sector_hits, false);
+      //if (region < 0 || region >= m_nRegions) continue;
       m_h_trackQoP_okRegion->Fill(track.getQOverPt());
+
       //For the Hough constants, find the Hough roads
       std::vector<std::shared_ptr<const FPGATrackSimRoad>> houghRoads;
       if (m_doHoughConstants){
-	
-	std::vector<std::shared_ptr<const FPGATrackSimHit>> phits;
-	
-	for (const FPGATrackSimHit& hit : sector_hits) if (hit.isMapped() && hit.isReal()) phits.emplace_back(std::make_shared<const FPGATrackSimHit>(hit));
-	StatusCode sc = m_roadFinderTool->getRoads(phits, houghRoads);
-	if (sc.isFailure()) ATH_MSG_WARNING("Hough Transform -> getRoads() failed");
-	if (m_doSecondStage) { // if doing 2nd stage, we want to get tracks from the road and then do tracking and overlap removal
 
-	  /// map hits as 2nd stage
-	  const FPGATrackSimPlaneMap *pmap_2nd = m_FPGATrackSimMapping->PlaneMap_2nd(iSlice);
-	  for (auto & iHit : track_hits) {
-	    pmap_2nd->map(iHit);
-	  }
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> phits;
 
-	  std::vector<FPGATrackSimTrack> tracks_1st;
-	  ATH_CHECK(m_trackFitterTool_1st->getTracks(houghRoads, tracks_1st));
-	  ATH_CHECK(m_overlapRemovalTool->runOverlapRemoval(tracks_1st));
-	  // Prepare the accumulator struct
-	  std::vector<module_t> modules(m_nLayers_2nd);
-	  FPGATrackSimMatrixAccumulator acc(m_nLayers_2nd, m_nDim_2nd);	
-	  std::vector<FPGATrackSimHit> hits_2nd;
-	  std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_2nd;
-	  success = filterSectorHits(track_hits, hits_2nd, track, false, iSlice); // only look at 2nd stage hits!
-	  
-	  
-	  if (!success) continue; // Skip this track if it has bad hits (not complete, etc.)
-	  // awkward fixme
-	  for (const auto& hit : hits_2nd) {
-	    phits_2nd.push_back(std::make_shared<const FPGATrackSimHit>(hit));
-	  }
-	  
-	  // Use the track extension tool to actually produce a new set of roads.
-	  std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_2nd;
-	  std::vector<std::shared_ptr<const FPGATrackSimTrack>> ptracks_1st;
-	  ptracks_1st.reserve(tracks_1st.size());
-	  for (const auto& track : tracks_1st) {
-	    ptracks_1st.push_back(std::make_shared<const FPGATrackSimTrack>(track));
-	  }
-	  ATH_CHECK(m_trackExtensionTool->extendTracks(phits_2nd, ptracks_1st, roads_2nd));
-	  for (auto road_2nd : roads_2nd) {
-	    std::vector<module_t> modules(m_nLayers_2nd);
-	    FPGATrackSimMatrixAccumulator acc(m_nLayers_2nd, m_nDim_2nd);
-	    acc.pars.qOverPt = road_2nd->getY();
-	    acc.pars.phi = road_2nd->getX();
-	    
-	    std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> modules_acc = {modules, acc};
-	    std::vector<std::shared_ptr<const FPGATrackSimHit>> phits;
-	    ATH_CHECK(makeAccumulator(hits_2nd, track, modules_acc));
-	    
-	    // Add the track to the accumulate map
-	    accumulate(m_sector_cum[region], modules_acc.first, modules_acc.second);
-	    
-	    if (m_dropHitsAndFill)
-	      ATH_CHECK(fillAccumulatorByDropping(hits_2nd, false, acc.pars.phi, acc.pars.qOverPt, modules, m_sector_cum[region], track, iSlice));
-	    
-	    m_nTracksUsed++;
-	  }
-	}
-	else {	
-	  //For each Hough road, make the accumulator
-	  if (!houghRoads.empty()){
-	    double y = 0.0;
-	    double x = 0.0;
-	    
-	    //For each Hough road, make the accumulator
-	    for (auto const &hr : houghRoads){
-	      y = hr->getY();
-	      x = hr->getX();
-	      // Prepare the accumulator struct
-	      std::vector<module_t> modules(m_nLayers_1st);
-	      FPGATrackSimMatrixAccumulator acc(m_nLayers_1st, m_nDim_1st);
-	      acc.pars.qOverPt = y;
-	      acc.pars.phi = x;
-	      std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> modules_acc = {modules, acc};
-	      ATH_CHECK(makeAccumulator(sector_hits, track, modules_acc));
-	      
-	      // Add the track to the accumulate map
-	      accumulate(m_sector_cum[region], modules_acc.first, modules_acc.second);
-	      
-	      if (m_dropHitsAndFill)
-		ATH_CHECK(fillAccumulatorByDropping(sector_hits, true, acc.pars.phi, acc.pars.qOverPt, modules, m_sector_cum[region], track, iSlice));	      
-	      
-	      m_nTracksUsed++;
-	    }
-	  }
-	}
+        ATH_MSG_DEBUG("Starting from some number of sector hits = " << sector_hits.size());
+        for (const FPGATrackSimHit& hit : sector_hits) if (hit.isMapped() && hit.isReal()) phits.emplace_back(std::make_shared<const FPGATrackSimHit>(hit));
+        ATH_MSG_DEBUG("Passing nhits = " << phits.size() << " to road finder");
+        StatusCode sc = m_roadFinderTool->getRoads(phits, houghRoads, truth_tracks);
+        if (sc.isFailure()) ATH_MSG_WARNING("Hough Transform -> getRoads() failed");
+
+        ATH_MSG_DEBUG("We found " << houghRoads.size() << " roads");
+
+        // We now want to just form the accumulator for any valid combination of hits
+        // In first stage mode we'll make the track fitter just generate combinations
+        std::vector<FPGATrackSimTrack> tracks_1st;
+        if (m_doSecondStage) {
+          ATH_CHECK(m_trackFitterTool_1st->getTracks(houghRoads, tracks_1st));
+          ATH_CHECK(m_overlapRemovalTool->runOverlapRemoval(tracks_1st));
+        } else {
+          roadsToTrack(houghRoads, tracks_1st);
+          ATH_MSG_DEBUG("We found " << tracks_1st.size() << " combinations");
+        }
+        for (const auto& track_comb : tracks_1st) {
+          std::vector<FPGATrackSimHit> track_hits = track_comb.getFPGATrackSimHits();
+
+          if (m_doSecondStage) { // if doing 2nd stage, we want to get tracks from the road and then do tracking and overlap removal
+
+            // Prepare the accumulator struct
+            std::vector<module_t> modules(m_nLayers_2nd);
+            FPGATrackSimMatrixAccumulator acc(m_nLayers_2nd, m_nDim_2nd);
+            std::vector<FPGATrackSimHit> hits_2nd;
+            std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_2nd;
+
+            // This will need updating once we have the second stage working again.
+            success = filterSectorHits(track_hits, hits_2nd, track, false, iSlice); // only look at 2nd stage hits!
+
+
+            if (!success) continue; // Skip this track if it has bad hits (not complete, etc.)
+            // awkward fixme
+            for (const auto& hit : hits_2nd) {
+              phits_2nd.push_back(std::make_shared<const FPGATrackSimHit>(hit));
+            }
+
+            // Use the track extension tool to actually produce a new set of roads.
+            std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_2nd;
+            std::vector<std::shared_ptr<const FPGATrackSimTrack>> ptracks_1st;
+            ptracks_1st.reserve(tracks_1st.size());
+            for (const auto& track : tracks_1st) {
+              ptracks_1st.push_back(std::make_shared<const FPGATrackSimTrack>(track));
+            }
+            ATH_CHECK(m_trackExtensionTool->extendTracks(phits_2nd, ptracks_1st, roads_2nd));
+            for (auto road_2nd : roads_2nd) {
+              std::vector<module_t> modules(m_nLayers_2nd);
+              FPGATrackSimMatrixAccumulator acc(m_nLayers_2nd, m_nDim_2nd);
+              acc.pars.qOverPt = road_2nd->getY();
+              acc.pars.phi = road_2nd->getX();
+
+              std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> modules_acc = {modules, acc};
+              std::vector<std::shared_ptr<const FPGATrackSimHit>> phits;
+              ATH_CHECK(makeAccumulator(hits_2nd, track, modules_acc));
+
+              // Add the track to the accumulate map
+              accumulate(m_sector_cum[region], modules_acc.first, modules_acc.second);
+
+              if (m_dropHitsAndFill)
+                ATH_CHECK(fillAccumulatorByDropping(hits_2nd, false, acc.pars.phi, acc.pars.qOverPt, modules, m_sector_cum[region], track, iSlice));
+
+              m_nTracksUsed++;
+            }
+          }
+          else {
+            // For each track combination (from a Hough road)
+            double y = track_comb.getHoughY();
+            double x = track_comb.getHoughX();
+            // Prepare the accumulator struct
+            std::vector<module_t> modules(m_nLayers_1st);
+            FPGATrackSimMatrixAccumulator acc(m_nLayers_1st, m_nDim_1st);
+            acc.pars.qOverPt = y;
+            acc.pars.phi = x;
+            std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> modules_acc = {modules, acc};
+            ATH_CHECK(makeAccumulator(track_hits, track, modules_acc));
+
+            // Add the track to the accumulate map
+            accumulate(m_sector_cum[region], modules_acc.first, modules_acc.second);
+
+            if (m_dropHitsAndFill)
+              ATH_CHECK(fillAccumulatorByDropping(track_hits, true, acc.pars.phi, acc.pars.qOverPt, modules, m_sector_cum[region], track, iSlice));
+
+            m_nTracksUsed++;
+          }
+        }
       }
       else{
-	// Prepare the accumulator struct
-	std::vector<module_t> modules(m_nLayers_1st);
-	FPGATrackSimMatrixAccumulator acc(m_nLayers_1st, m_nDim_1st);
-	std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> modules_acc = {modules, acc};
-	ATH_CHECK(makeAccumulator(sector_hits, track, modules_acc));
-	
-	// Add the track to the accumulate map
-	accumulate(m_sector_cum[region], modules_acc.first, modules_acc.second);      
-	
-	if (m_dropHitsAndFill)
-	  ATH_CHECK(fillAccumulatorByDropping(sector_hits, true, acc.pars.phi, acc.pars.qOverPt, modules, m_sector_cum[region], track, iSlice));
-	
-	m_nTracksUsed++;
+        // Prepare the accumulator struct
+        std::vector<module_t> modules(m_nLayers_1st);
+        FPGATrackSimMatrixAccumulator acc(m_nLayers_1st, m_nDim_1st);
+        std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> modules_acc = {modules, acc};
+        ATH_CHECK(makeAccumulator(sector_hits, track, modules_acc));
+
+        // Add the track to the accumulate map
+        accumulate(m_sector_cum[region], modules_acc.first, modules_acc.second);
+
+        if (m_dropHitsAndFill)
+          ATH_CHECK(fillAccumulatorByDropping(sector_hits, true, acc.pars.phi, acc.pars.qOverPt, modules, m_sector_cum[region], track, iSlice));
+
+        m_nTracksUsed++;
       }
     }
   }
@@ -360,6 +369,71 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
   return StatusCode::SUCCESS;
 }
 
+// Adapted from TrackFitter, but TrackFitter *depends* on fit constants and this algorithm
+void FPGATrackSimMatrixGenAlgo::roadsToTrack(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& houghRoads, std::vector<FPGATrackSimTrack>& track_cands)
+{
+    for (const std::shared_ptr<const FPGATrackSimRoad>& road : houghRoads) {
+
+      FPGATrackSimTrack temp;
+      temp.setNLayers(m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers());
+      temp.setBankID(-1);
+      temp.setPatternID(road->getPID());
+      temp.setHoughX(road->getX());
+      temp.setHoughY(road->getY());
+      temp.setQOverPt(road->getY());
+
+      temp.setSubRegion(road->getSubRegion());
+      temp.setHoughXBin(road->getXBin());
+      temp.setHoughYBin(road->getYBin());
+
+      // This comes from FPGATrackSimFunctions
+      std::vector<std::vector<int>> combs = getComboIndices(road->getNHits_layer());
+      unsigned existing_size = track_cands.size();
+      track_cands.resize(existing_size + combs.size(), temp);
+
+      //get the WC hits:
+      layer_bitmask_t wcbits= road->getWCLayers();
+      // Add the hits from each combination to the track, and set ID
+      for (size_t icomb = 0; icomb < combs.size(); icomb++)
+      {
+        track_cands[existing_size + icomb].setNLayers(m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers());
+        std::vector<int> const & hit_indices = combs[icomb]; // size nLayers
+        for (unsigned layer = 0; layer < m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers(); layer++)
+        {
+            if (hit_indices[layer] < 0) // Set a dummy hit if road has no hits in this layer
+            {
+                FPGATrackSimHit newhit=FPGATrackSimHit();
+                newhit.setLayer(layer);
+                newhit.setSection(0);
+                if (m_FPGATrackSimMapping->PlaneMap_1st(0)->getDim(layer) == 2) newhit.setDetType(SiliconTech::pixel);
+                    else newhit.setDetType(SiliconTech::strip);
+
+                if (wcbits & (1 << layer ) ) {
+                    newhit.setHitType(HitType::wildcard);
+                    newhit.setLayer(layer);
+                }
+
+                track_cands[existing_size + icomb].setFPGATrackSimHit(layer, newhit);
+            }
+            else
+            {
+                const std::shared_ptr<const FPGATrackSimHit> hit = road->getHits(layer)[hit_indices[layer]];
+                // If this is an outer spacepoint, and it is not the same as the inner spacepoint, reject it.
+                // Here we "reject" it by marking the candidate as "invalid", to be rejected later.
+                // That require another field on the track object, but it avoids having to change the sizes
+                // of arrays computed above.
+                if (hit->getHitType() == HitType::spacepoint && (hit->getPhysLayer() % 2) == 1) {
+                    const FPGATrackSimHit inner_hit = track_cands[existing_size + icomb].getFPGATrackSimHits().at(layer - 1);
+                    if ((hit->getX() != inner_hit.getX()) || (hit->getY() != inner_hit.getY()) || (hit->getZ() != inner_hit.getZ())) {
+                        track_cands[existing_size + icomb].setValidCand(false);
+                    }
+                }
+                track_cands[existing_size + icomb].setFPGATrackSimHit(layer, *hit);
+            }
+        }
+      }
+    }
+}
 
 // Converts raw hits from header into logical hits, and filters those in FPGATrackSim layers
 // Could replace this with the RawToLogical tool (but probably won't)
@@ -409,7 +483,10 @@ std::vector<FPGATrackSimTruthTrack> FPGATrackSimMatrixGenAlgo::filterTrainingTra
   for (FPGATrackSimTruthTrack const & track : truth_tracks) {
     if (HepMC::generations(&track) >= 1 || std::abs(track.getPDGCode()) != m_TRAIN_PDG) continue;
     if (std::abs(track.getD0()) > m_D0_THRESHOLD) continue;
-    
+
+    // Actually use the event selection service here to kill anything outside the region.
+    if (!(m_EvtSel->passMatching(track))) continue;
+
     double pt = TMath::Sqrt(track.getPX()*track.getPX() + track.getPY()*track.getPY());
     double pt_GeV = pt / 1000;
     
@@ -671,9 +748,10 @@ int FPGATrackSimMatrixGenAlgo::getRegion(std::vector<FPGATrackSimHit> const & hi
   }
 
   // For now just give preference to lowest region index for simplicity
-  for (int region = 0; region < m_nRegions; region++)
+  for (int region = 0; region < m_nRegions; region++) {
     if (region_mask[region])
       return region;
+  }
 
   return -1;
 }
