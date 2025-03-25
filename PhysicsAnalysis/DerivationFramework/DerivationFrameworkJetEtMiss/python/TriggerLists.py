@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
 from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod, TriggerType
+from DerivationFrameworkPhys.TriggerListsHelper import getTapisSession
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from AthenaConfiguration.Enums import LHCPeriod
 import re
@@ -21,9 +22,16 @@ def jetTrig(flags):
 
 # electron triggers (unprescaled)
 def single_el_Trig(flags):
-	TriggerAPI.setConfigFlags(flags)
-	API_singleElTriggers = TriggerAPI.getLowestUnprescaled(TriggerPeriod.y2015, TriggerType.el_single) + TriggerAPI.getLowestUnprescaled(TriggerPeriod.y2016, TriggerType.el_single) + TriggerAPI.getLowestUnprescaled(TriggerPeriod.y2017, TriggerType.el_single) + TriggerAPI.getLowestUnprescaled(TriggerPeriod.y2018, TriggerType.el_single) + TriggerAPI.getLowestUnprescaled(TriggerPeriod.future, TriggerType.el_single)
-	return API_singleElTriggers
+	if flags.Trigger.EDMVersion <= 2:
+		TriggerAPI.setConfigFlags(flags)
+		allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
+		trigger_names = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.el,  livefraction=0.8)
+	else:
+		session = getTapisSession(flags)
+		lf = 0.8 # Prescale weighted life fraction of the GRL's LBs
+		trigger_names = set()
+		trigger_names = list(session.getLowestUnprescaled(triggerType=TriggerType.el, livefraction=lf).union(trigger_names))
+	return trigger_names
 
 def multi_el_Trig(flags):
 	TriggerAPI.setConfigFlags(flags)
@@ -32,9 +40,16 @@ def multi_el_Trig(flags):
 
 # single muon triggers (unprescaled)
 def single_mu_Trig(flags):
-	TriggerAPI.setConfigFlags(flags)
-	API_singleMuTriggers = TriggerAPI.getLowestUnprescaled(TriggerPeriod.y2015, TriggerType.mu_single) + TriggerAPI.getLowestUnprescaled(TriggerPeriod.y2016, TriggerType.mu_single) + TriggerAPI.getLowestUnprescaled(TriggerPeriod.y2017, TriggerType.mu_single) + TriggerAPI.getLowestUnprescaled(TriggerPeriod.y2018, TriggerType.mu_single) + TriggerAPI.getLowestUnprescaled(TriggerPeriod.future, TriggerType.mu_single)
-	return API_singleMuTriggers
+	if flags.Trigger.EDMVersion <= 2:
+		TriggerAPI.setConfigFlags(flags)
+		allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
+		trigger_names = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.mu,  livefraction=0.8)
+	else:
+		session = getTapisSession(flags)
+		lf = 0.8 # Prescale weighted life fraction of the GRL's LBs
+		trigger_names = set()
+		trigger_names = list(session.getLowestUnprescaled(triggerType=TriggerType.mu, livefraction=lf).union(trigger_names))
+	return trigger_names
 
 def multi_mu_Trig(flags):
 	TriggerAPI.setConfigFlags(flags)
@@ -43,15 +58,29 @@ def multi_mu_Trig(flags):
 
 # xe triggers (unprescaled)
 def MET_Trig(flags):
-	TriggerAPI.setConfigFlags(flags)
-	API_MET_Triggers = TriggerAPI.getLowestUnprescaled(TriggerPeriod.y2015, TriggerType.xe) + TriggerAPI.getLowestUnprescaled(TriggerPeriod.y2016, TriggerType.xe) + TriggerAPI.getLowestUnprescaled(TriggerPeriod.y2017, TriggerType.xe) + TriggerAPI.getLowestUnprescaled(TriggerPeriod.y2018, TriggerType.xe) + TriggerAPI.getLowestUnprescaled(TriggerPeriod.future, TriggerType.xe)
-	return API_MET_Triggers
+	if flags.Trigger.EDMVersion <= 2:
+		TriggerAPI.setConfigFlags(flags)
+		allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
+		trigger_names = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.xe,  livefraction=0.8)
+	else:
+		session = getTapisSession(flags)
+		lf = 0.8 # Prescale weighted life fraction of the GRL's LBs
+		trigger_names = set()
+		trigger_names = list(session.getLowestUnprescaled(triggerType=TriggerType.xe, livefraction=lf).union(trigger_names))
+	return trigger_names
 
 # photon triggers (prescaled and unprescaled)
 def single_photon_Trig(flags):
-	TriggerAPI.setConfigFlags(flags)
-	API_singlePhotonTriggers = TriggerAPI.getActive(TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future, TriggerType.g_single)
-	return API_singlePhotonTriggers
+	if flags.Trigger.EDMVersion <= 2:
+		TriggerAPI.setConfigFlags(flags)
+		allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
+		trigger_names = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.g,  livefraction=0.8)
+	else:
+		session = getTapisSession(flags)
+		lf = 0.8 # Prescale weighted life fraction of the GRL's LBs
+		trigger_names = set()
+		trigger_names = list(session.getLowestUnprescaled(triggerType=TriggerType.g, livefraction=lf).union(trigger_names))
+	return trigger_names
 
 # get jet triggers
 # Run 2: returns list returned by trigAPI
