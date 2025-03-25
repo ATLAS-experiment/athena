@@ -5,7 +5,7 @@
 
 #include "GenericTob.h"
 #include "AlgoDataTypes.h"
-
+#include "binStrToHexStr.h"
 #include <sstream>
 
 namespace GlobalSim {
@@ -94,8 +94,6 @@ namespace GlobalSim {
     for(std::size_t i = 0; i != GenericOverflowWidth; ++i) {
       result[begin+i] = m_Overflow_bits[i];
     }
-
-    
     
     return result;
 
@@ -104,14 +102,19 @@ namespace GlobalSim {
 }
 
 std::ostream& operator << (std::ostream& os, const GlobalSim::GenericTob& tob) {
-  
-  
+
   os << "GlobalSim::GenericTob\n"
-     << "Et: " << tob.Et_bits() << '\n'
-     << "Eta: " << tob.Eta_bits() << '\n'
-     << "Phi: " << tob.Phi_bits() << '\n'
-     << "Charge: " << tob.Charge_bits() << '\n'
-     << "overflow: " << tob.overflow_bits() << '\n'
-     << "bits: " << tob.as_bits() << '\n';
+     << "Et: " << tob.Et_bits()  << ' '
+     << "0x" << GlobalSim::binStrToHexStr(tob.Et_bits().to_string()) << '\n'
+     << "Eta: " << tob.Eta_bits() << ' '
+     << "0x" << GlobalSim::binStrToHexStr(tob.Eta_bits().to_string()) << '\n'
+     << "Phi: " << tob.Phi_bits() << ' '
+     << "0x" << GlobalSim::binStrToHexStr(tob.Phi_bits().to_string()) << '\n'
+     << "Charge: " << tob.Charge_bits() << ' '
+     << "0x" << GlobalSim::binStrToHexStr(tob.Charge_bits().to_string()) << '\n'
+     << "overflow: " << tob.overflow_bits() << ' '
+     << "0x" << GlobalSim::binStrToHexStr(tob.overflow_bits().to_string()) << '\n'
+     << "bits: " << tob.as_bits() << ' '
+     << "0x" << GlobalSim::binStrToHexStr(tob.as_bits().to_string()) << '\n';
   return os;
 }

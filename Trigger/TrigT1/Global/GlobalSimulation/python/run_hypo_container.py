@@ -97,21 +97,27 @@ if __name__ == '__main__':
     base_data = "/eos/atlas/atlascerngroupdisk/data-art/"\
         "large-input/trig-val/GlobalSimTest/eEmSortSelectCount/"
 
+    
     # an example input file name of test vectors
     ## would be os.path.join(base_data, 'tests_00.dat')
 
     # run from  file.
-    hypoTestBench_alg.testsFileName=os.path.join(base_data, 'tests_00.dat')
-    
-    exp_mults_data =  os.path.join(base_data, 'expected_multiplicity_00.dat')
-    hypoTestBench_alg.expectedMultsFileName = exp_mults_data
 
-    exp_tobs_data =  os.path.join(base_data, 'expected_tobs_00.dat')
-    hypoTestBench_alg.expectedTobsFileName = exp_tobs_data
+    test_vectors =  os.path.join(base_data, '2025-03-24_tests.dat')
+    hypoTestBench_alg.testsFileName= test_vectors
 
+    expected_multiplicity = os.path.join(base_data,
+                                         '2025-03-24_expected_multiplicity.dat')
+    hypoTestBench_alg.expectedMultsFileName = expected_multiplicity
+
+    expected_tobs = os.path.join(base_data, '2025-03-24_expected_tobs.dat')
+    hypoTestBench_alg.expectedTobsFileName = expected_tobs
+
+ 
     # values for manual testing.
     # manual testing is active if no input file name is given
-    hypoTestBench_alg.test_vecs = ['0x1000000000000000fe']
+    hypoTestBench_alg.test_vecs = ['0x000000000000000000']
+
     hypoTestBench_alg.expTobs = '0x' + '0'* (198*8)
     hypoTestBench_alg.expMults = '0x' + '0' * 13
     
