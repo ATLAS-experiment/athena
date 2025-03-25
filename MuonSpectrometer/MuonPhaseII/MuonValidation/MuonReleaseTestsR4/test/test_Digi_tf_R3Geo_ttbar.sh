@@ -16,8 +16,13 @@ export ATHENA_CORE_NUMBER=8
 
 BASE_DIR="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/OverlayTests_R3/"
 HITS_FILE="${BASE_DIR}/601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep/myHits.pool.root"
-geo_db="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R3-MUONTEST_v3.db"
-geo_tag="ATLAS-R3S-2021-03-02-00"
+
+
+GEOMODEL_DB_FILE=$(python -c "from MuonGeoModelTestR4.testGeoModel import geoModelFileDefault; print(geoModelFileDefault(useR4Layout = False))")
+ATLAS_CONDDB_TAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+ATLAS_GEO_TAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+
+
 validNTuple="MuonDigitNTuple.root"
 
  Digi_tf.py \
@@ -25,12 +30,12 @@ validNTuple="MuonDigitNTuple.root"
         --inputHITSFile ${HITS_FILE} \
         --multithreaded True \
         --geometrySQLite True \
-	--geometrySQLiteFullPath "${geo_db}" \
-        --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-09'\
+	--geometrySQLiteFullPath "${GEOMODEL_DB_FILE}" \
+        --conditionsTag "default:${ATLAS_CONDDB_TAG} "\
+        --geometryVersion "default:${ATLAS_GEO_TAG}" \
         --digiSeedOffset1 170 \
         --digiSeedOffset2 170 \
         --digiSteeringConf 'StandardSignalOnlyTruth' \
-        --geometryVersion "default:${geo_tag}" \
         --jobNumber 568 \
         --outputRDOFile myRDO.pool.root \
         --skipEvents 0 \
