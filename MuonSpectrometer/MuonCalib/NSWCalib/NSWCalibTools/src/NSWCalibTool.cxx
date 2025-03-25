@@ -57,6 +57,7 @@ StatusCode Muon::NSWCalibTool::initialize()
   ATH_CHECK(m_condT0Key.initialize(m_applyMmT0Calib || m_applysTgcT0Calib));
   ATH_CHECK(m_fieldCondObjInputKey.initialize( m_idHelperSvc->hasMM() && m_idHelperSvc->hasSTGC() ));
   ATH_CHECK(m_muDetMgrKey.initialize( m_idHelperSvc->hasMM() && m_idHelperSvc->hasSTGC() ));
+  ATH_CHECK(m_ctpClusterCalibKey.initialize(m_CalibDriftVelocityFromData));
 
   if ( m_idHelperSvc->hasMM() && m_idHelperSvc->hasSTGC() ) {
     ATH_CHECK(initializeGasProperties());
@@ -92,6 +93,17 @@ const NswCalibDbTimeChargeData* Muon::NSWCalibTool::getCalibData(const EventCont
   return readTdoPdo.cptr();
 }
 
+const Muon::mmCTPClusterCalibData* Muon::NSWCalibTool::getCTPClusterCalibData(const EventContext& ctx) const {
+  //Can we not get this somewhere above? Can this not be read just once? per run?
+  SG::ReadCondHandle<Muon::mmCTPClusterCalibData> ctpClusterCalibDB{m_ctpClusterCalibKey, ctx};
+  if (!ctpClusterCalibDB.isValid()) {
+      ATH_MSG_FATAL("Failed to retrieve the parameterized errors "<<ctpClusterCalibDB.fullKey());
+      return nullptr;
+  }
+  return ctpClusterCalibDB.cptr();
+}
+
+
 StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const Muon::MMPrepData* prepData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const {
 
   double lorentzAngle {0.};
@@ -120,14 +132,18 @@ StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const Muon
     Identifier id = prepData->rdoList().at(i);
     double time = prepData->stripTimes().at(i);
     double charge = prepData->stripCharges().at(i);
+    //Retrieve pointing constraint
+    const Amg::Vector3D& globPos{prepData->globalPosition()};
     NSWCalib::CalibratedStrip calibStrip;
-    ATH_CHECK(calibrateStrip(id,time, charge, lorentzAngle, calibStrip));
+    ATH_CHECK(calibrateStrip(ctx, id, time, charge, (globPos.theta() / toRad) , lorentzAngle, calibStrip));
+
     calibClus.push_back(std::move(calibStrip));
   }
   return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::NSWCalibTool::calibrateStrip(const Identifier& id, const double time, const double charge, const double lorentzAngle, NSWCalib::CalibratedStrip& calibStrip) const {
+StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, const Identifier& id, const double time, const double charge, const double theta, const double lorentzAngle, NSWCalib::CalibratedStrip& calibStrip) const {
+
 
   //get local positon
   Amg::Vector2D locPos{Amg::Vector2D::Zero()};
@@ -140,14 +156,34 @@ StatusCode Muon::NSWCalibTool::calibrateStrip(const Identifier& id, const double
   calibStrip.charge = charge;
   calibStrip.time = time;
 
-  double vDriftCorrected = m_vDrift * std::cos(lorentzAngle);
+  //retrieve identifier for the gas gap, not necessarily for the channel
+  //There is no pcb segmentation for these corrections, stored with pcb = 1 as default 
+  Identifier gasGapId = m_idHelperSvc->mmIdHelper().channelID(id,                                                          m_idHelperSvc->mmIdHelper().multilayer(id),
+m_idHelperSvc->mmIdHelper().gasGap(id), 1);
+
+  double vDrift = m_vDrift; //nominal value from Garfield simulation  
+
+  if(m_CalibDriftVelocityFromData){
+     vDrift = getCTPClusterCalibData(ctx)->getCTPCorrectedDriftVelocity(gasGapId, theta);
+
+     //Calculate the new half max possible time based on the new drift velocity
+     float max_half_drifttime = (vDrift != 0 ) ? 2.5/vDrift : 50.;
+
+     //Shift the mean of the time to account for different values of drift velocities
+     calibStrip.time = time + (max_half_drifttime - m_mmT0TargetValue);
+     ATH_MSG_VERBOSE( "Original drift time: " << time << " new max half drift time: " << max_half_drifttime <<  " new time: " << calibStrip.time << " targett0 " << m_mmT0TargetValue );
+  }
+
+
+  double vDriftCorrected = vDrift * std::cos(lorentzAngle);
+
   calibStrip.distDrift = vDriftCorrected * calibStrip.time;
 
   /// transversal and longitudinal components of the resolution
   calibStrip.resTransDistDrift = pitchErr + std::pow(m_transDiff * calibStrip.distDrift, 2);
   calibStrip.resLongDistDrift = std::pow(m_ionUncertainty * vDriftCorrected, 2)
     + std::pow(m_longDiff * calibStrip.distDrift, 2);
-  calibStrip.dx = std::sin(lorentzAngle) * calibStrip.time * m_vDrift;  
+  calibStrip.dx = std::sin(lorentzAngle) * calibStrip.time * vDrift;  
   calibStrip.locPos = Amg::Vector2D(locPos.x() + calibStrip.dx, locPos.y()); 
   return StatusCode::SUCCESS;
 }
