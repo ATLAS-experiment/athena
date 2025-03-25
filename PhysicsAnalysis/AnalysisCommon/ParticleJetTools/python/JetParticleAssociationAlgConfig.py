@@ -16,15 +16,9 @@ def JetParticleAssociationCfg(ConfigFlags, jetCollName, partcollname, assocname,
     options["OutputDecoration"] = assocname
 
     # -- create the association tool
-    #Mario adding origin vertex association
-    if jetCollName=="AntiKt4EMPFlowByVertexJets":
-        acc.setPrivateTools(
-        CompFactory.JetParticleOriginVertexAssociation(
+    acc.setPrivateTools(
+        CompFactory.JetParticleShrinkingConeAssociation(
             JetContainer=jetCollName, **options))
-    else:
-        acc.setPrivateTools(
-            CompFactory.JetParticleShrinkingConeAssociation(
-                JetContainer=jetCollName, **options))
 
     return acc
 

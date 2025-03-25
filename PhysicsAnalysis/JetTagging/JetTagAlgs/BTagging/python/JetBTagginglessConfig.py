@@ -5,7 +5,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg
+from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg, JetParticleAssociationByVertexAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg, BTagTrackAugmenterByVertexAlgCfg
 from BTagging.BTagConfig import _get_flip_config
 from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
@@ -125,6 +125,79 @@ def JetBTagginglessAlgCfg(
 
     return acc
 
+def JetBTagginglessByVertexAlgCfg(
+        cfgFlags,
+        JetCollection,
+        pv_col='PrimaryVertices',
+        trackAugmenterPrefix=None,
+        dzCut_vec=[10],
+        useMinZ0Vertex_vec=[True]):
+
+    """
+    Run flavour tagging on ByVertex jet collection in derivations.
+    """
+
+    JetTrackAssociator = 'TracksForBTagging'
+    trackCollection='InDetTrackParticles'
+
+    acc = ComponentAccumulator()
+         
+    acc.merge(BTagTrackAugmenterByVertexAlgCfg(
+        cfgFlags,
+        TrackCollection='InDetTrackParticles',
+        PrimaryVertexCollectionName=pv_col,
+        prefix=trackAugmenterPrefix,
+    ))        
+              
+    for networks in cfgFlags.BTagging.NNs.get(JetCollection, []):
+        assert isinstance(networks['folds'], list)
+        dirnames = [Path(path).parent for path in networks['folds']]
+        assert len(set(dirnames)) == 1, 'Different folds should be located in the same dir'
+        dirname = str(dirnames[0])
+        if 'Muon' in dirname:
+            acc.merge(TrackLeptonDecorationCfg(cfgFlags))
+
+        args = dict(
+             flags=cfgFlags,
+             JetCollection=JetCollection,
+             TrackCollection=trackCollection,
+             nnFilePaths=networks['folds'],
+             remapping=networks.get('remapping', {}),
+        )
+
+        if foldHashName := networks.get('hash'):
+            args['foldHashName'] = foldHashName
+
+        # we want to run this for different cuts in z0, inclusive/exclusive at the same time
+        for dzCut in dzCut_vec:
+            for useMinZ0Vertex in useMinZ0Vertex_vec:
+       
+                acc.merge(JetParticleAssociationByVertexAlgCfg(
+                    ConfigFlags = cfgFlags,
+                    JetCollection = JetCollection,
+                    InputParticleCollection = trackCollection,
+                    OutputParticleDecoration = JetTrackAssociator,
+                    dzCut = dzCut,
+                    useMinZ0Vertex = useMinZ0Vertex,
+                ))
+                # here I need to add all the possible remapping
+                # find out how the re
+                args['remapping'].setdefault(
+                'BTagTrackToJetAssociator', 'GhostTrack')
+     
+                '''
+
+                if '/GN2v01/' in dirname:
+                    args['tag_requirements'] = {'nonzeroTracks'}
+                acc.merge(MultifoldGNNCfg(**args))
+                # I think we can remove flip taggers and here we need to find a way to 
+                # add flip taggers
+                if cfgFlags.BTagging.RunFlipTaggers and networks.get('flip', True):
+                    for flip_config in _get_flip_config(dirname):
+                        acc.merge(MultifoldGNNCfg(**args, FlipConfig=flip_config))
+                '''
+
+    return acc
 
 def _fastCfg(flags, pv, tc, pfx):
     acc = ComponentAccumulator()

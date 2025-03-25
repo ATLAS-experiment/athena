@@ -31,6 +31,8 @@ class JetParticleOriginVertexAssociation : public JetParticleAssociation {
         double m_coneSizeFitPar1;
         double m_coneSizeFitPar2;
         double m_coneSizeFitPar3;
+        float  m_dzCut;
+        bool   m_useMinZ0Vertex;
 };
 
 #endif
