@@ -10,6 +10,8 @@
 # temporary preExec override due to ATLASRECTS-7502
 # TODO update following ATLASRECTS-8054
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA22)")
+
 Reco_tf.py  \
 --AMI f1328  \
 --preExec="flags.DQ.useTrigger=False; flags.DQ.triggerDataAvailable=False; flags.DQ.Steering.doHLTMon=False; flags.DQ.Steering.doTauMon=False;" \
@@ -17,7 +19,7 @@ Reco_tf.py  \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
 --outputHISTFile="HIST.root" \
---conditionsTag="CONDBR2-BLKPA-2022-15" \
+--conditionsTag="${conditions}" \
 --imf False
 
 rc1=$?
