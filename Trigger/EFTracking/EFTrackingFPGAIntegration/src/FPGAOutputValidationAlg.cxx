@@ -20,7 +20,7 @@ std::vector<const T*> findMatchingCluster(const T* cluster0, const DataVector<T>
       continue;
     }
 
-    std::vector<Identifier> rdoList1 = cluster0->rdoList();
+    std::vector<Identifier> rdoList1 = cluster1->rdoList();
     std::sort(rdoList1.begin(), rdoList1.end());
     std::vector<Identifier> rdoMatchList{};
     std::set_intersection(rdoList0.begin(), 
