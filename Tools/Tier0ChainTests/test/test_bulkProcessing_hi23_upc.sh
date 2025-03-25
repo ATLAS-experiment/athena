@@ -9,8 +9,6 @@
 
 # TODO update following ATLASRECTS-8054
 
-conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA23)")
-
 Reco_tf.py  \
 --AMI f1406 \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data23_hi.00462107.physics_UPC.daq.RAW._lb0500._SFO-14._0002.data" \
@@ -18,7 +16,7 @@ Reco_tf.py  \
 --outputESDFile="ESD.pool.root" \
 --outputHISTFile="HIST.root" \
 --maxEvents=1500 \
---conditionsTag="${conditions}" \
+--conditionsTag="CONDBR2-BLKPA-2022-15" \
 --imf False
 
 rc1=$?
