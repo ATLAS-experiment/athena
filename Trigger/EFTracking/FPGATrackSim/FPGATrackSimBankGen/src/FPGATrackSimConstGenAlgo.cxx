@@ -63,6 +63,7 @@ StatusCode FPGATrackSimConstGenAlgo::initialize()
     ATH_MSG_DEBUG("initialize()");
     ATH_MSG_DEBUG("Are we going to dump missing hist constants? " << m_dumpMissingHitsConstants);
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
+    ATH_CHECK(m_EvtSel.retrieve());
     m_pmap = (m_isSecondStage ? m_FPGATrackSimMapping->PlaneMap_2nd(0) : m_FPGATrackSimMapping->PlaneMap_1st(0) );
 
     ATH_CHECK(m_tHistSvc.retrieve());
