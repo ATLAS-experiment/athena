@@ -94,7 +94,10 @@ def DataPrepCfg(flags, name = "DataPreparationPipeline", **kwarg):
 
 if __name__=="__main__":
     from EFTrackingFPGAIntegration.IntegrationConfigFlag import addFPGADataPrepFlags
-    flags = addFPGADataPrepFlags()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    
+    flags = initConfigFlags()
+    flags = addFPGADataPrepFlags(flags)
     
     # useful for testing -> /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root
 

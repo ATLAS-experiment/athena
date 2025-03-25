@@ -190,6 +190,7 @@ namespace EFTrackingTransient
     float *spVarianceR;
     float *spVarianceZ;
     int *spMeasurementIndexes;
+    unsigned int *spElementIdList;
     float *spTopHalfStripLength;
     float *spBottomHalfStripLength;
     float *spTopStripDirection;
