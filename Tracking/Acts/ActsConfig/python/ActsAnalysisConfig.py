@@ -162,9 +162,10 @@ def ActsHgtdClusterAnalysisAlgCfg(flags,
     monitoringGroup.defineHistogram('globalZ,globalR;h_globalZR', title="h_globalZR; z [mm]; r [mm]", type="TH2F", path=path,
                                     xbins=100, xmin=-3600, xmax=3600,
                                     ybins=100, ymin=0, ymax=800)
-    monitoringGroup.defineTree('localX,localY,localT,localCovXX,localCovYY,localCovTT,globalX,globalY,globalZ,globalR,eta;HgtdClusters',
-                               path='ntuples',
-                               treedef='localX/vector<float>:localY/vector<float>:localT/vector<float>:localCovXX/vector<float>:localCovYY/vector<float>:localCovTT/vector<float>:globalX/vector<float>:globalY/vector<float>:globalZ/vector<float>:globalR/vector<float>:eta/vector<float>')
+    if flags.Acts.doAnalysisNtuples:
+      monitoringGroup.defineTree('localX,localY,localT,localCovXX,localCovYY,localCovTT,globalX,globalY,globalZ,globalR,eta;HgtdClusters',
+                                path='ntuples',
+                                treedef='localX/vector<float>:localY/vector<float>:localT/vector<float>:localCovXX/vector<float>:localCovYY/vector<float>:localCovTT/vector<float>:globalX/vector<float>:globalY/vector<float>:globalZ/vector<float>:globalR/vector<float>:eta/vector<float>')
     
     acc.merge(helper.result())
     return acc
@@ -592,9 +593,9 @@ def ActsSeedingAlgorithmAnalysisAlgCfg(flags,
     helper = AthMonitorCfgHelper(flags, 'SeedingAlgorithmAnalysisAlgCfg')
     monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.SeedingAlgorithmAnalysisAlg, name, **kwargs)
 
-    for groupName in MonitoringGroupNames:
-      monitoringGroup = helper.addGroup(monitoringAlgorithm, groupName, '/'+groupName+'/')
-      if flags.Acts.doAnalysisNtuples:
+    if flags.Acts.doAnalysisNtuples:
+      for groupName in MonitoringGroupNames:
+        monitoringGroup = helper.addGroup(monitoringAlgorithm, groupName, '/'+groupName+'/')
         monitoringGroup.defineTree('eventNumber,stripSeedInitialisationTime,stripSeedProductionTime,pixelSeedInitialisationTime,pixelSeedProductionTime,numberPixelSpacePoints,numberStripSpacePoints,numberPixelSeeds,numberStripSeeds;seedInformation',
                                   path='ntuples',
                                   treedef='eventNumber/I:stripSeedInitialisationTime/F:stripSeedProductionTime/F:pixelSeedInitialisationTime/F:pixelSeedProductionTime/F:numberPixelSpacePoints/I:numberStripSpacePoints/I:numberPixelSeeds/I:numberStripSeeds/I')
