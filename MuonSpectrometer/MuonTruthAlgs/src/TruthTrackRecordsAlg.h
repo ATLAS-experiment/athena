@@ -9,13 +9,11 @@
   *        previous layer; extrapolation's covariance matrix; and a flag 
   *        representing the exrapolation outcome.
 */
-
-#pragma once
-
-#include <string>
-#include <vector>
+#ifndef MUONTRUTHALGS_TruthTrackRecordsAlg_H
+#define MUONTRUTHALGS_TruthTrackRecordsAlg_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "MuonTruthAlgs/DecorUtils.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
@@ -25,7 +23,7 @@
 
 namespace Muon {
 
-    class MuonTruthAddTrackRecordsAlg : public AthReentrantAlgorithm {
+    class TruthTrackRecordsAlg : public AthReentrantAlgorithm {
     public:
 
         // Constructor with parameters:
@@ -44,13 +42,14 @@ namespace Muon {
         *          representing if the extrapolation has been successful.
         *          We can decouple declaration and population of this object because vectors can be initialized empty.        
         */
-        using WriteDecorArray_f = std::vector<SG::WriteDecorHandle<xAOD::TruthParticleContainer, float>>;
-        using WriteDecorArray_b = std::vector<SG::WriteDecorHandle<xAOD::TruthParticleContainer, char>>;
-        using WriteDecorArray_fvec = std::vector<SG::WriteDecorHandle<xAOD::TruthParticleContainer, std::vector<float>>>;
-        struct summaryDecors{
+        using WriteDecorArray_f = DecorHandlePtrVec_t<xAOD::TruthParticleContainer, float>;
+        using WriteDecorArray_b = DecorHandlePtrVec_t<xAOD::TruthParticleContainer, char>;
+        using WriteDecorArray_fvec = DecorHandlePtrVec_t<xAOD::TruthParticleContainer, std::vector<float>>;
+        
+        struct SummaryDecors{
             WriteDecorArray_f xDecor{};
-            WriteDecorArray_f yDecor {};
-            WriteDecorArray_f zDecor {};
+            WriteDecorArray_f yDecor{};
+            WriteDecorArray_f zDecor{};
             WriteDecorArray_f pxDecor {};
             WriteDecorArray_f pyDecor {};
             WriteDecorArray_f pzDecor {};
@@ -77,7 +76,7 @@ namespace Muon {
         */
         StatusCode addTrackRecords(const EventContext& ctx, 
                                    const xAOD::TruthParticle& truthParticle,
-                                   summaryDecors& myDecors) const;
+                                   SummaryDecors& myDecors) const;
         
         /** @brief This function fills the arrays of write-decorator keys and initializes them. Specifically, the key that will be written
         *          at i-th position is <property_name>_<detector_position(i)>, where property_name = writeKey, and detector_position(i) is 
@@ -104,24 +103,22 @@ namespace Muon {
         *          position and momentum; ecov is a vector encapsulating the covariance matrix from extrapolation; eis is a flag representing 
         *          if the extrapolation has been successful.    
         */
-        using WriteDecorKeyArray_f = SG::WriteDecorHandleKeyArray<xAOD::TruthParticleContainer, float>;
-        using WriteDecorKeyArray_b = SG::WriteDecorHandleKeyArray<xAOD::TruthParticleContainer, char>;
-        using WriteDecorKeyArray_fvec = SG::WriteDecorHandleKeyArray<xAOD::TruthParticleContainer, std::vector<float>>;
-        WriteDecorKeyArray_f m_muonSnapShotX{this, "SnapShotX", { }, "Position decoration..."};
-        WriteDecorKeyArray_f m_muonSnapShotY{this, "SnapShotY", { }, "Position decoration..."};
-        WriteDecorKeyArray_f m_muonSnapShotZ{this, "SnapShotZ", { }, "Position decoration..."};
-        WriteDecorKeyArray_f m_muonSnapShotPx{this, "SnapShotPx", { }, "Momentum decoration..."};
-        WriteDecorKeyArray_f m_muonSnapShotPy{this, "SnapShotPy", { }, "Momentum decoration..."};
-        WriteDecorKeyArray_f m_muonSnapShotPz{this, "SnapShotPz", { }, "Momentum decoration..."};
-        WriteDecorKeyArray_b m_muonSnapShotMtc{this, "SnapShotMtc", { }, "is matched decoration..."};
-        WriteDecorKeyArray_f m_muonSnapShotEX{this, "SnapShotEX", { }, "Position decoration..."};
-        WriteDecorKeyArray_f m_muonSnapShotEY{this, "SnapShotEY", { }, "Position decoration..."};
-        WriteDecorKeyArray_f m_muonSnapShotEZ{this, "SnapShotEZ", { }, "Position decoration..."};
-        WriteDecorKeyArray_f m_muonSnapShotEPx{this, "SnapShotEPx", { }, "Momentum decoration..."};
-        WriteDecorKeyArray_f m_muonSnapShotEPy{this, "SnapShotEPy", { }, "Momentum decoration..."};
-        WriteDecorKeyArray_f m_muonSnapShotEPz{this, "SnapShotEPz", { }, "Momentum decoration..."};
-        WriteDecorKeyArray_fvec m_muonSnapShotEcov{this, "SnapShotEcov", { }, "..."};
-        WriteDecorKeyArray_b m_muonSnapShotEis{this, "SnapShotEis", { }, "..."};
+        using DecorKey_t = SG::WriteDecorHandleKeyArray<xAOD::TruthParticleContainer>;
+        DecorKey_t m_muonSnapShotX{this, "SnapShotX", { }, "Position decoration..."};
+        DecorKey_t m_muonSnapShotY{this, "SnapShotY", { }, "Position decoration..."};
+        DecorKey_t m_muonSnapShotZ{this, "SnapShotZ", { }, "Position decoration..."};
+        DecorKey_t m_muonSnapShotPx{this, "SnapShotPx", { }, "Momentum decoration..."};
+        DecorKey_t m_muonSnapShotPy{this, "SnapShotPy", { }, "Momentum decoration..."};
+        DecorKey_t m_muonSnapShotPz{this, "SnapShotPz", { }, "Momentum decoration..."};
+        DecorKey_t m_muonSnapShotMtc{this, "SnapShotMtc", { }, "is matched decoration..."};
+        DecorKey_t m_muonSnapShotEX{this, "SnapShotEX", { }, "Position decoration..."};
+        DecorKey_t m_muonSnapShotEY{this, "SnapShotEY", { }, "Position decoration..."};
+        DecorKey_t m_muonSnapShotEZ{this, "SnapShotEZ", { }, "Position decoration..."};
+        DecorKey_t m_muonSnapShotEPx{this, "SnapShotEPx", { }, "Momentum decoration..."};
+        DecorKey_t m_muonSnapShotEPy{this, "SnapShotEPy", { }, "Momentum decoration..."};
+        DecorKey_t m_muonSnapShotEPz{this, "SnapShotEPz", { }, "Momentum decoration..."};
+        DecorKey_t m_muonSnapShotEcov{this, "SnapShotEcov", { }, "Covariance decoration"};
+        DecorKey_t m_muonSnapShotEis{this, "SnapShotEis", { }, "Flag decoration whether the extrapolation worked"};
 
         /** @brief  Extrapolation tool handle */
         ToolHandle<Trk::IExtrapolator> m_extrapolator{this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator"};
@@ -129,3 +126,4 @@ namespace Muon {
     };
 
 }  // namespace Muon
+#endif

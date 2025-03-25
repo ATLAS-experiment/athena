@@ -1,16 +1,16 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-  * @brief This algorithm receives the container of all the truth particles coming from the MC generator and copies
+  * @brief This algorithm retrieves the container of all the truth particles coming from the MC generator and copies
   *        the truth muons in a new container. Muons'properties include PDG, MC BARCODE, status, momentum components, 
   *        charge and mass. The link to the production vertex, if present, is also attached. 
   *        Then, truth muons are decorated with type and origin.
     
 */
 
-#pragma once
+#ifndef MUONTRUTHALGS_TruthMuonMakerAlg_H
+#define MUONTRUTHALGS_TruthMuonMakerAlg_H
 
-#include <string>
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
@@ -22,7 +22,7 @@
 
 namespace Muon {
 
-    class MuonTruthClassificationAlg : public AthReentrantAlgorithm {
+    class TruthMuonMakerAlg : public AthReentrantAlgorithm {
     public:
 
         // Constructor with parameters:
@@ -52,3 +52,4 @@ namespace Muon {
     };
 
 }  // namespace Muon
+#endif
