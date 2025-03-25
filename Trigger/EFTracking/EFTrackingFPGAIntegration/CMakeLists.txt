@@ -11,7 +11,7 @@ if( NOT DEFINED ENV{XILINX_XRT} )
 
     atlas_add_component(EFTrackingFPGAIntegration
     src/FPGADataFormat* src/FPGAOutputValidationAlg* src/OutputConversionTool* src/TestVectorTool* src/xAODClusterMaker* src/xAODSpacePointMaker*
-    src/components/FPGA*.cxx
+    src/components/FPGA*.cxx src/PassThroughTool.*
     LINK_LIBRARIES GaudiKernel AthenaBaseComps AthenaMonitoringKernelLib xAODInDetMeasurement InDetPrepRawData InDetIdentifier InDetReadoutGeometry
     )
     atlas_install_python_modules(python/*.py)

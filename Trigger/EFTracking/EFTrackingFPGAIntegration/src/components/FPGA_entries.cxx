@@ -9,6 +9,7 @@
 #include "../FPGAOutputValidationAlg.h"
 #include "../xAODClusterMaker.h"
 #include "../xAODSpacePointMaker.h"
+#include "../PassThroughTool.h"
 
 DECLARE_COMPONENT(FPGADataFormatAlg)
 DECLARE_COMPONENT(FPGADataFormatTool)
@@ -17,3 +18,4 @@ DECLARE_COMPONENT(OutputConversionTool)
 DECLARE_COMPONENT(FPGAOutputValidationAlg)
 DECLARE_COMPONENT(xAODClusterMaker)
 DECLARE_COMPONENT(xAODSpacePointMaker)
+DECLARE_COMPONENT(PassThroughTool)
