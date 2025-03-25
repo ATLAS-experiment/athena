@@ -17,6 +17,7 @@
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 #include "MuonCondData/NswCalibDbTimeChargeData.h"
 #include "MuonCondData/NswT0Data.h"
+#include "MuonCondData/mmCTPClusterCalibData.h"
 
 #include "TRandom3.h"
 #include "TTree.h"
@@ -40,7 +41,7 @@ namespace Muon {
     
     StatusCode calibrateClus(const EventContext& ctx, const Muon::MMPrepData* prepData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const override;
     StatusCode distToTime(const EventContext& ctx, const Muon::MMPrepData* prepData, const Amg::Vector3D& globalPos, const std::vector<double>& driftDistances, std::vector<double>& driftTimes) const override;
-    StatusCode calibrateStrip(const Identifier& id, const double time, const double charge, const double lorentzAngle, NSWCalib::CalibratedStrip& calibStrip) const override;
+    StatusCode calibrateStrip(const EventContext& ctx, const Identifier& id, const double time, const double charge, const double theta, const double lorentzAngle, NSWCalib::CalibratedStrip& calibStrip) const override;
     StatusCode calibrateStrip(const EventContext& ctx, const Muon::MM_RawData* mmRawData, NSWCalib::CalibratedStrip& calibStrip) const override;
     StatusCode calibrateStrip(const EventContext& ctx, const Muon::STGC_RawData* sTGCRawData, NSWCalib::CalibratedStrip& calibStrip) const override;
     
@@ -60,6 +61,7 @@ namespace Muon {
   private:
     const NswCalibDbTimeChargeData* getCalibData(const EventContext& ctx) const;
     bool loadMagneticField(const EventContext& ctx, MagField::AtlasFieldCache& fieldCache ) const;
+    const Muon::mmCTPClusterCalibData* getCTPClusterCalibData(const EventContext& ctx) const;
 
     bool timeToTdoMM(const NswCalibDbTimeChargeData* tdoPdoData, const float time, const Identifier& chnlId, int& tdo, int& relBCID) const;
     bool timeToTdoSTGC(const NswCalibDbTimeChargeData* tdoPdoData, const float time, const Identifier& chnlId, int& tdo, int& relBCID) const;
@@ -73,6 +75,9 @@ namespace Muon {
     SG::ReadCondHandleKey<NswT0Data> m_condT0Key{this, "condT0Key", "NswT0Data", "Key of NswT0Data containing the t0 calibration data"};
 
     Gaudi::Property<bool> m_isData{this, "isData", false, "Processing data"};
+
+    Gaudi::Property<bool> m_CalibDriftVelocityFromData{this, "calibrateDriftVelocityFromData", false, "calibrateDriftVelocityFromData"};
+    SG::ReadCondHandleKey<Muon::mmCTPClusterCalibData> m_ctpClusterCalibKey{this, "CTPClusterCalibKey", "mmCTPClusterCalibData", "Key of the CTP cluster calibration corrections"};
 
     StatusCode initializeGasProperties();
     

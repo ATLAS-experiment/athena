@@ -120,9 +120,10 @@ def createMuonConfigFlags():
     # 'rtAnalytic'   : do analytic rt calibration
     mcf.addFlag("Muon.Calib.mdtMode", "ntuple")
 
+
     # for now the T0 calibration in the NSW should be disabled by default until a final calibration is available. Introducing the flags anyhow to allow for studies of the calibration 
-    # do not apply NSW T0 calibration if we are running online or MC or a RUN4 geometry 
-    mcf.addFlag("Muon.Calib.applyMmT0Correction",   lambda prevFlags: prevFlags.GeoModel.Run<LHCPeriod.Run4  and not prevFlags.Common.isOnline and not prevFlags.Input.isMC and False)
+    # do not apply NSW T0 calibration if we are running online or MC or a RUN4 geometry, keep only for 23 or 24 
+    mcf.addFlag("Muon.Calib.applyMmT0Correction",   lambda prevFlags: prevFlags.GeoModel.Run==LHCPeriod.Run3 and prevFlags.Input.DataYear != 2022 and not prevFlags.Common.isOnline and not prevFlags.Input.isMC )
     mcf.addFlag("Muon.Calib.applysTgcT0Correction", lambda prevFlags: prevFlags.GeoModel.Run<LHCPeriod.Run4  and not prevFlags.Common.isOnline and not prevFlags.Input.isMC and False) 
     mcf.addFlag("Muon.Calib.applyMmBFieldCalib", True) 
     
@@ -151,8 +152,9 @@ def createMuonConfigFlags():
 
     mcf.addFlag("Muon.writeSDOs", lambda prevFlags : prevFlags.Output.doWriteESD and prevFlags.Input.isMC)
 
-    # configure the MM cluster reco method that is used in the cluster calibration step
-    mcf.addFlag("Muon.MMClusterCalibRecoTool",  lambda prevFlags : MMClusterBuilderEnum.ClusterTimeProjection if prevFlags.Input.isMC else MMClusterBuilderEnum.Centroid, type=MMClusterBuilderEnum)
+    # configure the MM cluster reco method that is used in the cluster calibration step 
+    #Use charge weighted only for trigger and 2022 where not sure if the t0 calibrations that we have are ok dor the commissioning phase of the NSW in 2022
+    mcf.addFlag("Muon.MMClusterCalibRecoTool", lambda prevFlags: MMClusterBuilderEnum.Centroid if (prevFlags.Common.isOnline or prevFlags.Input.DataYear == 2022 or prevFlags.Beam.Type is not BeamType.Collisions) else MMClusterBuilderEnum.ClusterTimeProjection, type=MMClusterBuilderEnum)
 
     # use the MDT DCS data to determine if a chamber is alive or not. This is used in the hole search and the region selector. Needs to be false if the job is running online or is the reconstruction of the MDT calib stream
     mcf.addFlag("Muon.useMdtDcsData", lambda prevFlags : not prevFlags.Common.isOnline)
