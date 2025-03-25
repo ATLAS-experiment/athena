@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "L1TopoCoreSim/TopoSteeringStructure.h"
 
@@ -328,7 +328,7 @@ TCS::TopoSteeringStructure::setupFromMenu ATLAS_NOT_THREAD_SAFE (const TrigConf:
          ( dynamic_cast<DecisionAlg *>(alg) )->setNumberOutputBits(l1algo.outputs().size());
 
       // create ParameterSpace for this algorithm
-      ParameterSpace * ps = new ParameterSpace(alg->name());
+      auto ps = std::make_unique<ParameterSpace>(alg->name());
 
       for(auto & pe : l1algo.parameters()) {
 	 
