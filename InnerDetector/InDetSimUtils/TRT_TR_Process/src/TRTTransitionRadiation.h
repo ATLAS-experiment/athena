@@ -1,22 +1,18 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTTRANSITIONRADIATION_H
 #define TRTTRANSITIONRADIATION_H
 
 #include "TRTRadiatorParameters.h"
-
-#include "G4VDiscreteProcess.hh"
-#include "G4LogicalVolume.hh"
-#include "G4Material.hh"
-#include "G4PhysicsLogVector.hh"
-#include "G4Step.hh"
-#include "G4Track.hh"
-
 #include "AthenaBaseComps/AthMessaging.h"
+#include "G4VDiscreteProcess.hh"
 
 #include <vector>
+class G4Material;
+class G4Step;
+class G4Track;
 
 
 class TRRegionXMLHandler;
