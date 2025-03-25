@@ -2,10 +2,9 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonTruthAddTrackRecordsAlg.h"
+#include "TruthTrackRecordsAlg.h"
+#include "MuonTruthAlgs/DecorUtils.h"
 
-#include "AthenaBaseComps/AthCheckMacros.h"
-#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "EventPrimitives/EventPrimitivesCovarianceHelpers.h"
 #include "xAODTruth/TruthVertex.h"
@@ -39,7 +38,7 @@ namespace {
 namespace Muon {
 
     template <typename T>
-    StatusCode MuonTruthAddTrackRecordsAlg::fillWriteDecorator(SG::WriteDecorHandleKeyArray<xAOD::TruthParticleContainer, T>& writeKey,
+    StatusCode TruthTrackRecordsAlg::fillWriteDecorator(SG::WriteDecorHandleKeyArray<xAOD::TruthParticleContainer, T>& writeKey,
                                                              const std::string& keyName) const{
         for (const SG::ReadHandleKey<TrackRecordCollection>& recordKey : m_trackRecords){
             const std::string fullKey = recordKey.key() + "_" + keyName; 
@@ -49,7 +48,7 @@ namespace Muon {
     }
 
     // Initialize method:
-    StatusCode MuonTruthAddTrackRecordsAlg::initialize() {
+    StatusCode TruthTrackRecordsAlg::initialize() {
         ATH_CHECK(m_muonTruth.initialize());
         ATH_CHECK(m_trackRecords.initialize());
 
@@ -74,27 +73,27 @@ namespace Muon {
     }
 
     // Execute method:
-    StatusCode MuonTruthAddTrackRecordsAlg::execute(const EventContext& ctx) const {
+    StatusCode TruthTrackRecordsAlg::execute(const EventContext& ctx) const {
         // skip if no input data found
         SG::ReadHandle muonTruthContainer(m_muonTruth, ctx);
         ATH_CHECK(muonTruthContainer.isPresent());
 
-        summaryDecors myDecors;
-        myDecors.xDecor = m_muonSnapShotX.makeHandles(ctx);
-        myDecors.yDecor = m_muonSnapShotY.makeHandles(ctx);
-        myDecors.zDecor = m_muonSnapShotZ.makeHandles(ctx);
-        myDecors.pxDecor = m_muonSnapShotPx.makeHandles(ctx);
-        myDecors.pyDecor = m_muonSnapShotPy.makeHandles(ctx);
-        myDecors.pzDecor = m_muonSnapShotPz.makeHandles(ctx);
-        myDecors.matchedDecor = m_muonSnapShotMtc.makeHandles(ctx);
-        myDecors.exDecor = m_muonSnapShotEX.makeHandles(ctx);
-        myDecors.eyDecor = m_muonSnapShotEY.makeHandles(ctx);
-        myDecors.ezDecor = m_muonSnapShotEZ.makeHandles(ctx);
-        myDecors.epxDecor = m_muonSnapShotEPx.makeHandles(ctx);
-        myDecors.epyDecor = m_muonSnapShotEPy.makeHandles(ctx);
-        myDecors.epzDecor = m_muonSnapShotEPz.makeHandles(ctx);
-        myDecors.ecovDecor = m_muonSnapShotEcov.makeHandles(ctx);
-        myDecors.eisDecor = m_muonSnapShotEis.makeHandles(ctx);
+        SummaryDecors myDecors;
+        myDecors.xDecor  = makeHandles<float>(ctx, m_muonSnapShotX);
+        myDecors.yDecor  = makeHandles<float>(ctx, m_muonSnapShotY);
+        myDecors.zDecor  = makeHandles<float>(ctx, m_muonSnapShotZ);
+        myDecors.pxDecor = makeHandles<float>(ctx, m_muonSnapShotPx);
+        myDecors.pyDecor = makeHandles<float>(ctx, m_muonSnapShotPy);
+        myDecors.pzDecor = makeHandles<float>(ctx, m_muonSnapShotPz);
+        myDecors.matchedDecor = makeHandles<char>(ctx, m_muonSnapShotMtc);
+        myDecors.exDecor = makeHandles<float>(ctx, m_muonSnapShotEX);
+        myDecors.eyDecor = makeHandles<float>(ctx, m_muonSnapShotEY);
+        myDecors.ezDecor = makeHandles<float>(ctx, m_muonSnapShotEZ);
+        myDecors.epxDecor = makeHandles<float>(ctx, m_muonSnapShotEPx);
+        myDecors.epyDecor = makeHandles<float>(ctx, m_muonSnapShotEPy);
+        myDecors.epzDecor = makeHandles<float>(ctx, m_muonSnapShotEPz);
+        myDecors.ecovDecor = makeHandles<std::vector<float>>(ctx, m_muonSnapShotEcov);
+        myDecors.eisDecor = makeHandles<char>(ctx, m_muonSnapShotEis);
 
         // loop over truth coll
         for (const xAOD::TruthParticle* truthParticle : *muonTruthContainer) {
@@ -103,7 +102,7 @@ namespace Muon {
         return StatusCode::SUCCESS;
     }
     
-    StatusCode MuonTruthAddTrackRecordsAlg::addTrackRecords(const EventContext& ctx, const xAOD::TruthParticle& truthParticle, summaryDecors& myDecors) const {          
+    StatusCode TruthTrackRecordsAlg::addTrackRecords(const EventContext& ctx, const xAOD::TruthParticle& truthParticle, SummaryDecors& myDecors) const {          
 
         // first loop over track records, store parameters at the different positions
         const xAOD::TruthVertex* vertex = truthParticle.prodVtx();
@@ -121,29 +120,26 @@ namespace Muon {
             ATH_CHECK(trackRecordCollection.isPresent());
     
             const std::string r_name = trackRecordCollection.key();
-            float& x = myDecors.xDecor[idx](truthParticle);
-            float& y = myDecors.yDecor[idx](truthParticle);
-            float& z = myDecors.zDecor[idx](truthParticle);
-            float& px = myDecors.pxDecor[idx](truthParticle);
-            float& py = myDecors.pyDecor[idx](truthParticle);
-            float& pz = myDecors.pzDecor[idx](truthParticle);
+            float& x = (*myDecors.xDecor[idx])(truthParticle);
+            float& y = (*myDecors.yDecor[idx])(truthParticle);
+            float& z = (*myDecors.zDecor[idx])(truthParticle);
+            float& px = (*myDecors.pxDecor[idx])(truthParticle);
+            float& py = (*myDecors.pyDecor[idx])(truthParticle);
+            float& pz = (*myDecors.pzDecor[idx])(truthParticle);
 
-            char& found_truth = myDecors.matchedDecor[idx](truthParticle);
+            char& found_truth = (*myDecors.matchedDecor[idx])(truthParticle);
 
             x = y = z = px = py = pz = dummy_val;
             found_truth = false;
 
             // Need to always make these, to avoid crashes later
-            float& ex = myDecors.exDecor[idx](truthParticle);
-            float& ey = myDecors.eyDecor[idx](truthParticle);
-            float& ez = myDecors.ezDecor[idx](truthParticle);
-            float& epx = myDecors.epxDecor[idx](truthParticle);
-            float& epy = myDecors.epyDecor[idx](truthParticle);
-            float& epz = myDecors.epzDecor[idx](truthParticle);
+            float& ex = (*myDecors.exDecor[idx])(truthParticle);
+            float& ey = (*myDecors.eyDecor[idx])(truthParticle);
+            float& ez = (*myDecors.ezDecor[idx])(truthParticle);
+            float& epx = (*myDecors.epxDecor[idx])(truthParticle);
+            float& epy = (*myDecors.epyDecor[idx])(truthParticle);
+            float& epz = (*myDecors.epzDecor[idx])(truthParticle);
 
-            myDecors.ecovDecor[idx](truthParticle) = std::vector<float>{};
-
-            myDecors.eisDecor[idx](truthParticle) = false;
             ex = ey = ez = epx = epy = epz = dummy_val;
 
             /// loop over collection and find trackRecord with the same bar code. If we find a record, we save position and momentum
@@ -196,14 +192,14 @@ namespace Muon {
             const Trk::TrackingVolume* volume = end_pars.volume;
             const std::string& r_name = end_pars.record_name;    
 
-            float& ex = myDecors.exDecor[end_pars.idx](truthParticle);
-            float& ey = myDecors.eyDecor[end_pars.idx](truthParticle);
-            float& ez = myDecors.ezDecor[end_pars.idx](truthParticle);
-            float& epx = myDecors.epxDecor[end_pars.idx](truthParticle);  
-            float& epy = myDecors.epyDecor[end_pars.idx](truthParticle);
-            float& epz = myDecors.epzDecor[end_pars.idx](truthParticle);
+            float& ex = (*myDecors.exDecor[end_pars.idx])(truthParticle);
+            float& ey = (*myDecors.eyDecor[end_pars.idx])(truthParticle);
+            float& ez = (*myDecors.ezDecor[end_pars.idx])(truthParticle);
+            float& epx = (*myDecors.epxDecor[end_pars.idx])(truthParticle);  
+            float& epy = (*myDecors.epyDecor[end_pars.idx])(truthParticle);
+            float& epz = (*myDecors.epzDecor[end_pars.idx])(truthParticle);
             
-            std::vector<float>& covMat = myDecors.ecovDecor[end_pars.idx](truthParticle);
+            std::vector<float>& covMat = (*myDecors.ecovDecor[end_pars.idx])(truthParticle);
 
             std::unique_ptr<Trk::TrackParameters> exPars{
                 m_extrapolator->extrapolateToVolume(ctx, pars, *volume, Trk::alongMomentum, Trk::muon)};
@@ -211,7 +207,7 @@ namespace Muon {
                 ATH_MSG_VERBOSE("Extrapolation to "<<r_name<<" failed. ");
                 continue;
             }
-            myDecors.eisDecor[end_pars.idx](truthParticle) = true;
+            (*myDecors.eisDecor[end_pars.idx])(truthParticle) = true;
             ex = exPars->position().x();
             ey = exPars->position().y();
             ez = exPars->position().z();

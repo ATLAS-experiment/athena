@@ -2,7 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonTruthClassificationAlg.h"
+#include "TruthMuonMakerAlg.h"
+#include "MuonTruthAlgs/DecorUtils.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
@@ -11,7 +12,7 @@
 namespace Muon {
 
     // Initialize method:
-    StatusCode MuonTruthClassificationAlg::initialize() {
+    StatusCode TruthMuonMakerAlg::initialize() {
         ATH_CHECK(m_truthRecordKey.initialize());
         ATH_CHECK(m_outTruthMuonKey.initialize());
         ATH_CHECK(m_truthOriginKey.initialize());
@@ -22,7 +23,7 @@ namespace Muon {
     }
 
     // Execute method:
-    StatusCode MuonTruthClassificationAlg::execute(const EventContext& ctx) const {
+    StatusCode TruthMuonMakerAlg::execute(const EventContext& ctx) const {
         // skip if no input data found
         SG::ReadHandle truthContainer(m_truthRecordKey, ctx);
         ATH_CHECK(truthContainer.isValid());
@@ -33,6 +34,8 @@ namespace Muon {
                                             std::make_unique<xAOD::TruthParticleAuxContainer>()));
         ATH_MSG_DEBUG("Recorded TruthParticleContainer with key: " << m_outTruthMuonKey);
 
+        SG::WriteDecorHandle<xAOD::TruthParticleContainer, int> truthOrigin{m_truthOriginKey, ctx};
+        SG::WriteDecorHandle<xAOD::TruthParticleContainer, int> truthType{m_truthTypeKey, ctx};
         // loop over truth coll
         for (const xAOD::TruthParticle* truth : *truthContainer) {
             if (!MC::isStable(truth)	 || !m_pdgIds.value().count(truth->absPdgId()) || truth->pt() < m_pt) continue;
@@ -63,11 +66,9 @@ namespace Muon {
                 iType = truthClass.first;
                 iOrigin = truthClass.second;
                 ATH_MSG_VERBOSE("Got truth type  " << iType << "  origin " << iOrigin);
-                SG::WriteDecorHandle<xAOD::TruthParticleContainer, int> truthOrigin(m_truthOriginKey, ctx);
-                truthOrigin(*truthParticle) = iOrigin;
-                SG::WriteDecorHandle<xAOD::TruthParticleContainer, int> truthType(m_truthTypeKey, ctx);
-                truthType(*truthParticle) = iType;
             }
+            truthOrigin(*truthParticle) = iOrigin;
+            truthType(*truthParticle) = iType;
 
             ATH_MSG_DEBUG("good muon with type " << iType << " and origin" << iOrigin);
         }

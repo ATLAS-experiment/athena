@@ -25,13 +25,13 @@ def MuonDetailedTrackTruthMakerCfg(flags, name="MuonDetailedTrackTruthMaker", **
     return result
 
 # The following 4 configuration fragments replace the ld MuonTruthDecorationAlg config
-def MuonTruthClassificationAlgCfg(flags, name="MuonTruthClassificationAlg", **kwargs):
+def TruthMuonMakerAlgCfg(flags, name="TruthMuonMakerAlg", **kwargs):
     result = ComponentAccumulator()
 
     from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
     kwargs.setdefault("MCTruthClassifier", result.popToolsAndMerge(MCTruthClassifierCfg(flags)))
         
-    result.addEventAlgo(CompFactory.Muon.MuonTruthClassificationAlg(name, **kwargs))
+    result.addEventAlgo(CompFactory.Muon.TruthMuonMakerAlg(name, **kwargs))
     return result
 
 def MuonTruthAddTrackRecordsAlgCfg(flags, name="MuonTruthAddTrackRecordsAlg", **kwargs):
@@ -43,10 +43,10 @@ def MuonTruthAddTrackRecordsAlgCfg(flags, name="MuonTruthAddTrackRecordsAlg", **
     trackRecords = [item for item in ["CaloEntryLayer", "MuonEntryLayer", "MuonExitLayer"] if item in flags.Input.Collections]
     kwargs.setdefault("TrackRecordCollectionNames", trackRecords)
 
-    result.addEventAlgo(CompFactory.Muon.MuonTruthAddTrackRecordsAlg(name, **kwargs))
+    result.addEventAlgo(CompFactory.Muon.TruthTrackRecordsAlg(name, **kwargs))
     return result
 
-def MuonTruthHitCountsAlgCfg(flags, name="MuonTruthHitCountsAlg", **kwargs):
+def MuonTruthHitCountsAlgCfg(flags, name="MuonTruthHitSummaryAlg", **kwargs):
     result = ComponentAccumulator()
 
     PRD_TruthNames = []
@@ -65,7 +65,7 @@ def MuonTruthHitCountsAlgCfg(flags, name="MuonTruthHitCountsAlg", **kwargs):
     
     kwargs.setdefault("PRD_TruthMaps", PRD_TruthNames)
   
-    result.addEventAlgo(CompFactory.Muon.MuonTruthHitCountsAlg(name, **kwargs))
+    result.addEventAlgo(CompFactory.Muon.TruthHitSummaryAlg(name, **kwargs))
     return result
 
 def MuonTruthSegmentCreationAlgCfg(flags, name="MuonTruthSegmentCreationAlg", **kwargs):

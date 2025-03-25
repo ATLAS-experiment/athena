@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonTruthHitCountsAlg.h"
+#include "TruthHitSummaryAlg.h"
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
@@ -11,7 +11,7 @@
 
 namespace Muon {    
     // Initialize method:
-    StatusCode MuonTruthHitCountsAlg::initialize() {
+    StatusCode TruthHitSummaryAlg::initialize() {
         ATH_CHECK(m_muonTruth.initialize());
         ATH_CHECK(m_PRD_TruthNames.initialize());
         ATH_CHECK(m_idHelperSvc.retrieve());
@@ -46,27 +46,25 @@ namespace Muon {
     }
 
     // Execute method:
-    StatusCode MuonTruthHitCountsAlg::execute(const EventContext& ctx) const {
+    StatusCode TruthHitSummaryAlg::execute(const EventContext& ctx) const {
         // skip if no input data found
         SG::ReadHandle muonTruthContainer(m_muonTruth, ctx);
         ATH_CHECK(muonTruthContainer.isPresent());
 
-        summaryDecors myDecors(this, ctx);
+        summaryDecors myDecors{this, ctx};
         
         // loop over truth coll (muon only)
         for (const xAOD::TruthParticle* truthParticle : *muonTruthContainer) {
-            
-            ChamberIdMap ids;
-            
+            ChamberIdMap ids{};
             ATH_CHECK(addHitCounts(ctx, *truthParticle, ids, myDecors));
             ATH_CHECK(addHitIDVectors(*truthParticle, ids, myDecors));
         }
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonTruthHitCountsAlg::addHitCounts(const EventContext& ctx,
-                                                   const xAOD::TruthParticle& truthParticle,
-                                                   ChamberIdMap& ids, summaryDecors& myDecors) const {
+    StatusCode TruthHitSummaryAlg::addHitCounts(const EventContext& ctx,
+                                                const xAOD::TruthParticle& truthParticle,
+                                                ChamberIdMap& ids, summaryDecors& myDecors) const {
         
         std::vector<unsigned int> nprecHitsPerChamberLayer;
         nprecHitsPerChamberLayer.resize(Muon::MuonStationIndex::ChIndexMax);
@@ -117,16 +115,15 @@ namespace Muon {
                 } else if (m_idHelperSvc->isTrigger(id)) {
                     int index = m_idHelperSvc->phiIndex(id);
                     if (index >= 0) {
-                    if (measPhi)
-                        ++nphiHitsPerChamberLayer.at(index);
-                    else
-                        ++ntrigEtaHitsPerChamberLayer.at(index);
+                        if (measPhi)
+                            ++nphiHitsPerChamberLayer.at(index);
+                        else
+                            ++ntrigEtaHitsPerChamberLayer.at(index);
                     }
                 } else {
                     if (measPhi) {
                         Muon::MuonStationIndex::PhiIndex index = m_idHelperSvc->phiIndex(id);
                         ++nphiHitsPerChamberLayer.at(index);
-
                     } else {
                         ++nprecHitsPerChamberLayer.at(chIndex);
                     }
@@ -235,27 +232,27 @@ namespace Muon {
             ++ntrigEtaLayers;
 
         // copy hit counts onto TruthParticle
-        myDecors.nprecLayersDecor(truthParticle) = nprecLayers;
-        myDecors.nphiLayersDecor(truthParticle) = nphiLayers;
-        myDecors.ntrigEtaLayersDecor(truthParticle) = ntrigEtaLayers;
-        myDecors.innerSmallHitsDecor(truthParticle) = innerSmallHits;
-        myDecors.innerLargeHitsDecor(truthParticle) = innerLargeHits;
-        myDecors.middleSmallHitsDecor(truthParticle) = middleSmallHits;
-        myDecors.middleLargeHitsDecor(truthParticle) = middleLargeHits;
-        myDecors.outerSmallHitsDecor(truthParticle) = outerSmallHits;
-        myDecors.outerLargeHitsDecor(truthParticle) = outerLargeHits;
-        myDecors.extendedSmallHitsDecor(truthParticle) = extendedSmallHits;
-        myDecors.extendedLargeHitsDecor(truthParticle) = extendedLargeHits;
+        (*myDecors.nprecLayersDecor)(truthParticle) = nprecLayers;
+        (*myDecors.nphiLayersDecor)(truthParticle) = nphiLayers;
+        (*myDecors.ntrigEtaLayersDecor)(truthParticle) = ntrigEtaLayers;
+        (*myDecors.innerSmallHitsDecor)(truthParticle) = innerSmallHits;
+        (*myDecors.innerLargeHitsDecor)(truthParticle) = innerLargeHits;
+        (*myDecors.middleSmallHitsDecor)(truthParticle) = middleSmallHits;
+        (*myDecors.middleLargeHitsDecor)(truthParticle) = middleLargeHits;
+        (*myDecors.outerSmallHitsDecor)(truthParticle) = outerSmallHits;
+        (*myDecors.outerLargeHitsDecor)(truthParticle) = outerLargeHits;
+        (*myDecors.extendedSmallHitsDecor)(truthParticle) = extendedSmallHits;
+        (*myDecors.extendedLargeHitsDecor)(truthParticle) = extendedLargeHits;
 
-        myDecors.phiLayer1HitsDecor(truthParticle) = phiLayer1Hits;
-        myDecors.phiLayer2HitsDecor(truthParticle) = phiLayer2Hits;
-        myDecors.phiLayer3HitsDecor(truthParticle) = phiLayer3Hits;
-        myDecors.phiLayer4HitsDecor(truthParticle) = phiLayer4Hits;
+        (*myDecors.phiLayer1HitsDecor)(truthParticle) = phiLayer1Hits;
+        (*myDecors.phiLayer2HitsDecor)(truthParticle) = phiLayer2Hits;
+        (*myDecors.phiLayer3HitsDecor)(truthParticle) = phiLayer3Hits;
+        (*myDecors.phiLayer4HitsDecor)(truthParticle) = phiLayer4Hits;
 
-        myDecors.etaLayer1HitsDecor(truthParticle) = etaLayer1Hits;
-        myDecors.etaLayer2HitsDecor(truthParticle) = etaLayer2Hits;
-        myDecors.etaLayer3HitsDecor(truthParticle) = etaLayer3Hits;
-        myDecors.etaLayer4HitsDecor(truthParticle) = etaLayer4Hits;
+        (*myDecors.etaLayer1HitsDecor)(truthParticle) = etaLayer1Hits;
+        (*myDecors.etaLayer2HitsDecor)(truthParticle) = etaLayer2Hits;
+        (*myDecors.etaLayer3HitsDecor)(truthParticle) = etaLayer3Hits;
+        (*myDecors.etaLayer4HitsDecor)(truthParticle) = etaLayer4Hits;
 
 
         if (msgLvl(MSG::DEBUG)) {
@@ -293,7 +290,7 @@ namespace Muon {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonTruthHitCountsAlg::addHitIDVectors(const xAOD::TruthParticle& truthParticle,
+    StatusCode TruthHitSummaryAlg::addHitIDVectors(const xAOD::TruthParticle& truthParticle,
                                                 const ChamberIdMap& ids,
                                                 summaryDecors& myDecors) const {
         std::vector<unsigned long long> mdtTruthHits{};
@@ -328,12 +325,18 @@ namespace Muon {
                     mmTruthHits.push_back(id.get_compact());
             }
         }
-        if (myDecors.truthMdtHitsDecor) (*myDecors.truthMdtHitsDecor)(truthParticle) = std::move(mdtTruthHits);
-        if (myDecors.truthTgcHitsDecor) (*myDecors.truthTgcHitsDecor)(truthParticle) = std::move(tgcTruthHits );
-        if (myDecors.truthRpcHitsDecor) (*myDecors.truthRpcHitsDecor)(truthParticle) = std::move(rpcTruthHits );
-        if (myDecors.truthCscHitsDecor) (*myDecors.truthCscHitsDecor)(truthParticle) = std::move(cscTruthHits);
-        if (myDecors.truthStgcHitsDecor) (*myDecors.truthStgcHitsDecor)(truthParticle) = std::move(stgcTruthHits);
-        if (myDecors.truthMMHitsDecor) (*myDecors.truthMMHitsDecor)(truthParticle) = std::move(mmTruthHits);
+        auto attatchHits = [&truthParticle](const WriteDecor_llvec& dec,
+                                            std::vector<unsigned long long>& hits) {
+            if (dec) {
+                (*dec)(truthParticle) = std::move(hits);
+            }
+        };
+        attatchHits(myDecors.truthMdtHitsDecor, mdtTruthHits);
+        attatchHits(myDecors.truthTgcHitsDecor, tgcTruthHits);
+        attatchHits(myDecors.truthRpcHitsDecor, rpcTruthHits);
+        attatchHits(myDecors.truthCscHitsDecor, cscTruthHits);
+        attatchHits(myDecors.truthStgcHitsDecor, stgcTruthHits);
+        attatchHits(myDecors.truthMMHitsDecor, mmTruthHits);
         ATH_MSG_VERBOSE("Added " << mdtTruthHits.size() << " mdt truth hits, " << cscTruthHits.size() << " csc truth hits, "
                                 << rpcTruthHits.size() << " rpc truth hits, and " << tgcTruthHits.size() << " tgc truth hits");
     return StatusCode::SUCCESS;
