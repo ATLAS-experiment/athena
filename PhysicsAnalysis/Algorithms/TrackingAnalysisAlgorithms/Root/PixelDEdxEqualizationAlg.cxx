@@ -7,12 +7,10 @@
 
 namespace CP {
 
-  /* //Reentrant 
   PixelDEdxEqualizationAlg::PixelDEdxEqualizationAlg( const std::string& name,
                                                   ISvcLocator* svcLoc )
     : EL::AnaReentrantAlgorithm( name, svcLoc ) {
   }
-  */
 
   StatusCode PixelDEdxEqualizationAlg::initialize() {
 
@@ -34,14 +32,14 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  //StatusCode PixelDEdxEqualizationAlg::execute(const EventContext& ctx) const {  //Reentrant
-  StatusCode PixelDEdxEqualizationAlg::execute() {
+  StatusCode PixelDEdxEqualizationAlg::execute(const EventContext& ctx) const {  //Reentrant
+  // StatusCode PixelDEdxEqualizationAlg::execute() {
 
     // Increase the event counter
     m_nEventsProcessed.fetch_add(1, std::memory_order_relaxed);
 
-    //SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_trackContainerName, ctx); //Reentrant
-    SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_trackContainerName);
+    SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_trackContainerName, ctx); //Reentrant
+    // SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_trackContainerName);
     ATH_CHECK( tracks.isValid() );
     
     // Increase the track counter
@@ -79,7 +77,8 @@ namespace CP {
       ///    So some clusters included in the truncated mean during reco (ESD) may not be included here (xAOD).  And vice versa. 
 
       ATH_MSG_INFO("Will decorate  variable " << m_dEdxEqKey << " with value " << pixeldEdxEqual);
-      SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > dEdxEqHandle(m_dEdxEqKey);
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > dEdxEqHandle(m_dEdxEqKey, ctx); // reentrant
+      // SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > dEdxEqHandle(m_dEdxEqKey);
       dEdxEqHandle(*trk) = pixeldEdxEqual;
 
     }

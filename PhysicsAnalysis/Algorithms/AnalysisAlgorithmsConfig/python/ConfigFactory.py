@@ -248,7 +248,6 @@ class ConfigFactory():
                                alg=FlavourTaggingEventSF,
                                defaults={'selectionName': ''},
                                superBlocks="Jets")
-        print("Ian using yours.")
         from FTagAnalysisAlgorithms.XbbAnalysisConfig import XbbConfig
         self.addAlgConfigBlock(algName="XbbTagging", alg=XbbConfig,
                                superBlocks="Jets")

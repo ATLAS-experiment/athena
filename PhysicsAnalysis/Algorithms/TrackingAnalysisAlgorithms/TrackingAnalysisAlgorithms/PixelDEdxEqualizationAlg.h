@@ -5,8 +5,8 @@
 #ifndef TRACKINGANALYSISALGORITHMS_PIXELDEDXEQUALIZATIONALG_H
 #define TRACKINGANALYSISALGORITHMS_PIXELDEDXEQUALIZATIONALG_H
 
-//#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
+//#include <AnaAlgorithm/AnaAlgorithm.h>
 #include <xAODTracking/TrackParticleContainer.h>
 #include <xAODTracking/TrackParticleAuxContainer.h>
 
@@ -43,7 +43,6 @@ namespace CP {
   /// @author Ian Dyckes
   /// @author Simone Pagan Griso
   ///
-  /*
   class PixelDEdxEqualizationAlg final : public EL::AnaReentrantAlgorithm {
 
   public:
@@ -55,13 +54,13 @@ namespace CP {
 
     /// Function executing the algorithm
     StatusCode execute(const EventContext& ctx) const override;
-  */
 
+  /*
   class PixelDEdxEqualizationAlg final : public EL::AnaAlgorithm {
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
     StatusCode execute () override;
-
+  */
 
 
   private:
@@ -80,7 +79,7 @@ namespace CP {
     /// Decorators
     SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dEdxEqKey{this, "dEdxEqName", "", "SG key for the equalized pixel dE/dx attribute"}; //set dynamically in initialize.
 
-    /// Counters.  Maybe drop?  No longer Reentrant
+    /// Counters.  Maybe drop?
     mutable std::atomic<unsigned long> m_nEventsProcessed{};
     mutable std::atomic<unsigned long> m_nTracksProcessed{};
 

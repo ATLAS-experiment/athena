@@ -25,12 +25,14 @@ class PixelToTPIDBlock (ConfigBlock) :  ## should match the alg in ../TrackingAn
         # log = logging.getLogger('PixelToTPIDDualToolConfig')
         # log = logging.getLogger('PixelToTPIDBlock')
         
-        # Setup the muon quality selection
-        alg = config.createAlgorithm( 'CP::PixelDEdxEqualizationAlg', ## should match the alg in ../TrackingAnalysisAlgorithms I think... not the tool...
-                               'PixelDEdxEqualizationAlg' + self.postfix ) # not of required type???
-        #config.addPrivateTool( 'PixelDEdxEqualizationAlg', 'CP::PixelDEdxEqualizationAlg' )
+        ### Setup the muon quality selection
+        # alg = config.createAlgorithm( 'CP::PixelDEdxEqualizationAlg', ## should match the alg in ../TrackingAnalysisAlgorithms I think... not the tool...
+        #                               'PixelDEdxEqualizationAlg' + self.postfix ) # not of required type???
+        alg = config.createAlgorithm( 'CP::PixelDEdxEqualizationAlg',
+                                      'PixelDEdxEqualizationAlg' + self.postfix,
+                                      reentrant=True)
         config.addPrivateTool( 'PixelToTPIDDualTool', 'CP::PixelToTPIDDualTool' )
-        #alg.PixelToTPIDDualTool.TrackContainerName = self.containerName
+        # alg.PixelToTPIDDualTool.TrackContainerName = self.containerName
         alg.TrackContainerName = self.containerName # belongs to alg, not tool.
         alg.PixelToTPIDDualTool.EqualizeClusterMeasurements = self.equalizeClusterMeasurements # belongs to tool, not alg.
     
