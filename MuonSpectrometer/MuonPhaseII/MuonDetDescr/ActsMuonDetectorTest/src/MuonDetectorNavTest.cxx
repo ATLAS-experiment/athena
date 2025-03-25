@@ -37,11 +37,15 @@ static const SG::ConstAccessor<SegLink_t> segAcc{"truthSegLinks"};
 static const Amg::Vector3D dummyPos{100.*Gaudi::Units::m, 100.*Gaudi::Units::m, 100.*Gaudi::Units::m};
 struct PropagatorRecorder{
     /// @brief Position obtained by the ACTS propagator
-    Amg::Vector3D actsPropPos{Amg::Vector3D::Zero()};
+    Amg::Vector3D actsPropPos{dummyPos};
+    /// @brief Position obtained by the ACTS propagator in the global frame
+    Amg::Vector3D actsGlobalPos{dummyPos};
     /// @brief Direction obtained by the ACTS propgator
     Amg::Vector3D actsPropDir{Amg::Vector3D::Zero()};
     /// @brief Position obtained by the ATLAS extrapolator
     Amg::Vector3D atlasPropPos{dummyPos};
+    /// @brief Position obtained by the ATLAS extrapolator in the global frame
+    Amg::Vector3D atlasGlobalPos{dummyPos};
     /// @brief Direction obtained by the ATLAS extrapolator
     Amg::Vector3D atlasPropDir{Amg::Vector3D::Zero()};
     /// @Identifier of the state
@@ -50,6 +54,8 @@ struct PropagatorRecorder{
     double atlasPropabsMomentum{0.};
     /// @brief Momentum obtained by the ACTS propagator
     double actsPropabsMomentum{0.};
+    /// @brief The step size from the acts propagator
+    double actsStepSize{0.};
 };
 }
 
@@ -166,8 +172,9 @@ StatusCode MuonDetectorNavTest::execute() {
         
         //the particle hypothesis
         Acts::ParticleHypothesis particleHypothesis(static_cast<Acts::PdgParticle>(truthParticle->absPdgId()),
-						    truthParticle->m(),
-						    Acts::AnyCharge(truthParticle->charge()));
+        truthParticle->m(),
+        Acts::AnyCharge(truthParticle->charge()));
+
         
         std::vector<std::pair<const xAOD::MuonSegment*, std::vector<const xAOD::MuonSimHit*>>> muonSegmentWithSimHits;
         for (const auto& truthSegLink : segAcc(*truthParticle)){
@@ -278,6 +285,7 @@ StatusCode MuonDetectorNavTest::execute() {
     
         ATH_MSG_VERBOSE("Number of propagated steps : " << state.steps.size());
         m_propSteps = state.steps.size();
+        m_propLength = result.value().pathLength;
         for(const auto& state: state.steps){
             if(!state.surface){
                 continue;
@@ -294,8 +302,10 @@ StatusCode MuonDetectorNavTest::execute() {
             PropagatorRecorder newRecord{};
             newRecord.id = ID;
             newRecord.actsPropPos = toGap*state.position;
+            newRecord.actsGlobalPos = state.position;
             newRecord.actsPropDir = toGap.linear()*state.momentum.unit();
             newRecord.actsPropabsMomentum = state.momentum.norm();
+            newRecord.actsStepSize = state.stepSize.value();
 
             //define the surface to propagate
             const Trk::Surface& surface = detMgr->getReadoutElement(ID)->surface(ID);
@@ -315,9 +325,12 @@ StatusCode MuonDetectorNavTest::execute() {
                 newRecord.atlasPropPos =  toGap* atlasPars->position();
                 newRecord.atlasPropDir = toGap.linear()*atlasPars->momentum().unit();
                 newRecord.atlasPropabsMomentum = atlasPars->momentum().mag();
+                newRecord.atlasGlobalPos = atlasPars->position();
             }
             propagatedHits.emplace_back(newRecord);
         }
+
+        std::size_t propHitsSize = propagatedHits.size();
 
         //fill with the truthHits- id and local position on the measurement layer's frame and look in the propagated hits
         unsigned int nMatchedTruth = 0, nMatchedProp = 0, nTruth{0};
@@ -329,6 +342,7 @@ StatusCode MuonDetectorNavTest::execute() {
                 const Amg::Transform3D localTrf{toLocalTrf(*gctx, simHit->identify())*
                     toGlobalTrf(*gctx,simHit->identify())};
                 const Amg::Vector3D localPos = localTrf*xAOD::toEigen(simHit->localPosition());
+                const Amg::Vector3D globalPos = toGlobalTrf(*gctx, simHit->identify())*xAOD::toEigen(simHit->localPosition());
                 const Amg::Vector3D localDir = localTrf.linear()*xAOD::toEigen(simHit->localDirection());
                 m_detId.push_back(ID);
                 m_techIdx.push_back(m_idHelperSvc->technologyIndex(ID));
@@ -336,35 +350,57 @@ StatusCode MuonDetectorNavTest::execute() {
 
                 m_truthLoc.push_back(localPos);
                 m_truthDir.push_back(localDir);
+                m_truthGlob.push_back(globalPos);
+                m_startGlob.push_back(startPropPos);
                 ATH_MSG_VERBOSE("Identify truth hit at local position in 1st measurement plane" << Amg::toString(localPos));
 
-                auto it = std::ranges::find_if(propagatedHits,
-                                        [this, ID](const auto& propagatedHit) {
+                auto it_begin = std::ranges::find_if(propagatedHits,
+                                        [this, ID, &localPos](const auto& propagatedHit) {
                                         return  m_idHelperSvc->detElId(ID) == m_idHelperSvc->detElId(propagatedHit.id) &&
                                                 layerHash(ID) == layerHash(propagatedHit.id);
                 });
-                m_isPropagated.push_back(it != propagatedHits.end());
-                if(it != propagatedHits.end()){
-                    ATH_MSG_DEBUG("Truth hit found in propagated hits: " << m_idHelperSvc->toString(ID));
-                    m_actsPropLoc.push_back(it->actsPropPos);
-                    m_actsPropDir.push_back(it->actsPropDir);
-                    m_atlasPropLoc.push_back(it->atlasPropPos);
-                    m_atlasPropDir.push_back(it->atlasPropDir);        
-                    m_actsPropMomentum.push_back(it->actsPropabsMomentum);
-                    m_atlasPropMomentum.push_back(it->atlasPropabsMomentum);                
-                    nMatchedTruth++;
-                }else{
+                m_isPropagated.push_back(it_begin != propagatedHits.end());
+
+                if (it_begin == propagatedHits.end()) {
                     m_actsPropLoc.push_back(dummyPos);
                     m_actsPropDir.push_back(dummyPos);
                     m_atlasPropLoc.push_back(dummyPos);
                     m_atlasPropDir.push_back(dummyPos);
+                    m_actsPropGlob.push_back(dummyPos);
+                    m_atlasPropGlob.push_back(dummyPos);
                     m_actsPropMomentum.push_back(0.);
                     m_atlasPropMomentum.push_back(0.);
+                    m_actsStepSize.push_back(0.);
+                    continue;
                 }
+                auto it_end = std::find_if(it_begin, propagatedHits.end(),
+                [this, ID, &localPos](const auto& propagatedHit) {
+                    return  m_idHelperSvc->detElId(ID) != m_idHelperSvc->detElId(propagatedHit.id) ||
+                            layerHash(ID) != layerHash(propagatedHit.id);
+                });
+                /// now let's find the closest one
+                auto it = std::min_element(it_begin, it_end,
+                                       [&localPos](const PropagatorRecorder& a,
+                                                   const PropagatorRecorder& b){
+                    return (localPos - a.actsPropPos).mag() < (localPos - b.actsPropPos).mag();
+                });
+
+
+                ATH_MSG_DEBUG("Truth hit found in propagated hits: " << m_idHelperSvc->toString(ID));
+                m_actsPropLoc.push_back(it->actsPropPos);
+                m_actsPropDir.push_back(it->actsPropDir);
+                m_actsPropGlob.push_back(it->actsGlobalPos);
+                m_atlasPropLoc.push_back(it->atlasPropPos);
+                m_atlasPropDir.push_back(it->atlasPropDir);    
+                m_atlasPropGlob.push_back(it->atlasGlobalPos); 
+                m_actsPropMomentum.push_back(it->actsPropabsMomentum);
+                m_atlasPropMomentum.push_back(it->atlasPropabsMomentum);     
+                m_actsStepSize.push_back(it->actsStepSize);           
+                ++nMatchedTruth;
             }
         }
         m_matchedTruthFraction = 1.f*nMatchedTruth / nTruth;
-        m_matchedPropFraction = 1.f*nMatchedProp / propagatedHits.size();
+        m_matchedPropFraction = 1.f*nMatchedProp / propHitsSize;
 
         m_tree.fill(ctx); 
         
