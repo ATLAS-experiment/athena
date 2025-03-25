@@ -1,36 +1,33 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import argparse
-import logging
-from ROOT import PathResolver
-from AthenaConfiguration.AllConfigFlags import initConfigFlags
-from AnalysisAlgorithmsConfig.ConfigText import TextConfig
-
+from AnaAlgorithm.Logging import logging
 from abc import ABC, abstractmethod
 
 class CPBaseRunner(ABC):
     def __init__(self):
         self.logger = logging.getLogger("CPBaseRunner")
+        self._args = None
         self._inputList = None
         self.parser = self._defaultParseArguments()
-        self.config = self._readYamlConfig()
-        self.flags = self._defaultFlagsInitialization()
+        # parse the arguments here is a bad idea
 
     @property
     def args(self):
-        return self.parser.parse_args()
+        if self._args is None:
+            self._args = self.parser.parse_args()
+        return self._args   
     
     @property
     def inputList(self):
-        if self.args.input_list and self.args.input_file:
-            raise ValueError('use either --input-list or --input-file, not both')
         if self._inputList is None:
-            if self.args.input_list:
-                self._inputList = self._parseInputFileList(self.args.input_list)
-            elif self.args.input_file:
-                self._inputList = [self.args.input_file]
+            if self.args.input_list.endswith('.txt'):
+                self._inputList = CPBaseRunner._parseInputFileList(self.args.input_list)
+            elif ".root" in self.args.input_list:
+                self._inputList = [self.args.input_list]
             else:
-                raise ValueError('use --input-list or --input-file to specify input files')
+                raise FileNotFoundError(f'Input file list \"{self.args.input_list}\" is not supported!'
+                                        'Please provide a text file with a list of input files or a single root file.')
         return self._inputList
     
     def printFlags(self):
@@ -57,6 +54,7 @@ class CPBaseRunner(ABC):
     
     # The responsiblity of flag.lock will pass to the caller
     def _defaultFlagsInitialization(self):
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
         flags = initConfigFlags()
         flags.Input.Files = self.inputList
         flags.Exec.MaxEvents = self.args.max_events
@@ -65,27 +63,28 @@ class CPBaseRunner(ABC):
     def _defaultParseArguments(self):
         parser = argparse.ArgumentParser(
             description='Runscript for CP Algorithm unit tests')
-        parser.add_argument('--input-list', dest='input_list',
-                            help='path to text file containing list of input files')
-        parser.add_argument('--work-dir', dest='work_dir', default='workDir',
-                            help='path to work directory, containing output and intermediate files')
-        parser.add_argument('-e', '--max-events', dest='max_events', type=int, default=-1,
+        baseGroup = parser.add_argument_group('Base Script Options')
+        baseGroup.add_argument('--input-list', dest='input_list',
+                            help='path to text file containing list of input files, or a single root file')
+        baseGroup.add_argument('--output-name', dest='output_name', default='output',
+                            help='output name of the analysis root file')
+        baseGroup.add_argument('-e', '--max-events', dest='max_events', type=int, default=-1,
                             help='Number of events to run')
-        parser.add_argument('-t', '--text-config', dest='text_config',
+        baseGroup.add_argument('-t', '--text-config', dest='text_config',
                             help='path to the YAML configuration file')
-        parser.add_argument('--no-systematics', dest='no_systematics',
+        baseGroup.add_argument('--no-systematics', dest='no_systematics',
                             action='store_true', help='Disable systematics')
-        parser.add_argument('--input-file', dest='input_file',
-                            help='path to a single input file')
         return parser
     
     def _readYamlConfig(self):
+        from ROOT import PathResolver
         yamlconfig = PathResolver.find_file(
             self.args.text_config, "CALIBPATH", PathResolver.RecursiveSearch)
         if not yamlconfig:
             raise FileNotFoundError(f'PathResolver failed to locate \"{self.args.text_config}\" config file!'
                                     'Check if you have a typo in -t/--text-config argument or missing file in the analysis configuration sub-directory.')
         self.logger.info("Setting up configuration based on YAML config:")
+        from AnalysisAlgorithmsConfig.ConfigText import TextConfig
         config = TextConfig(yamlconfig)
         return config
     
@@ -100,3 +99,13 @@ class CPBaseRunner(ABC):
             # remove leading/trailing whitespaces, and \n
             files = [file.strip() for file in files]
         return files
+    
+    def setup(self):
+        self.parser.parse_args()
+        self.config = self._readYamlConfig()
+        self.flags = self._defaultFlagsInitialization() 
+    
+    def printAvailableArguments(self):
+        self.parser.description = 'CPRunScript available arguments'
+        self.parser.usage = argparse.SUPPRESS
+        self.parser.print_help()
