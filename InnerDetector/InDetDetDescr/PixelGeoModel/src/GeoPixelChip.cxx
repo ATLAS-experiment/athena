@@ -37,6 +37,5 @@ GeoVPhysVol* GeoPixelChip::Build() {
   GeoLogVol* theChip = new GeoLogVol(LogName,chipBox,chipMat);
   GeoPhysVol* chipPhys = new GeoPhysVol(theChip);
 
-  //std::cout<<"chip volume " << chipBox->volume() << " density " << chipMat->getDensity() << std::endl;
   return chipPhys;
 }
