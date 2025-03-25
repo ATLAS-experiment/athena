@@ -39,7 +39,7 @@ class TauCalibrateLC : public TauRecToolBase {
 
     std::vector<std::vector<std::unique_ptr<TF1>>> m_calibFunc;
     std::vector<std::unique_ptr<TH1>> m_slopeNPVHist; 
-    std::unique_ptr<TH1> m_etaBinHist = nullptr; 
+    std::unique_ptr<TH1> m_etaBinHist = {};
 
     int    m_nEtaBins=0;
     double m_averageNPV=0;
