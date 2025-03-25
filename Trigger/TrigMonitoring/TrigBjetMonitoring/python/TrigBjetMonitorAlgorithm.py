@@ -134,13 +134,13 @@ def TrigBjetMonConfig(inputFlags):
 
         if "a10sd_cssk" in chain:  # GN2Xv01 chains
 
-            HistName = 'GN2Xv01_nJet_' + chain[2:]
+            HistName = 'LargeR_nJet_' + chain[2:]
             if chain[0:1] == "E" :
-                BjetMonGroup.defineHistogram(HistName, title='Number of GN2Xv01 LargeR jets;nJet;Events',
+                BjetMonGroup.defineHistogram(HistName, title='Number of LargeR jets;nJet;Events',
                                              path='Expert/'+chain[2:],xbins=40,xmin=0.0,xmax=40.0)
 
             if chain[0:1] == "S" :
-                BjetMonGroup.defineHistogram(HistName, title='Number of GN2Xv01 LargeR jets;nJet;Events',
+                BjetMonGroup.defineHistogram(HistName, title='Number of LargeR jets;nJet;Events',
                                              path='Shifter/'+chain[2:],xbins=40,xmin=0.0,xmax=40.0)
 
             HistName = 'GN2Xv01_phbb_tr_' + chain[2:]
@@ -175,40 +175,40 @@ def TrigBjetMonConfig(inputFlags):
                 BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2Xv01_mv LLR;GN2Xv01_mv;Events',
                                              path='Shifter/'+chain[2:],xbins=200,xmin=-50.,xmax=50.)
 
-            HistName = 'GN2Xv01_jetPt_' + chain[2:]
+            HistName = 'LargeR_jetPt_' + chain[2:]
             if chain[0:1] == "E" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2Xv01_Pt_jet;Pt_jet;Events',
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of LargeR jet Pt;Pt_jet;Events',
                                              path='Expert/'+chain[2:],xbins=100,xmin=0.0,xmax=750.0)
 
             if chain[0:1] == "S" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2Xv01_Pt_jet;Pt_jet;Events',
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of LargeR jet Pt;Pt_jet;Events',
                                              path='Shifter/'+chain[2:],xbins=100,xmin=0.0,xmax=750.0)
 
-            HistName = 'GN2Xv01_jetMass_' + chain[2:]
+            HistName = 'LargeR_jetMass_' + chain[2:]
             if chain[0:1] == "E" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2Xv01_jetMass;Mass;Events',
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of LargeR jet Mass;Mass;Events',
                                              path='Expert/'+chain[2:],xbins=100,xmin=0.0,xmax=750.0)
 
             if chain[0:1] == "S" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2Xv01_jetMass;Mass;Events',
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of LargeR jet Mass;Mass;Events',
                                              path='Shifter/'+chain[2:],xbins=100,xmin=0.0,xmax=750.0)
 
-            HistName = 'GN2Xv01_jetEta_' + chain[2:]
+            HistName = 'LargeR_jetEta_' + chain[2:]
             if chain[0:1] == "E" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2Xv01_Eta_jet;Eta_jet;Events',
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of LargeR jet Eta;Eta_jet;Events',
                                              path='Expert/'+chain[2:],xbins=100,xmin=-7.5,xmax=7.5)
 
             if chain[0:1] == "S" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2Xv01_Eta_jet;Eta_jet;Events',
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of LargeR jet Eta;Eta_jet;Events',
                                              path='Shifter/'+chain[2:],xbins=100,xmin=-7.5,xmax=7.5)
 
-            HistName = 'GN2Xv01_jetEta_' + chain[2:] + ',GN2Xv01_jetPhi_' + chain[2:]
+            HistName = 'LargeR_jetEta_' + chain[2:] + ',LargeR_jetPhi_' + chain[2:]
             if chain[0:1] == "E" :
-                BjetMonGroup.defineHistogram(HistName,type='TH2F',title='GN2Xv01_Phi vs GN2Xv01_Eta of jets;Eta_jet;Phi_jet',
+                BjetMonGroup.defineHistogram(HistName,type='TH2F',title='LargeR jet Phi vs LargeR jet Eta;Eta_jet;Phi_jet',
                                              path='Expert/'+chain[2:],xbins=20,xmin=-5.0,xmax=+5.0,ybins=20,ymin=-3.1416,ymax=+3.1416)
 
             if chain[0:1] == "S" :
-                BjetMonGroup.defineHistogram(HistName,type='TH2F',title='GN2Xv01_Phi vs GN2Xv01_Eta of jets;Eta_jet;Phi_jet',
+                BjetMonGroup.defineHistogram(HistName,type='TH2F',title='LargeR jet Phi vs LargeR jet Eta;Eta_jet;Phi_jet',
                                              path='Shifter/'+chain[2:],xbins=20,xmin=-5.0,xmax=+5.0,ybins=20,ymin=-3.1416,ymax=+3.1416)
 
 

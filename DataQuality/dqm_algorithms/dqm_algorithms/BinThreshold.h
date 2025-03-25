@@ -25,7 +25,7 @@ namespace dqm_algorithms
           bool CompareBinThreshold( const std::string & objname, double bincontent, double threshold );
           using dqm_core::Algorithm::printDescription;
 	  void  printDescription(std::ostream& out);
- 
+	  void  parseVetoList(const std::string& input, std::vector<int>& rows, std::vector<int>& columns, std::vector<std::vector<int>>& bins);
 	  private:
 	  std::string m_name;
 	};
