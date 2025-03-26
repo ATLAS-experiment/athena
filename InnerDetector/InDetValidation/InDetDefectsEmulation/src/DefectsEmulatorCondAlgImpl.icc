@@ -155,8 +155,8 @@ namespace InDet{
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(detStore()->retrieve(m_idHelper,derived().IDName()));
     if constexpr( T_ModuleHelper::ROW_BITS==0 || T_ModuleHelper::COL_BITS==0) {
-       if (!m_radialDefectParamsPerPattern.empty() || !m_radialDefectNCornerFractionsPerPattern.empty()) {
-          ATH_MSG_ERROR("Radial defects are not supported in this instance but are configured.");
+       if (!m_cornerDefectParamsPerPattern.empty() || !m_cornerDefectNCornerFractionsPerPattern.empty()) {
+          ATH_MSG_ERROR("Corner defects are not supported in this instance but are configured.");
           return StatusCode::FAILURE;
        }
     }
@@ -402,10 +402,10 @@ namespace InDet{
 
           // Create corner defects only for modules with columns and rows.
           if constexpr( T_ModuleHelper::ROW_BITS>0 && T_ModuleHelper::COL_BITS>0) {
-          if (!m_radialDefectParamsPerPattern.empty() && !m_radialDefectParamsPerPattern[module_pattern_idx.front()].empty()) {
+          if (!m_cornerDefectParamsPerPattern.empty() && !m_cornerDefectParamsPerPattern[module_pattern_idx.front()].empty()) {
              if (module_pattern_idx.size()!=1) {
                 ATH_MSG_WARNING("Multiple module pattern match module " << module_i
-                                << ", but for radial defects only the parameters are used which are associated to the first pattern" );
+                                << ", but for corner defects only the parameters are used which are associated to the first pattern" );
              }
              // create defects at certain corners outside of a circle which crosses the sensor edges at certain positions
              // chosen in a random range. The edge crossing at the particular corner defines a sagitta of a certain value
@@ -413,12 +413,12 @@ namespace InDet{
 
              // throw the number of corners with corner defects.
              float defect_prob=CLHEP::RandFlat::shoot(rndmEngine,1.);
-             unsigned int n_corners=m_perPatternRadialDefectNCornerCummulativeProb[module_pattern_idx.front() ].size();
+             unsigned int n_corners=m_perPatternCornerDefectNCornerCummulativeProb[module_pattern_idx.front() ].size();
              for (;
-                  n_corners>0 && defect_prob<m_perPatternRadialDefectNCornerCummulativeProb[module_pattern_idx.front() ][n_corners-1];
+                  n_corners>0 && defect_prob<m_perPatternCornerDefectNCornerCummulativeProb[module_pattern_idx.front() ][n_corners-1];
                   --n_corners);
              unsigned int n_current_defects =module_defects.size();
-             if (n_corners<m_perPatternRadialDefectNCornerCummulativeProb[module_pattern_idx.front() ].size()) {
+             if (n_corners<m_perPatternCornerDefectNCornerCummulativeProb[module_pattern_idx.front() ].size()) {
                 assert( !m_histogrammingEnabled || ( hist_pattern_i < m_hist.size() && matrix_histogram_index < m_hist[hist_pattern_i].size()) );
                 TH2 *h2 = (m_histogrammingEnabled ? m_hist.at(hist_pattern_i).at(matrix_histogram_index) : nullptr);
 
@@ -430,13 +430,38 @@ namespace InDet{
                    if (corner_mask & (1u << corner_i)) {
                       // chose random positions at which the circle crosses the edges at the particular corner
                       // and chose a random sagitta defined by the corssings.
-                      assert( m_radialDefectParamsPerPattern[module_pattern_idx.front()].size()==kNRadialDefectParams);
-                      float rx=m_radialDefectParamsPerPattern[module_pattern_idx.front()][kRadialDefectWidthColumnDirectionOffset]
-                         +CLHEP::RandFlat::shoot(rndmEngine,m_radialDefectParamsPerPattern[module_pattern_idx.front() ][kRadialDefectWidthColumnDirection]);
-                      float ry=m_radialDefectParamsPerPattern[module_pattern_idx.front() ][kRadialDefectkWidthRowDirectionOffset]
-                         +CLHEP::RandFlat::shoot(rndmEngine,m_radialDefectParamsPerPattern[module_pattern_idx.front() ][kRadialDefectkWidthRowDirection]);
-                      float sagitta=m_radialDefectParamsPerPattern[module_pattern_idx.front() ][kRadialDefectkSagittaOffset]
-                         +CLHEP::RandFlat::shoot(rndmEngine,m_radialDefectParamsPerPattern[module_pattern_idx.front() ][kRadialDefectkSagitta]);
+                      assert( m_cornerDefectParamsPerPattern[module_pattern_idx.front()].size()==kNCornerDefectParams);
+                      float rx=m_cornerDefectParamsPerPattern[module_pattern_idx.front()][kCornerDefectWidthColumnDirectionOffset]
+                         +CLHEP::RandFlat::shoot(rndmEngine,m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectWidthColumnDirection]);
+                      float ry=m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkWidthRowDirectionOffset]
+                         +CLHEP::RandFlat::shoot(rndmEngine,m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkWidthRowDirection]);
+
+                      float sagitta;
+                      {
+                         // make sure that the sagitta is small enough that the circle can actually cross the bounds.
+                         // conditions: the circle radius Rc has to be larger than rx and ry. If the circle radius
+                         // is equal to rx or ry, the circle will just touch the border.
+                         // This leads to quadratic equations x^2 + 2*hp1/2 * x + q solved by x1/2,1/2 = -hp1/2 +- sqrt(hp1/2^2-q)
+                         float r2=rx*rx+ry*ry;
+                         float hp1=0.5*sqrt(r2)*rx/ry;
+                         float hp2=0.5*sqrt(r2)*ry/rx;
+                         float q=-0.25*r2;
+                         float sagitta_max = std::min( (-hp1 + sqrt( hp1*hp1 -q )),(-hp2 + sqrt( hp2*hp2 -q )) );
+                         float sagitta_range = m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkSagitta];
+                         float sagitta_offset = m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkSagittaOffset];
+                         sagitta_offset=std::min(sagitta_offset,sagitta_max);
+                         sagitta_range=std::min( sagitta_range, sagitta_max - sagitta_offset);
+                         if (sagitta_range != m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkSagitta]
+                             || sagitta_offset != m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkSagittaOffset]) {
+                            ATH_MSG_VERBOSE("limited sagitta range from "
+                                            << m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkSagittaOffset]
+                                            << ".."
+                                            << (m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkSagittaOffset]
+                                                +  m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkSagitta])
+                                            << " to " << sagitta_offset << ".." << (sagitta_offset+sagitta_range));
+                         }
+                         sagitta=sagitta_offset+CLHEP::RandFlat::shoot(rndmEngine,sagitta_range);
+                      }
 
                       // compute column range with defects
                       double scale_rx=(corner_i==1 || corner_i==2) ? -1.f : 1.f;
@@ -495,7 +520,7 @@ namespace InDet{
                                for (unsigned int row_i=row_range[0]; row_i<row_range[1]; ++row_i) {
                                   // create a key which identifies the particular defect
                                   // @TODO should store as range instead e.g. mark that a key is the beginning of a range
-                                  //       up the the next key 
+                                  //       up the the next key
                                   typename T_ModuleHelper::KEY_TYPE
                                      key = helper.maskedKey( 0u,
                                                              helper.swapOfflineRowsColumns()
@@ -524,7 +549,7 @@ namespace InDet{
                       }
                    }
                 }
-                // add radial defects to random pixel defects for histogramming
+                // add corner defects to random pixel defects for histogramming
                 n_mask_defects[0] += module_defects.size() - n_current_defects;
              }
           }
