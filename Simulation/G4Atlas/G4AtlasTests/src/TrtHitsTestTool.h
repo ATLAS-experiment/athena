@@ -7,6 +7,9 @@
 
 #include "SimTestToolBase.h"
 
+namespace InDetDD {
+  class TRT_DetectorManager;
+}
 
 class TrtHitsTestTool : public SimTestToolBase {
 
@@ -28,6 +31,7 @@ public:
   TH2 *m_hits_xy, *m_hits_zr;
   TH2 *m_hits_edep_zr_photons, *m_hits_edep_zr_nonphotons;
   TH1 *m_hits_log_barcode;
+  const InDetDD::TRT_DetectorManager* m_detMgr{nullptr};
 };
 
 #endif
