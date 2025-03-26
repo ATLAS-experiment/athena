@@ -22,4 +22,47 @@ namespace ActsTrk {
 
     return StatusCode::SUCCESS;
   }
+
+  template <class MeasurementSource>
+  std::unique_ptr<Acts::BoundTrackParameters> TrackFindingAlg::doRefit(
+      const EventContext &ctx,
+      const MeasurementSource &measurement,
+      const Acts::BoundTrackParameters &initialParameters,
+      const Acts::GeometryContext &tgContext,
+      const Acts::MagneticFieldContext &mfContext,
+      const Acts::CalibrationContext &calContext,
+      const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
+      const bool paramsAtOutermostSurface) const {
+    // Perform KF before CKF
+    const auto fittedSeedCollection = m_fitterTool->fit(ctx, measurement, initialParameters,
+                                                        tgContext, mfContext, calContext,
+                                                        detectorElementToGeoId);
+    if (not fittedSeedCollection) {
+      ATH_MSG_WARNING("KF Fitted Track is nullptr");
+    }
+    else if (fittedSeedCollection->size() != 1) {
+      ATH_MSG_WARNING("KF produced " << fittedSeedCollection->size() << " tracks but should produce 1!");
+    }
+    else
+    {
+      const auto fittedSeed = fittedSeedCollection->getTrack(0);
+      const auto trackState = paramsAtOutermostSurface ? fittedSeed.outermostTrackState()
+                                                       : fittedSeed.innermostTrackState().value();
+      const auto boundParameters = fittedSeed.createParametersFromState(trackState);
+
+      // Check pTmin requirement
+      const double etaSeed = -std::log(std::tan(0.5 * boundParameters.parameters()[Acts::eBoundTheta]));
+      const auto &cutSet = getCuts(etaSeed);
+      if (boundParameters.transverseMomentum() < cutSet.ptMin) {
+        ATH_MSG_VERBOSE("min pt requirement not satisfied after param refinement: pt min is " << cutSet.ptMin << " but Refined params have pt of " << boundParameters.transverseMomentum());
+        return nullptr;
+      }
+
+      // Return updated parameters
+      return std::make_unique<Acts::BoundTrackParameters>(boundParameters);
+    }
+
+    // When skipping return unchanged parameters
+    return std::make_unique<Acts::BoundTrackParameters>(initialParameters);
+  };
 }  // namespace ActsTrk

@@ -494,20 +494,12 @@ namespace ActsTrk
       addPixelStripCounts(tracksContainerTemp);
     }
 
-    const auto &trackSelectorCfg = trackFinder().trackSelector.config();
-    auto getCuts = [&trackSelectorCfg](double eta) -> const Acts::TrackSelector::Config & {
-      // return the last bin for |eta|>=4 or nan
-      return (!(std::abs(eta) < trackSelectorCfg.absEtaEdges.back())) ? trackSelectorCfg.cutSets.back()
-             : (std::abs(eta) < trackSelectorCfg.absEtaEdges.front()) ? trackSelectorCfg.cutSets.front()
-                                                                      : trackSelectorCfg.getCuts(eta);
-    };
-
     std::size_t category_i = 0;
 
+    const auto &trackSelectorCfg = trackFinder().trackSelector.config();
     using BranchStopperResult = Acts::CombinatorialKalmanFilterBranchStopperResult;
     auto stopBranch = [&](const detail::RecoTrackContainer::TrackProxy &track,
                           const detail::RecoTrackContainer::TrackStateProxy &trackState) -> BranchStopperResult {
-
       if (m_addPixelStripCounts) {
         updatePixelStripCounts(track, trackState.typeFlags(), measurementType(trackState));
         checkPixelStripCounts(track);
@@ -674,7 +666,7 @@ namespace ActsTrk
         continue;
       }
 
-      Acts::BoundTrackParameters* initialParameters = &(*optTrackParams);
+      Acts::BoundTrackParameters *initialParameters = &(*optTrackParams);
       printSeed(iseed, *initialParameters);
       if (isDupSeed) continue;  // skip now if not done before
 
@@ -684,39 +676,13 @@ namespace ActsTrk
       ++event_stat[category_i][kNUsedSeeds];
 
       std::unique_ptr<Acts::BoundTrackParameters> refitSeedParameters;
-      if (refitSeeds)
-      {
-        // Perform KF before CKF
-        const auto fittedSeedCollection = m_fitterTool->fit(ctx, seed, *initialParameters,
-                                                            tgContext, mfContext, calContext,
-                                                            detectorElementToGeoId);
-        if (not fittedSeedCollection)
-        {
-          ATH_MSG_WARNING("KF Fitted Track is nullptr");
+      if (refitSeeds) {
+        refitSeedParameters = doRefit(ctx, seed, *initialParameters, tgContext, mfContext, calContext, detectorElementToGeoId, reverseSearch);
+        if (refitSeedParameters.get() == nullptr) {
+          ++event_stat[category_i][kNRejectedRefinedSeeds];
+          continue;
         }
-        else if (fittedSeedCollection->size() != 1)
-        {
-          ATH_MSG_WARNING("KF produced " << fittedSeedCollection->size() << " tracks but should produce 1!");
-        }
-        else
-        {
-          const auto fittedSeed = fittedSeedCollection->getTrack(0);
-          const auto trackState = reverseSearch ? fittedSeed.outermostTrackState()
-                                                : fittedSeed.innermostTrackState().value();
-          const auto boundParameters = fittedSeed.createParametersFromState(trackState);
-
-          // Check pTmin requirement
-          double etaSeed = -std::log(std::tan(0.5 * boundParameters.parameters()[Acts::eBoundTheta]));
-          const auto &cutSet = getCuts(etaSeed);
-          if (boundParameters.transverseMomentum() < cutSet.ptMin)
-          {
-            ATH_MSG_VERBOSE("min pt requirement not satisfied after param refinement: pt min is " << cutSet.ptMin << " but Refined params have pt of " << boundParameters.transverseMomentum());
-            ++event_stat[category_i][kNRejectedRefinedSeeds];
-            continue;
-          }
-
-          // Pass the refined params to the CKF
-          refitSeedParameters = std::make_unique<Acts::BoundTrackParameters>(boundParameters);
+        if (refitSeedParameters.get() != initialParameters) {
           initialParameters = refitSeedParameters.get();
           printSeed(iseed, *initialParameters, true);
         }
@@ -808,9 +774,7 @@ namespace ActsTrk
       };
 
       std::size_t nfirst = 0;
-      for (auto &firstTrack : tracksForSeed) {
-        std::size_t nsecond = 0;
-
+      for (TrkProxy &firstTrack : tracksForSeed) {
         auto smoothingResult = Acts::smoothTrack(tgContext, firstTrack, logger(), Acts::MbfSmoother());
         if (!smoothingResult.ok()) {
           ATH_MSG_DEBUG("Smoothing for seed "
@@ -819,67 +783,10 @@ namespace ActsTrk
           continue;
         }
 
-        if (m_doTwoWay) {
-          std::optional<detail::RecoTrackStateContainerProxy> firstMeasurement;
-          for (auto st : firstTrack.trackStatesReversed()) {
-            bool isMeasurement = st.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag);
-            bool isOutlier = st.typeFlags().test(Acts::TrackStateFlag::OutlierFlag);
-            // We are excluding non measurement states and outlier here. Those can
-            // decrease resolution because only the smoothing corrected the very
-            // first prediction as filtering is not possible.
-            if (isMeasurement && !isOutlier)
-              firstMeasurement = st;
-          }
+        const std::size_t nsecond =
+            m_doTwoWay ? doTwoWayTrackFinding(addTrack, firstTrack, tracksContainerTemp, secondOptions, tgContext, reverseSearch)
+                       : 0;
 
-          if (firstMeasurement.has_value()) {
-            Acts::BoundTrackParameters secondInitialParameters = firstTrack.createParametersFromState(detail::RecoConstTrackStateContainerProxy{*firstMeasurement});
-
-            if (!secondInitialParameters.referenceSurface().insideBounds(secondInitialParameters.localPosition())) {  // #3751
-              ATH_MSG_DEBUG("Smoothing of first pass fit produced out-of-bounds parameters relative to the surface, '"
-                            << secondInitialParameters.referenceSurface().name()
-                            << "'. Skipping second pass for " << seedType << " seed " << iseed << " track " << nfirst);
-            } else {
-              auto rootBranch = tracksContainerTemp.makeTrack();
-              rootBranch.copyFrom(firstTrack, false);  // #3534
-              if (m_addPixelStripCounts)
-                copyPixelStripCounts(rootBranch, firstTrack);
-              auto secondResult = trackFinder().ckf.findTracks(secondInitialParameters, secondOptions, tracksContainerTemp, rootBranch);
-
-              if (not secondResult.ok()) {
-                ATH_MSG_WARNING("Second track finding failed for " << seedType << " seed " << iseed << " track " << nfirst << " with error" << secondResult.error());
-              } else {
-                // store the original previous state to restore it later
-                auto originalFirstMeasurementPrevious = firstMeasurement->previous();
-
-                auto &secondTracksForSeed = secondResult.value();
-                for (auto &secondTrack : secondTracksForSeed) {
-                  secondTrack.reverseTrackStates(true);
-
-                  firstMeasurement->previous() = secondTrack.outermostTrackState().index();
-                  secondTrack.tipIndex() = firstTrack.tipIndex();
-
-                  if (reverseSearch) {
-                    // smooth the full track
-                    auto secondSmoothingResult = Acts::smoothTrack(tgContext, secondTrack, logger());
-                    if (!secondSmoothingResult.ok()) {
-                      ATH_MSG_WARNING("Second smoothing for seed " << iseed << " and track " << secondTrack.index() << " failed with error " << secondSmoothingResult.error());
-                      continue;
-                    }
-
-                    secondTrack.reverseTrackStates(true);
-                  }
-
-                  addTrack(secondTrack);
-
-                  ++nsecond;
-                }
-
-                // restore the original previous state for the first track
-                firstMeasurement->previous() = originalFirstMeasurementPrevious;
-              }
-            }
-          }
-        }
         if (nsecond == 0) {
           if (m_doTwoWay) {
             ATH_MSG_DEBUG("No viable result from second track finding for " << seedType << " seed " << iseed << " track " << nfirst);
@@ -904,6 +811,90 @@ namespace ActsTrk
 
     return StatusCode::SUCCESS;
   }
+
+  std::size_t TrackFindingAlg::doTwoWayTrackFinding(
+      std::function<void(detail::RecoTrackContainerProxy &)> addTrack,
+      TrkProxy &trackProxy,
+      detail::RecoTrackContainer &tracksContainerTemp,
+      const TrackFinderOptions &options,
+      Acts::GeometryContext &tgContext,
+      const bool reverseSearch) const {
+    std::size_t count = 0;
+
+    std::optional<detail::RecoTrackStateContainerProxy> firstMeasurement;
+    for (auto st : trackProxy.trackStatesReversed()) {
+      bool isMeasurement = st.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag);
+      bool isOutlier = st.typeFlags().test(Acts::TrackStateFlag::OutlierFlag);
+      // We are excluding non measurement states and outlier here. Those can
+      // decrease resolution because only the smoothing corrected the very
+      // first prediction as filtering is not possible.
+      if (isMeasurement && !isOutlier) {
+        firstMeasurement = st;
+      }
+    }
+
+    if (!firstMeasurement.has_value()) {
+      return 0;
+    }
+
+    Acts::BoundTrackParameters secondInitialParameters = trackProxy.createParametersFromState(detail::RecoConstTrackStateContainerProxy{*firstMeasurement});
+
+    if (!secondInitialParameters.referenceSurface().insideBounds(secondInitialParameters.localPosition())) {  // #3751
+      return 0;
+    }
+
+    auto rootBranch = tracksContainerTemp.makeTrack();
+    rootBranch.copyFrom(trackProxy, false);  // #3534
+    if (m_addPixelStripCounts) {
+      copyPixelStripCounts(rootBranch, trackProxy);
+    }
+    auto secondResult = trackFinder().ckf.findTracks(secondInitialParameters, options, tracksContainerTemp, rootBranch);
+
+    if (not secondResult.ok()) {
+      return 0;
+    }
+
+    // store the original previous state to restore it later
+    auto originalFirstMeasurementPrevious = firstMeasurement->previous();
+
+    auto &secondTracksForSeed = secondResult.value();
+    for (auto &secondTrack : secondTracksForSeed) {
+      secondTrack.reverseTrackStates(true);
+
+      firstMeasurement->previous() = secondTrack.outermostTrackState().index();
+      secondTrack.tipIndex() = trackProxy.tipIndex();
+
+      if (reverseSearch) {
+        // smooth the full track
+        auto secondSmoothingResult = Acts::smoothTrack(tgContext, secondTrack, logger());
+        if (!secondSmoothingResult.ok()) {
+          continue;
+        }
+
+        secondTrack.reverseTrackStates(true);
+      }
+
+      addTrack(secondTrack);
+
+      ++count;
+    }
+
+    // restore the original previous state for the first track
+    firstMeasurement->previous() = originalFirstMeasurementPrevious;
+
+    return count;
+  };
+
+
+  const Acts::TrackSelector::Config&
+  TrackFindingAlg::getCuts (double eta) const {
+    const auto &trackSelectorCfg = trackFinder().trackSelector.config();
+    // return the last bin for |eta|>=4 or nan
+    return (!(std::abs(eta) < trackSelectorCfg.absEtaEdges.back())) ? trackSelectorCfg.cutSets.back()
+           : (std::abs(eta) < trackSelectorCfg.absEtaEdges.front()) ? trackSelectorCfg.cutSets.front()
+                                                                    : trackSelectorCfg.getCuts(eta);
+  };
+
 
   void 
   TrackFindingAlg::storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,
