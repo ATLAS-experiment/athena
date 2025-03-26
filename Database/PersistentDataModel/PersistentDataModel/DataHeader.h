@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENTDATAMODEL_DATAHEADER_H
@@ -182,6 +182,10 @@ public: // Non-static members
    /// Add new entry to hash map
    void addHash(IStringPool* pool);
 
+   /// Form token, to be able to tell when the form changes.
+   const std::string& dhFormToken() const;
+   void setDhFormToken(const std::string& formToken);
+
    void setAttributeList(const coral::AttributeList* attrList);
    const coral::AttributeList* getAttributeList();
    void setEvtRefTokenStr(const std::string& tokenStr);
@@ -208,6 +212,8 @@ private:
    const coral::AttributeList* m_attrList;
    /// Optional Token String for Event Reference to enable writing of TAG to Payload files.
    std::string m_evtRefTokenStr;
+   /// Token to the DH format object.
+   std::string m_dhFormToken;
 };
 
 #include "AthenaKernel/CLASS_DEF.h"
