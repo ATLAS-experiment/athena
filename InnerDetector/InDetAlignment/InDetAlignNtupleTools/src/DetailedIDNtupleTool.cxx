@@ -2,6 +2,8 @@
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
+#include "DetailedIDNtupleTool.h"
+
 #include "TrkEventPrimitives/FitQuality.h"
 #include "TrkTrack/Track.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
@@ -14,7 +16,6 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "TrkVertexOnTrack/VertexOnTrack.h"
 
-
 #include "TrkToolInterfaces/ITrackSummaryTool.h"
 #include "TrkAlignEvent/AlignModule.h"
 #include "TrkAlignEvent/AlignTrack.h"
@@ -25,8 +26,6 @@
 #include "AtlasHepMC/GenVertex.h"
 
 #include "TrkAlignInterfaces/IAlignModuleTool.h"
-
-#include "InDetAlignNtupleTools/DetailedIDNtupleTool.h"
 
 #include "TFile.h"
 #include "TTree.h"
