@@ -814,7 +814,7 @@ def LLP1Cfg(flags):
     contNames = [ "LRTElectrons", "MuonsLRT" ] 
     acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1", isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1', hasLRT = True))
     contNames = [ MergedMuonContainer, MergedElectronContainer, "Photons" ] 
-    acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1_LRTMerged", isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1', isoDecSuffix = "CloseByCorr_LRT", hasLRT = True))
+    acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1_LRTMerged", isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1', isoDecSuffix = "CloseByCorr_LRT", caloDecSuffix = '_LRT', hasLRT = True))
     contNames = [ "ZeroPixelHitMuons" ]
     acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1_ZeroPixelHitsMuons", isPhysLite = False, containerNames = contNames, stream_name = 'StreamDAOD_LLP1', isoDecSuffix = "CloseByCorr_ZPH"))
 
