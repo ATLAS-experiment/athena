@@ -63,7 +63,7 @@ namespace {
             caloClusterLinks(*(src->caloCluster())).at(0)) {
           ElementLink<xAOD::EgammaContainer> link(
             *destContainer, destIndex, ctx);
-          ELink(*dest) = link;
+          ELink(*src) = link;
           break;
         }
       }
