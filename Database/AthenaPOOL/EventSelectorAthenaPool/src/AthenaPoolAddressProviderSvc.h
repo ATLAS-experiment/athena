@@ -18,6 +18,7 @@
 #include "PersistentDataModel/Guid.h"
 
 #include <string>
+#include <unordered_set>
 
 class IClassIDSvc;
 
@@ -56,6 +57,8 @@ private: // data
    ServiceHandle<StoreGateSvc> m_metaDataStore;
    ServiceHandle<IClassIDSvc> m_clidSvc;
    Guid m_guid;
+   /// Set of DataHeader form keys for which we've already done registerKeys.
+   std::unordered_set<std::string> m_dhFormKeys;
 
 private: // properties
    Gaudi::Property<std::string> m_dataHeaderKey{this, "DataHeaderKey", "EventSelector",

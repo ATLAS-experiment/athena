@@ -129,8 +129,14 @@ StatusCode AthenaPoolAddressProviderSvc::loadAddresses(StoreID::type storeID,
       }
       ATH_MSG_DEBUG("Created dataHeader SecondaryEventSelector");
    }
+   /// Only call registerKeys() if we haven't seen this form before.
+   bool doRegister = dataHeader->dhFormToken().empty() ||
+     m_dhFormKeys.emplace (dataHeader->dhFormToken()).second;
    ATH_MSG_DEBUG("The current Event contains: " << dataHeader->size() << " objects");
    for (const auto& element : *dataHeader) {
+      if (doRegister) {
+         EventSelectorAthenaPoolUtil::registerKeys(element, eventStore());
+      }
       SG::TransientAddress* tadd = element.getAddress();
       if (tadd->clID() == ClassID_traits<DataHeader>::ID()) { // self reference
          delete tadd; tadd = nullptr;
@@ -139,7 +145,6 @@ StatusCode AthenaPoolAddressProviderSvc::loadAddresses(StoreID::type storeID,
          tadd->setProvider(this, storeID);
          tads.push_back(tadd);
       }
-      EventSelectorAthenaPoolUtil::registerKeys(element, eventStore());
    }
    m_guid = thisFile;
    return(StatusCode::SUCCESS);

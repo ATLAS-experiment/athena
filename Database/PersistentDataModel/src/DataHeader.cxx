@@ -286,6 +286,16 @@ void DataHeader::addHash(IStringPool* pool) {
    }
 }
 //______________________________________________________________________________
+const std::string& DataHeader::dhFormToken() const
+{
+  return m_dhFormToken;
+}
+//______________________________________________________________________________
+void DataHeader::setDhFormToken(const std::string& formToken)
+{
+  m_dhFormToken = formToken;
+}
+//______________________________________________________________________________
 void DataHeader::setAttributeList(const coral::AttributeList* attrList) {
    m_attrList = attrList;
 }

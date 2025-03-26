@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv_p5.cxx
@@ -218,6 +218,7 @@ void DataHeaderCnv_p5::persToTrans(const DataHeader_p5& pers,
 {
   unsigned int entry = 1;
   const unsigned int provSize = dhForm.params(entry)[0];
+  trans.setDhFormToken (pers.dhFormToken());
   trans.m_inputDataHeader.resize(provSize);
   std::vector<DataHeaderElement>::iterator it = trans.m_inputDataHeader.begin();
   std::vector<DataHeaderElement_p5>::const_iterator pit = pers.m_dataHeader.begin();

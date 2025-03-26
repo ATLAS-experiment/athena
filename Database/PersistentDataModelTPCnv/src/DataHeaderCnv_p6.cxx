@@ -60,6 +60,7 @@ DataHeader* DataHeaderCnv_p6::createTransient( const DataHeader_p6* pers,
                                                const Token* dhToken ) const
 {
    DataHeader* trans = new DataHeader();
+   trans->setDhFormToken (pers->dhFormToken());
    const unsigned int provSize = pers->m_provenanceSize;
    trans->m_inputDataHeader.resize(provSize);
    // DataHeaders with a self Reference at the end have the list longer by 1 element
