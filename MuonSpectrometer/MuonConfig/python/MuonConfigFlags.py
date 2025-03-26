@@ -133,7 +133,7 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.Align.UseBLines", lambda prevFlags: 'all' if _muonAlignMode(prevFlags) else 'none') # Can be ['none','all','barrel','endcaps']
     mcf.addFlag("Muon.Align.UseILines", lambda prevFlags: (_muonAlignMode(prevFlags)))
     mcf.addFlag("Muon.Align.UseAsBuilt", lambda prevFlags: (_muonAlignMode(prevFlags)))
-    mcf.addFlag("Muon.Align.UsesTGCAsBuild2",False)
+    mcf.addFlag("Muon.Align.UsesTGCAsBuild",False)
 
     # Muon Trigger Flags
     mcf.addFlag("Muon.MuonTrigger", False) 

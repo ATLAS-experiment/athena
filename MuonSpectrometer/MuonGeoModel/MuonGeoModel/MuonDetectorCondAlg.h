@@ -9,7 +9,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "MuonAlignmentData/CorrContainer.h"
 #include "MuonAlignmentData/NswAsBuiltDbData.h"
-#include "MuonAlignmentData/sTGCAsBuiltData2.h"
+#include "MuonAlignmentData/sTGCAsBuiltData.h"
 #include "MuonGeoModel/MuonDetectorTool.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonAlignmentData/NswPassivationDbData.h"
@@ -37,7 +37,7 @@ class MuonDetectorCondAlg : public AthReentrantAlgorithm {
     
     Gaudi::Property<bool> m_applyNswAsBuilt{this, "applyNswAsBuilt", true, 
                                             "Toggles the application of the Nsw as-built parameters"};
-    Gaudi::Property<bool> m_applysTGCAsBuilt2{this, "applysTGCAsBuilt2", false, 
+    Gaudi::Property<bool> m_applysTGCAsBuilt{this, "applysTGCAsBuilt", false, 
                                             "Toggles the application of the alternative sTGC as-built parameters"};
 
     Gaudi::Property<bool> m_applyMdtAsBuilt{this, "applyMdtAsBuilt", true, 
@@ -59,7 +59,7 @@ class MuonDetectorCondAlg : public AthReentrantAlgorithm {
                                                          "Key of input muon alignment CSC/ILine condition data"};
     SG::ReadCondHandleKey<MdtAsBuiltContainer> m_readMdtAsBuiltKey{this, "ReadMdtAsBuiltKey", "MdtAsBuiltContainer", "Key of output muon alignment MDT/AsBuilt condition data"};
     SG::ReadCondHandleKey<NswAsBuiltDbData> m_readNswAsBuiltKey{this, "ReadNswAsBuiltKey", "NswAsBuiltDbData", "Key of NswAsBuiltDbData object containing conditions data for NSW as-built params!"};
-    SG::ReadCondHandleKey<sTGCAsBuiltData2> m_readsTGCAsBuilt2Key{this, "ReadsTGCAsBuilt2Key", "sTGCAsBuilt2", "Key of sTGCAsBuiltData2 object containing conditions data for alternative sTGC as-built model!"};
+    SG::ReadCondHandleKey<sTGCAsBuiltData> m_readsTGCAsBuiltKey{this, "ReadsTGCAsBuiltKey", "sTGCAsBuilt", "Key of sTGCAsBuiltData object containing conditions data for the sTGC as-built model!"};
     SG::ReadCondHandleKey<NswPassivationDbData> m_condMmPassivKey {this, "condMmPassivKey", "NswPassivationDbData", "Key of NswPassivationDbData object containing passivation data for MMs"};
 
     // Write Handle
