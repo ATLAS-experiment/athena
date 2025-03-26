@@ -350,8 +350,6 @@
   <y title="Fraction of TRT Extended Tracks" lo="0" hi="2.0"/>
 </h>
 
-
-
 <h id="fracTRTExtensions_matched_vs_eta" type="TEfficiency" title="Fraction of TRT Extended Matched Tracks">
   <x title="#eta" n="32" lo="-&ETA;" hi="&ETA;"/>
   <y title="Fraction of TRT Extended Matched Tracks" lo="0" hi="2.0"/>
@@ -360,6 +358,36 @@
 <h id="fracTRTExtensions_matched_vs_pt" type="TEfficiency" title="Fraction of TRT Extended Matched Tracks">
   <x title="p_{T} [GeV]" n="25" lo="0" hi="50"/>
   <y title="Fraction of TRT Extended Matched Tracks" lo="0" hi="2.0"/>
+</h>
+
+<h id="fracFindableTRTExtensions_vs_eta" type="TEfficiency" title="Fraction of TRT Extended Tracks with TRT hits">
+  <x title="#eta" n="32" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Fraction of TRT Extended Tracks with TRT hits" lo="0" hi="2.0"/>
+</h>
+
+<h id="fracFindableTRTExtensions_vs_pt" type="TEfficiency" title="Fraction of TRT Extended Tracks with TRT hits">
+  <x title="p_{T} [GeV]" n="25" lo="0" hi="50"/>
+  <y title="Fraction of TRT Extended Tracks with TRT hits" lo="0" hi="2.0"/>
+</h>
+
+<h id="fracFindableTRTExtensions_vs_nvertices" type="TEfficiency" title="Fraction of TRT Extended Tracks with TRT hits">
+  <x title="Number of Reconstucted Vertices" n="50" lo="0" hi="100"/>
+  <y title="Fraction of TRT Extended Tracks with TRT hits" lo="0" hi="2.0"/>
+</h>
+
+<h id="fracFindableTRTExtensions_vs_mu" type="TEfficiency" title="Fraction of TRT Extended Tracks with TRT hits">
+  <x title="#LT#mu#GT" n="50" lo="0" hi="100"/>
+  <y title="Fraction of TRT Extended Tracks with TRT hits" lo="0" hi="2.0"/>
+</h>
+
+<h id="fracFindableTRTExtensions_matched_vs_eta" type="TEfficiency" title="Fraction of TRT Extended Matched Tracks with TRT hits">
+  <x title="#eta" n="32" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Fraction of TRT Extended Matched Tracks with TRT hits" lo="0" hi="2.0"/>
+</h>
+
+<h id="fracFindableTRTExtensions_matched_vs_pt" type="TEfficiency" title="Fraction of TRT Extended Matched Tracks with TRT hits">
+  <x title="p_{T} [GeV]" n="25" lo="0" hi="50"/>
+  <y title="Fraction of TRT Extended Matched Tracks with TRT hits" lo="0" hi="2.0"/>
 </h>
 
 <h id="chi2ndofTRTExtensions" type="TH1F" title="reco_{#chi^2/ndof}">
