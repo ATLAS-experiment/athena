@@ -422,7 +422,7 @@ void FPGATrackSimMatrixGenAlgo::roadsToTrack(std::vector<std::shared_ptr<const F
                 // Here we "reject" it by marking the candidate as "invalid", to be rejected later.
                 // That require another field on the track object, but it avoids having to change the sizes
                 // of arrays computed above.
-                if (hit->getHitType() == HitType::spacepoint && (hit->getPhysLayer() % 2) == 1) {
+                if (hit->getHitType() == HitType::spacepoint && (hit->getPhysLayer() % 2) == 1 && (layer>0)) {
                     const FPGATrackSimHit inner_hit = track_cands[existing_size + icomb].getFPGATrackSimHits().at(layer - 1);
                     if ((hit->getX() != inner_hit.getX()) || (hit->getY() != inner_hit.getY()) || (hit->getZ() != inner_hit.getZ())) {
                         track_cands[existing_size + icomb].setValidCand(false);
