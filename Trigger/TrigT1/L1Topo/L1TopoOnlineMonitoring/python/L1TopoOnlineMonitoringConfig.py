@@ -36,11 +36,16 @@ def getL1TopoLabels(flags,connectors = {0: 'LegacyTopo0', 1: 'LegacyTopo1'}, bma
         else:
             for topo_trigline in topo_triglines_dict:
                 topo_trigline_name = topo_trigline['name']
+                topo_trigline_name= topo_trigline_name.replace("TOPO_","")
                 bit_id = topo_trigline['startbit']
                 fpga_id = topo_trigline['fpga']
                 clock_id = topo_trigline['clock']
                 topo_trigline_index = 64*connector_id + 32*fpga_id + 2*bit_id + clock_id
                 topo_trigline_labels[topo_trigline_index] = topo_trigline_name
+
+        for i in range(len(topo_trigline_labels)):
+            if ( topo_trigline_labels[i] == ""):
+                topo_trigline_labels[i] = "-- Unassigned Item --"
 
     return topo_trigline_labels
 
@@ -53,6 +58,8 @@ def getMultiplicityLabels(flags,topoModule):
         topo_trigline_name = topo_trigline['name']
         bit_id = topo_trigline['startbit']
         topo_trigline_labels[bit_id] = topo_trigline_name
+        if ( topo_trigline_labels[bit_id].find("SPARE") >= 0):
+                topo_trigline_labels[bit_id] = "-- Unassigned Item --"
     
     return topo_trigline_labels
 
@@ -69,7 +76,7 @@ def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=Tru
                                           doComp = doComp,
                                           doMultComp = doMultComp,
                                           forceCTPasHdw=forceCtp,
-                                          MultiplicityVetoList=["ZeroBiasC","ZeroBiasB"],
+                                          MultiplicityVetoList=["ZeroBiasA","ZeroBiasB"],
                                           AlgorithmVetoList   =["jXE40delay"])
     if logLevel : alg.OutputLevel=logLevel
     alg.MonTool = GenericMonitoringTool(flags, 'MonTool')
@@ -87,14 +94,19 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwM
                                           doHwMonCTP = doHwMonCtp,
                                           doComp = doComp,
                                           doMultComp = doMultComp,
-                                          forceCTPasHdw=forceCtp,
                                           MultiplicityVetoList=["ZeroBiasA","ZeroBiasB"],
-                                          AlgorithmVetoList   =["jXE40delay"])
+                                          AlgorithmVetoList   =["jXE40delay"],
+                                          forceCTPasHdw=forceCtp)
 
     #Define the Monitoring plots for L1Calo DQ
     helper.defineDQAlgorithm("L1TopoMismatchRate",
-                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.1"}, # counts bins with value>0.9
-                             thresholdConfig={"NBins":[0,1]}, # warn if any high rate, error if more than 10 bins anywhere.
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.001","PublishBins":"1"}, # counts bins with value>0.001
+                             thresholdConfig={"NBins":[0,1]}, # warn if any high rate, error if more than 1 bin anywhere.
+                             )
+
+    helper.defineDQAlgorithm("L1TopoMismatchCountVerticalRange",
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.001","PublishBins":"1","yMax":"2"}, #,"IgnoreBins":"\"25:1,26:2,*:25,*:58,500:*\""}, # counts bins with value>0.001 for Bins in Y between 0 and 1.
+                             thresholdConfig={"NBins":[0,1]}, # warn if any high rate, error if more than 1 bin anywhere.
                              )
 
     #Multiplicity mismatches between Sim and Hdw
@@ -130,7 +142,7 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwM
         helper.defineHistogram(name,
                            fillGroup="L1TopoDQ_mismatches",
                            paths=['Expert/Sim/detail/L1Topo/Multiplicities'],
-                           hanConfig={"description":"Agreements and Mismatches between L1Topo Simulation and Hdw per L1Topo Item (x-axis). The upper row should be filled (Sim and Hdw agrees), while the lower two rows shouldn't have any entry","display":"SetPalette(55)"},
+                           hanConfig={"algorithm":"L1TopoMismatchCountVerticalRange","description":"Agreements and Mismatches between L1Topo Simulation and Hdw per L1Topo Item (x-axis). The upper row should be filled (Sim and Hdw agrees), while the lower two rows shouldn't have any entry","display":"SetPalette(55)"},
                            type='TH2D',
                            title=title, xbins=len(xlabels), ybins=3,
                            xlabels=xlabels,ylabels=ylabels,
@@ -169,7 +181,7 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwM
         helper.defineHistogram(name,
                                fillGroup="L1TopoDQ_mismatches",
                                paths=['Expert/Sim/detail/L1Topo/Algos'],
-                               hanConfig={"description":"Agreements and Mismatches between L1Topo Simulation and Hardware per L1Topo Item (x-axis). The upper row should be filled (Sim and Hdw agrees), while the lower two rows shouldn't have any entry","display":"SetPalette(55)"},
+                               hanConfig={"algorithm":"L1TopoMismatchCountVerticalRange","description":"Agreements and Mismatches between L1Topo Simulation and Hardware per L1Topo Item (x-axis). The upper row should be filled (Sim and Hdw agrees), while the lower two rows shouldn't have any entry","display":"SetPalette(55)"},
                                type='TH2F',
                                title=title,xbins=32,ybins=3,
                                #weight=f'Phase1TopoWeight_{topo[0]}',
