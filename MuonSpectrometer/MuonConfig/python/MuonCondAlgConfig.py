@@ -338,6 +338,9 @@ def NswCalibDbAlgCfg(flags, **kwargs):
             folders = ["/TGC/NSW/TIME/SIDEA", "/TGC/NSW/CHARGE/SIDEA", \
                        "/TGC/NSW/TIME/SIDEC", "/TGC/NSW/CHARGE/SIDEC"]
             result.merge( addFolders(flags, folders , detDb=scheme, className='CondAttrListCollection') )
+
+            if kwargs["ReadKey_STGC_T0"]:
+                result.merge(addFolders(flags, [kwargs["ReadKey_STGC_T0"]], detDb=scheme, className='CondAttrListCollection'))
     
     result.addCondAlgo(CompFactory.NswCalibDbAlg(**kwargs))
     return result
