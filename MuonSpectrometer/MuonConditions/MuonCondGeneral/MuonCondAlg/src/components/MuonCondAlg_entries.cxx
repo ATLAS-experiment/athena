@@ -20,7 +20,7 @@
 #include "MuonCondAlg/NswAsBuiltCondAlg.h"
 #include "MuonCondAlg/MdtAsBuiltCondAlg.h"
 #include "MuonCondAlg/CscILinesCondAlg.h"
-#include "MuonCondAlg/sTGCAsBuiltCondAlg2.h"
+#include "MuonCondAlg/sTGCAsBuiltCondAlg.h"
 #include "MuonCondAlg/MmCTPCondDbAlg.h"
 
 
@@ -43,5 +43,5 @@ DECLARE_COMPONENT(NswAsBuiltCondAlg)
 DECLARE_COMPONENT(MdtAsBuiltCondAlg)
 DECLARE_COMPONENT(CscILinesCondAlg)
 DECLARE_COMPONENT(NswUncertDbAlg)
-DECLARE_COMPONENT(sTGCAsBuiltCondAlg2)
+DECLARE_COMPONENT(sTGCAsBuiltCondAlg)
 DECLARE_COMPONENT(MmCTPCondDbAlg)

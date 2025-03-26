@@ -29,14 +29,14 @@ StatusCode MuonDetectorCondAlg::initialize() {
     ATH_CHECK(m_readILineKey.initialize(m_applyILines));
     ATH_CHECK(m_readMdtAsBuiltKey.initialize(m_applyMdtAsBuilt));
     ATH_CHECK(m_readNswAsBuiltKey.initialize(m_applyNswAsBuilt));
-    ATH_CHECK(m_readsTGCAsBuilt2Key.initialize(m_applysTGCAsBuilt2));
+    ATH_CHECK(m_readsTGCAsBuiltKey.initialize(m_applysTGCAsBuilt));
     ATH_CHECK(m_condMmPassivKey.initialize(m_applyMmPassivation));
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_writeDetectorManagerKey.initialize());
     ATH_CHECK(m_worldWriteKey.initialize());
     ATH_MSG_INFO("Initialize successful -- "<<m_applyALines<<", "<<m_applyBLines<<","
                                             <<m_applyILines<<","<<m_applyMdtAsBuilt<<","
-                                            <<m_applyNswAsBuilt<<","<<m_applyMmPassivation << "," << m_applysTGCAsBuilt2);
+                                            <<m_applyNswAsBuilt<<","<<m_applyMmPassivation << "," << m_applysTGCAsBuilt);
     return StatusCode::SUCCESS;
 }
 
@@ -133,14 +133,14 @@ StatusCode MuonDetectorCondAlg::execute(const EventContext& ctx) const {
         MuonMgrData->setNswAsBuilt(*readNswAsBuilt); 
     }
 
-    if(!m_readsTGCAsBuilt2Key.empty()){
-        SG::ReadCondHandle<sTGCAsBuiltData2> readsTGCAsBuilt2{m_readsTGCAsBuilt2Key, ctx};
-        if(!readsTGCAsBuilt2.isValid()){
-            ATH_MSG_ERROR("Cannot find conditions data container for sTGC as-built 2");
+    if(!m_readsTGCAsBuiltKey.empty()){
+        SG::ReadCondHandle<sTGCAsBuiltData> readsTGCAsBuilt{m_readsTGCAsBuiltKey, ctx};
+        if(!readsTGCAsBuilt.isValid()){
+            ATH_MSG_ERROR("Cannot find conditions data container for sTGC as-built");
             return StatusCode::FAILURE;
         }
-        writeHandle.addDependency(readsTGCAsBuilt2);
-        MuonMgrData->setsTGCAsBuilt2(*readsTGCAsBuilt2);
+        writeHandle.addDependency(readsTGCAsBuilt);
+        MuonMgrData->setsTGCAsBuilt(*readsTGCAsBuilt);
     }
 
 

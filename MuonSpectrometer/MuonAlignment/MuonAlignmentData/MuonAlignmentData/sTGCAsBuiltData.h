@@ -12,7 +12,7 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 
 /**
- * @class sTGCAsBuiltData2
+ * @class sTGCAsBuiltData
  *
  * @brief Class holding the sTGC as built conditions data and applying it. The model consists of four parameters:
  *         - offset: shift of the strip layer in the precission coordinate
@@ -24,9 +24,9 @@
  *
  */
 
-class sTGCAsBuiltData2: public AthMessaging {
+class sTGCAsBuiltData: public AthMessaging {
     public:
-        sTGCAsBuiltData2(const Muon::IMuonIdHelperSvc* idHelperSvc);
+        sTGCAsBuiltData(const Muon::IMuonIdHelperSvc* idHelperSvc);
         // returns the local positon corrected for the as built parameters
         Amg::Vector2D correctPosition(const Identifier& channelId, const Amg::Vector2D& pos) const;
         // Set the parameters of the as build model (shift, rotation, scale)
@@ -47,6 +47,8 @@ class sTGCAsBuiltData2: public AthMessaging {
         ParMap m_asBuiltData{};
 };
 
-CLASS_DEF( sTGCAsBuiltData2  , 189786421 , 1 );
-CONDCONT_DEF( sTGCAsBuiltData2 , 15989615 );
+std::ostream& operator<<(std::ostream& ostr, const sTGCAsBuiltData::Parameters& par);
+
+CLASS_DEF( sTGCAsBuiltData  , 154485394 , 1 );
+CONDCONT_DEF( sTGCAsBuiltData , 66070092 );
 #endif

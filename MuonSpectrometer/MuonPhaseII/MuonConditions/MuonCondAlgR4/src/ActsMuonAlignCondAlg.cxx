@@ -184,9 +184,9 @@ StatusCode ActsMuonAlignCondAlg::loadMmDeformPars(const EventContext& ctx,
 StatusCode ActsMuonAlignCondAlg::loadStgcDeformPars(const EventContext& ctx,
                                                     ActsTrk::RawGeomAlignStore& store) const{
     std::unique_ptr<sTgcAlignmentStore> trkAlignment = std::make_unique<sTgcAlignmentStore>();
-    if (m_applyNswAsBuilt) {
-        CREATE_READHANDLE(NswAsBuiltDbData, m_readNswAsBuiltKey);
-        trkAlignment->asBuiltPars = readHandle->sTgcData;
+    if (m_applyNswAsBuilt && !m_readsTgcAsBuiltKey.empty()) {
+        CREATE_READHANDLE(sTGCAsBuiltData, m_readsTgcAsBuiltKey);
+        trkAlignment->asBuiltPars = *readHandle;
     }
     if (m_applyBLines) {
         CREATE_READHANDLE(BLineContainer, m_readKeyBLines);
@@ -213,10 +213,11 @@ StatusCode ActsMuonAlignCondAlg::declareDependencies(const EventContext& ctx,
         CREATE_READHANDLE(ALineContainer, m_readKeyALines);
         writeHandle.addDependency(readHandle);
     }
-    const bool isNsw = detType == ActsTrk::DetectorType::sTgc ||
-                       detType == ActsTrk::DetectorType::Mm;
+    const bool issTGC = detType == ActsTrk::DetectorType::sTgc;
+    const bool isMm   = detType == ActsTrk::DetectorType::Mm;
     const bool isMdt = detType == ActsTrk::DetectorType::Mdt;
-    if (m_applyBLines&& (isNsw || isMdt)) {
+    
+    if (m_applyBLines&& (issTGC || isMm || isMdt)) {
         CREATE_READHANDLE(BLineContainer, m_readKeyBLines);
         writeHandle.addDependency(readHandle);
     }
@@ -228,8 +229,12 @@ StatusCode ActsMuonAlignCondAlg::declareDependencies(const EventContext& ctx,
         CREATE_READHANDLE(NswPassivationDbData, m_readNswPassivKey);
         writeHandle.addDependency(readHandle);
     }
-    if (m_applyNswAsBuilt && isNsw) {
+    if (m_applyNswAsBuilt && isMm) {
         CREATE_READHANDLE(NswAsBuiltDbData, m_readNswAsBuiltKey);
+        writeHandle.addDependency(readHandle);
+    }
+    if(m_applyNswAsBuilt && issTGC && !m_readsTgcAsBuiltKey.empty()){
+        CREATE_READHANDLE(sTGCAsBuiltData, m_readsTgcAsBuiltKey);
         writeHandle.addDependency(readHandle);
     }
     return StatusCode::SUCCESS;
