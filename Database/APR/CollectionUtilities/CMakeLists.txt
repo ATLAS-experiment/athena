@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CollectionUtilities )
@@ -14,7 +14,6 @@ atlas_add_library( CollectionUtilities
   src/CmdLineArgs2.cpp
   src/Args2Container.cpp
   src/CatalogInfo.cpp
-  src/CollectionPool.cpp
   src/Progress.cpp
   src/UtilityFuncs.cpp
   src/MaxEventsInfo.cpp
