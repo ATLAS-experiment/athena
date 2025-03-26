@@ -108,10 +108,12 @@ class JetTagMonitorAlgorithm : public AthMonitorAlgorithm {
  
   std::string m_TaggerName;
   float m_cFraction;
-  float m_WP60Cut;
+  float m_tauFraction;
+  float m_WP65Cut;
   float m_WP70Cut;
   float m_WP77Cut;
   float m_WP85Cut;
+  float m_WP90Cut;
 
   enum Jet_t {goodJet, suspectJet, badJet};
   void fillGoodJetHistos(const xAOD::Jet *jet) const;
