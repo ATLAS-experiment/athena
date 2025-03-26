@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -25,6 +25,12 @@ InDetPerfPlot_TRTExtension::InDetPerfPlot_TRTExtension(InDetPlotBase* pParent, c
   m_fracTRTExtensions_vs_nvertices{},
   m_fracTRTExtensions_matched_vs_eta{},
   m_fracTRTExtensions_matched_vs_pt{},
+  m_fracFindableTRTExtensions_vs_eta{},
+  m_fracFindableTRTExtensions_vs_pt{},
+  m_fracFindableTRTExtensions_vs_mu{},
+  m_fracFindableTRTExtensions_vs_nvertices{},
+  m_fracFindableTRTExtensions_matched_vs_eta{},
+  m_fracFindableTRTExtensions_matched_vs_pt{},
   m_chi2ndofTRTExtensions{},
   m_chi2ndofNoTRTExtensions{},
   m_ptresTRTExtensions_vs_eta{},
@@ -66,6 +72,14 @@ InDetPerfPlot_TRTExtension::initializePlots() {
 
   book(m_fracTRTExtensions_matched_vs_eta, "fracTRTExtensions_matched_vs_eta");
   book(m_fracTRTExtensions_matched_vs_pt, "fracTRTExtensions_matched_vs_pt");
+
+  book(m_fracFindableTRTExtensions_vs_eta, "fracFindableTRTExtensions_vs_eta");
+  book(m_fracFindableTRTExtensions_vs_pt, "fracFindableTRTExtensions_vs_pt");
+  book(m_fracFindableTRTExtensions_vs_mu, "fracFindableTRTExtensions_vs_mu");
+  book(m_fracFindableTRTExtensions_vs_nvertices, "fracFindableTRTExtensions_vs_nvertices");
+
+  book(m_fracFindableTRTExtensions_matched_vs_eta, "fracFindableTRTExtensions_matched_vs_eta");
+  book(m_fracFindableTRTExtensions_matched_vs_pt, "fracFindableTRTExtensions_matched_vs_pt");
 
   book(m_chi2ndofTRTExtensions, "chi2ndofTRTExtensions");
   book(m_chi2ndofNoTRTExtensions, "chi2ndofNoTRTExtensions");
@@ -113,13 +127,20 @@ InDetPerfPlot_TRTExtension::fill(const xAOD::TrackParticle& particle, float weig
   float chi2Overndof = ndof > 0 ? chi2 / ndof : 0;
 
   uint8_t iTrtHits = 0;
+  uint8_t iTrtOutliers = 0;
   particle.summaryValue(iTrtHits, xAOD::numberOfTRTHits);
+  particle.summaryValue(iTrtOutliers, xAOD::numberOfTRTOutliers);
 
-  std::bitset<xAOD::TrackPatternRecoInfo::NumberOfTrackRecoInfo>  patternInfo = particle.patternRecoInfo();
-  bool isTRTExtension = patternInfo.test(xAOD::TrackPatternRecoInfo::InDetExtensionProcessor) or iTrtHits > 0;
+  bool hasTRTHits = iTrtHits + iTrtOutliers > 0;
+  // failed extensions will have only outlier hits and iTRThits will be 0
+  bool isTRTExtension = iTrtHits > 0;
 
   fillHisto(m_fracTRTExtensions_vs_eta, eta, isTRTExtension, weight);
   fillHisto(m_fracTRTExtensions_vs_pt, pt, isTRTExtension, weight);
+  if (hasTRTHits) {
+    fillHisto(m_fracFindableTRTExtensions_vs_eta, eta, isTRTExtension, weight);
+    fillHisto(m_fracFindableTRTExtensions_vs_pt, pt, isTRTExtension, weight);
+  }
 
   if(isTRTExtension) fillHisto(m_chi2ndofTRTExtensions, chi2Overndof, weight);
   else { fillHisto(m_chi2ndofNoTRTExtensions, chi2Overndof, weight); }
@@ -130,13 +151,20 @@ void
 InDetPerfPlot_TRTExtension::fill(const xAOD::TrackParticle& particle, const float mu, const unsigned int nvertices, float weight) {
 
   uint8_t iTrtHits = 0;
+  uint8_t iTrtOutliers = 0;
   particle.summaryValue(iTrtHits, xAOD::numberOfTRTHits);
+  particle.summaryValue(iTrtOutliers, xAOD::numberOfTRTOutliers);
 
-  std::bitset<xAOD::TrackPatternRecoInfo::NumberOfTrackRecoInfo>  patternInfo = particle.patternRecoInfo();
-  bool isTRTExtension = patternInfo.test(xAOD::TrackPatternRecoInfo::InDetExtensionProcessor) or iTrtHits > 0;
+  bool hasTRTHits = iTrtHits + iTrtOutliers > 0;
+  // failed extensions will have only outlier hits and iTRThits will be 0
+  bool isTRTExtension = iTrtHits > 0;
 
   fillHisto(m_fracTRTExtensions_vs_mu, mu, isTRTExtension, weight);
   fillHisto(m_fracTRTExtensions_vs_nvertices, nvertices, isTRTExtension, weight);
+  if (hasTRTHits) {
+    fillHisto(m_fracFindableTRTExtensions_vs_mu, mu, isTRTExtension, weight);
+    fillHisto(m_fracFindableTRTExtensions_vs_nvertices, nvertices, isTRTExtension, weight);
+  }
 
 }
 
@@ -146,10 +174,13 @@ InDetPerfPlot_TRTExtension::fill(const xAOD::TrackParticle& particle, const xAOD
   //Fraction of extended for truth matched tracks
 
   uint8_t iTrtHits = 0;
+  uint8_t iTrtOutliers = 0;
   particle.summaryValue(iTrtHits, xAOD::numberOfTRTHits);
+  particle.summaryValue(iTrtOutliers, xAOD::numberOfTRTOutliers);
 
-  std::bitset<xAOD::TrackPatternRecoInfo::NumberOfTrackRecoInfo>  patternInfo = particle.patternRecoInfo();
-  bool isTRTExtension = patternInfo.test(3) or iTrtHits > 0;
+  bool hasTRTHits = iTrtHits + iTrtOutliers > 0;
+  // failed extensions will have only outlier hits and iTRThits will be 0
+  bool isTRTExtension = iTrtHits > 0;
   
   //Get pT resolution for TRT extensions versus without
   const float undefinedValue = -9999;
@@ -189,7 +220,10 @@ InDetPerfPlot_TRTExtension::fill(const xAOD::TrackParticle& particle, const xAOD
 
   fillHisto(m_fracTRTExtensions_matched_vs_eta, eta, isTRTExtension, weight);
   fillHisto(m_fracTRTExtensions_matched_vs_pt, pt, isTRTExtension, weight);
-
+  if (hasTRTHits) {
+    fillHisto(m_fracFindableTRTExtensions_matched_vs_eta, eta, isTRTExtension, weight);
+    fillHisto(m_fracFindableTRTExtensions_matched_vs_pt, pt, isTRTExtension, weight);
+  }
 
 }
 
