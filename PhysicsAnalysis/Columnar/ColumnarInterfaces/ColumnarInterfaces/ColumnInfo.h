@@ -74,6 +74,14 @@ namespace columnar
     std::string offsetName {};
 
 
+    /// @brief the fixed dimensions this column has (if any)
+    ///
+    /// For the most part we use dynamic dimensions via offset maps, but
+    /// sometimes the dimensions are hard-coded, which then uses these
+    /// dimensions.
+    std::vector<unsigned> fixedDimensions {};
+
+
     /// @brief whether this is an offset column
     ///
     /// In part this is for consistency checks, i.e. other columns can
