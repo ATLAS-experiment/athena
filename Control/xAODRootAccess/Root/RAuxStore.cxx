@@ -23,14 +23,15 @@
 #include "CxxUtils/as_const_ptr.h"
 
 
-using ROOT::Experimental::RFieldBase;
 using ROOT::Experimental::RNTupleInspector;
 using ROOT::Experimental::RNTupleWriter;
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,35,1)
 using ROOT::RException;
+using ROOT::RFieldBase;
 #else
 using ROOT::Experimental::RException;
+using ROOT::Experimental::RFieldBase;
 #endif
 
 namespace {
