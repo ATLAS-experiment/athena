@@ -1013,7 +1013,7 @@ void update_multiple_arg(void *field, char ***orig_field,
       if (!(*orig_field)) {
         char ** pc = (char **)malloc (sizeof (char *));
         if (pc){
-          *orig_field = (char **) malloc (sizeof (char *));
+          *orig_field = pc;
           (*orig_field)[0] = 0;
         }
       }
