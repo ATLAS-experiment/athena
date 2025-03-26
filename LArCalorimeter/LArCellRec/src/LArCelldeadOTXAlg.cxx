@@ -164,7 +164,6 @@ void LArCelldeadOTXAlg::buildMap(const EventContext& ctx, StatusCode& sc) const 
         const Identifier scID = m_scidtool->offlineToSuperCellID(id);
         const HWIdentifier scHwid = scCabling->createSignalChannelID(scID);
         const IdentifierHash hashidSC = m_onlineSCID->channel_Hash(scHwid);
-        vector_of_chans[ch]=hashidSC.value();
         if (!bcSCCont->status(scHwid).good()) {
           ATH_MSG_DEBUG("SuperCell with id 0x" << std::hex << scHwid.get_identifier32().get_compact() << std::dec
                                                << " is ignored b/c of it's bad-channel word. Connected to deadFEB channel " << m_onlineID->channel_name(chid));
@@ -173,12 +172,13 @@ void LArCelldeadOTXAlg::buildMap(const EventContext& ctx, StatusCode& sc) const 
         const unsigned nCell = (m_scidtool->superCellToOfflineID(scID)).size();
         const CaloDetDescrElement* dde = caloDDM->get_element(hashId);
         if (ATH_UNLIKELY(!dde)) {
-          ATH_MSG_ERROR("No DetDescElement for cell hash" << hashId);
-          return;
+          ATH_MSG_INFO("No DetDescElement for cell hash : " << hashId);
+	} else {
+          // 12.5: Convert SC ADC to MeV (Et), et ->e, scale by the number of regular cells connected to this super-cell
+          const float convFactor = 12.5 * (1.0 / nCell) * (1.0 / dde->sinTh());
+          vector_of_multipliers[ch]=convFactor;
+          vector_of_chans[ch]=hashidSC.value();
         }
-        // 12.5: Convert SC ADC to MeV (Et), et ->e, scale by the number of regular cells connected to this super-cell
-        const float convFactor = 12.5 * (1.0 / nCell) * (1.0 / dde->sinTh());
-        vector_of_multipliers[ch]=convFactor;
       }  // end loop over channels of one dead FEB
       m_multipliers.push_back(vector_of_multipliers);
       m_channels.push_back(vector_of_chans);
