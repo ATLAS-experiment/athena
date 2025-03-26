@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAOUTPUTSTREAMTOOL_H
@@ -15,6 +15,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include <string>
+#include <map>
+#include <regex>
 
 class IClassIDSvc;
 class IDecisionSvc;
@@ -81,6 +83,8 @@ public:
 private:
    /// Do the real connection to services
    virtual StatusCode connectServices();
+   /// copy provenance records when creating new DataHeaders
+   void propagateProvenance( const DataHeader& src_dh );
 
 private:
    StringProperty  m_outputName{ this, "OutputFile", "", "name of the output db name"};
@@ -106,12 +110,20 @@ private:
    /// Ref to DecisionSvc
    ServiceHandle<IDecisionSvc>   m_decSvc;
    /// Current DataHeader for streamed objects
-   DataHeader*     m_dataHeader;
+   DataHeader*          m_dataHeader;
    /// Flag to tell whether connectOutput has been called
-   bool            m_connectionOpen;
+   bool                 m_connectionOpen;
+
    /// Flag as to whether to extend provenance via the DataHeader
-   bool            m_extendProvenanceRecord;
-   /// Flag to extend attribute list with stream flags from DecisionSvc
+   bool                 m_extendProvenanceRecord;
+   /// RegEx string to match provenance tags to keep in the output DataHeader. Retrieved from an OutputStream property
+   std::string          m_keepProvenancesStr;
+   /// RegEx pattern created from m_keepProvenancesStr
+   std::regex           m_keepProvenancesRE;
+   /// Cache provenance RegEx matching result in a map
+   std::map<std::string, bool>  m_keepProvenanceMatch;
+
+   /// Flag to extend attribute list with stream flags from DecisionSvc 
    bool m_extend;
    
    /// set of skipped item keys, because of missing CLID
