@@ -6,6 +6,7 @@
 #ifndef GLOBALSIM_BINSTRTOHEXSTR_H
 #define GLOBALSIM_BINSTRTOHEXSTR_H
 
+#include <algorithm>
 #include <string>
 
 namespace GlobalSim {
