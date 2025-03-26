@@ -39,7 +39,7 @@ namespace InDet {
    protected:
       StatusCode initializeBase(unsigned int n_masks, unsigned int wafer_hash_max);
       StatusCode initializeProbabilities(unsigned int n_masks);
-      StatusCode initializeRadialDefects();
+      StatusCode initializeCornerDefects();
 
       ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};
 
@@ -54,16 +54,16 @@ namespace InDet {
          {this,"NDefectFractionsPerPattern", {},
          "List of fractions per pattern for exactly 1 to n  defects under the codition that there is a defect, where -1. marks the"
          "end of this lists, before the fractions for the next mask start." };
-      Gaudi::Property<std::vector<std::vector<double> > > m_radialDefectParamsPerPattern
-         {this,"RadialDefectParamsPerPattern", {},
-         "Set of radial defect parameters (probability, x-intersection pos min, max, y-intersection pos min, max, sagitta minm max). "
+      Gaudi::Property<std::vector<std::vector<double> > > m_cornerDefectParamsPerPattern
+         {this,"CornerDefectParamsPerPattern", {},
+         "Set of corner defect parameters (probability, x-intersection pos min, max, y-intersection pos min, max, sagitta minm max). "
          "per module pattern.  " };
-      Gaudi::Property<std::vector<std::vector<double> > > m_radialDefectNCornerFractionsPerPattern
-         {this,"NRadialCornerDefectFractionsPerPattern", {},
-         "List of fractions per pattern for exactly 1 to 4 radial corner defects under the codition that there is a defect." };
+      Gaudi::Property<std::vector<std::vector<double> > > m_cornerDefectNCornerFractionsPerPattern
+         {this,"NCornerDefectFractionsPerPattern", {},
+         "List of fractions per pattern for exactly 1 to 4 corner defects under the codition that there is a defect." };
 
       std::vector<std::vector<std::vector<float> > > m_perPatternAndMaskFractions;
-      std::vector<std::vector<float> > m_perPatternRadialDefectNCornerCummulativeProb;
+      std::vector<std::vector<float> > m_perPatternCornerDefectNCornerCummulativeProb;
 
       // Properties to add a checker board like pattern to the defects
       // for debugging
@@ -92,15 +92,15 @@ namespace InDet {
          kNProb
       };
 
-      enum ERadialDefectParams {
-         kRadialDefectProb,
-         kRadialDefectWidthColumnDirectionOffset,
-         kRadialDefectWidthColumnDirection,
-         kRadialDefectkWidthRowDirectionOffset,
-         kRadialDefectkWidthRowDirection,
-         kRadialDefectkSagittaOffset,
-         kRadialDefectkSagitta,
-         kNRadialDefectParams
+      enum ECornerDefectParams {
+         kCornerDefectProb,
+         kCornerDefectWidthColumnDirectionOffset,
+         kCornerDefectWidthColumnDirection,
+         kCornerDefectkWidthRowDirectionOffset,
+         kCornerDefectkWidthRowDirection,
+         kCornerDefectkSagittaOffset,
+         kCornerDefectkSagitta,
+         kNCornerDefectParams
       };
 
       /** Consistency check of module patterns, probabilities.

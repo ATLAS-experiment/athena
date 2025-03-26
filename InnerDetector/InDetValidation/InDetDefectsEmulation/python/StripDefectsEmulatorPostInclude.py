@@ -1,10 +1,10 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # can be added as a post include to a Reco_tf
-#   --postInclude "StripDefectsEmulatorPostInclude.emulateITkStripDefects"
-# or
-#  --postExec "from InDetDefectsEmulation.StripDefectsEmulatorPostInclude import emulateITkStripDefects;
-#              emulateITkStripDefects(flags,cfg,HistogramFileName="itk_strip_defects.root",StripDefectProb=1e-2,ModuleDefectProb=1e-2,NoiseProb=1e-3,PropagateDefectsToStatus=True);"
+#   --postInclude "StripDefectsEmulatorPostInclude.emulateITkStripDefectsDefault"
+# or (with noise 1e-3)
+#  --postExec "from InDetDefectsEmulation.StripDefectsEmulatorPostInclude import emulateITkStripDefectsDefault;
+#              emulateITkStripDefectsDefault(flags,cfg,HistogramFileName='itk_strip_defects.root',StripDefectProb=1e-2,ModuleDefectProb=1e-2,NoiseProb=1e-3,PropagateDefectsToStatus=True);"
 #   disable histogramming:  HistogramFileName=None
 
 def emulateITkStripDefects(flags,
@@ -42,7 +42,7 @@ def emulateITkStripDefects(flags,
 
     # dummy "fractions" for strips, module pattern are just examples, and currently all
     # modules get the same defect probabilities irrespectively of e.g. strip length.
-    module_pattern, module_defect_prob, fractions, ignore_NoiseProbability,ignore_NoiseShape, radialDefectParam, radialDefectFractions  = combineModuleDefects([
+    module_pattern, module_defect_prob, fractions, ignore_NoiseProbability,ignore_NoiseShape, cornerDefectParam, cornerDefectFractions  = combineModuleDefects([
                                          moduleDefect(bec=[-2,-2],layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all endcap A modules
                                                       side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
                                                       all_rows=False,       # if True all rows of the same un-split module are marked as defect
@@ -88,7 +88,7 @@ def emulateITkStripDefects(flags,
                                         probability=[],
                                         noiseProbability=NoiseProb * 0.5*( 1 + length / 37627.5 ),
                                         noiseShape=time_bin_dist)]
-            module_pattern_noise, ignore_module_defect_prob, ignore_fractions, NoiseProbability,NoiseShape,radialDefectParam,radialDefectFractions = combineModuleDefects(defects)
+            module_pattern_noise, ignore_module_defect_prob, ignore_fractions, NoiseProbability,NoiseShape,cornerDefectParam,cornerDefectFractions = combineModuleDefects(defects)
     else :
         module_pattern_noise=[]
         NoiseProbability=[]
@@ -101,8 +101,8 @@ def emulateITkStripDefects(flags,
                                                  MaxRandomPositionAttempts=MaxRandomPositionAttempts,
                                                  ModulePatterns=module_pattern,
                                                  DefectProbabilities=module_defect_prob,
-                                                 RadialDefectParamsPerPattern=[],
-                                                 NRadialCornerDefectFractionsPerPattern=[],
+                                                 CornerDefectParamsPerPattern=[],
+                                                 NCornerDefectFractionsPerPattern=[],
                                                  FillHistogramsPerPattern=FillHistogramsPerPattern,
                                                  FillEtaPhiHistogramsPerPattern=FillEtaPhiHistogramsPerPattern,
                                                  WriteKey="ITkStripEmulatedDefects", # the default should match the key below
@@ -127,3 +127,17 @@ def emulateITkStripDefects(flags,
                                                                            WriteKey="ITkStripDetectorElementStatusFromEmulatedDefects"))
         strip_det_el_status_cond_alg=cfg.getCondAlgo("ITkStripDetectorElementStatusCondAlgNoByteStreamErrors")
         strip_det_el_status_cond_alg.ConditionsSummaryTool.SCTDetElStatusCondDataBaseKey="ITkStripDetectorElementStatusFromEmulatedDefects"
+
+def emulateITkStripDefectsDefault(flags,
+                                  cfg,
+                                  StripDefectProb: float=1e-2,
+                                  ModuleDefectProb: float=1e-2,
+                                  NoiseProb: float=0.,
+                                  HistogramFileName: str=None,
+                                  PropagateDefectsToStatus=True) :
+            emulateITkStripDefects(flags,cfg,
+                               StripDefectProb=StripDefectProb,
+                               ModuleDefectProb=ModuleDefectProb,
+                               NoiseProb=NoiseProb,
+                               HistogramFileName=HistogramFileName,
+                               PropagateDefectsToStatus=PropagateDefectsToStatus)

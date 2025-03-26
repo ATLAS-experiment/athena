@@ -19,7 +19,7 @@ def ordered_pairs(a_list) :
             return False
     return True
 
-def makeRadialDefectParam(probability=1e-1,
+def makeCornerDefectParam(probability=1e-1,
                           min_rx=0.,
                           max_rx=4e-3,
                           min_ry=0.,
@@ -29,7 +29,7 @@ def makeRadialDefectParam(probability=1e-1,
     """
     Convenience method to create a parameter set for module corner defects.
     The corner defects have a circular shape and intersect the sensor edges at certain
-    points in x and y direction. The line between these two intersection points forms 
+    points in x and y direction. The line between these two intersection points forms
     a sagitta of the circle.
     probability: Probability of a module to have one or more corner defects.
     min_rx: minimum position from the corner in local x-direction of possible intersection points.
@@ -37,7 +37,7 @@ def makeRadialDefectParam(probability=1e-1,
     min_ry: minimum position from the corner in local y-direction of possible intersection points.
     max_ry: maximum position from the corner in local x-direction of possible intersection points.
     min_sagitta: minimum size of the sagitta (upper limit of circle radius)
-    max_sagitta: maximum size of the sagitta (lower limit of circle radius)    
+    max_sagitta: maximum size of the sagitta (lower limit of circle radius)
     """
     assert  min_rx<max_rx
     assert  min_ry<max_ry
@@ -59,8 +59,8 @@ def moduleDefect(bec=[-2,2],
                  fractionsOfNDefects=[],
                  noiseProbability=None,
                  noiseShape=[],
-                 radialDefectParam=None,
-                 radialDefectNCornerFractions=None,
+                 cornerDefectParam=None,
+                 cornerDefectNCornerFractions=None,
                  ) :
     '''
     Convenience function to create parameters for strip or pixel defects emulation conditions data
@@ -78,8 +78,8 @@ def moduleDefect(bec=[-2,2],
                at least one such group defect.
     noiseProbability: None or probability of a strip (or pixel) to produce a spurious hit.
     noiseShape: empty list or binned pdf used to compute one random number per spurious hit (time bin for strips, tot for pixel).
-    radialDefectParam: None or parameters e.g. created with makeRadialDefectParam to create defects at module corners.
-    radialDefectNCornerFractions: if radialDefectParam is not None the fractions of 1 to 4 corners to have a defect if the module
+    cornerDefectParam: None or parameters e.g. created with makeCornerDefectParam to create defects at module corners.
+    cornerDefectNCornerFractions: if cornerDefectParam is not None the fractions of 1 to 4 corners to have a defect if the module
                                   has such defects.
     '''
     # test that the ranges have coorect number of elements and that ranges are ordered
@@ -92,8 +92,8 @@ def moduleDefect(bec=[-2,2],
     assert len(column_or_strip_length)%2==0 and len(column_or_strip_length) >= 2 and ordered_pairs(column_or_strip_length)
     assert len(fractionsOfNDefects)==0 or len(fractionsOfNDefects)+2==len(probability)
 
-    assert radialDefectParam is not None or radialDefectNCornerFractions is None
-    assert radialDefectParam is None or radialDefectNCornerFractions is not None
+    assert cornerDefectParam is not None or cornerDefectNCornerFractions is None
+    assert cornerDefectParam is None or cornerDefectNCornerFractions is not None
 
     length=[ l for l in set([len(bec),len(layer),len(eta_range),len(phi_range),len(side_range),len(columns_or_strips)]) ]
     # every range must contain a multiple of the number of elements of every other range
@@ -106,8 +106,8 @@ def moduleDefect(bec=[-2,2],
     fractions=[]
     noiseProbList=[]
     noiseShapeList=[]
-    radialDefectList=[]
-    radialDefctCornerFractionList=[]
+    cornerDefectList=[]
+    cornerDefectCornerFractionList=[]
     if noiseProbability is not None and noiseProbability>0. :
         # ensure that the the noise shape integral is 1.
         shape_sum = sum(noiseShape)
@@ -129,11 +129,11 @@ def moduleDefect(bec=[-2,2],
         if noiseProbability is not None:
             noiseProbList+=[noiseProbability]
             noiseShapeList+=[noiseShape]
-        if radialDefectParam is not None:
-            radialDefectList+=[ radialDefectParam ]
-            radialDefctCornerFractionList+=[ radialDefectNCornerFractions ]
+        if cornerDefectParam is not None:
+            cornerDefectList+=[ cornerDefectParam ]
+            cornerDefectCornerFractionList+=[ cornerDefectNCornerFractions ]
 
-    return module_pattern, prob, fractions, noiseProbList, noiseShapeList, radialDefectList, radialDefctCornerFractionList
+    return module_pattern, prob, fractions, noiseProbList, noiseShapeList, cornerDefectList, cornerDefectCornerFractionList
 
 def combineModuleDefects( defects ) :
     '''
