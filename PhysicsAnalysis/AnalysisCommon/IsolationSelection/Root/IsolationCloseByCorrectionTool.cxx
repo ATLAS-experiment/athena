@@ -17,17 +17,22 @@
 
 #include "xAODEgamma/Egamma.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace CP {
     using namespace xAOD::Iso;
     using caloDecorNames = IsolationCloseByCorrectionTool::caloDecorNames;
-    caloDecorNames IsolationCloseByCorrectionTool::caloDecors() {
-        return {"IsoCloseByCorr_assocClustEta", "IsoCloseByCorr_assocClustPhi", "IsoCloseByCorr_assocClustEnergy",
-                "IsoCloseByCorr_assocClustDecor"};
+    const caloDecorNames& IsolationCloseByCorrectionTool::caloDecors() {
+        static const caloDecorNames names =
+          {"IsoCloseByCorr_assocClustEta", "IsoCloseByCorr_assocClustPhi", "IsoCloseByCorr_assocClustEnergy",
+           "IsoCloseByCorr_assocClustDecor"};
+        return names;
     }
-    caloDecorNames IsolationCloseByCorrectionTool::pflowDecors() {
-        return {"IsoCloseByCorr_assocPflowEta", "IsoCloseByCorr_assocPflowPhi", "IsoCloseByCorr_assocPflowEnergy",
-                "IsoCloseByCorr_assocPflowDecor"};
+    const caloDecorNames& IsolationCloseByCorrectionTool::pflowDecors() {
+        static const caloDecorNames names =
+          {"IsoCloseByCorr_assocPflowEta", "IsoCloseByCorr_assocPflowPhi", "IsoCloseByCorr_assocPflowEnergy",
+           "IsoCloseByCorr_assocPflowDecor"};
+        return names;
     }
     constexpr float MinClusterEnergy = 100.;
     constexpr float MeVtoGeV = 1.e-3;
@@ -128,7 +133,7 @@ namespace CP {
                 for (const std::string& decor : pflowDecors()) m_isoVarKeys.emplace_back(cont + "." + decor);
             }
             if (m_declareCaloDecors || m_hasEtConeIso) {
-                for (const std::string& decor : caloDecors()) m_isoVarKeys.emplace_back(cont + "." + decor);
+                for (const std::string& decor : caloDecors()) m_isoVarKeys.emplace_back(cont + "." + decor + m_caloDecSuffix);
             }   
         }
     }
@@ -318,16 +323,39 @@ namespace CP {
     }
     void IsolationCloseByCorrectionTool::lockDecorations (const xAOD::IParticleContainer* parts) const {
         if (!parts) return;
+
+        const FloatDecorator dec_assocEta{IsolationCloseByCorrectionTool::caloDecors()[0] + m_caloDecSuffix};
+        const FloatDecorator dec_assocPhi{IsolationCloseByCorrectionTool::caloDecors()[1] + m_caloDecSuffix};
+        const  CharDecorator dec_isDecor{caloDecors()[3] + m_caloDecSuffix};
+
         std::lock_guard<std::mutex> guard{m_isoHelpersMutex};
-        for (const auto& p : m_isohelpers) {
-          if (parts->ownPolicy() == SG::VIEW_ELEMENTS) {
-            for (const xAOD::IParticle* part : *parts) {
+
+        if (parts->ownPolicy() == SG::VIEW_ELEMENTS) {
+          UnorderedContainerSet conts;
+          for (const xAOD::IParticle* part : *parts) {
+            const SG::AuxVectorData* c = part->container();
+            if (conts.insert(c).second) {
+              for (const auto& p : m_isohelpers) {
                 p.second->lockDecorations(*part->container());
+              }
+              SG::AuxVectorData* c_nc ATLAS_THREAD_SAFE =
+                const_cast<SG::AuxVectorData*> (c);
+              c_nc->lockDecoration (dec_assocEta.auxid());
+              c_nc->lockDecoration (dec_assocPhi.auxid());
+              c_nc->lockDecoration (dec_isDecor.auxid());
             }
           }
-          else {
+        }
+
+        else {
+          for (const auto& p : m_isohelpers) {
             p.second->lockDecorations(*parts);
           }
+          SG::AuxVectorData* c_nc ATLAS_THREAD_SAFE =
+            const_cast<xAOD::IParticleContainer*> (parts);
+          c_nc->lockDecoration (dec_assocEta.auxid());
+          c_nc->lockDecoration (dec_assocPhi.auxid());
+          c_nc->lockDecoration (dec_isDecor.auxid());
         }
     }
     const IsoVector& IsolationCloseByCorrectionTool::getIsolationTypes(const xAOD::IParticle* particle) const {
@@ -744,10 +772,10 @@ namespace CP {
                             << primary->pt() * MeVtoGeV << " GeV, eta: " << primary->eta()
                             << ", phi: " << primary->phi() << " after correction: " << isoValue * MeVtoGeV << " GeV. ");
         } else if (m_caloModel == TopoConeCorrectionModel::UseAveragedDecorators) {
-            static const FloatAccessor acc_eta{caloDecors()[0]};
-            static const FloatAccessor acc_phi{caloDecors()[1]};
-            static const FloatAccessor acc_ene{caloDecors()[2]};
-            static const CharAccessor acc_isDecor{caloDecors()[3]};
+            const FloatAccessor acc_eta{caloDecors()[0] + m_caloDecSuffix};
+            const FloatAccessor acc_phi{caloDecors()[1] + m_caloDecSuffix};
+            const FloatAccessor acc_ene{caloDecors()[2] + m_caloDecSuffix};
+            const CharAccessor acc_isDecor{caloDecors()[3] + m_caloDecSuffix};
              for (const xAOD::IParticle* others : cache.prim_parts) {
                 if (others == primary) continue;
                 if (!acc_isDecor.isAvailable(*others) || !acc_isDecor(*others)) {
@@ -766,9 +794,9 @@ namespace CP {
         return CorrectionCode::Ok;
     }
     void IsolationCloseByCorrectionTool::getExtrapEtaPhi(const xAOD::IParticle* par, float& eta, float& phi) const {
-        static const FloatAccessor acc_assocEta{IsolationCloseByCorrectionTool::caloDecors()[0]};
-        static const FloatAccessor acc_assocPhi{IsolationCloseByCorrectionTool::caloDecors()[1]};
-        static const CharAccessor acc_isDecor{caloDecors()[3]};
+        const FloatAccessor acc_assocEta{IsolationCloseByCorrectionTool::caloDecors()[0] + m_caloDecSuffix};
+        const FloatAccessor acc_assocPhi{IsolationCloseByCorrectionTool::caloDecors()[1] + m_caloDecSuffix};
+        const CharAccessor acc_isDecor{caloDecors()[3] + m_caloDecSuffix};
         if (par->type() != xAOD::Type::ObjectType::Muon) {
             const xAOD::Egamma* egam = dynamic_cast<const xAOD::Egamma*>(par);
             if( egam ) {
@@ -784,9 +812,9 @@ namespace CP {
             phi = acc_assocPhi(*par);
         } else {
             float assoc_ene{0.f};
-            static const FloatDecorator dec_assocEta{IsolationCloseByCorrectionTool::caloDecors()[0]};
-            static const FloatDecorator dec_assocPhi{IsolationCloseByCorrectionTool::caloDecors()[1]};
-            static const  CharDecorator dec_isDecor{caloDecors()[3]};
+            const FloatDecorator dec_assocEta{IsolationCloseByCorrectionTool::caloDecors()[0] + m_caloDecSuffix};
+            const FloatDecorator dec_assocPhi{IsolationCloseByCorrectionTool::caloDecors()[1] + m_caloDecSuffix};
+            const  CharDecorator dec_isDecor{caloDecors()[3] + m_caloDecSuffix};
             associateCluster(par,eta, phi, assoc_ene);
             dec_assocEta(*par) = eta;
             dec_assocPhi(*par) = phi;
