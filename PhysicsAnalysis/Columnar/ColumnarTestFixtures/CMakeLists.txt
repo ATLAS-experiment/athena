@@ -9,6 +9,8 @@ find_package( GTest )
 set (extra_libs)
 if (XAOD_STANDALONE)
   set (extra_libs ComponentFactoryPreloaderLib)
+else()
+  set (extra_libs POOLRootAccessLib)
 endif ()
 
 # Add the shared library:
