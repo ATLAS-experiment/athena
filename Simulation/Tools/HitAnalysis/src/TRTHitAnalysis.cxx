@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTHitAnalysis.h"
@@ -7,6 +7,7 @@
 // Section of includes for TRT tests
 #include "InDetSimEvent/TRTUncompressedHitCollection.h"
 #include "GeoAdaptors/GeoTRTUncompressedHit.h"
+#include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 
 #include "TH1.h"
 #include "TTree.h"
@@ -134,6 +135,8 @@ StatusCode TRTHitAnalysis::initialize() {
   else {
     ATH_MSG_ERROR("No tree found!");
   }
+
+  ATH_CHECK(detStore()->retrieve(m_detMgr,"TRT"));
   
   return StatusCode::SUCCESS;
 }		 
@@ -158,7 +161,7 @@ StatusCode TRTHitAnalysis::execute() {
   if (evtStore()->retrieve(p_collection, "TRTUncompressedHits") == StatusCode::SUCCESS) {
     for (TRTUncompressedHitConstIter i_hit = p_collection->begin(); i_hit != p_collection->end(); ++i_hit) {
       GeoTRTUncompressedHit ghit(*i_hit);
-      HepGeom::Point3D<double> p = ghit.getGlobalPosition();
+      HepGeom::Point3D<double> p = ghit.getGlobalPosition(m_detMgr);
 
       m_h_TRT_x->Fill(p.x());
       m_h_TRT_y->Fill(p.y());
