@@ -122,9 +122,10 @@ def createMuonConfigFlags():
 
 
     # for now the T0 calibration in the NSW should be disabled by default until a final calibration is available. Introducing the flags anyhow to allow for studies of the calibration 
+
     # do not apply NSW T0 calibration if we are running online or MC or a RUN4 geometry, keep only for 23 or 24 
     mcf.addFlag("Muon.Calib.applyMmT0Correction",   lambda prevFlags: prevFlags.GeoModel.Run==LHCPeriod.Run3 and prevFlags.Input.DataYear != 2022 and not prevFlags.Common.isOnline and not prevFlags.Input.isMC )
-    mcf.addFlag("Muon.Calib.applysTgcT0Correction", lambda prevFlags: prevFlags.GeoModel.Run<LHCPeriod.Run4  and not prevFlags.Common.isOnline and not prevFlags.Input.isMC and False) 
+    mcf.addFlag("Muon.Calib.applysTgcT0Correction", lambda prevFlags: prevFlags.GeoModel.Run == LHCPeriod.Run3  and not prevFlags.Common.isOnline and not prevFlags.Input.isMC and prevFlags.Input.DataYear!=2022) # activated for data offline reco in Run3 but not for the first year of data taking with the NSW.
     mcf.addFlag("Muon.Calib.applyMmBFieldCalib", True) 
     
     # Muon Align flags
