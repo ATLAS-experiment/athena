@@ -1,3 +1,6 @@
+/*
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 /**
  * @file PassThroughTool.cxx
  * @author zhaoyuan.cui@cern.ch
@@ -348,35 +351,35 @@ StatusCode PassThroughTool::runPassThrough(EFTrackingTransient::StripClusterAuxI
         }
 
         // Group data to make the strip cluster container
-        scAux.localPosition = scLocalPosition;
-        scAux.localCovariance = scLocalCovariance;
-        scAux.idHash = scIdHash;
-        scAux.id = scId;
-        scAux.globalPosition = scGlobalPosition;
-        scAux.rdoList = scRdoList;
-        scAux.channelsInPhi = scChannelsInPhi;
+        scAux.localPosition = std::move(scLocalPosition);
+        scAux.localCovariance = std::move(scLocalCovariance);
+        scAux.idHash = std::move(scIdHash);
+        scAux.id = std::move(scId);
+        scAux.globalPosition = std::move(scGlobalPosition);
+        scAux.rdoList = std::move(scRdoList);
+        scAux.channelsInPhi = std::move(scChannelsInPhi);
 
         // Group data to make the pixel cluster container
-        pxAux.id = pcId;
-        pxAux.idHash = pcIdHash;
-        pxAux.localPosition = pcLocalPosition;
-        pxAux.localCovariance = pcLocalCovariance;
-        pxAux.globalPosition = pcGlobalPosition;
-        pxAux.rdoList = pcRdoList;
-        pxAux.channelsInPhi = pcChannelsInPhi;
-        pxAux.channelsInEta = pcChannelsInEta;
-        pxAux.widthInEta = pcWidthInEta;
-        pxAux.omegaX = pcOmegaX;
-        pxAux.omegaY = pcOmegaY;
-        pxAux.totList = pcTotList;
-        pxAux.totalToT = pcTotalToT;
-        pxAux.chargeList = pcChargeList;
-        pxAux.totalCharge = pcTotalCharge;
-        pxAux.energyLoss = pcEnergyLoss;
-        pxAux.isSplit = pcIsSplit;
-        pxAux.splitProbability1 = pcSplitProbability1;
-        pxAux.splitProbability2 = pcSplitProbability2;
-        pxAux.lvl1a = pcLvl1a;
+        pxAux.id = std::move(pcId);
+        pxAux.idHash = std::move(pcIdHash);
+        pxAux.localPosition = std::move(pcLocalPosition);
+        pxAux.localCovariance = std::move(pcLocalCovariance);
+        pxAux.globalPosition = std::move(pcGlobalPosition);
+        pxAux.rdoList = std::move(pcRdoList);
+        pxAux.channelsInPhi = std::move(pcChannelsInPhi);
+        pxAux.channelsInEta = std::move(pcChannelsInEta);
+        pxAux.widthInEta = std::move(pcWidthInEta);
+        pxAux.omegaX = std::move(pcOmegaX);
+        pxAux.omegaY = std::move(pcOmegaY);
+        pxAux.totList = std::move(pcTotList);
+        pxAux.totalToT = std::move(pcTotalToT);
+        pxAux.chargeList = std::move(pcChargeList);
+        pxAux.totalCharge = std::move(pcTotalCharge);
+        pxAux.energyLoss = std::move(pcEnergyLoss);
+        pxAux.isSplit = std::move(pcIsSplit);
+        pxAux.splitProbability1 = std::move(pcSplitProbability1);
+        pxAux.splitProbability2 = std::move(pcSplitProbability2);
+        pxAux.lvl1a = std::move(pcLvl1a);
 
         // Transfer pixel space point data to pixelSpAux
         for (unsigned int i = 0; i < metadata->numOfPixelSpacePoints; i++) {
