@@ -248,6 +248,57 @@ namespace ActsTrk
         TrackFinderOptions &options) const;
 
     /**
+     * @brief Perform Kalman Filter fit and update given initialParameters
+     *
+     * @tparam MeasurementSource Type of measurement source: ActsTrk::Seed or (in future) ActsTrk::ProtoTrack
+     * @param ctx Event context
+     * @param measurement Measurement source for KF
+     * @param initialParameters Parameters to use in KF
+     * @param tgContext Geometry context
+     * @param mfContext Magnetic field context
+     * @param calContext Calibration context
+     * @param detectorElementToGeoId map Trk detector element to Acts Geometry id
+     * @param paramsAtOutermostSurface Flag for searching in reverse direction
+     *
+     * @return Unique pointer to updated parameters
+     */
+    template <class MeasurementSource>
+    std::unique_ptr<Acts::BoundTrackParameters> doRefit(
+        const EventContext &ctx,
+        const MeasurementSource &measurement,
+        const Acts::BoundTrackParameters &initialParameters,
+        const Acts::GeometryContext &tgContext,
+        const Acts::MagneticFieldContext &mfContext,
+        const Acts::CalibrationContext &calContext,
+        const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
+        const bool paramsAtOutermostSurface) const;
+
+    using TrkProxy = Acts::TrackProxy<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::RefHolder, false>;
+
+    /**
+     * @brief Perform two-way track finding
+     *
+     * @param addTrack Function or lambda which adds newly found track to container
+     * @param trackProxy Track proxy object
+     * @param tracksContainerTemp Track proxy container
+     * @param options Fit options
+     * @param tgContext Geometry context
+     * @param reverseSearch Flag for searching in reverse direction
+     * @param seedType Seed type (only used for warnings/debug printouts)
+     * @param iseed Seed number (only used for warnings/debug printouts)
+     * @param itrack Track number (only used for warnings/debug printouts)
+     *
+     * @return Number of found tracks
+     */
+    std::size_t doTwoWayTrackFinding(
+        std::function<void(detail::RecoTrackContainerProxy &)> addTrack,
+        TrkProxy &trackProxy,
+        detail::RecoTrackContainer &tracksContainerTemp,
+        const TrackFinderOptions &options,
+        Acts::GeometryContext &tgContext,
+        const bool reverseSearch) const;
+
+    /**
      * @brief invoke track finding procedure
      *
      * @param ctx - event context
@@ -283,6 +334,13 @@ namespace ActsTrk
                        const detail::RecoTrackContainerProxy &track,
                        detail::DuplicateSeedDetector &duplicateSeedDetector,
                        const detail::MeasurementIndex &measurementIndex) const;
+
+    /**
+     * @brief Retrieves track selector configuration for given eta value
+     *
+     * @param eta track candidate eta value
+     */
+    const Acts::TrackSelector::Config & getCuts (double eta) const;
 
     // Access Acts::CombinatorialKalmanFilter etc using "pointer to implementation"
     // so we don't have to instantiate the heavily templated classes in the header.
