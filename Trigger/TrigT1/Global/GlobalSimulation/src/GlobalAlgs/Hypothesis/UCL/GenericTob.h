@@ -47,7 +47,7 @@ namespace GlobalSim {
     const std::bitset<1>& overflow_bits() const {return m_Overflow_bits;}
     std::bitset<32> as_bits() const;
  
-    ulong Et () const {return m_Et_bits.to_ulong();}
+    int Et () const {return bitSetToInt(m_Et_bits);}
     int Eta () const {return bitSetToInt(m_Eta_bits);}
     int Phi () const {return bitSetToInt(m_Phi_bits);}
     int Charge () const{return bitSetToInt(m_Charge_bits);}
