@@ -61,15 +61,15 @@ def createTrigTauConfigFlags():
     #####################################################################################
     # Using ONNX inference
 
-    flags.addFlag('Trigger.Offline.Tau.GNTau.ONNXConfig', ['dev/HLTGNTau_v1p0_20250307/GNTau0p_SC2_HP0_fmt.onnx', 'dev/HLTGNTau_v1p0_20250307/GNTau1p_SC2_HP0_fmt.onnx', 'dev/HLTGNTau_v1p0_20250307/GNTaump_SC2_HP0_fmt.onnx'])
+    flags.addFlag('Trigger.Offline.Tau.GNTau.ONNXConfig', ['HLTGNTau_v1p1/GNTau0p_SC2_HP0_fmt.onnx', 'HLTGNTau_v1p1/GNTau1p_SC2_HP0_fmt.onnx', 'HLTGNTau_v1p1/GNTaump_SC2_HP0_fmt.onnx'])
     flags.addFlag('Trigger.Offline.Tau.GNTau.MaxTracks', 10)
     flags.addFlag('Trigger.Offline.Tau.GNTau.MaxClusters', 8)
     flags.addFlag('Trigger.Offline.Tau.GNTau.OutputDiscriminant', 1) # 0: -log(PJet), 1: PTau
-    flags.addFlag('Trigger.Offline.Tau.GNTau.ScoreFlatteningConfig', ['dev/HLTGNTau_v1p0_20250307/0p_GNTau_map.root', 'dev/HLTGNTau_v1p0_20250307/1p_GNTau_map.root', 'dev/HLTGNTau_v1p0_20250307/mp_GNTau_map.root'])
+    flags.addFlag('Trigger.Offline.Tau.GNTau.ScoreFlatteningConfig', ['HLTGNTau_v1p1/0p_GNTau_map.root', 'HLTGNTau_v1p1/1p_GNTau_map.root', 'HLTGNTau_v1p1/mp_GNTau_map.root'])
     flags.addFlag('Trigger.Offline.Tau.GNTau.WPNames', ['VeryLoose', 'Loose', 'Medium', 'Tight'])
     flags.addFlag("Trigger.Offline.Tau.GNTau.TargetEff", [[0.98,  0.90, 0.65,  0.50],  # 0p WPs: VL, L, M, T
-                                                          [0.992, 0.99, 0.97,  0.94],  # 1p WPs: VL, L, M, T
-                                                          [0.99,  0.94, 0.895, 0.80]]) # mp WPs: VL, L, M, T
+                                                          [0.992, 0.99, 0.973, 0.94],  # 1p WPs: VL, L, M, T
+                                                          [0.99,  0.95, 0.92,  0.80]]) # mp WPs: VL, L, M, T
 
 
     return flags
