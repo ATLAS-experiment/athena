@@ -399,6 +399,16 @@ namespace ActsTrk
 	setSummaryValue(*track_particle,
 			specialHitCounts[ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::PixelClusterType)][ActsTrk::detail::HitCategory::Hole],
 			xAOD::numberOfPixelHoles);
+	setSummaryValue(*track_particle,
+			hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 0),
+			xAOD::numberOfInnermostPixelLayerSharedEndcapHits);
+	setSummaryValue(*track_particle,
+			hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 1)
+			+hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 2),
+			xAOD::numberOfNextToInnermostPixelLayerSharedEndcapHits);
+	setSummaryValue(*track_particle,
+			hitInfo.contributingSharedHits(ActsTrk::detail::HitSummaryData::pixelTotal),
+			xAOD::numberOfPixelSharedHits);
 	// do not expect pixel hits if there are not contributing pixel hits in the flat barrel and expectIfPixelContributes is true
 	std::array<unsigned int,4> expect_layer_pattern = ((   !m_expectIfPixelContributes.value()
 							       || hitInfo.contributingLayers(ActsTrk::detail::HitSummaryData::pixelTotal))
@@ -427,6 +437,12 @@ namespace ActsTrk
 	setSummaryValue(*track_particle,
 			static_cast<unsigned int >(hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat,1)),
 			xAOD::numberOfNextToInnermostPixelLayerOutliers);
+	setSummaryValue(*track_particle,
+			static_cast<unsigned int >(hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat,0)),
+			xAOD::numberOfInnermostPixelLayerSharedHits);
+	setSummaryValue(*track_particle,
+			static_cast<unsigned int >(hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat,1)),
+			xAOD::numberOfNextToInnermostPixelLayerSharedHits);
 	
 	// Strip summaries
 	setSummaryValue(*track_particle,
@@ -435,6 +451,9 @@ namespace ActsTrk
 	setSummaryValue(*track_particle,
 			hitInfo.contributingOutlierHits( ActsTrk::detail::HitSummaryData::stripTotal ),
 			xAOD::numberOfSCTOutliers);
+	setSummaryValue(*track_particle,
+			hitInfo.contributingSharedHits( ActsTrk::detail::HitSummaryData::stripTotal ),
+			xAOD::numberOfSCTSharedHits);
 	setSummaryValue(*track_particle,
 			specialHitCounts[ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::StripClusterType)][ActsTrk::detail::HitCategory::Hole],
 			xAOD::numberOfSCTHoles);
