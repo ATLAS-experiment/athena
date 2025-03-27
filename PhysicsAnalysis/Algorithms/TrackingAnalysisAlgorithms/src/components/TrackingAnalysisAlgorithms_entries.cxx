@@ -6,7 +6,7 @@
 #include "TrackingAnalysisAlgorithms/VertexSelectionAlg.h"
 #include "TrackingAnalysisAlgorithms/TrackParticleMergerAlg.h"
 #include "TrackingAnalysisAlgorithms/SecVertexTruthMatchAlg.h"
-
+#include "TrackingAnalysisAlgorithms/PixelDEdxEqualizationAlg.h"
 
 // Declare the component(s) of the package:
 DECLARE_COMPONENT( CP::VertexSelectionAlg )
