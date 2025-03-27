@@ -40,9 +40,6 @@ namespace {
 }
 namespace CP {
 
-  using keyMap = std::map<std::string, int>;
-  using valMap = std::map<std::string, double>;
-
   /// Implementation of the Pixel ToT PID tool.
   /// This is refactoring of the tool for dual use in Athena and AnalysisBase using CP Algs.
 
@@ -136,9 +133,6 @@ namespace CP {
                            int& nUsedHits,
                            int pixelhits,
                            bool equalize = false) const;
-
-    valMap getScaleFactorFromMap(const PixelCluster& cluster, 
-                                                      const std::map<keyMap,valMap>& sfMap) const;
 
   }; // class PixelToTPIDDualTool
 

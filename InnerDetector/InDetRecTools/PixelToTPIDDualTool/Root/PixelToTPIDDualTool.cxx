@@ -94,8 +94,8 @@ namespace CP {
     }
 
     //// For testing
-    filename = "../src/athena/InnerDetector/InDetRecTools//PixelToTPIDDualTool/share/nTuple_data_lowMu_flat.root"; // FIXME!!!!
-    //filename = "../athena/InnerDetector/InDetRecTools//PixelToTPIDDualTool/share/nTuple_data_lowMu_flat.root";
+    //filename = "../src/athena/InnerDetector/InDetRecTools//PixelToTPIDDualTool/share/nTuple_data_lowMu_flat.root"; // FIXME!!!!
+    filename = "../athena/InnerDetector/InDetRecTools//PixelToTPIDDualTool/share/nTuple_data_lowMu_flat.root";
 
     if (filename.empty()) {
       ATH_MSG_ERROR("Could not find file: " << filename);
@@ -184,7 +184,7 @@ namespace CP {
             
             float dotProd = (*tsosIter)->trackParameters()->momentum().dot( (*tsosIter)->trackParameters()->associatedSurface().normal() );
             cluster.cosalpha = fabs(dotProd / (*tsosIter)->trackParameters()->momentum().mag());
-            cluster.charge = pixclus->prepRawData()->totalCharge()*cluster.cosalpha;
+            cluster.charge = pixclus->prepRawData()->totalCharge()*cluster.cosalpha; // NB: multiplying by cosalpha!
 
             /// keep track if this is an ibl cluster with overflow
             int iblOverflow=0;
@@ -307,7 +307,9 @@ namespace CP {
     ///    In .h:  std::optional<int> m_cachedRunNumber;
     ///    In execute: if (!m_cachedRunNumber) m_cachedRunNumber = currentRunNumber;
     int closestRunNumber = 0;
-    std::map<keyMap,valMap> sfMap; 
+
+    std::optional<ROOT::RDF::RNode> filtered_df; // since no default constructor.
+
     if( m_equalizeClusterMeasurements ) {
       
       ROOT::RDataFrame df = *m_df;
@@ -320,17 +322,20 @@ namespace CP {
       ATH_MSG_INFO("Closest run number:" << closestRunNumber);
 
       /// Filter the RDataFrame to just keep this run:
-      auto filtered_df = df.Filter([closestRunNumber](int run) { return run == closestRunNumber; }, {"runNumber"});
-      
-      /// Fill SF map for later use.
-      /// Can't use filtered dataframe directly outside this scope, and don't want to copy dataframe & filter for every cluster.
-      filtered_df.Foreach([&sfMap](int bec, int layerID, int etaM, double SF, double SF_error) { //mpv, mpv_error, mpv_spread, nentries
-          /// Process only the selected columns
-          keyMap thisKeyMap = {{"bec",bec}, {"layerID",layerID}, {"etaM",etaM}};
-          valMap thisValMap = {{"SF",SF}, {"SF_error",SF_error}};
-          sfMap.insert( {thisKeyMap, thisValMap} );
-        }, {"bec", "layerID", "etaM", "SF", "SF_error"});
+      filtered_df = df.Filter([closestRunNumber](int run) { return run == closestRunNumber; }, {"runNumber"});
     }
+
+    /*
+    /// test
+    auto result = filtered_df->Filter(
+                                  [](int bec, int layerID, int etaM) {
+                                    return bec == 0 && layerID == 1 && etaM == 2;
+                                  },
+                                  {"bec", "layerID", "etaM"});
+    auto SF_values = result.Take<double>("SF");
+    auto SF_error_values = result.Take<double>("SF_error");
+    ATH_MSG_INFO("Test: found SF " << SF_values->at(0) << "for this run for bec 0, layerID 1, etaM 2");
+    */
 
     /// Check for track states:
     static const SG::AuxElement::ConstAccessor< StatesOnTrack > trackStateAcc(m_msosLink);
@@ -458,14 +463,25 @@ namespace CP {
       /// Read from trees on CVMFS or from conditions database.
       if(m_equalizeClusterMeasurements){
         
-        /// Get scale factor from tree (tree->RDataFrame->filtered RDataFrame->map).
-        valMap thisValMap = getScaleFactorFromMap(cluster, sfMap);
-        if(thisValMap.size()==0) {
-          ATH_MSG_ERROR("Could not find the scale factor for this pixel cluster!");
-          return -1;
+        /// Get SF and error from the filtered dataframe ((tree->RDataFrame->filtered RDataFrame for specific run).
+        auto result = filtered_df->Filter(
+                                          [&cluster](int bec, int layerID, int etaM) {
+                                            return bec == cluster.bec && layerID == cluster.layer && etaM == abs(cluster.eta_module); // average over phi & +-z.
+                                          },
+                                          {"bec", "layerID", "etaM"});
+
+        auto SF_values = result.Take<double>("SF");
+        auto SF_error_values = result.Take<double>("SF_error");
+        if (SF_values->empty() || SF_error_values->empty()) {
+          ATH_MSG_ERROR("Could not find the scale factor matching the (bec, layer, module eta) of this pixel cluster!");
         }
-        float SF = thisValMap["SF"];
-        // float SF_error = thisValMap["SF_error"]; // can add more columns (branches from SF tree).
+        if (SF_values->size()>1 || SF_error_values->size()>1) {
+          ATH_MSG_ERROR("Found multiple scale factors matching the (bec, layer, module eta) of this pixel cluster!");
+        }
+
+        double SF = SF_values->at(0);
+        double SF_error = SF_error_values->at(0);
+        ATH_MSG_DEBUG("Test: found SF " << SF << " with error " << SF_error << " for this pixel cluster.");
 
         /// Apply scale factor and store
         cluster.dEdxEq = clusterdEdx * SF;
@@ -625,43 +641,6 @@ namespace CP {
       return averagedEdx;
     }
     return -1;
-  }
-
-  //////////////////
-  //////////////////
-  //////////////////
-  
-  /// Get scale factor from the map<keyMap, valMap>
-  /// keyMap has bec, layerID, abs(etaM).
-  /// valMap has SF, SF_error, mpv, mpv_error, mpv_spread,
-  /// SFs are originally stored in flat TTrees & read as RDataFrame in initialize().
-  /// Filter this RDF to only keep rows from the closest run number in execute (don't know runNumber before).  Before cluster loop.
-  ///    Actually filtering a copy.  
-  ///    Some tricks required to get around RDFs lack of a default construction --> have to initialize when declare (std::optional).
-  ///    Also some concern about thread safety if filtering the m_df  directly.
-  /// Transform into this filtered RDF to somewhat complicated map.
-  ///    Need to transform to something besides an RDF related scopes and inability to declare without initialzing.
-  ///    Chose somewhat complicated map where the key and value are also maps.
-  ///    Key is the module (bec, layerID, etaM).  Value is the (SF, SF_error, etc.).
-  ///    Chose this format for lookup table  b/c can use variable names.  Don't have to remember positions.
-  valMap PixelToTPIDDualTool::getScaleFactorFromMap(const PixelCluster& cluster, 
-                                                    const std::map<keyMap,valMap>& sfMap) const {
-  
-    keyMap thisKeyMap = {{"bec",cluster.bec}, {"layerID",cluster.layer}, {"etaM", std::abs(cluster.eta_module)}}; // note abs(eta)!!!
-    
-    auto it = sfMap.find(thisKeyMap);
-    if (it != sfMap.end()) {
-      valMap thisValMap = sfMap.at(thisKeyMap); // won't modify.
-      ATH_MSG_DEBUG("Found scale factor: " << thisValMap["SF"] << " with error: " << thisValMap["SF_error"]
-                    << " for (bec, layer, etaM): (" <<cluster.bec<<", "<<cluster.layer<<", "<<cluster.eta_module<<").");
-      return thisValMap;
-    }
-    else {
-      ATH_MSG_ERROR("Could not find scale factor! (bec, layer, etaM): (" 
-                    <<cluster.bec<<", "<<cluster.layer<<", "<<cluster.eta_module<<").");
-      valMap empty;
-      return empty;
-    }
   }
   
 } // namespace CP
