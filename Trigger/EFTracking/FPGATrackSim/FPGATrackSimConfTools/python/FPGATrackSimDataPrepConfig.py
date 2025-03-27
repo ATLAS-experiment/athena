@@ -492,7 +492,7 @@ def runDataPrepChain():
     flags.Acts.doRotCorrection = False
     
     ############################################
-    flags.Concurrency.NumThreads=4
+    flags.Concurrency.NumThreads=1
     flags.Concurrency.NumConcurrentEvents=1
     flags.Concurrency.NumProcs=0
     flags.Scheduler.ShowDataDeps=False
