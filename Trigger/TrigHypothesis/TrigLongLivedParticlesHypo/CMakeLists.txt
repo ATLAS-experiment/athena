@@ -10,9 +10,7 @@ find_package( ROOT COMPONENTS Core )
 atlas_add_component( TrigLongLivedParticlesHypo
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthViews AthenaBaseComps AthenaKernel AthenaMonitoringKernelLib CxxUtils DecisionHandlingLib FourMomUtils GaudiKernel LumiBlockCompsLib LumiBlockData MVAUtils
-		     PathResolver StoreGateLib TrigCompositeUtilsLib TrigSteeringEvent TrkTrack xAODJet xAODTracking xAODTrigger BeamSpotConditionsData TrigInDetToolInterfacesLib TrigInDetEvent TrkPrepRawData TrkRIO_OnTrack
-		     TrigInDetPattRecoTools)
+		     LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthViews AthenaBaseComps AthenaKernel AthenaMonitoringKernelLib CxxUtils DecisionHandlingLib FourMomUtils GaudiKernel LumiBlockCompsLib LumiBlockData MVAUtils PathResolver StoreGateLib TrigCompositeUtilsLib TrigSteeringEvent TrkTrack xAODJet xAODTracking xAODTrigger BeamSpotConditionsData TrigInDetToolInterfacesLib TrigInDetEvent TrkPrepRawData TrkRIO_OnTrack xAODTrigger TrigInDetPattRecoToolsLib)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-extensions=ATL900,ATL901 )

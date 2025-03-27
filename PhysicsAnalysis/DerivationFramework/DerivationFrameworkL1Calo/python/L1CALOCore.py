@@ -490,7 +490,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import PreJetMCTruthAugmentationsCfg
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTruthCollectionNavigationDecorationsCfg,AddBornLeptonCollectionCfg
-        from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTruthMETCfg,PostJetMCTruthAugmentationsCfg
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import PostJetMCTruthAugmentationsCfg
 
         acc.merge(PreJetMCTruthAugmentationsCfg(flags,decorationDressing = 'dressedPhoton'))
         #
