@@ -13,11 +13,15 @@
 #include <AsgTesting/UnitTest.h>
 #include <AsgTools/AsgToolConfig.h>
 #include <ColumnarTestFixtures/ColumnarMemoryTest.h>
+#include <ColumnarTestFixtures/ColumnarPhysliteTest.h>
 
 #include <ColumnarExampleTools/SimpleSelectorExampleTool.h>
 #include <ColumnarExampleTools/OptionalColumnExampleTool.h>
 #include <ColumnarExampleTools/ConfigurableColumnExampleTool.h>
 #include <ColumnarExampleTools/ModularExampleTool.h>
+
+#include <xAODJet/JetContainer.h>
+#include <xAODCore/ShallowCopy.h>
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
@@ -29,6 +33,7 @@
 // namespace, but for actual tools the tool may actually exist in a
 // different namespace, so I usually use a `using` statement like this.
 using columnar::ColumnarMemoryTest;
+using columnar::ColumnarPhysLiteTest;
 
 
 // this is a test that manually loads data into memory, and then runs
@@ -79,6 +84,58 @@ TEST_F (ColumnarMemoryTest, SimpleSelectorExampleTool)
 
   // check the output
   columnMap.checkExpectations ();
+}
+
+
+// this is a helper function that wraps the tool for XAOD usage for the
+// PHYSLITE test below.  there is usually some amount of boilerplate
+// code that test needs to run in XAOD mode, which is usually factored
+// out into a separate function.
+void callXAODSimpleSelectorExampleTool (const columnar::SimpleSelectorExampleTool& tool, bool isPrepCall, const std::string& name)
+{
+  using namespace asg::msgUserCode;
+  const xAOD::JetContainer *jets = nullptr;
+  ANA_CHECK_THROW (tool.evtStore()->retrieve (jets, name));
+  // to allow for accurate performance measurements this function is
+  // generally called twice, the first time is mostly to make sure that
+  // all data is loaded into memory, and the second time is then used as
+  // a performance measurement of the tool without i/o.
+  if (isPrepCall)
+  {
+    // for the first preparatory call we make a copy of the object to
+    // avoid the tool modifying the original object.
+    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*jets);
+    tool.callSingleEvent (*jetsCopy);
+    delete jetsCopy;
+    delete auxCopy;
+  } else
+  {
+    // for the second call we can skip the shallow copy, as this tool
+    // just adds to the existing object.  for tools that modify the
+    // object in place both paths would be identical, making shallow
+    // copies and then recording them (the TStore is cleared between
+    // both calls).
+    tool.callSingleEvent (*jets);
+  }
+}
+
+
+// this is a test that runs the tool on PHYSLITE.  this ensures that the
+// tool works on actual data, not just synthetic one of the in-memory
+// test.  it also allows for performance measurements of the tool in the
+// different modes.
+TEST_F (ColumnarPhysLiteTest, SimpleSelectorExampleTool)
+{
+  // check that we are in a project that supports this test
+  if (!checkMode())
+    return;
+
+  auto tool = std::make_unique<columnar::SimpleSelectorExampleTool> (makeUniqueName());
+  ASSERT_SUCCESS (tool->initialize ());
+
+  // this will call the tool in either mode, and also performs some
+  // performance measurements of the tool in either mode
+  doCall (*tool, "SimpleSelectorExampleTool", "AnalysisJets", [&] (auto& args) {callXAODSimpleSelectorExampleTool (*tool, args.isPrepCall, args.inputContainer);}, {{"Particles", "AnalysisJets"}});
 }
 
 
