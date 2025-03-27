@@ -3089,6 +3089,9 @@ const xAOD::TrackParticleContainer& SUSYObjDef_xAOD::GetInDetLargeD0GSFTracks(co
 }
 
 StatusCode SUSYObjDef_xAOD::ApplyLRTUncertainty(){
+
+  // Don't apply variations for data
+  if (isData()) return StatusCode::SUCCESS;
   
   const EventContext& ctx = Gaudi::Hive::currentContext();
 

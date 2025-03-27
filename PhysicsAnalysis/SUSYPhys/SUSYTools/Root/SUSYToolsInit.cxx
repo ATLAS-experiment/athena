@@ -159,11 +159,18 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
   /////////////////////////////////////////////////////////////////////////////////////////
   // Initialize LRT systematics tool
-  if (!m_LRTuncTool.isUserConfigured())
+  if (!m_LRTuncTool.isUserConfigured() && !isData())
   {
     ATH_MSG_INFO("Initializing LRT uncertainty tool");
     m_LRTuncTool.setTypeAndName("InDet::InclusiveTrackFilterTool/LRTUncTool");    
     ATH_CHECK( m_LRTuncTool.setProperty("Seed", 1) );
+    if (m_isRun3) {
+      if (m_mcCampaign == "mc23d" || m_mcCampaign == "mc23e")
+        ATH_MSG_WARNING("Please note that current ID recommendations only cover mc23a and not (yet) mc23d/e!");
+      ATH_CHECK( m_LRTuncTool.setProperty("calibFileLRTEff", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/LargeD0TrackingRecommendations_mc23a.root") );
+    }
+    else
+      ATH_CHECK( m_LRTuncTool.setProperty("calibFileLRTEff", "InDetTrackSystematicsTools/CalibData_24.0_2023-v00/LargeD0TrackingRecommendations_20230824.root") );
     ATH_CHECK(m_LRTuncTool.retrieve());
   } else {
     ATH_MSG_INFO("Using user-configured LRT uncertainty tool");
