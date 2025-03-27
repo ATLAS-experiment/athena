@@ -353,7 +353,7 @@ StatusCode MuFastSteering::execute(const EventContext& ctx) const
   else {
     // to StatusCode findMuonSignature()
     ATH_CHECK(findMuonSignature(internalRoI, recRoIVector,
-				*muFastContainer, *muIdContainer, *muMsContainer, dynamicDeltaRpc, ctx));
+				*muFastContainer, *muCompositeContainer, *muIdContainer, *muMsContainer, dynamicDeltaRpc, ctx));
   }
 
   if (msgLvl(MSG::DEBUG)) {
@@ -820,6 +820,7 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
 StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDescriptor*>& roids,
                                              const std::vector<const xAOD::MuonRoI*>&   muonRoIs,
 				             DataVector<xAOD::L2StandAloneMuon>& 	outputTracks,
+                     xAOD::TrigCompositeContainer& outputMuonCal,
 					     TrigRoiDescriptorCollection& 		outputID,
 					     TrigRoiDescriptorCollection&		outputMS,
 					     const bool                                 dynamicDeltaRpc,
@@ -1106,18 +1107,34 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
     //--------------------------- 
     if (m_doCalStream && trackPatterns.size()>0 ) { 
       TrigL2MuonSA::TrackPattern tp = trackPatterns[0];
-      bool updateTriggerElement = false;
-      //int calBS = m_calBufferSize;
-      bool calDS = m_calDataScouting;
+      std::vector<uint32_t> localBuffer;  // init localBuffer parameter
       sc = m_calStreamer->createRoiFragment(*p_roi,tp,mdtHits_normal,
        					    rpcHits,
        					    tgcHits,
-       					    //calBS,
-       					    calDS,
-       					    updateTriggerElement,ctx); 
+       					    localBuffer,
+       					    m_calDataScouting,
+       					    ctx); 
       if (sc != StatusCode::SUCCESS ) {  
 	ATH_MSG_WARNING("Calibration streamer: create Roi Fragment failed");
       }
+      // if it's a data scouting chain
+      if ( m_calDataScouting ) {
+          
+          ATH_MSG_DEBUG("Retrieved the buffer, with size: " << localBuffer.size());
+
+          // create the TrigCompositeContainer to store the calibration buffer
+          // add the trigcomposite object to the container outputMuonCal
+          xAOD::TrigComposite* tc = new xAOD::TrigComposite();
+          outputMuonCal.push_back(tc);
+
+          ATH_MSG_DEBUG("The size of the TrigCompositeContainer is: " << outputMuonCal.size() );
+              
+          // set the detail of the trigcomposite object
+          tc->setDetail("MuonCalibrationStream", localBuffer );
+
+          }
+
+
     }
     
     
