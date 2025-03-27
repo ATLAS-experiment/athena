@@ -78,7 +78,10 @@ StatusCode TauEfficiencyCorrectionsTool::initialize()
     return StatusCode::FAILURE;
   }
   
-  if (m_sRecommendationTag == "2022-prerec") {
+  if(m_sRecommendationTag == "2025-prerec") {
+    ATH_MSG_WARNING("2025-prerec is under development and not complete yet.");
+    ATH_CHECK(initializeTools_2025_prerec());
+  } else if (m_sRecommendationTag == "2022-prerec") {
     ATH_MSG_WARNING("2022-prerec tag are pre-recommendations and still under development.");
     ATH_CHECK(initializeTools_2022_prerec());
   }
@@ -303,8 +306,45 @@ StatusCode TauEfficiencyCorrectionsTool::applySystematicVariation ( const CP::Sy
 }
 
 //=================================PRIVATE-PART=================================
+StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
+{
+  std::string sDirectory = "TauAnalysisTools/" + std::string(sSharedFilesVersion) + "/EfficiencyCorrections/";
+  for (auto iEfficiencyCorrectionType : m_vEfficiencyCorrectionTypes){
 
-//______________________________________________________________________________
+    if (iEfficiencyCorrectionType == SFTriggerHadTau)
+    {
+      if (m_sTriggerName.empty()) {
+        ATH_MSG_ERROR("Property \"Trigger\" was not set, please provide a trigger name.");
+        return StatusCode::FAILURE;
+      }
+      if (m_sInputFilePathTriggerHadTau.empty()) {
+        // Determine the input file name from the given trigger name.
+        if (m_sTriggerName.find("mediumRNN_tracktwoMVA") != std::string::npos) {
+          m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_data2022"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+        }
+        else {
+          ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported. Please fix \"TriggerName\" property. In case of doube please consult with TauTrigger coordinators");
+          return StatusCode::FAILURE;
+        }
+      }
+      if (m_sVarNameTriggerHadTau.empty()) m_sVarNameTriggerHadTau = "TauScaleFactorTriggerHadTau";
+	 
+      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::TauEfficiencyTriggerTool/TriggerHadTauTool", this);
+      m_vTriggerEfficiencyTools.push_back(tTool);
+      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathTriggerHadTau));
+      ATH_CHECK(tTool->setProperty("VarName", m_sVarNameTriggerHadTau));
+      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+      ATH_CHECK(tTool->setProperty("WP", ConvertTriggerIDToString(m_iJetIDLevel)));
+    }
+    else {
+      ATH_MSG_WARNING("unsupported EfficiencyCorrectionsType with enum " << iEfficiencyCorrectionType);
+    }
+  }
+
+  return StatusCode::SUCCESS;
+}
+
+//_____________________________________________________________________________
 // this whole block is a place holder until we get R22 Run2 recommendations
 // none of these SFs are valid for R22 MC, except possibly RNN ID to very coarse approximation
 StatusCode TauEfficiencyCorrectionsTool::initializeTools_2022_prerec()
