@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 ////////////////////////////// 
 //
@@ -11,7 +11,7 @@
 **/
 
 
-#include "TRT_ConditionsAlgs/TRTStrawStatusRead.h"
+#include "TRTStrawStatusRead.h"
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -20,7 +20,6 @@
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "TRT_ConditionsData/StrawStatusMultChanContainer.h"
 #include "TRT_ReadoutGeometry/TRT_BaseElement.h"
-#include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "TRT_ConditionsData/ExpandedIdentifier.h"
 

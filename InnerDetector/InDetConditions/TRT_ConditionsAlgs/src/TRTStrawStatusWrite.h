@@ -1,15 +1,14 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-/////////////////////////////////////////////////////
-//TRTStrawStatusWrite.h
-//phansen@nbi.dk
-////////////////////////////////////////////////////
+/**
+ * @class TRTStrawStatusWrite.h
+ * @author phansen@nbi.dk
+ */
 
-
-#ifndef TRTSTRAWSTATUSWRITE_H
-#define TRTSTRAWSTATUSWRITE_H
+#ifndef TRT_CONDITIONSALGS_TRTSTRAWSTATUSWRITE_H
+#define TRT_CONDITIONSALGS_TRTSTRAWSTATUSWRITE_H
 #include <string>
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -21,10 +20,6 @@
 #include "TRT_ConditionsData/StrawStatusMultChanContainer.h"
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
-
-namespace InDetDD{ class TRT_DetectorManager; }
-
-
 
 class TRTStrawStatusWrite : public AthAlgorithm
 {
