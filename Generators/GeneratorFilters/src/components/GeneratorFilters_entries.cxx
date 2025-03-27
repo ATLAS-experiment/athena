@@ -75,6 +75,7 @@
 #include "GeneratorFilters/ParentTwoChildrenFilter.h"
 #include "GeneratorFilters/PhotonFilter.h"
 #include "GeneratorFilters/SameParticleHardScatteringFilter.h"
+#include "GeneratorFilters/SplitPhotonFilter.h"
 #include "GeneratorFilters/TauFilter.h"
 #include "GeneratorFilters/TTbarWToLeptonFilter.h"
 #include "GeneratorFilters/TTbarWithJpsimumuFilter.h"
@@ -184,6 +185,7 @@ DECLARE_COMPONENT( ParticleDecayFilter )
 DECLARE_COMPONENT( ParticleFilter )
 DECLARE_COMPONENT( PhotonFilter ) 
 DECLARE_COMPONENT( SameParticleHardScatteringFilter )
+DECLARE_COMPONENT( SplitPhotonFilter )
 DECLARE_COMPONENT( TauFilter )
 DECLARE_COMPONENT( TTbarWToLeptonFilter )
 DECLARE_COMPONENT( TTbarWithJpsimumuFilter )
@@ -209,3 +211,4 @@ DECLARE_COMPONENT( TrimuMassRangeFilter )
 DECLARE_COMPONENT( TruthJetFilter )
 DECLARE_COMPONENT( VBFHbbEtaSortingFilter )
 DECLARE_COMPONENT( ZtoLeptonFilter )
+
