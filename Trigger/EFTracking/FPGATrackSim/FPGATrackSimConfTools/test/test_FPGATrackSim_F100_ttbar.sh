@@ -2,7 +2,7 @@
 # art-description: Test running F100 pipeline on ttbar events
 # art-type: grid
 # art-include: main/Athena
-# art-memory: 8192
+# art-memory: 16384
 # art-input-nfiles: 2
 # art-output: *.txt
 # art-output: *.root
