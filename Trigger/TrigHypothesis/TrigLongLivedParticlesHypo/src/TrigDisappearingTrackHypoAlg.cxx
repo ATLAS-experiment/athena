@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
   * Trigger Hypo Tool, that is aimed at triggering disappearing tracks
   * author Kunihiro Nagano <kunihiro.nagano@cern.ch> 
@@ -10,6 +10,9 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "PathResolver/PathResolver.h"
+
+#include "TFile.h"
+#include "TTree.h"
 
 using TrigCompositeUtils::createAndStore; 
 using TrigCompositeUtils::DecisionContainer;
@@ -44,102 +47,30 @@ StatusCode TrigDisappearingTrackHypoAlg::initialize()
 
    if ( !m_monTool.empty() ) CHECK( m_monTool.retrieve() );
 
-   // --- declare variables to the reader
-   const std::string methodName = "BDT method";
-
+   // MVAUtils BDT initialisation
+   // could make this configurable as a property
+   std::string weightfile[4];
    // pix4l_sct0
-   for (auto& reader : m_tmva_pix4l_sct0_reader) {
-      reader.tmva = std::make_unique<TMVA::Reader>( "!Color:!Silent" );
-      reader.tmva->AddVariable("pt",             &reader.pt);
-      reader.tmva->AddVariable("z0",             &reader.z0);
-      reader.tmva->AddVariable("d0",             &reader.d0);
-      reader.tmva->AddVariable("trkiso3_dr01",   &reader.trkiso3_dr01);
-      reader.tmva->AddVariable("trkiso3_dr0201", &reader.trkiso3_dr0201);
-      reader.tmva->AddVariable("chi2ndof",       &reader.chi2ndof);
-      reader.tmva->AddVariable("chi2ndof_pix",   &reader.chi2ndof_pix);
-      reader.tmva->AddVariable("refit_pt",       &reader.refit_pt);
-      reader.tmva->AddVariable("n_pix",          &reader.n_pix);
-      reader.tmva->AddVariable("refit_ptratio",  &reader.refit_ptratio);
-      reader.tmva->AddVariable("refit_chi2ndof", &reader.refit_chi2ndof);
-      reader.tmva->AddVariable("n_bl",           &reader.n_bl);
-
-      const std::string tuningVer  = "v21a";
-      const std::string weightfile = PathResolver::find_calib_file(
-         "TrigDisappearingTrackTriggerHypo/pix4l_sct0.BDT.weights." + tuningVer + ".xml");
-      ATH_MSG_DEBUG( "opening weightfile for Pix4l_SCT0 = " << weightfile );
-      reader.tmva->BookMVA(methodName, weightfile);
-   }
-
+   weightfile[0] = PathResolver::find_calib_file("TrigDisappearingTrackTriggerHypo/pix4l_sct0.BDT.weights.v21a.root");
    // pix4l_sct1p
-   for (auto& reader : m_tmva_pix4l_sct1p_reader) {
-      reader.tmva = std::make_unique<TMVA::Reader>( "!Color:!Silent" );
-      reader.tmva->AddVariable("pt",                   &reader.pt);
-      reader.tmva->AddVariable("refit_pt",             &reader.refit_pt);
-      reader.tmva->AddVariable("refit_z0",             &reader.refit_z0);
-      reader.tmva->AddVariable("refit_d0",             &reader.refit_d0);
-      reader.tmva->AddVariable("n_sct",                &reader.n_sct);
-      reader.tmva->AddVariable("refit_ptratio",        &reader.refit_ptratio);
-      reader.tmva->AddVariable("refit_chi2ndof_ratio", &reader.refit_chi2ndof_ratio);
-      reader.tmva->AddVariable("trkiso3_dr01",         &reader.trkiso3_dr01);
-      reader.tmva->AddVariable("trkiso3_dr0201",       &reader.trkiso3_dr0201);
-      reader.tmva->AddVariable("is_fail",              &reader.is_fail);
-      reader.tmva->AddVariable("chi2ndof_pix",         &reader.chi2ndof_pix);
-      reader.tmva->AddVariable("n_pix",                &reader.n_pix);
-
-      const std::string tuningVer  = "v21b"; // "b" only for this category
-      const std::string weightfile = PathResolver::find_calib_file(
-         "TrigDisappearingTrackTriggerHypo/pix4l_sct1p.BDT.weights." + tuningVer + ".xml");
-      ATH_MSG_DEBUG( "opening weightfile for Pix4l_SCT1p = " << weightfile );
-      reader.tmva->BookMVA(methodName, weightfile);
-   }
-
+   weightfile[1] = PathResolver::find_calib_file("TrigDisappearingTrackTriggerHypo/pix4l_sct1p.BDT.weights.v21b.root");
    // pix3l_sct0
-   for (auto& reader : m_tmva_pix3l_sct0_reader) {
-      reader.tmva = std::make_unique<TMVA::Reader>( "!Color:!Silent" );
-      reader.tmva->AddVariable("pt",             &reader.pt);
-      reader.tmva->AddVariable("z0",             &reader.z0);
-      reader.tmva->AddVariable("d0",             &reader.d0);
-      reader.tmva->AddVariable("chi2ndof",       &reader.chi2ndof);
-      reader.tmva->AddVariable("chi2ndof_pix",   &reader.chi2ndof_pix);
-      reader.tmva->AddVariable("trkiso3_dr01",   &reader.trkiso3_dr01);
-      reader.tmva->AddVariable("trkiso3_dr0201", &reader.trkiso3_dr0201);
-      reader.tmva->AddVariable("refit_pt",       &reader.refit_pt);
-      reader.tmva->AddVariable("refit_z0",       &reader.refit_z0);
-      reader.tmva->AddVariable("refit_d0",       &reader.refit_d0);
-      reader.tmva->AddVariable("n_pix",          &reader.n_pix);
-      reader.tmva->AddVariable("n_bl",           &reader.n_bl);
-
-      const std::string tuningVer  = "v21a";
-      const std::string weightfile = PathResolver::find_calib_file(
-         "TrigDisappearingTrackTriggerHypo/pix3l_sct0.BDT.weights." + tuningVer + ".xml");
-      ATH_MSG_DEBUG( "opening weightfile for Pix3l_SCT0 = " << weightfile );
-      reader.tmva->BookMVA(methodName, weightfile);
-   }
-
+   weightfile[2] = PathResolver::find_calib_file("TrigDisappearingTrackTriggerHypo/pix3l_sct0.BDT.weights.v21a.root");
    // pix3l_sct1p
-   for (auto& reader : m_tmva_pix3l_sct1p_reader) {
-      reader.tmva = std::make_unique<TMVA::Reader>( "!Color:!Silent" );
-      reader.tmva->AddVariable("pt",             &reader.pt);
-      reader.tmva->AddVariable("z0",             &reader.z0);
-      reader.tmva->AddVariable("d0",             &reader.d0);
-      reader.tmva->AddVariable("refit_pt",       &reader.refit_pt);
-      reader.tmva->AddVariable("refit_z0",       &reader.refit_z0);
-      reader.tmva->AddVariable("refit_d0",       &reader.refit_d0);
-      reader.tmva->AddVariable("n_pix",          &reader.n_pix);
-      reader.tmva->AddVariable("n_sct",          &reader.n_sct);
-      reader.tmva->AddVariable("refit_ptratio",  &reader.refit_ptratio);
-      reader.tmva->AddVariable("is_fail",        &reader.is_fail);
-      reader.tmva->AddVariable("n_bl",           &reader.n_bl);
-      reader.tmva->AddVariable("chi2ndof",       &reader.chi2ndof);
-      reader.tmva->AddVariable("trkiso3_dr01",   &reader.trkiso3_dr01);
-      reader.tmva->AddVariable("trkiso3_dr0201", &reader.trkiso3_dr0201);
-      reader.tmva->AddVariable("refit_chi2ndof", &reader.refit_chi2ndof);
-
-      const std::string tuningVer  = "v21a";
-      const std::string weightfile = PathResolver::find_calib_file(
-         "TrigDisappearingTrackTriggerHypo/pix3l_sct1p.BDT.weights." + tuningVer + ".xml");
-      ATH_MSG_DEBUG( "opening weightfile for Pix3l_SCT1p = " << weightfile );
-      reader.tmva->BookMVA(methodName, weightfile);
+   weightfile[3] = PathResolver::find_calib_file("TrigDisappearingTrackTriggerHypo/pix3l_sct1p.BDT.weights.v21a.root");
+   for (unsigned int i=0; i<4; ++i) {
+     std::unique_ptr<TFile> rootFile(TFile::Open(weightfile[i].c_str(), "READ"));
+     if (!rootFile) {
+       ATH_MSG_ERROR("Can not open BDT root file: " << weightfile[i] );
+       return StatusCode::FAILURE;
+     }
+     std::unique_ptr<TTree> tree((TTree*)rootFile->Get("BDT"));
+     if (!tree) {
+       ATH_MSG_ERROR("Can not find BDT tree in file: " << weightfile[i]);
+       return StatusCode::FAILURE;
+     }
+     ATH_MSG_INFO("Loading BDT tree from file: " << weightfile[i]);
+     m_bdt[i] = std::make_unique<MVAUtils::BDT>(tree.get());
    }
 
    return StatusCode::SUCCESS;
@@ -191,7 +122,7 @@ StatusCode TrigDisappearingTrackHypoAlg::execute( const EventContext& context ) 
    xAOD::TrigCompositeContainer* disTrkContainer = DisTrkBDTSelContainer.get();
 
    // Prepare inputs to HypoTool
-   ATH_CHECK( createCandidates(context, disTrkCandContainer, disTrkContainer) );
+   ATH_CHECK( createCandidates(disTrkCandContainer, disTrkContainer) );
 
    std::vector<TrigDisappearingTrackHypoTool::DisTrkHypoInfo> disTrkHypoInputs;
 
@@ -240,7 +171,7 @@ StatusCode TrigDisappearingTrackHypoAlg::execute( const EventContext& context ) 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-StatusCode TrigDisappearingTrackHypoAlg::createCandidates( const EventContext& context,  const xAOD::TrigCompositeContainer* disTrkCandContainer,
+StatusCode TrigDisappearingTrackHypoAlg::createCandidates(const xAOD::TrigCompositeContainer* disTrkCandContainer,
 							   xAOD::TrigCompositeContainer* disTrkBDTSelContainer) const
 {
    // monitoring
@@ -428,7 +359,7 @@ StatusCode TrigDisappearingTrackHypoAlg::createCandidates( const EventContext& c
       // BDT score
       float bdt_score = 0.0;
       if( category==1 ) {
-	 bdt_score = bdt_eval_pix4l_sct0(context, ptGeV, z0_wrtVtx, d0_wrtVtx, iso3_dr01, iso3_dr02-iso3_dr01, chi2ndof, chi2ndof_pix,
+	bdt_score = bdt_eval_pix4l_sct0(ptGeV, z0_wrtVtx, d0_wrtVtx, iso3_dr01, iso3_dr02-iso3_dr01, chi2ndof, chi2ndof_pix,
 					 refit_ptGeV, n_hits_pix, refit_ptratio, refit_chi2ndof, n_hits_bl);
 	 mnt_cat1_pt.push_back(ptGeV);
 	 mnt_cat1_z0.push_back(z0_wrtVtx);
@@ -445,7 +376,7 @@ StatusCode TrigDisappearingTrackHypoAlg::createCandidates( const EventContext& c
 	 mnt_cat1_bdtscore.push_back(bdt_score);
       }
       else if( category==2 ) {
-	 bdt_score = bdt_eval_pix4l_sct1p(context, ptGeV, refit_ptGeV, refit_z0_wrtVtx, refit_d0_wrtVtx, n_hits_sct, refit_ptratio,
+	bdt_score = bdt_eval_pix4l_sct1p(ptGeV, refit_ptGeV, refit_z0_wrtVtx, refit_d0_wrtVtx, n_hits_sct, refit_ptratio,
 					  refit_chi2ndof_ratio, iso3_dr01, iso3_dr02-iso3_dr01, is_fail, chi2ndof_pix, n_hits_pix);
 	 mnt_cat2_pt.push_back(ptGeV);
 	 mnt_cat2_refit_pt.push_back(refit_ptGeV);
@@ -461,7 +392,7 @@ StatusCode TrigDisappearingTrackHypoAlg::createCandidates( const EventContext& c
 	 mnt_cat2_bdtscore.push_back(bdt_score);
       }
       else if( category==3 ) {
-	 bdt_score = bdt_eval_pix3l_sct0(context, ptGeV, z0_wrtVtx, d0_wrtVtx, chi2ndof, chi2ndof_pix, iso3_dr01, iso3_dr02-iso3_dr01,
+	bdt_score = bdt_eval_pix3l_sct0(ptGeV, z0_wrtVtx, d0_wrtVtx, chi2ndof, chi2ndof_pix, iso3_dr01, iso3_dr02-iso3_dr01,
 					 refit_ptGeV, refit_z0_wrtVtx, refit_d0_wrtVtx, n_hits_pix, n_hits_bl);
 	 mnt_cat3_pt.push_back(ptGeV);
 	 mnt_cat3_z0.push_back(z0_wrtVtx);
@@ -478,7 +409,7 @@ StatusCode TrigDisappearingTrackHypoAlg::createCandidates( const EventContext& c
 	 mnt_cat3_bdtscore.push_back(bdt_score);
       }
       else if( category==4 ) {
-	 bdt_score = bdt_eval_pix3l_sct1p(context, ptGeV, z0_wrtVtx, d0_wrtVtx, refit_ptGeV, refit_z0_wrtVtx, refit_d0_wrtVtx, n_hits_pix, n_hits_sct,
+	bdt_score = bdt_eval_pix3l_sct1p(ptGeV, z0_wrtVtx, d0_wrtVtx, refit_ptGeV, refit_z0_wrtVtx, refit_d0_wrtVtx, n_hits_pix, n_hits_sct,
 					  refit_ptratio, is_fail, n_hits_bl, chi2ndof, iso3_dr01, iso3_dr02-iso3_dr01, refit_chi2ndof);
 	 mnt_cat4_pt.push_back(ptGeV);
 	 mnt_cat4_z0.push_back(z0_wrtVtx);
@@ -495,7 +426,7 @@ StatusCode TrigDisappearingTrackHypoAlg::createCandidates( const EventContext& c
 	 mnt_cat4_iso0201.push_back(iso3_dr02-iso3_dr01);
 	 mnt_cat4_refit_chi2ndof.push_back(refit_chi2ndof);
 	 mnt_cat4_bdtscore.push_back(bdt_score);
-      } 
+      }
       ATH_MSG_VERBOSE("BDT score = " << bdt_score);
 
       // preselection
@@ -547,97 +478,96 @@ StatusCode TrigDisappearingTrackHypoAlg::createCandidates( const EventContext& c
 inline float TrigDisappearingTrackHypoAlg::BDTinput(float var) const { return ( std::abs(var) < 1e-5 ) ? 1e-5 : var; }
 
 float TrigDisappearingTrackHypoAlg::bdt_eval_pix4l_sct0
-(const EventContext& context,
- float pt, float z0, float d0, float trkiso3_dr01, float trkiso3_dr0201, float chi2ndof, float chi2ndof_pix,
+(float pt, float z0, float d0, float trkiso3_dr01, float trkiso3_dr0201, float chi2ndof, float chi2ndof_pix,
  float refit_pt, int n_pix, float refit_ptratio, float refit_chi2ndof, int n_bl) const
 {
-   auto& reader = *m_tmva_pix4l_sct0_reader.get(context);
-   reader.pt             = BDTinput(pt);
-   reader.z0             = BDTinput(z0);
-   reader.d0             = BDTinput(d0);
-   reader.trkiso3_dr01   = BDTinput(trkiso3_dr01);
-   reader.trkiso3_dr0201 = BDTinput(trkiso3_dr0201);
-   reader.chi2ndof       = BDTinput(chi2ndof);
-   reader.chi2ndof_pix   = BDTinput(chi2ndof_pix);
-   reader.refit_pt       = BDTinput(refit_pt);
-   reader.n_pix          = BDTinput((float)n_pix);
-   reader.refit_ptratio  = BDTinput(refit_ptratio);
-   reader.refit_chi2ndof = BDTinput(refit_chi2ndof);
-   reader.n_bl           = BDTinput((float)n_bl);
+  const std::vector<float> input_values = {
+    BDTinput(pt),
+    BDTinput(z0),
+    BDTinput(d0),
+    BDTinput(trkiso3_dr01),
+    BDTinput(trkiso3_dr0201),
+    BDTinput(chi2ndof),
+    BDTinput(chi2ndof_pix),
+    BDTinput(refit_pt),
+    BDTinput((float)n_pix),
+    BDTinput(refit_ptratio),
+    BDTinput(refit_chi2ndof),
+    BDTinput((float)n_bl)
+  };
 
-   return reader.tmva->EvaluateMVA("BDT method");
+  return m_bdt[0]->GetClassification(input_values);
 }
 
 float TrigDisappearingTrackHypoAlg::bdt_eval_pix4l_sct1p
-(const EventContext& context,
- float pt, float refit_pt, float refit_z0, float refit_d0, int n_sct, float refit_ptratio,
+(float pt, float refit_pt, float refit_z0, float refit_d0, int n_sct, float refit_ptratio,
  float refit_chi2ndof_ratio, float trkiso3_dr01, float trkiso3_dr0201, int is_fail, float chi2ndof_pix, int n_pix) const
 {
-   auto& reader = *m_tmva_pix4l_sct1p_reader.get(context);
-   reader.pt                   = BDTinput(pt);
-   reader.refit_pt             = BDTinput(refit_pt);
-   reader.refit_z0             = BDTinput(refit_z0);
-   reader.refit_d0             = BDTinput(refit_d0);
-   reader.n_sct                = BDTinput((float)n_sct);
-   reader.refit_ptratio        = BDTinput(refit_ptratio);
-   reader.refit_chi2ndof_ratio = BDTinput(refit_chi2ndof_ratio);
-   reader.trkiso3_dr01         = BDTinput(trkiso3_dr01);
-   reader.trkiso3_dr0201       = BDTinput(trkiso3_dr0201);
-   reader.is_fail              = BDTinput((float)is_fail);
-   reader.chi2ndof_pix         = BDTinput(chi2ndof_pix);
-   reader.n_pix                = BDTinput((float)n_pix);
+  const std::vector<float> input_values = {
+    BDTinput(pt),
+    BDTinput(refit_pt),
+    BDTinput(refit_z0),
+    BDTinput(refit_d0),
+    BDTinput((float)n_sct),
+    BDTinput(refit_ptratio),
+    BDTinput(refit_chi2ndof_ratio),
+    BDTinput(trkiso3_dr01),
+    BDTinput(trkiso3_dr0201),
+    BDTinput((float)is_fail),
+    BDTinput(chi2ndof_pix),
+    BDTinput((float)n_pix)
+  };
 
-   return reader.tmva->EvaluateMVA("BDT method");
+  return m_bdt[1]->GetClassification(input_values);
 }
 
 float TrigDisappearingTrackHypoAlg::bdt_eval_pix3l_sct0
-(const EventContext& context,
- float pt, float z0, float d0, float chi2ndof, float chi2ndof_pix, float trkiso3_dr01, float trkiso3_dr0201,
+(float pt, float z0, float d0, float chi2ndof, float chi2ndof_pix, float trkiso3_dr01, float trkiso3_dr0201,
  float refit_pt, float refit_z0, float refit_d0, int n_pix, int n_bl) const
 {
-   auto& reader = *m_tmva_pix3l_sct0_reader.get(context);
-   reader.pt             = BDTinput(pt);
-   reader.z0             = BDTinput(z0);
-   reader.d0             = BDTinput(d0);
-   reader.chi2ndof       = BDTinput(chi2ndof);
-   reader.chi2ndof_pix   = BDTinput(chi2ndof_pix);
-   reader.trkiso3_dr01   = BDTinput(trkiso3_dr01);
-   reader.trkiso3_dr0201 = BDTinput(trkiso3_dr0201);
-   reader.refit_pt       = BDTinput(refit_pt);
-   reader.refit_z0       = BDTinput(refit_z0);
-   reader.refit_d0       = BDTinput(refit_d0);
-   reader.n_pix          = BDTinput((float)n_pix);
-   reader.n_bl           = BDTinput((float)n_bl);
+  const std::vector<float> input_values = {
+    BDTinput(pt),
+    BDTinput(z0),
+    BDTinput(d0),
+    BDTinput(chi2ndof),
+    BDTinput(chi2ndof_pix),
+    BDTinput(trkiso3_dr01),
+    BDTinput(trkiso3_dr0201),
+    BDTinput(refit_pt),
+    BDTinput(refit_z0),
+    BDTinput(refit_d0),
+    BDTinput((float)n_pix),
+    BDTinput((float)n_bl)
+  };
 
-   return reader.tmva->EvaluateMVA("BDT method");
+  return m_bdt[2]->GetClassification(input_values);
 }
 
 float TrigDisappearingTrackHypoAlg::bdt_eval_pix3l_sct1p
-(const EventContext& context,
- float pt, float z0, float d0, float refit_pt, float refit_z0, float refit_d0,
+(float pt, float z0, float d0, float refit_pt, float refit_z0, float refit_d0,
  int n_pix, int n_sct, float refit_ptratio, int is_fail, int n_bl,
  float chi2ndof, float trkiso3_dr01, float trkiso3_dr0201, float refit_chi2ndof) const
 {
-   auto& reader = *m_tmva_pix3l_sct1p_reader.get(context);
-   reader.pt             = BDTinput(pt);
-   reader.z0             = BDTinput(z0);
-   reader.d0             = BDTinput(d0);
-   reader.refit_pt       = BDTinput(refit_pt);
-   reader.refit_z0       = BDTinput(refit_z0);
-   reader.refit_d0       = BDTinput(refit_d0);
-   reader.n_pix          = BDTinput((float)n_pix);
-   reader.n_sct          = BDTinput((float)n_sct);
-   reader.refit_ptratio  = BDTinput(refit_ptratio);
-   reader.is_fail        = BDTinput((float)is_fail);
-   reader.n_bl           = BDTinput((float)n_bl);
-   reader.chi2ndof       = BDTinput(chi2ndof);
-   reader.trkiso3_dr01   = BDTinput(trkiso3_dr01);
-   reader.trkiso3_dr0201 = BDTinput(trkiso3_dr0201);
-   reader.refit_chi2ndof = BDTinput(refit_chi2ndof);
+  const std::vector<float> input_values = {
+    BDTinput(pt),
+    BDTinput(z0),
+    BDTinput(d0),
+    BDTinput(refit_pt),
+    BDTinput(refit_z0),
+    BDTinput(refit_d0),
+    BDTinput((float)n_pix),
+    BDTinput((float)n_sct),
+    BDTinput(refit_ptratio),
+    BDTinput((float)is_fail),
+    BDTinput((float)n_bl),
+    BDTinput(chi2ndof),
+    BDTinput(trkiso3_dr01),
+    BDTinput(trkiso3_dr0201),
+    BDTinput(refit_chi2ndof)
+  };
 
-   return reader.tmva->EvaluateMVA("BDT method");
+  return m_bdt[3]->GetClassification(input_values);
 }
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
-

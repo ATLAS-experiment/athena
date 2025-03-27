@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
   * Trigger Hypo Tool, that is aimed at triggering displaced vertex
   * author Kunihiro Nagano <kunihiro.nagano@cern.ch> - KEK
@@ -270,13 +270,15 @@ bool TrigHitDVHypoTool::decideOnSingleObject( HitDVHypoInfo& input, size_t cutIn
 
    // normal cut
    bool  doSPseed     = m_doSPseed[cutIndex];
-   float BDTthreshold = getBDTthreshold(input.averageMu);
+   float BDTthreshold = 0.;
    float bdt_score    = dv->getDetail<float>("hitDV_bdt_score");
 
    if ( std::abs(seed_eta) < 1 ) {
       BDTthreshold = getBDTthreshold_0eta1(input.averageMu, eff);
    } else if ( std::abs(seed_eta) < 2 ) {
       BDTthreshold = getBDTthreshold_1eta2(input.averageMu, eff);
+   } else {
+     BDTthreshold = getBDTthreshold(input.averageMu);
    }
 
    if( ! doSPseed                   && seed_type==SeedType::SP ) return false;

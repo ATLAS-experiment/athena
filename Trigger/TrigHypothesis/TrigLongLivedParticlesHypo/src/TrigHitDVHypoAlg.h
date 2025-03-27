@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGLONGLIVEDPARTICLESHYPO_TRIGHITDVHYPOALG_H
 #define TRIGLONGLIVEDPARTICLESHYPO_TRIGHITDVHYPOALG_H
 
 #include <string>
+#include <memory>
 
 #include "Gaudi/Property.h"
-#include "AthenaKernel/SlotSpecificObj.h"
 #include "CxxUtils/checker_macros.h"
 #include "DecisionHandling/HypoBase.h"
 #include "TrigHitDVHypoTool.h"
@@ -15,8 +15,9 @@
 #include "xAODJet/JetContainer.h"
 #include "LumiBlockData/LuminosityCondData.h"
 #include "LumiBlockComps/ILumiBlockMuTool.h"
+#include "TrkTrack/TrackCollection.h"
 
-#include "TMVA/Reader.h"
+#include "MVAUtils/BDT.h"
 
 #include "TrigInDetToolInterfaces/ITrigSpacePointConversionTool.h"
 #include "xAODTrigger/jFexSRJetRoIContainer.h"
@@ -103,25 +104,12 @@ private:
    StatusCode findJetSeeds(const xAOD::JetContainer*, const float, const float, std::vector<float>&, std::vector<float>&, std::vector<float>&) const;
    StatusCode selectSeedsNearby(const std::vector<HitDVSeed>& hitDVSeedsContainer,
 				std::vector<float>& jetSeeds_eta, std::vector<float>& jetSeeds_phi, std::vector<float>& jetSeeds_pt) const;
-   StatusCode calculateBDT(const EventContext&, const std::vector<HitDVSpacePoint>&, const std::vector<HitDVTrk>&,
+   StatusCode calculateBDT(const std::vector<HitDVSpacePoint>&, const std::vector<HitDVTrk>&,
 			   const std::vector<float>&, const std::vector<float>&, const std::vector<float>&,
 			   const float&, const int, xAOD::TrigCompositeContainer*, int&) const;
 
-   // BDT
-   struct TMVAReader {
-      std::unique_ptr<TMVA::Reader> tmva_0eta1;
-      std::unique_ptr<TMVA::Reader> tmva_1eta2;
-      float n_track_qual;
-      float ly0_sp_frac;
-      float ly1_sp_frac;
-      float ly2_sp_frac;
-      float ly3_sp_frac;
-      float ly4_sp_frac;
-      float ly5_sp_frac;
-      float ly6_sp_frac;
-      float ly7_sp_frac;
-   };
-   mutable SG::SlotSpecificObj<TMVAReader> m_tmva_reader ATLAS_THREAD_SAFE;
+   // MVAUtils BDT
+   std::unique_ptr<MVAUtils::BDT> m_bdt_eta[2];
 
    // parameters
    int m_tools_lowest_jetEt = 1000;
@@ -137,13 +125,13 @@ private:
    SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 
    StatusCode findSPSeeds( const EventContext& ctx,
-					     const std::vector<float>& v_sp_eta, const std::vector<float>& v_sp_phi,
-					     const std::vector<int>& v_sp_layer, const std::vector<int>& v_sp_usedTrkId,
-					     std::vector<float>& seeds_eta, std::vector<float>& seeds_phi ) const;
+			   const std::vector<float>& v_sp_eta, const std::vector<float>& v_sp_phi,
+			   const std::vector<int>& v_sp_layer, const std::vector<int>& v_sp_usedTrkId,
+			   std::vector<float>& seeds_eta, std::vector<float>& seeds_phi ) const;
    StatusCode findHitDV(const EventContext& ctx, const std::vector<TrigSiSpacePointBase>& convertedSpacePoints,
-					  const DataVector<Trk::Track>& tracks, std::vector<HitDVSeed>& hitDVSeedsContainer, 
-                 std::vector<HitDVTrk>& hitDVTrksContainer,
-                 std::vector<HitDVSpacePoint>& hitDVSPContainer) const;
+			const DataVector<Trk::Track>& tracks, std::vector<HitDVSeed>& hitDVSeedsContainer,
+			std::vector<HitDVTrk>& hitDVTrksContainer,
+			std::vector<HitDVSpacePoint>& hitDVSPContainer) const;
 };
 
 #endif //> !TRIGLONGLIVEDPARTICLESHYPO_TRIGHITDVHYPOALG_H
