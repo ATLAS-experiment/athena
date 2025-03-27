@@ -67,11 +67,6 @@ namespace TrigL2MuonSA {
     // set the properties
     void setBufferName(const std::string& buffName) {m_calBufferName=buffName;}
 
-    std::vector<int>* getLocalBuffer()   {return &m_localBuffer;}
-    int getLocalBufferSize() const {return m_localBuffer.size();}
-    /* void clearLocalBuffer(); */
-
-    //
     // initialize the stream
     StatusCode openStream(int calBufferSize);
 
@@ -88,9 +83,9 @@ namespace TrigL2MuonSA {
 				 TrigL2MuonSA::MdtHits& mdtHits, 
 				 TrigL2MuonSA::RpcHits& rpcHits, 
 				 TrigL2MuonSA::TgcHits& tgcHits, 
-				 //int calBufferSize, 
+				 std::vector<uint32_t>& localBuffer,  // Add localBuffer parameter
 				 bool doDataScouting,
-				 bool& updateTriggerElement, const EventContext&                        ctx) const; 
+				 const EventContext& ctx) const; 
 
   private:
 
@@ -107,39 +102,24 @@ namespace TrigL2MuonSA {
     // output file 
     std::ofstream m_outputFile;
 
-
-
     // the region selector
 
     ToolHandle<IRegSelTool> m_regSel_MDT{this, "RegSel_MDT", "RegSelTool/RegSelTool_MDT", "MDT Region Selector Tool"};
     ToolHandle<IRegSelTool> m_regSel_TGC{this, "RegSel_TGC", "RegSelTool/RegSelTool_TGC", "TGC Region Selector Tool"};
     
-
-
     SG::ReadCondHandleKey<RpcCablingCondData> m_readKey{this, "ReadKey", "RpcCablingCondData", "Key of RpcCablingCondData"};
 
-
-
-    // local buffer for the TrigComposite object
-    int m_localBufferSize = 0;
-    std::vector<int> m_localBuffer;
-
-    //
     // create the MDT fragment
     StatusCode createMdtFragment(TrigL2MuonSA::MdtHits& mdtHits,  
 				 LVL2_MUON_CALIBRATION::MdtCalibFragment& mdtFragment, float phi) const;
 
-    //
     // create the RPC fragment
     StatusCode createRpcFragment(const xAOD::MuonRoI* roi,
-				 LVL2_MUON_CALIBRATION::RpcCalibFragment& rpcFragment, const EventContext&                        ctx) const;
+				 LVL2_MUON_CALIBRATION::RpcCalibFragment& rpcFragment, const EventContext& ctx) const;
 
-    //
     // create the TGC fragment
     StatusCode createTgcFragment(std::vector<uint32_t>& tgcRobIdList,
 				 LVL2_MUON_CALIBRATION::TgcCalibFragment& tgcFragment) const;
-
-
 
     TrigL2MuonSA::MuCalCircClient *m_circ = nullptr;
 
