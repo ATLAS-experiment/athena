@@ -14858,7 +14858,19 @@ HLT_j175_35smcINF_86bgntwox_j260_35smcINF_a10sd_cssk_pf_jes_ftf_preselj180_L1gLJ
     0: 3
   stepFeatures:
     0: 6
+HLT_j175_35smcINF_86bgntwox_j260_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1SC111-CjJ40:
+  eventCount: 0
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
 HLT_j175_35smcINF_86bgntwox_j260_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25:
+  eventCount: 0
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+HLT_j175_35smcINF_86bgntwox_j260_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160:
   eventCount: 0
   stepCounts:
     0: 2
@@ -15923,7 +15935,19 @@ HLT_j260_35smcINF_86bgntwox_j175_35smcINF_a10sd_cssk_pf_jes_ftf_preselj180_L1gLJ
     0: 3
   stepFeatures:
     0: 6
+HLT_j260_35smcINF_86bgntwox_j175_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1SC111-CjJ40:
+  eventCount: 0
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
 HLT_j260_35smcINF_86bgntwox_j175_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25:
+  eventCount: 0
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+HLT_j260_35smcINF_86bgntwox_j175_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160:
   eventCount: 0
   stepCounts:
     0: 2
