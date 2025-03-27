@@ -1,5 +1,5 @@
-#include "InDetAlignNtupleTools/SimpleIDNtupleTool.h"
-#include "InDetAlignNtupleTools/DetailedIDNtupleTool.h"
+#include "../SimpleIDNtupleTool.h"
+#include "../DetailedIDNtupleTool.h"
 
 
 DECLARE_COMPONENT( InDet::SimpleIDNtupleTool )

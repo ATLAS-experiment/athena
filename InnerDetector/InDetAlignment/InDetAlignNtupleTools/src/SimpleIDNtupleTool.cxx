@@ -1,6 +1,8 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
+
+#include "SimpleIDNtupleTool.h"
 
 #include "TrkEventPrimitives/FitQuality.h"
 //Eigen stuff
@@ -24,8 +26,6 @@
 #include "TrkAlignEvent/Residual.h"
 
 #include "TrkAlignInterfaces/IAlignModuleTool.h"
-
-#include "InDetAlignNtupleTools/SimpleIDNtupleTool.h"
 
 #include "TFile.h"
 #include "TTree.h"
