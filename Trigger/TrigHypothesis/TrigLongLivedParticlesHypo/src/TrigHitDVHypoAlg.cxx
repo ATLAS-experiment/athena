@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
   * Trigger Hypo Tool, that is aimed at triggering displaced vertex
   * author Kunihiro Nagano <kunihiro.nagano@cern.ch> - KEK
@@ -16,6 +16,9 @@
 #include "TrigInDetPattRecoTools/TrigInDetUtils.h"
 #include "CxxUtils/phihelper.h"
 #include "TrigInDetToolInterfaces/ITrigSpacePointConversionTool.h"
+
+#include "TFile.h"
+#include "TTree.h"
 
 #include <vector>
 #include <unordered_map>
@@ -84,40 +87,27 @@ StatusCode TrigHitDVHypoAlg::initialize()
 
    ATH_CHECK(m_beamSpotKey.initialize());
    ATH_CHECK(m_spacePointTool.retrieve() );
-   
 
-   for (auto& reader : m_tmva_reader) {
-      // Create two instances with same variables
-      auto tmva = std::array{std::make_unique<TMVA::Reader>( "!Color:!Silent" ),
-                             std::make_unique<TMVA::Reader>( "!Color:!Silent" )};
-      for (auto& t : tmva) {
-         t->AddVariable("n_track_qual", &reader.n_track_qual);
-         t->AddVariable("ly0_sp_frac",  &reader.ly0_sp_frac);
-         t->AddVariable("ly1_sp_frac",  &reader.ly1_sp_frac);
-         t->AddVariable("ly2_sp_frac",  &reader.ly2_sp_frac);
-         t->AddVariable("ly3_sp_frac",  &reader.ly3_sp_frac);
-         t->AddVariable("ly4_sp_frac",  &reader.ly4_sp_frac);
-         t->AddVariable("ly5_sp_frac",  &reader.ly5_sp_frac);
-         t->AddVariable("ly6_sp_frac",  &reader.ly6_sp_frac);
-         t->AddVariable("ly7_sp_frac",  &reader.ly7_sp_frac);
-      };
-      reader.tmva_0eta1 = std::move(tmva[0]);
-      reader.tmva_1eta2 = std::move(tmva[1]);
-
-      // --- Book the MVA methods specific to eta range
-      const std::string tuningVer  = "v22a"; // "v21a";
-      const std::string methodName = "BDT method";
-
-      const std::string weightfile_0eta1 = PathResolver::find_calib_file(
-         "TrigHitDVHypo/HitDV.BDT.weights.0eta1." + tuningVer + ".xml");
-      const std::string weightfile_1eta2 = PathResolver::find_calib_file(
-         "TrigHitDVHypo/HitDV.BDT.weights.1eta2." + tuningVer + ".xml");
-      ATH_MSG_DEBUG("opening weightfile = " << weightfile_0eta1);
-      ATH_MSG_DEBUG("opening weightfile = " << weightfile_1eta2);
-      reader.tmva_0eta1->BookMVA(methodName, weightfile_0eta1);
-      reader.tmva_1eta2->BookMVA(methodName, weightfile_1eta2);
+   // MVAUtils BDT initialisation
+   // could make this configurable as a property
+   std::string weightfile[2];
+   weightfile[0] = PathResolver::find_calib_file("TrigHitDVHypo/HitDV.BDT.weights.0eta1.v22a.root");
+   weightfile[1] = PathResolver::find_calib_file("TrigHitDVHypo/HitDV.BDT.weights.1eta2.v22a.root");
+   for (unsigned int i=0; i<2; ++i) {
+     std::unique_ptr<TFile> rootFile(TFile::Open(weightfile[i].c_str(), "READ"));
+     if (!rootFile) {
+       ATH_MSG_ERROR("Can not open BDT root file: " << weightfile[i] );
+       return StatusCode::FAILURE;
+     }
+     std::unique_ptr<TTree> tree((TTree*)rootFile->Get("BDT"));
+     if (!tree) {
+       ATH_MSG_ERROR("Can not find BDT tree in file: " << weightfile[i]);
+       return StatusCode::FAILURE;
+     }
+     ATH_MSG_INFO("Loading BDT tree from file: " << weightfile[i]);
+     m_bdt_eta[i] = std::make_unique<MVAUtils::BDT>(tree.get());
    }
-
+   
    return StatusCode::SUCCESS;
 }
 
@@ -264,12 +254,12 @@ StatusCode TrigHitDVHypoAlg::execute( const EventContext& context ) const
 
       int n_passed_jet = 0;
       int seed_type = SeedType::HLTJet;
-      ATH_CHECK( calculateBDT(context, hitDVSPsContainer, hitDVTrksContainer, jetSeeds_pt, jetSeeds_eta, jetSeeds_phi, preselBDTthreshold, seed_type, dvContainer, n_passed_jet) );
+      ATH_CHECK( calculateBDT(hitDVSPsContainer, hitDVTrksContainer, jetSeeds_pt, jetSeeds_eta, jetSeeds_phi, preselBDTthreshold, seed_type, dvContainer, n_passed_jet) );
 
       int n_passed_sp = 0;
       if( m_tools_loosest_wp <= 1 ) {
 	 seed_type = SeedType::SP;
-	 ATH_CHECK( calculateBDT(context, hitDVSPsContainer, hitDVTrksContainer, void_pt, spSeeds_eta, spSeeds_phi, preselBDTthreshold, seed_type, dvContainer, n_passed_sp) );
+	 ATH_CHECK( calculateBDT(hitDVSPsContainer, hitDVTrksContainer, void_pt, spSeeds_eta, spSeeds_phi, preselBDTthreshold, seed_type, dvContainer, n_passed_sp) );
       }
 
       ATH_MSG_DEBUG( "nr of dv container / jet-seeded / sp-seed candidates = " << dvContainer->size() << " / " << n_passed_jet << " / " << n_passed_sp );
@@ -562,8 +552,7 @@ StatusCode TrigHitDVHypoAlg::doMonitor(const xAOD::TrigCompositeContainer* dvCon
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-StatusCode TrigHitDVHypoAlg::calculateBDT(const EventContext& context,
-					  const std::vector<HitDVSpacePoint>& spsContainer,
+StatusCode TrigHitDVHypoAlg::calculateBDT(const std::vector<HitDVSpacePoint>& spsContainer,
 					  const std::vector<HitDVTrk>& trksContainer,
 					  const std::vector<float>& seeds_pt,
 					  const std::vector<float>& seeds_eta, const std::vector<float>& seeds_phi,
@@ -648,21 +637,21 @@ StatusCode TrigHitDVHypoAlg::calculateBDT(const EventContext& context,
       }
       float bdt_score = -2.0;
       if( ! isSeedOutOfRange ) {
-         auto& reader = *m_tmva_reader.get(context);
-         reader.n_track_qual = static_cast<float>(n_qtrk_injet);
-         reader.ly0_sp_frac  = v_ly_sp_frac[0];
-         reader.ly1_sp_frac  = v_ly_sp_frac[1];
-         reader.ly2_sp_frac  = v_ly_sp_frac[2];
-         reader.ly3_sp_frac  = v_ly_sp_frac[3];
-         reader.ly4_sp_frac  = v_ly_sp_frac[4];
-         reader.ly5_sp_frac  = v_ly_sp_frac[5];
-         reader.ly6_sp_frac  = v_ly_sp_frac[6];
-         reader.ly7_sp_frac  = v_ly_sp_frac[7];
+	 const std::vector<float> input_values = {
+	   static_cast<float>(n_qtrk_injet),
+	   v_ly_sp_frac[0],
+	   v_ly_sp_frac[1],
+	   v_ly_sp_frac[2],
+	   v_ly_sp_frac[3],
+	   v_ly_sp_frac[4],
+	   v_ly_sp_frac[5],
+	   v_ly_sp_frac[6],
+	   v_ly_sp_frac[7] };
 
          if ( std::abs(seed_eta) < 1 ) {
-            bdt_score = reader.tmva_0eta1->EvaluateMVA("BDT method");
+	    bdt_score = m_bdt_eta[0]->GetClassification(input_values);
          } else if ( std::abs(seed_eta) < 2 ) {
-            bdt_score = reader.tmva_1eta2->EvaluateMVA("BDT method");
+	    bdt_score = m_bdt_eta[1]->GetClassification(input_values);
          }
       }
 
@@ -1138,7 +1127,6 @@ StatusCode TrigHitDVHypoAlg::findSPSeeds( const EventContext& ctx,
       float eta = seeds_eta[i] / seeds_wsum[i];
       float phi = seeds_phi[i] / seeds_wsum[i];
       seeds_eta[i] = eta;
-      seeds_phi[i] = phi;
       if( phi < -TMath::Pi() ) phi =  2*TMath::Pi() + phi;
       if( phi >  TMath::Pi() ) phi = -2*TMath::Pi() + phi;
       seeds_phi[i] = phi;

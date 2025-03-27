@@ -367,17 +367,13 @@ class EmptyMenuSequence:
 
 def createEmptyMenuSequenceCfg(flags, name):
     """ creates the generator function named as the empty sequence"""
-    def create_sequence(name):            
+    def create_sequence(flags, name):  
         return EmptyMenuSequence(name)
-    # this allows to create the function with the same name as the sequence
-    #TODO need to extend it to also use it instead of EmptyMenuSequenceCfg inside custom steps
-    create_sequence.__name__ = name    
+    # this allows to create the function with the same name as the sequence   
+    create_sequence.__name__ = name
     globals()[name] = create_sequence
     return globals()[name]
 
-def EmptyMenuSequenceCfg(flags, name):
-    """Function to create a EmptyMenuSequence (used in the functools.partial)"""
-    return EmptyMenuSequence(name)
 
 def isEmptySequenceCfg(o):
     return 'Empty' in o.func.__name__
@@ -544,9 +540,9 @@ class Chain(object):
                         name = seq.func.__name__ 
                         if re.search('Seq[0-9]_',name):
                             newname = re.sub('Seq[0-9]_', 'Seq%d_'%(stepID+1), name)
-                            #replace the empty sequence                            
-                            thisEmpty = createEmptyMenuSequenceCfg(None, newname)                
-                            step.sequenceGens[iseq]=functools.partial(thisEmpty, name=newname)
+                            #replace the empty sequence        
+                            thisEmpty = createEmptyMenuSequenceCfg(flags=None, name=newname)                
+                            step.sequenceGens[iseq]=functools.partial(thisEmpty, flags=None, name=newname)
         return
 
 
@@ -697,7 +693,7 @@ class ChainStep(object):
     def createSequences(self):
         """ creation of this step sequences with instantiation of the CAs"""
         log.debug("creating sequences for step %s", self.name)
-        for seq in self.sequenceGens:                        
+        for seq in self.sequenceGens:
             self.sequences.append(seq()) # create the sequences         
         
     def relabelLegIdsForJets(self):

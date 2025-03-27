@@ -40,6 +40,13 @@ StatusCode LArCelldeadOTXTool::process(CaloCellContainer* cellCollection, const 
     return StatusCode::FAILURE;
   }
 
+  if (!(cellCollection->hasCalo(CaloCell_ID::LAREM) ||
+	cellCollection->hasCalo(CaloCell_ID::LARHEC) ||
+	cellCollection->hasCalo(CaloCell_ID::LARFCAL))) {
+    ATH_MSG_VERBOSE("No LAr cell in CellContainer. Do nothing");
+    return StatusCode::SUCCESS;    
+  }
+
   StatusCode sc = StatusCode::SUCCESS;
   std::call_once(m_onceFlag, &LArCelldeadOTXTool::buildMap, this, ctx, m_scToDead, sc);
 

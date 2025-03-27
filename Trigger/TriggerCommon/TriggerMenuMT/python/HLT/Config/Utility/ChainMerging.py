@@ -542,8 +542,8 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = None, 
                 is_fs_string = 'FS' if isFullScanRoI(chainDefList[chain_index].L1decisions[0]) else ''                
                 seqName=seqName+is_fs_string
                 signature=new_stepDict['signature']+is_fs_string
-                thisEmpty = createEmptyMenuSequenceCfg(None, seqName)                
-                stepSeq.append(functools.partial(thisEmpty, name=seqName))                 
+                thisEmpty = createEmptyMenuSequenceCfg(flags=None, name=seqName)                  
+                stepSeq.append(functools.partial(thisEmpty, flags=None, name=seqName))                
                 oldLegName = new_stepDict['chainName']
                 if re.search('^leg[0-9]{3}_',oldLegName):
                     oldLegName = oldLegName[7:]
@@ -639,8 +639,9 @@ def build_empty_sequences(emptyChainDicts, step_mult, caller, L1decisions, seqNa
         is_fs_string = 'FS' if isFullScanRoI(L1decisions[ileg]) else ''   
         sname = seqNames[ileg]+is_fs_string                    
         log.debug("[%s] adding %s empty sequenc with name %s", caller, is_fs_string, sname)
-        thisEmpty = createEmptyMenuSequenceCfg(None, sname)
-        emptySequences += [functools.partial(thisEmpty, name=sname)]
+        
+        thisEmpty = createEmptyMenuSequenceCfg(flags=None, name=sname)
+        emptySequences += [functools.partial(thisEmpty, flags=None, name=sname)]
         
             
     log.verbose("[%s] emptyChainDicts %s", caller, emptyChainDicts)

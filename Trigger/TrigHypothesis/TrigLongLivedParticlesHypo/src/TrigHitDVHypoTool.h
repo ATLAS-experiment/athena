@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGLONGLIVEDPARTICLESHYPO_TRIGHITDVHYPOTOOL_H
 #define TRIGLONGLIVEDPARTICLESHYPO_TRIGHITDVHYPOTOOL_H
@@ -10,8 +10,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
-#include "xAODTracking/TrackParticlexAODHelpers.h"
-#include "xAODTracking/TrackParticleContainer.h"
 #include "xAODJet/JetContainer.h"
 
 

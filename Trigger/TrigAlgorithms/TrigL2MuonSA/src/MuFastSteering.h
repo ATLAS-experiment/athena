@@ -78,7 +78,8 @@ class MuFastSteering : public AthReentrantAlgorithm , public IIncidentListener
 
   StatusCode findMuonSignature(const std::vector<const TrigRoiDescriptor*>&	roi,
 			       const std::vector<const xAOD::MuonRoI*>& 	muonRoIs,
-                               DataVector<xAOD::L2StandAloneMuon>& 		outputTracks,
+			       DataVector<xAOD::L2StandAloneMuon>& 		outputTracks,
+			       xAOD::TrigCompositeContainer& outputMuonCal,
 			       TrigRoiDescriptorCollection&	 		outputID,
 			       TrigRoiDescriptorCollection&	 		outputMS,
 			       const bool                                       dynamicDeltaRpc,

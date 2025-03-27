@@ -201,6 +201,22 @@ class L1Menu(object):
             if conn.ctype == CType.CTPIN:
                if len(conn.triggerLines)>31:
                    raise RuntimeError("Too many CTP inputs in %s: %i but a max of 31 are allowed" %(conn.name,len(conn.triggerLines)))
+               
+    def checkTOPObits(self):
+        import re
+        pattern=r"topo[1-3](e|$)"
+        for conn in self.connectors:
+            flatindexs = []
+            if re.search(pattern, conn.name.lower()):
+                for tl in conn.triggerLines:
+                    for thr in conn.triggerLines[tl]:
+                        for thrname in conn.triggerLines[tl][thr]:
+                            if thrname.flatindex not in flatindexs:
+                                flatindexs.append(thrname.flatindex)
+                            else:
+                                log.error("TOPO connector %s has duplicate flatindex %i", conn.name, thrname.flatindex)
+                                raise RuntimeError("Duplicate flatindex found in TOPO algorithm")
+            
 
     def checkCountCTPInputsOutput(self):
         from collections import namedtuple
