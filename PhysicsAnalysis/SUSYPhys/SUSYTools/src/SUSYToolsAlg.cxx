@@ -987,11 +987,11 @@ StatusCode SUSYToolsAlg::execute() {
           ATH_CHECK( m_SUSYTools->GetJetsSyst(*jets_nominal, jets_syst, jets_syst_aux, true, m_isPHYSLITE?"AnalysisJets":"") );
           jets = jets_syst;
         }
-        if (m_slices["fatjet"]) {
+        if (m_slices["fjet"]) {
           ATH_MSG_DEBUG("Get systematics-varied fatjets");
           xAOD::JetContainer* fatjets_syst(0);
           xAOD::ShallowAuxContainer* fatjets_syst_aux(0);
-          ATH_CHECK( m_SUSYTools->GetJetsSyst(*fatjets_nominal, fatjets_syst, fatjets_syst_aux) );
+          ATH_CHECK( m_SUSYTools->GetFatJets(fatjets_syst, fatjets_syst_aux, true, m_FatJetCollection, true) );
           fatjets = fatjets_syst;
         }
         if (m_slices["trkjet"]) {
@@ -1050,7 +1050,7 @@ StatusCode SUSYToolsAlg::execute() {
         }
         ATH_MSG_VERBOSE( "  Electron passing baseline selection? "  << static_cast<int>( ST::acc_baseline(*el)));
         ATH_MSG_VERBOSE( "  Electron passing signal selection? "    << static_cast<int>( ST::acc_signal(*el)));
-        if (ST::acc_signal(*el) == 1)
+        if (ST::acc_signal(*el) == 1 && ST::acc_effscalefact.isAvailable(*el))
           ATH_MSG_VERBOSE( "  Electron weight " << ST::acc_effscalefact(*el) );
 
       }
@@ -1084,7 +1084,7 @@ StatusCode SUSYToolsAlg::execute() {
         }
         ATH_MSG_VERBOSE( "  Photon passing baseline selection? "  << static_cast<int>(ST::acc_baseline(*ph)));
         ATH_MSG_VERBOSE( "  Photon passing signal selection? "    << static_cast<int>(ST::acc_signal(*ph)));
-        if (ST::acc_signal(*ph) == 1)
+        if (ST::acc_signal(*ph) == 1 && ST::acc_effscalefact.isAvailable(*ph))
           ATH_MSG_VERBOSE( "  Photon weight " << ST::acc_effscalefact(*ph) );
       }
       if (isNominal) {
@@ -1118,7 +1118,7 @@ StatusCode SUSYToolsAlg::execute() {
         ATH_MSG_VERBOSE( "  Muon passing baseline selection? "  << static_cast<int>(ST::acc_baseline(*mu)));
         ATH_MSG_VERBOSE( "  Muon passing signal selection? "    << static_cast<int>(ST::acc_signal(*mu)));
         ATH_MSG_VERBOSE( "  Muon is a cosmic ray? "             << static_cast<int>(ST::acc_cosmic(*mu)));
-        if (ST::acc_signal(*mu) == 1)
+        if (ST::acc_signal(*mu) == 1 && ST::acc_effscalefact.isAvailable(*mu))
           ATH_MSG_VERBOSE( "  Muon weight " << ST::acc_effscalefact(*mu) );
       }
       if (isNominal) {
@@ -1267,7 +1267,7 @@ StatusCode SUSYToolsAlg::execute() {
         }
         ATH_MSG_VERBOSE( "  Tau passing baseline selection? " << static_cast<int>(ST::acc_baseline(*ta)));
         ATH_MSG_VERBOSE( "  Tau passing signal selection? "   << static_cast<int>(ST::acc_signal(*ta)));
-        if (ST::acc_signal(*ta) == 1)
+        if (ST::acc_signal(*ta) == 1 && ST::acc_effscalefact.isAvailable(*ta))
           ATH_MSG_VERBOSE( "  Tau weight " << ST::acc_effscalefact(*ta) );
       }
 

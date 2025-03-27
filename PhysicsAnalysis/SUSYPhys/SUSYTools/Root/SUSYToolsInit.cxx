@@ -4,6 +4,10 @@
 
 #include "SUSYTools/SUSYObjDef_xAOD.h"
 
+// For making the systematics list and looping through it
+#include "PATInterfaces/SystematicsUtil.h"
+#include "PATInterfaces/SystematicRegistry.h"
+
 // For the data types to be used in configuring tools
 #include "PATCore/PATCoreEnums.h"
 
@@ -364,7 +368,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ATH_MSG_INFO("Set up Jet Uncertainty tool...");
 
     // if not set, derive the MCType from the simulation type and MC campaign
-    if (m_jetUncertaintiesMCType.empty()) m_jetUncertaintiesMCType = m_isRun3 ? "MC23" : (isAtlfast() ? "AF3" : "MC20");
+    if (m_jetUncertaintiesMCType.empty()) m_jetUncertaintiesMCType = m_isRun3 ? (isAtlfast() ? "MC23AF3" : "MC23") : (isAtlfast() ? "AF3" : "MC20");
 
     if (!m_jetUncertaintiesTool.isUserConfigured()) {
       std::string jetdef("AntiKt4" + xAOD::JetInput::typeName(xAOD::JetInput::Type(m_jetInputType)));
@@ -374,10 +378,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         jetdef = "AntiKt4EMPFlow";
       }
       toolName = "JetUncertaintiesTool_" + jetdef;
-
-      if (m_isRun3 && isAtlfast()) {
-          ATH_MSG_WARNING("Jet Uncertaintes pre-recommendations for Run3 only exist for full sim");
-      }
 
       m_jetUncertaintiesTool.setTypeAndName("JetUncertaintiesTool/"+toolName);
 
@@ -413,6 +413,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("JetDefinition", jetdef) );
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("MCType", m_jetUncertaintiesMCType) );
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("IsData", true) ); // Set to True by default for PDSmear-named tool.
+      ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("PseudoDataJERsmearingMode", true) );
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("ConfigFile", m_jetUncertaintiesConfig) );
       if (m_jetUncertaintiesCalibArea != "default") ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("CalibArea", m_jetUncertaintiesCalibArea) );
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("OutputLevel", this->msg().level()) );
@@ -424,16 +425,21 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   }
 
   if (m_slices["fjet"]) {
-    ATH_MSG_INFO("Won't initialise jet uncertainty tool for fat jets until we get rec for UFO");
-    // Won't initialise jet uncertainty tool for fat jets until we get rec for UFO
-    /*
+
+    // JetUncertaintiesTool handles JES, JER and JMS uncertainties for large-R jets
     if (!m_fatjetUncertaintiesTool.isUserConfigured() && !m_fatJets.empty() && !m_fatJetUncConfig.empty()) {
+
+      ATH_MSG_INFO("Set up Large-R Jet Uncertainty tool...");
+
+      // Print warning about missing large-R jets uncertainties for FastSim in mc23
+      if (m_isRun3 && isAtlfast())
+        ATH_MSG_WARNING("Uncertainties for large-R jets in mc23 and fast simulation not yet available; be aware uncertainties might be not complete!");
 
       toolName = "JetUncertaintiesTool_" + m_fatJets;
       m_fatjetUncertaintiesTool.setTypeAndName("JetUncertaintiesTool/"+toolName);
 
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("JetDefinition", fatjetcoll) );
-      ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("MCType", "MC16") );
+      ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("MCType", m_jetUncertaintiesMCType) );
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("IsData", isData()) );
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("ConfigFile", m_fatJetUncConfig) );
       if (m_jetUncertaintiesCalibArea != "default") ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("CalibArea", m_jetUncertaintiesCalibArea) );
@@ -460,7 +466,59 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_fatjetUncertaintiesTool.retrieve() );
     } else if (m_fatjetUncertaintiesTool.isUserConfigured()) ATH_CHECK(m_fatjetUncertaintiesTool.retrieve());
-    */
+
+
+    if (!m_fatjetUncertaintiesPDSmearTool.isUserConfigured() && !m_fatJets.empty() && !m_fatJetUncConfig.empty() && m_fatJetUncertaintiesPDsmearing == true) {
+
+      ATH_MSG_INFO("Set up Jet PD Smear Uncertainty tool...");
+
+      toolName = "JetUncertaintiesPDSmearTool_" + m_fatJets;
+      m_fatjetUncertaintiesPDSmearTool.setTypeAndName("JetUncertaintiesTool/"+toolName);
+
+      // If, for some reason, you're trying to use the PDSmear, with the reduced set return an error (you shouldn't do this, you're just going to duplicate the SimpleJER results.
+      bool JERUncPDsmearing = isData() ? isData() : m_fatJetUncertaintiesPDsmearing;
+      if (m_fatJetUncConfig.find("SimpleJER") != std::string::npos && JERUncPDsmearing){
+        ATH_MSG_ERROR("You are trying to use the SimpleJER set, with PDsmearing. There is no functionality for this. Please fix your config file. Either run with PDSmear set to false, or run with the AllJER or FullJER sets.");
+        return StatusCode::FAILURE;
+      }
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("JetDefinition", fatjetcoll) );
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("MCType", m_jetUncertaintiesMCType) );
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("IsData", true) ); // Set to True by default for PDSmear-named tool.
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("PseudoDataJERsmearingMode", true) );
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("ConfigFile", m_fatJetUncConfig) );
+      if (m_jetUncertaintiesCalibArea != "default") ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("CalibArea", m_jetUncertaintiesCalibArea) );
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("OutputLevel", this->msg().level()) );
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.retrieve() );
+    } else{
+      ATH_MSG_DEBUG("Do not retrieve the jet PD Smearing tool if it is not configured");
+    }
+
+
+    // FFSmearingTool handles JMR uncertainties for large-R jets
+    if (!m_fatjetFFSmearingTool.isUserConfigured() && !m_fatJets.empty() && !m_fatJetUncConfig.empty()) {
+
+      ATH_MSG_INFO("Set up Large-R FFJetSmearingTool ...");
+
+      toolName = "FFJetSmearingTool_" + m_fatJets;
+      m_fatjetFFSmearingTool.setTypeAndName("CP::FFJetSmearingTool/"+toolName);
+
+      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("MassDef", "UFO") );
+      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("MCType", m_jetUncertaintiesMCType) );
+      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("ConfigFile", "rel22/Fall2024_PreRec/R10_FullJMR.config") );
+      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("OutputLevel", this->msg().level()) );
+      ATH_CHECK( m_fatjetFFSmearingTool.retrieve() );
+    } else if (m_fatjetFFSmearingTool.isUserConfigured()) ATH_CHECK(m_fatjetFFSmearingTool.retrieve());
+
+    // Need to keep track of systematics of FFJetSmearingTool
+    if (!m_fatJets.empty()) {
+      // m_fatjetFFSmearingSyst = CP::make_systematics_vector(m_fatjetFFSmearingTool->recommendedSystematics());
+      ATH_MSG_INFO("The following uncertainties have been defined for the m_fatjetFFSmearingTool");
+      for (auto & sysSet : m_fatjetFFSmearingTool->recommendedSystematics()){
+        m_fatjetFFSmearingSyst.push_back(CP::SystematicSet({sysSet}));
+        ATH_MSG_INFO("   - " << sysSet.name());
+      }
+    }
+
     ATH_MSG_INFO(" Won't initialise Wtagger uncertainty tool for fat jets until we get rec for UFO");
     // Won't initialise Wtagger uncertainty tool for fat jets until we get rec for UFO
     /*
@@ -1913,7 +1971,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
       if (m_trkMETsyst) {
         ATH_CHECK( m_metSystTool.setProperty("ConfigSoftCaloFile", "") );
-        ATH_CHECK( m_metSystTool.setProperty("ConfigSoftTrkFile", "TrackSoftTerms-pflow.config") );
+        ATH_CHECK( m_metSystTool.setProperty("ConfigSoftTrkFile", "TrackSoftTerms-pflow_Dec24.config") );
       }
 
       if (m_caloMETsyst) {
