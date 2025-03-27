@@ -44,6 +44,8 @@ namespace ActsTrk {
     m_measurement_centroid_xphi = m_write_xaod_key.key() + "." + m_measurement_centroid_xphi.key();
     m_measurement_centroid_xeta = m_write_xaod_key.key() + "." + m_measurement_centroid_xeta.key();
     m_measurement_side = m_write_xaod_key.key() + "." + m_measurement_side.key();
+
+    m_measurement_tots = m_write_xaod_key.key() + "." + m_measurement_tots.key();
     
     ATH_CHECK(m_measurement_truth_indices.initialize(m_useTruthInfo));
     ATH_CHECK(m_measurement_truth_barcodes.initialize(m_useTruthInfo));
@@ -64,6 +66,8 @@ namespace ActsTrk {
     ATH_CHECK(m_measurement_centroid_xeta.initialize());
     ATH_CHECK(m_measurement_side.initialize());
 
+    ATH_CHECK(m_measurement_tots.initialize());
+    
     ATH_CHECK( m_lorentzAngleTool.retrieve() );
     ATH_CHECK( detStore()->retrieve(m_PixelHelper, "PixelID") );
     
@@ -112,6 +116,7 @@ namespace ActsTrk {
   SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float> decor_centroid_xeta ( m_measurement_centroid_xeta, ctx );
   SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, int> decor_side ( m_measurement_side, ctx );
 
+  SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, std::vector<int>> decor_tots ( m_measurement_tots, ctx );
   
   // Create output collection
   xAOD::TrackMeasurementValidationContainer *measurements = xaod.ptr();
@@ -197,6 +202,7 @@ namespace ActsTrk {
     decor_centroid_xphi(*measurement) = centroid.xPhi();
     decor_centroid_xeta(*measurement) = centroid.xEta();
     decor_side(*measurement) = 0;
+    decor_tots(*measurement) = cluster->totList();
   }
 
   

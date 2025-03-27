@@ -71,6 +71,8 @@ namespace ActsTrk {
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_centroid_xphi {this, "MeasurementCentroidXphi", "centroid_xphi"};
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_centroid_xeta {this, "MeasurementCentroidXeta", "centroid_xeta"};
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_side {this, "MeasurementSide", "side"};
+
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_tots {this, "MeasurementToT", "tots"};
     
     Gaudi::Property<bool> m_useTruthInfo {this, "UseTruthInfo", true};
     const PixelID *m_PixelHelper {nullptr};
