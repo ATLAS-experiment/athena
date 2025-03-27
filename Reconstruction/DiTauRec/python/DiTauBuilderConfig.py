@@ -1,7 +1,7 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from DiTauRec.DiTauToolsConfig import SeedJetBuilderCfg, SubjetBuilderCfg, ElMuFinderCfg, JetAlgCfg, VertexFinderCfg, DiTauTrackFinderCfg, CellFinderCfg, IDVarCalculatorCfg
+from DiTauRec.DiTauToolsConfig import SeedJetBuilderCfg, SubjetBuilderCfg, JetAlgCfg, VertexFinderCfg, DiTauTrackFinderCfg, CellFinderCfg, IDVarCalculatorCfg, DiTauIDVarDecoratorCfg, DiTauOnnxScoreCalculatorCfg, ElMuFinderCfg
 
 def DiTauBuilderCfg(flags, name="DiTauBuilder", **kwargs):
     acc = ComponentAccumulator()
@@ -19,6 +19,9 @@ def DiTauBuilderCfg(flags, name="DiTauBuilder", **kwargs):
     tools.append(acc.popToolsAndMerge(DiTauTrackFinderCfg(flags)))
     tools.append(acc.popToolsAndMerge(CellFinderCfg(flags)))
     tools.append(acc.popToolsAndMerge(IDVarCalculatorCfg(flags)))
+    if flags.DiTau.doRunDiTauDiscriminant:
+        tools.append(acc.popToolsAndMerge(DiTauIDVarDecoratorCfg(flags)))
+        tools.append(acc.popToolsAndMerge(DiTauOnnxScoreCalculatorCfg(flags)))
 
     kwargs.setdefault("DiTauContainer", flags.DiTau.DiTauContainer[0])
     kwargs.setdefault("Tools", tools)
