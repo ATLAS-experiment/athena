@@ -91,11 +91,12 @@ namespace ActsTrk::detail {
          return (key>>REGION_BITS) & LAYER_MASK;                // bits 3-8
       }
  
-      // To select, hits, outliers or both.
+      // To select, hits, outliers, and/or shared hits.
       enum EHitSelection {
          Hit = 1,
          Outlier = 2,
-         HitAndOutlier = 3
+         HitAndOutlier = 3,
+         SharedHit = 4
       };
  
       /** @brief reset all summary counters to zero.
@@ -104,13 +105,14 @@ namespace ActsTrk::detail {
          m_stat.clear();
          std::fill(m_hits.begin(),m_hits.end(), 0u);
          std::fill(m_outlierHits.begin(),m_outlierHits.end(), 0u);
+         std::fill(m_sharedHits.begin(),m_sharedHits.end(), 0u);
          std::fill(m_layers.begin(),m_layers.end(), 0u);
       }
  
       /** @brief update summaries to take the given hit into account.
        * @param detector_elements detector element collection relevant for the given hit.
        * @param id_hash the id_hash of the hit
-       * @param hit_selection should be set to either Hit, or Outlier.
+       * @param hit_selection should be set to bit mask for Hit, Outlier, SharedHit.
        * @param returns false in case the hit was not considered.
        * The hit is not considered if the given id_hash is not valid for the given detector element collectio.
        */
@@ -141,16 +143,18 @@ namespace ActsTrk::detail {
          }
  
          unsigned short key = makeKey(region, layer, eta_module);
-         for (auto &[stat_key, stat_hits, stat_outlier_hits] : m_stat) {
+         for (auto &[stat_key, stat_hits, stat_outlier_hits, stat_shared_hits] : m_stat) {
             if (stat_key == key) {
                stat_hits         += ((hit_selection & HitSummaryData::Hit)!=0);
                stat_outlier_hits += ((hit_selection & HitSummaryData::Outlier)!=0);
+               stat_shared_hits  += ((hit_selection & HitSummaryData::SharedHit)!=0);
                return true;
             }
          }
          m_stat.emplace_back( std::make_tuple(key,
                                               ((hit_selection & HitSummaryData::Hit)!=0),
-                                              ((hit_selection & HitSummaryData::Outlier)!=0)) );
+                                              ((hit_selection & HitSummaryData::Outlier)!=0),
+                                              ((hit_selection & HitSummaryData::SharedHit)!=0)) );
          return true;
       }
  
@@ -158,18 +162,21 @@ namespace ActsTrk::detail {
        * Must be called only after all hits have been gathered, and must not be called more than once.
        */
       void computeSummaries() {
-         for (const auto &[stat_key, stat_hits, stat_outlier_hits] : m_stat) {
+         for (const auto &[stat_key, stat_hits, stat_outlier_hits, stat_shared_hits] : m_stat) {
             unsigned short region=regionFromKey(stat_key);
             m_hits.at(region) += stat_hits;
             m_outlierHits.at(region) += stat_outlier_hits;
+            m_sharedHits.at(region) += stat_shared_hits;
             ++m_layers.at(region);
          }
          for (unsigned int region_i=0; region_i<unknown+1; ++region_i) {
             m_hits.at(s_type.at(region_i)) += m_hits[region_i];
             m_outlierHits.at(s_type.at(region_i)) += m_outlierHits[region_i];
+            m_sharedHits.at(s_type.at(region_i)) += m_sharedHits[region_i];
             m_layers.at(s_type.at(region_i)) += m_layers[region_i];
             m_hits.at(Total) += m_hits[region_i];
             m_outlierHits.at(Total) += m_outlierHits[region_i];
+            m_sharedHits.at(Total) += m_sharedHits[region_i];
             m_layers.at(Total) += m_layers[region_i];
          }
       }
@@ -198,8 +205,16 @@ namespace ActsTrk::detail {
          return m_outlierHits.at(region);
       }
  
+      /** @brief return the number of shared hits in a certain detector region.
+       * @param region the detector region.
+       * Only meaningful after @ref computeSummaries was called.
+       */
+      uint8_t contributingSharedHits(DetectorRegion region) const {
+        return m_sharedHits.at(region);
+      }
+
  
-      /** @brief return the total number of hits, outliers or hits+outliers in the givrn detector region and layer.
+      /** @brief return the total number of hits, outliers, and/or shared hits in the givrn detector region and layer.
        * @param region the detector region.
        * @param layer the detector layer.
        */
@@ -207,7 +222,7 @@ namespace ActsTrk::detail {
       uint8_t sum(DetectorRegion region, uint8_t layer) const {
          uint8_t total=0u;
          unsigned short key = makeKey(region, layer, 0);
-         for (auto &[stat_key, stat_hits, stat_outlier_hits] : m_stat) {
+         for (const auto &[stat_key, stat_hits, stat_outlier_hits, stat_shared_hits] : m_stat) {
             if ((stat_key & LAYER_REGION_MASK) == key) {
                if constexpr(HIT_SELECTION & HitSummaryData::Hit) {
                   total +=  stat_hits;
@@ -215,15 +230,19 @@ namespace ActsTrk::detail {
                if constexpr(HIT_SELECTION & HitSummaryData::Outlier) {
                   total +=  stat_outlier_hits;
                }
+               if constexpr(HIT_SELECTION & HitSummaryData::SharedHit) {
+                  total +=  stat_shared_hits;
+               }
             }
          }
          return total;
       }
  
    private:
-      std::vector< std::tuple<unsigned short, uint8_t, uint8_t> > m_stat;
+      std::vector< std::tuple<unsigned short, uint8_t, uint8_t, uint8_t> > m_stat;
       std::array<uint8_t, Total+1>                                m_hits;
       std::array<uint8_t, Total+1>                                m_outlierHits;
+      std::array<uint8_t, Total+1>                                m_sharedHits;
       std::array<uint8_t, Total+1>                                m_layers;
       static constexpr std::array<uint8_t, unknown+1>             s_type
         { pixelTotal, pixelTotal, pixelTotal, stripTotal, stripTotal, unknownTotal};
