@@ -9,6 +9,7 @@
 
 #include "ParticleJetTools/JetParticleAssociation.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
+#include "xAODTracking/VertexContainer.h"
 
 #include <vector>
 #include <string>

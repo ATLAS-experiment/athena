@@ -119,7 +119,7 @@ namespace Analysis {
     // ==========================================================================================================================
     //    ** Computation
     // ==========================================================================================================================
-
+    
     // now decorate the tracks
     for (const xAOD::TrackParticle *track: *tracks) {
       //counter for the vertex index 
@@ -133,18 +133,19 @@ namespace Analysis {
       std::vector<int> vertex_index;
       std::vector<std::vector<float>> track_out_vec_pos;
       std::vector<std::vector<float>> track_out_vec_mom;
+      std::vector<char> invalid_vec;
       // loop through vertices
       for (const xAOD::Vertex *primary: *verteces) {
         // get IP and extra pars
         std::unique_ptr< const Trk::ImpactParametersAndSigma > ip( m_track_to_vx->estimate( track, primary) );
-        Trk::PerigeeSurface primary_surface( vertex->position() );
+        Trk::PerigeeSurface primary_surface( primary->position() );
         std::unique_ptr< const Trk::TrackParameters > extrap_pars( m_extrapolator->extrapolate(ctx,
                                                                                             track->perigeeParameters(),
                                                                                             primary_surface ) );
         
         if ( ip ){
           // if vertex to track is below 5 mm, save corresponding IP params
-          if ( std::fabs(ipMin->IPz0SinTheta) < 10){
+          if ( std::fabs(ip->IPz0SinTheta) < 10){
             d0.push_back(ip->IPd0);
             z0SinTheta.push_back(ip->IPz0SinTheta);
             sigmad0.push_back(ip->sigmad0);

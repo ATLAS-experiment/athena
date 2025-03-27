@@ -44,10 +44,11 @@ def JetParticleAssociationByVertexAlgCfg(
 
     acc=ComponentAccumulator()
     jetcol = JetCollection
+    name=(jetcol + "_" + OutputParticleDecoration).lower()
     if useMinZ0Vertex:
-        name=(jetcol + "_" + OutputParticleDecoration + str(dzCut) + "inclusive_assoc").lower()
+        decorName="_" + str(dzCut) + "_inclusive_assoc"
     else:
-        name=(jetcol + "_" + OutputParticleDecoration + str(dzCut) + "exclusive_assoc").lower()
+        decorName="_" + str(dzCut) + "_exclusive_assoc"
     if MinimumJetPt is None:
         MinimumJetPt = ConfigFlags.BTagging.minimumJetPtForTrackAssociation
     if MinimumJetPt > 0.0 and MinimumJetPtFlag is None:
@@ -59,7 +60,7 @@ def JetParticleAssociationByVertexAlgCfg(
 
     # -- create the association algorithm
     acc.addEventAlgo(CompFactory.JetDecorationAlg(
-        name=name,
+        name=name+decorName,
         JetContainer=jetcol,
         Decorators=[
             acc.popToolsAndMerge(
@@ -67,9 +68,9 @@ def JetParticleAssociationByVertexAlgCfg(
                     ConfigFlags,
                     jetcol,
                     InputParticleCollection,
-                    OutputParticleDecoration,
+                    OutputParticleDecoration+decorName,
                     MinimumJetPt=MinimumJetPt,
-                    PassPtFlag=ptflag,
+                    PassPtFlag=ptflag+decorName,
                     dzCut=dzCut,
                     useMinZ0Vertex=useMinZ0Vertex,
                 ))

@@ -44,7 +44,7 @@ JetParticleOriginVertexAssociation::match(const xAOD::JetContainer& jets, const 
       int selectedVertexIndex = -1;
       if (m_useMinZ0Vertex) {
         // Find the vertex with the minimum absolute value of z0SinTheta
-        float minAbsIt = std::min_element(z0SinTheta_vec.begin(), z0SinTheta_vec.end(), 
+        auto minAbsIt = std::min_element(z0SinTheta_vec.begin(), z0SinTheta_vec.end(), 
                                         [](float a, float b) {
                                             return std::abs(a) < std::abs(b);
                                         });
@@ -54,7 +54,7 @@ JetParticleOriginVertexAssociation::match(const xAOD::JetContainer& jets, const 
         }
       }
       // loop through vertices
-      for (unsigned int iVtx=0; iVtx < z0SinTheta_vec.size(); iVtx++){
+      for (auto iVtx=0; iVtx < z0SinTheta_vec.size(); iVtx++){
         // if we want to do exclusive, only use the vertex with the min(z0)
         if (m_useMinZ0Vertex && selectedVertexIndex!=iVtx) continue;
         // retrieve vertex link
@@ -74,19 +74,19 @@ JetParticleOriginVertexAssociation::match(const xAOD::JetContainer& jets, const 
         double drmin = -1.0;
         // Loop through jets
         for (unsigned int iJet = 0; iJet < jets.size(); iJet++) {
-            //get jet
-            const Jet* jet = jets[iJet];
-            // if origin of jet is not the same as the vertex associated to the track then continue to next jet
-            if (jet->getAssociatedObject<xAOD::Vertex>("OriginVertex") != vtx_to_trk) continue;
-            
-            // do dR matching between jet and track
-            double match_dr = coneSize(jet->pt());
-            double dr = jet->p4().DeltaR(part->p4());
-            if (dr > match_dr) continue;
-            if (drmin < 0 || dr < drmin) {
-                drmin = dr;
-                matchjetidx = iJet;
-            }
+          //get jet
+          const Jet* jet = jets[iJet];
+          // if origin of jet is not the same as the vertex associated to the track then continue to next jet
+          if (jet->getAssociatedObject<xAOD::Vertex>("OriginVertex") != vtx_to_trk) continue;
+          
+          // do dR matching between jet and track
+          double match_dr = coneSize(jet->pt());
+          double dr = jet->p4().DeltaR(part->p4());
+          if (dr > match_dr) continue;
+          if (drmin < 0 || dr < drmin) {
+              drmin = dr;
+              matchjetidx = iJet;
+          }
         }
         if (matchjetidx >= 0) {
           ElementLink<xAOD::IParticleContainer> EL; 

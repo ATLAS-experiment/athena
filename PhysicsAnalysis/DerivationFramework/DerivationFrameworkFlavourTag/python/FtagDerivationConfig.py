@@ -26,10 +26,10 @@ def JetCollectionsBTaggingCfg(cfgFlags, jet_cols, pv_cols=None,
 
     for jet_col, pv_col in zip(jet_cols, pv_cols):
         if ByVertex:
-            acc.merge(JetBTagginglessAlgCfg(cfgFlags, JetCollection=jet_col, pv_col=pv_col, trackAugmenterPrefix=trackAugmenterPrefix, ByVertex=ByVertex))
-        else:
             acc.merge(JetBTagginglessByVertexAlgCfg(cfgFlags, JetCollection=jet_col, pv_col=pv_col, trackAugmenterPrefix=trackAugmenterPrefix,
                                                     dzCut_vec=dzCut_vec, useMinZ0Vertex_vec=useMinZ0Vertex_vec))
+        else:
+            acc.merge(JetBTagginglessAlgCfg(cfgFlags, JetCollection=jet_col, pv_col=pv_col, trackAugmenterPrefix=trackAugmenterPrefix))
 
     return acc
 
