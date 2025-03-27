@@ -79,6 +79,24 @@ namespace xAOD {
     return z0/sqrt(sigma_z0);
   }
 
+  double TrackingHelpers::z0sinthetasignificance(const xAOD::TrackParticle *tp, const xAOD::Vertex *vx) {
+    checkTPAndDefiningParamCovDiag(tp);
+    double z0 = tp->z0() + tp->vz();
+    double sintheta = sin(tp->theta());
+    // elements in definingParametersCovMatrixVec should be : sigma_d0^2, sigma_z0^2
+    double sigma_z0 = tp->definingParametersCovMatrixDiagVec().at(1);
+    if (vx) z0 -= vx->z();
+    double costheta = cos(tp->theta());
+    double sigma_theta = tp->definingParametersCovMatrixDiagVec().at(3);
+    double sigma_z0sintheta = sigma_z0 * sintheta * sintheta + z0 * z0 * costheta * costheta * sigma_theta;
+    if (sigma_z0sintheta <= 0.) {
+      throw std::runtime_error("TrackParticle with zero or negative z0sintheta uncertainty.");
+    }
+    sigma_z0sintheta = sqrt(sigma_z0sintheta);
+    return z0 * sintheta / sigma_z0sintheta;
+        
+  }
+
   double TrackingHelpers::pTErr2(const xAOD::TrackParticle *tp) {
     checkTPAndDefiningParamCov(tp);
     if (!hasValidCovQoverP(tp)) {

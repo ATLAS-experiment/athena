@@ -23,6 +23,9 @@ namespace CP
     ANA_CHECK (m_d0sigHandle.initialize(m_systematicsList, m_particlesHandle));
     ANA_CHECK (m_z0sinthetaHandle.initialize(m_systematicsList, m_particlesHandle));
     
+    ANA_CHECK (m_d0Handle.initialize(m_systematicsList, m_particlesHandle));
+    ANA_CHECK (m_z0sinthetasigHandle.initialize(m_systematicsList, m_particlesHandle));
+
     ANA_CHECK (m_systematicsList.initialize());
 
     ANA_CHECK (m_eventInfoKey.initialize());
@@ -57,7 +60,9 @@ namespace CP
       for (const xAOD::IParticle *particle : *particles)
       {
         float d0sig = -999;
+        float d0 = -999;
         float deltaZ0SinTheta = -999;
+        float deltaZ0SinThetasig = -999;
 
         const xAOD::TrackParticle *track {nullptr};
         if (const xAOD::Muon *muon = dynamic_cast<const xAOD::Muon *>(particle)){
@@ -70,6 +75,7 @@ namespace CP
         }
 
         if (track != nullptr) {
+          d0 = track->d0();
           d0sig = xAOD::TrackingHelpers::d0significance(track,
 							eventInfo->beamPosSigmaX(),
 							eventInfo->beamPosSigmaY(),
@@ -77,10 +83,13 @@ namespace CP
 
           const double vertex_z = primaryVertex ? primaryVertex->z() : 0;
           deltaZ0SinTheta = (track->z0() + track->vz() - vertex_z) * sin (particle->p4().Theta());
+          deltaZ0SinThetasig = xAOD::TrackingHelpers::z0sinthetasignificance(track,primaryVertex);
         }
 
+        m_d0Handle.set(*particle,d0,sys);
         m_d0sigHandle.set(*particle, d0sig, sys);
         m_z0sinthetaHandle.set(*particle, deltaZ0SinTheta, sys);
+        m_z0sinthetasigHandle.set(*particle,deltaZ0SinThetasig,sys);
       }
     }
 

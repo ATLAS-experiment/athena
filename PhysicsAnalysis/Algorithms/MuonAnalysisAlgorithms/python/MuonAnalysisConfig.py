@@ -128,8 +128,10 @@ class MuonCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
 
         if self.writeTrackD0Z0:
+            config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0', noSys=True)
             config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig', noSys=True)
             config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta', noSys=True)
+            config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig', noSys=True)
 
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
