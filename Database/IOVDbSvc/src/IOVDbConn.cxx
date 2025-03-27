@@ -39,27 +39,33 @@ cool::IDatabasePtr IOVDbConn::getCoolDb() {
       return m_coolDb;
     }
     // open new connection
-    m_log << MSG::INFO << "Opening COOL connection for " << m_connstr << 
-      endmsg;
+    m_log << MSG::INFO << "Opening COOL connection for " << m_connstr << endmsg;
     ++m_nconn;
-    cool::IDatabaseSvc& dbSvc=cool::DatabaseSvcFactory::databaseService();
+    cool::IDatabaseSvc& dbSvc = cool::DatabaseSvcFactory::databaseService();
     try {
-      m_coolDb=dbSvc.openDatabase(m_connstr,m_readonly);
-      m_active=true;
+      m_coolDb = dbSvc.openDatabase(m_connstr, m_readonly);
+      m_active = true;
     } catch (std::exception& e) {
       // create a new COOL conditions DB
-      m_log << MSG::INFO << "*** COOL  exception caught: " << e.what() << endmsg;
-      m_log << MSG::INFO << "Create a new conditions database: " << m_connstr<< endmsg;
-      try {
-        m_coolDb=dbSvc.createDatabase(m_connstr);
-        m_active=true;
-      } catch (std::exception&e ) {
+      if (!m_readonly) {
+        m_log << MSG::INFO << "*** COOL  exception caught: " << e.what() << endmsg;
+        m_log << MSG::INFO << "Create a new conditions database: " << m_connstr << endmsg;
+        try {
+          m_coolDb = dbSvc.createDatabase(m_connstr);
+          m_active = true;
+        } catch (std::exception& e) {
+          m_log << MSG::ERROR << "*** COOL  exception caught: " << e.what() << endmsg;
+          m_log << MSG::ERROR << "Could not create a new conditions database - abort connection" << endmsg;
+          m_abort = true;
+          m_coolDb.reset();
+        }
+      } else { //read-only-case:
         m_log << MSG::ERROR << "*** COOL  exception caught: " << e.what() << endmsg;
-        m_log << MSG::ERROR << "Could not create a new conditions database - abort connection"<< endmsg;
-        m_abort=true;
+        m_log << MSG::ERROR << "*** Cannot open database connection [" << m_connstr << "] in " << (m_readonly ? "readonly" : "writing") << " mode - abort connection" << endmsg;
+        m_abort = true;
         m_coolDb.reset();
       }
-    }
+    }// end catch
   }
   return m_coolDb;
 }
