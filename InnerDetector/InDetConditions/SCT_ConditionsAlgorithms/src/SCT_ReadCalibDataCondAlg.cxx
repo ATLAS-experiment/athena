@@ -98,6 +98,9 @@ StatusCode SCT_ReadCalibDataCondAlg::initialize() {
   m_defectMapIntToString[37] = "BAD_OPE";       //<! Bad occupancy per event variance/binomial variance > 2.0)
   m_defectMapIntToString[38] = "DOUBTR_HI";     //<! High double trigger noise occupancy, > 5
   m_defectMapIntToString[41] = "LO_GAIN_ABSOLUTE"; // <! Gain < 15 mV/fC, newly added for Run 3
+  m_defectMapIntToString[42] = "LO_NOISE";      // <! Noise < 0.75 * chip average, newly added for Run 3
+  m_defectMapIntToString[43] = "VLO_NOISE";     // <! Noise < 0.5 * chip average, newly added for Run 3
+  m_defectMapIntToString[44] = "VLO_NOISE_SHORT"; // <! Noise < 0.7 * chip average, newly added for Run 3
 
   //Check ignoreDefects vectors are the same size
   if (m_ignoreDefects.value().size() != m_ignoreDefectParameters.value().size()) {
