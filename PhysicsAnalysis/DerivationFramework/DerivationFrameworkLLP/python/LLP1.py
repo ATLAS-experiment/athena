@@ -988,8 +988,9 @@ def LLP1Cfg(flags):
         if flags.Derivation.LLP.saveFullTruth:
             LLP1SlimmingHelper.ExtraVariables += ['TruthParticles', 'TruthVertices']
         StaticContent += ["xAOD::JetContainer#AntiKt10TruthRCJets","xAOD::JetAuxContainer#AntiKt10TruthRCJetsAux.-PseudoJet"]
-
-        StaticContent += ["xAOD::MuonContainer#ZeroPixelHitMuons", "xAOD::MuonAuxContainer#ZeroPixelHitMuonsAux."]
+    
+    # ZeroPixelHitMuons container
+    StaticContent += ["xAOD::MuonContainer#ZeroPixelHitMuons", "xAOD::MuonAuxContainer#ZeroPixelHitMuonsAux."]
 
     from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
         PhotonsCPDetailedContent,
