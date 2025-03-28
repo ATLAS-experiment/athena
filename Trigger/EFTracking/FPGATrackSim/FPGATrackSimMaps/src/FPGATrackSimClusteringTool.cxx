@@ -232,8 +232,8 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
                     float zNew = hit.getZ();
                     float xPhiNew = hit.getPhiCoord();
                     float xEtaNew = hit.getEtaCoord();
-                    float cPhiNew = hit.getPhiIndex() + 0.5;
-                    float cEtaNew = hit.getEtaIndex() + 0.5;
+                    float cPhiNew = hit.getPhiIndex();
+                    float cEtaNew = hit.getEtaIndex();
                     int tot = clusterEquiv.getToT();
                     int totNew = hit.getToT();
                     if (m_digitalClustering) {
@@ -463,8 +463,8 @@ bool FPGATrackSimCLUSTERING::updatePixelCluster(FPGATrackSimCluster &currentClus
         newHit.setPhiIndex(incomingHit.getPhiIndex());
         newHit.setEtaCoord(incomingHit.getEtaCoord());
         newHit.setPhiCoord(incomingHit.getPhiCoord());
-        newHit.setCentroidPhiIndex(incomingHit.getPhiIndex() + 0.5);
-        newHit.setCentroidEtaIndex(incomingHit.getEtaIndex() + 0.5);
+        newHit.setCentroidPhiIndex(incomingHit.getPhiIndex());
+        newHit.setCentroidEtaIndex(incomingHit.getEtaIndex());
         newHit.setEtaWidth(1);
         newHit.setPhiWidth(1);
         //Set the initial clusterEquiv to be the incoming hit with double precision
@@ -641,8 +641,8 @@ bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentC
     float zNew = incomingHit.getZ();
     float xPhiNew = incomingHit.getPhiCoord();
     float xEtaNew = incomingHit.getEtaCoord();
-    float cPhiNew = incomingHit.getPhiIndex() + 0.5;
-    float cEtaNew = incomingHit.getEtaIndex() + 0.5;
+    float cPhiNew = incomingHit.getPhiIndex();
+    float cEtaNew = incomingHit.getEtaIndex();
     int tot = clusterEquiv.getToT();
     int totNew = incomingHit.getToT();
     //As strips arrive pre-clustered, this is different for pixels/strips
