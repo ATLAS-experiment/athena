@@ -907,7 +907,7 @@ namespace dqutils {
         std::cout << "Merging/copying directory " << dir << std::endl;
         for (const std::string& fName : filenames) {
           std::unique_ptr<TFile> in(TFile::Open(fName.c_str()));
-          if (in1) {
+          if (!in) {
             std::cout << "ERROR, could not open input file " << fName << std::endl;
             return -1;
           }
