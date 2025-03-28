@@ -94,7 +94,7 @@ def BTagLargeRDecoration(cfgFlags, jet_col):
                 f'{jet_col}{tagger_name}JetTagAlg',
                 container=jet_col,
                 constituentContainer=trackContainer,
-                decorator=CompFactory.FlavorTagDiscriminants.GNNTool(
+                decorator=CompFactory.FlavorTagInference.GNNTool(
                     tagger_name,
                     nnFile=nnFile,
                     variableRemapping=variableRemapping,

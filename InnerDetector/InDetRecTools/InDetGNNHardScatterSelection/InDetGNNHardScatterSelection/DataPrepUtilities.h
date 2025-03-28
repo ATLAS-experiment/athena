@@ -7,7 +7,7 @@
 
 // local includes
 #include "InDetGNNHardScatterSelection/ConstituentsLoader.h"
-#include "FlavorTagDiscriminants/SaltModel.h"
+#include "FlavorTagInference/SaltModel.h"
 
 // EDM includes
 #include "xAODTracking/Vertex.h"

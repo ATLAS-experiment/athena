@@ -29,7 +29,7 @@ namespace InDetGNNHardScatterSelection {
     class IParticlesLoader : public IConstituentsLoader {
       public:
         IParticlesLoader(ConstituentsInputConfig);
-        std::tuple<std::string, FlavorTagDiscriminants::Inputs, std::vector<const xAOD::IParticle*>> getData(
+        std::tuple<std::string, FlavorTagInference::Inputs, std::vector<const xAOD::IParticle*>> getData(
           const xAOD::Vertex& vertex) const override ;
         std::string getName() const override;
         ConstituentsType getType() const override;
