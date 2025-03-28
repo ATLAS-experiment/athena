@@ -169,7 +169,7 @@ def sTGCAsBuiltCondAlgCfg(flags, name = "sTGCAsBuiltCondAlg", **kwargs):
     if not kwargs["readFromJSON"]:
         kwargs.setdefault("ReadKey","/MUONALIGN/ASBUILTPARAMS/STGC")
         from IOVDbSvc.IOVDbSvcConfig import addFolders
-        result.merge(addFolders( flags, kwargs["ReadKey"], 'MUONALIGN_OFL', className='CondAttrListCollection', tag = 'MUONALIGN_STG_IntAl_alCons_noQL3_v01'))
+        result.merge(addFolders( flags, kwargs["ReadKey"], 'MUONALIGN_OFL', className='CondAttrListCollection'))
     the_alg = CompFactory.sTGCAsBuiltCondAlg(name,**kwargs)
     result.addCondAlgo(the_alg, primary=True)
     return result
