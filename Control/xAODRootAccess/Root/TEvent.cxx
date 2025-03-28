@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 // System include(s):
 #include <cassert>
@@ -9,7 +9,7 @@
 // ROOT include(s):
 #include <TFile.h>
 #include <TTree.h>
-#include <TKey.h> 
+#include <TKey.h>
 #include <TChain.h>
 #include <TFriendElement.h>
 #include <TChainElement.h>
@@ -38,6 +38,7 @@
 #include "xAODCore/tools/IOStats.h"
 #include "xAODCore/tools/ReadStats.h"
 #include "xAODCore/tools/PerfStats.h"
+#include "xAODCore/AuxSelection.h"
 
 // Local include(s):
 #include "xAODRootAccess/TEvent.h"
@@ -411,7 +412,7 @@ namespace xAOD {
          return StatusCode::FAILURE;
       }
 
-      // Set metadata entry to be read 
+      // Set metadata entry to be read
       // NB: no reading is done calling LoadTree
       if ( m_inMetaTree->LoadTree(0) < 0 ){
          ::Error( "xAOD::TEvent::readFrom",
@@ -476,46 +477,46 @@ namespace xAOD {
       delete format;
 
 
-      // List all the other Metadata trees in the input file 
-      // Having several metatrees can happen for augmented files for instance 
-      // as one metadata tree per stream is produced  
+      // List all the other Metadata trees in the input file
+      // Having several metatrees can happen for augmented files for instance
+      // as one metadata tree per stream is produced
       std::set<std::string> lOtherMetaTreeNames = {};
       TList *lKeys = file->GetListOfKeys();
 
       if (lKeys){
          for (int iKey = 0; iKey < lKeys->GetEntries() ; iKey++){
-            // iterate over keys and add 
+            // iterate over keys and add
             std::string keyName = lKeys->At(iKey)->GetName();
-            // Make sure the key corresponds to a metadata tree but  
+            // Make sure the key corresponds to a metadata tree but
             // do not add the current metadata tree in the list of other trees
-            // and do not add the metadata tree handlers to the list  
-            if (  (keyName != METADATA_TREE_NAME) 
+            // and do not add the metadata tree handlers to the list
+            if (  (keyName != METADATA_TREE_NAME)
                && (keyName.find("MetaData") != std::string::npos)
                && !(keyName.find("MetaDataHdr") != std::string::npos)){
-               // Make sure key corresponds to a tree 
+               // Make sure key corresponds to a tree
                const char *className = ((::TKey*)lKeys->At(iKey))->GetClassName();
                static constexpr Bool_t LOAD = kFALSE;
                static constexpr Bool_t SILENT = kTRUE;
                ::TClass* cl = ::TClass::GetClass(className, LOAD, SILENT);
                if ((cl != nullptr) && cl->InheritsFrom(::TTree::Class())){
-                  // key is corresponding to a metadata tree 
+                  // key is corresponding to a metadata tree
                   lOtherMetaTreeNames.insert(keyName);
                }
             }
          }
       }
 
-      // Loop over the other metadata trees found (if any) 
+      // Loop over the other metadata trees found (if any)
       for (const std::string & metaTreeName : lOtherMetaTreeNames){
          TTree *tmpMetaTree =  dynamic_cast< ::TTree* >( file->Get( metaTreeName.c_str() ) );
 
-         if (!tmpMetaTree){ 
-            // Skip tree if could not read it 
+         if (!tmpMetaTree){
+            // Skip tree if could not read it
             ::Warning( "xAOD::TEvent::readFrom", "Could not read metadata tree=%s",metaTreeName.c_str());
             continue;
          }
 
-         // Set metadata entry to be read 
+         // Set metadata entry to be read
          // NB: no reading is done calling LoadTree
          if ( tmpMetaTree->LoadTree(0) < 0 ){
             ::Error( "xAOD::TEvent::readFrom",
@@ -528,7 +529,7 @@ namespace xAOD {
          const std::string tmpEventFormatBranchName =
             Utils::getFirstBranchMatch( tmpMetaTree, "EventFormat");
          if( ! tmpMetaTree->GetBranch( tmpEventFormatBranchName.c_str() ) ) {
-           // skip the additionnal metadata tree 
+           // skip the additionnal metadata tree
            ::Warning( "xAOD::TEvent::readFrom", "No EventFormat branch found in metadata tree=%s",tmpMetaTree->GetName() );
             continue ;
          }
@@ -542,11 +543,11 @@ namespace xAOD {
                      XAOD_MESSAGE( "Failed to connect to EventFormat object for metadata tree = %s"), tmpMetaTree->GetName() );
             return StatusCode::FAILURE;
          }
-         // Read in the object 
+         // Read in the object
          tmpBr->GetEntry( 0 );
-         // read all objects contained in the event format 
+         // read all objects contained in the event format
          for (const std::pair<const std::string, xAOD::EventFormatElement> &evtElem : *tmpFormat){
-            // if element is not existing 
+            // if element is not existing
             // then add it to the private event format member
             if (!m_inputEventFormat.exists(evtElem.first)){
                m_inputEventFormat.add(evtElem.second);
@@ -554,7 +555,7 @@ namespace xAOD {
          }
          delete tmpFormat;
       }
- 
+
       // Look for the event tree in the input file:
       m_inTree = dynamic_cast< ::TTree* >( file->Get( treeName ) );
       if( ! m_inTree ) {
@@ -563,7 +564,7 @@ namespace xAOD {
          // that needs to be collected.
          m_inTreeMissing = kTRUE;
       }
-     
+
       // Turn on the cache if requested:
       if( m_inTree && useTreeCache && ( ! m_inTree->GetCacheSize() ) ) {
          m_inTree->SetCacheSize( CACHE_SIZE );
@@ -1080,13 +1081,13 @@ namespace xAOD {
       if( itr == m_outputObjects.end() ) {
          // Create one if if it doesn't exist yet...
          // Translate the store type:
-         TAuxStore::EStructMode mode = TAuxStore::kUndefinedStore;
+         TAuxStore::EStructMode mode = TAuxStore::EStructMode::kUndefinedStore;
          switch( type ) {
          case SG::IAuxStoreHolder::AST_ObjectStore:
-            mode = TAuxStore::kObjectStore;
+            mode = TAuxStore::EStructMode::kObjectStore;
             break;
          case SG::IAuxStoreHolder::AST_ContainerStore:
-            mode = TAuxStore::kContainerStore;
+            mode = TAuxStore::EStructMode::kContainerStore;
             break;
          default:
             ::Error( "xAOD::TEvent::recordAux",
@@ -1095,7 +1096,7 @@ namespace xAOD {
             return 0;
          }
          // Create and record the object:
-         TAuxStore* store = new TAuxStore( key.c_str(), kTRUE, mode,
+         TAuxStore* store = new TAuxStore( key, kTRUE, mode,
                                            basketSize, splitLevel );
          if( record( store, key, basketSize, splitLevel, kTRUE ).isFailure() ) {
             ::Error( "xAOD::TEvent::recordAux",
@@ -1369,14 +1370,14 @@ namespace xAOD {
          m_entry = entry;
       }
 
-      // In order to make the reading of branches+tree cache work 
-      // NB: TTree::LoadTree() only set the entry that should be read for each branch 
+      // In order to make the reading of branches+tree cache work
+      // NB: TTree::LoadTree() only set the entry that should be read for each branch
       // but no reading of the branch content is performed when calling that function.
-      // The entry set that can be retrieved with 
+      // The entry set that can be retrieved with
       // branch->GetTree()->GetReadEntry()
       // For friend trees, if an index was built, then the entry which is set for the related branches
-      // is found by the LoadTree function by matching 
-      // the the major and minor values of the main tree and friend tree  
+      // is found by the LoadTree function by matching
+      // the the major and minor values of the main tree and friend tree
       if( m_inTree && m_inTree->LoadTree( m_entry ) < 0 ) {
          ::Error( "xAOD::TEvent::getEntry",
                   XAOD_MESSAGE( "Failure in loading entry %i from the input "
@@ -1729,13 +1730,13 @@ namespace xAOD {
       // The results go in here
       std::set<std::string> keys;
 
-      // Get list of branches from 
-      // the input metadata tree or input tree 
+      // Get list of branches from
+      // the input metadata tree or input tree
       std::vector<TObjArray*> fullListOfBranches = {};
       if (metadata){
          if (m_inMetaTree){
             // No friend tree expected for metadata tree
-            // Only add the list of branches of the metadata tree 
+            // Only add the list of branches of the metadata tree
             ::Info("xAOD::TEvent::getNames", "scanning input objects");
             fullListOfBranches.push_back(m_inMetaTree->GetListOfBranches());
          }
@@ -1743,29 +1744,29 @@ namespace xAOD {
       else {
          if (m_inTree){
             ::Info("xAOD::TEvent::getNames", "scanning input objects");
-             // Add the list of branches of the main tree 
+             // Add the list of branches of the main tree
             fullListOfBranches.push_back(m_inTree->GetListOfBranches());
-            // If input tree has friend trees 
-            // add as well the list of friend tree branches  
+            // If input tree has friend trees
+            // add as well the list of friend tree branches
             if (m_inTree->GetListOfFriends()){
-               // Get the list of friends 
+               // Get the list of friends
                TList *fList = m_inTree->GetListOfFriends();
-               // Loop over friend elements 
+               // Loop over friend elements
                for (TObject * feObj : *fList){
                   if (feObj){
-                     // Get corresponding friend tree 
+                     // Get corresponding friend tree
                      TTree *friendTree = dynamic_cast<TFriendElement*>(feObj)->GetTree();
-                     // Add list of branches of the friend tree 
+                     // Add list of branches of the friend tree
                      fullListOfBranches.push_back(friendTree->GetListOfBranches());
                   }
                }
             }
          }
       }
-      
+
       // Loop over all list of branches (if any)
       for (const TObjArray * in : fullListOfBranches){
-         // Loop over all branches inside the current list of branches 
+         // Loop over all branches inside the current list of branches
          for ( Int_t index = 0; index < in->GetEntriesFast(); ++index ) {
             const TObject * obj = in->At(index);
             if ( ! obj ) continue;
@@ -1787,7 +1788,7 @@ namespace xAOD {
             }
          }
       }
-      
+
       const Object_t& inAux = ( metadata ?
                                 m_inputMetaObjects : m_inputObjects );
 
@@ -2008,19 +2009,19 @@ namespace xAOD {
                const std::string dynName = Utils::dynBranchPrefix( branchName );
 
                std::vector<TObjArray*> fullListOfBranches = {};
-               // Add the list of branches of the main tree 
+               // Add the list of branches of the main tree
                fullListOfBranches.push_back(m_inTree->GetListOfBranches());
-               // If input tree has friend trees 
-               // add as well the list of friend tree branches  
+               // If input tree has friend trees
+               // add as well the list of friend tree branches
                if (m_inTree->GetListOfFriends()){
-                  // Get the list of friends 
+                  // Get the list of friends
                   TList *fList = m_inTree->GetListOfFriends();
-                  // Loop over friend elements 
+                  // Loop over friend elements
                   for (TObject * feObj : *fList){
                      if (feObj){
-                        // Get corresponding friend tree 
+                        // Get corresponding friend tree
                         TTree *friendTree = dynamic_cast<TFriendElement*>(feObj)->GetTree();
-                        // Add list of branches of the friend tree 
+                        // Add list of branches of the friend tree
                         fullListOfBranches.push_back(friendTree->GetListOfBranches());
                      }
                   }
@@ -2072,13 +2073,26 @@ namespace xAOD {
             // The type of the auxiliary store is finally deduced from the
             // inheritance of the interface container.
             const TAuxStore::EStructMode mode =
-               ( cl->InheritsFrom( baseCl ) ? TAuxStore::kContainerStore :
-                 TAuxStore::kObjectStore );
+               ( cl->InheritsFrom( baseCl ) ? TAuxStore::EStructMode::kContainerStore :
+                 TAuxStore::EStructMode::kObjectStore );
 
             // Scan the branches using a temporary TAuxStore instance:
-            TAuxStore temp( branchName.c_str(), kTRUE, mode );
+            static constexpr bool TOP_STORE = true;
+            TAuxStore temp( branchName, TOP_STORE, mode );
+            static constexpr bool PRINT_WARNINGS = false;
             RETURN_CHECK( "xAOD::TEvent::initStats",
-                          temp.initStats( m_inTree ) );
+                          temp.readFrom( *m_inTree, PRINT_WARNINGS ) );
+
+            // Conveninence variable:
+            ReadStats& stats = IOStats::instance().stats();
+
+            // Teach the cache about all the branches:
+            for (SG::auxid_t id : temp.getAuxIDs()) {
+               stats.branch(branchName, id);
+            }
+
+            // Increment the number of known branches:
+            stats.setBranchNum(stats.branchNum() + temp.getAuxIDs().size());
          }
          // If it's an interface container:
          else {
@@ -2494,7 +2508,7 @@ namespace xAOD {
             store->selectAux( *filter );
          }
          // Tell the object where to write its contents:
-         RETURN_CHECK( "xAOD::TEvent::record", store->writeTo( m_outTree ) );
+         RETURN_CHECK( "xAOD::TEvent::record", store->writeTo( *m_outTree ) );
          // Record it to the output list:
          TAuxManager* mgr = new TAuxManager( store, ownsStore );
          m_outputObjects[ key ] = mgr;
@@ -2529,7 +2543,7 @@ namespace xAOD {
       }
 
       // Connect the auxiliary store to the output tree:
-      RETURN_CHECK( "xAOD::TEvent::record", store->writeTo( m_outTree ) );
+      RETURN_CHECK( "xAOD::TEvent::record", store->writeTo( *m_outTree ) );
 
       // Update the manager:
       mgr->setObject( store );
@@ -2940,9 +2954,9 @@ namespace xAOD {
          // In "branch access mode" let's create a TAuxStore object, and let
          // that take care of the auxiliary store access:
          TAuxStore* store =
-            new TAuxStore( prefix.c_str(), kTRUE,
-                           ( standalone ? TAuxStore::kObjectStore :
-                             TAuxStore::kContainerStore ) );
+            new TAuxStore( prefix, kTRUE,
+                           ( standalone ? TAuxStore::EStructMode::kObjectStore :
+                             TAuxStore::EStructMode::kContainerStore ) );
          // We're using this object to read from the input, it needs to be
          // locked:
          store->lock();
@@ -2951,7 +2965,7 @@ namespace xAOD {
 
          // Now connect the object to the input tree:
          RETURN_CHECK( "xAOD::TEvent::connectAux",
-                       store->readFrom( m_inTree ) );
+                       store->readFrom( *m_inTree ) );
 
          // Return gracefully:
          return StatusCode::SUCCESS;
@@ -3051,9 +3065,9 @@ namespace xAOD {
          // In "branch access mode" let's create a TAuxStore object, and let
          // that take care of the auxiliary store access:
          TAuxStore* store =
-            new TAuxStore( prefix.c_str(), kTRUE,
-                           ( standalone ? TAuxStore::kObjectStore :
-                             TAuxStore::kContainerStore ) );
+            new TAuxStore( prefix, kTRUE,
+                           ( standalone ? TAuxStore::EStructMode::kObjectStore :
+                             TAuxStore::EStructMode::kContainerStore ) );
          // We use this object to read data from the input, it needs to be
          // locked:
          store->lock();
@@ -3062,7 +3076,7 @@ namespace xAOD {
 
          // Now connect the object to the input tree:
          RETURN_CHECK( "xAOD::TEvent::connectMetaAux",
-                       store->readFrom( m_inMetaTree ) );
+                       store->readFrom( *m_inMetaTree ) );
 
          // Tell the auxiliary store which entry to use:
          store->getEntry( 0 );
@@ -3138,8 +3152,8 @@ namespace xAOD {
          new TAuxStore( mgr.branch()->GetName(), kFALSE,
                         ( storeHolder->getStoreType() ==
                           SG::IAuxStoreHolder::AST_ObjectStore ?
-                          TAuxStore::kObjectStore :
-                          TAuxStore::kContainerStore ) );
+                          TAuxStore::EStructMode::kObjectStore :
+                          TAuxStore::EStructMode::kContainerStore ) );
       // This object is used to read data from the input, it needs to be
       // locked:
       store->lock();
@@ -3147,7 +3161,7 @@ namespace xAOD {
       m_inputObjects[ std::string( mgr.branch()->GetName() ) +
                       "Dynamic" ] = amgr;
       RETURN_CHECK( "xAOD::TEvent::setUpDynamicStore",
-                    store->readFrom( tree ) );
+                    store->readFrom( *tree ) );
       // Tell the auxiliary store which entry to use. This is essential for
       // metadata objects, and non-important for event data objects, which will
       // get a possibly different entry loaded in setAuxStore(...).
@@ -3296,12 +3310,11 @@ namespace xAOD {
          }
          store = amgr->getConstStore();
          // If the store still doesn't know its type, help it now:
-         if( amgr->getStore()->structMode() == TAuxStore::kUndefinedStore ) {
+         if( amgr->getStore()->structMode() == TAuxStore::EStructMode::kUndefinedStore ) {
             const TAuxStore::EStructMode mode = ( vec ?
-                                                  TAuxStore::kContainerStore :
-                                                  TAuxStore::kObjectStore );
-            RETURN_CHECK( "xAOD::TEvent::setAuxStore",
-                          amgr->getStore()->setStructMode( mode ) );
+                                                  TAuxStore::EStructMode::kContainerStore :
+                                                  TAuxStore::EStructMode::kObjectStore );
+            amgr->getStore()->setStructMode( mode );
          }
       } else if( m_auxMode == kClassAccess || m_auxMode == kAthenaAccess ) {
          // Get the concrete auxiliary manager:
