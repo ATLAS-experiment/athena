@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <TSystem.h>
@@ -1126,7 +1126,7 @@ void ZdcNtuple::processMCEventCollection(){
         t_ZdcTruthParticlePy.push_back(particle->momentum().y());
         t_ZdcTruthParticlePz.push_back(particle->momentum().z());
         t_ZdcTruthParticleEnergy.push_back(particle->momentum().e());
-        t_ZdcTruthParticlePid.push_back(particle->pid());
+        t_ZdcTruthParticlePid.push_back(particle->pdg_id());
         t_ZdcTruthParticleStatus.push_back(particle->status());
       } // end loop over particles
     }// end loop over vertices
