@@ -23,8 +23,12 @@ namespace InDet {
 
   StatusCode InclusiveTrackFilterTool::initialize()
   {
-
     m_rnd = std::make_unique<TRandom3>(m_seed);
+
+    if (m_calibFileLRTEff.empty()) {
+      ATH_MSG_ERROR("No calibration file for requested LRT track efficiency set. You may be running an unsupported datataking period, please contact Tracking CP if you believe this message is in error.");
+      return StatusCode::FAILURE;
+    }
 
     TH2* trkLRTEff_tmp = nullptr;
     ATH_CHECK( initObject<TH2>( trkLRTEff_tmp,
