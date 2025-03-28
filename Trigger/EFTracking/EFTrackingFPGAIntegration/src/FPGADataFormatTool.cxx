@@ -82,8 +82,8 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
           // Get the pixel word
           auto pixelWord = FPGADataFormatUtilities::fill_PIXEL_EF_RDO (
             (pixelRawData == pixel_rdoCollection->back()), // last
-            m_pixelId->eta_index(rdoId), // ROW
-            m_pixelId->phi_index(rdoId), // COL
+            m_pixelId->phi_index(rdoId), // ROW
+            m_pixelId->eta_index(rdoId), // COL
             pixelRawData->getToT(), // TOT
             pixelRawData->getLVL1A(),  // Lvl!
             0 // Spare
