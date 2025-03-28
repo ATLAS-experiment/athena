@@ -52,12 +52,11 @@ fi
 Reco_tf.py --CA \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsFastWorkflowFlags' \
-    --preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \
+    --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}
-#    --conditionsTag 'all:OFLCOND-MC21-SDR-RUN4-02' \
-#    --geometryVersion 'all:ATLAS-P2-RUN4-03-00-00' \
+    #--preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \
 
 rc=$?
 echo "Reco_tf.py result: $rc"

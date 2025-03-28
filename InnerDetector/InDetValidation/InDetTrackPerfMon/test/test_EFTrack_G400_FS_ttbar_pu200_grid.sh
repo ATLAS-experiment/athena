@@ -1,7 +1,6 @@
 #!/bin/bash
 # art-description: Nightly test to compare G-400 vs C-000 (Full-scan) for EFTrack studies using ttbar pu200 sample
 # art-type: grid
-# art-memory: 8192
 # art-include: main/Athena
 # art-architecture: '#&nvidia'
 # art-output: IDTPM.*.root
@@ -62,8 +61,8 @@ fi
 run "${pipelineName}" \
   runReco_G400_FS.sh \
     -i ${InputRDOfiles} \
-    -o "${OutSampleName}.AOD.pool.root" \
-    -n 50
+    -o "${OutSampleName}.AOD.pool.root"
+    #-n 50
 
 ## Don't run if IDTPM json config is not found
 if [ ! -f "$IDTPMjsonConfig_absPath" ]; then

@@ -73,7 +73,6 @@
         <hist1D name="truth_prodR" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="truth_prodZ" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="truth_nSiHits" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="truth_nSiHits_vs_eta" type="TH2F" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="Multiplicities">
         <hist1D name="num_offl_all" type="TH1D" plotopts="" tests="KSnorm"/>
@@ -205,7 +204,6 @@
         <hist1D name="truth_prodR" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="truth_prodZ" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="truth_nSiHits" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="truth_nSiHits_vs_eta" type="TH2F" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="Multiplicities">
         <hist1D name="num_offl_all" type="TH1D" plotopts="" tests="KSnorm"/>

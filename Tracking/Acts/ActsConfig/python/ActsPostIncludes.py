@@ -99,8 +99,18 @@ def ACTSClusterPostInclude(flags):
     acc = ITkActsDataPreparationCfg(flags)
 
     from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
-    acc.merge(ITkActsPrepDataToxAODCfg(
-        flags, PixelMeasurementContainer="ITkPixelMeasurements_offl",
-        StripMeasurementContainer="ITkStripMeasurements_offl"))
+    acc.merge( ITkActsPrepDataToxAODCfg( flags,
+                    PixelMeasurementContainer = "ITkPixelMeasurements_offl",
+                    StripMeasurementContainer = "ITkStripMeasurements_offl" ) )
+
+    ## write out measurements containers in any case
+    toAOD = [
+        'xAOD::TrackMeasurementValidationContainer#ITkPixelMeasurements_offl',
+        'xAOD::TrackMeasurementValidationAuxContainer#ITkPixelMeasurements_offlAux.',
+        'xAOD::TrackMeasurementValidationContainer#ITkStripMeasurements_offl',
+        'xAOD::TrackMeasurementValidationAuxContainer#ITkStripMeasurements_offlAux.'
+    ]
+    from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+    acc.merge( addToAOD( flags, toAOD ) )
 
     return acc
