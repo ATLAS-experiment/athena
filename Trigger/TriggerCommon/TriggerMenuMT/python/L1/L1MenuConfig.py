@@ -91,7 +91,6 @@ class L1MenuConfig(object):
         self._generateMenu(flags)
 
         self.generated = True
-        
 
     def thresholdExists(self,thrName):
         return thrName in self._registeredThresholds
@@ -254,7 +253,7 @@ class L1MenuConfig(object):
             return False
 
         return True
-
+    
 
     def _importMenuDefinition(self):
         """
@@ -740,6 +739,9 @@ class L1MenuConfig(object):
 
         # check that every item in the menu is on a board connected to CTP
         self.l1menu.checkItemsHaveInputs()
+
+        # check TOPO bits
+        self.l1menu.checkTOPObits()
 
         # check that items essential for detector operations are monitored
         if 'PhysicsP1' in self.menuFullName:

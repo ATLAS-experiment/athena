@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -518,8 +518,7 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
  
   /// this uses move semantics so doesn't do a deep copy, so ...
   std::unique_ptr<TrigRoiDescriptor> tmpRoi = std::make_unique<TrigRoiDescriptor>(roi);
-  /// need to disable managment of the constituents
-  tmpRoi->manageConstituents(false);
+
   auto vertices = std::make_unique<TrigVertexCollection>();
   std::vector<float> vZv;
 

@@ -44,10 +44,12 @@ JetTagMonitorAlgorithm::JetTagMonitorAlgorithm( const std::string& name, ISvcLoc
 
   declareProperty("TaggerName", m_TaggerName);
   declareProperty("cFraction", m_cFraction);
-  declareProperty("WP60Cut", m_WP60Cut);
+  declareProperty("tauFraction", m_tauFraction);
+  declareProperty("WP65Cut", m_WP65Cut);
   declareProperty("WP70Cut", m_WP70Cut);
   declareProperty("WP77Cut", m_WP77Cut);
   declareProperty("WP85Cut", m_WP85Cut);
+  declareProperty("WP90Cut", m_WP90Cut);
 }
 
 JetTagMonitorAlgorithm::~JetTagMonitorAlgorithm() {}
@@ -691,7 +693,7 @@ bool JetTagMonitorAlgorithm::passJVTCut(const xAOD::Jet *jet) const {
 
 double JetTagMonitorAlgorithm::getTaggerWeight(const xAOD::Jet *jet) const {
 
-  ATH_MSG_DEBUG("retrieving DL1* weight");
+  ATH_MSG_DEBUG("retrieving GN2* weight");
 
   const xAOD::BTagging *bTaggingObject = xAOD::BTaggingUtilities::getBTagging( *jet );
   if ( !bTaggingObject ) {
@@ -699,14 +701,15 @@ double JetTagMonitorAlgorithm::getTaggerWeight(const xAOD::Jet *jet) const {
     return 0;
   }
 
-  double mv = 0, mv_pu = 0, mv_pb = 0, mv_pc = 0;  
+  double mv = 0, mv_pu = 0, mv_pb = 0, mv_pc = 0, mv_ptau = 0;
 
   bTaggingObject->pu(m_TaggerName,mv_pu);
   bTaggingObject->pc(m_TaggerName,mv_pc);
   bTaggingObject->pb(m_TaggerName,mv_pb);
-  //DL1* formula (standard)
-  if ( mv_pb != 0 && (mv_pu != 0 || mv_pc != 0)) {
-    mv = log( mv_pb / ( mv_pu * ( 1 - m_cFraction ) + mv_pc * m_cFraction ) );
+  mv_ptau = 1 - mv_pu - mv_pc - mv_pb;
+  //GN2v01 formula: https://ftag.docs.cern.ch/recommendations/algs/r22-preliminary/#recommendation-as-of-07032024
+  if ( mv_pb != 0 && (mv_pu != 0 || mv_pc != 0 || mv_ptau != 0) ) {
+    mv = log( mv_pb / ( mv_pc * m_cFraction + mv_ptau * m_tauFraction + mv_pu * (1 - m_cFraction - m_tauFraction) ) );
   }
 
   return mv;
@@ -723,58 +726,69 @@ void JetTagMonitorAlgorithm::fillTTbarEventJetHistos(const xAOD::Jet *jet) const
   TTbarJets_MV=mv;
   fill(tool,TTbarJets_MV);
 
-  auto TTbarJets_n_60tag = Monitored::Scalar<int>("TTbarJets_n_60tag",0);
+  auto TTbarJets_n_65tag = Monitored::Scalar<int>("TTbarJets_n_65tag",0);
   auto TTbarJets_n_70tag = Monitored::Scalar<int>("TTbarJets_n_70tag",0);
   auto TTbarJets_n_77tag = Monitored::Scalar<int>("TTbarJets_n_77tag",0);
   auto TTbarJets_n_85tag = Monitored::Scalar<int>("TTbarJets_n_85tag",0);
+  auto TTbarJets_n_90tag = Monitored::Scalar<int>("TTbarJets_n_90tag",0);
 
-  auto TTbarJets_pT_60tag = Monitored::Scalar<float>("TTbarJets_pT_60tag",0);
+  auto TTbarJets_pT_65tag = Monitored::Scalar<float>("TTbarJets_pT_65tag",0);
   auto TTbarJets_pT_70tag = Monitored::Scalar<float>("TTbarJets_pT_70tag",0);
   auto TTbarJets_pT_77tag = Monitored::Scalar<float>("TTbarJets_pT_77tag",0);
   auto TTbarJets_pT_85tag = Monitored::Scalar<float>("TTbarJets_pT_85tag",0);
+  auto TTbarJets_pT_90tag = Monitored::Scalar<float>("TTbarJets_pT_90tag",0);
 
-  if (mv > m_WP85Cut) {
-    fill(tool,TTbarJets_n_85tag);
-    TTbarJets_pT_85tag=jet->pt() / Gaudi::Units::GeV;
-    fill(tool,TTbarJets_pT_85tag);
-    if (mv > m_WP77Cut) {
-      fill(tool,TTbarJets_n_77tag);
-      TTbarJets_pT_77tag=jet->pt() / Gaudi::Units::GeV;
-      fill(tool,TTbarJets_pT_77tag);
-      if (mv > m_WP70Cut) {
-	fill(tool,TTbarJets_n_70tag);
-	TTbarJets_pT_70tag=jet->pt() / Gaudi::Units::GeV;
-	fill(tool,TTbarJets_pT_70tag);
-	if (mv > m_WP60Cut) {
-	  fill(tool,TTbarJets_n_60tag);
-	  TTbarJets_pT_60tag=jet->pt() / Gaudi::Units::GeV;
-	  fill(tool,TTbarJets_pT_60tag);
-	}
+  if (mv > m_WP90Cut) {
+    fill(tool,TTbarJets_n_90tag);
+    TTbarJets_pT_90tag=jet->pt() / Gaudi::Units::GeV;
+    fill(tool,TTbarJets_pT_90tag);
+    if (mv > m_WP85Cut) {
+      fill(tool,TTbarJets_n_85tag);
+      TTbarJets_pT_85tag=jet->pt() / Gaudi::Units::GeV;
+      fill(tool,TTbarJets_pT_85tag);
+      if (mv > m_WP77Cut) {
+        fill(tool,TTbarJets_n_77tag);
+        TTbarJets_pT_77tag=jet->pt() / Gaudi::Units::GeV;
+        fill(tool,TTbarJets_pT_77tag);
+        if (mv > m_WP70Cut) {
+	        fill(tool,TTbarJets_n_70tag);
+	        TTbarJets_pT_70tag=jet->pt() / Gaudi::Units::GeV;
+	        fill(tool,TTbarJets_pT_70tag);
+	        if (mv > m_WP65Cut) {
+	          fill(tool,TTbarJets_n_65tag);
+	          TTbarJets_pT_65tag=jet->pt() / Gaudi::Units::GeV;
+	          fill(tool,TTbarJets_pT_65tag);
+	        }
+        }
       }
     }
   }
 
   auto TTbarJets_n = Monitored::Scalar<int>("TTbarJets_n",0);
+  auto pass90n = Monitored::Scalar<bool>("pass90n",false);
   auto pass85n = Monitored::Scalar<bool>("pass85n",false);
   auto pass77n = Monitored::Scalar<bool>("pass77n",false);
   auto pass70n = Monitored::Scalar<bool>("pass70n",false);
-  auto pass60n = Monitored::Scalar<bool>("pass60n",false);
+  auto pass65n = Monitored::Scalar<bool>("pass65n",false);
+  pass90n = mv > m_WP90Cut;
   pass85n = mv > m_WP85Cut;
   pass77n = mv > m_WP77Cut;
   pass70n = mv > m_WP70Cut;
-  pass60n = mv > m_WP60Cut;
+  pass65n = mv > m_WP65Cut;
   
   auto TTbarJets_pT = Monitored::Scalar<float>("TTbarJets_pT",0);
   TTbarJets_pT=jet->pt() / Gaudi::Units::GeV;
+  auto pass90p = Monitored::Scalar<bool>("pass90p",false);
   auto pass85p = Monitored::Scalar<bool>("pass85p",false);
   auto pass77p = Monitored::Scalar<bool>("pass77p",false);
   auto pass70p = Monitored::Scalar<bool>("pass70p",false);
-  auto pass60p = Monitored::Scalar<bool>("pass60p",false);
+  auto pass65p = Monitored::Scalar<bool>("pass65p",false);
+  pass90p = mv > m_WP90Cut;
   pass85p = mv > m_WP85Cut;
   pass77p = mv > m_WP77Cut;
   pass70p = mv > m_WP70Cut;
-  pass60p = mv > m_WP60Cut;
-  fill(tool,TTbarJets_n,pass85n,pass77n,pass70n,pass60n,TTbarJets_pT,pass85p,pass77p,pass70p,pass60p);
+  pass65p = mv > m_WP65Cut;
+  fill(tool,TTbarJets_n,pass90n,pass85n,pass77n,pass70n,pass65n,TTbarJets_pT,pass90p,pass85p,pass77p,pass70p,pass65p);
 
   return;
 }
@@ -872,60 +886,72 @@ void JetTagMonitorAlgorithm::fillGoodJetHistos(const xAOD::Jet *jet) const {
     jet_MV_phi_00_05=mv;
     fill(tool,jet_MV_phi_00_05);}
 
-  auto jet_eta_60tag = Monitored::Scalar<float>("jet_eta_60tag",0);
+  auto jet_eta_65tag = Monitored::Scalar<float>("jet_eta_65tag",0);
   auto jet_eta_70tag = Monitored::Scalar<float>("jet_eta_70tag",0);
   auto jet_eta_77tag = Monitored::Scalar<float>("jet_eta_77tag",0);
   auto jet_eta_85tag = Monitored::Scalar<float>("jet_eta_85tag",0);
+  auto jet_eta_90tag = Monitored::Scalar<float>("jet_eta_90tag",0);
 
-  auto jet_phi_60tag = Monitored::Scalar<float>("jet_phi_60tag",0);
+  auto jet_phi_65tag = Monitored::Scalar<float>("jet_phi_65tag",0);
   auto jet_phi_70tag = Monitored::Scalar<float>("jet_phi_70tag",0);
   auto jet_phi_77tag = Monitored::Scalar<float>("jet_phi_77tag",0);
   auto jet_phi_85tag = Monitored::Scalar<float>("jet_phi_85tag",0);
+  auto jet_phi_90tag = Monitored::Scalar<float>("jet_phi_90tag",0);
   
-  if ( mv > m_WP85Cut ) {
-    jet_eta_85tag = jet->eta();
-    jet_phi_85tag = jet->phi();   
-    fill(tool,jet_eta_85tag,jet_phi_85tag);
-    if ( mv > m_WP77Cut ) {
-      jet_eta_77tag = jet->eta();
-      jet_phi_77tag = jet->phi();
-      fill(tool,jet_eta_77tag,jet_phi_77tag);
-      if ( mv > m_WP70Cut ) {
-	jet_eta_70tag = jet->eta();
-	jet_phi_70tag = jet->phi();
-	fill(tool,jet_eta_70tag,jet_phi_70tag);
-	if ( mv >  m_WP60Cut ) {
-	  jet_eta_60tag = jet->eta();
-	  jet_phi_60tag = jet->phi();
-	  fill(tool,jet_eta_60tag,jet_phi_60tag);
-	}
+  if ( mv > m_WP90Cut ) {
+    jet_eta_90tag = jet->eta();
+    jet_phi_90tag = jet->phi();
+    fill(tool,jet_eta_90tag,jet_phi_90tag);
+    if ( mv > m_WP85Cut ) {
+      jet_eta_85tag = jet->eta();
+      jet_phi_85tag = jet->phi();
+      fill(tool,jet_eta_85tag,jet_phi_85tag);
+      if ( mv > m_WP77Cut ) {
+        jet_eta_77tag = jet->eta();
+        jet_phi_77tag = jet->phi();
+        fill(tool,jet_eta_77tag,jet_phi_77tag);
+        if ( mv > m_WP70Cut ) {
+          jet_eta_70tag = jet->eta();
+          jet_phi_70tag = jet->phi();
+          fill(tool,jet_eta_70tag,jet_phi_70tag);
+          if ( mv > m_WP65Cut ) {
+            jet_eta_65tag = jet->eta();
+            jet_phi_65tag = jet->phi();
+            fill(tool,jet_eta_65tag,jet_phi_65tag);
+          }
+        }
       }
     }
   }
+
   
   auto jet_eta = Monitored::Scalar<float>("jet_eta",0);
   jet_eta = jet->eta();
+  auto pass90e = Monitored::Scalar<bool>("pass90e",false);
   auto pass85e = Monitored::Scalar<bool>("pass85e",false);
   auto pass77e = Monitored::Scalar<bool>("pass77e",false);
   auto pass70e = Monitored::Scalar<bool>("pass70e",false);
-  auto pass60e = Monitored::Scalar<bool>("pass60e",false);
+  auto pass65e = Monitored::Scalar<bool>("pass65e",false);
+  pass90e = mv > m_WP90Cut;
   pass85e = mv > m_WP85Cut;
   pass77e = mv > m_WP77Cut;
   pass70e = mv > m_WP70Cut;
-  pass60e = mv > m_WP60Cut;
+  pass65e = mv > m_WP65Cut;
 
   auto jet_phi = Monitored::Scalar<float>("jet_phi",0);
+  auto pass90f = Monitored::Scalar<bool>("pass90f",false);
   auto pass85f = Monitored::Scalar<bool>("pass85f",false);
   auto pass77f = Monitored::Scalar<bool>("pass77f",false);
   auto pass70f = Monitored::Scalar<bool>("pass70f",false);
-  auto pass60f = Monitored::Scalar<bool>("pass60f",false);
+  auto pass65f = Monitored::Scalar<bool>("pass65f",false);
   jet_phi = jet->phi();
+  pass90f = mv > m_WP90Cut;
   pass85f = mv > m_WP85Cut;
   pass77f = mv > m_WP77Cut;
   pass70f = mv > m_WP70Cut;
-  pass60f = mv > m_WP60Cut;
-  fill(tool,jet_eta,pass85e,pass77e,pass70e,pass60e,jet_phi,pass85f,pass77f,pass70f,pass60f);
-  
+  pass65f = mv > m_WP65Cut;
+  fill(tool,jet_eta,pass90e,pass85e,pass77e,pass70e,pass65e,jet_phi,pass90f,pass85f,pass77f,pass70f,pass65f);
+
   return;
 }
 
@@ -1023,59 +1049,69 @@ void JetTagMonitorAlgorithm::fillSuspectJetHistos(const xAOD::Jet *jet) const {
     sus_jet_MV_phi_00_05=mv;
     fill(tool,sus_jet_MV_phi_00_05);}
 
-  auto sus_jet_eta_60tag = Monitored::Scalar<float>("sus_jet_eta_60tag",0);
+  auto sus_jet_eta_65tag = Monitored::Scalar<float>("sus_jet_eta_65tag",0);
   auto sus_jet_eta_70tag = Monitored::Scalar<float>("sus_jet_eta_70tag",0);
   auto sus_jet_eta_77tag = Monitored::Scalar<float>("sus_jet_eta_77tag",0);
   auto sus_jet_eta_85tag = Monitored::Scalar<float>("sus_jet_eta_85tag",0);
+  auto sus_jet_eta_90tag = Monitored::Scalar<float>("sus_jet_eta_90tag",0);
 
-  auto sus_jet_phi_60tag = Monitored::Scalar<float>("sus_jet_phi_60tag",0);
+  auto sus_jet_phi_65tag = Monitored::Scalar<float>("sus_jet_phi_65tag",0);
   auto sus_jet_phi_70tag = Monitored::Scalar<float>("sus_jet_phi_70tag",0);
   auto sus_jet_phi_77tag = Monitored::Scalar<float>("sus_jet_phi_77tag",0);
   auto sus_jet_phi_85tag = Monitored::Scalar<float>("sus_jet_phi_85tag",0);
+  auto sus_jet_phi_90tag = Monitored::Scalar<float>("sus_jet_phi_90tag",0);
 
-  if ( mv > m_WP85Cut ) {
-    sus_jet_eta_85tag = jet->eta();
-    sus_jet_phi_85tag = jet->phi();   
-    fill(tool,sus_jet_eta_85tag,sus_jet_phi_85tag);
-    if ( mv > m_WP77Cut ) {
-      sus_jet_eta_77tag = jet->eta();
-      sus_jet_phi_77tag = jet->phi();
-      fill(tool,sus_jet_eta_77tag,sus_jet_phi_77tag);
-      if ( mv > m_WP70Cut ) {
-	sus_jet_eta_70tag = jet->eta();
-	sus_jet_phi_70tag = jet->phi();
-	fill(tool,sus_jet_eta_70tag,sus_jet_phi_70tag);
-	if ( mv >  m_WP60Cut ) {
-	  sus_jet_eta_60tag = jet->eta();
-	  sus_jet_phi_60tag = jet->phi();
-	  fill(tool,sus_jet_eta_60tag,sus_jet_phi_60tag);
-	}
+  if ( mv > m_WP90Cut ) {
+    sus_jet_eta_90tag = jet->eta();
+    sus_jet_phi_90tag = jet->phi();
+    fill(tool,sus_jet_eta_90tag,sus_jet_phi_90tag);
+    if ( mv > m_WP85Cut ) {
+      sus_jet_eta_85tag = jet->eta();
+      sus_jet_phi_85tag = jet->phi();
+      fill(tool,sus_jet_eta_85tag,sus_jet_phi_85tag);
+      if ( mv > m_WP77Cut ) {
+        sus_jet_eta_77tag = jet->eta();
+        sus_jet_phi_77tag = jet->phi();
+        fill(tool,sus_jet_eta_77tag,sus_jet_phi_77tag);
+        if ( mv > m_WP70Cut ) {
+          sus_jet_eta_70tag = jet->eta();
+          sus_jet_phi_70tag = jet->phi();
+          fill(tool,sus_jet_eta_70tag,sus_jet_phi_70tag);
+          if ( mv > m_WP65Cut ) {
+            sus_jet_eta_65tag = jet->eta();
+            sus_jet_phi_65tag = jet->phi();
+            fill(tool,sus_jet_eta_65tag,sus_jet_phi_65tag);
+          }
+        }
       }
     }
   }
-  
   auto sus_jet_eta = Monitored::Scalar<float>("sus_jet_eta",0);
   sus_jet_eta = jet->eta();
+  auto pass90e = Monitored::Scalar<bool>("pass90e",false);
   auto pass85e = Monitored::Scalar<bool>("pass85e",false);
   auto pass77e = Monitored::Scalar<bool>("pass77e",false);
   auto pass70e = Monitored::Scalar<bool>("pass70e",false);
-  auto pass60e = Monitored::Scalar<bool>("pass60e",false);
+  auto pass65e = Monitored::Scalar<bool>("pass65e",false);
+  pass90e = mv > m_WP90Cut;
   pass85e = mv > m_WP85Cut;
   pass77e = mv > m_WP77Cut;
   pass70e = mv > m_WP70Cut;
-  pass60e = mv > m_WP60Cut;
+  pass65e = mv > m_WP65Cut;
 
   auto sus_jet_phi = Monitored::Scalar<float>("sus_jet_phi",0);
+  auto pass90f = Monitored::Scalar<bool>("pass90f",false);
   auto pass85f = Monitored::Scalar<bool>("pass85f",false);
   auto pass77f = Monitored::Scalar<bool>("pass77f",false);
   auto pass70f = Monitored::Scalar<bool>("pass70f",false);
-  auto pass60f = Monitored::Scalar<bool>("pass60f",false);
+  auto pass65f = Monitored::Scalar<bool>("pass65f",false);
   sus_jet_phi = jet->phi();
+  pass90f = mv > m_WP90Cut;
   pass85f = mv > m_WP85Cut;
   pass77f = mv > m_WP77Cut;
   pass70f = mv > m_WP70Cut;
-  pass60f = mv > m_WP60Cut;
-  fill(tool,sus_jet_eta,pass85e,pass77e,pass70e,pass60e,sus_jet_phi,pass85f,pass77f,pass70f,pass60f);
+  pass65f = mv > m_WP65Cut;
+  fill(tool,sus_jet_eta,pass90e,pass85e,pass77e,pass70e,pass65e,sus_jet_phi,pass90f,pass85f,pass77f,pass70f,pass65f);
 
   return;
 }

@@ -122,15 +122,16 @@ def JetTagMonitorConfig(inputFlags):
     jetTagMonAlg.JVTpTCut = 60.0
     jetTagMonAlg.JVTetaCut = 2.4
      
-    #Temporarily monitoring DL1dv01 while FTAG software is updated to make GN2v01 available also outside Derivations.
     #Benchmarks from: https://ftag.docs.cern.ch/recommendations/algs/r22-preliminary/#preliminary-recommendation-as-of-07102023-superseded
-    jetTagMonAlg.TaggerName = "DL1dv01"
-    
-    jetTagMonAlg.WP60Cut = 4.854
-    jetTagMonAlg.WP70Cut = 3.493
-    jetTagMonAlg.WP77Cut = 2.456
-    jetTagMonAlg.WP85Cut = 0.948
-    jetTagMonAlg.cFraction = 0.018
+    jetTagMonAlg.TaggerName = "GN2v01"
+
+    jetTagMonAlg.WP65Cut = 2.669
+    jetTagMonAlg.WP70Cut = 1.892
+    jetTagMonAlg.WP77Cut = 0.844
+    jetTagMonAlg.WP85Cut = -0.378
+    jetTagMonAlg.WP90Cut = -1.34
+    jetTagMonAlg.cFraction = 0.2
+    jetTagMonAlg.tauFraction = 0.01
     MV_bins = 100
     MV_start = -6.0
     MV_stop = 14.0
@@ -256,25 +257,29 @@ def JetTagMonitorConfig(inputFlags):
     GeneralGroup.defineHistogram('nTTbarGoodJets',title='Number of good jets in ttbar events;Good jets per event;Number of events',path='TTbarEventSelection',xbins=10,xmin=-0.5,xmax=9.5)
 
     GeneralGroup.defineHistogram('TTbarJets_n',title='Total number of ttbar jets;Number of jets;Number of events',path='TTbarEventSelection',xbins=1,xmin=-0.5,xmax=0.5)
-    GeneralGroup.defineHistogram('TTbarJets_n_60tag',title='Number of ttbar jets passing 60 tag WP; Jets passing 60 tag WP;Number of ttbar jets',path='TTbarEventSelection',xbins=1,xmin=-0.5,xmax=0.5)
+    GeneralGroup.defineHistogram('TTbarJets_n_65tag',title='Number of ttbar jets passing 65 tag WP; Jets passing 65 tag WP;Number of ttbar jets',path='TTbarEventSelection',xbins=1,xmin=-0.5,xmax=0.5)
     GeneralGroup.defineHistogram('TTbarJets_n_70tag',title='Number of ttbar jets passing 70 tag WP; Jets passing 70 tag WP;Number of ttbar jets',path='TTbarEventSelection',xbins=1,xmin=-0.5,xmax=0.5)
     GeneralGroup.defineHistogram('TTbarJets_n_77tag',title='Number of ttbar jets passing 77 tag WP; Jets passing 77 tag WP;Number of ttbar jets',path='TTbarEventSelection',xbins=1,xmin=-0.5,xmax=0.5)
-    GeneralGroup.defineHistogram('TTbarJets_n_85tag',title='Number of ttbar jets passing 85 tag WP; Jets passing 60 tag WP;Number of ttbar jets',path='TTbarEventSelection',xbins=1,xmin=-0.5,xmax=0.5)
-    GeneralGroup.defineHistogram('pass60n,TTbarJets_n',type='TEfficiency',title='TTbar jets 60 tag WP Efficiency;ttbar jets;60 tag WP Efficiency',path='TTbarEventSelection',xbins=1,xmin=-0.5,xmax=0.5)
+    GeneralGroup.defineHistogram('TTbarJets_n_85tag',title='Number of ttbar jets passing 85 tag WP; Jets passing 65 tag WP;Number of ttbar jets',path='TTbarEventSelection',xbins=1,xmin=-0.5,xmax=0.5)
+    GeneralGroup.defineHistogram('TTbarJets_n_90tag',title='Number of ttbar jets passing 90 tag WP; Jets passing 90 tag WP;Number of ttbar jets',path='TTbarEventSelection',xbins=1,xmin=-0.5,xmax=0.5)
+    GeneralGroup.defineHistogram('pass65n,TTbarJets_n',type='TEfficiency',title='TTbar jets 65 tag WP Efficiency;ttbar jets;65 tag WP Efficiency',path='TTbarEventSelection',xbins=1,xmin=-0.5,xmax=0.5)
     GeneralGroup.defineHistogram('pass70n,TTbarJets_n',type='TEfficiency',title='TTbar jets 70 tag WP Efficiency;ttbar jets;70 tag WP Efficiency',path='TTbarEventSelection',xbins=1,xmin=-0.5,xmax=0.5)
     GeneralGroup.defineHistogram('pass77n,TTbarJets_n',type='TEfficiency',title='TTbar jets 77 tag WP Efficiency;ttbar jets;77 tag WP Efficiency',path='TTbarEventSelection',xbins=1,xmin=-0.5,xmax=0.5)
     GeneralGroup.defineHistogram('pass85n,TTbarJets_n',type='TEfficiency',title='TTbar jets 85 tag WP Efficiency;ttbar jets;85 tag WP Efficiency',path='TTbarEventSelection',xbins=1,xmin=-0.5,xmax=0.5)
+    GeneralGroup.defineHistogram('pass90n,TTbarJets_n',type='TEfficiency',title='TTbar jets 90 tag WP Efficiency;ttbar jets;90 tag WP Efficiency',path='TTbarEventSelection',xbins=1,xmin=-0.5,xmax=0.5)
 
     GeneralGroup.defineHistogram('TTbarJets_MV',title='MV of jets in ttbar events;Jet MV;Number of jets',path='JetTTbarEvents',xbins=int(MV_bins/2),xmin=MV_start,xmax=MV_stop)
     GeneralGroup.defineHistogram('TTbarJets_pT',title='Number of ttbar jets vs pT;ttbar jet pT;Number of ttbar jets',path='JetTTbarEvents',xbins=40,xmin=0,xmax=200)
-    GeneralGroup.defineHistogram('TTbarJets_pT_60tag',title='Number of ttbar jets passing 60 tag WP vs pT;ttbar jet pT;Number of ttbar jets',path='JetTTbarEvents',xbins=40,xmin=0,xmax=200)
+    GeneralGroup.defineHistogram('TTbarJets_pT_65tag',title='Number of ttbar jets passing 65 tag WP vs pT;ttbar jet pT;Number of ttbar jets',path='JetTTbarEvents',xbins=40,xmin=0,xmax=200)
     GeneralGroup.defineHistogram('TTbarJets_pT_70tag',title='Number of ttbar jets passing 70 tag WP vs pT;ttbar jet pT;Number of ttbar jets',path='JetTTbarEvents',xbins=40,xmin=0,xmax=200)
     GeneralGroup.defineHistogram('TTbarJets_pT_77tag',title='Number of ttbar jets passing 77 tag WP vs pT;ttbar jet pT;Number of ttbar jets',path='JetTTbarEvents',xbins=40,xmin=0,xmax=200)
     GeneralGroup.defineHistogram('TTbarJets_pT_85tag',title='Number of ttbar jets passing 85 tag WP vs pT;ttbar jet pT;Number of ttbar jets',path='JetTTbarEvents',xbins=40,xmin=0,xmax=200)
-    GeneralGroup.defineHistogram('pass60p,TTbarJets_pT',type='TEfficiency',title='TTbar jets 60 tag WP Efficiency vs pT;ttbar jet pT;60 tag WP Efficiency',path='JetTTbarEvents',xbins=40,xmin=0.0,xmax=200.0)
+    GeneralGroup.defineHistogram('TTbarJets_pT_90tag',title='Number of ttbar jets passing 90 tag WP vs pT;ttbar jet pT;Number of ttbar jets',path='JetTTbarEvents',xbins=40,xmin=0,xmax=200)
+    GeneralGroup.defineHistogram('pass65p,TTbarJets_pT',type='TEfficiency',title='TTbar jets 65 tag WP Efficiency vs pT;ttbar jet pT;65 tag WP Efficiency',path='JetTTbarEvents',xbins=40,xmin=0.0,xmax=200.0)
     GeneralGroup.defineHistogram('pass70p,TTbarJets_pT',type='TEfficiency',title='TTbar jets 70 tag WP Efficiency vs pT;ttbar jet pT;70 tag WP Efficiency',path='JetTTbarEvents',xbins=40,xmin=0.0,xmax=200.0)
     GeneralGroup.defineHistogram('pass77p,TTbarJets_pT',type='TEfficiency',title='TTbar jets 77 tag WP Efficiency vs pT;ttbar jet pT;77 tag WP Efficiency',path='JetTTbarEvents',xbins=40,xmin=0.0,xmax=200.0)
     GeneralGroup.defineHistogram('pass85p,TTbarJets_pT',type='TEfficiency',title='TTbar jets 85 tag WP Efficiency vs pT;ttbar jet pT;85 tag WP Efficiency',path='JetTTbarEvents',xbins=40,xmin=0.0,xmax=200.0)
+    GeneralGroup.defineHistogram('pass90p,TTbarJets_pT',type='TEfficiency',title='TTbar jets 90 tag WP Efficiency vs pT;ttbar jet pT;90 tag WP Efficiency',path='JetTTbarEvents',xbins=40,xmin=0.0,xmax=200.0)
 
     # SMT jets histograms
     GeneralGroup.defineHistogram('SoftMuons_n',title='Number of Soft Muons;Muons per event;Number of muons',path='SMTJetSelection',xbins=3,xmin=-0.5,xmax=2.5)
@@ -348,30 +353,35 @@ def JetTagMonitorConfig(inputFlags):
 
     #Good jet: eta and phi distributions of jets passing WPs and efficiency
     GeneralGroup.defineHistogram('jet_eta',title='Number of jets before passing tag vs #eta;Jet #eta;Number of jets',path='JetEtaPhi',xbins=20,xmin=-2.5,xmax=2.5)
-    GeneralGroup.defineHistogram('jet_eta_60tag',title='Number of jets passing 60 tag WP vs #eta;Jet #eta;Number of jets',path='JetEtaPhi',xbins=20,xmin=-2.5,xmax=2.5)
+    GeneralGroup.defineHistogram('jet_eta_65tag',title='Number of jets passing 65 tag WP vs #eta;Jet #eta;Number of jets',path='JetEtaPhi',xbins=20,xmin=-2.5,xmax=2.5)
     GeneralGroup.defineHistogram('jet_eta_70tag',title='Number of jets passing 70 tag WP vs #eta;Jet #eta;Number of jets',path='JetEtaPhi',xbins=20,xmin=-2.5,xmax=2.5)
     GeneralGroup.defineHistogram('jet_eta_77tag',title='Number of jets passing 77 tag WP vs #eta;Jet #eta;Number of jets',path='JetEtaPhi',xbins=20,xmin=-2.5,xmax=2.5)
     GeneralGroup.defineHistogram('jet_eta_85tag',title='Number of jets passing 85 tag WP vs #eta;Jet #eta;Number of jets',path='JetEtaPhi',xbins=20,xmin=-2.5,xmax=2.5)
-    GeneralGroup.defineHistogram('pass60e,jet_eta',type='TEfficiency',title='Jets 60 tag WP Efficiency vs #eta;Jet #eta;60 tag WP Efficiency',path='JetEtaPhi',xbins=20,xmin=-2.5,xmax=2.5)
+    GeneralGroup.defineHistogram('jet_eta_90tag',title='Number of jets passing 90 tag WP vs #eta;Jet #eta;Number of jets',path='JetEtaPhi',xbins=20,xmin=-2.5,xmax=2.5)
+    GeneralGroup.defineHistogram('pass65e,jet_eta',type='TEfficiency',title='Jets 65 tag WP Efficiency vs #eta;Jet #eta;65 tag WP Efficiency',path='JetEtaPhi',xbins=20,xmin=-2.5,xmax=2.5)
     GeneralGroup.defineHistogram('pass70e,jet_eta',type='TEfficiency',title='Jets 70 tag WP Efficiency vs #eta;Jet #eta;70 tag WP Efficiency',path='JetEtaPhi',xbins=20,xmin=-2.5,xmax=2.5)
     GeneralGroup.defineHistogram('pass77e,jet_eta',type='TEfficiency',title='Jets 77 tag WP Efficiency vs #eta;Jet #eta;77 tag WP Efficiency',path='JetEtaPhi',xbins=20,xmin=-2.5,xmax=2.5)
     GeneralGroup.defineHistogram('pass85e,jet_eta',type='TEfficiency',title='Jets 85 tag WP Efficiency vs #eta;Jet #eta;85 tag WP Efficiency',path='JetEtaPhi',xbins=20,xmin=-2.5,xmax=2.5)
+    GeneralGroup.defineHistogram('pass90e,jet_eta',type='TEfficiency',title='Jets 90 tag WP Efficiency vs #eta;Jet #eta;90 tag WP Efficiency',path='JetEtaPhi',xbins=20,xmin=-2.5,xmax=2.5)
 
     GeneralGroup.defineHistogram('jet_phi',title='Number of jets before passing tag vs #phi;Jet #phi;Number of jets',path='JetEtaPhi',xbins=24,xmin=-1*math.pi,xmax=math.pi)
-    GeneralGroup.defineHistogram('jet_phi_60tag',title='Number of jets passing 60 tag WP vs #phi;Jet #phi;Number of jets',path='JetEtaPhi',xbins=24,xmin=-1*math.pi,xmax=math.pi)
+    GeneralGroup.defineHistogram('jet_phi_65tag',title='Number of jets passing 65 tag WP vs #phi;Jet #phi;Number of jets',path='JetEtaPhi',xbins=24,xmin=-1*math.pi,xmax=math.pi)
     GeneralGroup.defineHistogram('jet_phi_70tag',title='Number of jets passing 70 tag WP vs #phi;Jet #phi;Number of jets',path='JetEtaPhi',xbins=24,xmin=-1*math.pi,xmax=math.pi)
     GeneralGroup.defineHistogram('jet_phi_77tag',title='Number of jets passing 77 tag WP vs #phi;Jet #phi;Number of jets',path='JetEtaPhi',xbins=24,xmin=-1*math.pi,xmax=math.pi)
     GeneralGroup.defineHistogram('jet_phi_85tag',title='Number of jets passing 85 tag WP vs #phi;Jet #phi;Number of jets',path='JetEtaPhi',xbins=24,xmin=-1*math.pi,xmax=math.pi)
-    GeneralGroup.defineHistogram('pass60f,jet_phi',type='TEfficiency',title='Jets 60 tag WP Efficiency vs #phi;Jet #phi;60 tag WP Efficiency',path='JetEtaPhi',xbins=24,xmin=-1*math.pi,xmax=math.pi)
+    GeneralGroup.defineHistogram('jet_phi_90tag',title='Number of jets passing 90 tag WP vs #phi;Jet #phi;Number of jets',path='JetEtaPhi',xbins=24,xmin=-1*math.pi,xmax=math.pi)
+    GeneralGroup.defineHistogram('pass65f,jet_phi',type='TEfficiency',title='Jets 65 tag WP Efficiency vs #phi;Jet #phi;65 tag WP Efficiency',path='JetEtaPhi',xbins=24,xmin=-1*math.pi,xmax=math.pi)
     GeneralGroup.defineHistogram('pass70f,jet_phi',type='TEfficiency',title='Jets 70 tag WP Efficiency vs #phi;Jet #phi;70 tag WP Efficiency',path='JetEtaPhi',xbins=24,xmin=-1*math.pi,xmax=math.pi)
     GeneralGroup.defineHistogram('pass77f,jet_phi',type='TEfficiency',title='Jets 77 tag WP Efficiency vs #phi;Jet #phi;77 tag WP Efficiency',path='JetEtaPhi',xbins=24,xmin=-1*math.pi,xmax=math.pi)
     GeneralGroup.defineHistogram('pass85f,jet_phi',type='TEfficiency',title='Jets 85 tag WP Efficiency vs #phi;Jet #phi;85 tag WP Efficiency',path='JetEtaPhi',xbins=24,xmin=-1*math.pi,xmax=math.pi)
+    GeneralGroup.defineHistogram('pass90f,jet_phi',type='TEfficiency',title='Jets 90 tag WP Efficiency vs #phi;Jet #phi;90 tag WP Efficiency',path='JetEtaPhi',xbins=24,xmin=-1*math.pi,xmax=math.pi)
 
     #Good jet: 2D MAP (eta/phi) and 2D TEfficiency of fraction of good jets
-    GeneralGroup.defineHistogram('jet_eta_60tag,jet_phi_60tag;jet_MAP_60tag',title='2D MAP of jets passing 60 tag WP;Jet #eta;Jet #phi',type='TH2F',path='JetEtaPhi',xbins=25,xmin=-2.5,xmax=2.5,ybins=50,ymin=-1*math.pi,ymax=math.pi)
+    GeneralGroup.defineHistogram('jet_eta_65tag,jet_phi_65tag;jet_MAP_65tag',title='2D MAP of jets passing 65 tag WP;Jet #eta;Jet #phi',type='TH2F',path='JetEtaPhi',xbins=25,xmin=-2.5,xmax=2.5,ybins=50,ymin=-1*math.pi,ymax=math.pi)
     GeneralGroup.defineHistogram('jet_eta_70tag,jet_phi_70tag;jet_MAP_70tag',title='2D MAP of jets passing 70 tag WP;Jet #eta;Jet #phi',type='TH2F',path='JetEtaPhi',xbins=25,xmin=-2.5,xmax=2.5,ybins=50,ymin=-1*math.pi,ymax=math.pi)
     GeneralGroup.defineHistogram('jet_eta_77tag,jet_phi_77tag;jet_MAP_77tag',title='2D MAP of jets passing 77 tag WP;Jet #eta;Jet #phi',type='TH2F',path='JetEtaPhi',xbins=25,xmin=-2.5,xmax=2.5,ybins=50,ymin=-1*math.pi,ymax=math.pi)
     GeneralGroup.defineHistogram('jet_eta_85tag,jet_phi_85tag;jet_MAP_85tag',title='2D MAP of jets passing 85 tag WP;Jet #eta;Jet #phi',type='TH2F',path='JetEtaPhi',xbins=25,xmin=-2.5,xmax=2.5,ybins=50,ymin=-1*math.pi,ymax=math.pi)
+    GeneralGroup.defineHistogram('jet_eta_90tag,jet_phi_90tag;jet_MAP_90tag',title='2D MAP of jets passing 90 tag WP;Jet #eta;Jet #phi',type='TH2F',path='JetEtaPhi',xbins=25,xmin=-2.5,xmax=2.5,ybins=50,ymin=-1*math.pi,ymax=math.pi)
 
     #Suspect jet plots (same definition of good jet plots) --> jet quality from Suspect/Suspect/Bad selection)
     GeneralGroup.defineHistogram('jet_pT_suspect',title='Suspect jets pT;Suspect Jet pT [GeV];Jets',path='JetSuspect',xbins=100,xmin=0.0,xmax=200.0)
@@ -401,29 +411,34 @@ def JetTagMonitorConfig(inputFlags):
     GeneralGroup.defineHistogram('sus_jet_MV_phi_25_31',title='Suspect jet MV in #phi bin 6 : #phi = [2.5,3.1];Jet MV;Jets',path='JetSuspect',xbins=int(MV_bins/2),xmin=MV_start,xmax=MV_stop)
 
     GeneralGroup.defineHistogram('sus_jet_eta',title='Number of Suspect jets before passing tag vs #eta;Jet #eta;Number of jets',path='JetSuspect',xbins=20,xmin=-2.5,xmax=2.5)
-    GeneralGroup.defineHistogram('sus_jet_eta_60tag',title='Number of Suspect jets passing 60 tag WP vs #eta;Jet #eta;Number of jets',path='JetSuspect',xbins=20,xmin=-2.5,xmax=2.5)
+    GeneralGroup.defineHistogram('sus_jet_eta_65tag',title='Number of Suspect jets passing 65 tag WP vs #eta;Jet #eta;Number of jets',path='JetSuspect',xbins=20,xmin=-2.5,xmax=2.5)
     GeneralGroup.defineHistogram('sus_jet_eta_70tag',title='Number of Suspect jets passing 70 tag WP vs #eta;Jet #eta;Number of jets',path='JetSuspect',xbins=20,xmin=-2.5,xmax=2.5)
     GeneralGroup.defineHistogram('sus_jet_eta_77tag',title='Number of Suspect jets passing 77 tag WP vs #eta;Jet #eta;Number of jets',path='JetSuspect',xbins=20,xmin=-2.5,xmax=2.5)
     GeneralGroup.defineHistogram('sus_jet_eta_85tag',title='Number of Suspect jets passing 85 tag WP vs #eta;Jet #eta;Number of jets',path='JetSuspect',xbins=20,xmin=-2.5,xmax=2.5)
-    GeneralGroup.defineHistogram('pass60e,sus_jet_eta',type='TEfficiency',title='Suspect jets 60 tag WP Efficiency vs #eta;Jet #eta;60 tag WP Efficiency',path='JetSuspect',xbins=20,xmin=-2.5,xmax=2.5)
+    GeneralGroup.defineHistogram('sus_jet_eta_90tag',title='Number of Suspect jets passing 90 tag WP vs #eta;Jet #eta;Number of jets',path='JetSuspect',xbins=20,xmin=-2.5,xmax=2.5)
+    GeneralGroup.defineHistogram('pass65e,sus_jet_eta',type='TEfficiency',title='Suspect jets 65 tag WP Efficiency vs #eta;Jet #eta;65 tag WP Efficiency',path='JetSuspect',xbins=20,xmin=-2.5,xmax=2.5)
     GeneralGroup.defineHistogram('pass70e,sus_jet_eta',type='TEfficiency',title='Suspect jets 70 tag WP Efficiency vs #eta;Jet #eta;70 tag WP Efficiency',path='JetSuspect',xbins=20,xmin=-2.5,xmax=2.5)
     GeneralGroup.defineHistogram('pass77e,sus_jet_eta',type='TEfficiency',title='Suspect jets 77 tag WP Efficiency vs #eta;Jet #eta;77 tag WP Efficiency',path='JetSuspect',xbins=20,xmin=-2.5,xmax=2.5)
     GeneralGroup.defineHistogram('pass85e,sus_jet_eta',type='TEfficiency',title='Suspect jets 85 tag WP Efficiency vs #eta;Jet #eta;85 tag WP Efficiency',path='JetSuspect',xbins=20,xmin=-2.5,xmax=2.5)
+    GeneralGroup.defineHistogram('pass90e,sus_jet_eta',type='TEfficiency',title='Suspect jets 90 tag WP Efficiency vs #eta;Jet #eta;90 tag WP Efficiency',path='JetSuspect',xbins=20,xmin=-2.5,xmax=2.5)
 
     GeneralGroup.defineHistogram('sus_jet_phi',title='Number of Suspect jets before passing tag vs #phi;Jet #phi;Number of jets',path='JetSuspect',xbins=24,xmin=-1*math.pi,xmax=math.pi)
-    GeneralGroup.defineHistogram('sus_jet_phi_60tag',title='Number of Suspect jets passing 60 tag WP vs #phi;Jet #phi;Number of jets',path='JetSuspect',xbins=24,xmin=-1*math.pi,xmax=math.pi)
+    GeneralGroup.defineHistogram('sus_jet_phi_65tag',title='Number of Suspect jets passing 65 tag WP vs #phi;Jet #phi;Number of jets',path='JetSuspect',xbins=24,xmin=-1*math.pi,xmax=math.pi)
     GeneralGroup.defineHistogram('sus_jet_phi_70tag',title='Number of Suspect jets passing 70 tag WP vs #phi;Jet #phi;Number of jets',path='JetSuspect',xbins=24,xmin=-1*math.pi,xmax=math.pi)
     GeneralGroup.defineHistogram('sus_jet_phi_77tag',title='Number of Suspect jets passing 77 tag WP vs #phi;Jet #phi;Number of jets',path='JetSuspect',xbins=24,xmin=-1*math.pi,xmax=math.pi)
     GeneralGroup.defineHistogram('sus_jet_phi_85tag',title='Number of Suspect jets passing 85 tag WP vs #phi;Jet #phi;Number of jets',path='JetSuspect',xbins=24,xmin=-1*math.pi,xmax=math.pi)
-    GeneralGroup.defineHistogram('pass60f,sus_jet_phi',type='TEfficiency',title='Suspect jets 60 tag WP Efficiency vs #phi;Jet #phi;60 tag WP Efficiency',path='JetSuspect',xbins=24,xmin=-1*math.pi,xmax=math.pi)
+    GeneralGroup.defineHistogram('sus_jet_phi_90tag',title='Number of Suspect jets passing 90 tag WP vs #phi;Jet #phi;Number of jets',path='JetSuspect',xbins=24,xmin=-1*math.pi,xmax=math.pi)
+    GeneralGroup.defineHistogram('pass65f,sus_jet_phi',type='TEfficiency',title='Suspect jets 65 tag WP Efficiency vs #phi;Jet #phi;65 tag WP Efficiency',path='JetSuspect',xbins=24,xmin=-1*math.pi,xmax=math.pi)
     GeneralGroup.defineHistogram('pass70f,sus_jet_phi',type='TEfficiency',title='Suspect jets 70 tag WP Efficiency vs #phi;Jet #phi;70 tag WP Efficiency',path='JetSuspect',xbins=24,xmin=-1*math.pi,xmax=math.pi)
     GeneralGroup.defineHistogram('pass77f,sus_jet_phi',type='TEfficiency',title='Suspect jets 77 tag WP Efficiency vs #phi;Jet #phi;77 tag WP Efficiency',path='JetSuspect',xbins=24,xmin=-1*math.pi,xmax=math.pi)
     GeneralGroup.defineHistogram('pass85f,sus_jet_phi',type='TEfficiency',title='Suspect jets 85 tag WP Efficiency vs #phi;Jet #phi;85 tag WP Efficiency',path='JetSuspect',xbins=24,xmin=-1*math.pi,xmax=math.pi)
+    GeneralGroup.defineHistogram('pass90f,sus_jet_phi',type='TEfficiency',title='Suspect jets 90 tag WP Efficiency vs #phi;Jet #phi;90 tag WP Efficiency',path='JetSuspect',xbins=24,xmin=-1*math.pi,xmax=math.pi)
 
-    GeneralGroup.defineHistogram('sus_jet_eta_60tag,sus_jet_phi_60tag;sus_jet_MAP_60tag',title='2D MAP of Suspect jets passing 60 tag WP;Jet #eta;Jet #phi',type='TH2F',path='JetSuspect',xbins=25,xmin=-2.5,xmax=2.5,ybins=50,ymin=-1*math.pi,ymax=math.pi)
+    GeneralGroup.defineHistogram('sus_jet_eta_65tag,sus_jet_phi_65tag;sus_jet_MAP_65tag',title='2D MAP of Suspect jets passing 65 tag WP;Jet #eta;Jet #phi',type='TH2F',path='JetSuspect',xbins=25,xmin=-2.5,xmax=2.5,ybins=50,ymin=-1*math.pi,ymax=math.pi)
     GeneralGroup.defineHistogram('sus_jet_eta_70tag,sus_jet_phi_70tag;sus_jet_MAP_70tag',title='2D MAP of Suspect jets passing 70 tag WP;Jet #eta;Jet #phi',type='TH2F',path='JetSuspect',xbins=25,xmin=-2.5,xmax=2.5,ybins=50,ymin=-1*math.pi,ymax=math.pi)
     GeneralGroup.defineHistogram('sus_jet_eta_77tag,sus_jet_phi_77tag;sus_jet_MAP_77tag',title='2D MAP of Suspect jets passing 77 tag WP;Jet #eta;Jet #phi',type='TH2F',path='JetSuspect',xbins=25,xmin=-2.5,xmax=2.5,ybins=50,ymin=-1*math.pi,ymax=math.pi)
     GeneralGroup.defineHistogram('sus_jet_eta_85tag,sus_jet_phi_85tag;sus_jet_MAP_85tag',title='2D MAP of Suspect jets passing 85 tag WP;Jet #eta;Jet #phi',type='TH2F',path='JetSuspect',xbins=25,xmin=-2.5,xmax=2.5,ybins=50,ymin=-1*math.pi,ymax=math.pi)
+    GeneralGroup.defineHistogram('sus_jet_eta_90tag,sus_jet_phi_90tag;sus_jet_MAP_90tag',title='2D MAP of Suspect jets passing 90 tag WP;Jet #eta;Jet #phi',type='TH2F',path='JetSuspect',xbins=25,xmin=-2.5,xmax=2.5,ybins=50,ymin=-1*math.pi,ymax=math.pi)
 
     ### STEP 6 ###
     # Finalize. The return value should be a tuple of the ComponentAccumulator

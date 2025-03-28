@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # L1CALOCore.py
 # Define the list of containers for the L1Calo derivations
@@ -35,7 +35,6 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     if isNotPool:
         from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
         acc.merge(LVL1CaloRun2ReadBSCfg(flags))
-
 
     # set up thinning tools
     thinningTools = []
@@ -120,6 +119,20 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         SCellType = flags.Trigger.L1.L1CaloSuperCellContainerName
         if SCellType in flags.Input.Collections:
             acc.merge(L1CaloFEXSimCfg(flags, simulateAltTau=True))
+        # Need to deal with database for MC productions where L1Calo DB was not in global tag
+        if flags.Input.isMC:
+            from Campaigns.Utils import Campaign
+            print("campaign",flags.Input.MCCampaign)
+            if flags.Input.MCCampaign != Campaign.MC23e:
+                if flags.Trigger.L1.doeFex:
+                    from IOVDbSvc.IOVDbSvcConfig import addOverride
+                    acc.merge(addOverride(flags, '/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts', 'EfexNoiseCuts-RUN3-MCDEFAULT-TEST-00'))
+                    acc.merge(addOverride(flags, '/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib', 'EfexEnergyCalib-RUN3-MCDEFAULT-TEST-00'))
+                if flags.Trigger.L1.dojFex:
+                    from IOVDbSvc.IOVDbSvcConfig import addOverride
+                    acc.merge(addOverride(flags, '/TRIGGER/L1Calo/V1/Calibration/JfexSystemSettings', 'JfexSystemSettings-RUN3-MCDEFAULT-TEST'))
+                    acc.merge(addOverride(flags, '/TRIGGER/L1Calo/V1/Calibration/JfexModuleSettings', 'JfexModuleSettings-RUN3-MCDEFAULT-TEST'))
+                    acc.merge(addOverride(flags, '/TRIGGER/L1Calo/V1/Calibration/JfexNoiseCuts', 'JfexNoiseCuts-RUN3-MCDEFAULT-TEST'))
 
     # decorate the eFEX TOBs 
     if flags.Trigger.L1.doeFex and isNotPool:
@@ -135,7 +148,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
                                                             eFexTauRoIContainer = 'L1_eTauRoIAltSim',
                                                             ExtraInputs=[]) )
     
-    if fillSuperCells :
+    if fillSuperCells:
         acc.addEventAlgo( CompFactory.LVL1.eFexTOBSuperCellDecorator('eFexTOBSuperCellDecoratorSim',
                                                                      eFexEMRoIContainer = 'L1_eEMRoISim',
                                                                      eFexTauRoIContainer = 'L1_eTauxRoISim') )
@@ -157,6 +170,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     L1CaloSlimmingHelper.IncludeJetTriggerContent = True
     L1CaloSlimmingHelper.IncludeBJetTriggerContent = True
     L1CaloSlimmingHelper.IncludeTauTriggerContent = True # does not select any Run3 HLT collections - added below
+    IncludeEtMissTriggerContent = True # very useful to have MET trigger info
 
     # Container selection based on share/L1CALO versions
     # Note: if the container is in the on-the-fly list (ContainersOnTheFly.py) then we do not have to add it to the dictionary
@@ -222,6 +236,32 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
                                                          "HLT_TrigTauRecMerged_CaloMVAOnly":"xAOD::TauJetContainer",
                                                          "HLT_TrigTauRecMerged_CaloMVAOnlyAux":"xAOD::TauJetAuxContainer"})
         AllVariables += ["HLT_TrigTauRecMerged_MVA", "HLT_TrigTauRecMerged_LLP", "HLT_TrigTauRecMerged_LRT", "HLT_TrigTauRecMerged_CaloMVAOnly"]
+
+    if IncludeEtMissTriggerContent:
+        L1CaloSlimmingHelper.AppendToDictionary.update ({"HLT_MET_tcpufit":"xAOD::TrigMissingETContainer",
+                                                         "HLT_MET_tcpufitAux":"xAOD::TrigMissingETAuxContainer",
+                                                         "HLT_MET_cell":"xAOD::TrigMissingETContainer",
+                                                         "HLT_MET_cellAux":"xAOD::TrigMissingETAuxContainer", # not present
+                                                         "HLT_MET_trkmht":"xAOD::TrigMissingETContainer",
+                                                         "HLT_MET_trkmhtAux":"xAOD::TrigMissingETAuxContainer",
+                                                         "HLT_MET_cvfpufit":"xAOD::TrigMissingETContainer",
+                                                         "HLT_MET_cvfpufitAux":"xAOD::TrigMissingETAuxContainer",
+                                                         "HLT_MET_pfopufit":"xAOD::TrigMissingETContainer",
+                                                         "HLT_MET_pfopufitAux":"xAOD::TrigMissingETAuxContainer",
+                                                         "HLT_MET_mhtpufit_em":"xAOD::TrigMissingETContainer",
+                                                         "HLT_MET_mhtpufit_emAux":"xAOD::TrigMissingETAuxContainer",
+                                                         "HLT_MET_mhtpufit_pf":"xAOD::TrigMissingETContainer",
+                                                         "HLT_MET_mhtpufit_pfAux":"xAOD::TrigMissingETAuxContainer",
+                                                         "HLT_MET_pfsum":"xAOD::TrigMissingETContainer",
+                                                         "HLT_MET_pfsumAux":"xAOD::TrigMissingETAuxContainer",
+                                                         "HLT_MET_pfsum_vssk":"xAOD::TrigMissingETContainer",
+                                                         "HLT_MET_pfsum_vsskAux":"xAOD::TrigMissingETAuxContainer",
+                                                         "HLT_MET_pfsum_cssk":"xAOD::TrigMissingETContainer",
+                                                         "HLT_MET_pfsum_csskAux":"xAOD::TrigMissingETAuxContainer",
+                                                         "HLT_MET_nn":"xAOD::TrigMissingETContainer",
+                                                         "HLT_MET_nnAux":"xAOD::TrigMissingETAuxContainer"})
+
+        AllVariables += ["HLT_MET_tcpufit","HLT_MET_cell","HLT_MET_trkmht","HLT_MET_cvfpufit","HLT_MET_pfopufit","HLT_MET_mhtpufit_em","HLT_MET_mhtpufit_pf","HLT_MET_pfsum","HLT_MET_pfsum_vssk","HLT_MET_pfsum_cssk","HLT_MET_nn"]
 
     # Generic event info
     L1CaloSlimmingHelper.AppendToDictionary.update({"EventInfo":"xAOD::EventInfo","EventInfoAux":"xAOD::EventAuxInfo"}) 
@@ -448,13 +488,26 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
 
     # Truth collections
     if flags.Input.isMC:
-        from DerivationFrameworkMCTruth.MCTruthCommonConfig import PreJetMCTruthAugmentationsCfg,AddTruthJetsCfg
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import PreJetMCTruthAugmentationsCfg
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTruthCollectionNavigationDecorationsCfg,AddBornLeptonCollectionCfg
-        from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTruthMETCfg,PostJetMCTruthAugmentationsCfg
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import PostJetMCTruthAugmentationsCfg
 
         acc.merge(PreJetMCTruthAugmentationsCfg(flags,decorationDressing = 'dressedPhoton'))
-        acc.merge(AddTruthJetsCfg(flags))
-        acc.merge(AddTruthMETCfg(flags))
+        #
+        from JetRecConfig.StandardSmallRJets import AntiKt4Truth,AntiKt4TruthWZ,AntiKt4TruthDressedWZ,AntiKtVRTruthCharged
+        from JetRecConfig.StandardLargeRJets import AntiKt10TruthTrimmed,AntiKt10TruthSoftDrop
+        from JetRecConfig.JetRecConfig import JetRecCfg
+        jetList = [AntiKt4Truth,AntiKt4TruthWZ,AntiKt4TruthDressedWZ,AntiKtVRTruthCharged,
+                   AntiKt10TruthTrimmed,AntiKt10TruthSoftDrop]
+
+        for jd in jetList:
+            if jd.fullname() not in flags.Input.Collections:
+                acc.merge(JetRecCfg(flags,jd))
+
+        if ( "xAOD::MissingETContainer#MET_Truth") not in flags.Input.TypedCollections:
+            from METReconstruction.METTruth_Cfg import METTruth_Cfg
+            acc.merge(METTruth_Cfg(flags))
+
         acc.merge(PostJetMCTruthAugmentationsCfg(flags, decorationDressing = 'dressedPhoton'))
         acc.addEventAlgo(CompFactory.DerivationFramework.LockDecorations(name ="L1CALOTruthContentsLockDecoration", Decorations = ['TruthParticles.dressedPhoton']))
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos"]))
@@ -462,14 +515,10 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         acc.merge(AddBornLeptonCollectionCfg(flags))
 
         L1CaloSlimmingHelper.AppendToDictionary.update (
-            {'TruthElectrons':'xAOD::TruthParticleContainer','TruthElectronsAux':'xAOD::TruthParticleAuxContainer',
-             'TruthMuons':'xAOD::TruthParticleContainer','TruthMuonsAux':'xAOD::TruthParticleAuxContainer',
-             'TruthPhotons':'xAOD::TruthParticleContainer','TruthPhotonsAux':'xAOD::TruthParticleAuxContainer',
-             'TruthTaus':'xAOD::TruthParticleContainer','TruthTausAux':'xAOD::TruthParticleAuxContainer',
-             'TruthNeutrinos':'xAOD::TruthParticleContainer','TruthNeutrinosAux':'xAOD::TruthParticleAuxContainer',
-             'BornLeptons':'xAOD::TruthParticleContainer','BornLeptonsAux':'xAOD::TruthParticleAuxContainer',
-             'MET_Truth':'xAOD::MissingETContainer','MET_TruthAux':'xAOD::MissingETAuxContainer'}
+            {
+                'HardScatterParticles':'xAOD::TruthParticleContainer','HardScatterParticlesAux':'xAOD::TruthParticleAuxContainer'}
         )
+
         AllVariables += [
             "TruthElectrons",
             "TruthMuons",
@@ -477,7 +526,12 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
             "TruthTaus",
             "TruthNeutrinos",
             "BornLeptons",
-            "MET_Truth"
+            "HardScatterParticles",
+            "MET_Truth",
+            "AntiKt4TruthJets",
+            "AntiKt4TruthWZJets",
+            "AntiKt10TruthTrimmedPtFrac5SmallR20Jets",
+            "AntiKt10TruthSoftDropBeta100Zcut10Jets"
         ]
 
     L1CaloSlimmingHelper.AllVariables = AllVariables
