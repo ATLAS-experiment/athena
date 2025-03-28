@@ -492,14 +492,7 @@ namespace xAOD {
 
 
   float CaloCluster_v1::getSamplVarFromAcc(const Accessor< std::vector <float > >& acc , const CaloSample sampling, const float errorvalue) const {
-    const std::vector<float>& vec=acc(*this);
-    const unsigned idx=sampVarIdx(sampling);
-    if (idx<vec.size() ) {
-      return vec[idx];
-    }
-
-      //std::cout <<Sampling " << sampling << ", Pattern=" << std::hex <<m_samplingPattern << std::dec << ", index=" << idx << " size=" << vec.size() << std::endl;
-      return errorvalue;
+    return CaloClusterDetails::getSamplVar(sampling,m_samplingPattern,acc(*this),errorvalue);
   }
 
   bool CaloCluster_v1::setSamplVarFromAcc(const Accessor< std::vector <float > >& acc, const CaloSample sampling, const float value) {
@@ -628,17 +621,8 @@ namespace xAOD {
 
 
   float CaloCluster_v1::energyBE(const unsigned sample) const {
-    if (sample>3) return -999;
-    const CaloSample barrelSample=(CaloSample)(CaloSampling::PreSamplerB+sample);
-    const CaloSample endcapSample=(CaloSample)(CaloSampling::PreSamplerE+sample);
-    double energy=0;
-    if (this->hasSampling(barrelSample)) {
-      energy+=eSample(barrelSample); //Check for errorcode? Should not happen...
-    }
-    if (this->hasSampling(endcapSample)) {
-      energy+=eSample(endcapSample);
-    }
-    return energy;
+    static const Accessor< std::vector <float > > eAcc("e_sampl");
+    return CaloClusterDetails::energyBE(sample,m_samplingPattern,eAcc(*this));
   }
 
   float CaloCluster_v1::etaBE(const unsigned sample) const {
