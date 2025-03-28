@@ -159,6 +159,10 @@ StatusCode AthenaOutputStreamTool::connectServices(const std::string& dataStore,
    }
    m_extendProvenanceRecord = extendProvenenceRecord;
    auto pprop = dynamic_cast<const IProperty*>(parent());
+   if (not pprop){
+     ATH_MSG_ERROR("'parent' could not be cast to IProperty");
+     return(StatusCode::FAILURE);
+   }
    auto keep = dynamic_cast<const StringProperty&>( pprop->getProperty("KeepProvenanceTagsRegEx") );
    m_keepProvenancesStr = keep.value();
    // create RegEx pattern from the property value, specify extended grammar
