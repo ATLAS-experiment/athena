@@ -34,6 +34,7 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticleAuxContainer.h"
 #include "xAODTracking/TrackingPrimitives.h"
+#include "xAODTracking/TrackMeasurementValidationContainer.h"
 #include "AthContainers/ConstAccessor.h"
 
 // Local include(s):
@@ -151,6 +152,24 @@ int main(int argc, char* argv[]) {
       }
     } // done loop over tracks
     
+    // Get clusters
+    const xAOD::TrackMeasurementValidationContainer* clusters = 0;
+    if ( event.retrieve( clusters, "PixelClusters" ).isFailure() ) {
+      Error( APP_NAME, "Failed to read pixel cluster container!" );
+      return 1;
+    }
+    Info(APP_NAME, "Number of clusters: %i", static_cast<int>(clusters->size()));
+
+    for (const xAOD::TrackMeasurementValidation* clusIt : *clusters  ) { 
+      float dEdxEq = 0.;
+      dEdxEq = (clusIt)->auxdataConst<float>("dEdxEq");
+      static const SG::AuxElement::ConstAccessor< float > dEdxEqAcc("dEdxEq");
+      if (dEdxEqAcc.isAvailable(*clusIt)) {
+        dEdxEq = dEdxEqAcc(*clusIt);
+        Info(APP_NAME, "cluster dEdxEq:        %g ", dEdxEq);
+      }
+    }
+
     // Close with a message:
     Info(APP_NAME,
          "===>>>  done processing event #%i, "

@@ -3,7 +3,13 @@
 
 #include "TrkAnalysisInterfaces/IPixelToTPIDDualTool.h"
 #include "AsgTools/AsgTool.h"
+#include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/ReadHandleKey.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
+
+#include "xAODTracking/TrackStateValidation.h"
+#include "xAODTracking/TrackMeasurementValidation.h"
 
 #include "AsgTools/PropertyWrapper.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -103,7 +109,11 @@ namespace CP {
     /// dE/dx equalization scale factor dataframe read from trees.
     std::optional<ROOT::RDataFrame> m_df; 
     std::unique_ptr<TFile> m_file;  // Keep the file open
-    // std::optional<ROOT::RDataFrame> m_filtered_df; // will only contain the SFs from the closest run.
+
+    /// Decorators
+    /// Start with equalized dE/dx measurement.  Safe to hardcode PixelCluster container?  Track container -> MSOS container is 1-to-1. Only 1 PixelCluster container...
+    /// Also include raw dE/dx?  Or the SF?  Or the SF error?
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidation> m_clusterdEdxKey{this, "clusterdEdxKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
 
     /// For charge -> dE/dx calc.
     double m_conversionfactor;

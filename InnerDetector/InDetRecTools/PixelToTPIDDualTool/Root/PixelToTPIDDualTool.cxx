@@ -1,8 +1,6 @@
 #include "PixelToTPIDDualTool/PixelToTPIDDualTool.h"
 
-// Needed?
-#include "AsgDataHandles/ReadHandle.h"
-#include "PathResolver/PathResolver.h"
+// Needed?  Move to .h?
 #ifndef XAOD_STANDALONE
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackStateOnSurface.h"
@@ -37,9 +35,9 @@ namespace CP {
     float sidensity = 2.329; // silicon density in g cm^-3
     m_conversionfactor=energyPair/sidensity;
 
-    m_Pixel_sensorthickness=.025; //250 microns Pixel Planars
-    m_IBL_3D_sensorthickness=.023; //230 microns IBL 3D
-    m_IBL_PLANAR_sensorthickness=.020;// 200 microns IBL Planars
+    m_Pixel_sensorthickness=.025; // 250 microns Pixel Planars
+    m_IBL_3D_sensorthickness=.023; // 230 microns IBL 3D
+    m_IBL_PLANAR_sensorthickness=.020; // 200 microns IBL Planars
   }
 
   PixelToTPIDDualTool::~PixelToTPIDDualTool() = default;
@@ -58,6 +56,9 @@ namespace CP {
     else{
       ATH_MSG_INFO("Will NOT equalize cluster dE/dx measurements before calculating truncated mean.");
     }
+
+    ANA_CHECK ( m_clusterdEdxKey.initialize() );
+    ATH_MSG_INFO("Will decorate PixelCluster container with variable " << m_clusterdEdxKey);
 
 #ifndef XAOD_STANDALONE
     ATH_CHECK(m_eventInfo.initialize());
@@ -223,14 +224,12 @@ namespace CP {
             /// Read from trees on CVMFS or from conditions database.
             if(m_equalizeClusterMeasurements){
 
-              /// Get dE/dx equalization scale factor.
-              /// Need runNumber.  See MuonSelectionTool for an example.
+              /// Insert code from Rebeccas Hicks' QT task here (ATLIDTRKCP-579).
+              /// Pulls dE/dx equalization SF from conditons database.
               float SF = 1.;
 
               /// Apply scale factor and store
               cluster.dEdxEq = clusterdEdx * SF;
-
-              /// Decorate PixelClusterOnTrack?  Might not want to for ESD.  Definitely want to for xAOD.
 
             }
 
@@ -242,7 +241,6 @@ namespace CP {
 
     /// Always calculate raw truncated mean.
     float averagedEdx = getTruncatedMean(clusters, nUsedHits, pixelhits);
-    //float averagedEdx = getTruncatedMean(dEdxMap, nUsedHits, pixelhits);
     
     /// Calculate equalized truncated mean.
     if(m_equalizeClusterMeasurements) {
@@ -302,10 +300,6 @@ namespace CP {
     /// If using SFs from trees, get the closest run.
     /// Ideally, would filter the dataframe in initialize, only keeping the rows from the closest runNumber.
     /// But we don't know the runNumber until execute...
-    /// Unless runNumber is included as a property...
-    /// Or the runNumber is cached the first time in execute:
-    ///    In .h:  std::optional<int> m_cachedRunNumber;
-    ///    In execute: if (!m_cachedRunNumber) m_cachedRunNumber = currentRunNumber;
     int closestRunNumber = 0;
 
     std::optional<ROOT::RDF::RNode> filtered_df; // since no default constructor.
@@ -324,18 +318,6 @@ namespace CP {
       /// Filter the RDataFrame to just keep this run:
       filtered_df = df.Filter([closestRunNumber](int run) { return run == closestRunNumber; }, {"runNumber"});
     }
-
-    /*
-    /// test
-    auto result = filtered_df->Filter(
-                                  [](int bec, int layerID, int etaM) {
-                                    return bec == 0 && layerID == 1 && etaM == 2;
-                                  },
-                                  {"bec", "layerID", "etaM"});
-    auto SF_values = result.Take<double>("SF");
-    auto SF_error_values = result.Take<double>("SF_error");
-    ATH_MSG_INFO("Test: found SF " << SF_values->at(0) << "for this run for bec 0, layerID 1, etaM 2");
-    */
 
     /// Check for track states:
     static const SG::AuxElement::ConstAccessor< StatesOnTrack > trackStateAcc(m_msosLink);
@@ -487,7 +469,9 @@ namespace CP {
         cluster.dEdxEq = clusterdEdx * SF;
 
         /// Decorate PixelClusterOnTrack?  Might not want to for ESD.  Definitely want to for xAOD.
-        
+        ATH_MSG_DEBUG("Will decorate  variable " << m_clusterdEdxKey << " with value " << cluster.dEdxEq);
+        SG::WriteDecorHandle<xAOD::TrackMeasurementValidation, float > dEdxEqHandle(m_clusterdEdxKey); // no ctx?
+        dEdxEqHandle(**pixclus) = cluster.dEdxEq;
       }
      
       /// Add cluster to vector for truncated mean calculation
