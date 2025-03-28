@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Configuration of TrkAmbiguityProcessor
 # The ambiguity processor drives the ambiguity resolution step that
@@ -13,6 +13,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
+from TrkConfig.TrkConfigFlags import PixelClusterSplittingType
 
 
 def SimpleAmbiguityProcessorToolCfg(flags,
@@ -300,10 +301,12 @@ def DenseEnvironmentsAmbiguityScoreProcessorToolCfg(
             InDetScoringToolCfg(flags)))
 
     if "SplitProbTool" not in kwargs:
-        if flags.Tracking.doPixelTruthSplit:
+        if (flags.Tracking.pixelClusterSplittingType is
+            PixelClusterSplittingType.Truth):
             from InDetConfig.SiClusterizationToolConfig import (
                 TruthPixelClusterSplitProbToolCfg as PixelClusterSplitProbToolCfg)
-        else:
+        elif (flags.Tracking.pixelClusterSplittingType is
+              PixelClusterSplittingType.NeuralNet):
             from InDetConfig.SiClusterizationToolConfig import (
                 NnPixelClusterSplitProbToolCfg as PixelClusterSplitProbToolCfg)
         kwargs.setdefault("SplitProbTool", (
@@ -376,10 +379,12 @@ def ITkDenseEnvironmentsAmbiguityScoreProcessorToolCfg(
             ITkScoringToolCfg(flags)))
 
     if "SplitProbTool" not in kwargs:
-        if flags.Tracking.doPixelTruthSplit:
+        if (flags.Tracking.pixelClusterSplittingType is
+            PixelClusterSplittingType.Truth):
             from InDetConfig.SiClusterizationToolConfig import (
                 ITkTruthPixelClusterSplitProbToolCfg as PixelClusterSplitProbToolCfg)
-        else:
+        elif (flags.Tracking.pixelClusterSplittingType is
+              PixelClusterSplittingType.NeuralNet):
             from InDetConfig.SiClusterizationToolConfig import (
                 ITkNnPixelClusterSplitProbToolCfg as PixelClusterSplitProbToolCfg)
         kwargs.setdefault("SplitProbTool", (

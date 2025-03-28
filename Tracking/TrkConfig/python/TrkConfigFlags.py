@@ -106,9 +106,6 @@ def createTrackingConfigFlags():
     # Switch for running TIDE Ambi
     icf.addFlag("Tracking.doTIDE_Ambi", lambda prevFlags:
                 not (prevFlags.Beam.Type is BeamType.Cosmics))
-    # Switch to use truth-based pixel cluster splitting emulation
-    icf.addFlag("Tracking.doPixelTruthSplit", lambda prevFlags:
-                prevFlags.GeoModel.Run >= LHCPeriod.Run4)
     # Use simple position and error estimate for on-track pixel cluster
     icf.addFlag("Tracking.doPixelDigitalClustering", False)
     # Try to split pixel clusters
