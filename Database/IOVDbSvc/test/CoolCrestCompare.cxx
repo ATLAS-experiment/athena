@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /* CoolCrestCompare.cxx
@@ -21,6 +21,7 @@
 #include "../src/IOVDbFolder.h"
 #include "../src/CrestFunctions.h"
 #include "../src/IOVDbStringFunctions.h"
+#include "../src/CoralCrestManager.h"
 //
 #include "GaudiKernelFixtureBase.h"
 #include "TestFolderFixture.h"
@@ -111,18 +112,13 @@ public:
     std::map<std::string, std::string> cresttagmap;
     IOVDbNamespace::CrestFunctions cfunctions(m_crest_str);
     cresttagmap.clear();
-    cresttagmap = cfunctions.getGlobalTagMap(m_gTagCrest);
+    cresttagmap = CoralCrestManager::getGlobalTagMap(m_crest_str,m_gTagCrest);
     m_crest_tag = cresttagmap[m_folder];
-   /* for (auto it = cresttagmap.cbegin(); it != cresttagmap.cend(); ++it) {
-        std::cout << "{" << (*it).first << ": " << (*it).second << "}\n";
-    }*/
-    //std::cerr<<"Crest tag="<<m_crest_tag<<std::endl;
     if(m_crest_tag.size()==0){
       std::cerr<<"ERROR in Crest. No folder:\""<<m_folder<<"\" in Global tag:\""<<m_gTagCrest<<"\""<<std::endl;
       exit(1);
     } 
     m_crest_folder_desc=cfunctions.folderDescriptionForTag(m_crest_tag);
-    //std::cerr<<"Folder descr: "<<m_crest_folder_desc<<std::endl;
     IOVDbParser parser(m_folder+m_crest_folder_desc,m_log);
     IOVDbConn connection("", true, m_log);
     IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "CREST",false,m_crest_str,m_crest_tag,true);
