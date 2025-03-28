@@ -56,9 +56,6 @@ namespace IOVDbNamespace{
     std::string 
     extractDescriptionFromJson(const std::string & jsonReply);
 
-    std::map<std::string, std::string>
-    getGlobalTagMap(const std::string& globaltag);
-
     nlohmann::json getTagInfo(const std::string & tag);
 
     nlohmann::json getTagProperties(const std::string & tag);
