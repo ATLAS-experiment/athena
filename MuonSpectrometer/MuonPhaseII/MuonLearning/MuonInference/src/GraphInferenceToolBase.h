@@ -8,6 +8,7 @@
 #include "MuonInferenceInterfaces/NodeFeatureList.h"
 #include "MuonInferenceInterfaces/GraphData.h"
 
+#include "AthOnnxInterfaces/IOnnxRuntimeSessionTool.h"
 
 #include "MuonSpacePoint/SpacePointContainer.h"
 
@@ -37,20 +38,13 @@ namespace MuonML{
         protected:
             StatusCode setupModel();
     
-            const Ort::Session* model() const;
+            Ort::Session& model() const;
             /** @brief Input space points to filter  */
             SG::ReadHandleKey<MuonR4::SpacePointContainer> m_readKey{this, "ReadSpacePoints", "MuonSpacePoints"};
         private:
-            /** @brief Location of the model file */
-            Gaudi::Property<std::string> m_modelPath{this, "ModelPath", ""};
             /** @brief List of features to be used for the inference */
             NodeFeatureList m_graphFeatures{};
-            /** @brief Pointer to the ONNX runtime environment */
-            std::unique_ptr<Ort::Env> m_env{};
-            /** @brief Pointer to the ONNX session options */
-            std::unique_ptr<Ort::SessionOptions> m_session_options{};
-            /** @brief Pointer to the ONNX model session */
-            std::unique_ptr<Ort::Session> m_model{};
+            ToolHandle<AthOnnx::IOnnxRuntimeSessionTool> m_onnxSessionTool{this, "ModelSession", "" };
 
     }; 
 

@@ -8,7 +8,9 @@
 #include "MuonInferenceInterfaces/NodeFeatureList.h"
 #include "MuonPatternHelpers/MatrixUtils.h"
 #include "PathResolver/PathResolver.h"
-#include <filesystem>
+
+#include <span>
+
 namespace {
     template <typename T>
         std::ostream& operator<<(std::ostream& ostr, const std::vector<T>& vec) {
@@ -83,56 +85,35 @@ namespace {
     }
 }
 namespace MuonML{
+    Ort::Session& GraphInferenceToolBase::model() const {
+        return m_onnxSessionTool->session();
+    }
     StatusCode GraphInferenceToolBase::setupModel() {
-        
-        const std::string  modelPath = std::filesystem::is_regular_file(std::filesystem::path{m_modelPath.value()}) 
-                                     ? m_modelPath.value() : PathResolver::find_calib_file(m_modelPath);
-        if (modelPath.empty()) {
-            ATH_MSG_FATAL("No such file or directory "<<m_modelPath<<".");
-            return StatusCode::FAILURE;
-        }
-        try {
-            m_env             = std::make_unique<Ort::Env>(ORT_LOGGING_LEVEL_WARNING, "ONNXInference");
-            m_session_options = std::make_unique<Ort::SessionOptions>();
-            m_session_options->SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
-            m_model           = std::make_unique<Ort::Session>(*m_env, modelPath.c_str(), *m_session_options);
-
-            Ort::Env env(ORT_LOGGING_LEVEL_WARNING, "ONNXInference");
-            Ort::SessionOptions session_options;
-            session_options.SetIntraOpNumThreads(1);
-            session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
-
-            m_model = std::make_unique<Ort::Session>(env, modelPath.c_str(), session_options);
-            ATH_MSG_DEBUG("Successfully loaded inference model from "<<modelPath);
-        
+        ATH_CHECK(m_onnxSessionTool.retrieve());
+        ATH_CHECK(m_readKey.initialize());
             
-            Ort::ModelMetadata metadata = m_model->GetModelMetadata();
-            Ort::AllocatorWithDefaultOptions allocator;
-            Ort::AllocatedStringPtr feature_json_ptr = metadata.LookupCustomMetadataMapAllocated("feature_names", allocator);
+        Ort::ModelMetadata metadata = model().GetModelMetadata();
+        Ort::AllocatorWithDefaultOptions allocator;
+        Ort::AllocatedStringPtr feature_json_ptr = metadata.LookupCustomMetadataMapAllocated("feature_names", allocator);
             
-            if (feature_json_ptr) {
-                std::string feature_json = feature_json_ptr.get();
-                nlohmann::json json_obj = nlohmann::json::parse(feature_json);
-                for (const auto& feature : json_obj) {
-                    m_graphFeatures.addFeature(feature.get<std::string>(), msgStream());
-                }
+        if (feature_json_ptr) {
+            std::string feature_json = feature_json_ptr.get();
+            nlohmann::json json_obj = nlohmann::json::parse(feature_json);
+            for (const auto& feature : json_obj) {
+                m_graphFeatures.addFeature(feature.get<std::string>(), msgStream());
             }
-            m_graphFeatures.setConnector("fullyConnected", msgStream());
-        } catch (const std::exception& e) {
-            ATH_MSG_ERROR("Failed to retrieve feature from ONNX model: " << e.what());
-            return StatusCode::FAILURE;
         }
+        m_graphFeatures.setConnector("fullyConnected", msgStream());
 
         if (!m_graphFeatures.isValid()) {
             ATH_MSG_FATAL("No graph features have been parsed. Please check the model: "<<m_graphFeatures.featureNames());
             return StatusCode::FAILURE;
         }
-        ATH_CHECK(m_readKey.initialize());
         return StatusCode::SUCCESS;
     }
 
     StatusCode GraphInferenceToolBase::buildGraph(const EventContext& ctx,
-                                                    GraphRawData& graphData) const {
+                                                  GraphRawData& graphData) const {
 
         /** Check whether the graph needs a rebuild */
         if (graphData.previousList && (*graphData.previousList) != m_graphFeatures) {
@@ -177,11 +158,9 @@ namespace MuonML{
         graphData.srcEdges.insert(graphData.srcEdges.end(), std::make_move_iterator(graphData.desEdges.begin()),
                                     std::make_move_iterator(graphData.desEdges.end()));
 
-        //std::vector<int64_t> sortedEdges = makeSortedEdges(graphData.srcEdges);
-	ATH_MSG_DEBUG("Features:"<<m_graphFeatures.featureNames());
+        ATH_MSG_DEBUG("Features:"<<m_graphFeatures.featureNames());
         ATH_MSG_DEBUG(formatNodeFeatures(graphData.featureLeaves, m_graphFeatures.numFeatures()));
-        ATH_MSG_DEBUG("Edge indices:");
-        ATH_MSG_DEBUG(makeIndexPairs(makeSortedEdges(graphData.srcEdges)));
+        ATH_MSG_DEBUG("Edge indices:"<<makeIndexPairs(makeSortedEdges(graphData.srcEdges)));
 
         std::vector<int64_t> featShape{nNodes, static_cast<int64_t>(m_graphFeatures.numFeatures())};    // (N, nFeatures)
         std::vector<int64_t> edgeShape{2, static_cast<int64_t>(graphData.srcEdges.size() / 2)};         // (2, E)
@@ -203,16 +182,15 @@ namespace MuonML{
         graphData.srcEdges.clear();
         graphData.desEdges.clear();
         graphData.featureLeaves.clear();
-
+        ATH_MSG_DEBUG("Graph data built successfully.");
         return StatusCode::SUCCESS;
     }
 
     StatusCode GraphInferenceToolBase::runInference(GraphRawData& graphData) const {
-        if (!m_model) {
-            ATH_MSG_ERROR("ONNX model is not loaded.");
+        if (!m_graphFeatures.isValid()) {
+            ATH_MSG_ERROR("ONNX model is not loaded. Please call setupModel()");
             return StatusCode::FAILURE;
         }
-    
         if (!graphData.graph) {
             ATH_MSG_ERROR("Graph data is not built.");
             return StatusCode::FAILURE;
@@ -229,7 +207,7 @@ namespace MuonML{
         Ort::RunOptions run_options;
         run_options.SetRunLogSeverityLevel(ORT_LOGGING_LEVEL_WARNING);
 
-        std::vector<Ort::Value> outputTensors = m_model->Run(run_options, 
+        std::vector<Ort::Value> outputTensors = model().Run(run_options, 
                                                 inputNames.data(),                    // input tensor names
                                                 graphData.graph->dataTensor.data(),  // pointer to the tensor vector
                                                 graphData.graph->dataTensor.size(),   // size of the tensor vector
@@ -244,11 +222,11 @@ namespace MuonML{
         float* output_data = outputTensors[0].GetTensorMutableData<float>();
         size_t output_size = outputTensors[0].GetTensorTypeAndShapeInfo().GetElementCount();
 
-        std::vector<float> predictions(output_data, output_data + output_size);
-
+        std::span<float> predictions(output_data, output_data + output_size);
+        
         for (size_t i = 0; i < output_size; i++) {
             if (!std::isfinite(predictions[i])) {
-                ATH_MSG_ERROR("Non-finite prediction detected! Setting to zero.");
+                ATH_MSG_WARNING("Non-finite prediction detected! Setting to -100..");
                 predictions[i] = -100.0f;
             }
         }

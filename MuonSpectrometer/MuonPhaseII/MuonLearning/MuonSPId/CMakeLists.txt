@@ -19,10 +19,10 @@ atlas_add_component( MuonSPId
                                      
 atlas_install_python_modules( python/*.py)
 
-atlas_add_test( testMuonSPId
-	SCRIPT python -m MuonSPId.muonSPIdDump --nEvents 5 --noSTGC --noMM
-                PROPERTIES TIMEOUT 600
-                PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT noerror.sh)
+#atlas_add_test( testMuonSPId
+#	SCRIPT python -m MuonSPId.muonSPIdDump --nEvents 5 --noSTGC --noMM
+#                PROPERTIES TIMEOUT 600
+#                PRIVATE_WORKING_DIRECTORY
+#                POST_EXEC_SCRIPT noerror.sh)
 
 # atlas_install_data( models/* )

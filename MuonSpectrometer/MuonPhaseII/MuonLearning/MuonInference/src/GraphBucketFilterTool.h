@@ -18,7 +18,7 @@ namespace MuonML{
             virtual StatusCode initialize() override final;
         private:
             SG::WriteHandleKey<MuonR4::SpacePointContainer> m_writeKey{this, "WriteSpacePointKey", "FilteredMlSpacePoints"};
-            Gaudi::Property<double>                         m_filterCut{this,"MLFilterCut", -7};
+            Gaudi::Property<double>                         m_filterCut{this,"MLFilterCut", -2.8};
 
     };
 

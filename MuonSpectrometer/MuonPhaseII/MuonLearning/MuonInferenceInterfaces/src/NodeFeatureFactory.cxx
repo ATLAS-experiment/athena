@@ -5,6 +5,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include "AthenaBaseComps/AthMessaging.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 
+#include <GaudiKernel/SystemOfUnits.h>
 #include <set>
 
 namespace MuonML {
@@ -81,7 +82,8 @@ namespace MuonML {
                     }),
                 std::make_unique<NodeFeature>("bucket_density", 
                     [](const Bucket_t& bucket, size_t /*index*/) {
-                        return 1.*bucket.size() / (bucket.coveredMax() - bucket.coveredMin()); 
+
+                        return 1.*bucket.size() / std::max(bucket.coveredMax() - bucket.coveredMin(), 1. * Gaudi::Units::cm); 
                     }), 
                 std::make_unique<NodeFeature>("isolation", 
                     [](const Bucket_t& bucket, size_t index) {
@@ -90,7 +92,8 @@ namespace MuonML {
                         for (size_t other =0 ; other < bucket.size(); ++ other){
                             neighbors+= index != other && (bucket[index]->positionInChamber() - bucket[other]->positionInChamber()).perp2() < radCut2;
                         }
-                        float bucket_density = 1.f*bucket.size() / (bucket.coveredMax() - bucket.coveredMin());
+                    
+                        float bucket_density = 1.f*bucket.size() / std::max(bucket.coveredMax() - bucket.coveredMin(), 1. * Gaudi::Units::cm);
                         return neighbors / bucket_density;
                     }), 
                 std::make_unique<NodeFeature>("covX", 

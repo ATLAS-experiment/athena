@@ -13,7 +13,7 @@ find_package( onnxruntime REQUIRED)
 atlas_add_component( MuonInference
                      src/components/*.cxx src/*.cxx 
                      LINK_LIBRARIES AthenaKernel StoreGateLib  MuonInferenceInterfaces PathResolver
-                                    ${ONNXRUNTIME_LIBRARIES})
+                                    AthOnnxInterfaces  ${ONNXRUNTIME_LIBRARIES})
 
 atlas_install_python_modules( python/*.py)
 

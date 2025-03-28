@@ -11,33 +11,41 @@ namespace MuonML{
                                                         GraphRawData& graphData) const {
 
         ATH_CHECK(buildGraph(ctx, graphData));
-        ATH_CHECK(runInference(graphData));
-        SG::WriteHandle filteredSpacePoints{m_writeKey, ctx};
-        ATH_CHECK(filteredSpacePoints.record(std::make_unique<MuonR4::SpacePointContainer>()));
-        //// Inference part
-    
+
         SG::ReadHandle inputSpacePoints{m_readKey, ctx};
         ATH_CHECK(inputSpacePoints.isPresent());
 
+        SG::WriteHandle filteredSpacePoints{m_writeKey, ctx};
+        ATH_CHECK(filteredSpacePoints.record(std::make_unique<MuonR4::SpacePointContainer>()));
+        if (inputSpacePoints->empty()) {
+            ATH_MSG_DEBUG("No input space points found.");
+            return StatusCode::SUCCESS;
+        }
+    
+        ATH_CHECK(runInference(graphData));
+    
         size_t predictionIndex = 0;
         auto outputPredictions = graphData.graph->dataTensor[2].GetTensorMutableData<float>();
 
         ATH_MSG_DEBUG("Cut value: " << m_filterCut);
     
         for (const MuonR4::SpacePointBucket* bucket : *inputSpacePoints) {
-            std::unique_ptr<MuonR4::SpacePointBucket> filteredBucket = std::make_unique<MuonR4::SpacePointBucket>();
+            std::unique_ptr<MuonR4::SpacePointBucket> filteredBucket = std::make_unique<MuonR4::SpacePointBucket>(*bucket);
+            filteredBucket->clear();
+            LayerSpBucket mlBucket{*bucket};  // We are ordering twice... this must be optimized! 
 
             for (size_t i = 0; i < bucket->size(); ++i, ++predictionIndex) {
                 ATH_MSG_DEBUG("Prediction[" << predictionIndex << "]: " << outputPredictions[predictionIndex]);
                 if (outputPredictions[predictionIndex] > m_filterCut) {
-                    filteredBucket->push_back((*bucket)[i]);
+                    filteredBucket->push_back(std::make_unique<MuonR4::SpacePoint>(*(mlBucket)[i]));
                 }
             }
 
-            ATH_MSG_DEBUG("Bucket size before filtering: " << bucket->size() 
+            ATH_MSG_DEBUG("Bucket size before filtering: " << mlBucket.size() 
                             << ", after filtering: " << filteredBucket->size() );
-            
-            filteredSpacePoints->push_back(std::move(filteredBucket));
+            if (filteredBucket->size()) {
+                filteredSpacePoints->push_back(std::move(filteredBucket));
+            }
         }
 
         return StatusCode::SUCCESS;

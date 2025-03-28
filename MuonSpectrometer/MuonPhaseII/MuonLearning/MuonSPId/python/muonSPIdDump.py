@@ -16,6 +16,7 @@ def MuonSPIdDumpCfg(flags, name="MuonSPIdMaker", **kwargs):
 
 
 def main(args):
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, executeTest, setupHistSvcCfg
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = True
@@ -36,12 +37,12 @@ def main(args):
     cfg.merge(MuonSegmentFittingAlgCfg(flags))
 
     cfg.merge(MuonSPIdDumpCfg(flags))
-    cfg.getService("MessageSvc").setVerbose= [ "MuonSPIdMaker"]
+    #cfg.getService("MessageSvc").setVerbose= [ "MuonSPIdMaker"]
     executeTest(cfg)
 
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, setupHistSvcCfg
+    from MuonGeoModelTestR4.testGeoModel import SetupArgParser
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(outRootFile="MuonSPId_R3SimHits.root")
