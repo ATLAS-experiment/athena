@@ -945,20 +945,17 @@ namespace MuonGM {
         //*********************
         // As-Built (MuonNswAsBuilt is not included in AthSimulation)
         //*********************
-        
         if(manager()->getsTGCAsBuilt() && design->type == MuonChannelDesign::ChannelType::etaStrip){
             pos.head(2) = manager()->getsTGCAsBuilt()->correctPosition(layerId, pos.head(2));
-        
-#ifndef NDEBUG
         }
+#ifndef NDEBUG
         else {
             MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
             if (log.level() <= MSG::DEBUG) {    
-                log << MSG::DEBUG << "No as-built corrections provided for stEta: "<<getStationEta() << " stPhi: "<<getStationPhi()<<" ml: "<<m_ml<<" layer: "<<strip_id.ilayer<< endmsg;
+                log << MSG::DEBUG << "No as-built corrections provided for stEta: "<<getStationEta() << " stPhi: "<<getStationPhi()<<" ml: "<<m_ml<< endmsg;
             }
         }
 #endif
-        }
 #endif 
         
 
