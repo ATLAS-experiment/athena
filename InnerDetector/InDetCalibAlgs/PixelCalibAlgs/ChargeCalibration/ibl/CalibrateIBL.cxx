@@ -316,10 +316,13 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
             TIter modItr(modKeyList);
             TKey *modKey;
 
+            TDirectory *dirRod = roThrDir->mkdir(rodName);
+
             while ((modKey = (TKey *)modItr()))
             {
                 TString modName(modKey->GetName());
                 string modStr(modKey->GetName());
+                TDirectory *dirMod = dirRod->mkdir(modName);
 
                 TString chi2HistDirPath = modName + "/" + chi2HistName + "/A0/B0";
 
@@ -469,6 +472,9 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
                         h2_ThrSig[sfe]->Fill(0.5, THRnormSig, 1);
                         h2_ThrSig[sfe]->Fill(1.5, THRlongSig, 1);
                     }
+                    dirMod->WriteTObject(h1_ThrNorm[sfe].get());
+                    dirMod->WriteTObject(h1_ThrLong[sfe].get());
+                    
                     h1_ThrNorm[sfe].reset();
                     h1_ThrSigNorm[sfe].reset();
                     h1_ThrLong[sfe].reset();
@@ -980,7 +986,6 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
                 grTotSprd->SetLineColor(4);
                 grTotSprd->SetMarkerStyle(4);
                 grTotSprd->SetMarkerSize(1.);
-                grTotSprd->SetMaximum(0.9);
 
                 TF1 ToTres("ToTres", funcDispConvoluted, 0.8, 16.5, 3);
                 ToTres.SetParameter(1,13.);
