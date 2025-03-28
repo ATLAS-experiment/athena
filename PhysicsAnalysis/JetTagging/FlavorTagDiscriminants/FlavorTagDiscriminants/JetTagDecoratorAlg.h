@@ -6,7 +6,7 @@
 #define JET_TAG_DECORATOR_ALG_H
 
 #include "FlavorTagDiscriminants/DecoratorAlg.h"
-#include "FlavorTagDiscriminants/IJetTagDecorator.h"
+#include "FlavorTagInference/IJetTagDecorator.h"
 
 #include "xAODJet/JetContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"

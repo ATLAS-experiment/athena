@@ -7,7 +7,7 @@
 
 
 #include "FlavorTagDiscriminants/DecoratorAlg.h"
-#include "FlavorTagDiscriminants/IBTagDecorator.h"
+#include "FlavorTagInference/IBTagDecorator.h"
 
 #include "xAODBTagging/BTaggingContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"

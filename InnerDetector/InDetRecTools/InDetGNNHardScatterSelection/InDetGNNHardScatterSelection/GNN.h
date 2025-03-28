@@ -14,7 +14,7 @@
 // Tool includes
 #include "InDetGNNHardScatterSelection/DataPrepUtilities.h"
 #include "InDetGNNHardScatterSelection/IParticlesLoader.h"
-#include "FlavorTagDiscriminants/SaltModel.h"
+#include "FlavorTagInference/SaltModel.h"
 
 // EDM includes
 #include "xAODTracking/VertexFwd.h"
@@ -49,7 +49,7 @@ namespace InDetGNNHardScatterSelection {
 
     virtual void decorate(const xAOD::Vertex& verrtex) const;
 
-    std::shared_ptr<const FlavorTagDiscriminants::SaltModel> m_saltModel;
+    std::shared_ptr<const FlavorTagInference::SaltModel> m_saltModel;
   private:
     // type definitions for ONNX output decorators
     using TPC = xAOD::TrackParticleContainer;
@@ -66,7 +66,7 @@ namespace InDetGNNHardScatterSelection {
     };
 
     /* create all decorators */
-    std::set<std::string> createDecorators(const FlavorTagDiscriminants::SaltModel::OutputConfig& outConfig);
+    std::set<std::string> createDecorators(const FlavorTagInference::SaltModel::OutputConfig& outConfig);
     
     std::string m_input_node_name;
     std::vector<internal::VarFromVertex> m_varsFromVertex;

@@ -3,7 +3,7 @@
 */
 
 #include "FlavorTagDiscriminants/BTagMuonAugmenter.h"
-#include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
+#include "FlavorTagInference/BTagTrackIpAccessor.h"
 #include "xAODBTagging/BTaggingUtilities.h"
 #include "xAODMuon/Muon.h"
 #include "xAODMuon/MuonContainer.h"

@@ -6,14 +6,16 @@
 #ifndef BTAG_MUON_AUGMENTER_H
 #define BTAG_MUON_AUGMENTER_H
 
-#include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
-#include "FlavorTagDiscriminants/FlipTagEnums.h"
+#include "FlavorTagInference/BTagTrackIpAccessor.h"
+#include "FlavorTagInference/FlipTagEnums.h"
 #include "xAODBTagging/BTaggingFwd.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODMuon/MuonContainer.h"
 
 namespace FlavorTagDiscriminants {
+
+  using FlipTagConfig = FlavorTagInference::FlipTagConfig;
 
   // Accessor and Decorator pair template for IO purposes where you
   // just want to decorate "someVariable" to the btagging object as

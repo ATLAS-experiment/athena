@@ -9,7 +9,7 @@ from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 from BTagging.BTagConfig import BTagAlgsCfg
 
 # fast btagging
-from FlavorTagDiscriminants.FlavorTagNNConfig import getStaticTrackVars
+from FlavorTagInference.FlavorTagNNConfig import getStaticTrackVars
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
 
 def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
@@ -212,7 +212,7 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
         nnAlgoext = nnAlgo[1]
         toolDict = {
             "json": CompFactory.FlavorTagDiscriminants.DL2Tool,
-            "onnx": CompFactory.FlavorTagDiscriminants.GNNTool
+            "onnx": CompFactory.FlavorTagInference.GNNTool
         }
         tag_flags = {pass_flag}
 

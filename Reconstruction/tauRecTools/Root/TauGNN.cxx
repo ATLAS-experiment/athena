@@ -3,7 +3,7 @@
 */
 
 #include "tauRecTools/TauGNN.h"
-#include "FlavorTagDiscriminants/SaltModel.h"
+#include "FlavorTagInference/SaltModel.h"
 #include "lwtnn/parse_json.hh"
 #include "PathResolver/PathResolver.h"
 
@@ -14,7 +14,7 @@
 
 TauGNN::TauGNN(const std::string &nnFile, const Config &config):
     asg::AsgMessaging("TauGNN"),
-    m_saltModel(std::make_shared<FlavorTagDiscriminants::SaltModel>(nnFile)),
+    m_saltModel(std::make_shared<FlavorTagInference::SaltModel>(nnFile)),
     m_config{config}
   {
     //==================================================//
@@ -22,13 +22,13 @@ TauGNN::TauGNN(const std::string &nnFile, const Config &config):
     //==================================================//
 
     // get the configuration of the model outputs
-    FlavorTagDiscriminants::SaltModel::OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
+    FlavorTagInference::SaltModel::OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
     
     //Let's see the output!
     for (const auto& out_node: gnn_output_config) {
-        if(out_node.type==FlavorTagDiscriminants::SaltModelOutput::OutputType::FLOAT) ATH_MSG_INFO("Found output FLOAT node named:" << out_node.name);
-        if(out_node.type==FlavorTagDiscriminants::SaltModelOutput::OutputType::VECCHAR) ATH_MSG_INFO("Found output VECCHAR node named:" << out_node.name);
-        if(out_node.type==FlavorTagDiscriminants::SaltModelOutput::OutputType::VECFLOAT) ATH_MSG_INFO("Found output VECFLOAT node named:" << out_node.name);
+        if(out_node.type==FlavorTagInference::SaltModelOutput::OutputType::FLOAT) ATH_MSG_INFO("Found output FLOAT node named:" << out_node.name);
+        if(out_node.type==FlavorTagInference::SaltModelOutput::OutputType::VECCHAR) ATH_MSG_INFO("Found output VECCHAR node named:" << out_node.name);
+        if(out_node.type==FlavorTagInference::SaltModelOutput::OutputType::VECFLOAT) ATH_MSG_INFO("Found output VECFLOAT node named:" << out_node.name);
     }
 
     //Get model config (for inputs)

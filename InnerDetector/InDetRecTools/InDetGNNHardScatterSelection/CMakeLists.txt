@@ -17,6 +17,7 @@ atlas_add_library( InDetGNNHardScatterSelectionLib
     InDetTruthVertexValidationLib 
     xAODTracking 
     xAODJet 
+    FlavorTagInference
     FlavorTagDiscriminants
     FourMomUtils 
     AthenaBaseComps
@@ -32,7 +33,6 @@ atlas_add_library( InDetGNNHardScatterSelectionLib
     SystematicsHandlesLib
     FourMomUtils
     TruthUtils
-    FlavorTagDiscriminants
     InDetPhysValMonitoringLib
     TrackVertexAssociationToolLib
 )

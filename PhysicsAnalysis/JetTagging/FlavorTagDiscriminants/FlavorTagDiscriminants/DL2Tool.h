@@ -7,8 +7,8 @@
 #define DL2_TOOL_H
 
 #include "AsgTools/AsgTool.h"
-#include "FlavorTagDiscriminants/IBTagDecorator.h"
-#include "FlavorTagDiscriminants/IJetTagConditionalDecorator.h"
+#include "FlavorTagInference/IBTagDecorator.h"
+#include "FlavorTagInference/IJetTagConditionalDecorator.h"
 
 namespace FlavorTagDiscriminants {
 

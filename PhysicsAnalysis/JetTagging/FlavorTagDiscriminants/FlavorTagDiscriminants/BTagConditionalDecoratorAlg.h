@@ -6,7 +6,7 @@
 #define B_TAG_CONDITIONALDECORATOR_ALG_H
 
 #include "FlavorTagDiscriminants/DecoratorAlg.h"
-#include "FlavorTagDiscriminants/IBTagConditionalDecorator.h"
+#include "FlavorTagInference/IBTagConditionalDecorator.h"
 
 #include "xAODBTagging/BTaggingContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"

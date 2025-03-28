@@ -3,7 +3,8 @@
 */
 
 #include "FlavorTagDiscriminants/DL2.h"
-#include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
+#include "FlavorTagInference/BTagTrackIpAccessor.h"
+#include "FlavorTagInference/FTagDataDependencyNames.h"
 #include "lwtnn/LightweightGraph.hh"
 #include "lwtnn/NanReplacer.hh"
 
@@ -140,7 +141,7 @@ namespace FlavorTagDiscriminants {
     }
   }
 
-  FTagDataDependencyNames DL2::getDataDependencyNames() const {
+ FTagDataDependencyNames DL2::getDataDependencyNames() const {
     return m_dataDependencyNames;
   }
 }

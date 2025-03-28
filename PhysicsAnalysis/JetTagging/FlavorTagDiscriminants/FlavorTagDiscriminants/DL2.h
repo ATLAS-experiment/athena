@@ -6,8 +6,8 @@
 #define DL2_H
 
 // local includes
-#include "FlavorTagDiscriminants/DataPrepUtilities.h"
-#include "FlavorTagDiscriminants/TracksLoader.h"
+#include "FlavorTagInference/DataPrepUtilities.h"
+#include "FlavorTagInference/TracksLoader.h"
 
 // forward declarations
 namespace lwt {
@@ -16,6 +16,8 @@ namespace lwt {
 }
 
 namespace FlavorTagDiscriminants {
+
+  using namespace FlavorTagInference;
 
   class DL2 {
   public:

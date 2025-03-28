@@ -8,7 +8,7 @@
 
 
 #include "AsgTools/AsgTool.h"
-#include "FlavorTagDiscriminants/IBTagDecorator.h"
+#include "FlavorTagInference/IBTagDecorator.h"
 
 class BTagJetAugmenter;
 

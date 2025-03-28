@@ -34,7 +34,7 @@ atlas_add_library( tauRecToolsLib
    ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES}
    CxxUtils AthLinks AsgMessagingLib AsgDataHandlesLib AsgTools xAODCaloEvent
    xAODEventInfo xAODJet xAODParticleEvent xAODPFlow xAODTau xAODTracking xAODEventShape
-   MVAUtils FlavorTagDiscriminants ${extra_public_libs}
+   MVAUtils FlavorTagDiscriminants FlavorTagInference ${extra_public_libs}
    PRIVATE_LINK_LIBRARIES CaloGeoHelpers FourMomUtils PathResolver )
 
 atlas_add_dictionary( tauRecToolsDict
@@ -47,5 +47,5 @@ if( NOT XAOD_STANDALONE )
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
       LINK_LIBRARIES ${Boost_LIBRARIES} AsgTools AsgMessagingLib xAODBase
       xAODCaloEvent xAODJet xAODPFlow xAODTau FourMomUtils tauRecToolsLib PFlowUtilsLib
-      FlavorTagDiscriminants ${extra_private_libs} )
+      FlavorTagDiscriminants FlavorTagInference ${extra_private_libs} )
 endif()
