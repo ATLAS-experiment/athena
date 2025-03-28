@@ -25,7 +25,11 @@
 
 using namespace pool::RootCollection;
 // Import classes from experimental namespace for the time being
-using RNTupleModel = ROOT::Experimental::RNTupleModel;
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+  using RNTupleModel = ROOT::RNTupleModel;
+#else
+  using RNTupleModel = ROOT::Experimental::RNTupleModel;
+#endif
 
 
 RNTCollectionQuery::RNTCollectionQuery( const pool::ICollectionDescription& description, 

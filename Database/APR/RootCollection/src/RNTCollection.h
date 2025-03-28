@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include "RVersion.h"
 class TFile;
 class IFileMgr;
 
@@ -26,8 +27,16 @@ class IFileMgr;
 namespace ROOT::Experimental {
    class RNTupleReader;
    class RNTupleWriter;
+}
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+namespace ROOT {
    class RNTupleModel;
 }
+#else
+namespace ROOT::Experimental {
+   class RNTupleModel;
+}
+#endif
 
 namespace pool {
 
@@ -35,9 +44,15 @@ namespace pool {
 
    namespace RootCollection {
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+      using RNTupleModel  = ROOT::RNTupleModel;
       using RNTupleReader = ROOT::Experimental::RNTupleReader;
       using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
+#else
       using RNTupleModel  = ROOT::Experimental::RNTupleModel;
+      using RNTupleReader = ROOT::Experimental::RNTupleReader;
+      using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
+#endif
       class Attribute;
       class AttributeSpecification;
 

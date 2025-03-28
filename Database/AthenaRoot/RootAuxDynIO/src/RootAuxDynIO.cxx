@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainers/tools/error.h"
@@ -23,7 +23,6 @@
 
 namespace RootAuxDynIO
 {
-   using ROOT::Experimental::RNTupleModel;
    using ROOT::Experimental::RNTupleReader;
 
    bool
