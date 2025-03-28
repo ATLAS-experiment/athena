@@ -171,7 +171,7 @@ def JetBTagginglessByVertexAlgCfg(
         # we want to run this for different cuts in z0, inclusive/exclusive at the same time
         for dzCut in dzCut_vec:
             for useMinZ0Vertex in useMinZ0Vertex_vec:
-       
+                print("Mario: runnning ", str(dzCut), " ", str(useMinZ0Vertex))
                 acc.merge(JetParticleAssociationByVertexAlgCfg(
                     ConfigFlags = cfgFlags,
                     JetCollection = JetCollection,
@@ -180,16 +180,50 @@ def JetBTagginglessByVertexAlgCfg(
                     dzCut = dzCut,
                     useMinZ0Vertex = useMinZ0Vertex,
                 ))
+                print("Mario worked")
                 # here I need to add all the possible remapping
                 # find out how the re
-                args['remapping'].setdefault(
-                'BTagTrackToJetAssociator', 'GhostTrack')
-     
-                '''
+                if useMinZ0Vertex:
+                    '''
+                    args['remapping'].setdefault(
+                    'BTagTrackToJetAssociator', 'TracksForBTagging_' + str(dzCut) + '_' + 'exclusive_assoc')
+                    args['remapping'].setdefault(
+                    'GN2v01_pb', 'GN2v01_' + str(dzCut) + '_' + 'exclusive_pb')
+                    '''
+                    args["remapping"]={'BTagTrackToJetAssociator':'TracksForBTagging_' + str(dzCut) + '_' + 'exclusive_assoc',
+                                        'GN2v01_pb': 'GN2v01_' + str(dzCut) + '_' + 'exclusive_pb'}
+                    '''
+                    args['remapping'].setdefault(
+                    'GN2v01_pc', 'GN2v01_' + str(dzCut) + '_' + 'exclusive_pc')
+                    args['remapping'].setdefault(
+                    'GN2v01_pu', 'GN2v01_' + str(dzCut) + '_' + 'exclusive_pu')
+                    args['remapping'].setdefault(
+                    'GN2v01_ptau', 'GN2v01_' + str(dzCut) + '_' + 'exclusive_ptau')
+                    '''
+                  
+                else:
+                    args["remapping"]={'BTagTrackToJetAssociator': 'TracksForBTagging_' + str(dzCut) + '_' + 'inclusive_assoc',
+                                        'GN2v01_pb': 'GN2v01_' + str(dzCut) + '_' + 'inclusive_pb'}
+                    '''
+                    args['remapping'].setdefault(
+                    'BTagTrackToJetAssociator', 'TracksForBTagging_' + str(dzCut) + '_' + 'inclusive_assoc')
+                    
+                    args['remapping'].setdefault(
+                    'GN2v01_pb', 'GN2v01_' + str(dzCut) + '_' + 'inclusive_pb')
+                    
+                    args['remapping'].setdefault(
+                    'GN2v01_pc', 'GN2v01_' + str(dzCut) + '_' + 'inclusive_pc')
+                    args['remapping'].setdefault(
+                    'GN2v01_pu', 'GN2v01_' + str(dzCut) + '_' + 'inclusive_pu')
+                    args['remapping'].setdefault(
+                    'GN2v01_ptau', 'GN2v01_' + str(dzCut) + '_' + 'inclusive_ptau')
+                    '''
 
                 if '/GN2v01/' in dirname:
                     args['tag_requirements'] = {'nonzeroTracks'}
+                    
                 acc.merge(MultifoldGNNCfg(**args))
+                '''
                 # I think we can remove flip taggers and here we need to find a way to 
                 # add flip taggers
                 if cfgFlags.BTagging.RunFlipTaggers and networks.get('flip', True):

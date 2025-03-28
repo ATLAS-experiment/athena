@@ -2,22 +2,17 @@
 #====================================================================
 # DAOD_FTAG_PU.py
 # This defines DAOD_FTAG_PU, an unskimmed DAOD format for Run 3.
-# It contains the variables and objects needed for the using btagging for the pileup dataset.
+# It contains the variables and objects needed for the large majority 
+# of physics analyses in ATLAS.
 # It requires the flag FTAG_PU in Derivation_tf.py   
 #====================================================================
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
-from AthenaConfiguration.Enums import LHCPeriod
-
-from DerivationFrameworkEGamma.ElectronsCPDetailedContent import (
-    ElectronsCPDetailedContent
-)
 from DerivationFrameworkFlavourTag.FtagBaseContent import (
     addCommonAugmentation
 )
-
 
 # Main algorithm config
 def FTAG_PUKernelCfg(flags, name='FTAG_PUKernel', **kwargs):
@@ -28,31 +23,82 @@ def FTAG_PUKernelCfg(flags, name='FTAG_PUKernel', **kwargs):
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
-    augmentationTools = []
-
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
-    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]))
-
-    # thinning tools
+    skimmingTools = []
     thinningTools = []
+    '''
+    # Thinning tools...
+    from DerivationFrameworkInDet.InDetToolsConfig import JetTrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg
+
+    
+    # filter leptons
+    # 2-leptons
+    lepton_skimming_expression = 'count( (Muons.pt > 18*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 18*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 2 && count( (Muons.pt > 25*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 25*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1'
+    # 1-lepton + 1-tau
+    taul_skimming_expression = '(count( TauJets.pt >= 20*GeV && abs(TauJets.eta) < 2.5 && abs(TauJets.charge)==1.0 && (TauJets.nTracks == 1 || TauJets.nTracks == 3) && TauJets.DFTauLoose) >= 1) && (count( (Muons.pt > 25*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 25*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1)'
+
+    total_skimming_expression = '('+lepton_skimming_expression+') || ('+taul_skimming_expression+')'
+    
+    FTAG_PULeptonSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
+            name = "FTAG_PULeptonSkimmingTool",
+            expression = total_skimming_expression )
+    acc.addPublicTool(FTAG_PULeptonSkimmingTool)
+
+
+    # TrackParticles associated with small-R jets
+    FTAG_PUAkt4PFlowJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
+        name            = "FTAG_PUAkt4PFlowJetTPThinningTool",
+        StreamName      = kwargs['StreamName'],
+        JetKey   = "AntiKt4EMPFlowJets",
+        SelectionString = 'AntiKt4EMPFlowJets.pt > 15*GeV',
+        InDetTrackParticlesKey  = "InDetTrackParticles"))
+
+    # Include inner detector tracks associated with muons
+    FTAG_PUMuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
+        flags,
+        name                    = "FTAG_PUMuonTPThinningTool",
+        StreamName              = kwargs['StreamName'],
+        MuonKey                 = "Muons",
+        InDetTrackParticlesKey  = "InDetTrackParticles"))
+
+    # Include inner detector tracks associated with electrons
+    FTAG_PUElectronTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
+        flags,
+        name                    = "FTAG_PUElectronTPThinningTool",
+        StreamName              = kwargs['StreamName'],
+        SGKey                 = "Electrons",
+        InDetTrackParticlesKey  = "InDetTrackParticles"))
 
     # Finally the kernel itself
+    thinningTools = [
+            FTAG_PUMuonTPThinningTool,
+            FTAG_PUElectronTPThinningTool,
+            FTAG_PUAkt4PFlowJetTPThinningTool,
+            ]
+    skimmingTools = [
+            FTAG_PULeptonSkimmingTool,
+            ]
+    '''
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel(name, AugmentationTools = augmentationTools, ThinningTools = thinningTools))      
-
+    acc.addEventAlgo(DerivationKernel(name, SkimmingTools = skimmingTools, ThinningTools = thinningTools))       
+    
     # Extra jet content:
     acc.merge(FTAG_PUExtraContentCfg(flags))
-
+    
     return acc
 
 
-def FTAG_PUCoreCfg(flags, name_tag='FTAG_PU', extra_SmartCollections=None, extra_AllVariables=None, trigger_option='', TriggerListsHelper = None):
-
-    if extra_SmartCollections is None: extra_SmartCollections = []
-    if extra_AllVariables is None: extra_AllVariables = []
-
-
+def FTAG_PUCfg(flags):
     acc = ComponentAccumulator()
+
+    # Get the lists of triggers needed for trigger matching.
+    # This is needed at this scope (for the slimming) and further down in the config chain
+    # for actually configuring the matching, so we create it here and pass it down
+    # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
+    from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
+    FTAG_PUTriggerListsHelper = TriggerListsHelper(flags)
+
+    # Common augmentations
+    acc.merge(FTAG_PUKernelCfg(flags, name="FTAG_PUKernel", StreamName = 'StreamDAOD_FTAG_PU', TriggerListsHelper = FTAG_PUTriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -61,71 +107,22 @@ def FTAG_PUCoreCfg(flags, name_tag='FTAG_PU', extra_SmartCollections=None, extra
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    FTAG_PUSlimmingHelper = SlimmingHelper(name_tag+"SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
+    FTAG_PUSlimmingHelper = SlimmingHelper("FTAG_PUSlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
-    # Many of these are added to AllVariables below as well. We add
-    # these items in both places in case some of the smart collections
-    # add variables from some other collection. For flavor tagging,
-    # for example will add jet variables.
-    
     from DerivationFrameworkFlavourTag import FtagBaseContent
-
-    FTAG_PUSlimmingHelper.SmartCollections = []
-    FtagBaseContent.add_baseline_slimming_smartcollections(FTAG_PUSlimmingHelper)
 
     addCommonAugmentation(flags, acc, FTAG_PUSlimmingHelper)
 
-    FTAG_PUSlimmingHelper.SmartCollections += [
-                                           "BTagging_AntiKt4UFOCSSK",
-                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                           "AntiKt4EMPFlowJets_FTAG",
-                                           "AntiKt4EMPFlowByVertexJets_FTAG",
-                                          ]
-
-
-    if len(extra_SmartCollections)>0:
-        for a_container in extra_SmartCollections:
-            if a_container not in FTAG_PUSlimmingHelper.SmartCollections:
-                FTAG_PUSlimmingHelper.SmartCollections.append(a_container)
-
-    FTAG_PUSlimmingHelper.AllVariables = []
-    FtagBaseContent.add_baseline_slimming_allvariables(FTAG_PUSlimmingHelper)
-
-    FTAG_PUSlimmingHelper.AllVariables += [
-            "InDetLargeD0TrackParticles",
-            "AntiKt4EMPFlowJets",
-            "AntiKt4UFOCSSKJets",
-            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-            "UFOCSSK",
-            "GlobalChargedParticleFlowObjects",
-            "GlobalNeutralParticleFlowObjects",
-            "CHSGChargedParticleFlowObjects",
-            "CHSGNeutralParticleFlowObjects",
-            "TruthParticles",
-            "TruthVertices",
-    ]
+    FTAG_PUSlimmingHelper.SmartCollections = ["AntiKt4EMPFlowJets",
+                                            "AntiKt4TruthJets",
+                                            ]
+    #FtagBaseContent.add_baseline_slimming_smartcollections(FTAG_PUSlimmingHelper)
     
-    if len(extra_AllVariables)>0:
-        for a_container in extra_AllVariables:
-            if a_container not in FTAG_PUSlimmingHelper.AllVariables:
-                FTAG_PUSlimmingHelper.AllVariables.append(a_container)
-
-    if flags.BTagging.Pseudotrack:
-        FTAG_PUSlimmingHelper.AllVariables += [ "InDetPseudoTrackParticles" ]
-
-    if flags.BTagging.Trackless:
-        FTAG_PUSlimmingHelper.AllVariables += [
-                "JetAssociatedPixelClusters",
-                "JetAssociatedSCTClusters",
-                ]
-
-    # Add additional e/gamma variables
-    FTAG_PUSlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
-
-    # update AppendToDictionary
-    extra_AppendToDictionary = {} #only add those items specifically for FTAG_PU here!
-    FtagBaseContent.update_AppendToDictionary_in_SlimmingHelper(FTAG_PUSlimmingHelper, flags, extra_AppendToDictionary)
-
+    FTAG_PUSlimmingHelper.AllVariables = ["EventInfo",
+                                        "PrimaryVertices",
+                                        "InDetTrackParticles",
+                                        ]
+    
     # Add truth containers
     if flags.Input.isMC:
         FtagBaseContent.add_truth_to_SlimmingHelper(FTAG_PUSlimmingHelper)
@@ -135,45 +132,25 @@ def FTAG_PUCoreCfg(flags, name_tag='FTAG_PU', extra_SmartCollections=None, extra
             acc.merge(HLTJetFTagDecorationCfg(flags))
 
     # Add ExtraVariables
-    FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG_PUSlimmingHelper, flags)
+    #FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG_PUSlimmingHelper, flags)
    
     # Trigger content
-    FtagBaseContent.trigger_setup(FTAG_PUSlimmingHelper, trigger_option)
-    FtagBaseContent.trigger_matching(FTAG_PUSlimmingHelper, TriggerListsHelper, flags)
+    FtagBaseContent.trigger_setup(FTAG_PUSlimmingHelper, 'FTAG_PU')
+    FtagBaseContent.trigger_matching(FTAG_PUSlimmingHelper, FTAG_PUTriggerListsHelper, flags)
 
-    jetOutputList = ["AntiKt4UFOCSSKJets", "AntiKt4EMPFlowByVertexJets"]
+    jetOutputList = ["AntiKt4EMPFlowByVertexJets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(FTAG_PUSlimmingHelper, jetOutputList, FTAG_PUSlimmingHelper.SmartCollections)
-    
-    # Flavour tagging (Mario)
+
+    # Flavour tagging 
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
-    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowByVertexJets"], ByVertex=True, dzCut_vec=[5], useMinZ0Vertex_vec=[True,False]))
-  
-    # Output stream    
+    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowByVertexJets"], ByVertex=True, dzCut_vec=[5, 4], useMinZ0Vertex_vec=[True,False]))
+    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]))
+
+    # Output stream
     FTAG_PUItemList = FTAG_PUSlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(flags, "DAOD_"+name_tag, ItemList=FTAG_PUItemList, AcceptAlgs=[name_tag+"Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_"+name_tag, AcceptAlgs=[name_tag+"Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
-
-    return acc
-
-def FTAG_PUCfg(flags):
-
-    acc = ComponentAccumulator()
-
-    # Get the lists of triggers needed for trigger matching.
-    # This is needed at this scope (for the slimming) and further down in the config chain
-    # for actually configuring the matching, so we create it here and pass it down
-    # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
-    from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    FTAG_PUTriggerListsHelper = TriggerListsHelper(flags)
-   
-    # name_tag has to be consistent between KernelCfg and CoreCfg
-    FTAG_PU_name_tag = 'FTAG_PU'
-
-    # Common augmentations
-    acc.merge(FTAG_PUKernelCfg(flags, name=FTAG_PU_name_tag + "Kernel", StreamName = 'StreamDAOD_'+FTAG_PU_name_tag, TriggerListsHelper = FTAG_PUTriggerListsHelper))
-    # Content of FTAG_PU 
-    acc.merge(FTAG_PUCoreCfg(flags, FTAG_PU_name_tag, trigger_option='FTAG_PU', TriggerListsHelper = FTAG_PUTriggerListsHelper))
+    acc.merge(OutputStreamCfg(flags, "DAOD_FTAG_PU", ItemList=FTAG_PUItemList, AcceptAlgs=["FTAG_PUKernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_FTAG_PU", AcceptAlgs=["FTAG_PUKernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
 
@@ -227,6 +204,3 @@ def FTAG_PUExtraContentCfg(flags):
             acc.addEventAlgo(CompFactory.xAODMaker.AuxStoreWrapper( wrapperName, SGKeys = [ auxContainerName+"." ] ))
 
     return acc
-
-
-

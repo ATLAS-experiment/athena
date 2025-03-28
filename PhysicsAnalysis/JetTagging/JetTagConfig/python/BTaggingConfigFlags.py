@@ -115,6 +115,13 @@ def getNNs(flags):
                 'cone_association': True
             },
             *[{'folds' : [nn_path]} for nn_path in gn3_paths]
+        ],
+        'AntiKt4EMPFlowByVertexJets': [
+            {
+                'folds': pf_nns,
+                'hash': 'jetFoldHash',
+                'cone_association': True
+            }
         ]
     }
 

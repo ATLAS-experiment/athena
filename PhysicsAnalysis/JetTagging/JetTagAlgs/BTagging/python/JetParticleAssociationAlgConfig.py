@@ -46,9 +46,9 @@ def JetParticleAssociationByVertexAlgCfg(
     jetcol = JetCollection
     name=(jetcol + "_" + OutputParticleDecoration).lower()
     if useMinZ0Vertex:
-        decorName="_" + str(dzCut) + "_inclusive_assoc"
-    else:
         decorName="_" + str(dzCut) + "_exclusive_assoc"
+    else:
+        decorName="_" + str(dzCut) + "_inclusive_assoc"
     if MinimumJetPt is None:
         MinimumJetPt = ConfigFlags.BTagging.minimumJetPtForTrackAssociation
     if MinimumJetPt > 0.0 and MinimumJetPtFlag is None:
