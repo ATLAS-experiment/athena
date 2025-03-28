@@ -1,5 +1,8 @@
-
-
+ApplicationMgr    SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v39r4)
+                                          running on aibuild16-024.cern.ch on Fri Mar 28 10:13:18 2025
+====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 EventLoopMgr      WARNING Unable to locate service "EventSelector" 
 EventLoopMgr      WARNING No events will be processed from external input.
@@ -9,9 +12,15 @@ ApplicationMgr Ready
 [OVAL] Loading the shared libraries.
 Loading library test_StorageSvc_AuxStoreDict
 [OVAL] Testing the writing operations
+[OVAL]   - TTree
 createStorageSvc
 startSession
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     CREATE    [ROOT_All] 
 Session connect
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   CREATE    [ROOT_All] BFC788CB-A611-FD89-2DE5-64B1393EE097
+Domain[ROOT_All]     INFO                           AUX.pool_test.root
+RootDatabase.open    INFO AUX.pool_test.root File version:63404
 Creating objects
 Creating Shape
 StorageSvc           INFO Building shape according to reflection information using shape ID for:
@@ -30,12 +39,268 @@ Committing transaction
 Committing transaction
 Deleting written data objects
 Disconnecting StorageSvc
+AUX.pool_test.root   INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   CREATE    [ROOT_All] BFC788CB-A611-FD89-2DE5-64B1393EE097
 Ending Session
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     CREATE    [ROOT_All] 
+Releasing StorageSvc
+[OVAL]   - RNTuple
+createStorageSvc
+startSession
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     CREATE    [ROOT_All] 
+Session connect
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   CREATE    [ROOT_All] 9B5660CA-9CA5-A466-38C2-E29316AB74C9
+Domain[ROOT_All]     INFO                           AUX.rntuple_test.root
+RootDatabase.open    INFO AUX.rntuple_test.root File version:63404
+Creating objects
+Creating Shape
+StorageSvc           INFO Building shape according to reflection information using shape ID for:
+StorageSvc           INFO APRTest::AuxStore [A2222222-B111-C111-D111-E22134511111]
+Writing objects
+Committing transaction
+Committing transaction
+Committing transaction
+Committing transaction
+Committing transaction
+Committing transaction
+Committing transaction
+Committing transaction
+Committing transaction
+Committing transaction
+Committing transaction
+Deleting written data objects
+Disconnecting StorageSvc
+AUX.rntuple_tes...   INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   CREATE    [ROOT_All] 9B5660CA-9CA5-A466-38C2-E29316AB74C9
+Ending Session
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     CREATE    [ROOT_All] 
 Releasing StorageSvc
 [OVAL] ...done
 [OVAL] Testing the reading operations
+[OVAL]   - TTree
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] BFC788CB-A611-FD89-2DE5-64B1393EE097
+Domain[ROOT_All]     INFO                           AUX.pool_test.root
+RootDatabase.open    INFO AUX.pool_test.root File version:63404
+0: 0   : 0  : withdict[0]:  val=0
+1: 1   : 2  : withdict[1]:  val=0
+2: 2   : 4  : withdict[2]:  val=0
+3: 3   : 6  : withdict[3]:  val=0
+4: 4   : 8  : withdict[4]:  val=0
+5: 5   : 10  : withdict[5]:  val=0
+6: 6   : 12  : withdict[6]:  val=0
+7: 7   : 14  : withdict[7]:  val=0
+8: 8   : 16  : withdict[8]:  val=0
+9: 9   : 18  : withdict[9]:  val=0
+0: 1000   : 5000  : withdict[0]:  val=1
+1: 1001   : 5002  : withdict[1]:  val=1
+2: 1002   : 5004  : withdict[2]:  val=1
+3: 1003   : 5006  : withdict[3]:  val=1
+4: 1004   : 5008  : withdict[4]:  val=1
+5: 1005   : 5010  : withdict[5]:  val=1
+6: 1006   : 5012  : withdict[6]:  val=1
+7: 1007   : 5014  : withdict[7]:  val=1
+8: 1008   : 5016  : withdict[8]:  val=1
+9: 1009   : 5018  : withdict[9]:  val=1
+0: 2000   : 10000  : withdict[0]:  val=2
+1: 2001   : 10002  : withdict[1]:  val=2
+2: 2002   : 10004  : withdict[2]:  val=2
+3: 2003   : 10006  : withdict[3]:  val=2
+4: 2004   : 10008  : withdict[4]:  val=2
+5: 2005   : 10010  : withdict[5]:  val=2
+6: 2006   : 10012  : withdict[6]:  val=2
+7: 2007   : 10014  : withdict[7]:  val=2
+8: 2008   : 10016  : withdict[8]:  val=2
+9: 2009   : 10018  : withdict[9]:  val=2
+0: 3000   : 15000  : withdict[0]:  val=3
+1: 3001   : 15002  : withdict[1]:  val=3
+2: 3002   : 15004  : withdict[2]:  val=3
+3: 3003   : 15006  : withdict[3]:  val=3
+4: 3004   : 15008  : withdict[4]:  val=3
+5: 3005   : 15010  : withdict[5]:  val=3
+6: 3006   : 15012  : withdict[6]:  val=3
+7: 3007   : 15014  : withdict[7]:  val=3
+8: 3008   : 15016  : withdict[8]:  val=3
+9: 3009   : 15018  : withdict[9]:  val=3
+0: 4000   : 20000  : withdict[0]:  val=4
+1: 4001   : 20002  : withdict[1]:  val=4
+2: 4002   : 20004  : withdict[2]:  val=4
+3: 4003   : 20006  : withdict[3]:  val=4
+4: 4004   : 20008  : withdict[4]:  val=4
+5: 4005   : 20010  : withdict[5]:  val=4
+6: 4006   : 20012  : withdict[6]:  val=4
+7: 4007   : 20014  : withdict[7]:  val=4
+8: 4008   : 20016  : withdict[8]:  val=4
+9: 4009   : 20018  : withdict[9]:  val=4
+0: 5000   : 25000  : withdict[0]:  val=5
+1: 5001   : 25002  : withdict[1]:  val=5
+2: 5002   : 25004  : withdict[2]:  val=5
+3: 5003   : 25006  : withdict[3]:  val=5
+4: 5004   : 25008  : withdict[4]:  val=5
+5: 5005   : 25010  : withdict[5]:  val=5
+6: 5006   : 25012  : withdict[6]:  val=5
+7: 5007   : 25014  : withdict[7]:  val=5
+8: 5008   : 25016  : withdict[8]:  val=5
+9: 5009   : 25018  : withdict[9]:  val=5
+0: 6000   : 30000  : withdict[0]:  val=6
+1: 6001   : 30002  : withdict[1]:  val=6
+2: 6002   : 30004  : withdict[2]:  val=6
+3: 6003   : 30006  : withdict[3]:  val=6
+4: 6004   : 30008  : withdict[4]:  val=6
+5: 6005   : 30010  : withdict[5]:  val=6
+6: 6006   : 30012  : withdict[6]:  val=6
+7: 6007   : 30014  : withdict[7]:  val=6
+8: 6008   : 30016  : withdict[8]:  val=6
+9: 6009   : 30018  : withdict[9]:  val=6
+0: 7000   : 35000  : withdict[0]:  val=7
+1: 7001   : 35002  : withdict[1]:  val=7
+2: 7002   : 35004  : withdict[2]:  val=7
+3: 7003   : 35006  : withdict[3]:  val=7
+4: 7004   : 35008  : withdict[4]:  val=7
+5: 7005   : 35010  : withdict[5]:  val=7
+6: 7006   : 35012  : withdict[6]:  val=7
+7: 7007   : 35014  : withdict[7]:  val=7
+8: 7008   : 35016  : withdict[8]:  val=7
+9: 7009   : 35018  : withdict[9]:  val=7
+0: 8000   : 40000  : withdict[0]:  val=8
+1: 8001   : 40002  : withdict[1]:  val=8
+2: 8002   : 40004  : withdict[2]:  val=8
+3: 8003   : 40006  : withdict[3]:  val=8
+4: 8004   : 40008  : withdict[4]:  val=8
+5: 8005   : 40010  : withdict[5]:  val=8
+6: 8006   : 40012  : withdict[6]:  val=8
+7: 8007   : 40014  : withdict[7]:  val=8
+8: 8008   : 40016  : withdict[8]:  val=8
+9: 8009   : 40018  : withdict[9]:  val=8
+0: 9000   : 45000  : withdict[0]:  val=9
+1: 9001   : 45002  : withdict[1]:  val=9
+2: 9002   : 45004  : withdict[2]:  val=9
+3: 9003   : 45006  : withdict[3]:  val=9
+4: 9004   : 45008  : withdict[4]:  val=9
+5: 9005   : 45010  : withdict[5]:  val=9
+6: 9006   : 45012  : withdict[6]:  val=9
+7: 9007   : 45014  : withdict[7]:  val=9
+8: 9008   : 45016  : withdict[8]:  val=9
+9: 9009   : 45018  : withdict[9]:  val=9
 Objects read: 10
+AUX.pool_test.root   INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] BFC788CB-A611-FD89-2DE5-64B1393EE097
 Closing the session
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+[OVAL]   - RNTuple
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 9B5660CA-9CA5-A466-38C2-E29316AB74C9
+Domain[ROOT_All]     INFO                           AUX.rntuple_test.root
+RootDatabase.open    INFO AUX.rntuple_test.root File version:63404
+0: 0   : 0  : withdict[0]:  val=0
+1: 1   : 2  : withdict[1]:  val=0
+2: 2   : 4  : withdict[2]:  val=0
+3: 3   : 6  : withdict[3]:  val=0
+4: 4   : 8  : withdict[4]:  val=0
+5: 5   : 10  : withdict[5]:  val=0
+6: 6   : 12  : withdict[6]:  val=0
+7: 7   : 14  : withdict[7]:  val=0
+8: 8   : 16  : withdict[8]:  val=0
+9: 9   : 18  : withdict[9]:  val=0
+0: 1000   : 5000  : withdict[0]:  val=1
+1: 1001   : 5002  : withdict[1]:  val=1
+2: 1002   : 5004  : withdict[2]:  val=1
+3: 1003   : 5006  : withdict[3]:  val=1
+4: 1004   : 5008  : withdict[4]:  val=1
+5: 1005   : 5010  : withdict[5]:  val=1
+6: 1006   : 5012  : withdict[6]:  val=1
+7: 1007   : 5014  : withdict[7]:  val=1
+8: 1008   : 5016  : withdict[8]:  val=1
+9: 1009   : 5018  : withdict[9]:  val=1
+0: 2000   : 10000  : withdict[0]:  val=2
+1: 2001   : 10002  : withdict[1]:  val=2
+2: 2002   : 10004  : withdict[2]:  val=2
+3: 2003   : 10006  : withdict[3]:  val=2
+4: 2004   : 10008  : withdict[4]:  val=2
+5: 2005   : 10010  : withdict[5]:  val=2
+6: 2006   : 10012  : withdict[6]:  val=2
+7: 2007   : 10014  : withdict[7]:  val=2
+8: 2008   : 10016  : withdict[8]:  val=2
+9: 2009   : 10018  : withdict[9]:  val=2
+0: 3000   : 15000  : withdict[0]:  val=3
+1: 3001   : 15002  : withdict[1]:  val=3
+2: 3002   : 15004  : withdict[2]:  val=3
+3: 3003   : 15006  : withdict[3]:  val=3
+4: 3004   : 15008  : withdict[4]:  val=3
+5: 3005   : 15010  : withdict[5]:  val=3
+6: 3006   : 15012  : withdict[6]:  val=3
+7: 3007   : 15014  : withdict[7]:  val=3
+8: 3008   : 15016  : withdict[8]:  val=3
+9: 3009   : 15018  : withdict[9]:  val=3
+0: 4000   : 20000  : withdict[0]:  val=4
+1: 4001   : 20002  : withdict[1]:  val=4
+2: 4002   : 20004  : withdict[2]:  val=4
+3: 4003   : 20006  : withdict[3]:  val=4
+4: 4004   : 20008  : withdict[4]:  val=4
+5: 4005   : 20010  : withdict[5]:  val=4
+6: 4006   : 20012  : withdict[6]:  val=4
+7: 4007   : 20014  : withdict[7]:  val=4
+8: 4008   : 20016  : withdict[8]:  val=4
+9: 4009   : 20018  : withdict[9]:  val=4
+0: 5000   : 25000  : withdict[0]:  val=5
+1: 5001   : 25002  : withdict[1]:  val=5
+2: 5002   : 25004  : withdict[2]:  val=5
+3: 5003   : 25006  : withdict[3]:  val=5
+4: 5004   : 25008  : withdict[4]:  val=5
+5: 5005   : 25010  : withdict[5]:  val=5
+6: 5006   : 25012  : withdict[6]:  val=5
+7: 5007   : 25014  : withdict[7]:  val=5
+8: 5008   : 25016  : withdict[8]:  val=5
+9: 5009   : 25018  : withdict[9]:  val=5
+0: 6000   : 30000  : withdict[0]:  val=6
+1: 6001   : 30002  : withdict[1]:  val=6
+2: 6002   : 30004  : withdict[2]:  val=6
+3: 6003   : 30006  : withdict[3]:  val=6
+4: 6004   : 30008  : withdict[4]:  val=6
+5: 6005   : 30010  : withdict[5]:  val=6
+6: 6006   : 30012  : withdict[6]:  val=6
+7: 6007   : 30014  : withdict[7]:  val=6
+8: 6008   : 30016  : withdict[8]:  val=6
+9: 6009   : 30018  : withdict[9]:  val=6
+0: 7000   : 35000  : withdict[0]:  val=7
+1: 7001   : 35002  : withdict[1]:  val=7
+2: 7002   : 35004  : withdict[2]:  val=7
+3: 7003   : 35006  : withdict[3]:  val=7
+4: 7004   : 35008  : withdict[4]:  val=7
+5: 7005   : 35010  : withdict[5]:  val=7
+6: 7006   : 35012  : withdict[6]:  val=7
+7: 7007   : 35014  : withdict[7]:  val=7
+8: 7008   : 35016  : withdict[8]:  val=7
+9: 7009   : 35018  : withdict[9]:  val=7
+0: 8000   : 40000  : withdict[0]:  val=8
+1: 8001   : 40002  : withdict[1]:  val=8
+2: 8002   : 40004  : withdict[2]:  val=8
+3: 8003   : 40006  : withdict[3]:  val=8
+4: 8004   : 40008  : withdict[4]:  val=8
+5: 8005   : 40010  : withdict[5]:  val=8
+6: 8006   : 40012  : withdict[6]:  val=8
+7: 8007   : 40014  : withdict[7]:  val=8
+8: 8008   : 40016  : withdict[8]:  val=8
+9: 8009   : 40018  : withdict[9]:  val=8
+0: 9000   : 45000  : withdict[0]:  val=9
+1: 9001   : 45002  : withdict[1]:  val=9
+2: 9002   : 45004  : withdict[2]:  val=9
+3: 9003   : 45006  : withdict[3]:  val=9
+4: 9004   : 45008  : withdict[4]:  val=9
+5: 9005   : 45010  : withdict[5]:  val=9
+6: 9006   : 45012  : withdict[6]:  val=9
+7: 9007   : 45014  : withdict[7]:  val=9
+8: 9008   : 45016  : withdict[8]:  val=9
+9: 9009   : 45018  : withdict[9]:  val=9
+Objects read: 10
+AUX.rntuple_tes...   INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 9B5660CA-9CA5-A466-38C2-E29316AB74C9
+Closing the session
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
 [OVAL] ...done
+[OVAL] Number of floating tokens : 0
 [OVAL] Number of floating tokens : 0
 [OVAL] Exiting...
