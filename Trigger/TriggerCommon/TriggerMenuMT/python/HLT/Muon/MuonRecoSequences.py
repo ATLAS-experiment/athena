@@ -182,6 +182,11 @@ def muonDecodeCfg(flags, RoIs):
       mmAcc = MMRDODecodeCfg( flags, name="MMRdoToMMPrepData_"+RoIs, RoIs =  RoIs, DoSeededDecoding = doSeededDecoding)
       acc.merge( mmAcc )
 
+    # add space point formation
+    if flags.Muon.usePhaseIIGeoSetup:
+      from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
+      acc.merge( MuonSpacePointFormationCfg( flags ) )
+
     return acc
 
 def muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads):
@@ -200,6 +205,13 @@ def muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads):
       dataObjects += [('Muon::sTgcPrepDataContainer','StoreGateSvc+STGC_Measurements')]
     if flags.Detector.GeometryMM:
       dataObjects += [('Muon::MMPrepDataContainer','StoreGateSvc+MM_Measurements')]
+    
+    if flags.Muon.usePhaseIIGeoSetup:
+      dataObjects += [( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' )]
+      dataObjects += [( 'MuonR4::SpacePointContainer' , 'StoreGateSvc+MuonSpacePoints' )]
+      if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
+        dataObjects += [( 'MuonR4::SpacePointContainer' , 'StoreGateSvc+NswSpacePoints' )]
+        
   else:
     dataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
   dataObjects += [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
@@ -208,9 +220,6 @@ def muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads):
   else:
     dataObjects += [( 'DataVector< LVL1::RecMuonRoI >' , 'StoreGateSvc+HLT_RecMURoIs' )]
   
-  if flags.Muon.usePhaseIIGeoSetup:
-      dataObjects += [( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' )]
-      
   #For L2 multi-track SA mode
   if extraLoads:
     dataObjects += extraLoads
@@ -393,6 +402,10 @@ def VDVEFMuCBCfg(flags, RoIs, name):
   if flags.Detector.GeometrysTGC and flags.Detector.GeometryMM: 
     dataObjects += [( 'Muon::MMPrepDataContainer' , 'StoreGateSvc+MM_Measurements'),
                     ( 'Muon::sTgcPrepDataContainer' , 'StoreGateSvc+STGC_Measurements') ]
+  if flags.Muon.usePhaseIIGeoSetup:
+      dataObjects += [( 'MuonR4::SpacePointContainer' , 'StoreGateSvc+MuonSpacePoints' )]
+      if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
+        dataObjects += [( 'MuonR4::SpacePointContainer' , 'StoreGateSvc+NswSpacePoints' )]
 
   alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuEFCB_"+name,
                                                DataObjects = dataObjects)
