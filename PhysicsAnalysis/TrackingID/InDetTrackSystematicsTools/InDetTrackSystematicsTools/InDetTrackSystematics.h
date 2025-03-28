@@ -25,7 +25,7 @@ namespace InDet {
     TRK_BIAS_D0_WM,
     TRK_BIAS_Z0_WM,
     TRK_BIAS_QOVERP_SAGITTA_WM,
-    // a (currently 30%) uncertainty in the fake rate - this needs to be updated for Loose vs. TightPrimary
+    // uncertainties in the fake rate for Loose and TightPrimary
     TRK_FAKE_RATE_LOOSE,
     TRK_FAKE_RATE_TIGHT,
     // uncertainties in the efficiency for two cut levels, "Loose" and "TightPrimary"
@@ -39,15 +39,15 @@ namespace InDet {
     TRK_EFF_TIGHT_PP0,
     TRK_EFF_TIGHT_PHYSMODEL,
     TRK_EFF_LARGED0_GLOBAL,
-    TRK_EFF_LARGED0_IBL,
-    TRK_EFF_LARGED0_PP0,
-    TRK_EFF_LARGED0_PHYSMODEL,
     // uncertainty for tracking efficiency in jets
     TRK_EFF_LOOSE_TIDE,
     // uncertainties for tracking fake rates in jets
     TRK_FAKE_RATE_TIGHT_TIDE,
     TRK_FAKE_RATE_LOOSE_TIDE,
-    TRK_FAKE_RATE_LOOSE_ROBUST
+    // combined efficiency systematics for use in downstream objects such as secondary vertexing ONLY
+    // this is not an additional systematic, but rather a replacement for the standard efficiencies in objects where four variations are prohibitive
+    TRK_EFF_LOOSE_COMBINED,
+    TRK_EFF_TIGHT_COMBINED,
   };
 
   // without getting too crafty with macros, this map needs to be maintained with the enum above
@@ -78,12 +78,10 @@ namespace InDet {
     DEF_SYST( EFF_TIGHT_PHYSMODEL ),
     DEF_SYST( EFF_LOOSE_TIDE ),
     DEF_SYST( EFF_LARGED0_GLOBAL ),
-    DEF_SYST( EFF_LARGED0_IBL ),
-    DEF_SYST( EFF_LARGED0_PP0 ),
-    DEF_SYST( EFF_LARGED0_PHYSMODEL ),
     DEF_SYST( FAKE_RATE_TIGHT_TIDE ),
     DEF_SYST( FAKE_RATE_LOOSE_TIDE ),
-    DEF_SYST( FAKE_RATE_LOOSE_ROBUST )
+    DEF_SYST( EFF_LOOSE_COMBINED ),
+    DEF_SYST( EFF_TIGHT_COMBINED ),
 #undef DEF_SYST
   };
 

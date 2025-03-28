@@ -7,8 +7,10 @@
 #define INDETTRACKSYSTEMATICSTOOLS_INDETTRACKTRUTHFILTERTOOL_H
 
 #include "InDetTrackSystematicsTools/IInDetTrackTruthFilterTool.h"
+#include "InDetTrackSystematicsTools/IInDetTrackTruthOriginTool.h"
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "PATInterfaces/SystematicVariation.h"
 #include "PATInterfaces/SystematicSet.h"
 #include "InDetTrackSystematicsTools/InDetTrackSystematicsTool.h"
@@ -21,8 +23,6 @@ class TRandom3;
 class TFile;
 
 namespace InDet {
-
-  class IInDetTrackTruthOriginTool;
 
   /// @class InDetTrackTruthFilterTool
   /// This class selects tracks based on their truth origin
@@ -50,12 +50,8 @@ namespace InDet {
 
     // right now this returns a bool; if we want to implement the ASG selection tool interface then this will need to change to a TAccept
 
-    // "standard" accept method - if appropriate systematic is activated, will call mu-dependent version (below) using mu value from EventInfo, otherwise will use truth info
+    // accept method to determine if a track should be kept or not
     virtual bool accept(const xAOD::TrackParticle* track) const override;
-
-    // This is a version of the accept method that takes a value of mu (i.e. mean interactions per crossing) in order to calculate a probability that a givent track at that mu is a fake,
-    // and so should be considered for being dropped for the fake systematic variation - this version does not rely on truth information
-    virtual bool accept(const xAOD::TrackParticle* track, float mu) const override;
 
     /// returns: whether the tool is affected by the systematic
     virtual bool isAffectedBySystematic( const CP::SystematicVariation& ) const override;
@@ -73,31 +69,15 @@ namespace InDet {
 
     StatusCode initTrkEffSystHistogram(float scale, TH2 *&histogram, std::string rootFileName, std::string histogramName) const;
     float getFractionDropped(float fDefault, const TH2 *histogram, float x, float y, bool xAxisIspT = true) const;
-    float pseudoFakeProbability(const xAOD::TrackParticle* track, float mu) const;
-    bool dropPseudoFake(float prob) const;
 
-    int m_seed = 0;
+    ToolHandle< IInDetTrackTruthOriginTool > m_trackOriginTool{this, "trackOriginTool", "InDet::InDetTrackTruthOriginTool", "Tool to get the truth origin of a track"};
+
+    Gaudi::Property<int> m_seed{this, "Seed", 0, "Random seed"};
     std::unique_ptr<TRandom3> m_rnd; //!
     
-    float m_fPrim = 1.;
-    float m_fSec = 1.;
-    float m_fFakeLoose = 0.10;
-    float m_fFakeTight = 1.00; // this method breaks down for uncertainties > 1.00 (as was present in previous iterations)
-    float m_fPU = 1.;
-    float m_fFrag = 1.;
-    float m_fFromC = 1.;
-    float m_fFromB = 1.;
-    float m_trkEffSystScale = 1.;
-    bool m_doLRTSystematics = false;
-
-    TH2 *m_fPrimHistogram = nullptr;
-    TH2 *m_fSecHistogram = nullptr;
-    //TH2 *m_fFakeHistogram = nullptr;
-    TH2 *m_fPUHistogram = nullptr;
-    TH2 *m_fFragHistogram = nullptr;
-    TH2 *m_fFromCHistogram = nullptr;
-    TH2 *m_fFromBHistogram = nullptr;
-
+    Gaudi::Property<float> m_fFakeLoose{this, "fFakeLoose", -1.0, "Fake loose fraction"};
+    Gaudi::Property<float> m_fFakeTight{this, "fFakeTight", -1.0, "Fake tight fraction"};
+    Gaudi::Property<float> m_trkEffSystScale{this, "trkEffSystScale", 1.0, "Track efficiency systematic scale"};
 
     TH2* m_trkEffHistLooseGlobal = nullptr;
     TH2* m_trkEffHistLooseIBL = nullptr;
@@ -107,21 +87,13 @@ namespace InDet {
     TH2* m_trkEffHistTightIBL = nullptr;
     TH2* m_trkEffHistTightPP0 = nullptr;
     TH2* m_trkEffHistTightPhysModel = nullptr;
-    TH2* m_trkEffHistLRTGlobal = nullptr;
-    TH2* m_trkEffHistLRTIBL = nullptr;
-    TH2* m_trkEffHistLRTPP0 = nullptr;
-    TH2* m_trkEffHistLRTPhysModel = nullptr;
 
     std::unordered_map<std::string, TH2*> m_histMap;
 
     // allow the user to configure which calibration files to use if desired
-    std::string m_calibFileNomEff;
-    std::string m_calibFileLRTEff;
+    Gaudi::Property<std::string> m_calibFileNomEff{this, "calibFileNomEff", "", "Calibration file for nominal efficiency"};
 
-    ToolHandle< IInDetTrackTruthOriginTool > m_trackOriginTool;
-
-
-}; // class InDetTrackTruthFilterTool
+  }; // class InDetTrackTruthFilterTool
 
 } // namespace InDet
 
