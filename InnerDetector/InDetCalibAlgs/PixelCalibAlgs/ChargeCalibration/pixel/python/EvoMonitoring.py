@@ -134,7 +134,7 @@ def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
                 key = "%-18s - %i" % (mod_str, mod)
                 if boolFit:
                     if key not in log_info:
-                        log_info[key] = "\tFE%02i ---> slope: %5.2f -  dev: %5.1f%%\n" % (fe,m, abs((1-m)/m)*100)
+                        log_info[key]  = "\tFE%02i ---> slope: %5.2f -  dev: %5.1f%%\n" % (fe,m, abs((1-m)/m)*100)
                     else:
                         log_info[key] += "\tFE%02i ---> slope: %5.2f -  dev: %5.1f%%\n" % (fe,m, abs((1-m)/m)*100)
                 if boolTOT:
@@ -307,7 +307,7 @@ if __name__ == "__main__":
                             Example: python -m PixelCalibAlgs.EvoMonitoring --new "path/to/file" --old "path/to/file" """)
     
     parser.add_argument('--new', default="PIX_FINAL_calibration_candidate.txt", help="New calibration file (output format from the Recovery.py)")
-    parser.add_argument('--old', default="PixelChargeCalibration-DATA-RUN2-UPD4-27.log", help="Old DB IOV calibration")
+    parser.add_argument('--old', default="PixelChargeCalibration-DATA-RUN2-UPD4-28.log", help="Old DB IOV calibration")
     
     args = parser.parse_args()
     setupRunEvo(args.new, args.old)

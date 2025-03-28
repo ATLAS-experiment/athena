@@ -274,7 +274,7 @@ payloadToString(const cool::IObject &obj)
 int main(int argc, char *argv[])
 {
 
-    std::string tagName{"PixelChargeCalibration-DATA-RUN2-UPD4-27"};
+    std::string tagName{"PixelChargeCalibration-DATA-RUN2-UPD4-28"};
     std::string folderName{"/PIXEL/ChargeCalibration"};
     std::string outputFileName{"test"};
     std::string dbName{"COOLOFL_PIXEL/CONDBR2"};
