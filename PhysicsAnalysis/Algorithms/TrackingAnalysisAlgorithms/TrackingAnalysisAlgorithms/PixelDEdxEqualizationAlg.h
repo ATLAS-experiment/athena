@@ -77,7 +77,12 @@ namespace CP {
     this, "TrackContainerName", "InDetTrackParticles", "Input track collection to decorate with corrected dE/dx measurements."};
 
     /// Decorators
-    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dEdxEqKey{this, "dEdxEqName", "", "SG key for the equalized pixel dE/dx attribute"}; //set dynamically in initialize.
+    /// Equalized dE/dx.  Provide the variable name without the container.  Container will be set dynamically in initialize.  Form will be <container>.<m_dEdxEqKey>.
+    Gaudi::Property<std::string>  m_dEdxEqVarName
+    { this, "dEdxEqVarName", "dEdxEq", "Variabel name for the equalized pixel dE/dx attribute" };
+    /// Declaire WriteDectorHandleKey but set dynamically in initialize once track container is known...
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dEdxEqKey; 
+    // SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dEdxEqKey{this, "dEdxEqName", "dEdxEq", "SG key for the equalized pixel dE/dx attribute"}; //set container  dynamically in initialize.
 
     /// Counters.  Maybe drop?
     mutable std::atomic<unsigned long> m_nEventsProcessed{};

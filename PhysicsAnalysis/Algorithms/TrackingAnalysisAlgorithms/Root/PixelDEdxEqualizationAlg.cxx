@@ -22,9 +22,17 @@ namespace CP {
       
     ATH_CHECK ( m_trackContainerName.initialize() );
 
+    if ( m_dEdxEqVarName.empty() ) {
+      ATH_MSG_FATAL("No variable name provided for the equalized dE/dx truncated mean!");
+      return StatusCode::FAILURE;
+    }
+
     std::string trackContainer = m_trackContainerName.key();
+    std::string dEdxEqKey = Form("%s.%s", trackContainer.c_str(), m_dEdxEqVarName.value().c_str());
     m_dEdxEqKey = SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>{
-      this, "dEdxEqName", trackContainer + ".dEdxEq", "SG key for the equalized pixel dE/dx attribute"};
+      this, "dEdxEqName", dEdxEqKey, "SG key for the equalized pixel dE/dx attribute"};
+    // m_dEdxEqKey = SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>{
+    // this, "dEdxEqName", trackContainer + ".dEdxEq", "SG key for the equalized pixel dE/dx attribute"};
     
     ANA_CHECK ( m_dEdxEqKey.initialize() );
     ATH_MSG_INFO("Will decorate track container " << m_trackContainerName << " with variable " << m_dEdxEqKey);
