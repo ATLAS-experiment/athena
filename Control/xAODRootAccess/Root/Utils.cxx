@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // STL include(s):
@@ -241,6 +241,48 @@ namespace xAOD {
          }
       }
 
+/// Macro instantiating another macro for all usual "primitive" types
+#define TYPE_CHECK_INSTANTIATE(MACRO) \
+   MACRO(std::int8_t)                 \
+   MACRO(std::uint8_t)                \
+   MACRO(std::int16_t)                \
+   MACRO(std::uint16_t)               \
+   MACRO(std::int32_t)                \
+   MACRO(std::uint32_t)               \
+   MACRO(std::int64_t)                \
+   MACRO(std::uint64_t)               \
+   MACRO(float)                       \
+   MACRO(double)
+
+/// Macro returning the type info for a given type name
+#define GETTYPEINFO_SPECIALIZE(TYPE) \
+   if(typeName == #TYPE) {           \
+      return typeid(TYPE);           \
+   }
+
+      const std::type_info& getTypeInfo(std::string_view typeName) {
+         TYPE_CHECK_INSTANTIATE(GETTYPEINFO_SPECIALIZE)
+         ::Error("xAOD::Utils::getTypeInfo",
+                 XAOD_MESSAGE("Unknown data type (%s) received"),
+                 typeName.data());
+         return typeid(void);
+      }
+
+#undef GETTYPEINFO_SPECIALIZE
+
+#define ISPRIMITIVETYPE_SPECIALIZE(TYPE) \
+   if(typeName == #TYPE) {               \
+      return true;                       \
+   }
+
+      bool isPrimitiveType(std::string_view typeName) {
+         TYPE_CHECK_INSTANTIATE(ISPRIMITIVETYPE_SPECIALIZE)
+         return false;
+      }
+
+#undef ISPRIMITIVETYPE_SPECIALIZE
+#undef TYPE_CHECK_INSTANTIATE
+
       /// This function is used internally in the code when creating primitive
       /// dynamic auxiliary branches. I just took the code from SFrame to be
       /// honest...
@@ -340,9 +382,9 @@ namespace xAOD {
          return result;
       }
       /// This function is used to search for a branch in a TTree that contains
-      /// a given substring. It returns the name of the first branch that contains the search term. 
-      /// If no branch is found, the function returns the search term itself. 
-      /// 
+      /// a given substring. It returns the name of the first branch that contains the search term.
+      /// If no branch is found, the function returns the search term itself.
+      ///
       /// @param tree The TTree to search in
       /// @param pre The search term
       /// @returns The name of the first branch that contains the search term
@@ -361,55 +403,6 @@ namespace xAOD {
          }
 
          return pre;
-      }
-
-      /// This function is used to search for a field in an RNTupleReader that
-      /// contains a given substring. It returns the name of the first field
-      /// that contains the search term. If no field is found, the function
-      /// returns the search term itself.
-      ///
-      /// @param ntupleReader The RNTupleReader to search in
-      /// @param pre The search term
-      /// @returns The name of the first field that contains the search term
-      ///
-      std::string getFirstFieldMatch(
-          RNTupleReader& ntupleReader,
-          const std::string& pre ) {
-         const std::regex pattern( ".*" + pre + ".*" );
-         ntupleReader.LoadEntry( 0 );
-         for( const auto& field :
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
-              ntupleReader.GetModel().GetConstFieldZero()
-               ) {
-                  auto name = field.GetQualifiedFieldName();
-#else
-               ntupleReader.GetModel().GetFieldZero().GetSubFields()
-               ) {
-            auto name = field->GetQualifiedFieldName();
-#endif
-            if( std::regex_match( name, pattern ) ) {
-               return name;
-            }
-         }
-         return pre;
-      }
-
-      /// This function is used to check if a field exists in an RNTupleReader.
-      ///
-      /// @param fieldName The name of the field to check
-      /// @param ntupleReader The RNTupleReader to check in
-      /// @returns True if the field exists, false otherwise
-      ///
-      ::Bool_t fieldExists(
-          std::string fieldName,
-          RNTupleReader& ntupleReader ) {
-         // If it cannot find a field id it will give the maximum value of
-         // unsigned long
-         if( ntupleReader.GetDescriptor().FindFieldId( fieldName ) ==
-             std::numeric_limits< unsigned long >::max() ) {
-            return kFALSE;
-         }
-         return kTRUE;
       }
 
    }  // namespace Utils
