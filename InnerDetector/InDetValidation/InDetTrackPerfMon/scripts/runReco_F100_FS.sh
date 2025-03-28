@@ -74,7 +74,10 @@ fi
 
 ## running reconstruction
 run "${pipelineName}" \
-    FPGATrackSim_F100.sh -t -i ${inputRDO} -o ${outputAOD}
+    FPGATrackSim_F100.sh -t -q \
+      -i ${inputRDO} \
+      -o ${outputAOD} \
+      -n ${nEvents}
     
 rc=$?
 echo "Reco_tf.py result: $rc"

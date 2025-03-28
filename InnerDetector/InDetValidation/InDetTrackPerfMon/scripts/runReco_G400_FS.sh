@@ -55,12 +55,13 @@ Reco_tf.py --CA \
     --outputAODFile ${outputAOD} \
     --steering 'doRAWtoALL' \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
-    --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
-        flags.Tracking.useITkFTF=True; \
-        flags.Tracking.doITkFastTracking=True; \
-        flags.Tracking.ITkFTFPass.useTracklets=True; \
-        flags.Detector.GeometryHGTD=False; \
-        flags.Trigger.InDetTracking.doGPU=True"
+    --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
+    --preExec "flags.Tracking.useITkFTF=True; \
+               flags.Tracking.doITkFastTracking=True; \
+               flags.Tracking.ITkFTFPass.useTracklets=True; \
+               flags.Detector.GeometryHGTD=False; \
+               flags.Trigger.InDetTracking.doGPU=True"
+    #--preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
 
 rc=$?
 echo "Reco_tf.py result: $rc"

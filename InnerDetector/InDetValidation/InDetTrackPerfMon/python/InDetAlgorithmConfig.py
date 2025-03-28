@@ -24,9 +24,18 @@ def TruthHitDecoratorAlgCfg( flags, name="InDetPhysValTruthDecoratorAlg", **kwar
     acc.addPublicTool( extrapolator )
     kwargs.setdefault( "Extrapolator", extrapolator )
 
+    PixelClusterContainerName = "PixelClusters"
+    SCTClusterContainerName   = "SCT_Clusters"
     if flags.Detector.GeometryITk :
-        kwargs.setdefault( "PixelClusterContainerName", "ITkPixelMeasurements" )
-        kwargs.setdefault( "SCTClusterContainerName",   "ITkStripMeasurements" )
+        if flags.PhysVal.IDTPM.currentTrkAna.useActsSiMeasurements :
+            PixelClusterContainerName = "ITkPixelMeasurements_offl"
+            SCTClusterContainerName   = "ITkStripMeasurements_offl"
+        else :
+            PixelClusterContainerName = "ITkPixelMeasurements"
+            SCTClusterContainerName   = "ITkStripMeasurements"
+
+    kwargs.setdefault( "PixelClusterContainerName", PixelClusterContainerName )
+    kwargs.setdefault( "SCTClusterContainerName",   SCTClusterContainerName )
 
     doTechEff = False
     for trkAnaName in flags.PhysVal.IDTPM.trkAnaNames:

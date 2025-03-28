@@ -49,7 +49,18 @@ if [ ! -f $inputRDO ]; then
 fi
 
 ## check out G-200 and build
-git clone https://:@gitlab.cern.ch:8443/atlas-tdaq-ph2upgrades/atlas-tdaq-eftracking/traccc-integration/G-200.git
+#git clone https://:@gitlab.cern.ch:8443/atlas-tdaq-ph2upgrades/atlas-tdaq-eftracking/traccc-integration/G-200.git
+## FIXME - temporary, until repo is public
+git clone https://:@gitlab.cern.ch:8443/maparo/G-200.git
+if [ ! -d G-200 ]; then
+  echo "Could not clone G-200 repository. Exiting."
+  exit 1
+fi
+if [ -z "$( ls -A G-200 )" ]; then
+  echo "Cloned an empty repository. Exiting."
+  exit 1
+fi
+#
 cd G-200
 mkdir build
 cd build
@@ -75,13 +86,11 @@ cd ../..
 Reco_tf.py --CA \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
-    --preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \
+    --postInclude 'EFTracking.TrackingAlgConfig.TrackingAlgCfg,ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --steering 'doRAWtoALL' \
-    --postInclude 'EFTracking.TrackingAlgConfig.TrackingAlgCfg' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}
-#    --conditionsTag 'all:OFLCOND-MC21-SDR-RUN4-02' \
-#    --geometryVersion 'all:ATLAS-P2-RUN4-03-00-00' \
+    #--preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \
 
 rc=$?
 echo "Reco_tf.py result: $rc"

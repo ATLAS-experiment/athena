@@ -133,6 +133,7 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "plotTrackMultiplicities"  , True )
     icf.addFlag( "plotEfficiencies"         , True )
     icf.addFlag( "plotTechnicalEfficiencies", False )
+    icf.addFlag( "useActsSiMeasurements"    , False )
     icf.addFlag( "plotResolutions"          , True )
     icf.addFlag( "plotFakeRates"            , True )
     icf.addFlag( "unlinkedAsFakes"          , True )

@@ -44,8 +44,8 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
 
 
 def ITkActsPrepDataToxAODCfg(
-        flags, PixelMeasurementContainer="ITkPixelMeasurements",
-        StripMeasurementContainer="ITkStripMeasurements") -> ComponentAccumulator:
+        flags, PixelMeasurementContainer = "ITkPixelMeasurements",
+        StripMeasurementContainer = "ITkStripMeasurements") -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # need to decorate truth particles and clusters with same unique identified
