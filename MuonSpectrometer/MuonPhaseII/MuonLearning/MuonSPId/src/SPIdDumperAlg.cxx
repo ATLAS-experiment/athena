@@ -41,8 +41,8 @@ namespace MuonR4 {
         ATH_CHECK(m_graphFilterTool->runGraphInference(ctx, graphData));
 
         if (graphData.graph->dataTensor.size() < 3) {
-            ATH_MSG_ERROR("ONNX inference output tensor is missing.");
-            return StatusCode::FAILURE;
+            ATH_MSG_DEBUG("ONNX inference output tensor is missing.");
+            return StatusCode::SUCCESS;
         }
 
         const float* predictions = graphData.graph->dataTensor[2].GetTensorMutableData<float>();
