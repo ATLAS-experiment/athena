@@ -88,28 +88,18 @@ def ActsMainTrackFindingAlgCfg(flags,
     # Borrow many settings from flags.Tracking.ActiveConfig, normally initialised in createITkTrackingPassFlags() at
     # https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkConfig/python/TrackingPassFlags.py#L121
 
-    # bins in |eta|, used for both MeasurementSelectorCuts and TrackSelector::EtaBinnedConfig
+    # bins in |eta|, used for both MeasurementSelectorConfig and TrackSelector::EtaBinnedConfig
     if flags.Detector.GeometryITk:
         kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)
-    if flags.Acts.trackFindingTrackSelectorConfig <= 0:
-        # clusters with chi2 above this value will be treated as outliers
-        kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
-    elif flags.Acts.trackFindingTrackSelectorConfig == 2:
-        # clusters with chi2 above this value will be treated as outliers
-        kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2max))
-        # clusters with chi2 above this value will be discarded.
-        kwargs.setdefault("chi2OutlierCutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
-    else:        
-        # new default chi2 cuts optimise efficiency vs speed. Set same value as Athena's Xi2maxNoAdd.
-        if flags.Tracking.doITkFastTracking:
-            kwargs.setdefault("chi2CutOff", [100])
-            kwargs.setdefault("chi2OutlierCutOff", [100])
-        else:
-            kwargs.setdefault("chi2CutOff", [25])
-            kwargs.setdefault("chi2OutlierCutOff", [25])
-    if flags.Acts.trackFindingTrackSelectorConfig > 0 and flags.Acts.trackFindingTrackSelectorConfig != 3:
-        kwargs.setdefault("branchStopperPtMinFactor", 0.9)
-        kwargs.setdefault("branchStopperAbsEtaMaxExtra", 0.1)
+    # new default chi2 cuts optimise efficiency vs speed. Set same value as Athena's Xi2maxNoAdd.
+    if flags.Tracking.doITkFastTracking:
+        kwargs.setdefault("chi2CutOff", [100])
+        kwargs.setdefault("chi2OutlierCutOff", [100])
+    else:
+        kwargs.setdefault("chi2CutOff", [25])
+        kwargs.setdefault("chi2OutlierCutOff", [25])
+    kwargs.setdefault("branchStopperPtMinFactor", 0.9)
+    kwargs.setdefault("branchStopperAbsEtaMaxExtra", 0.1)
 
     kwargs.setdefault("numMeasurementsCutOff", [1])
 
@@ -117,27 +107,23 @@ def ActsMainTrackFindingAlgCfg(flags,
     # if all eta bins are >=0. the counter will be categorized by abs(eta) otherwise eta
     kwargs.setdefault("StatisticEtaBins", [eta/10. for eta in range(5, 40, 5)]) # eta 0.0 - 4.0 in steps of 0.5
 
-    if flags.Acts.trackFindingTrackSelectorConfig > 0:
-        kwargs.setdefault("absEtaMax", flags.Tracking.ActiveConfig.maxEta)
-        kwargs.setdefault("ptMin", [p / Units.GeV * UnitConstants.GeV for p in tolist(flags.Tracking.ActiveConfig.minPT)])
-        # z0 cut is the same for all eta bins. I use the size of the eta bins limits minus one to find the number of bins.
-        kwargs.setdefault("z0Min", [-flags.Tracking.ActiveConfig.maxZImpactSeed / Units.mm * UnitConstants.mm for etabin in flags.Tracking.ActiveConfig.etaBins[:-1]])
-        kwargs.setdefault("z0Max", [ flags.Tracking.ActiveConfig.maxZImpactSeed / Units.mm * UnitConstants.mm for etabin in flags.Tracking.ActiveConfig.etaBins[:-1]])
-        kwargs.setdefault("d0Min", [-d0 / Units.mm * UnitConstants.mm for d0 in tolist(flags.Tracking.ActiveConfig.maxPrimaryImpact)])
-        kwargs.setdefault("d0Max", [ d0 / Units.mm * UnitConstants.mm for d0 in tolist(flags.Tracking.ActiveConfig.maxPrimaryImpact)])
-        kwargs.setdefault("minMeasurements", tolist(flags.Tracking.ActiveConfig.minClusters))
-        kwargs.setdefault("maxHoles", tolist(flags.Tracking.ActiveConfig.maxHoles))
-        if flags.Acts.trackFindingTrackSelectorConfig != 4:
-            kwargs.setdefault("minPixelHits", tolist(flags.Tracking.ActiveConfig.minPixel))
-            kwargs.setdefault("maxPixelHoles", tolist(flags.Tracking.ActiveConfig.maxPixelHoles))
-            kwargs.setdefault("maxStripHoles", tolist(flags.Tracking.ActiveConfig.maxSctHoles))
-        else:
-            kwargs.setdefault("addPixelStripCounts", False)
-        # The shared hits are not calculated until *after* the track selection, so maxSharedHits is not used.
-        # Even if that were not the case, we need the ambiguity solver to decide which track to drop.
-        ### kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
-        kwargs.setdefault("ptMinMeasurements", isdet(flags, pixel=[3], strip=[6]))
-        kwargs.setdefault("absEtaMaxMeasurements", isdet(flags, pixel=[3], strip=[999999]))
+    kwargs.setdefault("absEtaMax", flags.Tracking.ActiveConfig.maxEta)
+    kwargs.setdefault("ptMin", [p / Units.GeV * UnitConstants.GeV for p in tolist(flags.Tracking.ActiveConfig.minPT)])
+    # z0 cut is the same for all eta bins. I use the size of the eta bins limits minus one to find the number of bins.
+    kwargs.setdefault("z0Min", [-flags.Tracking.ActiveConfig.maxZImpactSeed / Units.mm * UnitConstants.mm for etabin in flags.Tracking.ActiveConfig.etaBins[:-1]])
+    kwargs.setdefault("z0Max", [ flags.Tracking.ActiveConfig.maxZImpactSeed / Units.mm * UnitConstants.mm for etabin in flags.Tracking.ActiveConfig.etaBins[:-1]])
+    kwargs.setdefault("d0Min", [-d0 / Units.mm * UnitConstants.mm for d0 in tolist(flags.Tracking.ActiveConfig.maxPrimaryImpact)])
+    kwargs.setdefault("d0Max", [ d0 / Units.mm * UnitConstants.mm for d0 in tolist(flags.Tracking.ActiveConfig.maxPrimaryImpact)])
+    kwargs.setdefault("minMeasurements", tolist(flags.Tracking.ActiveConfig.minClusters))
+    kwargs.setdefault("maxHoles", tolist(flags.Tracking.ActiveConfig.maxHoles))
+    kwargs.setdefault("minPixelHits", tolist(flags.Tracking.ActiveConfig.minPixel))
+    kwargs.setdefault("maxPixelHoles", tolist(flags.Tracking.ActiveConfig.maxPixelHoles))
+    kwargs.setdefault("maxStripHoles", tolist(flags.Tracking.ActiveConfig.maxSctHoles))
+    # The shared hits are not calculated until *after* the track selection, so maxSharedHits is not used.
+    # Even if that were not the case, we need the ambiguity solver to decide which track to drop.
+    ### kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
+    kwargs.setdefault("ptMinMeasurements", isdet(flags, pixel=[3], strip=[6]))
+    kwargs.setdefault("absEtaMaxMeasurements", isdet(flags, pixel=[3], strip=[999999]))
 
     if 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
