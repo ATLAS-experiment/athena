@@ -57,7 +57,7 @@ StatusCode GepTopoTowerAlg::execute(const EventContext& context) const {
 
 
   // Loop over clusters and their associated cells
-  for (const auto& iClust : *h_caloClusters) {
+  for (const auto iClust : *h_caloClusters) {
       CaloClusterCellLink::const_iterator cellBegin = iClust->cell_begin();
       CaloClusterCellLink::const_iterator cellEnd = iClust->cell_end();
 

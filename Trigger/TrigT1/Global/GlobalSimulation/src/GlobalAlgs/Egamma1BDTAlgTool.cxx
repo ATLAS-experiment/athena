@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Egamma1BDTAlgTool.h"
@@ -39,7 +39,7 @@ namespace GlobalSim {
     ATH_MSG_DEBUG("read in " << (*in).size() << " neighborhoods");
 
     
-    for (const auto& nbhd : *in) {
+    for (const auto nbhd : *in) {
       auto c_phi = combine_phi(nbhd);
       if (c_phi.empty()) {continue;}  // corner case: not all phi have len 17
       auto input = digitize(c_phi);
