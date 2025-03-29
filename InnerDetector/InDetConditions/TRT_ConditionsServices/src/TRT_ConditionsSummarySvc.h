@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+#ifndef TRT_CONDITIONSSERVICES_TRT_CONDITIONSSUMMARYSVC_H
+#define TRT_CONDITIONSSERVICES_TRT_CONDITIONSSUMMARYSVC_H
 
 /**
  * @file TRT_ConditionsSummarySvc.h
  * @author Christian.Schmitt@cern.ch, Denver.Whittington@cern.ch
 **/
-#ifndef TRT_ConditionsSummarySvc_h
-#define TRT_ConditionsSummarySvc_h
 
 //STL includes
 #include <vector>
@@ -43,28 +43,27 @@ class TRT_ConditionsSummarySvc :
   virtual ~TRT_ConditionsSummarySvc();
   //@name Gaudi Service Implementation
   //@{
-  virtual StatusCode initialize();          //!< Service init
-  virtual StatusCode finalize();            //!< Service finalize
+  virtual StatusCode initialize() override;          //!< Service init
   //@}
   
   //@name reimplemented from IInDetConditionsSvc
   //@{
-  virtual bool isActive(const Identifier & elementId, const InDetConditions::Hierarchy h=InDetConditions::DEFAULT);
-  virtual bool isActive(const IdentifierHash & elementHash);
-  virtual bool isActive(const IdentifierHash & elementHash, const Identifier & elementId);
-  virtual double activeFraction(const IdentifierHash & elementHash, const Identifier & idStart, const Identifier & idEnd);  
-  virtual bool isGood(const Identifier & elementId, const InDetConditions::Hierarchy h=InDetConditions::DEFAULT);
-  virtual bool isGood(const IdentifierHash & elementHash);
-  virtual bool isGood(const IdentifierHash & elementHash, const Identifier & elementId);
-  virtual double goodFraction(const IdentifierHash & elementHash, const Identifier & idStart, const Identifier & idEnd);
+  virtual bool isActive(const Identifier & elementId, const InDetConditions::Hierarchy h=InDetConditions::DEFAULT) override;
+  virtual bool isActive(const IdentifierHash & elementHash) override;
+  virtual bool isActive(const IdentifierHash & elementHash, const Identifier & elementId) override;
+  virtual double activeFraction(const IdentifierHash & elementHash, const Identifier & idStart, const Identifier & idEnd) override;
+  virtual bool isGood(const Identifier & elementId, const InDetConditions::Hierarchy h=InDetConditions::DEFAULT) override;
+  virtual bool isGood(const IdentifierHash & elementHash) override;
+  virtual bool isGood(const IdentifierHash & elementHash, const Identifier & elementId) override;
+  virtual double goodFraction(const IdentifierHash & elementHash, const Identifier & idStart, const Identifier & idEnd) override;
   //@}
 
 private:
   ServiceHandleArray<ITRT_ConditionsSvc> m_svcCollection;
   InDet::TRT_CondFlag condSummaryStatus( const Identifier & ident);
 
-  const InDetDD::TRT_DetectorManager* m_manager;
-  const TRT_ID* m_trtid;
+  const InDetDD::TRT_DetectorManager* m_manager{nullptr};
+  const TRT_ID* m_trtid{nullptr};
 
 };
 

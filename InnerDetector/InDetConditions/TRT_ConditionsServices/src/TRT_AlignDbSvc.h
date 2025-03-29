@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRT_ALIGNDBSVC_H
-#define TRT_ALIGNDBSVC_H 
+#ifndef TRT_CONDITIONSSERVICES_TRT_ALIGNDBSVC_H
+#define TRT_CONDITIONSSERVICES_TRT_ALIGNDBSVC_H
 
 /** @file TRT_AlignDbSvc.h
  * @brief a Service to manage TRT alignment conditions
