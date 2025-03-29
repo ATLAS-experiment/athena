@@ -3,6 +3,7 @@
 // Local include(s).
 #include "xAODRootAccess/RAuxStore.h"
 
+#include "ROOTTypes.h"
 #include "isRegisteredType.h"
 #include "lookupVectorType.h"
 #include "xAODRootAccess/tools/Message.h"
@@ -23,35 +24,11 @@
 #include <TClass.h>
 #include <TROOT.h>
 
-#include <ROOT/RNTupleInspector.hxx>
-#include <ROOT/RNTupleReader.hxx>
-#include <ROOT/RNTupleView.hxx>
-#include <ROOT/RNTupleWriter.hxx>
-
 // System include(s).
 #include <cassert>
 #include <functional>
 #include <memory>
 #include <string>
-
-// Make the RNTuple types available in the ROOT namespace
-// with all versions of ROOT.
-#if ROOT_VERSION_CODE < ROOT_VERSION(6, 36, 0)
-namespace ROOT {
-using Experimental::DescriptorId_t;
-using Experimental::REntry;
-using Experimental::RFieldDescriptor;
-using Experimental::RNTupleInspector;
-using Experimental::RNTupleModel;
-using Experimental::RNTupleReader;
-using Experimental::RNTupleView;
-using Experimental::RNTupleWriter;
-#if ROOT_VERSION_CODE < ROOT_VERSION(6, 35, 1)
-using Experimental::RException;
-using Experimental::RFieldBase;
-#endif  // ROOT_VERSION_CODE < ROOT_VERSION(6, 35, 1)
-}  // namespace ROOT
-#endif  // ROOT_VERSION_CODE < ROOT_VERSION(6, 36, 0)
 
 namespace {
 
@@ -314,7 +291,7 @@ struct RAuxStore::impl {
         // Loop over the sub-fields of this field.
         for (const ROOT::RFieldBase* subField :
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6, 35, 0)
-             field->GetConstSubFields()
+             field->GetConstSubfields()
 #else
              field->GetSubFields()
 #endif  // ROOT_VERSION_CODE >= ROOT_VERSION(6, 35, 0)

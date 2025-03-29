@@ -4,9 +4,11 @@
 
 #undef NDEBUG
 
-// System include(s):
-#include <filesystem>
-#include <memory>
+// Local include(s):
+#include "../Root/ROOTTypes.h"
+#include "xAODRootAccess/Init.h"
+#include "xAODRootAccess/RAuxStore.h"
+#include "xAODRootAccess/tools/ReturnCheck.h"
 
 // EDM include(s):
 #include "AsgMessaging/MessageCheck.h"
@@ -14,22 +16,12 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/exceptions.h"
 
-// Local include(s):
-#include "xAODRootAccess/Init.h"
-#include "xAODRootAccess/RAuxStore.h"
-#include "xAODRootAccess/tools/ReturnCheck.h"
-
 // ROOT include(s):
 #include <TFile.h>
 
-#include <ROOT/RNTuple.hxx>
-#include <ROOT/RNTupleModel.hxx>
-#include <ROOT/RNTupleReader.hxx>
-#include <ROOT/RNTupleWriter.hxx>
-
-using ROOT::Experimental::RNTupleModel;
-using ROOT::Experimental::RNTupleReader;
-using ROOT::Experimental::RNTupleWriter;
+// System include(s):
+#include <filesystem>
+#include <memory>
 
 /// Helper macro for evaluating logical tests
 #define SIMPLE_ASSERT(EXP)                                             \
@@ -43,11 +35,11 @@ using ROOT::Experimental::RNTupleWriter;
   } while (0)
 
 // The name of the application:
-const char* APP_NAME = "ut_xaodrootaccess_rauxstore_test";
-const char* INPUT_FILE_NAME = "InputNtuple.root";
-const char* INPUT_NTUPLE_NAME = "InputNtuple";
-const char* OUTPUT_FILE_NAME = "OutputNtuple.root";
-const char* OUTPUT_NTUPLE_NAME = "OutputNtuple";
+static const char* const APP_NAME = "ut_xaodrootaccess_rauxstore_test";
+static const char* const INPUT_FILE_NAME = "InputNtuple.root";
+static const char* const INPUT_NTUPLE_NAME = "InputNtuple";
+static const char* const OUTPUT_FILE_NAME = "OutputNtuple.root";
+static const char* const OUTPUT_NTUPLE_NAME = "OutputNtuple";
 
 StatusCode test_linked() {
 
@@ -280,14 +272,15 @@ StatusCode test_insertmove() {
 
 void createAndFillNtuple(const char* ntupleName, const char* fileName) {
   // Create an RNTuple model
-  auto model = RNTupleModel::Create();
+  auto model = ROOT::RNTupleModel::Create();
 
   // Create fields for the RNTuple
   auto var1Field = model->MakeField<std::vector<float> >("PrefixAuxDyn:var1");
   auto var2Field = model->MakeField<std::vector<float> >("PrefixAuxDyn:var2");
 
   // Create an RNTuple writer
-  auto ntuple = RNTupleWriter::Recreate(std::move(model), ntupleName, fileName);
+  auto ntuple =
+      ROOT::RNTupleWriter::Recreate(std::move(model), ntupleName, fileName);
 
   // Fill the RNTuple with some information
   std::vector<float> var1{1, 2, 3, 4, 5};
@@ -397,8 +390,8 @@ int main() {
   store.selectAux({"var1", "decoration"});
 
   // Create another ntuple to test the ntuple writing with:
-  auto outputNtuple = RNTupleWriter::Recreate(
-      RNTupleModel::Create(), OUTPUT_NTUPLE_NAME, OUTPUT_FILE_NAME);
+  auto outputNtuple = ROOT::RNTupleWriter::Recreate(
+      ROOT::RNTupleModel::Create(), OUTPUT_NTUPLE_NAME, OUTPUT_FILE_NAME);
   ANA_CHECK(store.writeTo(*outputNtuple));
 
   // Create the decoration again:
@@ -449,7 +442,7 @@ int main() {
 
   // Check that the output ntuple looks as it should:
   auto outputNtupleTester =
-      RNTupleReader::Open(OUTPUT_NTUPLE_NAME, OUTPUT_FILE_NAME);
+      ROOT::RNTupleReader::Open(OUTPUT_NTUPLE_NAME, OUTPUT_FILE_NAME);
   outputNtupleTester->PrintInfo();
   const std::size_t nFields =
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6, 35, 0)
