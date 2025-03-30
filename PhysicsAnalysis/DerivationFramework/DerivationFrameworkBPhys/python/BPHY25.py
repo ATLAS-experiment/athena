@@ -753,7 +753,7 @@ def BPHY25Cfg(flags):
         list_2V0A_obj[i].JpsiMassLowerCut         = Jpsi_lo
         list_2V0A_obj[i].JpsiMassUpperCut         = Jpsi_hi
         list_2V0A_obj[i].MassLowerCut             = 0.
-        list_2V0A_obj[i].MassUpperCut             = 9400.
+        list_2V0A_obj[i].MassUpperCut             = 100000.
         list_2V0A_obj[i].CascadeVertexCollections = ["BPHY25_"+list_2V0A_hypo[i]+"_CascadeVtx1","BPHY25_"+list_2V0A_hypo[i]+"_CascadeVtx2","BPHY25_"+list_2V0A_hypo[i]+"_CascadeMainVtx"]
         list_2V0A_obj[i].HasJXSubVertex           = False
         list_2V0A_obj[i].HasJXV02SubVertex        = False
