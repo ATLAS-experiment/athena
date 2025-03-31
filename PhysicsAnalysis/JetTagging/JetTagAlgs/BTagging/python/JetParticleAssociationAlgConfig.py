@@ -10,7 +10,6 @@ from ParticleJetTools.JetParticleAssociationAlgConfig import ( # noqa: F401
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from math import inf
 
 def JetParticleAssociationByVertexCfg(ConfigFlags, jetCollName, partcollname, assocname, dzCut, useMinZ0Vertex, **options):
 
