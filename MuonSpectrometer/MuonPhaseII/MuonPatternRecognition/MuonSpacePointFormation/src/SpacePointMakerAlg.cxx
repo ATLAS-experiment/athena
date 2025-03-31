@@ -317,7 +317,7 @@ void SpacePointMakerAlg::distributePointsAndStore(
     // Sorter
     MuonR4::SpacePointPerLayerSorter sorter(m_idHelperSvc.get());
 
-    auto newBucket = [this, &lastPointPos, &splittedHits, &sorter] () {
+    auto newBucket = [this, &splittedHits, &sorter] () {
         SpacePointBucket& newContainer = splittedHits.emplace_back();
         newContainer.setBucketId(splittedHits.size() -1);
 
