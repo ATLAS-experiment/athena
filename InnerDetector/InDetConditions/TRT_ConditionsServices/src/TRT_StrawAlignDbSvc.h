@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRT_STRAWALIGNDBSVC_H
-#define TRT_STRAWALIGNDBSVC_H
+#ifndef TRT_CONDITIONSSERVICES_TRT_STRAWALIGNDBSVC_H
+#define TRT_CONDITIONSSERVICES_TRT_STRAWALIGNDBSVC_H
+
 /** @file TRT_StrawAlignDbSvc.h
  * @brief interface to TRT straw alignment constants
  * @author Peter Hansen <phansen@nbi.dk>
