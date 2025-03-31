@@ -17,7 +17,7 @@
 namespace MuonR4{
     using namespace SegmentFit;
     using namespace SegmentFitHelpers;
-    using HitVec = SpacePointPerLayerSorter::HitVec;
+    using HitVec = SpacePointPerLayerSplitter::HitVec;
 
     double driftCov(const CalibratedSpacePoint& dcHit){
         return std::visit([](const auto& cov) ->double{

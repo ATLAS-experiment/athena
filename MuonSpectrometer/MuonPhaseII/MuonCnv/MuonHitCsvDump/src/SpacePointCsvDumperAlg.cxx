@@ -5,7 +5,7 @@
 #include "SpacePointCsvDumperAlg.h"
 
 #include "StoreGate/ReadHandle.h"
-#include "MuonSpacePoint/SpacePointPerLayerSorter.h"
+#include "MuonSpacePoint/SpacePointPerLayerSplitter.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include <fstream>
 #include <TString.h>
@@ -137,15 +137,15 @@ StatusCode SpacePointCsvDumperAlg::execute(){
    };
 
    for(const SpacePointBucket* bucket : *readHandle) {
-       const SpacePointPerLayerSorter sorter{*bucket};
+       const SpacePointPerLayerSplitter splitter{*bucket};
        unsigned int gasGap{0};
-       for (const SpacePointPerLayerSorter::HitVec& mdtLayer : sorter.mdtHits()) {
+       for (const SpacePointPerLayerSplitter::HitVec& mdtLayer : splitter.mdtHits()) {
             ++gasGap;
             for (const SpacePoint* spacePoint : mdtLayer) {
                 dumpToFile(bucket->bucketId(), *spacePoint, gasGap);
             }
        }
-       for (const SpacePointPerLayerSorter::HitVec& mdtLayer : sorter.stripHits()) {
+       for (const SpacePointPerLayerSplitter::HitVec& mdtLayer : splitter.stripHits()) {
             ++gasGap;
             for (const SpacePoint* spacePoint : mdtLayer) {
                 dumpToFile(bucket->bucketId(), *spacePoint, gasGap);

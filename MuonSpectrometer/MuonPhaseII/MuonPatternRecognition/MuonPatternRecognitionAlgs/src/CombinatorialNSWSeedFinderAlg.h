@@ -17,7 +17,7 @@
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "MuonPatternEvent/MuonHoughDefs.h"
 #include "MuonRecToolInterfacesR4/IPatternVisualizationTool.h"
-#include <MuonSpacePoint/SpacePointPerLayerSorter.h>
+#include <MuonSpacePoint/SpacePointPerLayerSplitter.h>
 
 #include <span>
 #include <vector>
@@ -25,8 +25,8 @@
 
 namespace MuonR4{
 
-using HitVec = SpacePointPerLayerSorter::HitVec;
-using HitLayVec = SpacePointPerLayerSorter::HitLayVec;
+using HitVec = SpacePointPerLayerSplitter::HitVec;
+using HitLayVec = SpacePointPerLayerSplitter::HitLayVec;
 using HitLaySpan = std::span<const HitVec,std::dynamic_extent>;
 
 enum class HitWindow{

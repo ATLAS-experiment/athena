@@ -157,18 +157,18 @@ StatusCode ReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
     
     /// Retrieve the full phyiscal volume
     const GeoVFullPhysVol* readOutVol = copyMe->getMaterialGeom();
-    PVConstLink parentVolume = readOutVol->getParent();
+    PVConstLink parentVolume = readOutVol->getParent();   // This is the physical volume that contains the readOutVol as a child. This is a const link to an existing physical volume
     cacheObj.translatedStations.insert(parentVolume);
     /// Copy the full physical volume of the muon station
-    PVLink parentPhysVol{make_intrusive<GeoFullPhysVol>(parentVolume->getLogVol())};
+    PVLink parentPhysVol{make_intrusive<GeoFullPhysVol>(parentVolume->getLogVol())};  // This is a mutable pointer. This creates a new physical volume using the same logical structure (shapes and materials but not position).
 
     /// Make sure to copy all the children from the original tree that're not FullPhysVols -> represent
     /// They represent the passive material inside the station and are needed for the TrackinGeometry building
-    const std::vector<GeoChildNodeWithTrf> children = getChildrenWithRef(parentVolume, false);
+    const std::vector<GeoChildNodeWithTrf> children = getChildrenWithRef(parentVolume, false);    // we get the list of child nodes attached to the parent volume
     double minX{1.e9}, maxX{-1.e9}, minY1{1.e9}, maxY1{-1.e9}, minY2{1.e9}, maxY2{-1.e9}, minZ{1.e9}, maxZ{-1.e9};
     for (const GeoChildNodeWithTrf& child : children) {
-        std::vector<Amg::Vector3D> edges = getPolyShapeEdges(child.volume->getLogVol()->getShape(),
-                                                             readOutVol->getX().inverse() * child.transform);
+        std::vector<Amg::Vector3D> edges = getPolyShapeEdges(child.volume->getLogVol()->getShape(),                     //we are getting corner points of the edges
+                                                             readOutVol->getX().inverse() * child.transform);           //getX() returns the transformation from readout physical volume ref to parent physical volume ref. We take the inverse and we chain it with child.transform, which is from child ref to parent ref
         for (const Amg::Vector3D& edge : edges) {
             minX = std::min(minX, edge.x());
             maxX = std::max(maxX, edge.x());

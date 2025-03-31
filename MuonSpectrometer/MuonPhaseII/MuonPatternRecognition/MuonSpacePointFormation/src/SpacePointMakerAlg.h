@@ -120,11 +120,11 @@ namespace MuonR4{
              * @param hitsPerChamber: List of all premade space points which have to be sorted
              * @param finalContainer: Output SpacePoint bucket container.
              *  */
-            void distributePointsAndStore(const EventContext& ctx,
+            void distributePointsAndStore(
                                           SpacePointsPerChamber&& hitsPerChamber,
                                           SpacePointContainer& finalContainer) const;
 
-            void distributePointsAndStore(const EventContext& ctx,
+            void distributePointsAndStore(
                                           std::vector<SpacePoint>&& spacePoints,
                                           SpacePointBucketVec& splittedContainer) const;
 

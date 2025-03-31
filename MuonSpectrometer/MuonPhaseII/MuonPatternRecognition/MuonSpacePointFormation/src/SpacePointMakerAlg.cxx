@@ -3,11 +3,13 @@
 */
 #include "SpacePointMakerAlg.h"
 
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
+#include <GaudiKernel/IMessageSvc.h>
 #include <xAODMuonViews/ChamberViewer.h>
 #include <thread>
-
+#include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 namespace {
     inline std::vector<std::shared_ptr<unsigned>> matchCountVec(unsigned int n) {
         std::vector<std::shared_ptr<unsigned>> out{};
@@ -269,14 +271,14 @@ StatusCode SpacePointMakerAlg::execute(const EventContext& ctx) const {
     
     for (auto &[chamber, hitsPerChamber] : preSortedContainer){
         ATH_MSG_VERBOSE("Fill space points for chamber "<<chamber);
-        distributePointsAndStore(ctx, std::move(hitsPerChamber), *outContainer);
+        distributePointsAndStore(std::move(hitsPerChamber), *outContainer);
     }
     SG::WriteHandle<SpacePointContainer> writeHandle{m_writeKey, ctx};
     ATH_CHECK(writeHandle.record(std::move(outContainer)));
     return StatusCode::SUCCESS;
 }
 
-void SpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
+void SpacePointMakerAlg::distributePointsAndStore(
                                                   SpacePointsPerChamber&& hitsPerChamber,
                                                   SpacePointContainer& finalContainer) const {
     SpacePointBucketVec splittedHits{};
@@ -286,94 +288,97 @@ void SpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
         m_statCounter->addToStat(hitsPerChamber.phiHits);
 
     }
-    distributePointsAndStore(ctx, std::move(hitsPerChamber.etaHits), splittedHits);
-    distributePointsAndStore(ctx, std::move(hitsPerChamber.phiHits), splittedHits);
+    distributePointsAndStore(std::move(hitsPerChamber.etaHits), splittedHits);
+    distributePointsAndStore(std::move(hitsPerChamber.phiHits), splittedHits);
     
     for (SpacePointBucket& bucket : splittedHits) {
-        if (bucket.size() > 1)
+        if (bucket.size() > 1){
             finalContainer.push_back(std::make_unique<SpacePointBucket>(std::move(bucket)));
+        }
     }
 
 }
-void SpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
-                                                  std::vector<SpacePoint>&& spacePoints,
-                                                  SpacePointBucketVec& splittedHits) const {
-    
+
+void SpacePointMakerAlg::distributePointsAndStore(
+    std::vector<SpacePoint>&& spacePoints, SpacePointBucketVec& splittedHits) const {
+
     if (spacePoints.empty()) return;
 
-    const bool defineBuckets = splittedHits[0].empty();
-    const bool hasEtaMeas{spacePoints[0].measuresEta()};    
-    
-    auto pointPos = [hasEtaMeas, defineBuckets] (const SpacePoint& p) {
-        return hasEtaMeas || !defineBuckets ?  p.positionInChamber().y() : p.positionInChamber().x();
-    };
-    SG::ReadHandle<ActsGeometryContext> gctx{m_geoCtxKey, ctx};
-
-    auto channelDir = [hasEtaMeas, defineBuckets, &gctx](const SpacePoint & p) {
-        const Amg::Vector3D d = xAOD::channelDirInChamber(*gctx, p.primaryMeasurement());
-        return std::abs(hasEtaMeas || !defineBuckets ? d.y() : d.z());
-    };
+    const bool defineBuckets = splittedHits.size()==1 and splittedHits[0].empty();
 
     std::sort(spacePoints.begin(), spacePoints.end(), 
-              [&pointPos] (const SpacePoint& a, const SpacePoint& b) {
-                    return pointPos(a) < pointPos(b);
-              });
-    
+        [] (const SpacePoint& a, const SpacePoint& b) {
+        return a.positionInChamber().y() < b.positionInChamber().y();
+    });
 
-    double lastPoint = pointPos(spacePoints[0]);
+    // here we'll save the first element of the last bucket
+    double lastPointPos = spacePoints[0].positionInChamber().y();
 
-    auto newBucket = [this, &lastPoint, &splittedHits, &pointPos, &channelDir] (const double currPos) {
-        splittedHits.emplace_back();
-        splittedHits.back().setBucketId(splittedHits.size() -1);
+    // Sorter
+    MuonR4::SpacePointPerLayerSorter sorter(m_idHelperSvc.get());
+
+    auto newBucket = [this, &lastPointPos, &splittedHits, &sorter] () {
+        SpacePointBucket& newContainer = splittedHits.emplace_back();
+        newContainer.setBucketId(splittedHits.size() -1);
+
         SpacePointBucket& overlap{splittedHits[splittedHits.size() - 2]};
-        SpacePointBucket& newContainer{splittedHits[splittedHits.size() - 1]};
-     
+        overlap.setCoveredRange(overlap.front()->positionInChamber().y(), overlap.back()->positionInChamber().y());
+        overlap.populateChamberLocations();
+        std::sort(overlap.begin(), overlap.end(), sorter);
+        
+        if (msgLvl(MSG::VERBOSE)){
+            ATH_MSG_VERBOSE("Created a bucket, printing all spacepoints...");
+            for (const std::shared_ptr<SpacePoint>& sp : overlap){
+                ATH_MSG_VERBOSE("SpacePoint: PrimaryMeas: " << m_idHelperSvc->toString(sp->identify()) << " SecondaryMeas: " << (sp->secondaryMeasurement() ? m_idHelperSvc->toString(xAOD::identify(sp->secondaryMeasurement())) : " None ") << " Pos: " <<  Amg::toString(sp->positionInChamber()));
+            }
+        }
+        
         for (const std::shared_ptr<SpacePoint>& pointInBucket : overlap) {
-            const double overlapPos = pointPos(*pointInBucket) + pointInBucket->uncertainty()[1] * channelDir(*pointInBucket);
-            if (std::abs(overlapPos - currPos) < m_spacePointOverlap) {
+            const double overlapPos = pointInBucket->positionInChamber().y() + pointInBucket->uncertainty()[1];
+            if (overlapPos >= overlap.coveredMax() or (overlap.coveredMax() - overlapPos < m_spacePointOverlap)) {    //(std::abs(overlapPos - overlap.coveredMax()) < m_spacePointOverlap) 
                 newContainer.push_back(pointInBucket);
             }
         }
-        lastPoint = newContainer.empty() ? currPos : pointPos(**newContainer.begin());
-        overlap.setCoveredRange(pointPos(**overlap.begin()), pointPos(**overlap.rbegin()));
-        overlap.populateChamberLocations(); 
-    };
+    };    
 
     for (SpacePoint& toSort : spacePoints) {        
-        const double currPoint = pointPos(toSort);
-        /// Phi modules
+        const double currPoint = toSort.positionInChamber().y();
+        /// Only-phi measurements
         if (!defineBuckets) {
-           std::shared_ptr<SpacePoint> madePoint = std::make_shared<SpacePoint>(std::move(toSort));
-           for (SpacePointBucket& bucket : splittedHits) {
-                const double measDir = channelDir(toSort);
-                const double posMin = currPoint - toSort.uncertainty()[1] * measDir;
-                const double posMax = currPoint + toSort.uncertainty()[1] * measDir;
-                
-                if (posMax >= bucket.coveredMin() && bucket.coveredMax() >= posMin) {
+            std::shared_ptr<SpacePoint> madePoint = std::make_shared<SpacePoint>(std::move(toSort));
+            for (SpacePointBucket& bucket : splittedHits) {
+                const double posMin = currPoint - madePoint->uncertainty().y();
+                const double posMax = currPoint + madePoint->uncertainty().y();
+
+                ATH_MSG_VERBOSE("Spacepoint range: "<< posMin << "," << posMax << " bucket range: " << bucket.coveredMin() << "," << bucket.coveredMax() << " Overlap: " << (posMax >= bucket.coveredMin() && bucket.coveredMax() >= posMin)); 
+                if (posMax >= bucket.coveredMin() and bucket.coveredMax() >= posMin) {
                     bucket.push_back(madePoint);
                 }
-           }
-           continue;
+            }
+            continue;
         }
+
         /// The current measurement is too far away from the first one. Make a new bucket
-        if (currPoint - lastPoint > m_maxBucketLength || (!splittedHits.empty() && !splittedHits.back().empty()  && currPoint - pointPos(*splittedHits.back().back()) > m_spacePointWindow )) {
-            newBucket(currPoint);            
+        if (currPoint - lastPointPos > m_maxBucketLength || (!splittedHits.empty() && !splittedHits.back().empty()  && (currPoint - splittedHits.back().back()->positionInChamber().y() > m_spacePointWindow) )) {
+            newBucket(); 
+            lastPointPos = splittedHits.back().empty() ? currPoint : splittedHits.back().front()->positionInChamber().y();   
+            ATH_MSG_VERBOSE("New bucket: id " << splittedHits.back().bucketId() << " Coverage: " << lastPointPos << "," << "-");        
         }
         std::shared_ptr<SpacePoint> spacePoint = std::make_shared<SpacePoint>(std::move(toSort));
         splittedHits.back().emplace_back(spacePoint);
+
         if (splittedHits.size() > 1) {
             SpacePointBucket& overlap{splittedHits[splittedHits.size() - 2]};
-            const double overlapPos = currPoint - spacePoint->uncertainty()[1] * channelDir(*spacePoint);
-            if (overlapPos - overlap.coveredMax() < m_spacePointOverlap) {
+            const double overlapPos = currPoint - spacePoint->uncertainty().y();
+            if (overlapPos < lastPointPos or (overlapPos - lastPointPos < m_spacePointOverlap)) {  
                 overlap.push_back(spacePoint);
             }
         }
     }
     if (defineBuckets){
-        SpacePointBucket& lastBucket{splittedHits[splittedHits.size() - 1]};
-        newBucket(pointPos(*lastBucket.back()));
-        /// Remove the probably empty bucket again.
-        splittedHits.pop_back();
+    newBucket();
+    /// Remove the probably empty bucket again.
+    splittedHits.pop_back();
     }
 
 }

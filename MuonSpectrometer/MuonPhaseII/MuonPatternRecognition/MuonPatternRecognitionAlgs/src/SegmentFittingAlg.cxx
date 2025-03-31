@@ -12,7 +12,7 @@
 #include <MuonPatternHelpers/MdtSegmentFitter.h>
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
 #include "xAODMuonPrepData/RpcStripContainer.h"
-#include <MuonSpacePoint/SpacePointPerLayerSorter.h>
+#include <MuonSpacePoint/SpacePointPerLayerSplitter.h>
 #include <MuonSpacePoint/UtilFunctions.h>
 
 #include <xAODMuonPrepData/RpcMeasurement.h>
@@ -345,7 +345,7 @@ namespace MuonR4 {
         }
 
         HitVec candidateHits{};
-        SpacePointPerLayerSorter hitLayers{*seed.parentBucket()};
+        SpacePointPerLayerSplitter hitLayers{*seed.parentBucket()};
         bool hasCandidate{false};
         const auto [locPos, locDir] = beforeRecov.makeLine();
         for (const std::vector<HoughHitType>& mdtLayer : hitLayers.mdtHits()) {

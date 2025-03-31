@@ -4,7 +4,7 @@
 
 #include "CombinatorialNSWSeedFinderAlg.h"
 
-#include <MuonSpacePoint/SpacePointPerLayerSorter.h>
+#include <MuonSpacePoint/SpacePointPerLayerSplitter.h>
 #include <MuonTruthHelpers/MuonSimHitHelpers.h>
 #include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
 
@@ -258,7 +258,7 @@ CombinatorialNSWSeedFinderAlg::buildSegmentSeed(HitVec& hits,
 std::vector<std::unique_ptr<SegmentSeed>>
 CombinatorialNSWSeedFinderAlg::findSeedsFromMaximum(const HoughMaximum &max, const ActsGeometryContext &gctx) const {
     // first sort the hits per layer from the maximum
-    SpacePointPerLayerSorter hitLayers{max.getHitsInMax()};
+    SpacePointPerLayerSplitter hitLayers{max.getHitsInMax()};
 
     HitLayVec stripHitsLayers{hitLayers.stripHits()};
 
