@@ -13,11 +13,21 @@
 #include <span>
 #include <algorithm>
 
+
 #include "CLHEP/Random/RandFlat.h"
 
 #include "ModuleIdentifierMatchUtil.h"
 #include "ConnectedModulesUtil.h"
 #include "EmulatedDefectsBuilder.h"
+
+#include <cstdlib>
+#include "nlohmann/json.hpp"
+
+#include "TVirtualRWMutex.h"
+#include "ROOT/RNTupleWriter.hxx"
+#include "ROOT/RNTupleReader.hxx"
+#include "ROOT/RNTupleModel.hxx"
+#include "TFile.h"
 
 namespace {
 
@@ -144,6 +154,190 @@ namespace {
    inline T sqr(T a) {
       return a*a;
    }
+
+   bool hasExtensions(const std::string &name, const std::string_view &ext) {
+      return name.size()>=ext.size() && name.substr(name.size()-ext.size(),ext.size())==ext;
+   }
+
+   template <typename T_EmulatedDefects>
+   void toJson(const T_EmulatedDefects &defects, const std::string &name) {
+      nlohmann::json data;
+      for (unsigned int id_hash = 0; id_hash < defects.size(); ++id_hash) {
+         if (defects.isModuleDefect(id_hash) || !defects[id_hash].empty()) {
+            nlohmann::json module_data;
+            if (defects.isModuleDefect(id_hash)) {
+               module_data["isDefect"]=true;
+            }
+            else {
+               module_data["defects"]=defects[id_hash];
+            }
+
+            std::stringstream id_hash_name;
+            id_hash_name << id_hash;
+            data[id_hash_name.str()]=module_data;
+         }
+      }
+      std::ofstream out(name.c_str());
+      out << data;
+   }
+
+   template <typename T_EmulatedDefects>
+   void toRoot(const T_EmulatedDefects &defects, const std::string &name) {
+      ROOT::TWriteLockGuard lock (ROOT::gCoreMutex);
+
+      auto model=ROOT::RNTupleModel::Create();
+      auto nt_defects=model->MakeField< std::vector<typename T_EmulatedDefects::KEY_TYPE> >("defects");
+      auto nt_is_defect=model->MakeField<bool>("isDefect");
+      ROOT::RNTupleWriteOptions options;
+      options.SetCompression(ROOT::RCompressionSetting::EAlgorithm::kZSTD, ROOT::RCompressionSetting::ELevel::kDefaultZSTD);
+      auto writer = ROOT::RNTupleWriter::Recreate(std::move(model), "defects", name.c_str(), options);
+      for (unsigned int id_hash = 0; id_hash < defects.size(); ++id_hash) {
+         nt_defects->clear();
+         if (defects.isModuleDefect(id_hash)) {
+           *nt_is_defect =true;
+         }
+         else {
+           *nt_is_defect =false;
+           *nt_defects = defects[id_hash];
+         }
+         writer->Fill();
+      }
+   }
+
+   template <typename KEY_TYPE>
+   class JsonAdapter {
+   public:
+      bool open(const std::string &name)  {
+         std::ifstream input_file(name);
+         if (!input_file) {
+            return false;
+         }
+         input_file >> m_jsDefects;
+         return true;
+      }
+      auto items() {
+         return m_jsDefects.items();
+      }
+      template <typename T>
+      static std::size_t moduleHash(const T &element) {
+         char *ptr;
+         return strtol(element.key().c_str(),&ptr, 10);
+      }
+      template <typename T>
+      static nlohmann::json value(const T &element) {
+         return element.value();
+      }
+      static bool isDefect(const nlohmann::json &value) {
+         return value["isDefect"];
+      }
+      static std::vector<KEY_TYPE> moduleDefects(const nlohmann::json &value) {
+         return value["defects"];
+      }
+   private:
+      nlohmann::json m_jsDefects;
+   };
+
+   template <typename KEY_TYPE>
+   class RootAdapter {
+   public:
+      bool open(const std::string &name) {
+         auto model=ROOT::RNTupleModel::Create();
+         m_defects=model->MakeField< std::vector<KEY_TYPE> >("defects");
+         m_isDefect=model->MakeField<bool>("isDefect");
+         m_reader = ROOT::RNTupleReader::Open(std::move(model), "defects", name.c_str());
+         return m_reader.get() != nullptr;
+      }
+      ROOT::RNTupleReader &items() {
+         return *m_reader;
+      }
+      static auto moduleHash( std::size_t entry_i) {
+         return entry_i;
+      }
+      auto value(std::size_t entry_i) {
+         m_reader->LoadEntry(entry_i);
+         return entry_i;
+      }
+      bool isDefect([[maybe_unused]] std::size_t entry_i) {
+         return *m_isDefect;
+      }
+      const std::vector<KEY_TYPE> &moduleDefects([[maybe_unused]] std::size_t entry_i) {
+         return *m_defects;
+      }
+   private:
+      std::unique_ptr< ROOT::RNTupleReader > m_reader;
+      std::shared_ptr< bool > m_isDefect;
+      std::shared_ptr<std::vector<KEY_TYPE> > m_defects;
+   };
+
+   template <typename T_ModuleHelper, typename T_ReaderAdapter, typename T_EmulatedDefects>
+   void fromFile(const InDetDD::SiDetectorElementCollection &det_ele_coll, T_EmulatedDefects &defects, const std::string &name) {
+      T_ReaderAdapter reader;
+      if (!reader.open(name)) {
+         std::stringstream amsg;
+         amsg << "Failed to read \"" << name << "\"";
+         throw std::runtime_error(amsg.str());
+      }
+
+      for (auto entry_i : reader.items()) {
+         auto module_i = reader.moduleHash(entry_i);
+         assert( module_i < det_ele_coll.size());
+         auto value = reader.value(entry_i);
+         if (reader.isDefect(value)) {
+            defects.setModuleDefect(module_i);
+         }
+         else if (!defects.isModuleDefect(module_i)) {
+            std::vector<typename T_EmulatedDefects::KEY_TYPE> &module_defects = defects.at(module_i);
+            if (module_defects.empty()) {
+               module_defects = reader.moduleDefects(value); // move ?
+            }
+            else {
+               InDetDD::SiDetectorElementCollection::const_value_type det_ele = det_ele_coll[module_i];
+               T_ModuleHelper helper(det_ele->design());
+               auto input_defects = reader.moduleDefects(value);
+               for (typename std::vector<typename T_EmulatedDefects::KEY_TYPE>::const_reverse_iterator iter = input_defects.rbegin();
+                    iter != input_defects.rend();
+                    ++iter) {
+                  auto key = *iter;
+                  if (T_ModuleHelper::isRangeKey(*iter)) {
+                     ++iter;
+                     if (iter == input_defects.rend()) {
+                        break;
+                     }
+                     EmulatedDefectsBuilder::insertKeyRange(helper,
+                                                            module_defects,
+                                                            std::make_pair(key, *iter),
+                                                            T_ModuleHelper::getDefectTypeComponent(key));
+                     if (T_ModuleHelper::getDefectTypeComponent(key) != T_ModuleHelper::getDefectTypeComponent(*iter)) {
+                        auto [end_key_iter, end_iter] =  InDet::EmulatedDefects<T_ModuleHelper>::lower_bound(module_defects, *iter);
+                        if (end_key_iter != end_iter && T_ModuleHelper::makeBaseKey(*iter) == T_ModuleHelper::makeBaseKey(*end_key_iter)) {
+                           *end_key_iter |= T_ModuleHelper::getDefectTypeComponent(*iter);
+                        }
+                     }
+                  }
+                  else {
+                     EmulatedDefectsBuilder::insertKey(helper,
+                                                       module_defects,
+                                                       key,
+                                                       T_ModuleHelper::getDefectTypeComponent(key));
+                  }
+               }
+            }
+         }
+      }
+   }
+
+
+   template <typename T_ModuleHelper, typename T_EmulatedDefects>
+   void fromJson(const InDetDD::SiDetectorElementCollection &det_ele_coll, T_EmulatedDefects &defects, const std::string &name) {
+      fromFile<T_ModuleHelper, JsonAdapter<typename T_ModuleHelper::KEY_TYPE> >(det_ele_coll, defects, name);
+   }
+
+   template <typename T_ModuleHelper, typename T_EmulatedDefects>
+   void fromRoot(const InDetDD::SiDetectorElementCollection &det_ele_coll, T_EmulatedDefects &defects, const std::string &name) {
+      ROOT::TReadLockGuard lock (ROOT::gCoreMutex);
+      fromFile<T_ModuleHelper, RootAdapter<typename T_ModuleHelper::KEY_TYPE> >(det_ele_coll, defects, name);
+   }
+
 }
 
 namespace InDet{
@@ -175,6 +369,16 @@ namespace InDet{
     defectsOut.addDependency(detEleColl);
 
     std::unique_ptr<T_EmulatedDefects> defects = std::make_unique<T_EmulatedDefects>(*(detEleColl.cptr()));
+
+    for (const std::string &input_file : m_inputFiles.value()) {
+       if (hasExtensions(input_file,".json")) {
+          fromJson<T_ModuleHelper>(*(detEleColl.cptr()),*defects, input_file);
+       }
+       else if (hasExtensions(input_file,".root")) {
+          fromRoot<T_ModuleHelper>(*(detEleColl.cptr()), *defects, input_file);
+       }
+    }
+
     // last counts (+1) are counts for entire modules being defect
     std::vector<std::array<unsigned int,kNCounts> > counts(T_ModuleHelper::nMasks()+1, std::array<unsigned int,kNCounts>{});
 
@@ -564,6 +768,14 @@ namespace InDet{
        }
     }
     m_modulesWithoutDefectParameters += module_without_matching_pattern;
+    if (!m_outputFile.value().empty()) {
+       if (hasExtensions(m_outputFile.value(),".json")) {
+          toJson(*defects, m_outputFile.value());
+       }
+       else if (hasExtensions(m_outputFile.value(),".root")) {
+          toRoot(*defects, m_outputFile.value());
+       }
+    }
     ATH_CHECK( defectsOut.record (std::move(defects)) );
 
     if (msgLvl(MSG::INFO)) {

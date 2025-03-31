@@ -90,6 +90,11 @@ namespace InDet {
       Gaudi::Property<bool> m_fillEtaPhiHistogramsPerPattern
          {this, "FillEtaPhiHistogramsPerPattern",  false, "If true, histogram per eta, phi amd z, R are filled separately per pattern."};
 
+      Gaudi::Property<std::string> m_outputFile
+         {this,"DefectsOutputFile","", "Empty or file name to write out conditions data (.json or .root)."};
+      Gaudi::Property<std::vector<std::string> > m_inputFiles
+         {this,"DefectsInputFiles",{}, "Empty or file name to write out conditions data (.json or .root)."};
+
       std::vector<std::string> m_rngName;
 
       enum DefectTypes {

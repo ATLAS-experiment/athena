@@ -12,6 +12,12 @@
 #include <numeric>
 #include <cmath>
 
+namespace {
+   bool hasExtensions(const std::string &name, const std::string_view &ext) {
+      return name.size()>=ext.size() && name.substr(name.size()-ext.size(),ext.size())==ext;
+   }
+}
+
 namespace InDet{
 
   DefectsEmulatorCondAlgBase::DefectsEmulatorCondAlgBase(const std::string &name, ISvcLocator *pSvcLocator)
@@ -36,6 +42,16 @@ namespace InDet{
     }
     ATH_CHECK( initializeProbabilities(n_masks) );
     ATH_CHECK( initializeCornerDefects() );
+    if (!m_outputFile.empty() && (!hasExtensions(m_outputFile.value(), ".root") && !hasExtensions(m_outputFile.value(), ".json"))) {
+       ATH_MSG_ERROR("Output file \"" << m_outputFile.value() << "\" does not have extensions \".root\" or \".json\".");
+       return StatusCode::FAILURE;
+    }
+    for (const std::string &input_file : m_inputFiles.value()) {
+       if ((!hasExtensions(input_file, ".root") && !hasExtensions(input_file, ".json"))) {
+          ATH_MSG_ERROR("Input file \"" << input_file << "\" does not have extensions \".root\" or \".json\".");
+          return StatusCode::FAILURE;
+       }
+    }
 
     if (!m_histSvc.name().empty() && !m_histogramGroupName.value().empty()) {
        ATH_CHECK(m_histSvc.retrieve());

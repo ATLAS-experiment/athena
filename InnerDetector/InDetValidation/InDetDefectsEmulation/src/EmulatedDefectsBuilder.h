@@ -146,7 +146,7 @@ namespace EmulatedDefectsBuilder {
    template <typename T_ModuleHelper>
    bool insertKeyRange(const T_ModuleHelper &helper,
                        std::vector< typename T_ModuleHelper::KEY_TYPE> &module_defects,
-                       std::pair<typename T_ModuleHelper::KEY_TYPE, typename T_ModuleHelper::KEY_TYPE> &key_range,
+                       const std::pair<typename T_ModuleHelper::KEY_TYPE, typename T_ModuleHelper::KEY_TYPE> &key_range,
                        typename T_ModuleHelper::KEY_TYPE defect_type_key_component) {
       if (key_range.first == key_range.second) {
          return insertKey<T_ModuleHelper>(helper, module_defects, key_range.first, defect_type_key_component);
