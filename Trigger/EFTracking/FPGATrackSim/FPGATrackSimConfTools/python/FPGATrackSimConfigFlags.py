@@ -180,7 +180,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('idealCoordFitType', 2)
     cf.addFlag('doDeltaGPhis', False)
     cf.addFlag('chi2cut', 9)
-
+    cf.addFlag('useVaryingChi2Cut', False)
     # second stage fitting
     cf.addFlag('secondStage', False)
     cf.addFlag('secondChi2Cut', 36)
