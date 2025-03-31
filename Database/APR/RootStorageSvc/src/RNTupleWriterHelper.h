@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RNTUPLEWRITERHELPER_H
@@ -14,19 +14,17 @@
 
 #include <tuple>
 
-namespace ROOT::Experimental {
-class RNTupleModel;
-}
 
 namespace RootStorageSvc {
 using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
-using RNTupleModel = ROOT::Experimental::RNTupleModel;
 using REntry = ROOT::Experimental::REntry;
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
   using RNTupleWriteOptions = ROOT::RNTupleWriteOptions;
+  using RNTupleModel = ROOT::RNTupleModel;
   using RFieldBase = ROOT::RFieldBase;
 #else
   using RNTupleWriteOptions = ROOT::Experimental::RNTupleWriteOptions;
+  using RNTupleModel = ROOT::Experimental::RNTupleModel;
   using RFieldBase = ROOT::Experimental::RFieldBase;
 #endif
 
