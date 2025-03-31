@@ -133,11 +133,6 @@ def ActsMainTrackFindingAlgCfg(flags,
             kwargs.setdefault("maxStripHoles", tolist(flags.Tracking.ActiveConfig.maxSctHoles))
         else:
             kwargs.setdefault("addPixelStripCounts", False)
-        if flags.Acts.useDefaultActsMeasurementSelector:
-            # Acts default measurement selector counts most holes as outliers, so use the same cut for maxOutliers
-            kwargs.setdefault("maxOutliers", tolist(flags.Tracking.ActiveConfig.maxHoles))
-        else:
-            pass  # no maxOutliers cut
         # The shared hits are not calculated until *after* the track selection, so maxSharedHits is not used.
         # Even if that were not the case, we need the ambiguity solver to decide which track to drop.
         ### kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
@@ -199,8 +194,6 @@ def ActsMainTrackFindingAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsTrackFindingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(
             ActsTrackFindingMonitoringToolCfg(flags)))
-
-    kwargs.setdefault("UseDefaultActsMeasurementSelector",flags.Acts.useDefaultActsMeasurementSelector)
 
     acc.addEventAlgo(CompFactory.ActsTrk.TrackFindingAlg(name, **kwargs))
     return acc
