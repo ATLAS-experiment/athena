@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_IDDetDescrCnv.h"
@@ -47,7 +47,7 @@ SCT_IDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
     const IdDictMgr* mgr          = idDictMgr->manager();
 
     // Internal InDet id tag
-    std::string   inDetIDTag      = mgr->tag();
+    const std::string &  inDetIDTag      = mgr->tag();
 
     // DoChecks flag
     bool doChecks                 = mgr->do_checks();
@@ -59,10 +59,10 @@ SCT_IDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
     }
 
     // File to be read for InDet ids
-    std::string   inDetIDFileName = dict->file_name();
+    const std::string &  inDetIDFileName = dict->file_name();
 
     // Tag of RDB record for InDet ids
-    std::string   inDetIdDictTag  = dict->dict_tag();
+    const std::string &  inDetIdDictTag  = dict->dict_tag();
 
 
     if (m_sctId) {
