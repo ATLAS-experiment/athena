@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -160,6 +160,18 @@ template <class T>
 void convert (std::ostream& os, const T& x)
 {
   os << x;
+}
+
+
+void convert (std::ostream& os, const char x)
+{
+  os << static_cast<int > (x);
+}
+
+
+void convert (std::ostream& os, const unsigned char x)
+{
+  os << static_cast<unsigned > (x);
 }
 
 
