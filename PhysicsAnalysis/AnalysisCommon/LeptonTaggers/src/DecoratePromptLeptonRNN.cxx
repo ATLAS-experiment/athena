@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local
@@ -11,6 +11,8 @@
 #include "xAODBase/IParticleHelpers.h"
 #include "xAODTracking/TrackParticlexAODHelpers.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
+#include "StoreGate/DecorKeyHelpers.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 // ROOT
 #include "TH1.h"
@@ -40,13 +42,16 @@ StatusCode Prompt::DecoratePromptLeptonRNN::initialize()
   //
   ATH_CHECK( m_histSvc.retrieve() );
 
+  m_decorHandleKeys.clear();
   for(const std::string &label: m_toolRNN->getOutputLabels()) {
     const std::string key = m_decorationPrefixRNN + label;
 
     ATH_MSG_DEBUG("Add output RNN label: \"" << key << "\"");
 
-    m_decoratorMap.insert(decoratorFloatMap_t::value_type(key, std::make_unique<decoratorFloat_t>(key)));
+    m_decorNameMap.try_emplace (label, m_decorHandleKeys.size());
+    m_decorHandleKeys.push_back (SG::makeContDecorKey (m_inputContainerLeptonKey, key));
   }
+  ATH_CHECK(m_decorHandleKeys.initialize());
 
   ATH_MSG_DEBUG("inputContainerMuon=\"" << m_inputContainerLeptonKey << "\"");
 
@@ -71,6 +76,8 @@ StatusCode Prompt::DecoratePromptLeptonRNN::execute()
   //
   TimerScopeHelper timer(m_timerEvent);
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   ATH_MSG_DEBUG("execute() - begin...");
 
   m_countEvent++;
@@ -78,14 +85,20 @@ StatusCode Prompt::DecoratePromptLeptonRNN::execute()
   //
   // Retrieve object containers and event info
   //
-  SG::ReadHandle<xAOD::IParticleContainer> h_leptons (m_inputContainerLeptonKey);
-  SG::ReadHandle<xAOD::TrackParticleContainer> h_tracks (m_inputContainerTrackKey);
-  SG::ReadHandle<xAOD::JetContainer> h_trackJets (m_inputContainerTrackJetKey);
-  SG::ReadHandle<xAOD::VertexContainer> h_vertices  (m_inputContainerPrimaryVerticesKey);
+  SG::ReadHandle<xAOD::IParticleContainer> h_leptons (m_inputContainerLeptonKey, ctx);
+  SG::ReadHandle<xAOD::TrackParticleContainer> h_tracks (m_inputContainerTrackKey, ctx);
+  SG::ReadHandle<xAOD::JetContainer> h_trackJets (m_inputContainerTrackJetKey, ctx);
+  SG::ReadHandle<xAOD::VertexContainer> h_vertices  (m_inputContainerPrimaryVerticesKey, ctx);
 
-  SG::ReadHandle<xAOD::EventInfo> event_handle (m_eventHandleKey);
+  SG::ReadHandle<xAOD::EventInfo> event_handle (m_eventHandleKey, ctx);
 
   ATH_MSG_DEBUG("Size of LeptonContainer: " << h_leptons->size());
+
+  std::vector<decoratorFloatH_t> decors;
+  decors.reserve (m_decorHandleKeys.size());
+  for (const SG::WriteDecorHandleKey<xAOD::IParticleContainer>& k : m_decorHandleKeys) {
+    decors.emplace_back (k, ctx);
+  }
 
   //
   // Find default Primary Vertex
@@ -129,7 +142,7 @@ StatusCode Prompt::DecoratePromptLeptonRNN::execute()
     const xAOD::Jet *trackJet = findClosestTrackJet(trackLep, *h_trackJets);
 
     if(!trackLep || !trackJet) {
-      compDummy(*lepton, m_decorationPrefixRNN);
+      compDummy(*lepton, decors);
       continue;
     }
 
@@ -177,7 +190,7 @@ StatusCode Prompt::DecoratePromptLeptonRNN::execute()
     //
     // Compute RNN
     //
-    compScore(*lepton, select_tracks, m_decorationPrefixRNN);
+    compScore(*lepton, select_tracks, decors);
 
     ATH_MSG_DEBUG("DecoratePromptLeptonRNN::CompScore - " << std::endl
                     << "lepton pT= " << lepton->pt()
@@ -361,7 +374,7 @@ bool Prompt::DecoratePromptLeptonRNN::passTrack(Prompt::VarHolder &p)
 //=============================================================================
 bool Prompt::DecoratePromptLeptonRNN::compScore(const xAOD::IParticle &particle,
                               const std::vector<Prompt::VarHolder> &tracks,
-                              const std::string &prefix)
+                              std::vector<decoratorFloatH_t>& decors)
 {
   //
   // Call the RNN tool to get the RNN prediction for the leptons and decorate the lepton with those RNN scores.
@@ -384,19 +397,16 @@ bool Prompt::DecoratePromptLeptonRNN::compScore(const xAOD::IParticle &particle,
     //
     // Decorate muon
     //
-    const std::string dkey = prefix + v.first;
 
     ATH_MSG_DEBUG("DecoratePromptLeptonRNN compScore - " << v.first << " = " << v.second );
 
-    decoratorFloatMap_t::iterator dit = m_decoratorMap.find(dkey);
+    auto dit = m_decorNameMap.find (v.first);
 
-    // TODO: make sure this fits within the StoreGate framework
-    // for memory access
-    if(dit != m_decoratorMap.end()) {
-      (*dit->second)(particle) = v.second;
+    if(dit != m_decorNameMap.end()) {
+      decors.at(dit->second)(particle) = v.second;
     }
     else {
-      ATH_MSG_WARNING("CompScore - unknown output label=\"" << dkey << "\"");
+      ATH_MSG_WARNING("CompScore - unknown output label=\"" << v.first << "\"");
     }
 
     if(m_debug) {
@@ -424,18 +434,13 @@ bool Prompt::DecoratePromptLeptonRNN::compScore(const xAOD::IParticle &particle,
 
 //=============================================================================
 bool Prompt::DecoratePromptLeptonRNN::compDummy(const xAOD::IParticle &particle,
-                              const std::string &prefix)
+                                                std::vector<decoratorFloatH_t>& decors) const
 {
   //
   // Fill dummy values for RNN outputs
   //
-  for(const decoratorFloatMap_t::value_type &v: m_decoratorMap) {
-    //
-    // Decorate muon
-    //
-    const std::string dkey = prefix + v.first;
-
-    (*v.second)(particle) = -1.0;
+  for (auto& d : decors) {
+    d(particle) = -1.0;
   }
 
   return true;
