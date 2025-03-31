@@ -174,7 +174,8 @@ namespace MuonR4{
                     }
                     ATH_MSG_VERBOSE("Associate hit "<<m_idHelperSvc->toString(assocMe->identify())
                                     <<" pdgId: "<<assocMe->pdgId()<<", energy: "<<assocMe->kineticEnergy()
-                                    <<", genParticle: "<<assocMe->genParticleLink().cptr());
+                                    <<", genParticle: "<<assocMe->genParticleLink().cptr()
+                                    <<", beta: "<<simHit->beta()<<" global time: "<<simHit->globalTime());
                     EleLink_t link{*static_cast<const xAOD::MuonSimHitContainer*>(assocMe->container()), assocMe->index()};
                     associatedHits.push_back(std::move(link));
                 }
@@ -189,7 +190,8 @@ namespace MuonR4{
                 SegPars& locPars{parDecor(*truthSegment)};
                 locPars[toInt(ParamDefs::x0)] = chamberPos.x();
                 locPars[toInt(ParamDefs::y0)] = chamberPos.y();
-                locPars[toInt(ParamDefs::time)] = simHit->globalTime() + distance *c_inv /simHit->beta();
+                constexpr float betaLowLimit = 1.e-6;
+                locPars[toInt(ParamDefs::time)] = simHit->globalTime() + distance *c_inv / std::max(simHit->beta(), betaLowLimit);
                 locPars[toInt(ParamDefs::theta)] = chamberDir.theta();
                 locPars[toInt(ParamDefs::phi)]   = chamberDir.phi();
                 truthSegment->setPosition(globPos.x(), globPos.y(), globPos.z());
