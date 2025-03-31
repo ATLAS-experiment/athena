@@ -374,7 +374,7 @@ namespace ActsTrk
       TrackFinderOptions &options) const {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
-    detail::MeasurementSelectorData state {
+    detail::MeasurementSelectorData measurementSelectorData {
         .slAccessor{measurements.measurementRanges()},
         .slAccessorDelegate{},
         .trackStateCreator{},
@@ -385,18 +385,18 @@ namespace ActsTrk
         .measurementSelector{}
     };
 
-    state.slAccessorDelegate.connect<&detail::UncalibSourceLinkAccessor::range>(&state.slAccessor);
+    measurementSelectorData.slAccessorDelegate.connect<&detail::UncalibSourceLinkAccessor::range>(&measurementSelectorData.slAccessor);
 
-    state.measurementSelector = ActsTrk::detail::getMeasurementSelector(
+    measurementSelectorData.measurementSelector = ActsTrk::detail::getMeasurementSelector(
         m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
         measurements.measurementRanges(),
         m_measurementSelectorConfig.m_etaBins,
         m_measurementSelectorConfig.m_chi2CutOffOutlier,
         m_numMeasurementsCutOff.value());
 
-    state.measurementSelector->connect(&options.extensions.createTrackStates);
+    measurementSelectorData.measurementSelector->connect(&options.extensions.createTrackStates);
 
-    return state;
+    return measurementSelectorData;
   }
 
   // === findTracks ==========================================================
