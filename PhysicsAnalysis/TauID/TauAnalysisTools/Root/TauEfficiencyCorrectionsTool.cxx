@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -44,7 +44,7 @@ TauEfficiencyCorrectionsTool::TauEfficiencyCorrectionsTool( const std::string& s
   declareProperty( "UseTauSubstructure",           m_bUseTauSubstructure           = false );
   declareProperty( "JetIDLevel",                   m_iJetIDLevel                   = (int)JETIDNONE );
   declareProperty( "EleIDLevel",                   m_iEleIDLevel                   = (int)ELEIDNONE );
-  declareProperty( "MCCampaign",                   m_sMCCampaign                   = "" ); // MC16a, MC16d or MC16e
+  declareProperty( "Campaign",                     m_sCampaign                     = "" ); // MC20, MC23
   declareProperty( "useFastSim",                   m_useFastSim                    = false );
   declareProperty( "SkipTruthMatchCheck",          m_bSkipTruthMatchCheck          = false );
   declareProperty( "PileupReweightingTool",        m_tPRWTool );
@@ -191,7 +191,7 @@ void TauEfficiencyCorrectionsTool::printConfig() const
   ATH_MSG_DEBUG( "  UseTauSubstructure " << m_bUseTauSubstructure );
   ATH_MSG_DEBUG( "  JetIDLevel " << m_iJetIDLevel );
   ATH_MSG_DEBUG( "  EleIDLevel " << m_iEleIDLevel );
-  ATH_MSG_DEBUG( "  MCCampaign " << m_sMCCampaign );
+  ATH_MSG_DEBUG( "  Campaign " << m_sCampaign );
   ATH_MSG_DEBUG( "  useFastSim " << m_useFastSim);
 }
 
@@ -311,8 +311,40 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
   std::string sDirectory = "TauAnalysisTools/" + std::string(sSharedFilesVersion) + "/EfficiencyCorrections/";
   for (auto iEfficiencyCorrectionType : m_vEfficiencyCorrectionTypes){
 
-    if (iEfficiencyCorrectionType == SFTriggerHadTau)
+    if (iEfficiencyCorrectionType == SFEleIDElectron)
     {
+      // the path must be updated once RNN eVeto SFs are available
+      if (m_sInputFilePathEleIDElectron.empty()) {
+        if(m_useFastSim) {
+          ATH_MSG_WARNING("No fast-sim recommendation for tau electron veto, using full sim");
+        }
+
+        if(m_sCampaign=="mc23"){
+            if( m_iJetIDLevel == (int)JETIDRNNLOOSE){
+                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_SF_2022_looseRNNTauID_1p.root"; 
+            } else if( m_iJetIDLevel == (int)JETIDRNNMEDIUM){
+                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_SF_2022_mediumRNNTauID_1p.root";
+            }
+        } else if(m_sCampaign=="mc20"){
+            if( m_iJetIDLevel == (int)JETIDRNNLOOSE){
+                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_SF_Run2_looseRNNTauID_1p.root";
+            } else if( m_iJetIDLevel == (int)JETIDRNNMEDIUM){
+                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_SF_Run2_mediumRNNTauID_1p.root";
+            }
+        }
+      }
+      if (m_sVarNameEleIDElectron.empty()) m_sVarNameEleIDElectron = "TauScaleFactorEleIDElectron";
+
+      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/EleIDElectronTool", this);
+      m_vCommonEfficiencyTools.push_back(tTool);
+      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathEleIDElectron));
+      ATH_CHECK(tTool->setProperty("VarName", m_sVarNameEleIDElectron));
+      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+      ATH_CHECK(tTool->setProperty("WP", ConvertEleIDToString(m_iEleIDLevel)));
+      ATH_CHECK(tTool->setProperty("UseTauSubstructure", false));
+
+    } else if (iEfficiencyCorrectionType == SFTriggerHadTau){
+
       if (m_sTriggerName.empty()) {
         ATH_MSG_ERROR("Property \"Trigger\" was not set, please provide a trigger name.");
         return StatusCode::FAILURE;

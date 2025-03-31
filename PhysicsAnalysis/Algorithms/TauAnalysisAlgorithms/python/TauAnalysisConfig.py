@@ -193,6 +193,7 @@ class TauWorkingPointConfig (ConfigBlock) :
             config.addPrivateTool( 'efficiencyCorrectionsTool',
                             'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
             alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [0]
+            alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
             alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
             alg.scaleFactorDecoration = 'tau_Reco_effSF' + selectionPostfix + '_%SYS%'
             alg.outOfValidity = 2 #silent
@@ -223,6 +224,7 @@ class TauWorkingPointConfig (ConfigBlock) :
 
                 alg.efficiencyCorrectionsTool.JetIDLevel = JetIDLevel
                 alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
+                alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
                 alg.scaleFactorDecoration = 'tau_ID_effSF' + selectionPostfix + '_%SYS%'
                 alg.outOfValidity = 2 #silent
                 alg.outOfValidityDeco = 'bad_ID_eff' + selectionPostfix
@@ -246,6 +248,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                 # since all TauSelectionTool config files have loose eRNN, code only this option for now
                 alg.efficiencyCorrectionsTool.EleIDLevel = 2
                 alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
+                alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
                 alg.scaleFactorDecoration = 'tau_EvetoFakeTau_effSF' + selectionPostfix + '_%SYS%'
                 alg.outOfValidity = 2 #silent
                 alg.outOfValidityDeco = 'bad_EvetoFakeTau_eff' + selectionPostfix
@@ -264,6 +267,7 @@ class TauWorkingPointConfig (ConfigBlock) :
 
                 alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [8]
                 alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
+                alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
                 alg.scaleFactorDecoration = 'tau_EvetoTrueTau_effSF' + selectionPostfix + '_%SYS%'
                 alg.outOfValidity = 2 #silent
                 alg.outOfValidityDeco = 'bad_EvetoTrueTau_eff' + selectionPostfix
@@ -372,6 +376,7 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                 # SFTriggerHadTau correction type from
                 # https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h#L79
                 alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [12]
+                alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
                 alg.efficiencyCorrectionsTool.TriggerName = chain
 
                 # JetIDLevel from

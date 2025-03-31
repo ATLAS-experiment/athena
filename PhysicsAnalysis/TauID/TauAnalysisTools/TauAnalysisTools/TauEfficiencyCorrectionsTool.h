@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_TAUEFFICIENCYCORRECTIONSTOOL_H
@@ -118,7 +118,7 @@ private:
   bool m_bReadRandomRunNumber;
   int m_iJetIDLevel;
   int m_iEleIDLevel;
-  std::string m_sMCCampaign;
+  std::string m_sCampaign;
   bool m_useFastSim;
   bool m_firstEvent = false;
   unsigned int m_iRunNumber;
