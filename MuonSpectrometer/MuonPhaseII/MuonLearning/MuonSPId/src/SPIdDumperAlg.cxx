@@ -9,7 +9,7 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadHandle.h"
 #include "MuonTesterTree/EventHashBranch.h"
-#include "MuonSpacePoint/SpacePointPerLayerSorter.h"
+#include "MuonSpacePoint/SpacePointPerLayerSplitter.h"
 #include "MuonInferenceInterfaces/GraphData.h"
 
 #include "xAODMuonPrepData/MdtDriftCircle.h"
@@ -81,10 +81,10 @@ namespace MuonR4 {
                 }
             }
 
-            SpacePointPerLayerSorter sorter{*bucket};
+            SpacePointPerLayerSplitter splitter{*bucket};
             unsigned int layer{0};
 
-            for (const auto& hitsInLay : sorter.mdtHits()) {
+            for (const auto& hitsInLay : splitter.mdtHits()) {
                 for (const auto sp : hitsInLay){
 
                     const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(sp->primaryMeasurement());
@@ -118,7 +118,7 @@ namespace MuonR4 {
 
             }
 
-            for (const auto& hitsInLay : sorter.stripHits()) {
+            for (const auto& hitsInLay : splitter.stripHits()) {
 
                 for (const auto sp : hitsInLay){
 
