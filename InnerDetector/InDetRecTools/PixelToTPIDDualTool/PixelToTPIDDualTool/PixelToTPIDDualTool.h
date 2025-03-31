@@ -2,22 +2,22 @@
 #define PIXELTOTPIDDUALTOOL_PIXELTOTPIDDUALTOOL_H
 
 #include "TrkAnalysisInterfaces/IPixelToTPIDDualTool.h"
+
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
-
-#include "xAODTracking/TrackStateValidation.h"
-#include "xAODTracking/TrackMeasurementValidation.h"
-
-#include "AsgTools/PropertyWrapper.h"
-#include "xAODEventInfo/EventInfo.h"
 #include "PathResolver/PathResolver.h"
-#include "TFile.h"
-#include <ROOT/RDataFrame.hxx>
 
-#include <optional> // since no default constructor for RDataFrame
+#include "xAODEventInfo/EventInfo.h"
+#include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/TrackStateValidation.h"
+#include "xAODTracking/TrackStateValidationContainer.h"
+#include "xAODTracking/TrackMeasurementValidation.h"
+#include "xAODTracking/TrackMeasurementValidationContainer.h"
+
 
 #ifndef XAOD_STANDALONE
 #pragma message("NOT compiling in XAOD_STANDALONE mode")
@@ -25,9 +25,31 @@
 #include "PixelConditionsData/PixeldEdxData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "PixelGeoModel/IIBLParameterSvc.h"
+//
+#include "TrkTrack/Track.h"
+#include "TrkTrack/TrackStateOnSurface.h"
+#include "TrkTrack/TrackInfo.h"
+#include "TrkMeasurementBase/MeasurementBase.h"
+#include "TrkParameters/TrackParameters.h"
+#include "TrkRIO_OnTrack/RIO_OnTrack.h"
+#include "TrkSurfaces/Surface.h"
+#include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
+#include "Identifier/Identifier.h" // needed?
+#include "InDetIdentifier/PixelID.h"
+
 #else
 #pragma message("Compiling in XAOD_STANDALONE mode")
 #endif
+
+// ROOT
+#include "TFile.h"
+#include <ROOT/RDataFrame.hxx>
+
+// C++
+#include <optional> // since no default constructor for RDataFrame
+#include <cmath>
+
+
 
 #ifndef XAOD_STANDALONE
 class AtlasDetectorID;
@@ -113,7 +135,8 @@ namespace CP {
     /// Decorators
     /// Start with equalized dE/dx measurement.  Safe to hardcode PixelCluster container?  Track container -> MSOS container is 1-to-1. Only 1 PixelCluster container...
     /// Also include raw dE/dx?  Or the SF?  Or the SF error?
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidation> m_clusterdEdxKey{this, "clusterdEdxKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
+    //SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidation> m_clusterdEdxKey{this, "clusterdEdxKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxKey{this, "clusterdEdxKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
 
     /// For charge -> dE/dx calc.
     double m_conversionfactor;

@@ -1,25 +1,5 @@
 #include "PixelToTPIDDualTool/PixelToTPIDDualTool.h"
 
-// Needed?  Move to .h?
-#ifndef XAOD_STANDALONE
-#include "TrkTrack/Track.h"
-#include "TrkTrack/TrackStateOnSurface.h"
-#include "TrkMeasurementBase/MeasurementBase.h"
-#include "TrkParameters/TrackParameters.h"
-#include "TrkRIO_OnTrack/RIO_OnTrack.h"
-#include "TrkSurfaces/Surface.h"
-#include "TrkTrack/TrackInfo.h"
-#include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
-#include "Identifier/Identifier.h" // needed?
-#include "InDetIdentifier/PixelID.h"
-#include "PixelGeoModel/IIBLParameterSvc.h"
-#endif
-#include "xAODTracking/TrackParticle.h"
-#include "xAODTracking/TrackStateValidationContainer.h"
-#include "xAODTracking/TrackMeasurementValidationContainer.h"
-
-#include <cmath>
-
 namespace {
 
   // Some functions
@@ -319,6 +299,9 @@ namespace CP {
       filtered_df = df.Filter([closestRunNumber](int run) { return run == closestRunNumber; }, {"runNumber"});
     }
 
+    /// Declare decorator here, but only use if m_equalizeClusterMeasurements == True
+    SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > dEdxEqHandle(m_clusterdEdxKey); // no ctx?
+
     /// Check for track states:
     static const SG::AuxElement::ConstAccessor< StatesOnTrack > trackStateAcc(m_msosLink);
     if( ! trackStateAcc.isAvailable( track ) ) {
@@ -468,9 +451,8 @@ namespace CP {
         /// Apply scale factor and store
         cluster.dEdxEq = clusterdEdx * SF;
 
-        /// Decorate PixelClusterOnTrack?  Might not want to for ESD.  Definitely want to for xAOD.
+        /// Decorate PixelClusterOnTrack.  Might not want to for ESD.  Definitely want to for xAOD.
         ATH_MSG_DEBUG("Will decorate  variable " << m_clusterdEdxKey << " with value " << cluster.dEdxEq);
-        SG::WriteDecorHandle<xAOD::TrackMeasurementValidation, float > dEdxEqHandle(m_clusterdEdxKey); // no ctx?
         dEdxEqHandle(**pixclus) = cluster.dEdxEq;
       }
      
@@ -494,11 +476,11 @@ namespace CP {
     }
     if ( std::fabs(stored_dEdx - averagedEdx) > epsilon ) {
       ATH_MSG_WARNING("The track dE/dx stored in the AOD as summary variable (" << stored_dEdx << ") does not match the value calculated here (" << averagedEdx << ")!");
-      ATH_MSG_WARNING("This may be due to the local (x,y) of the cluster migrating from the ESD to AOD EDM.");
+      ATH_MSG_WARNING("This may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
     }
     if ( (int)stored_numberOfUsedHitsdEdx != nUsedHits ) {
       ATH_MSG_WARNING("The numberOfUsedHitsdEdx stored in the AOD ("<< stored_numberOfUsedHitsdEdx <<") does not match the value calculated here ("<< nUsedHits <<")!");
-      ATH_MSG_WARNING("This may be due to the local (x,y) of the cluster migrating from the ESD to AOD EDM.");
+      ATH_MSG_WARNING("This may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
     }
 
     /// Calculate equalized truncated mean.

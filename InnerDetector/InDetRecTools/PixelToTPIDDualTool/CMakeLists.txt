@@ -9,7 +9,7 @@ find_package( VDT ) # might need for RDataFrame.  See Control/xAODDataSource/CMa
 message(STATUS "XAOD_STANDALONE = ${XAOD_STANDALONE}")
 
 if( NOT XAOD_STANDALONE )
-    set(EXTRA_ATHENA_LIBS PixelConditionsData PixelGeoModelLib)
+    set(EXTRA_ATHENA_LIBS PixelConditionsData PixelGeoModelLib TrkRIO_OnTrack InDetRIO_OnTrack)
 else()
     set(EXTRA_ATHENA_LIBS "")
 endif()
@@ -24,22 +24,11 @@ atlas_add_library( PixelToTPIDDualToolLib
                  xAODTracking PathResolver TrkAnalysisInterfacesLib 
                  ${EXTRA_ATHENA_LIBS} )
 
-# Athena-specific dependencies (Not in XAOD_STANDALONE)
-if( NOT XAOD_STANDALONE )
-    message(STATUS "Not in STANDALONE, so adding more libraries ")
-    target_link_libraries(PixelToTPIDDualToolLib
-        PRIVATE TrkTrack TrkRIO_OnTrack InDetRIO_OnTrack
-                TrkSurfaces TrkEventPrimitives TrkMeasurementBase  
-                InDetIdentifier StoreGateLib GaudiKernel TrkToolInterfaces )
-endif()
-
 # Athena Component Library
 if( NOT XAOD_STANDALONE )
    atlas_add_component( PixelToTPIDDualTool
       src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES AthenaBaseComps GaudiKernel xAODCore PathResolver xAODTracking
-                     PixelToTPIDDualToolLib PATCoreLib Identifier InDetIdentifier 
-                     InDetRIO_OnTrack TrkToolInterfaces TrkAnalysisInterfacesLib )
+      LINK_LIBRARIES PixelToTPIDDualToolLib )
 endif()
 
 # Dictionary Generation
