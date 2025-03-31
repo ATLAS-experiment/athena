@@ -22,7 +22,6 @@
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "Acts/MagneticField/MagneticFieldProvider.hpp"
 #include "Acts/Surfaces/Surface.hpp"
-#include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
@@ -165,34 +164,19 @@ namespace ActsTrk
     // Using the CKF propagator as extrapolator
     detail::Extrapolator extrapolator = propagator;
 
-    std::vector<double> etaBins;
     // m_etaBins (from flags.Tracking.ActiveConfig.etaBins) includes a dummy first and last bin, which we ignore
-    if (m_etaBins.size() > 2) {
-      etaBins.assign(m_etaBins.begin() + 1, m_etaBins.end() - 1);
-    }
-    Acts::MeasurementSelectorCuts measurementSelectorCuts{etaBins};
-
-    if (!m_chi2CutOff.empty())
-      measurementSelectorCuts.chi2CutOff = m_chi2CutOff;
-    if (!m_chi2OutlierCutOff.empty() && m_chi2OutlierCutOff.size() == m_chi2CutOff.size())
-      measurementSelectorCuts.chi2CutOffOutlier = m_chi2OutlierCutOff;
-    if (!m_numMeasurementsCutOff.empty())
-      measurementSelectorCuts.numMeasurementsCutOff = m_numMeasurementsCutOff;
-
-    Acts::MeasurementSelector::Config measurementSelectorCfg{{Acts::GeometryIdentifier(), std::move(measurementSelectorCuts)}};
-    Acts::MeasurementSelector measurementSelector(measurementSelectorCfg);
-
     std::vector<double> absEtaEdges;
-    absEtaEdges.reserve(etaBins.size() + 2);
-    if (etaBins.empty())
+    if (m_etaBins.size() <= 2)
     {
+      absEtaEdges.reserve(2ul);
       absEtaEdges.push_back(0.0);
       absEtaEdges.push_back(std::numeric_limits<double>::infinity());
     }
     else
     {
+      absEtaEdges.reserve(m_etaBins.size());
       absEtaEdges.push_back(m_absEtaMin);
-      absEtaEdges.insert(absEtaEdges.end(), etaBins.begin(), etaBins.end());
+      absEtaEdges.insert(absEtaEdges.end(), m_etaBins.begin() + 1, m_etaBins.end() - 1);
       absEtaEdges.push_back(m_absEtaMax);
     }
 
@@ -204,7 +188,7 @@ namespace ActsTrk
     };
 
     Acts::TrackSelector::EtaBinnedConfig trackSelectorCfg{std::move(absEtaEdges)};
-    if (etaBins.empty())
+    if (m_etaBins.size() <= 2)
     {
       assert(trackSelectorCfg.cutSets.size() == 1);
       trackSelectorCfg.cutSets[0].absEtaMin = m_absEtaMin;
@@ -233,18 +217,12 @@ namespace ActsTrk
 
     ATH_MSG_INFO(trackSelectorCfg);
 
-    if (!m_useDefaultMeasurementSelector.value()) {
-       // initializer measurement selector and connect it to the delegates of the track finder optins
-       ATH_CHECK( initializeMeasurementSelector());
-    }
-    else if (!m_chi2OutlierCutOff.empty()) {
-       ATH_MSG_DEBUG("chi2OutlierCutOff set but not supported when using the default measurement selector.");
-    }
+    // initializer measurement selector and connect it to the delegates of the track finder optins
+    ATH_CHECK( initializeMeasurementSelector());
 
     detail::CKF_config ckfConfig{
         std::move(extrapolator),
         detail::CKF{std::move(propagator), logger().cloneWithSuffix("CKF")},
-        measurementSelector,
         {},
         Acts::TrackSelector{trackSelectorCfg}};
 
@@ -409,23 +387,14 @@ namespace ActsTrk
 
     state.slAccessorDelegate.connect<&detail::UncalibSourceLinkAccessor::range>(&state.slAccessor);
 
-    if (m_useDefaultMeasurementSelector.value()) {
-       state.trackStateCreator.sourceLinkAccessor = state.slAccessorDelegate;
-       state.trackStateCreator.calibrator.template connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&state.calibrator);
-       state.trackStateCreator.measurementSelector.template connect<&Acts::MeasurementSelector::select<detail::RecoTrackContainer>>(&trackFinder().measurementSelector);
+    state.measurementSelector = ActsTrk::detail::getMeasurementSelector(
+        m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
+        measurements.measurementRanges(),
+        m_measurementSelectorConfig.m_etaBins,
+        m_measurementSelectorConfig.m_chi2CutOffOutlier,
+        m_numMeasurementsCutOff.value());
 
-       // for default measurement selector need connect calibrator
-       options.extensions.createTrackStates.template connect<&DefaultTrackStateCreator::createTrackStates>(&state.trackStateCreator);
-    } else {
-      state.measurementSelector = ActsTrk::detail::getMeasurementSelector(
-          m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
-          measurements.measurementRanges(),
-          m_measurementSelectorConfig.m_etaBins,
-          m_measurementSelectorConfig.m_chi2CutOffOutlier,
-          m_numMeasurementsCutOff.value());
-
-      state.measurementSelector->connect(&options.extensions.createTrackStates);
-    }
+    state.measurementSelector->connect(&options.extensions.createTrackStates);
 
     return state;
   }
