@@ -47,8 +47,8 @@ a_int -2
 a_uint 10
 a_short 10
 a_ushort 20
-a_char a
-a_uchar b
+a_char 97
+a_uchar 98
 a_long 50
 a_ulong 60
 a_llong 50
@@ -60,8 +60,8 @@ a_intvec [1, -2, 3]
 a_uintvec [1, 2, 3]
 a_shortvec [4, 5, 6]
 a_ushortvec [7, 8, 9]
-a_chartvec [a, b, c]
-a_uchartvec [d, e, f]
+a_chartvec [97, 98, 99]
+a_uchartvec [100, 101, 102]
 a_longvec [10, 11, 12]
 a_ulongvec [13, 14, 15]
 a_llongvec [16, 17, 18]
