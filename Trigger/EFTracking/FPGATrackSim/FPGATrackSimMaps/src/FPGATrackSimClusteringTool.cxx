@@ -232,8 +232,8 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
                     float zNew = hit.getZ();
                     float xPhiNew = hit.getPhiCoord();
                     float xEtaNew = hit.getEtaCoord();
-                    float cPhiNew = hit.getPhiIndex() + 0.5;
-                    float cEtaNew = hit.getEtaIndex() + 0.5;
+                    float cPhiNew = hit.getPhiIndex();
+                    float cEtaNew = hit.getEtaIndex();
                     int tot = clusterEquiv.getToT();
                     int totNew = hit.getToT();
                     if (m_digitalClustering) {
@@ -463,8 +463,8 @@ bool FPGATrackSimCLUSTERING::updatePixelCluster(FPGATrackSimCluster &currentClus
         newHit.setPhiIndex(incomingHit.getPhiIndex());
         newHit.setEtaCoord(incomingHit.getEtaCoord());
         newHit.setPhiCoord(incomingHit.getPhiCoord());
-        newHit.setCentroidPhiIndex(incomingHit.getPhiIndex() + 0.5);
-        newHit.setCentroidEtaIndex(incomingHit.getEtaIndex() + 0.5);
+        newHit.setCentroidPhiIndex(incomingHit.getPhiIndex());
+        newHit.setCentroidEtaIndex(incomingHit.getEtaIndex());
         newHit.setEtaWidth(1);
         newHit.setPhiWidth(1);
         //Set the initial clusterEquiv to be the incoming hit with double precision
@@ -474,14 +474,14 @@ bool FPGATrackSimCLUSTERING::updatePixelCluster(FPGATrackSimCluster &currentClus
         //It doesn't really matter, as we will be at the end of the hit loop, but we did technically "cluster" this hit
         return true;
     } else {
-        int hitRow = incomingHit.getEtaIndex();
-        int hitCol = incomingHit.getPhiIndex();
+        int hitCol = incomingHit.getEtaIndex();
+        int hitRow = incomingHit.getPhiIndex();
 
         FPGATrackSimHit clusterEquiv = currentCluster.getClusterEquiv();
-        int clusterRow = clusterEquiv.getEtaIndex();
-        int clusterRowWidth = clusterEquiv.getEtaWidth();
-        int clusterCol = clusterEquiv.getPhiIndex();
-        int clusterColWidth = clusterEquiv.getPhiWidth();
+        int clusterCol = clusterEquiv.getEtaIndex();
+        int clusterColWidth = clusterEquiv.getEtaWidth();
+        int clusterRow = clusterEquiv.getPhiIndex();
+        int clusterRowWidth = clusterEquiv.getPhiWidth();
 
         if ((hitCol == clusterCol + clusterColWidth) && (hitRow == clusterRow + clusterRowWidth)) {
             clusterColWidth++;
@@ -616,10 +616,17 @@ bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentC
     }
 
     //Update the clusterEquiv's position and width
-    clusterEquiv.setEtaIndex(clusterRow);
-    clusterEquiv.setEtaWidth(clusterRowWidth);
-    clusterEquiv.setPhiIndex(clusterCol);
-    clusterEquiv.setPhiWidth(clusterColWidth);
+    if (incomingHit.isPixel()) {
+        clusterEquiv.setEtaIndex(clusterCol);
+        clusterEquiv.setEtaWidth(clusterColWidth);
+        clusterEquiv.setPhiIndex(clusterRow);
+        clusterEquiv.setPhiWidth(clusterRowWidth);
+    } else {
+        clusterEquiv.setEtaIndex(clusterRow);
+        clusterEquiv.setEtaWidth(clusterRowWidth);
+        clusterEquiv.setPhiIndex(clusterCol);
+        clusterEquiv.setPhiWidth(clusterColWidth);
+    }
 
 
     float xOld = clusterEquiv.getX();
@@ -634,8 +641,8 @@ bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentC
     float zNew = incomingHit.getZ();
     float xPhiNew = incomingHit.getPhiCoord();
     float xEtaNew = incomingHit.getEtaCoord();
-    float cPhiNew = incomingHit.getPhiIndex() + 0.5;
-    float cEtaNew = incomingHit.getEtaIndex() + 0.5;
+    float cPhiNew = incomingHit.getPhiIndex();
+    float cEtaNew = incomingHit.getEtaIndex();
     int tot = clusterEquiv.getToT();
     int totNew = incomingHit.getToT();
     //As strips arrive pre-clustered, this is different for pixels/strips
