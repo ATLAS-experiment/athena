@@ -97,7 +97,7 @@ namespace columnar
 
     void addColumn (const std::string& name, std::vector<std::any> data);
 
-    void setExpectation (const std::string& name, std::vector<std::any> values);
+    void setExpectation (const std::string& name, const std::vector<std::any> & values);
 
     /// @brief add the columns we have to the tool
     void connectColumnsToTool ();

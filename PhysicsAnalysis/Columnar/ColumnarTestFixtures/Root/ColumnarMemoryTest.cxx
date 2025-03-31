@@ -195,7 +195,7 @@ namespace columnar
 
 
   void ColumnarMemoryTest::ColumnMapType ::
-  setExpectation (const std::string& name, std::vector<std::any> values)
+  setExpectation (const std::string& name, const std::vector<std::any> & values)
   {
     auto column = m_columnMap.find (name);
     if (column == m_columnMap.end())
