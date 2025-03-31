@@ -189,7 +189,8 @@ def SetupVP1():
 
     args = flags.fillFromArgs(parser=parser)
 
-    if "help" in args:
+    if args.help:
+        print(args)
         # No point doing more here, since we just want to print the help.
         import sys
         sys.exit()
