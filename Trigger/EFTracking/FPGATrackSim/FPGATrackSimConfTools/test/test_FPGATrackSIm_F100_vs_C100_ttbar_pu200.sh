@@ -1,10 +1,9 @@
 #!/bin/bash
-# art-description: Compare F100 to C100 on Zmumu pu0 events (full detector)
+# art-description: Compare F100 to C100 on ttbar pu200 events (whole detector)
 # art-type: grid
 # art-include: main/Athena
 # art-memory: 16384
-# art-input: mc21_14TeV:mc21_14TeV.601190.PhPy8EG_AZNLO_Zmumu.recon.RDO.e8481_s4203_r14697
-# art-input-nfiles: 11
+# art-input-nfiles: 2
 # art-output: *.txt
 # art-output: *.root
 # art-output: *.xml
@@ -13,9 +12,7 @@
 
 
 set -e
-echo "$ArtInFile"
-fileList="${ArtInFile// /,}"
-echo $fileList
+
 PREFIX_F100="F100"
 INPUT_AOD_FILE_F100="xAOD_${PREFIX_F100}.root"
 
@@ -52,18 +49,18 @@ run () {
 
 # Run F100 and produce IDTPM output
 run "${PREFIX_F100} pipeline" \
-    FPGATrackSim_F100.sh -o $INPUT_AOD_FILE_F100 -t -n 10000 -q -i $fileList > F100.txt 2>&1 &
+    FPGATrackSim_F100.sh -o $INPUT_AOD_FILE_F100 -t -n -1 --noDataOutput
 
 
 
 # Run C100 and produce IDTPM output
 run "${PREFIX_C100} pipeline" \
-    source ${ATHENA_SOURCE}/Trigger/EFTracking/FPGATrackSim/FPGATrackSimConfTools/test/FPGATrackSimWorkflow/FPGATrackSim_CommonEnv.sh -t -n 10000 -q -i $fileList
+    source ${ATHENA_SOURCE}/Trigger/EFTracking/FPGATrackSim/FPGATrackSimConfTools/test/FPGATrackSimWorkflow/FPGATrackSim_CommonEnv.sh -t -n -1
     python -m FPGATrackSimConfTools.C100Config \
         --evtMax="${RDO_EVT_ANALYSIS}" \
         --filesInput="${RDO_ANALYSIS}" \
         PhysVal.IDTPM.trkAnaCfgFile="${IDTPM_CONFIG}" \
-        PhysVal.IDTPM.outputFilePrefix="IDTPM.${PREFIX_C100}" > C100.txt 2>&1 &
+        PhysVal.IDTPM.outputFilePrefix="IDTPM.${PREFIX_C100}"
 
 wait 
 

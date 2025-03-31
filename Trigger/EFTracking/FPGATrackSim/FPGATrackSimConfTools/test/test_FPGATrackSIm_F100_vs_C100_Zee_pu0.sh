@@ -52,7 +52,7 @@ run () {
 
 # Run F100 and produce IDTPM output
 run "${PREFIX_F100} pipeline" \
-    FPGATrackSim_F100.sh -o $INPUT_AOD_FILE_F100 -t -n 10000 -q -i $fileList &
+    FPGATrackSim_F100.sh -o $INPUT_AOD_FILE_F100 -t -n 10000 -q -i $fileList > F100.txt 2>&1 &
 
 
 
@@ -63,7 +63,7 @@ run "${PREFIX_C100} pipeline" \
         --evtMax="${RDO_EVT_ANALYSIS}" \
         --filesInput="${RDO_ANALYSIS}" \
         PhysVal.IDTPM.trkAnaCfgFile="${IDTPM_CONFIG}" \
-        PhysVal.IDTPM.outputFilePrefix="IDTPM.${PREFIX_C100}" &
+        PhysVal.IDTPM.outputFilePrefix="IDTPM.${PREFIX_C100}" > C100.txt 2>&1 &
 
 wait 
 

@@ -1,10 +1,10 @@
 #!/bin/bash
-# art-description: Compare F100 to C100 on Zmumu pu0 events (full detector)
+# art-description: Compare F100 to C100 on ttbar pu0 events (full detector)
 # art-type: grid
 # art-include: main/Athena
-# art-memory: 16384
-# art-input: mc21_14TeV:mc21_14TeV.601190.PhPy8EG_AZNLO_Zmumu.recon.RDO.e8481_s4203_r14697
-# art-input-nfiles: 11
+# art-memory: 8192
+# art-input: mc21_14TeV:mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_s4422_r16128
+# art-input-nfiles: 21
 # art-output: *.txt
 # art-output: *.root
 # art-output: *.xml
@@ -16,6 +16,7 @@ set -e
 echo "$ArtInFile"
 fileList="${ArtInFile// /,}"
 echo $fileList
+
 PREFIX_F100="F100"
 INPUT_AOD_FILE_F100="xAOD_${PREFIX_F100}.root"
 

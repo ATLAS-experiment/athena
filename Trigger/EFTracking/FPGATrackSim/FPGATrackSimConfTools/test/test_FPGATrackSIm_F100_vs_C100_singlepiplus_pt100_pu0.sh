@@ -1,17 +1,21 @@
 #!/bin/bash
-# art-description: Compare F100 to C100 on ttbar events (whole detector)
+# art-description: Compare F100 to C100 on single pi-plus pt100 pu0 events (full detector)
 # art-type: grid
 # art-include: main/Athena
-# art-memory: 16384
-# art-input-nfiles: 2
+# art-memory: 8192
+# art-input: mc21_14TeV:mc21_14TeV.900042.PG_singlepiplus_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128
+# art-input-nfiles: 21
 # art-output: *.txt
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_latest
+# art-html: dcube_compare
 
 
 set -e
+echo "$ArtInFile"
+fileList="${ArtInFile// /,}"
+echo $fileList
 
 PREFIX_F100="F100"
 INPUT_AOD_FILE_F100="xAOD_${PREFIX_F100}.root"
@@ -49,18 +53,18 @@ run () {
 
 # Run F100 and produce IDTPM output
 run "${PREFIX_F100} pipeline" \
-    FPGATrackSim_F100.sh -o $INPUT_AOD_FILE_F100 -t -n -1 --noDataOutput
+    FPGATrackSim_F100.sh -o $INPUT_AOD_FILE_F100 -t -n 10000 -q -i $fileList > F100.txt 2>&1 &
 
 
 
 # Run C100 and produce IDTPM output
 run "${PREFIX_C100} pipeline" \
-    source ${ATHENA_SOURCE}/Trigger/EFTracking/FPGATrackSim/FPGATrackSimConfTools/test/FPGATrackSimWorkflow/FPGATrackSim_CommonEnv.sh -t -n -1
+    source ${ATHENA_SOURCE}/Trigger/EFTracking/FPGATrackSim/FPGATrackSimConfTools/test/FPGATrackSimWorkflow/FPGATrackSim_CommonEnv.sh -t -n 10000 -q -i $fileList
     python -m FPGATrackSimConfTools.C100Config \
         --evtMax="${RDO_EVT_ANALYSIS}" \
         --filesInput="${RDO_ANALYSIS}" \
         PhysVal.IDTPM.trkAnaCfgFile="${IDTPM_CONFIG}" \
-        PhysVal.IDTPM.outputFilePrefix="IDTPM.${PREFIX_C100}"
+        PhysVal.IDTPM.outputFilePrefix="IDTPM.${PREFIX_C100}" > C100.txt 2>&1 &
 
 wait 
 
@@ -72,7 +76,7 @@ run "IDTPM" \
 # Run dcube
 run "dcube-F100_vs_C100" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-        -p -x dcube_last \
+        -p -x dcube_compare \
         --plotopts=ratio \
         -c ${DCUBE_CONFIG} \
         -M "${PREFIX_F100}" \
