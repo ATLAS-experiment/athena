@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./CTPSimulation.h"
@@ -11,10 +11,6 @@
 #include "TrigT1Interfaces/CTPSLink.h"
 #include "TrigT1Result/RoIBResult.h"
 #include "TrigT1Result/JetEnergyRoI.h"
-
-#include "TrigT1Interfaces/CPRoIDecoder.h"
-#include "TrigT1Interfaces/JEPRoIDecoder.h"
-#include "TrigT1CaloUtils/CoordToHardware.h"
 
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "AthenaMonitoringKernel/HistogramDef.h"
@@ -43,9 +39,7 @@ const std::function< CLHEP::HepRandomEngine*(void) > CTPSimRanluxFactory = [](vo
 
 LVL1CTP::CTPSimulation::CTPSimulation( const std::string& name, ISvcLocator* pSvcLocator ) :
    AthReentrantAlgorithm ( name, pSvcLocator ),
-   m_RNGEngines( CTPSimRanluxFactory, SG::getNSlots() ),
-   m_decoder( new LVL1::CPRoIDecoder() ),
-   m_jetDecoder( new LVL1::JEPRoIDecoder() )
+   m_RNGEngines( CTPSimRanluxFactory, SG::getNSlots() )
 {}
 
 LVL1CTP::CTPSimulation::~CTPSimulation()
