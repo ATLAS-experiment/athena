@@ -254,7 +254,7 @@ namespace columnar
         if (iter == requestedColumns.end())
           return false;
 
-        auto offsetName = iter->second.offsetName;
+        const auto & offsetName = iter->second.offsetName;
         if (offsetName.empty())
           throw std::runtime_error ("missing offset column for: " + columnName);
 
@@ -695,6 +695,9 @@ namespace columnar
       Benchmark benchmarkGetEntry (name + " getEntry");
 
       const auto numberOfEvents = event.getEntries();
+      if (numberOfEvents == 0){
+        throw std::runtime_error ("ColumnarPhysLiteTest: numberOfEvents == 0");
+      }
       Long64_t entry = 0;
 
       // Instead of running for a fixed number of events, we run for a
