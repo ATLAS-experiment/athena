@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <utility>
@@ -235,7 +235,7 @@ namespace InDetDD {
     IRDBRecordset_ptr PixelBarrelGeneral = rdbSvc->getRecordsetPtr("PixelBarrelGeneral", detectorKey, detectorNode);
     IRDBRecordset_ptr PixelLayer = rdbSvc->getRecordsetPtr("PixelLayer", detectorKey, detectorNode);
 
-    int numLayers = db()->getInt(PixelBarrelGeneral, "NLAYER");
+    int numLayers = db()->getInt(std::move(PixelBarrelGeneral), "NLAYER");
     layerShift.reserve(numLayers);
     for (int iLayer = 0; iLayer < numLayers; iLayer++) {
       double shift = 0;

@@ -401,31 +401,27 @@ SCT_Layer::activeEnvelopeExtent(double & rmin, double & rmax)
   // These are the coordinates of the corners of the ski envelope.
   // x is in the radial direction and x is in the phi direction.
 
-  //GeoTrf::Vector3D c0();
   GeoTrf::Vector3D c1(-(m_ski->env1RefPointVector()->x()) - 0.5*(m_ski->env1Thickness()),
                        -(m_ski->env1RefPointVector()->y()) + 0.5*(m_ski->env1Width()),
                        0.0);
   GeoTrf::Vector3D c2(-(m_ski->env2RefPointVector()->x()) - 0.5*(m_ski->env2Thickness()),
                        -(m_ski->env2RefPointVector()->y()) + 0.5*(m_ski->env2Width()),
                        0.0);
-  //GeoTrf::Vector3D c3();
   GeoTrf::Vector3D c4(-(m_ski->env1RefPointVector()->x()) + 0.5*(m_ski->env1Thickness()),
                        -(m_ski->env1RefPointVector()->y()) - 0.5*(m_ski->env1Width()),
   0.0);
 
-  //c0.rotateZ(m_tilt);
   c1 = GeoTrf::RotateZ3D(m_tilt)*c1;
   c2 = GeoTrf::RotateZ3D(m_tilt)*c2;
-  //c3.rotateZ(m_tilt);
   c4 = GeoTrf::RotateZ3D(m_tilt)*c4;
 
-  GeoTrf::Vector3D vxmax = c4;
+  GeoTrf::Vector3D vxmax = std::move(c4);
   GeoTrf::Vector3D vxmin;
   if (c1.x() < c2.x()) {
-    vxmin = c1;
+    vxmin = std::move(c1);
   }
   else {
-    vxmin = c2;
+    vxmin = std::move(c2);
   }
 
   double xmax = vxmax.x();
