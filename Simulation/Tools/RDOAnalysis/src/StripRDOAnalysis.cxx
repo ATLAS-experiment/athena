@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StripRDOAnalysis.h"
@@ -251,35 +251,35 @@ StatusCode StripRDOAnalysis::initialize() {
   m_h_belowThresh_ec->StatOverflows();
   ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_belowThresh_ec->GetName(), m_h_belowThresh_ec));
 
-  m_h_disabled_brl = new TH1F("m_h_disabled_brl", "Disabled strips - Barrel; # disabled strips; layer", 8, -0.5, 7.5);
+  m_h_disabled_brl = new TH1F("h_disabled_brl", "Disabled strips - Barrel; # disabled strips; layer", 8, -0.5, 7.5);
   m_h_disabled_brl->StatOverflows();
   ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_disabled_brl->GetName(), m_h_disabled_brl));
 
-  m_h_disabled_ec = new TH1F("m_h_disabled_ec", "Disabled strips - Endcap; # disabled strips; layer", 8, -0.5, 7.5);
+  m_h_disabled_ec = new TH1F("h_disabled_ec", "Disabled strips - Endcap; # disabled strips; layer", 8, -0.5, 7.5);
   m_h_disabled_ec->StatOverflows();
   ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_disabled_ec->GetName(), m_h_disabled_ec));
 
   for (unsigned int layer=0; layer<4; layer++) {
-    m_h_brl_strip_perLayer.emplace_back(new TH1F(("m_h_brl_strip_perLayer"+std::to_string(layer)).c_str(), ("Strip index - Barrel - Layer "+std::to_string(layer)).c_str(), 1300, 0, 1300));
+    m_h_brl_strip_perLayer.emplace_back(new TH1F(("h_brl_strip_perLayer"+std::to_string(layer)).c_str(), ("Strip index - Barrel - Layer "+std::to_string(layer)).c_str(), 1300, 0, 1300));
     m_h_brl_strip_perLayer.back()->StatOverflows();
     ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_brl_strip_perLayer.back()->GetName(), m_h_brl_strip_perLayer.back()));
   }
 
   for (unsigned int layer=0; layer<9; layer++) {
-    m_h_ec_strip_perLayer.emplace_back(new TH1F(("m_h_ec_strip_perLayer"+std::to_string(layer)).c_str(), ("Strip index - Barrel - Layer "+std::to_string(layer)).c_str(), 1300, 0, 1300));
+    m_h_ec_strip_perLayer.emplace_back(new TH1F(("h_ec_strip_perLayer"+std::to_string(layer)).c_str(), ("Strip index - Barrel - Layer "+std::to_string(layer)).c_str(), 1300, 0, 1300));
     m_h_ec_strip_perLayer.back()->StatOverflows();
     ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_ec_strip_perLayer.back()->GetName(), m_h_ec_strip_perLayer.back()));
   }
 
-  m_h_globalXY = new TH2F("m_h_globalXY","m_h_globalXY; x [mm]; y [mm]",2200,-1100.,1100.,2200,1100.,1100.);
+  m_h_globalXY = new TH2F("h_globalXY","h_globalXY; x [mm]; y [mm]",2200,-1100.,1100.,2200,1100.,1100.);
   ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_globalXY->GetName(), m_h_globalXY));
-  m_h_globalZR = new TH2F("m_h_globalZR","m_h_globalZR; z [mm]; r [mm]",6800,-3400.,3400.,1100,0.,1100.);
+  m_h_globalZR = new TH2F("h_globalZR","h_globalZR; z [mm]; r [mm]",6800,-3400.,3400.,1100,0.,1100.);
   ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_globalZR->GetName(), m_h_globalZR));
-  m_h_globalX = new TH1F("m_h_globalX","m_h_globalX; x [mm]",2200,-1100.,1100.);
+  m_h_globalX = new TH1F("h_globalX","h_globalX; x [mm]",2200,-1100.,1100.);
   ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_globalX->GetName(), m_h_globalX));
-  m_h_globalY = new TH1F("m_h_globalY","m_h_globalY; y [mm]",2200,-1100.,1100.);
+  m_h_globalY = new TH1F("h_globalY","h_globalY; y [mm]",2200,-1100.,1100.);
   ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_globalY->GetName(), m_h_globalY));
-  m_h_globalZ = new TH1F("m_h_globalZ","m_h_globalZ; z [mm]",6800,-3400.,3400.);
+  m_h_globalZ = new TH1F("h_globalZ","h_globalZ; z [mm]",6800,-3400.,3400.);
   ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_globalZ->GetName(), m_h_globalZ));
 
   // Special shared ITk histograms
