@@ -254,7 +254,7 @@ def UpdateCalib(tag):
 # Just used for testing - Experts only                
 if __name__ == "__main__":
     
-    UpdateCalib("PixelChargeCalibration-DATA-RUN2-UPD4-27")
+    UpdateCalib("PixelChargeCalibration-DATA-RUN2-UPD4-28")
     exit(0)    
 
 

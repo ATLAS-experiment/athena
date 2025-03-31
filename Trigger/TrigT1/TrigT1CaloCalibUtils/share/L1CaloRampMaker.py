@@ -22,10 +22,11 @@ from TileConfiguration.TileConfigFlags import TileRunType
 def main():
     from optparse import OptionParser
     parser = OptionParser(usage = "usage: %prog arguments", version="%prog")
-    parser.add_option("-i","--InputFiles",        dest="InputFiles",                      help="Input raw data (default: %default)")
-    parser.add_option("-l","--doLAr",            dest="doLAr",    action="store_true",  help="Do L1Calo+LAr calibration(default: %default)")
-    parser.add_option("-t","--doTile",           dest="doTile",   action="store_true",  help="Do L1Calo+Tile calibration(default: %default)")
-    parser.set_defaults(InputFiles="/eos/atlas/atlastier0/rucio/data22_calib/calibration_L1CaloEnergyScan/00429494/data22_calib.00429494.calibration_L1CaloEnergyScan.daq.RAW/*", doLAr=False, doTile=False)
+    parser.add_option("-i","--InputFiles", dest="InputFiles",                     help="Input raw data (default: %default)")
+    parser.add_option("-l","--doLAr",      dest="doLAr",    action="store_true",  help="Do L1Calo+LAr calibration (default: %default)")
+    parser.add_option("-t","--doTile",     dest="doTile",   action="store_true",  help="Do L1Calo+Tile calibration (default: %default)")
+    parser.add_option("-r","--useROD",     dest="useROD",   action="store_true",  help="Use legacy ROD instead of SWROD (default: %default)")
+    parser.set_defaults(InputFiles="None", doLAr=False, doTile=False, useROD=False)
     (options,args) = parser.parse_args()
     
     flags = initConfigFlags()
@@ -64,7 +65,11 @@ def main():
     acc = MainServicesCfg(flags)
     acc.merge( ByteStreamReadCfg(flags) )
     acc.merge( LVL1CaloRun2ReadBSCfg(flags))
-    
+
+    # Force to use legacy ROD readout, if requested
+    if options.useROD == True:
+        acc.getPublicTool("RodHeaderByteStreamTool").UseSWROD=False
+        acc.getPublicTool("PpmByteStreamReadV1V2Tool").UseSWROD=False
     
     from TrigT1CaloCalibUtils.CaloRecoCalibConfig import CaloRecoCalibCfg
     acc.merge(CaloRecoCalibCfg(flags))
@@ -104,7 +109,7 @@ def main():
     
     from TrigT1CaloCondSvc.L1CaloCondConfig import L1CaloCondAlgCfg
     acc.merge(L1CaloCondAlgCfg(flags,Physics=True,Calib1=True,Calib2=True))
-
+    acc.merge(addFolders(flags,"/TRIGGER/Receivers/Conditions/Strategy","TRIGGER",className="CondAttrListCollection"))
     
     decorator = CompFactory.LVL1.L1CaloTriggerTowerDecoratorAlg()
     decorator.TriggerTowerTools = CompFactory.LVL1.L1CaloxAODOfflineTriggerTowerTools()
