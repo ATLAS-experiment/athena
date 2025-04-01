@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimEvent/SiHit.h"
@@ -92,18 +92,15 @@ void SiHitCollectionCnv_p2::transToPers(const SiHitCollection* transCont, SiHitC
   HepGeom::Point3D<double> lastPersEnd(0.0, 0.0, 0.0);
 
   for (SiHitCollection::const_iterator it = transCont->begin(); it != transCont->end(); ++it) {
-
-    //   const SiHit* siHit = *it;
-
     SiHitCollection::const_iterator siHit = it;
-
-
     if ( siHit->particleLink().barcode() != lastBarcode || (idx-endBC)==USHRT_MAX ) {
 
       // store barcode once for set of consecutive hits with same barcode
-
       lastBarcode = siHit->particleLink().barcode();
-      persCont->m_barcode.push_back(lastBarcode);
+      //m_barcode has type  std::vector<unsigned long>, but lastBarcode could be -1
+      //make the conversion explicit here with a static_cast
+      using barcodeRep = decltype(persCont->m_barcode)::value_type;
+      persCont->m_barcode.push_back(static_cast<barcodeRep>(lastBarcode));
 
       if (idx > 0) {
         persCont->m_nBC.push_back(idx - endBC);
@@ -180,7 +177,7 @@ void SiHitCollectionCnv_p2::transToPers(const SiHitCollection* transCont, SiHitC
       persCont->m_hit1_theta.push_back(theta);
       persCont->m_hit1_phi.push_back(phi);
 
-      lastPersEnd = st;
+      lastPersEnd = std::move(st);
 
       stringFirstTheta = theta;
       stringFirstPhi = phi;
@@ -191,7 +188,7 @@ void SiHitCollectionCnv_p2::transToPers(const SiHitCollection* transCont, SiHitC
       }
     }
 
-    lastTransEnd = en;
+    lastTransEnd = std::move(en);
     transSumE += siHit->energyLoss();
 
     const int eneLoss_2b = (int)((transSumE - persSumE) / m_persEneUnit + 0.5);  // calculated to allow recovery sum over
@@ -340,7 +337,7 @@ void SiHitCollectionCnv_p2::persToTrans(const SiHitCollection_p2* persCont, SiHi
         }
         transCont->Emplace( endLast, endThis, eneLoss, meanTime, partLink, persCont->m_id[idxId]);
 
-        endLast = endThis;
+        endLast = std::move(endThis);
 
         ++hitCount;
         if (j > start) ++angleCount;

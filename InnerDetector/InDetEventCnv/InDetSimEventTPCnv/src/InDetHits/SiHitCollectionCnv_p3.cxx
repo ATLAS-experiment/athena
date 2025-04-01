@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimEvent/SiHit.h"
@@ -361,7 +361,7 @@ void SiHitCollectionCnv_p3::persToTrans(const SiHitCollection_p3* persCont, SiHi
         }
         transCont->Emplace( endLast, endThis, eneLoss, meanTime, partLink, persCont->m_id[idxId]);
 
-        endLast = endThis;
+        endLast = std::move(endThis);
 
         ++hitCount;
         if (j > start) ++angleCount;
