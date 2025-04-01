@@ -8,6 +8,7 @@
 # art-output: ecube*
 # art-output: hist_physlite_latest.root
 # art-output: generated_csv_files.tar.gz
+# art-output: physlite_disksize.tar.gz
 # art-html: ecube
 
 export ATHENA_CORE_NUMBER=8
@@ -116,3 +117,9 @@ trf_getVariables.py --inputFile DAOD_PHYSLITE.art.pool.root
 rccsv=$?
 tar czf generated_csv_files.tar.gz generated_csv_files/
 echo "art-result: ${rccsv} trf_getVariables.py"
+get_files trf_disksize_get_metrics.py
+python trf_disksize_get_metrics.py --inputFile DAOD_PHYSLITE.art.pool.root --isuproot=True
+dscsv=$?
+tar czf physlite_disksize.tar.gz physlite_disksize/
+echo "art-result: ${dscsv} trf_disksize_get_metrics.py"
+echo "art-output: physlite_disksize.tar.gz"
