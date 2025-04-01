@@ -68,15 +68,6 @@ namespace ActsTrk
   namespace detail {
     class TrackFindingMeasurements;
     class SharedHitCounter;
-
-    /// Struct holding objects required by the measurement selector
-    struct [[nodiscard]] MeasurementSelectorData {
-      AtlUncalibSourceLinkAccessor slAccessor;
-      DefaultTrackStateCreator::SourceLinkAccessor slAccessorDelegate;
-      DefaultTrackStateCreator trackStateCreator;
-      detail::OnTrackCalibrator<detail::RecoTrackStateContainer> calibrator;
-      std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector;
-    };
   }
 
   class TrackFindingAlg : public AthReentrantAlgorithm
@@ -233,15 +224,11 @@ namespace ActsTrk
      *
      * Common code with TrackExtendAlg – to be moved to the base class
      *
-     * @param trackingGeometry Acts tracking geometry
-     * @param detectorElementToGeoId map Trk detector element to Acts Geometry id
      * @param measurements measurements container used in MeasurementSelector
      * @param options Kalman filter options
-     * @return Struct with all objects needed by the measurement selector
+     * @return unique_ptr to MeasurementSelector
      */
-    detail::MeasurementSelectorData setMeasurementSelector(
-        const Acts::TrackingGeometry &trackingGeometry,
-        const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
+    [[nodiscard]] std::unique_ptr<ActsTrk::IMeasurementSelector> setMeasurementSelector(
         const detail::TrackFindingMeasurements &measurements,
         TrackFinderOptions &options) const;
 
@@ -300,7 +287,6 @@ namespace ActsTrk
      * @brief invoke track finding procedure
      *
      * @param ctx - event context
-     * @param trackingGeometry - Acts tracking geometry
      * @param detectorElementToGeoId - map Trk detector element to Acts Geometry id
      * @param measurements - measurements container used in MeasurementSelector
      * @param sharedHits - measurements container used for shared hit counting
@@ -314,7 +300,6 @@ namespace ActsTrk
      */
     StatusCode
     findTracks(const EventContext &ctx,
-               const Acts::TrackingGeometry &trackingGeometry,
                const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
                const detail::TrackFindingMeasurements &measurements,
                const detail::MeasurementIndex &measurementIndex,

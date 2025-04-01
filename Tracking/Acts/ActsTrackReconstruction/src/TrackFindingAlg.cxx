@@ -274,9 +274,6 @@ namespace ActsTrk
     std::size_t measurementIndexContainersSize = (m_skipDuplicateSeeds || m_countSharedHits || m_trackStatePrinter.isSet()) ? uncalibratedMeasurementContainers.size() : 0ul;
     detail::MeasurementIndex measurementIndex(measurementIndexContainersSize);
     detail::SharedHitCounter sharedHits;
-    const Acts::TrackingGeometry *
-       acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
-    ATH_CHECK(acts_tracking_geometry != nullptr);
 
     for (std::size_t icontainer = 0; icontainer < uncalibratedMeasurementContainers.size(); ++icontainer) {
       ATH_MSG_DEBUG("Create " << uncalibratedMeasurementContainers[icontainer]->size() << " source links from measurements in " << m_uncalibratedMeasurementContainerKeys[icontainer].key());
@@ -317,7 +314,6 @@ namespace ActsTrk
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
     {
       ATH_CHECK(findTracks(ctx,
-                           *acts_tracking_geometry,
                            **detectorElementToGeometryIdMap,
                            measurements,
                            measurementIndex,
@@ -367,43 +363,27 @@ namespace ActsTrk
     return r > rBoundary || z > zBoundary;
   }
 
-  detail::MeasurementSelectorData TrackFindingAlg::setMeasurementSelector(
-      const Acts::TrackingGeometry &trackingGeometry,
-      const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
+  std::unique_ptr<ActsTrk::IMeasurementSelector> TrackFindingAlg::setMeasurementSelector(
       const detail::TrackFindingMeasurements &measurements,
       TrackFinderOptions &options) const {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
-    detail::MeasurementSelectorData measurementSelectorData {
-        .slAccessor{measurements.measurementRanges()},
-        .slAccessorDelegate{},
-        .trackStateCreator{},
-        // Measurement calibration
-        // N.B. OnTrackCalibrator expects disabled tool handles when no calibration is requested.
-        // Therefore, passing them without checking if they are enabled is safe.
-        .calibrator{trackingGeometry, detectorElementToGeoId, m_pixelCalibTool, m_stripCalibTool, m_hgtdCalibTool},
-        .measurementSelector{}
-    };
-
-    measurementSelectorData.slAccessorDelegate.connect<&detail::UncalibSourceLinkAccessor::range>(&measurementSelectorData.slAccessor);
-
-    measurementSelectorData.measurementSelector = ActsTrk::detail::getMeasurementSelector(
+    std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = ActsTrk::detail::getMeasurementSelector(
         m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
         measurements.measurementRanges(),
         m_measurementSelectorConfig.m_etaBins,
         m_measurementSelectorConfig.m_chi2CutOffOutlier,
         m_numMeasurementsCutOff.value());
 
-    measurementSelectorData.measurementSelector->connect(&options.extensions.createTrackStates);
+    measurementSelector->connect(&options.extensions.createTrackStates);
 
-    return measurementSelectorData;
+    return measurementSelector;
   }
 
   // === findTracks ==========================================================
 
   StatusCode
   TrackFindingAlg::findTracks(const EventContext &ctx,
-                              const Acts::TrackingGeometry &trackingGeometry,
                               const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
                               const detail::TrackFindingMeasurements &measurements,
                               const detail::MeasurementIndex &measurementIndex,
@@ -443,7 +423,7 @@ namespace ActsTrk
                                plainOptions,
                                pSurface.get());
 
-    const detail::MeasurementSelectorData measurementSelectorData = setMeasurementSelector(trackingGeometry, detectorElementToGeoId, measurements, options);
+    std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(measurements, options);
 
     TrackFinderOptions secondOptions(tgContext,
                                      mfContext,
