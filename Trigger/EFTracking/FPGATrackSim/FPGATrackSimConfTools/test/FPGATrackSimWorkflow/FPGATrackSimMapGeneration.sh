@@ -11,27 +11,27 @@ run_map_maker() {
     python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
     --filesInput=${WRAPPER} \
     OutFileName=${STD_PREFIX} \
+    Trigger.FPGATrackSim.oldRegionDefs=True \
     Trigger.FPGATrackSim.region=0 \
     GeoModel.AtlasVersion=${GEO_TAG}
 }
 
 INSIDEOUT_PREFIX="MyMaps_insideOut"
-run_map_maker_for_insideOut() {
+run_5L_map_maker() {
     python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
     --filesInput=${WRAPPER} \
     OutFileName=${INSIDEOUT_PREFIX} \
     Trigger.FPGATrackSim.region=33 \
     doInsideOut=True \
     Trigger.FPGATrackSim.spacePoints=False \
-    Trigger.FPGATrackSim.oldRegionDefs=False \
     KeyString="plane 0" \
     GeoModel.AtlasVersion=${GEO_TAG}
 }
 
-echo "Running map maker"
+echo "Running map maker for 9L"
 run_map_maker
-echo "Now running map maker for insideOut"
-run_map_maker_for_insideOut
+echo "Running map maker for insideOut"
+run_5L_map_maker
 echo "Maps Made, this part is done ..."
 ls -l
 

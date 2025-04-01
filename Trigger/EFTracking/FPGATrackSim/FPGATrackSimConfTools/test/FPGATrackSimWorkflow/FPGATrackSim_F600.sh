@@ -28,13 +28,13 @@ run_InsideOut(){
         Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
         Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
         Trigger.FPGATrackSim.runCKF=$RUN_CKF \
-        Trigger.FPGATrackSim.region=0 \
+        Trigger.FPGATrackSim.region=34 \
         Trigger.FPGATrackSim.pipeline='F-600' \
         Trigger.FPGATrackSim.tracking=True \
         Trigger.FPGATrackSim.sampleType="${SAMPLE_TYPE}" \
         Trigger.FPGATrackSim.doEDMConversion=True \
         Trigger.FPGATrackSim.doOverlapRemoval=True \
-        Trigger.FPGATrackSim.Hough.secondStage=True \
+        Trigger.FPGATrackSim.Hough.secondStage=False \
         Trigger.FPGATrackSim.writeToAOD=True \
         Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
         Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \

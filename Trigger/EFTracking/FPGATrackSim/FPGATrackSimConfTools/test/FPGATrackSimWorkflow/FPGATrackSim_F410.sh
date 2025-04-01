@@ -35,6 +35,7 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
     Trigger.FPGATrackSim.mapsDir=$MAPS_9L_GNN \
     Trigger.FPGATrackSim.region=0 \
+    Trigger.FPGATrackSim.oldRegionDefs=True \
     Trigger.FPGATrackSim.writeToAOD=True \
     Trigger.FPGATrackSim.bankDir=$BANKS_9L \
     Trigger.FPGATrackSim.FakeNNonnxFile=$ONNX_INPUT_FAKE \
