@@ -252,7 +252,7 @@ class CaloClusterCorrSetup:
         if corrlist is None:
             corrlist = vcorrlist
 
-        log.info ("%s corrections for %s (%s) using version %s" %
+        log.debug ("%s corrections for %s (%s) using version %s" %
                   (self.name, key, suffix, version))
 
         # Now, walk through the list of corrections.

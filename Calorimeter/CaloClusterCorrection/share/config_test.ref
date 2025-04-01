@@ -1,13 +1,7 @@
 Py:Athena            INFO using release [WorkDir-22.0.19] [x86_64-centos7-gcc8-opt] [atlas-work3h/b64d5586bf6b] -- built on [2020-10-20T1924]
-Py:CaloClusterCorrection    INFO EM sliding-window corrections for ele35 () using version v12_calh
 Py:AutoConfigFlags    INFO Obtaining metadata of auto-configuration by peeking into /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1
 Py:MetaReader        INFO Current mode used: peeker
 Py:MetaReader        INFO Current filenames: ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1']
-Py:CaloClusterCorrection    INFO EM sliding-window corrections for gam35_conv () using version @GLOBAL
-Py:CaloClusterCorrection    INFO EM sliding-window corrections for gam35 () using version @GLOBAL
-Py:CaloClusterCorrection    INFO EM sliding-window corrections for gam35 () using version v6_lwc
-Py:CaloClusterCorrection    INFO EM sliding-window corrections for gam35 () using version v6_lwc
-Py:CaloClusterCorrection    INFO EM sliding-window corrections for gam35 () using version @CaloOflSwClusterCorrections-00-02-01-v6_calh
 Py:GaudiHandles   WARNING CaloDummyCorrection('larupdatee-dummy', prefix='e.') with instance name 'larupdatee-dummy' already in PrivateToolHandleArray. Not adding CaloDummyCorrection('larupdatee-dummy', prefix='e.').
 Py:GaudiHandles   WARNING CaloDummyCorrection('etaoffe-dummy', prefix='e.') with instance name 'etaoffe-dummy' already in PrivateToolHandleArray. Not adding CaloDummyCorrection('etaoffe-dummy', prefix='e.').
 Py:GaudiHandles   WARNING CaloDummyCorrection('phioffe-dummy', prefix='e.') with instance name 'phioffe-dummy' already in PrivateToolHandleArray. Not adding CaloDummyCorrection('phioffe-dummy', prefix='e.').

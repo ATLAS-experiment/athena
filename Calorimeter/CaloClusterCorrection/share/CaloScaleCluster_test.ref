@@ -1,4 +1,3 @@
-Py:CaloClusterCorrection    INFO EM sliding-window corrections for ele35 () using version v12_calh
 ApplicationMgr       INFO Application Manager Configured successfully
 CoreDumpSvc                                          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 
 IOVDbSvc                                             INFO Only 5 POOL conditions files will be open at once
