@@ -486,6 +486,18 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     )    
     AllVariables += ["L1_jFexEmulatedTowers"]
 
+    # In case MC has no jets, schedule reconstruction
+    if flags.Input.isMC:
+        from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow
+        from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_noVR, AntiKt10UFOCSSKSoftDrop_trigger
+        jets_to_schedule = [jet for jet in (AntiKt4EMPFlow, AntiKt10LCTopo_noVR, AntiKt10UFOCSSKSoftDrop_trigger)
+                             if jet.fullname() not in flags.Input.Collections]
+
+        if jets_to_schedule:
+            from JetRecConfig.JetRecConfig import JetRecCfg
+            for container in jets_to_schedule:
+                acc.merge(JetRecCfg(flags, container))
+
     # Truth collections
     if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import PreJetMCTruthAugmentationsCfg

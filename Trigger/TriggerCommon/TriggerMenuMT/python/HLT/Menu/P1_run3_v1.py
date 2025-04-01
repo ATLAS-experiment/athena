@@ -95,6 +95,7 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_noalg_LArPEBCalib_L1eEM12L', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
 
         # LAr noise burst chains
+        ChainProp(name='HLT_larnoiseburst_L1eTAU12', l1SeedThresholds=['FSNOSEED'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup), #ATR-28679
         ChainProp(name='HLT_larnoiseburst_L1jXE120', l1SeedThresholds=['FSNOSEED'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup), #ATR-28679
         ChainProp(name='HLT_larnoiseburst_L1gXEJWOJ120', l1SeedThresholds=['FSNOSEED'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup), #ATR-28679
         ChainProp(name='HLT_larnoiseburst_L1jJ125', l1SeedThresholds=['FSNOSEED'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),

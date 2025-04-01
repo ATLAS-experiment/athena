@@ -137,7 +137,7 @@ class MonitorDef:
                 "L1_3jJ90", "L1_4jJ40", "L1_4jJ50",
                 "L1_3jJ70p0ETA23", "L1_4jJ40p0ETA25", "L1_5jJ40p0ETA25",
                 "L1_jJ140_3jJ60", "L1_jJ85p0ETA21_3jJ40p0ETA25",
-                "L1_jXE60", "L1_jXE70", "L1_jXE80", "L1_jXE90", "L1_jXE100",
+                "L1_jXE60", "L1_jXE70", "L1_jXE80", "L1_jXE90", "L1_jXE100", "L1_eTAU12",
                 "L1_jXE110", "L1_jXE120", "L1_jXE500",
                 "L1_jXEC100",
                 "L1_jTE200",

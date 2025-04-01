@@ -266,7 +266,7 @@ L1CaloBsDecoderRun3::decodeEfexDataChan( const uint32_t payload[],
          //           We can OR those with error bits for this fibre.
          uint32_t towerFlag = errorField;
          
-         if ( towerSumEt || towerFlag ) {
+         if ( true/*towerSumEt || towerFlag*/ ) { // commented out zero suppression of towers, so that we can recognise case when we do not have a tower
             EfexCellMapping mapping( shelfNumber, efexNumber, fpgaNumber, chanNumber, wordNumber );
             L1CaloDetectorRegion region = mapping.getDetectorRegion();
             EfexHardwareInfo hwInfo( mapping.getHardwareInfo() );
@@ -309,7 +309,7 @@ L1CaloBsDecoderRun3::decodeEfexDataChan( const uint32_t payload[],
          const uint32_t invalid = ( towerVals[wordNumber] == 0x3fe ) ? 1 : 0;
          const uint32_t towerFlag = errorMask | ( invalid << 31 );
          
-         if ( towerEt || towerFlag ) {
+         if ( true/*towerEt || towerFlag*/ ) { // commented out zero suppression of towers, so that we can recognise case when we do not have a tower
             EfexCellMapping mapping( shelfNumber, efexNumber, fpgaNumber, chanNumber, wordNumber );
             L1CaloDetectorRegion region = mapping.getDetectorRegion();
             EfexHardwareInfo hwInfo( mapping.getHardwareInfo() );

@@ -151,7 +151,6 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
     auto BelowCut = Monitored::Scalar<bool>("BelowCut",false);
     auto binNumber = Monitored::Scalar<int>("binNumber",0);
 
-  missingLAr = false; // will set true if find any 1025 counts
   for(const xAOD::eFexTower* eTower : *eFexTowerContainer) {
     TowerId = eTower->id();
     Towereta=eTower->eta();
@@ -187,8 +186,17 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
           bool isLAr = !(i==10 && std::abs(Towereta)<=1.5);
           if(counts[i]==1025) {
               // 1025 is the code used by bytestream decoder if there is no input for that slot
-              // only should be the case for LAr; Tile is zero-suppressed so missing input can just mean 0 energy.
-              missingLAr=true;
+              if(isLAr) {
+                  if (auto itr = m_scMap.find(std::make_pair(coord, i)); itr != m_scMap.end()) {
+                      SlotSCID = itr->second.second;
+                  }
+                  Decision = "MissingLAr";
+                  fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+              } else {
+                  Decision = "MissingTile";
+                  SlotSCID="";
+                  fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+              }
               continue;
           }
           TowerSlot = i;
@@ -243,10 +251,6 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
           }
       }
   }
-    if(missingLAr) {
-        Decision = "MissingLAr";
-        fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
-    }
 
 
   return StatusCode::SUCCESS;
