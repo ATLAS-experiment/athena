@@ -4,7 +4,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #include "InDetGNNHardScatterSelection/DataPrepUtilities.h"
 #include "InDetGNNHardScatterSelection/CustomGetterUtils.h"
-#include "FlavorTagDiscriminants/StringUtils.h"
+#include "FlavorTagInference/StringUtils.h"
 
 namespace {
   using namespace InDetGNNHardScatterSelection;
@@ -42,8 +42,8 @@ namespace {
     for (const auto& var: variable_names) {
       HSGNNInputConfig input;
       input.name = var;
-      input.type = FlavorTagDiscriminants::str::match_first(type_regexes, var, "type matching");
-      input.default_flag = FlavorTagDiscriminants::str::sub_first(default_flag_regexes, var,
+      input.type = FlavorTagInference::str::match_first(type_regexes, var, "type matching");
+      input.default_flag = FlavorTagInference::str::sub_first(default_flag_regexes, var,
                                      "default matching");
       inputs.push_back(input);
     }

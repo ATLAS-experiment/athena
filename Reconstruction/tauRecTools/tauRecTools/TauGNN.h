@@ -10,7 +10,7 @@
 
 #include "AsgMessaging/AsgMessaging.h"
 
-#include "FlavorTagDiscriminants/SaltModel.h"
+#include "FlavorTagInference/SaltModel.h"
 
 #include <memory>
 #include <string>
@@ -18,6 +18,10 @@
 
 namespace TauGNNUtils {
     class GNNVarCalc;
+}
+
+namespace FlavorTagInference{
+    class SaltModel;
 }
 
 /**
@@ -39,7 +43,7 @@ public:
         std::string output_node_tau;
         std::string output_node_jet;
     };
-    std::shared_ptr<const FlavorTagDiscriminants::SaltModel> m_saltModel;
+    std::shared_ptr<const FlavorTagInference::SaltModel> m_saltModel;
 public:
     TauGNN(const std::string &nnFile, const Config &config);
     ~TauGNN();
@@ -66,10 +70,10 @@ public:
     }
 
     //Make the output config transparent to external tools
-    FlavorTagDiscriminants::SaltModel::OutputConfig gnn_output_config;
+    FlavorTagInference::SaltModel::OutputConfig gnn_output_config;
 
 private:
-    using Inputs = FlavorTagDiscriminants::Inputs;
+    using Inputs = FlavorTagInference::Inputs;
     // Abbreviations for lwtnn
     using VariableMap = std::map<std::string, double>;
     using VectorMap = std::map<std::string, std::vector<double>>;

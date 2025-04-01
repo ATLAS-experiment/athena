@@ -1,11 +1,11 @@
-#include "FlavorTagDiscriminants/GNNOptions.h"
+#include "FlavorTagInference/GNNOptions.h"
 
 #include <unordered_map>
 
 #include <iostream>
 
 int main(int, char*[]) {
-  using namespace FlavorTagDiscriminants;
+  using namespace FlavorTagInference;
   GNNOptions opts;
   std::unordered_map<GNNOptions, std::string> optsMap;
   optsMap[opts] = "zooz";

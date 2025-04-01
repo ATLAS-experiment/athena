@@ -4,6 +4,7 @@
 
 #include "FlavorTagDiscriminants/DL2HighLevel.h"
 #include "FlavorTagDiscriminants/DL2.h"
+#include "FlavorTagInference/FTagDataDependencyNames.h"
 
 #include "PathResolver/PathResolver.h"
 

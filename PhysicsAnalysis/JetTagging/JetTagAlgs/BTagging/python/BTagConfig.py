@@ -17,10 +17,11 @@ from BTagging.JetSecVtxFindingAlgConfig import JetSecVtxFindingAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 from FlavorTagDiscriminants.BTagJetAugmenterAlgConfig import BTagJetAugmenterAlgCfg
 from FlavorTagDiscriminants.BTagMuonAugmenterAlgConfig import BTagMuonAugmenterAlgCfg
-from FlavorTagDiscriminants.FlavorTagNNConfig import (
+from FlavorTagInference.FlavorTagNNConfig import (
     FlavorTagNNCfg,
     MultifoldGNNCfg,
 )
+from FlavorTagDiscriminants.FlavorTagDLNNConfig import FlavorTagDLNNCfg
 from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
 from JetHitAssociation.JetHitAssociationConfig import JetHitAssociationCfg
@@ -204,6 +205,9 @@ def _track_measurement_list(container_name):
         f'xAOD::TrackMeasurementValidationAuxContainer#{container_name}Aux.'
     ]
 
+def GNN_or_DL_cfg(nn_path):
+    """Use the correct configuration for the NN based on the path"""
+    return FlavorTagNNCfg if ('GN' in nn_path or 'gn' in nn_path) else FlavorTagDLNNCfg
 
 def BTagAlgsCfg(
     inputFlags,
@@ -354,6 +358,7 @@ def BTagAlgsCfg(
     # Add the final taggers based on neural networks
     for nn_path in nnList:
         # add standard (unflipped) taggers
+        NN_cfg_func = GNN_or_DL_cfg(nn_path)
         output_remapping={}
         if  '20240122trig' in nn_path:
             output_remapping={
@@ -364,7 +369,7 @@ def BTagAlgsCfg(
             }
 
         result.merge(
-            FlavorTagNNCfg(
+            NN_cfg_func(
                 inputFlags,
                 BTaggingCollection=BTagCollection,
                 TrackCollection=trackCollection,
@@ -375,7 +380,7 @@ def BTagAlgsCfg(
         if inputFlags.BTagging.RunFlipTaggers:
             for flip_config in _get_flip_config(nn_path):
                 result.merge(
-                    FlavorTagNNCfg(
+                    NN_cfg_func(
                         inputFlags,
                         BTaggingCollection=BTagCollection,
                         TrackCollection=trackCollection,

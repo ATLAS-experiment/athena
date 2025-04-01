@@ -87,6 +87,7 @@
 + PhysicsAnalysis/JetTagging/JetTagPerformanceCalibration/CalibrationDataInterface
 + PhysicsAnalysis/JetTagging/JetTagPerformanceCalibration/xAODBTaggingEfficiency
 + PhysicsAnalysis/JetTagging/FlavorTagDiscriminants
++ PhysicsAnalysis/JetTagging/FlavorTagInference
 + PhysicsAnalysis/JetTagging/JetTagConfig
 + PhysicsAnalysis/JetTagging/FlavourTaggingTests
 + PhysicsAnalysis/JetTagging/JetH5Writer
