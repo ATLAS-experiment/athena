@@ -116,9 +116,10 @@ def LLP1TriggerSkimmingToolCfg(flags, name, TriggerListsHelper, **kwargs):
         if 'perf' in chain_name.lower(): continue
         if result_jets is None and result_taus is None: trig_run3_elmug.append(chain_name)
 
-    trig_EJ_Run3 = ["HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1J100", "HLT_j460_a10r_L1J100"]
+    trig_EJ_Run3 = ["HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1J100", "HLT_j460_a10r_L1J100","HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25","HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1SC111-CjJ40","HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160"]
     trig_VBF_2018 =["HLT_j55_gsc80_bmv2c1070_split_j45_gsc60_bmv2c1085_split_j45_320eta490", "HLT_j45_gsc55_bmv2c1070_split_2j45_320eta490_L1J25.0ETA23_2J15.31ETA49", "HLT_j80_0eta240_j60_j45_320eta490_AND_2j35_gsc45_bmv2c1070_split", "HLT_ht300_2j40_0eta490_invm700_L1HT150-J20s5.ETA31_MJJ-400-CF_AND_2j35_gsc45_bmv2c1070_split", "HLT_j70_j50_0eta490_invm1100j70_dphi20_deta40_L1MJJ-500-NFF"]
-    trig_dispjet_Run3 = ["HLT_j180_hitdvjet260_tight_L1J100", "HLT_j180_dispjet50_3d2p_dispjet50_1p_L1J100", "HLT_j180_2dispjet50_3d2p_L1J100"]
+    trig_VBF_Run3 = ["HLT_j70_j50a_j0_DJMASS1000j50dphi200x400deta_L1MJJ500NFF","HLT_j70_j50a_j0_DJMASS1000j50dphi200x400deta_L1jMJJ-500-NFF"] 
+    trig_dispjet_Run3 = ["HLT_j180_hitdvjet260_tight_L1J100", "HLT_j180_dispjet50_3d2p_dispjet50_1p_L1J100", "HLT_j180_2dispjet50_3d2p_L1J100","HLT_j180_2dispjet50_3d2p_L1jJ160", "HLT_j180_dispjet50_3d2p_dispjet50_1p_L1jJ160", "HLT_j180_dispjet90_x3d1p_L1jJ160", "HLT_j180_dispjet100_x3d1p_L1jJ160", "HLT_j180_2dispjet50_3d2p_L1J100", "HLT_j180_dispjet50_3d2p_dispjet50_1p_L1J100", "HLT_j180_dispjet90_x3d1p_L1J100", "HLT_j180_dispjet90_x3d1p_L1J100", "HLT_j180_dispjet100_x3d1p_L1J100", "HLT_j180_2dispjet50_2p_L1jJ160", "HLT_j180_2dispjet50_2p_L1J100"]
     trig_dedx_Run3 = ["HLT_xe80_tcpufit_dedxtrk25_medium_L1XE50", "HLT_xe80_tcpufit_dedxtrk50_medium_L1XE50", "HLT_xe80_tcpufit_dedxtrk25_medium_L1XE55", "HLT_xe80_tcpufit_dedxtrk50_medium_L1XE55"]
     trig_dt_Run3 = ["HLT_xe80_tcpufit_distrk20_tight_L1XE50", "HLT_xe80_tcpufit_distrk20_medium_L1XE50", "HLT_xe80_tcpufit_distrk20_tight_L1XE55", "HLT_xe80_tcpufit_distrk20_medium_L1XE55"]
     trig_isohighpt_Run3  = ["HLT_xe80_tcpufit_isotrk100_medium_iaggrmedium_L1XE50", "HLT_xe80_tcpufit_isotrk120_medium_iaggrmedium_L1XE50", "HLT_xe80_tcpufit_isotrk120_medium_iaggrloose_L1XE50", "HLT_xe80_tcpufit_isotrk140_medium_iaggrmedium_L1XE50"]
@@ -126,7 +127,7 @@ def LLP1TriggerSkimmingToolCfg(flags, name, TriggerListsHelper, **kwargs):
 
     trig_multijet_ht_data22_23 = ["HLT_2j250c_j120c_pf_ftf_presel2j180XXj80_L1J100", "HLT_3j200_pf_ftf_L1J100", "HLT_4j115_pf_ftf_presel4j85_L13J50", "HLT_4j110_pf_ftf_presel4j85_L13J50", "HLT_4j120_L13J50", "HLT_5j70c_pf_ftf_presel5c50_L14J15", "HLT_5j65c_pf_ftf_presel5c55_L14J15", "HLT_5j85_pf_ftf_presel5j50_L14J15", "HLT_5j80_pf_ftf_presel5j50_L14J15", "HLT_5j80_pf_ftf_presel5j55_L14J15", "HLT_6j35c_020jvt_pf_ftf_presel6c25_L14J15", "HLT_6j55c_pf_ftf_presel6j40_L14J15", "HLT_6j70_pf_ftf_presel6j40_L14J15", "HLT_7j45_pf_ftf_presel7j30_L14J15", "HLT_10j40_pf_ftf_presel7j30_L14J15", "HLT_j0_HT1000_L1HT190-J15s5pETA21", "HLT_j0_HT1000_L1J100", "HLT_j0_HT1000_pf_ftf_preselcHT450_L1HT190-J15s5pETA21", "HLT_j0_HT940_pf_ftf_preselcHT450_L1HT190-J15s5pETA21", "HLT_j0_HT1000_pf_ftf_preselj180_L1HT190-J15s5pETA21", "HLT_j0_HT940_pf_ftf_preselj180_L1HT190-J15s5pETA21", "HLT_j0_HT1000_pf_ftf_preselj180_L1J100"] 
 
-    triggers = trig_el + trig_mu + trig_g + trig_elmu + trig_mug + trig_VBF_2018 + trig_EJ_Run3 + trig_run3_elmug + trig_dispjet_Run3 + trig_xe + trig_multijet_ht_data22_23 + trig_dedx_Run3 + trig_dt_Run3 + trig_isohighpt_Run3 + trig_latemu
+    triggers = trig_el + trig_mu + trig_g + trig_elmu + trig_mug + trig_VBF_2018 + trig_EJ_Run3 + trig_run3_elmug + trig_dispjet_Run3 + trig_xe + trig_multijet_ht_data22_23 + trig_dedx_Run3 + trig_dt_Run3 + trig_isohighpt_Run3 + trig_latemu + trig_VBF_Run3 
 
     #remove duplicates
     triggers = sorted(list(set(triggers)))
