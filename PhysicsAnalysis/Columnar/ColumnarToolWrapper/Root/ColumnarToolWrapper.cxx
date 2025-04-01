@@ -72,13 +72,13 @@ namespace columnar
         myinfo.numpyType = iter->second.first;
         myinfo.numpyBits = iter->second.second;
       }
-
+      const auto infoIdx = myinfo.index;
       auto [iter, success] = m_columns.emplace (column.name, std::move (myinfo));
       if (!success)
         throw std::runtime_error ("column name already registered: " + column.name);
 
-      if (m_numColumns <= myinfo.index)
-        m_numColumns = myinfo.index + 1;
+      if (m_numColumns <= infoIdx)
+        m_numColumns = infoIdx + 1;
    }
 
     for (auto& column : toolColumns)
