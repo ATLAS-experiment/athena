@@ -10,13 +10,13 @@ if (NOT XAOD_ANALYSIS)
   atlas_add_library( FlavourTaggingTestsLib
     src/*.cxx
     PUBLIC_HEADERS FlavourTaggingTests
-    LINK_LIBRARIES AsgTools AthenaBaseComps xAODEventInfo xAODBTagging xAODJet xAODTracking GaudiKernel AthContainers TrigDecisionToolLib FlavorTagDiscriminants
+    LINK_LIBRARIES AsgTools AthenaBaseComps xAODEventInfo xAODBTagging xAODJet xAODTracking GaudiKernel AthContainers TrigDecisionToolLib FlavorTagDiscriminants FlavorTagInference
     PRIVATE_LINK_LIBRARIES GeoPrimitives )
 
   atlas_add_component( FlavourTaggingTests
     src/*.cxx
     src/components/*.cxx
-    LINK_LIBRARIES AsgTools AthenaBaseComps xAODEventInfo xAODBTagging xAODJet xAODTracking GaudiKernel AthContainers TrigDecisionToolLib FlavorTagDiscriminants GeoPrimitives )
+    LINK_LIBRARIES AsgTools AthenaBaseComps xAODEventInfo xAODBTagging xAODJet xAODTracking GaudiKernel AthContainers TrigDecisionToolLib FlavorTagDiscriminants FlavorTagInference GeoPrimitives )
 
   # Install files from the package:
   atlas_install_python_modules( python/*.py )

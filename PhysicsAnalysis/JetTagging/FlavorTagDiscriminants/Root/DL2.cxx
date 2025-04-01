@@ -3,7 +3,8 @@
 */
 
 #include "FlavorTagDiscriminants/DL2.h"
-#include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
+#include "FlavorTagInference/BTagTrackIpAccessor.h"
+#include "FlavorTagInference/FTagDataDependencyNames.h"
 #include "lwtnn/LightweightGraph.hh"
 #include "lwtnn/NanReplacer.hh"
 

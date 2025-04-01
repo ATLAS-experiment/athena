@@ -6,7 +6,7 @@
 #define JET_TAG_CONDITIONALDECORATOR_ALG_H
 
 #include "FlavorTagDiscriminants/DecoratorAlg.h"
-#include "FlavorTagDiscriminants/IJetTagConditionalDecorator.h"
+#include "FlavorTagInference/IJetTagConditionalDecorator.h"
 
 #include "StoreGate/ReadDecorHandleKeyArray.h"
 #include "xAODJet/JetContainer.h"

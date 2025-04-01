@@ -10,7 +10,7 @@
 #define INDET_CONSTITUENTS_LOADER_H
 
 // local includes
-#include "FlavorTagDiscriminants/SaltModel.h"
+#include "FlavorTagInference/SaltModel.h"
 
 // EDM includes
 #include "xAODTracking/Vertex.h"
@@ -62,7 +62,7 @@ namespace InDetGNNHardScatterSelection {
         public:
             IConstituentsLoader(const ConstituentsInputConfig & cfg):m_config(cfg) { }
             virtual ~IConstituentsLoader() = default;
-            virtual std::tuple<std::string, FlavorTagDiscriminants::Inputs, std::vector<const xAOD::IParticle*>> getData(
+            virtual std::tuple<std::string, FlavorTagInference::Inputs, std::vector<const xAOD::IParticle*>> getData(
                 const xAOD::Vertex& vertex) const = 0;
             virtual std::string getName() const = 0;
             virtual ConstituentsType getType() const = 0;

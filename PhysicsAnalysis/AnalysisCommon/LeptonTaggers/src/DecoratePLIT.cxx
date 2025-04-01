@@ -38,25 +38,25 @@ namespace Prompt {
     // Load and initialize the neural network model from the given file path.
     if(m_leptonsName == "Electrons") {
         std::string fullPathToOnnxFile = PathResolverFindCalibFile(m_configPath.value() + m_configFileVersion.value());
-        m_saltModel = std::make_shared<FlavorTagDiscriminants::SaltModel>(fullPathToOnnxFile);
+        m_saltModel = std::make_shared<FlavorTagInference::SaltModel>(fullPathToOnnxFile);
 
         std::string fullPathToOnnxFile_endcap = PathResolverFindCalibFile(m_configPath.value() + m_configFileVersion_endcap.value());
-        m_saltModel_endcap = std::make_shared<FlavorTagDiscriminants::SaltModel>(fullPathToOnnxFile_endcap);
+        m_saltModel_endcap = std::make_shared<FlavorTagInference::SaltModel>(fullPathToOnnxFile_endcap);
 
         m_num_lepton_features = 6;
         m_num_track_features = 18;
 
         // set up decorators using a dummy query of the onnx model
-        std::map<std::string, FlavorTagDiscriminants::Inputs> gnn_input;
+        std::map<std::string, FlavorTagInference::Inputs> gnn_input;
         
         std::vector<float> elec_feat(m_num_lepton_features, 0.);
         std::vector<int64_t> elec_feat_dim = {1, static_cast<int64_t>(elec_feat.size())};
-        FlavorTagDiscriminants::Inputs elec_info (elec_feat, elec_feat_dim);
+        FlavorTagInference::Inputs elec_info (elec_feat, elec_feat_dim);
         gnn_input.insert({"jet_features", elec_info}); // need to use the "jet_features" keyword as we are borrowing flavour tagging code
         
         std::vector<float> track_feat(m_num_track_features, 0.);
         std::vector<int64_t> track_feat_dim = {1, m_num_track_features};
-        FlavorTagDiscriminants::Inputs track_info(track_feat, track_feat_dim);
+        FlavorTagInference::Inputs track_info(track_feat, track_feat_dim);
         gnn_input.insert({"track_features", track_info});
         
         auto [out_f, out_vc, out_vf] = m_saltModel->runInference(gnn_input); // the dummy evaluation
@@ -70,22 +70,22 @@ namespace Prompt {
     }
     else if (m_leptonsName == "Muons") {
         std::string fullPathToOnnxFile = PathResolverFindCalibFile(m_configPath.value() + m_configFileVersion.value());
-        m_saltModel = std::make_shared<FlavorTagDiscriminants::SaltModel>(fullPathToOnnxFile);
+        m_saltModel = std::make_shared<FlavorTagInference::SaltModel>(fullPathToOnnxFile);
 
         m_num_lepton_features = 6;
         m_num_track_features = 19;
 
         // set up decorators using a dummy query of the onnx model
-        std::map<std::string, FlavorTagDiscriminants::Inputs> gnn_input;
+        std::map<std::string, FlavorTagInference::Inputs> gnn_input;
         
         std::vector<float> muon_feat(m_num_lepton_features, 0.);
         std::vector<int64_t> muon_feat_dim = {1, static_cast<int64_t>(muon_feat.size())};
-        FlavorTagDiscriminants::Inputs muon_info (muon_feat, muon_feat_dim);
+        FlavorTagInference::Inputs muon_info (muon_feat, muon_feat_dim);
         gnn_input.insert({"jet_features", muon_info}); // need to use the "jet_features" keyword as we are borrowing flavour tagging code
         
         std::vector<float> track_feat(m_num_track_features, 0.);
         std::vector<int64_t> track_feat_dim = {1, m_num_track_features};
-        FlavorTagDiscriminants::Inputs track_info(track_feat, track_feat_dim);
+        FlavorTagInference::Inputs track_info(track_feat, track_feat_dim);
         gnn_input.insert({"track_features", track_info});
         
         auto [out_f, out_vc, out_vf] = m_saltModel->runInference(gnn_input); // the dummy evaluation
@@ -192,7 +192,7 @@ namespace Prompt {
 
     // prepare input
     // -------------
-    std::map<std::string, FlavorTagDiscriminants::Inputs> gnn_input;
+    std::map<std::string, FlavorTagInference::Inputs> gnn_input;
 
     // collect muon features
     float muon_pt = muon.pt();
@@ -226,7 +226,7 @@ namespace Prompt {
     std::vector<int64_t> muon_feat_dim = {1, static_cast<int64_t>(muon_feat.size())};
 
     // need to use the "jet_features" keyword as we are borrowing flavour tagging code
-    FlavorTagDiscriminants::Inputs muon_info (muon_feat, muon_feat_dim);
+    FlavorTagInference::Inputs muon_info (muon_feat, muon_feat_dim);
     gnn_input.insert({"jet_features", muon_info});
 
     // decorate and fill track particles around the muon
@@ -348,7 +348,7 @@ namespace Prompt {
     int num_cnsts = parts.size();
     std::vector<int64_t> track_feat_dim = {num_cnsts, m_num_track_features};
 
-    FlavorTagDiscriminants::Inputs track_info(track_feat, track_feat_dim);
+    FlavorTagInference::Inputs track_info(track_feat, track_feat_dim);
     gnn_input.insert({"track_features", track_info});
 
     if (msgLvl(MSG::VERBOSE)) {
@@ -408,7 +408,7 @@ namespace Prompt {
     const EventContext& ctx) const {
     // prepare input
     // -------------
-    std::map<std::string, FlavorTagDiscriminants::Inputs> gnn_input;
+    std::map<std::string, FlavorTagInference::Inputs> gnn_input;
 
     // accessors
     // ---------
@@ -473,7 +473,7 @@ namespace Prompt {
     std::vector<int64_t> electron_feat_dim = {1, static_cast<int64_t>(electron_feat.size())};
 
     // need to use the "jet_features" keyword as we are borrowing flavour tagging code
-    FlavorTagDiscriminants::Inputs electron_info (electron_feat, electron_feat_dim);
+    FlavorTagInference::Inputs electron_info (electron_feat, electron_feat_dim);
     gnn_input.insert({"jet_features", electron_info});
 
     // decorate and fill track particles around the electron
@@ -596,7 +596,7 @@ namespace Prompt {
     int num_cnsts = parts.size();
     std::vector<int64_t> track_feat_dim = {num_cnsts, m_num_track_features};
 
-    FlavorTagDiscriminants::Inputs track_info (track_feat, track_feat_dim);
+    FlavorTagInference::Inputs track_info (track_feat, track_feat_dim);
     gnn_input.insert({"track_features", track_info});
 
     if (msgLvl(MSG::VERBOSE)) {

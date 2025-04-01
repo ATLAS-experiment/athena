@@ -63,7 +63,7 @@ namespace InDetGNNHardScatterSelection {
         return only_particles;
     }
 
-    std::tuple<std::string, FlavorTagDiscriminants::Inputs, std::vector<const xAOD::IParticle*>> TracksLoader::getData(
+    std::tuple<std::string, FlavorTagInference::Inputs, std::vector<const xAOD::IParticle*>> TracksLoader::getData(
       const xAOD::Vertex& vertex) const {
         TrackParticles sorted_particles = getTrackParticlesFromVertex(vertex);
         std::vector<const xAOD::IParticle*> sorted_particles_ip;

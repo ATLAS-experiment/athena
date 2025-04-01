@@ -9,7 +9,7 @@ from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCf
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 from BTagging.BTagConfig import _get_flip_config
 from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
-from FlavorTagDiscriminants.FlavorTagNNConfig import MultifoldGNNCfg
+from FlavorTagInference.FlavorTagNNConfig import MultifoldGNNCfg
 
 from pathlib import Path
 

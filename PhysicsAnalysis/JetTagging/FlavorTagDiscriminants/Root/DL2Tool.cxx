@@ -24,11 +24,11 @@ namespace FlavorTagDiscriminants {
     ATH_MSG_INFO("Initialize DL2 from: " + m_props.nnFile);
     FlipTagConfig flipConfig = FlipTagConfig::STANDARD;
     if (m_props.flipTagConfig.size() > 0) {
-      flipConfig = flipTagConfigFromString(m_props.flipTagConfig);
+      flipConfig = FlavorTagInference::flipTagConfigFromString(m_props.flipTagConfig);
     }
     TrackLinkType trackLinkType = TrackLinkType::TRACK_PARTICLE;
     if (m_props.trackLinkType.size() > 0) {
-      trackLinkType = trackLinkTypeFromString(m_props.trackLinkType);
+      trackLinkType = FlavorTagInference::trackLinkTypeFromString(m_props.trackLinkType);
     }
     m_dl2.reset(
       new DL2HighLevel(

@@ -10,7 +10,7 @@ find_package( ROOT COMPONENTS Core RIO )
 atlas_add_component( DerivationFrameworkFlavourTag
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps FlavorTagDiscriminants GaudiKernel xAODJet xAODTracking xAODBTagging )
+                     LINK_LIBRARIES AthenaBaseComps FlavorTagDiscriminants FlavorTagInference GaudiKernel xAODJet xAODTracking xAODBTagging )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

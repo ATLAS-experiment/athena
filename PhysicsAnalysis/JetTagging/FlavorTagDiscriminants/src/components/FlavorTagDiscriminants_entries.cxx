@@ -5,8 +5,6 @@
 #include "FlavorTagDiscriminants/VRJetOverlapDecoratorTool.h"
 #include "FlavorTagDiscriminants/HbbTagTool.h"
 #include "FlavorTagDiscriminants/DL2Tool.h"
-#include "FlavorTagDiscriminants/GNNTool.h"
-#include "FlavorTagDiscriminants/MultifoldGNNTool.h"
 #include "FlavorTagDiscriminants/BTagAugmenterTool.h"
 #include "FlavorTagDiscriminants/BTagMuonAugmenterTool.h"
 #include "FlavorTagDiscriminants/BTagDecoratorAlg.h"
@@ -29,19 +27,15 @@
 #include "FlavorTagDiscriminants/HitDecoratorAlg.h"
 #include "FlavorTagDiscriminants/JetHitAssociationAlg.h"
 
-#include "src/FoldDecoratorAlg.h"
 #include "src/CountIParticleAlg.h"
 #include "src/CountTrackParticleAlg.h"
 
-#include "FlavorTagDiscriminants/NNSharingSvc.h"
 
 using namespace FlavorTagDiscriminants;
 
 DECLARE_COMPONENT(VRJetOverlapDecoratorTool)
 DECLARE_COMPONENT(HbbTagTool)
 DECLARE_COMPONENT(DL2Tool)
-DECLARE_COMPONENT(GNNTool)
-DECLARE_COMPONENT(MultifoldGNNTool)
 DECLARE_COMPONENT(BTagAugmenterTool)
 DECLARE_COMPONENT(BTagMuonAugmenterTool)
 DECLARE_COMPONENT(BTagDecoratorAlg)
@@ -60,9 +54,7 @@ DECLARE_COMPONENT(SoftElectronDecoratorAlg)
 DECLARE_COMPONENT(SoftElectronTruthDecoratorAlg)
 DECLARE_COMPONENT(TrackClassifier)
 
-DECLARE_COMPONENT(NNSharingSvc)
 
-DECLARE_COMPONENT(FoldDecoratorAlg)
 DECLARE_COMPONENT(GNNAuxTaskDecoratorAlg)
 DECLARE_COMPONENT(CountIParticleAlg)
 DECLARE_COMPONENT(CountTrackParticleAlg)
