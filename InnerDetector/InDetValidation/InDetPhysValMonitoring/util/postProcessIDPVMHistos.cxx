@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2021-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -116,17 +116,17 @@ int postProcessDir(TDirectory* dir, IDPVM::ResolutionHelper & theHelper){
   dir->cd();
   auto *keys = dir->GetListOfKeys();
   for (auto *const key : *keys){
-    std::unique_ptr<TObject> gotIt(dir->Get(key->GetName()));
-    
-    // if we encounter a directory, descend into it and repeat the process
-    TDirectory* theDir = dynamic_cast<TDirectory*>(gotIt.get());
+    // Check if it's a directory and handle separately
+    TDirectory* theDir = dynamic_cast<TDirectory*>(dir->Get(key->GetName()));
     if (theDir){
-      outcome |= postProcessDir(theDir, theHelper); 
+      outcome |= postProcessDir(theDir, theHelper);
+      continue;  // Do NOT delete directories, ROOT manages them
     }
-    
-    // if we encounter a histogram that could be a resolution input, post-process it 
+
+    // If it's a histogram, wrap it in a unique_ptr
+    std::unique_ptr<TObject> gotIt(dir->Get(key->GetName()));
     if (isResolutionHelper(gotIt.get())){
-      outcome |= postProcessHistos(gotIt.get(), theHelper); 
+      outcome |= postProcessHistos(gotIt.get(), theHelper);
     }
   }
   theCWD->cd();
