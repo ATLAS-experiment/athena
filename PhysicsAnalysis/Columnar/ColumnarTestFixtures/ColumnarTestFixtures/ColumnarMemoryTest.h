@@ -197,12 +197,15 @@ namespace columnar
       {
         if (index != 0)
           std::cout << ", ";
-        if constexpr (std::is_floating_point_v<T>)
+        if constexpr (std::is_floating_point_v<T>){
+          auto ss = std::cout.precision();
           std::cout << std::setprecision (8) << output[index];
-        else if constexpr (std::is_same_v<T,char>)
+          std::cout.precision(ss); //restore ostream state
+        } else if constexpr (std::is_same_v<T,char>){
           std::cout << int (output[index]);
-        else
+        } else {
           std::cout << output[index];
+        }
       }
       std::cout << "});" << std::endl;
     }
