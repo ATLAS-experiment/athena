@@ -74,7 +74,7 @@ def single_photon_Trig(flags):
 	if flags.Trigger.EDMVersion <= 2:
 		TriggerAPI.setConfigFlags(flags)
 		allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
-		trigger_names = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.g,  livefraction=0.8)
+		trigger_names = TriggerAPI.getActive(allperiods, triggerType=TriggerType.g, livefraction=0.8)
 	else:
 		session = getTapisSession(flags)
 		lf = 0.8 # Prescale weighted life fraction of the GRL's LBs
