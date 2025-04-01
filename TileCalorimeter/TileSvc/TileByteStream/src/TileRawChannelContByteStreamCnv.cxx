@@ -196,8 +196,11 @@ StatusCode TileRawChannelContByteStreamCnv::createRepConst(DataObject* pObj, IOp
   } 
 
   std::string name = pObj->registry()->name(); 
+
+  if ( pAddr != nullptr ) pAddr->release();
   ByteStreamAddress* addr = new ByteStreamAddress(classID(), name, ""); 
   pAddr = addr; 
+  pAddr->addRef();
 
   ATH_CHECK( m_tool->convert(rccont, fea) );
 
