@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimEvent/TRTUncompressedHit.h"
@@ -61,13 +61,13 @@ void TRT_HitCollectionCnv_p3::transToPers(const TRTUncompressedHitCollection* tr
 
   for (TRTUncompressedHitCollection::const_iterator it = transCont->begin(); it != transCont->end(); ++it) {
 
-    //   const TRTUncompressedHit* trtHit = *it;
     TRTUncompressedHitCollection::const_iterator trtHit = it;
 
     if ( trtHit->particleLink().barcode() != lastBarcode  ||  idx - endBC > 65500) {   // max unsigned short =  65535;
       // store barcode once for set of consecutive hits with same barcode
       lastBarcode = trtHit->particleLink().barcode();
-      persCont->m_barcode.push_back(lastBarcode);
+      using barcodeType = decltype(persCont->m_barcode)::value_type;
+      persCont->m_barcode.push_back(static_cast<barcodeType>(lastBarcode));
       if ( idx > 0 ) {
         persCont->m_nBC.push_back(idx - endBC);
         endBC = idx;
