@@ -418,11 +418,9 @@ def HIGG1D1Cfg(flags):
                                            "AFPVertexContainer",
                                            "AFPToFTrackContainer"]
     # Add Btagging information
-    from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent,BTaggingXbbContent
+    from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
     HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowCustomVtxJets", flags)
     HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowJets", flags)
-    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowCustomVtxJets", flags)
-    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowJets", flags)
 
     # is this really needed given Photons are in the AllVariables list ?
     from DerivationFrameworkEGamma.PhotonsCPDetailedContent import PhotonsCPDetailedContent

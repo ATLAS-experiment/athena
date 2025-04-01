@@ -255,9 +255,8 @@ def HIGG1D2Cfg(flags):
                                             "EventInfo.hardScatterVertexLink.timeStampNSOffset"]
     
     # Add Btagging information
-    from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent, BTaggingXbbContent
+    from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
     HIGG1D2SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowJets", flags)
-    HIGG1D2SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowJets", flags)
     
     # Truth containers
     if flags.Input.isMC:

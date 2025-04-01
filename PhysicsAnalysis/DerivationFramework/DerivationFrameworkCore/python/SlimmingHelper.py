@@ -487,6 +487,8 @@ class SlimmingHelper:
                 elif collectionName=="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets":
                         from DerivationFrameworkJetEtMiss.AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent import AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent
                         items.extend(AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent)
+                        from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingLargeRContent
+                        items.extend(BTaggingLargeRContent("AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets", self.flags))
                 elif collectionName=="AntiKtVR30Rmax4Rmin02PV0TrackJets":
                         from DerivationFrameworkJetEtMiss.AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent import AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent
                         items.extend(AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent)
