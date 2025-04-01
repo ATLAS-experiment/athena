@@ -226,21 +226,16 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>>
                 mlCfg.transform = mdtTransform;      
                 auto mdtBounds = std::make_unique<Acts::TrapezoidVolumeBounds>(parameters.shortHalfX, parameters.longHalfX, parameters.halfY, parameters.halfHeight);
                 using BoundsV = Acts::TrapezoidVolumeBounds::BoundValues;
-                mlCfg.mlBounds= mdtBounds->values();
-                Acts::ProtoAxis a1(Acts::AxisDirection::AxisY, 
-                                 Acts::AxisBoundaryType::Bound,                   
-                                   -mdtBounds->get(BoundsV::eHalfLengthXnegY), 
-                                   mdtBounds->get(BoundsV::eHalfLengthXposY), 
-                                  std::lround(2*mdtBounds->get(BoundsV::eHalfLengthXposY)/parameters.tubePitch));
+                mlCfg.mlBounds= mdtBounds->values();              
 
                 mlCfg.mlBinning = {{{Acts::AxisDirection::AxisY, Acts::AxisBoundaryType::Bound,                   
-                                     -mdtBounds->get(BoundsV::eHalfLengthXnegY), 
-                                     mdtBounds->get(BoundsV::eHalfLengthXposY), 
-                                     static_cast<std::size_t>(std::lround(2*mdtBounds->get(BoundsV::eHalfLengthXposY)/parameters.tubePitch))}, 0u}, 
-                                   {{Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound,                   
                                      -mdtBounds->get(BoundsV::eHalfLengthY), 
                                      mdtBounds->get(BoundsV::eHalfLengthY), 
-                                     static_cast<std::size_t>(std::lround(2*mdtBounds->get(BoundsV::eHalfLengthY)/parameters.tubePitch))}, 0u}};
+                                     static_cast<std::size_t>(std::lround(2*mdtBounds->get(BoundsV::eHalfLengthY)/parameters.tubePitch))}, 2u}, 
+                                   {{Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound,                   
+                                     -mdtBounds->get(BoundsV::eHalfLengthZ), 
+                                     mdtBounds->get(BoundsV::eHalfLengthZ), 
+                                     static_cast<std::size_t>(std::lround(2*mdtBounds->get(BoundsV::eHalfLengthZ)/parameters.tubePitch))}, 1u}};
 
                 Acts::Experimental::MultiWireStructureBuilder mdtBuilder(mlCfg);
                 volumePtr mdtVolume = mdtBuilder.construct(gctx.context()).volumes[0];
