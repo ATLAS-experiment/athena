@@ -171,7 +171,6 @@ class FeatureHandler:
         self.addCombinedFeatures_Single()
         self.addCombinedFeatures_TypeVsType()
         self.addCombinedFeatures_SelectedTypes()
-        self.addGenericJetFeatures()
         self.addImpactParameterFeatures()
         
     #end init
@@ -590,36 +589,7 @@ class FeatureHandler:
             #end loop over jTypes
         #end loop over iTypes
     #end addCombinedFeatures_SelectedTypes
-    
-    
-    def addGenericJetFeatures(self):
-        Variables = []
         
-        #thrust and such
-        Variables += ["JetThrust"]
-        Variables += ["JetThrustMajor"]
-        Variables += ["JetThrustMinor"]
-        Variables += ["JetOblateness"]
-        Variables += ["JetSphericity"]
-        Variables += ["JetAplanarity"]
-        Variables += ["JetPlanarity"]
-        
-        #fox wolfram moments
-        Variables += ["JetFoxWolfram1"]
-        Variables += ["JetFoxWolfram1"]
-        Variables += ["JetFoxWolfram1"]
-        Variables += ["JetFoxWolfram1"]
-        Variables += ["JetFoxWolframRatioFW2OverFW1"]
-        Variables += ["JetFoxWolframRatioFW4pow4OverFW1"]
-        Variables += ["JetFoxWolframRatioFW234OverFW1pow4"]
-        Variables += ["JetFoxWolframRatioFW1PlusFW2OverFW4"]
-        
-        for iVar in Variables:
-            self.addToFeatures(iVar, self.m_VarTypeName_JetShape, "F")
-        #end loop over variables
-    #end addGenericJetFeatures
-    
-    
     def addImpactParameterFeatures(self):
         maxTrack = 4
         
