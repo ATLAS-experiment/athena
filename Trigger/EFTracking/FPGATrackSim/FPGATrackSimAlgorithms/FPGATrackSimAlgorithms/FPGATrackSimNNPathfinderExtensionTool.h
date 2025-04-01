@@ -31,6 +31,97 @@
 
 #include <vector>
 
+  // internal object for book-keeping during the tree branching, basically just a vector of hits with helper functions - NOTHING else
+  struct miniRoad {
+
+    miniRoad() {}
+    miniRoad(unsigned nLayers) {m_hits.resize(nLayers);}
+
+    // only one objects that we storek a vector of the hits 
+    std::vector<std::shared_ptr<const FPGATrackSimHit>> m_hits;
+
+    // getter functions
+    std::shared_ptr<const FPGATrackSimHit> getHit(size_t layer) const {
+      if (layer < m_hits.size()) return m_hits[layer];
+      const FPGATrackSimHit dummyHit;
+      return std::make_shared<const FPGATrackSimHit>(dummyHit);
+    }
+
+    std::vector<std::shared_ptr<const FPGATrackSimHit>>& getHits() {
+      return m_hits;
+    }
+
+    std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> getVecHits() const {
+      std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> vecHits;
+      vecHits.resize(m_hits.size());
+      for (unsigned layer = 0; layer < m_hits.size(); layer++) {
+	std::vector<std::shared_ptr<const FPGATrackSimHit>> thislayerVec;
+	thislayerVec.push_back(m_hits[layer]);
+	vecHits[layer] = thislayerVec;
+      }
+      return vecHits;
+    }
+
+    unsigned getNHits() const {
+      return m_hits.size();
+    }
+    
+    size_t getNLayers() const { return m_hits.size(); }
+    size_t getNHitLayers() const {
+      return getNLayers() - getNWCLayers();
+    }
+    size_t getNWCLayers() const {
+      size_t nwc = 0;
+      for (auto hit : m_hits) {
+	if (!hit->isReal()) nwc++;
+      }
+      return nwc;
+    }
+    
+    layer_bitmask_t getWCLayers() const {
+      layer_bitmask_t wcLayers = 0;
+      for (unsigned layer = 0; layer < m_hits.size(); layer++)
+	if (!((*m_hits[layer]).isReal()))
+	  wcLayers |= (0x1 << layer);
+      return wcLayers;
+    }
+
+    layer_bitmask_t getHitLayers() const {
+      layer_bitmask_t hitLayers = 0;
+      for (unsigned layer = 0; layer < m_hits.size(); layer++)
+	if ((*m_hits[layer]).isReal())
+	  hitLayers |= (0x1 << layer);
+      return hitLayers;
+    }
+
+    
+    // setters
+    void setNLayers(unsigned layers) { m_hits.resize(layers); }    
+    void setHits(std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits) {
+      m_hits = hits;
+    }
+    void addHits(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits) {
+      m_hits.insert(m_hits.end(), hits.begin(), hits.end());
+    }
+    
+    void setHit(unsigned layer, const std::shared_ptr<const FPGATrackSimHit> & hit) {
+      if (layer >= m_hits.size()) m_hits.resize(layer + 1);
+      m_hits[layer] = hit;
+    }
+
+    void addHit(const std::shared_ptr<const FPGATrackSimHit> & hit) {
+      m_hits.push_back(hit);
+    }
+
+    
+    ///////////////////////////////////////////////////////////////////////
+    // Utility
+
+
+  };
+
+
+
 class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPGATrackSimTrackExtensionTool>
 {
     public:
@@ -84,8 +175,6 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         std::vector<std::vector<bool>> m_foundHitIsSP;
 
         std::vector<FPGATrackSimRoad> m_roads;
-        //This is a map(dict python equivalent) of slice IDs that have a map of layer IDs in it. That map has a vector of hits associated with it
-        std::map<unsigned, std::map<unsigned, std::vector<std::shared_ptr<const FPGATrackSimHit>>>> m_phits_atLayer;
         unsigned m_nLayers_1stStage = 0;
         unsigned m_nLayers_2ndStage = 0;
         unsigned m_maxMiss = 0;
@@ -102,16 +191,17 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         OnnxRuntimeBase m_extensionVolNN;
         OnnxRuntimeBase m_extensionHitNN;
 
-        StatusCode fillInputTensorForNN(FPGATrackSimRoad& thisRoad, std::vector<float>& inputTensorValues);
+        StatusCode fillInputTensorForNN(miniRoad& thisRoad, std::vector<float>& inputTensorValues);
         StatusCode getPredictedHit(std::vector<float>& inputTensorValues, std::vector<float>& outputTensorValues, long& fineID);
-        StatusCode addHitToRoad(FPGATrackSimRoad& newroad, FPGATrackSimRoad& currentRoad, const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits);
-        StatusCode getFakeHit(FPGATrackSimRoad& currentRoad, size_t slice, std::vector<float>& predhit, const long& fineID, std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits);
-        StatusCode getLastLayer(FPGATrackSimRoad& currentRoad, unsigned& lastHitLayer, std::shared_ptr<const FPGATrackSimHit>& lastHit);
+        StatusCode addHitToRoad(miniRoad& newroad, miniRoad& currentRoad, const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits);
+        StatusCode getFakeHit(miniRoad& currentRoad, std::vector<float>& predhit, const long& fineID, std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits);
+        StatusCode getLastLayer(miniRoad& currentRoad, unsigned& lastHitLayer, std::shared_ptr<const FPGATrackSimHit>& lastHit);
 
-        StatusCode findHitinNextStripLayer(std::shared_ptr<const FPGATrackSimHit> hit, std::vector<std::shared_ptr<const FPGATrackSimHit>>& hitList, std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits);
+        StatusCode findHitinNextStripLayer(std::shared_ptr<const FPGATrackSimHit> hit, const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hitList, std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits);
 
-        void printRoad(FPGATrackSimRoad& currentRoad);
+        void printRoad(miniRoad& currentRoad);
 
+  
 };
 
 #endif
