@@ -14,14 +14,9 @@ def JETM4SkimmingToolCfg(flags):
 
     from DerivationFrameworkJetEtMiss import TriggerLists
     triggerlist = TriggerLists.single_photon_Trig(flags)
-    addRun3PhotonTriggers = ["HLT_g140_loose_L1EM22VHI","HLT_g300_etcut_L1EM22VHI"]
-    triggerlist = triggerlist+addRun3PhotonTriggers
 
-    triggers = '||'.join(triggerlist)
-
-    JETM4SkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "JETM4SkimmingTool",
-                                                                               expression = triggers)
-    acc.addPublicTool(JETM4SkimmingTool, primary = True)
+    JETM4SkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "JETM4SkimmingTool", TriggerListOR = triggerlist)
+    acc.addPublicTool(JETM4SkimmingTool, primary=True)
 
     return(acc)
 
