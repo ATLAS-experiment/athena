@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 
 /**
@@ -32,6 +32,7 @@ void test1()
   assert (SG::decorKeyFromKey ("a.b") == "b");
   assert (SG::decorKeyFromKey ("S+a.b") == "b");
   assert (SG::decorKeyFromKey ("a") == "");
+  assert (SG::decorKeyFromKey ("a", "b") == "b");
   assert (SG::decorKeyFromKey ("a.") == "");
   assert (SG::decorKeyFromKey ("") == "");
   assert (SG::decorKeyFromKey (".b") == "b");
