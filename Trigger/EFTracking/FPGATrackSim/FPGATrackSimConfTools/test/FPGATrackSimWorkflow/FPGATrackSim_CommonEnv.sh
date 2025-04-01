@@ -5,13 +5,14 @@ RDO_EVT=500 # used for map/bank generation
 
 # instructions on how to change version of files can be found in https://twiki.cern.ch/twiki/bin/view/Atlas/EFTrackingSoftware
 MAP_9L_VERSION="v0.22"
-MAP_5L_VERSION="v0.12"
+MAP_5L_VERSION="v0.22"
 MAP_9L_GNN_VERSION="v0.10"
 
 BANK_9L_VERSION="v0.20"
-BANK_5L_VERSION="v0.11"
+BANK_5L_VERSION="v0.21"
 
 export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
+
 MAPS_9L="maps_9L/OtherFPGAPipelines/${MAP_9L_VERSION}/"
 MAPS_5L="maps_5L/InsideOut/${MAP_5L_VERSION}/"
 MAPS_9L_GNN="maps_9L/GNN/${MAP_9L_GNN_VERSION}/"
@@ -19,7 +20,7 @@ MAPS_9L_GNN="maps_9L/GNN/${MAP_9L_GNN_VERSION}/"
 BANKS_9L="banks_9L/${BANK_9L_VERSION}/"
 BANKS_5L="banks_5L/${BANK_5L_VERSION}/"
 
-COMBINED_MATRIX="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/${BANKS_5L}/combined_matrix.root"
+COMBINED_MATRIX="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/${BANKS_5L}/combined_matrix_reg34.root"
 
 ONNX_INPUT_FAKE="${BANKS_5L}HT_class_v7_longer_training_pruned_0.5.onnx"
 ONNX_INPUT_PARAM="${BANKS_5L}HT_param_v7_long_training_400_epochs_pruned_0.5.onnx"

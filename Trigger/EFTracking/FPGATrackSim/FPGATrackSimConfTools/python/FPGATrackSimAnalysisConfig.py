@@ -191,11 +191,11 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
             toload = 'FPGATrackSimHough.FPGATrackSimGenScanCuts_incr'
         cutset = importlib.import_module(toload).cuts[flags.Trigger.FPGATrackSim.region]
     else:
+        cutFileName = f"{PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir)}{flags.Trigger.FPGATrackSim.GenScan.genScanCuts}.py"
+        print(f"Cut File = {cutFileName}")
         # this allows the cut file defined in python to be loaded from the map directory
-        print("Cut File = ", flags.Trigger.FPGATrackSim.GenScan.genScanCuts,
-                                                    flags.Trigger.FPGATrackSim.mapsDir+"/{}.py".format(flags.Trigger.FPGATrackSim.GenScan.genScanCuts))
-        spec=importlib.util.spec_from_file_location(flags.Trigger.FPGATrackSim.GenScan.genScanCuts,
-                                                    flags.Trigger.FPGATrackSim.mapsDir+"/{}.py".format(flags.Trigger.FPGATrackSim.GenScan.genScanCuts))
+        spec=importlib.util.spec_from_file_location(flags.Trigger.FPGATrackSim.GenScan.genScanCuts ,cutFileName)
+        print ("Spec = ", spec)
         if spec is None:
             print("Failed to find Cut File")
         cutmodule = importlib.util.module_from_spec(spec)
@@ -251,7 +251,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
             tool.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
         else:
             # now assumed to be in the map directory with name = basename for region + _lyrmap.json
-            tool.layerMapFile = flags.Trigger.FPGATrackSim.mapsDir+"/"+FPGATrackSimDataPrepConfig.getBaseName(flags)+"_lyrmap.json"
+            tool.layerMapFile = f"{PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir)}{FPGATrackSimDataPrepConfig.getBaseName(flags)}_lyrmap.json"
 
     # even though we are not actually doing a Union, we need the 
     # RoadUnionTool because mapping is now there

@@ -3,7 +3,7 @@
 # art-type: grid
 # art-include: main/Athena
 # art-memory: 16384
-# art-input: mc21_14TeV:mc21_14TeV.601189.PhPy8EG_AZNLO_Zee.recon.RDO.e8481_s4203_r14697
+# art-input: mc21_14TeV:mc21_14TeV.601189.PhPy8EG_AZNLO_Zee.recon.RDO.e8557_s4422_r16320
 # art-input-nfiles: 11
 # art-output: *.txt
 # art-output: *.root
