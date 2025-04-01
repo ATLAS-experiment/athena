@@ -105,10 +105,10 @@ StatusCode L2MuonSAIOMon :: fillVariablesPerOfflineMuonPerChain(const EventConte
 
   if( chain.find("probe") != std::string::npos ){ // L2Inside-Out efficiency using Tag&Probe chain
     if(chain.find("L1MU14FCH") != std::string::npos){
-      if ( !getTrigDecisionTool()->isPassed("HLT_mu24_ivarmedium_L1MU14FCH") ) return StatusCode::SUCCESS; // impose trigger pass in order to eliminate bias
+      if ( !getTrigDecisionTool()->isPassed("HLT_mu24_ivarmedium_L1MU14FCH", TrigDefs::requireDecision) ) return StatusCode::SUCCESS; // impose trigger pass in order to eliminate bias
     }
     else if(chain.find("L1MU18VFCH") != std::string::npos){
-      if ( !getTrigDecisionTool()->isPassed("HLT_mu24_ivarmedium_L1MU18VFCH") ) return StatusCode::SUCCESS; // impose trigger pass in order to eliminate bias
+      if ( !getTrigDecisionTool()->isPassed("HLT_mu24_ivarmedium_L1MU18VFCH", TrigDefs::requireDecision) ) return StatusCode::SUCCESS; // impose trigger pass in order to eliminate bias
     }
     else
     {
