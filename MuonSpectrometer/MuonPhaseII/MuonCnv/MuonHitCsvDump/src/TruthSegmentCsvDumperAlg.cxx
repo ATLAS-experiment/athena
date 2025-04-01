@@ -19,9 +19,12 @@
 
 
 namespace {
-  int encodeId(const int8_t stName, const int8_t stEta,
+  constexpr int encodeId(const int8_t stName, const int8_t stEta,
                const int8_t sector) {
       return (sector <<16 |stEta << 8| stName);
+  }
+  constexpr double precCutOff(const double value, const double cutOff = 1.e-15) {
+    return std::abs(value) > cutOff ? value : 0.;
   }
 
 }
@@ -127,24 +130,24 @@ StatusCode TruthSegmentCsvDumperAlg::execute(){
 
     // save the segment information to the csv file 
     file<<secId<<delim;
-    file<<globPos.x()<<delim;
-    file<<globPos.y()<<delim;
-    file<<globPos.z()<<delim;
-    file<<globDir.x()<<delim;
-    file<<globDir.y()<<delim;
-    file<<globDir.z()<<delim;
+    file<<precCutOff(globPos.x())<<delim;
+    file<<precCutOff(globPos.y())<<delim;
+    file<<precCutOff(globPos.z())<<delim;
+    file<<precCutOff(globDir.x())<<delim;
+    file<<precCutOff(globDir.y())<<delim;
+    file<<precCutOff(globDir.z())<<delim;
 
-    file<<locPos.x()<<delim;
-    file<<locPos.y()<<delim;
-    file<<locPos.z()<<delim;
-    file<<locDir.x()<<delim;
-    file<<locDir.y()<<delim;
-    file<<locDir.z()<<delim;
+    file<<precCutOff(locPos.x())<<delim;
+    file<<precCutOff(locPos.y())<<delim;
+    file<<precCutOff(locPos.z())<<delim;
+    file<<precCutOff(locDir.x())<<delim;
+    file<<precCutOff(locDir.y())<<delim;
+    file<<precCutOff(locDir.z())<<delim;
 
 
-    file<<seg_t0<<delim;
-    file<<seg_t0error<<delim;
-    file<<seg_chiSquared<<delim;
+    file<<precCutOff(seg_t0)<<delim;
+    file<<precCutOff(seg_t0error)<<delim;
+    file<<precCutOff(seg_chiSquared)<<delim;
     file<<seg_numberDoF<<delim;
     file<<seg_PrecisionHits<<delim;
     file<<seg_PhiLayers<<delim;
