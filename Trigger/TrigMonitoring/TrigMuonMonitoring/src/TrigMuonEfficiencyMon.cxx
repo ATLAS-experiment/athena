@@ -32,7 +32,7 @@ StatusCode TrigMuonEfficiencyMon :: initialize(){
 
 bool TrigMuonEfficiencyMon :: selectEvents() const {
   if(m_event_trigger.empty()) return true;
-  return getTrigDecisionTool()->isPassed(m_event_trigger);
+  return getTrigDecisionTool()->isPassed(m_event_trigger, TrigDefs::requireDecision);
 }
 
 
