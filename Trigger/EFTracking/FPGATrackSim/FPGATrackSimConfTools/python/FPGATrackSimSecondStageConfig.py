@@ -96,10 +96,11 @@ def NNTrackToolCfg(flags):
     NNTrackTool.THistSvc = CompFactory.THistSvc()
     NNTrackTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     NNTrackTool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.FPGATrackSimBankSvcCfg(flags))
-    NNTrackTool.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
+    NNTrackTool.IdealGeoRoads = False
     NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan
     NNTrackTool.SPRoadFilterTool = FPGATrackSimAnalysisConfig.getSPRoadFilterTool(flags,secondStage=True)
     NNTrackTool.Do2ndStageTrackFit = True
+    NNTrackTool.useSectors = False
     result.setPrivateTools(NNTrackTool)
     return result
 
@@ -164,7 +165,7 @@ def FPGATrackSimSecondStageAlgCfg(inputFlags):
     theFPGATrackSimSecondStageAlg.FPGATrackSimMapping = FPGATrackSimMapping
     theFPGATrackSimSecondStageAlg.passLowestChi2TrackOnly = flags.Trigger.FPGATrackSim.ActiveConfig.passLowestChi2TrackOnly
     # If tracking is set to False, don't configure the bank service
-    if theFPGATrackSimSecondStageAlg.tracking:
+    if theFPGATrackSimSecondStageAlg.tracking and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis:
         result.getPrimaryAndMerge(FPGATrackSimAnalysisConfig.FPGATrackSimBankSvcCfg(flags))
 
     # Here, configure the window tool.

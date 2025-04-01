@@ -372,11 +372,11 @@ def NNTrackToolCfg(flags):
     NNTrackTool.THistSvc = CompFactory.THistSvc()
     NNTrackTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     NNTrackTool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
-    NNTrackTool.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
+    NNTrackTool.IdealGeoRoads = False
     NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan
     NNTrackTool.SPRoadFilterTool = getSPRoadFilterTool(flags)
     NNTrackTool.MinNumberOfRealHitsInATrack = 5 if flags.Trigger.FPGATrackSim.ActiveConfig.genScan else 9
-    
+    NNTrackTool.useSectors = False
     result.setPrivateTools(NNTrackTool)
     return result
 
@@ -459,8 +459,8 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
     FPGATrackSimMaping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     theFPGATrackSimLogicalHitsProcessAlg.FPGATrackSimMapping = FPGATrackSimMaping
 
-    # If tracking is set to False, don't configure the bank service
-    if flags.Trigger.FPGATrackSim.tracking:
+    # If tracking is set to False or if we do the NN analysis, don't configure the bank service
+    if flags.Trigger.FPGATrackSim.tracking and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis:
         result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
 
     if (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
