@@ -1,7 +1,6 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-// Silicon trackers includes
 #include "DefectsEmulatorCondAlgImpl.h"
 
 #include "Identifier/Identifier.h"
@@ -18,6 +17,7 @@
 
 #include "ModuleIdentifierMatchUtil.h"
 #include "ConnectedModulesUtil.h"
+#include "EmulatedDefectsBuilder.h"
 
 namespace {
 
@@ -70,7 +70,7 @@ namespace {
 
    template <class T_ModuleHelper>
    void histogramDefects(const T_ModuleHelper &helper,
-                         typename T_ModuleHelper::KEY_TYPE key,
+                         const typename std::pair<typename T_ModuleHelper::KEY_TYPE,typename T_ModuleHelper::KEY_TYPE> &key,
                          TH2 *h2) {
       std::array<unsigned int,4> ranges_row_col = helper.offlineRange(key);
       for (unsigned int row_i=ranges_row_col[0]; row_i<ranges_row_col[1]; ++row_i) {
@@ -326,7 +326,9 @@ namespace InDet{
           // create defects starting from the mask (or group) defect covering the largest area (assuming
           // that masks are in ascending order) e.g. defect chips, core-column defects, individual pixel
           // or strip defects
-          for (unsigned int mask_i = T_ModuleHelper::nMasks(); mask_i-->0; ) {
+          auto masks = helper.masks();
+          for (unsigned int mask_i = masks.size(); mask_i-->0; ) {
+
              assert( mask_i < n_mask_defects.size());
              counts[mask_i][kNElements] += helper.nElements(mask_i);
              unsigned int n_defects = n_mask_defects[mask_i];
@@ -355,36 +357,18 @@ namespace InDet{
                                                     m_oddColToggle.value() );
                       }
 
-                      // create a key which identifies the particular defect
-                      typename T_ModuleHelper::KEY_TYPE
-                         key = helper.maskedKey( mask_i,
-                                                 helper.hardwareCoordinates(getSensorRow(helper, cell_idx),
-                                                                            getSensorColumn(helper, cell_idx)));
+                      std::pair<typename T_ModuleHelper::KEY_TYPE, typename T_ModuleHelper::KEY_TYPE>
+                         key_range( T_ModuleHelper::makeRangeForMask(helper.hardwareCoordinates(getSensorRow(helper, cell_idx),
+                                                                                                getSensorColumn(helper, cell_idx)),
+                                                                     masks[mask_i]));
 
-                      // ... and insert the defect in the list of defects registered for this module
-                      auto [insert_iter,end_iter] = T_EmulatedDefects::lower_bound( module_defects, key);
-                      if (insert_iter == end_iter) {
-                         module_defects.push_back(key);
+                      if (EmulatedDefectsBuilder::insertKeyRange(helper, module_defects, key_range, T_ModuleHelper::makeDefectTypeKey(mask_i))) {
                          if (h2) {
-                            histogramDefects(helper,key,h2);
+                            histogramDefects(helper,key_range,h2);
                          }
                          break;
                       }
-                      else {
-                         if (!helper.isMatchingDefect(*insert_iter, key)) {
-                            module_defects.insert( insert_iter, key);
-                            if (h2) {
-                               histogramDefects(helper,key,h2);
-                            }
-                            break;
-                         }
-                         else if (helper.getMaskIdx(key) < helper.getMaskIdx(*insert_iter)) {
-                            // if smaller defects e.g single pixel defects overlap with a larger defect e.g. a core-column
-                            // defect do not retry, since the total number of defects is not corrected for
-                            // already existing larger area defects.
-                            break;
-                         }
-                      }
+
                       assert( mask_i+1 < counts.size());
                       ++counts[mask_i][ kNRetries ];
                    }
@@ -426,6 +410,12 @@ namespace InDet{
                 // chose the corners which have defects randomly
                 unsigned int the_combination =CLHEP::RandFlat::shoot(rndmEngine,n_corner_combinations[n_corners] );
                 unsigned char corner_mask = corner_combinations[n_corners][the_combination];
+                // columns, rows and their pitch are already in direction of the hardware columns and rows
+                unsigned int hwa_columns = helper.columns();
+                unsigned int  hwa_rows = helper.rows();
+                float hwa_columnPitch = helper.columnPitch();
+                float hwa_rowPitch = helper.rowPitch();
+
                 for (unsigned int corner_i=0; corner_i<4; ++corner_i) {
                    if (corner_mask & (1u << corner_i)) {
                       // chose random positions at which the circle crosses the edges at the particular corner
@@ -466,15 +456,15 @@ namespace InDet{
                       // compute column range with defects
                       double scale_rx=(corner_i==1 || corner_i==2) ? -1.f : 1.f;
                       double scale_ry=(corner_i<=1) ? -1.f : 1.f;
-                      std::array<unsigned int,2>  row_range{0,helper.rows()};
+                      std::array<unsigned int,2>  row_range{0,hwa_rows};
                       unsigned int row_var_idx=(corner_i<=1) ? 0 : 1;
-                      unsigned int col_start=(corner_i==1 || corner_i==2) ? helper.columns() : 0;
+                      unsigned int col_start=(corner_i==1 || corner_i==2) ? hwa_columns : 0;
 
-                      Amg::Vector2D corner_pos{col_start*helper.columnPitch(),row_range[row_var_idx^1]*helper.rowPitch()};
+                      Amg::Vector2D corner_pos{col_start*hwa_columnPitch,row_range[row_var_idx^1]*hwa_rowPitch};
 
                       unsigned int col_end = std::min(static_cast<unsigned int>(std::max(0,static_cast<int>(col_start)
-                                                                                         + static_cast<int>(rx*scale_rx / helper.columnPitch() +.5))),
-                                                      helper.columns());
+                                                                                         + static_cast<int>(rx*scale_rx / hwa_columnPitch +.5))),
+                                                      hwa_columns);
                       if (col_end < col_start) {
                          std::swap(col_start, col_end);
                       }
@@ -482,16 +472,18 @@ namespace InDet{
                       // compute circle parameters
                       Amg::Vector2D c0 = corner_pos + Amg::Vector2D{0.f,ry*scale_ry};
                       Amg::Vector2D c1 = corner_pos + Amg::Vector2D{rx*scale_rx,0.f};
-
-                      double radius = (rx*rx+ry*ry)/(8*sagitta)+0.5*sagitta;
-                      Amg::Vector2D Rc = c0+(c1-c0)*.5 - (scale_ry*scale_rx) * (radius-sagitta)/(sqrt(rx*rx+ry*ry))*Amg::Vector2D{-ry*scale_ry,-rx*scale_rx};
+                      double rho2=sqr(rx) + sqr(ry);
+                      double radius = rho2/(8*sagitta)+0.5*sagitta;
+                      Amg::Vector2D Rc = c0+(c1-c0)*.5 - (scale_ry*scale_rx) * (radius-sagitta)
+                                                        /sqrt(rho2)
+                                                        *Amg::Vector2D{-ry*scale_ry,-rx*scale_rx};
 
                       double ymin=std::min(c0[1],c1[1]);
                       double  ymax=std::max(c0[1],c1[1]);
                       for (unsigned int col_i=col_start; col_i< col_end; ++col_i) {
                          //compute row range with defects per column i.e. the row at which the circle crosses the column
                          // and the corresponding edge row (top or bottom)
-                         double q = sqr(col_i*helper.columnPitch()-Rc[0]) + sqr(Rc[1]) - sqr(radius);
+                         double q = sqr(col_i*hwa_columnPitch-Rc[0]) + sqr(Rc[1]) - sqr(radius);
                          double ph = -Rc[1];
                          double Q=sqr(ph)-q;
                          if (Q>=0.) {
@@ -508,39 +500,27 @@ namespace InDet{
                                   if (d2<d1) {
                                      cx=cx2;
                                   }
-                                  cx = std::clamp( cx, ymin, ymax - helper.rowPitch()*.25);
+                                  cx = std::clamp( cx, ymin, ymax - hwa_rowPitch*.25);
                                }
                                else {
                                   cx=cx2;
                                }
                             }
                             if (cx>=ymin && cx<ymax) {
-                               row_range[row_var_idx]=static_cast<unsigned int>( std::max(0.,cx / helper.rowPitch() + .5));
-                               // create corner defects for one column
-                               for (unsigned int row_i=row_range[0]; row_i<row_range[1]; ++row_i) {
-                                  // create a key which identifies the particular defect
-                                  // @TODO should store as range instead e.g. mark that a key is the beginning of a range
-                                  //       up the the next key
-                                  typename T_ModuleHelper::KEY_TYPE
-                                     key = helper.maskedKey( 0u,
-                                                             helper.swapOfflineRowsColumns()
-                                                             ? helper.hardwareCoordinates(col_i,row_i)
-                                                             : helper.hardwareCoordinates(row_i,col_i));
+                               row_range[row_var_idx]=static_cast<unsigned int>( std::max(0.,cx / hwa_rowPitch + .5));
 
-                                  // ... and insert the defect in the list of defects registered for this module
-                                  auto [insert_iter,end_iter] = T_EmulatedDefects::lower_bound( module_defects, key);
-                                  if (insert_iter == end_iter) {
-                                     module_defects.push_back(key);
+                               if (row_range[0] < row_range[1] && row_range[0] <hwa_rows) {
+                                  // create corner defects for one column
+                                  std::pair<typename T_ModuleHelper::KEY_TYPE, typename T_ModuleHelper::KEY_TYPE> key_range{
+                                     helper.swapOfflineRowsColumns() ? helper.hardwareCoordinates(col_i, std::min(row_range[0],helper.nSensorColumns()-1u))
+                                     : helper.hardwareCoordinates(std::min(row_range[0],helper.nSensorRows()-1u),col_i),
+                                     helper.swapOfflineRowsColumns() ? helper.hardwareCoordinates(col_i, std::min(row_range[1]-1, helper.nSensorColumns()-1u))
+                                     : helper.hardwareCoordinates(std::min(row_range[1]-1,helper.nSensorRows()-1u),col_i)
+                                  };
+
+                                  if (EmulatedDefectsBuilder::insertKeyRange(helper, module_defects, key_range, T_ModuleHelper::makeDefectTypeKey(masks.size()>1 ? 1 : 0))) {
                                      if (h2) {
-                                        histogramDefects(helper,key,h2);
-                                     }
-                                  }
-                                  else {
-                                     if (!helper.isMatchingDefect(*insert_iter, key)) {
-                                        module_defects.insert( insert_iter, key);
-                                        if (h2) {
-                                           histogramDefects(helper,key,h2);
-                                        }
+                                        histogramDefects(helper,key_range,h2);
                                      }
                                   }
                                }
@@ -570,4 +550,5 @@ namespace InDet{
 
     return StatusCode::SUCCESS;
   }
+
 }

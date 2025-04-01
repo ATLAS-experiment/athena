@@ -17,3 +17,9 @@ atlas_add_component( InDetDefectsEmulation
                      SCT_ConditionsToolsLib Acts::Core ActsGeometryLib ActsGeometryInterfacesLib )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+atlas_add_test( EmulatedDefectsBuilder_test
+                SOURCES test/EmulatedDefectsBuilder_test.cxx
+                INCLUDE_DIRS
+                LINK_LIBRARIES InDetReadoutGeometry PixelReadoutGeometryLib
+                POST_EXEC_SCRIPT nopost.sh )

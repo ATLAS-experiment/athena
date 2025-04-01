@@ -10,6 +10,8 @@
 #include "InDetIdentifier/SCT_ID.h"
 #include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
 
+#include <utility>
+
 namespace InDet {
 
    template <>
@@ -66,7 +68,7 @@ namespace InDet {
             unsigned int strip = module_helper.getRow(rdo_key);
             std::pair<unsigned int, unsigned int> overlap = (defect_iter != end_iter
                                                              ?  getOverlap( module_helper,
-                                                                            *defect_iter,
+                                                                            EmulatedDefects<StripModuleHelper>::getRange(defect_iter),
                                                                             strip,
                                                                             rdo.getGroupSize())
                                                              : std::make_pair(0u,0u));
@@ -82,24 +84,34 @@ namespace InDet {
                for (;;) {
                   unsigned int start = overlap.first + overlap.second;
                   unsigned int group_size = last_defect_start - start;
-                  if (group_size==0u) break;
-                  dest.push_back(std::make_unique<SCT3_RawData>( m_idHelper->strip_id(module_id,start, col_idx_aka_eta),
-                                                                 makeStripWord( sct3_rdo.getTimeBin(), start, group_size, getErrorBits(rdo) ),
-                                                                 &s_dummyvector));
-                  ++n_new;
-                  if (defect_iter == end_iter) break;
-
+                  if (group_size > 0) {
+                     dest.push_back(std::make_unique<SCT3_RawData>( m_idHelper->strip_id(module_id,start, col_idx_aka_eta),
+                                                                    makeStripWord( sct3_rdo.getTimeBin(), start, group_size, getErrorBits(rdo) ),
+                                                                    &s_dummyvector));
+                     ++n_new;
+                  }
+                  if (overlap.first == strip) break;
                   last_defect_start = overlap.first;
-                  overlap = std::make_pair(strip, 0u);
+
+                  // if it is a range the range end key is already handled
+                  // so skip it.
                   ++defect_iter;
+                  if (defect_iter != end_iter && StripModuleHelper::isRangeKey(*defect_iter)) {
+                     // make sure that last_defect start is not smaller than the first strip in the strip group
+                     // otherwise the group size for the next strip group would become negative.
+                     last_defect_start = std::max(static_cast<unsigned int>(module_helper.getRow(*defect_iter)),strip);
+                     ++defect_iter;
+                  }
+
                   if (defect_iter != end_iter) {
                      overlap = getOverlap( module_helper,
-                                           *defect_iter,
+                                           EmulatedDefects<StripModuleHelper>::getRange(defect_iter),
                                            strip,
                                            rdo.getGroupSize());
-                     if (overlap.second == 0u) {
-                        overlap.first= strip;
-                     }
+                  }
+                  else {
+                     overlap.first=strip;
+                     overlap.second=0u;
                   }
                }
             }
@@ -136,26 +148,27 @@ namespace InDet {
           * Will compute the region of the given defect which overlaps with the given strip group.
           */
          std::pair<unsigned int,unsigned int> getOverlap( const StripModuleHelper &module_helper,
-                                                          StripModuleHelper::KEY_TYPE defect_key,
+                                                          const std::pair<StripModuleHelper::KEY_TYPE, StripModuleHelper::KEY_TYPE> &defect_range,
                                                           unsigned int strip,
                                                           unsigned int sequence_length) {
             static_assert( StripModuleHelper::CHIP_MASK == StripModuleHelper::KEY_TYPE{});
             static_assert( StripModuleHelper::COL_MASK == StripModuleHelper::KEY_TYPE{});
-            unsigned int defect_row = module_helper.getRow(defect_key);
+            unsigned int defect_row_start = module_helper.getRow(defect_range.first);
+            unsigned int defect_row_end = module_helper.getRow(defect_range.second)+1;
             unsigned int strip_row = strip;
-            unsigned int mask=module_helper.getMask(defect_key);
-            if (mask >1u) {
-               if (defect_row+mask >= strip_row && defect_row < strip_row+sequence_length) {
-                  return std::make_pair( defect_row > strip_row ? defect_row : strip_row,
-                                         (defect_row+mask <= strip_row+sequence_length ? mask :  (strip_row+sequence_length) - defect_row ));
+            if (defect_row_end-defect_row_start>1u) {
+               if (defect_row_end >= strip_row && defect_row_start < strip_row+sequence_length) {
+                  unsigned int overlap_start = defect_row_start > strip_row ? defect_row_start : strip_row;
+                  unsigned int overlap_end = defect_row_end < strip_row+sequence_length ? defect_row_end :  strip_row+sequence_length;
+                  return std::make_pair( overlap_start , overlap_end- overlap_start);
                }
             }
             else {
-               if (defect_row >= strip_row && defect_row < strip_row+sequence_length) {
-                  return std::make_pair(defect_row,1u);
+               if (defect_row_start >= strip_row && defect_row_start < strip_row+sequence_length) {
+                  return std::make_pair(defect_row_start,1u);
                }
             }
-            return std::make_pair(0u,0u);
+            return std::make_pair(strip,0u);
          }
 
 

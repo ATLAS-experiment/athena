@@ -36,16 +36,32 @@ namespace InDet {
          T_ModuleHelper module_helper( detector_element.design() );
          ChipFlags_t chip_status=(1u<<module_helper.circuitsPerColumn()*module_helper.circuitsPerRow())-1;
          if constexpr(CHIP_MASK_IDX < T_ModuleHelper::N_MASKS) {
-            for (T_EmulatedDefectsKey key : emulated_module_defects) {
-               if (module_helper.getMaskIdx(key) == CHIP_MASK_IDX) {
-                  assert( module_helper.getChip(key) < 31 && (1u<<module_helper.getChip(key) ) < std::numeric_limits<ChipFlags_t>::max());
-                  chip_status &= ~(1<<(module_helper.getChip(key)));
+            if (!emulated_module_defects.empty()) {
+               T_EmulatedDefectsKey last_key = emulated_module_defects.front();
+               for (T_EmulatedDefectsKey key : emulated_module_defects) {
+                  if (module_helper.isRangeKey(key)) {
+                     // if the range covers entire circuits, treat this as a circuit defect
+                     if (   module_helper.getRow(key)==0
+                         && module_helper.getColumn(key)==0
+                         && (module_helper.getChip(last_key)-module_helper.getChip(key)>0
+                             || (    module_helper.getColumn(last_key) >=module_helper.columnsPerCircuit()
+                                 &&  module_helper.getRow(last_key) >=module_helper.rowsPerCircuit()))) {
+                        unsigned int end_chip = module_helper.getChip(last_key);
+                        if (    module_helper.getColumn(last_key) >=module_helper.columnsPerCircuit()
+                            &&  module_helper.getRow(last_key) >= module_helper.rowsPerCircuit()) {
+                           ++end_chip;
+                        }
+                        for (unsigned int chip_i=module_helper.getChip(key); chip_i<end_chip; ++chip_i) {
+                           assert( chip_i < 31u && (1u<<chip_i ) < std::numeric_limits<ChipFlags_t>::max());
+                           chip_status &= ~(1<<(chip_i));
+                        }
+                     }
+                  }
                }
             }
          }
          return chip_status;
-      };
-
+      }
 
       SG::ReadCondHandleKey<T_EmulatedDefects> m_emulatedDefectsKey
          {this, "EmulatedDefectsKey", "", "Key of the emulated defects input collection"};

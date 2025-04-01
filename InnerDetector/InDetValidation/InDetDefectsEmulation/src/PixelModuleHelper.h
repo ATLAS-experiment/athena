@@ -17,8 +17,7 @@ namespace InDet {
                                                     12,  // bits for rows
                                                     12,  // bits for columns
                                                     4,   // bits for chip
-                                                    4,   // bits for flags
-                                                    3    // number of masks: single-pixel, core-column, circuit
+                                                    2    // bits for defect type
                                                     > {
    public:
 
@@ -37,9 +36,6 @@ namespace InDet {
 
 
       PixelModuleHelper(const InDetDD::SiDetectorDesign &design)
-         : ModuleKeyHelper( std::array<unsigned int,MASKS_SIZE>{ PixelModuleHelper::getPixelMask(),
-                                                                 PixelModuleHelper::getColGroup8Mask(),
-                                                                 PixelModuleHelper::getChipMask()} )
       {
          const InDetDD::PixelModuleDesign *pixelModuleDesign = dynamic_cast<const InDetDD::PixelModuleDesign *>(&design);
          if (pixelModuleDesign) {
@@ -73,9 +69,15 @@ namespace InDet {
          }
          m_rectangularPixels = (m_columns==200);
          }
-         if (m_rectangularPixels) {
-            m_masks[1]= PixelModuleHelper::getColGroup4Mask();
-         }
+      }
+      static constexpr unsigned int N_MASKS=3;
+      static constexpr unsigned int nMasks() { return N_MASKS; }
+      std::array<unsigned int, N_MASKS> masks() const {
+         return std::array<unsigned int,N_MASKS> {
+            PixelModuleHelper::getPixelMask(),
+            (m_rectangularPixels ? PixelModuleHelper::getColGroup4Mask() : PixelModuleHelper::getColGroup8Mask() ),
+            PixelModuleHelper::getChipMask()
+         };
       }
       operator bool () const { return m_columns>0; }
 
@@ -116,6 +118,38 @@ namespace InDet {
          }
          return makeKey(0u, chip, column, row);
       }
+      /** compute offline coordinates from "hardware" coordinates
+       * @param key packed hardware coordinates
+       * @return offline row, column pair
+      */
+      std::pair<unsigned int,unsigned int> offlineCoordinates(unsigned int key) const {
+         unsigned int chip = getChip(key);
+         unsigned int column = getColumn(key);
+         unsigned int row = getRow(key);
+         // handle special values
+         // used for merging
+         if (row == getLimitRowMax()) {
+            row=rowsPerCircuit()-1;
+         }
+         if (row == rowsPerCircuit()) {
+            column+=1u;
+            row=0u;
+         }
+
+         column+= columnsPerCircuit() * (chip%circuitsPerRow());
+         if (chip>=circuitsPerRow()) {
+            column=columns() - column -1;
+            row=rowsPerCircuit() - row -1;
+            row+=rowsPerCircuit() * (chip/circuitsPerRow());
+         }
+         if (swapOfflineRowsColumns()) {
+            std::swap(column,row);
+         }
+         if (row>=nSensorRows() || column>=nSensorColumns()) {
+            throw std::runtime_error("Invvalid offline coordinates");
+         }
+         return std::make_pair(row,column);
+      }
 
       /** Return total number of pixels per module.
        */
@@ -146,74 +180,25 @@ namespace InDet {
          }
       }
 
-      /** Test whether the given packed hardware coordinates match the given defect
-       * @param key_ref the packed "coordinates" of the defect
-       * @param key_test the packed coordinates of a pixel.
-       */
-      bool isMatchingDefect( unsigned int key_ref, unsigned int key_test) const {
-         return isOverlapping(key_ref, key_test);
-      }
-
       /** Function to return offline column and row ranges matching the defect-area of the given key (used for histogramming)
-       * @param key packed hardware coordinates addressing a single pixel, a column group or circuit defect
+       * @param range pair of packed hardware coordinates addressing the start and end pixel of an rectangular inclusive pixel range.
        * @return offline start column, end column, start row, end row, where the end is meant to be exclusive i.e. [start, end)
        */
-      std::array<unsigned int,4> offlineRange(unsigned int key) const {
-         unsigned int mask_index = getMaskIdx(key);
-         if (mask_index !=0) {
-            if (getRow(key) !=0) {
-               throw std::runtime_error("invalid key");
-            };
+      std::array<unsigned int,4> offlineRange(const std::pair<unsigned int,unsigned int> &range) const {
+         if (range.first != range.second) {
+            // if (getRow(range.first) !=0) {
+            //    throw std::runtime_error("invalid key");
+            // };
 
-            unsigned int chip=getChip(key);
-            unsigned int row=getRow(key);
-            unsigned int row_end=row + rowsPerCircuit()-1;
-            unsigned int column=getColumn(key);
-            unsigned int column_end= column + (mask_index == 1 ? N_COLS_PER_GROUP[m_rectangularPixels]-1 : columnsPerCircuit());
-
-            unsigned int chip_row = chip / circuitsPerRow();
-            unsigned int chip_column = chip % circuitsPerRow();
-
-            column += chip_column * columnsPerCircuit();
-            column_end += chip_column * columnsPerCircuit();
-            if (chip_row>=1) {
-               column = columns() - column -1;
-               column_end = columns() - column_end -1;
-
-               row = rowsPerCircuit() - row -1 + chip_row * rowsPerCircuit();
-               row_end = rowsPerCircuit() - row_end -1 + chip_row * rowsPerCircuit();
-            }
-            if (swapOfflineRowsColumns()) {
-               return std::array<unsigned int,4>{ std::min(column, column_end), std::max(column,column_end)+1,
-                                                  std::min(row, row_end),       std::max(row, row_end)+1 };
-            }
-            else {
-               return std::array<unsigned int,4>{ std::min(row, row_end),       std::max(row, row_end)+1,
-                                                  std::min(column, column_end), std::max(column,column_end)+1 };
-            }
+            std::pair<unsigned int, unsigned int> start=offlineCoordinates(range.first);
+            std::pair<unsigned int, unsigned int> end=offlineCoordinates(range.second);
+            return std::array<unsigned int,4>{ std::min(start.first, end.first),   std::max(start.first, end.first)+1,
+                                               std::min(start.second, end.second), std::max(start.second,end.second)+1};
          }
          else {
-            unsigned int chip=getChip(key);
-            unsigned int row=getRow(key);
-            unsigned int column=getColumn(key);
-
-            unsigned int chip_row = chip / circuitsPerRow();
-            unsigned int chip_column = chip % circuitsPerRow();
-
-            column += chip_column * columnsPerCircuit();
-            if (chip_row>=1) {
-               column = columns() - column -1;
-
-               row = rowsPerCircuit() - row -1 + chip_row * rowsPerCircuit();
-            }
-            if (swapOfflineRowsColumns()) {
-               return std::array<unsigned int,4 >{ column, column + 1,
-                                                   row, row +1 };
-            }
-            else {
-               return std::array<unsigned int,4>{ row, row + 1,
-                                                  column, column +1 };
-            }
+            std::pair<unsigned int, unsigned int> start=offlineCoordinates(range.first);
+            return std::array<unsigned int,4>{ start.first,  start.first+1,
+                                               start.second, start.second+1};
          }
       }
       bool swapOfflineRowsColumns() const { return m_swapOfflineRowsColumns; }
