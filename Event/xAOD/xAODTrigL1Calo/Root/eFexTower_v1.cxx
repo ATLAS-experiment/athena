@@ -108,4 +108,36 @@ namespace xAOD{
       return false;
   };
 
+    size_t eFexTower_v1::cellIdx(uint32_t layer, uint32_t cell) const {
+
+        if(cell > 3 || (layer!=1 && layer!=2 && cell>0)) return et_count().size();
+        // for |eta|>2.4 towers, the l1 energy (which is in the last slot) is treated as ps
+        if(layer==0 && std::abs(eta()+0.025)>2.4) return 4;
+        return (layer>0)*1 + (layer>1)*4 + (layer>2)*4 + (layer>3)*1 + cell;
+
+    }
+
+    int eFexTower_v1::cellEt(uint32_t layer, uint32_t cell) const {
+
+        auto idx = cellIdx(layer,cell);
+        if(idx == et_count().size()) return 0;
+        if(disconnectedCount(idx)) return 0;
+        auto count = et_count().at(idx);
+        // convert count to MeV using either LATOME or Tile energy scales
+        if (layer==4 && std::abs(eta()+0.025)<1.5) {
+            // Tile energy scale (500MeV per count)
+            return count*500;
+        }
+
+        // Deal with special codes first:
+        if (count == 0)  return 0; // NoData
+        if (count == 1021 || count == 1022 || count > 1023) return 0; // Reserved || Invalid || OutOfRange
+        if (count == 1023) return 65535*25; // Saturated case, return saturated value;
+
+        if (count >= 768) return 44000 + (count-768)*400;
+        if (count >= 512) return 18400 + (count-512)*100;
+        if (count >= 256) return 5600 + (count-256)*50;
+        return -750 + (count-2)*25;
+    }
+
 } // namespace xAOD
