@@ -116,18 +116,10 @@ from DerivationFrameworkJetEtMiss.JETM3 import JETM3Cfg
 from DerivationFrameworkJetEtMiss.JETM4 import JETM4Cfg
 # JETM5: zero bias data - random cones
 from DerivationFrameworkJetEtMiss.JETM5 import JETM5Cfg
-# JETM6: tagging SFs
-from DerivationFrameworkJetEtMiss.JETM6 import JETM6Cfg
 # JETM7: by-vertex jet reconstruction
 from DerivationFrameworkJetEtMiss.JETM7 import JETM7Cfg
-# JETM10: MET trigger
-from DerivationFrameworkJetEtMiss.JETM10 import JETM10Cfg
-# JETM11: MET trigger (e + mu skimming)
-from DerivationFrameworkJetEtMiss.JETM11 import JETM11Cfg
 # JETM12: E/p studies in W to tau + v events
 from DerivationFrameworkJetEtMiss.JETM12 import JETM12Cfg
-# JETM14: MET trigger (single mu selection)
-from DerivationFrameworkJetEtMiss.JETM14 import JETM14Cfg
 # JETM42: MC only - Upgrade studies format
 from DerivationFrameworkJetEtMiss.JETM42 import JETM42Cfg
 
@@ -185,8 +177,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'TCAL1Cfg', 'TCAL2Cfg',
            'EGAM1Cfg', 'EGAM2Cfg', 'EGAM3Cfg', 'EGAM4Cfg', 'EGAM5Cfg',
            'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg', 'EGAM11Cfg', 'EGAM12Cfg',
-           'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM6Cfg','JETM7Cfg',
-           'JETM10Cfg','JETM11Cfg','JETM12Cfg','JETM14Cfg', 'JETM42Cfg',
+           'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM7Cfg','JETM12Cfg','JETM42Cfg',
            'TRIG8Cfg',"TRIG9Cfg","TRIG10Cfg",'L1CALO1Cfg',
            'MUON1Cfg','MUON5Cfg',
            'TLA0Cfg', 'TLA1Cfg', 'TLA2Cfg',
