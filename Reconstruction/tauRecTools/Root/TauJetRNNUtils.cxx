@@ -160,13 +160,13 @@ std::unique_ptr<VarCalc> get_calculator(const std::vector<std::string>& scalar_v
     calc->insert("nIBLHitsAndExp", Variables::Track::nIBLHitsAndExp, track_vars);
     calc->insert("nPixelHitsPlusDeadSensors", Variables::Track::nPixelHitsPlusDeadSensors, track_vars);
     calc->insert("nSCTHitsPlusDeadSensors", Variables::Track::nSCTHitsPlusDeadSensors, track_vars);
-    calc->insert("eProbabilityHT", Variables::Track::eProbabilityHT, track_vars);
-    calc->insert("eProbabilityNN", Variables::Track::eProbabilityNN, track_vars);
+    //calc->insert("eProbabilityHT", Variables::Track::eProbabilityHT, track_vars);
+    //calc->insert("eProbabilityNN", Variables::Track::eProbabilityNN, track_vars);
     calc->insert("eProbabilityNNorHT", Variables::Track::eProbabilityNNorHT, track_vars);
-    calc->insert("chargedScoreRNN", Variables::Track::chargedScoreRNN, track_vars);
-    calc->insert("isolationScoreRNN", Variables::Track::isolationScoreRNN, track_vars);
-    calc->insert("conversionScoreRNN", Variables::Track::conversionScoreRNN, track_vars);
-    calc->insert("fakeScoreRNN", Variables::Track::fakeScoreRNN, track_vars);
+    //calc->insert("chargedScoreRNN", Variables::Track::chargedScoreRNN, track_vars);
+    //calc->insert("isolationScoreRNN", Variables::Track::isolationScoreRNN, track_vars);
+    //calc->insert("conversionScoreRNN", Variables::Track::conversionScoreRNN, track_vars);
+    //calc->insert("fakeScoreRNN", Variables::Track::fakeScoreRNN, track_vars);
 
     // Cluster variable calculator functions
     calc->insert("et_log", Variables::Cluster::et_log, cluster_vars);
