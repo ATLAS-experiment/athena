@@ -202,8 +202,8 @@ StatusCode SiTrkAlignDBTool::initialize() {
   }
 
   m_doSi = (m_siAlignLevel==0);
-  m_doPixel = (checkPixelLevel() && !m_doSi);
-  m_doSCT = (checkSCTLevel() && !m_doSi);
+  m_doPixel = (m_pixelAlignLevel != -1 && checkPixelLevel() && !m_doSi);
+  m_doSCT = (m_sctAlignLevel != -1 && checkSCTLevel() && !m_doSi);
 
   if (m_writeAsL3)
     ATH_MSG_INFO(" Storing as level 3 constants.");
