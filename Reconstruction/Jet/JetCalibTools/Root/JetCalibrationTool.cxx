@@ -52,7 +52,7 @@ JetCalibrationTool::~JetCalibrationTool() {
 /////////////////////////////////////////////////////////////////// 
 
 StatusCode JetCalibrationTool::initialize() {
-  ATH_MSG_INFO ("Initializing " << name() << " to calibrate " << m_jetAlgo << "jets");
+  ATH_MSG_INFO ("Initializing " << name() << " to calibrate " << m_jetAlgo << " jets.  ");
 
   TString jetAlgo = m_jetAlgo;
   TString calibSeq = m_calibSeq;
