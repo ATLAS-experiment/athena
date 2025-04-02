@@ -69,14 +69,21 @@ class EventCleaningBlock (ConfigBlock):
             if self.noFilter:
                 # here we only decorate the PHYSLITE events with a boolean and don't do any cleaning
                 # Set up the GRL Decoration
-                for GRLDecoratorName,GRLFile in (self.GRLDict).items():
-                    alg = config.createAlgorithm( 'GRLSelectorAlg', GRLDecoratorName )
-                    config.addPrivateTool( 'Tool', 'GoodRunsListSelectionTool' )
+                if not self.GRLDict:
+                    raise ValueError ("No GRLDict specified for GRL decoration, please specify a GRLDict")
+
+                for GRLDecoratorName, GRLFileList in self.GRLDict.items():
+                    if isinstance(GRLFileList, str):
+                        GRLFileList = [GRLFileList]
+
+                    alg = config.createAlgorithm("GRLSelectorAlg", GRLDecoratorName)
+                    config.addPrivateTool("Tool", "GoodRunsListSelectionTool")
                     alg.Tool.UseRandomRunNumber = self.useRandomRunNumber
-                    alg.Tool.GoodRunsListVec = GRLFile
+                    alg.Tool.GoodRunsListVec = GRLFileList
                     alg.noFilter = True
-                    alg.grlKey = "EventInfo." + GRLDecoratorName
-                    # Using WriteDecorHandle thus no need for addOutputVar
+                    alg.grlKey = f"EventInfo.{GRLDecoratorName}"
+
+                    config.addOutputVar("EventInfo", GRLDecoratorName, GRLDecoratorName, noSys=True)
             else:
                 # Set up the GRL selection:
                 alg = config.createAlgorithm( 'GRLSelectorAlg', 'GRLSelectorAlg' )
