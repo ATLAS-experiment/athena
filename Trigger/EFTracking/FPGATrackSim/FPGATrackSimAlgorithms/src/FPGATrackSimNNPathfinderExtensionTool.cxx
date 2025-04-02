@@ -223,7 +223,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             if(fineID == 215){
                 ATH_MSG_DEBUG("Stopping condition reached");
                 completedRoads.push_back(currentRoad);
-                break;
+                continue;
             }
 
             // Get the last layer and hit in the road
