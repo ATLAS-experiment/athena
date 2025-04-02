@@ -61,9 +61,6 @@ namespace PanTau {
         StatusCode addCombinedFeatures(PanTau::PanTauSeed* inSeed,
 				       const std::map<std::string, double>& variants_SeedEt) const;
         
-        //Function to add impact parameter features
-        StatusCode addImpactParameterFeatures(PanTau::PanTauSeed* inSeed) const;
-        
         //Function to fill the variants_SeedEt member
         static void fillVariantsSeedEt(const std::vector<PanTau::TauConstituent*>& tauConstituents,
 				std::map<std::string, double>& variants_SeedEt) ;

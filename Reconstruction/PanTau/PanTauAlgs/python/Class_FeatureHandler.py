@@ -171,7 +171,6 @@ class FeatureHandler:
         self.addCombinedFeatures_Single()
         self.addCombinedFeatures_TypeVsType()
         self.addCombinedFeatures_SelectedTypes()
-        self.addImpactParameterFeatures()
         
     #end init
     
@@ -590,26 +589,6 @@ class FeatureHandler:
         #end loop over iTypes
     #end addCombinedFeatures_SelectedTypes
         
-    def addImpactParameterFeatures(self):
-        maxTrack = 4
-        
-        Variables = []
-        Variables += [ ["TransIPTrack", "_SortByEt"] ]
-        Variables += [ ["LongIPTrack", "_SortByEt"] ]
-        Variables += [ ["TransSignfIPTrack", "_SortByEt"] ]
-        Variables += [ ["LongSignfIPTrack", "_SortByEt"] ]
-        Variables += [ ["TransIP", "_SortByValue"] ]
-        Variables += [ ["TransSignfIP", "_SortByValue"] ]
-        
-        for iTrk in range(1, maxTrack):
-            for iVar in Variables:
-                featName = iVar[0] + str(iTrk) + iVar[1]
-                self.addToFeatures(featName, self.m_VarTypeName_ImpactParams, "F")
-            #end loop over variables
-        #end loop over tracks
-    #end addGenericJetFeatures
-    
-    
 #end class config_FeatureCalculator
 
 

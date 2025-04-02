@@ -164,9 +164,6 @@ StatusCode PanTau::Tool_FeatureExtractor::execute(PanTau::PanTauSeed* inSeed) co
   //fill the combined features
   ATH_CHECK( addCombinedFeatures(inSeed, variants_SeedEt) );
     
-  //fill the impact paramter features
-  ATH_CHECK( addImpactParameterFeatures(inSeed) );
-    
   return StatusCode::SUCCESS;
 }
 
@@ -1004,69 +1001,3 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
   return StatusCode::SUCCESS;
 }
 
-
-StatusCode PanTau::Tool_FeatureExtractor::addImpactParameterFeatures(PanTau::PanTauSeed* inSeed) const {
-    
-  const xAOD::TauJet* tauJet = inSeed->getTauJet();
-
-  const xAOD::Vertex* vtx_TauJet = tauJet->vertex();
-  if(!vtx_TauJet) {
-    ATH_MSG_DEBUG("Vertex of taujet points to 0! Not extracting impact parameters");
-    return StatusCode::SUCCESS;
-  }
-    
-  PanTau::TauFeature* tauFeatures = inSeed->getFeatures();
-  std::string inputAlgName = inSeed->getNameInputAlgorithm();
-  std::string featureNamePrefix = m_varTypeName_ImpactParams;
-  std::vector<double> impactParameters(0);
-  std::vector<double> impactParameterSignf(0);
-    
-  // get a list of tracks from the inputseed
-  // NOTE: if we ever have more than one charged type, may want to generalize this part to automagically get IPs from all tracks
-  bool foundIt;
-  std::vector<PanTau::TauConstituent*>    list_ChargedConsts = inSeed->getConstituentsOfType(PanTau::TauConstituent::t_Charged, foundIt);
-  if (!foundIt || list_ChargedConsts.empty()) return StatusCode::SUCCESS;
-  std::sort(list_ChargedConsts.begin(),     list_ChargedConsts.end(),     sortTauConstituentEt);
-    
-  std::vector<const xAOD::TrackParticle*>  list_Tracks;
-  for(unsigned int iChrg=0; iChrg<list_ChargedConsts.size(); iChrg++) list_Tracks.push_back( list_ChargedConsts[iChrg]->getPFO()->track(0) );
-    
-  // calculate the transverse impact parameter for the 4 highest momentum tracks
-  for(unsigned int iTrk=0; iTrk<list_Tracks.size(); iTrk++) {
-    const xAOD::TrackParticle* curTrack = list_Tracks[iTrk];
-        
-    double errD02 = curTrack->definingParametersCovMatrix()(0, 0);
-    double signfD0 = -999.;
-    if(errD02 > 0) signfD0 = curTrack->d0() / sqrtf( errD02 );
-
-    double errZ02 = curTrack->definingParametersCovMatrix()(1, 1);
-    double signfZ0 = -999.;
-    if(errZ02 > 0) signfZ0 = curTrack->z0() / sqrtf( errZ02 );
-        
-    // add to features
-    if (iTrk < 4) {
-      std::string indexTrk = m_HelperFunctions.convertNumberToString(iTrk+1);
-      tauFeatures->addFeature(inputAlgName + "_" + featureNamePrefix + "_TransIPTrack" + indexTrk + "_SortByEt", curTrack->d0() );
-      tauFeatures->addFeature(inputAlgName + "_" + featureNamePrefix + "_LongIPTrack" + indexTrk + "_SortByEt", curTrack->z0() );
-            
-      if (!std::isnan(signfD0)) tauFeatures->addFeature(inputAlgName + "_" + featureNamePrefix + "_TransSignfIPTrack" + indexTrk + "_SortByEt", signfD0);
-      if (!std::isnan(signfZ0)) tauFeatures->addFeature(inputAlgName + "_" + featureNamePrefix + "_LongSignfIPTrack" + indexTrk + "_SortByEt", signfZ0);
-
-      impactParameters.push_back(std::abs(curTrack->d0()));
-      impactParameterSignf.push_back(std::abs(signfD0));
-    }
-
-  }//end loop over tracks
-    
-  //sort impact parameters and also store sorted by value
-  std::sort( impactParameters.begin(),     impactParameters.end(),     std::greater<double>() );
-  std::sort( impactParameterSignf.begin(), impactParameterSignf.end(), std::greater<double>() );
-    
-  for(unsigned int iIP=0; iIP<impactParameters.size(); iIP++) {
-    std::string curNum = m_HelperFunctions.convertNumberToString(iIP+1);
-    tauFeatures->addFeature(inputAlgName + "_" + featureNamePrefix + "_TransIP" + curNum + "_SortByValue", impactParameters[iIP] );
-    tauFeatures->addFeature(inputAlgName + "_" + featureNamePrefix + "_TransSignfIP" + curNum + "_SortByValue", impactParameterSignf[iIP] );
-  }
-    
-  return StatusCode::SUCCESS;
-}
