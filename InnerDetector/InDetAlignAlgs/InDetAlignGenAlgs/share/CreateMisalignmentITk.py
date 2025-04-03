@@ -60,6 +60,18 @@ def getFlags(**kwargs):
         MisalignMode = 11 # Radial
     else:
         MisalignMode=int(kwargs.get('MisalignMode',11))
+    if 'Translation' not in kwargs.keys():
+        Translation = True
+    else:
+        Translation=bool(kwargs.get('Translation','True')=='True')
+        if not Translation:
+            print ("Translation not set to \"True\" - disabling generation of translations")
+    if 'Rotation' not in kwargs.keys():
+        Rotation = True
+    else:
+        Rotation=bool(kwargs.get('Rotation','True')=='True')
+        if not Rotation:
+            print ("Rotation not set to \"True\" - disabling generation of rotations")
     databaseFilename     = 'MisalignmentSet%s.db' % (MisalignMode)
     flags.IOVDb.DBConnection="sqlite://;schema=%s;dbname=OFLCOND" % (databaseFilename) 
     flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
@@ -103,6 +115,8 @@ def CreateMis(flags,name="CreateITkMisalignAlg",**kwargs):
     kwargs.setdefault("ASCIIFilenameBase",outFiles)
     kwargs.setdefault("SQLiteTag",'MisalignmentMode_'+str(misalignModeMap.get(int(MisalignMode),'unknown')))
     kwargs.setdefault("MisalignMode",int(MisalignMode))
+    kwargs.setdefault("Translation",bool(str(kwargs.pop('Translation','True'))=='True'))
+    kwargs.setdefault("Rotation",bool(str(kwargs.pop('Rotation','True'))=='True'))
     kwargs.setdefault("MaxShift",shiftInMicrons)
     kwargs.setdefault("CreateFreshDB",createFreshDB)
     #Create and configure the AlignDB tool

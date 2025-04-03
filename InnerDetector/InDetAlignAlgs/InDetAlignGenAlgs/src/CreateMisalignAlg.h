@@ -79,6 +79,8 @@ private:
                                                                  ///< (to be switched off when adding misalignments to a given geometry)
     int                                    m_MisalignmentMode;   //!< Flag which Misalignment mode is to be generated
     long int                               m_nEvents;
+    bool                                   m_translation;        ///< Flag which turns on misalignment with translation 
+    bool                                   m_rotation;           ///< Flag which turns on misalignment with rotation  
     Gaudi::Property<double> m_Misalign_x {this,"MisalignmentX",0.0,"Fixed X shift (mode 1 and 2)"};
     Gaudi::Property<double> m_Misalign_y {this,"MisalignmentY",0.0,"Fixed Y shif (model 1 and 2)"};       
     Gaudi::Property<double> m_Misalign_z {this,"MisalignmentZ",0.0,"Fixed Z shift (mode 1 and 2)"};
