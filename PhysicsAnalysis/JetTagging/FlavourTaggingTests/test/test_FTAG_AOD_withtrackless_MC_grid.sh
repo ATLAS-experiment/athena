@@ -8,7 +8,7 @@
 # art-output: *.pool.root
 # art-output: *.log
 # art-output: *log.
-# art-athena-mt: 4
+# art-athena-mt: 8
 
 ATHENA_CORE_NUMBER=4
 
