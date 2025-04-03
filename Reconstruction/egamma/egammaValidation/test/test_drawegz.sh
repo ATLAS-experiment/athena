@@ -5,7 +5,7 @@
 # art-type: grid
 # art-input: user.gunal.data22_13p6TeV.00439911.physics_Main.merge.DRAW_EGZ.f1310_m2151_der1689237472
 # art-input-nfiles: 5
-# art-cores: 4
+# art-cores: 8
 # art-include: main/Athena
 # art-output: *.hist.root
 # art-output: *.txt

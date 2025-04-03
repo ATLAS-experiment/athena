@@ -5,7 +5,7 @@
 # art-type: grid
 # art-input: mc21_14TeV.900494.PG_single_epm_Pt10_etaFlatnp0_43.recon.RDO.e8481_s4038_r14365
 # art-input-nfiles: 45
-# art-cores: 4
+# art-cores: 8
 # art-include: main/Athena
 # art-output: *.hist.root
 # art-output: *.txt
