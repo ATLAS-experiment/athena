@@ -96,7 +96,10 @@ def FPGATrackSimRoadUnionToolCfg(flags):
     yMin -= yBuffer
     yMax += yBuffer
     tools = []
-    
+    houghType = flags.Trigger.FPGATrackSim.ActiveConfig.houghType
+    roadMerge = flags.Trigger.FPGATrackSim.ActiveConfig.roadMerge
+
+
     FPGATrackSimMapping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     for number in range(getNSubregions(FPGATrackSimMapping.subrmap)): 
         HoughTransform = CompFactory.FPGATrackSimHoughTransformTool("HoughTransform_0_" + str(number))
@@ -124,12 +127,29 @@ def FPGATrackSimRoadUnionToolCfg(flags):
         HoughTransform.traceHits = True
         HoughTransform.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
         HoughTransform.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
+        HoughTransform.houghType = houghType
+        HoughTransform.roadMerge = roadMerge
+        if houghType=='LowResource': ##consider only case of LowResource version
+            HoughTransform.requirements = flags.Trigger.FPGATrackSim.ActiveConfig.requirements
+        if houghType=='Flexible': ##consider only case of Flexible version
+            HoughTransform.r_max=flags.Trigger.FPGATrackSim.ActiveConfig.r_max
+            HoughTransform.phi_coord_max=flags.Trigger.FPGATrackSim.ActiveConfig.phi_coord_max
+            HoughTransform.phi_range=flags.Trigger.FPGATrackSim.ActiveConfig.phi_range
+            HoughTransform.r_max_mm=flags.Trigger.FPGATrackSim.ActiveConfig.r_max_mm
+            HoughTransform.bitwise_qApt_conv=flags.Trigger.FPGATrackSim.ActiveConfig.bitwise_qApt_conv
+            HoughTransform.bitwise_phi0_conv=flags.Trigger.FPGATrackSim.ActiveConfig.bitwise_phi0_conv
+            HoughTransform.phi0_sectors=flags.Trigger.FPGATrackSim.ActiveConfig.phi0_sectors
+            HoughTransform.qApt_sectors=flags.Trigger.FPGATrackSim.ActiveConfig.qApt_sectors
+            HoughTransform.pipes_qApt=flags.Trigger.FPGATrackSim.ActiveConfig.pipes_qApt
+            HoughTransform.pipes_phi0=flags.Trigger.FPGATrackSim.ActiveConfig.pipes_phi0
 
         tools.append(HoughTransform)
 
     RF.tools = tools
     result.addPublicTool(RF, primary=True)
     return result
+
+
 
 def FPGATrackSimRoadUnionTool1DCfg(flags):
     result=ComponentAccumulator()
