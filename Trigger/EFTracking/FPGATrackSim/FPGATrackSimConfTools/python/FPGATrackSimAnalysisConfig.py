@@ -526,8 +526,8 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
     return result
 
 def getChi2Cut(region):
-    #list of chi2 cuts for time being. Last four are stand ins since those new regions don't work for now!
-    chi2cut_l = [12, 16, 60, 16, 60, 60, 14, 20, 16, 19, 19, 15, 18, 12, 15, 15, 20, 20, 20, 20]
+    #list of chi2 cuts for time being
+    chi2cut_l = [12, 16, 16, 16, 16, 18, 14, 16, 16, 16, 19, 15, 18, 12, 15, 15, 14, 14, 12, 15]
     binSize = 0.2
     side = (region >> 5) & 0x1
     etaBin = (region >> 6) & 0x1F
