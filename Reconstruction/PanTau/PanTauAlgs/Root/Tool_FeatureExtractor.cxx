@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODTau/TauJet.h"
@@ -81,8 +81,6 @@ void PanTau::Tool_FeatureExtractor::fillVariantsSeedEt(const std::vector<PanTau:
 
   //use different approaches to calculate total energy of seed:
   variants_SeedEt["EtAllConsts"] = 0.0;
-  variants_SeedEt["EtNeutLowA"]  = 0.0;
-  variants_SeedEt["EtNeutLowB"]  = 0.0;
     
   //loop over all constituents in seed
   for (unsigned int iConst = 0; iConst < tauConstituents.size(); iConst++) {
@@ -92,24 +90,12 @@ void PanTau::Tool_FeatureExtractor::fillVariantsSeedEt(const std::vector<PanTau:
     double                  curEt           = curConstituent->p4().Et();
         
     //update the different Et definitions
-    if (curConstituent->isOfType(PanTau::TauConstituent::t_Charged)) {
+    if (curConstituent->isOfType(PanTau::TauConstituent::t_Charged) ||
+        curConstituent->isOfType(PanTau::TauConstituent::t_Neutral) ) {
       variants_SeedEt["EtAllConsts"]    += curEt;
-      variants_SeedEt["EtNeutLowA"]     += curEt;
-      variants_SeedEt["EtNeutLowB"]     += curEt;
     }
-    if (curConstituent->isOfType(PanTau::TauConstituent::t_Neutral)) {
-      variants_SeedEt["EtAllConsts"]    += curEt;
-    }        
-    if (curConstituent->isOfType(PanTau::TauConstituent::t_NeutLowA)) {
-      variants_SeedEt["EtNeutLowA"]     += curEt;
-    }
-    if (curConstituent->isOfType(PanTau::TauConstituent::t_NeutLowB)) {
-      variants_SeedEt["EtNeutLowB"]     += curEt;
-    }
-        
-  }//end loop over constituents in seed
-    
-  }
+  }//end loop over constituents in seed    
+}
 
 
 void PanTau::Tool_FeatureExtractor::addFeatureWrtSeedEnergy(PanTau::TauFeature* targetMap,
@@ -157,9 +143,6 @@ StatusCode PanTau::Tool_FeatureExtractor::execute(PanTau::PanTauSeed* inSeed) co
   ATH_CHECK( calculateFeatures(inSeed, PanTau::TauConstituent::t_Charged, variants_SeedEt) ); //=> charged ones in core
   ATH_CHECK( calculateFeatures(inSeed, PanTau::TauConstituent::t_Neutral, variants_SeedEt) ); //=> neutral ones in core
   ATH_CHECK( calculateFeatures(inSeed, PanTau::TauConstituent::t_Pi0Neut, variants_SeedEt) ); //=> pi0 tagged ones in core
-  //for testing
-  ATH_CHECK( calculateFeatures(inSeed, PanTau::TauConstituent::t_NeutLowA, variants_SeedEt) ); //=> same as neutral but with lower Et
-  ATH_CHECK( calculateFeatures(inSeed, PanTau::TauConstituent::t_NeutLowB, variants_SeedEt) ); //=> same as neutral but with even lower et    
     
   //fill the combined features
   ATH_CHECK( addCombinedFeatures(inSeed, variants_SeedEt) );
