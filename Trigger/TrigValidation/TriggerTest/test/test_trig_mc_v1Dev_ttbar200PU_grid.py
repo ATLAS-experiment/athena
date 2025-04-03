@@ -4,8 +4,7 @@
 # art-description: Trigger RDO->RDO_TRIG athena for Run4 with ttbar mu=200
 # art-type: grid
 # art-include: main/Athena
-# art-include: 24.0/Athena
-# art-athena-mt: 4
+# art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*
@@ -27,8 +26,8 @@ ex = ExecStep.ExecStep()
 ex.type = 'athena'
 ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'ttbar_pu200_Run4'
-ex.threads = 4
-ex.concurrent_events = 4
+ex.threads = 8
+ex.concurrent_events = 8
 ex.flags = [ 'Trigger.triggerMenuSetup="MC_pp_run4_v1"',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
