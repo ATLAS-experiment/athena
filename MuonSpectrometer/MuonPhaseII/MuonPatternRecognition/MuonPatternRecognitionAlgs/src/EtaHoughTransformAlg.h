@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONR4_MUONPATTERNRECOGNITIONALGS_ETAHOUGHTRANSFORMALG__H
 #define MUONR4_MUONPATTERNRECOGNITIONALGS_ETAHOUGHTRANSFORMALG__H
@@ -9,7 +9,6 @@
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "StoreGate/ReadCondHandleKey.h"
 
 #include <MuonPatternEvent/MuonPatternContainer.h>
 #include <MuonPatternEvent/HoughEventData.h>
@@ -30,7 +29,7 @@ namespace MuonR4{
     /// for downstream use. 
     class EtaHoughTransformAlg: public AthReentrantAlgorithm{
         public:
-            EtaHoughTransformAlg(const std::string& name, ISvcLocator* pSvcLocator);
+            using AthReentrantAlgorithm::AthReentrantAlgorithm;
             virtual ~EtaHoughTransformAlg() = default;
             virtual StatusCode initialize() override;
             virtual StatusCode execute(const EventContext& ctx) const override;
