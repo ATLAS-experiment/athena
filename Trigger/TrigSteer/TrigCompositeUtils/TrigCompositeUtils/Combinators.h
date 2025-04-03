@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,7 +13,7 @@
 namespace HLT {
   /**
    * @class CombinationsGenerator helper to generate all possible combinations of objects
-   * @warning The class is not making any assumption as if the this are combinations with objets repeated, i.e. it works on set of indices.   
+   * @warning The class is not making any assumption as if the this are combinations with objects repeated, i.e. it works on set of indices.   
    **/
   class CombinationGenerator {
   public:
@@ -139,14 +139,14 @@ namespace HLT {
   typedef std::vector<size_t>  Index1DVec;
   typedef std::vector< Index1DVec > Index2DVec;
 
-  void elementsInUniqueCombinations( const Index2DVec& indices,  std::set<size_t>& participants, std::function<bool(const Index1DVec&)>&& filter = [](const Index1DVec&){ return true; } );
+  void elementsInUniqueCombinations( const Index2DVec& indices,  std::set<size_t>& participants, const std::function<bool(const Index1DVec&)>& filter = [](const Index1DVec&){ return true; } );
   
   /**
    * @brief Creates unique combinations of elements 
    * @arg combinations - all calid combinations
    * For desciption @see elementsInUnuqueCombinations, this method is different as it exposes all combinations formed    
    **/
-  void findUniqueCombinations( const Index2DVec& indices,  std::vector<std::vector<size_t> >& combinations, std::function<bool(const Index1DVec&)>&& filter = [](const Index1DVec&){ return true; } );
+  void findUniqueCombinations( const Index2DVec& indices,  std::vector<std::vector<size_t> >& combinations, const std::function<bool(const Index1DVec&)>& filter = [](const Index1DVec&){ return true; } );
 
 
   
