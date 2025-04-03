@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: FTAG Validation plots run on mc16 AOD file
 # art-type: grid
 # art-include: main/Athena
-# art-athena-mt: 4
+# art-athena-mt: 8
 # art-memory: 7000
 # art-output: *.root
 # art-output: *.log
