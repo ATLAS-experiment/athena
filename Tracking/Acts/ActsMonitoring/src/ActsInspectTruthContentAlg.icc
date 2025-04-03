@@ -1,0 +1,236 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "ActsInterop/TableUtils.h"
+
+
+namespace ActsTrk {
+  
+  template <typename row_t,
+	    typename coll_t,
+	    typename stat_t>
+  StatusCode ActsInspectTruthContentAlg::printStatTables(const std::string& objectCollectionName,
+							 const stat_t& stat) const
+  {
+    constexpr std::size_t NROW = static_cast<std::size_t>(row_t::kNStat);
+    constexpr std::size_t NCOL = static_cast<std::size_t>(coll_t::nTypes);
+    constexpr std::size_t TOTROW = static_cast<std::size_t>(row_t::kNTotal);
+    static_assert( std::same_as<stat_t,
+		   std::array<
+		   std::array<std::size_t, NCOL>, NROW>> );
+
+    // labels have to follow the enum
+    std::array<std::string, NROW> stat_labels;
+    for (std::size_t i(0); i<NROW; ++i) {
+      stat_labels[i] = to_label(static_cast<row_t>(i));
+    }
+    
+    std::array<std::string, NROW - 1> ratio_labels {};
+    for (std::size_t i(1); i< stat_labels.size(); ++i) {
+      ratio_labels[i-1] = stat_labels[i] + " / total";
+    }    
+    
+    std::size_t max_label_width = TableUtils::maxLabelWidth(ratio_labels);
+    
+    std::array<std::string, NCOL> categories {};
+    for (std::size_t i(0); i<categories.size(); ++i) {
+      categories[i] = to_string( static_cast<coll_t>(i) );
+    }
+
+    std::stringstream table_out;
+    table_out << makeTable(stat,
+			   stat_labels,
+			   categories)
+      .columnWidth(12)
+      .dumpFooter(false)
+      .minLabelWidth(max_label_width);
+    
+    // define ratios
+    std::array<
+      std::array<float, NCOL>,
+      NROW - 1> ratioStat {};
+    
+    // fill ratios
+    for (std::size_t i(1); i<NROW; ++i) {
+      for (std::size_t j(0); j<NCOL; ++j) {
+	if (stat[TOTROW][j] == 0) ratioStat[i-1][j] = 0;
+	else ratioStat[i-1][j] = stat[i][j] * 1. / stat[TOTROW][j];
+      }
+    }
+    
+    table_out << makeTable(ratioStat,
+			   ratio_labels,
+                           categories)
+      .columnWidth(12)
+      .dumpHeader(false)
+      .minLabelWidth(max_label_width);
+
+    ATH_MSG_INFO(objectCollectionName << " statistics:" << std::endl
+		 << table_out.str());
+
+    return StatusCode::SUCCESS;
+  }
+
+  // -------------------------------------------------------------------- //
+
+  template <typename stat_t>
+  StatusCode ActsInspectTruthContentAlg::copyStatTable(const stat_t& contextual,
+						       stat_t& global) const {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    for (std::size_t i(0); i<contextual.size(); ++i) {
+      for (std::size_t j(0); j<contextual[i].size(); ++j) {
+	global[i][j] += contextual[i][j];
+      }
+    }
+    return StatusCode::SUCCESS;
+  }
+
+  // -------------------------------------------------------------------- //
+  
+  inline std::string ActsInspectTruthContentAlg::to_string(xAOD::UncalibMeasType type) const {
+    switch(type) {
+    case (xAOD::UncalibMeasType::Other):
+      return "Other";
+    case (xAOD::UncalibMeasType::PixelClusterType):
+      return "Pixel";
+    case (xAOD::UncalibMeasType::StripClusterType):
+      return "Strip";
+    case (xAOD::UncalibMeasType::MdtDriftCircleType):
+      return "MDT";
+    case (xAOD::UncalibMeasType::RpcStripType):
+      return "RPC";
+    case (xAOD::UncalibMeasType::TgcStripType):
+      return "TGC";
+    case (xAOD::UncalibMeasType::MMClusterType):
+      return "MM";
+    case (xAOD::UncalibMeasType::sTgcStripType):
+      return "sTGC";
+    case (xAOD::UncalibMeasType::HGTDClusterType):
+      return "HGTD";
+    default:
+      return "Unknown";
+    }
+  }
+
+  inline std::string ActsInspectTruthContentAlg::to_string(ActsInspectTruthContentAlg::SeedType type) const {
+    switch(type) {
+    case (ActsInspectTruthContentAlg::SeedType::PPP):
+      return "PPP";
+    case (ActsInspectTruthContentAlg::SeedType::SSS):
+      return "SSS";
+    case (ActsInspectTruthContentAlg::SeedType::PPS):
+      return "PPS";
+    case (ActsInspectTruthContentAlg::SeedType::PSS):
+      return "PSS";
+    case (ActsInspectTruthContentAlg::SeedType::Others):
+      return "Others";
+    default:
+      return "Unknown";
+    }
+  }
+
+  
+  inline std::string ActsInspectTruthContentAlg::to_string(ActsInspectTruthContentAlg::TrackType type) const {
+    switch(type) {
+    case (ActsInspectTruthContentAlg::TrackType::Main):
+      return "Collection";
+    default:
+      return "Unknown";
+    }
+  }
+
+  
+  inline std::string ActsInspectTruthContentAlg::to_label(ActsInspectTruthContentAlg::EStatClusters type) const {
+    switch(type) {
+    case (ActsInspectTruthContentAlg::EStatClusters::kNTotal):
+      return "Total number of Clusters";
+    case (ActsInspectTruthContentAlg::EStatClusters::kNClustersFromPrimaries):
+      return "Clusters with barcode < 200k";
+    case (ActsInspectTruthContentAlg::EStatClusters::kNClustersWithNoBarcode):
+      return "Clusters with no barcode";
+    case (ActsInspectTruthContentAlg::EStatClusters::kNClustersWith1Contribution):
+      return "Clusters with 1 contribution";
+    case (ActsInspectTruthContentAlg::EStatClusters::kNClustersWith1ValidContribution):
+      return "Clusters with 1 contribution (all < 200k)";
+    case (ActsInspectTruthContentAlg::EStatClusters::kNClustersWith2Contribution):
+      return "Clusters with 2 contributions";
+    case (ActsInspectTruthContentAlg::EStatClusters::kNClustersWith2ValidContribution):
+      return "Clusters with 2 contributions (all < 200k)";
+    case (ActsInspectTruthContentAlg::EStatClusters::kNClustersWith3Contribution):
+      return "Clusters with 3+ contributions";
+    case (ActsInspectTruthContentAlg::EStatClusters::kNClustersWith3ValidContribution):
+      return "Clusters with 3+ contributions (all < 200k)";
+    case (ActsInspectTruthContentAlg::EStatClusters::kNClustersWith200kBarcode):
+      return "Clusters with barcode >= 200k";
+    default:
+      return "Unknown";
+    }
+  }
+
+  inline std::string ActsInspectTruthContentAlg::to_label(ActsInspectTruthContentAlg::EStatSeeds type) const {
+    switch(type) {
+    case (ActsInspectTruthContentAlg::EStatSeeds::kNTotal):
+      return "Total number of Seeds";
+    case (ActsInspectTruthContentAlg::EStatSeeds::nKSeedsWith0Matches):
+      return "Seeds with 0 clusters with barcode < 200k";
+    case (ActsInspectTruthContentAlg::EStatSeeds::nKSeedsWith1Matches):
+      return "Seeds with 1 clusters with barcode < 200k";
+    case (ActsInspectTruthContentAlg::EStatSeeds::nKSeedsWith2Matches):
+      return "Seeds with 2 clusters with barcode < 200k";
+    case (ActsInspectTruthContentAlg::EStatSeeds::nKSeedsWith3Matches):
+      return "Seeds with 3 clusters with barcode < 200k";
+    case (ActsInspectTruthContentAlg::EStatSeeds::nKSeedsWith4Matches):
+      return "Seeds with 4 clusters with barcode < 200k";
+    case (ActsInspectTruthContentAlg::EStatSeeds::nKSeedsWith5Matches):
+      return "Seeds with 5 clusters with barcode < 200k";
+    case (ActsInspectTruthContentAlg::EStatSeeds::nKSeedsWith6Matches):
+      return "Seeds with 6 clusters with barcode < 200k";
+    case (ActsInspectTruthContentAlg::EStatSeeds::nKSeedsSame2Matches):
+      return "Seeds with 2 clusters with barcode < 200k (all same)";
+    case (ActsInspectTruthContentAlg::EStatSeeds::nKSeedsSame3Matches):
+      return "Seeds with 3 clusters with barcode < 200k (all same)";
+    case (ActsInspectTruthContentAlg::EStatSeeds::nKSeedsSame4Matches):
+      return "Seeds with 4 clusters with barcode < 200k (all same)";
+    case (ActsInspectTruthContentAlg::EStatSeeds::nKSeedsSame5Matches):
+      return "Seeds with 5 clusters with barcode < 200k (all same)";
+    case (ActsInspectTruthContentAlg::EStatSeeds::nKSeedsSame6Matches):
+      return "Seeds with 6 clusters with barcode < 200k (all same)";
+    default:
+      return "Unknown";
+    }
+  }
+
+
+  inline std::string ActsInspectTruthContentAlg::to_label(ActsInspectTruthContentAlg::EStatTracks type) const {
+    switch(type) {
+    case (ActsInspectTruthContentAlg::EStatTracks::kNTotal):
+      return "Total number of Tracks";
+    case (ActsInspectTruthContentAlg::EStatTracks::kNFullMatch):
+      return "Tracks with only clusters with barcodes <200k";
+    case (ActsInspectTruthContentAlg::EStatTracks::kNPerfectMatch):
+      return "Tracks with only clusters with barcodes <200k (all same)";
+    case (ActsInspectTruthContentAlg::EStatTracks::kNTracks0Holes):
+      return "Tracks with 0 holes";
+    case (ActsInspectTruthContentAlg::EStatTracks::kNTracks1Holes):
+      return "Tracks with 1 holes";
+    case (ActsInspectTruthContentAlg::EStatTracks::kNTracks2Holes):
+      return "Tracks with 2 holes";
+    case (ActsInspectTruthContentAlg::EStatTracks::kNTracks3Holes):
+      return "Tracks with 3+ holes";
+    case (ActsInspectTruthContentAlg::EStatTracks::kNTracks0Outliers):
+      return "Tracks with 0 outliers";
+    case (ActsInspectTruthContentAlg::EStatTracks::kNTracks1Outliers):
+      return "Tracks with 1 outliers";
+    case (ActsInspectTruthContentAlg::EStatTracks::kNTracks2Outliers):
+      return "Tracks with 2 outliers";
+    case (ActsInspectTruthContentAlg::EStatTracks::kNTracks3Outliers):
+      return "Tracks with 3+ outliers";
+    default:
+      return "Unknown";
+    }
+  }
+
+
+} // namespace 
+
