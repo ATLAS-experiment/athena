@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef FTAG_METADATA_ALG_H
-#define FTAG_METADATA_ALG_H_H
+#ifndef JETTAGDERIVATIONUTILS_METADATAALG_H
+#define JETTAGDERIVATIONUTILS_METADATAALG_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
