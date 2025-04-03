@@ -26,6 +26,13 @@ atlas_add_test( PixelDigitizationUtilities_test
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} GaudiKernel AthenaKernel CxxUtils TestTools PathResolver PixelConditionsData
    POST_EXEC_SCRIPT "nopost.sh" )
+   
+atlas_add_test( PixelNoiseFunctions_test
+   SOURCES test/PixelNoiseFunctions_test.cxx src/PixelNoiseFunctions.cxx
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} CxxUtils TestTools PixelConditionsData SiDigitization
+   POST_EXEC_SCRIPT "nopost.sh" )
+
 
 
 # Install files from the package:
