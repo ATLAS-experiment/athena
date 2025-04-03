@@ -96,6 +96,48 @@ namespace xAOD
       }
       return energy;
     }
+
+
+
+    /// @brief Get the eta in one layer of the EM Calo
+    /// @param layer Layer between 0 (Presampler) and 3 (Back)
+    /// @return energy
+    /// Works for both, barrel and endcap
+    [[nodiscard]] inline float etaBE(const unsigned sample, const std::uint32_t samplingPattern, const std::span<const float> e_sampl, const std::span<const float> eta_sampl) {
+      if (sample>3) {return defaultErrorValue;}
+      const CaloSample barrelSample=(CaloSample)(CaloSampling::PreSamplerB+sample);
+      const CaloSample endcapSample=(CaloSample)(CaloSampling::PreSamplerE+sample);
+      const bool haveBarrel=hasSampling(barrelSample, samplingPattern);
+      const bool haveEndcap=hasSampling(endcapSample, samplingPattern);
+      if (haveBarrel && haveEndcap) {
+        //cluster spans barren and endcap
+        float eBarrel=getSamplVar(barrelSample,samplingPattern,e_sampl);  //Check for errorcode? Should not happen...
+        float eEndcap=getSamplVar(endcapSample,samplingPattern,e_sampl);
+
+        float etaBarrel=getSamplVar(barrelSample,samplingPattern,eta_sampl);
+        float etaEndcap=getSamplVar(endcapSample,samplingPattern,eta_sampl);
+        float eSum=eBarrel + eEndcap;
+        if (eSum > 100 /*MeV*/) {
+          //E-weighted average ...
+          if ((eBarrel > 0 && eEndcap > 0) || (eBarrel < 0 && eEndcap < 0))
+            return (eBarrel * etaBarrel + eEndcap * etaEndcap) / eSum;
+          else if (eBarrel > 0)
+            return etaBarrel;
+          else
+            return etaEndcap;
+         }//else eSum==0 case, should never happen
+         return (0.5 * (etaBarrel + etaEndcap));
+      }
+      if (haveBarrel) {
+        return getSamplVar(barrelSample,samplingPattern,eta_sampl);
+      }
+      if (haveEndcap) {
+        return getSamplVar(endcapSample,samplingPattern,eta_sampl);
+      }
+  
+      //Should never reach this point ...
+      return defaultErrorValue;
+    }
   }
 }
 
