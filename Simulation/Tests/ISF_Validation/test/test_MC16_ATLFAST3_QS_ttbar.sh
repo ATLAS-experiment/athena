@@ -5,7 +5,7 @@
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-memory: 5999
-# art-athena-mt: 4
+# art-athena-mt: 8
 # art-output: test.HITS.pool.root
 # art-output: truth.root
 
