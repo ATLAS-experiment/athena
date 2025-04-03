@@ -7,7 +7,7 @@
 
 /*
   author: Dirk Duschinger
-  documentation: https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-TauTruthMatchingTool.rst
+  documentation: https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-TauTruthMatchingTool.rst
 */
 
 // Framework include(s):
