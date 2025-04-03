@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( Rivet_i )
 
 # External dependencies:
 find_package( FastJet )
-find_package( FastJetContrib )
+find_package( FastJetContrib COMPONENTS RecursiveTools )
 find_package( ROOT COMPONENTS Core Hist )
 find_package( Rivet )
 find_package( YODA )
