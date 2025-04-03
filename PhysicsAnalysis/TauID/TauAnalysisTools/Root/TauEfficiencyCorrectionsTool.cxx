@@ -311,7 +311,36 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
   std::string sDirectory = "TauAnalysisTools/" + std::string(sSharedFilesVersion) + "/EfficiencyCorrections/";
   for (auto iEfficiencyCorrectionType : m_vEfficiencyCorrectionTypes){
 
-    if (iEfficiencyCorrectionType == SFEleIDElectron)
+    if (iEfficiencyCorrectionType == SFJetIDHadTau)
+    {
+      if (m_sInputFilePathJetIDHadTau.empty()) {
+        if(m_useFastSim) {
+          ATH_MSG_WARNING("No fast-sim recommendation for Tau RNN, using full sim");
+        }
+
+	if(m_sCampaign=="mc23"){  
+            m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_mc23_v0.root";
+        } else if (m_sCampaign=="mc20"){ 
+            ATH_MSG_ERROR("SFs for Run2 not available, please check the Campaign option in the tool configuration");
+            return StatusCode::FAILURE;
+        }
+      }
+      if (m_sVarNameJetIDHadTau.empty()) m_sVarNameJetIDHadTau = "TauScaleFactorJetIDHadTau";
+
+      std::string sJetIDWP = ConvertJetIDToString(m_iJetIDLevel);
+      if (sJetIDWP.empty()) {
+        ATH_MSG_WARNING("Could not find valid ID working point. Skip ID efficiency corrections.");
+        continue;
+      }
+
+      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/JetIDHadTauTool", this);
+      m_vCommonEfficiencyTools.push_back(tTool);
+      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathJetIDHadTau));
+      ATH_CHECK(tTool->setProperty("VarName", m_sVarNameJetIDHadTau));
+      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+      ATH_CHECK(tTool->setProperty("WP", sJetIDWP));
+    }	  
+    else if (iEfficiencyCorrectionType == SFEleIDElectron)
     {
       // the path must be updated once RNN eVeto SFs are available
       if (m_sInputFilePathEleIDElectron.empty()) {
@@ -351,13 +380,18 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
       }
       if (m_sInputFilePathTriggerHadTau.empty()) {
         // Determine the input file name from the given trigger name.
-        if (m_sTriggerName.find("mediumRNN_tracktwoMVA") != std::string::npos) {
-          m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_data2022"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
-        }
-        else {
-          ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported. Please fix \"TriggerName\" property. In case of doube please consult with TauTrigger coordinators");
-          return StatusCode::FAILURE;
-        }
+	if(m_sCampaign=="mc23"){
+          if (m_sTriggerName.find("mediumRNN_tracktwoMVA") != std::string::npos) {
+            m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_data2022"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+          }
+          else {
+            ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported. Please fix \"TriggerName\" property. In case of doube please consult with TauTrigger coordinators");
+            return StatusCode::FAILURE;
+          }
+	} else if (m_sCampaign=="mc20"){
+            ATH_MSG_ERROR("SFs for Run2 not available, please check the Campaign option in the tool configuration");
+	    return StatusCode::FAILURE;
+	}
       }
       if (m_sVarNameTriggerHadTau.empty()) m_sVarNameTriggerHadTau = "TauScaleFactorTriggerHadTau";
 	 
