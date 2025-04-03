@@ -6,6 +6,7 @@ atlas_subdir( ReadoutGeometryBase )
 # External dependencies:
 find_package( CLHEP )
 find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( Boost COMPONENTS unit_test_framework)
 
 # Component(s) in the package:
 atlas_add_library( ReadoutGeometryBase
@@ -18,3 +19,10 @@ atlas_add_library( ReadoutGeometryBase
                   CxxUtils AthenaKernel AtlasDetDescr GeoPrimitives Identifier
                   GaudiKernel InDetCondTools TrkDetElementBase AthenaBaseComps
    PRIVATE_LINK_LIBRARIES GeoModelUtilities TrkSurfaces )
+   
+atlas_add_test( SiCellId_test
+   SOURCES test/SiCellId_test.cxx 
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+   LINK_LIBRARIES ${Boost_LIBRARIES}  CxxUtils TestTools ReadoutGeometryBase
+   POST_EXEC_SCRIPT "nopost.sh" )
+

@@ -92,7 +92,7 @@ std::ostream & operator << (std::ostream & os, const SiCellId & cellId);
 inline SiCellId::SiCellId()
 {
   // set in invalid state
-  // This sets the invalid bit plus set phi and eta index to there most negative value
+  // This sets the invalid bit plus set phi and eta index to their most negative value
   m_word = VALID | ETA_NEG | PHI_NEG ;
 }
 
