@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PhiHoughTransformAlg.h"
@@ -9,6 +9,7 @@
 
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h" 
+#include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 #include "MuonSpacePoint/UtilFunctions.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 
@@ -20,9 +21,6 @@ namespace {
 namespace MuonR4{
 using namespace SegmentFit;
 
-PhiHoughTransformAlg::PhiHoughTransformAlg(const std::string& name,
-                                                   ISvcLocator* pSvcLocator)
-    : AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode PhiHoughTransformAlg::initialize() {
     ATH_CHECK(m_geoCtxKey.initialize());
@@ -76,7 +74,7 @@ int PhiHoughTransformAlg::countIncompatibleEtaHits(const ActsPeakFinderForMuon::
         }
     }
     // count the number of eta PRD not compatible with this extension.
-    return std::count_if(foundEtas.begin(), foundEtas.end(),
+    return std::ranges::count_if(foundEtas,
                          [](const std::pair<const xAOD::UncalibratedMeasurement*, bool>& p) {
                              return !p.second;
                          });
@@ -85,15 +83,17 @@ std::unique_ptr<SegmentSeed>
     PhiHoughTransformAlg::buildSegmentSeed(const HoughMaximum & etaMax,  
                                            const ActsPeakFinderForMuon::Maximum & phiMax) const {
         // book a new hit list
-        std::vector<HoughHitType> hitsOnMax; 
+        std::vector<HoughHitType> hitsOnMax{}; 
         // copy the pure eta hits onto the hit list 
-        std::copy_if(etaMax.getHitsInMax().begin(), etaMax.getHitsInMax().end(), std::back_inserter(hitsOnMax), [](const HoughHitType &hit){
+        std::ranges::copy_if(etaMax.getHitsInMax(), 
+                             std::back_inserter(hitsOnMax), [](const HoughHitType &hit){
             return (hit->measuresEta() && !hit->measuresPhi()); 
         }); 
         // and then add all hits (2D and pure phi) from the phi-extension to it 
         hitsOnMax.insert(hitsOnMax.end(), phiMax.hitIdentifiers.begin(), phiMax.hitIdentifiers.end()); 
         // use this to construct the segment seed
-        sortByLayer(hitsOnMax);
+        SpacePointPerLayerSorter sorter{hitsOnMax.front()->chamber()->idHelperSvc()};
+        std::ranges::stable_sort(hitsOnMax, sorter);
         return std::make_unique<SegmentSeed>(etaMax.tanTheta(), etaMax.interceptY(), phiMax.x, phiMax.y, hitsOnMax.size(), std::move(hitsOnMax), etaMax.parentBucket());         
 }
 
@@ -194,7 +194,8 @@ std::unique_ptr<SegmentSeed>
     // recovers cases of a single phi hit assuming a straight 
     // line extrapolation from the beam line to the phi measurement
     std::vector<HoughHitType> hits{maximum.getHitsInMax()};
-    sortByLayer(hits);
+    SpacePointPerLayerSorter sorter{hits.front()->chamber()->idHelperSvc()};
+    std::ranges::stable_sort(hits, sorter);
     return std::make_unique<SegmentSeed>(maximum.tanTheta(), maximum.interceptY(), 
                         data.searchSpaceTanAngle.first, 
                         data.searchSpaceIntercept.first, 

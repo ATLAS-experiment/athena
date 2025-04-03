@@ -1,21 +1,18 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EtaHoughTransformAlg.h"
 
 #include <MuonReadoutGeometryR4/SpectrometerSector.h>
-#include <StoreGate/ReadCondHandle.h>
 
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
 #include "MuonPatternEvent/SegmentSeed.h"
 #include "MuonSpacePoint/UtilFunctions.h"
+#include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 #include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
 
 namespace MuonR4{
-EtaHoughTransformAlg::EtaHoughTransformAlg(const std::string& name,
-                                                   ISvcLocator* pSvcLocator)
-    : AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode EtaHoughTransformAlg::initialize() {
     ATH_CHECK(m_geoCtxKey.initialize());
@@ -363,7 +360,8 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
         // add phi measurements - will be filtered for compatibility in separate algorithm
         extendWithPhiHits(hitList, bucket);
         // sort hits by layer 
-        sortByLayer(hitList);
+        SpacePointPerLayerSorter sorter{m_idHelperSvc.get()};
+        std::ranges::stable_sort(hitList, sorter);
         // create hough maximum instance and add it to the event data for later writing! 
         const HoughMaximum& houghMax{data.maxima.emplace_back(max.x, max.y, nHits, std::move(hitList), bucket.bucket)};
 

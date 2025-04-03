@@ -77,16 +77,4 @@ namespace MuonR4{
             return Amg::toString(cov);
         }, mat);
     }
-    void sortByLayer(std::vector<const SpacePoint*>& spacePoints) {
-        std::ranges::sort(spacePoints, 
-              [](const SpacePoint*& a, const SpacePoint*& b){   
-                    const Amg::Vector3D& hitA{a->positionInChamber()};
-                    const Amg::Vector3D& hitB{b->positionInChamber()};
-                    constexpr double layerTol = 1.*Gaudi::Units::mm;
-                    if (std::abs(hitA.z() - hitB.z()) > layerTol) {
-                        return hitA.z() < hitB.z();
-                    }
-                    return hitA.y() < hitB.y();
-              });
-    }
 }
