@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/Tool_InputConverter.h"
@@ -113,8 +113,6 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
     }
     else {
       typeFlags.at((int)PanTau::TauConstituent::t_Neutral) = 1;
-      typeFlags.at((int)PanTau::TauConstituent::t_NeutLowA) = 1;
-      typeFlags.at((int)PanTau::TauConstituent::t_NeutLowB) = 1;
             
       //neutral PFO arranging --- check for pi0 tag
       mvaValue = pfo->bdtPi0Score();

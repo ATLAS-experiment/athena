@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 import AthenaCommon.SystemOfUnits as Units
@@ -31,8 +31,6 @@ def createPanTauConfigFlags():
     flags.addFlag("TauConstituents_Selection_Charged_EtaBinned_EtCut", [1.0*Units.GeV, 1.0*Units.GeV, 1.0*Units.GeV, 1.0*Units.GeV, 1.0*Units.GeV])
     flags.addFlag("TauConstituents_Selection_OutNeut_EtaBinned_EtCut", [1.0*Units.GeV, 1.0*Units.GeV, 1.0*Units.GeV, 1.0*Units.GeV, 1.0*Units.GeV])
     flags.addFlag("TauConstituents_Selection_OutChrg_EtaBinned_EtCut", [1.0*Units.GeV, 1.0*Units.GeV, 1.0*Units.GeV, 1.0*Units.GeV, 1.0*Units.GeV])
-    flags.addFlag("TauConstituents_Selection_NeutLowA_EtaBinned_EtCut", [1.85*Units.GeV, 2.25*Units.GeV, 2.35*Units.GeV, 2.15*Units.GeV, 1.65*Units.GeV])
-    flags.addFlag("TauConstituents_Selection_NeutLowB_EtaBinned_EtCut", [1.6*Units.GeV, 2.0*Units.GeV, 2.1*Units.GeV, 1.9*Units.GeV, 1.4*Units.GeV])
     flags.addFlag("CellBased_BinEdges_Eta", [0.000, 0.800, 1.400, 1.500, 1.900, 9.900])
     flags.addFlag("CellBased_EtaBinned_Pi0MVACut_1prong", [0.46, 0.39, 0.51, 0.47, 0.54])
     flags.addFlag("CellBased_EtaBinned_Pi0MVACut_3prong", [0.47, 0.52, 0.60, 0.55, 0.50])

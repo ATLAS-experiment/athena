@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/Tool_TauConstituentSelector.h"
@@ -42,10 +42,6 @@ StatusCode PanTau::Tool_TauConstituentSelector::initialize() {
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_OutNeut_EtaBinned_EtCut", m_Selection_OutNeut_EtaBinned_EtCut) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_OutChrg_EtaBinned_EtCut", m_Selection_OutChrg_EtaBinned_EtCut) );
     
-  //et cuts for neutral test types with lower et cuts
-  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_NeutLowA_EtaBinned_EtCut", m_Selection_NeutLowA_EtaBinned_EtCut) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_NeutLowB_EtaBinned_EtCut", m_Selection_NeutLowB_EtaBinned_EtCut) );    
-    
   return StatusCode::SUCCESS;
 } 
 
@@ -60,8 +56,6 @@ double PanTau::Tool_TauConstituentSelector::getEtCut(double eta, PanTau::TauCons
       case PanTau::TauConstituent::t_Pi0Neut:  return m_Selection_Pi0Neut_EtaBinned_EtCut[iEtaBin];
       case PanTau::TauConstituent::t_OutNeut:  return m_Selection_OutNeut_EtaBinned_EtCut[iEtaBin];
       case PanTau::TauConstituent::t_OutChrg:  return m_Selection_OutChrg_EtaBinned_EtCut[iEtaBin];
-      case PanTau::TauConstituent::t_NeutLowA: return m_Selection_NeutLowA_EtaBinned_EtCut[iEtaBin];
-      case PanTau::TauConstituent::t_NeutLowB: return m_Selection_NeutLowB_EtaBinned_EtCut[iEtaBin];
       default:
 	return 9999999.;
       }
@@ -102,18 +96,9 @@ StatusCode PanTau::Tool_TauConstituentSelector::SelectTauConstituents(const std:
       passesSelection = passesSelection_NeutralConstituent(curConstituent);
             
       //special treatment for the testing neutral flags
-      //  a constituent can be a NeutLowA but not a neutral (because neutral Et cut is higher)
-      //  => need that the constituent is in the seed for calculating test variables, but need it to NOT be tagged as neutral
-      //  => remove the neutral-tag and check if it passes NeutLowA
-      //-> repeat those steps for NeutLowB
       if (!passesSelection) {
 	curConstituent->removeTypeFlag(PanTau::TauConstituent::t_Neutral);
 	curConstituent->removeTypeFlag(PanTau::TauConstituent::t_Pi0Neut);
-	passesSelection = passesSelection_NeutLowAConstituent(curConstituent);
-	if (!passesSelection) {
-	  curConstituent->removeTypeFlag(PanTau::TauConstituent::t_NeutLowA);
-	  passesSelection = passesSelection_NeutLowBConstituent(curConstituent);
-	}
       }            
       // apply further selection to constituent in isolation cone:
     } else if (curConstituent->isOfType(PanTau::TauConstituent::t_OutChrg)) {
@@ -181,16 +166,3 @@ bool PanTau::Tool_TauConstituentSelector::passesSelection_OutChrgConstituent(Tau
   return true;
 }
 
-
-bool PanTau::Tool_TauConstituentSelector::passesSelection_NeutLowAConstituent(TauConstituent* TauConstituent) const {
-  TLorentzVector tlv_Constituent = TauConstituent->p4();
-    
-  return tlv_Constituent.Pt() >= getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_NeutLowA);
-}
-
-
-bool PanTau::Tool_TauConstituentSelector::passesSelection_NeutLowBConstituent(TauConstituent* TauConstituent) const {
-  TLorentzVector tlv_Constituent = TauConstituent->p4();
-   
-  return tlv_Constituent.Pt() >= getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_NeutLowB);
-}

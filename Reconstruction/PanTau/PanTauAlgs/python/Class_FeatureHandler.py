@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import string
 
@@ -130,22 +130,15 @@ class FeatureHandler:
         self.m_ConstituentTypeName_Pi0Neut  = "Pi0Neut"
         self.m_ConstituentTypeName_OutNeut  = "OuterNeut"
         self.m_ConstituentTypeName_OutChrg  = "OuterChrg"
-        self.m_ConstituentTypeName_NeutLowA = "NeutLowA"
-        self.m_ConstituentTypeName_NeutLowB = "NeutLowB"
         
         self.m_ConstituentTypes = []
         #baseline
         self.m_ConstituentTypes += [self.m_ConstituentTypeName_Charged]
         self.m_ConstituentTypes += [self.m_ConstituentTypeName_Neutral]
         self.m_ConstituentTypes += [self.m_ConstituentTypeName_Pi0Neut]
-        #for testing
-        self.m_ConstituentTypes += [self.m_ConstituentTypeName_NeutLowA]
-        self.m_ConstituentTypes += [self.m_ConstituentTypeName_NeutLowB]
         
         self.m_EnergyVariantsList = []
         self.m_EnergyVariantsList += ["EtAllConsts"]
-        self.m_EnergyVariantsList += ["EtNeutLowA"]
-        self.m_EnergyVariantsList += ["EtNeutLowB"]
         # ==============================================
         
         
@@ -317,8 +310,6 @@ class FeatureHandler:
                     
                     self.addToFeatures_FullName(self.m_ConstituentTypeName_Neutral + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)
                     self.addToFeatures_FullName(self.m_ConstituentTypeName_Pi0Neut + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)
-                    self.addToFeatures_FullName(self.m_ConstituentTypeName_NeutLowA + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)
-                    self.addToFeatures_FullName(self.m_ConstituentTypeName_NeutLowB + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)
                 #end loop over iNum
             #end loop over sorts
         #end loop over variables
@@ -343,9 +334,6 @@ class FeatureHandler:
             
             self.addToFeatures_FullName(self.m_ConstituentTypeName_Neutral + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)
             self.addToFeatures_FullName(self.m_ConstituentTypeName_Pi0Neut + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)
-            self.addToFeatures_FullName(self.m_ConstituentTypeName_NeutLowA + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)
-            self.addToFeatures_FullName(self.m_ConstituentTypeName_NeutLowB + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)
-            
         #end loop over variables
     #end addTypeSpecificFeatures_Shots
     
