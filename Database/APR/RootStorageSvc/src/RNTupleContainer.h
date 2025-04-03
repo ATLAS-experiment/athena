@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //====================================================================
 //    Root Database Container RNTuple implementation
@@ -34,7 +34,11 @@ namespace ROOT::Experimental { class RNTupleReader; }
 namespace pool {
 
 using ROOT::Experimental::RNTupleReader;
-using ROOT::Experimental::RNTupleView;
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+   using ROOT::RNTupleView;
+#else
+   using ROOT::Experimental::RNTupleView;
+#endif
 
 // Forward declaration
 class DbColumn;

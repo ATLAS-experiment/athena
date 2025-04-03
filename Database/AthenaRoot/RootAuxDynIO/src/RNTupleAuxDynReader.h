@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RNTUPLEAUXDYNREADER_H
@@ -15,15 +15,18 @@
 #include <optional>
 #include <string>
 
-namespace ROOT::Experimental {
-   class RNTupleReader; 
-}
+namespace ROOT::Experimental { class RNTupleReader; }
+
 class TClass;
 
 namespace RootAuxDynIO
 {
-   using ROOT::Experimental::RNTupleReader;
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+   using ROOT::RNTupleView;
+#else
    using ROOT::Experimental::RNTupleView;
+#endif
+   using ROOT::Experimental::RNTupleReader;
 
    class RNTupleAuxDynReader : public AthMessaging, public IRootAuxDynReader
    {

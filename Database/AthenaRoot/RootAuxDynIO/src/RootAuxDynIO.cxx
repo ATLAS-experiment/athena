@@ -23,7 +23,6 @@
 
 namespace RootAuxDynIO
 {
-   using ROOT::Experimental::RNTupleReader;
 
    bool
    hasAuxStore(std::string_view fieldname, TClass *tc) {
