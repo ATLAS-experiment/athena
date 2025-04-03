@@ -41,7 +41,6 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::initialize() {
       return StatusCode::FAILURE;
     }
 
-    
     m_maxMiss = (m_nLayers_1stStage + m_nLayers_2ndStage) - m_threshold;
 
     if (m_FPGATrackSimMapping->getExtensionNNVolMapString() != "" && m_FPGATrackSimMapping->getExtensionNNHitMapString() != "") {
@@ -91,8 +90,8 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
     // Note that there now might be only one "slice", at least for the time being.
     if (m_slicedHitHeader) {
       for (int ireg = 0; ireg < rmap_2nd->getNRegions(); ireg++) {
-	FPGATrackSimTowerInputHeader tower = FPGATrackSimTowerInputHeader(ireg);
-	m_slicedHitHeader->addTower(tower);
+        FPGATrackSimTowerInputHeader tower = FPGATrackSimTowerInputHeader(ireg);
+        m_slicedHitHeader->addTower(tower);
       }
     }
     // JAA need to update this
@@ -103,8 +102,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
     if(m_debugEvent) ATH_MSG_DEBUG("Got: "<<tracks.size()<<" tracks to extrapolate");
 
     // Now, loop over the tracks.
-    for (std::shared_ptr<const FPGATrackSimTrack> track : tracks)
-    {
+    for (std::shared_ptr<const FPGATrackSimTrack> track : tracks) {
         if(m_debugEvent) ATH_MSG_DEBUG("\033[1;31m-------------------------- extraploating Track ------------------ \033[0m");
 
         if (track->passedOR() == 0) {
@@ -112,20 +110,20 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
         }
 
         const std::vector<FPGATrackSimHit> hitsOnTrack = track->getFPGATrackSimHits();
-	miniRoad road;	
-	float pt = track->getPt();
-        for (const auto &thit : hitsOnTrack)
-        {	  
-	  road.addHit(std::make_shared<const FPGATrackSimHit>(thit)); // add all hits, we check if WC later
+        miniRoad road;
+        float pt = track->getPt();
+
+        for (const auto &thit : hitsOnTrack) {
+            road.addHit(std::make_shared<const FPGATrackSimHit>(thit)); // add all hits, we check if WC later
         }
-        if(m_debugEvent)
-        {
+
+        if(m_debugEvent) {
             ATH_MSG_DEBUG("-----------------Hits in event");
-	    for (const std::shared_ptr<const FPGATrackSimHit>& hit: hits)
-	      {
-		ATH_MSG_DEBUG("Hit "<<" X: "<<hit->getX()<<" Y: "<<hit->getY()<<" Z: "<<hit->getZ()<<" R: "<<hit->getR()<<" hitType: "<<hit->getHitType()<<" getDetType: "<<hit->getDetType());
-	      }
+            for (const std::shared_ptr<const FPGATrackSimHit>& hit: hits) {
+                ATH_MSG_DEBUG("Hit " << " X: " << hit->getX() << " Y: " << hit->getY() << " Z: " << hit->getZ() << " R: " << hit->getR() << " hitType: " << hit->getHitType() << " getDetType: " << hit->getDetType());
+            }
         }
+
         std::vector<miniRoad> roadsToExtrapolate;
         roadsToExtrapolate.push_back(road);
 
@@ -135,10 +133,8 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
         std::vector<std::vector<unsigned long>> tmp_predictedHitsFineID;
         std::vector<unsigned int> currentRoadHitITkLayer;
         std::vector<std::vector<unsigned int>> tmp_foundHitITkLayer;
-
         std::vector<float> currentRoadHitDistancePredFound;
         std::vector<std::vector<float>> tmp_foundHitDistancePredFound;
-
 
         for (unsigned int i = 0; i < roadsToExtrapolate.size(); i++){
             tmp_predictedHitsFineID.push_back(currentRoadHitFineIDs);
@@ -147,9 +143,8 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
         }
 
         int count = 0;
-        while(roadsToExtrapolate.size() > 0)
-        {
-	    miniRoad currentRoad = *roadsToExtrapolate.begin();
+        while(roadsToExtrapolate.size() > 0) {
+            miniRoad currentRoad = *roadsToExtrapolate.begin();
             std::vector<unsigned long> tmp_currentRoadHitFineIDs = *tmp_predictedHitsFineID.begin();
             std::vector<unsigned int> tmp_currentRoadHitITkLayer = *tmp_foundHitITkLayer.begin();
             std::vector<float> tmp_currentRoadHitDistancePredFound = *tmp_foundHitDistancePredFound.begin();
@@ -159,8 +154,11 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             tmp_foundHitITkLayer.erase(tmp_foundHitITkLayer.begin());
             tmp_foundHitDistancePredFound.erase(tmp_foundHitDistancePredFound.begin());
             count ++;
-            if(m_debugEvent) ATH_MSG_DEBUG("\033[1;31m-------------------------- extraploating road "<< count << "------------------ \033[0m");
-            printRoad(currentRoad);
+
+            if(m_debugEvent) {
+                ATH_MSG_DEBUG("\033[1;31m-------------------------- extraploating road "<< count << "------------------ \033[0m");
+                printRoad(currentRoad);
+            }
             // Check exit condition
             if (currentRoad.getNHits() >= (m_nLayers_1stStage+m_nLayers_2ndStage))
             {
@@ -172,25 +170,21 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             }
             // Other try to find the next hit in this road
             std::vector<float> inputTensorValues;
-            if(!fillInputTensorForNN(currentRoad, inputTensorValues))
-            {
+            if (!fillInputTensorForNN(currentRoad, inputTensorValues)) {
                 ATH_MSG_WARNING("Failed to create input tensor for this road");
                 continue;
             }
             std::vector<float> predhit;
             long fineID;
-            if(!getPredictedHit(inputTensorValues, predhit, fineID))
-            {
+            if (!getPredictedHit(inputTensorValues, predhit, fineID)) {
                 ATH_MSG_WARNING("Failed to predict hit for this road");
                 continue;
             }
             // Check if exist conditions are there
-            if(m_doOutsideIn)
-            {
+            if (m_doOutsideIn) {
                 // Make sure we are not predicting inside the inner most layer (x and y < 25)
                 // If we are, road is done
-                if (abs(predhit[0]) < 25 && abs(predhit[1]) < 25)
-                {
+                if (abs(predhit[0]) < 25 && abs(predhit[1]) < 25) {
                     completedRoads.push_back(currentRoad);
                     m_predictedHitsFineID.push_back(tmp_currentRoadHitFineIDs);
                     m_foundHitITkLayer.push_back(tmp_currentRoadHitITkLayer);
@@ -198,13 +192,11 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                     continue;
                 }
             }
-            else
-            {
+            else {
                 // Make sure we are not predicting outside the outer most layer
                 // if we are, road is done
-                double rad = std::sqrt(std::pow(predhit[0], 2) + std::pow(predhit[1], 2));
-                if (abs(predhit[0]) > 1024 || abs(predhit[1]) > 1024 || rad > 1024 || abs(predhit[2]) > 3000)
-                {
+                double rad = std::sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]);
+                if (abs(predhit[0]) > 1024 || abs(predhit[1]) > 1024 || rad > 1024 || abs(predhit[2]) > 3000) {
                     completedRoads.push_back(currentRoad);
                     m_predictedHitsFineID.push_back(tmp_currentRoadHitFineIDs);
                     m_foundHitITkLayer.push_back(tmp_currentRoadHitITkLayer);
@@ -212,12 +204,11 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                     continue;
                 }
             }
-            if(m_debugEvent)
-            {
-                ATH_MSG_DEBUG("Predicted hit at: "<<predhit[0]<<" "<<predhit[1]<<" "<<predhit[2]);
+
+            if(m_debugEvent) {
+                ATH_MSG_DEBUG("Predicted hit at: " << predhit[0] << " " << predhit[1] << " " << predhit[2]);
             }
 
-	    
             // Now search for the hits
             bool foundhitForRoad = false;
             if(fineID == 215){
@@ -229,173 +220,158 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             // Get the last layer and hit in the road
             unsigned lastLayerInRoad = 0;
             std::shared_ptr<const FPGATrackSimHit> lastHit;
-            if(!getLastLayer(currentRoad, lastLayerInRoad, lastHit) or !lastHit)
-            {
+            if(!getLastLayer(currentRoad, lastLayerInRoad, lastHit) or !lastHit) {
                 ATH_MSG_WARNING("Failed to find last layer this road");
                 continue;
             }
-	    unsigned layer = lastLayerInRoad+1; // the layer we're looking to find
-	    bool lastHitWasReal = lastHit->isReal();
-	    float lastHitR = lastHit->getR();
-            if(layer >= (m_nLayers_1stStage + m_nLayers_2ndStage))
-            {
+            unsigned layer = lastLayerInRoad+1; // the layer we're looking to find
+            bool lastHitWasReal = lastHit->isReal();
+            float lastHitR = lastHit->getR();
+            if(layer >= (m_nLayers_1stStage + m_nLayers_2ndStage)) {
                 completedRoads.push_back(currentRoad);
                 continue;
             }
 
-	    unsigned int hitsInWindow = 0;
-	    
-	    // List of all the hits, with their distances to the predicted point
-	    std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> listofHitsFound;
+            unsigned int hitsInWindow = 0;
 
-	    for (const std::shared_ptr<const FPGATrackSimHit>& hit: hits) 
-	      {
-		if (m_doOutsideIn && (hit->getR() > lastHitR)) continue;
-		if (!m_doOutsideIn && (hit->getR() < lastHitR)) continue;
-		if ((hit->getHitType() == HitType::spacepoint) && ((hit->getPhysLayer()) %2 == 1)) continue; // ignore outer parts of SP, they get added separately
-		if(m_debugEvent)
-		  {
-		    ATH_MSG_DEBUG("In the hit loop hit at: "<<hit->getX() << " " << hit->getY() << " " << hit->getZ());
-		  }
-		
-		// loop over hits in that layer
-		if (getFineID(*hit) == fineID && hit->isReal())
-		  {
-		    // a hit is in the right fine ID == layer
-		    double hitz = hit->getZ();
-		    double hitr = hit->getR();
-		    double predr = sqrt(predhit[0]*predhit[0] + predhit[1] * predhit[1]);
-		    double predz = predhit[2];
-		    double windowR = m_windowR[0]; // default for all layers
-		    double windowZ = m_windowZ[0]; // default for all layers
-		    // But if available pick up per-window values
-		    if (m_windowR.size() > 1) {
-		      windowR = m_windowR[layer-m_nLayers_1stStage]; // offset by n1st stage
-		    }
-		    if (m_windowZ.size() > 1) {
-		      windowZ = m_windowZ[layer-m_nLayers_1stStage]; // offset by n1st stage
-		    }
-		    
-		    // If last hit was not real and we want to, scale the window
-		    if (m_missedHitRScaling > 0 && !lastHitWasReal) windowR *= m_missedHitRScaling;
-		    if (m_missedHitZScaling > 0 && !lastHitWasReal) windowZ *= m_missedHitZScaling;			
-		    
-		    // now scale windows for low pt, if desired
-		    if (pt < m_lowPtValueForWindowRScaling.value()) windowR *= m_lowPtWindowRScaling.value();
-		    if (pt < m_lowPtValueForWindowZScaling.value()) windowZ *= m_lowPtWindowZScaling.value();			
-		    
-		    if (abs(hitr - predr) < windowR && abs(hitz - predz) < windowZ)
-		      {
-			std::vector<std::shared_ptr<const FPGATrackSimHit>> theseHits {hit};
-			hitsInWindow = hitsInWindow + 1;
-			// If the hit is a space point, skip the next layer, as it will be duplicated space point and we have already taken care of that in the adding of the hits
-			if(hit->isStrip())
-			  {			    
-			    if (hit->getHitType() == HitType::spacepoint) {
-			      // find the hit in the next layer
-			      if(!findHitinNextStripLayer(hit,  hits, theseHits))
-				{
-				  ATH_MSG_WARNING("For a SP in layer "<<layer<<" Couldn't find a matching strip SP");
-				}
-			    }
-			    else {
-			      std::shared_ptr<FPGATrackSimHit> guessedSecondHitPtr = std::make_shared<FPGATrackSimHit>();
-			      guessedSecondHitPtr->setX(0);
-			      guessedSecondHitPtr->setY(0);
-			      guessedSecondHitPtr->setZ(0);
-			      guessedSecondHitPtr->setPhysLayer(lastHit->getPhysLayer()+1);
-			      guessedSecondHitPtr->setHitType(HitType::undefined);
-			      if(isFineIDInStrip(fineID))  guessedSecondHitPtr->setDetType(SiliconTech::strip);
-			      else  guessedSecondHitPtr->setDetType(SiliconTech::pixel);
-			      
-			      theseHits.push_back(guessedSecondHitPtr);
-			    }
-			  }
-			// Store the hits for now
-			listofHitsFound.push_back(theseHits);
-		      }
-		  }
-	      }
-	    // Sort the hit by the distance
-	    std::sort(listofHitsFound.begin(), listofHitsFound.end(), [&predhit](auto& a, auto& b){
-	      double predr = sqrt(predhit[0]*predhit[0] + predhit[1] * predhit[1]);
-	      double predz = predhit[2];
-	      
-	      // HitA
-	      double hitz = a[0]->getZ();
-	      double hitr = a[0]->getR();
-	      float distance_a= sqrt((hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz));
-	      
-	      // HitB
-	      hitz = b[0]->getZ();
-	      hitr = b[0]->getR();
-	      float distance_b= sqrt((hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz));
-	      
-	      return distance_a < distance_b;
-	    });
-	    
-	    // Select the top N hits
-	    std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> cleanHitsToGrow;
-	    
-	    // If max branches are limited, pick only the top N from the list of hits found at each level 
-	    if (m_maxBranches.value() >= 0) 
-	      {
-		int nHitsToChoose = std::min(int(m_maxBranches.value()), int(listofHitsFound.size()));
-		cleanHitsToGrow.reserve(nHitsToChoose);
-		std::copy(listofHitsFound.begin(), listofHitsFound.begin() + nHitsToChoose, std::back_inserter(cleanHitsToGrow));
-	      }
-	    else
-	      {
-		cleanHitsToGrow = std::move(listofHitsFound);
-	      }
-	    
-	    
-	    for (auto& hitsFound: cleanHitsToGrow)
-	      {
-		// get the first hit
-		auto hit = hitsFound[0];
-		
-		// a hit is in the right fine ID == layer
-		double hitz = hit->getZ();
-		double hitr = hit->getR();
-		double predr = sqrt(predhit[0]*predhit[0] + predhit[1] * predhit[1]);
-		double predz = predhit[2];
-		float distancePredFound = sqrt((hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz));
-		
-		// We got a hit, lets make a road
-		miniRoad newRoad;
-		if(!addHitToRoad(newRoad, currentRoad, std::move(hitsFound)))
-		  {
-		    ATH_MSG_WARNING("Failed to make a new road");
-		    continue;
-		  }
-		roadsToExtrapolate.push_back(newRoad);
-		foundhitForRoad = true;
-		tmp_currentRoadHitFineIDs.push_back(fineID);
-		tmp_predictedHitsFineID.push_back(tmp_currentRoadHitFineIDs);
-		tmp_currentRoadHitITkLayer.push_back(hit->getLayerDisk());
-		tmp_foundHitITkLayer.push_back(tmp_currentRoadHitITkLayer);
-		tmp_currentRoadHitDistancePredFound.push_back(distancePredFound);
-		tmp_foundHitDistancePredFound.push_back(tmp_currentRoadHitDistancePredFound);
-		if(m_debugEvent)
-		  {
-		    ATH_MSG_DEBUG("------ road grown with hit from layer "<<layer<<" to");
-		    printRoad(newRoad);
-		  }
-	      }
-	    if (hitsInWindow != 0) m_nHitsInSearchWindow.push_back(hitsInWindow);
+            // List of all the hits, with their distances to the predicted point
+            std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> listofHitsFound;
+
+            for (const std::shared_ptr<const FPGATrackSimHit>& hit: hits) {
+                if (m_doOutsideIn && (hit->getR() > lastHitR)) continue;
+                if (!m_doOutsideIn && (hit->getR() < lastHitR)) continue;
+                if ((hit->getHitType() == HitType::spacepoint) && ((hit->getPhysLayer()) %2 == 1)) continue; // ignore outer parts of SP, they get added separately
+                if(m_debugEvent) {
+                    ATH_MSG_DEBUG("In the hit loop hit at: " << hit->getX() << " " << hit->getY() << " " << hit->getZ());
+                }
+
+                // loop over hits in that layer
+                if (getFineID(*hit) == fineID && hit->isReal()) {
+                    // a hit is in the right fine ID == layer
+                    double hitz = hit->getZ();
+                    double hitr = hit->getR();
+                    double predr = sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]);
+                    double predz = predhit[2];
+                    double windowR = m_windowR[0]; // default for all layers
+                    double windowZ = m_windowZ[0]; // default for all layers
+                    // But if available pick up per-window values
+                    if (m_windowR.size() > 1) {
+                        windowR = m_windowR[layer-m_nLayers_1stStage]; // offset by n1st stage
+                    }
+                    if (m_windowZ.size() > 1) {
+                        windowZ = m_windowZ[layer-m_nLayers_1stStage]; // offset by n1st stage
+                    }
+
+                // If last hit was not real and we want to, scale the window
+                if (m_missedHitRScaling > 0 && !lastHitWasReal) windowR *= m_missedHitRScaling;
+                if (m_missedHitZScaling > 0 && !lastHitWasReal) windowZ *= m_missedHitZScaling;
+
+                // now scale windows for low pt, if desired
+                if (pt < m_lowPtValueForWindowRScaling.value()) windowR *= m_lowPtWindowRScaling.value();
+                if (pt < m_lowPtValueForWindowZScaling.value()) windowZ *= m_lowPtWindowZScaling.value();
+
+                if (abs(hitr - predr) < windowR && abs(hitz - predz) < windowZ) {
+                    std::vector<std::shared_ptr<const FPGATrackSimHit>> theseHits {hit};
+                    hitsInWindow = hitsInWindow + 1;
+                    // If the hit is a space point, skip the next layer, as it will be a duplicated space point and we have already taken care of that in the adding of the hits
+                    if(hit->isStrip()) {
+                        if (hit->getHitType() == HitType::spacepoint) {
+                            // find the hit in the next layer
+                            if(!findHitinNextStripLayer(hit,  hits, theseHits)) {
+                                ATH_MSG_WARNING("For a SP in layer " << layer << " Couldn't find a matching strip SP");
+                            }
+                        }
+                        else {
+                            std::shared_ptr<FPGATrackSimHit> guessedSecondHitPtr = std::make_shared<FPGATrackSimHit>();
+                            guessedSecondHitPtr->setX(0);
+                            guessedSecondHitPtr->setY(0);
+                            guessedSecondHitPtr->setZ(0);
+                            guessedSecondHitPtr->setPhysLayer(lastHit->getPhysLayer()+1);
+                            guessedSecondHitPtr->setHitType(HitType::undefined);
+                            if(isFineIDInStrip(fineID))  guessedSecondHitPtr->setDetType(SiliconTech::strip);
+                            else  guessedSecondHitPtr->setDetType(SiliconTech::pixel);
+
+                            theseHits.push_back(guessedSecondHitPtr);
+                        }
+                    }
+                    // Store the hits for now
+                    listofHitsFound.push_back(theseHits);
+                    }
+                }
+            }
+
+            // Sort the hit by the distance
+            std::sort(listofHitsFound.begin(), listofHitsFound.end(), [&predhit](auto& a, auto& b){
+                double predr = sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]);
+                double predz = predhit[2];
+
+                // HitA
+                double hitz = a[0]->getZ();
+                double hitr = a[0]->getR();
+                float distance_a = sqrt((hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz));
+
+                // HitB
+                hitz = b[0]->getZ();
+                hitr = b[0]->getR();
+                float distance_b = sqrt((hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz));
+
+                return distance_a < distance_b;
+            });
+
+            // Select the top N hits
+            std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> cleanHitsToGrow;
+
+            // If max branches are limited, pick only the top N from the list of hits found at each level
+            if (m_maxBranches.value() >= 0) {
+                int nHitsToChoose = std::min(int(m_maxBranches.value()), int(listofHitsFound.size()));
+                cleanHitsToGrow.reserve(nHitsToChoose);
+                std::copy(listofHitsFound.begin(), listofHitsFound.begin() + nHitsToChoose, std::back_inserter(cleanHitsToGrow));
+            }
+            else {
+                cleanHitsToGrow = std::move(listofHitsFound);
+            }
+
+
+            for (auto& hitsFound: cleanHitsToGrow) {
+                // get the first hit
+                auto hit = hitsFound[0];
+
+                // a hit is in the right fine ID == layer
+                double hitz = hit->getZ();
+                double hitr = hit->getR();
+                double predr = sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]);
+                double predz = predhit[2];
+                float distancePredFound = sqrt((hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz));
+
+                // We got a hit, lets make a road
+                miniRoad newRoad;
+                if(!addHitToRoad(newRoad, currentRoad, std::move(hitsFound))) {
+                    ATH_MSG_WARNING("Failed to make a new road");
+                    continue;
+                }
+                roadsToExtrapolate.push_back(newRoad);
+                foundhitForRoad = true;
+                tmp_currentRoadHitFineIDs.push_back(fineID);
+                tmp_predictedHitsFineID.push_back(tmp_currentRoadHitFineIDs);
+                tmp_currentRoadHitITkLayer.push_back(hit->getLayerDisk());
+                tmp_foundHitITkLayer.push_back(tmp_currentRoadHitITkLayer);
+                tmp_currentRoadHitDistancePredFound.push_back(distancePredFound);
+                tmp_foundHitDistancePredFound.push_back(tmp_currentRoadHitDistancePredFound);
+                if(m_debugEvent) {
+                    ATH_MSG_DEBUG("------ road grown with hit from layer "<<layer<<" to");
+                    printRoad(newRoad);
+                }
+            }
+            if (hitsInWindow != 0) m_nHitsInSearchWindow.push_back(hitsInWindow);
             // If the hit wasn't found, push a fake hit
-            if (!foundhitForRoad)
-	      {
+            if (!foundhitForRoad) {
                 // did not find a hit to extrapolate to, check if we need to delete this road. if not, add a guessed hit if still useful
                 m_nHitsInSearchWindow.push_back(0);
-                if (currentRoad.getNWCLayers() >= m_maxMiss)
-		  {
+                if (currentRoad.getNWCLayers() >= m_maxMiss) {
                     // we don't want this road, so we continue
                     continue;
-		  }
-                else
-		  {
+                }
+                else {
                     std::vector<std::shared_ptr<const FPGATrackSimHit>> theseHits;
                     // first make the fake hit that we will add
                     if (!getFakeHit(currentRoad, predhit, fineID, theseHits)) {
@@ -403,14 +379,11 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                         continue;
                     }
 
-                    if((isFineIDInPixel(fineID) && theseHits.size() != 1) || (isFineIDInStrip(fineID) && theseHits.size() != 2))
-		      {
+                    if((isFineIDInPixel(fineID) && theseHits.size() != 1) || (isFineIDInStrip(fineID) && theseHits.size() != 2)) {
                         continue;
-		      }
-		    
+                    }
                     // add the hit to the road
                     miniRoad newroad;
-		    
                     if (!addHitToRoad(newroad, currentRoad, std::move(theseHits))) {
                         ATH_MSG_WARNING("Failed making a new road with fake hit");
                         continue;
@@ -420,25 +393,26 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                     tmp_foundHitITkLayer.push_back(tmp_currentRoadHitITkLayer);
                     tmp_foundHitDistancePredFound.push_back(tmp_currentRoadHitDistancePredFound);
                 }
-	      }
+            }
         }
+
         m_NcompletedRoads.push_back(completedRoads.size());
         // This track has been extrapolated, copy the completed tracks to the full list with full road objects
         for (const auto &miniroad : completedRoads) {
-	  FPGATrackSimRoad road;
-	  road.setNLayers(miniroad.getNLayers());
-	  road.setWCLayers(miniroad.getWCLayers());
-	  road.setHitLayers(miniroad.getHitLayers());
-	  m_missingHitsOnRoad.push_back(miniroad.getNWCLayers());
-	  road.setRoadID(m_roads.size() - 1);
-	  // Set the "Hough x" and "Hough y" using the track parameters.
-	  road.setX(track->getPhi());
-	  road.setY(track->getQOverPt());
-	  road.setXBin(track->getHoughXBin());
-	  road.setYBin(track->getHoughYBin());
-	  road.setSubRegion(track->getSubRegion());
-	  road.setHits(miniroad.getVecHits());
-	  m_roads.push_back(road);
+            FPGATrackSimRoad road;
+            road.setNLayers(miniroad.getNLayers());
+            road.setWCLayers(miniroad.getWCLayers());
+            road.setHitLayers(miniroad.getHitLayers());
+            m_missingHitsOnRoad.push_back(miniroad.getNWCLayers());
+            road.setRoadID(m_roads.size() - 1);
+            // Set the "Hough x" and "Hough y" using the track parameters.
+            road.setX(track->getPhi());
+            road.setY(track->getQOverPt());
+            road.setXBin(track->getHoughXBin());
+            road.setYBin(track->getHoughYBin());
+            road.setSubRegion(track->getSubRegion());
+            road.setHits(miniroad.getVecHits());
+            m_roads.push_back(road);
         }
         currentRoadHitFineIDs.clear();
         tmp_predictedHitsFineID.clear();
@@ -472,10 +446,10 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::fillInputTensorForNN(miniRoad&
     std::vector<std::shared_ptr<const FPGATrackSimHit>> hitsR;
 
     std::vector<std::shared_ptr<const FPGATrackSimHit>> hits = thisroad.getHits();
-    
-      
+
+
     for (unsigned ihit = 0; ihit < hits.size(); ihit++) {
-      if (ihit < m_nLayers_1stStage && !(hits[ihit]->isReal())) continue; // skip guessed hits for the 1st stage      
+      if (ihit < m_nLayers_1stStage && !(hits[ihit]->isReal())) continue; // skip guessed hits for the 1st stage
        hitsR.push_back(hits[ihit]);
     }
     // Sort in increasing R. We will reverise it for inside out after the cleanup
@@ -608,8 +582,8 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::getFakeHit(miniRoad& currentRo
     }
 
     guessedHitPtr->setLayer(guessedLayer);
-    guessedHitPtr->setHitType(HitType::guessed);    
-    
+    guessedHitPtr->setHitType(HitType::guessed);
+
     if(isFineIDInStrip(fineID))  {
       guessedHitPtr->setDetType(SiliconTech::strip);
       guessedHitPtr->setPhysLayer(0); // it is just to set the side, it's not actually 0
