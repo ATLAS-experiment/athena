@@ -41,11 +41,12 @@ using namespace std;
 using namespace pool::RootCollection;
 using namespace pool::CollectionBaseNames;
 
-using REntry = ROOT::Experimental::REntry;
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+   using REntry = ROOT::REntry;
    using RFieldBase = ROOT::RFieldBase;
    using RNTupleWriteOptions = ROOT::RNTupleWriteOptions;
 #else
+   using REntry = ROOT::Experimental::REntry;
    using RFieldBase = ROOT::Experimental::RFieldBase;
    using RNTupleWriteOptions = ROOT::Experimental::RNTupleWriteOptions;
 #endif

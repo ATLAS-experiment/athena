@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RNTCOLLECTIONCURSOR_H
@@ -18,16 +18,27 @@
 #include <memory>
 #include <map>
 
+#include "RVersion.h"
+
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+   namespace ROOT { class REntry; }
+   namespace ROOT::Experimental { class RNTupleReader; }
+#else
 namespace ROOT::Experimental {
    class RNTupleReader;
    class REntry;
 }
+#endif
 
 namespace pool {
    namespace RootCollection {
 
       using ROOT::Experimental::RNTupleReader;
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+      using ROOT::REntry;
+#else
       using ROOT::Experimental::REntry;
+#endif
 
       /** 
        * @class RNTCollectionCursor RNTCollectionCursor.h Rootcollection/RNTCollectionCursor.h
