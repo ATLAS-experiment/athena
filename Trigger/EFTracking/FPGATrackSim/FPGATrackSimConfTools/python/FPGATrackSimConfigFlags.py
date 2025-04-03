@@ -312,6 +312,7 @@ def createGenScanFPGATrackSimConfigFlags():
 
 class graphTool(FlagEnum):
     ModuleMap = 'ModuleMap'
+    MetricLearning = 'MetricLearning'
 
 class moduleMapType(FlagEnum):
     doublet = 'doublet'
@@ -331,6 +332,9 @@ def createGNNFPGATrackSimConfigFlags():
     cf.addFlag("moduleMapFunc", moduleMapFunc.minmax, type=moduleMapFunc)
     cf.addFlag("moduleMapTol",0.0000000001) # 1e-10
     cf.addFlag("moduleMapPath",'')
+    cf.addFlag("metricLearningR",0.1)
+    cf.addFlag("metricLearningMaxN", 50)
+    cf.addFlag("MLModelPath",'')
     cf.addFlag("GNNModelPath",'') 
     cf.addFlag("roadMakerTool", roadMakerTool.ConnectedComponents, type=roadMakerTool)
     cf.addFlag("edgeScoreCut",0.8)

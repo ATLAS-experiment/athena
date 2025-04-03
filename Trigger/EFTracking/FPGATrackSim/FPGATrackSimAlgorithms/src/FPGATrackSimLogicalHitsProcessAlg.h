@@ -139,7 +139,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         unsigned long m_maxNTracksChi2Tot = 0; // max number of tracks passing chi2 in an event
         unsigned long m_maxNTracksChi2OLRTot = 0; // max number of tracks passing chi2 and OLR in an events
 
-
+        
         StatusCode writeOutputData(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_1st, std::vector<FPGATrackSimTrack> const & tracks_1st,
                                    FPGATrackSimDataFlowInfo const * dataFlowInfo);
 
