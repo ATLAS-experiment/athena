@@ -8,6 +8,7 @@
 #include <MuonAlignmentData/BLinePar.h>
 #include <MuonAlignmentData/NswAsBuiltDbData.h>
 #include <ActsGeometryInterfaces/DetectorAlignStore.h>
+#include <MuonAlignmentData/sTGCAsBuiltData.h>
 /*  Alignment store to additionally ship the sTgc as-built parameters and
  *  B-Line deformation parameters through the Acts geometry context.
  */
@@ -16,8 +17,7 @@ class sTgcAlignmentStore : public ActsTrk::DetectorAlignStore::InternalAlignStor
         sTgcAlignmentStore() = default;
         /// @brief   Pointer to the collection of passivation parameters
         ///          if the project is not AthSimulation. Otherwise, it's a char
-        using sTgcAsBuiltPtr = NswAsBuiltDbData::sTgcAsBuiltPtr;
-        sTgcAsBuiltPtr asBuiltPars{};
+         const sTGCAsBuiltData* asBuiltPars{};
 
         /// Caches the micromega BLine parameter. 
         void cacheBLine(const Identifier& detElId, const BLinePar& bline);

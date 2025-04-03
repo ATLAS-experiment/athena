@@ -106,6 +106,8 @@ def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
     if flags.Muon.Align.UseAsBuilt:
         acc.merge(MdtAsBuiltCondAlgCfg(flags))
         acc.merge(NswAsBuiltCondAlgCfg(flags))
+        if(flags.Muon.Align.UsesTGCAsBuild):
+            acc.merge(sTGCAsBuiltCondAlgCfg(flags))
 
     if not flags.Muon.Align.UseALines and not flags.Muon.Align.UseBLines:
         return acc
@@ -144,12 +146,8 @@ def NswAsBuiltCondAlgCfg(flags, name = "NswAsBuiltCondAlg", **kwargs):
     if flags.GeoModel.Run < LHCPeriod.Run3:
         return result
     kwargs.setdefault("MicroMegaJSON","")
-    kwargs.setdefault("sTgcJSON","")
 
     kwargs.setdefault("ReadMmAsBuiltParamsKey","/MUONALIGN/ASBUILTPARAMS/MM")
-    #kwargs.setdefault("ReadSTgcAsBuiltParamsKey","/MUONALIGN/ASBUILTPARAMS/STGC") # This is the folder that sould be used once the as builts are validated, so keep it here but commented out
-    kwargs.setdefault("ReadSTgcAsBuiltParamsKey","") # disable the stgc part of NswAsBuilt, proper code cleanup will follow
-
 
     ##TODO: remove hard-coded tag once the global tag is ready
     from IOVDbSvc.IOVDbSvcConfig import addFolders
@@ -159,17 +157,17 @@ def NswAsBuiltCondAlgCfg(flags, name = "NswAsBuiltCondAlg", **kwargs):
     result.addCondAlgo(the_alg, primary = True)     
     return result
 
-def sTGCAsBuiltCondAlg2Cfg(flags, name = "sTGCAsBuiltCondAlg2", **kwargs):
+def sTGCAsBuiltCondAlgCfg(flags, name = "sTGCAsBuiltCondAlg", **kwargs):
     result = ComponentAccumulator()
     #### Do not apply the as-built correction if not activated
-    if flags.GeoModel.Run < LHCPeriod.Run3 or not flags.Muon.Align.UsesTGCAsBuild2:
+    if flags.GeoModel.Run < LHCPeriod.Run3 or not flags.Muon.Align.UsesTGCAsBuild:
         return result
     kwargs.setdefault("readFromJSON","")
     if not kwargs["readFromJSON"]:
         kwargs.setdefault("ReadKey","/MUONALIGN/ASBUILTPARAMS/STGC")
         from IOVDbSvc.IOVDbSvcConfig import addFolders
-        result.merge(addFolders( flags, kwargs["ReadKey"], 'MUONALIGN_OFL', className='CondAttrListCollection'))
-    the_alg = CompFactory.sTGCAsBuiltCondAlg2(name,**kwargs)
+        result.merge(addFolders( flags, kwargs["ReadKey"], 'MUONALIGN_OFL', className='CondAttrListCollection', tag = 'MUONALIGN_STG_IntAl_alCons_noQL3_v01'))
+    the_alg = CompFactory.sTGCAsBuiltCondAlg(name,**kwargs)
     result.addCondAlgo(the_alg, primary=True)
     return result
         
@@ -216,7 +214,7 @@ def MuonDetectorCondAlgCfg(flags, name = "MuonDetectorCondAlg", **kwargs):
     kwargs.setdefault("applyBLines", flags.Muon.Align.UseBLines)
     kwargs.setdefault("applyILines", flags.Muon.Align.UseILines)
     kwargs.setdefault("applyNswAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "NswAsBuiltCondAlg"])>0)
-    kwargs.setdefault("applysTGCAsBuilt2", len([alg for alg in result.getCondAlgos() if alg.name == "sTGCAsBuiltCondAlg2"])>0)
+    kwargs.setdefault("applysTGCAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "sTGCAsBuiltCondAlg"])>0)
     kwargs.setdefault("applyMdtAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "MdtAsBuiltCondAlg"])>0)
 
    
