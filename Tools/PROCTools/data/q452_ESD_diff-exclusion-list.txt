@@ -10,8 +10,8 @@ xAOD::TrackParticleAuxContainer.*\.btagIp_.*
 
 # Ignore additional truth labelling info
 xAOD::JetAuxContainer.*Hadron.*TruthLabel.*
-xAOD::JetAuxContainer.*PartonTruthLabel.*
+xAOD::JetAuxContainer.*Parton.*TruthLabel.*
 
 # Ignore Fold variables for b-tagging on PFlow
 xAOD::JetAuxContainer.*PFlow.*jetFold.*
-
+xAOD::JetAuxContainer.*PFlow.*ConeExcl.*HadronsInitial
