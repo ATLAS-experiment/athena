@@ -93,11 +93,12 @@ def getLArFormatForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
 
 class LArDTRunInfo:
     "Wrapper class to hold LAr DT run configuration information"
-    def __init__(self,streamTypes, streamLengths, timing, adccalib):
+    def __init__(self,streamTypes, streamLengths, timing, adccalib, fw):
         self._sTypes = streamTypes
         self._sLengths = streamLengths
         self._tim = timing
         self._adcc = adccalib
+        self._fwversion = fw
 
     def streamTypes(self):
            return self._sTypes
@@ -110,6 +111,9 @@ class LArDTRunInfo:
 
     def ADCCalib(self):
            return self._adcc
+
+    def FWversion(self):
+           return self._fwversion
 
 def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
     from AthenaCommon.Logging import logging
@@ -127,6 +131,7 @@ def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
     timing="LAR"
     adccalib=0
     mux=[]
+    fw=0
     try:
         folder=runDB.getFolder('/LAR/Configuration/RunLogDT')
         runiov=run << 32
@@ -143,6 +148,8 @@ def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
         if not quiet:
            mlog_LRF.info('mux_setting: %s',mux)
         adccalib=payload['ADCCalibMode']
+        if run > 493743: # hardcoded, first run when this info was filled
+            fw=payload['ttype_mask_A']
     except Exception:
         mlog_LRF.warning("No information in /LAR/Configuration/RunLogDT for run %i", run)
         mlog_LRF.warning("Using defaults: MUX0: ADC MUX1: ET_ID receipe: at0_bc5-at1_bc1_ts1-q")
@@ -178,7 +185,7 @@ def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
         mlog_LRF.info('sTypes: %s',sTypes)
         mlog_LRF.info('sLengths: %s',sLengths)
 
-    return  LArDTRunInfo(sTypes, sLengths, timing, adccalib)
+    return  LArDTRunInfo(sTypes, sLengths, timing, adccalib, fw)
 
 # command line driver for convenience
 if __name__=='__main__':
