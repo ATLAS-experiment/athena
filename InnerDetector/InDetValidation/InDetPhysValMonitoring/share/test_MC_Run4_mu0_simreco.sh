@@ -27,6 +27,7 @@ dcubemon_rdo=RDOAnalysis.root
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubecfg_sim=$artdata/InDetPhysValMonitoring/dcube/config/run4_SiHitValid.xml
 dcubecfg_rdo=$artdata/InDetPhysValMonitoring/dcube/config/run4_RDOAnalysis.xml
+art_dcube=$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py
 
 lastref_dir=last_results
 dcubeXml=dcube_ART_IDPVMPlots_ITk.xml
@@ -49,9 +50,6 @@ run () {
     echo "Running ${name}..."
     time "${cmd[@]}"
     rc=$?
-    # Only report hard failures for 21.9 vs master tests since both
-    # branches are unlikely to ever match perfectly
-    [ "${name}" = "dcube-21p9" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
 }
@@ -103,9 +101,10 @@ run "Digitization"\
     --preInclude 'HITtoRDO:Campaigns.PhaseIINoPileUp' \
     --postInclude 'PyJobTransforms.UseFrontier'
 
-run RunRDOAnalysis.py \
-   -i $rdo \
-   ITkPixel ITkStrip
+run "RDOAnalysis" \
+    RunRDOAnalysis.py \
+    -i $rdo \
+    ITkPixel ITkStrip
 echo "art-result: $? RDOAnalysis"
 
 # To be enabled when references are available
