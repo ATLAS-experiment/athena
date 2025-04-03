@@ -2,18 +2,16 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/sTGCAsBuiltCondAlg2.h"
+#include "MuonCondAlg/sTGCAsBuiltCondAlg.h"
 
 #include <StoreGate/WriteCondHandle.h>
 #include <AthenaKernel/IOVInfiniteRange.h>
 #include <PathResolver/PathResolver.h>
 #include <fstream>
 
-sTGCAsBuiltCondAlg2::sTGCAsBuiltCondAlg2(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
 
 // Initialize
-StatusCode sTGCAsBuiltCondAlg2::initialize() {
+StatusCode sTGCAsBuiltCondAlg::initialize() {
     ATH_MSG_DEBUG("initializing " << name());
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_writeKey.initialize());
@@ -30,10 +28,10 @@ StatusCode sTGCAsBuiltCondAlg2::initialize() {
 }
 
 // execute
-StatusCode sTGCAsBuiltCondAlg2::execute(const EventContext& ctx) const {
+StatusCode sTGCAsBuiltCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
     // launching Write Cond Handle
-    SG::WriteCondHandle<sTGCAsBuiltData2> writeHandle{m_writeKey, ctx};
+    SG::WriteCondHandle<sTGCAsBuiltData> writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
                                     << " In theory this should not be called, but may happen"
@@ -41,7 +39,7 @@ StatusCode sTGCAsBuiltCondAlg2::execute(const EventContext& ctx) const {
         return StatusCode::SUCCESS;
     }
     writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
-    std::unique_ptr<sTGCAsBuiltData2> writeCdo{std::make_unique<sTGCAsBuiltData2>(m_idHelperSvc.get())};
+    std::unique_ptr<sTGCAsBuiltData> writeCdo{std::make_unique<sTGCAsBuiltData>(m_idHelperSvc.get())};
     if (!m_readKeyDb.empty()) {
         SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKeyDb, ctx};
         if (!readHandle.isValid()) {
@@ -69,8 +67,8 @@ StatusCode sTGCAsBuiltCondAlg2::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("Recorded new " << writeHandle.key() << " with range " << writeHandle.getRange() << " into Conditions Store");
     return StatusCode::SUCCESS;
 }
-StatusCode sTGCAsBuiltCondAlg2::parseDataFromJSON(const nlohmann::json& lines,
-                                                   sTGCAsBuiltData2& effiData) const {
+StatusCode sTGCAsBuiltCondAlg::parseDataFromJSON(const nlohmann::json& lines,
+                                                   sTGCAsBuiltData& effiData) const {
     for (auto& corr : lines.items()) {
         nlohmann::json line = corr.value();    
          /// Station Component identification
@@ -88,7 +86,7 @@ StatusCode sTGCAsBuiltCondAlg2::parseDataFromJSON(const nlohmann::json& lines,
             return StatusCode::FAILURE;
         }
         
-        sTGCAsBuiltData2::Parameters pars;
+        sTGCAsBuiltData::Parameters pars;
         pars.offset = line["offset"];
         pars.rotation = line["rotation"];
         pars.scale = line["scale"];

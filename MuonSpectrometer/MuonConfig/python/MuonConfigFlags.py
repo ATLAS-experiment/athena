@@ -136,6 +136,7 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.Align.UseAsBuilt", lambda prevFlags: (_muonAlignMode(prevFlags)) and not \
                                                            (prevFlags.IOVDb.DatabaseInstance == 'COMP200' or \
                                                             'HLT' in prevFlags.IOVDb.GlobalTag or prevFlags.Common.isOnline) )
+    mcf.addFlag("Muon.Align.UsesTGCAsBuild",False)
 
     # Muon Trigger Flags
     mcf.addFlag("Muon.MuonTrigger", False) 

@@ -44,6 +44,7 @@
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 
 #define THROW_EXCEPTION_RE(MSG)                                                                            \
      {                                                                                                  \
@@ -828,51 +829,21 @@ namespace MuonGM {
             return;
         }
 
-        bool conditionsApplied{false};
-        Amg::Transform3D trfToML{Amg::Transform3D::Identity()};
-
 #ifndef SIMULATIONBASE
         //*********************
         // As-Built (MuonNswAsBuilt is not included in AthSimulation)
         //*********************
-        const NswAsBuilt::StgcStripCalculator* sc = manager()->getStgcAsBuiltCalculator();        
-        if(manager()->getsTGCAsBuilt2() && design->type == MuonChannelDesign::ChannelType::etaStrip){
-            pos.head<2>() = manager()->getsTGCAsBuilt2()->correctPosition(layerId, pos.head<2>());
-
-        } else if (sc && design->type == MuonChannelDesign::ChannelType::etaStrip) {
-
-            Amg::Vector2D lpos(locXpos, locYpos);
-            
-            // express the local position w.r.t. the nearest active strip
-            Amg::Vector2D rel_pos;
-            int istrip = design->positionRelativeToStrip(lpos, rel_pos);
-            if (istrip < 0) {                
-                ATH_MSG_WARNING( "As-built corrections are provided only for eta strips within the active area. Returning." );
-                return;
-            }
-
-            // setup strip calculator
-            NswAsBuilt::stripIdentifier_t strip_id;
-            strip_id.quadruplet = { (largeSector() ? NswAsBuilt::quadrupletIdentifier_t::STL : NswAsBuilt::quadrupletIdentifier_t::STS), getStationEta(), getStationPhi(), m_ml };
-            strip_id.ilayer     = m_idHelper.gasGap(layerId);
-            strip_id.istrip     = istrip;
-
-            // get the position coordinates, in the chamber frame, from NswAsBuilt.
-            // applying the 10um shift along the beam axis for strips (see fillCache()).
-            NswAsBuilt::StgcStripCalculator::position_t calcPos = sc->getPositionAlongStgcStrip(NswAsBuilt::Element::ParameterClass::CORRECTION, strip_id, rel_pos.y(), rel_pos.x());
-            
-            if (calcPos.isvalid == NswAsBuilt::StgcStripCalculator::IsValid::VALID) {
-                pos = calcPos.pos;
-                pos[0] += (strip_id.ilayer%2) ? 0.01 : -0.01; // 1st layer gets +0.01; layer numbering starts from 1
-
-                // signal that pos is now in the chamber reference frame
-                // (don't go back to the layer frame yet, since we may apply b-lines later on)
-                trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);   
-                conditionsApplied = true;
-            } else {                
-                ATH_MSG_DEBUG( "No as-built corrections provided for stEta: "<<getStationEta() << " stPhi: "<<getStationPhi()<<" ml: "<<m_ml<<" layer: "<<strip_id.ilayer);
+        if(manager()->getsTGCAsBuilt() && design->type == MuonChannelDesign::ChannelType::etaStrip){
+            pos.head(2) = manager()->getsTGCAsBuilt()->correctPosition(layerId, pos.head(2));
+        }
+#ifndef NDEBUG
+        else {
+            MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
+            if (log.level() <= MSG::DEBUG) {    
+                log << MSG::DEBUG << "No as-built corrections provided for stEta: "<<getStationEta() << " stPhi: "<<getStationPhi()<<" ml: "<<m_ml<< endmsg;
             }
         }
+#endif
 #endif 
         
 
@@ -880,18 +851,14 @@ namespace MuonGM {
         // B-Lines
         //*********************
         if (has_BLines()) {
-          // go to the multilayer reference frame if we are not already there
-          if (!conditionsApplied) {
-             trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);
-             pos = trfToML*pos;             
-             // signal that pos is now in the multilayer reference frame
-             conditionsApplied = true; 
-          }
-          posOnDefChamber(pos);
+            // go to the muultilayer frame
+            Amg::Transform3D trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);
+            pos = trfToML*pos;
+            posOnDefChamber(pos);
+            // back to the layer reference frame from where we started
+            pos = trfToML.inverse()*pos;
+       
         }
-        
-        // back to the layer reference frame from where we started
-        if (conditionsApplied) pos = trfToML.inverse()*pos;
     }
 
 }  // namespace MuonGM

@@ -23,11 +23,8 @@ public:
 private:
     SG::ReadCondHandleKey<CondAttrListCollection> m_readMmAsBuiltParamsKey{this, "ReadMmAsBuiltParamsKey", "/MUONALIGN/ASBUILTPARAMS/MM",
                                                                             "Key of MM/ASBUILTPARAMS input condition data"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readSTgcAsBuiltParamsKey{this, "ReadSTgcAsBuiltParamsKey", "/MUONALIGN/ASBUILTPARAMS/STGC",
-                                                                            "Key of sTGC/ASBUILTPARAMS input condition data"};
      
     Gaudi::Property<std::string> m_MmJsonPath{this,"MicroMegaJSON",   "", "Pass As-Built parameters for MM chambers from an Ascii file"};
-    Gaudi::Property<std::string> m_StgcJsonPath{this, "sTgcJSON", "", "Pass As-Built parameters for sTGC chambers from an Ascii file"};
      
     SG::WriteCondHandleKey<NswAsBuiltDbData> m_writeNswAsBuiltKey{this, "WriteNswAsBuiltKey", "NswAsBuiltDbData",
                                                                      "Key of output muon alignment MM+STGC/AsBuilt condition data"};
