@@ -18,7 +18,7 @@ class MuonSimHitAuxContainer_v1 : public AuxContainerBase {
    public:
     /// Default constructor
     MuonSimHitAuxContainer_v1();
-
+    virtual ~MuonSimHitAuxContainer_v1() = default;
    private:
     /// @name Defining Mdt Drift Circle parameters
     /// @{
