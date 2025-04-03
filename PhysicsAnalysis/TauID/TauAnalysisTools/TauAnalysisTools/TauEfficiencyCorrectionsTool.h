@@ -10,7 +10,7 @@
   maintainer: Guillermo Hamity
   mail: guillermo.nicolas.hamity@cern.ch
   documentation in: ../README.rst
-                    https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/TauID/TauAnalysisTools/README.rst
+                    https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/README.rst
 */
 
 // Framework include(s):
