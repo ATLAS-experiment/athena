@@ -123,6 +123,23 @@ class FPGATrackSimHoughTransformTool : public extends <AthAlgTool, IFPGATrackSim
             // Size m_imageSize_y * m_imageSize_x. (NOTE y is row coordinate)
         Image const & getImage() const { return m_image; } // Returns the image generated from the last call of getRoads
 
+        //used for FPGA emulation
+        struct pos
+        {
+          int x;
+          int y;
+          int layer;
+        };
+ 
+        struct LUT
+        {
+          int input_begin;
+          int input_end;
+          int layer;
+          std::vector<pos> output;
+        };
+        int m_bitlength = 16;
+
     private:
 
         ///////////////////////////////////////////////////////////////////////
@@ -166,6 +183,21 @@ class FPGATrackSimHoughTransformTool : public extends <AthAlgTool, IFPGATrackSim
 	Gaudi::Property <bool> m_doRegionalMapping { this, "RegionalMapping", false,  "Use the sub-region maps to define the sector"};
 	Gaudi::Property <bool> m_doEtaPatternConsts { this, "doEtaPatternConsts", false, "Whether to use the eta pattern tool for constant generation"};
 	Gaudi::Property <bool> m_useSpacePoints { this, "useSpacePoints", false, "Whether we are using spacepoints."};
+	Gaudi::Property <std::string> m_houghType { this, "houghType", "Original", "Switch Hough strategy. Original: close to mathematical HT, LowResource: emulate pre calculated LUTs base FPGA performance, Flexible: emulate culculation on FPGA performance"};
+	Gaudi::Property <bool> m_roadMerge { this, "roadMerge", false};
+	Gaudi::Property <std::string> m_requirements { this, "requirements", "", "path of the requirements file"};
+
+        //Parameters generally used by Hough Transform 2D Flexible
+        Gaudi::Property <int> m_r_max { this, "r_max", 2047," - maximum -"};   
+        Gaudi::Property <int> m_phi_coord_max { this, "phi_coord_max", 65535," - maximum - phi"};
+        Gaudi::Property <double> m_phi_range { this, "phi_range", 6.399609375,"range of phi in rad, customized ofr the algo"}; 
+        Gaudi::Property <double> m_r_max_mm { this, "r_max_mm", 1137.5,"r value maximum used in the mm-to-bits conversion"};        
+        Gaudi::Property <int> m_bitwise_qApt_conv { this, "bitwise_qApt_conv", 16384, "exponential of 2 to multiply with qA/pt in case the latter in < 1"};
+        Gaudi::Property <int> m_bitwise_phi0_conv { this, "bitwise_phi0_conv", 1, "exponential of 2 to multiply with phi0 in case the latter in < 1"};    
+        Gaudi::Property <int> m_phi0_sectors { this, "phi0_sectors", 1,"firmware method to draw monotonic lines. separation alongside phi0"};
+        Gaudi::Property <int> m_qApt_sectors { this, "qApt_sectors", 7,"firmware method to draw monotonic lines. separation alongside qA/pt"};
+        Gaudi::Property <int> m_pipes_qApt { this, "pipes_qApt", 8,"!!!!!!MAX 32 !!!!!!clock domains separation alongside qA/pt bins"};
+        Gaudi::Property <int> m_pipes_phi0 { this, "pipes_phi0", 1," !!!!!!MAX 32 !!!!!!clock domains separation alongside phi0  bins"};    
 
         std::vector<std::vector<unsigned>> m_combineLayer2D; // 2d array of combined layers i.e. [[1,2,3],[0,4,5],[6,7]] will combine (L1, L2, L3), (L0, L4, L5), (L6, L7)
 
@@ -183,6 +215,22 @@ class FPGATrackSimHoughTransformTool : public extends <AthAlgTool, IFPGATrackSim
             // These are calculated from m_parMin/Max.
 
         ///////////////////////////////////////////////////////////////////////
+        // Conistants for HT2D Flex
+	int m_HT_sel = 0;
+	long int m_one_r_const_twoexp = 0;
+	double m_phi0_min_bit = 0;
+	double m_qApt_min_bit = 0;
+	long int m_DBinQApt_bit_int = 0;
+	long int m_DBinPhi0_bit_int = 0;
+	long int m_qAptBins_bit = 0;
+	long int m_phi0Bins_bit = 0;
+	long int m_phi0_bins_first_sector = 0;
+	long int m_qApt_bins_first_sector = 0;
+	long int m_tot_bitwise_conv = 0;
+	long int m_one_r_const_twoexp_post_conv = 0;
+	long int m_qApt_min_post_conv = 0;
+
+        ///////////////////////////////////////////////////////////////////////
         // Event Storage
 
         Image m_image;
@@ -195,6 +243,7 @@ class FPGATrackSimHoughTransformTool : public extends <AthAlgTool, IFPGATrackSim
         // std::vector<FPGATrackSimHit const *> filterHits(std::vector<FPGATrackSimHit const *> const & hits) const;
         Image createLayerImage(std::vector<unsigned> const & combine_layers, const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, unsigned const scale) const;
         Image createImage(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits) const;
+        std::vector<std::vector<int>> lineGenLay(const std::shared_ptr<const FPGATrackSimHit> &hit) const;
         Image convolute(Image const & image) const;
 
         ///////////////////////////////////////////////////////////////////////
@@ -208,6 +257,12 @@ class FPGATrackSimHoughTransformTool : public extends <AthAlgTool, IFPGATrackSim
         void addRoad(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, unsigned x, unsigned y);
         int conv(unsigned y, unsigned x) { return m_conv[y * m_convSize_x + x]; } // NOTE: y index is first
         void drawImage(Image const & image, std::string const & name);
+	///////////////////////////////////////////////////////////////////////
+        // FPGA emulation functions
+        std::vector<std::vector<std::vector<LUT>>> m_LUT;
+        std::vector<TH1D*> m_h_rfix;
+	void makeLUT(std::vector<std::vector<std::vector<LUT>>> &v_LUT,std::vector<TH1D*> &v_h, const std::string& tag="");
+        ///////////////////////////////////////////////////////////////////////
 };
 
 

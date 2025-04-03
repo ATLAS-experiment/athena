@@ -123,6 +123,8 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('houghRootoutput2nd', False)
     cf.addFlag('hough', True)
     cf.addFlag('hough1D', False)
+    cf.addFlag('houghType', 'Original')
+    cf.addFlag('roadMerge', False)
     cf.addFlag('genScan', False)
     cf.addFlag('NumOfHitPerGrouping', 5)
 
@@ -167,6 +169,19 @@ def createBasicFPGATrackSimConfigFlags():
 
     cf.addFlag('doTracking', False)
     cf.addFlag('outputHitTxt', False)
+
+    cf.addFlag('requirements', '')
+    # only for 2DHT Flex
+    cf.addFlag('r_max',2047)
+    cf.addFlag('phi_coord_max',65535)
+    cf.addFlag('phi_range', 6.399609375)
+    cf.addFlag('r_max_mm',1137.5)
+    cf.addFlag('bitwise_qApt_conv',204)
+    cf.addFlag('bitwise_phi0_conv',1)
+    cf.addFlag('phi0_sectors',1)
+    cf.addFlag('qApt_sectors',7)
+    cf.addFlag('pipes_qApt',8)
+    cf.addFlag('pipes_phi0',1)
 
     # performance monitoring
     cf.addFlag('barcodeFracMatch', 0.5)
