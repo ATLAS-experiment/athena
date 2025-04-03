@@ -224,6 +224,8 @@ namespace ActsTrk {
   std::unique_ptr<ActsTrk::IMeasurementSelector> TrackFindingBaseAlg::setMeasurementSelector(
       const EventContext &ctx,
       const detail::TrackFindingMeasurements &measurements,
+      const std::vector<const InDet::SiDetectorElementStatus *> &detElStatusArr,
+      const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap,
       TrackFinderOptions &options) const {
 
     std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = ActsTrk::detail::getMeasurementSelector(
@@ -232,6 +234,8 @@ namespace ActsTrk {
         m_stripCalibTool.isEnabled() ? &(*m_stripCalibTool) : nullptr,
         m_hgtdCalibTool.isEnabled() ? &(*m_hgtdCalibTool) : nullptr,
         measurements.measurementRanges(),
+        detElStatusArr,
+        volumeIdMap,
         m_measurementSelectorConfig.m_etaBins,
         m_measurementSelectorConfig.m_chi2CutOffOutlier,
         m_numMeasurementsCutOff.value(),
@@ -310,6 +314,8 @@ namespace ActsTrk {
       const EventContext &ctx,
       const DetectorContextHolder &detContext,
       const detail::TrackFindingMeasurements &measurements,
+      const std::vector<const InDet::SiDetectorElementStatus *> &detElStatusArr,
+      const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap,
       const Acts::PerigeeSurface* pSurface) const {
     Acts::PropagatorPlainOptions plainOptions{detContext.geometry, detContext.magField};
     plainOptions.maxSteps = m_maxPropagationStep;
@@ -321,7 +327,8 @@ namespace ActsTrk {
                                trackFinder().ckfExtensions, plainOptions);
     options.recordMaterialStates = m_recordMaterialStates;
 
-    std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(ctx, measurements, options);
+    std::unique_ptr<ActsTrk::IMeasurementSelector>
+       measurementSelector = setMeasurementSelector(ctx,measurements,detElStatusArr, volumeIdMap, options);
 
     Acts::PropagatorPlainOptions plainSecondOptions{detContext.geometry, detContext.magField};
     plainSecondOptions.maxSteps = m_maxPropagationStep;
@@ -341,6 +348,8 @@ namespace ActsTrk {
         const EventContext &ctx,
         const DetectorContextHolder &detContext,
         const detail::TrackFindingMeasurements &measurements,
+        const std::vector<const InDet::SiDetectorElementStatus *> &detElStatusArr,
+        const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap,
         const Acts::PerigeeSurface* pSurface) const {
       Acts::PropagatorPlainOptions plainOptions{detContext.geometry, detContext.magField};
       plainOptions.maxSteps = m_maxPropagationStep;
@@ -358,7 +367,8 @@ namespace ActsTrk {
       options.extensions.mixtureReducer.connect<&Acts::reduceMixtureWithKLDistance>();
       options.betheHeitlerApprox = std::make_shared<Acts::PolynomialBetheHeitlerApprox>(Acts::makeDefaultBetheHeitlerApprox());
 
-      std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(ctx, measurements, options);
+      std::unique_ptr<ActsTrk::IMeasurementSelector>
+         measurementSelector = setMeasurementSelector(ctx,measurements,detElStatusArr, volumeIdMap, options);
 
       Acts::PropagatorPlainOptions plainSecondOptions{detContext.geometry, detContext.magField};
       plainSecondOptions.maxSteps = m_maxPropagationStep;

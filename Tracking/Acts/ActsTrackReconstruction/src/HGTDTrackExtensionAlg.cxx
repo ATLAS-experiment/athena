@@ -104,6 +104,7 @@ StatusCode HGTDTrackExtensionAlg::initialize()
   ATH_CHECK(m_actsTrackLinkKey.initialize());
 
   ATH_CHECK(m_uncalibratedMeasurementContainerKeys.initialize());
+  ATH_CHECK(m_volumeIdToDetectorElementCollMapKey.initialize());
 
   // Initialize all WriteDecorHandleKeys
   ATH_CHECK(m_layerHasExtensionKey.initialize());
@@ -214,6 +215,12 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
   atomicMax(actsTrackBackend.size(), m_nTrackReserve); 
   atomicMax(actsTrackStateBackend.size(), m_nTrackStateReserve);
 
+  // map detector element status to volume ids
+  SG::ReadCondHandle<ActsTrk::ActsVolumeIdToDetectorElementCollectionMap>
+     volumeIdToDetectorElementCollMap(m_volumeIdToDetectorElementCollMapKey,ctx);
+  ATH_CHECK(volumeIdToDetectorElementCollMap.isValid());
+  std::vector< const InDet::SiDetectorElementStatus *> detElStatusArr(volumeIdToDetectorElementCollMap->collections().size(), nullptr);
+
   detail::RecoTrackContainer actsTracksContainer(actsTrackBackend,
                                                   actsTrackStateBackend);
 
@@ -308,6 +315,8 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
                       detContext,
                       measurements,
                       measurementIndex,
+                      detElStatusArr,
+                      *(volumeIdToDetectorElementCollMap.cptr()),
                       lastMeasurementStateParameters,
                       tracksContainerTemp,
                       actsTracksContainer,
@@ -377,6 +386,8 @@ bool HGTDTrackExtensionAlg::findExtension(
   const DetectorContextHolder& detContext,
   const detail::TrackFindingMeasurements &measurements,
   const detail::MeasurementIndex& measurementIndex,
+  const std::vector< const InDet::SiDetectorElementStatus *> &detElStatusArr,
+  const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap,
   const Acts::BoundTrackParameters & initialParameters,
   detail::RecoTrackContainer &tracksContainerTemp,
   detail::RecoTrackContainer &actsTracksContainer,
@@ -385,7 +396,7 @@ bool HGTDTrackExtensionAlg::findExtension(
   int& extension_index) const{
 
   //Setting pSurface to nullptr
-  auto [options, secondOptions, measurementSelector] = getDefaultOptions(ctx, detContext, measurements, nullptr);
+  auto [options, secondOptions, measurementSelector] = getDefaultOptions(ctx, detContext, measurements, detElStatusArr,volumeIdMap, nullptr);
 
 
   std::size_t category_i = 0;

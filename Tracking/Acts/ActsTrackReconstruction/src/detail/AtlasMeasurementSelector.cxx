@@ -23,9 +23,12 @@
 
 #include "src/detail/MeasurementSelector.h"
 #include "ActsEvent/TrackContainer.h"
+#include "ActsGeometry/ActsVolumeIdToDetectorElementCollectionMap.h"
+#include "ActsGeometry/ActsDetectorElement.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
+#include "InDetReadoutGeometry/SiDetectorElementStatus.h"
 
 #include "src/detail/AtlasUncalibSourceLinkAccessor.h"
 #include "src/IMeasurementSelector.h"
@@ -194,6 +197,9 @@ struct AtlasMeasurementSelector
    
    const ActsTrk::detail::MeasurementRangeList *m_measurementRanges{};
    const ActsTrk::detail::MeasurementRangeListFlat *m_measurementRangesForced{};
+   const std::vector<const InDet::SiDetectorElementStatus *> *m_detectorElementStatus;
+   const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap *m_volumeIdMap;
+
 
    void setMeasurementRangesForced(const ActsTrk::detail::MeasurementRangeListFlat *measurementRangesForced) {
       m_measurementRangesForced = measurementRangesForced;
@@ -211,9 +217,13 @@ struct AtlasMeasurementSelector
 
 
    AtlasMeasurementSelector(typename BASE::Config &&config,
-                            const ActsTrk::detail::MeasurementRangeList &measurementRanges)
+                            const ActsTrk::detail::MeasurementRangeList &measurementRanges,
+                            const std::vector< const InDet::SiDetectorElementStatus *> &detElStatusArr,
+                            const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap)
       : BASE{std::move(config)},
-        m_measurementRanges(&measurementRanges)
+        m_measurementRanges(&measurementRanges),
+        m_detectorElementStatus(&detElStatusArr),
+        m_volumeIdMap(&volumeIdMap)
    {}
 
    // register  a calibrator for the given measurement type and the measurement dimension i.e. number of coordinates
@@ -302,10 +312,19 @@ struct AtlasMeasurementSelector
       }
    }
 
-   bool expectMeasurements([[maybe_unused]] const Acts::Surface &surface,
+   bool expectMeasurements(const Acts::Surface &surface,
                            [[maybe_unused]] const measurement_container_variant_t *container_variant_ptr,
-                           const abstract_measurement_range_t &abstract_range) const {
-      return (abstract_range.begin()<=abstract_range.end());
+                           [[maybe_unused]] const abstract_measurement_range_t &abstract_range) const {
+     assert(m_detectorElementStatus && m_volumeIdMap);
+     unsigned int collection_id = m_volumeIdMap->collecionMap().at(surface.geometryId().volume());
+     const InDet::SiDetectorElementStatus *det_el_status = m_detectorElementStatus->at(collection_id);
+     if (det_el_status) {
+        const ActsDetectorElement *acts_detector_element = getActsDetectorElement(surface);
+        if (acts_detector_element) {
+           return det_el_status->isGood(acts_detector_element->identifyHash());
+        }
+     }
+     return true;
    }
 
    template <typename measurement_container_t>
@@ -347,10 +366,14 @@ namespace {
 
       AtlasActsMeasurmentSelector(ActsTrk::MeasurementCalibrator<traj_t> &&calibrator,
                                   const ActsTrk::detail::MeasurementRangeList &measurementRanges,
+                                  const std::vector< const InDet::SiDetectorElementStatus *> &detElStatusArr,
+                                  const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap,
                                   TheAtlasMeasurementSelector::Config &&config)
          : m_calibrator( std::move(calibrator)),
            m_measurementSelector(std::move(config),
-                                 measurementRanges)
+                                 measurementRanges,
+                                 detElStatusArr,
+                                 volumeIdMap)
       {
          // have to register one calibrator per measurement container type and associated dimension.
          // @TODO unfortunately automatic type deduction does not work, so have to provide the type
@@ -401,11 +424,14 @@ bool checkNumMeasurementsCutOff(const std::vector<size_t> &numMeasurementsCutOff
 }
 
 // return a configured, wrapper for the measurement selector
-std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const EventContext &ctx,
+std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(
+       const EventContext &ctx,
        const ActsTrk::IPixelOnTrackCalibratorTool<detail::RecoTrackStateContainer> *pixelOnTrackCalibratorTool,
        const ActsTrk::IStripOnTrackCalibratorTool<detail::RecoTrackStateContainer> *stripOnTrackCalibratorTool,
        const ActsTrk::IHGTDOnTrackCalibratorTool<detail::RecoTrackStateContainer> *hgtdOnTrackCalibratorTool,
        const ActsTrk::detail::MeasurementRangeList &measurementRanges,
+       const std::vector< const InDet::SiDetectorElementStatus *> &detElStatusArr,
+       const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap,
        const std::vector<float> &etaBinsf,
        const std::vector<std::array<std::pair<float, float>, 4> > &chi2CutOffOutlier,
        const std::vector<size_t> &numMeasurementsCutOff,
@@ -425,6 +451,8 @@ std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const Eve
        selector(new AtlMeasurementSelector(
                            std::move(atl_measurement_calibrator),
                            measurementRanges,
+                           detElStatusArr,
+                           volumeIdMap,
                            AtlMeasurementSelectorConfig{
                               {Acts::GeometryIdentifier(),
                                     AtlMeasurementSelectorCuts{ etaBinsf,

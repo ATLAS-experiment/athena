@@ -35,6 +35,14 @@
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/ContextUtility.h"
 
+namespace InDet {
+   class SiDetectorElementStatus;
+}
+
+namespace ActsTrk {
+   class ActsVolumeIdToDetectorElementCollectionMap;
+}
+
 namespace ActsTrk {
   namespace detail {
     class TrackFindingMeasurements;
@@ -105,7 +113,6 @@ namespace ActsTrk {
     ToolHandle<ActsTrk::IPixelOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_pixelCalibTool{this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};
     ToolHandle<ActsTrk::IStripOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_stripCalibTool{this, "StripCalibrator", "", "Opt. strip measurement calibrator"};
     ToolHandle<ActsTrk::IHGTDOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_hgtdCalibTool{this, "HGTDCalibrator", "", "Opt. HGTD measurement calibrator"};
-
     SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
     ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
 
@@ -231,6 +238,8 @@ namespace ActsTrk {
     [[nodiscard]] std::unique_ptr<ActsTrk::IMeasurementSelector> setMeasurementSelector(
         const EventContext &ctx,
         const detail::TrackFindingMeasurements &measurements,
+        const std::vector<const InDet::SiDetectorElementStatus *> &detElStatusArr,
+        const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap,
         TrackFinderOptions &options) const;
 
     /**
@@ -243,11 +252,15 @@ namespace ActsTrk {
     TrackFindingDefaultOptions getDefaultOptions(const EventContext &ctx,
                                                  const DetectorContextHolder &detContext,
                                                  const detail::TrackFindingMeasurements &measurements,
+                                                 const std::vector<const InDet::SiDetectorElementStatus *> &detElStatusArr,
+                                                 const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap,
                                                  const Acts::PerigeeSurface* pSurface) const;
 
     TrackFindingBremOptions getBremOptions(const EventContext &ctx,
                                                  const DetectorContextHolder &detContext,
                                                  const detail::TrackFindingMeasurements &measurements,
+                                                 const std::vector<const InDet::SiDetectorElementStatus *> &detElStatusArr,
+                                                 const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap,
                                                  const Acts::PerigeeSurface* pSurface) const;
 
     /**
