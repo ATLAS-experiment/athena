@@ -7,7 +7,7 @@
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_wrt_last_nightly
-# art-athena-mt: 4
+# art-athena-mt: 8
 
 run () {
   name="${1}"
