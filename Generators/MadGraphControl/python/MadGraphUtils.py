@@ -2348,12 +2348,12 @@ def run_card_consistency_check(isNLO=False,process_dir='.'):
         for rawline in content:
             line = rawline.split('#')[0]
             if line.startswith("define p"):
-                if 'b' in line.split() and 'b~' in line.split():
+                if ('b' in line.split() and 'b~' in line.split()) or ('5' in line.split() and '-5' in line.split()):
                     proton_5flav = True
                 if 'j' in line.split() and jet_5flav:
                     proton_5flav = True
             if line.startswith("define j"):
-                if 'b' in line.split() and 'b~' in line.split():
+                if ('b' in line.split() and 'b~' in line.split()) or ('5' in line.split() and '-5' in line.split()):
                     jet_5flav = True
                 if 'p' in line.split() and proton_5flav:
                     jet_5flav = True
