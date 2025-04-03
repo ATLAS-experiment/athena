@@ -155,6 +155,9 @@ if flags.Detector.EnableITkPixel:
     PrintPixelDetElements.OutputLevel = 5
     PrintPixelDetElements.DetectorManagerNames = ["ITkPixel"]
     PrintPixelDetElements.OutputFile = "PixelGeometry.dat"
+    if args.MisalignMode is not None:
+        PrintPixelDetElements.AlignedPosition = True
+        print ("Pixel aligned position written into dat")
     acc.addEventAlgo(PrintPixelDetElements)
 
 
@@ -173,6 +176,9 @@ if flags.Detector.EnableITkStrip:
     PrintStripDetElements.DetectorManagerNames = ["ITkStrip"]
     PrintStripDetElements.ModulesOnly = False
     PrintStripDetElements.OutputFile = "StripGeometry.dat"
+    if args.MisalignMode is not None:
+        PrintStripDetElements.AlignedPosition = True
+        print ("Strip aligned position written into dat")
     acc.addEventAlgo(PrintStripDetElements)
 
 # Execute and finish
