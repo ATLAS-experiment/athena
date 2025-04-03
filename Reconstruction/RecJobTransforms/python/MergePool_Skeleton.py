@@ -128,6 +128,21 @@ def fromRunArgs(runArgs):
             from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
             cfg.merge(MuonGeoModelCfg(flags))
 
+    # Needed for merging in MT
+    if 'ESD' in streamToMerge:
+        Stream.ExtraInputs.add(
+            ( 'MuonGM::MuonDetectorManager',
+                  'ConditionStore+MuonDetectorManager' ) )
+        Stream.ExtraInputs.add(
+            ( 'InDetDD::SiDetectorElementCollection',
+                  'ConditionStore+PixelDetectorElementCollection' ) )
+        Stream.ExtraInputs.add(
+            ( 'InDetDD::SiDetectorElementCollection',
+                  'ConditionStore+SCT_DetectorElementCollection' ) )
+        Stream.ExtraInputs.add(
+            ( 'InDetDD::TRT_DetElementContainer',
+                  'ConditionStore+TRT_DetElementContainer' ) )
+
     # Add PerfMon
     if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
         from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg

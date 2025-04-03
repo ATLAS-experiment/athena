@@ -126,7 +126,6 @@ void test1()
     SG::WriteDecorHandleKey<MyObj> k (&owner, "CCCKey", w, "dec", "doc string");
     check(owner, k);
   }
-
   {
     TestOwner owner;
     SG::WriteHandleKey<MyObj> w ("xxx");
@@ -135,7 +134,14 @@ void test1()
     k.initialize().ignore();
     check(owner, k);
   }
-
+  {
+    TestOwner owner;
+    SG::WriteHandleKey<MyObj> w;  // empty key that gets changed later
+    SG::WriteDecorHandleKey<MyObj> k (&owner, "CCCKey", w, "dec", "doc string");
+    w="ccc";
+    k.initialize().ignore();
+    check(owner, k);
+  }
 }
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/ReadDecorHandleKey.icc
@@ -179,7 +179,7 @@ StatusCode ReadDecorHandleKey<T>::initialize (bool used /*= true*/)
   // If a parent container is used, its key may have changed
   if (m_contKey){
     m_contHandleKey = m_contKey->key();
-    std::string decorKey=decorKeyFromKey(this->key());
+    const std::string decorKey = decorKeyFromKey(this->key(), this->key());
     VarHandleKey::operator=(makeContDecorKey (m_contKey->key(), decorKey));
   }
 

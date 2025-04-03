@@ -50,7 +50,7 @@ def defineMenu():
         'L1_MU3V_jJ50',
         'L1_MU3V_jJ60',        
 
-        'L1_eTAU12_EMPTY', 'L1_eTAU80', 
+        'L1_eTAU12_EMPTY', 'L1_eTAU80', 'L1_eTAU12',
 
         # single jet 
         # new calo
