@@ -6,7 +6,7 @@
 #define GLOBALSIM_INVARIANTMASSDELTAPHIINCLUSIVE2_H
 
 /**
- * Algtool to run the Global InvariantMassDeltaPhiInclusive2
+ * AlgTool to run the Global InvariantMassDeltaPhiInclusive2
  */
 
 #include "GenericTob.h"
@@ -122,8 +122,23 @@ namespace GlobalSim {
        {},
        "maximum DeltaPhi"
       };
- 
- 
+
+    
+    Gaudi::Property<int> m_maxTob1
+      {this,
+       "maxTob1",
+       {6},
+       "maximum number of Tobs from 1st list to consider"
+      };
+
+     
+    Gaudi::Property<int> m_maxTob2
+      {this,
+       "maxTob2",
+       {6},
+       "maximum number of Tobs from 2nd list to consider"
+      };
+  
     SG::ReadHandleKey<GenericTobContainer>
     m_tobsInReadKey1 {
       this,
@@ -147,27 +162,32 @@ namespace GlobalSim {
       "key to write a bitset of results"};
     
 
+    using AcceptFlags =  std::vector<std::vector<bool>>;
+    
     StatusCode
     selectTobs1(const GenericTobContainer&,
-		std::vector<GenericTobContainer>&) const;
+		AcceptFlags&) const;
 
     StatusCode
     selectTobs2(const GenericTobContainer&,
-		std::vector<GenericTobContainer>&) const;
-
+		AcceptFlags&) const;
+    
     StatusCode
-    selectTobs(const GenericTobContainer&,
-	       GenericTobContainer&,
-	       int minEt,
-	       int minEta,
-	       int maxEta) const;
+    setAcceptFlags(const GenericTobContainer&,
+		   std::vector<bool>&,
+		   int minEt,
+		   int minEta,
+		   int maxEta) const;
 
     
     StatusCode
-    selectTobs(const GenericTobContainer&,
-	       GenericTobContainer&,
-	       int minEt) const;
+    setAcceptFlags(const GenericTobContainer&,
+		   std::vector<bool>&,
+		   int minEt) const;
     
+
+    constexpr static std::size_t s_inputWidth1{6};
+    constexpr static std::size_t s_inputWidth2{6};
   };
 
   
