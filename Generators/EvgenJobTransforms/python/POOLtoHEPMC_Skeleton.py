@@ -18,8 +18,8 @@ JobProperties.jobPropertiesDisallowed = True
 def fromRunArgs(runArgs):
     # Start the logger and identify ourselves
     from AthenaCommon.Logging import logging
-    log = logging.getLogger('EVNTtoHEPMC')
-    log.info('*** Starting EVNTtoHEPMC translation ***')
+    log = logging.getLogger('POOLtoHEPMC')
+    log.info('*** Starting POOLtoHEPMC translation ***')
 
     # Print some job information
     log.info('*** Transformation run arguments ***')
@@ -35,11 +35,18 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.Enums import ProductionStep
     flags.Common.ProductionStep = ProductionStep.Derivation
 
-    # Set the input file
+    # Set the input file and configure the input collection key
     if hasattr(runArgs, 'inputEVNTFile'):
         flags.Input.Files = runArgs.inputEVNTFile
+        McEventKey = 'GEN_EVENT'
+    elif hasattr(runArgs, 'inputHITSFile'):
+        flags.Input.Files = runArgs.inputHITSFile
+        McEventKey = 'TruthEvent'
+    elif hasattr(runArgs, 'inputRDOFile'):
+        flags.Input.Files = runArgs.inputRDOFile
+        McEventKey = 'TruthEvent'
     else:
-        log.error('Input EVNT file required for EVNTtoHEPMC')
+        log.error('Input EVNT, HITS, or RDO file required for POOLtoHEPMC')
     # Set the output file
     if hasattr(runArgs, 'outputHEPMCFile'):
        if ('.tar' in runArgs.outputHEPMCFile):
@@ -48,7 +55,7 @@ def fromRunArgs(runArgs):
        else:
           log.error('Output should be a tar.gz file but it is '+runArgs.outputHEPMCFile)
     else:
-        log.error('OutputHEPMCFile required for EVNTtoHEPMC')
+        log.error('OutputHEPMCFile required for POOLtoHEPMC')
 
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
@@ -77,7 +84,8 @@ def fromRunArgs(runArgs):
     # Use the WriteHepMC AlgTool from TruthIO to do the conversion
     from AthenaConfiguration.ComponentFactory import CompFactory
     cfg.addEventAlgo( CompFactory.WriteHepMC( 'WriteHepMC',
-                      OutputFile = my_output_HepMCFile ) )
+                      OutputFile = my_output_HepMCFile,
+                      McEventKey = McEventKey ) )
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)
@@ -103,7 +111,7 @@ def fromRunArgs(runArgs):
     os.remove( my_output_HepMCFile )
 
     # All done, now just report back
-    log.info("Ran EVNTtoHEPMC in " + str(time.time()-tic) + " seconds")
+    log.info("Ran POOLtoHEPMC in " + str(time.time()-tic) + " seconds")
 
     sys.exit(not sc.isSuccess())
 
