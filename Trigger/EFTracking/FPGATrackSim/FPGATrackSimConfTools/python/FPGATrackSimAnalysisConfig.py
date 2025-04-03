@@ -289,10 +289,22 @@ def FPGATrackSimGNNGraphConstructionToolCfg(flags):
 
     GNNGraphConstructionTool = CompFactory.FPGATrackSimGNNGraphConstructionTool()
     GNNGraphConstructionTool.graphTool = flags.Trigger.FPGATrackSim.GNN.graphTool.value
+
+    # Module Map Configuration
     GNNGraphConstructionTool.moduleMapType=flags.Trigger.FPGATrackSim.GNN.moduleMapType.value
     GNNGraphConstructionTool.moduleMapFunc=flags.Trigger.FPGATrackSim.GNN.moduleMapFunc.value
     GNNGraphConstructionTool.moduleMapTol=flags.Trigger.FPGATrackSim.GNN.moduleMapTol
     GNNGraphConstructionTool.moduleMapPath=PathResolver.FindCalibFile(flags.Trigger.FPGATrackSim.GNN.moduleMapPath)
+
+    # Metric Learning Configuration
+    GNNGraphConstructionTool.metricLearningR=flags.Trigger.FPGATrackSim.GNN.metricLearningR
+    GNNGraphConstructionTool.metricLearningMaxN=flags.Trigger.FPGATrackSim.GNN.metricLearningMaxN
+
+    from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
+    from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
+
+    GNNGraphConstructionTool.MLInferenceTool = result.popToolsAndMerge(OnnxRuntimeInferenceToolCfg(
+        flags, flags.Trigger.FPGATrackSim.GNN.MLModelPath, OnnxRuntimeType.CPU))
 
     result.setPrivateTools(GNNGraphConstructionTool)
 

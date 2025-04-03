@@ -18,6 +18,7 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
 source FPGATrackSim_CommonEnv.sh "${FWRD_ARGS[@]}"
 
 echo "... Running ${TEST_LABEL} analysis"
@@ -29,7 +30,9 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.doEDMConversion=True \
     Trigger.FPGATrackSim.runCKF=$RUN_CKF \
     Trigger.FPGATrackSim.pipeline='F-410' \
+    Trigger.FPGATrackSim.GNN.graphTool=graphTool.MetricLearning \
     Trigger.FPGATrackSim.GNN.moduleMapPath=$GNN_MODULE_MAP \
+    Trigger.FPGATrackSim.GNN.MLModelPath=$GNN_METRIC_LEARNING \
     Trigger.FPGATrackSim.GNN.GNNModelPath=$GNN_ONNX_MODEL \
     Trigger.FPGATrackSim.GNN.doGNNRootOutput=True \
     Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
