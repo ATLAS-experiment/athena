@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # art-description: Reco_tf runs on 2011 Heavy Ion data with HardProbes stream. Report issues to https://its.cern.ch/jira/projects/ATLASRECTS/
-# art-athena-mt: 4
+# art-athena-mt: 8
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
