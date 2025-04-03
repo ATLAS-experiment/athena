@@ -21,14 +21,14 @@ if __name__=="__main__":
 
    # make logging more verbose
    from AthenaCommon.Logging import log
-   from AthenaCommon.Constants import DEBUG, INFO
+   from AthenaCommon.Constants import DEBUG
    log.setLevel(DEBUG)
    
    # --- set flags
-   # the input file
-   flags.Input.Files = ['/eos/user/o/okovanda/data/ITk/DAQ/RDO/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33628990._000069.pool.root.1']
-   #flags.Input.Files = ['/eos/user/o/okovanda/data/ITk/DAQ/RDO/mc21_14TeV.601230.PhPy8EG_A14_ttbar_hdamp258p75_dil.recon.RDO.e8557_s4422_r16130/RDO.41929907._001786.pool.root.1']
+   from AthenaConfiguration.TestDefaults import defaultTestFiles
+   flags.Input.Files = defaultTestFiles.RDO_RUN4
 
+   flags.Concurrency.NumThreads = 1
    
    # --- end flag customization
    flags.lock()
@@ -61,5 +61,5 @@ if __name__=="__main__":
    sg.Dump = True
 
 
-   # loop over 10 events
-   cfg.run(10)
+   # loop over 1 event
+   cfg.run(1)
