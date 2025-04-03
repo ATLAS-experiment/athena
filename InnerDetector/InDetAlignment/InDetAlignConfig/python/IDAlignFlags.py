@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # File: InDetAlignConfig/python/IDAlignFlags.py
 # Author: David Brunner (david.brunner@cern.ch), Thomas Strebler (thomas.strebler@cern.ch)
@@ -6,13 +6,15 @@
 def createInDetAlignFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     icf = AthConfigFlags()
-    
+
+    icf.addFlag("baseDir", "./")
+    icf.addFlag("accumulate", True)
     icf.addFlag("solveLocal", True)
     icf.addFlag("doMonitoring", False)
     icf.addFlag("alignInDet", True)
+    icf.addFlag("alignSilicon", True)
     icf.addFlag("alignPixel", True)
     icf.addFlag("alignSCT", True)
-    icf.addFlag("alignSilicon", True)
     icf.addFlag("alignTRT", True)
     icf.addFlag("writeConstantsToPool", True)
     icf.addFlag("writeSilicon", True)
@@ -38,12 +40,12 @@ def createInDetAlignFlags():
     icf.addFlag("PixelDistortionTag", "")
     icf.addFlag("TRTCalibT0TagCos", "")
     icf.addFlag("TRTCalibRtTagCos", "")
-    icf.addFlag("useDynamicAlignFolders", True)
+    icf.addFlag("useDynamicAlignFolders", False)
     icf.addFlag("inputAlignmentConstants", [])
     icf.addFlag("inputBowingDatabase", "")
     icf.addFlag("inputDynamicGlobalDatabase", "")
     icf.addFlag("siPoolFile", [])
-    icf.addFlag("FileName", "newIDalign.root")
+    icf.addFlag("inputTFiles", "AlignmentTFile.root")
     icf.addFlag("outputConditionFile", "alignment_output.pool.root")
-
+    
     return icf

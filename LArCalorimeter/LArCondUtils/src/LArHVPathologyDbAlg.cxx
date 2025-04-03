@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHVPathologyDbAlg.h"
-#include "LArElecCalib/ILArHVPathologyDbTool.h"
+
 #include "LArRecConditions/LArHVPathologiesDb.h"
 #include "RegistrationServices/IIOVRegistrationSvc.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
@@ -30,42 +30,24 @@
 #include <fstream>
 #include <cstdlib>
 
-LArHVPathologyDbAlg::LArHVPathologyDbAlg(const std::string& name, ISvcLocator* pSvcLocator) 
-  : AthAlgorithm(name, pSvcLocator)
-  , m_writeCondObjs(false)
-  , m_inpFile("LArHVPathology.inp")
-  , m_outFile("")
-  , m_folder("")
-  , m_outpTag("HVPathologies-TEST")
-  , m_regSvc("IOVRegistrationSvc",name)
-  , m_pathologyTool("LArHVPathologyDbTool")
-  , m_mode(0)
-{
-  declareProperty("WriteCondObjs", m_writeCondObjs);
-  declareProperty("InpFile",       m_inpFile);
-  declareProperty("OutFile",       m_outFile);
-  declareProperty("Folder",        m_folder);
-  declareProperty("TagName",       m_outpTag);
-  declareProperty("Mode",  m_mode,"Mode to read file (0=offlineID/elecID, 1=online ID fields + HV module/line, 2=type is HV value to overwrite)");
-}
+#include "AthenaPoolUtilities/AthenaAttributeList.h"
+#include "CoralBase/Blob.h"
 
-LArHVPathologyDbAlg::~LArHVPathologyDbAlg()
-= default;
+#include "TBufferFile.h"
+#include "TClass.h"
+
 
 StatusCode LArHVPathologyDbAlg::initialize()
 {
   ATH_MSG_INFO(" in initialize()");
 
-  if(m_folder.value().empty()) {
+  if(m_writeCondObjs && m_folder.value().empty()) {
     ATH_MSG_ERROR("Folder property not set. Exiting ... ");
     return StatusCode::FAILURE;
   }
 
   // Get HVPathology tool
-  ATH_CHECK(m_pathologyTool.retrieve());
-
-  // Get the IOVRegistrationSvc when needed
-  if(m_writeCondObjs) ATH_CHECK(m_regSvc.retrieve());
+  //ATH_CHECK(m_pathologyTool.retrieve());
 
   // retrieve LArEM id helpers
   ATH_CHECK(detStore()->retrieve(m_caloIdMgr));
@@ -79,6 +61,7 @@ StatusCode LArHVPathologyDbAlg::initialize()
   ATH_CHECK( m_hvCablingKey.initialize() );
   ATH_CHECK( m_cablingKey.initialize() );
   ATH_CHECK( m_caloMgrKey.initialize() );
+  ATH_CHECK( m_hvPathologyKey.initialize(!m_writeCondObjs) );
 
   return StatusCode::SUCCESS;
 }
@@ -90,66 +73,55 @@ StatusCode LArHVPathologyDbAlg::execute()
   const EventContext& ctx = Gaudi::Hive::currentContext();
 
   int nevt = ctx.eventID().event_number();
+  if (nevt!=1) return StatusCode::SUCCESS;
 
+  
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
   ATH_CHECK(caloMgrHandle.isValid());
   const CaloDetDescrManager* calodetdescrmgr = *caloMgrHandle;
+  
 
-  if(m_writeCondObjs && nevt==1) {
+  const std::vector<LArHVPathologiesDb::LArHVElectPathologyDb>* pathologyContainer=nullptr;
+  if(m_writeCondObjs) {
     ATH_MSG_INFO("Creating conditions objects");
 
     // Create cond objects
-    if(!createCondObjects(ctx,calodetdescrmgr).isSuccess()) {
+    auto pathologies=createCondObjects(ctx,calodetdescrmgr);
+    if(!pathologies) {
       ATH_MSG_ERROR("Could not create cond objects ");
       m_writeCondObjs = false;
       return StatusCode::FAILURE;
     }
-  }
-
-  // Dump cond objects
-  StatusCode sc = printCondObjects (ctx,calodetdescrmgr);
-  if(!sc.isSuccess()) {
-    ATH_MSG_ERROR("Could not print out cond objects");
-    return sc;
-  }
-
-  return sc;
-}
-
-StatusCode LArHVPathologyDbAlg::stop()
-{
-  ATH_MSG_INFO(" in stop()");
-  StatusCode sc= StatusCode::SUCCESS;
- 
-  if(m_writeCondObjs) {
-    sc = registerCondObjects();
+    pathologyContainer=&(pathologies->m_v);
+    std::unique_ptr<AthenaAttributeList> attrlist = hvPathology2AttrList(*pathologies);
+    ATH_MSG_INFO("Created Attribute List");
+    coral::Blob& blob=(*attrlist)["Constants"].data<coral::Blob>();
+    ATH_MSG_DEBUG("Blob size=" << blob.size());
+    StatusCode sc = detStore()->record(std::move(attrlist),m_folder.value());
     if(!sc.isSuccess()) {
-      ATH_MSG_ERROR("Could not register objects");
+      ATH_MSG_ERROR("Could not record " << m_folder.value());
       return sc;
-    } 
-    else {
-      ATH_MSG_INFO("Register OK");
     }
+    else
+      ATH_MSG_INFO("Recorded " << m_folder.value());
   }
-
-  return sc;
+  // Dump cond objects
+  ATH_CHECK(printCondObjects (ctx,calodetdescrmgr,pathologyContainer));
+  return StatusCode::SUCCESS;
 }
 
-StatusCode LArHVPathologyDbAlg::createCondObjects (const EventContext & ctx, const CaloDetDescrManager* calodetdescrmgr)
+
+std::optional<LArHVPathologiesDb> LArHVPathologyDbAlg::createCondObjects (const EventContext & ctx, const CaloDetDescrManager* calodetdescrmgr) const
 {
   ATH_MSG_INFO(" in createCondObjects() ");
 
-  if(detStore()->contains<AthenaAttributeList>(m_folder)) {
-    ATH_MSG_INFO("EMB Pathologies already in SG, skipping ");
-  }
-  else {
     SG::ReadCondHandle<LArHVIdMapping> hvIdMapping (m_hvCablingKey, ctx);
 
     SG::ReadCondHandle<LArOnOffIdMapping> cabHdl (m_cablingKey, ctx);
     const LArOnOffIdMapping *cabling = *cabHdl;
     if(!cabling) {
        ATH_MSG_ERROR("Do not have cabling object with key " << m_cablingKey.key());
-       return StatusCode::FAILURE;
+       return std::nullopt;
     }
     // Read input file and construct LArHVPathologiesDb for given folder
     std::ifstream infile;
@@ -157,7 +129,7 @@ StatusCode LArHVPathologyDbAlg::createCondObjects (const EventContext & ctx, con
 
     if(!infile.is_open()) {
       ATH_MSG_ERROR("Unable to open " << m_inpFile << " for reading");
-      return StatusCode::FAILURE;
+      return std::nullopt;
     }
 
     char checkChar;
@@ -174,9 +146,9 @@ StatusCode LArHVPathologyDbAlg::createCondObjects (const EventContext & ctx, con
     }
 
     if(foldername!=m_folder.value()) {
-      ATH_MSG_ERROR("Unable to find data for the folder " << m_folder 
+      ATH_MSG_ERROR("Unable to find data for the folder " << m_folder.value() 
 		      << " in the input file");
-      return StatusCode::FAILURE;
+      return std::nullopt;
     }
     else
       ATH_MSG_INFO("Found folder " << foldername << " in the input file");
@@ -188,7 +160,6 @@ StatusCode LArHVPathologyDbAlg::createCondObjects (const EventContext & ctx, con
     while(!infile.eof()) {
       // Number or string?
       checkChar = static_cast<char> (infile.get());
-      ATH_MSG_INFO(" checChar " << checkChar);
       if(checkChar=='\n')
 	continue;
       if((checkChar >= '0') && (checkChar <= '9')) {
@@ -233,23 +204,11 @@ StatusCode LArHVPathologyDbAlg::createCondObjects (const EventContext & ctx, con
 
     infile.close();
     ATH_MSG_INFO("Finished parsing input file");    
-
-    AthenaAttributeList* attrlist = m_pathologyTool->hvPathology2AttrList(pathologies);
-    ATH_MSG_INFO("Created Attribute List");
-
-    StatusCode sc = detStore()->record(attrlist,m_folder);
-    if(!sc.isSuccess()) {
-      ATH_MSG_ERROR("Could not record " << m_folder);
-      return sc;
-    }
-    else
-      ATH_MSG_INFO("Recorded " << m_folder);
-  }
- 
-  return StatusCode::SUCCESS;
+    return std::make_optional<LArHVPathologiesDb>(pathologies);
 }
 
-StatusCode LArHVPathologyDbAlg::printCondObjects (const EventContext& ctx, const CaloDetDescrManager* calodetdescrmgr)
+StatusCode LArHVPathologyDbAlg::printCondObjects (const EventContext& ctx, const CaloDetDescrManager* calodetdescrmgr, 
+                                                  const std::vector<LArHVPathologiesDb::LArHVElectPathologyDb>* pathologyContainer) const
 {
   ATH_MSG_INFO(" in printCondObjects() ");
 
@@ -262,14 +221,17 @@ StatusCode LArHVPathologyDbAlg::printCondObjects (const EventContext& ctx, const
   }
 
   std::ofstream *fout=nullptr;
-  const AthenaAttributeList* attrlist = nullptr;
-  StatusCode sc = detStore()->retrieve(attrlist,m_folder);
+  if (!m_hvPathologyKey.empty() &&  pathologyContainer==nullptr) {
+    SG::ReadCondHandle<LArHVPathology> pathHdl(m_hvPathologyKey,ctx);
+    pathologyContainer=&(pathHdl->getPathology());
+  }
+  if (!pathologyContainer) {
+    ATH_MSG_WARNING("No input data "); 
 
-  if(sc.isFailure())
-    ATH_MSG_WARNING("Could not find object for " << m_folder);
+    return StatusCode::SUCCESS;
+  }
+  
   else {
-    LArHVPathologiesDb* pathologyContainer = m_pathologyTool->attrList2HvPathology(*attrlist);
-    ATH_MSG_INFO("Unpacked pathologies from Attribute List for " << m_folder);
     if(!m_outFile.value().empty()) {
        fout = new std::ofstream(m_outFile.value().c_str());
        if((!fout) || (fout && !(fout->good()))) {
@@ -278,8 +240,7 @@ StatusCode LArHVPathologyDbAlg::printCondObjects (const EventContext& ctx, const
              }
        if(fout) *fout<<m_folder.value()<<std::endl;
     }
-    for(unsigned i=0; i<pathologyContainer->m_v.size(); ++i) {
-      LArHVPathologiesDb::LArHVElectPathologyDb electPath = pathologyContainer->m_v[i];
+    for (const LArHVPathologiesDb::LArHVElectPathologyDb& electPath : *pathologyContainer) {
       if(m_mode==0) {
          ATH_MSG_INFO("Got pathology for cell ID: " << electPath.cellID
       	     << "(" << electPath.electInd 
@@ -305,37 +266,20 @@ StatusCode LArHVPathologyDbAlg::printCondObjects (const EventContext& ctx, const
          }
       }
     }
-    delete pathologyContainer;
   }
   if(fout) fout->close();
-  return sc;
+  return StatusCode::SUCCESS;
 }
 
-StatusCode LArHVPathologyDbAlg::registerCondObjects()
-{
-  ATH_MSG_INFO("entering registerCondObject()" );
-
-  std::string objname("AthenaAttributeList");
-
-  StatusCode sc = m_regSvc->registerIOV(objname, m_folder, m_outpTag);
-  if(!sc.isSuccess()) 
-    ATH_MSG_ERROR("Could not register (" << objname << ", " << m_outpTag << ") in IOV DB ");
-  else
-    ATH_MSG_INFO("Successfully registered");
-
-  return sc;
-}
- 
 std::vector<unsigned int>
 LArHVPathologyDbAlg::getElectInd(const LArHVIdMapping& hvIdMapping,
                                  const Identifier & id,
                                  unsigned int module,
                                  unsigned int line,
-				 const CaloDetDescrManager* calodetdescrmgr)
+				 const CaloDetDescrManager* calodetdescrmgr) const
 {
 
   std::vector<unsigned int> list;
-  list.clear();
   int HVline = 1000*module + line;
 // EM calo
   if (m_larem_id->is_lar_em(id)) {
@@ -430,7 +374,7 @@ LArHVPathologyDbAlg::getElectInd(const LArHVIdMapping& hvIdMapping,
 int LArHVPathologyDbAlg::getHVline(const LArHVIdMapping& hvIdMapping,
                                    const Identifier & id,
                                    short unsigned int ElectInd,
-				   const CaloDetDescrManager* calodetdescrmgr)
+				   const CaloDetDescrManager* calodetdescrmgr) const
 {
 
   unsigned int igap, ielec;
@@ -529,4 +473,36 @@ int LArHVPathologyDbAlg::getHVline(const LArHVIdMapping& hvIdMapping,
   // should not get up to this point....
   return -1;
 
+}
+
+std::unique_ptr<AthenaAttributeList> LArHVPathologyDbAlg::hvPathology2AttrList(const LArHVPathologiesDb& pathologyContainer) const {
+
+  coral::AttributeListSpecification* spec = new coral::AttributeListSpecification();
+  spec->extend("blobVersion",
+               "unsigned int");       // Should allow schema evolution if needed
+  spec->extend("Constants", "blob");  // Holds the container
+
+  std::unique_ptr<AthenaAttributeList> attrList = std::make_unique<AthenaAttributeList>(*spec);
+
+  (*attrList)["blobVersion"].data<unsigned int>() = (unsigned int)0;
+  coral::Blob& blob = (*attrList)["Constants"].data<coral::Blob>();
+
+  TClass* klass = TClass::GetClass("LArHVPathologiesDb");
+  if (klass == nullptr) {
+    ATH_MSG_ERROR("Can't find TClass LArHVPathologiesDb");
+    return nullptr;
+  } else
+    ATH_MSG_DEBUG("Got TClass LArHVPathologiesDb");
+
+  TBufferFile buf(TBuffer::kWrite);
+
+  if (buf.WriteObjectAny(&pathologyContainer, klass) != 1) {
+    ATH_MSG_ERROR("Failed to stream LArHVPathologiesDb");
+    return nullptr;
+  }
+
+  blob.resize(buf.Length());
+  void* adr = blob.startingAddress();
+  memcpy(adr, buf.Buffer(), buf.Length());
+  return attrList;
 }

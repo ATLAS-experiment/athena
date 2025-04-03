@@ -72,3 +72,11 @@ def MergeMuonInDetTracksAlgCfg(flags, name="MergeMuonInDetTracksAlg", **kwargs):
     acc.addEventAlgo(mergeTracks(name, **kwargs))
     return acc
 
+def GetL2CBmuonInDetTracksAlgCfg(flags, name="GetL2CBmuonInDetTracksAlg", **kwargs):
+
+    getTracks = CompFactory.GetL2CBmuonInDetTracksAlg
+    acc = ComponentAccumulator()
+    kwargs.setdefault("MuonL2CBContainerLocation", "MuonsL2CB")
+    acc.addEventAlgo(getTracks(name, **kwargs))
+    return acc
+
