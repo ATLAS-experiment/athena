@@ -116,19 +116,34 @@ namespace GlobalSim {
       ss << *tob << '\n';
     }
     ATH_MSG_DEBUG(ss.str());
-
-    auto tobSelections1 =
-      std::vector<GenericTobContainer>(s_NumResultBits,
-				       GenericTobContainer());
-    CHECK(selectTobs1(*tobs1, tobSelections1));
     
-    auto tobSelections2 =
-      std::vector<GenericTobContainer>(s_NumResultBits,
-				       GenericTobContainer());
-    CHECK(selectTobs2(*tobs2, tobSelections2));
+    // n selections on Tobs according to the s_NumResult cut categories
 
+    std::size_t maxCount1 = std::max(tobs1->size(), s_inputWidth1);
+    auto acceptFlagsEtEta1 =
+      AcceptFlags(s_NumResultBits, std::vector<bool>(maxCount1, false));
+    
+    CHECK(selectTobs1(*tobs1, acceptFlagsEtEta1));
+
+    std::size_t maxCount2 = std::max(tobs2->size(), s_inputWidth2); 
+    auto acceptFlagsEtEta2 =
+      AcceptFlags(s_NumResultBits, std::vector<bool>(maxCount2, false));
+    CHECK(selectTobs1(*tobs2,  acceptFlagsEtEta2));
+    
+    CHECK(selectTobs2(*tobs2, acceptFlagsEtEta2));
 
     auto result = std::make_unique<InvariantMassResult>();
+
+    for (auto isel{0U}; isel != s_NumResultBits; ++isel) {
+      for (auto i1{0U}; i1 != maxCount1; ++i1) {
+	if (!acceptFlagsEtEta1[isel][i1]) {continue;}
+	for (auto i2{0U}; i2 != maxCount2; ++i2) {
+	  if (!acceptFlagsEtEta1[isel][i2]) {continue;}
+	  (*result)[isel] = true;
+	}
+      }
+    }
+
     auto h_write =
       SG::WriteHandle<InvariantMassResult>(m_resultsWriteKey, ctx);
     CHECK(h_write.record(std::move(result)));
@@ -150,21 +165,21 @@ namespace GlobalSim {
 
   StatusCode
   InvariantMassDeltaPhiInclusive2AlgTool::selectTobs1(const GenericTobContainer& tobs,
-						      std::vector<GenericTobContainer>& tobSelections) const {
+						      AcceptFlags& flags) const {
 
     
     
     for (std::size_t isel{0}; isel != s_NumResultBits; ++isel) {
       if (m_applyEtaCuts) {
-	CHECK (selectTobs(tobs,
-			  tobSelections[isel],
-			  m_minEt1Cuts[isel],
-			  m_minEta1Cuts[isel],
-			  m_maxEta1Cuts[isel]));
+	CHECK (setAcceptFlags(tobs,
+			      flags[isel],
+			      m_minEt1Cuts[isel],
+			      m_minEta1Cuts[isel],
+			      m_maxEta1Cuts[isel]));
       } else {
-	CHECK (selectTobs(tobs,
-			  tobSelections[isel],
-			  m_minEt1Cuts[isel]));
+	CHECK (setAcceptFlags(tobs,
+			      flags[isel],
+			      m_minEt1Cuts[isel]));
       }
     }
     
@@ -173,26 +188,27 @@ namespace GlobalSim {
 
   StatusCode
   InvariantMassDeltaPhiInclusive2AlgTool::selectTobs2(const GenericTobContainer& tobs,
-						      std::vector<GenericTobContainer>& tobSelections) const {
+						      AcceptFlags& flags) const {
 
     
     for (std::size_t isel{0}; isel != s_NumResultBits; ++isel) {
       if (m_applyEtaCuts) {
-	CHECK (selectTobs(tobs,
-			  tobSelections[isel],
-			  m_minEt2Cuts[isel],
-			  m_minEta2Cuts[isel],
-			  m_maxEta2Cuts[isel]));
+	CHECK (setAcceptFlags(tobs,
+			      flags[isel],
+			      m_minEt2Cuts[isel],
+			      m_minEta2Cuts[isel],
+			      m_maxEta2Cuts[isel]));
       } else {
-	CHECK (selectTobs(tobs,
-			  tobSelections[isel],
-			  m_minEt2Cuts[isel]));
+	CHECK (setAcceptFlags(tobs,
+			      flags[isel],
+			      m_minEt2Cuts[isel]));
       }
     }
     return StatusCode::SUCCESS;
   }
   
-  
+
+  /* FIXME
   StatusCode
   InvariantMassDeltaPhiInclusive2AlgTool::selectTobs(const GenericTobContainer& tobs,
 						     GenericTobContainer& selectedTobs,
@@ -215,6 +231,8 @@ namespace GlobalSim {
     return StatusCode::SUCCESS;
   }
 
+  
+
   StatusCode
   InvariantMassDeltaPhiInclusive2AlgTool::selectTobs(const GenericTobContainer& tobs,
 						     GenericTobContainer& selectedTobs,
@@ -232,6 +250,49 @@ namespace GlobalSim {
     
     return StatusCode::SUCCESS;
   }
+
+  */
   
+  StatusCode
+  InvariantMassDeltaPhiInclusive2AlgTool::setAcceptFlags(const GenericTobContainer& tobs,
+							 std::vector<bool>& flags,
+							 int minEt,
+							 int minEta,
+							 int maxEta) const {
+    
+    auto tobSelector = [minEt,
+			minEta,
+			maxEta] (const auto& t) {
+      return  t->Et() > minEt and t->Eta() >= minEta and t->Eta() <= maxEta;
+    };
+    
+    std::transform(std::cbegin(tobs),
+		   std::cend(tobs),
+		   std::back_inserter(flags),
+		   tobSelector);
+
+
+    return StatusCode::SUCCESS;
+  }
+
+  
+
+  StatusCode
+  InvariantMassDeltaPhiInclusive2AlgTool::setAcceptFlags(const GenericTobContainer& tobs,
+							 std::vector<bool>& flags,
+							 int minEt) const {
+ 
+    auto tobSelector = [minEt] (const auto& t) {
+      return t->Et() > minEt;
+    };
+      
+    std::transform(std::cbegin(tobs),
+		  std::cend(tobs),
+		  std::back_inserter(flags),
+		  tobSelector);
+    
+    
+    return StatusCode::SUCCESS;
+  }
 }
 
