@@ -208,7 +208,7 @@ def getTransform():
     exeSet.add(EvgenExecutor(name="afterburn", skeleton="EvgenJobTransforms/skel.ABtoEVGEN.py", inData=["EVNT_Pre"], outData=["EVNT"]))
     exeSet.add(athenaExecutor(name = "AODtoDPD", skeletonFile = "PATJobTransforms/skeleton.AODtoDPD_tf.py",
                               substep = "a2d", inData = ["EVNT"], outData = ["NTUP_TRUTH"], perfMonFile = "ntuple_AODtoDPD.pmon.gz"))
-    exeSet.add(athenaExecutor(name = 'EVNTtoHEPMC', skeletonCA = 'EvgenJobTransforms.EVNTtoHEPMC_Skeleton',
+    exeSet.add(athenaExecutor(name = 'EVNTtoHEPMC', skeletonCA = 'EvgenJobTransforms.POOLtoHEPMC_Skeleton',
                               substep = "a2d", perfMonFile = 'ntuple.pmon.gz', inData=['EVNT'], outData=['HEPMC']))
     trf = transform(executor=exeSet)
     addAthenaArguments(trf.parser, maxEventsDefaultSubstep='all')

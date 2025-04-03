@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-# Simple script for converting an EVNT file into a HEPMC file
+# Simple script for converting an EVNT, HITS, or RDO file into a HEPMC file
 
 # Options: input and output file, and compression (tgz)
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -16,11 +16,19 @@ from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 cfg = MainServicesCfg(flags)
 cfg.merge(PoolReadCfg(flags))
 
+
+McEventKey = 'GEN_EVENT'
+if 'McEventCollection#GEN_EVENT' not in flags.Input.TypedCollections:
+    if 'McEventCollection#TruthEvent' in flags.Input.TypedCollections:
+        McEventKey = 'TruthEvent'
+    else:
+        print('Truth collection not found in input file. Might be a problem.')
+
 # Use the WriteHepMC AlgTool from TruthIO to do the conversion
 from AthenaConfiguration.ComponentFactory import CompFactory
 cfg.addEventAlgo( CompFactory.WriteHepMC( 'WriteHepMC',
-                  OutputFile = flags.Output.HepMCFileName.replace('.tgz','') ) )
-
+                  OutputFile = flags.Output.HepMCFileName.replace('.tgz',''),
+                  McEventKey = McEventKey ) )
 cfg.run(flags.Exec.MaxEvents)
 
 # In case we were asked to, compress the output
