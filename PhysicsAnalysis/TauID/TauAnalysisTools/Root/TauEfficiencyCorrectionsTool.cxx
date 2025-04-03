@@ -380,15 +380,23 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
       }
       if (m_sInputFilePathTriggerHadTau.empty()) {
         // Determine the input file name from the given trigger name.
-	if(m_sCampaign=="mc23"){
+	if(m_sCampaign=="mc23a"){
           if (m_sTriggerName.find("mediumRNN_tracktwoMVA") != std::string::npos) {
             m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_data2022"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
           }
           else {
-            ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported. Please fix \"TriggerName\" property. In case of doube please consult with TauTrigger coordinators");
+            ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported for " << m_sCampaign << " campaign. Please fix \"TriggerName\" property. In case of doubt please consult with TauTrigger coordinators");
             return StatusCode::FAILURE;
           }
-	} else if (m_sCampaign=="mc20"){
+	} if(m_sCampaign=="mc23d"){
+          if (m_sTriggerName.find("mediumRNN_tracktwoMVA") != std::string::npos) {
+            m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_data2023"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+          }
+          else {
+            ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported for " << m_sCampaign << " campaign. Please fix \"TriggerName\" property. In case of doubt please consult with TauTrigger coordinators");
+            return StatusCode::FAILURE;
+          }
+        } else if (m_sCampaign=="mc20"){
             ATH_MSG_ERROR("SFs for Run2 not available, please check the Campaign option in the tool configuration");
 	    return StatusCode::FAILURE;
 	}
