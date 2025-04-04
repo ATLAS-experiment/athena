@@ -28998,28 +28998,6 @@ HLT_tau180_tightRNN_tracktwoLLP_L1eTAU140:
     1: 3
     2: 3
     3: 3
-? HLT_tau19_mediumGNTau_probe_L1eTAU12_2j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel3c20XX1c20bgtwo85_L13jJ40p0ETA25
-: eventCount: 6
-  stepCounts:
-    0: 13
-    1: 13
-    2: 12
-    3: 12
-    4: 12
-    5: 12
-    6: 12
-    7: 12
-    8: 6
-  stepFeatures:
-    0: 52
-    1: 52
-    2: 235
-    3: 23
-    4: 42
-    5: 42
-    6: 42
-    7: 42
-    8: 6
 HLT_tau200_mediumGNTau_L1eTAU140:
   eventCount: 0
   stepCounts:
@@ -29556,6 +29534,28 @@ HLT_tau20_mediumGNTau_probe_L1cTAU20M_xe75_cell_xe100_pfopufit_L1jXE110:
     4: 7
     5: 7
     6: 1
+? HLT_tau20_mediumGNTau_probe_L1eTAU12_2j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel3c20XX1c20bgtwo85_L13jJ40p0ETA25
+: eventCount: 6
+  stepCounts:
+    0: 13
+    1: 13
+    2: 12
+    3: 12
+    4: 12
+    5: 12
+    6: 12
+    7: 12
+    8: 6
+  stepFeatures:
+    0: 52
+    1: 52
+    2: 235
+    3: 23
+    4: 41
+    5: 41
+    6: 41
+    7: 41
+    8: 6
 HLT_tau20_mediumGNTau_probe_L1eTAU12_j110_pf_ftf_preselj80_03dRAB_L1jJ60:
   eventCount: 2
   stepCounts:
