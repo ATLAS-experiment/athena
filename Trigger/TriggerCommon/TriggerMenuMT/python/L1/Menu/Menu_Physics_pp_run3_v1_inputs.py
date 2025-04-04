@@ -27,14 +27,13 @@ def remapThresholds(L1MenuFlags):
                                 thresholdsToRemove.append(thrIndex) 
                     for i in reversed(thresholdsToRemove):
                         del c["thresholds"][i]
-        
+
 
 def defineInputsMenu():
-    
+
     ctpinBoards = odict() # Ctpin/Slot9 (CTPCAL, NIM1, NIM2)
     topoBoards = odict()  # Topo1, Topo2, Topo3
     muctpiBoard = odict() # MuCTPi
-
 
     #-----------------------------------
     # SLOT 9 / CON 1 (CTPCal, NIM1,NIM2)
@@ -115,19 +114,19 @@ def defineInputsMenu():
             (None,3), (None,3), (None,3), (None,3), 
 
             'eEM12L', 'eEM15', 'eEM18', 'eEM18L', 'eEM18M',
-            'eEM22M', 'eEM24L', 
+            'eEM22M', 'eEM24L',
             #beam splashes
-            'eEM22A', 'eEM22C',                    
+            'eEM22A', 'eEM22C',
             #ATR-26333, adding eEM12, potentially more efficient than eEM12L in central HI collisions
             'eEM12',
             # variable eEM  thresholds
             'eEM24VM', 'eEM26', 'eEM26L', 'eEM26M', 'eEM26T', 'eEM28M', 'eEM40L',
             #ATR-26979, eEMSPARE1 was replaced by eEM1, eEMSPARE2 was replaced by eEM2, decrement other eEMSPARE thresholds
             'eEM1', 'eEM2',
-            
-            # eEM thresholds for production      
-            'eEMSPARE1', 
-            
+
+            # eEM thresholds for production
+            'eEMSPARE1',
+
             ('ZeroBiasA', 1)
         ],
 
@@ -263,12 +262,6 @@ def defineInputsMenu():
             # spare energy thresholds for commissioning
             ('jXESPARE1',1),
 
-            # production
-            # decrement jXESPARE for additional heavy ion jTE thresholds
-            #('jXESPARE2',1), ('jXESPARE3',1), ('jXESPARE4',1), ('jXESPARE5',1),
-            # ('jXESPARE6',1), ('jXESPARE7',1), ('jXESPARE8',1),('jXESPARE9',1), ('jXESPARE10',1), ('jXESPARE11',1),
-            # ('jXESPARE12',1), ('jXESPARE13',1), ('jXESPARE14',1),
-
         ]
     })
 
@@ -297,8 +290,8 @@ def defineInputsMenu():
                     TopoMenuDef( 'LATE-MU10s1',                          outputbits = 10 ),
                     TopoMenuDef( 'INVM_DR_2MU3VFab',                     outputbits = (11,12), outputlines = ['2INVM9-0DR15-2MU3VFab',
                                                                                                               '7INVM11-25DR99-2MU3VFab'] ), #BLS, ATR-21566
-                ]
-            },            
+        ]
+            },
 
             {
                 "fpga" : 0,
@@ -306,8 +299,8 @@ def defineInputsMenu():
                 "algorithms" : [
                     TopoMenuDef( '0INVM10-3MU3Vab',                          outputbits = 0 ), # BLS
                     TopoMenuDef( '0DR04-MU3Vab-CjJ40ab',                     outputbits = 1 ), # Bjet, TODO: not a primary
-                    TopoMenuDef( '0DR04-MU3VFab-CjJ30ab' ,                   outputbits = 2 ), #ATR-30657
-                    TopoMenuDef( '0DR04-MU5VFab-CjJ30ab' ,                   outputbits = 3 ), #ATR-30657
+                    TopoMenuDef( '0DR04-MU3VFab-CjJ40ab'                 , outputbits = 2),
+                    TopoMenuDef( '0DR04-MU5VFab-CjJ40ab'                 , outputbits = 3),
                     TopoMenuDef( '0DR04-MU5VFab-CjJ80ab',                    outputbits = 4 ), # Bjet, TODO: not a primary
                     TopoMenuDef( '0INVM10-3MU3VFab',                         outputbits = 5 ), # BLS
                     TopoMenuDef( '2DISAMB-jJ55ab-0DR28-eTAU30abl-eTAU20abl', outputbits = 6 ),
@@ -511,6 +504,5 @@ def defineInputsMenu():
     L1MenuFlags.boards().update( ctpinBoards )  # CTPIN/Slot9 NIM1, NIM2, CALREQ
 
     #----------------------------------------------
-
 
     remapThresholds(L1MenuFlags)
