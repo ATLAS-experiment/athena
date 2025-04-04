@@ -1065,16 +1065,13 @@ class TopoAlgoDef:
            
         # added for muon-jet:
         algoList = [
-            {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 30, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ30ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU8Fab" , "otype2" : "CjJ", "ocut2": 30, "olist2" : "ab"}, #0DR04-MU8Fab-CjJ30ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ40ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU8Fab" , "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"}, #0DR04-MU8Fab-CjJ40ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU3Vab" , "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"}, #0DR04-MU3Vab-CjJ40ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 80, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ80ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 90, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ90ab
-            {"minDr": 0, "maxDr": 4, "otype1" : "MU3VFab", "otype2" : "CjJ", "ocut2": 30, "olist2" : "ab"}, #0DR04_MU3VFab_CjJ30ab
-            {"minDr": 0, "maxDr": 4, "otype1" : "MU3VFab", "otype2" : "CjJ", "ocut2": 20, "olist2" : "ab"}, #0DR04_MU3VFab_CjJ20ab
-            {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 20, "olist2" : "ab"}, #0DR04_MU5VFab_CjJ20ab
+            {"minDr": 0, "maxDr": 4, "otype1" : "MU3VFab", "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"}, #0DR04_MU3VFab_CjJ40ab
         ]
         for x in algoList:
             class d:
@@ -1434,16 +1431,6 @@ class TopoAlgoDef:
             tm.registerTopoAlgo(alg)
 
 
-
-        # DISAMB Lines with DR Cut
-        # output lines = '2DISAMB-jJ55ab-0DR25-eTAU30ab-eTAU20ab'
-        #                '2DISAMB-jJ55ab-0DR28-eTAU30ab-eTAU20ab'
-        #                '2DISAMB-jJ50ab-0DR25-eTAU30ab-eTAU20ab',
-        #                '2DISAMB-jJ50ab-0DR28-eTAU30ab-eTAU20ab',
-        #                '2DISAMB-jJ40ab-0DR25-eTAU30ab-eTAU20ab',
-        #                '2DISAMB-jJ40ab-0DR28-eTAU30ab-eTAU20ab',
-        #                '2DISAMB-jJ30ab-0DR25-eTAU30ab-eTAU20ab',
-        #                '2DISAMB-jJ30ab-0DR28-eTAU30ab-eTAU20ab']
         DISAMB_DR_jJ_eTau_eTau_Map = [
         {
             "algoname": "2DISAMB_jJ55ab_DR_eTAU_eTAU",
