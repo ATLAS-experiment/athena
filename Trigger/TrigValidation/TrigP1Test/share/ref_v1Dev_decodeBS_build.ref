@@ -12558,8 +12558,6 @@ HLT_tau180_mediumRNN_tracktwoLLP_probe_xe75_cell_xe100_pfopufit_L1jXE110:
   eventCount: 0
 HLT_tau180_tightRNN_tracktwoLLP_L1eTAU140:
   eventCount: 0
-? HLT_tau19_mediumGNTau_probe_L1eTAU12_2j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel3c20XX1c20bgtwo85_L13jJ40p0ETA25
-: eventCount: 0
 HLT_tau200_mediumGNTau_L1eTAU140:
   eventCount: 0
 HLT_tau200_mediumRNN_tracktwoLLP_L1eTAU140:
@@ -12684,6 +12682,8 @@ HLT_tau20_mediumGNTau_probe_L1cTAU20M_xe75_cell_xe100_pfopufit_L1jXE100:
     0: 1
 HLT_tau20_mediumGNTau_probe_L1cTAU20M_xe75_cell_xe100_pfopufit_L1jXE110:
   eventCount: 0
+? HLT_tau20_mediumGNTau_probe_L1eTAU12_2j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel3c20XX1c20bgtwo85_L13jJ40p0ETA25
+: eventCount: 0
 HLT_tau20_mediumGNTau_probe_L1eTAU12_j110_pf_ftf_preselj80_03dRAB_L1jJ60:
   eventCount: 1
   stepCounts:
