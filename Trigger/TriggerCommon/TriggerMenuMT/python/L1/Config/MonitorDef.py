@@ -158,7 +158,7 @@ class MonitorDef:
                 "L1_BPH-0M9-eEM9-eEM7",  "L1_BPH-0M10-3MU3V", "L1_BPH-0M10-3MU3VF",
                 "L1_JPSI-1M5-eEM9", "L1_JPSI-1M5-eEM15",
                 "L1_BTAG-MU3VjJ40", "L1_BTAG-MU5VFjJ80",
-                "L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M",
+                "L1_cTAU30M_2cTAU20M_DR-eTAU30LeTAU20L",
                 "L1_jMJJ-700",
                 "L1_DY-BOX-2MU3VF", "L1_DY-BOX-MU5VFMU3V",
                 "L1_LAR-ZEE-eEM",  "L1_LFV-MU5VF",

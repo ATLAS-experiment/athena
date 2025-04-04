@@ -28019,6 +28019,8 @@ HLT_noalg_L1eTAU140:
   eventCount: 2
 HLT_noalg_L1eTAU20:
   eventCount: 19
+HLT_noalg_L1eTAU20L:
+  eventCount: 19
 HLT_noalg_L1eTAU20M:
   eventCount: 19
 HLT_noalg_L1eTAU30:
@@ -30954,6 +30956,20 @@ HLT_tau25_idperf_tracktwoMVA_L1eTAU20:
     2: 48
     3: 48
     4: 48
+HLT_tau25_idperf_tracktwoMVA_L1eTAU20L:
+  eventCount: 19
+  stepCounts:
+    0: 19
+    1: 19
+    2: 19
+    3: 19
+    4: 19
+  stepFeatures:
+    0: 48
+    1: 48
+    2: 48
+    3: 48
+    4: 48
 HLT_tau25_idperf_tracktwoMVA_L1eTAU20M:
   eventCount: 19
   stepCounts:
@@ -32177,6 +32193,20 @@ HLT_tau25_mediumRNN_tracktwoMVA_L1eTAU20:
     2: 48
     3: 48
     4: 4
+HLT_tau25_mediumRNN_tracktwoMVA_L1eTAU20L:
+  eventCount: 4
+  stepCounts:
+    0: 19
+    1: 19
+    2: 19
+    3: 19
+    4: 4
+  stepFeatures:
+    0: 48
+    1: 48
+    2: 48
+    3: 48
+    4: 4
 HLT_tau25_mediumRNN_tracktwoMVA_L1eTAU20M:
   eventCount: 4
   stepCounts:
@@ -33329,6 +33359,20 @@ HLT_tau25_perf_tracktwoMVA_L1cTAU20M:
     3: 42
     4: 20
 HLT_tau25_perf_tracktwoMVA_L1eTAU20:
+  eventCount: 15
+  stepCounts:
+    0: 19
+    1: 19
+    2: 19
+    3: 19
+    4: 15
+  stepFeatures:
+    0: 48
+    1: 48
+    2: 48
+    3: 48
+    4: 23
+HLT_tau25_perf_tracktwoMVA_L1eTAU20L:
   eventCount: 15
   stepCounts:
     0: 19
@@ -35556,7 +35600,20 @@ HLT_tau35_mediumGNTau_tau20_mediumGNTau_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25:
     2: 26
     3: 26
     4: 6
-HLT_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M:
+HLT_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30LeTAU20L:
+  eventCount: 0
+  stepCounts:
+    0: 12
+    1: 12
+    2: 12
+    3: 12
+  stepFeatures:
+    0: 61
+    1: 59
+    2: 59
+    3: 59
+    4: 10
+HLT_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30LeTAU20L-jJ55:
   eventCount: 0
   stepCounts:
     0: 10
@@ -35564,24 +35621,11 @@ HLT_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30MeT
     2: 10
     3: 10
   stepFeatures:
-    0: 52
-    1: 50
-    2: 50
-    3: 50
-    4: 6
-HLT_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M-jJ55:
-  eventCount: 0
-  stepCounts:
-    0: 8
-    1: 8
-    2: 8
-    3: 8
-  stepFeatures:
-    0: 44
-    1: 42
-    2: 42
-    3: 42
-    4: 6
+    0: 53
+    1: 51
+    2: 51
+    3: 51
+    4: 10
 HLT_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20:
   eventCount: 0
   stepCounts:
@@ -35904,6 +35948,32 @@ HLT_tau35_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_2cT
     2: 26
     3: 26
     4: 2
+HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30LeTAU20L:
+  eventCount: 0
+  stepCounts:
+    0: 12
+    1: 12
+    2: 12
+    3: 12
+  stepFeatures:
+    0: 61
+    1: 59
+    2: 59
+    3: 59
+    4: 6
+HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30LeTAU20L-jJ55:
+  eventCount: 0
+  stepCounts:
+    0: 10
+    1: 10
+    2: 10
+    3: 10
+  stepFeatures:
+    0: 53
+    1: 51
+    2: 51
+    3: 51
+    4: 6
 HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M:
   eventCount: 0
   stepCounts:

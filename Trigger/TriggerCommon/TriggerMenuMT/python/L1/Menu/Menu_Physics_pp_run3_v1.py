@@ -68,27 +68,18 @@ def defineMenu():
         'L1_cTAU30M_2cTAU20M_4jJ30p0ETA25',
         'L1_cTAU35M_2cTAU30M_2jJ55_3jJ50',  
         'L1_cTAU35M_2cTAU30M',
-        'L1_eTAU30M_2eTAU20M_jJ55_2jJ50_3jJ30',
-        'L1_eTAU35M_2eTAU30M',
+        'L1_cTAU30M_2cTAU20M_jJ55_2jJ50_3jJ30',
         
         # combined tau - lepton
         #Phase-I
-        'L1_eEM18M_2eTAU20M',
-        'L1_MU8F_eTAU20M',
         'L1_MU8F_cTAU20M',
-        'L1_MU8F_eTAU20M_jJ55_2jJ30',
-        'L1_MU8F_eTAU20M_3jJ30',
+        'L1_MU8F_cTAU20M_jJ55_2jJ30',
         'L1_MU8F_cTAU20M_3jJ30',
-        'L1_eEM18M_2eTAU20M_jJ55_3jJ30',
-        'L1_MU8F_eTAU30M',
         'L1_eEM18M_2cTAU20M_4jJ30',
         
         # combined tau - xe
         'L1_eEM18M_2cTAU20M_jXE70',
-        'L1_eTAU30M_2jJ50_jXE90',
-        'L1_MU8F_eTAU20M_jXE70',
         'L1_MU8F_cTAU20M_jXE70',
-        'L1_eTAU30M_2eTAU20M_jXE70',
         'L1_eTAU60_2cTAU20M_jXE80',
 
 
@@ -260,7 +251,7 @@ def defineMenu():
 
         # tau 
         'L1_cTAU30M_2cTAU20M',
-        'L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M', 'L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M-jJ55',
+        'L1_cTAU30M_2cTAU20M_DR-eTAU30LeTAU20L', 'L1_cTAU30M_2cTAU20M_DR-eTAU30LeTAU20L-jJ55',
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20', 'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', 
         'L1_eTAU80_2cTAU30M_DR-eTAU30eTAU20', 
         'L1_cTAU20M_DR-eTAU20eTAU12-jJ40', 
