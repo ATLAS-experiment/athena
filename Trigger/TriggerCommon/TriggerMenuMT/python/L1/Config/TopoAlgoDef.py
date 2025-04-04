@@ -265,9 +265,10 @@ class TopoAlgoDef:
         #jJ lists
         # No additional parameters
         algoList = [
-            {"otype" : "jJ",  "ocut" : 50, "olist" : "ab", "etamin" : 0,  "etamax" : 32}, # jJab
-            {"otype" : "CjJ", "ocut" : 40, "olist" : "ab", "etamin" : 0,  "etamax" : 26}, # CjJab
-            {"otype" : "FjJ", "ocut" : 40, "olist" : "ab", "etamin" : 30, "etamax" : 49}, # FjJab
+            {"otype" : "jJ",   "ocut" : 50, "olist" : "ab", "etamin" : 0,  "etamax" : 32}, # jJab
+            {"otype" : "CjJ",  "ocut" : 40, "olist" : "ab", "etamin" : 0,  "etamax" : 26}, # CjJab
+            {"otype" : "SCjJ", "ocut" : 10, "olist" : "ab", "etamin" : 0,  "etamax" : 26}, # SCjJab
+            {"otype" : "FjJ",  "ocut" : 40, "olist" : "ab", "etamin" : 30, "etamax" : 49}, # FjJab
         ]
         for x in algoList:
             class d:
@@ -1306,8 +1307,8 @@ class TopoAlgoDef:
             
 
         # (ATR-12748) fat jet trigger with Simple Cone algo
-        algoList = [
-            {"itemNameMinHT": 111, "minHT": 166, "otype" : "CjJ", "ocut" : 40, "olist" : "ab", "nleading" : HW.jJetOutputWidthSelect, "inputwidth": HW.jJetOutputWidthSelect, "oeta" : 26}, #SC111-CjJ40abpETA26
+        algoList = [ #name (SC175) is rounded on purpose to avoid more name changes in case the actual threshold is slightly tweaked later on
+            {"itemNameMinHT": 175, "minHT": 176, "otype" : "SCjJ", "ocut" : 10, "olist" : "ab", "nleading" : HW.jJetOutputWidthSelect, "inputwidth": HW.jJetOutputWidthSelect, "oeta" : 26}, #SC175-SCjJ10abpETA26
         ]
         for x in algoList:
             class d:
@@ -1322,7 +1323,7 @@ class TopoAlgoDef:
             alg.addgeneric('NumResultBits', 1)
             alg.addvariable('MinET', d.ocut*_et_conversion)
             alg.addvariable('MinSumET', d.minHT*_et_conversion)
-            alg.addvariable('MaxRSqr', 10*10*_dr_conversion*_dr_conversion)                        
+            alg.addvariable('MaxRSqr', 15*15*_dr_conversion*_dr_conversion)                        
             tm.registerTopoAlgo(alg)  
  
         #  0INVM9-eEM9ab-eEMab 
@@ -1785,7 +1786,7 @@ class TopoAlgoDef:
               "otype3" : "MU", "olist3": "s", "inputwidth3": 6, "nleading3": 4,
               "otype4" : "jXE", "olist4": "s", "inputwidth4": 1, "nleading4": 1,
               "WPList" : ["Tight", "Loose"],
-              "MinET1" : 0, # jJets in GeV (= 100MeV steps after conversion)
+              "MinET1" : 15, # jJets in GeV (= 100MeV steps after conversion)
               "MinET2" : 0, # eTaus
               "MinET3" : 0, # muons
               "MinET4" : 0, # jXE

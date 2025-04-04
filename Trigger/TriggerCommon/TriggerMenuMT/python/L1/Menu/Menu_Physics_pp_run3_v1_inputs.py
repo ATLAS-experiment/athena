@@ -376,7 +376,7 @@ def defineInputsMenu():
                                                                                                                 '700INVM-jJ60s6-AjJ50s6',] ), # TODO: needed? 
                     TopoMenuDef( 'HT150-jJ50s5pETA32',                       outputbits = 5 ),
                     TopoMenuDef( '400INVM-AjJ60s6pETA32-AjJ50s6p30ETA49',    outputbits = 6 ),
-                    TopoMenuDef( 'SC111-CjJ40abpETA26',                      outputbits = 7 ),
+                    TopoMenuDef( 'SC175-SCjJ10abpETA26',                     outputbits = 7 ),
                     TopoMenuDef( '0DETA20-jJ90s1-jJs2',                      outputbits = 8 ),
                     TopoMenuDef( '100RATIO-0MATCH-eTAU40si2-eEMall',         outputbits = 9 ),
                     TopoMenuDef( 'NOT-0MATCH-eTAU40si1-eEMall',              outputbits = 10),

@@ -603,12 +603,12 @@ getConfig_jTAU = L1Config_jTAU()
 
 def getConfig_jJ(do_HI_tob_thresholds):
     confObj = odict()
-    confObj["ptMinToTopo1"] = 5 if do_HI_tob_thresholds else 15
-    confObj["ptMinToTopo2"] = 5 if do_HI_tob_thresholds else 15
-    confObj["ptMinToTopo3"] = 5 if do_HI_tob_thresholds else 15
-    confObj["ptMinxTOB1"] = 5 if do_HI_tob_thresholds else 15
-    confObj["ptMinxTOB2"] = 5 if do_HI_tob_thresholds else 15
-    confObj["ptMinxTOB3"] = 5 if do_HI_tob_thresholds else 15
+    confObj["ptMinToTopo1"] = 5 if do_HI_tob_thresholds else 10
+    confObj["ptMinToTopo2"] = 5 if do_HI_tob_thresholds else 10
+    confObj["ptMinToTopo3"] = 5 if do_HI_tob_thresholds else 10
+    confObj["ptMinxTOB1"] = 5 if do_HI_tob_thresholds else 10
+    confObj["ptMinxTOB2"] = 5 if do_HI_tob_thresholds else 10
+    confObj["ptMinxTOB3"] = 5 if do_HI_tob_thresholds else 10
     confObj["resolutionMeV"] = 200  
     confObj["seedThreshold1"] = 3 # signed, in GeV, negative values in practice mean no seed threshold. 
     confObj["seedThreshold2"] = 3 # Max value (HW constraint): (2^20)-1 * 25MeV = 26214.375 (GeV)
