@@ -49,12 +49,12 @@ StatusCode PixelCablingCondAlg::execute(const EventContext& ctx) const {
   std::unique_ptr<PixelCablingCondData> writeCdo(std::make_unique<PixelCablingCondData>());
 
   // Signed values
-  int barrel_ec, eta_module;
+  int barrel_ec{}, eta_module{};
 
   // Unsigned 32 bit values
-  uint32_t layer_disk, phi_module;
-  uint32_t robid, rodid;
-  uint32_t sl_40_fmt, sl_40_link, sl_80_fmt, sl_80_link;
+  uint32_t layer_disk{}, phi_module{};
+  uint32_t robid{}, rodid{};
+  uint32_t sl_40_fmt{}, sl_40_link{}, sl_80_fmt{}, sl_80_link{};
 
   // Unsigned 64-bit values
   uint64_t onlineId = 0;
@@ -139,6 +139,11 @@ StatusCode PixelCablingCondAlg::execute(const EventContext& ctx) const {
     }
 
     // Get the offline ID for this module
+    // check layer_disk value is inside some very wide range
+    if (layer_disk>100){
+      ATH_MSG_ERROR("Value for layer_disk is insane: "<<layer_disk);
+      return StatusCode::FAILURE;
+    }
     Identifier offlineId = m_pixelID->wafer_id(barrel_ec,layer_disk,phi_module,eta_module);
 
     // Set linknumber for IBL / DBM entries

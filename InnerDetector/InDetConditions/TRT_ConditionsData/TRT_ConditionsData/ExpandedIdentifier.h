@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTConditionsData_TRTCondIdentifier_h
@@ -29,16 +29,15 @@ namespace TRTCond
   class ExpandedIdentifier
   {
   private:
-    size_t m_index[5] ;  //!< Index within levels higher than DETECTOR
-    size_t m_level ;     //!< Granularity level
+    size_t m_index[5]{} ;  //!< Index within levels higher than DETECTOR
+    size_t m_level{STRAW} ;     //!< Granularity level
   public:
 
     /** enum to specify the granularity level */
     enum Level { DETECTOR=0,BARRELEC=1, LAYERWHEEL=2, MODULE=3, STRAWLAYER=4, STRAW=5 } ;
 
     /** default constructor */
-    ExpandedIdentifier() : m_level(STRAW) { 
-      m_index[0] = m_index[1] = m_index[2] = m_index[3] = m_index[4] = 0 ;}
+    ExpandedIdentifier() = default;
 
     /** normal constructor */
     ExpandedIdentifier(int bec, int layerorwheel, int module, int strawlayer, int straw, int l=STRAW) 
@@ -50,9 +49,7 @@ namespace TRTCond
 	m_index[4] = straw ;
       }
 
-    // index operator subtracting 1 from the supplied index to skip the 'detector' level
-    //const size_t& operator[](size_t l) const { return m_index[l-1] ; }
-    //size_t& operator[]( size_t l ) { return m_index[l-1] ; }
+  
     
     /** returns const index at given level. Note that internally there is no indexing of the DETECTOR level */
     const size_t& index(size_t l) const { return m_index[l-1] ; }

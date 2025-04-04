@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixeldEdxAlg.h"
@@ -12,8 +12,7 @@
 #include <fstream>
 
 PixeldEdxAlg::PixeldEdxAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  ::AthAlgorithm(name, pSvcLocator),
-  m_pixelID(nullptr) { }
+  ::AthAlgorithm(name, pSvcLocator){ }
 
 StatusCode PixeldEdxAlg::initialize() {
   ATH_MSG_DEBUG("PixeldEdxAlg::initialize()");
@@ -43,7 +42,7 @@ StatusCode PixeldEdxAlg::execute() {
 //  const EventIDRange rangeW{start, stop};
   EventIDRange rangeW{start, stop};
 
-  int         fit_type;
+  int         fit_type{};
   std::string fun_type;
   std::string bb_type;
 
