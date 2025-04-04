@@ -11,6 +11,7 @@
  **/
 
 #include "GaudiKernel/ClassID.h"
+#include "GaudiKernel/DataObject.h"
 
 #include "PersistentDataModel/Token.h"
 #include "CxxUtils/sgkey_t.h"
@@ -120,7 +121,9 @@ private:
 /** @class DataHeader
  *  @brief This class provides the layout for summary information stored for data written to POOL.
  **/
-class  DataHeader {
+class  DataHeader
+  : public DataObject // Derive from DataObject so that it can be recyclable.
+{
 public:
    enum statusFlag { Output, Input, Other };
 
@@ -192,7 +195,12 @@ public: // Non-static members
    const std::string& getEvtRefTokenStr();
 
    void dump(std::ostream& ostr) const;
+
+protected:
+  /// Called before this object is recycled.
+  virtual void recycle();
   
+
 private:
    friend class DataHeaderCnv_p3;
    friend class DataHeaderCnv_p4;
