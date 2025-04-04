@@ -168,7 +168,7 @@ class MonitorDef:
             topo3_monitems = [
                 "L1_HT190-jJ40s5pETA21",  "L1_jMJJ-500-NFF",
                 "L1_LLP-RO-eEM",  "L1_LLP-NOMATCH-eEM",
-                "L1_SC111-CjJ40",
+                "L1_SC175-SCjJ10",
                 "L1_ZAFB-25DPHI-eEM18M",
                 "L1_jMJJ-300-NFF",
                 "L1_LFV-eEM10L-MU8VF", "L1_LFV-eEM15L-MU5VF",

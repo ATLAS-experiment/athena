@@ -2141,7 +2141,7 @@ class ItemDef:
             MenuItem('L1_jMJJ-400-CF').setLogic( d.TOPO_400INVM_AjJ60s6pETA32_AjJ50s6p30ETA49 & physcond)
             MenuItem('L1_jJ90_DETA20-jJ90J').setLogic( d.jJ50 & d.TOPO_0DETA20_jJ90s1_jJs2 & physcond)
             MenuItem('L1_HT190-jJ40s5pETA21').setLogic( d.TOPO_HT190_jJ40s5pETA21   & physcond)
-            MenuItem('L1_SC111-CjJ40').setLogic(  d.TOPO_SC111_CjJ40abpETA26 & physcond)
+            MenuItem('L1_SC175-SCjJ10').setLogic(  d.TOPO_SC175_SCjJ10abpETA26 & physcond)
 
             #ATR-30179
             MenuItem('L1_cTAU30M_3DR35-MU8F-eTAU30').setLogic( d.cTAU30M & d.TOPO_3DR35_MU8Fab_eTAU30ab & physcond)

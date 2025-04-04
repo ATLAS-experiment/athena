@@ -252,7 +252,7 @@ def defineMenu():
         #'L1_DPHI-2eEM5', 
         'L1_HT150-jJ50s5pETA32_jMJJ-400-CF',
         'L1_HT190-jJ40s5pETA21',
-        'L1_SC111-CjJ40',  
+        'L1_SC175-SCjJ10',  
         'L1_jJ90_DETA20-jJ90J', 
         #ATR-30618
         'L1_ADVAET',
