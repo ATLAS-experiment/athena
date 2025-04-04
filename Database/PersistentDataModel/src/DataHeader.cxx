@@ -191,7 +191,9 @@ DataHeader::DataHeader() : m_dataHeader(),
 	m_evtRefTokenStr() {
 }
 //______________________________________________________________________________
-DataHeader::DataHeader(const DataHeader& rhs) : m_dataHeader(rhs.m_dataHeader),
+DataHeader::DataHeader(const DataHeader& rhs) :
+        DataObject (rhs),
+        m_dataHeader(rhs.m_dataHeader),
 	m_inputDataHeader(rhs.m_inputDataHeader),
 	m_status(rhs.m_status),
 	m_processTag(rhs.m_processTag),
@@ -331,4 +333,8 @@ void DataHeader::dump(std::ostream& ostr) const
    ostr << "attrListPtr: " << m_attrList << endl;
    if( m_attrList ) ostr << "attrListSize: " << m_attrList->size() << endl;
    ostr << "--- DataHeader End ---" << endl;   
+}
+//______________________________________________________________________________
+void DataHeader::recycle()
+{
 }
