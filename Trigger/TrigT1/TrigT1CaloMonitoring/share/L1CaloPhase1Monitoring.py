@@ -49,7 +49,7 @@ flags.Trigger.enableL1CaloPhase1 = True # used by this script to turn on/off the
 flags.Trigger.L1.doeFex = True
 flags.Trigger.L1.dojFex = True
 flags.Trigger.L1.dogFex = True
-flags.Trigger.L1.doTopo = False
+flags.Trigger.L1.doTopo = (flags.Input.DataYear > 2023)
 # if running online, override these with autoconfig values
 # will set things like the GlobalTag automatically
 if partition.isValid():
@@ -75,7 +75,7 @@ Extra flags are specified after a " -- " and the following are most relevant boo
   Trigger.L1.doeFex          : controls efex simulation and monitoring [default: True]
   Trigger.L1.dojFex          : controls jfex simulation and monitoring [default: True]
   Trigger.L1.dogFex          : controls gfex simulation and monitoring [default: True]
-  Trigger.L1.doTopo          : controls topo simulation and monitoring [default: False]
+  Trigger.L1.doTopo          : controls topo simulation and monitoring [default: True] (from 2023 Onwards)
   DQ.useTrigger              : controls if JetEfficiency monitoring alg is run or not  [default: False]
   PerfMon.doFullMonMT        : print info about execution time of algorithms and memory use etc [default: False]
 
