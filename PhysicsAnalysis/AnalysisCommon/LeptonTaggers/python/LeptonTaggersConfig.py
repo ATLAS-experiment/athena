@@ -332,6 +332,7 @@ def DecoratePLITCfg(
 
 def DecoratePromptLeptonImprovedCfg(
     flags, BDT_name="", lepton_name="", track_jet_name="AntiKtVR30Rmax4Rmin02PV0TrackJets",
+    veto_BDT_name=None,
     **kwargs
 ) -> ComponentAccumulator:
     """
@@ -379,6 +380,12 @@ def DecoratePromptLeptonImprovedCfg(
     kwargs.setdefault("extraDecoratorShortVars", ['CandVertex_NPassVtx'])
     kwargs.setdefault("vetoDecoratorFloatVars", ['PromptLeptonRNN_prompt'])
     kwargs.setdefault("vetoDecoratorShortVars", [])
+
+    if veto_BDT_name:
+        kwargs['vetoDecoratorFloatVars'] += ['RawPt']
+        kwargs['vetoDecoratorFloatVars'] += getStringFloatVars(veto_BDT_name)
+        kwargs['vetoDecoratorShortVars'] += ['CandVertex_NPassVtx']
+        kwargs['vetoDecoratorShortVars'] += getStringIntVars(veto_BDT_name)
 
     kwargs.setdefault("leptonPtBinsVector", [10.0e3, 15.0e3, 20.0e3, 25.0e3, 32.0e3, 43.0e3, 100.0e3])
 
@@ -429,6 +436,7 @@ def DecorateImprovedPromptLeptonAlgsCfg(
         ))
         acc.merge(DecoratePromptLeptonImprovedCfg(
             ConfigFlags, BDT_name="PromptLeptonImprovedVetoECAP",
+            veto_BDT_name='PromptLeptonImprovedVetoBARR',
             lepton_name="Electrons", track_jet_name="AntiKtVR30Rmax4Rmin02PV0TrackJets"
         ))
 
