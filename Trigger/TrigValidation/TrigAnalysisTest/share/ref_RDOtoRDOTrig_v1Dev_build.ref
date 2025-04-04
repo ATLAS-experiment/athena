@@ -1485,18 +1485,6 @@ HLT_2j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_prese
     1: 40
     2: 136
     3: 17
-HLT_2j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L13jJ40p0ETA25:
-  eventCount: 7
-  stepCounts:
-    0: 13
-    1: 11
-    2: 11
-    3: 7
-  stepFeatures:
-    0: 52
-    1: 44
-    2: 209
-    3: 20
 HLT_2j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn277_pf_ftf_presel1c20XX2c20bgtwo85_L13jJ40p0ETA25:
   eventCount: 6
   stepCounts:

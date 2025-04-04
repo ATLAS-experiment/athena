@@ -5,7 +5,7 @@
 # art-type: grid
 # art-input: mc16_13TeV.423001.ParticleGun_single_photon_egammaET.recon.RDO.e3566_s3112_r12663
 # art-input-nfiles: 30
-# art-cores: 4
+# art-cores: 8
 # art-include: main/Athena
 # art-include: 24.0/Athena
 # art-output: *.hist.root
