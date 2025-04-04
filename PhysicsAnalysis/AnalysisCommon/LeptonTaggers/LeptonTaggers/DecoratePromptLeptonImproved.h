@@ -1,7 +1,7 @@
 // This is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PROMPT_DECORATEPROMPTLEPTONRNN_H
@@ -28,6 +28,8 @@
 // Athena
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "StoreGate/WriteDecorHandleKeyArray.h"
+#include "AthContainers/ConstAccessor.h"
 
 // xAOD
 #include "xAODEgamma/ElectronContainer.h"
@@ -40,6 +42,9 @@
 #include "TMVA/Reader.h"
 #include "TStopwatch.h"
 #include "TH1.h"
+
+#include <unordered_map>
+#include <optional>
 
 namespace Prompt
 {
@@ -65,6 +70,8 @@ namespace Prompt
     virtual StatusCode finalize() override;
 
   private:
+    using decoratorFloatH_t = SG::WriteDecorHandle<xAOD::IParticleContainer, float>;
+    using decoratorShortH_t = SG::WriteDecorHandle<xAOD::IParticleContainer, short>;
 
     bool initializeTMVAReader();
 
@@ -75,13 +82,17 @@ namespace Prompt
       const xAOD::Electron &electron,
       const xAOD::JetContainer &trackJets,
       const xAOD::CaloClusterContainer &clusters,
-      const xAOD::Vertex *primaryVertex
+      const xAOD::Vertex *primaryVertex,
+      std::vector<decoratorFloatH_t>& floatDecors,
+      std::vector<decoratorShortH_t>& shortDecors
     );
 
     void decorateMuon(
       const xAOD::Muon         &muon,
       const xAOD::JetContainer &trackJets,
-      const xAOD::Vertex *primaryVertex
+      const xAOD::Vertex *primaryVertex,
+      std::vector<decoratorFloatH_t>& floatDecors,
+      std::vector<decoratorShortH_t>& shortDecors
     );
 
     void getMutualVariables(
@@ -89,13 +100,13 @@ namespace Prompt
       const xAOD::Jet           &track_jet,
       const xAOD::TrackParticle *track,
       Prompt::VarHolder         &vars
-    );
+    ) const;
 
     void getMuonAnpVariables(
       const xAOD::Muon &muon,
       Prompt::VarHolder &vars,
       const xAOD::Vertex *primaryVertex
-    );
+    ) const;
 
     void getElectronAnpVariables(
       const xAOD::Electron             &elec,
@@ -104,8 +115,8 @@ namespace Prompt
       const xAOD::Vertex               *primaryVertex
     );
 
-    float accessIsolation(SG::AuxElement::ConstAccessor<float> &isoAccessor,
-        const xAOD::IParticle &particle);
+    float accessIsolation(const SG::ConstAccessor<float> &isoAccessor,
+        const xAOD::IParticle &particle) const;
 
     void addVarsToTMVA(Prompt::VarHolder &vars);
 
@@ -113,26 +124,25 @@ namespace Prompt
 
     void decorateAuxLepton(
       const xAOD::IParticle &particle,
-      Prompt::VarHolder &vars
-    );
+      Prompt::VarHolder &vars,
+      std::vector<decoratorFloatH_t>& floatDecors,
+      std::vector<decoratorShortH_t>& shortDecors
+    ) const;
 
     template<class T> std::pair<double, const xAOD::Jet*> findTrackJet(const T &part, const xAOD::JetContainer &jets);
 
     double getVertexLongitudinalNormDist(const xAOD::IParticle &lepton,
                                          const xAOD::Vertex    *secondaryVertex,
-                                         const xAOD::Vertex    *primaryVertex);
+                                         const xAOD::Vertex    *primaryVertex) const;
 
     double getVertexCosThetaWithLepDir(const xAOD::IParticle &lepton,
                                        const xAOD::Vertex    *secondaryVertex,
-                                       const xAOD::Vertex    *primaryVertex);
+                                       const xAOD::Vertex    *primaryVertex) const;
 
-    typedef std::map<Prompt::Def::Var, SG::AuxElement::Decorator<short> > shortDecoratorMap;
-    typedef std::map<Prompt::Def::Var, SG::AuxElement::Decorator<float> > floatDecoratorMap;
+    using AccessFloat = SG::ConstAccessor<float>;
+    using AccessVertex = SG::ConstAccessor<std::vector<ElementLink<xAOD::VertexContainer> > >;
 
-    typedef SG::AuxElement::ConstAccessor<float>                                             AccessFloat;
-    typedef SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::VertexContainer> > > AccessVertex;
-
-    typedef std::map<Prompt::Def::Var, AccessFloat> floatAccessorMap;
+    using floatAccessorMap = std::map<Prompt::Def::Var, AccessFloat>;
 
     // Properties:
     Gaudi::Property<std::string> m_leptonsName {
@@ -196,18 +206,10 @@ namespace Prompt
 
     Prompt::Def::Var                                     m_BDTVarKey;
 
-    shortDecoratorMap                                    m_shortMap;
-    floatDecoratorMap                                    m_floatMap;
-
     std::unique_ptr<TMVA::Reader>                        m_TMVAReader;
     std::vector<Float_t>                                 m_varTMVA;
 
-    std::unique_ptr<AccessFloat>                         m_accessCalIsolation30;
-    std::unique_ptr<AccessFloat>                         m_accessTrackIsolation30;
-    std::unique_ptr<AccessFloat>                         m_accessTrackIsolation30TTVA;
-    std::unique_ptr<AccessFloat>                         m_accessMuonCalE;
-    std::unique_ptr<AccessFloat>                         m_accessMuonParamEnergyLoss;
-    std::unique_ptr<AccessVertex>                        m_accessDeepSecondaryVertex;
+    std::optional<AccessVertex>                          m_accessDeepSecondaryVertex;
 
     floatAccessorMap                                     m_accessRNNMap;
 
@@ -217,6 +219,16 @@ namespace Prompt
     TStopwatch                                           m_timerExec;
     TStopwatch                                           m_timerMuon;
     TStopwatch                                           m_timerElec;
+
+    SG::WriteDecorHandleKeyArray<xAOD::IParticleContainer> m_floatDecorHandleKeys
+      { this, "FloatDecorHandleKeys", {} };
+    SG::WriteDecorHandleKeyArray<xAOD::IParticleContainer> m_shortDecorHandleKeys
+      { this, "ShortDecorHandleKeys", {} };
+
+    using DecorMap_t = std::unordered_map<Def::Var, size_t>;
+    DecorMap_t                                           m_floatDecorMap;
+    DecorMap_t                                           m_shortDecorMap;
+
   };
 }
 
