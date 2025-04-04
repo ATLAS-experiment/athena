@@ -27,6 +27,16 @@ atlas_add_test( LArBadChannelConfigTest
    SCRIPT python -m LArBadChannelTool.LArBadChannelConfig
    POST_EXEC_SCRIPT nopost.sh )
 
+
+atlas_add_test ( LArBadFebWritingTest
+  SCRIPT python -m LArBadChannelTool.LArMissingFebsDBAlg -o test.db  -f /LAR/BadChannelsOfl/MissingFEBs -t LARBadChannelsOflMissingFEBs-RUN2-UPD4-02 -r 480000 ${CMAKE_CURRENT_SOURCE_DIR}/share/badfebs.txt
+  POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test ( LArBadChanWritingTest
+  SCRIPT python -m LArBadChannelTool.LArBadChannelDBAlg -o test.db -f /LAR/BadChannelsOfl/BadChannels -t  LARBadChannelsOflBadChannels-TEST -r 480000 ${CMAKE_CURRENT_SOURCE_DIR}/share/badchannels.txt
+  POST_EXEC_SCRIPT noerror.sh )
+
+
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( share/LArBuildBadChannelDB.sh share/LArBuildMissingFebDB.sh )
