@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file MultChanContainer.h 
@@ -33,6 +33,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include <cxxabi.h>
 #include <algorithm>
+#include <stdexcept>
 
 namespace TRTCond
 {
@@ -194,7 +195,7 @@ template <class DaughterContainer>
     }
     typename CondMultChanCollection<DaughterContainer>::chan_const_iterator chanit = 
       std::find( this->chan_begin(), this->chan_end(), chanid ) ;
-    size_t chanindex = std::distance(this->chan_begin(),chanit) ;
+    auto chanindex = std::distance(this->chan_begin(),chanit) ;
     if(chanit==this->chan_end()) {
       // add a new container
       this->push_back( new DaughterContainer() ) ;
@@ -202,6 +203,9 @@ template <class DaughterContainer>
       chanindex = this->size()-1 ; //std::distance(chan_begin(),chan_end())-1 ;
       // make sure to clear the cache
       m_channelmap.clear() ;
+    }
+    if (chanindex < 0 or chanindex >= std::ssize(*this)){
+      throw std::out_of_range("MultiChanContainer::findContainer chanindex out of range");
     }
     return this->operator[]( chanindex ) ;
   }
