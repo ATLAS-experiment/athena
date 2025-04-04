@@ -159,16 +159,15 @@ def getL1LowLumi():
         'L1_2MU5VF', 'L1_3MU3V',
         'L1_eEM18L_MU8F',
         'L1_2eEM10L_MU8F',
-        'L1_TAU60', 'L1_eTAU30M_2eTAU20M_jJ55_2jJ50_3jJ30',
+        'L1_TAU60',
+        'L1_cTAU30M_2cTAU20M_jJ55_2jJ50_3jJ30',
         'L1_EM15HI_2TAU12IM_XE35', 
-        'L1_MU8F_eTAU20M_jXE70',
         'L1_MU8F_cTAU20M_jXE70',
         'L1_TAU20_2TAU12_XE35', 
-        'L1_eTAU30M_2eTAU20M_jXE70',
+        'L1_cTAU30M_2cTAU20M_jXE70',
         'L1_EM15HI_2TAU12IM', 'L1_EM15HI_2TAU12IM_J25_3J12',
         'L1_EM15HI_TAU40_2TAU15',
-        'L1_MU8F_eTAU20M_jJ55_2jJ30',
-        'L1_MU8F_eTAU20M',
+        'L1_MU8F_cTAU20M_jJ55_2jJ30',
         'L1_MU8F_cTAU20M',
         'L1_J75', #'L1_4J15',
         'L1_XE50', 'L1_3J25p0ETA23',
@@ -188,9 +187,7 @@ def getL1BKeePrimary():
         'L1_BPH-0M9-eEM9-eEM7_2MU3V', # legacy 'L1_BPH-0M9-EM7-EM5_2MU3V'
         'L1_MU14FCH',
         'L1_MU8F_2MU5VF',
-        'L1_MU8F_eTAU30M', # legacy 'L1_MU8F_TAU20IM'
         'L1_cTAU30M_3DR35-MU8F-eTAU30',
-        'L1_MU8F_eTAU20M_3jJ30', # legacy 'L1_MU8F_TAU12IM_3J12'
         'L1_MU8F_cTAU20M_3jJ30',
         'L1_jXE100', # legacy 'L1_XE50',
         #'L1_eTAU60_2cTAU20M_jXE80', # legacy 'L1_TAU40_2TAU12IM_XE40', TriggerMenuMT:L1Seeds ERROR L1 item L1_eTAU60_2cTAU20M_jXE80 from L1_BKeePrimary seeds is not in current L1 menu

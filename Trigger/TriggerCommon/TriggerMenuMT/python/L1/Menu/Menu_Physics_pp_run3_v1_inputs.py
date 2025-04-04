@@ -310,13 +310,13 @@ def defineInputsMenu():
                     TopoMenuDef( '0DR04-MU5VFab-CjJ30ab' ,                   outputbits = 3 ), #ATR-30657
                     TopoMenuDef( '0DR04-MU5VFab-CjJ80ab',                    outputbits = 4 ), # Bjet, TODO: not a primary
                     TopoMenuDef( '0INVM10-3MU3VFab',                         outputbits = 5 ), # BLS
-                    TopoMenuDef( '2DISAMB-jJ55ab-0DR28-eTAU30abm-eTAU20abm', outputbits = 6 ),
+                    TopoMenuDef( '2DISAMB-jJ55ab-0DR28-eTAU30abl-eTAU20abl', outputbits = 6 ),
                     TopoMenuDef( '2DISAMB-jJ40ab-0DR10-eTAU20ab-eTAU12ab',   outputbits = 7 ),
                     TopoMenuDef( '2DISAMB_jJ55ab_DR_eTAU_eTAU',              outputbits = (8), outputlines = [ '2DISAMB-jJ55ab-0DR28-eTAU30ab-eTAU20ab']),
                     TopoMenuDef( 'DR_eTAU30ab_eTAU20ab',                     outputbits = (9), outputlines = [ '0DR28-eTAU30ab-eTAU20ab'  ]),
                     TopoMenuDef( 'ADVAE2A-jJ0s-eTAU0s-MU0s-jXE0s',           outputbits = (10,11), outputlines = [ 'ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Tight',
                                                                                                                    'ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Loose' ] ), # VAE AD
-                    TopoMenuDef( '0DR28-eTAU30abm-eTAU20abm',                outputbits = 12 ),
+                    TopoMenuDef( '0DR28-eTAU30abl-eTAU20abl',                outputbits = 12 ),
                 ]
             },
             

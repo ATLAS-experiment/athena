@@ -96,10 +96,19 @@ def defineMenu():
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ40',
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ30',
         'L1_cTAU30M_2cTAU20M_3jJ30p0ETA25',
+
+        'L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M', 'L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M-jJ55',
         
         # ATR-29651 - Tau+X chains using eTAU20M seeds
         'L1_eEM18M_2eTAU20M_4jJ30', 'L1_eTAU60_2eTAU20M_jXE80', 'L1_eEM18M_2eTAU20M_jXE70', 
         'L1_MU8F_cTAU30M',
+
+        # eTAUXXM removal
+        'L1_eTAU30M_2eTAU20M_jJ55_2jJ50_3jJ30',
+        'L1_MU8F_eTAU20M_jXE70',
+        'L1_eTAU35M_2eTAU30M',
+        'L1_MU8F_eTAU20M_jJ55_2jJ30',
+
         # ART-28443  test eEMX{} + {{3,4jJY{}}} L1 seeds
         'L1_eEM22M_3jJ40p0ETA25',
         'L1_eEM22M_4jJ30p0ETA25',
@@ -231,7 +240,6 @@ def defineMenu():
         'L1_3eEM12L':'',
 
         # non-primary TAU
-        'L1_eTAU20L':'',
         'L1_eTAU35':'',
         'L1_eTAU40HM':'',
         'L1_2TAU8':'',

@@ -129,6 +129,14 @@ class TopoAlgoDef:
         alg.addvariable('RHadMin',   0)
         tm.registerTopoAlgo(alg) 
 
+        alg = AlgConf.eTauSelect( name = 'eTAUabl', inputs = 'eTauTobs', outputs = 'eTAUabl' )
+        alg.addgeneric('InputWidth',  HW.eTauInputWidth)
+        alg.addgeneric('OutputWidth', HW.eTauOutputWidthSelect)
+        alg.addvariable('MinET',     get_threshold_cut('eTAU', 12)*_et_conversion)
+        alg.addvariable('RCoreMin',  1)
+        alg.addvariable('RHadMin',   0)
+        tm.registerTopoAlgo(alg) 
+
         alg = AlgConf.eTauSelect( name = 'eTAUabm', inputs = 'eTauTobs', outputs = 'eTAUabm' )
         alg.addgeneric('InputWidth',  HW.eTauInputWidth)
         alg.addgeneric('OutputWidth', HW.eTauOutputWidthSelect)
@@ -1396,6 +1404,9 @@ class TopoAlgoDef:
 
         # Tau dR chains
         algolist=[
+            { "minDr": 0, "maxDr": 28, "otype1" : "eTAU" ,"ocut1": 30, "olist1" : "abl",
+              "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,"otype2" : "eTAU", "ocut2": 20, "olist2" : "abl",
+              "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect}, # 0DR28-eTAU30abl-eTAU20abl
             { "minDr": 0, "maxDr": 28, "otype1" : "eTAU" ,"ocut1": 30, "olist1" : "abm",
               "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,"otype2" : "eTAU", "ocut2": 20, "olist2" : "abm",
               "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect}, # 0DR28-eTAU30abm-eTAU20abm
@@ -1610,6 +1621,11 @@ class TopoAlgoDef:
       
         # DISAMB 3 lists with DR cut to 2nd and 3rd lists
         algolist=[
+            { "disamb": 2,
+              "otype1" : "eTAU", "ocut1": 30, "olist1": "abl", "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
+              "otype2" : "eTAU", "ocut2": 20, "olist2": "abl", "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect,
+              "otype3" : "jJ"  , "ocut3": 55, "olist3": "ab" , "nleading3": HW.jJetOutputWidthSelect, "inputwidth3": HW.jJetOutputWidthSelect,
+              "drcutmin": 0, "drcutmax": 28}, # 2DISAMB-jJ55ab-0DR28-eTAU30abl-eTAU20abl
             { "disamb": 2,
               "otype1" : "eTAU", "ocut1": 30, "olist1": "abm", "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
               "otype2" : "eTAU", "ocut2": 20, "olist2": "abm", "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect,
