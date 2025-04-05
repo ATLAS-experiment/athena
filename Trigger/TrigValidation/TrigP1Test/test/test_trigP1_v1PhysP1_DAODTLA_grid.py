@@ -34,7 +34,7 @@ hlt.job_options = 'TriggerJobOpts.runHLT'
 hlt.forks = 1
 hlt.threads = 8
 hlt.concurrent_events = 8
-hlt.input = 'data_Main'
+hlt.input = 'data'
 hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
              'Trigger.doLVL1=True']
 hlt.args = '-o output'
@@ -65,11 +65,8 @@ test = Test.Test()
 test.art_type = 'grid'
 test.exec_steps = [hlt, filter_bs, tlareco]
 test.check_steps = CheckSteps.default_check_steps(test)
-add_analysis_steps(test)
-
-# Overwrite default histogram file name for checks
-for step in [test.get_step(name) for name in ['RootComp']]:
-    step.input_file = 'ExampleMonitorOutput.root'
+add_analysis_steps(test, input_file='DAOD_TLA.pool.root')
+test.exec_steps = [t for t in test.exec_steps if not t.name == "TrigEDMChecker"] # TrigEDMChecker fails on TLA DAOD output due to missing HLT containers
 
 import sys
 sys.exit(test.run())
