@@ -525,7 +525,7 @@ class CheckFileStep(InputDependentStep):
 
     def __init__(self, name='CheckFile'):
         super(CheckFileStep, self).__init__(name)
-        self.input_file = 'AOD.pool.root,ESD.pool.root,RDO_TRIG.pool.root'
+        self.input_file = 'AOD.pool.root,ESD.pool.root,RDO_TRIG.pool.root,DAOD_PHYS.DAOD.pool.root,DAOD_TLA.pool.root,DAOD_TLAFTAGPEB.pool.root'
         self.executable = 'checkFile.py,checkxAOD.py'
         self.__executables__ = None
         self.__input_files__ = None
