@@ -10,6 +10,7 @@
 #include "AthenaKernel/IDataShare.h"
 #include "AthenaKernel/IEvtSelectorSeek.h"
 #include "AthenaKernel/IHybridProcessorHelper.h"
+#include "CxxUtils/xmalloc.h"
 #include "GaudiKernel/IEvtSelector.h"
 #include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/IFileMgr.h"
@@ -239,7 +240,7 @@ SharedHiveEvtQueueConsumer::bootstrap_func()
   }
 
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = 1; // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
 
@@ -494,7 +495,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedHiveEvtQueueConsumer::e
 
   // Return value: "ERRCODE|Func_Flag|NEvt"
   int outsize = 2*sizeof(int)+sizeof(AthenaMPToolBase::Func_Flag);
-  void* outdata = malloc(outsize);
+  void* outdata = CxxUtils::xmalloc(outsize);
   *(int*)(outdata) = (all_ok?0:1); // Error code: for now use 0 success, 1 failure
   AthenaMPToolBase::Func_Flag func = AthenaMPToolBase::FUNC_EXEC;
   memcpy((char*)outdata+sizeof(int),&func,sizeof(func));
@@ -532,7 +533,7 @@ SharedHiveEvtQueueConsumer::fin_func()
 
   // Return value: "ERRCODE|Func_Flag|NEvt"  (Here NEvt=-1)
   int outsize = 2*sizeof(int)+sizeof(AthenaMPToolBase::Func_Flag);
-  void* outdata = malloc(outsize);
+  void* outdata = CxxUtils::xmalloc(outsize);
   *(int*)(outdata) = (all_ok?0:1); // Error code: for now use 0 success, 1 failure
   AthenaMPToolBase::Func_Flag func = AthenaMPToolBase::FUNC_FIN;
   memcpy((char*)outdata+sizeof(int),&func,sizeof(func));
