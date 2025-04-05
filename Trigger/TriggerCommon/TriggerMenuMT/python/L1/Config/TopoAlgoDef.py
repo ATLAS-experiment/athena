@@ -129,6 +129,14 @@ class TopoAlgoDef:
         alg.addvariable('RHadMin',   0)
         tm.registerTopoAlgo(alg) 
 
+        alg = AlgConf.eTauSelect( name = 'eTAUabl', inputs = 'eTauTobs', outputs = 'eTAUabl' )
+        alg.addgeneric('InputWidth',  HW.eTauInputWidth)
+        alg.addgeneric('OutputWidth', HW.eTauOutputWidthSelect)
+        alg.addvariable('MinET',     get_threshold_cut('eTAU', 12)*_et_conversion)
+        alg.addvariable('RCoreMin',  1)
+        alg.addvariable('RHadMin',   0)
+        tm.registerTopoAlgo(alg) 
+
         alg = AlgConf.eTauSelect( name = 'eTAUabm', inputs = 'eTauTobs', outputs = 'eTAUabm' )
         alg.addgeneric('InputWidth',  HW.eTauInputWidth)
         alg.addgeneric('OutputWidth', HW.eTauOutputWidthSelect)
@@ -257,9 +265,10 @@ class TopoAlgoDef:
         #jJ lists
         # No additional parameters
         algoList = [
-            {"otype" : "jJ",  "ocut" : 50, "olist" : "ab", "etamin" : 0,  "etamax" : 32}, # jJab
-            {"otype" : "CjJ", "ocut" : 40, "olist" : "ab", "etamin" : 0,  "etamax" : 26}, # CjJab
-            {"otype" : "FjJ", "ocut" : 40, "olist" : "ab", "etamin" : 30, "etamax" : 49}, # FjJab
+            {"otype" : "jJ",   "ocut" : 50, "olist" : "ab", "etamin" : 0,  "etamax" : 32}, # jJab
+            {"otype" : "CjJ",  "ocut" : 40, "olist" : "ab", "etamin" : 0,  "etamax" : 26}, # CjJab
+            {"otype" : "SCjJ", "ocut" : 10, "olist" : "ab", "etamin" : 0,  "etamax" : 26}, # SCjJab
+            {"otype" : "FjJ",  "ocut" : 40, "olist" : "ab", "etamin" : 30, "etamax" : 49}, # FjJab
         ]
         for x in algoList:
             class d:
@@ -1065,16 +1074,13 @@ class TopoAlgoDef:
            
         # added for muon-jet:
         algoList = [
-            {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 30, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ30ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU8Fab" , "otype2" : "CjJ", "ocut2": 30, "olist2" : "ab"}, #0DR04-MU8Fab-CjJ30ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ40ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU8Fab" , "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"}, #0DR04-MU8Fab-CjJ40ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU3Vab" , "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"}, #0DR04-MU3Vab-CjJ40ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 80, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ80ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 90, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ90ab
-            {"minDr": 0, "maxDr": 4, "otype1" : "MU3VFab", "otype2" : "CjJ", "ocut2": 30, "olist2" : "ab"}, #0DR04_MU3VFab_CjJ30ab
-            {"minDr": 0, "maxDr": 4, "otype1" : "MU3VFab", "otype2" : "CjJ", "ocut2": 20, "olist2" : "ab"}, #0DR04_MU3VFab_CjJ20ab
-            {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 20, "olist2" : "ab"}, #0DR04_MU5VFab_CjJ20ab
+            {"minDr": 0, "maxDr": 4, "otype1" : "MU3VFab", "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"}, #0DR04_MU3VFab_CjJ40ab
         ]
         for x in algoList:
             class d:
@@ -1301,8 +1307,8 @@ class TopoAlgoDef:
             
 
         # (ATR-12748) fat jet trigger with Simple Cone algo
-        algoList = [
-            {"itemNameMinHT": 111, "minHT": 166, "otype" : "CjJ", "ocut" : 40, "olist" : "ab", "nleading" : HW.jJetOutputWidthSelect, "inputwidth": HW.jJetOutputWidthSelect, "oeta" : 26}, #SC111-CjJ40abpETA26
+        algoList = [ #name (SC175) is rounded on purpose to avoid more name changes in case the actual threshold is slightly tweaked later on
+            {"itemNameMinHT": 175, "minHT": 176, "otype" : "SCjJ", "ocut" : 10, "olist" : "ab", "nleading" : HW.jJetOutputWidthSelect, "inputwidth": HW.jJetOutputWidthSelect, "oeta" : 26}, #SC175-SCjJ10abpETA26
         ]
         for x in algoList:
             class d:
@@ -1317,7 +1323,7 @@ class TopoAlgoDef:
             alg.addgeneric('NumResultBits', 1)
             alg.addvariable('MinET', d.ocut*_et_conversion)
             alg.addvariable('MinSumET', d.minHT*_et_conversion)
-            alg.addvariable('MaxRSqr', 10*10*_dr_conversion*_dr_conversion)                        
+            alg.addvariable('MaxRSqr', 15*15*_dr_conversion*_dr_conversion)                        
             tm.registerTopoAlgo(alg)  
  
         #  0INVM9-eEM9ab-eEMab 
@@ -1396,6 +1402,9 @@ class TopoAlgoDef:
 
         # Tau dR chains
         algolist=[
+            { "minDr": 0, "maxDr": 28, "otype1" : "eTAU" ,"ocut1": 30, "olist1" : "abl",
+              "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,"otype2" : "eTAU", "ocut2": 20, "olist2" : "abl",
+              "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect}, # 0DR28-eTAU30abl-eTAU20abl
             { "minDr": 0, "maxDr": 28, "otype1" : "eTAU" ,"ocut1": 30, "olist1" : "abm",
               "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,"otype2" : "eTAU", "ocut2": 20, "olist2" : "abm",
               "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect}, # 0DR28-eTAU30abm-eTAU20abm
@@ -1434,16 +1443,6 @@ class TopoAlgoDef:
             tm.registerTopoAlgo(alg)
 
 
-
-        # DISAMB Lines with DR Cut
-        # output lines = '2DISAMB-jJ55ab-0DR25-eTAU30ab-eTAU20ab'
-        #                '2DISAMB-jJ55ab-0DR28-eTAU30ab-eTAU20ab'
-        #                '2DISAMB-jJ50ab-0DR25-eTAU30ab-eTAU20ab',
-        #                '2DISAMB-jJ50ab-0DR28-eTAU30ab-eTAU20ab',
-        #                '2DISAMB-jJ40ab-0DR25-eTAU30ab-eTAU20ab',
-        #                '2DISAMB-jJ40ab-0DR28-eTAU30ab-eTAU20ab',
-        #                '2DISAMB-jJ30ab-0DR25-eTAU30ab-eTAU20ab',
-        #                '2DISAMB-jJ30ab-0DR28-eTAU30ab-eTAU20ab']
         DISAMB_DR_jJ_eTau_eTau_Map = [
         {
             "algoname": "2DISAMB_jJ55ab_DR_eTAU_eTAU",
@@ -1610,6 +1609,11 @@ class TopoAlgoDef:
       
         # DISAMB 3 lists with DR cut to 2nd and 3rd lists
         algolist=[
+            { "disamb": 2,
+              "otype1" : "eTAU", "ocut1": 30, "olist1": "abl", "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
+              "otype2" : "eTAU", "ocut2": 20, "olist2": "abl", "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect,
+              "otype3" : "jJ"  , "ocut3": 55, "olist3": "ab" , "nleading3": HW.jJetOutputWidthSelect, "inputwidth3": HW.jJetOutputWidthSelect,
+              "drcutmin": 0, "drcutmax": 28}, # 2DISAMB-jJ55ab-0DR28-eTAU30abl-eTAU20abl
             { "disamb": 2,
               "otype1" : "eTAU", "ocut1": 30, "olist1": "abm", "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
               "otype2" : "eTAU", "ocut2": 20, "olist2": "abm", "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect,
@@ -1782,7 +1786,7 @@ class TopoAlgoDef:
               "otype3" : "MU", "olist3": "s", "inputwidth3": 6, "nleading3": 4,
               "otype4" : "jXE", "olist4": "s", "inputwidth4": 1, "nleading4": 1,
               "WPList" : ["Tight", "Loose"],
-              "MinET1" : 0, # jJets in GeV (= 100MeV steps after conversion)
+              "MinET1" : 15, # jJets in GeV (= 100MeV steps after conversion)
               "MinET2" : 0, # eTaus
               "MinET3" : 0, # muons
               "MinET4" : 0, # jXE

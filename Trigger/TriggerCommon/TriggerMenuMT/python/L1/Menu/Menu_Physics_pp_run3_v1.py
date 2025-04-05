@@ -68,27 +68,18 @@ def defineMenu():
         'L1_cTAU30M_2cTAU20M_4jJ30p0ETA25',
         'L1_cTAU35M_2cTAU30M_2jJ55_3jJ50',  
         'L1_cTAU35M_2cTAU30M',
-        'L1_eTAU30M_2eTAU20M_jJ55_2jJ50_3jJ30',
-        'L1_eTAU35M_2eTAU30M',
+        'L1_cTAU30M_2cTAU20M_jJ55_2jJ50_3jJ30',
         
         # combined tau - lepton
         #Phase-I
-        'L1_eEM18M_2eTAU20M',
-        'L1_MU8F_eTAU20M',
         'L1_MU8F_cTAU20M',
-        'L1_MU8F_eTAU20M_jJ55_2jJ30',
-        'L1_MU8F_eTAU20M_3jJ30',
+        'L1_MU8F_cTAU20M_jJ55_2jJ30',
         'L1_MU8F_cTAU20M_3jJ30',
-        'L1_eEM18M_2eTAU20M_jJ55_3jJ30',
-        'L1_MU8F_eTAU30M',
         'L1_eEM18M_2cTAU20M_4jJ30',
         
         # combined tau - xe
         'L1_eEM18M_2cTAU20M_jXE70',
-        'L1_eTAU30M_2jJ50_jXE90',
-        'L1_MU8F_eTAU20M_jXE70',
         'L1_MU8F_cTAU20M_jXE70',
-        'L1_eTAU30M_2eTAU20M_jXE70',
         'L1_eTAU60_2cTAU20M_jXE80',
 
 
@@ -98,7 +89,16 @@ def defineMenu():
 
         # combined mu - jet 
         'L1_BTAG-MU3VjJ40', 'L1_BTAG-MU5VFjJ80',
-        'L1_BTAG-MU5VFjJ30', 'L1_BTAG-MU3VFjJ30', #ATR-30657
+
+        'L1_BTAG-MU3VFjJ40_2jJ30p0ETA25',
+        'L1_BTAG-MU3VFjJ40_2jJ30p0ETA25_jJ50p0ETA25',
+        'L1_BTAG-MU3VFjJ40_2jJ40p0ETA25',
+        'L1_BTAG-MU3VFjJ40_2jJ40p0ETA25_jJ50p0ETA25',
+
+        'L1_BTAG-MU5VFjJ40_2jJ30p0ETA25',
+        'L1_BTAG-MU5VFjJ40_2jJ30p0ETA25_jJ50p0ETA25',
+        'L1_BTAG-MU5VFjJ40_2jJ40p0ETA25',
+        'L1_BTAG-MU5VFjJ40_2jJ40p0ETA25_jJ50p0ETA25',
 
         #ATR-13743 J,XE thershold change for ATR-19376 
         'L1_MU8F_2jJ50','L1_MU8F_3jJ50', 'L1_MU8F_2jJ40_jJ50',
@@ -167,7 +167,6 @@ def defineMenu():
 
         # combined jet
         'L1_jJ80_jXE100',
-        #'L1_jJ80_jXE120',
         # ATR-27250 Duplicate multijet-seeded triggers to jFEX
         'L1_2jJ90_jXE80', 
         'L1_2jJ40_jXE110',
@@ -176,7 +175,6 @@ def defineMenu():
         #ATR-29523
         'L1_3jJ40p0ETA25',
         # new calo
-        #'L1_gXERHO70', 'L1_gXERHO100',
         'L1_gXENC70', 'L1_gXENC100',
         'L1_gXEJWOJ60', 'L1_gXEJWOJ70', 'L1_gXEJWOJ80', 'L1_gXEJWOJ100', 'L1_gXEJWOJ110', 'L1_gXEJWOJ120', 'L1_gXEJWOJ500',
         'L1_gTE200',
@@ -212,10 +210,8 @@ def defineMenu():
         # high-priority (low mu)
         'L1_AFP_NSA_BGRP12', 'L1_AFP_NSC_BGRP12', 
         'L1_AFP_A','L1_AFP_C', 'L1_AFP_A_AND_C', 'L1_AFP_A_AND_C_TOF',
-        #'L1_AFP_A_OR_C_J5','L1_AFP_A_AND_C_J5', # J5 not available in legacy menu. Need to update to jJ threshold for low-mu
         'L1_AFP_A_OR_C_jJ30', 'L1_AFP_A_AND_C_jJ30',
         'L1_MU5VF_AFP_A_OR_C', 'L1_MU5VF_AFP_A_AND_C',
-        # 'L1_EM7_AFP_A_OR_C','L1_EM7_AFP_A_AND_C',# ATR-27654
         'L1_eEM9_AFP_A_OR_C', 'L1_eEM9_AFP_A_AND_C',
         # med-priority (low mu)
         'L1_AFP_A_OR_C', 'L1_AFP_A_OR_C_MBTS_2', 'L1_AFP_A_AND_C_MBTS_2',
@@ -252,7 +248,7 @@ def defineMenu():
         #'L1_DPHI-2eEM5', 
         'L1_HT150-jJ50s5pETA32_jMJJ-400-CF',
         'L1_HT190-jJ40s5pETA21',
-        'L1_SC111-CjJ40',  
+        'L1_SC175-SCjJ10',  
         'L1_jJ90_DETA20-jJ90J', 
         #ATR-30618
         'L1_ADVAET',
@@ -260,7 +256,7 @@ def defineMenu():
 
         # tau 
         'L1_cTAU30M_2cTAU20M',
-        'L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M', 'L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M-jJ55',
+        'L1_cTAU30M_2cTAU20M_DR-eTAU30LeTAU20L', 'L1_cTAU30M_2cTAU20M_DR-eTAU30LeTAU20L-jJ55',
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20', 'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', 
         'L1_eTAU80_2cTAU30M_DR-eTAU30eTAU20', 
         'L1_cTAU20M_DR-eTAU20eTAU12-jJ40', 

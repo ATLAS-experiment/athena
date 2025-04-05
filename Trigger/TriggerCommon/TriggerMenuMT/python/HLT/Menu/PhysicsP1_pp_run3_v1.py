@@ -69,7 +69,6 @@ def addPhysicsP1Chains(chains):
         ChainProp(name='HLT_noalg_L1MU15VFCHR', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1MU20VFC',   l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup+SupportGroup),
 
-        ChainProp(name='HLT_noalg_L1eTAU20L',      l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+TauPhaseIStreamersGroup),
         ChainProp(name='HLT_noalg_L1eTAU35',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+TauPhaseIStreamersGroup),
         ChainProp(name='HLT_noalg_L1eTAU40HM',     l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+TauPhaseIStreamersGroup),
 

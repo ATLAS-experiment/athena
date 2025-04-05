@@ -63,25 +63,8 @@ def defineMenu():
         'L1_BTAG-MU5VFjJ90',
         'L1_BTAG-MU8FjJ40_2jJ40p0ETA25'      , 
         'L1_BTAG-MU8FjJ30_2jJ30p0ETA25_jJ50p0ETA25', 
-        'L1_BTAG-MU5VFjJ40_2jJ40p0ETA25'      , 
-        'L1_BTAG-MU5VFjJ30_2jJ30p0ETA25_jJ50p0ETA25', 
         'L1_BPH-0M9-EM7-EM5',
         'L1_BPH-0DR3-EM7J15',
-        'L1_BTAG-MU3VFjJ30_2jJ30p0ETA25',
-        'L1_BTAG-MU3VFjJ30_2jJ40p0ETA25', 
-        'L1_BTAG-MU3VFjJ30_2jJ30p0ETA25_jJ40p0ETA25', 
-        #ATR-30824
-        'L1_BTAG-MU3VFjJ20',
-        'L1_BTAG-MU3VFjJ20_2jJ30p0ETA25',
-        'L1_BTAG-MU3VFjJ20_2jJ30p0ETA25_jJ50p0ETA25',
-        'L1_BTAG-MU3VFjJ20_2jJ40p0ETA25',
-        'L1_BTAG-MU3VFjJ20_2jJ40p0ETA25_jJ50p0ETA25',
-
-        'L1_BTAG-MU5VFjJ20',
-        'L1_BTAG-MU5VFjJ20_2jJ30p0ETA25',
-        'L1_BTAG-MU5VFjJ20_2jJ30p0ETA25_jJ50p0ETA25',
-        'L1_BTAG-MU5VFjJ20_2jJ40p0ETA25',
-        'L1_BTAG-MU5VFjJ20_2jJ40p0ETA25_jJ50p0ETA25',
 
         #ATR-26902
         'L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU20',
@@ -96,10 +79,19 @@ def defineMenu():
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ40',
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ30',
         'L1_cTAU30M_2cTAU20M_3jJ30p0ETA25',
+
+        'L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M', 'L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M-jJ55',
         
         # ATR-29651 - Tau+X chains using eTAU20M seeds
         'L1_eEM18M_2eTAU20M_4jJ30', 'L1_eTAU60_2eTAU20M_jXE80', 'L1_eEM18M_2eTAU20M_jXE70', 
         'L1_MU8F_cTAU30M',
+
+        # eTAUXXM removal
+        'L1_eTAU30M_2eTAU20M_jJ55_2jJ50_3jJ30',
+        'L1_MU8F_eTAU20M_jXE70',
+        'L1_eTAU35M_2eTAU30M',
+        'L1_MU8F_eTAU20M_jJ55_2jJ30',
+
         # ART-28443  test eEMX{} + {{3,4jJY{}}} L1 seeds
         'L1_eEM22M_3jJ40p0ETA25',
         'L1_eEM22M_4jJ30p0ETA25',
@@ -199,11 +191,8 @@ def defineMenu():
         'L1_HT150-J20s5pETA31_MJJ-400-CF',
         'L1_LLP-RO',
         'L1_LLP-NOMATCH',
-        #'L1_DPHI-2EM3',
         'L1_SC111-CJ15',
         'L1_J50_DETA20-J50J',
-        #'L1_BPH-0M9-EM7-EM5', 
-        #'L1_BPH-0DR3-EM7J15',
         'L1_LAR-ZEE',
 
         #ATR-29330
@@ -231,7 +220,6 @@ def defineMenu():
         'L1_3eEM12L':'',
 
         # non-primary TAU
-        'L1_eTAU20L':'',
         'L1_eTAU35':'',
         'L1_eTAU40HM':'',
         'L1_2TAU8':'',
@@ -244,7 +232,6 @@ def defineMenu():
         'L1_eTAU30M_2eTAU20M_jXE70':'',
 
         # non-primary MU 
-        #'L1_MU8VF':'',
         'L1_MU14FCHR':'',
         'L1_MU8FC':'', 
         'L1_MU15VFCH':'',
@@ -257,23 +244,18 @@ def defineMenu():
         'L1_MU8EOF':'',
         'L1_MU9VF':'',
         'L1_MU9VFC':'',
-        #'L1_MU12FCH':'',
         'L1_MU14EOF':'',
         'L1_MU15VFCHR':'',
-        #'L1_MU18VFCH':'',
         'L1_MU20VFC':'',
 
         # non-primary J
         'L1_J12':'',
-        # 'L1_J25':'',
-        # 'L1_J85':'',
         'L1_J12_BGRP12':'',
         'L1_jJ30p0ETA25':'',
         'L1_jJ40p0ETA25':'',
         'L1_jJ55':'',
         'L1_jJ55p0ETA23':'',
         'L1_jJ70p0ETA23':'',
-        #'L1_jJ80':'',
         'L1_jJ80p0ETA25':'',
         'L1_jJ85p0ETA21':'',
         'L1_jJ140':'',
@@ -294,7 +276,6 @@ def defineMenu():
         # EM non-FILLED
 
         # J non-FILLED
-        # 'L1_J12_EMPTY':'',
         'L1_J12_FIRSTEMPTY':'', 
         'L1_J12_UNPAIRED_ISO':'', 
         'L1_J12_UNPAIRED_NONISO':'', 
