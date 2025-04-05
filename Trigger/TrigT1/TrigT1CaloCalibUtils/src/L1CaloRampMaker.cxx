@@ -61,6 +61,7 @@ L1CaloRampMaker::L1CaloRampMaker(const std::string& name, ISvcLocator* pSvcLocat
     m_jmTools("LVL1::L1CaloOfflineTriggerTowerTools/L1CaloOfflineTriggerTowerTools", this),
     m_nEvent(1),
     m_firstEvent(true),
+    m_nTTs(0),
     m_lvl1Helper(nullptr),
     m_rampDataContainer(nullptr)
 
@@ -162,6 +163,7 @@ StatusCode L1CaloRampMaker::execute()
 
     
     if(m_firstEvent) {
+      m_nTTs = tts->size();
       unsigned int runNumber = eventInfo->runNumber();
       std::string gainStrategy("");
       const CondAttrListCollection* gainStrategyColl = 0;
@@ -224,15 +226,30 @@ StatusCode L1CaloRampMaker::execute()
       m_rampDataContainer->setGainStrategy(gainStrategy);
       m_firstEvent = false;
     }
+    else {
+      if (tts->size() != m_nTTs) {
+	// Adding missing towers, if any
+	ATH_MSG_WARNING("Number of trigger towers changed in event " << eventInfo->eventNumber()
+			<< ": old=" << m_nTTs << ", new=" << tts->size());
 
- 
+	unsigned int nmiss = 0;
+	for(auto* tt: *tts) {
+	  bool isTile = m_xAODTTTools->isTile(*tt);
+	  if (this->validTower(isTile)) {
+	    if (m_rampDataContainer->rampData(tt->coolId()) == nullptr) {
+	      m_rampDataContainer->addRampData(tt->coolId(),L1CaloRampData());
+	      nmiss++;
+	    }
+	  }
+	}
+	ATH_MSG_WARNING("Added " << nmiss << " missing towers");
+	m_nTTs = tts->size();
+      }
+    }
 
- 
     // Reading L1Calo conditions 
     SG::ReadCondHandle<L1CaloPprDisabledChannelContainerRun2>  pprDisabledChannel(m_pprDisabledChannelContainer);
     SG::ReadCondHandle<L1CaloPprChanCalibContainer> pprChanCalib( m_pprChanCalibContainer);
-
-
     
     auto specialChannelRangeEnd = m_specialChannelRange.end();
     bool nextStep = (m_nEvent % m_nEventsPerStep == 0);
@@ -243,17 +260,12 @@ StatusCode L1CaloRampMaker::execute()
         // isSaturated flag is not enough to check - test FADC for saturation, too
         auto max = std::max_element(tt->adc().begin(), tt->adc().end());
         if(*max >= m_fadcSaturationCut) continue;
-
-
 	
 	// skip disabled channels
         if(m_ttTool->disabledChannel(tt->coolId())) continue;
 
-
-	
         bool isTile = m_xAODTTTools->isTile(*tt);
-
-        if((m_doLAr && !isTile) || (m_doTile && isTile)) {
+	if (this->validTower(isTile)) {
             if(m_checkProvenance) checkProvenance(tt);
             double level1Energy = getTriggerTowerEnergy(tt,pprChanCalib);
 	    double caloEnergy = getCaloEnergy(tt);
@@ -279,18 +291,13 @@ StatusCode L1CaloRampMaker::execute()
     return StatusCode::SUCCESS;
 }
 
-
-
-
-
 void L1CaloRampMaker::setupRampDataContainer(const xAOD::TriggerTowerContainer* tts)
 {
     m_rampDataContainer.reset(new L1CaloRampDataContainer());
-
     L1CaloRampData rd;
     for(auto* tt: *tts) {
       bool isTile = m_xAODTTTools->isTile(*tt);
-      if((m_doLAr && !isTile) || (m_doTile && isTile)) {
+      if (this->validTower(isTile)) {
         m_rampDataContainer->addRampData(tt->coolId(), rd);
       }
     }
@@ -389,6 +396,10 @@ void L1CaloRampMaker::checkProvenance(const xAOD::TriggerTower* tt) {
 	}
 	it->second.second += (cell->time()*oneOverNCells);
     }
+}
+
+bool L1CaloRampMaker::validTower(const bool& isTile) {
+  return ((m_doLAr && !isTile) || (m_doTile && isTile));
 }
 
 StatusCode L1CaloRampMaker::finalize()
