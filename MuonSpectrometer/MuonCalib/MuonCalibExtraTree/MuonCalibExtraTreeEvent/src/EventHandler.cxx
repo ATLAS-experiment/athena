@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibExtraTreeEvent/EventHandler.h"
@@ -412,7 +412,7 @@ namespace MuonCalib {
                 if (assoc_quality != other.assoc_quality) return assoc_quality > other.assoc_quality;
                 return seg->chi2() < other.seg->chi2();
             };
-            segmentMatchQual(ExtendedSegmentPtr _ptr, int score) : seg{std::move(_ptr)}, assoc_quality{score} {}
+            segmentMatchQual(ExtendedSegmentPtr ptr, int score) : seg{std::move(ptr)}, assoc_quality{score} {}
         };
 
         for (const ExtendedTrackPtr& trk : tracks) {
