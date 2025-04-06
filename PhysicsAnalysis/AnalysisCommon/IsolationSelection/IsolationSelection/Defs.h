@@ -40,7 +40,7 @@ namespace CP {
     /// Small helper struct to have sets of particle pointers sorted by pt
     template <class Obj> struct SortedObjPtr {
         SortedObjPtr() = default;
-        SortedObjPtr(const Obj* _ptr) : m_ptr{_ptr} {}
+        SortedObjPtr(const Obj* ptr) : m_ptr{ptr} {}
 
         const Obj* get() const { return m_ptr; }
         const Obj* operator->() const { return m_ptr; }
@@ -58,7 +58,7 @@ namespace CP {
     };
     /// For the flow elements we need a special derivate which also contains the weights
     struct FlowElementPtr : public SortedObjPtr<xAOD::FlowElement> {
-        FlowElementPtr(const xAOD::FlowElement* ele, float _weight) : SortedObjPtr<xAOD::FlowElement>{ele}, weight{_weight} {}
+        FlowElementPtr(const xAOD::FlowElement* ele, float weight_) : SortedObjPtr<xAOD::FlowElement>{ele}, weight{weight_} {}
         FlowElementPtr() = default;
         bool operator<(const FlowElementPtr& other) const {
             if (other.weight != weight) return weight < other.weight;
