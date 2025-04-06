@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -38,7 +38,7 @@ VP1HttpGetFile::VP1HttpGetFile(QObject * parent)
 VP1HttpGetFile::~VP1HttpGetFile()
 {
   m_d->dead = true;
-  foreach( VP1HttpGetFile_DownloadThread * thread, m_d->activeDownloadThreads) {
+  for( VP1HttpGetFile_DownloadThread * thread : m_d->activeDownloadThreads) {
     thread->blockSignals(true);
     QString urltofile = thread->urltofile();
     QString localtargetfile = thread->localtargetfile();

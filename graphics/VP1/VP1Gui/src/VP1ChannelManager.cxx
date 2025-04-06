@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -122,7 +122,7 @@ VP1ChannelManager::~VP1ChannelManager()
 	for(it=m_d->pluginfile_2_pluginloader.begin();it!=itE;++it)
 		delete it->second;
 
-	foreach (QObject* o,m_d->additionalOwnedObjects)
+	for (QObject* o : m_d->additionalOwnedObjects)
 	delete o;
 	delete m_d;
 }

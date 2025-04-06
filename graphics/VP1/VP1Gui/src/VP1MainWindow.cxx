@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -181,7 +181,7 @@ VP1MainWindow::VP1MainWindow(VP1ExecutionScheduler*sched,VP1AvailEvents * ae,QWi
 
 		QActionGroup * inputdir_actiongroup = new QActionGroup(menu_inputdir);
 		QAction*action_inputdir_current(0);
-		foreach (QString inputdir, inputdirs) {
+		for (QString inputdir : inputdirs) {
 			if (inputdir.endsWith("/"))
 				inputdir.chop(1);
 			QString dirname = QDir(inputdir).dirName();
@@ -205,11 +205,11 @@ VP1MainWindow::VP1MainWindow(VP1ExecutionScheduler*sched,VP1AvailEvents * ae,QWi
 		}
 
 		// Populate inputdirstatuses
-		foreach(QAction* action, m_inputdiractions)
-		m_inputdirstatuses[action] = VP1DirStatusData(action->data().toString(),
-				QString(),
-				true,
-				false);
+		for(QAction* action : m_inputdiractions)
+                  m_inputdirstatuses[action] = VP1DirStatusData(action->data().toString(),
+                                                                QString(),
+                                                                true,
+                                                                false);
 
 		m_streamMenuUpdater = new VP1StreamMenuUpdater(m_inputdirstatuses,m_mutex);
 		m_streamMenuUpdater->start();
@@ -303,7 +303,7 @@ VP1MainWindow::VP1MainWindow(VP1ExecutionScheduler*sched,VP1AvailEvents * ae,QWi
 	bool foundplastique=false;
 	QSettings s(m_settingsfile,QSettings::IniFormat);
 	QString defaultstyle=s.value("style/defaultstyle", "Fusion").toString();
-	foreach (QString style, QStyleFactory::keys() ) {
+	for (QString style : QStyleFactory::keys() ) {
 		QAction * act = m_menu_changeStyle->addAction(style);
 		act->setStatusTip("Change application style to "+style);
 		connect(act,SIGNAL(triggered(bool)),this,SLOT(changeStyleActionTriggered()));
@@ -337,7 +337,7 @@ VP1MainWindow::VP1MainWindow(VP1ExecutionScheduler*sched,VP1AvailEvents * ae,QWi
 	QActionGroup * fontGroup = new QActionGroup(this);
 	bool foundsavedgoal(false);
 	QAction * normalfontact(0);
-	foreach (int fontopt,fontoptions) {
+	for (int fontopt : fontoptions) {
 		if (m_defaultfont_pixelsize>0&&m_defaultfont_pixelsize+fontopt<=0)
 			continue;
 		QString text = (fontopt==0?"normal": (fontopt>0?"+":"")+QString::number(fontopt)+(m_defaultfont_pointsize < 0.0? " pixels" : "%"));
