@@ -4,22 +4,11 @@
 atlas_subdir( AthExStoreGateExample )
 
 # Component(s) in the package:
-atlas_add_library( SGTutorialLib
-                   Tutorial/LinkObj.cxx
-                   Tutorial/SGRead.cxx
-                   Tutorial/SGWrite.cxx
-                   PUBLIC_HEADERS AthExStoreGateExample
-                   LINK_LIBRARIES AthenaBaseComps AthenaKernel GaudiKernel StoreGateLib
-                   PRIVATE_LINK_LIBRARIES AthLinks  )
-
-atlas_add_component( SGTutorial
-                     Tutorial/SGTutorial_entries.cxx
-                     LINK_LIBRARIES SGTutorialLib )
-
 atlas_add_component( AthExStoreGateExample
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthContainers AthLinks AthenaBaseComps xAODEventInfo PileUpToolsLib SGTools SGTutorialLib TestTools )
+                     LINK_LIBRARIES AthContainers AthLinks AthenaBaseComps AthenaKernel GaudiKernel
+                     SGTools StoreGateLib TestTools xAODEventInfo )
 
 atlas_add_component( AthExDFlow
                      src_dflow/*.cxx
@@ -29,13 +18,26 @@ atlas_add_component( AthExDFlow
 atlas_add_dictionary( AthExStoreGateExampleDict
                       AthExStoreGateExample/AthExStoreGateExampleDict.h
                       AthExStoreGateExample/selection.xml
-                      LINK_LIBRARIES SGTutorialLib )
+                      LINK_LIBRARIES AthenaKernel GaudiKernel StoreGateLib )
 
-# Install files from the package:
-atlas_install_joboptions( share/StoreGateExample_Gen_jobOptions.py
-                          share/StoreGateExample_Reentrant_jobOptions.py
-                          share/dflow_jobo.py
-                          share/StoreGateHiveExample.py
-                          share/HandleTest_jobOptions.py
-                          share/DecorHandleTest_jobOptions.py )
+# Tests in the package:
+atlas_add_test( CircularDependency
+                SCRIPT test/test_CircularDependency.py
+                LOG_SELECT_PATTERN testalg )
 
+atlas_add_test( DecorHandle
+                SCRIPT test/test_DecorHandle.py
+                LOG_SELECT_PATTERN testalg )
+
+atlas_add_test( ReadWrite
+                SCRIPT test/test_ReadWrite.py
+                LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}" )
+
+atlas_add_test( ReadWriteReentrant
+                SCRIPT test/test_ReadWriteReentrant.py
+                LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}" )
+
+atlas_add_test( StoreGateDFlow
+                SCRIPT test/test_DFlowAlg.py
+                LOG_SELECT_PATTERN "dflow_alg"
+                LOG_IGNORE_PATTERN "ptr: 0x" )

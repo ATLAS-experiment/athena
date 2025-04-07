@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id$
 /**
  * @file WriteDataReentrant.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -33,26 +32,6 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-
-WriteDataReentrant::WriteDataReentrant(const std::string& name,
-                                       ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator)
-{
-  declareProperty ("DObjKey", m_dobjKey = "dobj");
-  declareProperty ("DObjKey2", m_dobjKey2 = "dobj2");
-  declareProperty ("DObjKey3", m_dobjKey3);
-  //declareProperty ("DObjKey4", m_dobjKey4 = "dobj4");
-  declareProperty ("CObjKey", m_cobjKey = "cobj");
-  declareProperty ("VFloatKey", m_vFloatKey = "vFloat");
-  declareProperty ("PLinkListKey", m_pLinkListKey);
-  declareProperty ("MKey", m_mKey = "mkey");
-  declareProperty ("LinkVectorKey", m_linkVectorKey = "linkvec");
-  declareProperty ("TestObjectKey", m_testObjectKey = "testobj");
-  declareProperty ("DObjKeyArray", m_dobjKeyArray = {"dobj_a1", "dobj_a2"});
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-
 StatusCode WriteDataReentrant::initialize()
 {
   errorcheck::ReportMessage::hideErrorLocus();
@@ -66,7 +45,6 @@ StatusCode WriteDataReentrant::initialize()
   ATH_CHECK( m_dobjKey.initialize() );
   ATH_CHECK( m_dobjKey2.initialize() );
   ATH_CHECK( m_dobjKey3.initialize() );
-  //ATH_CHECK( m_dobjKey4.initialize() );
   ATH_CHECK( m_cobjKey.initialize() );
   ATH_CHECK( m_vFloatKey.initialize() );
   ATH_CHECK( m_pLinkListKey.initialize() );
@@ -122,16 +100,6 @@ StatusCode WriteDataReentrant::execute (const EventContext& ctx) const
   if (m_testObject->refCount() != 1) std::abort();
   ATH_CHECK( testobj.record (m_testObject) );
   if (m_testObject->refCount() != 2) std::abort();
-
-#if 0  
-  {
-    SG::WriteHandle<MyDataObj> dobj4 (m_dobjKey4, ctx);
-    ATH_CHECK( dobj4.recordOrRetrieve (std::make_unique<MyDataObj>(4)) );
-    MyDataObj* pp = &*dobj4;
-    ATH_CHECK( dobj4.recordOrRetrieve (std::make_unique<MyDataObj>(4)) );
-    assert (pp == &*dobj4);
-  }
-#endif
 
   // Writing an array of objects.
   size_t i = 0;
@@ -306,13 +274,6 @@ StatusCode WriteDataReentrant::execute (const EventContext& ctx) const
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-
-StatusCode WriteDataReentrant::finalize()
-{
-  ATH_MSG_INFO ("in finalize()");
-  return StatusCode::SUCCESS;
-}
-
 
 StatusCode WriteDataReentrant::onError() const
 {
