@@ -11,11 +11,12 @@ def isdet(flags,
           *,
           pixel: list = None,
           strip: list = None,
-          hgtd: list = None) -> list:
+          hgtd: list = None,
+          noStrip: bool = False) -> list:
     keys = []
     if flags.Detector.EnableITkPixel and pixel is not None:
         keys += pixel
-    if flags.Detector.EnableITkStrip and strip is not None:
+    if flags.Detector.EnableITkStrip and strip is not None and not noStrip:
         keys += strip
     if flags.Acts.useHGTDClusterInTrackFinding and hgtd is not None:
         keys += hgtd
@@ -35,7 +36,9 @@ def ActsTrackStatePrinterToolCfg(flags,
                                  **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("InputSpacePoints", isdet(flags, pixel=["ITkPixelSpacePoints"], strip=["ITkStripSpacePoints", "ITkStripOverlapSpacePoints"]))
+    kwargs.setdefault("InputSpacePoints", isdet(flags, noStrip=flags.Tracking.doITkFastTracking,
+                                                pixel=['ITkPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkPixelSpacePoints'],
+                                                strip=['ITkStripSpacePoints_Cached', 'ITkStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints']))
 
     if 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
