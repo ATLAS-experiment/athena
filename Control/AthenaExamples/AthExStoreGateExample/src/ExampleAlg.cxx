@@ -1,7 +1,6 @@
 /*
- * Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
-// $Id$
 /**
  * @file AthExStoreGateExample/src/ExampleAlg.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -11,16 +10,6 @@
 
 
 #include "ExampleAlg.h"
-
-
-ExampleAlg::ExampleAlg (const std::string& name, ISvcLocator* svcLocator)
-  : AthReentrantAlgorithm (name, svcLocator)
-{
-  // Declare the keys as properties.
-  // You can set defaults here that can be overridden during job configuration.
-  declareProperty ("ReadKey", m_readKey = "in");
-  declareProperty ("WriteKey", m_writeKey = "out");
-}
 
 
 StatusCode ExampleAlg::initialize()
@@ -47,7 +36,6 @@ StatusCode ExampleAlg::execute (const EventContext& ctx) const
   // We make a new object, held by a unique_ptr, and record it
   // in the store using the record method of the handle.
   ATH_CHECK( h_write.record (std::make_unique<MyDataObj> (newval)) );
+
   return StatusCode::SUCCESS;
 }
-
-

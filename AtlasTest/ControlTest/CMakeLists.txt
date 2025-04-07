@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ControlTest )
@@ -62,27 +62,8 @@ else()
    set( SGGoptignore )
 endif()
 
-atlas_add_test( StoreGateReentrant
-   SCRIPT athena.py AthExStoreGateExample/StoreGateExample_Reentrant_jobOptions.py
-   LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}|Retrieved const handle to default|type EventInfo|^StoreGateSvc +DEBUG|^ of type|object modifiable when retrieved" )
-
-atlas_add_test( StoreGateGen
-   SCRIPT athena.py AthExStoreGateExample/StoreGateExample_Gen_jobOptions.py
-   LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}|Retrieved const handle to default|type EventInfo|^StoreGateSvc +DEBUG|^ of type|object modifiable when retrieved" )
-
-atlas_add_test( StoreGateDFlow
-   SCRIPT athena.py AthExStoreGateExample/dflow_jobo.py
-   LOG_IGNORE_PATTERN "ptr: 0x" )
-
 atlas_add_test( test_interactive_athena
    SCRIPT athena.py ControlTest/test_interactive_athena.py )
-
-atlas_add_test( test_handleTest
-                SCRIPT athena.py AthExStoreGateExample/HandleTest_jobOptions.py )
-
-atlas_add_test( test_decorHandleTest
-                SCRIPT athena.py AthExStoreGateExample/DecorHandleTest_jobOptions.py
-                LOG_SELECT_PATTERN "testalg.testool" )
 
 # Install files from the package:
 atlas_install_joboptions( share/StoreGateTestCommon.txt share/DataLink_test.txt share/*.py )

@@ -1,21 +1,16 @@
-Py:Athena            INFO executing ROOT6Setup
 ApplicationMgr       INFO Application Manager Configured successfully
-AthDictLoaderSvc     INFO in initialize...
-AthDictLoaderSvc     INFO acquired Dso-registry
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 WriteDataReentrant   INFO in initialize()
-StoreGateSvc      VERBOSE Initializing StoreGateSvc
-StoreGateSvc      VERBOSE Initializing StoreGateSvc
 ReadDataReentrant    INFO in initialize()
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr       INFO Application Manager Started successfully
 AthenaEventLoopMgr   INFO   ===>>>  start of run 1    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
 WriteDataReentrant   INFO in execute()
-WriteDataReentrantWARNING we expect  an error message here
+WriteDataReentrant WARNING we expect  an error message here
 StoreGateSvc WARNING  setupProxy:: error setting up proxy for key dobj and clid 8000
-VarHandle(Store...  ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
-WriteDataReentrantWARNING end of error message
+VarHandle(StoreGateSvc+dobj[8000]) ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
+WriteDataReentrant WARNING end of error message
 WriteDataReentrant   INFO  registered all data objects
 WriteDataReentrant   INFO  StoreGate structure before returning from execute 
 StoreGateSvc: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
@@ -39,15 +34,16 @@ ReadDataReentrant    INFO Time: 41.7  ID: 291
 ReadDataReentrant    INFO pVec [0] = 1
 ReadDataReentrant    INFO pVec [1] = 2
 ReadDataReentrant    INFO pVec [2] = 3
+ReadDataReentrant    INFO event store does not contain MyDataObj with 'StoreGateSvc+foo'
 ReadDataReentrant    INFO ListVecLinks::linked element 1
 ReadDataReentrant    INFO ListVecLinks::linked element 3
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
 WriteDataReentrant   INFO in execute()
-WriteDataReentrantWARNING we expect  an error message here
+WriteDataReentrant WARNING we expect  an error message here
 StoreGateSvc WARNING  setupProxy:: error setting up proxy for key dobj and clid 8000
-VarHandle(Store...  ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
-WriteDataReentrantWARNING end of error message
+VarHandle(StoreGateSvc+dobj[8000]) ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
+WriteDataReentrant WARNING end of error message
 WriteDataReentrant   INFO  registered all data objects
 WriteDataReentrant   INFO  StoreGate structure before returning from execute 
 StoreGateSvc: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
@@ -71,15 +67,16 @@ ReadDataReentrant    INFO Time: 41.7  ID: 291
 ReadDataReentrant    INFO pVec [0] = 1
 ReadDataReentrant    INFO pVec [1] = 2
 ReadDataReentrant    INFO pVec [2] = 3
+ReadDataReentrant    INFO event store does not contain MyDataObj with 'StoreGateSvc+foo'
 ReadDataReentrant    INFO ListVecLinks::linked element 1
 ReadDataReentrant    INFO ListVecLinks::linked element 3
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #1 2 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #1 2 events processed so far  <<<===
 WriteDataReentrant   INFO in execute()
-WriteDataReentrantWARNING we expect  an error message here
+WriteDataReentrant WARNING we expect  an error message here
 StoreGateSvc WARNING  setupProxy:: error setting up proxy for key dobj and clid 8000
-VarHandle(Store...  ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
-WriteDataReentrantWARNING end of error message
+VarHandle(StoreGateSvc+dobj[8000]) ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
+WriteDataReentrant WARNING end of error message
 WriteDataReentrant   INFO  registered all data objects
 WriteDataReentrant   INFO  StoreGate structure before returning from execute 
 StoreGateSvc: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
@@ -103,16 +100,15 @@ ReadDataReentrant    INFO Time: 41.7  ID: 291
 ReadDataReentrant    INFO pVec [0] = 1
 ReadDataReentrant    INFO pVec [1] = 2
 ReadDataReentrant    INFO pVec [2] = 3
+ReadDataReentrant    INFO event store does not contain MyDataObj with 'StoreGateSvc+foo'
 ReadDataReentrant    INFO ListVecLinks::linked element 1
 ReadDataReentrant    INFO ListVecLinks::linked element 3
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #1 3 events processed so far  <<<===
 ApplicationMgr       INFO Application Manager Stopped successfully
-WriteDataReentrant   INFO in finalize()
-ReadDataReentrant    INFO in finalize()
-StoreGateSvc      VERBOSE Finalizing StoreGateSvc
-StoreGateSvc      VERBOSE Finalizing StoreGateSvc
-AthDictLoaderSvc     INFO in finalize...
-ToolSvc              INFO Removing all tools created by ToolSvc
+FPEAuditor                                           INFO FPE summary for this job
+FPEAuditor                                           INFO  FPE OVERFLOWs  : 0
+FPEAuditor                                           INFO  FPE INVALIDs   : 0
+FPEAuditor                                           INFO  FPE DIVBYZEROs : 0
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
 Py:Athena            INFO leaving with code 0: "successful run"
