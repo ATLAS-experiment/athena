@@ -41,3 +41,6 @@ VarHandleKey.Se...  ERROR ServiceLocatorHelper::service: can not locate service 
                     ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot locate store: BazSvc
 test5
 test6
+test7
+VarHandle(Store...  ERROR FILE:LINE (const void*SG::VarHandleBase::get_impl(const EventContext*, bool) const): code FAILURE: Cannot find proxy for 293847295/nonExistent
+VarHandle(Store...  ERROR FILE:LINE (const void*SG::VarHandleBase::get_impl(const EventContext*, bool) const): code FAILURE: Cannot find proxy for 293847295/nonExistent
