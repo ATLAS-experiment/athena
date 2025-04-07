@@ -192,7 +192,21 @@ namespace ActsTrk
       kNTotalSharedHits,
       kNStat
     };
+
     using EventStats = std::vector<std::array<unsigned int, kNStat>>;
+    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
+
+    struct DetectorContextHolder {
+      Acts::GeometryContext geometry;
+      Acts::MagneticFieldContext magField;
+      Acts::CalibrationContext calib;
+    };
+
+    struct TrackFindingDefaultOptions {
+      TrackFinderOptions options;
+      TrackFinderOptions secondOptions;
+      std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector;
+    };
 
     // initialize measurement selector to be called during initialize
     StatusCode initializeMeasurementSelector();
@@ -217,7 +231,39 @@ namespace ActsTrk
         std::vector<const ContainerType *> &outputContainers,
         std::size_t &sum) const;
 
-    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
+    /**
+     * @brief Get CKF options for first and second pass + pointer to MeasurementSelector
+     *
+     * @param detContext Object holding detector-related context
+     * @param measurements <easurements container used in MeasurementSelector
+     * @param pSurface Raw pointer to perigee surface
+     */
+    TrackFindingDefaultOptions getDefaultOptions(const DetectorContextHolder &detContext,
+                                                 const detail::TrackFindingMeasurements &measurements,
+                                                 const Acts::PerigeeSurface* pSurface) const;
+
+    using BranchStopperResult = Acts::CombinatorialKalmanFilterBranchStopperResult;
+
+    /**
+     * @brief Branch stopper
+     *
+     * @param track Track proxy object
+     * @param trackState Track state proxy object
+     * @param trackSelectorCfg Track selector configuration
+     * @param tgContext Geometry context
+     * @param measurementIndex Measurement index
+     * @param typeIndex Type index
+     * @param event_stat_category_i Event statistics for current category
+     * @return BranchStopperResult
+     */
+    BranchStopperResult stopBranch(
+        const detail::RecoTrackContainer::TrackProxy &track,
+        const detail::RecoTrackContainer::TrackStateProxy &trackState,
+        const Acts::TrackSelector::EtaBinnedConfig &trackSelectorCfg,
+        const Acts::GeometryContext &tgContext,
+        const detail::MeasurementIndex &measurementIndex,
+        const std::size_t typeIndex,
+        EventStats::value_type &event_stat_category_i) const;
 
     /**
      * @brief Setup and attach measurement selector to KF options
@@ -239,9 +285,7 @@ namespace ActsTrk
      * @param ctx Event context
      * @param measurement Measurement source for KF
      * @param initialParameters Parameters to use in KF
-     * @param tgContext Geometry context
-     * @param mfContext Magnetic field context
-     * @param calContext Calibration context
+     * @param detContext Struct holding geometry, magnetic field and calibration contexts
      * @param detectorElementToGeoId map Trk detector element to Acts Geometry id
      * @param paramsAtOutermostSurface Flag for searching in reverse direction
      *
@@ -252,9 +296,7 @@ namespace ActsTrk
         const EventContext &ctx,
         const MeasurementSource &measurement,
         const Acts::BoundTrackParameters &initialParameters,
-        const Acts::GeometryContext &tgContext,
-        const Acts::MagneticFieldContext &mfContext,
-        const Acts::CalibrationContext &calContext,
+        const DetectorContextHolder &detContext,
         const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
         const bool paramsAtOutermostSurface) const;
 

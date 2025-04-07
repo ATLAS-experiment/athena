@@ -28,14 +28,12 @@ namespace ActsTrk {
       const EventContext &ctx,
       const MeasurementSource &measurement,
       const Acts::BoundTrackParameters &initialParameters,
-      const Acts::GeometryContext &tgContext,
-      const Acts::MagneticFieldContext &mfContext,
-      const Acts::CalibrationContext &calContext,
+      const DetectorContextHolder &detContext,
       const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
       const bool paramsAtOutermostSurface) const {
     // Perform KF before CKF
     const auto fittedSeedCollection = m_fitterTool->fit(ctx, measurement, initialParameters,
-                                                        tgContext, mfContext, calContext,
+                                                        detContext.geometry, detContext.magField, detContext.calib,
                                                         detectorElementToGeoId);
     if (not fittedSeedCollection) {
       ATH_MSG_WARNING("KF Fitted Track is nullptr");
