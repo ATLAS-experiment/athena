@@ -154,11 +154,11 @@ namespace ActsTrk
     auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
 
     detail::Stepper stepper(std::move(magneticField));
-    detail::Navigator::Config cfg{trackingGeometry};
-    cfg.resolvePassive = false;
-    cfg.resolveMaterial = true;
-    cfg.resolveSensitive = true;
-    detail::Navigator navigator(cfg, logger().cloneWithSuffix("Navigator"));
+    detail::Navigator::Config config{trackingGeometry};
+    config.resolvePassive = false;
+    config.resolveMaterial = true;
+    config.resolveSensitive = true;
+    detail::Navigator navigator(config, logger().cloneWithSuffix("Navigator"));
     detail::Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
 
     // Using the CKF propagator as extrapolator
@@ -401,38 +401,14 @@ namespace ActsTrk
     // Construct a perigee surface as the target surface
     auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
 
-    Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-    Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-    // CalibrationContext converter not implemented yet.
-    Acts::CalibrationContext calContext = Acts::CalibrationContext();
+    DetectorContextHolder detContext {
+      .geometry = m_trackingGeometryTool->getGeometryContext(ctx).context(),
+      .magField = m_extrapolationTool->getMagneticFieldContext(ctx),
+      // CalibrationContext converter not implemented yet.
+      .calib = Acts::CalibrationContext()
+    };
 
-    Acts::PropagatorPlainOptions plainOptions{tgContext, mfContext};
-    plainOptions.endOfWorldVolumeIds = m_endOfWorldVolumeIds;
-    Acts::PropagatorPlainOptions plainSecondOptions{tgContext, mfContext};
-
-    plainOptions.maxSteps = m_maxPropagationStep;
-    plainOptions.direction = Acts::Direction::Forward();
-    plainSecondOptions.maxSteps = m_maxPropagationStep;
-    plainSecondOptions.direction = plainOptions.direction.invert();
-
-    // Set the CombinatorialKalmanFilter options
-    TrackFinderOptions options(tgContext,
-                               mfContext,
-                               calContext,
-                               trackFinder().ckfExtensions,
-                               plainOptions,
-                               pSurface.get());
-
-    std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(measurements, options);
-
-    TrackFinderOptions secondOptions(tgContext,
-                                     mfContext,
-                                     calContext,
-                                     options.extensions,
-                                     plainSecondOptions,
-                                     pSurface.get());
-    secondOptions.targetSurface = pSurface.get();
-    secondOptions.skipPrePropagationUpdate = true;
+    auto [options, secondOptions, measurementSelector] = getDefaultOptions(detContext, measurements, pSurface.get());
 
     // ActsTrk::MutableTrackContainer tracksContainerTemp;
     Acts::VectorTrackContainer trackBackend;
@@ -444,95 +420,16 @@ namespace ActsTrk
     }
 
     std::size_t category_i = 0;
-
     const auto &trackSelectorCfg = trackFinder().trackSelector.config();
-    using BranchStopperResult = Acts::CombinatorialKalmanFilterBranchStopperResult;
-    auto stopBranch = [&](const detail::RecoTrackContainer::TrackProxy &track,
-                          const detail::RecoTrackContainer::TrackStateProxy &trackState) -> BranchStopperResult {
-      if (m_addPixelStripCounts) {
-        updatePixelStripCounts(track, trackState.typeFlags(), measurementType(trackState));
-        checkPixelStripCounts(track);
-      }
-
-      if (m_trackStatePrinter.isSet()) {
-        m_trackStatePrinter->printTrackState(tgContext, trackState, measurementIndex, true);
-      }
-
-      if (!m_doBranchStopper)
-        return BranchStopperResult::Continue;
-
-      const auto &parameters = trackState.hasFiltered() ? trackState.filtered() : trackState.predicted();
-      double eta = -std::log(std::tan(0.5 * parameters[Acts::eBoundTheta]));
-      const auto &cutSet = getCuts(eta);
-
-      if (typeIndex < m_ptMinMeasurements.size() &&
-          !(track.nMeasurements() < m_ptMinMeasurements[typeIndex])) {
-        double pT = std::sin(parameters[Acts::eBoundTheta]) / parameters[Acts::eBoundQOverP];
-        if (std::abs(pT) < cutSet.ptMin * m_branchStopperPtMinFactor) {
-          ++event_stat[category_i][kNStoppedTracksMinPt];
-          ATH_MSG_DEBUG("CkfBranchStopper: drop branch with q*pT="
-                        << pT << " after "
-                        << track.nMeasurements() << " measurements");
-          return BranchStopperResult::StopAndDrop;
-        }
-      }
-
-      if (typeIndex < m_absEtaMaxMeasurements.size() &&
-          !(track.nMeasurements() < m_absEtaMaxMeasurements[typeIndex]) &&
-          !(std::abs(eta) < trackSelectorCfg.absEtaEdges.back() + m_branchStopperAbsEtaMaxExtra)) {
-        ++event_stat[category_i][kNStoppedTracksMaxEta];
-        ATH_MSG_DEBUG("CkfBranchStopper: drop branch with eta="
-                      << eta << " after "
-                      << track.nMeasurements() << " measurements");
-        return BranchStopperResult::StopAndDrop;
-      }
-
-      bool enoughMeasurements = (track.nMeasurements() >= cutSet.minMeasurements);
-      bool tooManyHoles = (track.nHoles() > cutSet.maxHoles);
-      bool tooManyOutliers = (track.nOutliers() > cutSet.maxOutliers);
-
-      if (m_addPixelStripCounts) {
-        auto [enoughMeasurementsPS, tooManyHolesPS, tooManyOutliersPS] = selectPixelStripCounts(track, eta);
-        enoughMeasurements = enoughMeasurements && enoughMeasurementsPS;
-        tooManyHoles = tooManyHoles || tooManyHolesPS;
-        tooManyOutliers = tooManyOutliers || tooManyOutliersPS;
-      }
-
-      if (!(tooManyHoles || tooManyOutliers))
-        return BranchStopperResult::Continue;
-
-      if (!enoughMeasurements)
-        ++event_stat[category_i][kNStoppedTracksMaxHoles];
-      if (m_addPixelStripCounts) {
-        ATH_MSG_DEBUG("CkfBranchStopper: stop and "
-                      << (enoughMeasurements ? "keep" : "drop")
-                      << " branch with nHoles=" << track.nHoles()
-                      << " (" << s_branchState.nPixelHoles(track)
-                      << " pixel+" << s_branchState.nStripHoles(track)
-                      << " strip), nOutliers=" << track.nOutliers()
-                      << " (" << s_branchState.nPixelOutliers(track)
-                      << "+" << s_branchState.nStripOutliers(track)
-                      << "), nMeasurements=" << track.nMeasurements()
-                      << " (" << s_branchState.nPixelHits(track)
-                      << "+" << s_branchState.nStripHits(track)
-                      << ")");
-      } else {
-        ATH_MSG_DEBUG("CkfBranchStopper: stop and "
-                      << (enoughMeasurements ? "keep" : "drop")
-                      << " branch with nHoles=" << track.nHoles()
-                      << ", nOutliers=" << track.nOutliers()
-                      << ", nMeasurements=" << track.nMeasurements());
-      }
-
-      return enoughMeasurements ? BranchStopperResult::StopAndKeep
-                                : BranchStopperResult::StopAndDrop;
+    auto stopBranchProxy = [&](const detail::RecoTrackContainer::TrackProxy &track,
+                               const detail::RecoTrackContainer::TrackStateProxy &trackState) -> BranchStopperResult {
+      return stopBranch(track, trackState, trackSelectorCfg, detContext.geometry, measurementIndex, typeIndex, event_stat[category_i]);
     };
-
-    options.extensions.branchStopper.connect(stopBranch);
+    options.extensions.branchStopper.connect(stopBranchProxy);
 
     Acts::PropagatorOptions<detail::Stepper::Options, detail::Navigator::Options,
                             Acts::ActorList<Acts::MaterialInteractor>>
-    extrapolationOptions(tgContext, mfContext);
+    extrapolationOptions(detContext.geometry, detContext.magField);
 
     Acts::TrackExtrapolationStrategy extrapolationStrategy =
         Acts::TrackExtrapolationStrategy::first;
@@ -549,7 +446,7 @@ namespace ActsTrk
       {
         ATH_MSG_INFO("CKF results for " << seeds.size() << ' ' << seedType << " seeds:");
       }
-      m_trackStatePrinter->printSeed(tgContext, *seeds[iseed], seedParameters, measurementIndex, iseed, isKF);
+      m_trackStatePrinter->printSeed(detContext.geometry, *seeds[iseed], seedParameters, measurementIndex, iseed, isKF);
     };
 
     // Loop over the track finding results for all initial parameters
@@ -601,8 +498,8 @@ namespace ActsTrk
         m_paramEstimationTool->estimateTrackParameters(
 						       seed,
 						       useTopSp,
-						       tgContext,
-						       mfContext,
+						       detContext.geometry,
+						       detContext.magField,
 						       retrieveSurfaceFunction);
 
       if (!optTrackParams) {
@@ -626,7 +523,7 @@ namespace ActsTrk
 
       std::unique_ptr<Acts::BoundTrackParameters> refitSeedParameters;
       if (refitSeeds) {
-        refitSeedParameters = doRefit(ctx, seed, *initialParameters, tgContext, mfContext, calContext, detectorElementToGeoId, reverseSearch);
+        refitSeedParameters = doRefit(ctx, seed, *initialParameters, detContext, detectorElementToGeoId, reverseSearch);
         if (refitSeedParameters.get() == nullptr) {
           ++event_stat[category_i][kNRejectedRefinedSeeds];
           continue;
@@ -711,20 +608,20 @@ namespace ActsTrk
           ++event_stat[category_i][kNSelectedTracks];
 
           if (m_trackStatePrinter.isSet()) {
-            m_trackStatePrinter->printTrack(tgContext, tracksContainer, destProxy, measurementIndex);
+            m_trackStatePrinter->printTrack(detContext.geometry, tracksContainer, destProxy, measurementIndex);
           }
 
         } else {
           ATH_MSG_DEBUG("Track " << ntracks << " from " << seedType << " seed " << iseed << " failed track selection");
           if (m_trackStatePrinter.isSet()) {
-            m_trackStatePrinter->printTrack(tgContext, tracksContainerTemp, track, measurementIndex, true);
+            m_trackStatePrinter->printTrack(detContext.geometry, tracksContainerTemp, track, measurementIndex, true);
           }
         }
       };
 
       std::size_t nfirst = 0;
       for (TrkProxy &firstTrack : tracksForSeed) {
-        auto smoothingResult = Acts::smoothTrack(tgContext, firstTrack, logger(), Acts::MbfSmoother());
+        auto smoothingResult = Acts::smoothTrack(detContext.geometry, firstTrack, logger(), Acts::MbfSmoother());
         if (!smoothingResult.ok()) {
           ATH_MSG_DEBUG("Smoothing for seed "
                      << iseed << " and first track " << firstTrack.index()
@@ -733,7 +630,7 @@ namespace ActsTrk
         }
 
         const std::size_t nsecond =
-            m_doTwoWay ? doTwoWayTrackFinding(addTrack, firstTrack, tracksContainerTemp, secondOptions, tgContext, reverseSearch)
+            m_doTwoWay ? doTwoWayTrackFinding(addTrack, firstTrack, tracksContainerTemp, secondOptions, detContext.geometry, reverseSearch)
                        : 0;
 
         if (nsecond == 0) {
@@ -759,6 +656,129 @@ namespace ActsTrk
     ATH_MSG_DEBUG("Completed " << seedType << " track finding with " << computeStatSum(typeIndex, kNOutputTracks, event_stat) << " track candidates.");
 
     return StatusCode::SUCCESS;
+  }
+
+  TrackFindingAlg::TrackFindingDefaultOptions TrackFindingAlg::getDefaultOptions(
+      const DetectorContextHolder &detContext,
+      const detail::TrackFindingMeasurements &measurements,
+      const Acts::PerigeeSurface* pSurface) const {
+    Acts::PropagatorPlainOptions plainOptions{detContext.geometry, detContext.magField};
+    Acts::PropagatorPlainOptions plainSecondOptions{detContext.geometry, detContext.magField};
+
+    plainOptions.maxSteps = m_maxPropagationStep;
+    plainOptions.direction = Acts::Direction::Forward();
+    plainOptions.endOfWorldVolumeIds = m_endOfWorldVolumeIds;
+    plainSecondOptions.maxSteps = m_maxPropagationStep;
+    plainSecondOptions.direction = plainOptions.direction.invert();
+
+    // Set the CombinatorialKalmanFilter options
+    TrackFinderOptions options(detContext.geometry, detContext.magField, detContext.calib,
+                               trackFinder().ckfExtensions, plainOptions, pSurface);
+
+    std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(measurements, options);
+
+    TrackFinderOptions secondOptions(detContext.geometry, detContext.magField, detContext.calib,
+                                     options.extensions, plainSecondOptions, pSurface);
+    secondOptions.targetSurface = pSurface;
+    secondOptions.skipPrePropagationUpdate = true;
+
+    return {options, secondOptions, std::move(measurementSelector)};
+  };
+
+  TrackFindingAlg::BranchStopperResult TrackFindingAlg::stopBranch(
+      const detail::RecoTrackContainer::TrackProxy &track,
+      const detail::RecoTrackContainer::TrackStateProxy &trackState,
+      const Acts::TrackSelector::EtaBinnedConfig &trackSelectorCfg,
+      const Acts::GeometryContext &tgContext,
+      const detail::MeasurementIndex &measurementIndex,
+      const std::size_t typeIndex,
+      EventStats::value_type &event_stat_category_i) const {
+    if (m_addPixelStripCounts) {
+      updatePixelStripCounts(track, trackState.typeFlags(),
+                             measurementType(trackState));
+      checkPixelStripCounts(track);
+    }
+
+    if (m_trackStatePrinter.isSet()) {
+      m_trackStatePrinter->printTrackState(tgContext, trackState,
+                                           measurementIndex, true);
+    }
+
+    if (!m_doBranchStopper) {
+      return BranchStopperResult::Continue;
+    }
+
+    const auto &parameters = trackState.hasFiltered() ? trackState.filtered()
+                                                      : trackState.predicted();
+    double eta = -std::log(std::tan(0.5 * parameters[Acts::eBoundTheta]));
+    const auto &cutSet = getCuts(eta);
+
+    if (typeIndex < m_ptMinMeasurements.size() &&
+        !(track.nMeasurements() < m_ptMinMeasurements[typeIndex])) {
+      double pT = std::sin(parameters[Acts::eBoundTheta]) /
+                  parameters[Acts::eBoundQOverP];
+      if (std::abs(pT) < cutSet.ptMin * m_branchStopperPtMinFactor) {
+        ++event_stat_category_i[kNStoppedTracksMinPt];
+        ATH_MSG_DEBUG("CkfBranchStopper: drop branch with q*pT="
+                      << pT << " after " << track.nMeasurements()
+                      << " measurements");
+        return BranchStopperResult::StopAndDrop;
+      }
+    }
+
+    if (typeIndex < m_absEtaMaxMeasurements.size() &&
+        !(track.nMeasurements() < m_absEtaMaxMeasurements[typeIndex]) &&
+        !(std::abs(eta) < trackSelectorCfg.absEtaEdges.back() +
+                              m_branchStopperAbsEtaMaxExtra)) {
+      ++event_stat_category_i[kNStoppedTracksMaxEta];
+      ATH_MSG_DEBUG("CkfBranchStopper: drop branch with eta="
+                    << eta << " after " << track.nMeasurements()
+                    << " measurements");
+      return BranchStopperResult::StopAndDrop;
+    }
+
+    bool enoughMeasurements = (track.nMeasurements() >= cutSet.minMeasurements);
+    bool tooManyHoles = (track.nHoles() > cutSet.maxHoles);
+    bool tooManyOutliers = (track.nOutliers() > cutSet.maxOutliers);
+
+    if (m_addPixelStripCounts) {
+      auto [enoughMeasurementsPS, tooManyHolesPS, tooManyOutliersPS] =
+          selectPixelStripCounts(track, eta);
+      enoughMeasurements = enoughMeasurements && enoughMeasurementsPS;
+      tooManyHoles = tooManyHoles || tooManyHolesPS;
+      tooManyOutliers = tooManyOutliers || tooManyOutliersPS;
+    }
+
+    if (!(tooManyHoles || tooManyOutliers)) {
+      return BranchStopperResult::Continue;
+    }
+
+    if (!enoughMeasurements) {
+      ++event_stat_category_i[kNStoppedTracksMaxHoles];
+    }
+
+    if (m_addPixelStripCounts) {
+      ATH_MSG_DEBUG("CkfBranchStopper: stop and "
+                    << (enoughMeasurements ? "keep" : "drop")
+                    << " branch with nHoles=" << track.nHoles() << " ("
+                    << s_branchState.nPixelHoles(track) << " pixel+"
+                    << s_branchState.nStripHoles(track)
+                    << " strip), nOutliers=" << track.nOutliers() << " ("
+                    << s_branchState.nPixelOutliers(track) << "+"
+                    << s_branchState.nStripOutliers(track)
+                    << "), nMeasurements=" << track.nMeasurements() << " ("
+                    << s_branchState.nPixelHits(track) << "+"
+                    << s_branchState.nStripHits(track) << ")");
+    } else {
+      ATH_MSG_DEBUG("CkfBranchStopper: stop and "
+                    << (enoughMeasurements ? "keep" : "drop")
+                    << " branch with nHoles=" << track.nHoles()
+                    << ", nOutliers=" << track.nOutliers()
+                    << ", nMeasurements=" << track.nMeasurements());
+    }
+
+    return enoughMeasurements ? BranchStopperResult::StopAndKeep
+                              : BranchStopperResult::StopAndDrop;
   }
 
   std::size_t TrackFindingAlg::doTwoWayTrackFinding(
@@ -1250,8 +1270,8 @@ namespace ActsTrk
                                                    : std::numeric_limits<float>::max()) );
        ++idx;
     }
-    std::vector<float> &etaBinsf = m_measurementSelectorConfig.m_etaBins;
     if (m_etaBins.size() > 2) {
+      std::vector<float> &etaBinsf = m_measurementSelectorConfig.m_etaBins;
       etaBinsf.assign(m_etaBins.begin() + 1, m_etaBins.end() - 1);
     }
 
