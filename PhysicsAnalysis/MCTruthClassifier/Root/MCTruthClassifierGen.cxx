@@ -301,7 +301,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
         MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
         abs(pPDG) == 9900024 || abs(pPDG) == 9900012 || abs(pPDG) == 9900014 || abs(pPDG) == 9900016 || // Left-right symmetric model WBoson || Right-handed NU_E || Right-handed NU_MU || Right-handed NU_TAU
-        (abs(pPDG) < 2000040 && abs(pPDG) > 1000001)) // FIXME This is nearly MC::isSUSY(pPDG), but slightly stricter.
+        MC::isSUSY(pPDG))
       mother = MotherParent;
   }
 
@@ -604,7 +604,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     if (MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
         MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
         abs(pPDG) == 9900024 || abs(pPDG) == 9900012 || abs(pPDG) == 9900014 || abs(pPDG) == 9900016 ||  // Left-right symmetric model WBoson || Right-handed NU_E || Right-handed NU_MU || Right-handed NU_TAU
-        (abs(pPDG) < 2000040 && abs(pPDG) > 1000001)) { // FIXME This is nearly MC::isSUSY(pPDG), but slightly stricter.
+        MC::isSUSY(pPDG)) {
       if (info) info->setMotherProperties(mother);
     }
   }
@@ -1278,7 +1278,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
     if (std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
         MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) ||  // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
         std::abs(pPDG) == 9900024 || std::abs(pPDG) == 9900012 || std::abs(pPDG) == 9900014 || std::abs(pPDG) == 9900016 || // Left-right symmetric model WBoson || Right-handed NU_E || Right-handed NU_MU || Right-handed NU_TAU
-        (std::abs(pPDG) < 2000040 && std::abs(pPDG) > 1000001)) { // FIXME This is nearly MC::isSUSY(pPDG), but slightly stricter.
+        MC::isSUSY(pPDG)) {
       mother = MotherParent;
       if (info) info->setMotherProperties(mother);
     }
