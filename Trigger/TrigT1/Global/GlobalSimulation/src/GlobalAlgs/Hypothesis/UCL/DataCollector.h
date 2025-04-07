@@ -8,6 +8,7 @@
 #include "AlgoDataTypes.h"
 #include "GenericTob.h"
 #include "eEmSortSelectCountContainerPortsOut.h"
+#include "eTauSortSelectCountPortsOut.h"
 #include <ostream>
 #include <map>
 #include <vector>
@@ -40,11 +41,21 @@ namespace GlobalSim {
       m_eEmTobContainers[label] = val;
     }
 
+    void collect(const std::string& label,  const std::vector<eTauTobPtr>& val) {
+      m_eTauTobContainers[label] = val;
+    }
+
   
      void collect(const std::string& label,
 		  const std::vector<std::vector<eEmTobPtr>>& val) {
       m_vec_eEmTobContainers[label] = val;
     }
+
+    void collect(const std::string& label,
+		 const std::vector<std::vector<eTauTobPtr>>& val) {
+      m_vec_eTauTobContainers[label] = val;
+    }
+
 
     void collect(const std::string& label,
 		 const std::vector<std::vector<GenTobPtr>>& val) {
@@ -57,6 +68,10 @@ namespace GlobalSim {
     std::map<std::string, std::vector<eEmTobPtr>> m_eEmTobContainers;
     std::map<std::string,
 	     std::vector<std::vector<eEmTobPtr>>> m_vec_eEmTobContainers;
+
+    std::map<std::string, std::vector<eTauTobPtr>> m_eTauTobContainers;
+    std::map<std::string,
+	     std::vector<std::vector<eTauTobPtr>>> m_vec_eTauTobContainers;
 
 
     std::map<std::string, std::vector<std::vector<GenTobPtr>>>

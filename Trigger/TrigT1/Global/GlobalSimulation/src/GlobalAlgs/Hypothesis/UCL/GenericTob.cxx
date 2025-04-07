@@ -37,6 +37,34 @@ namespace GlobalSim {
 
   }
 
+  GenericTob::GenericTob(const eTauTobPtr& in_tob) {
+    
+    {
+      const auto& in = in_tob->Et_bits();
+      auto sz = in.size();
+      for (auto i = 0U; i != sz; ++i) {m_Et_bits[i] = in[i];}
+    }
+
+    
+    {
+      const auto& in = in_tob->Eta_bits();
+      
+      // vhdl etaL to_signed(unsigned(-100 + in, GenericEtaBitWidth)
+      int val = (-0x64 + bitSetToInt(in));
+
+      bool neg{val < 0};
+      m_Eta_bits = std::abs(val);
+      if (neg) {m_Eta_bits = m_Eta_bits.flip().to_ulong()+1;}
+    }
+
+    {
+      const auto& in = in_tob->Phi_bits();
+      m_Phi_bits = 2*(bitSetToInt(in)+2);
+    }
+
+  }
+
+
   GenericTob::GenericTob(const std::string& bit_string) {
     if(bit_string.size() != GenericTobWidth) {
       std::stringstream ss;
