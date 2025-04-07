@@ -1,18 +1,18 @@
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "EMBremCollectionBuilder.h"
 
 #include "AthenaKernel/errorcheck.h"
-#include "TrkTrack/LinkToTrack.h"
+#include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
 #include "TrkTrack/Track.h"
-#include "TrkTrackLink/ITrackLink.h"
 #include "TrkTrackSummary/TrackSummary.h"
 
-#include "TrkMaterialOnTrack/EstimatedBremOnTrack.h"
-#include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
+#include "egammaUtils/egammaCopyTrackParticleInfo.h"
+
 #include "xAODEgamma/EgammaxAODHelpers.h"
+#include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleAuxContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTruth/TruthParticle.h"
@@ -21,22 +21,9 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
-// std includes
 #include <algorithm>
 #include <memory>
 
-using xAOD::EgammaHelpers::summaryValueInt;
-
-namespace {
-  void copySummaryValue(
-    const xAOD::TrackParticle &src,
-    xAOD::TrackParticle &dest,
-    const xAOD::SummaryType &information
-  ) {
-    uint8_t value = summaryValueInt(src, information, 0);
-    dest.setSummaryValue(value, information);
-  }
-}
 
 EMBremCollectionBuilder::EMBremCollectionBuilder(const std::string& name,
                                                  ISvcLocator* pSvcLocator)
@@ -118,8 +105,10 @@ EMBremCollectionBuilder::execute(const EventContext& ctx) const
   for (const xAOD::TrackParticle* trackParticle : *selectedTrackParticles) {
     ATH_CHECK(trackParticle->trackLink().isValid());
     const Trk::Track* trktrack = trackParticle->track();
-    int nSiliconHits_trk = summaryValueInt(*trackParticle, xAOD::numberOfSCTHits, 0);
-    nSiliconHits_trk += summaryValueInt(*trackParticle, xAOD::numberOfPixelHits, 0);
+    int nSiliconHits_trk = xAOD::EgammaHelpers::summaryValueInt(
+        *trackParticle, xAOD::numberOfSCTHits, 0);
+    nSiliconHits_trk += xAOD::EgammaHelpers::summaryValueInt(
+        *trackParticle, xAOD::numberOfPixelHits, 0);
     if (nSiliconHits_trk >= m_MinNoSiHits) {
       siliconTrkTracks.push_back(trackParticle);
     } else {
@@ -134,13 +123,15 @@ EMBremCollectionBuilder::execute(const EventContext& ctx) const
   refitted.reserve(siliconTrkTracks.size());
   std::vector<TrackWithIndex> failedfit; // refit failure
 
-  // Do the GSF refit. Note that the output is  two collections
-  // (for fit success or failure) of TrackWithIndex.
-  // TrackWithIndex means a Trk::::Track
-  // and the index to the original TrackParticle Collection .
+  // Do the GSF refit.
   // Note that altough the input is a xAOD::TrackParticle
   // what we really refit is the corresponding Trk::Track.
-  ATH_CHECK(refitTracks(ctx, siliconTrkTracks, refitted, failedfit));
+  // The output is  two collections
+  // one for fit success or failure.
+  // TrackWithIndex means the newly created Trk::::Track
+  // and the index of the xAOD::TrackParticle  to the
+  // original TrackParticle Collection.
+ ATH_CHECK(refitTracks(ctx, siliconTrkTracks, refitted, failedfit));
 
   const size_t refittedCount = refitted.size();
   const size_t failedCount = failedfit.size();
@@ -273,8 +264,13 @@ EMBremCollectionBuilder::createNew(
   }
   static const SG::AuxElement::Accessor<float> QoverPLM("QoverPLM");
   QoverPLM(*aParticle) = QoverPLast;
-
-  copyOverInfo(*aParticle, *original, isRefitted);
+  egammaCopyTrackParticleInfo::ToCopy toCopy{.isRefitted = isRefitted,
+                                             .doTruth = m_doTruth,
+                                             .doPix = m_doPix,
+                                             .doSCT = m_doSCT,
+                                             .doTRT = m_doTRT,
+                                             .doHGTD = m_doHGTD};
+  egammaCopyTrackParticleInfo::copy(*aParticle, *original, toCopy);
   // Slim the Trk::Track, store to the new
   // Trk::Track collection and make the Track
   // Particle point to it
@@ -287,87 +283,3 @@ EMBremCollectionBuilder::createNew(
   aParticle->setTrackLink(trackLink);
   return StatusCode::SUCCESS;
 }
-
-void
-EMBremCollectionBuilder::copyOverInfo(xAOD::TrackParticle& created,
-                                      const xAOD::TrackParticle& original,
-                                      bool isRefitted) const
-{
-  // Add Truth decorations. Copy from the original.
-  if (m_doTruth) {
-    static const SG::AuxElement::Accessor<
-      ElementLink<xAOD::TruthParticleContainer>>
-      tPL("truthParticleLink");
-    if (tPL.isAvailable(original)) {
-      tPL(created) = tPL(original);
-    }
-    static const SG::AuxElement::Accessor<float> tMP("truthMatchProbability");
-    if (tMP.isAvailable(original)) {
-      tMP(created) = tMP(original);
-    }
-    static const SG::AuxElement::Accessor<int> tT("truthType");
-    if (tT.isAvailable(original)) {
-      tT(created) = tT(original);
-    }
-    static const SG::AuxElement::Accessor<int> tO("truthOrigin");
-    if (tO.isAvailable(original)) {
-      tO(created) = tO(original);
-    }
-  }
-
-  copySummaryValue(original, created, xAOD::numberOfPixelSplitHits);
-  copySummaryValue(original, created, xAOD::numberOfInnermostPixelLayerSplitHits);
-  copySummaryValue(original, created, xAOD::numberOfNextToInnermostPixelLayerSplitHits);
-  copySummaryValue(original, created, xAOD::numberOfPixelSharedHits);
-  copySummaryValue(original, created, xAOD::numberOfInnermostPixelLayerSharedHits);
-  copySummaryValue(original, created, xAOD::numberOfNextToInnermostPixelLayerSharedHits);
-  copySummaryValue(original, created, xAOD::numberOfSCTSharedHits);
-  copySummaryValue(original, created, xAOD::numberOfTRTSharedHits);
-
-  if (m_doHGTD) {
-    created.setHasValidTime(original.hasValidTime());
-    created.setTime(original.time());
-  }
-
-  if (isRefitted) {
-    if (m_doPix) {
-      // copy over dead sensors
-      copySummaryValue(original, created, xAOD::numberOfPixelDeadSensors);
-
-      // Figure the new number of holes
-      uint8_t nPixHolesRefitted =
-        - summaryValueInt(created, xAOD::numberOfPixelHits, -1)
-        - summaryValueInt(created, xAOD::numberOfPixelOutliers, -1)
-        + summaryValueInt(original, xAOD::numberOfPixelHits, -1)
-        + summaryValueInt(original, xAOD::numberOfPixelOutliers, -1)
-        + summaryValueInt(original, xAOD::numberOfPixelHoles, -1);
-
-      created.setSummaryValue(nPixHolesRefitted, xAOD::numberOfPixelHoles);
-    }
-    if (m_doSCT) {
-      // Copy over dead and double holes
-      copySummaryValue(original, created, xAOD::numberOfSCTDeadSensors);
-      copySummaryValue(original, created, xAOD::numberOfSCTDoubleHoles);
-
-      uint8_t nSCTHolesRefitted =
-        - summaryValueInt(created, xAOD::numberOfSCTHits, -1)
-        - summaryValueInt(created, xAOD::numberOfSCTOutliers, -1)
-        + summaryValueInt(original, xAOD::numberOfSCTHits, -1)
-        + summaryValueInt(original, xAOD::numberOfSCTHoles, -1)
-        + summaryValueInt(original, xAOD::numberOfSCTOutliers, -1);
-
-      created.setSummaryValue(nSCTHolesRefitted, xAOD::numberOfSCTHoles);
-    }
-    if (m_doTRT) {
-      uint8_t nTRTHolesRefitted =
-        - summaryValueInt(created, xAOD::numberOfTRTHits, -1)
-        - summaryValueInt(created, xAOD::numberOfTRTOutliers, -1)
-        + summaryValueInt(original, xAOD::numberOfTRTHits, -1)
-        + summaryValueInt(original, xAOD::numberOfTRTHoles, -1)
-        + summaryValueInt(original, xAOD::numberOfTRTOutliers, -1);
-
-      created.setSummaryValue(nTRTHolesRefitted, xAOD::numberOfTRTHoles);
-    }
-  }
-}
-
