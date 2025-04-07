@@ -78,4 +78,12 @@ namespace asg
     setPropertyFromString (name, std::move (valueString));
     return StatusCode::SUCCESS;
   }
+
+
+
+  template<typename T> StatusCode AsgComponentConfig ::
+  setProperty (const std::string& name, const Gaudi::Property<T>& value)
+  {
+    return setProperty (name, value.value());
+  }
 }
