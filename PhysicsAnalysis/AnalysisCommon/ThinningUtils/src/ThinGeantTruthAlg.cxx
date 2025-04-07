@@ -52,6 +52,19 @@ ThinGeantTruthAlg::initialize()
   ATH_CHECK(m_photonsKey.initialize(m_keepEGamma));
   ATH_CHECK(m_muonsKey.initialize(m_keepMuons));
   ATH_CHECK(m_egammaTruthKey.initialize(m_keepEGamma));
+  if (m_keepEGamma) {
+    m_readDecorKeys.emplace_back(m_electronsKey, m_truthLinkDecor);
+    m_readDecorKeys.emplace_back(m_photonsKey, m_truthLinkDecor);
+    if (!m_fwdElectronsKey.empty()){
+      m_readDecorKeys.emplace_back(m_fwdElectronsKey, m_truthLinkDecor);
+    }
+  }
+  if (!m_muonsKey.empty()){
+    m_readDecorKeys.emplace_back(m_muonsKey, m_truthLinkDecor);
+  }
+  
+  ATH_CHECK(m_readDecorKeys.initialize());
+
 
   return StatusCode::SUCCESS;
 }
@@ -101,8 +114,7 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
       ATH_MSG_WARNING("No muon container with key " << m_muonsKey.key() << " found.");
     }
     for (const xAOD::Muon* muon : *muons) {
-      const xAOD::TruthParticle* truthMuon =
-        xAOD::TruthHelpers::getTruthParticle(*muon);
+      const xAOD::TruthParticle* truthMuon = xAOD::TruthHelpers::getTruthParticle(*muon);
       if (truthMuon) {
         recoParticleTruthIndices.push_back(truthMuon->index());
       }
