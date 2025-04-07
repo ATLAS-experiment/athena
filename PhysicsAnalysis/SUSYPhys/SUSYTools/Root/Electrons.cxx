@@ -194,15 +194,17 @@ StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::S
     }
   }
 
-  std::pair<xAOD::ElectronContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*electrons);
-  copy = shallowcopy.first;
-  copyaux = shallowcopy.second;
-  bool setLinks = xAOD::setOriginalObjectLink(*electrons, *copy);
-  if (!setLinks) {
-    ATH_MSG_WARNING("Failed to set original object links on " << elekey);
+  if (copy==nullptr) { // empty container provided
+    std::pair<xAOD::ElectronContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*electrons);
+    copy = shallowcopy.first;
+    copyaux = shallowcopy.second;
+    bool setLinks = xAOD::setOriginalObjectLink(*electrons, *copy);
+    if (!setLinks) {
+      ATH_MSG_WARNING("Failed to set original object links on " << elekey);
+    }
   } else { // use the user-supplied collection instead
     ATH_MSG_DEBUG("Not retrieving electron collection, using existing one provided by user");
-    electrons=copy;
+    electrons=copy; // this does nothing
   }
 
   for (const auto electron : *copy) {
@@ -620,7 +622,7 @@ double SUSYObjDef_xAOD::GetEleTriggerEfficiency(const xAOD::Electron& el, const 
 
 
 
-  float SUSYObjDef_xAOD::GetTotalElectronSF(const xAOD::ElectronContainer& electrons, const bool recoSF, const bool idSF, const bool triggerSF, const bool isoSF, const std::string& trigExpr, const bool ecidsSF, const bool cidSF) {
+float SUSYObjDef_xAOD::GetTotalElectronSF(const xAOD::ElectronContainer& electrons, const bool recoSF, const bool idSF, const bool triggerSF, const bool isoSF, const std::string& trigExpr, const bool ecidsSF, const bool cidSF) {
   float sf(1.);
 
   for (const xAOD::Electron* electron : electrons) {

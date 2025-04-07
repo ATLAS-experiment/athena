@@ -161,8 +161,8 @@ StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAu
 
   const xAOD::MuonContainer* muons = nullptr;
   if (bool(m_muLRT) && evtStore()->contains<xAOD::MuonContainer>(lrtmuonkey)){
-      ATH_MSG_DEBUG("Using container: " << m_outMuonLocation.key());
-      ATH_CHECK( evtStore()->retrieve(muons, m_outMuonLocation.key())); 
+    ATH_MSG_DEBUG("Using container: " << m_outMuonLocation.key());
+    ATH_CHECK( evtStore()->retrieve(muons, m_outMuonLocation.key())); 
   }
   else { 
     if (copy==nullptr) { // empty container provided
@@ -178,15 +178,17 @@ StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAu
     }
   }
 
-  std::pair<xAOD::MuonContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*muons);
-  copy = shallowcopy.first;
-  copyaux = shallowcopy.second;
-  bool setLinks = xAOD::setOriginalObjectLink(*muons, *copy);
-  if (!setLinks) {
-    ATH_MSG_WARNING("Failed to set original object links on " << muonkey);
+  if (copy==nullptr) { // empty container provided
+    std::pair<xAOD::MuonContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*muons);
+    copy = shallowcopy.first;
+    copyaux = shallowcopy.second;
+    bool setLinks = xAOD::setOriginalObjectLink(*muons, *copy);
+    if (!setLinks) {
+      ATH_MSG_WARNING("Failed to set original object links on " << muonkey);
+    }
   } else { // use the user-supplied collection instead 
-      ATH_MSG_DEBUG("Not retrieving muon collection, using existing one provided by user");
-      muons=copy;
+    ATH_MSG_DEBUG("Not retrieving muon collection, using existing one provided by user");
+    muons=copy; // this does nothing
   }
 
   for (const auto muon : *copy) {
