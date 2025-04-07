@@ -208,7 +208,7 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     category = "Trigger.ActsTracking"
     defaults = defaultITkTrigTrackingFlags
   else:                                       
-    log.error("Acts not supported yet")       
+    log.error("Unsupported reconstruction mode %s", mode)       
                                             
      
   class categoryGeneratorWrapper():
