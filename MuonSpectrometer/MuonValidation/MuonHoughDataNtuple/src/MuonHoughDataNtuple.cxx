@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHoughDataNtuple.h"
@@ -8,8 +8,8 @@
 #include <unordered_set>
 
 struct HitTruthMatching{
-    HitTruthMatching(const xAOD::TruthParticle* _truthPart):
-      truthPart{_truthPart}{
+    HitTruthMatching(const xAOD::TruthParticle* truthPart_):
+      truthPart{truthPart_}{
         for (const std::string hitColl : {"truthMdtHits", "truthRpcHits", "truthTgcHits", "truthCscHits"}) {
             const SG::AuxElement::ConstAccessor<std::vector<long long unsigned>> acc{hitColl};
             if (!acc.isAvailable(*truthPart)) continue;
