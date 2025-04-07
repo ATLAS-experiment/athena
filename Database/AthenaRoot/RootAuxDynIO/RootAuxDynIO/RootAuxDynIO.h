@@ -21,10 +21,11 @@ class TClass;
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
    namespace ROOT { class RFieldBase; }
+   namespace ROOT { class RNTupleReader; }
 #else
    namespace ROOT::Experimental { class RFieldBase; }
+   namespace ROOT::Experimental { class RNTupleReader; }
 #endif
-namespace ROOT::Experimental { class RNTupleReader; }
 
 namespace SG { class IAuxStoreIO;  class auxid_set_t; }
 
@@ -33,10 +34,11 @@ namespace RootAuxDynIO
 {
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
    using ROOT::RFieldBase;
+   using ROOT::RNTupleReader;
 #else
    using ROOT::Experimental::RFieldBase;
-#endif
    using ROOT::Experimental::RNTupleReader;
+#endif
 
    class IRootAuxDynReader;
    class IRootAuxDynWriter;

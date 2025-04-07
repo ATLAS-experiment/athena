@@ -22,10 +22,11 @@
 #include <unordered_map>
 
 // Forward declarations
-namespace ROOT { namespace Experimental {
-   class RNTupleReader;
-} }
-
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+namespace ROOT { class RNTupleReader; }
+#else
+namespace ROOT::Experimental { class RNTupleReader; }
+#endif
 
 class TFile;
 class TTree;
@@ -42,8 +43,11 @@ namespace RootStorageSvc {
  * POOL namespace declaration
  */
 namespace pool  {  
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+   using ROOT::RNTupleReader;
+#else
    using ROOT::Experimental::RNTupleReader;
-
+#endif
    class RootTreeContainer;
    
   /** @class RootDatabase RootDatabase.h src/RootDatabase.h

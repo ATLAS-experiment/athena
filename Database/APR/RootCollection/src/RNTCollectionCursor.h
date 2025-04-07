@@ -22,7 +22,7 @@
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
    namespace ROOT { class REntry; }
-   namespace ROOT::Experimental { class RNTupleReader; }
+   namespace ROOT { class RNTupleReader; }
 #else
 namespace ROOT::Experimental {
    class RNTupleReader;
@@ -33,11 +33,12 @@ namespace ROOT::Experimental {
 namespace pool {
    namespace RootCollection {
 
-      using ROOT::Experimental::RNTupleReader;
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
       using ROOT::REntry;
+      using ROOT::RNTupleReader;
 #else
       using ROOT::Experimental::REntry;
+      using ROOT::Experimental::RNTupleReader;
 #endif
 
       /** 

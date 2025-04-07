@@ -15,7 +15,7 @@
 #include <optional>
 #include <string>
 
-namespace ROOT::Experimental { class RNTupleReader; }
+namespace ROOT{ class RNTupleReader; }
 
 class TClass;
 
@@ -23,10 +23,11 @@ namespace RootAuxDynIO
 {
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
    using ROOT::RNTupleView;
+   using ROOT::RNTupleReader;
 #else
    using ROOT::Experimental::RNTupleView;
-#endif
    using ROOT::Experimental::RNTupleReader;
+#endif
 
    class RNTupleAuxDynReader : public AthMessaging, public IRootAuxDynReader
    {

@@ -16,14 +16,15 @@
 
 
 namespace RootStorageSvc {
-using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
   using REntry = ROOT::REntry;
+  using RNTupleWriter = ROOT::RNTupleWriter;
   using RNTupleWriteOptions = ROOT::RNTupleWriteOptions;
   using RNTupleModel = ROOT::RNTupleModel;
   using RFieldBase = ROOT::RFieldBase;
 #else
   using REntry = ROOT::Experimental::REntry;
+  using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
   using RNTupleWriteOptions = ROOT::Experimental::RNTupleWriteOptions;
   using RNTupleModel = ROOT::Experimental::RNTupleModel;
   using RFieldBase = ROOT::Experimental::RFieldBase;
