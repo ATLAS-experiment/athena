@@ -1,13 +1,14 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 namespace DerivationFramework { namespace TriggerMatchingUtils {
 
-  template <typename T>
-    bool insertIntoSortedVector(std::vector<T>& vec, const T& ele)
+  template <typename T, typename PROJ>
+    bool insertIntoSortedVector(std::vector<T>& vec, const T& ele,
+                                PROJ proj)
     {
-      auto itr = std::lower_bound(vec.begin(), vec.end(), ele);
+      auto itr = std::ranges::lower_bound(vec, proj(ele), {}, proj);
       // if no lower bound is found or the found element doesn't equal ele then
       // insert ele at this point
       if (itr == vec.end() || *itr != ele) {
@@ -18,18 +19,20 @@ namespace DerivationFramework { namespace TriggerMatchingUtils {
         return false;
     }
 
-  template <typename T>
-    std::vector<typename T::value_type> sorted(T begin, T end)
+  template <typename R, typename PROJ>
+    std::vector<typename R::value_type> sorted(const R& r, PROJ proj)
     {
-      std::vector<typename T::value_type> output(begin, end);
-      std::sort(output.begin(), output.end() );
+      std::vector<typename R::value_type> output(std::begin(r), std::end(r));
+      std::ranges::sort(output, {}, proj);
       return output;
     }
   
 
-  template <typename T>
+  template <typename T, typename INNERPROJ, typename OUTERPROJ>
     std::vector<std::vector<T>> getAllDistinctCombinations(
-        std::vector<RangedItr<typename std::vector<T>::const_iterator>>& inputs)
+        std::vector<RangedItr<typename std::vector<T>::const_iterator>>& inputs,
+        INNERPROJ innerproj,
+        OUTERPROJ outerproj)
   {
     // This is where the output will go
     std::vector<std::vector<T>> output;
@@ -84,9 +87,9 @@ namespace DerivationFramework { namespace TriggerMatchingUtils {
           if (itr == inputs.end() ) {
             // If we're at the end then this is a complete combination, add it
             // to the output.
-            insertIntoSortedVector(output, sorted(
-                  currentCombination.begin(),
-                  currentCombination.end() ) );
+            insertIntoSortedVector(output,
+                                   sorted(currentCombination, innerproj),
+                                   outerproj);
           }
         } //> end if currentCandidate is in currentCombination
       } //> end else (if inner iterator is exhausted)
