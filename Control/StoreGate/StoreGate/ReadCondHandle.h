@@ -267,6 +267,14 @@ namespace SG {
     return ( m_cc->range(eid, r) );
   }
 
+
+  // helper methods to create a read cond handle from the corresponding key.
+  template <class T>
+  SG::ReadCondHandle<T> makeHandle(const SG::ReadCondHandleKey<T> &key,
+                                   const EventContext& ctx = Gaudi::Hive::currentContext()) {
+     return SG::ReadCondHandle<T>(key, ctx);
+  }
+
 }
 
 #endif
