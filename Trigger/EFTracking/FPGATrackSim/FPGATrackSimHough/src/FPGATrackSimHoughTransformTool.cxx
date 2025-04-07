@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimHoughTransformTool.cxx
@@ -219,14 +219,15 @@ StatusCode FPGATrackSimHoughTransformTool::getRoads(const std::vector<std::share
       //8. Repeat until all the roda in the input list are considered
       /////
       while(!roadListXY.empty()){
-	mergedRoadListXY.push_back(roadListXY[0]);
-	roadListXY.erase(roadListXY.begin());
+	      mergedRoadListXY.push_back(roadListXY[0]);
+	      roadListXY.erase(roadListXY.begin());
         for(size_t i = 0; i < mergedRoadListXY.size(); i++){
-          for(size_t j = 0; j < roadListXY.size(); j++){
-	    if(std::abs(static_cast<int>(roadListXY[j].first) - static_cast<int>(mergedRoadListXY[i].first)) < 2 && 
-		std::abs(static_cast<int>(roadListXY[j].second) - static_cast<int>(mergedRoadListXY[i].second)) < 2){
-	      mergedRoadListXY.push_back(roadListXY[j]);
-	      roadListXY.erase(roadListXY.begin() + j);
+          for(int j = 0; j < std::ssize(roadListXY); j++){
+	          if(std::abs(static_cast<int>(roadListXY[j].first) - static_cast<int>(mergedRoadListXY[i].first)) < 2 && 
+		         std::abs(static_cast<int>(roadListXY[j].second) - static_cast<int>(mergedRoadListXY[i].second)) < 2){
+	            mergedRoadListXY.push_back(roadListXY[j]);
+	            roadListXY.erase(roadListXY.begin() + j);
+	            //note: on first iteration, j=0 so j-- will produce negative number
               j--;
             }
           }
@@ -265,28 +266,28 @@ FPGATrackSimHoughTransformTool::Image FPGATrackSimHoughTransformTool::createLaye
       //FIXME at the moment, only the barrel is considered. And as the r is mostly the same for two strip layers, those two layers share the LUTs of acceptable input phi values. Here, LUT_layer is used to switch the list of LUTs 
       int LUT_layer = -1;
       switch (hit->getLayer()){
-	case 0 :
-	  LUT_layer = 0;
-	  break;
-	case 1 :
-	case 2 :
-	  LUT_layer = 1;
-	  break;
-	case 3 :
-	case 4 :
-	  LUT_layer = 2;
-	  break;
-	case 5 :
-	case 6 :
-	  LUT_layer = 3;
-	  break;
-	case 7 :
-	case 8 :
-	  LUT_layer = 4;
-	  break;
-	default :
-	  ATH_MSG_FATAL("Debug: something wrong! layer: " << hit->getLayer());
-	  break;
+        case 0 :
+          LUT_layer = 0;
+          break;
+        case 1 :
+        case 2 :
+          LUT_layer = 1;
+          break;
+        case 3 :
+        case 4 :
+          LUT_layer = 2;
+          break;
+        case 5 :
+        case 6 :
+          LUT_layer = 3;
+          break;
+        case 7 :
+        case 8 :
+          LUT_layer = 4;
+          break;
+        default :
+          ATH_MSG_FATAL("Debug: something wrong! layer: " << hit->getLayer());
+          break;
       }
       int phi_L_bin = m_h_rfix.at(LUT_layer)->FindBin(hit->getGPhi());
       int MSB = (phi_L_bin >> (m_bitlength -6));
@@ -643,33 +644,33 @@ std::vector<std::vector<int>> FPGATrackSimHoughTransformTool::lineGenLay(const s
                 unsigned end_qApt_bins_first_sector = m_qApt_bins_first_sector + static_cast <unsigned>(pq * m_qAptBins_bit / m_pipes_qApt);           
               
                 for (unsigned n = start_qApt_bins_first_sector; n < end_qApt_bins_first_sector; n++) {
-                    //formula for first sector
-                    int64_t d2 = m_bitwise_phi0_conv * static_cast<int>(bins_y_new[n]) / m_DBinPhi0_bit_int;
-                    double d_d2 = m_bitwise_phi0_conv * static_cast<int>(bins_y_new[n]) / m_DBinPhi0_bit_int;
+                  //formula for first sector
+                  int64_t d2 = m_bitwise_phi0_conv * static_cast<int>(bins_y_new[n]) / m_DBinPhi0_bit_int;
+                  //why repeat this calculation, which results in an int which will be cast to a double?
+                  double d_d2 =m_bitwise_phi0_conv * static_cast<int>(bins_y_new[n]) / m_DBinPhi0_bit_int;
 
-                    phi0_ht_sector = phi_conv_offseted + r_bit * d2; 
-                    phi0_ht_array[n - start_qApt_bins_first_sector] = phi0_ht_sector;
-                    d_phi0_ht_sector = d_phi_conv_offseted + r_bit * d_d2;
-                    d_phi0_ht_array[n - start_qApt_bins_first_sector] = d_phi0_ht_sector;
+                  phi0_ht_sector = phi_conv_offseted + r_bit * d2; 
+                  phi0_ht_array[n - start_qApt_bins_first_sector] = phi0_ht_sector;
+                  d_phi0_ht_sector = d_phi_conv_offseted + r_bit * d_d2;
+                  d_phi0_ht_array[n - start_qApt_bins_first_sector] = d_phi0_ht_sector;
 
-                    if (phi0_ht_sector >= 0) {
-			phi0_ht_pre = phi0_ht_sector / m_bitwise_qApt_conv;
-                    } else {
-			phi0_ht_pre = -1 + phi0_ht_sector / m_bitwise_qApt_conv;
-                    }
-                    
-                    if (phi0_ht_sector >= 0 && phi0_ht_pre >= 0 && (phi0_ht_sector >= m_bitwise_qApt_conv - m_imageSize_x)) {
-                        phi0_ht = phi0_ht_pre;
-                    }
-                    if (phi0_ht_sector < 0 && phi0_ht_pre >= 0 && (-1 + phi0_ht_sector >= m_bitwise_qApt_conv - m_imageSize_x)) {
-                        phi0_ht = phi0_ht_pre;
-                    }
+                  if (phi0_ht_sector >= 0) {
+                    phi0_ht_pre = phi0_ht_sector / m_bitwise_qApt_conv;
+                  } else {
+                    phi0_ht_pre = -1 + phi0_ht_sector / m_bitwise_qApt_conv;
+                  }
+                  
+                  if (phi0_ht_sector >= 0 && phi0_ht_pre >= 0 && (phi0_ht_sector >= m_bitwise_qApt_conv - m_imageSize_x)) {
+                      phi0_ht = phi0_ht_pre;
+                  }
+                  if (phi0_ht_sector < 0 && phi0_ht_pre >= 0 && (-1 + phi0_ht_sector >= m_bitwise_qApt_conv - m_imageSize_x)) {
+                      phi0_ht = phi0_ht_pre;
+                  }
 
-                    if (phi0_ht <= m_imageSize_x - 1 && phi0_ht >= 0){
-                        hitLineQAPtPhi0[n] = {static_cast<int>(n), static_cast<int>(phi0_ht)};
-                    }
-		    phi0_ht = -1;
-		    phi0_ht_pre = -1;                
+                  if (phi0_ht <= m_imageSize_x - 1 && phi0_ht >= 0){
+                      hitLineQAPtPhi0[n] = {static_cast<int>(n), static_cast<int>(phi0_ht)};
+                  }
+                  phi0_ht = -1;
                 }
                 if (m_qApt_sectors > 1) { //formula after first sector
                     for (int ts = 0; ts < m_qApt_sectors - 1; ts++) {   
