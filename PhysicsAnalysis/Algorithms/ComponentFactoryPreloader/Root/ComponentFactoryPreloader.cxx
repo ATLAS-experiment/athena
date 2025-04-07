@@ -94,6 +94,7 @@
 #include <EventSelectionAlgorithms/TransverseMassSelectorAlg.h>
 #include <FakeBkgTools/AsymptMatrixTool.h>
 #include <FTagAnalysisAlgorithms/BTaggingEfficiencyAlg.h>
+#include <FTagAnalysisAlgorithms/BTaggingTriggerEfficiencyAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingInformationDecoratorAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingScoresAlg.h>
 #include <FTagAnalysisAlgorithms/XbbEfficiencyAlg.h>
@@ -234,6 +235,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgxAODNTupleMakerAlg>("CP::AsgxAODNTupleMakerAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::BJetCalibrationAlg >("CP::BJetCalibrationAlg "));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::BTaggingEfficiencyAlg>("CP::BTaggingEfficiencyAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::BTaggingTriggerEfficiencyAlg>("CP::BTaggingTriggerEfficiencyAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::BTaggingInformationDecoratorAlg>("CP::BTaggingInformationDecoratorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::BTaggingScoresAlg>("CP::BTaggingScoresAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::BootstrapGeneratorAlg>("CP::BootstrapGeneratorAlg"));
