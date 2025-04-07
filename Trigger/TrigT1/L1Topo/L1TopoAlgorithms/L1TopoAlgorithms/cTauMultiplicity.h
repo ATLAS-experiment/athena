@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //  cTauMultiplicity.h
 //  TopoCore
@@ -26,7 +26,7 @@ namespace TCS {
    class cTauMultiplicity : public CountingAlg {
    public:
       cTauMultiplicity(const std::string & name);
-      virtual ~cTauMultiplicity();
+      virtual ~cTauMultiplicity() = default;
 
       virtual StatusCode initialize() override;
 
@@ -60,17 +60,10 @@ namespace TCS {
      std::vector<std::string> m_histcTauEt;
      std::vector<std::string> m_histcTauPhiEta;
      std::vector<std::string> m_histcTauEtEta;
-     std::vector<std::string> m_histcTauPartialIsoLoose;
-     std::vector<std::string> m_histcTauPartialIsoMedium;
-     std::vector<std::string> m_histcTauPartialIsoMedium12;
-     std::vector<std::string> m_histcTauPartialIsoMedium20;
-     std::vector<std::string> m_histcTauPartialIsoMedium30;
-     std::vector<std::string> m_histcTauPartialIsoMedium35;
-     std::vector<std::string> m_histcTauPartialIsoTight;
+     std::vector<std::string> m_histcTauIsoFraction;
      std::vector<std::string> m_histcTauIsoMatchedPass;
 
      using WP = TrigConf::Selection::WP;
-
    };
 
 } 
