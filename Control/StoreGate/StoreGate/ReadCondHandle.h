@@ -275,6 +275,45 @@ namespace SG {
      return SG::ReadCondHandle<T>(key, ctx);
   }
 
+  /**
+   * @brief Convenience function to retrieve an object given a @c ReadCondHandleKey.
+   * @param key The key to retrieve.
+   * @param ctx The event context.
+   *
+   * Returns the object.  Returns nullptr if the key is null or if there's an error.
+   */
+  template <class T>
+  const T* get (const ReadCondHandleKey<T>& key,
+                const EventContext& ctx)
+  {
+    if (key.key().empty()) return nullptr;
+    try {
+      ReadCondHandle<T> h (key, ctx);
+      return h.cptr();
+    }
+    catch (SG::ExcNoCondCont&) {
+      return nullptr;
+    }
+  }
+
+
+  /**
+   * @brief Convenience function to retrieve an object given a @c ReadCondHandleKey.
+   * @param ptr Pointer to the retrieved object.
+   * @param key The key to retrieve.
+   *
+   * In case of error, sets @c ptr to nullptr and returns FAILURE. In case of an
+   * empty key, sets @c ptr to nullptr and returns SUCCESS.
+   */
+  template <class T>
+  StatusCode get (const T*& ptr,
+                  const ReadCondHandleKey<T>& key,
+                  const EventContext& ctx)
+  {
+    ptr = get(key, ctx);
+    return (ptr || key.empty()) ? StatusCode::SUCCESS : StatusCode::FAILURE;
+  }
+
 }
 
 #endif
