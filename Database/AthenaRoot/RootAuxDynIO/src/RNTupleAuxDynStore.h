@@ -1,7 +1,7 @@
 // This file is really -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RNTUPLEAUXDYNSTORE_H
@@ -15,9 +15,14 @@
 #include "RootAuxDynStore.h"
 namespace RootAuxDynIO { class RNTupleAuxDynReader; }
 
+#include "RVersion.h"
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+namespace ROOT { class RNTupleReader; }
+using RNTupleReader   = ROOT::RNTupleReader;
+#else
 namespace ROOT::Experimental { class RNTupleReader; }
 using RNTupleReader   = ROOT::Experimental::RNTupleReader;
-
+#endif
 
 class RNTupleAuxDynStore : public RootAuxDynStore
 {

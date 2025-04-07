@@ -24,17 +24,17 @@ class TFile;
 class IFileMgr;
 
 // Import classes from experimental namespace for the time being
-namespace ROOT::Experimental {
-   class RNTupleReader;
-   class RNTupleWriter;
-}
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
 namespace ROOT {
    class RNTupleModel;
+   class RNTupleWriter;
+   class RNTupleReader;
 }
 #else
 namespace ROOT::Experimental {
    class RNTupleModel;
+   class RNTupleWriter;
+   class RNTupleReader;
 }
 #endif
 
@@ -46,8 +46,8 @@ namespace pool {
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
       using RNTupleModel  = ROOT::RNTupleModel;
-      using RNTupleReader = ROOT::Experimental::RNTupleReader;
-      using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
+      using RNTupleReader = ROOT::RNTupleReader;
+      using RNTupleWriter = ROOT::RNTupleWriter;
 #else
       using RNTupleModel  = ROOT::Experimental::RNTupleModel;
       using RNTupleReader = ROOT::Experimental::RNTupleReader;
