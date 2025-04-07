@@ -30,7 +30,7 @@ namespace ftag {
     VariableMule<int,JC> m_ints{-1};
     VariableMule<uint,JC> m_uints{0};
     VariableMule<ulong,JC> m_ulongs{0};
-    VariableMule<char,JC> m_chars{-1};
+    VariableMule<char,JC> m_chars{0};
     VariableMule<IPLV,JC> m_iparticles{{}};
     SG::ReadHandleKey<JC> m_targetJet {this, "targetJet", "", "target jet"};
     SG::ReadHandleKeyArray<JC> m_sourceJets;
