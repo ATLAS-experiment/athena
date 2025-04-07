@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 ///////////////////////////////////////////////////////////////////
@@ -4459,7 +4459,6 @@ Trk::Extrapolator::collectIntersections(
   const Trk::TrackParameters& parm,
   Trk::PropDirection dir,
   Trk::ParticleHypothesis particle,
-  std::vector<const Trk::TrackStateOnSurface*>*& material,
   int destination) const
 {
 
@@ -4473,8 +4472,6 @@ Trk::Extrapolator::collectIntersections(
   cache.m_path = 0.;
   // initialize parameters vector
   cache.m_identifiedParameters = std::make_unique<identifiedParameters_t>();
-  // initialize material collection
-  cache.m_matstates = material;
   // dummy input
   cache.m_currentStatic = nullptr;
   const Trk::TrackingVolume* boundaryVol = nullptr;

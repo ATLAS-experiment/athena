@@ -183,7 +183,6 @@ public:
     const Trk::TrackParameters& parm,
     Trk::PropDirection dir,
     Trk::ParticleHypothesis particle,
-    std::vector<const Trk::TrackStateOnSurface*>*& material,
     int destination = 3) const = 0;
 
   /** Return the TrackingGeometry used by the Extrapolator (forwards information

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 ///////////////////////////////////////////////////////////////////
@@ -225,7 +225,6 @@ public:
     const Trk::TrackParameters& parm,
     Trk::PropDirection dir,
     Trk::ParticleHypothesis particle,
-    std::vector<const Trk::TrackStateOnSurface*>*& material,
     int destination = 3) const override final;
 
   /** Extrapolation to the next active layer with material collection*/
