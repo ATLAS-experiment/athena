@@ -13,6 +13,6 @@ HeavyFlavorBHadronFilter.Request_cQuark=False
 HeavyFlavorBHadronFilter.Request_bQuark=False
 HeavyFlavorBHadronFilter.RequestSpecificPDGID=False
 HeavyFlavorBHadronFilter.RequireTruthJet=False
-HeavyFlavorBHadronFilter.BottomPtMin=0*GeV
+HeavyFlavorBHadronFilter.BottomPtMin=0.
 HeavyFlavorBHadronFilter.BottomEtaMax=4.0
 
