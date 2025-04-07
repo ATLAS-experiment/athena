@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PyAthenaAud.cxx 
@@ -150,55 +150,6 @@ Aud::after(CustomEventTypeRef evt, const std::string& comp,
 	   const StatusCode& sc)
 {
   py_after (evt, comp, sc);
-}
-
-// Obsolete methods
-void 
-Aud::beforeInitialize(INamedInterface* comp)
-{
-  py_before (IAuditor::Initialize, comp->name());
-}
-
-void 
-Aud::afterInitialize(INamedInterface* comp)
-{
-  py_after (IAuditor::Initialize, comp->name(), StatusCode::SUCCESS);
-}
-
-void 
-Aud::beforeReinitialize(INamedInterface* comp)
-{
-  py_before (IAuditor::ReInitialize, comp->name());
-}
-
-void 
-Aud::afterReinitialize(INamedInterface* comp)
-{
-  py_after (IAuditor::ReInitialize, comp->name(), StatusCode::SUCCESS);
-}
-
-void 
-Aud::beforeExecute(INamedInterface* comp)
-{
-  py_before (IAuditor::Execute, comp->name());
-}
-
-void 
-Aud::afterExecute(INamedInterface* comp, const StatusCode& sc)
-{
-  py_after (IAuditor::Execute, comp->name(), sc);
-}
-
-void 
-Aud::beforeFinalize(INamedInterface* comp)
-{
-  py_before (IAuditor::Finalize, comp->name());
-}
-
-void 
-Aud::afterFinalize(INamedInterface* comp)
-{
-  py_after (IAuditor::Finalize, comp->name(), StatusCode::SUCCESS);
 }
 
 /// Audit the start of a standard "event".
