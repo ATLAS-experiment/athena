@@ -13,71 +13,118 @@ from AthenaConfiguration.Enums import MetadataCategory
 from DerivationFrameworkFlavourTag.FtagBaseContent import (
     addCommonAugmentation
 )
+#skimming tool
+def FTAG_PUSkimmingToolCfg(flags):
+    """Configure the skimming tool"""
+    acc = ComponentAccumulator()
+
+
+    jetSelection = '(count(AntiKt4EMPFlowJets.pt > 10.*GeV && abs(AntiKt4EMPFlowJets.eta) < 2.5) >= 1)'
+    FTAG_PUOfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "FTAG_PUOfflineSkimmingTool1",
+                                                                                        expression = jetSelection)
+
+    acc.addPublicTool(FTAG_PUOfflineSkimmingTool, primary=True)
+
+    return(acc)
 
 # Main algorithm config
 def FTAG_PUKernelCfg(flags, name='FTAG_PUKernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for FTAG_PU"""
     acc = ComponentAccumulator()
+    # Skimming
+    skimmingTools = []
+    if not flags.Input.isMC:
+        skimmingTools = [acc.getPrimaryAndMerge(FTAG_PUSkimmingToolCfg(flags)),]
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
-
-    skimmingTools = []
-    thinningTools = []
-    '''
     # Thinning tools...
-    from DerivationFrameworkInDet.InDetToolsConfig import JetTrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg
+    from DerivationFrameworkInDet.InDetToolsConfig import MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, JetTrackParticleThinningCfg
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
 
+    muonSelectionString = "(Muons.pt > 5*GeV)"
+    electronSelectionString = "(Electrons.pt > 5*GeV)"
+    photonSelectionString = "(Photons.pt > 5*GeV)"
+    jetSelectionString = "(AntiKt4EMPFlowByVertexJets.pt > 7.*GeV && AntiKt4EMPFlowByVertexJets.Jvt > 0.4)"
+
+    # Include inner detector tracks associated with muons
+    FTAG_PUMuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(flags,
+        name                    = "FTAG_PUMuonTPThinningTool",
+        StreamName              = kwargs['StreamName'],
+        MuonKey                 = "Muons",
+        SelectionString         = muonSelectionString,
+        InDetTrackParticlesKey  = "InDetTrackParticles"))
     
-    # filter leptons
-    # 2-leptons
-    lepton_skimming_expression = 'count( (Muons.pt > 18*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 18*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 2 && count( (Muons.pt > 25*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 25*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1'
-    # 1-lepton + 1-tau
-    taul_skimming_expression = '(count( TauJets.pt >= 20*GeV && abs(TauJets.eta) < 2.5 && abs(TauJets.charge)==1.0 && (TauJets.nTracks == 1 || TauJets.nTracks == 3) && TauJets.DFTauLoose) >= 1) && (count( (Muons.pt > 25*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 25*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1)'
+    # Include inner detector tracks associated with electrons
+    FTAG_PUElectronTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(flags,
+        name                    = "FTAG_PUElectronTPThinningTool",
+        StreamName              = kwargs['StreamName'],
+        SGKey                   = "Electrons",
+        SelectionString         = electronSelectionString,
+        InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    total_skimming_expression = '('+lepton_skimming_expression+') || ('+taul_skimming_expression+')'
-    
-    FTAG_PULeptonSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name = "FTAG_PULeptonSkimmingTool",
-            expression = total_skimming_expression )
-    acc.addPublicTool(FTAG_PULeptonSkimmingTool)
+    # Include inner detector tracks associated with by-vertex jets
+    FTAG_PUAkt4JetTPThinningTool  = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
+        name                    = "FTAG_PUAkt4JetTPThinningTool",
+        StreamName              = kwargs['StreamName'],
+        JetKey                  = "AntiKt4EMPFlowByVertexJets",
+        SelectionString         = jetSelectionString,
+        InDetTrackParticlesKey  = "InDetTrackParticles"))
 
+
+    # Store EMPFlowByVertexJets with JVT > 0.4. This will result in jets extending up to about 2.6 in |eta|
+    FTAG_PUAkt4PFlowByVertexJetThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
+                                                                                 name             = "FTAG_PUAkt4PFlowByVertexJetThinningTool",
+                                                                                 ContainerName    = "AntiKt4EMPFlowByVertexJets",
+                                                                                 StreamName       = kwargs['StreamName'],
+                                                                                 SelectionString  = jetSelectionString))
 
     # TrackParticles associated with small-R jets
     FTAG_PUAkt4PFlowJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
-        name            = "FTAG_PUAkt4PFlowJetTPThinningTool",
+        name            = "FTAG2Akt4PFlowJetTPThinningTool",
         StreamName      = kwargs['StreamName'],
         JetKey   = "AntiKt4EMPFlowJets",
         SelectionString = 'AntiKt4EMPFlowJets.pt > 15*GeV',
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    # Include inner detector tracks associated with muons
-    FTAG_PUMuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
-        flags,
-        name                    = "FTAG_PUMuonTPThinningTool",
-        StreamName              = kwargs['StreamName'],
-        MuonKey                 = "Muons",
-        InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    # Include inner detector tracks associated with electrons
-    FTAG_PUElectronTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
-        flags,
-        name                    = "FTAG_PUElectronTPThinningTool",
-        StreamName              = kwargs['StreamName'],
-        SGKey                 = "Electrons",
-        InDetTrackParticlesKey  = "InDetTrackParticles"))
+    FTAG_PUMuonThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
+                                                                        name             = "FTAG_PUMuonThinningTool",
+                                                                        ContainerName    = "Muons",
+                                                                        StreamName       = kwargs['StreamName'],
+                                                                        SelectionString  = muonSelectionString))
+
+
+    FTAG_PUElectronThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
+                                                                            name             = "FTAG_PUElectronThinningTool",
+                                                                            ContainerName    = "Electrons",
+                                                                            StreamName       = kwargs['StreamName'],
+                                                                            SelectionString  = electronSelectionString))
+
+
+    FTAG_PUPhotonThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
+                                                                        name             = "FTAG_PUPhotonThinningTool",
+                                                                        ContainerName    = "Photons",
+                                                                        StreamName       = kwargs['StreamName'],
+                                                                        SelectionString  = photonSelectionString))
+
+
+    # Extra jet content:
+    acc.merge(FTAG_PUExtraContentCfg(flags))
 
     # Finally the kernel itself
-    thinningTools = [
-            FTAG_PUMuonTPThinningTool,
-            FTAG_PUElectronTPThinningTool,
-            FTAG_PUAkt4PFlowJetTPThinningTool,
-            ]
-    skimmingTools = [
-            FTAG_PULeptonSkimmingTool,
-            ]
-    '''
+    thinningTools = [FTAG_PUMuonTPThinningTool,
+                     FTAG_PUElectronTPThinningTool,
+                     FTAG_PUAkt4JetTPThinningTool,
+                     FTAG_PUAkt4PFlowByVertexJetThinningTool,
+                     FTAG_PUAkt4PFlowJetTPThinningTool,
+                     FTAG_PUMuonThinningTool,
+                     FTAG_PUElectronThinningTool,
+                     FTAG_PUPhotonThinningTool,
+                     ]
+    
+
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, SkimmingTools = skimmingTools, ThinningTools = thinningTools))       
     
@@ -118,9 +165,10 @@ def FTAG_PUCfg(flags):
                                             ]
     #FtagBaseContent.add_baseline_slimming_smartcollections(FTAG_PUSlimmingHelper)
     
-    FTAG_PUSlimmingHelper.AllVariables = ["EventInfo",
-                                        "PrimaryVertices",
-                                        "InDetTrackParticles",
+    FTAG_PUSlimmingHelper.AllVariables = ["Electrons", "Photons", "Muons",
+                                          "EventInfo",
+                                          "PrimaryVertices",
+                                          "InDetTrackParticles",
                                         ]
     
     # Add truth containers
@@ -131,12 +179,35 @@ def FTAG_PUCfg(flags):
             from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
             acc.merge(HLTJetFTagDecorationCfg(flags))
 
-    # Add ExtraVariables
-    #FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG_PUSlimmingHelper, flags)
    
     # Trigger content
-    FtagBaseContent.trigger_setup(FTAG_PUSlimmingHelper, 'FTAG_PU')
-    FtagBaseContent.trigger_matching(FTAG_PUSlimmingHelper, FTAG_PUTriggerListsHelper, flags)
+    FTAG_PUSlimmingHelper.IncludeTriggerNavigation = True
+    FTAG_PUSlimmingHelper.IncludeJetTriggerContent = False
+    FTAG_PUSlimmingHelper.IncludeMuonTriggerContent = True
+    FTAG_PUSlimmingHelper.IncludeEGammaTriggerContent = True
+    FTAG_PUSlimmingHelper.IncludeTauTriggerContent = False
+    FTAG_PUSlimmingHelper.IncludeEtMissTriggerContent = False
+    FTAG_PUSlimmingHelper.IncludeBJetTriggerContent = False
+    FTAG_PUSlimmingHelper.IncludeBPhysTriggerContent = False
+    FTAG_PUSlimmingHelper.IncludeMinBiasTriggerContent = False
+
+    # Trigger matching
+    # Run 2
+    if flags.Trigger.EDMVersion == 2:
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
+        #AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = FTAG_PUSlimmingHelper, 
+         #                                      OutputContainerPrefix = "TrigMatch_", 
+          #                                     TriggerList = FTAG_PUTriggerListsHelper.Run2TriggerNamesTau)
+        # This was adding the tau triggers even though its False
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = FTAG_PUSlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = FTAG_PUTriggerListsHelper.Run2TriggerNamesNoTau)
+    # Run 3, or Run 2 with navigation conversion
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
+        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
+        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(FTAG_PUSlimmingHelper)
+    
+
 
     jetOutputList = ["AntiKt4EMPFlowByVertexJets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
