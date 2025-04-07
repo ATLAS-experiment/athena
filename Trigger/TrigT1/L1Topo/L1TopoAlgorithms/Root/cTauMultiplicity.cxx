@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //  TopoCore
 //
@@ -25,9 +25,6 @@ TCS::cTauMultiplicity::cTauMultiplicity(const std::string & name) : CountingAlg(
 }
 
 
-TCS::cTauMultiplicity::~cTauMultiplicity() {}
-
-
 TCS::StatusCode TCS::cTauMultiplicity::initialize() {
   m_threshold = dynamic_cast<const TrigConf::L1Threshold_cTAU*>(getThreshold());
   if (not m_threshold){
@@ -36,25 +33,19 @@ TCS::StatusCode TCS::cTauMultiplicity::initialize() {
   }
 
   m_extraInfo = m_threshold->getExtraInfo();
-
-  // book histograms
-  std::string hname_accept = "cTauMultiplicity_accept_EtaPt_"+m_threshold->name();
-  bookHistMult(m_histAccept, hname_accept, "Mult_"+m_threshold->name(), "#eta#times40", "E_{t} [GeV]", 200, -200, 200, 100, 0, 100);
-
-  hname_accept = "cTauMultiplicity_accept_counts_"+m_threshold->name();
-  bookHistMult(m_histAccept, hname_accept, "Mult_"+m_threshold->name(), "counts", 15, 0, 15);
+ 
+  // Book monitoring histograms
+  bookHistMult(m_histAccept, "cTauMultiplicity_accept_EtaPt_"+m_threshold->name(), "Mult_"+m_threshold->name(), "#eta#times40", "E_{t} [GeV]", 200, -200, 200, 100, 0, 100);
+  bookHistMult(m_histAccept, "cTauMultiplicity_accept_counts_"+m_threshold->name(), "Mult_"+m_threshold->name(), "counts", 15, 0, 15);
 
   // cTau TOB monitoring histograms
   bookHistMult(m_histcTauEt, "cTauTOBEt", "Matched cTau TOB Et", "E_{t} [GeV]", 200, 0, 400);
   bookHistMult(m_histcTauPhiEta, "cTauTOBPhiEta", "Matched cTau TOB location", "#eta#times40", "#phi#times20", 200, -200, 200, 128, 0, 128);
   bookHistMult(m_histcTauEtEta, "cTauTOBEtEta", "Matched cTau TOB Et vs eta", "#eta#times40", "E_{t} [GeV]", 200, -200, 200, 200, 0, 400);
-  bookHistMult(m_histcTauPartialIsoLoose, "cTauTOBPartialIsoLoose", "Matched cTau Loose partial isolation", "Loose isolation", 200, 0, 10);
-  bookHistMult(m_histcTauPartialIsoMedium, "cTauTOBPartialIsoMedium", "Matched cTau Medium partial isolation", "Medium isolation", 200, 0, 10);
-  bookHistMult(m_histcTauPartialIsoMedium12, "cTauTOBPartialIsoMedium12", "Matched cTau Medium12 partial isolation", "Medium12 isolation", 200, 0, 10);
-  bookHistMult(m_histcTauPartialIsoMedium20, "cTauTOBPartialIsoMedium20", "Matched cTau Medium20 partial isolation", "Medium20 isolation", 200, 0, 10);
-  bookHistMult(m_histcTauPartialIsoMedium30, "cTauTOBPartialIsoMedium30", "Matched cTau Medium30 partial isolation", "Medium30 isolation", 200, 0, 10);
-  bookHistMult(m_histcTauPartialIsoMedium35, "cTauTOBPartialIsoMedium35", "Matched cTau Medium35 partial isolation", "Medium35 isolation", 200, 0, 10);
-  bookHistMult(m_histcTauPartialIsoTight, "cTauTOBPartialIsoTight", "Matched cTau Tight partial isolation", "Tight isolation", 200, 0, 10);
+  
+  const std::string wp_name = m_threshold->isolation() != WP::NONE ? TrigConf::Selection::wpToString(m_threshold->isolation()) : "NoIso";
+  bookHistMult(m_histcTauIsoFraction, "cTauTOBIsoFraction", std::string("Matched cTAU ") + wp_name + " isolation fraction", wp_name + " isolation fraction", 200, 0, 10);
+
   bookHistMult(m_histcTauIsoMatchedPass, "cTauTOBIsoMatchedPass", "Matched cTau isolation pass", "isolation pass", 2, 0, 2);
 
   return StatusCode::SUCCESS;
@@ -68,31 +59,22 @@ TCS::StatusCode TCS::cTauMultiplicity::processBitCorrect(const TCS::InputTOBArra
 }
 
 
-
-TCS::StatusCode TCS::cTauMultiplicity::process( const TCS::InputTOBArray & input, Count & count )
+TCS::StatusCode TCS::cTauMultiplicity::process(const TCS::InputTOBArray& input, Count& count)
 {
   const cTauTOBArray& cTaus = dynamic_cast<const cTauTOBArray&>(input);
 
   int counting = 0;
   // Loop over eTau candidates
-  for(cTauTOBArray::const_iterator etauCand = cTaus.begin(); etauCand != cTaus.end(); ++etauCand ) {
-
+  for(cTauTOBArray::const_iterator etauCand = cTaus.begin(); etauCand != cTaus.end(); ++etauCand) {
     if((*etauCand)->tobType() != TCS::ETAU) continue;
     
-    bool accept = false;     	// accept = true if (isMatched==true && isIsolated==true) || (isMatched==false)
-    bool isMatched  = false;	// Is the eTau matched to a jTau?
-    bool isIsolated = false;    // If matched: does the resulting cTau pass the isolation cut?
-    float isolation_partial_loose = 0;  // cTau Loose partial isolation (0 if no match is found)
-    float isolation_partial_medium = 0;  // cTau Medium partial isolation (0 if no match is found)
-    float isolation_partial_medium12 = 0; // cTau Medium12 partial isolation (0 if no match is found)
-    float isolation_partial_medium20 = 0; // cTau Medium20 partial isolation (0 if no match is found)
-    float isolation_partial_medium30 = 0; // cTau Medium30 partial isolation (0 if no match is found)
-    float isolation_partial_medium35 = 0; // cTau Medium35 partial isolation (0 if no match is found)
-    float isolation_partial_tight = 0;  // cTau Tight partial isolation (0 if no match is found)
+    bool accept = false; // accept = (isMatched==true && isIsolated==true) || (isMatched==false)
+    bool isMatched  = false; // Is the eTau matched to a jTau?
+    bool isIsolated = false; // If matched: does the resulting cTau pass the isolation cut?
+    float isolation_fraction = 0; // cTAU isolation fraction
 
     // Loop over jTau candidates
     for(cTauTOBArray::const_iterator jtauCand = cTaus.begin(); jtauCand != cTaus.end(); ++jtauCand) {
-      
       if((*jtauCand)->tobType() != TCS::JTAU) continue;
 
       isMatched = cTauMatching(*etauCand, *jtauCand);
@@ -102,19 +84,16 @@ TCS::StatusCode TCS::cTauMultiplicity::process( const TCS::InputTOBArray & input
         float etauCand_eta = static_cast<float>((*etauCand)->etaDouble());
         float jtauCand_et = static_cast<float>((*jtauCand)->Et());
         float jtauCand_etIso = static_cast<float>((*jtauCand)->EtIso());
-	// Updated isolation condition, WP-dependent (ATR-28641)
-	// "Partial" isolation formula: I = (E_T^{jTAU Iso} + jTAUCoreScale * E_T^{jTAU Core}) / E_T^{eTAU}
-	// This formula is missing the eTAU Core substraction from the numerator, grouped with the isolation cut value
-	isolation_partial_loose = (jtauCand_etIso + m_extraInfo->isolation(WP::LOOSE, etauCand_eta).isolation_jTAUCoreScale_fw()/1024.0 * jtauCand_et) / etauCand_et; // Internal variable for monitoring
-	isolation_partial_loose = (jtauCand_etIso + m_extraInfo->isolation(WP::MEDIUM, etauCand_eta).isolation_jTAUCoreScale_fw()/1024.0 * jtauCand_et) / etauCand_et; // Internal variable for monitoring
-	isolation_partial_medium12 = (jtauCand_etIso + m_extraInfo->isolation(WP::MEDIUM12, etauCand_eta).isolation_jTAUCoreScale_fw()/1024.0 * jtauCand_et) / etauCand_et; // Internal variable for monitoring
-	isolation_partial_medium20 = (jtauCand_etIso + m_extraInfo->isolation(WP::MEDIUM20, etauCand_eta).isolation_jTAUCoreScale_fw()/1024.0 * jtauCand_et) / etauCand_et; // Internal variable for monitoring
-	isolation_partial_medium30 = (jtauCand_etIso + m_extraInfo->isolation(WP::MEDIUM30, etauCand_eta).isolation_jTAUCoreScale_fw()/1024.0 * jtauCand_et) / etauCand_et; // Internal variable for monitoring
-	isolation_partial_medium35 = (jtauCand_etIso + m_extraInfo->isolation(WP::MEDIUM35, etauCand_eta).isolation_jTAUCoreScale_fw()/1024.0 * jtauCand_et) / etauCand_et; // Internal variable for monitoring
-	isolation_partial_tight = (jtauCand_etIso + m_extraInfo->isolation(WP::TIGHT, etauCand_eta).isolation_jTAUCoreScale_fw()/1024.0 * jtauCand_et) / etauCand_et; // Internal variable for monitoring
+
+        // Updated isolation condition, WP-dependent (ATR-28641)
+        // I = (E_T^{jTAU Iso} + jTAUCoreScale * (E_T^{jTAU Core} - E_T^{eTAU})) / E_T^{eTAU}
+        if(m_threshold->isolation() != WP::NONE) {
+          isolation_fraction = (jtauCand_etIso + m_extraInfo->isolation(m_threshold->isolation(), etauCand_eta).isolation_jTAUCoreScale_d() * (jtauCand_et - etauCand_et)) / etauCand_et;
+        }
         // Old isolation condition coded as in firmware: https://indico.cern.ch/event/1079697/contributions/4541419/attachments/2315137/3940824/cTAU_FirmwareAlgoProposal.pdf page 8
 
-	isIsolated = checkIsolationWP(*etauCand, *jtauCand);
+        // Check the isolation WP
+        isIsolated = checkIsolationWP(*etauCand, *jtauCand);
 
         break; // Break loop when a match is found
       }
@@ -126,13 +105,7 @@ TCS::StatusCode TCS::cTauMultiplicity::process( const TCS::InputTOBArray & input
       fillHist1D(m_histcTauEt[0], (*etauCand)->EtDouble());
       fillHist2D(m_histcTauPhiEta[0], (*etauCand)->eta(), (*etauCand)->phi());
       fillHist2D(m_histcTauEtEta[0], (*etauCand)->eta(), (*etauCand)->EtDouble());
-      fillHist1D(m_histcTauPartialIsoLoose[0], isolation_partial_loose);
-      fillHist1D(m_histcTauPartialIsoMedium[0], isolation_partial_medium);
-      fillHist1D(m_histcTauPartialIsoMedium12[0], isolation_partial_medium12);
-      fillHist1D(m_histcTauPartialIsoMedium20[0], isolation_partial_medium20);
-      fillHist1D(m_histcTauPartialIsoMedium30[0], isolation_partial_medium30);
-      fillHist1D(m_histcTauPartialIsoMedium35[0], isolation_partial_medium35);
-      fillHist1D(m_histcTauPartialIsoTight[0], isolation_partial_tight);
+      fillHist1D(m_histcTauIsoFraction[0], isolation_fraction);
       fillHist1D(m_histcTauIsoMatchedPass[0], isMatched && isIsolated);
     }
 
@@ -158,12 +131,10 @@ TCS::StatusCode TCS::cTauMultiplicity::process( const TCS::InputTOBArray & input
 
   fillHist1D(m_histAccept[1], counting);
   
-  // Pass counting to TCS::Count object - output bits are composed there                                                                                                                               
-  
+  // Pass counting to TCS::Count object - output bits are composed there
   count.setSizeCount(counting);
 
   return TCS::StatusCode::SUCCESS;
-  
 }
 
 

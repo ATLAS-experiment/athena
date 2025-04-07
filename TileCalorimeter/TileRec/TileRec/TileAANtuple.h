@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -53,10 +53,9 @@
 #include "TileEvent/TileDQstatus.h"
 #include "TileEvent/TileBeamElemContainer.h"
 #include "TileConditions/ITileDCSTool.h"
-#include "TileByteStream/TileROD_Decoder.h"
+#include "TileByteStream/TileHid2RESrcID.h"
 
 // Athena includes
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
@@ -438,11 +437,11 @@ class TileAANtuple : public AthAlgorithm {
     ServiceHandle<IROBDataProviderSvc>  m_robSvc{this,
        "ROBDataProviderSvc", "ROBDataProviderSvc", "The ROB data provider service" };
 
-    ToolHandle<TileROD_Decoder> m_decoder{this,
-       "TileROD_Decoder", "TileROD_Decoder", "Tile ROD decoder"};
-
     SG::ReadHandleKey<TileDQstatus> m_DQstatusKey{ this,
        "TileDQstatus", "TileDQstatus", "TileDQstatus key" };
+
+   SG::ReadCondHandleKey<TileHid2RESrcID> m_hid2RESrcIDKey{this,
+       "TileHid2RESrcID", "TileHid2RESrcID", "TileHid2RESrcID key"};
 };
 
 #endif // TILEREC_TILEAANTUPLE_H
