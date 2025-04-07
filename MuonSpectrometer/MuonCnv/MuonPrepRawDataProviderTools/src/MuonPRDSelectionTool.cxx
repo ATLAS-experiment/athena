@@ -75,7 +75,7 @@ namespace Muon {
   }
 
 
-  const MdtDriftCircleOnTrack* MuonPRDSelectionTool::calibrateAndSelect( const MuonSystemExtension::Intersection& intersection, const MdtPrepData& mdt ) const {
+  const MdtDriftCircleOnTrack* MuonPRDSelectionTool::calibrateAndSelect( const MuonSystemExtension::Intersection& intersection, const MdtPrepData& mdt, double beta) const {
 
     // calculate intersection with tube
     const Amg::Vector3D& direction = intersection.trackParameters->momentum();
@@ -120,7 +120,7 @@ namespace Muon {
     if( msgLvl(MSG::VERBOSE) ) msg(MSG::VERBOSE) << endmsg;
 
     // calibrate hit
-    const MdtDriftCircleOnTrack* mdtROT = m_mdtCreator->createRIO_OnTrack( mdt, intersect,  &direction ); 
+    const MdtDriftCircleOnTrack* mdtROT = m_mdtCreator->createRIO_OnTrack( mdt, intersect,  &direction, 0., nullptr, beta, 0.); 
     if( !mdtROT ) ATH_MSG_VERBOSE(" Failed to calibrate " << m_idHelperSvc->toString(id));
     return mdtROT;    
   }
