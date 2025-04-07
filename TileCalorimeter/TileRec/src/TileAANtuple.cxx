@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -27,7 +27,6 @@
 #include "TileDetDescr/TileDetDescrManager.h"
 #include "TileConditions/TileCondToolEmscale.h"
 #include "TileEvent/TileDigitsContainer.h"
-#include "TileEvent/TileBeamElemContainer.h"
 #include "TileEvent/TileRawChannelContainer.h"
 #include "TileEvent/TileContainer.h"
 #include "TileEvent/TileLaserObject.h"
@@ -266,6 +265,7 @@ StatusCode TileAANtuple::initialize() {
   ATH_CHECK( m_of1RawChannelContainerKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_wienerRawChannelContainerKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_l2CntKey.initialize(m_compareMode) );
+  ATH_CHECK( m_hid2RESrcIDKey.initialize(m_bsInput) );
   
   ATH_MSG_INFO( "initialization completed" ) ;
   return StatusCode::SUCCESS;
@@ -277,8 +277,8 @@ StatusCode TileAANtuple::ntuple_initialize(const EventContext& ctx,
 {
   if (m_bsInput) {
     ATH_CHECK( m_robSvc.retrieve() );
-    ATH_CHECK( m_decoder.retrieve() );
-    const TileHid2RESrcID* hid2re = m_decoder->getHid2re();
+    SG::ReadCondHandle<TileHid2RESrcID> hid2re(m_hid2RESrcIDKey, ctx);
+    ATH_CHECK(hid2re.isValid());
     m_ROBID.push_back( hid2re->getRobFromFragID(DIGI_PAR_FRAG) );
     m_ROBID.push_back( hid2re->getRobFromFragID(LASER_OBJ_FRAG) );
   }
