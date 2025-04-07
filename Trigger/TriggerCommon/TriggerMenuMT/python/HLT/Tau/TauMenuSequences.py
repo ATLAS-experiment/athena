@@ -248,11 +248,13 @@ def _ftfTauIsoSeq(flags, name, is_probe_leg=False):
 
     # VDV with all the required collections/objects in the View
     # (the VDV checks are disabled unless running with -l DEBUG)
+    inputTracks = flags.Trigger.ActsTracking.tauCore.trkTracks_FTF if flags.Trigger.useActsTracking \
+        else flags.Trigger.InDetTracking.tauCore.trkTracks_FTF
     recoAcc.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(
         name=f'{recoAcc.name}RecoVDV',
         DataObjects={
             ('TrigRoiDescriptorCollection', f'StoreGateSvc+{RoIs}'),
-            ('TrackCollection', f'StoreGateSvc+{flags.Trigger.InDetTracking.tauCore.trkTracks_FTF}'),
+            ('TrackCollection', f'StoreGateSvc+{inputTracks}' ),
         }
     ))
 
