@@ -151,17 +151,12 @@ class FeatureHandler:
         self.addSingleVariables()
         self.addMultiplicities()
         self.addFourMomentum()
-        self.addTypeSpecificFeatures_Num()
         self.addTypeSpecificFeatures_PID()
         self.addTypeSpecificFeatures_Shots()
         self.addTypeSpecificFeatures_Ratios()
-        self.addTypeSpecificFeatures_Mean()
         self.addTypeSpecificFeatures_StdDevs()
         self.addTypeSpecificFeatures_HLV()
-        self.addTypeSpecificFeatures_Angle()
-        self.addTypeSpecificFeatures_DeltaR()
         self.addTypeSpecificFeatures_JetMoment()
-        self.addCombinedFeatures_Single()
         self.addCombinedFeatures_TypeVsType()
         self.addCombinedFeatures_SelectedTypes()
         
@@ -243,18 +238,6 @@ class FeatureHandler:
             #end loop types
         #end loop vars 
     #end def addFourMomentum
-    
-    
-    def addTypeSpecificFeatures_Num(self):
-        Variables = []
-        Variables += ["ConstsIn00To01"]
-        Variables += ["ConstsIn01To02"]
-        Variables += ["ConstsIn02To03"]
-        Variables += ["ConstsIn03To04"]
-        for iVar in Variables:
-            self.addToFeatures_AllTypes(iVar, self.m_VarTypeName_Num, "F")
-    #end addTypeSpecificFeatures
-    
     
     def addTypeSpecificFeatures_PID(self):
         Variables = []
@@ -361,18 +344,6 @@ class FeatureHandler:
             self.addToFeatures_AllTypes(iVar, self.m_VarTypeName_Ratio, "F")
         #end loop over variables with energy types
     #end addTypeSpecificFeatures_Ratios
-   
-    
-    def addTypeSpecificFeatures_Mean(self):
-        Variables_WithEnergyTypes = []
-        Variables_WithEnergyTypes += ["Et_Wrt"]
-        Variables_WithEnergyTypes += ["DRToJetAxis_Wrt"]
-        Variables_WithEnergyTypes += ["DRToLeading_Wrt"]
-        for iVar in Variables_WithEnergyTypes:
-            self.addToFeatures_AllTypes_AllEnergyVariants(iVar, self.m_VarTypeName_Mean, "F")
-        #end loop over variables
-    #end addTypeSpecificFeatures_Mean
-    
     
     def addTypeSpecificFeatures_StdDevs(self):
         Variables = []
@@ -444,48 +415,6 @@ class FeatureHandler:
         #end loop over variables
     #end addTypeSpecificFeatures_HLV
     
-    
-    def addTypeSpecificFeatures_Angle(self):
-        Variables = []
-        Variables += ["ToJetAxis"]
-        Variables += ["1stToJetAxis"]
-        Variables += ["2ndToJetAxis"]
-        Variables += ["3rdToJetAxis"]
-        Variables += ["1stTo2nd"]
-        Variables += ["1stTo3rd"]
-        Variables += ["2ndTo3rd"]
-        Variables += ["MaxToJetAxis"]
-        Variables += ["MeanValue123"]
-        Variables += ["Btw1213Planes"]
-        for iVar in Variables:
-            self.addToFeatures_AllTypes(iVar, self.m_VarTypeName_Angle, "F")
-        #end loop over variables
-    #end addTypeSpecificFeatures_Angle
-    
-    
-    def addTypeSpecificFeatures_DeltaR(self):
-        Variables = []
-        Variables += ["ToJetAxis"]
-        Variables += ["MaxToJetAxis"]
-        Variables += ["1stToJetAxis"]
-        Variables += ["2ndToJetAxis"]
-        Variables += ["3rdToJetAxis"]
-        Variables += ["1stTo2nd"]
-        Variables += ["1stTo3rd"]
-        Variables += ["2ndTo3rd"]
-        
-        Sorts = []
-        Sorts += ["EtSort"]
-        Sorts += ["BDTSort"]
-        
-        for iSort in Sorts:
-            for iVar in Variables:
-                featName = iVar + "_" + iSort
-                self.addToFeatures_AllTypes(featName, self.m_VarTypeName_DeltaR, "F")
-        #end loop over variables
-    #end addTypeSpecificFeatures_DeltaR
-    
-    
     def addTypeSpecificFeatures_JetMoment(self):
         Variables = []
         Variables += ["EtDR"]
@@ -497,22 +426,6 @@ class FeatureHandler:
             self.addToFeatures_AllTypes(iVar, self.m_VarTypeName_JetMoment, "F")
         #end loop over variables
     #end addTypeSpecificFeatures_JetMoment
-    
-    
-    def addCombinedFeatures_Single(self):
-        Variables = []
-        Variables += ["NumChargedOverNumNeutral"]
-        Variables += ["NumChargedOverNumTotal"]
-        Variables += ["AnglePlane1stCharged1st2ndNeutral"]
-        Variables += ["FarthestNeutral_AngleToCharged"]
-        Variables += ["FarthestNeutral_BDTScore"]
-        Variables += ["FarthestNeutral_EtOverChargedEt"]
-        
-        for iVar in Variables:
-            self.addToFeatures(iVar, self.m_VarTypeName_Combined, "F")
-        #end loop over variables
-    #end addCombinedFeatures_Single
-    
     
     def addCombinedFeatures_TypeVsType(self):
         Types = []
