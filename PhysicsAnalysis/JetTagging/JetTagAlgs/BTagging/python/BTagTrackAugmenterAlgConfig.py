@@ -32,7 +32,8 @@ def BTagTrackAugmenterByVertexAlgCfg(
         flags,
         TrackCollection='InDetTrackParticles',
         PrimaryVertexCollectionName='PrimaryVertices',
-        prefix=None):
+        prefix=None,
+        dzCut=10):
 
     acc = ComponentAccumulator()
     pfx_str = prefix or "btagIp_"
@@ -46,6 +47,7 @@ def BTagTrackAugmenterByVertexAlgCfg(
         prefix=pfx_str,
         TrackToVertexIPEstimator=acc.popToolsAndMerge(AtlasTrackToVertexIPEstimatorCfg(flags, 'TrkToVxIPEstimator') ),
         Extrapolator=acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
+        dzCut=dzCut,
     ))
 
     return acc

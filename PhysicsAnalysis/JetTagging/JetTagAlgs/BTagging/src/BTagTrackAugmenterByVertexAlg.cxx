@@ -10,7 +10,9 @@
 namespace Analysis {
 
   BTagTrackAugmenterByVertexAlg::BTagTrackAugmenterByVertexAlg( const std::string& name, ISvcLocator* loc )
-    : AthReentrantAlgorithm(name, loc) {}
+    : AthReentrantAlgorithm(name, loc) {
+      declareProperty("dzCut", m_dzCut=10);
+    }
 
   StatusCode BTagTrackAugmenterByVertexAlg::initialize() {
     ATH_MSG_INFO( "Inizializing " << name() << "... " );
@@ -144,8 +146,8 @@ namespace Analysis {
                                                                                             primary_surface ) );
         
         if ( ip ){
-          // if vertex to track is below 5 mm, save corresponding IP params
-          if ( std::fabs(ip->IPz0SinTheta) < 10){
+          // if vertex to track is below a certain cut, save corresponding IP params
+          if ( std::fabs(ip->IPz0SinTheta) < m_dzCut){
             d0.push_back(ip->IPd0);
             z0SinTheta.push_back(ip->IPz0SinTheta);
             sigmad0.push_back(ip->sigmad0);

@@ -25,12 +25,9 @@ namespace Analysis {
     StatusCode execute(const EventContext& ctx) const override final;
 
   private:
-    const xAOD::Vertex* getPrimaryVertex( const xAOD::VertexContainer& ) const;
-
-  private:
     ToolHandle< Trk::ITrackToVertexIPEstimator > m_track_to_vx {this,"TrackToVertexIPEstimator","Trk::TrackToVertexIPEstimator",""};
     ToolHandle< Trk::IExtrapolator >  m_extrapolator {this,"Extrapolator","Trk::Extrapolator",""};
-
+    float m_dzCut;
     // Input Containers
     SG::ReadHandleKey< xAOD::TrackParticleContainer > m_TrackContainerKey {this,"TrackContainer","InDetTrackParticles","Key for the input track collection"};
     SG::ReadHandleKey< xAOD::VertexContainer > m_VertexContainerKey {this,"PrimaryVertexContainer","PrimaryVertices","Key for the input vertex collection"};

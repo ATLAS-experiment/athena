@@ -147,6 +147,7 @@ def JetBTagginglessByVertexAlgCfg(
         TrackCollection='InDetTrackParticles',
         PrimaryVertexCollectionName=pv_col,
         prefix=trackAugmenterPrefix,
+        dzCut=max(dzCut_vec),
     ))        
               
     for networks in cfgFlags.BTagging.NNs.get(JetCollection, []):
