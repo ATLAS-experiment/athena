@@ -53,11 +53,7 @@ class CaloCellFastCopyTool
   : public extends<AthAlgTool,ICaloCellMakerTool, ICaloConstCellMakerTool>
 {
   public:
-
-    /// AthAlgTool constructor
-    CaloCellFastCopyTool(const std::string& type,
-                         const std::string& name,
-                         const IInterface* parent);
+     using base_class::base_class;
 
     virtual StatusCode initialize() override;
     virtual StatusCode process (CaloCellContainer* theCellContainer,
@@ -96,19 +92,18 @@ private:
   StatusCode dispatchCopyConst(const CaloCellContainer* srcCont,
                                CaloConstCellContainer* destCont) const;
 
-    SG::ReadHandleKey<CaloCellContainer> m_srcCellContainerKey;
-    bool m_avoidDuplicates;
-    bool m_isFindCellFast;
-    IdentifierHash m_hashMax;
-    const CaloCell_ID* m_caloID; //!< Pointer to CaloID helper
+  SG::ReadHandleKey<CaloCellContainer> m_srcCellContainerKey{this, "InputName", "AllCalo"};
+  Gaudi::Property<bool> m_avoidDuplicates{this, "AvoidDuplicates", false};
+  Gaudi::Property<bool> m_isFindCellFast{this, "IsFindCellFast", false};
+  IdentifierHash m_hashMax;
+  const CaloCell_ID* m_caloID = nullptr;  //!< Pointer to CaloID helper
 
-    std::vector<std::string> m_acceptedSampleNames;
-    std::vector<CaloCell_ID::SUBCALO> m_acceptedCalos;
+  Gaudi::Property<std::vector<std::string> > m_acceptedSampleNames{this, "includeSamplings", {}};
+  std::vector<CaloCell_ID::SUBCALO> m_acceptedCalos;
 
-    // Calo cell hashes
-    std::vector<IdentifierHash> m_acceptedCellHashes;
-    std::vector<bool> m_cellsToBeCopied;
+  // Calo cell hashes
+  std::vector<IdentifierHash> m_acceptedCellHashes;
+  std::vector<bool> m_cellsToBeCopied;
 };
-
 
 #endif /* CALOREC_CALOCELLFASTCOPYTOOL_H_ */

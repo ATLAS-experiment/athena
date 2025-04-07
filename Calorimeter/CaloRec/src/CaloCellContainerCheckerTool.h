@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -18,11 +18,7 @@ class CaloCellContainerCheckerTool
 {
  
 public:    
-  
-  CaloCellContainerCheckerTool(const std::string& type, 
-			       const std::string& name, 
-			       const IInterface* parent) ;
-
+  using base_class::base_class;
 
   virtual StatusCode initialize() override; 
 
@@ -35,7 +31,7 @@ public:
   StatusCode doProcess (const CaloCellContainer* theCellContainer,
                         const EventContext& ctx) const;
 
-  size_t m_eventsToCheck;
+  Gaudi::Property<unsigned> m_eventsToCheck{this,"EventsToCheck",5};
   const CaloCell_ID* m_theCaloCCIDM  = nullptr;
   
 };
