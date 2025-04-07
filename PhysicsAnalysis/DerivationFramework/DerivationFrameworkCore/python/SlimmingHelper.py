@@ -501,18 +501,12 @@ class SlimmingHelper:
                 elif collectionName=="BTagging_AntiKt4EMPFlow":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
                         items.extend(BTaggingStandardContent("AntiKt4EMPFlowJets", self.flags))
-                elif collectionName=="BTagging_AntiKt4EMPFlowByVertex":
-                        from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-                        items.extend(BTaggingStandardContent("AntiKt4EMPFlowByVertexJets", self.flags))
                 elif collectionName=="BTagging_AntiKt4EMPFlow_expert":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingExpertContent
                         items.extend(BTaggingExpertContent("AntiKt4EMPFlowJets", self.flags))
                 elif collectionName=="AntiKt4EMPFlowJets_FTAG":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTagginglessContent
                         items.extend(BTagginglessContent("AntiKt4EMPFlowJets", self.flags))
-                elif collectionName=="AntiKt4EMPFlowByVertexJets_FTAG":
-                        from DerivationFrameworkFlavourTag.BTaggingContent import BTagginglessContent
-                        items.extend(BTagginglessContent("AntiKt4EMPFlowByVertexJets", self.flags))
                 elif collectionName=="BTagging_AntiKt4EMTopo":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
                         items.extend(BTaggingStandardContent("AntiKt4EMTopoJets", self.flags))
