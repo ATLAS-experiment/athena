@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATRACKSIMTRACKINGTOOLBASE_H
 #define FPGATRACKSIMTRACKINGTOOLBASE_H
@@ -36,7 +36,7 @@ protected:
   Gaudi::Property<bool> m_useSpacePoints{ this, "useSpacePoints", false, "Whether we are using spacepoints." };
   Gaudi::Property<bool> m_useSectors { this, "useSectors", false, "Will reverse calculate the sector for track-fitting purposes" };
   Gaudi::Property<bool> m_idealGeoRoads { this, "IdealGeoRoads", true, "Set sectors to use ideal geometry fit constants" };
-  Gaudi::Property<bool> m_isSecondStage { this, "IdealGeoRoads", true, "Set sectors to use ideal geometry fit constants" };
+  Gaudi::Property<bool> m_isSecondStage { this, "isSecondStage", true, "Is this the second stage?" };
   Gaudi::Property <bool> m_do2ndStage {this, "Do2ndStageTrackFit", false, "Do 2nd stage track fit"};
 };
 
