@@ -278,10 +278,16 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     # Add skimming tool to subsequence
     acc.addEventAlgo(HIGG9D1_bb_tautau_yy_skimKernel, sequenceName="HIGG9D1Sequence")
 
-    ## CloseByIsolation correction augmentation
-    ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
-    from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
-    acc.merge(IsoCloseByAlgsCfg(flags, suff = "_HIGG9D1", isPhysLite = False, stream_name = kwargs['StreamName']), sequenceName="HIGG9D1Sequence")
+    from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
+    acc.merge(DerivationTrackIsoCfg(flags, object_types=("Electrons", "Photons", "Muons"), sequenceName="HIGG9D1Sequence"))
+
+    # IFF augmentation - Adding Lepton Taggers
+    from LeptonTaggers.LeptonTaggersConfig import DecoratePLITAlgsCfg
+    acc.merge(DecoratePLITAlgsCfg(flags), sequenceName="HIGG9D1Sequence")
+    
+    from IsolationSelection.IsolationSelectionConfig import IsoCloseByAlgsCfg
+    contNames = [ "Muons", "Electrons", "Photons" ]
+    acc.merge(IsoCloseByAlgsCfg(flags, isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = kwargs['StreamName']), sequenceName="HIGG9D1Sequence")
 
     # diphoton vertex augmentation
     from DerivationFrameworkEGamma.EGammaToolsConfig import PhotonVertexSelectionWrapperKernelCfg
@@ -289,6 +295,7 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     from DerivationFrameworkHiggs.HIGG1D1CustomVertexConfig import DiphotonVertexDecoratorCfg
     DiphotonVertexDecorator = acc.popToolsAndMerge(DiphotonVertexDecoratorCfg(
         flags,
+        MinimumPhotonPt    = 4800.0,
         DiphotonVertexName = "HIGG9D1_DiphotonPrimaryVertices"))
     acc.addPublicTool(DiphotonVertexDecorator)
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name = "DiphotonVertexAugmentation", AugmentationTools = [DiphotonVertexDecorator]), sequenceName="HIGG9D1Sequence")
@@ -302,7 +309,7 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     HIGG9D1TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         flags,
         name                    = "HIGG9D1TrackParticleThinningTool",
-        StreamName              = kwargs['StreamName'], 
+        StreamName              = kwargs['StreamName'],
         SelectionString         = HIGG9D1TPthinning_expression,
         InDetTrackParticlesKey  = "InDetTrackParticles"))
     acc.addPublicTool(HIGG9D1TrackParticleThinningTool)
@@ -344,20 +351,11 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         IgnoreFlags                = True )
     acc.addPublicTool(HIGG9D1_ThinVtxTracks)
 
-    # Primary vertices
-    HIGG9D1_ThinPV = CompFactory.DerivationFramework.BPhysPVThinningTool(
-        name                 = "HIGG9D1_ThinPV",
-        CandidateCollections = [ HIGG9D1_Jpsi.OutputVtxContainerName, HIGG9D1_Upsi.OutputVtxContainerName ],
-        StreamName           = kwargs['StreamName'],
-        KeepPVTracks         = True)
-    acc.addPublicTool(HIGG9D1_ThinPV)
-
     thinningTools = [HIGG9D1TrackParticleThinningTool,
                      HIGG9D1MuonTPThinningTool,
                      HIGG9D1ElectronTPThinningTool,
                      HIGG9D1TauTPThinningTool,
-                     HIGG9D1_ThinVtxTracks,
-                     HIGG9D1_ThinPV]
+                     HIGG9D1_ThinVtxTracks]
 
     ### Truth thinning
     if flags.Input.isMC:
@@ -494,7 +492,6 @@ def HIGG9D1Cfg(flags):
     HIGG9D1SlimmingHelper.ExtraVariables += [
         "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.IsoFixedCone5PtPUsub",
         "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostPartons.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
-        "TruthPrimaryVertices.t.x.y.z",
         "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
         "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification",
         "TauJets.dRmax.etOverPtLeadTrk",
@@ -504,6 +501,10 @@ def HIGG9D1Cfg(flags):
     if flags.Tau.TauEleRM_isAvailable:
         HIGG9D1SlimmingHelper.ExtraVariables += ["TauJets_EleRM.dRmax.etOverPtLeadTrk"]
 
+    # needed for photon ID
+    from DerivationFrameworkEGamma.PhotonsCPDetailedContent import PhotonsCPDetailedContent
+    HIGG9D1SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
+        
     # FTAG Xbb extra content
     extraList = []
     for tagger in ["GN2Xv01", "GN2Xv02"]:
@@ -522,18 +523,59 @@ def HIGG9D1Cfg(flags):
     if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(HIGG9D1SlimmingHelper)
-        HIGG9D1SlimmingHelper.ExtraVariables += ["Electrons.TruthLink",
-                                                 "Muons.TruthLink",
-                                                 "Photons.TruthLink",
-                                                 "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt"]
+        HIGG9D1SlimmingHelper.ExtraVariables += ["Electrons.TruthLink","Muons.TruthLink","Photons.TruthLink","AntiKt4TruthDressedWZJets.IsoFixedCone5Pt","TruthPrimaryVertices.t.x.y.z"]
 
-        AllVariables += ["TruthEvents","TruthParticles","TruthVertices","MuonTruthParticles"]
-        AllVariables += ['TruthLHEParticles', 'TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
+        AllVariables += ["TruthEvents","TruthParticles","TruthVertices","MuonTruthParticles","TruthPrimaryVertices"]
+        AllVariables += ["TruthLHEParticles","TruthHFWithDecayParticles","TruthHFWithDecayVertices","TruthCharm","TruthPileupParticles","InTimeAntiKt4TruthJets","OutOfTimeAntiKt4TruthJets","AntiKt4TruthDressedWZJets","AntiKt4TruthWZJets"]
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
         acc.merge(AddTauAndDownstreamParticlesCfg(flags))
-        AllVariables += ['TruthTausWithDecayParticles','TruthTausWithDecayVertices']
-        
+        AllVariables += ["TruthTausWithDecayParticles","TruthTausWithDecayVertices"]
+
+    # Extra isolation content
+    EgammaExtraContent= [
+        "ptcone20","ptcone30","ptcone40", "ptvarcone20", "ptvarcone30", "ptvarcone40", "topoetcone20", "topoetcone30",
+        "neflowisol20", "neflowisol30", "neflowisol40",
+        "ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt500" ,"ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt1000",
+        "ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500","ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000",
+        "ptvarcone40_Nonprompt_All_MaxWeightTTVA_pt500","ptvarcone40_Nonprompt_All_MaxWeightTTVA_pt1000",
+        "ptcone20_Nonprompt_All_MaxWeightTTVA_pt500", "ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000",
+        "ptcone30_Nonprompt_All_MaxWeightTTVA_pt500", "ptcone30_Nonprompt_All_MaxWeightTTVA_pt1000",
+        "ptcone40_Nonprompt_All_MaxWeightTTVA_pt500", "ptcone40_Nonprompt_All_MaxWeightTTVA_pt1000",
+        "topoetconecoreConeEnergyCorrection", "isoSelIsOK", "topoetcone20_CloseByCorr"
+    ]
+
+    ElectronsExtraContent = [ ".".join( ["Electrons", "deltaPhiRescaled2", "deltaPhiFromLastMeasurement", "originalTrackParticle", "ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000", "ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000", "ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr", "ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr"] + EgammaExtraContent ) ]
+
+    PhotonsExtraContent = [ ".".join(["Photons", "topoetcone40", "topoetcone40_CloseByCorr", "ptcone20_CloseByCorr"] + EgammaExtraContent ) ]
+
+    MuonsExtraContent = [ ".".join( [
+        "Muons",
+        "MeasEnergyLoss.MeasEnergyLossSigma.EnergyLossSigma.ParamEnergyLoss",
+        "ParamEnergyLossSigmaMinus.ParamEnergyLossSigmaPlus.clusterLink.scatteringCurvatureSignificance",
+        "deltaPhiRescaled2.deltaPhiFromLastMeasurement.scatteringNeighbourSignificance",
+        "ptcone20.ptcone30.ptcone40.ptvarcone20.ptvarcone30.ptvarcone40.topoetcone30",
+        "neflowisol20.neflowisol30.neflowisol40.ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt500",
+        "ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500",
+        "ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone40_Nonprompt_All_MaxWeightTTVA_pt500",
+        "ptvarcone40_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone20_Nonprompt_All_MaxWeightTTVA_pt500",
+        "ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone30_Nonprompt_All_MaxWeightTTVA_pt500",
+        "ptcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone40_Nonprompt_All_MaxWeightTTVA_pt500",
+        "ptcone40_Nonprompt_All_MaxWeightTTVA_pt1000",
+        "msInnerMatchChi2", "isoSelIsOK", "ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500_CloseByCorr",
+        "ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000_CloseByCorr", "neflowisol20_CloseByCorr", "topoetcone20_CloseByCorr"
+    ] ) ]
+
+    HIGG9D1SlimmingHelper.ExtraVariables += ElectronsExtraContent
+    HIGG9D1SlimmingHelper.ExtraVariables += PhotonsExtraContent
+    HIGG9D1SlimmingHelper.ExtraVariables += MuonsExtraContent
+
+    from IsolationSelection.IsolationSelectionConfig import setupIsoCloseBySlimmingVariables
+    setupIsoCloseBySlimmingVariables(HIGG9D1SlimmingHelper)
+
+    from LeptonTaggers.LeptonTaggersConfig import GetExtraPLITVariablesForDxAOD
+    HIGG9D1SlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
+    
     HIGG9D1SlimmingHelper.AllVariables = AllVariables
 
     # Trigger content
