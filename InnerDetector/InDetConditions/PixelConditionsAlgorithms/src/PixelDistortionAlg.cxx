@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelDistortionAlg.h"
@@ -109,10 +109,6 @@ StatusCode PixelDistortionAlg::execute() {
         hashID = idmod;
       } else {
         input >> std::hex >> idmod >> std::dec;
-        if (idmod>std::numeric_limits<Identifier::value_type>::max()){
-          ATH_MSG_ERROR("idmod out of range: "<<idmod);
-          return StatusCode::FAILURE;
-        }
         hashID = m_pixelID->wafer_hash((Identifier)idmod); 
       }
       Identifier modId = m_pixelID->wafer_id((IdentifierHash)hashID);
