@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAUALGS_TOOL_HELPERFUNCTIONS
@@ -34,9 +34,6 @@ namespace PanTau {
 	{}
 
 	virtual ~HelperFunctions () {};
-        
-        static TauConstituent* getNeutralConstWithLargestAngle(const TLorentzVector& charged, 
-                                                        const std::vector<PanTau::TauConstituent*>& neutral) ;
         
         virtual std::string convertNumberToString(double x) const;
         

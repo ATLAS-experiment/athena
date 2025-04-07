@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/HelperFunctions.h"
@@ -11,26 +11,6 @@
 #include <vector>
 #include <sstream>
 #include <cmath>
-
-
-PanTau::TauConstituent* PanTau::HelperFunctions::getNeutralConstWithLargestAngle(const TLorentzVector& charged,
-										 const std::vector<PanTau::TauConstituent*>& neutral) {
-  if(neutral.empty()) return nullptr;
-  //loop through neutrals to find the one with largest angle
-  unsigned int    idx_Neutral = -1;
-  double          angle_Neutral  = -1.;
-  for(unsigned int iNeut=0; iNeut<neutral.size(); iNeut++) {
-    TLorentzVector tlv_CurNeut = neutral[iNeut]->p4();
-    double angle = charged.Angle(tlv_CurNeut.Vect());
-    if(angle > angle_Neutral) {
-      angle_Neutral = angle;
-      idx_Neutral = iNeut;
-    }
-  }//end loop neutrals
-    
-  return neutral[idx_Neutral];
-}
-
 
 std::string PanTau::HelperFunctions::convertNumberToString(double x) const {
   std::stringstream tmpStream;
