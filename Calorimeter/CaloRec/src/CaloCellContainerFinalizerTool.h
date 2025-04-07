@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -18,12 +18,9 @@ class CaloCell_ID;
 class CaloCellContainerFinalizerTool
   : public extends<AthAlgTool, ICaloCellMakerTool, ICaloConstCellMakerTool>
 {
-public:    
-  CaloCellContainerFinalizerTool(const std::string& type, 
-                                 const std::string& name, 
-				 const IInterface* parent) ;
-
-
+public:
+  using base_class::base_class;
+  
   virtual StatusCode initialize() override; 
 
   // update theCellContainer
@@ -36,7 +33,7 @@ private:
   template <class CONTAINER>
   StatusCode doProcess (CONTAINER* theCellContainer) const;
 
-  const CaloCell_ID* m_theCaloCCIDM;
+  const CaloCell_ID* m_theCaloCCIDM=nullptr;
 };
 
 #endif
