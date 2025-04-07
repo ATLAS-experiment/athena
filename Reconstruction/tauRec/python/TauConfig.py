@@ -103,9 +103,6 @@ def TauCaloAlgCfg(flags):
     CaloTopoForTausMaker.ClusterCorrectionTools += [result.popToolsAndMerge(tauTools.TauCaloClusterBadChannelCfg(flags))]
     CaloTopoForTausMaker.ClusterCorrectionTools += [result.popToolsAndMerge(tauTools.TauCaloClusterMomentsMakerCfg(flags))]
 
-    if flags.Calo.TopoCluster.doCellWeightCalib:
-        CaloTopoForTausMaker.ClusterCorrectionTools += [result.popToolsAndMerge(tauTools.TauCaloClusterCellWeightCalibCfg(flags))]
-
     if flags.Calo.TopoCluster.doTopoClusterLocalCalib:
         CaloTopoForTausMaker.ClusterCorrectionTools += [result.popToolsAndMerge(tauTools.TauCaloClusterLocalCalibCfg(flags)),
                                                         result.popToolsAndMerge(tauTools.TauCaloOOCCalibCfg(flags)),
