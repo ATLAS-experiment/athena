@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "ParticleCaloExtensionTool.h"
@@ -284,50 +284,27 @@ ParticleCaloExtensionTool::caloExtension(const EventContext& ctx,
                 << startPars.position().z() << " momentum "
                 << startPars.momentum().mag());
 
-  // pointers to hold results and go
-  std::vector<const TrackStateOnSurface*>* material = nullptr;
-
   auto extrapolation_timer = Monitored::Timer<std::chrono::microseconds>( "TIME_extrapolation" );
   auto group = Monitored::Group(m_monTool, extrapolation_timer);
   // Start monitoring timer
   extrapolation_timer.start();
-
   /* The last argument to the extrapolate  overload
    * corresponds  to a GeometrySignature value from
    * TrkDetDescrUtils/GeometrySignature.h
    * The extrapolation stop at the indicated subdetector exit
    */
-  std::unique_ptr<std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
-    caloParameters = m_extrapolator->collectIntersections(
-      ctx, startPars, propDir, particleType, material, m_extrapolDetectorID);
+  std::unique_ptr<
+      std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
+      caloParameters = m_extrapolator->collectIntersections(
+          ctx, startPars, propDir, particleType, m_extrapolDetectorID);
 
   // Stop monitoring timer
   extrapolation_timer.stop();
 
-  if (material) {
-    ATH_MSG_DEBUG("Got material " << material->size());
-    for (auto& m : *material) {
-      ATH_MSG_DEBUG(
-        " layer "
-        << " param " << m->trackParameters() << " pos: r "
-        << (m->trackParameters() ? m->trackParameters()->position().perp()
-                                 : -999)
-        << " z "
-        << (m->trackParameters() ? m->trackParameters()->position().z() : -999)
-        << " pt "
-        << (m->trackParameters() ? m->trackParameters()->momentum().perp()
-                                 : -999)
-        << " mat "
-        << (m->materialEffectsOnTrack()
-              ? m->materialEffectsOnTrack()->thicknessInX0()
-              : -999));
-      delete m;
-    }
-    delete material;
-  }
   if (!caloParameters) {
     return nullptr;
   }
+
   TrackParametersIdHelper parsIdHelper;
 
   // create final object
