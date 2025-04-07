@@ -1240,7 +1240,7 @@ namespace ActsTrk
   inline std::size_t TrackFindingAlg::computeStatSum(std::size_t seed_collection, EStat counter_i, const EventStats &stat) const
   {
     std::size_t out = 0u;
-    for (std::size_t category_i = seed_collection * seedCollectionStride() + static_cast<std::size_t>(counter_i);
+    for (std::size_t category_i = seed_collection * seedCollectionStride();
          category_i < (seed_collection + 1) * seedCollectionStride();
          ++category_i)
     {
