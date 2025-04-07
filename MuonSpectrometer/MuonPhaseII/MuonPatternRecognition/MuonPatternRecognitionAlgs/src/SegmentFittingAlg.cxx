@@ -25,6 +25,8 @@
 
 #include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
 
+#include <format>
+
 namespace MuonR4 {
     using namespace SegmentFit;
     using namespace MuonValR4;

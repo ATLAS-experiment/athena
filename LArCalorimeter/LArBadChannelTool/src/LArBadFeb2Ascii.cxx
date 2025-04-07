@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArBadChannelTool/LArBadFeb2Ascii.h"
 
 #include "LArBadChannelTool/LArBadChannelDBTools.h"
 #include "LArIdentifier/LArOnlineID.h"
+#include <format>
 #include <fstream>
 
 

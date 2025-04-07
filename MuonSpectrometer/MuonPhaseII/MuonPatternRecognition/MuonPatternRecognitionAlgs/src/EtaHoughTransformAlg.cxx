@@ -12,6 +12,8 @@
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 #include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
 
+#include <format>
+
 namespace MuonR4{
 
 StatusCode EtaHoughTransformAlg::initialize() {
