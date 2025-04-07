@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -26,23 +26,18 @@
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/IToolSvc.h"
 
-#include <fstream>
-#include <iostream>
-#include <istream>
-#include <iterator>
 #include <sstream>
 
-using std::string;
 /////////////////////////////////////////////////////////////////////////////
-const string SCTCalibWriteTool::s_separator{"-"};
-const string SCTCalibWriteTool::s_defectFolderName{"/SCT/Derived/Monitoring"};
-const string SCTCalibWriteTool::s_deadStripFolderName{"/SCT/Derived/DeadStrips"};
-const string SCTCalibWriteTool::s_deadChipFolderName{"/SCT/Derived/DeadChips"};
-const string SCTCalibWriteTool::s_effFolderName{"/SCT/Derived/Efficiency"};
-const string SCTCalibWriteTool::s_noFolderName{"/SCT/Derived/NoiseOccupancy"};
-const string SCTCalibWriteTool::s_RawOccuFolderName{"/SCT/Derived/RawOccupancy"};
-const string SCTCalibWriteTool::s_BSErrFolderName{"/SCT/Derived/BSErrorsRun2"};
-const string SCTCalibWriteTool::s_LAFolderName{"/SCT/Derived/LorentzAngleRun2_v2"};
+const std::string SCTCalibWriteTool::s_separator{"-"};
+const std::string SCTCalibWriteTool::s_defectFolderName{"/SCT/Derived/Monitoring"};
+const std::string SCTCalibWriteTool::s_deadStripFolderName{"/SCT/Derived/DeadStrips"};
+const std::string SCTCalibWriteTool::s_deadChipFolderName{"/SCT/Derived/DeadChips"};
+const std::string SCTCalibWriteTool::s_effFolderName{"/SCT/Derived/Efficiency"};
+const std::string SCTCalibWriteTool::s_noFolderName{"/SCT/Derived/NoiseOccupancy"};
+const std::string SCTCalibWriteTool::s_RawOccuFolderName{"/SCT/Derived/RawOccupancy"};
+const std::string SCTCalibWriteTool::s_BSErrFolderName{"/SCT/Derived/BSErrorsRun2"};
+const std::string SCTCalibWriteTool::s_LAFolderName{"/SCT/Derived/LorentzAngleRun2_v2"};
 
 const bool becCapsFormat{true};
 const bool becUnderscoreFormat{false};
@@ -53,25 +48,6 @@ SCTCalibWriteTool::SCTCalibWriteTool(const std::string& type, const std::string&
    m_streamer(((m_version == 0) ? "AthenaOutputStreamTool" : "AthenaPoolOutputStreamTool"), this),
    m_IOVDbSvc("IOVDbSvc", name)
 {
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-
-SCTCalibWriteTool::~SCTCalibWriteTool()
-{
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-
-StatusCode
-SCTCalibWriteTool::queryInterface(const InterfaceID& riid, void** ppvIF)
-{
-   if (SCTCalibWriteTool::interfaceID().versionMatch(riid) ) {
-      *ppvIF = static_cast<SCTCalibWriteTool*>(this);
-   } else {
-      return AthAlgTool::queryInterface(riid, ppvIF);
-   }
-   return StatusCode::SUCCESS;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -110,21 +86,6 @@ SCTCalibWriteTool::initialize()
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-StatusCode
-SCTCalibWriteTool::finalize() {
-   ATH_MSG_DEBUG("SCTCalibWriteTool::finalize");
-   if (!m_streamer.release().isSuccess()) {
-      return StatusCode::FAILURE;
-   }
-   if (!m_IOVDbSvc.release().isSuccess()) {
-      return StatusCode::FAILURE;
-   }
-   ATH_MSG_DEBUG("Thank you for using the SCTCalibWriteTool");
-   return StatusCode::SUCCESS;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
 unsigned int
 SCTCalibWriteTool::computeIstrip4moncond(const Identifier& elementId) const {
    unsigned int iiside{static_cast<unsigned int>(m_pHelper->side(elementId))};
@@ -138,8 +99,8 @@ SCTCalibWriteTool::computeIstrip4moncond(const Identifier& elementId) const {
 // Local stuff
 //////////////////////////////////////////////////////////////////////////////////////////
 
-string
-SCTCalibWriteTool::addDefect(const string& defectlist, const int defectBeginChannel, const int defectEndChannel) const {
+std::string
+SCTCalibWriteTool::addDefect(const std::string& defectlist, const int defectBeginChannel, const int defectEndChannel) const {
    // check size of defect list,
    // if it is empty then use createDefectString to make first entry.
    if (defectlist.empty()) return createDefectString(defectBeginChannel, defectEndChannel);
@@ -172,7 +133,7 @@ SCTCalibWriteTool::createDefectString(const int defectBeginChannel, const int de
 ///////////////////////////////////////////////////////////////////////////////////////
 
 std::string
-SCTCalibWriteTool::addNumber(const string& numStr, const unsigned long long number) const {
+SCTCalibWriteTool::addNumber(const std::string& numStr, const unsigned long long number) const {
    std::ostringstream num_string;
    // if it is empty then use createDefectString to make first entry.
    if (numStr.empty()) {
@@ -449,7 +410,7 @@ SCTCalibWriteTool::createListLA ATLAS_NOT_THREAD_SAFE // Thread unsafe CondAttrL
 ///////////////////////////////////////////////////////////////////////////////////////
 
 const CondAttrListCollection*
-SCTCalibWriteTool::getAttrListCollectionByFolder(const string& foldername) const {
+SCTCalibWriteTool::getAttrListCollectionByFolder(const std::string& foldername) const {
    std::lock_guard<std::mutex> lock{m_mutex};
    // trying to find the pointer in the hashmap
    // if it exists, return it, otherwise put it in.
