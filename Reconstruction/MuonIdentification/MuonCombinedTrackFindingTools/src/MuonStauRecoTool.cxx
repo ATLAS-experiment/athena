@@ -197,6 +197,7 @@ namespace MuonCombined {
                                                         << " layerDataVec size" << candidate->layerDataVec.size() << " hits size"
                                                         << candidate->hits.size());
 
+            float beta = candidate->betaFitResult.beta;
             // loop over layers and perform segment finding, collect segments per layer
             for (const auto& layerData : candidate->layerDataVec) {
                 // store segments in layer
@@ -205,7 +206,7 @@ namespace MuonCombined {
                 // loop over maxima
                 for (const auto& maximumData : layerData.maximumDataVec) {
                     // find segments for intersection
-                    findSegments(layerData.intersection, *maximumData, segments, m_muonPRDSelectionToolStau, m_segmentMaker);
+                    findSegments(layerData.intersection, *maximumData, segments, m_muonPRDSelectionToolStau, m_segmentMaker, beta);
                 }
 
                 // skip if no segment were found
@@ -1131,14 +1132,16 @@ namespace MuonCombined {
     void MuonStauRecoTool::findSegments(const Muon::MuonSystemExtension::Intersection& intersection, MaximumData& maximumData,
                                         std::vector<std::shared_ptr<const Muon::MuonSegment>>& segments,
                                         const ToolHandle<Muon::IMuonPRDSelectionTool>& muonPRDSelectionTool,
-                                        const ToolHandle<Muon::IMuonSegmentMaker>& segmentMaker) const {
+                                        const ToolHandle<Muon::IMuonSegmentMaker>& segmentMaker,
+                                        float beta) const {
         const MuonHough::MuonLayerHough::Maximum& maximum = *maximumData.maximum;
         const std::vector<std::shared_ptr<const Muon::MuonClusterOnTrack>>& phiClusterOnTracks = maximumData.phiClusterOnTracks;
 
         // lambda to handle calibration and selection of MDTs
         auto handleMdt = [intersection, muonPRDSelectionTool](const Muon::MdtPrepData& prd,
-                                                              std::vector<const Muon::MdtDriftCircleOnTrack*>& mdts) {
-            const Muon::MdtDriftCircleOnTrack* mdt = muonPRDSelectionTool->calibrateAndSelect(intersection, prd);
+                                                              std::vector<const Muon::MdtDriftCircleOnTrack*>& mdts,
+                                                              float beta) {
+            const Muon::MdtDriftCircleOnTrack* mdt = muonPRDSelectionTool->calibrateAndSelect(intersection, prd, beta);
             if (mdt) mdts.push_back(mdt);
         };
 
@@ -1170,7 +1173,7 @@ namespace MuonCombined {
             } else if ((*hit)->prd) {
                 Identifier id = (*hit)->prd->identify();
                 if (m_idHelperSvc->isMdt(id))
-                    handleMdt(static_cast<const Muon::MdtPrepData&>(*(*hit)->prd), mdts);
+                    handleMdt(static_cast<const Muon::MdtPrepData&>(*(*hit)->prd), mdts, beta);
                 else
                     handleCluster(static_cast<const Muon::MuonCluster&>(*(*hit)->prd), clusters);
             }
@@ -1189,7 +1192,7 @@ namespace MuonCombined {
             // run segment finder
             auto segColl = std::make_unique<Trk::SegmentCollection>(SG::VIEW_ELEMENTS);
             segmentMaker->find(intersection.trackParameters->position(), intersection.trackParameters->momentum(), mdts, clusters,
-                               !clusters.empty(), segColl.get(), intersection.trackParameters->momentum().mag());
+                               !clusters.empty(), segColl.get(), intersection.trackParameters->momentum().mag(), 0, beta);
             if (segColl) {
                 Trk::SegmentCollection::iterator sit = segColl->begin();
                 Trk::SegmentCollection::iterator sit_end = segColl->end();

@@ -86,7 +86,7 @@ namespace Muon {
     void DCMathSegmentMaker::find(const Amg::Vector3D& roadpos, const Amg::Vector3D& roaddir,
                                   const std::vector<const MdtDriftCircleOnTrack*>& mdts,
                                   const std::vector<const MuonClusterOnTrack*>& clusters, bool hasPhiMeasurements,
-                                  Trk::SegmentCollection* segColl, double momentum, double sinAngleCut) const {
+                                  Trk::SegmentCollection* segColl, double momentum, double sinAngleCut, double beta) const {
         const EventContext& ctx = Gaudi::Hive::currentContext();
         if (m_doTimeOutChecks && Athena::Timeout::instance().reached()) {
             ATH_MSG_DEBUG("Timeout reached. Aborting sequence.");
@@ -220,7 +220,7 @@ namespace Muon {
         // loop over segments
         segmentCreationInfo sInfo(spVecs, multiGeo.get(), gToStation, amdbToGlobal, phimin, phimax);
         for (TrkDriftCircleMath::Segment& seg : segs) {
-            std::unique_ptr<MuonSegment> segment = createSegment(ctx, seg, chid, roadpos, roaddir2, mdts, hasPhiMeasurements, sInfo);
+            std::unique_ptr<MuonSegment> segment = createSegment(ctx, seg, chid, roadpos, roaddir2, mdts, hasPhiMeasurements, sInfo, beta);
             if (segment) segColl->push_back(segment.release());
         }
         ATH_MSG_DEBUG(" Done ");
@@ -229,7 +229,7 @@ namespace Muon {
     std::unique_ptr<MuonSegment> DCMathSegmentMaker::createSegment(const EventContext& ctx, TrkDriftCircleMath::Segment& segment, const Identifier& chid,
                                                    const Amg::Vector3D& roadpos, const Amg::Vector3D& roaddir2,
                                                    const std::vector<const MdtDriftCircleOnTrack*>& mdts, bool hasPhiMeasurements,
-                                                   segmentCreationInfo& sInfo) const {
+                                                   segmentCreationInfo& sInfo, double beta) const {
         bool isEndcap = m_idHelperSvc->isEndcap(chid);
         // find all curved segments
         MuonStationIndex::ChIndex chIndex = m_idHelperSvc->chamberIndex(chid);
@@ -318,7 +318,7 @@ namespace Muon {
         std::set<Identifier> deltaVec;
         std::set<Identifier> outoftimeVec;
 
-        associateMDTsToSegment(gdir, segment, sInfo.geom, sInfo.globalTrans, sInfo.amdbTrans, deltaVec, outoftimeVec, rioDistVec);
+        associateMDTsToSegment(gdir, segment, sInfo.geom, sInfo.globalTrans, sInfo.amdbTrans, deltaVec, outoftimeVec, rioDistVec, beta);
         std::vector<std::pair<double, std::unique_ptr<const Trk::MeasurementBase>>> garbage_collector;
 
         TrkDriftCircleMath::DCSLHitSelector hitSelector;
@@ -1153,7 +1153,7 @@ namespace Muon {
         const Amg::Vector3D& gdir, TrkDriftCircleMath::Segment& segment,
         const TrkDriftCircleMath::ChamberGeometry* multiGeo, const Amg::Transform3D& gToStation, const Amg::Transform3D& amdbToGlobal,
         std::set<Identifier>& deltaVec, std::set<Identifier>& outoftimeVec,
-        std::vector<std::pair<double,  std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) const {
+        std::vector<std::pair<double,  std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec, double beta) const {
         // clear result vectors
 
         // convert segment parameters + x position from road
@@ -1224,7 +1224,7 @@ namespace Muon {
             bool hasT0 = segment.hasT0Shift();
             if (!hasT0 || m_mdtCreatorT0.empty()) {
                 // ATH_MSG_VERBOSE(" recalibrate MDT hit");
-                nonconstDC.reset(m_mdtCreator->createRIO_OnTrack(*riodc->prepRawData(), mdtGP, &gdir));
+                nonconstDC.reset(m_mdtCreator->createRIO_OnTrack(*riodc->prepRawData(), mdtGP, &gdir, 0., nullptr, beta, 0.));
                 if (hasT0) ATH_MSG_WARNING("Attempted to change t0 without a properly configured MDT creator tool. ");
             } else {
                 ATH_MSG_VERBOSE(" recalibrate MDT hit with shift " << segment.t0Shift()<<" "<<m_printer->print(*riodc));

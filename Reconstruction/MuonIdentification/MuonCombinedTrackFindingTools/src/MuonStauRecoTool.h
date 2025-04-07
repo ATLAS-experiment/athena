@@ -165,7 +165,8 @@ namespace MuonCombined {
         void findSegments(const Muon::MuonSystemExtension::Intersection& intersection, MaximumData& maximumData,
                           std::vector<std::shared_ptr<const Muon::MuonSegment>>& t0fittedSegments,
                           const ToolHandle<Muon::IMuonPRDSelectionTool>& muonPRDSelectionTool,
-                          const ToolHandle<Muon::IMuonSegmentMaker>& segmentMaker) const;
+                          const ToolHandle<Muon::IMuonSegmentMaker>& segmentMaker,
+                          float beta = 1.) const;
 
         /** associate Hough maxima and associate time measurements */
         bool extractTimeMeasurements(const EventContext& ctx, const Muon::MuonSystemExtension& muonSystemExtension,
