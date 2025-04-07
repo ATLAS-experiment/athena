@@ -70,6 +70,7 @@ namespace GlobalSim {
   using GepAlgoHypothesisFIFO = std::vector<GepAlgoHypothesisPortsIn>;
 
   std::string eEmInputTOBToString(const std::bitset<72>&);
+  std::string eTauInputTOBToString(const std::bitset<72>&);
 
 }
 

@@ -8,6 +8,7 @@
 #include "AlgoConstants.h"
 #include "AlgoDataTypes.h"  //bitSetToInt
 #include "eEmTob.h"
+#include "eTauTob.h"
 
 #include <bitset>
 #include <vector>
@@ -37,6 +38,7 @@ namespace GlobalSim {
     
     GenericTob(){};
     GenericTob(const eEmTobPtr& in_tob);
+    GenericTob(const eTauTobPtr& in_tob);
     GenericTob(const std::string&);
 
     
