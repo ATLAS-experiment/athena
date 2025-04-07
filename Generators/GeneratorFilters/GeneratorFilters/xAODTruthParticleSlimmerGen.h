@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_XAODTRUTHPARTICLESLIMMERPHOGEN_H
@@ -29,11 +29,10 @@ public:
 
 private:
     /// The key for the output xAOD truth containers
-    std::string m_xaodTruthParticleContainerNameGen;
-    std::string m_xaodTruthParticleContainerName;
-    std::string m_xaodTruthEventContainerName;
+  SG::WriteHandleKey<xAOD::TruthParticleContainer> m_xaodTruthParticleContainerNameGen{this, "xAODTruthParticleContainerNameGen",  "TruthGen"};
+  SG::ReadHandleKey<xAOD::TruthEventContainer> m_xaodTruthEventContainerName{this, "xAODTruthEventContainerName", "TruthEvents"};
 
-    ToolHandle<IMCTruthClassifier> m_classif;
+  PublicToolHandle<IMCTruthClassifier> m_classif{this, "MCTruthClassifier", "MCTruthClassifier/DFCommonTruthClassifier"};
 }; // class xAODTruthParticleSlimmerGen
 
 #endif //GENERATORFILTERS_XAODTRUTHPARTICLESLIMMERPHOGEN_H

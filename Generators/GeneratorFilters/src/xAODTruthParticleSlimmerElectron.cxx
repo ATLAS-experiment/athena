@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -21,44 +21,37 @@
 xAODTruthParticleSlimmerElectron::xAODTruthParticleSlimmerElectron(const std::string &name, ISvcLocator *svcLoc)
     : AthAlgorithm(name, svcLoc)
 {
-    declareProperty("xAODTruthParticleContainerName", m_xaodTruthParticleContainerName = "TruthParticles");
-    declareProperty("xAODTruthParticleContainerNameElectron", m_xaodTruthParticleContainerNameElectron = "TruthElectrons");
-    declareProperty("xAODTruthEventContainerName", m_xaodTruthEventContainerName = "TruthEvents");
-    declareProperty("el_pt_selection", m_el_pt_selection = 1. * Gaudi::Units::GeV); //User provides units in MeV!
-    declareProperty("abseta_selection", m_abseta_selection = 5.);
 }
 
 StatusCode xAODTruthParticleSlimmerElectron::initialize()
 {
-    ATH_MSG_INFO("xAOD input TruthParticleContainer name = " << m_xaodTruthParticleContainerName);
-    ATH_MSG_INFO("xAOD output TruthParticleContainerElectron name = " << m_xaodTruthParticleContainerNameElectron);
-    ATH_MSG_INFO("xAOD input xAODTruthEventContainerName name = " << m_xaodTruthEventContainerName);
-    return StatusCode::SUCCESS;
+  ATH_CHECK(m_xaodTruthParticleContainerNameElectron.initialize());
+  ATH_MSG_INFO("xAOD output TruthParticleContainerElectron name = " << m_xaodTruthParticleContainerNameElectron.key());
+  ATH_CHECK(m_xaodTruthEventContainerName.initialize());
+  ATH_MSG_INFO("xAOD input xAODTruthEventContainerName name = " << m_xaodTruthEventContainerName.key());
+  return StatusCode::SUCCESS;
 }
 
 StatusCode xAODTruthParticleSlimmerElectron::execute()
 {
-    // If the containers already exists then assume that nothing needs to be done
-    if (evtStore()->contains<xAOD::TruthParticleContainer>(m_xaodTruthParticleContainerNameElectron))
+  // If the containers already exists then assume that nothing needs to be done
+  if (evtStore()->contains<xAOD::TruthParticleContainer>(m_xaodTruthParticleContainerNameElectron.key()))
     {
-        ATH_MSG_WARNING("xAOD Electron Truth Particles are already available in the event");
-        return StatusCode::SUCCESS;
+      ATH_MSG_WARNING("xAOD Electron Truth Particles are already available in the event");
+      return StatusCode::SUCCESS;
     }
 
-    // Create new output container
-    xAOD::TruthParticleContainer *xTruthParticleContainerElectron = new xAOD::TruthParticleContainer();
-    CHECK(evtStore()->record(xTruthParticleContainerElectron, m_xaodTruthParticleContainerNameElectron));
-    xAOD::TruthParticleAuxContainer *xTruthParticleAuxContainerElectron = new xAOD::TruthParticleAuxContainer();
-    CHECK(evtStore()->record(xTruthParticleAuxContainerElectron, m_xaodTruthParticleContainerNameElectron + "Aux."));
-    xTruthParticleContainerElectron->setStore(xTruthParticleAuxContainerElectron);
-    ATH_MSG_INFO("Recorded TruthParticleContainerElectron with key: " << m_xaodTruthParticleContainerNameElectron);
+  // Create new output container
+  SG::WriteHandle<xAOD::TruthParticleContainer> xTruthParticleContainerElectron(m_xaodTruthParticleContainerNameElectron);
+  ATH_CHECK(xTruthParticleContainerElectron.record(std::make_unique<xAOD::TruthParticleContainer>(), std::make_unique<xAOD::TruthParticleAuxContainer>()));
+  ATH_MSG_INFO("Recorded TruthParticleContainerElectron with key: " << m_xaodTruthParticleContainerNameElectron.key());
 
     // Retrieve full TruthEventContainer container
-    const xAOD::TruthEventContainer *xTruthEventContainer=NULL;
-    if (evtStore()->retrieve(xTruthEventContainer, m_xaodTruthEventContainerName).isFailure())
+  SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer{m_xaodTruthEventContainerName};
+  if ( !xTruthEventContainer.isValid() )
     {
-        ATH_MSG_ERROR("No TruthEvent collection with name " << m_xaodTruthEventContainerName << " found in StoreGate!");
-        return StatusCode::FAILURE;
+      ATH_MSG_ERROR("No TruthEvent collection with name " << m_xaodTruthEventContainerName.key() << " found in StoreGate!");
+      return StatusCode::FAILURE;
     }
     // Set up decorators if needed
     xAOD::TruthEventContainer::const_iterator itr;

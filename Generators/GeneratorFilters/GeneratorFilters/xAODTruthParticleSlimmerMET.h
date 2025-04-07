@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_XAODTRUTHPARTICLESLIMMERPHOMET_H
@@ -30,12 +30,13 @@ public:
     virtual StatusCode execute();
 
 private:
-    /// The key for the output xAOD truth containers
-    std::string m_xaodTruthParticleContainerNameMET;
-    std::string m_xaodTruthParticleContainerName;
-    std::string m_xaodTruthEventContainerName;
+  SG::ReadHandleKey<xAOD::TruthEventContainer> m_xaodTruthEventContainerName
+  {this, "xAODTruthEventContainerName", "TruthEvents"};
+  /// The key for the output xAOD truth containers
+  SG::WriteHandleKey<xAOD::TruthParticleContainer> m_xaodTruthParticleContainerNameMET
+    {this, "xAODTruthParticleContainerNameMET","TruthMET"};
 
-    ToolHandle<IMCTruthClassifier> m_classif;
+  PublicToolHandle<IMCTruthClassifier> m_classif{this, "MCTruthClassifier", "MCTruthClassifier/DFCommonTruthClassifier"};
 }; // class xAODTruthParticleSlimmerMET
 
 #endif //GENERATORFILTERS_XAODTRUTHPARTICLESLIMMERPHOMET_H
