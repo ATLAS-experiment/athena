@@ -4,6 +4,8 @@
 
 // class header
 #include "MonopolePhysicsTool.h"
+
+#include <memory>
 // package headers
 #include "CustomMonopole.h"
 #include "CustomMonopoleFactory.h"
@@ -55,24 +57,19 @@ MonopolePhysicsTool::~MonopolePhysicsTool()
 StatusCode MonopolePhysicsTool::initialize( )
 {
   ATH_MSG_DEBUG("MonopolePhysicsTool initialize( )");
-  this->SetPhysicsName(name());
   return StatusCode::SUCCESS;
 }
 
-MonopolePhysicsTool* MonopolePhysicsTool::GetPhysicsOption()
-{
-  return this;
+auto MonopolePhysicsTool::GetPhysicsOption() -> UPPhysicsConstructor {
+  return std::make_unique<MonopolePhysicsTool::PhysicsConstructor>(name(),
+                                                                   msgLevel());
 }
 
-
-void MonopolePhysicsTool::ConstructParticle()
-{
+void MonopolePhysicsTool::PhysicsConstructor::ConstructParticle() {
   ATH_MSG_DEBUG(" ConstructParticle for the Monopole being run");
   CustomMonopoleFactory::instance();
-
 }
-void MonopolePhysicsTool::ConstructProcess()
-{
+void MonopolePhysicsTool::PhysicsConstructor::ConstructProcess() {
 
   PARTICLEITERATOR->reset();
 

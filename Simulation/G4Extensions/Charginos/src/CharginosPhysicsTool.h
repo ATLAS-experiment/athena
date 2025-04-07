@@ -6,9 +6,10 @@
 #define CHARGINOS_CHARGINOSPHYSICSTOOL_H
 
 // Include files
+
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "G4AtlasInterfaces/IPhysicsOptionTool.h"
-#include "G4VPhysicsConstructor.hh"
+#include "G4AtlasInterfaces/IPhysicsConstructor.h"
 
 /** @class CharginosPhysicsTool CharginosPhysicsTool.h "G4AtlasInfrstructure/CharginosPhysicsTool.h"
  *
@@ -17,8 +18,8 @@
  *  @author Edoardo Farina
  *  @date   15-05-2015
  */
-class CharginosPhysicsTool :  public G4VPhysicsConstructor, public extends<AthAlgTool, IPhysicsOptionTool>  {
-public:
+class CharginosPhysicsTool : public extends<AthAlgTool, IPhysicsOptionTool> {
+ public:
   /// Standard constructor
   CharginosPhysicsTool( const std::string& type , const std::string& name,
                         const IInterface* parent ) ;
@@ -26,35 +27,38 @@ public:
   virtual ~CharginosPhysicsTool( ); ///< Destructor
 
   /// Initialize method
-  virtual StatusCode initialize( ) override final;
-  virtual void ConstructParticle() override final;
-  virtual void ConstructProcess() override final;
-
+  virtual StatusCode initialize() override final;
 
   /** Implements
    */
 
-  virtual CharginosPhysicsTool* GetPhysicsOption() override final;
+  virtual UPPhysicsConstructor GetPhysicsOption() override final;
 
+  class PhysicsConstructor : public IPhysicsContructor {
+   public:
+    PhysicsConstructor(const std::string &name, MSG::Level level,
+                       CharginosPhysicsTool const &charginosPhysicsTool)
+        : IPhysicsContructor(name, level),
+          m_CharginoMinusParams(charginosPhysicsTool.m_CharginoMinusParams),
+          m_CharginoPlusParams(charginosPhysicsTool.m_CharginoPlusParams),
+          m_NeutralinoParams(charginosPhysicsTool.m_NeutralinoParams) {}
+
+    virtual void ConstructParticle() override;
+    virtual void ConstructProcess() override;
+
+   private:
+    ParticleDefinitionParams const &m_CharginoMinusParams;
+    ParticleDefinitionParams const &m_CharginoPlusParams;
+    ParticleDefinitionParams const &m_NeutralinoParams;
+    G4ParticleDefinition *m_theCharginoMinus{nullptr};
+    G4ParticleDefinition *m_theCharginoPlus{nullptr};
+    G4ParticleDefinition *m_theNeutralino{nullptr};
+  };
 
 protected:
-
-
-  G4double m_CharginoPlusMass, m_CharginoPlusWidth, m_CharginoPlusCharge, m_CharginoPlusPDGCode, m_CharginoPlusLifetime;
-  G4bool m_CharginoPlusShortlived,  m_CharginoPlusStable;
-
-  G4double m_CharginoMinusMass, m_CharginoMinusWidth, m_CharginoMinusCharge, m_CharginoMinusPDGCode, m_CharginoMinusLifetime;
-  G4bool m_CharginoMinusShortlived,  m_CharginoMinusStable;
-
-  G4double m_NeutralinoMass, m_NeutralinoWidth, m_NeutralinoCharge, m_NeutralinoPDGCode, m_NeutralinoLifetime;
-  G4bool m_NeutralinoShortlived,  m_NeutralinoStable;
-
-
-  G4ParticleDefinition *m_theCharginoMinus;
-  G4ParticleDefinition *m_theCharginoPlus;
-  G4ParticleDefinition *m_theNeutralino;
+ ParticleDefinitionParams m_CharginoMinusParams;
+ ParticleDefinitionParams m_CharginoPlusParams;
+ ParticleDefinitionParams m_NeutralinoParams;
 };
-
-
 
 #endif // CHARGINOS_CHARGINOSPHYSICSTOOL_H

@@ -6,15 +6,13 @@
 #define TRTPhysicsTool_H
 
 // Include files
-#include "AthenaBaseComps/AthAlgTool.h"
 
+#include "AthenaBaseComps/AthAlgTool.h"
 #include "G4AtlasInterfaces/IPhysicsOptionTool.h"
 
 //to handle
+#include "G4AtlasInterfaces/IPhysicsConstructor.h"
 #include "GaudiKernel/ToolHandle.h"
-
-#include "G4VPhysicsConstructor.hh"
-
 
 /** @class TRTPhysicsTool TRTPhysicsTool.h "TRT:TR_Process/TRTPhysicsTool.h"
  *
@@ -23,9 +21,8 @@
  *  @author Edoardo Farina
  *  @date  18-05-2015
  */
-class TRTPhysicsTool final: public G4VPhysicsConstructor, public extends<AthAlgTool, IPhysicsOptionTool>
-{
-public:
+class TRTPhysicsTool final : public extends<AthAlgTool, IPhysicsOptionTool> {
+ public:
   /// Standard constructor
   TRTPhysicsTool( const std::string& type , const std::string& name,
                   const IInterface* parent ) ;
@@ -34,16 +31,26 @@ public:
 
   /// Initialize method
   virtual StatusCode initialize() override;
-  virtual void ConstructParticle() override;
-  virtual void ConstructProcess() override;
 
   /// IPhysicsOptionTool method; simply returns self.
-  virtual G4VPhysicsConstructor* GetPhysicsOption() override;
+  virtual UPPhysicsConstructor GetPhysicsOption() override;
 
-protected:
+  class PhysicsConstructor : public IPhysicsContructor{
+   public:
+    PhysicsConstructor(const std::string& name, MSG::Level level,
+                       const std::string& xml_file)
+        : IPhysicsContructor(name, level), m_xmlFile(xml_file) {}
+
+    virtual void ConstructParticle() override;
+    virtual void ConstructProcess() override;
+
+   private:
+    std::string m_xmlFile;
+   };
+
+ private:
 
   std::string m_xmlFile;
-
 };
 
 #endif
