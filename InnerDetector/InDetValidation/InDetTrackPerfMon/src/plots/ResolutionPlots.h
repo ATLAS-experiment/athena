@@ -68,6 +68,7 @@ namespace IDTPM {
     TH1* m_pull[ NPARAMS ]{};
     TH1* m_res[ NPARAMS ]{};
     TH1* m_sigma[ NPARAMS ]{};
+    TH1* m_significance[ NPARAMS ]{};
     TH2* m_corr[ NPARAMS ]{}; // 2D correlation plots
 
     TH2* m_resHelper[ NPARAMS ][ NPARAMSOUT ]{};

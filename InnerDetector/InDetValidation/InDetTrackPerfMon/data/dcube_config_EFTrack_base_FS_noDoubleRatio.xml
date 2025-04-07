@@ -105,6 +105,7 @@
         <hist1D name="pull_pt" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="res_pt" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="sigma_offl_pt" type="TH1D" plotopts="ratio" tests="KSnorm"/>
+        <hist1D name="significance_offl_pt" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist2D name="corr_offl_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_pt_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="resmean_pt_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
@@ -121,6 +122,7 @@
         <hist1D name="pull_eta" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="res_eta" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="sigma_offl_eta" type="TH1D" plotopts="ratio" tests="KSnorm"/>
+        <hist1D name="significance_offl_eta" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist2D name="corr_offl_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_eta_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="resmean_eta_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
@@ -137,6 +139,7 @@
         <hist1D name="pull_d0" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="res_d0" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="sigma_offl_d0" type="TH1D" plotopts="ratio" tests="KSnorm"/>
+        <hist1D name="significance_offl_d0" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist2D name="corr_offl_vs_truth_d0" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_d0_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="resmean_d0_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
@@ -153,6 +156,7 @@
         <hist1D name="pull_z0" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="res_z0" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="sigma_offl_z0" type="TH1D" plotopts="ratio" tests="KSnorm"/>
+        <hist1D name="significance_offl_z0" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist2D name="corr_offl_vs_truth_z0" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_z0_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="resmean_z0_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
@@ -169,6 +173,7 @@
         <hist1D name="pull_qoverp" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="res_qoverp" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="sigma_offl_qoverp" type="TH1D" plotopts="ratio" tests="KSnorm"/>
+        <hist1D name="significance_offl_qoverp" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist2D name="corr_offl_vs_truth_qoverp" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_qoverp_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="resmean_qoverp_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
@@ -185,6 +190,7 @@
         <hist1D name="pull_ptqopt" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="res_ptqopt" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="sigma_offl_ptqopt" type="TH1D" plotopts="ratio" tests="KSnorm"/>
+        <hist1D name="significance_offl_ptqopt" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist2D name="corr_offl_vs_truth_ptqopt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_ptqopt_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="resmean_ptqopt_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
@@ -201,6 +207,7 @@
         <hist1D name="pull_theta" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="res_theta" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="sigma_offl_theta" type="TH1D" plotopts="ratio" tests="KSnorm"/>
+        <hist1D name="significance_offl_theta" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist2D name="corr_offl_vs_truth_theta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_theta_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="resmean_theta_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
@@ -217,6 +224,7 @@
         <hist1D name="pull_phi" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="res_phi" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="sigma_offl_phi" type="TH1D" plotopts="ratio" tests="KSnorm"/>
+        <hist1D name="significance_offl_phi" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist2D name="corr_offl_vs_truth_phi" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_phi_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="resmean_phi_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
@@ -233,6 +241,7 @@
         <hist1D name="pull_z0sin" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="res_z0sin" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="sigma_offl_z0sin" type="TH1D" plotopts="ratio" tests="KSnorm"/>
+        <hist1D name="significance_offl_z0sin" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist2D name="corr_offl_vs_truth_z0sin" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_z0sin_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
         <hist1D name="resmean_z0sin_vs_truth_inclusive" type="TH1D" plotopts="ratio" tests="KSnorm"/>
