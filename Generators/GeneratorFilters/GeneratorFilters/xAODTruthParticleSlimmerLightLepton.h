@@ -30,9 +30,9 @@ public:
     virtual StatusCode execute(const EventContext& context) const;
 
 private:
-    /// The key for the output xAOD truth containers
     SG::ReadHandleKey<xAOD::TruthEventContainer> m_xaodTruthEventContainerNameReadHandleKey
     {this,"xAODTruthEventContainerName","TruthEvents","Name of Truth Events container"};
+    /// The key for the output xAOD truth containers
     SG::WriteHandleKey<xAOD::TruthParticleContainer> m_xaodTruthParticleContainerNameLightLeptonKey
     {this, "xAODTruthParticleContainerNameLightLepton","TruthLightLeptons","Name of Truth Light Leptons contatiner from the slimmer"};
     
