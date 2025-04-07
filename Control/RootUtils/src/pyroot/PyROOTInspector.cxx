@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: PyROOTInspector.cxx 790007 2016-12-15 17:46:55Z ssnyder $
 
 //#define PYROOT_INSPECTOR_DBG 1
 #define PYROOT_INSPECTOR_DBG 0
@@ -199,6 +198,7 @@ recurse_pyinspect(PyObject *pyobj,
       (tcls->IsTObject() && clsname != "TLorentzVector") ||
       (retvecs && vecnames.count (clsname) > 0))
   {
+    // Return the object directly.
     PyObject *val = PyTuple_New(2);
     PyObject *v0 = pyobj_name; Py_INCREF(v0);
     PyObject *v1 = pyobj;      Py_XINCREF(pyobj);
@@ -243,6 +243,30 @@ recurse_pyinspect(PyObject *pyobj,
       Py_DECREF(v1);
       Py_DECREF(v0);
     }
+    return;
+  }
+
+  if (clsname.starts_with("ElementLink<")) {
+    PyObject* key = PyObject_CallMethod (pyobj, "key", nullptr);
+    PyObject* index = PyObject_CallMethod (pyobj, "index", nullptr);
+    PyObject *val= PyTuple_New(3);
+    PyObject *v0 = pyobj_name; Py_INCREF(v0);
+    PyTuple_SET_ITEM(val, 0, v0);
+    PyTuple_SET_ITEM(val, 1, key);
+    PyTuple_SET_ITEM(val, 2, index);
+    PyList_Append(pystack, val);
+    Py_DECREF(val);
+    return;
+  }
+
+  if (clsname.starts_with("DataLink<")) {
+    PyObject* key = PyObject_CallMethod (pyobj, "key", nullptr);
+    PyObject *val= PyTuple_New(2);
+    PyObject *v0 = pyobj_name; Py_INCREF(v0);
+    PyTuple_SET_ITEM(val, 0, v0);
+    PyTuple_SET_ITEM(val, 1, key);
+    PyList_Append(pystack, val);
+    Py_DECREF(val);
     return;
   }
 
