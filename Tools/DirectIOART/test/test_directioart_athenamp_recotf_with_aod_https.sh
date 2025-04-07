@@ -11,7 +11,7 @@ set -e
 Derivation_tf.py \
   --multiprocess True \
   --athenaMPMergeTargetSize 'DAOD_*:0' \
-  --inputAODFile https://webdav.mwt2.org:2881/atlasdatadisk/rucio/data18_13TeV/4e/57/data18_13TeV.00349263.physics_Main.merge.AOD.f937_m1972._lb0149._0001.1 \
+  --inputAODFile https://lcg-lrz-http.grid.lrz.de:443/pnfs/lrz-muenchen.de/data/atlas/dq2/atlasdatadisk/rucio/mc15_13TeV/ed/68/AOD.05536542._000001.pool.root.1 \
   --outputDAODFile art.pool.root \
   --formats TEST1 \
   --maxEvents 100
