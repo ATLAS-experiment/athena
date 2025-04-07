@@ -1,6 +1,6 @@
 #!/bin/env python3
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Original Author: davide.gerbaudo@gmail.com, Jul 2017
 # Modified by edward.moyse@cern.ch, Dec 2020
@@ -138,23 +138,6 @@ def main():
 
     # Create a Draft sweep MR in GitLab
     if args.sweep and args.token and gitlab_available:
-        # Warn in case one of the merged MRs has the sweep:ignore label
-
-        sweep_ignore = [mr for mr in merged_mrs if 'sweep:ignore' in mr.labels]
-        if sweep_ignore:
-            print('*'*80)
-            print('WARNING - the following MRs have the sweep:ignore label attached')
-            for mr in sweep_ignore:
-                print(f'  { mr.web_url} [branch: {mr.source_branch}]')
-            print()
-            print('Check the MRs and if needed revert them before proceeding:')
-            for mr in sweep_ignore:
-                print(' ', get_revert_cmd(mr.source_branch))
-            print('  git push origin')
-            print('  # Then rerun prepare_release_notes.py, ignore this message and edit the MR description as needed')
-            print('*'*80)
-            print()
-
         current_branch = subprocess.check_output("git rev-parse --abbrev-ref HEAD",
                                                  shell=True).decode('ascii').strip()
         msg = f'Would you like me to create the sweep MR in gitlab from "{current_branch}"?'
@@ -243,13 +226,6 @@ def get_command_output(command, with_current_environment=False):
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
     stdout, stderr = p.communicate()
     return {"stdout": stdout, "stderr": stderr, "returncode": p.returncode}
-
-
-def get_revert_cmd(branch):
-    """Get git revert commands required to revert the given branch name"""
-    # Find the merge commit that mentions the branch name
-    commit = get_command_output(f"git log --pretty=format:%H --grep \"^Merge branch '{branch}'\"")['stdout'].decode('ascii')
-    return f"git revert -m1 {commit}"
 
 
 class MergeRequestInfo(object):
