@@ -133,6 +133,20 @@ InDetPhysValMonitoringTool::initialize() {
 
   ATH_CHECK( m_trkParticleName.initialize() );
   ATH_CHECK( m_truthParticleName.initialize( (m_pileupSwitch == "HardScatter" or m_pileupSwitch == "All") and not m_truthParticleName.key().empty() ) );
+  if (not m_truthParticleName.key().empty()) {
+     // create decor handle keys for truth particle decorations which are needed by CachedGetAssocTruth
+     // The existence of the handles is good enough to ensure that data dependencies are propagated
+     // and that the decorations exist when this tool is being called. Albeit not very elegant
+     // there is no need to create decor handles for the keys and use those instead of static
+     // accessors. To keep changes minimal the original static accessors are not replaced.
+     std::vector<std::string> trk_decorations;
+     IDPVM::CachedGetAssocTruth::neededTrackParticleDecorations(trk_decorations);
+     IDPVM::addReadDecoratorHandleKeys(*this,
+                                       m_trkParticleName,
+                                       "" /* no configurable prefix*/,
+                                       trk_decorations,
+                                       m_linkTrkDecor);
+  }
   ATH_CHECK( m_vertexContainerName.initialize( not m_vertexContainerName.empty() ) );
   ATH_CHECK( m_truthVertexContainerName.initialize( not m_truthVertexContainerName.key().empty() ) );
   ATH_CHECK( m_eventInfoContainerName.initialize() );

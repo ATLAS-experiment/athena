@@ -32,9 +32,12 @@ namespace IDPVM {
     ///Get the associated truth particle, given a track particle
     const xAOD::TruthParticle* operator () (const xAOD::TrackParticle* trackParticle);
     const xAOD::TruthParticle* getTruth(const xAOD::TrackParticle* const trackParticle);
+
+    static void neededTrackParticleDecorations(std::vector<std::string> &decorations);
   private:
     ///private cache container; map or unordered_map could be used
     std::unordered_map<const xAOD::TrackParticle*, const xAOD::TruthParticle*> m_cache;
+    static const std::string s_trackParticleLinkDecorationName;
   };
 }// end of namespace
 #endif
