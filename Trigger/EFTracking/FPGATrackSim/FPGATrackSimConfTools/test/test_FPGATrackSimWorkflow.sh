@@ -75,11 +75,11 @@ mv sectors* corr* banks
 echo "... analysis on wrapper"
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.wrapperFileName="wrapper.root" \
-    Trigger.FPGATrackSim.mapsDir=./maps/ \
+    Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
     Trigger.FPGATrackSim.pipeline='F-600' \
     Trigger.FPGATrackSim.tracking=True \
     Trigger.FPGATrackSim.Hough.secondStage=False \
-    Trigger.FPGATrackSim.bankDir=./banks/
+    Trigger.FPGATrackSim.bankDir=${BANKS_5L}
 ls -l
 echo "... analysis on wrapper, this part is done ..."
 
@@ -106,8 +106,8 @@ echo "... analysis on RDO"
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
         --evtMax=${RDO_EVT} \
         --filesInput=${RDO_SINGLE_MUON} \
-        Trigger.FPGATrackSim.mapsDir=./maps/ \
-        Trigger.FPGATrackSim.bankDir=./banks/ \
+        Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
+        Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
         Trigger.FPGATrackSim.pipeline='F-600' \
         Trigger.FPGATrackSim.tracking=True \
         Trigger.FPGATrackSim.sampleType=${SAMPLE_TYPE} \
