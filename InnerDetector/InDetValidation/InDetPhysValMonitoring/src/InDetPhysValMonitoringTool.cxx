@@ -17,7 +17,6 @@
 #include "CachedGetAssocTruth.h"
 
 #include "safeDecorator.h"
-// #include "TrackTruthLookup.h"
 //
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "xAODTracking/TrackParticle.h"
