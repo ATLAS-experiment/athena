@@ -6,6 +6,10 @@
 
 // local
 #include "ExtraParticlesPhysicsTool.h"
+
+#include <G4VPhysicsConstructor.hh>
+#include <memory>
+
 #include "CustomParticle.hh"
 
 // Geant4 headers
@@ -46,59 +50,64 @@ ExtraParticlesPhysicsTool::~ExtraParticlesPhysicsTool() {}
 // Initialize
 //=============================================================================
 StatusCode ExtraParticlesPhysicsTool::initialize() {
-    ATH_MSG_DEBUG("initializing...");
-    this->SetPhysicsName(this->name());
-    return StatusCode::SUCCESS;
+  ATH_MSG_DEBUG("initializing...");
+  return StatusCode::SUCCESS;
 }
 
 //=============================================================================
 // GetPhysicsOption
 //=============================================================================
-ExtraParticlesPhysicsTool *ExtraParticlesPhysicsTool::GetPhysicsOption() {
-    return this;
+auto ExtraParticlesPhysicsTool::GetPhysicsOption() -> UPPhysicsConstructor {
+  return std::make_unique<ExtraParticlesPhysicsTool::PhysicsConstructor>(
+      name(), this->msgLevel(), m_extraParticlesConfig);
 }
 
 //=============================================================================
 // ConstructParticle
 //=============================================================================
-void ExtraParticlesPhysicsTool::ConstructParticle() {
-    ATH_MSG_DEBUG("ExtraParticlesPhysicsTool::ConstructParticle - start");
-    ATH_MSG_DEBUG("ExtraParticlesPhysicsTool::ConstructParticle - m_extraParticlesConfig = " << m_extraParticlesConfig);
+void ExtraParticlesPhysicsTool::PhysicsConstructor::ConstructParticle() {
+  ATH_MSG_DEBUG("ExtraParticlesPhysicsTool::ConstructParticle - start");
+  ATH_MSG_DEBUG(
+      "ExtraParticlesPhysicsTool::ConstructParticle - m_extraParticlesConfig = "
+      << m_extraParticlesConfig);
 
-    // the existing particle table
-    G4ParticleTable *theParticleTable = G4ParticleTable::GetParticleTable();
+  // the existing particle table
+  G4ParticleTable *theParticleTable = G4ParticleTable::GetParticleTable();
 
-    for (const auto &particle : m_extraParticlesConfig) {
+  for (const auto &particle : m_extraParticlesConfig) {
 
-        G4String name = particle.first;
-        G4double mass = particle.second[0];
-        G4double width = particle.second[1];
-        G4int charge = particle.second[2];
-        G4int pdg = particle.second[3];
-        G4double lifetime = particle.second[4];
-        G4bool stable = false;
+    G4String name = particle.first;
+    G4double mass = particle.second[0];
+    G4double width = particle.second[1];
+    G4int charge = particle.second[2];
+    G4int pdg = particle.second[3];
+    G4double lifetime = particle.second[4];
+    G4bool stable = false;
 
-        // don't add if the particle already exists
-        if (theParticleTable->FindParticle(pdg)) {
-          ATH_MSG_DEBUG("Skipping " << theParticleTable->FindParticle(pdg)->GetParticleName() << " ("<<pdg<<") as it is already in the ParticleTable.");
-          continue;
-        }
-
-        // printout
-        ATH_MSG_DEBUG("Adding: " << name << " " << pdg << " " << charge << " "
-                                 << mass << " " << width << " " << lifetime);
-
-        // create the new particle
-        m_extraParticles.insert(new CustomParticle(name, mass, width, charge,
-                                                   pdg, stable, lifetime));
+    // don't add if the particle already exists
+    if (theParticleTable->FindParticle(pdg)) {
+      ATH_MSG_DEBUG("Skipping "
+                    << theParticleTable->FindParticle(pdg)->GetParticleName()
+                    << " (" << pdg
+                    << ") as it is already in the ParticleTable.");
+      continue;
     }
-    ATH_MSG_DEBUG("ExtraParticlesPhysicsTool::ConstructParticle - end");
+
+    // printout
+    ATH_MSG_DEBUG("Adding: " << name << " " << pdg << " " << charge << " "
+                             << mass << " " << width << " " << lifetime);
+
+    // create the new particle
+    m_extraParticles.insert(
+        new CustomParticle(name, mass, width, charge, pdg, stable, lifetime));
+  }
+  ATH_MSG_DEBUG("ExtraParticlesPhysicsTool::ConstructParticle - end");
 }
 
 //=============================================================================
 // ConstructProcess
 //=============================================================================
-void ExtraParticlesPhysicsTool::ConstructProcess() {
+void ExtraParticlesPhysicsTool::PhysicsConstructor::ConstructProcess() {
   ATH_MSG_DEBUG("ExtraParticlesPhysicsTool::ConstructProcess - start");
   if (msgLvl(MSG::DEBUG)) {
     std::vector<std::string> extraParticleNames;

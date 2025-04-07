@@ -28,10 +28,10 @@
 //=============================================================================
 // Standard constructor, initializes variables
 //=============================================================================
-G4StepLimitationTool::G4StepLimitationTool( const std::string& type,
-                                            const std::string& nam,const IInterface* parent )
-  : base_class ( type, nam , parent )
-{
+G4StepLimitationTool::G4StepLimitationTool(const std::string& type,
+                                           const std::string& name,
+                                           const IInterface* parent)
+    : base_class(type, name, parent) {
   m_physicsOptionType = G4AtlasPhysicsOption::Type::GlobalProcesses;
 }
 
@@ -50,25 +50,16 @@ StatusCode G4StepLimitationTool::initialize( )
 {
   ATH_MSG_VERBOSE("G4StepLimitationTool initialize(  )");
 
-  this->SetPhysicsName(name());
   return StatusCode::SUCCESS;
 }
 
-
-G4VPhysicsConstructor* G4StepLimitationTool::GetPhysicsOption()
-{
-  return this;
+auto G4StepLimitationTool::GetPhysicsOption() -> UPPhysicsConstructor {
+  return std::make_unique<G4StepLimitationTool::PhysicsConstructor>(name(), this->msgLevel());
 }
 
-void G4StepLimitationTool::ConstructParticle()
-{
+void G4StepLimitationTool::PhysicsConstructor::ConstructParticle() {}
 
-
-
-}
-
-void G4StepLimitationTool::ConstructProcess()
-{
+void G4StepLimitationTool::PhysicsConstructor::ConstructProcess() {
 
   ATH_MSG_DEBUG(" ConstructProcess for G4StepLimiter being run");
   PARTICLEITERATOR->reset();

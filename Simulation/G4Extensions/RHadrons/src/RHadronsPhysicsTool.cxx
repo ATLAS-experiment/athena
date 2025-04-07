@@ -20,6 +20,7 @@
 #include "G4BaryonConstructor.hh"
 
 // STL headers
+#include <memory>
 #include <string>
 
 
@@ -53,24 +54,20 @@ RHadronsPhysicsTool::~RHadronsPhysicsTool()
 StatusCode RHadronsPhysicsTool::initialize( )
 {
   ATH_MSG_DEBUG("RHadronsPhysicsTool::initialize()");
-  this->SetPhysicsName(name());
   return StatusCode::SUCCESS;
 }
 
-RHadronsPhysicsTool* RHadronsPhysicsTool::GetPhysicsOption()
-{
-  return this;
+auto RHadronsPhysicsTool::GetPhysicsOption() -> UPPhysicsConstructor {
+  return std::make_unique<RHadronsPhysicsTool::PhysicsConstructor>(
+      name(), this->msgLevel(), m_standardpdgidtodecay.value());
 }
 
-
-void RHadronsPhysicsTool::ConstructParticle()
-{
+void RHadronsPhysicsTool::PhysicsConstructor::ConstructParticle() {
   ATH_MSG_DEBUG("RHadronsPhysicsTool::ConstructParticle() - start");
   CustomParticleFactory::loadCustomParticles();
   ATH_MSG_DEBUG("RHadronsPhysicsTool::ConstructParticle() - end");
 }
-void RHadronsPhysicsTool::ConstructProcess()
-{
+void RHadronsPhysicsTool::PhysicsConstructor::ConstructProcess() {
   ATH_MSG_DEBUG("RHadronsPhysicsTool::ConstructProcess() - start");
   G4Decay* pythiaDecayProcess = new G4Decay();
   pythiaDecayProcess->SetExtDecayer( new RHadronPythiaDecayer("RHadronPythiaDecayer") );
@@ -82,7 +79,7 @@ void RHadronsPhysicsTool::ConstructProcess()
   G4BaryonConstructor::ConstructParticle();
   ATH_MSG_DEBUG("RHadronsPhysicsTool::ConstructProcess() - m_standardpdgidtodecay = " << m_standardpdgidtodecay);
   G4ProcessManager *templateProcessMgr = G4ParticleTable::GetParticleTable()->FindParticle(4122)->GetProcessManager();
-  for (const int pid : m_standardpdgidtodecay.value()) {
+  for (const int pid : m_standardpdgidtodecay) {
     ATH_MSG_VERBOSE ( "Adding decay for "<<pid );
     G4ParticleDefinition *particle = G4ParticleTable::GetParticleTable()->FindParticle( pid );
     if (particle) {

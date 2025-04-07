@@ -4,6 +4,8 @@
 
 // class header
 #include "G4ScoringProcessTool.h"
+
+#include <memory>
 // package headers
 #include "G4ParallelWorldScoringProcess.hh"
 // Geant4 headers
@@ -52,24 +54,18 @@ G4ScoringProcessTool::~G4ScoringProcessTool()
 StatusCode G4ScoringProcessTool::initialize( )
 {
   ATH_MSG_DEBUG("G4ScoringProcessTool initialize( )");
-  this->SetPhysicsName(name());
   return StatusCode::SUCCESS;
 }
 
-
-G4ScoringProcessTool* G4ScoringProcessTool::GetPhysicsOption()
-{
-  return this;
+auto G4ScoringProcessTool::GetPhysicsOption() -> UPPhysicsConstructor {
+  return std::make_unique<G4ScoringProcessTool::PhysicsConstructor>(name(),
+                                                                    msgLevel());
 }
 
-void G4ScoringProcessTool::ConstructParticle()
-{
+void G4ScoringProcessTool::PhysicsConstructor::ConstructParticle() {}
 
-}
-
-void G4ScoringProcessTool::ConstructProcess()
-{
-   // Add parallel world scoring process
+void G4ScoringProcessTool::PhysicsConstructor::ConstructProcess() {
+  // Add parallel world scoring process
   ATH_MSG_DEBUG(" ScoringProcessDefinition::ConstructProcess()");
 
   G4ParallelWorldScoringProcess* theParallelWorldScoringProcess 

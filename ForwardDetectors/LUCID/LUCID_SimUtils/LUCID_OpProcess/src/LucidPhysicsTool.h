@@ -6,15 +6,13 @@
 #define LucidPhysicsTool_H
 
 // Include files
+
 #include "AthenaBaseComps/AthAlgTool.h"
-
-
 #include "G4AtlasInterfaces/IPhysicsOptionTool.h"
 
 //to handle
+#include "G4AtlasInterfaces/IPhysicsConstructor.h"
 #include "GaudiKernel/ToolHandle.h"
-
-#include "G4VPhysicsConstructor.hh"
 
 /** @class LucidPhysicsTool LucidPhysicsTool.h "G4AtlasInfrstructure/LucidPhysicsTool.h"
  *
@@ -23,8 +21,8 @@
  *  @author Edoardo Farina
  *  @date   18-05-2015
  */
-class LucidPhysicsTool :  public G4VPhysicsConstructor, public AthAlgTool, virtual public IPhysicsOptionTool  {
-public:
+class LucidPhysicsTool : public AthAlgTool, virtual public IPhysicsOptionTool {
+ public:
   /// Standard constructor
   LucidPhysicsTool( const std::string& type , const std::string& name,
                     const IInterface* parent ) ;
@@ -33,22 +31,18 @@ public:
 
   /// Initialize method
   virtual StatusCode initialize() override final;
-  virtual void ConstructParticle() override final;
-  virtual void ConstructProcess() override final;
-
 
   /** Implements
    */
-  virtual G4VPhysicsConstructor* GetPhysicsOption() override final;
+  UPPhysicsConstructor GetPhysicsOption() override;
 
+  class PhysicsConstructor : public IPhysicsContructor {
+   public:
+    using IPhysicsContructor::IPhysicsContructor;
 
-protected:
-
-
-
-
+    virtual void ConstructParticle() override;
+    virtual void ConstructProcess() override;
+  };
 };
-
-
 
 #endif
