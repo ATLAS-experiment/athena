@@ -50,6 +50,7 @@ StatusCode IDTPM::ResolutionPlots::bookPlots()
     ATH_CHECK( retrieveAndBook( m_pull[i], "pull_"+m_paramName[i] ) );
     ATH_CHECK( retrieveAndBook( m_res[i], "res_"+m_paramName[i] ) );
     ATH_CHECK( retrieveAndBook( m_sigma[i], "sigma_"+m_testType+"_"+m_paramName[i] ) );
+    ATH_CHECK( retrieveAndBook( m_significance[i], "significance_"+m_testType+"_"+m_paramName[i] ) );
     ATH_CHECK( retrieveAndBook( m_corr[i], "corr_"+m_testType+"_vs_"+m_refType+"_"+m_paramName[i] ) );
 
     /// loop all vs variables
@@ -99,6 +100,7 @@ StatusCode IDTPM::ResolutionPlots::fillPlots(
     if( i==PHI ) residual = deltaPhi( ptest, pref ); // angular difference
     float pull = testErrorP[i] > 0. ? residual / testErrorP[i] : -9999.;
     float sigma_test = testErrorP[i];
+    float significance_test = testErrorP[i] > 0. ? testP[i] / testErrorP[i] : -9999.;
 
     if( i==QOVERPT ) {
       residual = testP[i] / refP[i] - 1.; // Relative q/pt resolution
@@ -108,6 +110,7 @@ StatusCode IDTPM::ResolutionPlots::fillPlots(
     ATH_CHECK( fill( m_pull[i], pull, weight ) );
     ATH_CHECK( fill( m_res[i], residual, weight ) );
     ATH_CHECK( fill( m_sigma[i], sigma_test, weight ) );
+    ATH_CHECK( fill( m_significance[i], significance_test, weight ) );
     ATH_CHECK( fill( m_corr[i], refP[i], testP[i], weight ) );
 
     for( unsigned int j=0; j<NPARAMSOUT; j++ ) {
