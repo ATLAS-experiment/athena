@@ -85,7 +85,13 @@ def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", RDOContainer = None, **kw
     if not  flags.Muon.enableNRPC:
         tool_kwargs["NrpcInputCollection"] = ""
 
-    
+    #### After the tree ripping the main LHC powerline, the Rpc
+    #### community has managed to introduce a 50 ns shift on top
+    #### of the already existing 12.5ns shift in the RDO -> PRD conversion
+    #### Favoloso...
+    #### corresponding elog entry: https://atlasop.cern.ch/elisa/display/512036
+    if not flags.Input.isMC and (flags.Muon.MuonTrigger or flags.Input.RunNumbers[0] >= 454434):
+        tool_kwargs["timeShift"] = 37.5
     #Setup RPC RDO decoder to be consistent with RPC readout settings
     rpcrdo_decode = CompFactory.Muon.RpcRDO_Decoder("RpcRDO_Decoder", BCZERO=flags.Trigger.L1MuonSim.RPCNBCZ)
     if flags.Muon.MuonTrigger:
