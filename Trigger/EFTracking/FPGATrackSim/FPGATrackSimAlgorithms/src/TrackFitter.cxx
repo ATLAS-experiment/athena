@@ -1,5 +1,5 @@
 
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include <algorithm>
 #include <iostream>
@@ -339,8 +339,8 @@ void TrackFitter::makeTrackCandidates(const FPGATrackSimRoad & road, const FPGAT
                 // Here we "reject" it by marking the candidate as "invalid", to be rejected later.
                 // That require another field on the track object, but it avoids having to change the sizes
                 // of arrays computed above.
-                if (hit->getHitType() == HitType::spacepoint && (hit->getPhysLayer() % 2) == 1) {
-                    const FPGATrackSimHit inner_hit = track_cands[icomb].getFPGATrackSimHits().at(layer - 1);
+                if (hit->getHitType() == HitType::spacepoint && (hit->getPhysLayer() % 2) == 1 && layer>0) {
+                    const FPGATrackSimHit inner_hit = track_cands[icomb].getFPGATrackSimHits().at(layer - 1);//avoid negative index
                     if ((hit->getX() != inner_hit.getX()) || (hit->getY() != inner_hit.getY()) || (hit->getZ() != inner_hit.getZ())) {
                         track_cands[icomb].setValidCand(false);
                     }

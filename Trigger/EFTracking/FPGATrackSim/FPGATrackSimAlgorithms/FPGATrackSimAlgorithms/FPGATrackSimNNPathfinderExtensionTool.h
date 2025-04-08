@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackPATHFINDEREXTENSION_H
 #define FPGATrackPATHFINDEREXTENSION_H
@@ -57,7 +57,7 @@
       for (unsigned layer = 0; layer < m_hits.size(); layer++) {
 	std::vector<std::shared_ptr<const FPGATrackSimHit>> thislayerVec;
 	thislayerVec.push_back(m_hits[layer]);
-	vecHits[layer] = thislayerVec;
+	vecHits[layer] = std::move(thislayerVec);
       }
       return vecHits;
     }

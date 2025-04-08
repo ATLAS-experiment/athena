@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGATrackSimLogicalHitsProcessAlg.h"
 
@@ -175,7 +175,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // Get roads
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> prefilter_roads;
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st =
-        prefilter_roads;
+        std::move(prefilter_roads);
     ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st, *FPGATruthTracks));
     
     auto mon_nroads_1st = Monitored::Scalar<unsigned>("nroads_1st", roads_1st.size());
@@ -196,14 +196,14 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     if (m_filterRoads)
     {
         ATH_CHECK(m_roadFilterTool->filterRoads(roads_1st, postfilter_roads));
-        roads_1st = postfilter_roads;
+        roads_1st = std::move(postfilter_roads);
     }
     if (m_doOverlapRemoval) ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(roads_1st));
     // Road Filter2
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> postfilter2_roads;
     if (m_filterRoads2) {
         ATH_CHECK(m_roadFilterTool2->filterRoads(roads_1st, postfilter2_roads));
-        roads_1st = postfilter2_roads;
+        roads_1st = std::move(postfilter2_roads);
     }
 
     auto mon_nroads_1st_postfilter = Monitored::Scalar<unsigned>("nroads_1st_postfilter", roads_1st.size());

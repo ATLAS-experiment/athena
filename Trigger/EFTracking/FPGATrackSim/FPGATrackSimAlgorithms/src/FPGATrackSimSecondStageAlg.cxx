@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /* Second stage alg needs to:
  *  retrieve Tracks_1st and Hits_2nd from storegate
@@ -179,7 +179,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
 
     // Get second stage roads from tracks.
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> prefilter_roads;
-    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads = prefilter_roads;
+    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads = std::move(prefilter_roads);
 
     if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: TrackExtension");
     // Use the track extension tool to actually produce a new set of roads.
@@ -231,7 +231,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> post_spfilter_roads;
     if (m_doSpacepoints) {
         ATH_CHECK(m_spRoadFilterTool->filterRoads(roads, post_spfilter_roads));
-        roads = post_spfilter_roads;
+        roads = std::move(post_spfilter_roads);
     }
     if constexpr (enableBenchmark) m_chrono->chronoStop("2nd Stage: Road Filtering");
     auto mon_nroads_postfilter = Monitored::Scalar<unsigned>("nroads_2nd_postfilter", roads.size());
