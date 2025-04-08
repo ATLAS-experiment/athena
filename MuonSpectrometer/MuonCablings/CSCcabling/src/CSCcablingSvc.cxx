@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ISvcLocator.h"
@@ -15,28 +15,8 @@
 
 // Author: Ketevi A. Assamagan - may 2007
 
-CSCcablingSvc::CSCcablingSvc(const std::string& name, ISvcLocator* sl)
-  : ::AthService(name,sl), m_side(2), m_rod(16), m_max(32)
-{
 
-  declareProperty("Run1Cabling", m_run1 = false);
-}
-
-StatusCode CSCcablingSvc::queryInterface(const InterfaceID& riid, void** ppvIF) {
- 
-  if( IID_ICSCcablingSvc.versionMatch(riid) ) { 
-      *ppvIF = (CSCcablingSvc*)this; 
-  } else { 
-    return ::AthService::queryInterface(riid, ppvIF); 
-  }
-
-  return StatusCode::SUCCESS;
-} 
-
-StatusCode CSCcablingSvc::initialize() { 
-
-  ATH_MSG_DEBUG ( " in initialize()" );
-  ATH_CHECK( AthService::initialize() );
+StatusCode CSCcablingSvc::initialize() {
 
   // Retrieve geometry config information from the database (RUN1, RUN2, etc...)
   SmartIF<IRDBAccessSvc> rdbAccess{service("RDBAccessSvc")};
