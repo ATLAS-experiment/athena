@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -11,7 +11,6 @@
 #define MUONTGC_CABLING_MUONTGC_CABLINGSVC_H
 
 #include "AthenaBaseComps/AthService.h"
-#include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 
@@ -21,24 +20,20 @@
 #include "MuonTGC_Cabling/TGCCabling.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <algorithm>
 
 class Identifier;
 
-class MuonTGC_CablingSvc : public AthService, virtual public IInterface
+class MuonTGC_CablingSvc : public AthService
 {
  public:
   MuonTGC_CablingSvc(const std::string& name, ISvcLocator* svc);
   virtual ~MuonTGC_CablingSvc() = default;
-  /// Retrieve interface ID
-  DeclareInterfaceID(MuonTGC_CablingSvc, 1, 0);
 
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvIF) override; 
-  
   virtual StatusCode initialize(void) override;
-  virtual StatusCode finalize(void) override;
 
   const MuonTGC_Cabling::TGCCabling* getTGCCabling() const;
 
@@ -368,7 +363,7 @@ class MuonTGC_CablingSvc : public AthService, virtual public IInterface
   ///////////////////////  
 
  private:
-  MuonTGC_Cabling::TGCCabling* m_cabling;
+  std::unique_ptr<MuonTGC_Cabling::TGCCabling> m_cabling;
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
   ToolHandle<ITGCCablingDbTool> m_condDataTool{this,"TGCCablingDbTool","TGCCablingDbTool"};
 
@@ -388,7 +383,7 @@ class MuonTGC_CablingSvc : public AthService, virtual public IInterface
 
 inline const MuonTGC_Cabling::TGCCabling* MuonTGC_CablingSvc::getTGCCabling() const
 {
-  return m_cabling;
+  return m_cabling.get();
 }  
 
 #endif // MUONTGC_CABLING_MUONTGC_CABLINGSVC_H
