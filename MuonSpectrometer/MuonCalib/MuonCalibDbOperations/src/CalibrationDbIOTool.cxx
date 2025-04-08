@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // this
@@ -68,8 +68,8 @@ namespace MuonCalib {
     }
 
     StatusCode CalibrationDbIOTool::initialize() {
-        SmartIF<RegionSelectionSvc> reg_sel_svc{service("RegionSelectionSvc")};
-        ATH_CHECK(reg_sel_svc.isValid());
+        ServiceHandle<RegionSelectionSvc> reg_sel_svc{"RegionSelectionSvc", name()};
+        ATH_CHECK(reg_sel_svc.retrieve());
         m_region_ids = reg_sel_svc->GetStationsInRegions();
         ATH_MSG_INFO(" CalibrationDbIOTool::initialize() - number of selected regions: " << m_region_ids.size());
 
