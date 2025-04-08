@@ -15,8 +15,11 @@ StatusCode RPCSimulation::initialize() {
   ATH_CHECK(m_keyRpcRdo.initialize());
   ATH_CHECK(m_cablingKey.initialize());
 
+  /// container of output candidates
+  ATH_CHECK(m_outputCandKey.initialize());
   /// container of output RoIs
   ATH_CHECK(m_outputMuonRoIKey.initialize());
+
   
   /// retrieve the monitoring tool
   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
