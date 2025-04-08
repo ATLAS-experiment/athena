@@ -5,11 +5,15 @@
 #ifndef MMT_HIT_H
 #define MMT_HIT_H
 
+#include "MuonReadoutGeometry/MuonChannelDesign.h"
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "MuonReadoutGeometry/MMReadoutElement.h"
+#include <cmath>
 #include "MMT_struct.h"
 
 class MMT_Hit {
   public:
-    MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::string_view stName, const std::vector<ROOT::Math::XYZVector> &planeCoordinates);
+    MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::string_view stName);
     MMT_Hit(const MMT_Hit* hit);
     ~MMT_Hit()=default;
 

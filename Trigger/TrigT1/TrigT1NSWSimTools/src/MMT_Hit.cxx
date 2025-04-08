@@ -3,12 +3,8 @@
  */
 
 #include "TrigT1NSWSimTools/MMT_Hit.h"
-#include "MuonReadoutGeometry/MuonChannelDesign.h"
-#include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "MuonReadoutGeometry/MMReadoutElement.h"
-#include <cmath>
 
-MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::string_view stName, const std::vector<ROOT::Math::XYZVector> &planeCoordinates) {
+MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::string_view stName) {
   m_sector = stName[2];
   m_station_name = stName;
   m_VMM_chip = entry.VMM_chip;
@@ -79,16 +75,22 @@ MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* 
   const MuonGM::MMReadoutElement* readout = detManager->getMMReadoutElement(strip_id);
   Amg::Vector3D globalPos(0.0, 0.0, 0.0);
   if(readout->stripGlobalPosition(strip_id, globalPos)) {
-
     m_R = globalPos.perp();
     m_Z = globalPos.z();
     m_PitchOverZ = (readout->getDesign(strip_id))->inputPitch/m_Z;
     m_RZslope = m_R / m_Z;
-
-    double index = std::round((std::abs(m_RZslope)-0.1)/5e-04); // 0.0005 is approx. the step in slope achievable with a road size of 8 strips
     const double distanceFromZAxis = readout->absTransform().translation().perp() - 0.5*readout->getRsize();
-    m_Rp = distanceFromZAxis + (0.1 + index*((0.6 - 0.1)/1000.))*(planeCoordinates[m_plane].Z() - planeCoordinates[0].Z());
-    m_shift = m_Rp / m_Z;
+
+    Identifier tmpId = detManager->mmIdHelper()->channelID(m_station_name, 1, 1, 1, 1, 1);
+    const MuonGM::MMReadoutElement* roEl = detManager->getMMReadoutElement(tmpId);
+    int tmpStrip = (roEl->getDesign(tmpId))->nMissedBottomEta + 1;
+    tmpId = detManager->mmIdHelper()->channelID(m_station_name, 1, 1, 1, 1, tmpStrip);
+    globalPos = Amg::Vector3D::Zero();
+    if(roEl->stripGlobalPosition(tmpId, globalPos)) {
+      double index = std::round((std::abs(m_RZslope)-0.1)/5e-04); // 0.0005 is approx. the step in slope achievable with a road size of 8 strips
+      m_Rp = distanceFromZAxis + (0.1 + index*((0.6 - 0.1)/1000.))*(std::abs(m_Z) - globalPos.z());
+      m_shift = m_Rp / m_Z;
+    }
   }
 }
 

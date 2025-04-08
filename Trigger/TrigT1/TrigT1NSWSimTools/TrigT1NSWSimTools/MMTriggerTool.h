@@ -51,7 +51,6 @@ namespace NSWL1 {
     Gaudi::Property<bool>  m_doTruth         {this, "DoTruth",     false, "Process truth information. Disabled by default"};
 
     // Parameters for Diamond Road algorithms
-    Gaudi::Property<bool>  m_trapShape            {this, "TrapezoidalShape",         true, "Consider the quadruplet as a trapezoid"};
     Gaudi::Property<int>   m_diamRoadSize         {this, "DiamondRoadSize",          8,    "Number of strips to create a road"};
     Gaudi::Property<bool>  m_uv                   {this, "DiamondUV",                true, "Include Stereo planes for tracking"};
     Gaudi::Property<int>   m_diamXthreshold       {this, "DiamondEtaThreshold",      3,    "Number of Eta planes for coincidences"};
@@ -74,6 +73,7 @@ namespace NSWL1 {
     Gaudi::Property<float>        m_dThetaMax       {this, "DThetaMax",  0.015,          "Maximum dTheta [rad]"};
     Gaudi::Property<int>          m_dThetaBits      {this, "DThetaBits", 5,              "Number of dTheta bits"};
 
+    std::unique_ptr<MMT_Diamond> m_diamond;
     std::shared_ptr<MMT_Parameters> m_par_large;
     std::shared_ptr<MMT_Parameters> m_par_small;
     const MuonGM::MuonDetectorManager* m_detManager;        //!< MuonDetectorManager
@@ -82,7 +82,7 @@ namespace NSWL1 {
     std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_ntrig ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_bc ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<char> > m_trigger_diamond_sector ATLAS_THREAD_SAFE {};
-    std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_stationPhi ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_sectorPhi ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_totalCount ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_realCount ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_iX ATLAS_THREAD_SAFE {};
