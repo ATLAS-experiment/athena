@@ -36,8 +36,8 @@ def EGammaCommonCfg(ConfigFlags):
 
     # ====================================================================
     # SHOWER SHAPE CORRECTIONS IN MC
-    # TUNE26: e/gamma FUDGE FACTORS RUN2 FULL DATA, derived with
-    # rel 22 (e) or 21.2 (gamma)
+    # TUNE27: e FUDGE FACTORS RUN2 FULL DATA, derived with rel 22.2
+    # TUNE25: gamma FUDGE FACTORS RUN2 FULL DATA, derived with or 21.2
     # ====================================================================
     isMC = ConfigFlags.Input.isMC
     isFullSim = False
