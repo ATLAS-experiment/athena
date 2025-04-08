@@ -12326,6 +12326,8 @@ HLT_noalg_L110DR-MU14FCH-MU5VF_UNPAIRED_ISO:
   eventCount: 0
 HLT_noalg_L12MU5VF:
   eventCount: 0
+HLT_noalg_L1ADVAEL:
+  eventCount: 2
 HLT_noalg_L1AFP_A_AND_C_TOF_T0T1_jJ125:
   eventCount: 0
 HLT_noalg_L1AFP_A_AND_C_TOF_T0T1_jJ90:

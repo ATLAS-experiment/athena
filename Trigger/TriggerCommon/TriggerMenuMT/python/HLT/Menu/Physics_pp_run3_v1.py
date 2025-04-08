@@ -3530,6 +3530,8 @@ ChainProp(name='HLT_e140_dnnloose_L1eEM26M', groups=PrimaryPhIGroup+SingleElectr
     ]
 
     chains['Streaming'] = [
+        #AD testing trigger
+        ChainProp(name='HLT_noalg_L1ADVAEL', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+Topo2Group+SupportGroup), 
         # Streamers already active in MC for jet/MET monitoring
 
 
