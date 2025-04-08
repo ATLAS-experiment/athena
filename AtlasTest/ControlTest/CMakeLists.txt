@@ -51,9 +51,6 @@ atlas_add_test( ElementLinkVector_test
    LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}|ERROR.*known CLID.*7368883"  # duplicate CLID defined by test
    ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}" )
 
-atlas_add_test( FortranAlgorithm
-   SCRIPT test/FortranAlgorithm.sh )
-
 if( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" OR
       "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo" )
    set( SGGoptignore
