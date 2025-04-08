@@ -120,6 +120,13 @@ def RpcRdoToPrepDataToolCfg(flags, suffix ="", RDOContainer = None, **kwargs):
         kwargs["xAODKey"] = "xRpcMeasurements" if flags.Muon.writexAODPRD or \
                                                   flags.Muon.usePhaseIIGeoSetup else ""
 
+        #### After the tree ripping the main LHC powerline, the Rpc
+        #### community has managed to introduce a 50 ns shift on top
+        #### of the already existing 12.5ns shift in the RDO -> PRD conversion
+        #### Favoloso...
+        #### corresponding elog entry: https://atlasop.cern.ch/elisa/display/512036
+        if not flags.Input.isMC and (flags.Muon.MuonTrigger or flags.Input.RunNumbers[0] >= 454434):
+            kwargs["timeShift"] = 37.5
         #Setup RPC RDO decoder to be consistent with RPC readout settings
         if flags.Muon.MuonTrigger:
             kwargs["RdoDecoderTool"] = CompFactory.Muon.RpcRDO_Decoder("RpcRDO_Decoder", BCZERO=flags.Trigger.L1MuonSim.RPCNBCZ)

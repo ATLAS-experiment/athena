@@ -27,7 +27,10 @@ class TileRunType(FlagEnum):
           return commonType
 
      def getTimingType(self):
-          return self if self in [TileRunType.GAPLAS] else self.getCommonType()
+          if self is TileRunType.L1CALO:
+               return TileRunType.PHY
+          else:
+               return self if self in [TileRunType.GAPLAS] else self.getCommonType()
 
      def getIntValue(self):
           _runTypeInt = {TileRunType.PHY: 1, TileRunType.LAS: 2,
