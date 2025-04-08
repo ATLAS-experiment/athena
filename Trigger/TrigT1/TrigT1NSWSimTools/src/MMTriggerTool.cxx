@@ -38,6 +38,8 @@ namespace NSWL1 {
     m_par_large = std::make_shared<MMT_Parameters>("xxuvuvxx",'L', m_detManager);
     m_par_small = std::make_shared<MMT_Parameters>("xxuvuvxx",'S', m_detManager);
 
+    m_diamond = std::make_unique<MMT_Diamond>(m_diamXthreshold, m_uv, m_diamUVthreshold, m_diamRoadSize, m_diamOverlapEtaUp, m_diamOverlapEtaDown, m_diamOverlapStereoUp, m_diamOverlapStereoDown);
+
     return StatusCode::SUCCESS;
   }
 
@@ -45,7 +47,7 @@ namespace NSWL1 {
     m_trigger_diamond_ntrig = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_ntrig");
     m_trigger_diamond_bc = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_diamond_bc");
     m_trigger_diamond_sector = std::make_shared<MuonVal::VectorBranch<char> >(tree, "MM_diamond_sector");
-    m_trigger_diamond_stationPhi = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_diamond_stationPhi");
+    m_trigger_diamond_sectorPhi = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_diamond_sectorPhi");
     m_trigger_diamond_totalCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_totalCount");
     m_trigger_diamond_realCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_realCount");
     m_trigger_diamond_iX = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_diamond_iX");
@@ -90,7 +92,7 @@ namespace NSWL1 {
     tree.addBranch(m_trigger_diamond_ntrig);
     tree.addBranch(m_trigger_diamond_bc);
     tree.addBranch(m_trigger_diamond_sector);
-    tree.addBranch(m_trigger_diamond_stationPhi);
+    tree.addBranch(m_trigger_diamond_sectorPhi);
     tree.addBranch(m_trigger_diamond_totalCount);
     tree.addBranch(m_trigger_diamond_realCount);
     tree.addBranch(m_trigger_diamond_iX);
@@ -186,19 +188,6 @@ namespace NSWL1 {
       return StatusCode::SUCCESS;
     }
 
-    std::unique_ptr<MMT_Diamond> diamond = std::make_unique<MMT_Diamond>(m_detManager);
-    if (do_MMDiamonds) {
-      diamond->setTrapezoidalShape(m_trapShape);
-      diamond->setXthreshold(m_diamXthreshold);
-      diamond->setUV(m_uv);
-      diamond->setUVthreshold(m_diamUVthreshold);
-      diamond->setRoadSize(m_diamRoadSize);
-      diamond->setRoadSizeUpX(m_diamOverlapEtaUp);
-      diamond->setRoadSizeDownX(m_diamOverlapEtaDown);
-      diamond->setRoadSizeUpUV(m_diamOverlapStereoUp);
-      diamond->setRoadSizeDownUV(m_diamOverlapStereoDown);
-    }
-
     // We need to extract truth info, if available
     for (const auto &it : Event_Info) {
       double trueta = -999., truphi = -999., trutheta = -999., trupt = -999., dt = -999., tpos = -999., ppos = -999., epos = -999., tent = -999., pent = -999., eent = -999.;
@@ -236,46 +225,56 @@ namespace NSWL1 {
       std::string station = "-";
       auto event_it = entries.find(pair_event);
       station = event_it->second[0].stName; // Station name is taken from the first digit! In MMLoadVariables there's a check to ensure all digits belong to the same station
+      const bool isLarge = (station[2] == 'L');
 
       // Secondly, extracting the Phi of the station we're working on...
       int stationPhi = -999;
       digitWrapper dW = event_it->second[0];
       Identifier tmpID = dW.id();
       stationPhi = m_MmIdHelper->stationPhi(tmpID);
+      const int sectorPhi = (isLarge) ? stationPhi*2-2 : stationPhi*2-1;
 
       // Finally, let's start with hits
       auto reco_it = Hits_Data_Set_Time.find(pair_event);
       if (reco_it != Hits_Data_Set_Time.end()) {
-        if (reco_it->second.size() >= (diamond->getXthreshold()+diamond->getUVthreshold())) {
+        if (reco_it->second.size() >= (m_diamond->getXthreshold()+m_diamond->getUVthreshold())) {
           if (do_MMDiamonds) {
-            /*
-             * Filling hits for each event: a new class, MMT_Hit, is called in
-             * order to use both algorithms witghout interferences
-             */
-            diamond->createRoads_fillHits(i-nskip, reco_it->second, m_detManager, pars[station], stationPhi);
-            if (m_doNtuple) {
-              for(const auto &hit : reco_it->second) {
-                m_trigger_VMM->push_back(hit.VMM_chip);
-                m_trigger_plane->push_back(hit.plane);
-                m_trigger_station->push_back(hit.station_eta);
-                m_trigger_strip->push_back(hit.strip);
-              }
-              std::vector<double> slopes = diamond->getHitSlopes();
-              for (const auto &s : slopes) m_trigger_RZslopes->push_back(s);
-              slopes.clear();
-            }
-            diamond->resetSlopes();
-            /*
-             * Here we create roads with all MMT_Hit collected before (if any), then we save the results
-             */
-            diamond->findDiamonds(i-nskip, event);
+            // Setup roads
+            std::vector<std::shared_ptr<MMT_Road> > ev_roads;
+            m_diamond->createRoads(ev_roads, isLarge);
 
-            if (!diamond->getSlopeVector(i-nskip).empty()) {
+            // Fill hits for each event with a few preliminary checks
+            std::vector<std::shared_ptr<MMT_Hit> > ev_hits;
+            for (const auto &hit_entry : reco_it->second) {
+              ev_hits.emplace_back(std::make_shared<MMT_Hit>(hit_entry, m_detManager, station));
+              if (!ev_hits.back()->verifyHit()) {
+                ev_hits.pop_back();
+                continue;
+              }
+
               if (m_doNtuple) {
-                m_trigger_diamond_ntrig->push_back(diamond->getSlopeVector(i-nskip).size());
-                for (const auto &slope : diamond->getSlopeVector(i-nskip)) {
-                  m_trigger_diamond_sector->push_back(diamond->getDiamond(i-nskip).sector);
-                  m_trigger_diamond_stationPhi->push_back(diamond->getDiamond(i-nskip).stationPhi);
+                m_trigger_VMM->push_back(hit_entry.VMM_chip);
+                m_trigger_plane->push_back(hit_entry.plane);
+                m_trigger_station->push_back(hit_entry.station_eta);
+                m_trigger_strip->push_back(hit_entry.strip);
+                m_trigger_RZslopes->push_back(ev_hits.back()->getRZSlope());
+              }
+            }
+            char side = (std::all_of(ev_hits.begin(), ev_hits.end(), [] (const auto &hit) { return hit->getStationEta() < 0; })) ? 'C' : 'A';
+
+            // Evaluate coincidences only when hits are available
+            std::vector<slope_t> diamondSlopes;
+            if (!ev_hits.empty()) {
+              m_diamond->findDiamonds(ev_hits, ev_roads, diamondSlopes, sectorPhi);
+            }
+
+            // Store output, if any, in debug ntuple (if enabled) and in trigger RDO
+            if (!diamondSlopes.empty()) {
+              if (m_doNtuple) {
+                m_trigger_diamond_ntrig->push_back(diamondSlopes.size());
+                for (const auto &slope : diamondSlopes) {
+                  m_trigger_diamond_sector->push_back(station[2]);
+                  m_trigger_diamond_sectorPhi->push_back(sectorPhi);
                   m_trigger_diamond_bc->push_back(slope.BC);
                   m_trigger_diamond_totalCount->push_back(slope.totalCount);
                   m_trigger_diamond_realCount->push_back(slope.realCount);
@@ -302,13 +301,13 @@ namespace NSWL1 {
 
               // MM RDO filling below
               std::vector<int> slopeBC;
-              for (const auto &slope : diamond->getSlopeVector(i-nskip)) slopeBC.push_back(slope.BC);
+              for (const auto &slope : diamondSlopes) slopeBC.push_back(slope.BC);
               std::sort(slopeBC.begin(), slopeBC.end());
               slopeBC.erase( std::unique(slopeBC.begin(), slopeBC.end()), slopeBC.end() );
               for (const auto &bc : slopeBC) {
-                Muon::NSW_TrigRawData* trigRawData = new Muon::NSW_TrigRawData(diamond->getDiamond(i-nskip).stationPhi, diamond->getDiamond(i-nskip).side, bc);
+                Muon::NSW_TrigRawData* trigRawData = new Muon::NSW_TrigRawData(sectorPhi, side, bc);
 
-                for (const auto &slope : diamond->getSlopeVector(i-nskip)) {
+                for (const auto &slope : diamondSlopes) {
                   if (bc == slope.BC) {
                     Muon::NSW_TrigRawDataSegment* trigRawDataSegment = new Muon::NSW_TrigRawDataSegment();
 
@@ -384,7 +383,6 @@ namespace NSWL1 {
     entries.clear();
     Hits_Data_Set_Time.clear();
     Event_Info.clear();
-    if (do_MMDiamonds) diamond->clearEvent();
 
     return StatusCode::SUCCESS;
   }
