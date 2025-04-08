@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -38,6 +38,7 @@ def xAODClusterMakerCfg(flags, name = 'xAODClusterMaker', **kwarg):
     
     kwarg.setdefault('PixelClusterContainerKey', 'FPGAPixelClusters')
     kwarg.setdefault('StripClusterContainerKey', 'FPGAStripClusters')
+    kwarg.setdefault('DoBulkCopy', flags.ClusterMaker.DoBulkCopy)
     
     acc.setPrivateTools(CompFactory.xAODClusterMaker(name, **kwarg))
     return acc
@@ -84,8 +85,10 @@ def FPGAFormatterPrepCfg(flags, name = "FPGAFormatterPrep", **kwarg):
 if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
+    from EFTrackingFPGAIntegration.IntegrationConfigFlag import addClusterMakerFlags
 
     flags = initConfigFlags()
+    flags = addClusterMakerFlags(flags)
     flags.Concurrency.NumThreads = 1
     # Use a dummy input file for the EventInfo
     flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675668._000016.pool.root.1"]
@@ -93,6 +96,9 @@ if __name__=="__main__":
 
     # Disable calo for this test
     flags.Detector.EnableCalo = False
+    
+    # set flag for the bulk-copy container creation method
+    flags.ClusterMaker.DoBulkCopy = True
 
     # ensure that the xAOD SP and cluster containers are available
     flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True

@@ -24,6 +24,9 @@
 #include "EFTrackingFPGAIntegration/IEFTrackingFPGAIntegrationTool.h"
 #include "EFTrackingTransient.h"
 
+#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/IChronoStatSvc.h"
+
 /**
  * @class xAODClusterMaker
  * @brief Creates xAOD pixel and strip cluster containers from FPGA input
@@ -71,6 +74,10 @@ private:
   SG::WriteHandleKey<xAOD::StripClusterContainer> m_stripClustersKey{
       this, "StripClusterContainerKey", "FPGAStripClusters",
       "Key for output strip cluster container"};
+
+  Gaudi::Property<bool> m_doBulkCopy{this, "DoBulkCopy", true, "Do bulk copy"}; //!< Do bulk copy method
+
+  ServiceHandle<IChronoStatSvc> m_chronoSvc{this, "ChronoStatSvc", "ChronoStatSvc"};
 };
 
 #endif 
