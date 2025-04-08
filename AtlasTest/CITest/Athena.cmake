@@ -43,7 +43,7 @@ atlas_add_citest( PileUpPresamplingRun3
 #    SCRIPT RunWorkflowTests_Run4.py --CI -p -w PileUpPresampling -e '--maxEvents 5' --no-output-checks )
 
 atlas_add_citest( DataOverlayPreparationRun3
-   SCRIPT RunWorkflowTests_Run3.py --CI -p -w MinbiasPreprocessing -e '--maxEvents 5 --conditionsTag CONDBR2-BLKPA-2023-06' )
+   SCRIPT RunWorkflowTests_Run3.py --CI -p -w MinbiasPreprocessing -e '--maxEvents 5 --conditionsTag CONDBR2-BLKPA-2023-07' )
 
 atlas_add_citest( OverlayRun2MC
    SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay -e '--conditionsTag OFLCOND-MC16-SDR-RUN2-12')
@@ -69,7 +69,7 @@ atlas_add_citest( RecoRun2MC_PileUp
    DEPENDS_SUCCESS PileUpPresamplingRun2 )
 
 atlas_add_citest( RecoRun3Data
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--maxEvents 100 --preExec="flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-16' --run-only 
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--maxEvents 100 --preExec="flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-17' --run-only 
    PROPERTIES PROCESSORS 8 )
 
 atlas_add_citest( RecoRun3Data_Checks
@@ -77,7 +77,7 @@ atlas_add_citest( RecoRun3Data_Checks
    DEPENDS_SUCCESS RecoRun3Data )
 
 atlas_add_citest( RecoRun3Data_Bulk
-    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a f1333 --threads 8  -e '--skipEvents 100 --maxEvents 500 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data --conditionsTag CONDBR2-BLKPA-2022-16'  --run-only --no-output-checks 
+    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a f1333 --threads 8  -e '--skipEvents 100 --maxEvents 500 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data --conditionsTag CONDBR2-BLKPA-2022-17'  --run-only --no-output-checks 
    PROPERTIES PROCESSORS 8 )
 
 atlas_add_citest( RecoRun3Data_Bulk_Checks
@@ -85,7 +85,7 @@ atlas_add_citest( RecoRun3Data_Bulk_Checks
    DEPENDS_SUCCESS RecoRun3Data_Bulk )
 
 atlas_add_citest( RecoRun3Data_Express
-    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x785 -e '--maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data24_13p6TeV.00477023.express_express.merge.RAW._lb0287._SFO-ALL._0001.1 --conditionsTag CONDBR2-ES1PA-2024-05 ' --no-output-checks
+    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x785 -e '--maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data24_13p6TeV.00477023.express_express.merge.RAW._lb0287._SFO-ALL._0001.1 --conditionsTag CONDBR2-ES1PA-2025-01 ' --no-output-checks
     LOG_IGNORE_PATTERN "WARNING FPE .*PixelChargeLUTCalibCondAlg"
     # ignore FPEs from PixelChargeLUTCalibCondAlg
   )
@@ -106,10 +106,10 @@ atlas_add_citest( ZdcRec_ZDCInjCalib
   )
 
 atlas_add_citest( RecoRun3Data_Cosmics 
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q450 -e '--maxEvents 25  --preExec="all:flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-16'  --no-output-checks)
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q450 -e '--maxEvents 25  --preExec="all:flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-17'  --no-output-checks)
 
 atlas_add_citest( RecoRun3Data_Calib
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q451 -e '--maxEvents 25  --preExec="all:flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-16' --no-output-checks)
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q451 -e '--maxEvents 25  --preExec="all:flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-17' --no-output-checks)
 
 atlas_add_citest( RecoRun3MC
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--maxEvents 25 --conditionsTag OFLCOND-MC23-SDR-RUN3-08' )
