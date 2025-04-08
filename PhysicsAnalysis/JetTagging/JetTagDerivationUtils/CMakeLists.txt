@@ -32,6 +32,7 @@ atlas_add_component(JetTagDerivationUtils
 
 atlas_install_python_modules(
   python/MetadataAlgConfig.py
+  python/JetMatchingConfig.py
   POST_BUILD_CMD ${ATLAS_FLAKE8}
   )
 atlas_install_scripts( bin/ftag-test-metadata )
