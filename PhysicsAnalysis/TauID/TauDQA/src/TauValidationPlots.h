@@ -10,6 +10,7 @@
 #include "GeneralTauPlots.h"
 #include "HadProngPlots.h"
 #include "EVetoPlots.h"
+#include "ResolutionPlots.h"
 #include "RecoTauPlots.h"
 #include "NewCorePlots.h"
 #include "Migration.h"
@@ -81,7 +82,12 @@ class TauValidationPlots:public PlotBase {
       Tau::NewCorePlots m_oNewCoreFakePlots;
 
       //Migration Matrix plots
-      Tau::Migration m_oMigrationPlots;		
+      Tau::Migration m_oMigrationPlots;
+
+      //Resolution Plots 
+      Tau::ResolutionPlots m_oMatchedResolutionPlots;
+      Tau::ResolutionPlots m_oMatchedResolution1PPlots;
+      Tau::ResolutionPlots m_oMatchedResolution3PPlots;
 
       // Plots with the "nominal" tau selection
       Tau::ParamPlots m_oElMatchedParamPlotsNom;
@@ -105,6 +111,9 @@ class TauValidationPlots:public PlotBase {
       Tau::NewCorePlots m_oNewCoreRecTauPlotsNom;
       
       Tau::GeneralTauPlots m_oMatchedGeneralNom;
+      Tau::ResolutionPlots m_oMatchedResolutionPlotsNom;
+      Tau::ResolutionPlots m_oMatchedResolution1PPlotsNom;
+      Tau::ResolutionPlots m_oMatchedResolution3PPlotsNom;
       Tau::HadProngPlots m_oMatchedHad1ProngNom;
       Tau::HadProngPlots m_oMatchedHad3ProngNom;
       Tau::EfficiencyPtPlots m_oMatchedTauEffPlotsNom;
