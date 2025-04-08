@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPSTREAM_PILEUPSTREAM_H
@@ -13,15 +13,15 @@
 
 // Framework include files
 #include "GaudiKernel/IEvtSelector.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthMessaging.h"
 
+#include "PileUpTools/PileUpMergeSvc.h"
 #include "xAODEventInfo/EventInfo.h" //typedef, cannot fwd declare
 
 // Forward declarations
-class IMessageSvc;
 class ISvcLocator;
 class StoreGateSvc;
-class PileUpMergeSvc;
 
 
 /** @class PileUpStream
@@ -40,10 +40,7 @@ public:
   PileUpStream& operator=(const PileUpStream& rhs) = delete;
   PileUpStream(PileUpStream&& rhs);
   PileUpStream& operator=(PileUpStream&& rhs);
-  PileUpStream(const std::string& name, 
-	       IEvtSelector* sel, 
-	       StoreGateSvc* store);
-  PileUpStream(const std::string& name, 
+  PileUpStream(const std::string& name,
 	       ISvcLocator* svcLoc,
 	       const std::string& selecName);
   PileUpStream(const std::string& name, 
@@ -107,31 +104,27 @@ private:
   ///set ActiveStore
   void setActiveStore();
 
-  //test for end of stream
-  //  bool isNotEmpty() const;
-
   /// Stream name
   std::string m_name;
   /// ServiceLocator 
-  ISvcLocator* p_svcLoc;
+  ISvcLocator* p_svcLoc{nullptr};
   /// Selector 
   SmartIF<IEvtSelector> m_sel;
   /// StoreGateSvc;
   SmartIF<StoreGateSvc> m_SG;
   /// Input Iterators
-  EvtIterator* p_iter; 
+  EvtIterator* p_iter{nullptr};
 
-  SmartIF<PileUpMergeSvc> m_mergeSvc;
+  ServiceHandle<PileUpMergeSvc> m_mergeSvc;
   
 
-  bool m_ownEvtIterator; ///> do we own p_iter? 
-  /// Private message stream member
-  bool m_neverLoaded;  ///> has an event been loaded into this stream?
-  bool m_ownStore;  ///> is m_SG a store we cloned from the master one?
+  bool m_ownEvtIterator{false}; ///< do we own p_iter?
+  bool m_neverLoaded{true};     ///< has an event been loaded into this stream?
+  bool m_ownStore{false};       ///< is m_SG a store we cloned from the master one?
 
-  bool m_used; ///has this stream already been used? (for the current event)
-  bool m_hasRing;
-  unsigned int m_iOriginalRing; ///> original ring in which event was used
+  bool m_used{false};  ///< has this stream already been used? (for the current event)
+  bool m_hasRing{false};
+  unsigned int m_iOriginalRing{0}; ///< original ring in which event was used
 };
 #endif // PILEUPSTREAM_PILEUPSTREAM_H
 
