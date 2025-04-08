@@ -4,6 +4,11 @@
 atlas_subdir( AthExStoreGateExample )
 
 # Component(s) in the package:
+atlas_add_library( AthExStoreGateExampleLib
+                   INTERFACE
+                   PUBLIC_HEADERS AthExStoreGateExample
+                   LINK_LIBRARIES AthenaKernel GaudiKernel StoreGateLib )
+
 atlas_add_component( AthExStoreGateExample
                      src/*.cxx
                      src/components/*.cxx
@@ -13,12 +18,12 @@ atlas_add_component( AthExStoreGateExample
 atlas_add_component( AthExDFlow
                      src_dflow/*.cxx
                      src_dflow/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps GaudiKernel SGTools StoreGateLib xAODEventInfo )
+                     LINK_LIBRARIES AthenaBaseComps SGTools StoreGateLib xAODEventInfo )
 
 atlas_add_dictionary( AthExStoreGateExampleDict
                       AthExStoreGateExample/AthExStoreGateExampleDict.h
                       AthExStoreGateExample/selection.xml
-                      LINK_LIBRARIES AthenaKernel GaudiKernel StoreGateLib )
+                      LINK_LIBRARIES AthExStoreGateExampleLib )
 
 # Tests in the package:
 atlas_add_test( CircularDependency
