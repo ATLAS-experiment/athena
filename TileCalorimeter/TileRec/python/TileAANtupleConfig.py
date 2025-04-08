@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 
@@ -23,6 +23,17 @@ def TileAANtupleCfg(flags, outputFile='', saveTMDB=True, **kwargs):
 
     readDigits = flags.Tile.readDigits
 
+    kwargs.setdefault('UseDspUnits', False)
+    useDspUnits = kwargs['UseDspUnits']
+
+    offlineUnits = 3  # MeV (default)
+    if useDspUnits:
+        offlineUnits = -1
+    elif cisRun:
+        offlineUnits = 0  # ADC
+    elif not (pedestalRun or physicsRun):
+        offlineUnits = 1  # pCb
+
     kwargs.setdefault('TileDigitsContainer', 'TileDigitsCnt' if readDigits else "")
     kwargs.setdefault('TileDigitsContainerFlt', 'TileDigitsFlt' if not readDigits else "")
     kwargs.setdefault('TileRawChannelContainer', flags.Tile.RawChannelContainer)
@@ -44,7 +55,8 @@ def TileAANtupleCfg(flags, outputFile='', saveTMDB=True, **kwargs):
     kwargs.setdefault('CheckDCS', flags.Tile.useDCS)
     kwargs.setdefault('BSInput', flags.Input.Format is Format.BS and not physicsRun)
     kwargs.setdefault('CalibMode', pedestalRun or cisRun)
-    kwargs.setdefault('CalibrateEnergy', flags.Input.isMC or not (cisRun or physicsRun))
+    kwargs.setdefault('CalibrateEnergy', flags.Input.isMC or useDspUnits or not (cisRun or physicsRun))
+    kwargs.setdefault('OfflineUnits', offlineUnits)
 
     acc = ComponentAccumulator()
 

@@ -25,7 +25,7 @@ from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 # Specify trigger menu once here:
-triggermenu = 'Dev_pp_run3_v1_HLTReprocessing_prescale'
+triggermenu = 'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale'
 
 # HLT step (BS->BS)
 hlt = ExecStep.ExecStep()
@@ -65,11 +65,8 @@ test = Test.Test()
 test.art_type = 'grid'
 test.exec_steps = [hlt, filter_bs, tlareco]
 test.check_steps = CheckSteps.default_check_steps(test)
-add_analysis_steps(test)
-
-# Overwrite default histogram file name for checks
-for step in [test.get_step(name) for name in ['RootComp']]:
-    step.input_file = 'ExampleMonitorOutput.root'
+add_analysis_steps(test, input_file='DAOD_TLAFTAGPEB.pool.root')
+test.exec_steps = [t for t in test.exec_steps if not t.name == "TrigEDMChecker"] # TrigEDMChecker fails on TLA DAOD output due to missing HLT containers
 
 import sys
 sys.exit(test.run())

@@ -114,7 +114,7 @@ public:
         for (int i = firstHashPosition; i <= lastHashPosition; ++i) {
           TileRawChannelCollection* rawChannelCollection =  mutableContainer->indexFindPtr(param[i]);
           if (!rawChannelCollection) {
-            i += 5;
+            i += 4;
             continue;
           }
           rawChannelCollection->setFragDSPBCID(param[++i]);
@@ -154,7 +154,7 @@ public:
     pers->push_back_param(pers_type);
 
     if constexpr (std::is_same_v<TRANS, TileRawChannelContainer> ) {
-      if (trans->get_type() == TileFragHash::OptFilterDsp ) {
+      if ((trans->get_type() == TileFragHash::OptFilterDsp) && !trans->empty()) {
 
         std::unordered_map<unsigned int, int> bcidFreequency;
         std::vector<IdentifierHash> hashes = trans->GetAllCurrentHashes();

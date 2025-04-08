@@ -163,8 +163,7 @@ StatusCode WebdaqHistSvc::regHist_i(std::unique_ptr<T> hist_unique, const std::s
   }
 
   if (hist_unique->Class()->InheritsFrom(TH1::Class())) {
-    T* hist = hist_unique.release();
-
+    
     tbb::concurrent_hash_map<std::string, THistID>::accessor accessor;
     if (m_hists.find(accessor, id)) {
       ATH_MSG_ERROR("Histogram with name " << id << " already registered");
@@ -175,6 +174,7 @@ StatusCode WebdaqHistSvc::regHist_i(std::unique_ptr<T> hist_unique, const std::s
       ATH_MSG_ERROR("Failed to insert histogram with name " << id);
       return StatusCode::FAILURE;
     }
+    T* hist = hist_unique.release();
     m_histoMapUpdated = true;
     m_histoMapUpdatedFast = true;
     accessor->second = THistID(id, hist);
@@ -304,6 +304,7 @@ StatusCode WebdaqHistSvc::deReg(TObject* optr)
       return deReg(it->first);
     }
   }
+  ATH_MSG_ERROR("Histogram with pointer " << optr << " not found in the histogram map");
   return StatusCode::FAILURE;
 }
 
@@ -313,12 +314,15 @@ StatusCode WebdaqHistSvc::deReg(const std::string& id)
 {
   tbb::concurrent_hash_map<std::string, THistID>::accessor accessor;
   if (m_hists.find(accessor, id)) {
+    //Delete the histogram
+    accessor->second.obj->Delete();
     m_hists.erase(accessor);
     m_histoMapUpdated = true;
     m_histoMapUpdatedFast = true;
     ATH_MSG_DEBUG("Deregistration of " << id << " done");
     return StatusCode::SUCCESS;
   }
+  ATH_MSG_ERROR("Deregistration failed: histogram with id \"" << id << "\" not found");
   return StatusCode::FAILURE;
 }
 
