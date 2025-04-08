@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // MuonGeoModel
@@ -27,18 +27,6 @@
 using namespace MuonCalib;
 RegionSelectionSvc::~RegionSelectionSvc() = default;
 RegionSelectionSvc ::RegionSelectionSvc(const std::string &name, ISvcLocator *svc_locator) : AthService(name, svc_locator) {}
-
-StatusCode RegionSelectionSvc::queryInterface(const InterfaceID &riid, void **ppvUnknown) {
-    ATH_MSG_VERBOSE("StatusCode RegionSelectionSvc::queryInterface");
-
-    if (interfaceID().versionMatch(riid)) {
-        *ppvUnknown = (RegionSelectionSvc *)this;
-    } else {
-        return AthService::queryInterface(riid, ppvUnknown);
-    }
-
-    return StatusCode::SUCCESS;
-}
 
 StatusCode RegionSelectionSvc ::initialize() {
     ATH_MSG_INFO("initialize RegionSelectionSvc");
