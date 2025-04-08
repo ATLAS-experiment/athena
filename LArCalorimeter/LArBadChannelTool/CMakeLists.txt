@@ -29,11 +29,11 @@ atlas_add_test( LArBadChannelConfigTest
 
 
 atlas_add_test ( LArBadFebWritingTest
-  SCRIPT python -m LArBadChannelTool.LArMissingFebsDBAlg -o test.db  -f /LAR/BadChannelsOfl/MissingFEBs -t LARBadChannelsOflMissingFEBs-RUN2-UPD4-02 -r 480000 ${CMAKE_CURRENT_SOURCE_DIR}/share/badfebs.txt
+  SCRIPT python -m LArBadChannelTool.LArMissingFebsDBAlg -o testFeb.db  -f /LAR/BadChannelsOfl/MissingFEBs -t LARBadChannelsOflMissingFEBs-RUN2-UPD4-02 -r 480000 ${CMAKE_CURRENT_SOURCE_DIR}/share/badfebs.txt
   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test ( LArBadChanWritingTest
-  SCRIPT python -m LArBadChannelTool.LArBadChannelDBAlg -o test.db -f /LAR/BadChannelsOfl/BadChannels -t  LARBadChannelsOflBadChannels-TEST -r 480000 ${CMAKE_CURRENT_SOURCE_DIR}/share/badchannels.txt
+  SCRIPT python -m LArBadChannelTool.LArBadChannelDBAlg -o testChan.db -f /LAR/BadChannelsOfl/BadChannels -t  LARBadChannelsOflBadChannels-TEST -r 480000 ${CMAKE_CURRENT_SOURCE_DIR}/share/badchannels.txt
   POST_EXEC_SCRIPT noerror.sh )
 
 
