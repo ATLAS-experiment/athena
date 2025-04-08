@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSegmentFinderAlg.h"
@@ -19,7 +19,6 @@
 #include "MuonEDM_AssociationObjects/MuonSegPatAssMap.h"
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 
-MuonSegmentFinderAlg::MuonSegmentFinderAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonSegmentFinderAlg::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -29,7 +28,6 @@ StatusCode MuonSegmentFinderAlg::initialize() {
     /// MDT segments
     ATH_CHECK(m_patternCalibration.retrieve(DisableTool{!m_runMdtSegments}));
     ATH_CHECK(m_segmentMaker.retrieve(DisableTool{!m_runMdtSegments}));
-    ATH_CHECK(m_clusterSegMaker.retrieve(DisableTool{!m_doTGCClust && !m_doRPCClust}));
     
     const bool doNSW = m_doSTgcSegments || m_doMMSegments;
     ATH_CHECK(m_clusterCreator.retrieve(DisableTool{!doNSW}));
@@ -41,12 +39,7 @@ StatusCode MuonSegmentFinderAlg::initialize() {
     /// Initialize the alignment container in the NSW
     ATH_CHECK(m_segmentNSWCollectionKey.initialize(doNSW && !m_segmentNSWCollectionKey.empty()));
     ATH_CHECK(m_cscPrdsKey.initialize(!m_cscPrdsKey.empty()));  // check for layouts without CSCs
-    ATH_CHECK(m_mdtPrdsKey.initialize(m_doTGCClust || m_doRPCClust));
-    ATH_CHECK(m_rpcPrdsKey.initialize(m_doRPCClust));
-    ATH_CHECK(m_tgcPrdsKey.initialize(m_doTGCClust));
     ATH_CHECK(m_patternCollKey.initialize());
-    ATH_CHECK(m_tgcTruth.initialize(m_doClusterTruth));
-    ATH_CHECK(m_rpcTruth.initialize(m_doClusterTruth));
 
     return StatusCode::SUCCESS;
 }
@@ -62,7 +55,7 @@ StatusCode MuonSegmentFinderAlg::execute(const EventContext& ctx) const {
     
     
     const MuonPatternCombinationCollection* patternColl{nullptr};
-    ATH_CHECK(loadFromStoreGate(ctx, m_patternCollKey, patternColl));    
+    ATH_CHECK(SG::get(patternColl, m_patternCollKey, ctx));    
     ATH_MSG_DEBUG("Processing the pattern collections with  " << patternColl->size() << " Collections ");
 
     for (const Muon::MuonPatternCombination* patt :  *patternColl) {
@@ -87,22 +80,6 @@ StatusCode MuonSegmentFinderAlg::execute(const EventContext& ctx) const {
                
     }  // end loop on pattern combinations
 
-    // do cluster based segment finding
-    if (m_doTGCClust || m_doRPCClust) {
-        const Muon::MdtPrepDataContainer* mdtPrds{nullptr};
-        const PRD_MultiTruthCollection* tgcTruthColl{nullptr};
-        const PRD_MultiTruthCollection* rpcTruthColl{nullptr};
-        const Muon::TgcPrepDataContainer* tgcPrdCont{nullptr};
-        const Muon::RpcPrepDataContainer* rpcPrdCont{nullptr};
-        ATH_CHECK(loadFromStoreGate(ctx, m_rpcPrdsKey, rpcPrdCont));
-        ATH_CHECK(loadFromStoreGate(ctx, m_tgcPrdsKey, tgcPrdCont));
-        ATH_CHECK(loadFromStoreGate(ctx,m_mdtPrdsKey, mdtPrds));
-        ATH_CHECK(loadFromStoreGate(ctx,m_tgcTruth, tgcTruthColl));
-        ATH_CHECK(loadFromStoreGate(ctx,m_rpcTruth, rpcTruthColl));
-       
-        m_clusterSegMaker->getClusterSegments(mdtPrds, rpcPrdCont, tgcPrdCont, tgcTruthColl,
-                                              rpcTruthColl, segmentContainer.get());
-    }
 
     m_segmentOverlapRemovalTool->removeDuplicates(*segmentContainer);
 
@@ -140,7 +117,7 @@ StatusCode MuonSegmentFinderAlg::createCscSegments(const EventContext& ctx,
                                     std::unique_ptr<MuonSegmentCombinationCollection>& csc4dSegmentCombinations) const {
     
     const Muon::CscPrepDataContainer* cscPrds{nullptr};
-    ATH_CHECK(loadFromStoreGate(ctx,m_cscPrdsKey, cscPrds));
+    ATH_CHECK(SG::get(cscPrds, m_cscPrdsKey, ctx));
     if (!cscPrds) return StatusCode::SUCCESS;
 
     std::vector<const Muon::CscPrepDataCollection*> cscCols;
@@ -255,20 +232,4 @@ StatusCode MuonSegmentFinderAlg::createSegmentsWithMDTs(const EventContext& ctx,
         }  // end loop on hits per region
     }     
     return StatusCode::SUCCESS;    
-}
-template <class ContType> StatusCode MuonSegmentFinderAlg::loadFromStoreGate(const EventContext& ctx,
-                                                           const SG::ReadHandleKey<ContType>& key,
-                                                           const ContType* & cont_ptr) const {
-    if (key.empty()){
-        ATH_MSG_VERBOSE("Empty key given for "<<typeid(ContType).name()<<".");
-        cont_ptr = nullptr;
-        return StatusCode::SUCCESS;
-    }
-    SG::ReadHandle<ContType> readHandle{key, ctx};
-    if (!readHandle.isValid()) {
-        ATH_MSG_FATAL("Failed to retrieve "<<key.fullKey()<<" from store gate");
-        return StatusCode::FAILURE;
-    }
-    cont_ptr = readHandle.cptr();        
-    return StatusCode::SUCCESS;
 }

@@ -392,32 +392,6 @@ def MuonPRDSelectionToolCfg( flags, name="MuonPRDSelectionTool", **kwargs):
     result.setPrivateTools(the_tool)
     return result
 
-def MuonClusterSegmentFinderCfg(flags, name = " MuonClusterSegmentFinder", **kwargs):
-    from MuonConfig.MuonRecToolsConfig import MuonTrackToSegmentToolCfg
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg
-
-    result=ComponentAccumulator()
-
-    # Won't explicitly configure MuonIdHelperSvc
-    edm_printer = result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags) )
-    kwargs.setdefault("MuonEDMPrinterTool", edm_printer)
-    # Won't explicitly configure MuonLayerHashProviderTool
-    kwargs.setdefault("MuonPRDSelectionTool", result.popToolsAndMerge( MuonPRDSelectionToolCfg(flags) ) )
-    kwargs.setdefault('MdtSegmentMaker', result.popToolsAndMerge( DCMathSegmentMakerCfg(flags,name="DCMathSegmentMaker") ) ) 
-    # Won't explicitly configure MuonClusterizationTool
-    kwargs.setdefault("MuonClusterOnTrackCreator", result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)) )
-    kwargs.setdefault("TrackToSegmentTool", result.popToolsAndMerge( MuonTrackToSegmentToolCfg(flags) ) )
-    kwargs.setdefault('SLFitter', result.popToolsAndMerge( MCTBSLFitterCfg(flags) ) ) 
-    kwargs.setdefault('AmbiguityProcessor', result.popToolsAndMerge( MuonAmbiProcessorCfg(flags) ) ) 
-    kwargs.setdefault('TrackCleaner', result.popToolsAndMerge( MuonTrackCleanerCfg(flags) ) ) 
-    kwargs.setdefault('MuonSegmentOverlapRemovalTool', CompFactory.Muon.MuonSegmentOverlapRemovalTool(Printer=edm_printer)) 
-    
-    # Won't explicitly configure MuonSegmentOverlapRemovalTool (though it possibly needs it)
-
-    from MuonConfig.MuonRecToolsConfig import MuonTrackToSegmentToolCfg
-    kwargs.setdefault( "TrackToSegmentTool", result.popToolsAndMerge(MuonTrackToSegmentToolCfg(flags)))
-    result.setPrivateTools(CompFactory.Muon.MuonClusterSegmentFinder(name, **kwargs))
-    return result
 
 def MuonLayerHoughToolCfg(flags, name = "MuonLayerHoughTool" , **kwargs):
     result = ComponentAccumulator()
@@ -488,7 +462,6 @@ def MuonSegmentFinderNCBAlgCfg(flags, name="MuonSegmentMaker_NCB", **kwargs):
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg
     result = ComponentAccumulator()
     ### Only use the TGC measurements from the  current bunch crossing
-    kwargs.setdefault("TGC_PRDs", "TGC_Measurements")
     kwargs.setdefault("doStgcSegments", flags.Detector.EnablesTGC)
     kwargs.setdefault("doMMSegments", flags.Detector.EnableMM)
     kwargs.setdefault("doMdtSegments", False)
@@ -544,7 +517,6 @@ def MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker", **kwargs):
     kwargs.setdefault('MuonPatternCalibration', result.popToolsAndMerge( MuonPatternCalibrationCfg(flags) ) )   
     segment_maker = result.getPrimaryAndMerge(DCMathSegmentMakerCfg(flags,name="DCMathSegmentMaker"))
     kwargs.setdefault('SegmentMaker', segment_maker)
-    kwargs.setdefault("MuonClusterSegmentFinder", result.popToolsAndMerge(MuonClusterSegmentFinderCfg(flags, name = "MuonClusterSegmentFinder")))
     # Not yet configuring MuonSegmentOverlapRemovalTool
     
     if flags.Detector.EnableMM or flags.Detector.EnablesTGC:
@@ -569,7 +541,6 @@ def MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker", **kwargs):
     kwargs.setdefault("doMMSegments", flags.Detector.EnableMM)
 
     kwargs.setdefault("SegmentCollectionName",  "TrackMuonSegments" if flags.Muon.segmentOrigin != "TruthTracking" else "ThirdChainSegments")
-    kwargs.setdefault('TGC_PRDs', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
 
     the_alg = CompFactory.MuonSegmentFinderAlg( name, **kwargs)                                               
     result.addEventAlgo(the_alg)

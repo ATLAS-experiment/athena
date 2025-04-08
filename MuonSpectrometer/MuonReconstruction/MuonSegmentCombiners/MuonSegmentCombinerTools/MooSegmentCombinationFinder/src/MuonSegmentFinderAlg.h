@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MOOSEGMENTFINDERS_MUOSEGMENTFINDERALGS_H
@@ -19,7 +19,6 @@
 #include "MuonRecToolInterfaces/IMuonClusterOnTrackCreator.h"
 #include "MuonRecToolInterfaces/IMuonSegmentMaker.h"
 #include "MuonSegment/MuonSegmentCombinationCollection.h"
-#include "MuonSegmentMakerToolInterfaces/IMuonClusterSegmentFinder.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonSegmentSelectionTool.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonNSWSegmentFinderTool.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonPatternCalibration.h"
@@ -29,7 +28,7 @@
 
 class MuonSegmentFinderAlg : public AthReentrantAlgorithm {
 public:
-    MuonSegmentFinderAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual ~MuonSegmentFinderAlg() = default;
 
@@ -57,11 +56,6 @@ private:
         this,
         "SegmentMaker",
         "Muon::DCMathSegmentMaker/DCMathSegmentMaker",
-    };
-    ToolHandle<Muon::IMuonClusterSegmentFinder> m_clusterSegMaker{
-        this,
-        "MuonClusterSegmentFinder",
-        "Muon::MuonClusterSegmentFinder/MuonClusterSegmentFinder",
     };
     ToolHandle<Muon::IMuonSegmentOverlapRemovalTool> m_segmentOverlapRemovalTool{
         this,
@@ -111,41 +105,11 @@ private:
         "CSC_Clusters",
         "CSC PRDs",
     };
-    SG::ReadHandleKey<Muon::MdtPrepDataContainer> m_mdtPrdsKey{
-        this,
-        "MDT_PRDs",
-        "MDT_DriftCircles",
-        "MDT PRDs",
-    };
-    SG::ReadHandleKey<Muon::RpcPrepDataContainer> m_rpcPrdsKey{
-        this,
-        "RPC_PRDs",
-        "RPC_Measurements",
-        "RPC PRDs",
-    };
-    SG::ReadHandleKey<Muon::TgcPrepDataContainer> m_tgcPrdsKey{
-        this,
-        "TGC_PRDs",
-        "TGC_Measurements",
-        "TGC PRDs",
-    };
     SG::ReadHandleKey<MuonPatternCombinationCollection> m_patternCollKey{
         this,
         "MuonLayerHoughCombisKey",
         "MuonLayerHoughCombis",
         "Hough combinations",
-    };
-    SG::ReadHandleKey<PRD_MultiTruthCollection> m_tgcTruth{
-        this,
-        "TGCTruth",
-        "TGC_TruthMap",
-        "TGC PRD Multi-truth Collection",
-    };
-    SG::ReadHandleKey<PRD_MultiTruthCollection> m_rpcTruth{
-        this,
-        "RPCTruth",
-        "RPC_TruthMap",
-        "RPC PRD Multi-truth Collection",
     };
 
     StatusCode createSegmentsWithMDTs(const EventContext& ctx, const Muon::MuonPatternCombination* patt, Trk::SegmentCollection* segs) const;
@@ -165,9 +129,6 @@ private:
 
 
     Gaudi::Property<bool> m_printSummary{this, "PrintSummary", false};
-    Gaudi::Property<bool> m_doTGCClust{this, "doTGCClust", false, "selection flags for cluster based segment finding"};
-    Gaudi::Property<bool> m_doRPCClust{this, "doRPCClust", false, "selection flags for cluster based segment finding"};
-    Gaudi::Property<bool> m_doClusterTruth{this, "doClusterTruth", false, "selection flags for cluster based segment finding"};
 
     /// Run segment finding with eta / phi determination
     Gaudi::Property<bool> m_doFullFinder{this, "FullFinder", true}; 
@@ -181,12 +142,7 @@ private:
     Gaudi::Property<bool> m_removeUsedNswHits{this, "removeUsedNSW", true};
     /// Apply a preselection on the segments
     Gaudi::Property<int> m_segQuality{this, "SegmentQuality", -1};
-    
-    /// load the container from storegate given a ReadHandleKey. If the key is empty
-    /// a nullptr will be returned
-    template <class ContType> StatusCode loadFromStoreGate(const EventContext& ctx,
-                                                           const SG::ReadHandleKey<ContType>& key,
-                                                           const ContType* & cont_ptr) const;
+   
 };
 
 #endif
