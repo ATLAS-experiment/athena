@@ -1,12 +1,11 @@
  
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKEXALGS_PROPRESULTROOTWRITERSVC_H
 #define TRKEXALGS_PROPRESULTROOTWRITERSVC_H
 
-#include "GaudiKernel/IInterface.h"
 #include "Gaudi/Property.h"  /*no forward decl: typedef*/
 #include "GaudiKernel/ITHistSvc.h"
 #include "AthenaBaseComps/AthService.h"
@@ -25,29 +24,9 @@ class PropResultRootWriterSvc : public AthService {
     PropResultRootWriterSvc(const std::string& name, ISvcLocator* svcloc);
     /// destructor
     virtual ~PropResultRootWriterSvc();
-    
-    /// Retrieve interface ID
-    static const InterfaceID& interfaceID() {
-      /// Declaration of the interface ID ( interface id, major version, minor version)
-      static const InterfaceID IID_PropResultRootWriterSvc("PropResultRootWriterSvc", 1, 0);
-      return IID_PropResultRootWriterSvc;    
-    }
-    
-    virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface) override {
-      ATH_MSG_DEBUG("in queryInterface()");    
-      if (PropResultRootWriterSvc::interfaceID().versionMatch(riid)) {
-        ATH_MSG_DEBUG("matched PropResultRootWriterSvc");
-        *ppvInterface=(PropResultRootWriterSvc*)this;
-      } else {
-        ATH_MSG_DEBUG("Default to Service interface");
-        return AthService::queryInterface(riid,ppvInterface);
-      }
-      return StatusCode::SUCCESS;
-    }
-      
+
     virtual StatusCode initialize() override;
-    virtual StatusCode finalize() override;
-    
+
     template <typename T>
     void write(const T* initialPerigee, 
                const T* fwdParameters=nullptr, double fwdtime=std::numeric_limits<float>::quiet_NaN(), 
