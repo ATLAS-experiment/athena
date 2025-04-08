@@ -123,7 +123,8 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
       !isPartHadr)
     return std::make_pair(GenParticle, partOrig);
 
-  if (abs(thePart->pdg_id()) > 1000000000) return std::make_pair(NuclFrag, partOrig);
+  // FIXME vetoing protons here to preserve previous behaviour
+  if (MC::isNucleus(thePart) && std::abs(thePart->pdgId()) != MC::PROTON) return std::make_pair(NuclFrag, partOrig);
 
   if ( !MC::isSMLepton(thePart) && !MC::isPhoton(thePart)  && !isPartHadr) return std::make_pair(partType, partOrig);
   // don't consider  generator particles
@@ -346,7 +347,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     if (abs(DaugType) == abs(motherPDG) && theDaug &&  info && info->Mother() && HepMC::is_same_generator_particle(theDaug, info->Mother() )) samePart = true;
     if (numOfParents == 1 &&
         (MC::isPhoton(motherPDG) || MC::isElectron(motherPDG) || MC::isMuon(motherPDG) || abs(motherPDG) == MC::PIPLUS) &&
-        (DaugType > 1000000000 || DaugType == 0 || DaugType == MC::PROTON || DaugType == MC::NEUTRON ||
+        (MC::isNucleus(DaugType) || DaugType == 0 || DaugType == MC::PROTON || DaugType == MC::NEUTRON ||
          abs(DaugType) == MC::PIPLUS || abs(DaugType) == MC::PI0))
       NumOfNucFr++;
   }
@@ -997,7 +998,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
     if (!pout) continue;
     DaugType = pout->pdg_id();
     if (numOfParents == 1 && (MC::isPhoton(motherPDG) || MC::isElectron(motherPDG) || abs(motherPDG) == MC::PIPLUS) &&
-        (DaugType > 1000000000 || DaugType == 0 || DaugType == MC::PROTON || DaugType == MC::NEUTRON))
+        (MC::isNucleus(DaugType) || DaugType == 0 || DaugType == MC::PROTON || DaugType == MC::NEUTRON))
       NumOfNucFr++;
     if (DaugType == MC::PHOTON) NumOfPht++;
     else if (DaugType == MC::ELECTRON) NumOfEl++;
@@ -1052,7 +1053,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   if ((numOfParents == 1 && (MC::isPhoton(motherPDG) || MC::isElectron(motherPDG)) && numOfDaug > 2 && NumOfNucFr != 0) ||
       (numOfParents == 1 && abs(motherPDG) == MC::PIPLUS && numOfDaug > 10 && NumOfNucFr != 0) ||
       (numOfParents == 1 && MC::isPhoton(motherPDG) && numOfDaug > 10 && MC::isStable(mother)) ||
-      (numOfParents == 1 && motherPDG > 1000000000))
+      (numOfParents == 1 && MC::isNucleus(motherPDG) && std::abs(motherPDG) != MC::PROTON)) // FIXME vetoing protons here to preserve previous behaviour
     return NucReact;
 
   if (MC::isMuon(motherPDG) && NumOfMu == 0) return Mu;
