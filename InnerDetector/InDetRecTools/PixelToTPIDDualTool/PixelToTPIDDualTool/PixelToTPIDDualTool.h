@@ -135,7 +135,6 @@ namespace CP {
     /// Decorators
     /// Start with equalized dE/dx measurement.  Safe to hardcode PixelCluster container?  Track container -> MSOS container is 1-to-1. Only 1 PixelCluster container...
     /// Also include raw dE/dx?  Or the SF?  Or the SF error?
-    //SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidation> m_clusterdEdxKey{this, "clusterdEdxKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxKey{this, "clusterdEdxKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
 
     /// For charge -> dE/dx calc.
