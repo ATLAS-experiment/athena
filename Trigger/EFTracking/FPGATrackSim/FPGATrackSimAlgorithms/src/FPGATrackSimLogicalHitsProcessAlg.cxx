@@ -151,10 +151,9 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         if (rmap_1st->getRegions(hit).size() > 0) {
             phits_1st.emplace_back(&hit, [](const FPGATrackSimHit*){});
         }
-        else {
-            phits_2nd.emplace_back(&hit, [](const FPGATrackSimHit*){});
-            FPGAHits_2nd->push_back(hit);
-        }
+        // TODO: For now add all hits to 2nd stage until this is properly setup here
+        phits_2nd.emplace_back(&hit, [](const FPGATrackSimHit*){});
+        FPGAHits_2nd->push_back(hit);
     }
     if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: Split hits to 1st and 2nd stage");
 
