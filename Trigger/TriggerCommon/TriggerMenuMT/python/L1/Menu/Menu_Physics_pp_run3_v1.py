@@ -45,6 +45,7 @@ def defineMenu():
 
         ##
         # Combined lepton, new calo (for ATR-24182)
+        'L1_2eEM10L',  # prospective Run 4 L1 item, ATR-30180
         'L1_2eEM18', 'L1_2eEM18L', 'L1_2eEM18M', 'L1_2eEM24L', 'L1_3eEM12L', 'L1_eEM24L_3eEM12L',
         'L1_eEM18L_MU8F', 'L1_2eEM10L_MU8F',
         # ATR-27156
@@ -154,13 +155,15 @@ def defineMenu():
         'L1_jLJ80', 'L1_jLJ120', 'L1_jLJ140', 'L1_jLJ180',
 
         # jEM
-        'L1_jEM25', 'L1_jEM20M',   
+        'L1_jEM25', 'L1_jEM20M',
+        'L1_jEM35', # prospective Run 4 L1 item, ATR-30180
 
         # gJ
         'L1_gJ20p0ETA25', 'L1_gJ20p0ETA25_EMPTY', 'L1_gJ20p25ETA49', 'L1_gJ50p0ETA25', 'L1_gJ100p0ETA25', 'L1_gJ400p0ETA25',
 
         # gLJ
         'L1_gLJ80p0ETA25', 'L1_gLJ100p0ETA25', 'L1_gLJ140p0ETA25', 'L1_gLJ160p0ETA25',
+        'L1_gLJ90p0ETA25', # prospective Run 4 L1 item, ATR-30180
 
         # LAr saturation
         'L1_LArSaturation',
@@ -171,7 +174,8 @@ def defineMenu():
         'L1_2jJ90_jXE80', 
         'L1_2jJ40_jXE110',
         'L1_3jJ40p0ETA25_jXE80',
-        
+
+        'L1_2jJ56p0ETA49', # prospective Run 4 L1 item, ATR-30180
         #ATR-29523
         'L1_3jJ40p0ETA25',
         # new calo

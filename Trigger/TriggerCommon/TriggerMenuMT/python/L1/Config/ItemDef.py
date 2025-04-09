@@ -221,6 +221,7 @@ class ItemDef:
         MenuItem('L1_eEM22C'    ).setLogic( d.eEM22C     & physcond).setTriggerType( TT.calo )
 
         # PhaseI 2xEM and 3xEM
+        MenuItem('L1_2eEM10L').setLogic(d.eEM10L.x(2) & physcond).setTriggerType(TT.calo) # prospective Run 4 L1 item, ATR-30180
         MenuItem('L1_2eEM12').setLogic(d.eEM12.x(2) & physcond).setTriggerType(TT.calo) #heavy ions, ATR-26333
         MenuItem('L1_2eEM12L').setLogic(d.eEM12L.x(2) & physcond).setTriggerType(TT.calo) #heavy ions, ATR-26333
         MenuItem('L1_2eEM18').setLogic(d.eEM18.x(2) & physcond).setTriggerType(TT.calo)
@@ -562,7 +563,6 @@ class ItemDef:
         MenuItem('L1_cTAU35M_2cTAU30M_2jJ55_3jJ50').setLogic(d.cTAU35M & d.cTAU30M.x(2) & d.jJ55.x(2) & d.jJ50.x(3) & physcond).setTriggerType(TT.calo)
         # ATR-29439
         MenuItem('L1_cTAU30M_2cTAU20M_3jJ30p0ETA25').setLogic(d.cTAU30M & d.cTAU20M.x(2) & d.jJ300ETA25.x(3) & physcond).setTriggerType(TT.calo)
-
         
         #UPC TAU
         MenuItem('L1_2TAU1_VTE50' ).setLogic( d.HA1.x(2)      & Not(d.TE50) & physcond).setTriggerType(TT.calo)
@@ -768,6 +768,7 @@ class ItemDef:
         MenuItem('L1_jJ80p0ETA25_2jJ40p30ETA49'      ).setLogic( d.jJ800ETA25 & d.jJ4030ETA49.x(2)            & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ85p0ETA21_3jJ40p0ETA25'       ).setLogic( d.jJ850ETA21 & d.jJ400ETA25.x(3)             & physcond).setTriggerType(TT.calo)
         MenuItem('L1_3jJ40p0ETA25'  ).setLogic( d.jJ400ETA25.x(3) & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_2jJ56p0ETA49'  ).setLogic( d.jJ560ETA49.x(2) & physcond).setTriggerType(TT.calo) # prospective Run 4 L1 item, ATR-30180
 
         MenuItem('L1_jJ60_EMPTY'     ).setLogic( d.jJ60 & cosmiccond ).setTriggerType(TT.calo)
         MenuItem('L1_jJ60_FIRSTEMPTY').setLogic( d.jJ60 & firstempty ).setTriggerType(TT.calo)
@@ -796,12 +797,14 @@ class ItemDef:
         MenuItem('L1_gJ400p0ETA25'        ).setLogic( d.gJ4000ETA25       & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_gLJ80p0ETA25'         ).setLogic( d.gLJ800ETA25        & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gLJ90p0ETA25'         ).setLogic( d.gLJ900ETA25        & physcond).setTriggerType(TT.calo) # prospective Run 4 L1 item, ATR-30180
         MenuItem('L1_gLJ100p0ETA25'        ).setLogic( d.gLJ1000ETA25       & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gLJ140p0ETA25'        ).setLogic( d.gLJ1400ETA25       & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gLJ160p0ETA25'        ).setLogic( d.gLJ1600ETA25       & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_jEM25'         ).setLogic( d.jEM25        & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jEM20M'        ).setLogic( d.jEM20M       & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jEM35'         ).setLogic( d.jEM35        & physcond).setTriggerType(TT.calo) # prospective Run 4 L1 item, ATR-30180
 
         MenuItem('L1_J10p31ETA49').setLogic( d.J1031ETA49 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_J75p31ETA49').setLogic( d.J7531ETA49 & physcond).setTriggerType(TT.calo)
