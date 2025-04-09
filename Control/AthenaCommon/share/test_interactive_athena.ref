@@ -84,10 +84,6 @@ Py:pyalg             INFO execute...
 Py:pyalg             INFO --> evt: 10/11
 Py:pyalg             INFO execute... [ok]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #11, run #1 11 events processed so far  <<<===
-test lock
-ClassIDSvc           INFO  getRegistryEntries: read 1280 CLIDRegistry entries for module ALL
-ClassIDSvc           INFO  getRegistryEntries: read 174 CLIDRegistry entries for module ALL
-done test lock
 ApplicationMgr       INFO Application Manager Stopped successfully
 IncidentProcAlg1     INFO Finalize
 pyalg                INFO Finalizing pyalg...

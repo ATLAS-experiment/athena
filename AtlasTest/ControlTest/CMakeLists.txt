@@ -59,8 +59,5 @@ else()
    set( SGGoptignore )
 endif()
 
-atlas_add_test( test_interactive_athena
-   SCRIPT athena.py ControlTest/test_interactive_athena.py )
-
 # Install files from the package:
-atlas_install_joboptions( share/StoreGateTestCommon.txt share/DataLink_test.txt share/*.py )
+atlas_install_joboptions( share/StoreGateTestCommon.txt share/DataLink_test.txt )
