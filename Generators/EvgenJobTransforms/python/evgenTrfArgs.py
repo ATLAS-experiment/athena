@@ -117,3 +117,10 @@ def addStdEvgenArgs(parser):
                         help = 'ignore Blacklist - allows to run a test in a blacklisted release',
                         type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
                         default=trfArgClasses.argBool('False'))
+ 
+    parser.add_argument('--allowOldFilter', '--allowOldFilter', group='Evgen',
+                        help = 'useOldFilter - allows to use old (not xAOD based) filters',
+                        type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
+                        default=trfArgClasses.argBool('False'))
+
+

@@ -396,6 +396,12 @@ if len(evgenConfig.keywords)>0:
 from PyUtils import AMITagHelper
 AMITagHelper.SetAMITag(runArgs=runArgs)
 
+## Propagete EventStreamInfo metadata
+from OutputStreamAthenaPool.OutputStreamAthenaPoolConf import CopyEventStreamInfo
+streamInfoTool = CopyEventStreamInfo( "StreamEVGEN_CopyEventStreamInfo" )
+ToolSvc += streamInfoTool
+svcMgr.MetaDataSvc.MetaDataTools += [ streamInfoTool ]
+
 ## Propagate energy argument to the generators
 # TODO: Standardise energy setting in the GenModule interface
 include("EvgenJobTransforms/Generate_ecmenergies.py")

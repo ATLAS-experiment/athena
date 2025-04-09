@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for this module
@@ -30,15 +30,6 @@ HTFilter::HTFilter(const std::string& name, ISvcLocator* pSvcLocator)
    , m_passed(0)
    , m_ptfailed(0)
 {
-  declareProperty("MinJetPt",m_MinJetPt = 0*Gaudi::Units::GeV);  
-  declareProperty("MaxJetEta",m_MaxJetEta = 10.0);
-  declareProperty("TruthJetContainer", m_TruthJetContainerName = "AntiKt4TruthWZJets");
-  declareProperty("MinHT",m_MinHT = 20.*Gaudi::Units::GeV);
-  declareProperty("MaxHT",m_MaxHT = 14000.*Gaudi::Units::GeV);
-  declareProperty("UseNeutrinosFromWZTau",m_UseNu = false, "Include neutrinos from W/Z/tau decays in the calculation of HT");
-  declareProperty("UseLeptonsFromWZTau",m_UseLep = false, "Include e/mu from W/Z/tau decays in the HT");
-  declareProperty("MinLeptonPt",m_MinLepPt = 0*Gaudi::Units::GeV);
-  declareProperty("MaxLeptonEta",m_MaxLepEta = 10.0);
 }
 
 //--------------------------------------------------------------------------
@@ -49,10 +40,10 @@ HTFilter::~HTFilter() {
 //---------------------------------------------------------------------------
 
 StatusCode HTFilter::filterInitialize() {
-  m_MinJetPt /= Gaudi::Units::GeV;
-  m_MinLepPt /= Gaudi::Units::GeV;
-  m_MinHT /= Gaudi::Units::GeV;
-  m_MaxHT /= Gaudi::Units::GeV;
+  m_MinJetPt = m_MinJetPt/Gaudi::Units::GeV;
+  m_MinLepPt = m_MinLepPt/Gaudi::Units::GeV;
+  m_MinHT = m_MinHT/Gaudi::Units::GeV;
+  m_MaxHT = m_MaxHT/Gaudi::Units::GeV;
   if (m_MaxHT<0) m_MaxHT=9e9;
 
   ATH_MSG_INFO( "Configured with " << m_MinJetPt << "<p_T GeV and abs(eta)<" << m_MaxJetEta << " for jets in " << m_TruthJetContainerName );
@@ -78,9 +69,10 @@ StatusCode HTFilter::filterEvent() {
 
 #ifdef HEPMC3
     
-
-ATH_MSG_ERROR(" For HEPMC3 releases xAOD filters should be used. Exiting with ERROR. ");
-return StatusCode::FAILURE;
+if (! m_allowOld) {  
+  ATH_MSG_ERROR(" For HEPMC3 releases xAOD filters should be used. Exiting with ERROR. ");
+  return StatusCode::FAILURE;
+}
 
 #endif
 
@@ -138,7 +130,7 @@ return StatusCode::FAILURE;
     }
   } // End need to access MC Event
 
-  HT /= Gaudi::Units::GeV; // Make sure we're in GeV
+  HT = HT/Gaudi::Units::GeV; // Make sure we're in GeV
   ATH_MSG_DEBUG( "HT: " << HT );
 
   if (HT<m_MinHT || HT>=m_MaxHT){

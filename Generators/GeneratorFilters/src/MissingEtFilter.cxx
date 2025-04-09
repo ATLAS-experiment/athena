@@ -11,10 +11,6 @@
 MissingEtFilter::MissingEtFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name,pSvcLocator)
 {
-  declareProperty("METCut",m_METmin = 10000.);
-  // Normally we'd include them, but this is unstable if using EvtGen
-  declareProperty("UseNeutrinosFromHadrons",m_useHadronicNu = false);
-  declareProperty("UseChargedNonShowering",m_useChargedNonShowering = false);
 }
 
 
@@ -22,9 +18,11 @@ StatusCode MissingEtFilter::filterEvent() {
   double sumx(0), sumy(0);
 
 #ifdef HEPMC3
-  
-ATH_MSG_ERROR(" For HEPMC3 releases xAOD filters should be used. Exiting with ERROR. ");
-return StatusCode::FAILURE;
+
+if (! m_allowOld) {  
+  ATH_MSG_ERROR(" For HEPMC3 releases xAOD filters should be used. Exiting with ERROR. ");
+  return StatusCode::FAILURE;
+}
   
 #endif
 
