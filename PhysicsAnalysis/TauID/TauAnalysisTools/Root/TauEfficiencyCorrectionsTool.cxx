@@ -339,7 +339,30 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
       ATH_CHECK(tTool->setProperty("VarName", m_sVarNameJetIDHadTau));
       ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
       ATH_CHECK(tTool->setProperty("WP", sJetIDWP));
-    }	  
+    }
+    else if (iEfficiencyCorrectionType == SFRecoHadTau)
+    {
+      if (m_sInputFilePathRecoHadTau.empty()) m_sInputFilePathRecoHadTau = sDirectory + "Reco_TrueHadTau_2019-summer_v2.root";
+      if (m_sVarNameRecoHadTau.empty()) m_sVarNameRecoHadTau = "TauScaleFactorReconstructionHadTau";
+
+      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/RecoHadTauTool", this);
+      m_vCommonEfficiencyTools.push_back(tTool);
+      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathRecoHadTau));
+      ATH_CHECK(tTool->setProperty("VarName", m_sVarNameRecoHadTau));
+      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+    }
+    else if (iEfficiencyCorrectionType == SFEleIDHadTau)
+    {
+      // the path must be updated once RNN eVeto SFs are available
+      if (m_sInputFilePathEleIDHadTau.empty()) m_sInputFilePathEleIDHadTau = sDirectory + "EleOLR_TrueHadTau_2016-ichep.root";
+      if (m_sVarNameEleIDHadTau.empty()) m_sVarNameEleIDHadTau = "TauScaleFactorEleIDHadTau";
+
+      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/EleIDHadTauTool", this);
+      m_vCommonEfficiencyTools.push_back(tTool);
+      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathEleIDHadTau));
+      ATH_CHECK(tTool->setProperty("VarName", m_sVarNameEleIDHadTau));
+      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+    }
     else if (iEfficiencyCorrectionType == SFEleIDElectron)
     {
       // the path must be updated once RNN eVeto SFs are available
