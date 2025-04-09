@@ -14,6 +14,7 @@ xAODVBFForwardJetsFilter = xAODVBFForwardJetsFilter("xAODVBFForwardJetsFilter")
 filtSeq += xAODVBFForwardJetsFilter
 
 # to modify cuts put into JOs e.g.:
+from AthenaCommon.SystemOfUnits import GeV
 #filtSeq.xAODVBFForwardJetsFilter.JetMinPt=20.*GeV
 #filtSeq.xAODVBFForwardJetsFilter.JetMaxEta=5.0
 #filtSeq.xAODVBFForwardJetsFilter.NJets=2

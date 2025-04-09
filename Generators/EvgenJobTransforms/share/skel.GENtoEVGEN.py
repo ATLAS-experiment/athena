@@ -859,6 +859,14 @@ excludedNames = ['AthSequencer', 'PyAthena::Alg', 'TestHepMC']
 filterNames = list(set(filterNames) - set(excludedNames))
 print ("MetaData: %s = %s" % ("genFilterNames", ", ".join(filterNames)))
 
+if (hasattr( runArgs, "allowOldFilter") and runArgs.allowOldFilter):
+  for alg in acas.iter_algseq(filtSeq):
+     filtName = alg.getType()
+     exceptName =['xAOD','Jet']
+     if filtName not in excludedNames:
+        if not any(ex in filtName for ex in exceptName):  
+           alg.AllowOldFilter=True
+           print("eA old filter allowed via transform param.")
 
 ##==============================================================
 ## Dump evgenConfig so it can be recycled in post-run actions

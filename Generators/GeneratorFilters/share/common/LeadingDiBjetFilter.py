@@ -9,13 +9,14 @@ if not hasattr( filtSeq, "LeadingDiBjetFilter" ):
     filtSeq += LeadingDiBjetFilter()
     pass
 
+from AthenaCommon.SystemOfUnits import GeV
 """
 LeadingDiBjetFilter = filtSeq.LeadingDiBjetFilter
-LeadingDiBjetFilter.LeadJetPtMin = 0 * GeV 
-LeadingDiBjetFilter.LeadJetPtMax = 50000 *CLHEP::GeV
-LeadingDiBjetFilter.BottomPtMin = 5.0 *CLHEP::GeV
+LeadingDiBjetFilter.LeadJetPtMin = 0  
+LeadingDiBjetFilter.LeadJetPtMax = 50000 *GeV
+LeadingDiBjetFilter.BottomPtMin = 5.0 *GeV
 LeadingDiBjetFilter.BottomEtaMax = 3.0
-LeadingDiBjetFilter.JetPtMin = 15.0 *CLHEP::GeV
+LeadingDiBjetFilter.JetPtMin = 15.0 *GeV
 LeadingDiBjetFilter.JetEtaMax = 2.7
 LeadingDiBjetFilter.DeltaRFromTruth = 0.3
 LeadingDiBjetFilter.TruthContainerName = "AntiKt4TruthJets"
