@@ -343,7 +343,7 @@ namespace MuonValR4 {
     void MuonHoughTransformTester::fillSeedInfo(const ObjectMatching& obj) {
 
         m_out_seed_n = obj.matchedSeeds.size();
-        for (const auto& [iseed, seed] : Acts::enumerate(obj.matchedSeeds)){
+        for (const auto [iseed, seed] : Acts::enumerate(obj.matchedSeeds)){
             if (iseed ==0) {
                 fillBucketInfo(*seed->parentBucket());
             }
