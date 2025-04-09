@@ -29,6 +29,7 @@ threshold_mapping = {
     'jEM': {
         20:14,
         25:20,
+        35:30, # prospective Run 4 L1 item, ATR-30180
     },
     'eTAU': {
         # in pp menu (doHeavyIonTobThresholds=False) ptMinToTopo value is assigined to eTAU1
@@ -84,6 +85,7 @@ threshold_mapping = {
         40:25,
         50:33,
         55:39,
+        56:40, # prospective Run 4 L1 item, ATR-30180
         60:56,
         70:54,
         80:64,
@@ -140,6 +142,7 @@ threshold_mapping = {
     'gLJ':
     {
         80:50,
+        90:60, # prospective Run 4 L1 item, ATR-30180
         100:70,
         140:110,
         160:130,
