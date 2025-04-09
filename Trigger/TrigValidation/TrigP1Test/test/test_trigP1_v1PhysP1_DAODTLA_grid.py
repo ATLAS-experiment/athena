@@ -3,7 +3,7 @@
 
 # art-description: Test of P1+Tier0 workflow, runs athenaHLT with PhysicsP1_pp_run3_v1 menu followed by offline reco and monitoring (incl. EDM)
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log

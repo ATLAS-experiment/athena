@@ -5,7 +5,7 @@
 
 # art-description: art job for all_ttbar_nopileup
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4369_s4370_r16210_tid42196707_00
 # art-input-nfiles: 1

@@ -3,7 +3,7 @@
 
 # art-description: art job for all_ttbar_pu200_ITk
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-input: mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_s4345_r15583
 # art-input-nfiles: 20
 # art-athena-mt: 8

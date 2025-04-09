@@ -3,7 +3,7 @@
 
 # art-description: art job for minbias pixel only 
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-input: valid1.900341.Epos_LHC_minbias_inelastic.recon.RDO.e8514_e8528_s4159_s4114_r14838_tid34209703_00
 # art-input-nfiles: 4

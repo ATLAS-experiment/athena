@@ -3,7 +3,7 @@
 
 # art-description: Trigger BS->BS athena test of the Dev_pp_run3_v1 menu
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 # art-output: *.txt
