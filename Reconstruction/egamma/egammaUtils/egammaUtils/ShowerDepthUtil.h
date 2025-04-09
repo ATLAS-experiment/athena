@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAUTILS_SHOWERDEPTHTOOL_H
@@ -10,17 +10,13 @@
 #include <optional>
 #include <utility>
 
-// Forward declaration(s):
-class TH1;
+#include <TH1.h>
 
 namespace CP {
 
-class ShowerDepthTool {
+class ShowerDepthUtil {
  public:
-  ShowerDepthTool();
-  ~ShowerDepthTool();
-  /// Function initialising the tool
-  bool initialize();
+  ShowerDepthUtil();
 
   /** Shower depth (in mm) on EM1 vs. eta, considering misalignments **/
   float getCorrectedShowerDepthEM1(float etas1, float phi,

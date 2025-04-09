@@ -3,7 +3,9 @@
  */
 
 #include "egammaUtils/egammaCopyTrackParticleInfo.h"
+
 #include "xAODEgamma/EgammaxAODHelpers.h"
+#include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 namespace {
