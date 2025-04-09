@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 '''
 @file TileRawChNoiseCalibAlgConfig.py
@@ -40,9 +40,9 @@ def TileRawChNoiseCalibAlgCfg(flags, **kwargs):
     kwargs.setdefault('doOF1', flags.Tile.doOF1)
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    TileRawChNoiseCalibAlgCfg = CompFactory.TileRawChNoiseCalibAlg
+    TileRawChNoiseCalibAlg = CompFactory.TileRawChNoiseCalibAlg
 
-    acc.addEventAlgo(TileRawChNoiseCalibAlgCfg(**kwargs), primary=True)
+    acc.addEventAlgo(TileRawChNoiseCalibAlg(**kwargs), primary=True)
 
     return acc
 
