@@ -543,7 +543,7 @@ bool FPGATrackSimCLUSTERING::updateStripCluster(FPGATrackSimCluster &currentClus
 
     // Shift initial widths 1->0, 2->2, 3->4, 4->6 etc...
     //The groupSize is stored in the EtaWidth
-    int tempWidth = (incomingHit.getEtaWidth()*fpgatracksim::scaleHitFactor)-fpgatracksim::scaleHitFactor;
+    int tempWidth = (incomingHit.getPhiWidth()*fpgatracksim::scaleHitFactor)-fpgatracksim::scaleHitFactor;
     // Now shift to pixel width equivalents, 0->0, 2->1, 4->2, 6->3 etc...
     if(tempWidth > 0) tempWidth = tempWidth/fpgatracksim::scaleHitFactor;
     if(newCluster){
