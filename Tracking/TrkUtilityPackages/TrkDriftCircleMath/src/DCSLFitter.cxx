@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkDriftCircleMath/DCSLFitter.h"
+#include "CxxUtils/sincos.h"
 
 #include <iostream>
 
@@ -83,19 +84,18 @@ bool DCSLFitter::fit(Segment& result, const Line& line, const DCOnTrackVec& dcs,
   double R{0}, Ry{0}, Rz{0}, Att{0}, Add{S}, Bt{0}, Bd{0}, Stt{0}, Sd{0};
 
   double theta = line.phi();
-  double cosin = std::cos(theta);
-  double sinus = std::sin(theta);
+  CxxUtils::sincos sc (theta);
 
   // make sure 0 <= theta < PI
-  if (sinus < 0.0) {
-    sinus = -sinus;
-    cosin = -cosin;
-  } else if (sinus == 0.0 && cosin < 0.0) {
-    cosin = -cosin;
+  if (sc.sn < 0.0) {
+    sc.sn = -sc.sn;
+    sc.cs = -sc.cs;
+  } else if (sc.sn == 0.0 && sc.cs < 0.0) {
+    sc.cs = -sc.cs;
   }
   //
   // calculate shift
-  double d = line.y0() + Zc * sinus - Yc * cosin;
+  double d = line.y0() + sc.apply (Zc, -Yc);
 
   while (count < 100) {
     R = Ry = Rz = 0;
@@ -106,7 +106,7 @@ bool DCSLFitter::fit(Segment& result, const Line& line, const DCOnTrackVec& dcs,
 
       FitData& datum = data[i];
 
-      double dist = datum.y * cosin - datum.z * sinus;
+      double dist = sc.apply (-datum.z, datum.y);;
       if (dist > d) {
         R -= datum.rw;
         Ry -= datum.ryw;
@@ -117,8 +117,8 @@ bool DCSLFitter::fit(Segment& result, const Line& line, const DCOnTrackVec& dcs,
         Rz += datum.rzw;
       }
     }
-    Att = Syy + cosin * (2 * sinus * Szy - cosin * Syyzz);
-    Bt = -Szy + cosin * (sinus * Syyzz + 2 * cosin * Szy + Rz) + sinus * Ry;
+    Att = Syy + sc.cs * (2 * sc.sn * Szy - sc.cs * Syyzz);
+    Bt = -Szy + sc.cs * (sc.sn * Syyzz + 2 * sc.cs * Szy + Rz) + sc.sn * Ry;
     Bd = -S * d + R;
     if (Att == 0) {
       if (data.capacity() > 100) {
@@ -132,8 +132,8 @@ bool DCSLFitter::fit(Segment& result, const Line& line, const DCOnTrackVec& dcs,
       theta += M_PI;
     if (theta >= M_PI)
       theta -= M_PI;
-    cosin = std::cos(theta);
-    sinus = std::sqrt(1 - cosin * cosin);
+    sc = CxxUtils::sincos (theta);
+    sc.sn = std::abs(sc.sn);
     d = R / S;
     if (std::abs(Bt / Att) < 0.001 && std::abs(Bd / Add) < 0.001) {
       Stt = std::sqrt(1 / Att);
@@ -162,8 +162,8 @@ bool DCSLFitter::fit(Segment& result, const Line& line, const DCOnTrackVec& dcs,
   result.dcs().reserve(N);
   for (unsigned int i = 0; i < N; ++i) {
     FitData& datum = data[i];
-    yl = cosin * datum.y - sinus * datum.z - d;
-    double dth = -(sinus * datum.y + cosin * datum.z) * Stt;
+    yl = sc.apply (-datum.z, datum.y) - d;
+    double dth = -sc.apply (datum.y, datum.z) * Stt;
     double errorResiduals = std::hypot(dth, Sd);
     double residuals = std::abs(yl) - datum.r;
     if (selection[i] == 0) {
@@ -176,7 +176,7 @@ bool DCSLFitter::fit(Segment& result, const Line& line, const DCOnTrackVec& dcs,
   }
 
   result.set(chi2, nhits - 2, dtheta, dy0);
-  result.line().set(LocVec2D(Zc - sinus * d, Yc + cosin * d), theta);
+  result.line().set(LocVec2D(Zc - sc.sn * d, Yc + sc.cs * d), theta);
 
   return true;
 }
