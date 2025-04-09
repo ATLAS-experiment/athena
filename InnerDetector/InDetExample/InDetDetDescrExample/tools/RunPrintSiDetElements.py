@@ -53,7 +53,7 @@ flags.Input.Files = []
 
 flags.GeoModel.Align.Dynamic = False
 
-MisalignMode = args.MisalignMode
+MisalignMode = args.misalignmode
 if args.MisalignMode is not None:
     tag="InDetSi_MisalignmentMode_random misalignment"
     BFile=""
@@ -136,7 +136,7 @@ if flags.Detector.EnableSCT:
     PrintSCTDetElements.OutputFile = "SCT_Geometry.dat"
     acc.addEventAlgo(PrintSCTDetElements)
 
-if args.MisalignMode is not None:
+if args.misalignmode is not None:
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     print("Adding Align Folder")
     acc.merge(addFolders(flags,flags.ITk.Geometry.alignmentFolder,db=DBName,detDb=DBFile,tag=tag))
@@ -155,7 +155,7 @@ if flags.Detector.EnableITkPixel:
     PrintPixelDetElements.OutputLevel = 5
     PrintPixelDetElements.DetectorManagerNames = ["ITkPixel"]
     PrintPixelDetElements.OutputFile = "PixelGeometry.dat"
-    if args.MisalignMode is not None:
+    if args.misalignmode is not None:
         PrintPixelDetElements.AlignedPosition = True
         print ("Pixel aligned position written into dat")
     acc.addEventAlgo(PrintPixelDetElements)
@@ -176,7 +176,7 @@ if flags.Detector.EnableITkStrip:
     PrintStripDetElements.DetectorManagerNames = ["ITkStrip"]
     PrintStripDetElements.ModulesOnly = False
     PrintStripDetElements.OutputFile = "StripGeometry.dat"
-    if args.MisalignMode is not None:
+    if args.misalignmode is not None:
         PrintStripDetElements.AlignedPosition = True
         print ("Strip aligned position written into dat")
     acc.addEventAlgo(PrintStripDetElements)
