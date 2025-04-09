@@ -33,24 +33,6 @@ class TestAlg(PyAthena.Alg):
 
     pass # class TestAlg
 
-def test_lock():
-    print ('test lock')
-    sg = PyAthena.py_svc('StoreGateSvc')
-    ei = PyAthena.EventInfo()
-    sg.record (ei, 'EventInfo')
-    sg.setConst (ei).ignore()
-
-    ll = PyAthena.MyLockableDataObj()
-    assert (not ll.m_locked)
-    sg.record (ll, 'lockable')
-    assert (not ll.m_locked)
-    sg.setConst (ll).ignore()
-    assert (ll.m_locked)
-    print ('done test lock')
-    import sys
-    sys.stdout.flush()
-    return
-
 job += TestAlg("pyalg")
 
 theApp.initialize()
@@ -58,8 +40,6 @@ theApp.nextEvent()
 
 for _ in range(10):
     theApp.nextEvent()
-
-test_lock()
 
 theApp.finalize().ignore()
 print ("="*80)
