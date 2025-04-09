@@ -7,15 +7,13 @@
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 
-# TODO update following ATLASRECTS-8054
-
 Reco_tf.py  \
 --AMI x717  \
---inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00428353.express_express.merge.RAW._lb0800._SFO-ALL._0001.1" \
+--inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data24/RAW/data24_13p6TeV.00484909.physics_Main.daq.RAW/1627events_data24_13p6TeV.00484909.physics_Main.daq.RAW._lb0098._SFO-16._0001.data" \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
 --outputHISTFile="HIST.root" \
---conditionsTag="CONDBR2-ES1PA-2022-08" \
+--conditionsTag="CONDBR2-ES1PA-2024-05" \
 --imf False
 
 rc1=$?
