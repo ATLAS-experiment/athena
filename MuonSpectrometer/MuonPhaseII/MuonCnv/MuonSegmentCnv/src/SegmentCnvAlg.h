@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSEGMENTCNV_SEGMENTCNVALG_H
 #define MUONSEGMENTCNV_SEGMENTCNVALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 
@@ -40,15 +39,6 @@ namespace MuonR4{
             StatusCode convert(const EventContext& ctx,
                                const MuonR4::Segment& segment,
                                Trk::SegmentCollection& outContainer) const;
-            /** @brief Loads a container from the StoreGate and returns whether the retrieval is successful.
-             *         If the key is empty a nullptr is assigned and the code returns success
-             *  @param ctx: EventContext of the current Event
-             *  @param key: Container key to retrieve
-             *  @param contPtr: Pointer to which the retievec container will be assigned to */
-            template <class ContType> 
-                StatusCode retrieveContainer(const EventContext& ctx,
-                                             const SG::ReadHandleKey<ContType>& key,
-                                             const ContType*& contPtr) const;
             /*** @brief Fetches a MuonPrepData object from the PrepData container by matching the parsed Identifier.
                *        Nullptr is returned if the object does not exist and an error message is printed
                * @param prdId: Identifier of the measurement to fetch

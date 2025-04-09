@@ -4,7 +4,6 @@
 */
 #include "SdoMultiTruthMaker.h"
 
-#include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
 #include "xAODMuonPrepData/UtilFunctions.h"
@@ -22,12 +21,9 @@ namespace MuonR4 {
       SG::WriteHandle prdTruth{m_writeKey, ctx};
       ATH_CHECK(prdTruth.record(std::make_unique<PRD_MultiTruthCollection>()));
         
-      SG::ReadHandle readHandle{m_simHitKey, ctx};
-      if (!readHandle.isPresent()) {
-         ATH_MSG_FATAL("Failed to load container "<<m_simHitKey.fullKey());
-         return StatusCode::FAILURE;
-      }
-      for (const xAOD::MuonSimHit* truthHit : *readHandle) {
+      const xAOD::MuonSimHitContainer* hitContainer{nullptr};
+      ATH_CHECK(SG::get( hitContainer, m_simHitKey, ctx));
+      for (const xAOD::MuonSimHit* truthHit : *hitContainer) {
          if (!truthHit->genParticleLink().isValid()){
             continue;
          }

@@ -30,28 +30,13 @@ namespace MuonR4{
         ATH_CHECK(m_geoCtxKey.initialize());
         return StatusCode::SUCCESS;
     }
-    template <class ContainerType>
-        StatusCode SegmentCnvAlg::retrieveContainer(const EventContext& ctx, 
-                                                    const SG::ReadHandleKey<ContainerType>& key,
-                                                    const ContainerType*& contToPush) const {
-            contToPush = nullptr;
-            if (key.empty()) {
-                ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
-                return StatusCode::SUCCESS;
-            }
-            SG::ReadHandle readHandle{key, ctx};
-            ATH_CHECK(readHandle.isPresent());
-            contToPush = readHandle.cptr();
-            return StatusCode::SUCCESS;
-    }
-
-
+    
     StatusCode SegmentCnvAlg::execute(const EventContext& ctx) const {
 
         auto translatedSegments = std::make_unique<Trk::SegmentCollection>();
         for (const SG::ReadHandleKey<SegmentContainer>& key : m_readKeys) {
             const SegmentContainer* translateMe{nullptr};
-            ATH_CHECK(retrieveContainer(ctx, key, translateMe));
+            ATH_CHECK(SG::get(translateMe, key, ctx));
             for (const Segment* segment : *translateMe) {
                 ATH_CHECK(convert(ctx, *segment, *translatedSegments));
             }
@@ -139,14 +124,14 @@ namespace MuonR4{
         const Muon::sTgcPrepDataContainer* stgcPrds{nullptr};
         const Muon::MMPrepDataContainer* mmPrds{nullptr};
 
-        ATH_CHECK(retrieveContainer(ctx, m_keyMdt, mdtPrds));
-        ATH_CHECK(retrieveContainer(ctx, m_keyRpc, rpcPrds));
-        ATH_CHECK(retrieveContainer(ctx, m_keyTgc, tgcPrds));
-        ATH_CHECK(retrieveContainer(ctx, m_keysTgc, stgcPrds));
-        ATH_CHECK(retrieveContainer(ctx, m_keyMM, mmPrds));
+        ATH_CHECK(SG::get(mdtPrds, m_keyMdt, ctx));
+        ATH_CHECK(SG::get(rpcPrds, m_keyRpc, ctx));
+        ATH_CHECK(SG::get(tgcPrds, m_keyTgc, ctx));
+        ATH_CHECK(SG::get(stgcPrds, m_keysTgc, ctx));
+        ATH_CHECK(SG::get(mmPrds, m_keyMM, ctx));
 
         const ActsGeometryContext* gctx{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
+        ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         
         std::vector<std::unique_ptr<Trk::RIO_OnTrack>> rots{};
         unsigned int nPrec{0};

@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "PrepDataToSimHitAssocAlg.h"
 
-#include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "xAODMuonPrepData/RpcMeasurement.h"
@@ -12,21 +11,6 @@
 #include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonViews/ChamberViewer.h"
 namespace MuonR4{
-    template <class ContainerType>
-        StatusCode PrepDataToSimHitAssocAlg::retrieveContainer(const EventContext& ctx, 
-                                                               const SG::ReadHandleKey<ContainerType>& key,
-                                                               const ContainerType*& contToPush) const {
-        contToPush = nullptr;
-        if (key.empty()) {
-            ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
-            return StatusCode::SUCCESS;
-        }
-        SG::ReadHandle readHandle{key, ctx};
-        ATH_CHECK(readHandle.isPresent());
-        contToPush = readHandle.cptr();
-        return StatusCode::SUCCESS;
-    }
-
     StatusCode PrepDataToSimHitAssocAlg::initialize() {
         ATH_CHECK(m_simHitsKey.initialize());
         ATH_CHECK(m_prdHitKey.initialize());
@@ -39,9 +23,9 @@ namespace MuonR4{
         const ActsGeometryContext* gctx{nullptr};
         const xAOD::MuonSimHitContainer* simHits{nullptr};
         const xAOD::UncalibratedMeasurementContainer* measurements{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
-        ATH_CHECK(retrieveContainer(ctx, m_simHitsKey, simHits));
-        ATH_CHECK(retrieveContainer(ctx, m_prdHitKey, measurements));
+        ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
+        ATH_CHECK(SG::get(simHits, m_simHitsKey, ctx));
+        ATH_CHECK(SG::get(measurements, m_prdHitKey, ctx));
         
         
         SG::WriteDecorHandle<xAOD::UncalibratedMeasurementContainer, LinkType> decorHandle{m_decorKey, ctx};

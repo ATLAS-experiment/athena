@@ -36,11 +36,11 @@ namespace MuonR4 {
         using DigitSDOPair = std::pair<std::unique_ptr<MdtDigit>, TimedHit>;
         /// Fetch the needed conditions 
         const MuonCalib::MdtCalibDataContainer* calibData{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_calibDbKey, calibData));
+        ATH_CHECK(SG::get(calibData, m_calibDbKey, ctx));
         const MdtCondDbData* badTubes{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_badTubeKey, badTubes));
+        ATH_CHECK(SG::get(badTubes, m_badTubeKey, ctx));
         const Muon::TwinTubeMap* twinTubes{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_twinTubeKey, twinTubes));
+        ATH_CHECK(SG::get(twinTubes, m_twinTubeKey, ctx));
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
         
         DigiCache digitCache{};

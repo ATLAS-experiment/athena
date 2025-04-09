@@ -38,13 +38,6 @@ namespace MuonR4{
             virtual StatusCode execute(const EventContext& ctx) const override;
 
         private:
-            
-            /// Helper method to fetch data from StoreGate. If the key is empty, a nullptr is assigned to the container ptr
-            /// Failure is returned in cases, of non-empty keys and failed retrieval
-            template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
-                                                                        const SG::ReadHandleKey<ContainerType>& key,
-                                                                        const ContainerType* & contToPush) const;
-
             /// @brief prepare the hough plane once per event. 
             /// Books the accumulator and attaches it to the event data
             /// @param data: Event data object 

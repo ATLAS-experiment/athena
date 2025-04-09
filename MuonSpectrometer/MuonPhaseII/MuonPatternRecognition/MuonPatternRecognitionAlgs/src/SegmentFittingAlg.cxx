@@ -72,9 +72,9 @@ namespace MuonR4 {
     }
     StatusCode SegmentFittingAlg::execute(const EventContext& ctx) const {
         const ActsGeometryContext* gctx{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
+        ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         const SegmentSeedContainer* segmentSeeds=nullptr; 
-        ATH_CHECK(retrieveContainer(ctx, m_seedKey, segmentSeeds));
+        ATH_CHECK(SG::get(segmentSeeds, m_seedKey, ctx));
     
         SG::WriteHandle writeSegments{m_outSegments, ctx};
         ATH_CHECK(writeSegments.record(std::make_unique<SegmentContainer>()));
@@ -130,21 +130,6 @@ namespace MuonR4 {
         ATH_MSG_VERBOSE("Found in total "<<writeSegments->size()<<" segments. ");
         return StatusCode::SUCCESS; 
     }
-
-    template <class ContainerType>
-        StatusCode SegmentFittingAlg::retrieveContainer(const EventContext& ctx, 
-                                                        const SG::ReadHandleKey<ContainerType>& key,
-                                                        const ContainerType*& contToPush) const {
-            contToPush = nullptr;
-            if (key.empty()) {
-                ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
-                return StatusCode::SUCCESS;
-            }
-            SG::ReadHandle readHandle{key, ctx};
-            ATH_CHECK(readHandle.isPresent());
-            contToPush = readHandle.cptr();
-            return StatusCode::SUCCESS;
-        }
 
     SegmentFitResult SegmentFittingAlg::fitSegmentHits(const EventContext& ctx,
                                                        const ActsGeometryContext& gctx,

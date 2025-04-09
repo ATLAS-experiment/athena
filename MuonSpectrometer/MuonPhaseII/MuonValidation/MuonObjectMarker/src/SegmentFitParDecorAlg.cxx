@@ -18,22 +18,6 @@ namespace MuonR4 {
     using PrdLinkVec = std::vector<PrdLink_t>;
     using TechIdx_t = Muon::MuonStationIndex::TechnologyIndex;
 
-
-    template <class ContainerType>
-        StatusCode SegmentFitParDecorAlg::retrieveContainer(const EventContext& ctx, 
-                                                            const SG::ReadHandleKey<ContainerType>& key,
-                                                            const ContainerType*& contToPush) const {
-            contToPush = nullptr;
-            if (key.empty()) {
-                ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
-                return StatusCode::SUCCESS;
-            }
-            SG::ReadHandle readHandle{key, ctx};
-            ATH_CHECK(readHandle.isPresent());
-            contToPush = readHandle.cptr();
-            return StatusCode::SUCCESS;
-    }
-
     StatusCode SegmentFitParDecorAlg::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_geoCtxKey.initialize());
@@ -53,7 +37,7 @@ namespace MuonR4 {
                                                       const Identifier& measId,
                                                       const xAOD::UncalibratedMeasurement*& meas) const {
         const PrdCont_t* cont{nullptr};
-        ATH_CHECK(retrieveContainer(ctx,key, cont));
+        ATH_CHECK(SG::get(cont, key, ctx));
         if (!cont) {
             ATH_MSG_VERBOSE("No container key given");
             return StatusCode::SUCCESS;
@@ -72,9 +56,9 @@ namespace MuonR4 {
 
     StatusCode SegmentFitParDecorAlg::execute(const EventContext& ctx) const {
         const xAOD::MuonSegmentContainer* segmentContainer{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_segmentKey, segmentContainer));
+        ATH_CHECK(SG::get(segmentContainer, m_segmentKey, ctx));
         const ActsGeometryContext* gctx{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
+        ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegPars> parDecor{m_locParKey, ctx};
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, PrdLinkVec> prdLinkDecor{m_prdLinkKey, ctx};
         for (const xAOD::MuonSegment* seg : *segmentContainer) {

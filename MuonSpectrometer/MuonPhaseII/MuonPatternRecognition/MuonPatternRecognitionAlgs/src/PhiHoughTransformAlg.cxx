@@ -21,7 +21,6 @@ namespace {
 namespace MuonR4{
 using namespace SegmentFit;
 
-
 StatusCode PhiHoughTransformAlg::initialize() {
     ATH_CHECK(m_geoCtxKey.initialize());
     ATH_CHECK(m_maxima.initialize());
@@ -29,23 +28,6 @@ StatusCode PhiHoughTransformAlg::initialize() {
     ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));
     return StatusCode::SUCCESS;
 }
-
-template <class ContainerType>
-StatusCode PhiHoughTransformAlg::retrieveContainer(const EventContext& ctx, 
-                                                   const SG::ReadHandleKey<ContainerType>& key,
-                                                   const ContainerType*& contToPush) const {
-    contToPush = nullptr;
-    if (key.empty()) {
-        ATH_MSG_VERBOSE("No key has been parsed for object "
-                        << typeid(ContainerType).name());
-        return StatusCode::SUCCESS;
-    }
-    SG::ReadHandle readHandle{key, ctx};
-    ATH_CHECK(readHandle.isPresent());
-    contToPush = readHandle.cptr();
-    return StatusCode::SUCCESS;
-}
-
 void PhiHoughTransformAlg::prepareHoughPlane(HoughEventData& data) const {
     HoughPlaneConfig cfg;
     cfg.nBinsX = m_nBinsTanPhi;
@@ -209,10 +191,10 @@ StatusCode PhiHoughTransformAlg::execute(const EventContext& ctx) const {
    
     // read the inputs
     const EtaHoughMaxContainer* maxima{nullptr};
-    ATH_CHECK(retrieveContainer(ctx, m_maxima, maxima));
+    ATH_CHECK(SG::get(maxima, m_maxima, ctx));
 
     const ActsGeometryContext* gctx{nullptr};
-    ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
+    ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
     // book the event data object
     HoughEventData eventData{};

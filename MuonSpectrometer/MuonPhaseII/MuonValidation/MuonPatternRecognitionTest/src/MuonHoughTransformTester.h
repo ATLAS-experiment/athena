@@ -7,7 +7,7 @@
 
 // Framework includes
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
-#include "StoreGate/ReadHandleKey.h"
+
 #include "StoreGate/ReadHandleKeyArray.h"
 
 // EDM includes 
@@ -21,7 +21,6 @@
 #include <MuonRecToolInterfacesR4/IPatternVisualizationTool.h>
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonTesterTree/MuonTesterTree.h"
 #include "MuonTesterTree/ThreeVectorBranch.h"
 #include "MuonTesterTree/IdentifierBranch.h"
 #include "MuonPRDTestR4/SpacePointTesterModule.h"
@@ -59,16 +58,6 @@ namespace MuonValR4{
     };
 
   private:
-    
- 
-    /// Helper method to fetch data from StoreGate. If the key is empty, a nullptr is assigned to the container ptr
-    /// Failure is returned in cases, of non-empty keys and failed retrieval
-    template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
-                                                                const SG::ReadHandleKey<ContainerType>& key,
-                                                                const ContainerType* & contToPush) const;
-
-
-
     std::vector<ObjectMatching> matchWithTruth(const ActsGeometryContext& gctx,
                                                const xAOD::MuonSegmentContainer* truthSegments,
                                                const MuonR4::SegmentSeedContainer* seedContainer,
