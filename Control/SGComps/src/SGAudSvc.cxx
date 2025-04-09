@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // SGAudSvc.cxx 
@@ -38,43 +38,11 @@
 ////////////////
 SGAudSvc::SGAudSvc( const std::string& name, ISvcLocator* pSvcLocator ) : 
   base_class  ( name,     pSvcLocator ),
-  m_msg       ( msgSvc(),        name ), 
   p_algCtxSvc("AlgContextSvc", name),
-  m_pCID("ClassIDSvc", name),
-  m_useCLID(true),
-  m_nCurrAlg(0),
-  m_nCurrObj(0),
-  m_nEvents(0), m_startEvent(3), m_inExec(false)
+  m_pCID("ClassIDSvc", name)
 {
-  //
-  // Property declaration
-  // 
-  declareProperty( "OutFileName", m_outFileName = "SGAudSvc.out",
-		   "Name of the output file to hold SGAudSvc data" );
-
-  declareProperty( "FullFileName", m_allFileName = "",
-		   "Name of the output file to hold the full SG aud data");
-
-  declareProperty( "SummaryFileName", m_sumFileName = "",
-		   "Name of the output file to hold the summary output in json format");
-
-  declareProperty( "IgnoreFakeAlgs", m_ignoreFakeAlgs = false,
-		   "Set to ignore any attempts to override current-alg" );
-
-  declareProperty( "StartEvent", m_startEvent = 3,
-		   "Event number to start recording data" );
-
-  declareProperty( "UseCLID", m_useCLID = true,
-		   "Use CLID or DataObj name in Summary File" );
 }
 
-/*----------------------------------------------------------------------------*/
-// Destructor
-///////////////
-SGAudSvc::~SGAudSvc()
-{ 
-  m_msg << MSG::DEBUG << "Calling destructor" << endmsg;
-}
 
 /*----------------------------------------------------------------------------*/
 
@@ -83,25 +51,17 @@ SGAudSvc::~SGAudSvc()
 StatusCode 
 SGAudSvc::initialize() {
   
-  // initialize MsgStream
-  m_msg.setLevel( m_outputLevel.value() );
-
-  m_msg << MSG::INFO  << "Initializing " << name() << "..."  << endmsg;
-  
-  if ( AthService::initialize().isFailure() ) {
-    m_msg << MSG::ERROR  << "Could not intialize base class !!"  << endmsg;
-    return StatusCode::FAILURE;
-  }
+  ATH_MSG_INFO("Initializing " << name() << "..." );
 
   ATH_CHECK( p_algCtxSvc.retrieve() );
   ATH_CHECK( m_pCID.retrieve() );
 
   if (m_allFileName != "") {
-    m_ofa.open(m_allFileName.c_str());
+    m_ofa.open(m_allFileName.value().c_str());
   }
 
   if (m_sumFileName != "") {
-    m_ofs.open(m_sumFileName.c_str());
+    m_ofs.open(m_sumFileName.value().c_str());
   }
   
   // Set to be listener for end-of-event
@@ -120,15 +80,13 @@ SGAudSvc::initialize() {
 StatusCode 
 SGAudSvc::finalize() {
 
-  m_msg << MSG::INFO << "Finalizing " << name() <<"..."<< endmsg;
-  
   if (m_vAlg.size()==0) {
-    m_msg << MSG::WARNING<<"No data gathered. This might be because you did not run over at least 3 events."<<endmsg;
+    ATH_MSG_WARNING("No data gathered. This might be because you did not run over at least 3 events.");
     return StatusCode::SUCCESS;
   }
   
-  m_msg << MSG::INFO<<"Writing output to: "<<m_outFileName<<endmsg;
-  std::ofstream f( m_outFileName.c_str() );
+  ATH_MSG_INFO("Writing output to: "<<m_outFileName);
+  std::ofstream f( m_outFileName.value().c_str() );
   
   f << "Algs: " << m_vAlg.size() << std::endl;
   std::vector<std::string>::iterator i;
@@ -177,11 +135,8 @@ SGAudSvc::finalize() {
 void 
 SGAudSvc::handle( const Incident& inc )
 {
-  if ( m_msg.level() <= MSG::VERBOSE ) {
-    m_msg << MSG::VERBOSE << "Entering handle(): " << endmsg
-	  << "  Incidence type: " << inc.type()   << endmsg
-	  << "            from: " << inc.source() << endmsg;
-  }
+  ATH_MSG_VERBOSE("Entering handle(). Incidence type: " << inc.type() <<
+                  " from: " << inc.source());
 
   if (inc.type() == IncidentType::BeginEvent) {
     if (m_ofa.is_open())
@@ -211,17 +166,6 @@ SGAudSvc::handle( const Incident& inc )
   return;
 }
 
-/////////////////////////////////////////////////////////////////// 
-// Protected methods: 
-/////////////////////////////////////////////////////////////////// 
-
-/////////////////////////////////////////////////////////////////// 
-// Const methods: 
-///////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////////// 
-// Non-const methods: 
-/////////////////////////////////////////////////////////////////// 
 		
 /*----------------------------------------------------------------------------*/
 

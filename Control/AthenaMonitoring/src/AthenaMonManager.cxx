@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoring/AthenaMonManager.h"
@@ -20,14 +20,13 @@
 #include "Gaudi/Property.h"
 #include "GaudiKernel/ServiceHandle.h"
 
+#include "AthenaKernel/ISGAudSvc.h"
 #include "AthenaMonitoring/IMonitorToolBase.h"
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "CxxUtils/checker_macros.h"
 
 #include "TrigNavTools/TrigNavigationThinningSvcMutex.h"
-
-#include "SGAudCore/ISGAudSvc.h"
 
 #include <limits.h>
 #include <vector>

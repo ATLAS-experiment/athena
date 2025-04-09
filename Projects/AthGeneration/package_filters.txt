@@ -45,8 +45,6 @@
 + Control/RngComps
 + Control/RootUtils
 + Control/SGComps
-+ Control/SGMon/SGAudCore
-+ Control/SGMon/SGAudSvc
 + Control/SGTools
 + Control/StoreGate
 + Control/StoreGateBindings
