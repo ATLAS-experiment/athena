@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -23,6 +23,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <vector>
  
 static double PYTHAG(double a, double b)
 {
@@ -40,15 +41,14 @@ int dsvd(double **a, int m, int n, double *w, double **v)
     int flag, i, its, j, jj, k, l=0, nm=0;
     double c, f, h, s, x, y, z;
     double anorm = 0.0, g = 0.0, scale = 0.0;
-    double *rv1;
   
     if (m < n) 
     {
         fprintf(stderr, "#rows must be > #cols \n");
         return(0);
     }
-  
-    rv1 = (double *)malloc((unsigned int) n*sizeof(double));
+
+    std::vector<double> rv1 (n);
 
 /* Householder reduction to bidiagonal form */
     for (i = 0; i < n; i++) 
@@ -238,7 +238,6 @@ int dsvd(double **a, int m, int n, double *w, double **v)
                 break;
             }
             if (its >= 30) {
-                free((void*) rv1);
                 fprintf(stderr, "No convergence after 30,000! iterations \n");
                 return(0);
             }
@@ -300,6 +299,5 @@ int dsvd(double **a, int m, int n, double *w, double **v)
             w[k] = (double)x;
         }
     }
-    free((void*) rv1);
     return(1);
 }
