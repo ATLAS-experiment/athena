@@ -11,11 +11,8 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/PhysicalConstants.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "MdtCalibData/MdtCalibDataContainer.h"
 #include "MuidInterfaces/ICombinedMuonTrackBuilder.h"
-#include "MuonClusterization/RpcHitClustering.h"
 #include "MuonCombinedEvent/MuGirlLowBetaTag.h"
 #include "MuonCombinedToolInterfaces/IMuonCombinedInDetExtensionTool.h"
 #include "MuonCombinedToolInterfaces/IMuonLayerSegmentMatchingTool.h"
@@ -42,6 +39,7 @@
 
 namespace Muon {
     class RpcClusterOnTrack;
+    class RpcClusterObj;
 }
 
 namespace MuonCombined {
