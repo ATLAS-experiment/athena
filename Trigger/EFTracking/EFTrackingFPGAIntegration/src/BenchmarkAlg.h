@@ -16,7 +16,11 @@
 #include "IntegrationBase.h"
 #include "xAODClusterMaker.h"
 #include "TestVectorTool.h"
+#include "FPGADataFormatTool.h"
 
+// Athena include
+#include "InDetRawData/PixelRDO_Container.h"
+#include "InDetRawData/SCT_RDO_Container.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IChronoSvc.h"
 
@@ -32,20 +36,13 @@ namespace EFTrackingFPGAIntegration
     {
     public:
         using IntegrationBase::IntegrationBase;
-        StatusCode initialize() override final;
-        StatusCode execute(const EventContext &ctx) const override final;
-        StatusCode setupBuffers();
-        StatusCode setupKernelArgs();
+        virtual StatusCode initialize() override final;
+        virtual StatusCode execute(const EventContext &ctx) const override final;
+        virtual StatusCode finalize() override final;
+        StatusCode runPassThrough(std::vector<uint64_t> &pixelChainOutput, std::vector<uint64_t> &stripChainOutput, const EventContext &ctx) const;
+        StatusCode runDataPrep(std::vector<uint64_t> &pixelChainOutput, std::vector<uint64_t> &stripChainOutput, const EventContext &ctx) const;
 
     private:
-        // We need kernel and buffer objects
-
-        cl::Kernel m_kernel;       //!< FPGA pass-through kernel
-        cl::Buffer m_inPixelBuff;  //!< Input pixel tv buffer
-        cl::Buffer m_inStripBuff;  //!< Input strip tv buffer
-        cl::Buffer m_outPixelBuff; //!< Output pixel edm buffer
-        cl::Buffer m_outStripBuff; //!< Output strip edm buffer
-
         ServiceHandle<IChronoSvc> m_chronoSvc{
             "ChronoStatSvc", name()}; //!< Service for timing the algorithm
 
@@ -58,23 +55,51 @@ namespace EFTrackingFPGAIntegration
         ToolHandle<TestVectorTool> m_testVectorTool{
             this, "TestVectorTool", "TestVectorTool", "Tool for preparing test vectors"}; //!< Tool for preparing test vectors
 
+        ToolHandle<FPGADataFormatTool> m_FPGADataFormatTool{
+            this, "FPGADataFormatTool", "FPGADataFormatTool", "Tool for formatting FPGA data"}; //!< Tool for formatting FPGA data
+
         SG::ReadHandleKey<xAOD::PixelClusterContainer> m_inputPixelClusterKey{
             this, "InputPixelClusterKey", "ITkPixelClusters", "Key to access input pixel clusters"}; //!< Key to access input pixel clusters
 
         SG::ReadHandleKey<xAOD::StripClusterContainer> m_inputStripClusterKey{
             this, "InputStripClusterKey", "ITkStripClusters", "Key to access input strip clusters"}; //!< Key to access input strip clusters
 
+        SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey{this, "PixelRDO", "ITkPixelRDOs"};
+
+        SG::ReadHandleKey<SCT_RDO_Container> m_stripRDOKey{this, "StripRDO", "ITkStripRDOs"};
+
         Gaudi::Property<std::string> m_xclbin{
             this, "xclbin", "", "xclbin path and name"}; //!< Path and name of the xclbin file
 
-        Gaudi::Property<std::string> m_kernelName{
-            this, "kernelName", "", "Name of the FPGA kernel"}; //!< Name of the FPGA kernel
+        Gaudi::Property<std::string> m_edmKernelName{
+            this, "EDMPrepKernelName", "", "Name of the FPGA kernel"}; //!< Name of the FPGA kernel
 
-        Gaudi::Property<std::string> m_pixelClusterTVPath{
-            this, "pixelClusterTVPath", "", "Path to the pixel clustering test vector"}; //!< Path to the pixel clustering test vector
+        Gaudi::Property<std::string> m_pixelClusterKernelName{
+            this, "PixelClusterKernelName", "", "Name of the pixel clustering kernel"}; //!< Name of the pixel clustering kernel
 
-        Gaudi::Property<std::string> m_stripClusterTVPath{
-            this, "stripClusterTVPath", "", "Path to the strip clustering test vector"}; //!< Path to the strip clustering test vector
+        Gaudi::Property<std::string> m_stripClusterKernelName{
+            this, "StripClusterKernelName", "", "Name of the strip clustering kernel"}; //!< Name of the strip clustering kernel
+
+        Gaudi::Property<std::string> m_pixelL2GKernelName{
+            this, "PixelL2GKernelName", "", "Name of the pixel L2G kernel"}; //!< Name of the pixel L2G kernel
+
+        Gaudi::Property<std::string> m_stripL2GKernelName{
+            this, "StripL2GKernelName", "", "Name of the strip L2G kernel"}; //!< Name of the strip L2G kernelS
+
+        Gaudi::Property<bool> m_runPassThrough{
+            this, "runPassThrough", true, "Run the pass-through kernel"}; //!< Run the pass-through kernel
+
+        mutable std::atomic<ulonglong> m_numEvents{0};          //!< Number of events processed
+        mutable std::atomic<cl_ulong> m_pixelInputTime{0};      //!< Time for pixel input buffer write
+        mutable std::atomic<cl_ulong> m_stripInputTime{0};      //!< Time for strip input buffer write
+        mutable std::atomic<cl_ulong> m_pixelClusteringTime{0}; //!< Time for pixel clustering
+        mutable std::atomic<cl_ulong> m_stripClusteringTime{0}; //!< Time for strip clustering
+        mutable std::atomic<cl_ulong> m_pixelL2GTime{0};        //!< Time for pixel L2G
+        mutable std::atomic<cl_ulong> m_stripL2GTime{0};        //!< Time for strip L2G
+        mutable std::atomic<cl_ulong> m_edmPrepTime{0};         //!< Time for EDM preparation
+        mutable std::atomic<cl_ulong> m_pixelOutputTime{0};     //!< Time for pixel output buffer read
+        mutable std::atomic<cl_ulong> m_stripOutputTime{0};     //!< Time for strip output buffer read
+        mutable std::atomic<cl_ulong> m_kernelTime{0};          //!< Time for kernel execution
     };
 }
 

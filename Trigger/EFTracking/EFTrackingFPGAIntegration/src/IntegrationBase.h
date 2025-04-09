@@ -66,6 +66,7 @@ protected:
     cl::Device m_accelerator; //!< Device object for the accelerator card
     cl::Context m_context;    //!< Context object for the application
     cl::Program m_program;    //!< Program object containing the kernel
+    Gaudi::Property<std::string> m_deviceBDF{this, "bdfID", "", "BDF ID of the accelerator card"}; //!< BDF ID of the accelerator card
 };
 
 #endif // EFTRACKING_FPGA_INTEGRATION_INTEGRATION_BASE_H
