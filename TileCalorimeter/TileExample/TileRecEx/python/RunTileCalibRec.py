@@ -510,7 +510,7 @@ if __name__=='__main__':
                 cfg.merge( TileDigiNoiseCalibAlgCfg(flags) )
                 digiNoiseCalibAlg = cfg.getEventAlgo('TileDigiNoiseCalibAlg')
                 digiNoiseCalibAlg.DoAvgCorr = False # False=> Full AutoCorr matrix calculation
-                rawChanNoiseCalibAlg.FileNamePrefix = f'{args.outputDirectory}/Digi_NoiseCalib{fileVersion}'
+                digiNoiseCalibAlg.FileNamePrefix = f'{args.outputDirectory}/Digi_NoiseCalib{fileVersion}'
 
 
     # =======>>> Set up the Tile output Jive XML files
@@ -596,5 +596,9 @@ if __name__=='__main__':
                     summariseProps=args.printDetailedConfig,
                     printDefaults=args.printDetailedConfig)
 
-    sc = cfg.run()
-    sys.exit(0 if sc.isSuccess() else 1)
+    if args.config_only:
+        cfg.store(open('RunTileCalibRec.pkl', 'wb'))
+    else:
+        sc = cfg.run()
+        # Success should be 0
+        sys.exit(0 if sc.isSuccess() else 1)
