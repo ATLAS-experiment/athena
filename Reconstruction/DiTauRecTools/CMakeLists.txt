@@ -6,6 +6,7 @@ atlas_subdir( DiTauRecTools )
 # External dependencies:
 find_package( Eigen )
 find_package( ROOT COMPONENTS Core Tree Hist RIO )
+find_package( onnxruntime )
 
 atlas_add_component( DiTauRecTools
       src/*.h src/*.cxx src/components/*.cxx
@@ -17,14 +18,14 @@ atlas_add_component( DiTauRecTools
 atlas_add_library( DiTauRecToolsLib
    DiTauRecTools/*.h Root/*.cxx 
    PUBLIC_HEADERS DiTauRecTools
-   INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS}
+   INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
    ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${EIGEN_LIBRARIES}
+   LINK_LIBRARIES ${EIGEN_LIBRARIES} ${ONNXRUNTIME_LIBRARIES}
    ${ROOT_LIBRARIES}
    CxxUtils AthLinks AsgMessagingLib AsgDataHandlesLib AsgTools xAODCaloEvent
    xAODJet xAODParticleEvent xAODPFlow xAODTracking xAODEventShape
    MVAUtils ${extra_public_libs}
-   PRIVATE_LINK_LIBRARIES CaloGeoHelpers FourMomUtils PathResolver AthContainers )
+   PRIVATE_LINK_LIBRARIES CaloGeoHelpers FourMomUtils PathResolver AthContainers AthOnnxInterfaces )
 
 atlas_add_dictionary( DiTauRecToolsDict
    DiTauRecTools/DiTauRecToolsDict.h DiTauRecTools/selection.xml
