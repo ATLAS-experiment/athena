@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef OnnxRuntimeSessionToolCPU_H
 #define OnnxRuntimeSessionToolCPU_H
@@ -38,7 +38,7 @@ namespace AthOnnx {
 
         private:
         Gaudi::Property<std::string> m_modelFileName{this, "ModelFileName", "", "The model file name"};
-        ServiceHandle<IOnnxRuntimeSvc> m_onnxRuntimeSvc{"AthOnnx::OnnxRuntimeSvc", "AthOnnx::OnnxRuntimeSvc"};
+        ServiceHandle<IOnnxRuntimeSvc> m_onnxRuntimeSvc{this, "OnnxRuntimeSvc", "AthOnnx::OnnxRuntimeSvc", "The Onnx runtime service"};
         std::unique_ptr<Ort::Session> m_session;
     };
 }
