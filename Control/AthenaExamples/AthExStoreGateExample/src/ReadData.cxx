@@ -52,7 +52,7 @@ StatusCode ReadData::execute() {
 
   //this time we set a *non-const* pointer. *If* we get back a valid
   //pointer we'll be able to modify the content of the underlying transient obj
-  MyDataObj* dobj3;
+  MyDataObj* dobj3 = nullptr;
   //Most objects recorded to the SG may not be retrieved
   //using a non-const handle, unless the original producer of the object 
   //allowed for later modifications invoking StoreGateSvc::record with 
@@ -104,7 +104,7 @@ StatusCode ReadData::execute() {
   DataVector<MyContObj>::const_iterator it;
 
   //now let's try again with a const pointer
-  const DataVector<MyContObj>* list;
+  const DataVector<MyContObj>* list = nullptr;
 
   ATH_CHECK (evtStore()->retrieve(list));
   ATH_MSG_INFO ("Retrieved DataVector of MyContObj using a const pointer");
@@ -119,7 +119,7 @@ StatusCode ReadData::execute() {
   /////////////////////////////////////////////////////////////////////
   // Get the std::vector, print out its contents
 
-  const std::vector<float>* pVec;
+  const std::vector<float>* pVec = nullptr;
 
   ATH_CHECK (evtStore()->retrieve(pVec));
   for (unsigned int it=0; it<pVec->size(); it++) {
@@ -160,7 +160,7 @@ StatusCode ReadData::execute() {
   // Get the vector of links, print out its contents
 
   typedef ElementLink<MapStringFloat> MapElemLink;
-  const std::vector<MapElemLink>* vectorHandle;
+  const std::vector<MapElemLink>* vectorHandle = nullptr;
 
   ATH_CHECK (evtStore()->retrieve(vectorHandle));
   ATH_MSG_INFO ("Retrieved vector of links");
