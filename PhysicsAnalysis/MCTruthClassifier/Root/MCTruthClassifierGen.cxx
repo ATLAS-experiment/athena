@@ -301,7 +301,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
 
     if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
         MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
-        abs(pPDG) == 9900024 || abs(pPDG) == 9900012 || abs(pPDG) == 9900014 || abs(pPDG) == 9900016 || // Left-right symmetric model WBoson || Right-handed NU_E || Right-handed NU_MU || Right-handed NU_TAU
+        abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) || // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
         MC::isSUSY(pPDG))
       mother = MotherParent;
   }
@@ -407,9 +407,9 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     } while (MC::isW(ptrPart) && prodVert != nullptr);
 
     if (prodVert && prodVert->nIncomingParticles() == 1) {
-      if (abs(ptrPart->pdgId()) == 9900012) return NuREle; // Right-handed NU_E
-      if (abs(ptrPart->pdgId()) == 9900014) return NuRMu; // Right-handed NU_MU
-      if (abs(ptrPart->pdgId()) == 9900016) return NuRTau; // Right-handed NU_TAU
+      if (abs(ptrPart->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+      if (abs(ptrPart->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+      if (abs(ptrPart->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
     }
     return WBoson;
   }
@@ -516,10 +516,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     return (tautype == IsoTau)?tauOrig:TauLep;
   }
 
-  if (abs(motherPDG) == 9900024) return WBosonLRSM; // Left-right symmetric model WBoson
-  if (abs(motherPDG) == 9900012) return NuREle; // Right-handed NU_E
-  if (abs(motherPDG) == 9900014) return NuRMu; // Right-handed NU_MU
-  if (abs(motherPDG) == 9900016) return NuRTau; // Right-handed NU_TAU
+  if (abs(motherPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
   if (MC::isLeptoQuark(motherPDG) || NumOfLQ != 0) return LQ;
   if (MC::isSUSY(motherPDG)) return SUSY;
   if (MC::isBSM(motherPDG)) return OtherBSM;
@@ -604,7 +604,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
 
     if (MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
         MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
-        abs(pPDG) == 9900024 || abs(pPDG) == 9900012 || abs(pPDG) == 9900014 || abs(pPDG) == 9900016 ||  // Left-right symmetric model WBoson || Right-handed NU_E || Right-handed NU_MU || Right-handed NU_TAU
+        abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) ||  // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
         MC::isSUSY(pPDG)) {
       if (info) info->setMotherProperties(mother);
     }
@@ -651,9 +651,9 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     } while (MC::isW(itrP) && prodVert != nullptr);
 
     if (prodVert && prodVert->nIncomingParticles() == 1) {
-      if (abs(itrP->pdgId()) == 9900012) return NuREle; // Right-handed NU_E
-      if (abs(itrP->pdgId()) == 9900014) return NuRMu; // Right-handed NU_MU
-      if (abs(itrP->pdgId()) == 9900016) return NuRTau; // Right-handed NU_TAU
+      if (abs(itrP->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+      if (abs(itrP->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+      if (abs(itrP->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
     }
     return WBoson;
   }
@@ -751,10 +751,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
 
   if (MC::isHeavyBoson(motherPDG))  return HeavyBoson;  // Heavy bosons( Z', Z'', W'+)
 
-  if (abs(motherPDG) == 9900024) return WBosonLRSM; // Left-right symmetric model WBoson
-  if (abs(motherPDG) == 9900012) return NuREle; // Right-handed NU_E
-  if (abs(motherPDG) == 9900014) return NuRMu; // Right-handed NU_MU
-  if (abs(motherPDG) == 9900016) return NuRTau; // Right-handed NU_TAU
+  if (abs(motherPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
   if (MC::isLeptoQuark(motherPDG) || NumOfLQ != 0) return LQ;
   if (MC::isSUSY(motherPDG)) return SUSY;
   if (MC::isBSM(motherPDG)) return OtherBSM;
@@ -843,9 +843,9 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
     } while (MC::isW(itrP) && prodVert != nullptr);
 
     if (prodVert && prodVert->nIncomingParticles() == 1 ) {
-      if (abs(itrP->pdgId()) == 9900012) return NuREle; // Right-handed NU_E
-      if (abs(itrP->pdgId()) == 9900014) return NuRMu; // Right-handed NU_MU
-      if (abs(itrP->pdgId()) == 9900016) return NuRTau; // Right-handed NU_TAU
+      if (abs(itrP->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+      if (abs(itrP->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+      if (abs(itrP->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
     }
     return WBoson;
   }
@@ -932,8 +932,8 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
   if (MC::isHiggs(motherPDG)) return Higgs;
   if (MC::isMSSMHiggs(motherPDG)) return HiggsMSSM; // MSSM Higgs bosons
   if (MC::isHeavyBoson(motherPDG)) return HeavyBoson; // Heavy bosons( Z', Z'', W'+)
-  if (abs(motherPDG) == 9900024) return WBosonLRSM; // Left-right symmetric model WBoson
-  if (abs(motherPDG) == 9900016) return NuRTau; // Right-handed NU_TAU
+  if (abs(motherPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
   if (MC::isSUSY(motherPDG)) return SUSY;
   if (MC::isBSM(motherPDG)) return OtherBSM;
   if (abs(motherPDG) == MC::JPSI) return JPsi;
@@ -1096,7 +1096,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   // FSR  from Photos
   if (MC::isZ(motherPDG) && ((NumOfEl + NumOfPos == 2 || NumOfEl + NumOfPos == 4) || (NumOfMu == 2 || NumOfMu == 4) || (NumOfTau == 2 || NumOfTau == 4)) && NumOfPht > 0) return FSRPhot;
 
-  if (NumOfPht > 0 && (abs(motherPDG) == 9900024 || abs(motherPDG) == 9900012 || abs(motherPDG) == 9900014 || abs(motherPDG) == 9900016)) return FSRPhot; // Left-right symmetric model WBoson || Right-handed NU_E || Right-handed NU_MU || Right-handed NU_TAU
+  if (NumOfPht > 0 && (abs(motherPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(motherPDG))) return FSRPhot; // Left-right symmetric model WBoson || Right-handed neutrinos (Pythia-specific)
 
   if (numOfParents == 2 && NumOfLQ == 1) return FSRPhot;
 
@@ -1118,9 +1118,9 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
       if (prodVert && prodVert->nIncomingParticles() == 1 ) {
         if ( MC::isTau(itrP)) return TauLep;
         if ( MC::isMuon(itrP)) return Mu;
-        if ( abs(itrP->pdgId()) == 9900012) return NuREle; // Right-handed NU_E
-        if ( abs(itrP->pdgId()) == 9900014) return NuRMu; // Right-handed NU_MU
-        if ( abs(itrP->pdgId()) == 9900016) return NuRTau; // Right-handed NU_TAU
+        if ( abs(itrP->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+        if ( abs(itrP->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+        if ( abs(itrP->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
       }
     } else
       return WBoson;
@@ -1278,7 +1278,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
 
     if (std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
         MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) ||  // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
-        std::abs(pPDG) == 9900024 || std::abs(pPDG) == 9900012 || std::abs(pPDG) == 9900014 || std::abs(pPDG) == 9900016 || // Left-right symmetric model WBoson || Right-handed NU_E || Right-handed NU_MU || Right-handed NU_TAU
+        std::abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) || // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
         MC::isSUSY(pPDG)) {
       mother = MotherParent;
       if (info) info->setMotherProperties(mother);
@@ -1336,9 +1336,9 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
     } while (MC::isW(ptrPart) && prodVert != nullptr);
 
     if (prodVert && prodVert->nIncomingParticles() == 1) {
-      if (abs(ptrPart->pdgId()) == 9900012) return NuREle; // Right-handed NU_E
-      if (abs(ptrPart->pdgId()) == 9900014) return NuRMu; // Right-handed NU_MU
-      if (abs(ptrPart->pdgId()) == 9900016) return NuRTau; // Right-handed NU_TAU
+      if (abs(ptrPart->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+      if (abs(ptrPart->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+      if (abs(ptrPart->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
     }
     return WBoson;
   }
@@ -1452,10 +1452,10 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
     return (tautype == IsoTau)?tauOrig:TauLep;
   }
 
-  if (abs(motherPDG) == 9900024) return WBosonLRSM; // Left-right symmetric model WBoson
-  if (abs(motherPDG) == 9900012) return NuREle; // Right-handed NU_E
-  if (abs(motherPDG) == 9900014) return NuRMu; // Right-handed NU_MU
-  if (abs(motherPDG) == 9900016) return NuRTau; // Right-handed NU_TAU
+  if (abs(motherPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
   if (MC::isLeptoQuark(motherPDG) || NumOfLQ != 0) return LQ;
   if (MC::isSUSY(motherPDG)) return SUSY;
   if (MC::isBSM(motherPDG)) return OtherBSM;
