@@ -118,6 +118,7 @@ StatusCode FPGADataFormatTool::convertStripRDO(
         if (SCT_Collection == nullptr) { continue; }
 
         std::map<int, bool> firedStrips;
+        std::map<int, const SCT_RDORawData*> firedStripsToRDO;
 
         // Preprocess the SCT collection hits to get information for encoding strip in ITK format
         // All fired strips are stored in a map to get an overview of the full module that should be 
@@ -127,12 +128,14 @@ StatusCode FPGADataFormatTool::convertStripRDO(
             const int baseLineStrip{m_sctId->strip(rdoId)};
             for (int i = 0; i < sctRawData->getGroupSize(); i++) {
                 firedStrips[baseLineStrip + i] = true;
+                firedStripsToRDO[baseLineStrip + i] = sctRawData;
             }
         }
         // Loop over the fired hits and encode them in the ITk strips hit map
         // Finds unique hits in the list that can be encoded and don't overlap
         std::map<int, int> stripEncodingForITK;
-        for (auto& [stripID, fired] : firedStrips) {
+        std::map<int, const SCT_RDORawData* > stripEncodingForITKToRDO;
+        for (const auto& [stripID, fired] : firedStrips) {
             // Skip strips that have already been used in a cluster
             if (!fired) continue;
 
@@ -156,64 +159,65 @@ StatusCode FPGADataFormatTool::convertStripRDO(
 
             // Encode the hit map into an integer
             stripEncodingForITK[stripID] = static_cast<int>(hitMap.to_ulong());
+            stripEncodingForITKToRDO[stripID] = firedStripsToRDO[stripID];
         }
 
         stripNumber = 0;
         firstClusterFilled = false;
+
         // Process each fired strip and encode it
-        for (const SCT_RDORawData* sctRawData : *SCT_Collection) {
+        for (const auto& [stripID, encoding] : stripEncodingForITK) {
+            const SCT_RDORawData* sctRawData = stripEncodingForITKToRDO[stripID];
             const Identifier rdoId = sctRawData->identify();
             const InDetDD::SiDetectorElement* sielement = m_SCT_mgr->getDetectorElement(rdoId);
-            int stripID = m_sctId->strip(rdoId);
 
-            if (stripEncodingForITK.find(stripID) != stripEncodingForITK.end()) {
-                // Fill the module header if not already filled
-                if (!filledHeader) {
-                    if (!fillModuleHeader(sielement, encodedData)) return StatusCode::FAILURE;
-                    filledHeader = true;
-                }
-
-                // Compute chip ID and ITk strip ID
-                int chipID = stripID / MaxChannelinStripRow;
-                int ITkStripID = stripID % MaxChannelinStripRow;
-
-                // Adjust for row offset based on the eta module index
-                int offset = m_sctId->eta_module(rdoId) % 2;
-                if (m_sctId->barrel_ec(rdoId) == 0) {
-                    offset = (std::abs(m_sctId->eta_module(rdoId)) - 1) % 2;
-                }
-                ITkStripID += offset * MaxChannelinStripRow;
-                stripNumber++;
-                // Determine if this is the last cluster in the module
-                bool lastBit = (stripNumber == stripEncodingForITK.size());
-
-                // Create the encoded strip word
-                auto stripWord = FPGADataFormatUtilities::fill_STRIP_EF_RDO(
-                    lastBit,          // last bit indicating module boundary
-                    chipID,           // chip ID
-                    ITkStripID,      // cluster number
-                    stripEncodingForITK.at(stripID), // cluster map
-                    0                // spare bits
-                );
-
-                uint32_t encodedCluster = FPGADataFormatUtilities::get_dataformat_STRIP_EF_RDO(stripWord);
-
-                // **Pack two clusters into a single 64-bit word**
-                if (!firstClusterFilled) {
-                    packedWord = (static_cast<uint64_t>(encodedCluster) << 32); // Store first cluster in upper 32 bits
-                    firstClusterFilled = true;
-                } else {
-                    packedWord |= static_cast<uint64_t>(encodedCluster); // Store second cluster in lower 32 bits
-                    encodedData.push_back(packedWord);  // Push the full packed word
-                    firstClusterFilled = false;  // Reset flag
-                    packedWord = 0;  // Clear for the next pair
-                }
-
-                // If this is the last cluster in the module and a single cluster is left, push it
-                if (lastBit && firstClusterFilled) {
-                    encodedData.push_back(packedWord);
-                }
+            // Fill the module header if not already filled
+            if (!filledHeader) {
+                if (!fillModuleHeader(sielement, encodedData)) return StatusCode::FAILURE;
+                filledHeader = true;
             }
+
+            // Compute chip ID and ITk strip ID
+            int chipID = stripID / MaxChannelinStripRow;
+            int ITkStripID = stripID % MaxChannelinStripRow;
+
+            // Adjust for row offset based on the eta module index
+            int offset = m_sctId->eta_module(rdoId) % 2;
+            if (m_sctId->barrel_ec(rdoId) == 0) {
+                offset = (std::abs(m_sctId->eta_module(rdoId)) - 1) % 2;
+            }
+            ITkStripID += offset * MaxChannelinStripRow;
+            stripNumber++;
+            // Determine if this is the last cluster in the module
+            bool lastBit = (stripNumber == stripEncodingForITK.size());
+
+            // Create the encoded strip word
+            auto stripWord = FPGADataFormatUtilities::fill_STRIP_EF_RDO(
+                lastBit,          // last bit indicating module boundary
+                chipID,           // chip ID
+                ITkStripID,      // cluster number
+                stripEncodingForITK.at(stripID), // cluster map
+                0                // spare bits
+            );
+
+            uint32_t encodedCluster = FPGADataFormatUtilities::get_dataformat_STRIP_EF_RDO(stripWord);
+
+            // **Pack two clusters into a single 64-bit word**
+            if (!firstClusterFilled) {
+                packedWord = (static_cast<uint64_t>(encodedCluster) << 32); // Store first cluster in upper 32 bits
+                firstClusterFilled = true;
+            } else {
+                packedWord |= static_cast<uint64_t>(encodedCluster); // Store second cluster in lower 32 bits
+                encodedData.push_back(packedWord);  // Push the full packed word
+                firstClusterFilled = false;  // Reset flag
+                packedWord = 0;  // Clear for the next pair
+            }
+
+            // If this is the last cluster in the module and a single cluster is left, push it
+            if (lastBit && firstClusterFilled) {
+                encodedData.push_back(packedWord);
+            }
+            
         }
       // Reset the header flag for the next module
       filledHeader = false;

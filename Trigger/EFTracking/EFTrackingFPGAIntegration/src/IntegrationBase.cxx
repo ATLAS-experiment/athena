@@ -10,6 +10,8 @@
 
 #include "IntegrationBase.h"
 #include <fstream>
+#include <CL/cl_ext_xilinx.h>
+
 
 StatusCode IntegrationBase::initialize()
 {
@@ -48,15 +50,30 @@ StatusCode IntegrationBase::initialize()
         bool foundAccelerator = false;
         for(auto device : allDevices)
         {
-            if(device.getInfo<CL_DEVICE_TYPE>() == CL_DEVICE_TYPE_ACCELERATOR)
+            if (device.getInfo<CL_DEVICE_TYPE>() == CL_DEVICE_TYPE_ACCELERATOR)
             {
-                ATH_MSG_INFO("Found an FPGA accelerator card in this platform");
-                m_accelerator = device;
-                foundAccelerator = true;
-                break;
+                std::string deviceBDF = "";
+                device.getInfo(CL_DEVICE_PCIE_BDF, &deviceBDF);
+                // check if the user specify the BDF of the device
+                if (!m_deviceBDF.empty())
+                {
+                    if (deviceBDF == m_deviceBDF)
+                    {
+                        ATH_MSG_INFO("Found the device with BDF: " << m_deviceBDF.value());
+                        m_accelerator = device;
+                        foundAccelerator = true;
+                        break;
+                    }
+                }
+                else
+                {
+                    ATH_MSG_INFO("Using the first found accelerator card: " << device.getInfo<CL_DEVICE_NAME>());
+                    m_accelerator = device;
+                    foundAccelerator = true;
+                    break;
+                }
             }
-
-	    device_id++;
+        device_id++;
         }
 
         // If there is no accelerator card, print error and return
@@ -121,7 +138,22 @@ StatusCode IntegrationBase::loadProgram(const std::string& xclbin)
     return StatusCode::SUCCESS;
 }
 
-StatusCode IntegrationBase::precheck([[maybe_unused]] const std::vector<Gaudi::Property<std::string>>& inputs) const
+StatusCode IntegrationBase::precheck(const std::vector<Gaudi::Property<std::string>>& inputs) const
 {
+    for(const auto &item : inputs)
+    {
+        if(item.empty())
+        {
+            ATH_MSG_FATAL(item.documentation()<<" is empty. Please set it to a valid value");
+            return StatusCode::FAILURE;
+        }
+    }
+
+    // Always check if bdf is set
+    if (m_deviceBDF.empty())
+    {
+        ATH_MSG_WARNING("Device BDF is not set. Using the first found accelerator card. Set property 'bdfID' to specify the BDF of the device.");
+    }
+
     return StatusCode::SUCCESS;
 }

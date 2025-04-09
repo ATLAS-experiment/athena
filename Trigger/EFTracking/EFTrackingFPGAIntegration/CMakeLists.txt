@@ -19,10 +19,10 @@ if( NOT DEFINED ENV{XILINX_XRT} )
    return()
 endif()
 
-find_package(OpenCL REQUIRED)
+find_package(OpenCL)
 
 # Xilinx XRT library
-find_package(XRT REQUIRED)
+find_package(XRT)
 
 # FIXME this a hack as this library is currently not distributed in CVMFS
 add_library(LibXRT SHARED IMPORTED)
@@ -61,4 +61,5 @@ atlas_add_dictionary(
 )
 
 atlas_install_python_modules(python/*.py)
+atlas_install_scripts(script/*.sh)
 
