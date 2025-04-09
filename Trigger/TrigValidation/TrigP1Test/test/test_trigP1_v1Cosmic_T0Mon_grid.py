@@ -4,7 +4,7 @@
 # art-description: Test of cosmic P1+Tier0 workflow, runs athenaHLT with Cosmic_run3_v1 menu followed by offline reco and monitoring
 # art-type: grid
 # art-athena-mt: 8
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-output: *.txt
 # art-output: *.log

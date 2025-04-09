@@ -3,7 +3,7 @@
 #
 # art-description: Test of transform RDO->RDO_TRIG->AOD followed by HLT monitoring step with Run-3 DQ framework
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 # art-memory: 4096

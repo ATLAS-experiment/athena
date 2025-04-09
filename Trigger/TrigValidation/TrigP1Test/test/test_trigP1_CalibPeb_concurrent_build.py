@@ -3,7 +3,7 @@
 
 # art-description: CalibPeb test where chains are executed in parallel doing concurrent ROB requests
 # art-type: build
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.

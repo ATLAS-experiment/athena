@@ -3,7 +3,7 @@
 
 # art-description: art job for el_jpsiee_pu40
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-input: valid1.801272.P8B_A14_CTEQ6L1_Jpsie3e3.recon.RDO.e8542_e8586_s4369_s4370_r16083_tid42150424_00
 # art-input-nfiles: 4
