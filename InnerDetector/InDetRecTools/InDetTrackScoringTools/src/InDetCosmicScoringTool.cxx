@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackScoringTools/InDetCosmicScoringTool.h"
@@ -19,8 +19,16 @@ InDet::InDetCosmicScoringTool::InDetCosmicScoringTool(const std::string& t,
   AthAlgTool(t,n,p)
 {
   declareInterface<Trk::ITrackScoringTool>(this);
-  declareProperty("nWeightedClustersMin", m_nWeightedClustersMin = 0); 
-  declareProperty("minTRTHits",           m_minTRTHits = 0);
+}
+
+bool InDet::InDetCosmicScoringTool::passBasicSelections( const Trk::Track& track ) const
+{
+  const Trk::TrackParameters* parm = track.trackParameters()->front();
+  if (std::abs(parm->parameters()[Trk::z0]) > m_maxZImp) {
+    ATH_MSG_DEBUG ("Track Z impact > "<<m_maxZImp<<", reject it");
+    return false;
+  }
+  return true;
 }
 
 Trk::TrackScore InDet::InDetCosmicScoringTool::score( const Trk::Track& track, bool /*checkBasicSel*/ ) const
