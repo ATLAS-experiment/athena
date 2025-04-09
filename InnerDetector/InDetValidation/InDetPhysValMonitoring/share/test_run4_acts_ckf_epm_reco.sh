@@ -131,7 +131,7 @@ if [ $ckf_rc == 0 ] && [ $ckf_legacy_rc == 0 ]; then
     # Compare ACTS performance WRT legacy Athena
     run "dcube-comparison-athena-acts" \
         $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-        -p -x dcube_athena_acts_comparison_shifter \
+        -p -x dcube_athena_acts_comparison \
         -c ${dcubeXmlTechEffAbsPath} \
         -r idpvm.athena.ckf.root \
         -M "acts" \

@@ -5,7 +5,7 @@
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_acts_shifter_last,dcube_athena_shifter_last,dcube_athena_acts_comparison_shifter
+# art-html: dcube_acts_shifter_last
 
 rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900494.PG_single_epm_Pt10_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33628973._000032.pool.root.1
 
