@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILECABLINGSVC_H
@@ -20,24 +20,18 @@
 // Forward declaration
 class StoreGateSvc;
 
-template<class TYPE> class SvcFactory;
 //NGO This is a quick hack to make TileCablingService self contained, i.e. this
 //NGO wrapper tool takes care of the initialization.
 //NGO At some point TileCablingService should be made a tool, but this will introduce
 //NGO many upstream code changes.
 
 class TileCablingSvc: public AthService {
-    friend class SvcFactory<TileCablingSvc> ;
 
   public:
-    static const InterfaceID& interfaceID();
+
     TileCablingSvc(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~TileCablingSvc() {
-    }
 
     virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE () override;
-    virtual StatusCode finalize() override;
-    virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface) override;
 
     const TileCablingService* cablingService() const {
       return m_cablingService;
