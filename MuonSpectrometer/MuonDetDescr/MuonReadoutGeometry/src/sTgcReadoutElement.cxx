@@ -834,7 +834,16 @@ namespace MuonGM {
         // As-Built (MuonNswAsBuilt is not included in AthSimulation)
         //*********************
         if(manager()->getsTGCAsBuilt() && design->type == MuonChannelDesign::ChannelType::etaStrip){
+#if __GNUC__ >= 13
+// Avoid a warning seen with -march=x86-64-v3.
+// This has been cleaned up in eigen after 3.4.0.
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
             pos.head(2) = manager()->getsTGCAsBuilt()->correctPosition(layerId, pos.head(2));
+#if __GNUC__ >= 13
+# pragma GCC diagnostic pop
+#endif
         }
 #ifndef NDEBUG
         else {
