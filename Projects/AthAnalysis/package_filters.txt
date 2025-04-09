@@ -169,7 +169,6 @@
 + Control/SGComps
 + Control/SGTools
 + Control/StoreGateBindings
-+ Control/SGMon/SGAudCore
 + Control/AthenaBaseComps
 + Control/AthAnalysisBaseComps
 + Control/AthenaCommon

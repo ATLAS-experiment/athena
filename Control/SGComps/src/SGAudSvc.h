@@ -1,15 +1,13 @@
-///////////////////////// -*- C++ -*- /////////////////////////////
-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // SGAudSvc.h 
 // Header file for class SGAudSvc
 // Author: Ilija Vukotic <ivukotic@cern.ch>
 /////////////////////////////////////////////////////////////////// 
-#ifndef SGMONITORING_SGAUDSVC_H 
-#define SGMONITORING_SGAUDSVC_H 
+#ifndef SGCOMPS_SGAUDSVC_H
+#define SGCOMPS_SGAUDSVC_H
 
 // STL includes
 #include <string>
@@ -18,17 +16,13 @@
 #include <set>
 #include <fstream>
 
-
 // FrameWork includes
 #include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/IIncidentListener.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/IClassIDSvc.h"
 
-#include "SGAudCore/ISGAudSvc.h"
+#include "AthenaKernel/ISGAudSvc.h"
 
 // Forward declaration
 class ISvcLocator;
@@ -36,6 +30,15 @@ class IChronoStatSvc;
 class IAlgContextSvc;
 class AlgContextSvc;
 
+
+/**
+ * This service gives a graphical representation of algorithms accessing StoreGate.
+ * SGAudSvc instruments retrieve and record functions of StoreGate and from there gets
+ * names of objects accessed. Upon getting an object name it asks AlgContexSvc for the
+ * name of the current algorithm. At the end of run, an ASCII file is produced (SGAudSvc.out).
+ *
+ * By default data are not collected for the first three events.
+ */
 class SGAudSvc : public extends<AthService,
                                 ISGAudSvc, IIncidentListener>
 {
@@ -43,9 +46,6 @@ public:
 
   /// Constructor with parameters: 
   SGAudSvc( const std::string& name, ISvcLocator* pSvcLocator );
-
-  /// Destructor: 
-  virtual ~SGAudSvc(); 
 
   /// Gaudi Service Implementation
   //@{
@@ -97,22 +97,28 @@ public:
   /////////////////////////////////////////////////////////////////// 
  private: 
 
-  /// MsgStream for talking with the outside world
-  MsgStream m_msg;
+  Gaudi::Property<std::string> m_outFileName{this, "OutFileName", "SGAudSvc.out",
+    "Name of the output file to hold SGAudSvc data"};
+
+  Gaudi::Property<std::string> m_allFileName{ "FullFileName", "",
+    "Name of the output file to hold the full SG aud data"};
+
+  Gaudi::Property<std::string> m_sumFileName{this, "SummaryFileName", "",
+    "Name of the output file to hold the summary output in json format"};
+
+  Gaudi::Property<bool> m_ignoreFakeAlgs{this, "IgnoreFakeAlgs", false,
+    "Set to ignore any attempts to override current-alg"};
+
+  Gaudi::Property<int> m_startEvent{this, "StartEvent", m_startEvent = 3,
+    "Event number to start recording data"};
+
+  Gaudi::Property<bool> m_useCLID{this, "UseCLID", true,
+    "Use CLID or DataObj name in Summary File"};
 
   /// Pointer to the @c AlgContextScv
   ServiceHandle<IAlgContextSvc> p_algCtxSvc;
   ServiceHandle<IClassIDSvc> m_pCID;
   
-  /// Name of the output file 
-  std::string m_outFileName, m_allFileName, m_sumFileName;  
-
-  /// Whether to ignore fake current algs
-  bool m_ignoreFakeAlgs;
-
-  /// Whether to use CLID or Data Obj Name in JSON output file
-  bool m_useCLID;
-
   /// Vector of accessed SG objects names
   std::vector<std::string> m_vObj;
   /// Vector of names of algorithms accessing SG
@@ -124,10 +130,9 @@ public:
   std::string m_currAlg;
   std::string m_currObj;
   std::string m_fakeCurrAlg;
-  int m_nCurrAlg;
-  int m_nCurrObj;
-  int m_nEvents;
-  int m_startEvent;
+  int m_nCurrAlg{0};
+  int m_nCurrObj{0};
+  int m_nEvents{0};
 
   // map<"alg_name", set<"cid/key"> >
   typedef std::map<std::string, std::set<std::string> > DataMap;
@@ -135,7 +140,7 @@ public:
   DataMap m_write;
 
   std::ofstream m_ofa, m_ofs;
-  bool m_inExec;
+  bool m_inExec{false};
 }; 
 
 #endif
