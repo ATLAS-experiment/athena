@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONDIGITIZATION_MUONDIGITIZATIONTOOL_ICC
 #define MUONDIGITIZATION_MUONDIGITIZATIONTOOL_ICC
@@ -9,33 +9,6 @@
 #include <StoreGate/ReadCondHandle.h>
 
 namespace MuonR4{
-    template <class Container> 
-        StatusCode MuonDigitizationTool::retrieveContainer(const EventContext& ctx,
-                                                           const SG::ReadHandleKey<Container>& key,
-                                                           const Container* & contPtr) const {
-        if (key.empty()) {
-            ATH_MSG_VERBOSE("No container key has been set for "<<typeid(Container).name());
-            contPtr = nullptr;
-            return StatusCode::SUCCESS;
-        }
-        SG::ReadHandle<Container> readHandle{key, ctx};
-        ATH_CHECK(readHandle.isPresent());
-        contPtr = readHandle.cptr();
-        return StatusCode::SUCCESS;
-    }
-    template <class Container> StatusCode MuonDigitizationTool::retrieveConditions(const EventContext&ctx,
-                                                                                   const SG::ReadCondHandleKey<Container>& key,
-                                                                                   const Container* & contPtr) const {
-        if (key.empty()) {
-            ATH_MSG_VERBOSE("No conditions key has been set for "<<typeid(Container).name());
-            contPtr = nullptr;
-            return StatusCode::SUCCESS;
-        }
-        SG::ReadCondHandle<Container> readCondHandle{key, ctx};
-        ATH_CHECK(readCondHandle.isValid());
-        contPtr = readCondHandle.cptr();
-        return StatusCode::SUCCESS;    
-    }
     template <class DigitColl> 
         DigitColl* MuonDigitizationTool::fetchCollection(const Identifier& hitId,
                                                          OutDigitCache_t<DigitColl>& digitCache) const {

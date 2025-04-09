@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSPACEPOINTFORMATION_MUONSPACEPOINTMAKERALG_H
 #define MUONSPACEPOINTFORMATION_MUONSPACEPOINTMAKERALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/ReadHandleKey.h"
+
 #include "StoreGate/WriteHandleKey.h"
-#include "StoreGate/ReadCondHandleKey.h"
+
 
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -23,7 +23,7 @@
 namespace MuonR4{
     class SpacePointMakerAlg: public AthReentrantAlgorithm {
         public:
-            SpacePointMakerAlg(const std::string& name, ISvcLocator* pSvcLocator);
+            using AthReentrantAlgorithm::AthReentrantAlgorithm; 
 
             ~SpacePointMakerAlg() = default;
 

@@ -4,7 +4,6 @@
 #include "TruthSegmentMaker.h"
 
 #include "StoreGate/WriteHandle.h"
-#include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 
 #include "xAODMuon/MuonSegmentAuxContainer.h"
@@ -30,23 +29,7 @@ namespace{
 
 namespace MuonR4{
     using namespace SegmentFit;
-    template <class ContainerType>
-        StatusCode TruthSegmentMaker::retrieveContainer(const EventContext& ctx, 
-                                                        const SG::ReadHandleKey<ContainerType>& key,
-                                                        const ContainerType*& contToPush) const {
-        contToPush = nullptr;
-        if (key.empty()) {
-            ATH_MSG_DEBUG("No key has been parsed for object "<< typeid(ContainerType).name());
-            return StatusCode::SUCCESS;
-        }
-        SG::ReadHandle readHandle{key, ctx};
-        if (!readHandle.isPresent()) {
-            ATH_MSG_FATAL("Failed to retrieve "<<key.fullKey());
-            return StatusCode::FAILURE;
-        }
-        contToPush = readHandle.cptr();
-        return StatusCode::SUCCESS;
-    }
+   
     StatusCode TruthSegmentMaker::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_readKeys.initialize());
@@ -76,7 +59,7 @@ namespace MuonR4{
     }
     StatusCode TruthSegmentMaker::execute(const EventContext& ctx) const {
         const ActsGeometryContext* gctx{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
+        ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         
         
         using HitsPerParticle = std::unordered_map<HepMC::ConstGenParticlePtr, std::vector<const xAOD::MuonSimHit*>>;
@@ -85,7 +68,7 @@ namespace MuonR4{
 
         for (const SG::ReadHandleKey<xAOD::MuonSimHitContainer>& key : m_readKeys) {
             const xAOD::MuonSimHitContainer* simHits{nullptr};
-            ATH_CHECK(retrieveContainer(ctx, key, simHits));        
+            ATH_CHECK(SG::get(simHits, key, ctx));        
             for (const xAOD::MuonSimHit* simHit : *simHits) {
                 const MuonGMR4::MuonReadoutElement* reElement = m_detMgr->getReadoutElement(simHit->identify()); 
                 const MuonGMR4::SpectrometerSector* id{reElement->msSector()};

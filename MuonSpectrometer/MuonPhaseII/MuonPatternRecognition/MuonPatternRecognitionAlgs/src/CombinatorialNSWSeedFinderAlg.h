@@ -6,7 +6,6 @@
 #define MUONR4_MUONPATTERNRECOGNITIONALGS_COMBINATORIALNSWSEEDFINDERALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
@@ -46,14 +45,6 @@ class CombinatorialNSWSeedFinderAlg : public AthReentrantAlgorithm {
         virtual StatusCode execute(const EventContext& ctx) const override;    
 
     private:
-
-        /// Helper method to fetch data from StoreGate. If the key is empty, a nullptr is assigned to the container ptr
-        /// Failure is returned in cases, of non-empty keys and failed retrieval
-        template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
-                                                                        const SG::ReadHandleKey<ContainerType>& key,
-                                                                        const ContainerType* & contToPush) const;
-
-
         // read handle key for the input maxima (from a previous eta-transform)
         SG::ReadHandleKey<EtaHoughMaxContainer> m_etaKey{this, "CombinatorialReadKey", "MuonHoughNswMaxima"};
 

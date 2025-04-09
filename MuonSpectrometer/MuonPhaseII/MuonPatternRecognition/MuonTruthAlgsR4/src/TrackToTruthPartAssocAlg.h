@@ -9,7 +9,6 @@
 #include <xAODTruth/TruthParticleContainer.h>
 #include <xAODTracking/TrackParticleContainer.h>
 
-#include <StoreGate/ReadHandleKey.h>
 #include <StoreGate/ReadDecorHandleKeyArray.h>
 #include <StoreGate/WriteDecorHandleKey.h>
 

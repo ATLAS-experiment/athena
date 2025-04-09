@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSEGMENTCNV_SEGMENTFITPARDECORALG_H
 #define MUONSEGMENTCNV_SEGMENTFITPARDECORALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/ReadHandleKey.h"
+
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
@@ -23,16 +23,6 @@ namespace MuonR4{
             virtual StatusCode initialize() override final;
             virtual StatusCode execute(const EventContext& ctx) const override final;
         private:
-            /** @brief Loads a container from the StoreGate and returns whether the retrieval is successful.
-             *         If the key is empty a nullptr is assigned and the code returns success
-             *  @param ctx: EventContext of the current Event
-             *  @param key: Container key to retrieve
-             *  @param contPtr: Pointer to which the retievec container will be assigned to */
-            template <class ContType> 
-                StatusCode retrieveContainer(const EventContext& ctx,
-                                             const SG::ReadHandleKey<ContType>& key,
-                                             const ContType*& contPtr) const;
-
             using MeasKey_t = SG::ReadHandleKey<xAOD::UncalibratedMeasurementContainer>;
             StatusCode fetchMeasurement(const EventContext& ctx,
                                         const MeasKey_t& key,

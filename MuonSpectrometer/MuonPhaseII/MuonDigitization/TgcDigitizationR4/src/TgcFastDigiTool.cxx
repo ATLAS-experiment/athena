@@ -207,7 +207,7 @@ namespace MuonR4 {
         DigiCache digitCache{};
         /// Fetch the conditions for efficiency calculations
         const Muon::DigitEffiData* efficiencyMap{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_effiDataKey, efficiencyMap));
+        ATH_CHECK(SG::get( efficiencyMap, m_effiDataKey, ctx));
         const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
         
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);

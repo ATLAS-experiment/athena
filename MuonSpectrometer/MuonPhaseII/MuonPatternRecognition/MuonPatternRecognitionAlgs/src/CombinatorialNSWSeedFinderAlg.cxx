@@ -46,21 +46,6 @@ StatusCode CombinatorialNSWSeedFinderAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-template <class ContainerType>
-StatusCode CombinatorialNSWSeedFinderAlg::retrieveContainer(const EventContext &ctx, 
-                                                            const SG::ReadHandleKey<ContainerType> &key,
-                                                            const ContainerType* &contToPush) const {
-    contToPush = nullptr;
-    if (key.empty()) {
-        ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
-        return StatusCode::SUCCESS;
-    }
-    SG::ReadHandle readHandle{key, ctx};
-    ATH_CHECK(readHandle.isPresent());
-    contToPush = readHandle.cptr();
-    return StatusCode::SUCCESS;
-}
-
 HitWindow CombinatorialNSWSeedFinderAlg::findHitInWindow(const Amg::Vector3D& startPos, 
                                                         const SpacePoint* testHit, 
                                                         const Amg::Vector3D& dirEstUp,
@@ -351,10 +336,10 @@ CombinatorialNSWSeedFinderAlg::findSeedsFromMaximum(const HoughMaximum &max, con
 StatusCode CombinatorialNSWSeedFinderAlg::execute(const EventContext &ctx) const {
     // read the inputs
     const EtaHoughMaxContainer *maxima{nullptr};
-    ATH_CHECK(retrieveContainer(ctx, m_etaKey, maxima));
+    ATH_CHECK(SG::get( maxima, m_etaKey, ctx));
 
     const ActsGeometryContext *gctx{nullptr};
-    ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
+    ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
     // prepare our output collection
     SG::WriteHandle writeMaxima{m_writeKey, ctx};

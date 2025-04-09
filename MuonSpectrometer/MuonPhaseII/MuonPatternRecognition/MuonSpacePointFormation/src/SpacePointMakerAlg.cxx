@@ -78,10 +78,6 @@ void SpacePointMakerAlg::SpacePointStatistics::dumpStatisics(MsgStream& msg) con
 }
 
 
-SpacePointMakerAlg::SpacePointMakerAlg(const std::string& name, ISvcLocator* pSvcLocator):
-    AthReentrantAlgorithm{name, pSvcLocator}{}
-
-
 StatusCode SpacePointMakerAlg::finalize() {
     if (m_statCounter) {
         m_statCounter->dumpStatisics(msgStream());
@@ -139,22 +135,18 @@ template <class ContType>
     StatusCode SpacePointMakerAlg::loadContainerAndSort(const EventContext& ctx,
                                                         const SG::ReadHandleKey<ContType>& key,
                                                         PreSortedSpacePointMap& fillContainer) const {
-    if (key.empty()) {
-        ATH_MSG_DEBUG("Key "<<typeid(ContType).name()<<" not set. Do not fill anything");
-        return StatusCode::SUCCESS;
-    }                          
-    SG::ReadHandle readHandle{key, ctx};
-    ATH_CHECK(readHandle.isPresent());
-    if (readHandle->empty()){
+    const ContType* measurementCont{nullptr};
+    ATH_CHECK(SG::get(measurementCont, key, ctx));
+    if (!measurementCont || measurementCont->empty()){
         ATH_MSG_DEBUG("nothing to do"); 
         return StatusCode::SUCCESS;
     }
-    SG::ReadHandle gctx{m_geoCtxKey, ctx};
-    ATH_CHECK(gctx.isPresent());
+    const ActsGeometryContext* gctx{nullptr};
+    ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
     
     using PrdType = typename ContType::const_value_type;
     using PrdVec = std::vector<PrdType>;
-    xAOD::ChamberViewer viewer{*readHandle};
+    xAOD::ChamberViewer viewer{*measurementCont};
     do {
 
       SpacePointsPerChamber& pointsInChamb = fillContainer[viewer.at(0)->readoutElement()->msSector()];

@@ -224,24 +224,6 @@ namespace MuonValR4 {
         return allAssociations;
     }
 
-   template <class ContainerType>
-        StatusCode MuonHoughTransformTester::retrieveContainer(const EventContext& ctx, 
-                                                               const SG::ReadHandleKey<ContainerType>& key,
-                                                               const ContainerType*& contToPush) const {
-            contToPush = nullptr;
-            if (key.empty()) {
-                ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
-                return StatusCode::SUCCESS;
-            }
-            SG::ReadHandle readHandle{key, ctx};
-            if (!readHandle.isPresent()) {
-                ATH_MSG_FATAL("Failed to load "<<key.fullKey());
-                return StatusCode::FAILURE;
-            }
-            contToPush = readHandle.cptr();
-            return StatusCode::SUCCESS;
-        }
-
     StatusCode MuonHoughTransformTester::finalize() {
         ATH_CHECK(m_tree.write());
         return StatusCode::SUCCESS;
@@ -250,7 +232,7 @@ namespace MuonValR4 {
         
         const EventContext & ctx = Gaudi::Hive::currentContext();
         const ActsGeometryContext* gctxPtr{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctxPtr));
+        ATH_CHECK(SG::get(gctxPtr, m_geoCtxKey, ctx));
         const ActsGeometryContext& gctx{*gctxPtr};
 
 
@@ -259,16 +241,16 @@ namespace MuonValR4 {
 
         for (const SG::ReadHandleKey<SegmentSeedContainer>& key : m_inHoughSegmentSeedKeys) {
             const SegmentSeedContainer* readSegmentSeeds{nullptr};
-            ATH_CHECK(retrieveContainer(ctx,key, readSegmentSeeds));
+            ATH_CHECK(SG::get(readSegmentSeeds, key, ctx));
             segmentSeeds.insert(segmentSeeds.end(),readSegmentSeeds->begin(), readSegmentSeeds->end());
         }
         for (const SG::ReadHandleKey<SegmentContainer>& key : m_inSegmentKeys) {
             const SegmentContainer* readSegments{nullptr};
-            ATH_CHECK(retrieveContainer(ctx,key, readSegments));
+            ATH_CHECK(SG::get(readSegments, key, ctx));
             segments.insert(segments.end(),readSegments->begin(), readSegments->end());
         }
         const xAOD::MuonSegmentContainer* readTruthSegments{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_truthSegmentKey, readTruthSegments));
+        ATH_CHECK(SG::get(readTruthSegments , m_truthSegmentKey, ctx));
             
         ATH_MSG_DEBUG("Succesfully retrieved input collections. Seeds: "<<segmentSeeds.size()
                     <<", segments: "<<segments.size() <<", truth segments: "<<(readTruthSegments? readTruthSegments->size() : -1)<<".");

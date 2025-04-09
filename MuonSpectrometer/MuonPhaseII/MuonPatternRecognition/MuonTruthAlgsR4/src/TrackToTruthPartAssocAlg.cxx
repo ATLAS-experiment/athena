@@ -38,9 +38,9 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     StatusCode TrackToTruthPartAssocAlg::execute(const EventContext& ctx) const {
-        SG::ReadHandle tracks{m_trkKey, ctx};
-        ATH_CHECK(tracks.isPresent());
-
+        
+        const xAOD::TrackParticleContainer* tracks{nullptr};
+        ATH_CHECK(SG::get(tracks, m_trkKey, ctx));
 
         SG::WriteDecorHandle<xAOD::TrackParticleContainer, int> acc_truthOrigin{m_originWriteKey, ctx};
         SG::WriteDecorHandle<xAOD::TrackParticleContainer, int> acc_truthType{m_typeWriteKey, ctx};
@@ -54,8 +54,8 @@ namespace MuonR4{
         
         std::vector<TruthPartWithIds_t> truthWithIds{};
         ///
-        SG::ReadHandle truthMuonCont{m_truthMuonKey, ctx};
-        ATH_CHECK(truthMuonCont.isPresent());
+        const xAOD::TruthParticleContainer* truthMuonCont{nullptr};
+        ATH_CHECK(SG::get(truthMuonCont, m_truthMuonKey, ctx));
         for (const xAOD::TruthParticle* truthMuon : *truthMuonCont) {
             IdSet_t assocIds{};
             ATH_MSG_DEBUG("Truth muon: pT:"<<truthMuon->pt()<<" [GeV], eta: "<<truthMuon->eta()<<", phi: "

@@ -20,7 +20,7 @@ namespace MuonValR4{
   class MuonRecoChainTester : public AthHistogramAlgorithm {
     	public:
             using AthHistogramAlgorithm::AthHistogramAlgorithm;
-            virtual ~MuonRecoChainTester()  = default;
+            virtual ~MuonRecoChainTester() = default;
 
             virtual StatusCode initialize() override;
             virtual StatusCode execute() override;

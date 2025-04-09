@@ -207,14 +207,14 @@ namespace MuonR4 {
 
         // Fetch the conditions for efficiency calculations
         const Muon::DigitEffiData *efficiencyMap{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_effiDataKey, efficiencyMap));
+        ATH_CHECK(SG::get(efficiencyMap , m_effiDataKey, ctx));
 
         const NswErrorCalibData *errorCalibDB{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_uncertCalibKey, errorCalibDB));
+        ATH_CHECK(SG::get(errorCalibDB, m_uncertCalibKey, ctx));
 
         MagField::AtlasFieldCache fieldCache;
         const AtlasFieldCacheCondObj *fieldCondObj{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_fieldCondObjInputKey, fieldCondObj));
+        ATH_CHECK(SG::get(fieldCondObj, m_fieldCondObjInputKey, ctx));
         fieldCondObj->getInitializedCache(fieldCache);
 
         xAOD::ChamberViewer viewer{hitsToDigit, m_idHelperSvc.get()};
@@ -431,7 +431,7 @@ namespace MuonR4 {
         const MmIdHelper &idHelper{m_idHelperSvc->mmIdHelper()};
 
         const NswCalibDbThresholdData *thresholdData{nullptr};
-        if (m_useCondThresholds && !retrieveConditions(ctx, m_condThrshldsKey, thresholdData).isSuccess()) {
+        if (!SG::get(thresholdData, m_condThrshldsKey, ctx).isSuccess()) {
             THROW_EXCEPTION("Cannot find conditions data container for VMM thresholds!");
         }
 

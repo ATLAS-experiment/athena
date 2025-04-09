@@ -24,35 +24,18 @@ StatusCode EtaHoughTransformAlg::initialize() {
     ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));
     return StatusCode::SUCCESS;
 }
-
-template <class ContainerType>
-StatusCode EtaHoughTransformAlg::retrieveContainer(const EventContext& ctx, 
-                                                  const SG::ReadHandleKey<ContainerType>& key,
-                                                  const ContainerType*& contToPush) const {
-    contToPush = nullptr;
-    if (key.empty()) {
-        ATH_MSG_VERBOSE("No key has been parsed for object "
-                        << typeid(ContainerType).name());
-        return StatusCode::SUCCESS;
-    }
-    SG::ReadHandle readHandle{key, ctx};
-    ATH_CHECK(readHandle.isPresent());
-    contToPush = readHandle.cptr();
-    return StatusCode::SUCCESS;
-}
-
 StatusCode EtaHoughTransformAlg::execute(const EventContext& ctx) const {
 
     /// read the PRDs
     const SpacePointContainer* spacePoints{nullptr};
-    ATH_CHECK(retrieveContainer(ctx, m_spacePointKey, spacePoints));
+    ATH_CHECK(SG::get(spacePoints, m_spacePointKey, ctx));
 
     // book the output container
     SG::WriteHandle<EtaHoughMaxContainer> writeMaxima(m_maxima, ctx);
     ATH_CHECK(writeMaxima.record(std::make_unique<EtaHoughMaxContainer>()));
 
     const ActsGeometryContext* gctx{nullptr};
-    ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
+    ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
     HoughEventData data{};
 

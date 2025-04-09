@@ -83,12 +83,14 @@ namespace MuonValR4{
     StatusCode MuonRecoChainTester::execute() {
     
       const EventContext& ctx{Gaudi::Hive::currentContext()};
-      SG::ReadHandle legacyTrks{m_legacyTrackKey, ctx};
-      ATH_CHECK(legacyTrks.isPresent());
-      SG::ReadHandle trksFromHoughR4{m_TrackKeyHoughR4, ctx};
-      ATH_CHECK(trksFromHoughR4.isPresent());      
-      SG::ReadHandle trksR4{m_TrackKeyR4, ctx};
-      ATH_CHECK(trksR4.isPresent());
+      const xAOD::TrackParticleContainer* legacyTrks{nullptr};
+      ATH_CHECK(SG::get(legacyTrks, m_legacyTrackKey, ctx));
+
+      const xAOD::TrackParticleContainer* trksFromHoughR4{nullptr};
+      ATH_CHECK(SG::get(trksFromHoughR4, m_TrackKeyHoughR4, ctx));
+
+      const xAOD::TrackParticleContainer* trksR4{nullptr};
+      ATH_CHECK(SG::get(trksR4, m_TrackKeyR4, ctx));
       
       ATH_MSG_DEBUG("Fill reconstructed tracks from "<<m_legacyTrackKey.fullKey());
       for (const xAOD::TrackParticle* trk : *legacyTrks) {
@@ -104,16 +106,15 @@ namespace MuonValR4{
       } 
   
       if (!m_truthKey.empty()) {
-          SG::ReadHandle readHandle{m_truthKey, ctx};
-          ATH_CHECK(readHandle.isPresent());
-          ATH_MSG_DEBUG("Fill truth from "<<m_truthKey.fullKey());
-          for (const xAOD::TruthParticle* truth : *readHandle) {
+          const xAOD::TruthParticleContainer* truthCont{nullptr};
+          ATH_CHECK(SG::get(truthCont, m_truthKey, ctx));
+          for (const xAOD::TruthParticle* truth : *truthCont) {
             m_truthTrks->push_back(truth);
         }
       }
       /** Fill the bucket summary counts */
-      SG::ReadHandle spContainer{m_spacePointKey, ctx};
-      ATH_CHECK(spContainer.isPresent());
+      const MuonR4::SpacePointContainer* spContainer{nullptr};
+      ATH_CHECK(SG::get(spContainer, m_spacePointKey, ctx));
       m_nBucket = spContainer->size();
       
       fillBucketsPerStation(*spContainer, StIdx::BI, m_nBucketBI);

@@ -42,21 +42,21 @@ namespace MuonR4{
 
         std::unordered_map <const SpacePointBucket*, std::vector<const MuonR4::Segment*>> segmentMap;  // MuonR4Segment 
         
-        SG::ReadHandle readSegment(m_inSegmentKey, ctx);
-        ATH_CHECK(readSegment.isPresent());
+        const SegmentContainer* readSegment{nullptr};
+        ATH_CHECK(SG::get(readSegment, m_inSegmentKey, ctx));
         for (const MuonR4::Segment* segment : *readSegment) {
             segmentMap[segment->parent()->parentBucket()].push_back(segment);
         }
 
-        SG::ReadHandle gctx(m_geoCtxKey, ctx);
-        ATH_CHECK(gctx.isPresent());
+        const ActsGeometryContext* gctx{nullptr};
+        ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
-        SG::ReadHandle<SpacePointContainer> readHandle{m_readKey, ctx};
-        ATH_CHECK(readHandle.isPresent());
+        const SpacePointContainer* spContainer{nullptr};
+        ATH_CHECK(SG::get(spContainer, m_readKey, ctx));
 
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
 
-        for(const SpacePointBucket* bucket : *readHandle) {
+        for(const SpacePointBucket* bucket : *spContainer) {
 
             if (!m_isMC && segmentMap[bucket].size() && m_fracToKeep < 1. &&
                 CLHEP::RandFlat::shoot(rndEngine,0.,1.) > m_fracToKeep) {

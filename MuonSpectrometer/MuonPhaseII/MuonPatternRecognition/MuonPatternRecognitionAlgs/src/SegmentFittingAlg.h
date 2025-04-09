@@ -16,8 +16,8 @@
 #include "MuonPatternHelpers/SegmentAmbiSolver.h"
 
 #include "xAODMuon/MuonSegmentContainer.h"
+
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadDecorHandleKeyArray.h"
 
@@ -39,11 +39,6 @@ namespace MuonR4{
 
         private:
             using Parameters = SegmentFit::Parameters;
-            /// Helper method to fetch data from StoreGate. If the key is empty, a nullptr is assigned to the container ptr
-            /// Failure is returned in cases, of non-empty keys and failed retrieval
-            template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
-                                                                        const SG::ReadHandleKey<ContainerType>& key,
-                                                                        const ContainerType* & contToPush) const;
             /** @brief Executes the segment fit with start parameters. The returned fit result
              *         indicates whether the fit was a success and all relevant output parameters
              *  @brief ctx: Event context needed to access the calibration constants of the hits

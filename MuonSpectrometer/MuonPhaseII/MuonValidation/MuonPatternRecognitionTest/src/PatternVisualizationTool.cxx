@@ -253,7 +253,10 @@ namespace MuonValR4 {
             return;
         }
         auto truthHits = getMatchingSimHits(truthSeg);
-        SG::ReadHandle geoCtx{m_geoCtxKey, ctx};
+        const ActsGeometryContext* geoCtx{nullptr};
+        if (!SG::get(geoCtx, m_geoCtxKey, ctx).isSuccess()) {
+            return;
+        }
         for (const xAOD::MuonSimHit* simHit :  truthHits) {
             const MuonGMR4::MuonReadoutElement* re = m_detMgr->getReadoutElement(simHit->identify());
             const IdentifierHash hash = re->detectorType() == ActsTrk::DetectorType::Mdt ?
@@ -444,7 +447,10 @@ namespace MuonValR4 {
         }
         Parameters segPars{};
         {
-            SG::ReadHandle geoCtx{m_geoCtxKey, ctx};
+            const ActsGeometryContext* geoCtx{nullptr};
+            if (!SG::get(geoCtx, m_geoCtxKey, ctx).isSuccess()) {
+                return;
+            }
             const Amg::Transform3D trf{segment.msSector()->globalToLocalTrans(*geoCtx)};
             const Amg::Vector3D locPos = trf * segment.position();
             const Amg::Vector3D locDir = trf.linear() * segment.direction();
