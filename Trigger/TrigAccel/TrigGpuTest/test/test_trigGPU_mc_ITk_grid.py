@@ -15,7 +15,8 @@
 # art-output: *.log.tar.gz
 # art-output: *.new
 # art-output: *.json
-# art-output: *.root
+# art-output: expert-monitoring.root
+# art-output: rootcomp.root
 # art-output: *.pmon.gz
 # art-output: *perfmon*
 # art-output: prmon*
