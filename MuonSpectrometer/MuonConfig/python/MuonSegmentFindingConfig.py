@@ -450,6 +450,7 @@ def MuonPatternCalibrationCfg(flags, name="MuonPatternCalibration", **kwargs):
 def MuonSegmentFinderNCBAlgCfg(flags, name="MuonSegmentMaker_NCB", **kwargs):
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg
     result = ComponentAccumulator()
+    ### Only use the TGC measurements from the  current bunch crossing
     kwargs.setdefault("doStgcSegments", flags.Detector.EnablesTGC)
     kwargs.setdefault("doMMSegments", flags.Detector.EnableMM)
     kwargs.setdefault("doMdtSegments", False)

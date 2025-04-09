@@ -237,6 +237,8 @@ JetChainParts = {
        'preselj60XXj40',
        'preselj140XXj45',
        'preselj140XX2j45',
+       'preselj100XX2j45',
+       'preselj120XX2j45',
        'preselj80XX2j45',
        'presel2j180XXj80',
        # Nonstandard eta regions
@@ -260,9 +262,6 @@ JetChainParts = {
        'preselcHT650',
        'preselcHT850',
        #b-jet preselections
-       'presel1c20XX2c20b85',
-       'presel1c20XX2c20bgtwo85',
-       'presel1j25XX2j25bgtwo85',
        'presel2c20XX2c20b85',
        'presel2c20XX2c20b82',
        'presel2c20XX2c20b80',
