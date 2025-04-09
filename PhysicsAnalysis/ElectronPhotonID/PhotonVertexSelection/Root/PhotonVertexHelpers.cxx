@@ -15,7 +15,6 @@
 #include "CxxUtils/trapping_fp.h"
 
 // Asg tools
-#include "egammaUtils/ShowerDepthTool.h"
 #include <AsgMessaging/MessageCheck.h>
 
 // ROOT include(s).
@@ -183,8 +182,8 @@ getVertexMomentum(const xAOD::Vertex* vertex,
   SG::AuxElement::ConstAccessor<float> phi(derivationPrefix + "phi");
 
   if (useAux and pt.isAvailable(*vertex) and eta.isAvailable(*vertex) and phi.isAvailable(*vertex)) {
-    // protect against decoreated nan values (from Rel24 on?) 
-    if(!std::isnan(pt(*vertex)) and !std::isnan(eta(*vertex)) and !std::isnan(phi(*vertex))){ 
+    // protect against decoreated nan values (from Rel24 on?)
+    if(!std::isnan(pt(*vertex)) and !std::isnan(eta(*vertex)) and !std::isnan(phi(*vertex))){
       v.SetPtEtaPhiM(pt(*vertex), eta(*vertex), phi(*vertex), 0.0);
       return v;
     }
