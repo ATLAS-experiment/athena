@@ -60,6 +60,12 @@ ActsFastTrackFindingAlg                                           INFO Ratios
 |                                 3.0- 3.5 |   0.877702 |   0.877702 |
 |                                 3.5-+inf |   0.919654 |   0.919654 |
 |------------------------------------------|------------|------------|
+ActsFastAmbiguityResolutionAlg                                    INFO Ambiguity Resolution statistics
+|-------------------|------------|
+| Input tracks      |       9228 |
+| Resolved tracks   |       7384 |
+| Total shared hits |        161 |
+|-------------------|------------|
 ActsFastPrdAssociationAlg                                         INFO Prd Map statistics
 |-----------------------|------------|
 | N. Tracks             |       7384 |

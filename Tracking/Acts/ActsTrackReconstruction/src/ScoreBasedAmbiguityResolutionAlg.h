@@ -42,6 +42,7 @@ class ScoreBasedAmbiguityResolutionAlg : public AthReentrantAlgorithm {
                                    ISvcLocator *pSvcLocator);
 
   virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
   virtual StatusCode execute(const EventContext &ctx) const override;
 
  private:
@@ -85,6 +86,17 @@ class ScoreBasedAmbiguityResolutionAlg : public AthReentrantAlgorithm {
   /** ITk eta-dependent cuts*/
   ServiceHandle<InDet::IInDetEtaDependentCutsSvc> m_etaDependentCutsSvc{
       this, "InDetEtaDependentCutsSvc", ""};
+
+  public:
+    enum EStat {
+      kNInputTracks,
+      kNResolvedTracks,
+      kNSharedHits,
+      kNStat
+    };
+
+  private:
+    mutable std::array<std::atomic<unsigned int>, kNStat> m_stat ATLAS_THREAD_SAFE{};
 };
 
 }  // namespace ActsTrk
