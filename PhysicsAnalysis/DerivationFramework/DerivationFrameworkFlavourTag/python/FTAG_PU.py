@@ -40,7 +40,6 @@ def FTAG_PUKernelCfg(flags, name='FTAG_PUKernel', **kwargs):
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
     # Thinning tools...
-    from DerivationFrameworkInDet.InDetToolsConfig import MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, JetTrackParticleThinningCfg
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
 
     muonSelectionString = "(Muons.pt > 5*GeV)"
@@ -157,10 +156,6 @@ def FTAG_PUCfg(flags):
     # Run 2
     if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        #AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = FTAG_PUSlimmingHelper, 
-         #                                      OutputContainerPrefix = "TrigMatch_", 
-          #                                     TriggerList = FTAG_PUTriggerListsHelper.Run2TriggerNamesTau)
-        # This was adding the tau triggers even though its False
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = FTAG_PUSlimmingHelper, 
                                                OutputContainerPrefix = "TrigMatch_",
                                                TriggerList = FTAG_PUTriggerListsHelper.Run2TriggerNamesNoTau)
