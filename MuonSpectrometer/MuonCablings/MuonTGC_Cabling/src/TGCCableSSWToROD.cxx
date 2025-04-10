@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableSSWToROD.h"
@@ -10,44 +10,30 @@
 
 namespace MuonTGC_Cabling {
 
-// Constructor & Destructor
 TGCCableSSWToROD::TGCCableSSWToROD(const std::string& filename)
-  : TGCCable(TGCCable::SSWToROD)
-{
-  m_database = new TGCDatabaseSLBToROD(filename,"SSW ALL");
-}
-
-TGCCableSSWToROD::TGCCableSSWToROD (void)
   : TGCCable(TGCCable::SSWToROD),
-    m_database(nullptr)
-{
+    m_database(std::make_unique<TGCDatabaseSLBToROD>(filename, "SSW ALL")) {
 }
 
-TGCCableSSWToROD::TGCCableSSWToROD (const TGCCableSSWToROD& right)
-  : TGCCable(TGCCable::SSWToROD),
-    m_database(nullptr)
-{
-  TGCDatabaseSLBToROD* mypointer = dynamic_cast<TGCDatabaseSLBToROD*>(right.m_database);
-  if(mypointer) m_database = new TGCDatabaseSLBToROD(*mypointer);
-  else m_database = nullptr;
+TGCCableSSWToROD::TGCCableSSWToROD(const TGCCableSSWToROD& right)
+  : TGCCable(TGCCable::SSWToROD) {
+  if (auto mypointer = dynamic_cast<TGCDatabaseSLBToROD*>(right.m_database.get())) {
+    m_database = std::make_unique<TGCDatabaseSLBToROD>(*mypointer);
+  } else {
+    m_database.reset();
+  }
 }
 
-TGCCableSSWToROD& TGCCableSSWToROD::operator=(const TGCCableSSWToROD& right)
-{
+TGCCableSSWToROD& TGCCableSSWToROD::operator = (const TGCCableSSWToROD& right) {
   if (this != &right) {
-    delete m_database;
-    TGCDatabaseSLBToROD* mypointer = dynamic_cast<TGCDatabaseSLBToROD*>(right.m_database);
-    if(mypointer) m_database = new TGCDatabaseSLBToROD(*mypointer);
-    else m_database = nullptr;
+    if (auto mypointer = dynamic_cast<TGCDatabaseSLBToROD*>(right.m_database.get())) {
+      m_database = std::make_unique<TGCDatabaseSLBToROD>(*mypointer);
+    } else {
+      m_database.reset();
+    }
   }
   return *this;
 }
-  
-TGCCableSSWToROD::~TGCCableSSWToROD(void)
-{
-  delete m_database;
-}
- 
 
 TGCModuleMap* TGCCableSSWToROD::getModule(const TGCModuleId* moduleId) const {
   if(moduleId){

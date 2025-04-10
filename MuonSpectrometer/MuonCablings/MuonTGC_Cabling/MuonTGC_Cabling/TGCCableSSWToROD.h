@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCABLESSWTOROD_HH
@@ -8,29 +8,26 @@
 #include "MuonTGC_Cabling/TGCCable.h"
 
 #include <string>
+#include <memory>
 
-namespace MuonTGC_Cabling
-{
+namespace MuonTGC_Cabling {
 
 class TGCDatabase;
   
-class TGCCableSSWToROD : public TGCCable
-{
+class TGCCableSSWToROD : public TGCCable {
 public:
-  // Constructor & Destructor
   TGCCableSSWToROD(const std::string& filename);
-  TGCCableSSWToROD (const TGCCableSSWToROD&);
+  TGCCableSSWToROD(const TGCCableSSWToROD&);
   TGCCableSSWToROD& operator=(const TGCCableSSWToROD&);
-
-  virtual ~TGCCableSSWToROD(void);
+  virtual ~TGCCableSSWToROD() = default;
   
   virtual TGCModuleMap* getModule(const TGCModuleId* moduleId) const;
 
-private:
-  TGCCableSSWToROD(void);
+ private:
+  TGCCableSSWToROD() {}
   virtual TGCModuleMap* getModuleIn(const TGCModuleId* rod) const;
   virtual TGCModuleMap* getModuleOut(const TGCModuleId* ssw) const;
-  TGCDatabase* m_database;
+  std::unique_ptr<TGCDatabase> m_database{nullptr};
 };
   
 } // end of namespace

@@ -36,33 +36,6 @@ int TGCId::getSectorInReadout() const {
   return -1;
 }
 
-bool TGCId::isBackward() const { 
-  if (isEndcap()){
-    if ( !isInner() ) { 
-      if(isAside()) return (m_sector%2==1);
-      else          return (m_sector%2==0); 
-    } else {
-      // EI  
-      // Special case of EI11
-      if (m_sector == 15) {
-        if(isAside()) return false; 
-        else          return true;
-      } else if (m_sector == 16) {
-        if(isAside()) return true; 
-        else          return false;
-      } else {
-        //  A-m_side phi0 F: phi1 F: phi2 B
-        //  C-m_side phi0 B: phi1 B: phi2 F
-        if(isAside())  return (m_sector%3==2);
-        else           return (m_sector%3!=2);
-      }
-    }
-  } else {
-    if(isAside()) return true;  // all Backward
-    else          return false; // all Forward 
-  }
-}
-
 void TGCId::setModuleType(ModuleType v_module)  {
   m_module=v_module;
   if(m_module==WI){
