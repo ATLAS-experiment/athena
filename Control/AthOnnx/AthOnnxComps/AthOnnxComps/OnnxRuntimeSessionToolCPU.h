@@ -38,7 +38,7 @@ namespace AthOnnx {
 
         private:
         Gaudi::Property<std::string> m_modelFileName{this, "ModelFileName", "", "The model file name"};
-        ServiceHandle<IOnnxRuntimeSvc> m_onnxRuntimeSvc{this, "OnnxRuntimeSvc", "AthOnnx::OnnxRuntimeSvc", "The Onnx runtime service"};
+        ServiceHandle<IOnnxRuntimeSvc> m_onnxRuntimeSvc{this, "OnnxRuntimeSvc", "AthOnnx::OnnxRuntimeSvc/OnnxRuntimeSvc", "The Onnx runtime service"};
         std::unique_ptr<Ort::Session> m_session;
     };
 }
