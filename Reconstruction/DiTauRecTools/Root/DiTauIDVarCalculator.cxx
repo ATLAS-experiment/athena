@@ -24,7 +24,6 @@ using TrackParticleLinks_t = std::vector<ElementLink<xAOD::TrackParticleContaine
 DiTauIDVarCalculator::DiTauIDVarCalculator( const std::string& name )
   : AsgTool(name)
 {
-  declareProperty( "DefaultValue", m_dDefault = -1234);
 }
 
 //______________________________________________________________________________

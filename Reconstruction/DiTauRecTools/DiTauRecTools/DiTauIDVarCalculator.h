@@ -17,6 +17,7 @@
 
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // EDM include(s):
 #include "xAODTau/TauxAODHelpers.h"
@@ -51,6 +52,8 @@ public:
   
 private:
 
+  Gaudi::Property<float> m_dDefault{this, "DefaultValue", -1234};
+
   static float n_subjets(const xAOD::DiTauJet& xDiTau) ;
   float ditau_pt(const xAOD::DiTauJet& xDiTau) const;
   float f_core(const xAOD::DiTauJet& xDiTau, int iSubjet) const;
@@ -77,10 +80,6 @@ private:
   float R_subjets(const xAOD::DiTauJet& xDiTau, int iSubjet) const;
   float d0_leadtrack(const xAOD::DiTauJet& xDiTau, int iSubjet) const;
   float f_isotracks(const xAOD::DiTauJet& xDiTau) const;
-
-  // steering variables
-  // float m_dMaxDeltaR;
-  float m_dDefault;
   
   static StatusCode decorNtracks (const xAOD::DiTauJet& xDiTau);
 }; // class DiTauIDVarCalculator
