@@ -20,8 +20,8 @@ atlas_add_citest( Generation_H7_13p6TeV
 atlas_add_citest( Generation_MGPy8_13p6TeV
    SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid 421107 )
 
-atlas_add_citest( Generation_Sherpa_13p6TeV
-   SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid 421003 )
+atlas_add_citest( Generation_Sherpa_13TeV
+   SCRIPT RunWorkflowTests_Run2.py --CI -g --dsid 421003 )
 
 atlas_add_citest( Generation_ParticleGun_13p6TeV
    SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid 421119 )
