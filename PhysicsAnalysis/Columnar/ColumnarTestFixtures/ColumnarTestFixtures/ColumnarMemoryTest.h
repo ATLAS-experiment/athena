@@ -114,6 +114,8 @@ namespace columnar
         return std::any_cast<float> (value);
       if (value.type() == typeid(double))
         return std::any_cast<double> (value);
+      if (value.type() == typeid(char))
+        return std::any_cast<char> (value);
       if (value.type() == typeid(int))
         return std::any_cast<int> (value);
       if (value.type() == typeid(unsigned))

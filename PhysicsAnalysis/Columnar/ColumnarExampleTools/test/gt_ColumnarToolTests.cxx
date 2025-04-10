@@ -19,6 +19,7 @@
 #include <ColumnarExampleTools/OptionalColumnExampleTool.h>
 #include <ColumnarExampleTools/ConfigurableColumnExampleTool.h>
 #include <ColumnarExampleTools/ModularExampleTool.h>
+#include <ColumnarExampleTools/StringExampleTool.h>
 
 #include <xAODJet/JetContainer.h>
 #include <xAODCore/ShallowCopy.h>
@@ -265,6 +266,41 @@ TEST_F (ColumnarMemoryTest, ModularExampleTool)
   columnMap.addColumn ("Particles.selection", {0, 0, 0});
 
   columnMap.setExpectation ("Particles.selection", {1, 0, 0});
+
+  columnMap.connectColumnsToTool ();
+
+  columnMap.call ();
+
+  columnMap.checkExpectations ();
+}
+
+
+
+TEST_F (ColumnarMemoryTest, StringExampleTool)
+{
+  if (!checkMode())
+    return;
+
+  auto tool = std::make_unique<columnar::StringExampleTool> (makeUniqueName());
+  ASSERT_SUCCESS (tool->initialize ());
+
+  ColumnarTestToolHandle toolHandle (*tool);
+  toolHandle.initialize ();
+
+  for (auto& name : toolHandle.getColumnNames())
+    std::cout << "requested column: " << name << std::endl;
+  std::cout << "recommended systematics size: " << toolHandle.getRecommendedSystematics().size() << std::endl;
+
+  ColumnMapType columnMap {toolHandle};
+
+  columnMap.addColumn ("EventInfo", {0, 1});
+
+  columnMap.addColumn ("Met", {0, 2});
+  columnMap.addColumn ("Met.name.offset", {0, 9, 14});
+  columnMap.addColumn ("Met.name.data", {'I', 'n', 'v', 'i', 's', 'i', 'b', 'l', 'e', 'F', 'i', 'n', 'a', 'l'});
+  columnMap.addColumn ("Met.selection", {0, 0});
+
+  columnMap.setExpectation ("Met.selection", {0, 1});
 
   columnMap.connectColumnsToTool ();
 
