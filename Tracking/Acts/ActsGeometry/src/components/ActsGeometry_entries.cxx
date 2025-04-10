@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventPrimitives/EventPrimitives.h"
@@ -22,6 +22,7 @@
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
 #include "../DetectorElementToActsGeometryIdMappingAlg.h"
+#include "../ActsVolumeIdToDetectorElementCollectionMappingAlg.h"
 #include "../SimpleCylinderDetBuilderTool.h"
 
 DECLARE_COMPONENT(ActsExtrapolationAlg)
@@ -46,3 +47,4 @@ DECLARE_COMPONENT(ActsCaloTrackingVolumeBuilder)
 DECLARE_COMPONENT(ActsTrk::DetectorVolumeSvc)
 DECLARE_COMPONENT(ActsTrk::SimpleCylinderDetBuilderTool)
 DECLARE_COMPONENT(ActsTrk::DetectorElementToActsGeometryIdMappingAlg)
+DECLARE_COMPONENT(ActsTrk::ActsVolumeIdToDetectorElementCollectionMappingAlg)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
   */
 #ifndef ATLASUNCALIBSROUCELINACCESOR_H
 #define ATLASUNCALIBSROUCELINACCESOR_H
@@ -38,14 +38,21 @@ namespace ActsTrk::detail {
       return value & ELEMENT_IDX_MASK;
     }
     bool isConsistentRange() const {
-       return    extractContainerIndex(this->first)  == extractContainerIndex(this->second)
-              && extractElementIndex(this->first) <= extractElementIndex(this->second);
+       return     extractContainerIndex(this->first)  == extractContainerIndex(this->second)
+              && (    extractElementIndex(this->first) <= extractElementIndex(this->second)
+                  || (extractElementIndex(this->first)==ELEMENT_IDX_MASK && extractElementIndex(this->second)==0));
     }
 
     MeasurementRange() : std::pair<unsigned int, unsigned int>(std::numeric_limits<unsigned int>::max(), std::numeric_limits<unsigned int>::max()) {}
     MeasurementRange(unsigned int container_idx, unsigned int start_element_idx, unsigned int end_element_idx)
        : std::pair<unsigned int, unsigned int>( createRangeValue(container_idx, start_element_idx),
                                                 createRangeValue(container_idx, end_element_idx) ) {
+    }
+
+    static MeasurementRange noMeasurementExpected() {
+       return MeasurementRange(CONTAINER_IDX_MASK >> CONTAINER_IDX_SHIFT,
+                               ELEMENT_IDX_MASK,
+                               0);
     }
 
     void updateEnd(std::size_t container_idx, unsigned int end_element_idx) {
@@ -69,6 +76,7 @@ namespace ActsTrk::detail {
       return extractElementIndex(this->second);
     }
     bool empty() const { assert(isConsistentRange()); return this->first == this->second; }
+    bool isMeasurementExpected() const { assert(isConsistentRange()); return this->first <= this->second; }
   };
 
    // List of measurement ranges and the measurement container targeted by the ranges.

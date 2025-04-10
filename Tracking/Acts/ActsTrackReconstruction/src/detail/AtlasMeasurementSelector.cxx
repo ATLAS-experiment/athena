@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
@@ -289,9 +289,17 @@ struct AtlasMeasurementSelector
       else {
          abstract_measurement_range_t range{range_iter->second.elementBeginIndex(),
                                             range_iter->second.elementEndIndex()};
-         return {&m_measurementRanges->container(range_iter->second.containerIndex()),
+         assert( !range_iter->second.isMeasurementExpected() && range.begin() > range.end());
+         // if surface marked as defect
+         return { range_iter->second.isMeasurementExpected() ? &(m_measurementRanges->container(range_iter->second.containerIndex())) : nullptr,
                  std::move(range)};
       }
+   }
+
+   bool expectMeasurements([[maybe_unused]] const Acts::Surface &surface,
+                           [[maybe_unused]] const measurement_container_variant_t *container_variant_ptr,
+                           const abstract_measurement_range_t &abstract_range) const {
+      return (abstract_range.begin()<=abstract_range.end());
    }
 
    template <typename measurement_container_t>
