@@ -69,6 +69,8 @@ def createDQConfigFlags():
             arg = lambda x: x.Trigger.EDMVersion == 3 and x.DQ.Environment != 'AOD' # noqa: E731
         if flag == 'LVL1Calo.doValidation':
             arg = False
+        if flag == 'doZDCMon':
+            arg= lambda x: (x.Reco.EnableZDC is True) # noqa: E731
         acf.addFlag('DQ.Steering.' + flag, arg)
 
     # special protection for L1Calo monitoring : check L1Calo is indeed in
