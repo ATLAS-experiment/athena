@@ -1,17 +1,15 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODTTbarWToLeptonFilter.h"
+#include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/HepMCHelpers.h"
 
-xAODTTbarWToLeptonFilter::xAODTTbarWToLeptonFilter(const std::string &name, ISvcLocator *pSvcLocator)
-    : GenFilter(name, pSvcLocator)
+StatusCode xAODTTbarWToLeptonFilter::filterInitialize()
 {
-    declareProperty("Ptcut", m_Ptmin = 200000.);
-    declareProperty("NumLeptons", m_numLeptons = -1);            // Negative for >0, positive integers for the specific number
-    declareProperty("fourTopsFilter", m_fourTopsFilter = false); // four top filter or not
-    declareProperty("SSMLFilter", m_SSMLFilter = false);         // Same sign multilepton filter or not
+  CHECK(m_truthPartContKey.initialize());
+  return StatusCode::SUCCESS;
 }
 
 StatusCode xAODTTbarWToLeptonFilter::filterEvent()
@@ -19,11 +17,8 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
 
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
 // duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
     int N_quark_t = 0;
     int N_quark_tbar = 0;
@@ -39,9 +34,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
         count_found_leptons = 2; // In four tops, one can have the same charged lepton flavour twice
 
   // Loop over all particles in the event 
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-            const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
+  for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
             if (!MC::isTop(pitr))
                 continue;
             if (pitr->pdgId() == MC::TQUARK)
@@ -179,9 +172,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
         ATH_MSG_ERROR("No t or tbar quarks were found decaying to W in a (presumably) ttbar event! Event is rejected. Event dump follows.");
         int part = 0;
      // Loop over all particles in the event and build up the grid
-        unsigned int nPart = xTruthParticleContainer->size();
-        for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-                const xAOD::TruthParticle *mcpart =  (*xTruthParticleContainer)[iPart];
+        for (const xAOD::TruthParticle* mcpart : *xTruthParticleContainer) {
                 part++;
                 int pid = mcpart->pdgId();
                 ATH_MSG_ERROR("Particle number " << part << " has pdgId = " << pid);
