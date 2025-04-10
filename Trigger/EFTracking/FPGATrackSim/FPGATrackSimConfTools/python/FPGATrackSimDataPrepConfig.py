@@ -553,7 +553,7 @@ def runDataPrepChain():
         
         # cluster monitoring
         if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
-            from EFTrackingFPGAIntegration.FPGAOutputValidationConfig import FPGAOutputValidationCfg
+            from EFTrackingFPGAOutputValidation.FPGAOutputValidationConfig import FPGAOutputValidationCfg
             acc.merge(FPGAOutputValidationCfg(flags, **{'pixelKeys' : ["xAODPixelClusters_1stFromFPGACluster","ITkPixelClusters"],
                                                         'stripKeys' : ["xAODStripClusters_1stFromFPGACluster","ITkStripClusters"]}))
         
@@ -581,7 +581,7 @@ def runDataPrepChain():
                                            perEventReports = (flags.Trigger.FPGATrackSim.sampleType != 'skipTruth'),
                                            isDataPrep=True))
 
-        from EFTrackingFPGAIntegration.FPGAOutputValidationConfig import FPGAOutputValidationCfg
+        from EFTrackingFPGAOutputValidation.FPGAOutputValidationConfig import FPGAOutputValidationCfg
         acc.merge(FPGAOutputValidationCfg(flags, **{'pixelKeys' : ["xAODPixelClusters_1stFromFPGACluster","ITkPixelClusters"],'stripKeys':["xAODStripClusters_1stFromFPGACluster","ITkStripClusters"]}))
         
     acc.store(open('AnalysisConfig.pkl','wb'))
