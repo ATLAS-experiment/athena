@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_XAODCHARGEDTRACKSFILTER_H
@@ -16,20 +16,23 @@
 /// Filter events based on presence of charged tracks
 class xAODChargedTracksFilter : public GenFilter {
 public:
+  using GenFilter::GenFilter;
 
-  xAODChargedTracksFilter(const std::string& name, ISvcLocator* pSvcLocator);
-  StatusCode filterEvent();
+  virtual StatusCode filterInitialize() override final;
+  virtual StatusCode filterEvent() override final;
 
 private:
 
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthPartContKey{this, "TruthParticleContainerKey", "TruthGen"};
+
   // Minimum pT for a track to count
-  double m_Ptmin;
+  Gaudi::Property<double> m_Ptmin{this, "Ptcut", 50.0};
 
   // Maximum |pseudorapidity| for a track to count
-  double m_EtaRange;
+  Gaudi::Property<double> m_EtaRange{this, "Etacut", 2.5};
 
   // Minimum number of tracks
-  double m_NTracks;
+  Gaudi::Property<double> m_NTracks{this, "NTracks", 40};
 
 };
 
