@@ -54,7 +54,7 @@ flags.Input.Files = []
 flags.GeoModel.Align.Dynamic = False
 
 MisalignMode = args.misalignmode
-if args.MisalignMode is not None:
+if args.misalignmode is not None:
     tag="InDetSi_MisalignmentMode_random misalignment"
     BFile=""
     DBFile="MisalignmentSet"+str(MisalignMode)+".db"
