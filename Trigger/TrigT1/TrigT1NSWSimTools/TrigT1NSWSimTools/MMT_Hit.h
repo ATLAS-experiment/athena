@@ -9,11 +9,10 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 #include <cmath>
-#include "MMT_struct.h"
 
 class MMT_Hit {
   public:
-    MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::string_view stName);
+    MMT_Hit(const Identifier &id, const std::string_view stName, const int stEta, const int stPhi, const int sectorPhi, const int multiplet, const int gasGap, const int channel, const float stripTime, const int BC, const MuonGM::MuonDetectorManager* detManager);
     MMT_Hit(const MMT_Hit* hit);
     ~MMT_Hit()=default;
 
@@ -32,9 +31,9 @@ class MMT_Hit {
     std::string getStationName() const { return m_station_name; }
     int getStationEta() const { return m_station_eta; }
     int getStationPhi() const { return m_station_phi; }
+    int getSectorPhi() const { return m_sector_phi; }
     double getR() const { return m_R; }
     double getRp() const { return m_Rp; }
-    double getX() const { return m_localX; }
     double getZ() const { return m_Z; }
     double getPitchOverZ() const { return m_PitchOverZ; }
     float getTime() const { return m_time; }
@@ -47,7 +46,7 @@ class MMT_Hit {
     void setBC(int bc) { m_BC_time = bc; }
     void setRZSlope(double slope) { m_RZslope = slope; }
     void setZ(double z) { m_Z = z; }
-    bool verifyHit() const;
+    bool infSlope() const;
 
   private:
     char m_sector;
@@ -58,10 +57,10 @@ class MMT_Hit {
     int m_plane;
     int m_station_eta;
     int m_station_phi;
+    int m_sector_phi;
     int m_multiplet;
     int m_gasgap;
     int m_strip;
-    double m_localX;
     double m_RZslope;
     int m_BC_time, m_age;
     double m_Z, m_PitchOverZ;
