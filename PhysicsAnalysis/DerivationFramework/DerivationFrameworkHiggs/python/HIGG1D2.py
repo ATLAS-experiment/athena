@@ -186,28 +186,7 @@ def HIGG1D2KernelCfg(flags, name='HIGG1D2Kernel', **kwargs):
     from DerivationFrameworkHiggs.MergedElectronConfig import MergedElectronDetailsDecoratorCfg
     HIGG1D2MergedElectronDetailsDecorator = acc.getPrimaryAndMerge(MergedElectronDetailsDecoratorCfg(flags,
                                                                                                   name = "HIGG1D2MergedElectronDetailsDecorator"))
-    
-    # decorate electron and photons with correct ambiguity links
-    # fix issues with ambiguity links in EGamma Reco
-    from DerivationFrameworkEGamma.EGammaToolsConfig import EGAmbiguityReLinkToolToolCfg
-
-    EGRelinkAmbiguityPhotonsTool = acc.getPrimaryAndMerge(EGAmbiguityReLinkToolToolCfg(
-                    flags,
-                    name="EGRelinkAmbiguityPhotons",
-                    SourceEGammaContainer="Photons",
-                    DestEGammaContainer="Electrons",
-                    DecoratorName="ambiguityLink_fix")
-    )
-    EGRelinkAmbiguityElectronsTool = acc.getPrimaryAndMerge(EGAmbiguityReLinkToolToolCfg(
-                    flags,
-                    name="EGRelinkAmbiguityElectrons",
-                    SourceEGammaContainer="Electrons",
-                    DestEGammaContainer="Photons",
-                    DecoratorName="ambiguityLink_fix")
-    )
-    
-    
-    augmentationTools = [HIGG1D2MergedElectronDetailsDecorator, EGRelinkAmbiguityPhotonsTool, EGRelinkAmbiguityElectronsTool]
+    augmentationTools = [HIGG1D2MergedElectronDetailsDecorator]
 
     ## CloseByIsolation correction augmentation
     ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)

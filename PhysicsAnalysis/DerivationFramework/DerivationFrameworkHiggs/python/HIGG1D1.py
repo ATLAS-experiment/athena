@@ -30,24 +30,6 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
     acc.merge(HIGG1D1CustomJetsCfg(flags))
     acc.merge(HIGG1D1CustomJetsCleaningCfg(flags))
 
-    # decorate electron and photons with correct ambiguity links
-    from DerivationFrameworkEGamma.EGammaToolsConfig import EGAmbiguityReLinkToolToolCfg
-
-    EGRelinkAmbiguityPhotonsTool = acc.getPrimaryAndMerge(EGAmbiguityReLinkToolToolCfg(
-                    flags,
-                    name="EGRelinkAmbiguityPhotons",
-                    SourceEGammaContainer="Photons",
-                    DestEGammaContainer="Electrons",
-                    DecoratorName="ambiguityLink_fix")
-    )
-    EGRelinkAmbiguityElectronsTool = acc.getPrimaryAndMerge(EGAmbiguityReLinkToolToolCfg(
-                    flags,
-                    name="EGRelinkAmbiguityElectrons",
-                    SourceEGammaContainer="Electrons",
-                    DestEGammaContainer="Photons",
-                    DecoratorName="ambiguityLink_fix")
-    )
-
     # Reorder event cleaning / decoration locking to run at this
     # point in the algorithm sequence. 
     # See comments in JetCommonConfig.AddEventCleanFlagsCfg.
@@ -227,7 +209,7 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
                       HIGG1D1DiTauLowPtThinningTool,
                       HIGG1D1DiTauLowPtTPThinningTool]
     
-    augmentationTools = [EGRelinkAmbiguityPhotonsTool, EGRelinkAmbiguityElectronsTool] 
+    augmentationTools = [] 
 
     #====================================================================
     # Common calo decoration tools
@@ -492,9 +474,7 @@ def HIGG1D1Cfg(flags):
                                                  "Photons.maxEcell_energy",
                                                  "Photons.maxEcell_gain",
                                                  "Photons.maxEcell_onlId",
-                                                 "Photons.zvertex",
-                                                 "Photons.ambiguityLink_fix",
-                                                 "Electrons.ambiguityLink_fix",])
+                                                 "Photons.zvertex"])
     # Add TTVA variables
     HIGG1D1SlimmingHelper.ExtraVariables.extend(["InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.TTVA_AMVFVertices_forReco.TTVA_AMVFWeights_forReco.TTVA_AMVFVertices_forHiggs.TTVA_AMVFWeights_forHiggs.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers"])
 

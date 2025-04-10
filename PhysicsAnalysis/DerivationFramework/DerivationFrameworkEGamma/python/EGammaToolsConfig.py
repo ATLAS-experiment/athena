@@ -104,12 +104,3 @@ def PhotonVertexSelectionWrapperKernelCfg(
     acc.addEventAlgo(
         CompFactory.DerivationFramework.DerivationKernel(name, **kwargs))
     return acc
-
-
-# Ambiguity re-link tool
-def EGAmbiguityReLinkToolToolCfg(flags, name, **kwargs):
-    """Configure the ambiguity re-link tool"""
-    acc = ComponentAccumulator()
-    EGAmbiguityReLinkTool = CompFactory.DerivationFramework.EGAmbiguityReLinkTool
-    acc.addPublicTool(EGAmbiguityReLinkTool(name, **kwargs), primary=True)
-    return acc
