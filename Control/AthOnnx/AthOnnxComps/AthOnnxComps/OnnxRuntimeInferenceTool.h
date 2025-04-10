@@ -47,7 +47,7 @@ namespace AthOnnx {
         private:
         StatusCode getNodeInfo();
 
-        ServiceHandle<IOnnxRuntimeSvc> m_onnxRuntimeSvc{this, "OnnxRuntimeSvc", "AthOnnx::OnnxRuntimeSvc", "The Onnx runtime service"};
+        ServiceHandle<IOnnxRuntimeSvc> m_onnxRuntimeSvc{this, "OnnxRuntimeSvc", "AthOnnx::OnnxRuntimeSvc/OnnxRuntimeSvc", "The Onnx runtime service"};
         ToolHandle<IOnnxRuntimeSessionTool> m_onnxSessionTool{
             this, "ORTSessionTool", 
             "AthOnnx::OnnxRuntimeSessionToolCPU",

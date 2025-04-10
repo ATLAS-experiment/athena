@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -14,7 +14,9 @@ def OnnxRuntimeInferenceToolCfg(flags,
 
     acc = ComponentAccumulator()
 
-    session_tool = acc.popToolsAndMerge(OnnxRuntimeSessionToolCfg(flags, model_fname, execution_provider))
-    kwargs["ORTSessionTool"] = session_tool
+    if "OnnxRuntimeSvc" not in kwargs:
+        from AthOnnxComps.OnnxRuntimeSvcConfig import OnnxRuntimeSvcCfg
+        kwargs.setdefault("OnnxRuntimeSvc", acc.getPrimaryAndMerge(OnnxRuntimeSvcCfg(flags)))
+    kwargs.setdefault("ORTSessionTool", acc.popToolsAndMerge(OnnxRuntimeSessionToolCfg(flags, model_fname, execution_provider)))
     acc.setPrivateTools(CompFactory.AthOnnx.OnnxRuntimeInferenceTool(name, **kwargs))
     return acc
