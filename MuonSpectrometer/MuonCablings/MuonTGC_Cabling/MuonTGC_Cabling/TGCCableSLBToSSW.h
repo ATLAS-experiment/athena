@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCABLESLBTOSSW_HH
@@ -8,36 +8,32 @@
 #include "MuonTGC_Cabling/TGCCable.h"
 
 #include <string>
+#include <memory>
+#include <array>
 
-#include "MuonTGC_Cabling/TGCId.h"
-
-namespace MuonTGC_Cabling
-{
+namespace MuonTGC_Cabling {
 
 class TGCDatabase;
   
-class TGCCableSLBToSSW : public TGCCable
-{
-public:
+class TGCCableSLBToSSW : public TGCCable {
+ public:
   enum {
     SL            = TGCId::MaxModuleType, 
     MaxModuleType = TGCId::MaxModuleType + 1
   };
 
-  // Constructor & Destructor
   TGCCableSLBToSSW(const std::string& filename);
-
-  virtual ~TGCCableSLBToSSW(void);
+  virtual ~TGCCableSLBToSSW() = default;
   
   virtual TGCModuleMap* getModule(const TGCModuleId* moduleId) const;
 
-private:
-  TGCCableSLBToSSW(void) {}
+ private:
+  TGCCableSLBToSSW() {}
   virtual TGCModuleMap* getModuleIn(const TGCModuleId* ssw) const;
   virtual TGCModuleMap* getModuleOut(const TGCModuleId* slb) const;
-  TGCDatabase* m_database[TGCId::MaxRegionType][MaxModuleType]{};
+  std::array<std::array<std::unique_ptr<TGCDatabase>, MaxModuleType>, TGCId::MaxRegionType> m_database{nullptr};
 };
   
-} // end of namespace
+}  // end of namespace
  
 #endif

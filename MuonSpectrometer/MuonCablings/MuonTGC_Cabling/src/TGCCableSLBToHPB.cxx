@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableSLBToHPB.h"
@@ -12,38 +12,16 @@
 
 namespace MuonTGC_Cabling {
 
-// Constructor & Destructor
 TGCCableSLBToHPB::TGCCableSLBToHPB(const std::string& filename)
-  : TGCCable(TGCCable::SLBToHPB)
-{
-  m_database[TGCId::Endcap][TGCId::WT] = 
-    new TGCDatabasePPToSL(filename,"SB EWT");
-  m_database[TGCId::Endcap][TGCId::WD] = 
-    new TGCDatabasePPToSL(filename,"SB EWD");
-  m_database[TGCId::Endcap][TGCId::ST] =
-    new TGCDatabasePPToSL(filename,"SB EST");
-  m_database[TGCId::Endcap][TGCId::SD] = 
-    new TGCDatabasePPToSL(filename,"SB ESD");
-  m_database[TGCId::Forward][TGCId::WT] = 
-    new TGCDatabasePPToSL(filename,"SB FWT");
-  m_database[TGCId::Forward][TGCId::WD] =
-    new TGCDatabasePPToSL(filename,"SB FWD");
-  m_database[TGCId::Forward][TGCId::ST] = 
-    new TGCDatabasePPToSL(filename,"SB FST");
-  m_database[TGCId::Forward][TGCId::SD] = 
-    new TGCDatabasePPToSL(filename,"SB FSD");
-}
-
-TGCCableSLBToHPB::~TGCCableSLBToHPB(void)
-{
-  delete m_database[TGCId::Endcap][TGCId::WT];
-  delete m_database[TGCId::Endcap][TGCId::WD];
-  delete m_database[TGCId::Endcap][TGCId::ST];
-  delete m_database[TGCId::Endcap][TGCId::SD];
-  delete m_database[TGCId::Forward][TGCId::WT];
-  delete m_database[TGCId::Forward][TGCId::WD];
-  delete m_database[TGCId::Forward][TGCId::ST];
-  delete m_database[TGCId::Forward][TGCId::SD];
+  : TGCCable(TGCCable::SLBToHPB) {
+  m_database[TGCId::Endcap][TGCId::WT] = std::make_unique<TGCDatabasePPToSL>(filename,"SB EWT");
+  m_database[TGCId::Endcap][TGCId::WD] = std::make_unique<TGCDatabasePPToSL>(filename,"SB EWD");
+  m_database[TGCId::Endcap][TGCId::ST] = std::make_unique<TGCDatabasePPToSL>(filename,"SB EST");
+  m_database[TGCId::Endcap][TGCId::SD] = std::make_unique<TGCDatabasePPToSL>(filename,"SB ESD");
+  m_database[TGCId::Forward][TGCId::WT] = std::make_unique<TGCDatabasePPToSL>(filename,"SB FWT");
+  m_database[TGCId::Forward][TGCId::WD] = std::make_unique<TGCDatabasePPToSL>(filename,"SB FWD");
+  m_database[TGCId::Forward][TGCId::ST] = std::make_unique<TGCDatabasePPToSL>(filename,"SB FST");
+  m_database[TGCId::Forward][TGCId::SD] = std::make_unique<TGCDatabasePPToSL>(filename,"SB FSD");
 }
 
 TGCChannelId* TGCCableSLBToHPB::getChannel(const TGCChannelId* channelId,
@@ -322,8 +300,8 @@ TGCModuleMap* TGCCableSLBToHPB::getModuleIn(const TGCModuleId* hpb) const {
     return nullptr;
   }
   
-  TGCDatabase* doubletP = m_database[hpb->getRegionType()][doublet];
-  TGCDatabase* tripletP = m_database[hpb->getRegionType()][triplet];
+  TGCDatabase* doubletP = m_database[hpb->getRegionType()][doublet].get();
+  TGCDatabase* tripletP = m_database[hpb->getRegionType()][triplet].get();
   
   TGCModuleMap* mapId = nullptr;
   const int doubletMaxEntry = doubletP->getMaxEntry();
@@ -366,7 +344,7 @@ TGCModuleMap* TGCCableSLBToHPB::getModuleInforHPB(const TGCModuleId* hpb,
 
   const int hpbId = hpb->getId();
 
-  TGCDatabase* databaseP = m_database[hpb->getRegionType()][moduleType];
+  TGCDatabase* databaseP = m_database[hpb->getRegionType()][moduleType].get();
 
   TGCModuleMap* mapId = nullptr;
   const int MaxEntry = databaseP->getMaxEntry();
@@ -407,30 +385,29 @@ TGCModuleMap* TGCCableSLBToHPB::getModuleOut(const TGCModuleId* slb) const {
 
   const int slbId = slb->getId();
 
-  TGCDatabase* databaseP =m_database[slb->getRegionType()][slb->getModuleType()];
+  TGCDatabase* databaseP =m_database[slb->getRegionType()][slb->getModuleType()].get();
   
   TGCModuleMap* mapId = nullptr;
   const int MaxEntry = databaseP->getMaxEntry();
   for(int i=0; i<MaxEntry; i++){
-    if(databaseP->getEntry(i,0)==slbId)
-      {
+    if(databaseP->getEntry(i,0)==slbId) {
 	int id = databaseP->getEntry(i,1);
 	int block = databaseP->getEntry(i,2);
 	if(slb->getMultipletType()==TGCId::Triplet) 
 	  block *=-1;
-	
+
 	TGCModuleHPB* hpb = new TGCModuleHPB(slb->getSideType(),
 					     slb->getSignalType(),
 					     slb->getRegionType(),
 					     slb->getSector(),
 					     id);
-	
-	mapId = new TGCModuleMap();
-	mapId->insert(block,hpb);
-	break;
-      } 
+
+      mapId = new TGCModuleMap();
+      mapId->insert(block,hpb);
+      break;
+    } 
   }
-  
+
   return mapId;
 }
 
