@@ -22,6 +22,9 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
 
+#include "TrackParametersHelper.h"
+
+
 /// STL includes
 #include <string>
 
@@ -82,12 +85,42 @@ namespace IDTPM {
   inline const xAOD::TruthParticle* getLinkedTruth(
       const xAOD::TruthParticle&, const float ) { return nullptr; }; // dummy - to avoid compilation errors
 
-  bool isReconstructable( const xAOD::TruthParticle& truth,
-                          const std::vector< unsigned int >& minSilHits,
-                          const std::vector< float >& etaBins);
-  inline bool isReconstructable( const xAOD::TrackParticle&,
-                                 const std::vector< unsigned int >& ,
-                                 const std::vector< float >& ) { return false; }; // dummy - to avoid compilation errors
+  template< typename PARTICLE >
+  unsigned int getEtaBin( const PARTICLE& p,
+                                const std::vector< float >& etaBins );
+
+  template< typename PARTICLE >
+  inline bool nHitsSelVec( const PARTICLE& p,
+                           const std::vector< unsigned int >& minHits,
+                           const std::vector< float >& etaBins) {return nSiHits(p) >= minHits.at( getEtaBin( p, etaBins ) );};
+
+  template bool nHitsSelVec < xAOD::TruthParticle >( const xAOD::TruthParticle& truth,
+                                                     const std::vector< unsigned int >& minHits,
+                                                     const std::vector< float >& etaBins );
+  template bool nHitsSelVec < xAOD::TrackParticle >( const xAOD::TrackParticle& track,
+                                                     const std::vector< unsigned int >& minHits,
+                                                     const std::vector< float >& etaBins );
+
+  inline bool minPtSelVec( const xAOD::TrackParticle& track,
+                           const std::vector< float >& minPt,
+                           const std::vector< float >& etaBins) { return pT(track) >= minPt.at( getEtaBin( track, etaBins ) );};
+  inline bool minPtSelVec( const xAOD::TruthParticle& ,
+                           const std::vector< float >& ,
+                           const std::vector< float >& ) { return false; }; // dummy - to avoid compilation errors;
+
+  inline bool maxD0SelVec( const xAOD::TrackParticle& track,
+                           const std::vector< float >& maxD0,
+                           const std::vector< float >& etaBins) { return d0(track) <= maxD0.at( getEtaBin( track, etaBins ) );};
+  inline bool maxD0SelVec( const xAOD::TruthParticle& ,
+                           const std::vector< float >& ,
+                           const std::vector< float >& ) { return false; }; // dummy - to avoid compilation errors;
+
+  inline bool maxZ0SelVec( const xAOD::TrackParticle& track,
+                           const std::vector< float >& maxZ0,
+                           const std::vector< float >& etaBins) { return z0(track) <= maxZ0.at( getEtaBin( track, etaBins ) );};
+  inline bool maxZ0SelVec( const xAOD::TruthParticle& ,
+                           const std::vector< float >& ,
+                           const std::vector< float >& ) { return false; }; // dummy - to avoid compilation errors;
 
   /// For vertices (truth and reco)
   /// get vertex-associated tracks and their weights

@@ -313,7 +313,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
     /// technical efficiency plots 
     if( m_plots_tech_eff_vsTest ) {
       if (  m_trkAnaDefSvc->isTestTruth() and
-            isReconstructable( *particle,
+            nHitsSelVec( *particle,
                                m_trkAnaDefSvc->minSilHits(),
                                m_trkAnaDefSvc->etaBins() ) ) {
         ATH_CHECK( m_plots_tech_eff_vsTest->fillPlots(
@@ -321,7 +321,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
       }
       else if (  m_trkAnaDefSvc->isReferenceTruth() ) {
         bool isTechMatched = isMatched ?
-            isReconstructable( *(matches.getMatchedRefTruth( *particle )),
+            nHitsSelVec( *(matches.getMatchedRefTruth( *particle )),
                                m_trkAnaDefSvc->minSilHits(),
                                m_trkAnaDefSvc->etaBins() ) : false;
         ATH_CHECK( m_plots_tech_eff_vsTest->fillPlots(
@@ -331,7 +331,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
         const xAOD::TruthParticle* linkedTruth = getLinkedTruth(
           *particle, m_trkAnaDefSvc->truthProbCut() );
         bool isTechMatched = isMatched ? 
-            isReconstructable( *linkedTruth,
+            nHitsSelVec( *linkedTruth,
                                m_trkAnaDefSvc->minSilHits(),
                                m_trkAnaDefSvc->etaBins() ) : false;
         ATH_CHECK( m_plots_tech_eff_vsTest->fillPlots(
@@ -481,7 +481,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
     /// technical efficiency plots 
     if( m_plots_tech_eff_vsRef ) {
       if( m_trkAnaDefSvc->isReferenceTruth() and 
-          isReconstructable( *particle, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) )
+          nHitsSelVec( *particle, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) )
       {
         ATH_CHECK( m_plots_tech_eff_vsRef->fillPlots(
             *particle, isMatched, truthMu, actualMu, weight ) );
@@ -492,7 +492,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
 
         if (isMatched) {
           for ( const xAOD::TruthParticle *thisTruth : (matches.getMatchedTestTruths( *particle ))) {
-            if ( isReconstructable( *thisTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) ) {
+            if ( nHitsSelVec( *thisTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) ) {
               isTechMatched = true;
               break;
             }
@@ -506,7 +506,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
         const xAOD::TruthParticle* linkedTruth = getLinkedTruth(
           *particle, m_trkAnaDefSvc->truthProbCut() );
         bool isTechMatched = isMatched ? 
-            isReconstructable( *linkedTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) : false;
+            nHitsSelVec( *linkedTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) : false;
         ATH_CHECK( m_plots_tech_eff_vsRef->fillPlots(
             *particle, isTechMatched, truthMu, actualMu, weight ) );
       }
@@ -642,7 +642,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTruth(
 
       /// technical efficiency plots (for EFTruthMatch only)
       if( m_plots_tech_eff_vsTruth ) {
-        if (isReconstructable( *thisTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() )) {
+        if (nHitsSelVec( *thisTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() )) {
             ATH_CHECK( m_plots_tech_eff_vsTruth->fillPlots(
             *thisTruth, isMatched , truthMu, actualMu, weight ) );
         }

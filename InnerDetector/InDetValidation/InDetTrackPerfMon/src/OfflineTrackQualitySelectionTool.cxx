@@ -5,6 +5,7 @@
 #include "OfflineTrackQualitySelectionTool.h"
 #include "TrackAnalysisCollections.h"
 #include "TrackParametersHelper.h"
+#include "OfflineObjectDecorHelper.h"
 
 namespace IDTPM {
 
@@ -31,7 +32,7 @@ StatusCode OfflineTrackQualitySelectionTool::selectTracks(
 }
 
 bool OfflineTrackQualitySelectionTool::accept(const xAOD::TrackParticle* track) {
-  if (m_maxPt!=-9999.   and (pT(*track)) > m_maxPt )              return false;  
+  if (m_maxPt!=-9999.   and (pT(*track)) > m_maxPt )                return false;  
   if (m_maxEta!=-9999.  and (eta(*track)) > m_maxEta )              return false;
   if (m_minEta!=-9999.  and (eta(*track)) < m_minEta )              return false; 
   if (m_minPhi!=-9999.  and (phi(*track)) < m_minPhi )              return false; 
@@ -49,6 +50,10 @@ bool OfflineTrackQualitySelectionTool::accept(const xAOD::TrackParticle* track) 
   if (m_maxAbsZ0!=-9999.   and std::fabs(z0(*track)) > m_maxAbsZ0 )         return false; 
   if (m_minAbsQoPT!=-9999. and std::fabs(qOverPT(*track)) < m_minAbsQoPT )  return false; 
   if (m_maxAbsQoPT!=-9999. and std::fabs(qOverPT(*track)) > m_maxAbsQoPT )  return false; 
+  if (!m_minHitsVec.empty() and !nHitsSelVec(*track, m_minHitsVec, m_etaBins))  return false; 
+  if (!m_minPtVec.empty() and !minPtSelVec(*track, m_minPtVec, m_etaBins))  return false; 
+  if (!m_maxD0Vec.empty() and !maxD0SelVec(*track, m_maxD0Vec, m_etaBins))  return false; 
+  if (!m_maxZ0Vec.empty() and !maxZ0SelVec(*track, m_maxZ0Vec, m_etaBins))  return false; 
   return true;
 }
 
