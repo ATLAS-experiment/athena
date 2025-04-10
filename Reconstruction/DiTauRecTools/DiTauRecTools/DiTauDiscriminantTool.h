@@ -16,6 +16,7 @@
 
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // Local include(s):
 #include "DiTauRecTools/IDiTauToolBase.h"
@@ -56,13 +57,13 @@ public:
   
 private:
 
+  Gaudi::Property<std::string> m_sWeightsFile{this, "WeightsFile", "tauRecTools/R22_preprod/DiTau_JetBDT_winter2024.weights.root"};
+  Gaudi::Property<std::string> m_sBDTScoreName{this, "BDTScoreName", "JetBDT"};
+
   StatusCode parseWeightsFile();
 
   void setIDVariables(const xAOD::DiTauJet& xDiTau);
 
-  // steering variables
-  std::string m_sWeightsFile;
-  std::string m_sBDTScoreName;
   
   //MVAUtils::BDT* m_bdt; //!
   std::unique_ptr<MVAUtils::BDT> m_bdt;

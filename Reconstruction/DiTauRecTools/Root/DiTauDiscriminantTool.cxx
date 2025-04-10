@@ -23,8 +23,6 @@ DiTauDiscriminantTool::DiTauDiscriminantTool( const std::string& name )
   : AsgTool(name)
   , m_bdt()
 {
-  declareProperty( "WeightsFile", m_sWeightsFile = "tauRecTools/R22_preprod/DiTau_JetBDT_winter2024.weights.root");
-  declareProperty( "BDTScoreName", m_sBDTScoreName = "JetBDT");
 }
 
 //______________________________________________________________________________
