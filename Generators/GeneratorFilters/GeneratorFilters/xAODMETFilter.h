@@ -1,28 +1,28 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_XAODMETFILTER_H
 #define GENERATORFILTERS_XAODMETFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
-#include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
-#include "xAODTruth/TruthParticleAuxContainer.h"
-
 
 /// Filters on total missing energy from nus and LSPs
 /// @author Seth Zenz, December 2005
 class xAODMETFilter:public GenFilter {
 public:
+  using GenFilter::GenFilter;
 
-  xAODMETFilter(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterInitialize() override final;
+  virtual StatusCode filterEvent() override final;
 
  private:
 
-  double m_METmin;
-  bool m_useHadronicNu;
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthPartContKey{this, "TruthParticleContainerKey", "TruthMET"};
+  Gaudi::Property<double> m_METmin{this, "METCut", 10000.};
+  // Normally we'd include them, but this is unstable if using EvtGen
+  Gaudi::Property<bool> m_useHadronicNu{this, "UseNeutrinosFromHadrons", false};
 
 };
 
