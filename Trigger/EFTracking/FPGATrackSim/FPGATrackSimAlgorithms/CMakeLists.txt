@@ -15,7 +15,7 @@ atlas_add_library( FPGATrackSimAlgorithmsLib
    src/*.cxx
    PUBLIC_HEADERS FPGATrackSimAlgorithms
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}  ${ONNXRUNTIME_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib GaudiKernel FPGATrackSimBanksLib FPGATrackSimConfToolsLib FPGATrackSimHoughLib FPGATrackSimInputLib FPGATrackSimLRTLib FPGATrackSimMapsLib FPGATrackSimObjectsLib FPGATrackSimSGInputLib  ${ONNXRUNTIME_LIBRARIES}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib GaudiKernel FPGATrackSimBanksLib FPGATrackSimBinningLib FPGATrackSimConfToolsLib FPGATrackSimHoughLib FPGATrackSimInputLib FPGATrackSimLRTLib FPGATrackSimMapsLib FPGATrackSimObjectsLib FPGATrackSimSGInputLib  ${ONNXRUNTIME_LIBRARIES}
    PRIVATE_LINK_LIBRARIES FPGATrackSimBanksLib FPGATrackSimConfToolsLib )
  
 # Component(s) in the package:
