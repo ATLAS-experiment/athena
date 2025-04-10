@@ -1,42 +1,29 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODMultiLeptonFilter.h"
-#include "xAODTruth/TruthParticle.h"
-#include "xAODTruth/TruthParticleContainer.h"
-#include "xAODTruth/TruthParticleAuxContainer.h"
 #include "TruthUtils/HepMCHelpers.h"
 
-xAODMultiLeptonFilter::xAODMultiLeptonFilter(const std::string& name, ISvcLocator* pSvcLocator)
-: GenFilter(name, pSvcLocator)
+StatusCode xAODMultiLeptonFilter::filterInitialize()
 {
-  declareProperty("Ptcut", m_Ptmin = 10000.);
-  declareProperty("Etacut", m_EtaRange = 10.0);
-  declareProperty("NLeptons", m_NLeptons = 4);
+  CHECK(m_truthElectronContKey.initialize());
+  CHECK(m_truthMuonContKey.initialize());
+  return StatusCode::SUCCESS;
 }
 
 
 StatusCode xAODMultiLeptonFilter::filterEvent() {
-  
+
   // Retrieve TruthElectrons  container
-  const xAOD::TruthParticleContainer* xTruthParticleContainerElectron;
-  if (evtStore()->retrieve(xTruthParticleContainerElectron, "TruthElectrons").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthElectrons" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainerElectron{m_truthElectronContKey};
+  CHECK(xTruthParticleContainerElectron.isValid());
   // Retrieve TruthMuons container
-  const xAOD::TruthParticleContainer* xTruthParticleContainerMuon;
-  if (evtStore()->retrieve(xTruthParticleContainerMuon, "TruthMuons").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthMuons" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainerMuon{m_truthMuonContKey};
+  CHECK(xTruthParticleContainerMuon.isValid());
   int numLeptons = 0;
 
-  unsigned int nParticlesElectrons = xTruthParticleContainerElectron->size();
-  for (unsigned int iPart=0; iPart<nParticlesElectrons; ++iPart) {
-    const xAOD::TruthParticle* part = (*xTruthParticleContainerElectron)[iPart];
-
+  for (const xAOD::TruthParticle* part : *xTruthParticleContainerElectron) {
     if (MC::isStable(part) && MC::isElectron(part)) //electron
         if(  part->pt()>= m_Ptmin && part->abseta() <= m_EtaRange )
         {
@@ -49,10 +36,7 @@ StatusCode xAODMultiLeptonFilter::filterEvent() {
         }       
   }
 
-  unsigned int nParticlesMuons = xTruthParticleContainerMuon->size();
-  for (unsigned int iPart=0; iPart<nParticlesMuons; ++iPart) {
-    const xAOD::TruthParticle* part = (*xTruthParticleContainerMuon)[iPart];
-
+  for (const xAOD::TruthParticle* part : *xTruthParticleContainerMuon) {
     if (MC::isStable(part) && MC::isMuon(part)) //Muon
         if(  part->pt()>= m_Ptmin && part->abseta() <= m_EtaRange )
         {
