@@ -23,6 +23,7 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsInterop/Logger.h"
+#include "ActsInterop/TableUtils.h"
 #include "src/detail/MeasurementIndex.h"
 #include "src/detail/SharedHitCounter.h"
 
@@ -98,6 +99,16 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
+StatusCode ScoreBasedAmbiguityResolutionAlg::finalize() {
+  ATH_MSG_INFO("Score-based Ambiguity Resolution statistics" << std::endl
+               << makeTable(m_stat,
+                            std::array<std::string, kNStat>{
+                                "Input tracks",
+                                "Resolved tracks",
+                                "Total shared hits"}).columnWidth(10));
+  return StatusCode::SUCCESS;
+}
+
 StatusCode ScoreBasedAmbiguityResolutionAlg::execute(
     const EventContext &ctx) const {
   auto timer = Monitored::Timer<std::chrono::milliseconds>("TIME_execute");
@@ -106,6 +117,7 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::execute(
   SG::ReadHandle<ActsTrk::TrackContainer> trackHandle =
       SG::makeHandle(m_tracksKey, ctx);
   ATH_CHECK(trackHandle.isValid());
+  m_stat[kNInputTracks] += trackHandle->size();
 
   // creates mutable tracks from the input tracks to add summary information
   // NOTE: this operation likely needs to moved outside ambiguity resolution
@@ -138,6 +150,7 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::execute(
 
   ATH_MSG_DEBUG("Resolved to " << goodTracks.size() << " tracks from "
                               << updatedTracks.size());
+  m_stat[kNResolvedTracks] += goodTracks.size();
 
   ActsTrk::MutableTrackContainer solvedTracks;
   solvedTracks.ensureDynamicColumns(updatedTracks);
@@ -145,6 +158,7 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::execute(
   detail::MeasurementIndex measurementIndex;
   detail::SharedHitCounter sharedHits;
 
+  std::size_t totalShared = 0;
   for (auto iTrack : goodTracks) {
     auto destProxy = solvedTracks.getTrack(solvedTracks.addTrack());
     destProxy.copyFrom(updatedTracks.getTrack(iTrack));
@@ -153,7 +167,12 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::execute(
       if (nBadTrackMeasurements > 0) {
         ATH_MSG_ERROR("computeSharedHits: " << nBadTrackMeasurements << " track measurements not found in input track");
       }
+      totalShared += nShared;
     }
+  }
+  if (m_countSharedHits) {
+    ATH_MSG_DEBUG("total number of shared hits = " << totalShared);
+    m_stat[kNSharedHits] += totalShared;
   }
 
   std::unique_ptr<ActsTrk::TrackContainer> outputTracks =

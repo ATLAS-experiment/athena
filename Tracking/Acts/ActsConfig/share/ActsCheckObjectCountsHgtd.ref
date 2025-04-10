@@ -76,6 +76,12 @@ ActsTrackFindingAlg                                               INFO Ratios
 |                                 3.0- 3.5 |   0.937628 |          0 |   0.937628 |
 |                                 3.5-+inf |   0.963062 |          0 |   0.963062 |
 |------------------------------------------|------------|------------|------------|
+ActsAmbiguityResolutionAlg                                        INFO Ambiguity Resolution statistics
+|-------------------|------------|
+| Input tracks      |      13982 |
+| Resolved tracks   |       9563 |
+| Total shared hits |        200 |
+|-------------------|------------|
 ActsPrdAssociationAlg                                             INFO Prd Map statistics
 |-----------------------|------------|
 | N. Tracks             |       9563 |
@@ -155,6 +161,12 @@ ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
 |                                 3.0- 3.5 |          0 |          0 |
 |                                 3.5-+inf |          0 |          0 |
 |------------------------------------------|------------|------------|
+ActsLargeRadiusAmbiguityResolutionAlg                             INFO Ambiguity Resolution statistics
+|-------------------|------------|
+| Input tracks      |        115 |
+| Resolved tracks   |         83 |
+| Total shared hits |          0 |
+|-------------------|------------|
 ActsLargeRadiusPrdAssociationAlg                                  INFO Prd Map statistics
 |-----------------------|------------|
 | N. Tracks             |         83 |
@@ -229,6 +241,12 @@ ActsConversionTrackFindingAlg                                     INFO Ratios
 |                                 3.0- 3.5 |          0 |          0 |
 |                                 3.5-+inf |          0 |          0 |
 |------------------------------------------|------------|------------|
+ActsConversionAmbiguityResolutionAlg                              INFO Ambiguity Resolution statistics
+|-------------------|------------|
+| Input tracks      |          0 |
+| Resolved tracks   |          0 |
+| Total shared hits |          0 |
+|-------------------|------------|
 ActsConversionPrdAssociationAlg                                   INFO Prd Map statistics
 |-----------------------|------------|
 | N. Tracks             |          0 |
@@ -318,6 +336,12 @@ ActsLowPtTrackFindingAlg                                          INFO Ratios
 |                                 3.0- 3.5 | 0.00943396 |          0 | 0.00943396 |
 |                                 3.5-+inf |  0.0746269 |          0 |  0.0746269 |
 |------------------------------------------|------------|------------|------------|
+ActsLowPtAmbiguityResolutionAlg                                   INFO Ambiguity Resolution statistics
+|-------------------|------------|
+| Input tracks      |        652 |
+| Resolved tracks   |        501 |
+| Total shared hits |          8 |
+|-------------------|------------|
 ActsLowPtPrdAssociationAlg                                        INFO Prd Map statistics
 |-----------------------|------------|
 | N. Tracks             |        501 |

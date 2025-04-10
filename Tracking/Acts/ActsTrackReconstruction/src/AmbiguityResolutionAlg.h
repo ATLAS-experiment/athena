@@ -42,6 +42,7 @@ namespace ActsTrk
                            ISvcLocator *pSvcLocator);
 
     virtual StatusCode initialize() override;
+    virtual StatusCode finalize() override;
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
@@ -64,6 +65,16 @@ namespace ActsTrk
 
     std::unique_ptr<Acts::GreedyAmbiguityResolution> m_ambi;
 
+  public:
+    enum EStat {
+      kNInputTracks,
+      kNResolvedTracks,
+      kNSharedHits,
+      kNStat
+    };
+
+  private:
+    mutable std::array<std::atomic<unsigned int>, kNStat> m_stat ATLAS_THREAD_SAFE{};
   };
 
 } // namespace
