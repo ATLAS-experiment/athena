@@ -25,6 +25,7 @@
 #include "TrkDriftCircleMath/TransformToLine.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "AthContainers/ConstAccessor.h"
+#include "MuonClusterization/RpcHitClustering.h"
 
 namespace {
     constexpr double inverseSpeedOfLight = 1 / Gaudi::Units::c_light;  // need 1/299.792458 inside calculateTof()/calculateBeta()

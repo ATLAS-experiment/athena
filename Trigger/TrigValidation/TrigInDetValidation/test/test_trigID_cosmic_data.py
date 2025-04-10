@@ -3,7 +3,7 @@
 
 # art-description: art job for cosmic_data
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-input: group.trig-hlt.data23_cos.00457007.physics_CosmicMuons.merge.RAW
 # art-input-nfiles: 4

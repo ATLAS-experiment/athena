@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////
@@ -143,7 +143,7 @@ bool InDet::InDetAmbiScoringTool::passBasicSelections( const Trk::Track& track )
   double maxZ0 = m_etaDependentCutsSvc.name().empty() ?
     m_maxZImp.value() : m_etaDependentCutsSvc->getMaxZImpactAtEta(trackEta);
   if (std::abs(parm->parameters()[Trk::z0]) > maxZ0) {
-    ATH_MSG_DEBUG ("Track Z impact > "<<m_maxZImp<<", reject it");
+    ATH_MSG_DEBUG ("Track Z impact > "<<maxZ0<<", reject it");
     return false;
   }
 

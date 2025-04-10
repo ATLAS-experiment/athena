@@ -51,10 +51,9 @@ class TopoAlgoDefMultiplicity:
             tm.registerTopoAlgo(alg)
 
         emThresholds_2bits = [ 
-            'jEM25', 'jEM20M', 
-  
-            #spares
-            'jEMSPARE1', 
+            'jEM25', 'jEM20M',
+
+            'jEM35', # prospective Run 4 L1 item, ATR-30180
         ]
         for em in emThresholds_2bits:
             alg = EMMultiplicityAlgo( name = em,
@@ -136,8 +135,7 @@ class TopoAlgoDefMultiplicity:
 
             'jJ5p30ETA49', 'jJ10p30ETA49',
 
-            # spares
-            'jJSPARE1',
+            'jJ56p0ETA49', # prospective Run 4 L1 item, ATR-30180
 
         ]
 
@@ -185,8 +183,10 @@ class TopoAlgoDefMultiplicity:
         gLJThresholds_2bits = [ 
             'gLJ80p0ETA25', 'gLJ100p0ETA25', 'gLJ140p0ETA25', 'gLJ160p0ETA25', 
 
+            'gLJ90p0ETA25', # prospective Run 4 L1 item, ATR-30180
+
             # spares
-            'gLJSPARE1', 'gLJSPARE2', 'gLJSPARE3', 'gLJSPARE4',
+            'gLJSPARE1', 'gLJSPARE2', 'gLJSPARE3',
         ]
 
         for gLJet in gLJThresholds_2bits:
