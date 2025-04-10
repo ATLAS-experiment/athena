@@ -109,7 +109,7 @@ public:
   Gaudi::Property<bool> m_ignoreFakeAlgs{this, "IgnoreFakeAlgs", false,
     "Set to ignore any attempts to override current-alg"};
 
-  Gaudi::Property<int> m_startEvent{this, "StartEvent", m_startEvent = 3,
+  Gaudi::Property<int> m_startEvent{this, "StartEvent", 3,
     "Event number to start recording data"};
 
   Gaudi::Property<bool> m_useCLID{this, "UseCLID", true,
