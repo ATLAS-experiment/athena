@@ -3,7 +3,7 @@
 
 # art-description: art job for el_singlee_7-80_larged0_pu
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-input: valid1.901969.PG_e_Et7to80_vertxy20.recon.RDO.e8544_e8528_s4369_s4370_r16083_tid42190401_00
 # art-input-nfiles: 10

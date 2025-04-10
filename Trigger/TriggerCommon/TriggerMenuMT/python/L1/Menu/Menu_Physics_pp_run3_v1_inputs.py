@@ -154,8 +154,11 @@ def defineInputsMenu():
             # gLJ thresholds for production
             'gLJ80p0ETA25', 'gLJ100p0ETA25', 'gLJ140p0ETA25', 'gLJ160p0ETA25',
 
+             # prospective Run 4 L1 item, ATR-30180
+            'gLJ90p0ETA25',
+
             # gLJ thresholds for commissioning
-            'gLJSPARE1', 'gLJSPARE2', 'gLJSPARE3', 'gLJSPARE4',
+            'gLJSPARE1', 'gLJSPARE2', 'gLJSPARE3',
 
             None,
 
@@ -193,8 +196,11 @@ def defineInputsMenu():
 
             'jJ5p30ETA49', 'jJ10p30ETA49',
             # jJ thresholds for production
-            'jJSPARE1',
             'jJ50p0ETA25',
+
+            # prospective Run 4 L1 item, ATR-30180
+            'jJ56p0ETA49',
+
             None, None,
 
             # jLJ thresholds for commissioning
@@ -230,7 +236,9 @@ def defineInputsMenu():
             # jEM thresholds for commissioning
             'jEM25', 'jEM20M', 
             # jEM thresholds for production
-            'jEMSPARE1',
+
+            # prospective Run 4 L1 item, ATR-30180
+            'jEM35',
     
             # LAr saturation for Phase-I
             ('LArSaturation',1),

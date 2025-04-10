@@ -3,7 +3,7 @@
 
 # art-description: Compares results of a slice chains when running in full menu and when running alone with other slices disabled by prescaling
 # art-type: build
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
