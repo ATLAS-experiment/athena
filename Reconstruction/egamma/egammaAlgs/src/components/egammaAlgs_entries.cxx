@@ -11,7 +11,7 @@
 #include "../photonSuperClusterBuilder.h"
 #include "../egammaSuperClusterBuilder.h"
 #include "../egammaSelectedTrackCopy.h"
-#include "../electronRescaler.h"
+#include "../egammaAmbiguityRelinker.h"
 
 DECLARE_COMPONENT( egammaRecBuilder )
 DECLARE_COMPONENT( xAODEgammaBuilder )
@@ -26,4 +26,4 @@ DECLARE_COMPONENT( electronSuperClusterBuilder )
 DECLARE_COMPONENT( photonSuperClusterBuilder )
 DECLARE_COMPONENT( egammaSuperClusterBuilder )
 DECLARE_COMPONENT( egammaSelectedTrackCopy )
-DECLARE_COMPONENT( electronRescaler )
+DECLARE_COMPONENT( egammaAmbiguityRelinker )
