@@ -392,7 +392,7 @@ egammaTruthAssociationAlg::match(
           // we found a truthEgamma object we should annotate if this is the
           // best link
           bool annotateLink = true;                   // by default we annotate
-          const auto link = linkAccess(*truthEgamma); // what already exists
+          const auto& link = linkAccess(*truthEgamma); // what already exists
           if (link.isValid()) {
             auto oldPart = *link;
             if (oldPart && truthEgamma->e() > 0 &&
