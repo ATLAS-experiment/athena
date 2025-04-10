@@ -15,12 +15,18 @@
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
 
+#include "ColumnarCore/ColumnarTool.h"
+#include "ColumnarCore/ColumnAccessor.h"
+#include "ColumnarCore/ObjectColumn.h"
+#include "ColumnarEventInfo/EventInfoHelpers.h"
+#include "ColumnarMuon/MuonDef.h"
+
 #include <string>
 #include <memory>
 #include <map>
 #include <unordered_map>
 namespace CP {
-    class MuonEfficiencyScaleFactors: virtual public CP::IMuonEfficiencyScaleFactors, public asg::AsgTool {
+    class MuonEfficiencyScaleFactors: virtual public CP::IMuonEfficiencyScaleFactors, public asg::AsgTool, public columnar::ColumnarTool<>{
 
         public:
             MuonEfficiencyScaleFactors(const std::string& name);
@@ -34,6 +40,7 @@ namespace CP {
 
             /// Retrieve the Scale factor and decorate the muon
             virtual CorrectionCode getEfficiencyScaleFactor(const xAOD::Muon& mu, float& sf, const xAOD::EventInfo* info = 0) const;
+            CorrectionCode getEfficiencyScaleFactor(columnar::MuonId mu, float& sf, columnar::EventInfoId info) const;
             virtual CorrectionCode applyEfficiencyScaleFactor(const xAOD::Muon& mu, const xAOD::EventInfo* info = 0) const;
             /// replica generation
             virtual CorrectionCode getEfficiencyScaleFactorReplicas(const xAOD::Muon& mu, std::vector<float> & sf_err, const xAOD::EventInfo* info = 0) const;
@@ -71,6 +78,7 @@ namespace CP {
 
         private:
             unsigned int getRandomRunNumber(const xAOD::EventInfo* info) const;
+            unsigned int getRandomRunNumber(columnar::EventInfoId info) const;
             /// load the SF histos
             StatusCode LoadInputs();
 
@@ -202,6 +210,20 @@ namespace CP {
             bool m_useLRT;
 
             CP::MuonEfficiencyType m_Type;
+
+    public:
+
+        columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfoCol {*this, "EventInfo"};
+        columnar::EventInfoHelpers::EventTypeAccessor<> eventTypeAcc {*this};
+        columnar::EventInfoAccessor<uint32_t> runNumberAcc {*this, "runNumber"};
+        columnar::EventInfoAccessor<unsigned int> acc_rnd{*this, "RandomRunNumber"};
+
+        columnar::MuonAccessor<columnar::ObjectColumn> m_muons {*this, "Muons"};
+        columnar::MuonDecorator<float> sfDec {*this, "sfOut"};
+        columnar::MuonDecorator<char> validDec {*this, "validOut"};
+
+        void callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId event) const;
+        void callEvents (columnar::EventContextRange events) const;
     };
 
 } /* namespace CP */
