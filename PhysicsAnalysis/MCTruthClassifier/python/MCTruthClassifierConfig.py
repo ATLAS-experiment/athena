@@ -4,26 +4,27 @@ __doc__ = """
           Tool configuration to instantiate MCTruthClassifier
           with default configurations."""
 
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 
-def MCTruthClassifierCfg(flags, **kwargs):
+
+def MCTruthClassifierCfg(flags, name="MCTruthClassifier", **kwargs):
     """
     This is the default configuration allowing all options.
     By default, it does not do calo truth matching.
     """
     kwargs.setdefault("ParticleCaloExtensionTool", "")
     kwargs.setdefault("CaloDetDescrManager", "")
-    return MCTruthClassifierCaloTruthMatchCfg(flags, **kwargs)
+    return MCTruthClassifierCaloTruthMatchCfg(flags, name, **kwargs)
 
 
-def MCTruthClassifierCaloTruthMatchCfg(flags, **kwargs):
+def MCTruthClassifierCaloTruthMatchCfg(flags, name="MCTruthClassifier", **kwargs):
     """
     This is the default configuration allowing all options.
     By default, it does calo truth matching using a
     dedicated instance of the ParticleCaloExtensionTool
     """
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from AthenaConfiguration.Enums import LHCPeriod
-
     acc = ComponentAccumulator()
 
     if "ParticleCaloExtensionTool" not in kwargs:
@@ -44,8 +45,15 @@ def MCTruthClassifierCaloTruthMatchCfg(flags, **kwargs):
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         kwargs.setdefault("FwdElectronUseG4Sel", False)
 
-    from AthenaConfiguration.ComponentFactory import CompFactory
     acc.setPrivateTools(CompFactory.MCTruthClassifier(**kwargs))
+    return acc
+
+
+def DFCommonMCTruthClassifierCfg(flags):
+    """Configure the MCTruthClassifier tool"""
+    acc = ComponentAccumulator()
+    acc.addPublicTool(acc.popToolsAndMerge(MCTruthClassifierCfg(flags, name = "DFCommonTruthClassifier")),
+                      primary = True)
     return acc
 
 
@@ -55,8 +63,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import logging
 
-    from AthenaConfiguration.ComponentAccumulator import (
-        ComponentAccumulator, printProperties)
+    from AthenaConfiguration.ComponentAccumulator import printProperties
 
     flags = initConfigFlags()
     flags.Input.isMC = True

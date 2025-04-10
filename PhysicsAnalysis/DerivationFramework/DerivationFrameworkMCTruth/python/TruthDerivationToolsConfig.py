@@ -124,14 +124,6 @@ def TruthD2DecoratorCfg(flags, name, **kwargs):
     acc.addPublicTool(TruthD2Decorator(name, **kwargs), primary = True)
     return acc
 
-def DFCommonMCTruthClassifierCfg(flags):
-    """Configure the MCTruthClassifier tool"""
-    acc = ComponentAccumulator()
-    MCTruthClassifier = CompFactory.MCTruthClassifier
-    acc.addPublicTool(MCTruthClassifier(name = "DFCommonTruthClassifier", ParticleCaloExtensionTool = ""),
-                      primary = True)
-    return acc
-
 def TruthClassificationDecoratorCfg(flags, name, **kwargs):
     """Configure the TruthClassificationDecorator tool"""
     acc = ComponentAccumulator()
@@ -218,6 +210,7 @@ def HardScatterCollectionMakerCfg(flags, name, **kwargs):
 #add the 'decoration' tool to dress the main truth collection with the classification
 def DFCommonTruthClassificationToolCfg(flags):
     """dress the main truth collection with the classification"""
+    from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
     accMCTC = DFCommonMCTruthClassifierCfg(flags)
     DFCommonTruthClassifier = accMCTC.getPrimary()
     acc = TruthClassificationDecoratorCfg(flags,
