@@ -461,6 +461,15 @@ def xAODSameParticleHardScatteringFilterCommonCfg(flags, **kwargs):
     return cfg
 
 
+def xAODSplitPhotonFilterCommonCfg(flags, **kwargs):
+    """common fragment for xAODSplitPhoton filter conversion to xAOD,
+    connecting the filter"""
+    cfg = CreatexAODSlimmedContainerCfg(flags, containerName="TruthGen") # Algs in prefiltSeq
+    # To modify cuts make a new Cfg method depending on this one, where you set the required kwargs
+    cfg.addEventAlgo(CompFactory.xAODSplitPhotonFilter("xAODSplitPhotonFilter", **kwargs)) # TODO Add to filtSeq
+    return cfg
+
+
 def xAODTTbarWToLeptonFilterCommonCfg(flags, **kwargs):
     """common fragment for xAODTTbarWToLepton filter conversion to xAOD,
     connecting the filter"""
@@ -587,6 +596,7 @@ if __name__ == "__main__":
     acc.merge( xAODParticleFilterCommonCfg(flags))
     acc.merge( xAODPhotonFilterCommonCfg(flags))
     acc.merge( xAODSameParticleHardScatteringFilterCommonCfg(flags))
+    acc.merge( xAODSplitPhotonFilterCommonCfg(flags))
     acc.merge( xAODTTbarWToLeptonFilterCommonCfg(flags))
     acc.merge( xAODTTbarWithJpsimumuFilterCommonCfg(flags))
     acc.merge( xAODTauFilterCommonCfg(flags))

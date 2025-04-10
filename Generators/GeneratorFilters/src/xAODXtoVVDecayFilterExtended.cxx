@@ -1,27 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODXtoVVDecayFilterExtended.h"
 #include "TruthUtils/HepMCHelpers.h"
 
-xAODXtoVVDecayFilterExtended::xAODXtoVVDecayFilterExtended(const std::string &name, ISvcLocator *pSvcLocator)
-    : GenFilter(name, pSvcLocator)
-{
-    declareProperty("PDGGrandParent", m_PDGGrandParent);
-    declareProperty("PDGParent", m_PDGParent);
-    declareProperty("PDGChild1", m_PDGChild1);
-    declareProperty("PDGChild2", m_PDGChild2);
-    declareProperty("UseStatusParent", m_UseStatusParent);
-    declareProperty("StatusParent", m_StatusParent);
-
-    // initialize member variables (to make Coverity tool happy...)
-    m_nHtoVV = 0;
-    m_nGoodHtoVV = 0;
-}
-
 StatusCode xAODXtoVVDecayFilterExtended::filterInitialize()
 {
+    CHECK(m_truthEventKey.initialize());
     ATH_MSG_INFO("PDGGrandParent(H) = " << m_PDGGrandParent << " will scan all ancestors to find PDGGrandParent");
     ATH_MSG_INFO("PDGParent(V)      = " << m_PDGParent );
     if (m_PDGChild1.empty())
@@ -58,21 +44,15 @@ StatusCode xAODXtoVVDecayFilterExtended::filterEvent()
     int nGoodParent = 0;
 
     // Retrieve full TruthEventContainer container
-    const xAOD::TruthEventContainer *xTruthEventContainer = NULL;
-    if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-    {
-        ATH_MSG_ERROR("No TruthEvent collection with name "
-                      << "TruthEvents"
-                      << " found in StoreGate!");
-        return StatusCode::FAILURE;
-    }
+    SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer{m_truthEventKey};
+    CHECK( xTruthEventContainer.isValid() );
 
-    for (xAOD::TruthEventContainer::const_iterator itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr)
+    for (const xAOD::TruthEvent* event : *xTruthEventContainer)
     {
-        unsigned int nPart = (*itr)->nTruthParticles();
+        unsigned int nPart = event->nTruthParticles();
         for (unsigned int iPart = 0; iPart < nPart; ++iPart)
         {
-            const xAOD::TruthParticle *pitr = (*itr)->truthParticle(iPart);
+            const xAOD::TruthParticle *pitr = event->truthParticle(iPart);
             if (std::abs(pitr->pdgId()) == m_PDGParent)
             {
                 if((!m_UseStatusParent && !MC::isDecayed(pitr)) || (m_UseStatusParent && pitr->status() != m_StatusParent)) continue;
