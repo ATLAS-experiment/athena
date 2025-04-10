@@ -1465,18 +1465,6 @@ HLT_2j50_0eta290_nnJvtv1_bgn260_2j50_pf_ftf_presel2j25XX2j25bgtwo85_L14jJ40p0ETA
     1: 6
     2: 8
     3: 1
-HLT_2j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bgtwo85_L13jJ40p0ETA25:
-  eventCount: 7
-  stepCounts:
-    0: 13
-    1: 13
-    2: 12
-    3: 7
-  stepFeatures:
-    0: 52
-    1: 52
-    2: 227
-    3: 21
 HLT_2j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn277_pf_ftf_presel2c20XX2c20bgtwo85_L13jJ40p0ETA25:
   eventCount: 6
   stepCounts:
@@ -31371,6 +31359,20 @@ HLT_tau25_mediumGNTau_L1cTAU20M:
     3: 42
     4: 5
 HLT_tau25_mediumGNTau_L1eTAU20:
+  eventCount: 5
+  stepCounts:
+    0: 19
+    1: 19
+    2: 19
+    3: 19
+    4: 5
+  stepFeatures:
+    0: 48
+    1: 48
+    2: 48
+    3: 48
+    4: 5
+HLT_tau25_mediumGNTau_L1eTAU20L:
   eventCount: 5
   stepCounts:
     0: 19

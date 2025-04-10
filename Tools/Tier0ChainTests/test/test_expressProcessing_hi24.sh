@@ -11,11 +11,11 @@
 
 Reco_tf.py  \
 --AMI x788 \
---inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data23_hi.00462107.express_express.merge.RAW._lb0380._SFO-ALL._0001.1" \
+--inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data24_hi.00489764.express_express.merge.RAW._lb0285._SFO-ALL._0001.1" \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
 --outputHISTFile="HIST.root" \
---conditionsTag="CONDBR2-ES1PA-2023-02" \
+--conditionsTag="CONDBR2-ES1PA-2024-05" \
 --imf False
 
 rc1=$?

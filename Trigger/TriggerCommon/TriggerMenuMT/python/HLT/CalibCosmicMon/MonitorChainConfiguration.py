@@ -218,5 +218,5 @@ class MonitorChainConfiguration(ChainConfigurationBase):
              this_suffix = "_empty"
         elif "_FIRSTEMPTY" in self.chainL1Item:
              this_suffix = "_firstempty"
-        return self.getStep(flags, 'caloclustermon', [CaloClusterMonitorCfg], suffix = this_suffix)
+        return self.getStep(flags, 'caloclustermon' + this_suffix, [CaloClusterMonitorCfg], suffix = this_suffix)
         
