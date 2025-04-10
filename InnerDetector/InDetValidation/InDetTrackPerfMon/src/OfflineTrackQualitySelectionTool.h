@@ -61,6 +61,11 @@ private:
   FloatProperty   m_minZ0       { this, "minZ0", -9999., "Lower cut on z0 for truth particles" };
   FloatProperty   m_minQoPT     { this, "minQoPT", -9999., "Lower cut on q/pt for truth particles" };
   FloatProperty   m_maxQoPT     { this, "maxQoPT", -9999., "Higher cut on q/pt for truth particles" };
+  FloatArrayProperty m_etaBins  { this, "etaBins", {}, "Eta bins for reco tracks selections" };
+  UnsignedIntegerArrayProperty m_minHitsVec { this, "minHitsVec", {}, "Minimum number of Si hits for reco tracks selections" };
+  FloatArrayProperty m_minPtVec { this, "minPtVec", {}, "Minimum pt in eta bins for reco tracks selections" };
+  FloatArrayProperty m_maxD0Vec { this, "maxD0Vec", {}, "Maximum d0 in eta bins for reco tracks selections" };
+  FloatArrayProperty m_maxZ0Vec { this, "maxZ0Vec", {}, "Maximum z0 in eta bins for reco tracks selections" };
 
 };
 
