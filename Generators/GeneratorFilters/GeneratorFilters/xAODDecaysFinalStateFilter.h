@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // GeneratorFilters/DecaysFinalStateFilter
@@ -25,39 +25,36 @@
 class xAODDecaysFinalStateFilter : public GenFilter {
 
 public:
+  using GenFilter::GenFilter;
 
-  /// Constructor
-  xAODDecaysFinalStateFilter(const std::string& name, ISvcLocator* pSvcLocator);
-
-  /// Destructor
-  virtual ~xAODDecaysFinalStateFilter() { }
-
-  /// Initialize
-  virtual StatusCode filterInitialize() {
-    return StatusCode::SUCCESS;
-  }
-
-  /// Finalize
-  virtual StatusCode filterFinalize() {
-    return StatusCode::SUCCESS;
-  }
-
-  /// Do the filtering
-  virtual StatusCode filterEvent();
-
+  virtual StatusCode filterInitialize() override final;
+  virtual StatusCode filterEvent() override final;
 
 private:
 
   // list of allowed resonances from which decay products are counted
-  std::vector<int> m_PDGAllowedParents;
+  Gaudi::Property<std::vector<int>> m_PDGAllowedParents{this, "PDGAllowedParents", {}};
 
   // required (exact) number of quarks, electrons, muons, taus,
   // charged leptons (of any flavor), neutrinos and photons from decays
-  int m_NQuarks, m_NElectrons, m_NMuons, m_NTaus, m_NChargedLeptons, m_NNeutrinos, m_NPhotons;
+  Gaudi::Property<int> m_NQuarks{this, "NQuarks", -1};
+  Gaudi::Property<int> m_NElectrons{this, "NElectrons", -1};
+  Gaudi::Property<int> m_NMuons{this, "NMuons", -1};
+  Gaudi::Property<int> m_NTaus{this, "NTaus", -1};
+  Gaudi::Property<int> m_NChargedLeptons{this, "NChargedLeptons", -1};
+  Gaudi::Property<int> m_NNeutrinos{this, "NNeutrinos", -1};
+  Gaudi::Property<int> m_NPhotons{this, "NPhotons", -1};
 
   // required minimal number of quarks, electrons, muons, taus,
   // charged leptons (of any flavor), neutrinos and photons from decays
-  int m_MinNQuarks, m_MinNElectrons, m_MinNMuons, m_MinNTaus, m_MinNChargedLeptons, m_MinNNeutrinos, m_MinNPhotons;
+  Gaudi::Property<int> m_MinNQuarks{this, "MinNQuarks", 0};
+  Gaudi::Property<int> m_MinNElectrons{this, "MinNElectrons", 0};
+  Gaudi::Property<int> m_MinNMuons{this, "MinNMuons", 0};
+  Gaudi::Property<int> m_MinNTaus{this, "MinNTaus", 0};
+  Gaudi::Property<int> m_MinNChargedLeptons{this, "MinNChargedLeptons", 0};
+  Gaudi::Property<int> m_MinNNeutrinos{this, "MinNNeutrinos", 0};
+  Gaudi::Property<int> m_MinNPhotons{this, "MinNPhotons", 0};
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthPartContKey{this, "TruthParticleContainerKey", "TruthGen"};
 
 };
 

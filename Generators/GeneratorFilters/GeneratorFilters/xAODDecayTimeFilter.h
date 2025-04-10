@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -15,6 +15,7 @@
 
 #include "xAODTruth/TruthEvent.h"
 #include "xAODTruth/TruthEventContainer.h"
+#include <limits>       // std::numeric_limits
 
 namespace CLHEP {
   class HepRandomEngine;
@@ -22,22 +23,23 @@ namespace CLHEP {
 
 class xAODDecayTimeFilter : public GenFilter {
 public:
+  using GenFilter::GenFilter;
 
-  xAODDecayTimeFilter(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode filterInitialize();
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterInitialize() override final;
+  virtual StatusCode filterEvent() override final;
 
 private:
    CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName,
                                           const EventContext& ctx) const;
 
-   double tau(const xAOD::TruthParticle* ptr) const;
-   float m_lifetimeLow;
-   float m_lifetimeHigh;
-   float m_seedlifetime;
-   ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};
-   bool m_flatlifetime; 
-   std::vector<int> m_particleID;
+  double tau(const xAOD::TruthParticle* ptr) const;
+  Gaudi::Property<float> m_lifetimeLow{this, "LifetimeLow", std::numeric_limits<float>::lowest(), "proper decay time value in ps"};
+  Gaudi::Property<float> m_lifetimeHigh{this, "LifetimeHigh", std::numeric_limits<float>::max(), "proper decay time value in ps"};
+  Gaudi::Property<float> m_seedlifetime{this, "Seedlifetime", std::numeric_limits<float>::lowest(), "proper decay time value in ps"};
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};
+  Gaudi::Property<bool> m_flatlifetime{this, "Flatlifetime", false, "proper decay time value in ps"};
+  Gaudi::Property<std::vector<int>> m_particleID{this, "PDGs", {}};
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthPartContKey{this, "TruthParticleContainerKey", "TruthGen"};
 };
 
 
