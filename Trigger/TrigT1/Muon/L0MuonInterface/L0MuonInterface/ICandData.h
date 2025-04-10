@@ -17,6 +17,7 @@ namespace L0Muon
     ICandData(uint16_t subdetectorId, uint16_t sectorId, uint16_t bcTag)
       : m_subdetectorId(subdetectorId), m_sectorId(sectorId), m_bcTag(bcTag) {}
 
+    ICandData() = default;
     virtual ~ICandData() = default;
 
     uint16_t subdetectorId() const { return m_subdetectorId; };

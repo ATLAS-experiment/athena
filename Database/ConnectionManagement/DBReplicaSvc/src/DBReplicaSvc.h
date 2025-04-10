@@ -20,7 +20,7 @@ class DBReplicaSvc : public extends<AthService, IDBReplicaSvc>
 
   virtual StatusCode initialize() override;
 
-  void sort(std::vector<const coral::IDatabaseServiceDescription*>& replicaSet);
+  void sort(std::vector<const coral::IDatabaseServiceDescription*>& replicaSet) override;
 
  private:
   StatusCode readConfig();
