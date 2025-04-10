@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODVBFForwardJetsFilter.h"
 #include "GaudiKernel/PhysicalConstants.h"
-#include "xAODJet/JetContainer.h"
+#include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/HepMCHelpers.h"
 
 // Pt  High --> Low
@@ -17,33 +17,12 @@ public:
     }
 };
 
-xAODVBFForwardJetsFilter::xAODVBFForwardJetsFilter(const std::string &name, ISvcLocator *pSvcLocator)
-    : GenFilter(name, pSvcLocator)
-{
-    declareProperty("JetMinPt", m_JetMinPt = 10. * Gaudi::Units::GeV);
-    declareProperty("JetMaxEta", m_JetMaxEta = 5.);
-    declareProperty("NJets", m_NJets = 2);
-    declareProperty("Jet1MinPt", m_Jet1MinPt = 20. * Gaudi::Units::GeV);
-    declareProperty("Jet1MaxEta", m_Jet1MaxEta = 5.);
-    declareProperty("Jet2MinPt", m_Jet2MinPt = 10. * Gaudi::Units::GeV);
-    declareProperty("Jet2MaxEta", m_Jet2MaxEta = 5.);
-    declareProperty("UseOppositeSignEtaJet1Jet2", m_UseOppositeSignEtaJet1Jet2 = false);
-    declareProperty("MassJJ", m_MassJJ = 300. * Gaudi::Units::GeV);
-    declareProperty("DeltaEtaJJ", m_DeltaEtaJJ = 2.0);
-    declareProperty("DeltaPhiJJ", m_DeltaPhiJJ = -1.0);
-    declareProperty("RequireSamePair",m_RequireSamePair = false);
-    declareProperty("UseLeadingJJ", m_UseLeadingJJ = false);
-    declareProperty("TruthJetContainer", m_TruthJetContainerName = "AntiKt4TruthJets");
-    declareProperty("LGMinPt", m_LGMinPt = 10. * Gaudi::Units::GeV);
-    declareProperty("LGMaxEta", m_LGMaxEta = 2.5);
-    declareProperty("DeltaRJLG", m_DeltaRJLG = 0.05);
-    declareProperty("RatioPtJLG", m_RatioPtJLG = 0.3);
-}
-
 StatusCode xAODVBFForwardJetsFilter::filterInitialize()
 {
+    CHECK(m_TruthJetContainerName.initialize());
+    CHECK(m_truthPartContKey.initialize());
     ATH_MSG_INFO("*** Jet selection ***");
-    ATH_MSG_INFO("xAOD::JetContainer=" << m_TruthJetContainerName);
+    ATH_MSG_INFO("xAOD::JetContainer=" << m_TruthJetContainerName.key());
     ATH_MSG_INFO("JetMinPt=" << m_JetMinPt);
     ATH_MSG_INFO("JetMaxEta=" << m_JetMaxEta);
     ATH_MSG_INFO("*** Apply number of jets(=Nj)? ***");
@@ -93,26 +72,23 @@ StatusCode xAODVBFForwardJetsFilter::filterInitialize()
 
 StatusCode xAODVBFForwardJetsFilter::filterEvent()
 {
-    const xAOD::JetContainer *truthjetTES;
-    CHECK(evtStore()->retrieve(truthjetTES, m_TruthJetContainerName));
-    ATH_MSG_DEBUG("xAOD::JetContainer size = " << truthjetTES->size());
+  // Retrieve jet container
+  SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName};
+  CHECK(truthjetTES.isValid());
+  ATH_MSG_DEBUG("xAOD::JetContainer size = " << truthjetTES->size());
 
-// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
-// duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+  // duplicated barcode ones
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
-    // Get MCTruth Photon/Electon/Tau(HadronicDecay)
-    std::vector<const xAOD::TruthParticle *> MCTruthPhotonList;
-    std::vector<const xAOD::TruthParticle *> MCTruthElectronList;
-    std::vector<CLHEP::HepLorentzVector> MCTruthTauList;
-  // Loop over all particles in the event 
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-      const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
+  // Get MCTruth Photon/Electon/Tau(HadronicDecay)
+  std::vector<const xAOD::TruthParticle *> MCTruthPhotonList;
+  std::vector<const xAOD::TruthParticle *> MCTruthElectronList;
+  std::vector<CLHEP::HepLorentzVector> MCTruthTauList;
+
+  // Loop over all particles in the event
+  for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
             // photon
             if (MC::isPhoton(pitr) && MC::isStable(pitr) &&
                 pitr->pt() >= m_LGMinPt && std::abs(pitr->eta()) <= m_LGMaxEta)
@@ -164,12 +140,12 @@ StatusCode xAODVBFForwardJetsFilter::filterEvent()
 
     // Select TruthJets
     std::vector<const xAOD::Jet *> jetList;
-    for (xAOD::JetContainer::const_iterator it_truth = truthjetTES->begin(); it_truth != truthjetTES->end(); ++it_truth)
+    for (const xAOD::Jet* truthJet : *truthjetTES)
     {
-        if ((*it_truth)->pt() > m_JetMinPt && std::abs((*it_truth)->eta()) < m_JetMaxEta)
+        if (truthJet->pt() > m_JetMinPt && std::abs(truthJet->eta()) < m_JetMaxEta)
         {
-            jetList.push_back(*it_truth);
-            ATH_MSG_INFO("jet pt(Gaudi::Units::GeV) = " << (*it_truth)->pt() / Gaudi::Units::GeV << " eta = " << (*it_truth)->eta());
+            jetList.push_back(truthJet);
+            ATH_MSG_INFO("jet pt(Gaudi::Units::GeV) = " << truthJet->pt() / Gaudi::Units::GeV << " eta = " << truthJet->eta());
         }
     }
 

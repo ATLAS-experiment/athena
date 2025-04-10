@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERSXAODVBFMJJINTERVALFILTER_H
@@ -8,12 +8,10 @@
 #include "AthContainers/ConstDataVector.h"
 #include "GeneratorModules/GenFilter.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/PhysicalConstants.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "xAODJet/JetContainer.h"
-
-#include "xAODTruth/TruthEvent.h"
-#include "xAODTruth/TruthEventContainer.h"
-#include "xAODTruth/TruthParticle.h"
+#include "xAODTruth/TruthParticleContainer.h"
 
 namespace CLHEP {
   class HepRandomEngine;
@@ -21,10 +19,10 @@ namespace CLHEP {
 
 class xAODVBFMjjIntervalFilter : public GenFilter {
 public:
+  using GenFilter::GenFilter;
 
-  xAODVBFMjjIntervalFilter(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode filterInitialize();
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterInitialize() override final;
+  virtual StatusCode filterEvent() override final;
 
 private:
 
@@ -33,36 +31,31 @@ private:
 
   ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};// Random number generator
 
-   double m_olapPt;
-  double m_yMax;                           // Rapidity acceptance
-  double m_pTavgMin;                       // Required average dijet pT
-  std::string m_TruthJetContainerName;     // Name of the truth jet container
+  Gaudi::Property<double> m_olapPt{this, "MinOverlapPT", 15.0 * Gaudi::Units::GeV};
+  Gaudi::Property<double> m_yMax{this, "RapidityAcceptance", 5.0};
+  Gaudi::Property<double> m_pTavgMin{this, "MinSecondJetPT", 15.0 * Gaudi::Units::GeV};// Required average dijet pT
+  SG::ReadHandleKey<xAOD::JetContainer> m_TruthJetContainerName{this, "TruthJetContainerName", "AntiKt4TruthJets"}; // Name of the truth jet container
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthPartContKey{this, "TruthParticleContainerKey", "TruthGen"};
 
-  //long m_total;                            // Total number of events tested
-  //long m_passed;                           // Number of events passing all cuts
-  //long m_outsideAcceptance;                // Number of events failing rapidity acceptance cuts
-
-  double m_norm;                           // Normalization for weights
-  //double m_high;                           // High-side function level
-  //bool m_doShape;                          // Attempt to flatten the dY distribution
-  double m_prob0;
-  double m_prob1;
-  double m_prob2low;
-  double m_prob2high;
-  double m_mjjlow;
-  bool m_truncatelowmjj;
-  double m_mjjhigh;
-  bool m_truncatehighmjj;
-  bool m_photonjetoverlap;
-  bool m_electronjetoverlap;
-  bool m_taujetoverlap;
-  double m_alpha;
-  bool m_ApplyNjet; 
-  unsigned int m_NJetsMin; 
-  unsigned int m_NJetsMax; 
-  bool m_ApplyWeighting; 
-  bool m_applyDphi; 
-  double m_dphijj; 
+  Gaudi::Property<double> m_prob0{this, "NoJetProbability", 0.0002};
+  Gaudi::Property<double> m_prob1{this, "OneJetProbability", 0.001};
+  Gaudi::Property<double> m_prob2low{this, "LowMjjProbability", 0.005};
+  Gaudi::Property<double> m_prob2high{this, "HighMjjProbability", 1.0};
+  Gaudi::Property<double> m_mjjlow{this, "LowMjj", 100.0 * Gaudi::Units::GeV};
+  Gaudi::Property<bool> m_truncatelowmjj{this, "TruncateAtLowMjj", false};
+  Gaudi::Property<double> m_mjjhigh{this, "HighMjj", 800.0 * Gaudi::Units::GeV};
+  Gaudi::Property<bool> m_truncatehighmjj{this, "TruncateAtHighMjj", false};
+  Gaudi::Property<bool> m_photonjetoverlap{this, "PhotonJetOverlapRemoval", false};
+  Gaudi::Property<bool> m_electronjetoverlap{this, "ElectronJetOverlapRemoval", true};
+  Gaudi::Property<bool> m_taujetoverlap{this, "TauJetOverlapRemoval", false};
+  Gaudi::Property<bool> m_ApplyNjet{this, "ApplyNjet", false};
+  Gaudi::Property<unsigned int> m_NJetsMin{this, "Njets", 2};
+  Gaudi::Property<unsigned int> m_NJetsMax{this, "NjetsMax", -1};
+  Gaudi::Property<bool> m_ApplyWeighting{this, "ApplyWeighting", true};
+  Gaudi::Property<bool> m_applyDphi{this, "ApplyDphi", false};
+  Gaudi::Property<double> m_dphijj{this, "dphijjMax", 2.5};
+  double m_alpha{0.}; // FIXME configured value overridden in filterInitialize() function
+  double m_norm{1.0}; // Normalization for weights //< @todo Scalefactor always set to 1.0! Remove?
 
 
   bool checkOverlap(double, double, const std::vector<const xAOD::TruthParticle*>&);
