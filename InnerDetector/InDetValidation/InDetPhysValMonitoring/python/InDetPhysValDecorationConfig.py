@@ -39,8 +39,8 @@ def InDetPhysHitDecoratorAlgCfg(
     if 'InDetTrackHoleSearchTool' not in kwargs:
         from InDetConfig.InDetTrackHoleSearchConfig import (
             InDetTrackHoleSearchToolCfg)
-        kwargs.setdefault("InDetTrackHoleSearchTool", acc.addPublicTool(
-            acc.popToolsAndMerge(InDetTrackHoleSearchToolCfg(flags))))
+        kwargs.setdefault("InDetTrackHoleSearchTool",
+            acc.popToolsAndMerge(InDetTrackHoleSearchToolCfg(flags)))
 
     if 'Updator' not in kwargs:
         from TrkConfig.TrkMeasurementUpdatorConfig import InDetUpdatorCfg

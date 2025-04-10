@@ -17,6 +17,13 @@ namespace IDPVM {
     m_cache.clear();
   }
 
+  const std::string CachedGetAssocTruth::s_trackParticleLinkDecorationName("truthParticleLink");
+
+  void CachedGetAssocTruth::neededTrackParticleDecorations(std::vector<std::string> &decorations) {
+     if (std::find(decorations.begin(),decorations.end(),s_trackParticleLinkDecorationName) == decorations.end()) {
+        decorations.push_back(s_trackParticleLinkDecorationName);
+     }
+  }
   const xAOD::TruthParticle*
   CachedGetAssocTruth::getTruth(const xAOD::TrackParticle* trackParticle) {
     if (not trackParticle) {
@@ -28,10 +35,11 @@ namespace IDPVM {
     }
     using ElementTruthLink_t = ElementLink<xAOD::TruthParticleContainer>;
     const xAOD::TruthParticle* result(nullptr);
+    static const SG::ConstAccessor<ElementTruthLink_t> truthParticleLinkAcc(s_trackParticleLinkDecorationName);
     // 0. is there any truth?
-    if (trackParticle->isAvailable<ElementTruthLink_t>("truthParticleLink")) {
+    if (truthParticleLinkAcc.isAvailable(*trackParticle)) {
       // 1. ..then get link
-      const ElementTruthLink_t ptruthContainer = trackParticle->auxdata<ElementTruthLink_t>("truthParticleLink");
+      const ElementTruthLink_t ptruthContainer = truthParticleLinkAcc(*trackParticle);
       if (ptruthContainer.isValid()) {
         result = *ptruthContainer;
       }
