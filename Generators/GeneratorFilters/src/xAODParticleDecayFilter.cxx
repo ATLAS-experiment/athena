@@ -1,27 +1,17 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODParticleDecayFilter.h"
-
-xAODParticleDecayFilter::xAODParticleDecayFilter(const std::string &name, ISvcLocator *pSvcLocator)
-    : GenFilter(name, pSvcLocator)
-{
-}
+#include "xAODTruth/TruthVertex.h"
 
 StatusCode xAODParticleDecayFilter::filterInitialize()
 {
     ATH_MSG_INFO("xAODParticleDecayFilter::filterInitialize()");
 
     // initialize the ReadHandleKey
-    ATH_CHECK(m_truthEventsKey.initialize());
+    CHECK(m_truthPartContKey.initialize());
 
-    return StatusCode::SUCCESS;
-}
-
-StatusCode xAODParticleDecayFilter::filterFinalize()
-{
-    ATH_MSG_INFO("xAODParticleDecayFilter::filterFinalize()");
     return StatusCode::SUCCESS;
 }
 
@@ -46,17 +36,11 @@ StatusCode xAODParticleDecayFilter::filterEvent()
     ATH_MSG_DEBUG("xAODParticleDecayFilter::filterEvent()");
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
 // duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }    
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
   // Loop over all particles in the event 
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-      const xAOD::TruthParticle* particle =  (*xTruthParticleContainer)[iPart];
-
+  for (const xAOD::TruthParticle* particle : *xTruthParticleContainer) {
             ATH_MSG_DEBUG("pdg code of this particle in the event is " << particle->pdgId() << " with status " << particle->status());
             //maps with key pdgId and value of number of particles with that pdgId
             std::map<int, unsigned int> childCounters;

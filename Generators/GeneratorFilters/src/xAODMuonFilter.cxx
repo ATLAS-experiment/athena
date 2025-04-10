@@ -1,33 +1,22 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODMuonFilter.h"
-#include "xAODTruth/TruthParticle.h"
-#include "xAODTruth/TruthParticleContainer.h"
-#include "xAODTruth/TruthParticleAuxContainer.h"
 #include "TruthUtils/HepMCHelpers.h"
 
-xAODMuonFilter::xAODMuonFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name,pSvcLocator)
+StatusCode xAODMuonFilter::filterInitialize()
 {
-  declareProperty("Ptcut",m_Ptmin = 10000.);
-  declareProperty("Etacut",m_EtaRange = 10.0);
+  CHECK(m_truthPartContKey.initialize());
+  return StatusCode::SUCCESS;
 }
-
 
 StatusCode xAODMuonFilter::filterEvent() {
   // Retrieve TruthMuons container
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthMuons").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthMuons" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
-  unsigned int nParticles = xTruthParticleContainer->size();
-  for (unsigned int iPart=0; iPart<nParticles; ++iPart) {
-    const xAOD::TruthParticle* part = (*xTruthParticleContainer)[iPart];
-
+  for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
     if (MC::isStable(part) && MC::isMuon(part)) //muon
         if(  part->pt()>= m_Ptmin && part->abseta() <= m_EtaRange )
             return StatusCode::SUCCESS;
