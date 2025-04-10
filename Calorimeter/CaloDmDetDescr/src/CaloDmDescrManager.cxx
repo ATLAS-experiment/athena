@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /* ****************************************************************************
@@ -409,11 +409,11 @@ StatusCode CaloDmDescrManager::load_regions(const std::string& DmRegionFileName)
       if(!isBarrel) myRegionPos->m_isBarrel=false;
       // assigning of information over neighboring calo samplings for this DM region
       myRegionPos->m_CaloSampleNeighbours.clear();
-      myRegionPos->m_CaloSampleNeighbours = neighbours;
+      myRegionPos->m_CaloSampleNeighbours = std::move(neighbours);
       myRegionPos->m_CaloSampleEtaMin.clear();
-      myRegionPos->m_CaloSampleEtaMin = CaloEtaMinVector;
+      myRegionPos->m_CaloSampleEtaMin = std::move(CaloEtaMinVector);
       myRegionPos->m_CaloSampleEtaMax.clear();
-      myRegionPos->m_CaloSampleEtaMax = CaloEtaMaxVector;
+      myRegionPos->m_CaloSampleEtaMax = std::move(CaloEtaMaxVector);
       // hash index of first DM identifier for this DM region
       myRegionPos->m_region_id = id_side_pos;
       myRegionPos->m_region_hash = hash_side_pos;
