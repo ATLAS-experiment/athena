@@ -23,10 +23,6 @@
 #include "GeneratorObjects/McEventCollection.h"
 #include "TrackRecord/TrackRecordCollection.h"
 
-namespace MuonGM {
-  class MuonDetectorManager;
-}
-
 
 // namespace for the NSW LVL1 related classes
 namespace NSWL1 {
@@ -43,10 +39,12 @@ namespace NSWL1 {
     StatusCode runTrigger(const EventContext& ctx, Muon::NSW_TrigRawDataContainer* rdo, const bool do_MMDiamonds) const override;
 
   private:
-    // read data handle
     SG::ReadHandleKey<McEventCollection> m_keyMcEventCollection{this,"McEventCollection","TruthEvent","Location of TruthEvent"};
     SG::ReadHandleKey<TrackRecordCollection> m_keyMuonEntryLayer{this,"MuonEntryLayer","MuonEntryLayer","Location of MuonEntryLayer"};
     SG::ReadHandleKey<MmDigitContainer> m_keyMmDigitContainer{this,"MmDigitContainer","MM_DIGITS","Location of MmDigitContainer"};
+    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detectorManagerKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of MuonDetectorManager condition data"};
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+
     Gaudi::Property<bool>  m_isMC            {this, "IsMC",         true, "This is MC"};
     Gaudi::Property<bool>  m_doTruth         {this, "DoTruth",     false, "Process truth information. Disabled by default"};
 
@@ -74,10 +72,6 @@ namespace NSWL1 {
     Gaudi::Property<int>          m_dThetaBits      {this, "DThetaBits", 5,              "Number of dTheta bits"};
 
     std::unique_ptr<MMT_Diamond> m_diamond;
-    std::shared_ptr<MMT_Parameters> m_par_large;
-    std::shared_ptr<MMT_Parameters> m_par_small;
-    const MuonGM::MuonDetectorManager* m_detManager;        //!< MuonDetectorManager
-    const MmIdHelper*                  m_MmIdHelper;        //!< MM offline Id helper
 
     std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_ntrig ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_bc ATLAS_THREAD_SAFE {};
