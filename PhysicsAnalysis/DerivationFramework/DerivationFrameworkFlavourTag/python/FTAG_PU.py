@@ -48,46 +48,12 @@ def FTAG_PUKernelCfg(flags, name='FTAG_PUKernel', **kwargs):
     photonSelectionString = "(Photons.pt > 5*GeV)"
     jetSelectionString = "(AntiKt4EMPFlowByVertexJets.pt > 7.*GeV && AntiKt4EMPFlowByVertexJets.Jvt > 0.4)"
 
-    # Include inner detector tracks associated with muons
-    FTAG_PUMuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(flags,
-        name                    = "FTAG_PUMuonTPThinningTool",
-        StreamName              = kwargs['StreamName'],
-        MuonKey                 = "Muons",
-        SelectionString         = muonSelectionString,
-        InDetTrackParticlesKey  = "InDetTrackParticles"))
-    
-    # Include inner detector tracks associated with electrons
-    FTAG_PUElectronTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(flags,
-        name                    = "FTAG_PUElectronTPThinningTool",
-        StreamName              = kwargs['StreamName'],
-        SGKey                   = "Electrons",
-        SelectionString         = electronSelectionString,
-        InDetTrackParticlesKey  = "InDetTrackParticles"))
-
-    # Include inner detector tracks associated with by-vertex jets
-    FTAG_PUAkt4JetTPThinningTool  = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
-        name                    = "FTAG_PUAkt4JetTPThinningTool",
-        StreamName              = kwargs['StreamName'],
-        JetKey                  = "AntiKt4EMPFlowByVertexJets",
-        SelectionString         = jetSelectionString,
-        InDetTrackParticlesKey  = "InDetTrackParticles"))
-
-
     # Store EMPFlowByVertexJets with JVT > 0.4. This will result in jets extending up to about 2.6 in |eta|
     FTAG_PUAkt4PFlowByVertexJetThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
                                                                                  name             = "FTAG_PUAkt4PFlowByVertexJetThinningTool",
                                                                                  ContainerName    = "AntiKt4EMPFlowByVertexJets",
                                                                                  StreamName       = kwargs['StreamName'],
                                                                                  SelectionString  = jetSelectionString))
-
-    # TrackParticles associated with small-R jets
-    FTAG_PUAkt4PFlowJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
-        name            = "FTAG2Akt4PFlowJetTPThinningTool",
-        StreamName      = kwargs['StreamName'],
-        JetKey   = "AntiKt4EMPFlowJets",
-        SelectionString = 'AntiKt4EMPFlowJets.pt > 15*GeV',
-        InDetTrackParticlesKey  = "InDetTrackParticles"))
-
 
     FTAG_PUMuonThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
                                                                         name             = "FTAG_PUMuonThinningTool",
@@ -114,11 +80,7 @@ def FTAG_PUKernelCfg(flags, name='FTAG_PUKernel', **kwargs):
     acc.merge(FTAG_PUExtraContentCfg(flags))
 
     # Finally the kernel itself
-    thinningTools = [FTAG_PUMuonTPThinningTool,
-                     FTAG_PUElectronTPThinningTool,
-                     FTAG_PUAkt4JetTPThinningTool,
-                     FTAG_PUAkt4PFlowByVertexJetThinningTool,
-                     FTAG_PUAkt4PFlowJetTPThinningTool,
+    thinningTools = [FTAG_PUAkt4PFlowByVertexJetThinningTool,
                      FTAG_PUMuonThinningTool,
                      FTAG_PUElectronThinningTool,
                      FTAG_PUPhotonThinningTool,
