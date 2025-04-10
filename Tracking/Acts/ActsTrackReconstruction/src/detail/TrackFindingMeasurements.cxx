@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/detail/TrackFindingMeasurements.h"
@@ -76,5 +76,17 @@ namespace ActsTrk::detail {
     
     m_measurementsTotal += clusterContainer.size();
   }
+
+  MeasurementRange TrackFindingMeasurements::markSurfaceInsensitive(const Acts::GeometryIdentifier &identifier) {
+     auto ret = m_measurementRanges.insert( std::make_pair( identifier.value(),
+                                                            MeasurementRange::noMeasurementExpected() ));
+     if (!ret.second) {
+        return ret.first->second;
+     }
+     else {
+        return MeasurementRange();
+     }
+  }
+
 
 } // namespace ActsTrk::detail

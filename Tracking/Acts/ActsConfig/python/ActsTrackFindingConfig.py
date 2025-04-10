@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -60,7 +60,8 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     acc = ComponentAccumulator()
 
-    from ActsConfig.ActsGeometryConfig import ActsDetectorElementToActsGeometryIdMappingAlgCfg
+    from ActsConfig.ActsGeometryConfig import (ActsDetectorElementToActsGeometryIdMappingAlgCfg,
+                                               ActsVolumeIdToDetectorCollectionMappingAlgCfg)
     acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
     kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
 
@@ -71,6 +72,17 @@ def ActsMainTrackFindingAlgCfg(flags,
         # 25 for positive endcap
         kwargs.setdefault('EndOfTheWorldVolumeIds', [2, 25])
     
+    acc.merge( ActsVolumeIdToDetectorCollectionMappingAlgCfg(flags) )
+    kwargs.setdefault("ActsVolumeIdToDetectorElementCollectionMapKey", "VolumeIdToDetectorElementCollectionMap")
+    def filterCollections(flags, pixel_col, strip_col) :
+      ret=[]
+      if flags.Detector.GeometryITkPixel:
+        ret += [ pixel_col ]
+      if flags.Detector.GeometryITkStrip:
+        ret += [ strip_col ]
+      return ret
+    kwargs.setdefault("DetElStatus",filterCollections(flags,'ITkStripDetectorElementStatus','ITkPixelDetectorElementStatus'))
+
     # Seed labels and collections.
     # These 3 lists must match element for element, reversed if flags.Acts.useStripSeedsFirst is True.
     # Maybe it is best to start with strips where the occupancy is lower.

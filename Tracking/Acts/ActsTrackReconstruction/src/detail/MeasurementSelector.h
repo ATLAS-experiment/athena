@@ -721,6 +721,10 @@ struct MeasurementSelectorWithDispatch : public MeasurementSelectorBase< NMeasMa
          result = Acts::CombinatorialKalmanFilterError::MeasurementSelectionFailed;
       // get associated measurement container and the relevant measurement range for the given surface.
       auto [a_measurement_container_variant_ptr, range] = this->derived().containerAndRange(surface);
+      if (!this->derived().expectMeasurements( surface, a_measurement_container_variant_ptr, range)) {
+         result = result.failure(Acts::CombinatorialKalmanFilterError::NoMeasurementExpected);
+         return result;
+      }
       if (!range.empty()) {
          auto [numMeasurementsCut, maxChi2Cut] = this->getCuts(surface,boundState, logger);
          // numMeasurementsCut is == 0 in case getCuts failed
@@ -860,6 +864,14 @@ struct MeasurementSelectorBaseImpl : public MeasurementSelectorWithDispatch<NMea
    ///       on that surface. The index range may be empty.
    std::tuple<const measurement_container_variant_t &, abstract_measurement_range_t>
    containerAndRange(const Acts::Surface &surface) const; // not implemented
+
+   /// @param surface a surface
+   /// @param container_variant_ptr abstract measurement container as returned by @ref containerAndRange
+   /// @param abstract_range the range as returned by @ref containerAndRange for the given surface
+   /// @return true if measurements are expected, false if the surface is not supposed to have valid measurements.
+   bool expectMeasurements([[maybe_unused]] const Acts::Surface &surface,
+                           [[maybe_unused]] const measurement_container_variant_t *container_variant_ptr,
+                           const abstract_measurement_range_t &abstract_range) const;
 
    /// Create a range over elements of the given container from an abstract range
    /// @tparam measurement_container_t a concrete container type which is one of one of the possible types of measurement_container_variant_t

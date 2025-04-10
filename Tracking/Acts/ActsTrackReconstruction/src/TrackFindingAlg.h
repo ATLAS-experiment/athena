@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGALG_H
@@ -44,6 +44,8 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/EventContext.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+#include "InDetReadoutGeometry/SiDetectorElementStatus.h"
+#include "ActsGeometry/ActsVolumeIdToDetectorElementCollectionMap.h"
 
 // STL
 #include <limits>
@@ -109,6 +111,13 @@ namespace ActsTrk
     SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap> m_detectorElementToGeometryIdMapKey
        {this, "DetectorElementToActsGeometryIdMapKey", "DetectorElementToActsGeometryIdMap",
         "Map which associates detector elements to Acts Geometry IDs"};
+    SG::ReadCondHandleKey<ActsTrk::ActsVolumeIdToDetectorElementCollectionMap> m_volumeIdToDetectorElementCollMapKey
+       {this, "ActsVolumeIdToDetectorElementCollectionMapKey", "ActsVolumeIdToDetectorElementCollectionMap",
+        "Map which associates Acts geometry volume IDs to detector element collections."};
+
+    SG::ReadHandleKeyArray<InDet::SiDetectorElementStatus> m_detElStatus
+       {this, "DetElStatus", {}, "Keys for detector element status conditions data."};
+
 
     SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
     ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
@@ -210,6 +219,10 @@ namespace ActsTrk
 
     // initialize measurement selector to be called during initialize
     StatusCode initializeMeasurementSelector();
+
+    StatusCode propagateDetectorElementStatusToMeasurements(const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volume_id_to_det_el_coll,
+                                                            const std::vector< const InDet::SiDetectorElementStatus *> &det_el_status_arr,
+                                                            detail::TrackFindingMeasurements &measurements) const;
 
     bool shouldReverseSearch(const ActsTrk::Seed& seed) const;
 

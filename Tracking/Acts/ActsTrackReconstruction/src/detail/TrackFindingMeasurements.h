@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGMEASUREMENTS_H
@@ -26,6 +26,7 @@ namespace ActsTrk::detail {
     void addMeasurements(std::size_t typeIndex,
                          const xAOD::UncalibratedMeasurementContainer &clusterContainer,
                          const DetectorElementToActsGeometryIdMap &detectorElementToGeoid);
+    MeasurementRange markSurfaceInsensitive(const Acts::GeometryIdentifier &identifier);
 
     inline const ActsTrk::detail::MeasurementRangeList &measurementRanges() const;
     inline std::size_t nMeasurements() const;
