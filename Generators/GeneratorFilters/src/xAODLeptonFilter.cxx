@@ -1,32 +1,27 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODLeptonFilter.h"
 #include <cmath>
 #include "TruthUtils/HepMCHelpers.h"
 
-xAODLeptonFilter::xAODLeptonFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name,pSvcLocator) 
+StatusCode xAODLeptonFilter::filterInitialize()
 {
- 
+  CHECK(m_truthElectronContKey.initialize());
+  CHECK(m_truthMuonContKey.initialize());
+  return StatusCode::SUCCESS;
 }
 
 
 StatusCode xAODLeptonFilter::filterEvent() {
 
- // Retrieve TruthElectrons  container
-    const xAOD::TruthParticleContainer* xTruthParticleContainerElectron;
-    if (evtStore()->retrieve(xTruthParticleContainerElectron, "TruthElectrons").isFailure()) {
-       ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthElectrons" << " found in StoreGate!");
-    return StatusCode::FAILURE;
-           }
-   // Retrieve TruthMuons container
-      const xAOD::TruthParticleContainer* xTruthParticleContainerMuon;
-      if (evtStore()->retrieve(xTruthParticleContainerMuon, "TruthMuons").isFailure()) {
-        ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthMuons" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-        }
+  // Retrieve TruthElectrons  container
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainerElectron{m_truthElectronContKey};
+  CHECK(xTruthParticleContainerElectron.isValid());
+  // Retrieve TruthMuons container
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainerMuon{m_truthMuonContKey};
+  CHECK(xTruthParticleContainerMuon.isValid());
 
     double leading_lepton_pt_e = 0;
     double leading_lepton_pt_mu = 0;
@@ -34,13 +29,7 @@ StatusCode xAODLeptonFilter::filterEvent() {
     
 
    // Loop over xTruthParticleContainerElectron 
-    unsigned int nParticlesElectrons = xTruthParticleContainerElectron->size();
-  for (unsigned int iPart=0; iPart<nParticlesElectrons; ++iPart) {
-    const xAOD::TruthParticle* part = (*xTruthParticleContainerElectron)[iPart];
-
-
-
-
+  for (const xAOD::TruthParticle* part : *xTruthParticleContainerElectron) {
     if (MC::isStable(part) && MC::isElectron(part)){ //electron
           const double pT = part->pt();
           const double eta = part->abseta();
@@ -51,10 +40,7 @@ StatusCode xAODLeptonFilter::filterEvent() {
   }
 
   // Loop over xTruthParticleContainerMuon
-  unsigned int nParticlesMuons = xTruthParticleContainerMuon->size();
-  for (unsigned int iPart=0; iPart<nParticlesMuons; ++iPart) {
-    const xAOD::TruthParticle* part = (*xTruthParticleContainerMuon)[iPart];
-
+  for (const xAOD::TruthParticle* part : *xTruthParticleContainerMuon) {
     if (MC::isStable(part) && MC::isMuon(part)){ //Muon
         const double pT = part->pt();
           const double eta = part->abseta();

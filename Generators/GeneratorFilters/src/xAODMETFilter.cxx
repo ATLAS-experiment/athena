@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODMETFilter.h"
@@ -7,28 +7,20 @@
 #include "AthContainers/ConstAccessor.h"
 
 
-xAODMETFilter::xAODMETFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name,pSvcLocator)
+StatusCode xAODMETFilter::filterInitialize()
 {
-  declareProperty("METCut",m_METmin = 10000.);
-  // Normally we'd include them, but this is unstable if using EvtGen
-  declareProperty("UseNeutrinosFromHadrons",m_useHadronicNu = false);
+  CHECK(m_truthPartContKey.initialize());
+  return StatusCode::SUCCESS;
 }
-
 
 StatusCode xAODMETFilter::filterEvent() {
     
   // Retrieve TruthMET container from xAOD MET slimmer, contains (MC::isGenStable() && !MC::isInteracting()) particles
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthMET").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthMET" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
   double sumx(0), sumy(0);
-  unsigned int nParticles = xTruthParticleContainer->size();
-  for (unsigned int iPart=0; iPart<nParticles; ++iPart) {
-    const xAOD::TruthParticle* missingETparticle = (*xTruthParticleContainer)[iPart];
+  for (const xAOD::TruthParticle* missingETparticle : *xTruthParticleContainer) {
     static const SG::ConstAccessor<bool> isPromptAcc ("isPrompt");
     if (!m_useHadronicNu && MC::isNeutrino(missingETparticle) &&
         !(isPromptAcc(*missingETparticle))) continue; // ignore neutrinos from hadron decays
@@ -41,7 +33,7 @@ StatusCode xAODMETFilter::filterEvent() {
   double met = std::sqrt(sumx*sumx + sumy*sumy);
 #ifdef HEPMC3
   const McEventCollection* mecc = 0;
-    if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){
+  if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){ // FIXME keyless retrieve
       setFilterPassed(false);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - might not work");
       return StatusCode::SUCCESS;
