@@ -31384,6 +31384,20 @@ HLT_tau25_mediumGNTau_L1eTAU20:
     2: 48
     3: 48
     4: 5
+HLT_tau25_mediumGNTau_L1eTAU20L:
+  eventCount: 5
+  stepCounts:
+    0: 19
+    1: 19
+    2: 19
+    3: 19
+    4: 5
+  stepFeatures:
+    0: 48
+    1: 48
+    2: 48
+    3: 48
+    4: 5
 HLT_tau25_mediumGNTau_L1jTAU20:
   eventCount: 5
   stepCounts:
