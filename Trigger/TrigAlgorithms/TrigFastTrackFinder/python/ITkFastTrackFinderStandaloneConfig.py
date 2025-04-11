@@ -24,8 +24,8 @@ def ITkTrigTrackSeedingToolStandaloneCfg(flags: AthConfigFlags, **kwargs) -> Com
   kwargs.setdefault("UsePixelSpacePoints", (not isLRT))
   kwargs.setdefault("UseSctSpacePoints", isLRT)
   kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT[0])
-  kwargs.setdefault("MaxGraphEdges", 2500000 if flags.Trigger.InDetTracking.doGPU else 1500000)
-  kwargs.setdefault("ConnectionFileName", "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4.txt")
+  kwargs.setdefault("MaxGraphEdges", 2500000 if flags.Trigger.InDetTracking.doGPU else 1800000)
+  kwargs.setdefault("ConnectionFileName", "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4_UPD_10_APR_2025.txt")
 
   kwargs.setdefault("UseGPU", flags.Trigger.InDetTracking.doGPU)
 
@@ -118,7 +118,7 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
                                             LRT_Mode                 = isLRT,
                                             doDisappearingTrk        = False,
                                             dodEdxTrk                = False,
-                                            ConnectionFileName       = "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4.txt")
+                                            ConnectionFileName       = "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4_UPD_10_APR_2025.txt")
 
     acc.addEventAlgo( ftf, primary=True )
     
