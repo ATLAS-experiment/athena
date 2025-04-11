@@ -26,12 +26,10 @@ StatusCode MuonSimHitSortingAlg::initialize() {
 StatusCode MuonSimHitSortingAlg::execute(const EventContext& ctx) const {
     ConstDataVector<xAOD::MuonSimHitContainer> allSimHits{SG::VIEW_ELEMENTS};
     for (const SG::ReadHandleKey<xAOD::MuonSimHitContainer>& inKey : m_readKeys) {
-         SG::ReadHandle readHandle{inKey, ctx};
-         if(!readHandle.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve "<<inKey.fullKey());
-            return StatusCode::FAILURE;
-         }
-         std::ranges::copy(*readHandle, std::back_inserter(allSimHits));
+        const xAOD::MuonSimHitContainer* hits{nullptr};
+        ATH_CHECK(SG::get(hits, inKey, ctx));
+
+        std::ranges::copy(*hits, std::back_inserter(allSimHits));
     }
     std::stable_sort(allSimHits.begin(), allSimHits.end(),
                     [this](const xAOD::MuonSimHit* a, const xAOD::MuonSimHit* b){

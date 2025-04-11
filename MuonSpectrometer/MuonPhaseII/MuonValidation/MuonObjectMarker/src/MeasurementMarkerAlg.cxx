@@ -44,8 +44,8 @@ namespace MuonR4{
         return StatusCode::SUCCESS; 
     }
     StatusCode MeasurementMarkerAlg::execute(const EventContext& ctx) const{ 
-        SG::ReadHandle segments{m_segKey, ctx};
-        ATH_CHECK(segments.isPresent());
+        const xAOD::MuonSegmentContainer* segments{nullptr};
+        ATH_CHECK(SG::get(segments, m_segKey, ctx));
         SG::ReadDecorHandle<xAOD::MuonSegmentContainer, PrdLinkVec_t> prdLinks{m_prdLinkKey, ctx};
         SG::ReadDecorHandle<xAOD::MuonSegmentContainer, bool> readDecor{m_readMarkKey, ctx};
         /// Ensure that the decoration is actually written
@@ -53,14 +53,14 @@ namespace MuonR4{
         std::unordered_map<const SG::AuxVectorData*, MarkerHandle_t> writeDecorMap{};
         std::unordered_map<const SG::AuxVectorData*, LinkHandle_t> linkDecorMap{};
         for (const WriteDecorKey_t& decorKey : m_writeMarkKeys) {
-            SG::ReadHandle readHandle{decorKey.contHandleKey(), ctx};
-            ATH_CHECK(readHandle.isPresent());
-            writeDecorMap.emplace(std::make_pair(readHandle.cptr(),  makeHandle(ctx, decorKey, false)));
+            const xAOD::UncalibratedMeasurementContainer* measCont{nullptr};
+            ATH_CHECK(SG::get(measCont, decorKey.contHandleKey(), ctx));
+            writeDecorMap.emplace(std::make_pair(measCont,  makeHandle(ctx, decorKey, false)));
         }
         for (const WriteDecorKey_t& key : m_writeSegLinkKeys) {
-            SG::ReadHandle readHandle{key.contHandleKey(), ctx};
-            ATH_CHECK(readHandle.isPresent());
-            linkDecorMap.emplace(std::make_pair(readHandle.cptr(),  makeHandle(ctx, key, SegLinkVec_t{})));
+            const xAOD::UncalibratedMeasurementContainer* measCont{nullptr};
+            ATH_CHECK(SG::get(measCont, key.contHandleKey(), ctx));
+            linkDecorMap.emplace(std::make_pair(measCont,  makeHandle(ctx, key, SegLinkVec_t{})));
         }
         
 
@@ -68,7 +68,7 @@ namespace MuonR4{
             if (!readDecor(*seg)){
                 continue;
             }
-            SegLink_t segLink{segments.cptr(), seg->index()};
+            SegLink_t segLink{segments, seg->index()};
             for (const PrdLink_t& link : prdLinks(*seg)) {
                 const auto* prd = (*link);
                 writeDecorMap.at(prd->container())(*prd) = readDecor(*seg);
