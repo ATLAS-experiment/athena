@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 def getGoodRunsLists():
     GRLDict={}
@@ -6,19 +6,14 @@ def getGoodRunsLists():
 
     # 2024
     GRLDict['GRL2024'] = ['GoodRunsLists/data24_13p6TeV/20241118/physics_25ns_data24.xml']
-    GRLDict['GRL2024_IgnoreBSPOT_INVALID'] = ['GoodRunsLists/data24_13p6TeV/20241118/physics_25ns_data24_IgnoreBSPOT_INVALID.xml']
     
     # 2023
-    GRLDict['GRL2023'] = ['GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']
-    GRLDict['GRL2023_ignoreTRIG'] = ['GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns_ignoreTRIG_JETCTPIN.xml']
-    GRLDict['GRL2023_ignoreTRIG_HLTmisconf'] = ['GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns_ignoreTRIG_HLTmisconf.xml']
-    GRLDict['GRL2023_ignoreTRIG_HLTmisconf_JETCTPIN'] = ['GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns_ignoreTRIG_HLTmisconf_JETCTPIN.xml']
+    GRLDict['GRL2023'] = ['GoodRunsLists/data23_13p6TeV/20250321/data23_13p6TeV.periodAllYear_DetStatus-v133-pro31-11_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']
+    GRLDict['GRL2023_ignoreTRIG_JETCTPIN'] = ['GoodRunsLists/data23_13p6TeV/20250321/data23_13p6TeV.periodAllYear_DetStatus-v133-pro31-11_MERGED_PHYS_StandardGRL_All_Good_25ns_ignoreTRIG_JETCTPIN.xml']
 
     # 2022
-    GRLDict['GRL2022'] = ['GoodRunsLists/data22_13p6TeV/20230207/data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']
-    GRLDict['GRL2022_ignore_TRIGLAR'] = ['GoodRunsLists/data22_13p6TeV/20230207/data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns_ignore_TRIGLAR.xml']
-    GRLDict['GRL2022_ignore_TRIGMUO_TRIGLAR'] = ['GoodRunsLists/data22_13p6TeV/20230207/data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns_ignore_TRIGMUO_TRIGLAR.xml']
-
+    GRLDict['GRL2022'] = ['GoodRunsLists/data22_13p6TeV/20250321/data22_13p6TeV.periodAllYear_DetStatus-v134-pro28-09_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']
+    GRLDict['GRL2022_ignore_TRIGLAR'] = ['GoodRunsLists/data22_13p6TeV/20250321/data22_13p6TeV.periodAllYear_DetStatus-v134-pro28-10_MERGED_PHYS_StandardGRL_All_Good_25ns_ignore_TRIGLAR.xml']
 
     ## RUN 2
 
