@@ -13,9 +13,9 @@
 #include <SelectionHelpers/OutOfValidityHelper.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
+#include <SystematicsHandles/SysReadDecorHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
-#include <SystematicsHandles/SysReadHandle.h>
 #include <xAODJet/JetContainer.h>
 #include <TrigDecisionTool/TrigDecisionTool.h>
 #include <AsgTools/PropertyWrapper.h>
@@ -62,6 +62,8 @@ namespace CP
   private:
     SysReadHandle<xAOD::JetContainer> m_jetHandle {
       this, "jets", "Jets", "the jet collection to run on"};
+
+    SysReadDecorHandle<int> m_truthFlav{"HadronConeExclTruthLabelID", this};
 
     /// \brief the preselection we apply to our input
   private:
