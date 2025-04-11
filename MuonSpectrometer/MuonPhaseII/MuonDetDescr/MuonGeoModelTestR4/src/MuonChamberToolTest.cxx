@@ -26,8 +26,6 @@ namespace{
 }
 
 namespace MuonGMR4 {
-    MuonChamberToolTest::MuonChamberToolTest(const std::string& name, ISvcLocator* pSvcLocator):
-        AthReentrantAlgorithm{name, pSvcLocator} {}
 
     StatusCode MuonChamberToolTest::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
@@ -153,11 +151,8 @@ namespace MuonGMR4 {
     }
 
     StatusCode MuonChamberToolTest::execute(const EventContext& ctx) const {
-        SG::ReadHandle gctx{m_geoCtxKey, ctx};
-        if (!gctx.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve the Acts alignment "<<m_geoCtxKey.fullKey());
-            return StatusCode::FAILURE;
-        }
+        const ActsGeometryContext* gctx{nullptr};
+        ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         /** Check that all chambers covered by their sector envelopes */
         using SectorSet = MuonDetectorManager::MuonSectorSet;
         const SectorSet sectors = m_detMgr->getAllSectors();

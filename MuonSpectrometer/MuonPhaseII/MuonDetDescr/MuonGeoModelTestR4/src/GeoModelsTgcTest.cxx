@@ -87,8 +87,8 @@ StatusCode GeoModelsTgcTest::finalize() {
 StatusCode GeoModelsTgcTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
 
-    SG::ReadHandle geoContextHandle{m_geoCtxKey, ctx};
-    ATH_CHECK(geoContextHandle.isPresent());
+    const ActsGeometryContext* geoContextHandle{nullptr};
+    ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
     const ActsGeometryContext& gctx{*geoContextHandle};
 
 
