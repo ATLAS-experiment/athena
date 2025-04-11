@@ -72,7 +72,7 @@ evgenLog.info ("****************** CHECKING EVENT GENERATION ARGS **************
 if not hasattr(runArgs, "ecmEnergy"):
     raise RuntimeError("No center of mass energy provided.")
 else:
-    evgenLog.info(' ecmEnergy = ' + str(runArgs.ecmEnergy) )
+    evgenLog.info('ecmEnergy = ' + str(runArgs.ecmEnergy) )
 ##==============================================================
 ## Configure standard Athena and evgen services
 ##==============================================================
