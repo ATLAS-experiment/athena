@@ -184,7 +184,8 @@ def getL1BKeePrimary():
         'L1_eEM18L_MU8F',
         'L1_BPH-0M9-eEM9-eEM7_2MU3V', # legacy 'L1_BPH-0M9-EM7-EM5_2MU3V'
         'L1_MU14FCH',
-        'L1_MU8F_2MU5VF',
+        'L1_MU8VF_2MU5VF', # Replacing 'L1_MU8F_2MU5VF'
+        'L1_BPH-2M9-2DR15-2MU5VF',
         'L1_cTAU30M_3DR35-MU8F-eTAU30',
         'L1_MU8F_cTAU20M_3jJ30',
         'L1_jXE100', # legacy 'L1_XE50',
@@ -263,8 +264,10 @@ def getL1BKeePrescaled():
 
     return [
         'L1_LFV-MU5VF',
-        'L1_BPH-2M9-0DR15-MU5VFMU3V',
-        'L1_BPH-2M9-0DR15-2MU3V',
+        'L1_BPH-2M9-0DR15-MU5VFMU3V', # disabled
+        'L1_BPH-2M9-0DR15-C-MU5VFMU3V',
+        'L1_BPH-2M9-0DR15-2MU3V', #disabled
+        'L1_BPH-2M9-0DR15-2MU3VF',
         'L1_BPH-0M9-eEM9-eEM7_MU5VF', # legacy 'L1_BPH-0M9-EM7-EM5_MU5VF',
         'L1_BPH-0DR3-eEM9jJ40_MU5VF', # legacy 'L1_BPH-0DR3-EM7J15_MU5VF'
         'L1_BPH-0DR3-eEM9jJ40_2MU3V', # legacy 'L1_BPH-0DR3-EM7J15_2MU3V'
