@@ -12,7 +12,7 @@ def BTagMuonAugmenterAlgCfg(ConfigFlags, BTagCollection, Associator,  MuonCollec
         MuonAssociationName=Associator,
     )
 
-    decorAlg = CompFactory.FlavorTagDiscriminants.BTagDecoratorAlg(
+    decorAlg = CompFactory.FlavorTagInference.BTagDecoratorAlg(
         name=f'{name}_alg',
         container=BTagCollection,
         constituentContainer=MuonCollection,

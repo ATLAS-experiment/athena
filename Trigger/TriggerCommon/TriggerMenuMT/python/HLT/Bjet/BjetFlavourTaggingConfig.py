@@ -226,7 +226,7 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
             extra = {}
 
         ca.addEventAlgo(
-            CompFactory.FlavorTagDiscriminants.JetTagConditionalDecoratorAlg(
+            CompFactory.FlavorTagInference.JetTagConditionalDecoratorAlg(
                 name='_'.join([
                     'simpleJetTagAlg',
                     jet_name,
