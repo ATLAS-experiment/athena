@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArPhysWavePredictor.h"
@@ -335,6 +335,10 @@ StatusCode LArPhysWavePredictor::stop()
   FILE* f = nullptr;
   if (m_dumpMphysMcali) {
      f = fopen("MphysOverMcali.dat","w");
+     if (!f) {
+       ATH_MSG_ERROR("Cannot open file `MphysOverMcali.dat' for write");
+       return StatusCode::FAILURE;
+     }
      fprintf(f,"# Region Layer Eta Phi Gain  MphysMcali\n");
   }
   FileCloser fcloser (f);
