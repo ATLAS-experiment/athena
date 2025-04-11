@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -2762,13 +2762,13 @@ void TileTBAANtuple::ADDER_addBranch(void) {
 
   if (m_unpackAdder) {
     if (m_beamIdList[ADD_FADC_FRAG]) {
-      m_adder = (int**) malloc(16 * sizeof(int *));
-      m_adder[0] = (int*) malloc(16 * 16 * sizeof(int));
-      for (int j = 1; j < 16; j++) {
-        m_adder[j] = m_adder[0] + j * 16;
+      m_adder.resize(16);
+      m_adderPayload.resize(16*16);
+      for (int j = 0; j < 16; j++) {
+        m_adder[j] = m_adderPayload.data() + j * 16;
       }
 
-      m_ntuplePtr->Branch("Adder", *m_adder, "m_adder[16][16]/I");
+      m_ntuplePtr->Branch("Adder", *m_adder.data(), "m_adder[16][16]/I");
       m_ntuplePtr->Branch("EneAdd", &m_eneAdd, "m_eneAdd[16]/F");
       m_ntuplePtr->Branch("TimeAdd", &m_timeAdd, "m_timeAdd[16]/F");
     }

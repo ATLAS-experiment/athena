@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -2971,27 +2971,23 @@ unsigned int TileTBDump::tile_check_CRC(const unsigned int *frame, int framelen,
   static const unsigned int error[3] = { CRC_error_0, CRC_error_1, CRC_do_not_match };
 
   int i, j, k, length;
-  unsigned int *data, word, CRC_word;
+  unsigned int word, CRC_word;
   unsigned short bit_in, bit_out, reg, reg1, reg2;
 
   /* put all the data in one array with empty word at the end */
 
+  std::vector<unsigned int> data;
   if (delta != 0) { /* low gain and high gain in different places */
     length = 2 * framelen + 1;
-    data = (unsigned int *) malloc(length * sizeof(int));
-    if (delta > 0) {
-      memcpy(data, frame, framelen * sizeof(int));
-      memcpy(data + framelen, frame + delta, framelen * sizeof(int));
-      CRC_word = frame[framelen + delta]; /* after second part of the data */
-    } else {
-      memcpy(data, frame + delta, framelen * sizeof(int));
-      memcpy(data + framelen, frame, framelen * sizeof(int));
-      CRC_word = frame[framelen]; /* just after the data */
-    }
+    data.resize (length);
+    int xdelta = std::max (delta, 0);
+    auto pos = std::copy_n (frame, framelen, data.begin());
+    std::copy_n (frame+delta, framelen, pos);
+    CRC_word = frame[framelen + xdelta]; /* after second part of the data */
   } else {
     length = framelen + 1;
-    data = (unsigned int *) malloc(length * sizeof(int));
-    memcpy(data, frame, framelen * sizeof(int));
+    data.resize (length);
+    std::copy_n (frame, framelen, data.begin());
     CRC_word = frame[framelen]; /* just after the data */
   }
 
@@ -3034,7 +3030,6 @@ unsigned int TileTBDump::tile_check_CRC(const unsigned int *frame, int framelen,
     if (reg1 != reg2) CRC_error |= error[i];
   }
 
-  free(data);
   return CRC_error;
 }
 
