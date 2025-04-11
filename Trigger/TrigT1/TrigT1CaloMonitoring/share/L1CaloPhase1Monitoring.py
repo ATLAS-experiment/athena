@@ -167,6 +167,7 @@ if flags.GeoModel.AtlasVersion is None:
   from AthenaConfiguration.TestDefaults import defaultGeometryTags
   flags.GeoModel.AtlasVersion = defaultGeometryTags.autoconfigure(flags)
 
+if (flags.Input.Format == Format.POOL): flags.Trigger.L1.doTopo = False #Deactivating L1Topo if Format is POOL
 if not flags.Trigger.L1.doTopo: flags.Trigger.L1.doMuon = False # don't do muons if not doing topo
 
 if flags.Trigger.enableL1CaloPhase1:
