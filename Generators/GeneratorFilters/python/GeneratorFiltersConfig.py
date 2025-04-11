@@ -247,6 +247,8 @@ def xAODHTFilterCommonCfg(flags, **kwargs):
     """HT filter setup for anti-kT R=0.4 truth jets"""
     cfg = CreatexAODSlimmedContainerCfg(flags, containerName="TruthGen") # Algs in prefiltSeq
     cfg.merge(CreateTruthJetsCfg(flags, 0.4,"WZ")) # Algs in prefiltSeq
+    from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
+    cfg.merge(DFCommonMCTruthClassifierCfg(flags)) # FIXME this Cfg method creates a public MCTruthClassifier tool.
     # To modify cuts make a new Cfg method depending on this one, where you set the required kwargs
     cfg.addEventAlgo(CompFactory.xAODHTFilter("xAODHTFilter", **kwargs)) # TODO Add to filtSeq
     return cfg
@@ -540,16 +542,14 @@ if __name__ == "__main__":
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import log
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Constants import DEBUG
-    from AthenaConfiguration.Enums import BeamType
 
     # Test setup
     log.setLevel(DEBUG)
 
     flags = initConfigFlags()
-    flags.Input.SpecialConfiguration = dict() # Used by GEN_EVNT2xAODCfg, so can't allow to be auto-configured
-    flags.Input.isMC = True # Used by JetRecConfig/StandardJetConstits.py
-    flags.Beam.Type = BeamType.Collisions # Used by JetRecConfig/JetRecConfig.py
+    flags.Input.Files = defaultTestFiles.EVNT
     flags.lock()
 
     acc = ComponentAccumulator()

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // GeneratorFilters/ForwardProtonFilter
@@ -16,9 +16,10 @@
 #include "GeneratorFilters/xAODForwardProtonFilter.h"
 #include "TruthUtils/HepMCHelpers.h"
 
-xAODForwardProtonFilter::xAODForwardProtonFilter(const std::string &name, ISvcLocator *pSvcLocator)
-    : GenFilter(name, pSvcLocator)
+StatusCode xAODForwardProtonFilter::filterInitialize()
 {
+  CHECK(m_truthPartContKey.initialize());
+  return StatusCode::SUCCESS;
 }
 
 StatusCode xAODForwardProtonFilter::filterEvent()
@@ -27,19 +28,13 @@ StatusCode xAODForwardProtonFilter::filterEvent()
   bool accepted_C = false;
 
   // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
-// duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;   
-  }
+  // duplicated barcode ones
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-      const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
+  for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
 
       // We're only interested in stable (status == 1) particles
-
       if (!MC::isStable(pitr))
         continue;
       // We are specifically looking for protons
@@ -64,7 +59,7 @@ StatusCode xAODForwardProtonFilter::filterEvent()
         return StatusCode::SUCCESS;
 
       if (!m_DoubleTag)
-       
+
         // if Single tag is not requested, do or
         if (!m_Single_tagA && !m_Single_tagC && (accepted_A || accepted_C))
           return StatusCode::SUCCESS;

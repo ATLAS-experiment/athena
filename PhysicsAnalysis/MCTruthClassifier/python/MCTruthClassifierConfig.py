@@ -6,7 +6,7 @@ __doc__ = """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import LHCPeriod, Project
 
 
 def MCTruthClassifierCfg(flags, name="MCTruthClassifier", **kwargs):
@@ -14,8 +14,9 @@ def MCTruthClassifierCfg(flags, name="MCTruthClassifier", **kwargs):
     This is the default configuration allowing all options.
     By default, it does not do calo truth matching.
     """
-    kwargs.setdefault("ParticleCaloExtensionTool", "")
-    kwargs.setdefault("CaloDetDescrManager", "")
+    if flags.Common.Project not in [Project.AthGeneration, Project.AnalysisBase]:
+        kwargs.setdefault("ParticleCaloExtensionTool", "")
+        kwargs.setdefault("CaloDetDescrManager", "")
     return MCTruthClassifierCaloTruthMatchCfg(flags, name, **kwargs)
 
 
@@ -27,23 +28,26 @@ def MCTruthClassifierCaloTruthMatchCfg(flags, name="MCTruthClassifier", **kwargs
     """
     acc = ComponentAccumulator()
 
-    if "ParticleCaloExtensionTool" not in kwargs:
+    if flags.Common.Project not in [Project.AthGeneration, Project.AnalysisBase]:
+        if "ParticleCaloExtensionTool" not in kwargs:
 
-        from TrkConfig.AtlasExtrapolatorConfig import (
-            MCTruthClassifierExtrapolatorCfg)
-        extrapolator = acc.popToolsAndMerge(
-            MCTruthClassifierExtrapolatorCfg(flags))
+            from TrkConfig.AtlasExtrapolatorConfig import (
+                MCTruthClassifierExtrapolatorCfg)
+            extrapolator = acc.popToolsAndMerge(
+                MCTruthClassifierExtrapolatorCfg(flags))
 
-        from TrackToCalo.TrackToCaloConfig import (
-            EMParticleCaloExtensionToolCfg)
-        extension = EMParticleCaloExtensionToolCfg(
-            flags, Extrapolator=extrapolator)
-        kwargs["ParticleCaloExtensionTool"] = acc.popToolsAndMerge(extension)
+            from TrackToCalo.TrackToCaloConfig import (
+                EMParticleCaloExtensionToolCfg)
+            extension = EMParticleCaloExtensionToolCfg(
+                flags, Extrapolator=extrapolator)
+            kwargs["ParticleCaloExtensionTool"] = acc.popToolsAndMerge(extension)
 
-    kwargs.setdefault("CaloDetDescrManager", "CaloDetDescrManager")
+        kwargs.setdefault("CaloDetDescrManager", "CaloDetDescrManager")
 
-    if flags.GeoModel.Run >= LHCPeriod.Run4:
-        kwargs.setdefault("FwdElectronUseG4Sel", False)
+        if flags.Input.Files and set(['StreamEVGEN', 'StreamEVNT']).isdisjoint(set(flags.Input.ProcessingTags)):
+            # Skip if running with no input file or running on EVNT files
+            if flags.GeoModel.Run >= LHCPeriod.Run4:
+                kwargs.setdefault("FwdElectronUseG4Sel", False)
 
     acc.setPrivateTools(CompFactory.MCTruthClassifier(**kwargs))
     return acc
