@@ -20,7 +20,7 @@ atlas_add_library( ElectronEfficiencyCorrectionLib
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AsgTools AnaAlgorithmLib AsgDataHandlesLib
-   ColumnarEgammaLib ColumnarClusterLib ColumnarEventInfoLib PATInterfaces PATCoreAcceptLib AsgMessagingLib EgammaAnalysisInterfacesLib
+   xAODEgamma PATInterfaces PATCoreAcceptLib AsgMessagingLib EgammaAnalysisInterfacesLib
    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${extra_private_libs} xAODEventInfo AsgMessagingLib
    xAODMetaData PathResolver )
 
@@ -93,10 +93,5 @@ else()
               PROPERTIES TIMEOUT 300)
 
 endif()
-
-atlas_add_test( gt_ColumnarToolTests
-                SOURCES test/gt_ColumnarToolTests.cxx
-                LINK_LIBRARIES ColumnarTestFixturesLib ElectronEfficiencyCorrectionLib
-                POST_EXEC_SCRIPT nopost.sh )
 
 atlas_install_python_modules( util/*.py python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

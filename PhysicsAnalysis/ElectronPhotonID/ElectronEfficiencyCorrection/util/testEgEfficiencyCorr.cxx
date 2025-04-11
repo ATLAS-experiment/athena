@@ -63,7 +63,6 @@ main(int argc, char* argv[])
 
   // Create a TEvent object:
   xAOD::TEvent event;
-  xAOD::TStore store;
 
   // Then the tools
   asg::StandaloneToolHandle<IAsgElectronEfficiencyCorrectionTool>

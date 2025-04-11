@@ -16,6 +16,7 @@
 #ifdef XAOD_STANDALONE
 #include "xAODRootAccess/Init.h"
 #include "xAODRootAccess/TEvent.h"
+#include "xAODRootAccess/TStore.h"
 #endif // XAOD_STANDALONE
 
 // EDM include(s):

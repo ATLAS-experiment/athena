@@ -97,8 +97,6 @@ namespace columnar
 
     void addColumn (const std::string& name, std::vector<std::any> data);
 
-    ColumnarOffsetType columnSize (const std::string& name);
-
     void setExpectation (const std::string& name, const std::vector<std::any> & values);
 
     /// @brief add the columns we have to the tool
@@ -154,6 +152,8 @@ namespace columnar
         typedData.emplace_back (extractAny<T> (name, value));
       m_expectations.emplace (name, std::move (typedData));
     }
+
+    ColumnarOffsetType columnSize (const std::string& name);
 
     template<typename T> std::span<const T> getOutputColumn (const std::string& name)
     {
