@@ -1,17 +1,14 @@
-#ifndef MUONCSVDUMP_BucketDumperAlg_H
-#define MUONCSVDUMP_BucketDumperAlg_H
 /*
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+#ifndef MUONCSVDUMP_BucketDumperAlg_H
+#define MUONCSVDUMP_BucketDumperAlg_H
 
-#include <AthenaBaseComps/AthAlgorithm.h>
+
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
 
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
-#include "StoreGate/ReadHandleKey.h"
-#include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/ReadHandleKeyArray.h"
-#include "StoreGate/ReadCondHandleKey.h"
 
 #include <MuonPatternEvent/MuonPatternContainer.h>
 #include <MuonSpacePoint/SpacePointContainer.h>
@@ -22,8 +19,6 @@
 #include "MuonTesterTree/ThreeVectorBranch.h"
 #include "MuonTesterTree/IdentifierBranch.h"
 
-#include "xAODMuonSimHit/MuonSimHitContainer.h"
-#include "xAODMuon/MuonSegmentContainer.h"
 #include "MuonRecToolInterfacesR4/IPatternVisualizationTool.h"
 
 #include "AthenaKernel/IAthRNGSvc.h"
@@ -42,13 +37,18 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     virtual StatusCode execute() override final;
 
    private:
+      /** @brief Dumps the space point container with the associated muon segment container
+       *  @param spacePointKey: Key to the space point key (Legacy /Nsw)
+       *  @param segmentKey: Key to the fitted segments (Legacy / Nsw) */
+      StatusCode dumpContainer(const EventContext& ctx,
+                               const SG::ReadHandleKey<SpacePointContainer>& spacePointKey,
+                               const SG::ReadHandleKey<SegmentContainer>& segmentKey);
 
-    void fillChamberInfo(const MuonGMR4::Chamber* chamber); 
-
-    SG::ReadHandleKey<SpacePointContainer> m_readKey{this, "ReadKey", "MuonSpacePoints", "Key to the space point container"};
+    SG::ReadHandleKeyArray<SpacePointContainer> m_spacePointKeys{this, "SpacePointKeys", {"MuonSpacePoints"}, 
+                                                     "Key to the space point container"};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-    SG::ReadHandleKey<MuonR4::SegmentContainer> m_inSegmentKey{this, "SegmentKey", "R4MuonSegments"};
+    SG::ReadHandleKeyArray<MuonR4::SegmentContainer> m_inSegmentKeys{this, "SegmentKey", {"R4MuonSegments"}};
 
     SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
     
@@ -76,8 +76,6 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     MuonVal::VectorBranch<uint16_t>&        m_spoint_layer{m_tree.newVector<uint16_t>("Layer")};
     MuonVal::VectorBranch<unsigned short>&            m_spoint_isStrip{m_tree.newVector<unsigned short>("isStrip", false)};
     MuonVal::VectorBranch<unsigned short>&            m_spoint_isMdt{m_tree.newVector<unsigned short>("isMdt", false)};
-    MuonVal::ScalarBranch<short>&           m_spoint_mdtLayer{m_tree.newScalar<short>("mdtLayer", 0)};
-    MuonVal::ScalarBranch<short>&           m_spoint_mdtTube{m_tree.newScalar<short>("mdtTube", 0)};  
 
     MuonVal::VectorBranch<uint16_t>&        m_spoint_adc{m_tree.newVector<uint16_t>("adc")};
     MuonVal::VectorBranch<uint16_t>&        m_spoint_tdc{m_tree.newVector<uint16_t>("tdc")};
@@ -101,8 +99,6 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     MuonVal::ThreeVectorBranch              m_segmentDir{m_tree, "segmentDirection"};
     MuonVal::VectorBranch<float>&           m_segment_chiSquared{m_tree.newVector<float>("segment_chiSquared")};
     MuonVal::VectorBranch<float>&           m_segment_numberDoF{m_tree.newVector<float>("segment_numberDoF")};
-
-    size_t m_event{0};
 
 };
 }

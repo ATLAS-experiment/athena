@@ -15,7 +15,7 @@ atlas_add_component( MuonBucketDump
 atlas_install_python_modules( python/*.py)
 
 atlas_add_test( testMuonBucketDump
-                SCRIPT python -m MuonBucketDump.muonBucketDump --nEvents 5 --noSTGC --noMM
+                SCRIPT python -m MuonBucketDump.muonBucketDump --nEvents 5 --noSTGC
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT noerror.sh)

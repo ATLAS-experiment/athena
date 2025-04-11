@@ -5,7 +5,7 @@
 #include "SpacePointCsvDumperAlg.h"
 
 #include "StoreGate/ReadHandle.h"
-#include "MuonSpacePoint/SpacePointPerLayerSplitter.h"
+#include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include <fstream>
 #include <TString.h>
@@ -24,7 +24,7 @@ namespace {
 namespace MuonR4{
 
 StatusCode SpacePointCsvDumperAlg::initialize() {
-   ATH_CHECK(m_readKey.initialize());
+   ATH_CHECK(m_readKeys.initialize());
    ATH_CHECK(m_idHelperSvc.retrieve());
    return StatusCode::SUCCESS;
  }
@@ -66,15 +66,12 @@ StatusCode SpacePointCsvDumperAlg::execute(){
     file<<"measuresPhi"<<delim;
     file<<std::endl;
 
-
-   SG::ReadHandle readHandle{m_readKey, ctx};
-   ATH_CHECK(readHandle.isPresent());
-
    auto dumpToFile = [&](const unsigned bucketId,
                          const SpacePoint& spacePoint,
                          const unsigned gasGap) {
         
-        const Identifier measId = spacePoint.identify();
+        const Identifier& measId = spacePoint.identify();
+        ATH_MSG_VERBOSE("Dump space point "<<m_idHelperSvc->toString(measId)<<", gasGap: "<<gasGap);
         int primaryCh{0};
         using TechIndex = Muon::MuonStationIndex::TechnologyIndex; 
         const TechIndex techIdx = m_idHelperSvc->technologyIndex(measId);
@@ -139,18 +136,17 @@ StatusCode SpacePointCsvDumperAlg::execute(){
         file<<std::endl;
    };
 
-   for(const SpacePointBucket* bucket : *readHandle) {
-       const SpacePointPerLayerSplitter splitter{*bucket};
-       unsigned int gasGap{0};
-       for (const SpacePointPerLayerSplitter::HitVec& mdtLayer : splitter.mdtHits()) {
-            ++gasGap;
-            for (const SpacePoint* spacePoint : mdtLayer) {
-                dumpToFile(bucket->bucketId(), *spacePoint, gasGap);
-            }
-       }
-       for (const SpacePointPerLayerSplitter::HitVec& mdtLayer : splitter.stripHits()) {
-            ++gasGap;
-            for (const SpacePoint* spacePoint : mdtLayer) {
+   for (const SG::ReadHandleKey<SpacePointContainer>& key : m_readKeys) {
+        const SpacePointContainer* spContainer{nullptr};
+        ATH_CHECK(SG::get(spContainer, key, ctx));
+
+        const SpacePointPerLayerSorter layerSorter{m_idHelperSvc.get()};
+        for(const SpacePointBucket* bucket : *spContainer) {
+         std::unordered_map<Identifier, unsigned> gasNumbers{};
+         for (const SpacePointBucket::value_type& spacePoint:  *bucket) {
+                unsigned int gasGap{gasNumbers.insert(
+                                    std::make_pair(layerSorter.detectorLayerId(spacePoint->identify()), 
+                                                   gasNumbers.size())).first->second};
                 dumpToFile(bucket->bucketId(), *spacePoint, gasGap);
             }
         }

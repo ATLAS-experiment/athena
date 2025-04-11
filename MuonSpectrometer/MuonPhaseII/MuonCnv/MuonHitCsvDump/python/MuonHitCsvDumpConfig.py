@@ -7,6 +7,13 @@ def CsvSpacePointDumpCfg(flags, name="CsvDriftCircleDumper", **kwargs):
     result = ComponentAccumulator()
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
     result.merge(MuonSpacePointFormationCfg(flags))
+    spCont = []
+    if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
+        spCont+=["MuonSpacePoints"]
+    if flags.Detector.GeometryMM or flags.Detector.GeometrysTGC:
+        spCont+=["NswSpacePoints"]
+    
+    kwargs.setdefault("SpacePointKeys", spCont)
     the_alg = CompFactory.MuonR4.SpacePointCsvDumperAlg(name=name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
