@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_NSWPLOTTINGALG_H
 #define MUONGEOMODELTESTR4_NSWPLOTTINGALG_H
@@ -18,7 +18,7 @@ class TH1;
 namespace MuonGMR4{
 class NswGeoPlottingAlg : public AthHistogramAlgorithm {
  public:
-  NswGeoPlottingAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthHistogramAlgorithm::AthHistogramAlgorithm;
 
   StatusCode initialize() override;
   StatusCode execute() override;

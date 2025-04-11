@@ -91,8 +91,8 @@ StatusCode GeoModelRpcTest::finalize() {
 StatusCode GeoModelRpcTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
 
-    SG::ReadHandle geoContextHandle{m_geoCtxKey, ctx};
-    ATH_CHECK(geoContextHandle.isPresent());
+    const ActsGeometryContext* geoContextHandle{nullptr};
+    ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
     const ActsGeometryContext& gctx{*geoContextHandle};
 
     for (const Identifier& test_me : m_testStations) {

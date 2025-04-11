@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_MUONCHAMBERTOOLTEST_H
 #define MUONGEOMODELTESTR4_MUONCHAMBERTOOLTEST_H
@@ -23,8 +23,7 @@ namespace MuonGMR4 {
 
 class MuonChamberToolTest: public AthReentrantAlgorithm {
     public:
-        MuonChamberToolTest(const std::string& name, ISvcLocator* pSvcLocator);
-
+        using AthReentrantAlgorithm::AthReentrantAlgorithm;
         ~MuonChamberToolTest() = default;
 
         StatusCode execute(const EventContext& ctx) const override;        
