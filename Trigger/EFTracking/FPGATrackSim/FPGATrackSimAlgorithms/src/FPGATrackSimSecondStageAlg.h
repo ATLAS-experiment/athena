@@ -81,7 +81,7 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         Gaudi::Property<bool> m_doTracking {this, "tracking", false, "flag to enable the tracking"};
         Gaudi::Property<bool> m_doMissingHitsChecks {this, "DoMissingHitsChecks", false};
         Gaudi::Property<bool> m_doHoughRootOutput2nd {this, "DoHoughRootOutput2nd", false, "Dump output from the Hough Transform to flat ntuples"};
-        Gaudi::Property<bool> m_doNNTrack  {this, "DoNNTrack", false, "Run NN track filtering"};
+        Gaudi::Property<bool> m_doNNTrack_2nd  {this, "DoNNTrack_2nd", false, "Run NN track filtering for 2nd Stage"};
         Gaudi::Property<bool> m_writeOutputData  {this, "writeOutputData", true,"write the output TTree"};
         Gaudi::Property<float> m_trackScoreCut {this, "TrackScoreCut", 25.0, "Minimum track score (e.g. chi2 or NN)." };
         Gaudi::Property<bool> m_writeOutNonSPStripHits {this, "writeOutNonSPStripHits", true, "Write tracks to RootOutput if they have strip hits which are not SPs"};

@@ -58,7 +58,7 @@ StatusCode FPGATrackSimSecondStageAlg::initialize()
     }
 
     ATH_CHECK(m_houghRootOutputTool.retrieve(EnableTool{m_doHoughRootOutput2nd}));
-    ATH_CHECK(m_NNTrackTool.retrieve(EnableTool{m_doNNTrack}));
+    ATH_CHECK(m_NNTrackTool.retrieve(EnableTool{m_doNNTrack_2nd}));
     if (m_doSpacepoints) ATH_CHECK(m_spRoadFilterTool.retrieve(EnableTool{m_spRoadFilterTool}));
 
     ATH_CHECK(m_trackFitterTool.retrieve(EnableTool{m_doTracking}));
@@ -242,9 +242,9 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: Track Extraction");
     std::vector<FPGATrackSimTrack> tracks;
     if (m_doTracking) {
-        if (m_doNNTrack) {
+        if (m_doNNTrack_2nd) {
             ATH_MSG_DEBUG("Performing NN tracking");
-            ATH_CHECK(m_NNTrackTool->getTracks(roads, tracks));
+            ATH_CHECK(m_NNTrackTool->getTracks_2nd(roads, tracks));
         } else {
             ATH_MSG_DEBUG("Performing Linear tracking");
 
@@ -354,7 +354,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         auto truthz0= Monitored::Scalar<float>("z0",truthtracks.front().getZ0());
         if (roads.size() > 0) m_nRoadsFound++;
 	if (roads.size() > m_maxNRoadsFound) m_maxNRoadsFound = roads.size();
-		
+
 	unsigned npasschi2(0);
 	unsigned npasschi2OLR(0);
 
