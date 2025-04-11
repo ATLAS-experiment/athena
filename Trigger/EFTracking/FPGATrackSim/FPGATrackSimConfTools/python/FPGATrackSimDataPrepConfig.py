@@ -276,8 +276,10 @@ def FPGATrackSimMappingCfg(flags):
     mappingSvc.pmap = flags.Trigger.FPGATrackSim.mapsDir+"/"+getBaseName(flags)+".pmap"
     mappingSvc.modulemap = flags.Trigger.FPGATrackSim.mapsDir+"/moduleidmap"
     mappingSvc.radiiFile = flags.Trigger.FPGATrackSim.mapsDir + "/"+getBaseName(flags)+"_radii.txt"
-    mappingSvc.FakeNNonnx = flags.Trigger.FPGATrackSim.FakeNNonnxFile
-    mappingSvc.ParamNNonnx = flags.Trigger.FPGATrackSim.ParamNNonnxFile
+    mappingSvc.FakeNNonnx1st = flags.Trigger.FPGATrackSim.FakeNNonnxFile1st
+    mappingSvc.FakeNNonnx2nd = flags.Trigger.FPGATrackSim.FakeNNonnxFile2nd
+    mappingSvc.ParamNNonnx1st = flags.Trigger.FPGATrackSim.ParamNNonnxFile1st
+    mappingSvc.ParamNNonnx2nd = flags.Trigger.FPGATrackSim.ParamNNonnxFile2nd
     mappingSvc.ExtensionNNVolonnx = flags.Trigger.FPGATrackSim.ExtensionNNVolonnxFile
     mappingSvc.ExtensionNNHitonnx = flags.Trigger.FPGATrackSim.ExtensionNNHitonnxFile
     mappingSvc.layerOverride = []

@@ -215,7 +215,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     if (m_doTracking) {
         if (m_doNNTrack) {
             ATH_MSG_DEBUG("Performing NN tracking");
-            ATH_CHECK(m_NNTrackTool->getTracks(roads_1st, tracks_1st));
+            ATH_CHECK(m_NNTrackTool->getTracks_1st(roads_1st, tracks_1st));
         } else {
             ATH_MSG_DEBUG("Performing Linear tracking");
             if (m_passLowestChi2TrackOnly) { // Pass only the lowest chi2 track per road

@@ -41,8 +41,8 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.oldRegionDefs=True \
     Trigger.FPGATrackSim.writeToAOD=True \
     Trigger.FPGATrackSim.bankDir=$BANKS_9L \
-    Trigger.FPGATrackSim.FakeNNonnxFile=$ONNX_INPUT_FAKE \
-    Trigger.FPGATrackSim.ParamNNonnxFile=$ONNX_INPUT_PARAM \
+    Trigger.FPGATrackSim.FakeNNonnxFile1st=$ONNX_INPUT_FAKE \
+    Trigger.FPGATrackSim.ParamNNonnxFile1st=$ONNX_INPUT_PARAM \
     Trigger.FPGATrackSim.outputMonitorFile="monitoring${TEST_LABEL}.root"
 }
 run_F410

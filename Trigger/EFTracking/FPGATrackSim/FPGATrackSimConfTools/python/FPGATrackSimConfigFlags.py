@@ -20,7 +20,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('FPGATrackSimallBanks', False)
     cf.addFlag('region', 34)
     cf.addFlag('d0min', -2.0)
-    cf.addFlag('d0max', +2.0)    
+    cf.addFlag('d0max', +2.0)
     cf.addFlag('z0min', -150.0)
     cf.addFlag('z0max', +150.0)
     cf.addFlag('qOverPtmin', -0.001)
@@ -28,7 +28,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('oldRegionDefs', False)
     cf.addFlag('phiShift', 0.0)
     cf.addFlag('minSpacePlusPixel', 3)
-    cf.addFlag('baseName', '')    
+    cf.addFlag('baseName', '')
     cf.addFlag('CheckGood2ndStage', True)
     cf.addFlag('Is2ndStage', False)
     cf.addFlag('UseHitScaleFactor', False)
@@ -45,10 +45,12 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('loglevel', AthenaCommon.Constants.INFO)
     cf.addFlag('msgLimit',-1)
     cf.addFlag('singleTrackSample',  True)
-    cf.addFlag('FakeNNonnxFile', 'banks_9L/v0.20/ClassificationHT_v5.onnx')
+    cf.addFlag('FakeNNonnxFile1st', 'banks_9L/v0.20/ClassificationHT_v5.onnx')
+    cf.addFlag('FakeNNonnxFile2nd', 'banks_9L/v0.20/ClassificationHT_v5.onnx')
     cf.addFlag('ExtensionNNVolonnxFile', 'banks_9L/v0.20/HT_detector_v6_3.onnx')
     cf.addFlag('ExtensionNNHitonnxFile', 'banks_9L/v0.20/Ath_Extrap_v51_6_superBig_0_outsideIN.onnx')
-    cf.addFlag('ParamNNonnxFile', 'banks_9L/v0.20/ParamEstimationHT_v5.onnx')
+    cf.addFlag('ParamNNonnxFile1st', 'banks_9L/v0.20/ParamEstimationHT_v5.onnx')
+    cf.addFlag('ParamNNonnxFile2nd', 'banks_9L/v0.20/ParamEstimationHT_v5.onnx')
     cf.addFlag('doNNPathFinder', False)
     cf.addFlag('windowR', [20])
     cf.addFlag('windowZ', [20])
@@ -57,10 +59,10 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('lowPtWindowRScaling', 1.0)
     cf.addFlag('lowPtWindowZScaling', 1.0)
     cf.addFlag('missedHitRScaling', -1.0)
-    cf.addFlag('missedHitZScaling', -1.0)    
+    cf.addFlag('missedHitZScaling', -1.0)
     cf.addFlag('maxBranches', -1)
     cf.addFlag('hitThreshold', 10)
-    
+
     def __httHough1DFlags():
         """Additional function delays import"""
         from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createHough1dFPGATrackSimConfigFlags
@@ -134,8 +136,11 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('GNN', False)
 
 
-    # NN filtering
+    # NN filtering 1st stage
     cf.addFlag('trackNNAnalysis', False)
+    # NN filtering 2nd stage
+    cf.addFlag('trackNNAnalysis2nd', False)
+
 
     # overlap removal
     cf.addFlag('doFastOR', False)

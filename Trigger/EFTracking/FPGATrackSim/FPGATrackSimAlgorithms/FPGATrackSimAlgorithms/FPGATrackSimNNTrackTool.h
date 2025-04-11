@@ -46,15 +46,14 @@ class FPGATrackSimNNTrackTool : public FPGATrackSimTrackingToolBase, public Onnx
 	FPGATrackSimNNTrackTool(const std::string&, const std::string&, const IInterface*);
 
 	virtual StatusCode initialize() override;
-	StatusCode getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
+	StatusCode getTracks_1st(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
+	StatusCode getTracks_2nd(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
 
 	static float getXScale() { return 1015.;};
 	static float getYScale() { return 1015.;};
 	static float getZScale() { return 3000.;};
 
 	// Flags
-
-	Gaudi::Property <double> m_NNCut{ this, "NNCut", 0.2, " NN output value to cut on when selecting good tracks" };
 	Gaudi::Property <double> m_chi2_scalefactor{ this, "Chi2ScaleFactor", 40 / (1 - 0.1), "Scale factor to use in converting to a chi2, Nominal chi2ndof cut is 40 and we want to use NN>0.0075 (or NN<(1-0.0075)" };
 	Gaudi::Property <unsigned int> m_minNumberOfRealHitsInATrack{ this, "MinNumberOfRealHitsInATrack", 4, "Minimum number of real hits in a track candidate to process" };
 
@@ -64,12 +63,16 @@ class FPGATrackSimNNTrackTool : public FPGATrackSimTrackingToolBase, public Onnx
 	ServiceHandle<IFPGATrackSimMappingSvc>   m_FPGATrackSimMapping{this, "FPGATrackSimMappingSvc","FPGATrackSimMappingSvc"};
 	ServiceHandle<ITHistSvc> m_tHistSvc{this, "THistSvc","THistSvc"};
 
-	OnnxRuntimeBase m_paramNN;
-	OnnxRuntimeBase m_fakeNN;
+	OnnxRuntimeBase m_paramNN_1st;
+	OnnxRuntimeBase m_paramNN_2nd;
+	OnnxRuntimeBase m_fakeNN_1st;
+	OnnxRuntimeBase m_fakeNN_2nd;
 
-	bool m_useParamNN = true;
+	bool m_useParamNN_1st = true;
+	bool m_useParamNN_2nd = true;
 
-	void setTrackParameters(FPGATrackSimTrack& track, std::vector<float> inputTensorValues);
+	void setTrackParameters_1st(FPGATrackSimTrack& track, std::vector<float> inputTensorValues);
+	void setTrackParameters_2nd(FPGATrackSimTrack& track, std::vector<float> inputTensorValues);
 
 	std::vector<float> m_x; // x position of hit in road
 	std::vector<float> m_y; // y pos
