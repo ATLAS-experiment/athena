@@ -109,7 +109,15 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         acc.merge(TriggerTowersInputCfg(flags))
 
     if 'L1_eFexEmulatedTowers' in eFexTowerInputs and "L1_eFexEmulatedTowers" not in flags.Input.Collections:
-        acc.addEventAlgo( CompFactory.LVL1.eFexTowerBuilder("L1_eFexEmulatedTowers",CaloCellContainerReadKey=sCellType,ApplyMasking=not flags.Input.isMC) ) # builds the emulated towers to use as secondary input to eTowerMaker - name has to match what it gets called in other places to avoid conflict
+        doV6Mapping=False # latome fex input mapping if different between v5 and v6 ... for now only switching to v6 in data
+        if not flags.Input.isMC and len(flags.Input.RunNumbers)>0: # in HLT reprocessing jobs, the runNumbers list will be empty ... have to default to v5 for now for these jobs
+            from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+            runinfo = getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
+            doV6Mapping = (runinfo.FWversion()==6)
+        builderAlg = CompFactory.LVL1.eFexTowerBuilder("L1_eFexEmulatedTowers",UseLATOMEv6Mapping=doV6Mapping,
+                                                            CaloCellContainerReadKey=sCellType,ApplyMasking=not flags.Input.isMC) # builds the emulated towers to use as secondary input to eTowerMaker - name has to match what it gets called in other places to avoid conflict
+        if doV6Mapping: builderAlg.MappingFile='' # need to regenerate mapping on-the-fly for v6
+        acc.addEventAlgo( builderAlg )
 
     if flags.Trigger.L1.doeFex:
         if eFexTowerInputs==[]:
