@@ -673,6 +673,8 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
       spVec = {osp1, osp2, osp3};//create a 3-SP seed
     }
 
+    vec_seedSize.push_back(spVec.size());//monitoring seed length for GBTS seeding
+ 
     if(m_checkSeedRedundancy) {
       //check if clusters do not belong to any track
       std::vector<Identifier> clusterIds;
