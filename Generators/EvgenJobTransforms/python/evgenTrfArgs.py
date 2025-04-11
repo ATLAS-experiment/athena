@@ -6,7 +6,7 @@ def addStdEvgenArgs(parser):
     parser.defineArgGroup("Evgen", "Event generator options")
 
     parser.add_argument("--ecmEnergy", "--EcmEnergy", group="Evgen",
-                        default=trfArgClasses.argFloat(13000, runarg=True),
+                        default=trfArgClasses.argFloat(13600, runarg=True),
                         help="centre-of-mass energy parameter in GeV",
                         type=trfArgClasses.argFactory(trfArgClasses.argFloat, runarg=True))
 
