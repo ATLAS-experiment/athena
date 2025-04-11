@@ -347,7 +347,7 @@ def SUSY20Cfg(flags):
 		"InDetTrackParticles",
 		"PrimaryVertices",
 		"TauJets",
-		"AntiKt4EMTopoJets",
+#		"AntiKt4EMTopoJets",
 		"AntiKt4EMPFlowJets",
 		"BTagging_AntiKt4EMPFlow",
 		"MET_Baseline_AntiKt4EMPFlow",
@@ -400,6 +400,7 @@ def SUSY20Cfg(flags):
 			'TruthTausWithDecayParticles',
 			'TruthTausWithDecayVertices',
 			'AntiKt4TruthJets',
+			'AntiKt4TruthDressedWZJets'
 		]
 		SUSY20SlimmingHelper.ExtraVariables += [
 			"Electrons.TruthLink",
