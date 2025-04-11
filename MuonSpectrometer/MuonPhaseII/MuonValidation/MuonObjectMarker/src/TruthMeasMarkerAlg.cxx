@@ -37,30 +37,32 @@ namespace MuonR4 {
         return StatusCode::SUCCESS; 
     }
     StatusCode TruthMeasMarkerAlg::execute(const EventContext& ctx) const {
-        SG::ReadHandle segContainer{m_segKey, ctx};
+        const xAOD::MuonSegmentContainer* segContainer{nullptr};
+        ATH_CHECK(SG::get(segContainer, m_segKey, ctx));
 
         std::unordered_map<const SG::AuxVectorData*, MarkerHandle_t> markers{};
         std::unordered_map<Muon::MuonStationIndex::TechnologyIndex, std::vector<const PrdCont_t*>> techConts{};
         for (const WriteDecorKey_t& key : m_writeMarkKeys) {
-            SG::ReadHandle readHandle{key.contHandleKey(), ctx};
-            ATH_CHECK(readHandle.isPresent());
-            if (readHandle->empty()) {
+            const xAOD::UncalibratedMeasurementContainer* measContainer{nullptr};
+            ATH_CHECK(SG::get(measContainer, key.contHandleKey(), ctx));
+            if (measContainer->empty()) {
                 continue;
             }
             MarkerHandle_t decor{makeHandle(ctx, key, false)};
-            markers.insert(std::make_pair(readHandle.cptr(), std::move(decor)));
+            markers.insert(std::make_pair(measContainer, std::move(decor)));
             const Muon::MuonStationIndex::TechnologyIndex techIdx = 
-                 m_idHelperSvc->technologyIndex(xAOD::identify(readHandle->at(0)));
-            techConts[techIdx].push_back(readHandle.cptr());
+                 m_idHelperSvc->technologyIndex(xAOD::identify(measContainer->at(0)));
+            techConts[techIdx].push_back(measContainer);
         }
         std::unordered_map<const SG::AuxVectorData*, LinkHandle_t> links{};
         for (const WriteDecorKey_t& key : m_writeSegLinkKeys) {
-            SG::ReadHandle readHandle{key.contHandleKey(), ctx};
-            if (readHandle->empty()){
+            const xAOD::UncalibratedMeasurementContainer* measContainer{nullptr};
+            ATH_CHECK(SG::get(measContainer, key.contHandleKey(), ctx));
+            if (measContainer->empty()) {
                 continue;
             }
             LinkHandle_t decor{makeHandle(ctx, key,SegLinkVec_t{})};
-            links.insert(std::make_pair(readHandle.cptr(), std::move(decor)));
+            links.insert(std::make_pair(measContainer, std::move(decor)));
         }
         
         auto fetchPrd = [&techConts,this](const xAOD::MuonSimHit* hit) -> const xAOD::UncalibratedMeasurement*{
@@ -79,7 +81,7 @@ namespace MuonR4 {
         for (const xAOD::MuonSegment* segment : *segContainer) {
             const auto truthHits{getMatchingSimHits(*segment)};
             
-            SegLink_t segLink{segContainer.cptr(), segment->index()};
+            SegLink_t segLink{segContainer, segment->index()};
             for (const xAOD::MuonSimHit* simHit : truthHits) {
                 const xAOD::UncalibratedMeasurement* prd = fetchPrd(simHit);
                 if (!prd) {

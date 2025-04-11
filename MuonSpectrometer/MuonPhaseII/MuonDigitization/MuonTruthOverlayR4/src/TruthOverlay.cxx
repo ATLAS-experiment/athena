@@ -32,8 +32,8 @@ namespace MuonR4{
 
         /// Helper function to fill the hits to merge
         auto fillMap = [&overlayed, &ctx, this] (const SG::ReadHandleKey<xAOD::MuonSimHitContainer>& key) -> StatusCode{
-            SG::ReadHandle hits{key, ctx};
-            ATH_CHECK(hits.isPresent());
+            const xAOD::MuonSimHitContainer* hits{nullptr};
+            ATH_CHECK(SG::get(hits, key, ctx));
             xAOD::ChamberViewer viewer{*hits, m_idHelperSvc.get()};
             do {
                 for (const xAOD::MuonSimHit* hit : viewer) {

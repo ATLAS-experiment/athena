@@ -19,16 +19,16 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     StatusCode xRpcMeasToRpcTrkPrdCnvAlg::execute(const EventContext& ctx) const {
-        SG::ReadHandle readHandle{m_readKey, ctx};
-        ATH_CHECK(readHandle.isPresent());
+        const xAOD::RpcMeasurementContainer* measContainer{nullptr};
+        ATH_CHECK(SG::get(measContainer, m_readKey, ctx));
 
-        SG::ReadCondHandle detMgr{m_detMgrKey, ctx};
-        ATH_CHECK(detMgr.isValid());
+        const MuonGM::MuonDetectorManager* detMgr{nullptr};
+        ATH_CHECK(SG::get(detMgr, m_detMgrKey, ctx));
 
         std::vector<std::unique_ptr<Muon::RpcPrepDataCollection>> prdCollections{};
         const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
         prdCollections.resize(idHelper.module_hash_max());
-        for (const xAOD::RpcMeasurement* meas : *readHandle) {
+        for (const xAOD::RpcMeasurement* meas : *measContainer) {
             const Identifier measId = meas->identify();
             const IdentifierHash modHash{m_idHelperSvc->moduleHash(measId)};
             
