@@ -561,7 +561,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
     }
   }
 
-  ATH_CHECK(runOverlapRemoval(track_cands, minChi2, maxOverlappingHits, m_algo));
+  ATH_CHECK(runOverlapRemoval(track_cands, minChi2, maxOverlappingHits, m_algo, m_monTool));
   unsigned long passed = 0;
   for (auto const &cand : track_cands) {
     if (cand.passedOR()) {

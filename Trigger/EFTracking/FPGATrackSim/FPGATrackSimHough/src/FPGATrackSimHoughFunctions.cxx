@@ -6,11 +6,33 @@
 #include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
 #include <stdexcept>
 
+#include <AsgMessaging/MessageCheck.h>
+using namespace asg::msgUserCode;
+
 // EPSILON for hit position float comparisons
 constexpr float EPSILON = 1e-5;
 
-StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float minChi2, const int NumOfHitPerGrouping, ORAlgo orAlgo)
+StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float minChi2, const int NumOfHitPerGrouping, ORAlgo orAlgo, ToolHandle<GenericMonitoringTool> monTool)
 {
+  ANA_MSG_DEBUG("Beginning runOverlapRemoval()");
+  ANA_MSG_DEBUG("Tracks in event: " << tracks.size());
+
+  std::vector<int> flags_OR;
+  flags_OR.clear();
+
+  // Debug variables 
+  int ntrack_passOR = 0;
+  int ntrack = 0;
+  std::vector<int> track_passOR_counter;
+  std::vector<int> track_passOR_barcodefrac;
+  track_passOR_counter.clear();
+  track_passOR_barcodefrac.clear();
+  int track_barcodefrac_num;
+  int track_barcodefrac_den;
+  float track_barcodefrac;
+  int ntrack_passOR_total = 0;
+  int trackMuon_gt0pt5_passOR = 0;
+  float tmp_TrueTrack_BCF = 0.;
 
   // Create tracks to hold and compare
   FPGATrackSimTrack fit1, fit2;
@@ -28,8 +50,8 @@ StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float
     // Create vector for holding duplicate track list
     std::vector<int> duplicates(1,i);
 
-    // Loop through the remaning tracks
-    for(unsigned int j=i+1; j<tracks.size(); j++)
+    // Loop through the rest of the tracks
+    for(unsigned int j=0; j<tracks.size(); j++)
     {
       if(i!=j)
       {
@@ -68,9 +90,50 @@ StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float
         }
       }
     }
+    findMinChi2MaxHit(duplicates, tracks, flags_OR, minChi2);
 
-    findMinChi2MaxHit(duplicates, tracks);
+    // Monitoring 
+    ntrack++;
+    track_passOR_counter.push_back(ntrack);
+    track_barcodefrac_num = 0;
+    for(auto& hit : tracks.at(i).getFPGATrackSimHits())
+      {
+	      if(hit.getBarcode() == 10001) track_barcodefrac_num++;
+      }
+    track_barcodefrac_den = tracks.at(i).getFPGATrackSimHits().size();
+    track_barcodefrac = (float)track_barcodefrac_num/(float)track_barcodefrac_den;
+    fit1.setBarcodeFrac(track_barcodefrac);
+    track_passOR_barcodefrac.push_back(track_barcodefrac);
+    if(fit1.getBarcodeFrac() > 0.5 && tracks.at(i).passedOR()) {
+      trackMuon_gt0pt5_passOR++;
+      if(trackMuon_gt0pt5_passOR == 1) { 
+        tmp_TrueTrack_BCF = fit1.getBarcodeFrac(); 
+      }
+      if(trackMuon_gt0pt5_passOR > 1) { 
+        if (fit1.getBarcodeFrac() > tmp_TrueTrack_BCF) {
+          tmp_TrueTrack_BCF = fit1.getBarcodeFrac();
+        }
+      }
+    }
+
   }
+
+  // Monitoring histograms
+  ANA_MSG_DEBUG("List of tracks passing OR:: ");
+  for(unsigned int i=0; i<tracks.size();i++){
+    if(tracks.at(i).passedOR()) {
+        ntrack_passOR++;
+        ANA_MSG_DEBUG("track# = " << track_passOR_counter[i] << ": chi2 = " << tracks.at(i).getChi2ndof() << " barcodefrac = " << track_passOR_barcodefrac[i]);
+    }
+  }
+  ntrack_passOR_total =+ ntrack_passOR;
+  auto mon_ntrack_passOR = Monitored::Scalar<int>("ntrack_passOR", ntrack_passOR);
+  auto mon_barcodeFrac_passOR = Monitored::Scalar<int>("barcodeFrac_passOR", tmp_TrueTrack_BCF);
+  Monitored::Group(monTool, mon_ntrack_passOR);
+  Monitored::Group(monTool, mon_barcodeFrac_passOR);
+  ANA_MSG_DEBUG("Number of tracks passing OR (total) = " << ntrack_passOR_total);
+
+  
   return StatusCode::SUCCESS;
 }
 
@@ -107,8 +170,7 @@ int findNonOverlapHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack&
         continue;
       }
     }
-    else if(hit1.getPhiIndex() != hit1.getPhiIndex()
-            || hit1.getEtaIndex() != hit1.getEtaIndex())
+    else if (std::abs(hit1.getGPhi()-hit2.getGPhi())>0.001 && std::abs(hit1.getZ()-hit2.getZ())>0.001 && std::abs(hit1.getR()-hit2.getR())>0.001) 
     {
       nonOverlapHits++;
     }
@@ -121,54 +183,76 @@ int findNonOverlapHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack&
 }
 
 
-void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrackSimTrack>& RMtracks)
+void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrackSimTrack>& RMtracks, std::vector<int> flags_OR, const float minChi2)
 {
-  
-  float minChi2=100000.;
-  int   prevID =-1;
-  int   maxHitLayers=0;
+  int ntr_belowMinChi2 = 0;
+  std::vector<int> track_counter;
+  std::vector<int> track_counter_minChi2;
+
+  for(unsigned int i=0; i<RMtracks.size();i++)
+  {
+    if(RMtracks.at(i).getChi2ndof() >  minChi2) {
+      track_counter.push_back(0);
+      flags_OR.push_back(-1);
+      continue;
+    }
+    ntr_belowMinChi2++;    
+    track_counter.push_back(ntr_belowMinChi2);
+    track_counter_minChi2.push_back(ntr_belowMinChi2);
+    flags_OR.push_back(1);
+  }
+
+  int dup_counter = 0;
+  int head_track = 1;
+  float head_chi2 = 0.;
+  int head_nhits = 0;
+
   for(auto dup: duplicates)
   {
     float t_chi2 = RMtracks.at(dup).getChi2ndof();
-    int t_nhitlayers = RMtracks.at(dup).getFPGATrackSimHits().size();
+    int t_nhitlayers = RMtracks.at(dup).getFPGATrackSimHits().size(); 
     for(auto& hit : RMtracks.at(dup).getFPGATrackSimHits())
     {
+      ANA_MSG_DEBUG("Real hit info = " << hit);
+      ANA_MSG_DEBUG("Real hit info (global) = Gphi= " << hit.getGPhi() << " Z=" << hit.getZ() << " R=" << hit.getR() << " chi2=" << t_chi2);
+
       if(!hit.isReal())
       {
         t_nhitlayers--;
       }
     }
-
-    if(t_nhitlayers>maxHitLayers)
-    {
-      if(prevID!=-1)
-      {
-        RMtracks.at(prevID).setPassedOR(0);
-      }
-      prevID=dup;
-      maxHitLayers=t_nhitlayers;
-      minChi2=t_chi2;
+    if (dup_counter == 0) {
+      head_track = dup;
+      head_chi2 = RMtracks.at(head_track).getChi2ndof();
+      head_nhits = t_nhitlayers; 
     }
-    else if(t_nhitlayers==maxHitLayers)
-    {
-      if(t_chi2<minChi2)
+    if (dup_counter > 0){
+     if(t_nhitlayers>head_nhits)
       {
-        if(prevID!=-1)
-        {
-          RMtracks.at(prevID).setPassedOR(0);
-        }
-        prevID=dup;
-        minChi2=t_chi2;
+        RMtracks.at(head_track).setPassedOR(0); 
       }
-      else
+      else if(t_nhitlayers==head_nhits)
       {
-        RMtracks.at(dup).setPassedOR(0);
+        if(t_chi2<head_chi2)
+          {
+            RMtracks.at(head_track).setPassedOR(0);
+          }
+        if(std::abs(t_chi2-head_chi2)<0.000001)
+          {
+            if(track_counter[head_track] < track_counter[dup]) {
+              RMtracks.at(dup).setPassedOR(0); 
+            }
+            if(track_counter[head_track] > track_counter[dup]) { 
+              RMtracks.at(head_track).setPassedOR(0);
+            }
+          }
       }
     }
-    else
-    {
-      RMtracks.at(dup).setPassedOR(0);
-    }
+    
+    if(!RMtracks.at(head_track).passedOR()) flags_OR[head_track] = 0;
+    if(RMtracks.at(head_track).passedOR()) flags_OR[head_track] = 1;
+    dup_counter++;
+    
   }
 }
 
@@ -209,7 +293,7 @@ int findNCommonHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Tr
       }
     }
     // If both hits aren't spacepoints, we should be able to do this comparison.
-    else if (hit1.getPhiIndex() == hit2.getPhiIndex() && hit1.getEtaIndex() == hit2.getEtaIndex()) {
+    else if (std::abs(hit1.getGPhi()-hit2.getGPhi())<0.001 && std::abs(hit1.getZ()-hit2.getZ())<0.001 && std::abs(hit1.getR()-hit2.getR())<0.001) {
       nCommHits++;
     }
     else

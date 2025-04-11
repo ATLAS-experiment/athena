@@ -138,6 +138,9 @@ def FPGATrackSimOverlapRemovalToolCfg(flags):
         OR.nBins_y = flags.Trigger.FPGATrackSim.ActiveConfig.yBins + 2 * flags.Trigger.FPGATrackSim.ActiveConfig.yBufferBins
         OR.localMaxWindowSize = flags.Trigger.FPGATrackSim.ActiveConfig.localMaxWindowSize
         OR.roadSliceOR = flags.Trigger.FPGATrackSim.ActiveConfig.roadSliceOR
+    
+    from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimOverlapRemovalToolMonitoringCfg
+    OR.MonTool = result.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolMonitoringCfg(flags))
 
     result.setPrivateTools(OR)
     return result

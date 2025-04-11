@@ -302,6 +302,19 @@ def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
 
     return result
 
+def FPGATrackSimOverlapRemovalToolMonitoringCfg(flags):
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    result = ComponentAccumulator()
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool(flags, 'MonTool')
+
+    monTool.defineHistogram('ntrack_passOR', path='EXPERT', type='TH1I', title='ntrack_passOR', xbins=20, xmin=0, xmax=10)
+    monTool.defineHistogram('barcodeFrac_passOR', path='EXPERT', type='TH1I', title='barcodeFrac_passOR', xbins=20, xmin=0, xmax=1.5)
+  
+    result.setPrivateTools(monTool)
+
+    return result
+
 def FPGATrackSimSecondStageAlgMonitoringCfg(flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
