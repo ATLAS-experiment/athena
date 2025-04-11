@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -20,7 +20,6 @@
 #include "Identifier/IdContext.h"
 
 #include "TRT_CablingData.h"
-#include "TRT_ReadoutGeometry/TRT_DetectorManager.h" 
 #include "InDetIdentifier/TRT_ID.h"
 
 #include "eformat/SourceIdentifier.h"  // change to new eformat v3
