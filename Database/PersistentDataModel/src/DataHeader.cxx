@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeader.cxx
@@ -56,12 +56,15 @@ DataHeaderElement::DataHeaderElement(CLID clid,
                                      IOpaqueAddress* tokAddress,
                                      const std::string& pTag)
   : m_pClid(clid),
-    m_clids(tClids.begin(), tClids.end()),
+    m_clids(tClids),
     m_key((pTag.empty()) ? name : pTag),
     m_alias(std::move(alias)),
     m_hashes()
 {
-  m_clids.erase(m_pClid);
+  std::ranges::sort (m_clids);
+  const auto ret = std::ranges::unique (m_clids);
+  m_clids.erase (ret.begin(), ret.end());
+  std::erase (m_clids, m_pClid);
   TokenAddress* tokAddr = dynamic_cast<TokenAddress*>(tokAddress);
   if (tokAddr != 0 && tokAddr->getToken() != 0) {
     tokAddr->getToken()->setData (&m_token);
@@ -101,11 +104,11 @@ CLID DataHeaderElement::getPrimaryClassID() const {
    if (m_pClid > 0) {
       return(m_pClid);
    }
-   return(*(m_clids.begin()));
+   return(m_clids.front());
 }
 //______________________________________________________________________________
 const std::set<CLID> DataHeaderElement::getClassIDs() const {
-  std::set<CLID> allClids (m_clids);
+  std::set<CLID> allClids (m_clids.begin(), m_clids.end());
   allClids.insert(m_pClid);
   return(allClids);
 }
@@ -149,11 +152,7 @@ SG::TransientAddress* DataHeaderElement::getAddress(const std::string& key,
 	unsigned long contextId) const {
    CLID primaryClID = getPrimaryClassID();
    TokenAddress* tokAdd = new TokenAddress(this->getStorageType(), primaryClID, "", m_key, contextId , &m_token);
-   SG::TransientAddress* sgAddress = new SG::TransientAddress(primaryClID, key, tokAdd);
-   for (std::set<CLID>::const_iterator iter = m_clids.begin(), last = m_clids.end();
-	   iter != last; ++iter) {
-      sgAddress->setTransientID(*iter);
-   }
+   SG::TransientAddress* sgAddress = new SG::TransientAddress(primaryClID, key, tokAdd, m_clids);
    sgAddress->setAlias(m_alias);
    return(sgAddress);
 }

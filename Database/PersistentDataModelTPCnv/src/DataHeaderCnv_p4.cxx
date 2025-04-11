@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv_p4.cxx
@@ -24,11 +24,7 @@ void DataHeaderElementCnv_p4::persToTrans(const DataHeaderElement_p4* pers,
    std::vector<unsigned int>::const_iterator intIter = pers->m_clids.begin();
    const std::vector<unsigned int>::const_iterator intLast = pers->m_clids.end();
    trans->m_pClid = *intIter; ++intIter;
-   trans->m_clids.clear();
-   for (std::set<CLID>::const_iterator lastClid = trans->m_clids.begin();
-		   intIter != intLast; ++intIter) {
-      lastClid = trans->m_clids.insert(lastClid, *intIter);
-   }
+   trans->m_clids.assign (intIter, intLast);
    std::vector<std::string>::const_iterator strIter = pers->m_alias.begin();
    const std::vector<std::string>::const_iterator strLast = pers->m_alias.end();
    trans->m_key = *strIter; ++strIter;
