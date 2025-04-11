@@ -11,6 +11,8 @@
 
 NEVENTS="540"
 
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA23)")
+
 ATHENA_CORE_NUMBER=8 \
 timeout 64800 \
 Reco_tf.py \
@@ -20,7 +22,7 @@ Reco_tf.py \
   --outputESDFile="myESD.pool.root" \
   --multithreaded="True" \
   --autoConfiguration="everything" \
-  --conditionsTag="all:CONDBR2-BLKPA-2023-05" \
+  --conditionsTag="all:${conditionsTag}" \
   --geometryVersion="all:ATLAS-R3S-2021-03-02-00" \
   --steering="doRAWtoALL" \
   --preExec="flags.Output.StorageTechnology.EventData=\"ROOTRNTUPLE\";";
