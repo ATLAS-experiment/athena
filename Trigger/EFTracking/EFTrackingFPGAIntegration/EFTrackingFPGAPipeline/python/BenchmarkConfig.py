@@ -112,7 +112,7 @@ if __name__ == "__main__":
                     "xAOD::TrackParticleAuxContainer#FPGATrackParticlesAux."
                     ]
     
-    from EFTrackingFPGAIntegration.FPGAOutputValidationConfig import FPGAOutputValidationCfg
+    from EFTrackingFPGAOutputValidation.FPGAOutputValidationConfig import FPGAOutputValidationCfg
     cfg.merge(FPGAOutputValidationCfg(flags, **{
         "pixelKeys": ["FPGAPixelClusters", "ITkPixelClusters"],
         "stripKeys": ["FPGAStripClusters", "ITkStripClusters"],
