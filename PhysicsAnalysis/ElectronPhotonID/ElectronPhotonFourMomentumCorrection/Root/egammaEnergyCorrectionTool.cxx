@@ -4650,7 +4650,7 @@ double egammaEnergyCorrectionTool::getAlphaConvSyst(
 }
 
 double egammaEnergyCorrectionTool::getInterpolateConvSyst2D(
-    const TH2& conv_hist, double aeta, double ET) const {
+    const TH2& conv_hist, double aeta, double ET) {
 
   // use one bin in eta and linear interpolation in Et between 2 bins
   int ieta = conv_hist.GetXaxis()->FindBin(aeta);

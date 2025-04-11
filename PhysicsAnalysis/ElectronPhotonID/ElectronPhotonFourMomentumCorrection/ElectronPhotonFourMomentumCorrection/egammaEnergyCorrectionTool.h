@@ -599,8 +599,8 @@ class egammaEnergyCorrectionTool : public asg::AsgMessaging {
   double get_OFCSyst(double eta) const;
   static bool isInCrack(double cl_eta);
   static double nearestEtaBEC(double cl_eta);
-  double getInterpolateConvSyst2D(const TH2& conv_hist, double aeta,
-                                  double ET) const;
+  static double getInterpolateConvSyst2D(const TH2& conv_hist, double aeta,
+                                  double ET) ;
 
   /** @brief get resolution and its uncertainty)
       @brief particle type : 0=electron, 1=reco unconverted photon, 2=reco
