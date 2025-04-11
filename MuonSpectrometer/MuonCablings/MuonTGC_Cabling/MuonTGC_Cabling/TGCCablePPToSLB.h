@@ -34,7 +34,7 @@ private:
   virtual TGCModuleMap* getModuleIn(const TGCModuleId* slb) const;
   virtual TGCModuleMap* getModuleOut(const TGCModuleId* pp) const;
 
-  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>, TGCId::MaxRegionType> m_database{nullptr};
+  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>, TGCId::MaxRegionType> m_database{{{nullptr}}};
 };
   
 }  // end of namespace

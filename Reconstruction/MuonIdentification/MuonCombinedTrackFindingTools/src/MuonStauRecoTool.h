@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONSTAURECOTOOL_H
@@ -39,7 +39,7 @@
 
 namespace Muon {
     class RpcClusterOnTrack;
-    class RpcClusterObj;
+    struct RpcClusterObj;
 }
 
 namespace MuonCombined {

@@ -29,7 +29,7 @@ class TGCCableInASD : public TGCCable {
 				     bool orChannel=false) const;
   virtual TGCChannelId* getChannelOut(const TGCChannelId* asdin,
 				      bool orChannel=false) const;
-  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>, TGCId::MaxRegionType> m_database{nullptr};
+  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>, TGCId::MaxRegionType> m_database{{{nullptr}}};
 };
   
 }  // end of namespace
