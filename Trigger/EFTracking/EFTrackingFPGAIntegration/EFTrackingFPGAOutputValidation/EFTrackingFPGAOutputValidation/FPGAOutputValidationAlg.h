@@ -27,14 +27,20 @@ class FPGAOutputValidationAlg : public AthReentrantAlgorithm
 
   Gaudi::Property<bool> m_doDiffHistograms{
     this,
-    "doDiffHistograms", 
-    false, 
+    "doDiffHistograms",
+    false,
     "Create extra histograms for cluster parameter diffs between matched clusters."
   };
+  Gaudi::Property<bool> m_matchByID{this, "matchByID", false, "Use hash to match clusters. If false, use only the rdo list."};
+  Gaudi::Property<size_t> m_allowedRdoMisses {this, "allowedRdoMisses", 0, "Use hash to match clusters. If false, use only the rdo list."};
+
   SG::ReadHandleKeyArray<xAOD::PixelClusterContainer> m_pixelKeys{this, "pixelKeys", {}};
   SG::ReadHandleKeyArray<xAOD::StripClusterContainer> m_stripKeys{this, "stripKeys", {}};
 
   ToolHandle<GenericMonitoringTool> m_monitoringTool{this, "monitoringTool", "", "Monitoring tool"};
+
+  // chrono service
+  ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
 
  public:
   FPGAOutputValidationAlg(const std::string& name, ISvcLocator* pSvcLocator);

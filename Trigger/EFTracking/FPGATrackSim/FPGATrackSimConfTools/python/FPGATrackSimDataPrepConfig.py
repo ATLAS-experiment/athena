@@ -551,13 +551,7 @@ def runDataPrepChain():
         from ActsConfig.ActsSpacePointFormationConfig import ActsPixelSpacePointFormationAlgCfg
         acc.merge(ActsPixelSpacePointFormationAlgCfg(flags,name="FPGAActsPixelSpacePointFormationAlg",
                                                      **{'PixelClusters':"xAODPixelClusters_1stFromFPGACluster",
-                                                        'PixelSpacePoints':"xAODPixelSpacePoints_1stFromFPGA"}))
-        
-        # cluster monitoring
-        if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
-            from EFTrackingFPGAOutputValidation.FPGAOutputValidationConfig import FPGAOutputValidationCfg
-            acc.merge(FPGAOutputValidationCfg(flags, **{'pixelKeys' : ["xAODPixelClusters_1stFromFPGACluster","ITkPixelClusters"],
-                                                        'stripKeys' : ["xAODStripClusters_1stFromFPGACluster","ITkStripClusters"]}))
+                                                        'PixelSpacePoints':"xAODPixelSpacePoints_1stFromFPGA"}))         
         
         if flags.Trigger.FPGATrackSim.connectToToITkTracking:     
             # Run ACTS Fast Tracking on offline objects (starting from seeding)
@@ -582,10 +576,15 @@ def runDataPrepChain():
         acc.merge(FPGATrackSimReportingCfg(flags,stage="_1st",
                                            perEventReports = (flags.Trigger.FPGATrackSim.sampleType != 'skipTruth'),
                                            isDataPrep=True))
-
-        from EFTrackingFPGAOutputValidation.FPGAOutputValidationConfig import FPGAOutputValidationCfg
-        acc.merge(FPGAOutputValidationCfg(flags, **{'pixelKeys' : ["xAODPixelClusters_1stFromFPGACluster","ITkPixelClusters"],'stripKeys':["xAODStripClusters_1stFromFPGACluster","ITkStripClusters"]}))
         
+        # cluster monitoring
+        if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
+            from EFTrackingFPGAOutputValidation.FPGAOutputValidationConfig import FPGAOutputValidationCfg
+            acc.merge(FPGAOutputValidationCfg(flags, **{'pixelKeys' : ["xAODPixelClusters_1stFromFPGACluster","ITkPixelClusters"],
+                                                        'stripKeys':["xAODStripClusters_1stFromFPGACluster","ITkStripClusters"],
+                                                        'doDiffHistograms':True,
+                                                        'matchByID' : True}))
+            
     acc.store(open('AnalysisConfig.pkl','wb'))
 
     statusCode = acc.run(flags.Exec.MaxEvents)

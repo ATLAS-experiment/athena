@@ -7,6 +7,8 @@ def FPGAOutputValidationCfg(flags, **kwargs):
     kwargs.setdefault("pixelKeys", [])
     kwargs.setdefault("stripKeys", [])
     kwargs.setdefault("doDiffHistograms", False)
+    kwargs.setdefault("matchByID", False)
+    kwargs.setdefault("allowedRdoMisses", 0)
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monitoringTool = GenericMonitoringTool(flags, 'FPGAOutputValidationMonitoringTool')
