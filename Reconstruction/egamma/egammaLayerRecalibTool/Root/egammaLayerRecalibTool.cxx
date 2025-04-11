@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -18,8 +18,6 @@
 #include "PathResolver/PathResolver.h"
 
 #include "egammaLayerRecalibTool/egammaLayerRecalibTool.h"
-#include "xAODEgamma/EgammaxAODHelpers.h"
-
 #include "xAODEgamma/EgammaxAODHelpers.h"
 
 namespace {
@@ -279,7 +277,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale(new ScaleE2(InputModifier::SUBTRACT), new GetAmountPileupE2(m_pileup_tool));
     add_scale(new ScaleE3(InputModifier::SUBTRACT), new GetAmountPileupE3(m_pileup_tool));
   }
-  //Run 2 release 22 with fixed E1E2 and repeated acc 
+  //Run 2 release 22 with fixed E1E2 and repeated acc
   else if ("run2_alt_with_layer2_r22_Precision_v1"==tune) {
     add_scale("layer2_alt_el_mu_comb_r21_v0_fix");
     add_scale("ps_mu_r21_v0");
@@ -512,7 +510,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale(new ScaleE0(InputModifier::ZEROBASED), new GetAmountHisto1D(h_presampler));
     add_scale(new ScaleE1(InputModifier::ZEROBASED), new GetAmountFixed(0.01));
   }
-  // repeated acc scale based on layer2_alt_el_mu_comb_r21_v0_fix 
+  // repeated acc scale based on layer2_alt_el_mu_comb_r21_v0_fix
   else if ("acc_zee_r22_v1" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v12/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
