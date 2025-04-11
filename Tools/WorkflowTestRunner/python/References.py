@@ -31,9 +31,9 @@ references_map = {
     "q454": "v54",
     # Derivations
     "data_PHYS_Run2": "v48",
-    "data_PHYSLITE_Run2": "v26",
+    "data_PHYSLITE_Run2": "v27",
     "data_PHYS_Run3": "v49",
-    "data_PHYSLITE_Run3": "v28",
+    "data_PHYSLITE_Run3": "v29",
     "mc_PHYS_Run2": "v62",
     "mc_PHYSLITE_Run2": "v31",
     "mc_PHYS_Run3": "v65",
