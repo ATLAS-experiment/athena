@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PersistentDataModelTPCnv/DataHeader_p6.h"
@@ -64,7 +64,7 @@ unsigned int DataHeaderForm_p6::getDbTech(unsigned int index) const {
 
 unsigned int DataHeaderForm_p6::insertObj(const ObjRecord& rec,
         const std::set<std::string>& aliases, bool doAliasFiltering,
-	const std::set<unsigned int>& symLinks,
+	const std::vector<unsigned int>& symLinks,
 	const std::vector<sgkey_t>& hashes)
 {
    unsigned int index = 0U;
@@ -73,11 +73,10 @@ unsigned int DataHeaderForm_p6::insertObj(const ObjRecord& rec,
       if (*iter == rec) break;
    }
    std::vector<std::string>     alias( aliases.cbegin(), aliases.cend() );
-   std::vector<unsigned int>    symlinks( symLinks.begin(), symLinks.end() );
    if (index != m_objRecords.size()) {
       // found matching object record, check if all the info is the same
-      if( m_objSymLinks[index] != symlinks ) {
-         m_objSymLinks[index] = std::move(symlinks);
+      if( m_objSymLinks[index] != symLinks ) {
+         m_objSymLinks[index] = symLinks;
          m_modified = true;
       }
       if( m_objHashes[index] != hashes ) {
@@ -93,7 +92,7 @@ unsigned int DataHeaderForm_p6::insertObj(const ObjRecord& rec,
    // enter a new record
    m_objRecords.push_back( rec );
    m_objAlias.push_back( std::move(alias) );
-   m_objSymLinks.push_back( std::move(symlinks) );
+   m_objSymLinks.push_back( symLinks );
    m_objHashes.push_back( hashes );
    m_modified = true;
    return m_objRecords.size() - 1;
@@ -123,8 +122,9 @@ std::set<std::string> DataHeaderForm_p6::getObjAlias(unsigned int index) const {
    return(std::set<std::string>(m_objAlias[index].begin(), m_objAlias[index].end()));
 }
 
-std::set<unsigned int> DataHeaderForm_p6::getObjSymLinks(unsigned int index) const {
-   return(std::set<unsigned int>(m_objSymLinks[index].begin(), m_objSymLinks[index].end()));
+const std::vector<unsigned int>&
+DataHeaderForm_p6::getObjSymLinks(unsigned int index) const {
+  return m_objSymLinks[index];
 }
 
 std::vector<DataHeaderForm_p6::sgkey_t>

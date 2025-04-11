@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENTDATAMODEL_DATAHEADER_H
@@ -106,8 +106,8 @@ private:
 
    /// primary ClassID.
    CLID m_pClid;
-   /// set of unsigned long to store ClassID's for symlinked container.
-   std::set<CLID> m_clids;
+   /// vector of unsigned long to store ClassID's for symlinked container.
+   std::vector<CLID> m_clids;
    /// string with StoreGate key.
    std::string m_key;
    /// set of StoreGate alias string.
