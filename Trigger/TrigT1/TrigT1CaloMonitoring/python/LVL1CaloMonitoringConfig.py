@@ -282,6 +282,10 @@ thresholds th_AnyBinIsError {
         if splitPath[0] not in ["Shifter","Expert","Developer"]:
             raise Exception("Path of histogram invalid, does not start with one of the allowed audiences (Shifter,Expert,Developer)")
 
+        # don't bother registering Shifter plots in tier0 ... only needed in p1 and user environments
+        if splitPath[0]=="Shifter" and self.dqEnv == 'tier0':
+            return None
+
         # require a hanConfig not in Developer or a detail dir
         if splitPath[0] != "Developer" and splitPath[-1] != "detail" and ("algorithm" not in hanConfig):
             # will default to using GatherData as long as there is a description
@@ -297,6 +301,7 @@ thresholds th_AnyBinIsError {
         if fillGroup is None: fillGroup = self.alg.name + "_fillGroup"
         if fillGroup not in self.fillGroups:
             self.fillGroups[fillGroup] = self.helper.addGroup(self.alg,fillGroup,topPath="L1Calo")
+
 
         if "merge" not in kwargs and kwargs.get("type","") !="TEfficiency":
             kwargs["merge"] = "merge" # ensures we don't get a warning about not specifying merge method
@@ -360,7 +365,7 @@ thresholds th_AnyBinIsError {
         argsCopy[0] = argsCopy[0].replace(";"+treeName,";"+histName)
         kwargsCopy = dict(kwargs)
         kwargsCopy["title"] = f"Number of Entries in {treeName} TTree" + ";" + ";".join(kwargsCopy.get("title","").split(";")[1:])
-        kwargsCopy["opt"] = ['kCanRebin','kAddBinsDynamically']
+        kwargsCopy["opt"] = ['kCanRebin','kAddBinsDynamically','kAlwaysCreate']
         kwargsCopy["merge"] = "merge"
         is2d = (kwargsCopy["title"].count(";")>1)
         self.defineHistogram(argsCopy[0],type="TH2I" if is2d else "TH1I",xbins=1,xmin=0,xmax=1,ybins=1 if is2d else None,ymin=0,ymax=1,fillGroup=fillGroup,**kwargsCopy)

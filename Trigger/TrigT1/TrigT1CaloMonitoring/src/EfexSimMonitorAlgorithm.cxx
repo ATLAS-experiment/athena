@@ -155,8 +155,8 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
         }
 
         tobMismatched=100;
-        fill("mismatches",tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,evtType,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature,simReady);
-        fill("mismatches_count",lbn,signature,simReady,evtType);
+        auto simReadyMismatch = Monitored::Scalar<bool>("SimulationReadyMismatch",simReady);
+        fill("mismatches",simReadyMismatch,tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,evtType,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature,simReady);
     } else {
         tobMismatched=0;
         fill("mismatches",tobMismatched,lbn,signature,simReady,evtType);

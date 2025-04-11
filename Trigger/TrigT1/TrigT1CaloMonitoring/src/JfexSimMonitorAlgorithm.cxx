@@ -217,8 +217,8 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
             std::cout << std::endl << std::dec;
         }
         tobMismatched=100;
-        fill("mismatches",tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,eventType,IsDataTowers,IsEmulatedTowers,simReady,eventType);
-        fill("mismatches_count",lbn,Signature,simReady,eventType);
+        auto simReadyMismatch = Monitored::Scalar<bool>("SimulationReadyMismatch",simReady);
+        fill("mismatches",simReadyMismatch,tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,eventType,IsDataTowers,IsEmulatedTowers,simReady,eventType);
     } else {
         tobMismatched=0;
         fill("mismatches",lbn,Signature,tobMismatched,simReady,eventType);

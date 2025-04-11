@@ -190,8 +190,8 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 			std::cout << std::endl << std::dec;
 		}
         tobMismatched=100;
-		fill("mismatches",tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,simReady,eventType);
-        fill("mismatches_count",lbn,Signature,simReady,eventType);
+        auto simReadyMismatch = Monitored::Scalar<bool>("SimulationReadyMismatch",simReady);
+		fill("mismatches",simReadyMismatch,tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,simReady,eventType);
 		if (label=="gJ" || label=="gLJ") {
             auto locIdx = Monitored::Scalar<std::string>("locIdx","");
             for(auto tob : mismatchedTOBs) {
@@ -285,8 +285,8 @@ bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
 			std::cout << std::endl << std::dec;
 		}
         tobMismatched=100;
-		fill("mismatches",lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,tobMismatched,eventType);
-        fill("mismatches_count",lbn,Signature,eventType);
+        auto simReadyMismatch = Monitored::Scalar<bool>("SimulationReadyMismatch",false/* global RoI not sim ready yet*/);
+        fill("mismatches",simReadyMismatch,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,tobMismatched,eventType);
 	} else {
         tobMismatched=0;
         fill("mismatches",lbn,Signature,tobMismatched,eventType);
