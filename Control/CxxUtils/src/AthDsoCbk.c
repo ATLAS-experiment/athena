@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /* implementation for AthDsoCbk */
@@ -295,6 +295,7 @@ int
 ath_dso_cbk_register(ath_dso_event_cbk_t cbk, void *userdata)
 {
   ath_dso_event_cbk *dso_callback = (ath_dso_event_cbk*)malloc(sizeof(ath_dso_event_cbk));
+  if (!dso_callback) abort();
   dso_callback->cbk = cbk != NULL
     ? cbk
     : ath_dso_event_cbk_default;
