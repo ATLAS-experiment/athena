@@ -30,9 +30,18 @@ class TH2F;
 #include "PATInterfaces/CorrectionCode.h"
 #include "PATInterfaces/SystematicRegistry.h"
 
+#include <ColumnarCore/ColumnAccessor.h>
+#include "ColumnarCluster/ClusterHelpers.h"
+#include <ColumnarEventInfo/EventInfoDef.h>
+#include <ColumnarCore/LinkColumn.h>
+#include <ColumnarCore/ObjectColumn.h>
+#include <ColumnarCore/VectorColumn.h>
+#include <ColumnarEgamma/EgammaDef.h>
+
 class AsgElectronEfficiencyCorrectionTool final
   : virtual public IAsgElectronEfficiencyCorrectionTool
   , public asg::AsgMetadataTool
+  , public columnar::ColumnarTool<>
 {
   ASG_TOOL_CLASS(AsgElectronEfficiencyCorrectionTool,
                  IAsgElectronEfficiencyCorrectionTool)
@@ -71,6 +80,10 @@ public:
   virtual CP::CorrectionCode getEfficiencyScaleFactor(
     const xAOD::Electron& inputObject,
     double& efficiencyScaleFactor) const override final;
+  CP::CorrectionCode getEfficiencyScaleFactor(
+    columnar::ElectronId inputObject,
+    double& efficiencyScaleFactor,
+    columnar::EventInfoId info) const;
   //
   virtual CP::CorrectionCode getEfficiencyScaleFactor(
     const double et,  /*in MeV*/
@@ -106,6 +119,8 @@ public:
 
   virtual int systUncorrVariationIndex(
     const xAOD::Electron& inputObject) const override final;
+  int systUncorrVariationIndex(
+    columnar::ElectronId inputObject) const;
 
 private:
   StatusCode registerSystematics();
@@ -215,6 +230,33 @@ private:
   std::vector<CP::SystematicVariation> m_corrVarDown;
   std::vector<CP::SystematicVariation> m_uncorrVarUp;
   std::vector<CP::SystematicVariation> m_uncorrVarDown;
+
+public:
+
+  struct Accessors : public columnar::ColumnarTool<>
+  {
+    Accessors(AsgElectronEfficiencyCorrectionTool& tool) : columnar::ColumnarTool<>(&tool) {}
+
+    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfo {*this, "EventInfo"};
+    columnar::EventInfoAccessor<uint32_t> randomrunnumber;
+  
+    columnar::ElectronAccessor<columnar::ObjectColumn> m_electrons {*this, "Electrons"};
+    columnar::ElectronAccessor<float> m_eta{*this,"eta"};
+    columnar::ElectronAccessor<float> m_pt{*this,"pt"};
+    columnar::ElectronAccessor<uint16_t> accAuthor{*this,"author"};
+    columnar::ElectronDecorator<float> m_sfDec{*this,"sfOut"};
+    columnar::ElectronDecorator<char> m_validDec{*this,"validOut"};
+  
+    columnar::ClusterAccessor<columnar::ObjectColumn> m_clusterHandle {*this, "egammaClusters"};
+    columnar::ElectronAccessor<std::vector<columnar::OptClusterId>> caloClusterAcc {*this, "caloClusterLinks"};
+    columnar::ClusterAccessor<float> clusterEAcc {*this, "calE"};
+    columnar::ClusterAccessor<float> clusterEtaAcc {*this, "calEta"};
+    columnar::ClusterHelpers::EtaBEAccessor<> clusterEtaBEAcc {*this};
+  };
+  std::unique_ptr<Accessors> m_accessors;
+
+  void callSingleEvent (columnar::ElectronRange electrons, columnar::EventInfoId event) const;
+  void callEvents (columnar::EventContextRange events) const override;
 
 }; // End: class definition
 
