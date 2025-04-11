@@ -173,27 +173,27 @@ private:
   MCTruthPartClassifier::ParticleOrigin defOrigOfElectron(const xAOD::TruthParticleContainer* xTruthParticleContainer,
                                                           const xAOD::TruthParticle*,
                                                           bool& isPrompt,
-                                                          MCTruthPartClassifier::Info* info) const;
+                                                          MCTruthPartClassifier::Info& info) const;
 
   MCTruthPartClassifier::ParticleOrigin defOrigOfMuon(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
                                                       const xAOD::TruthParticle*,
                                                       bool& isPrompt,
-                                                      MCTruthPartClassifier::Info* info) const;
+                                                      MCTruthPartClassifier::Info& info) const;
 
   MCTruthPartClassifier::ParticleOrigin defOrigOfTau(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
                                                      const xAOD::TruthParticle*,
                                                      int motherPDG,
-                                                     MCTruthPartClassifier::Info* info) const;
+                                                     MCTruthPartClassifier::Info& info) const;
 
   MCTruthPartClassifier::ParticleOrigin defOrigOfPhoton(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
                                                         const xAOD::TruthParticle*,
                                                         bool& isPrompt,
-                                                        MCTruthPartClassifier::Info* info) const;
+                                                        MCTruthPartClassifier::Info& info) const;
 
   MCTruthPartClassifier::ParticleOrigin defOrigOfNeutrino(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
                                                           const xAOD::TruthParticle*,
                                                           bool& isPrompt,
-                                                          MCTruthPartClassifier::Info* info) const;
+                                                          MCTruthPartClassifier::Info& info) const;
 
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
   bool genPartToCalo(const EventContext& ctx,
