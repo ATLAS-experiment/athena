@@ -254,7 +254,9 @@ namespace columnar
         if (iter == requestedColumns.end())
           return false;
 
-        const auto & offsetName = iter->second.offsetName;
+        // WARNING: absolutely do not switch the next line to a
+        // reference, the pointed to element gets deleted below.
+        const auto offsetName = iter->second.offsetName;
         if (offsetName.empty())
           throw std::runtime_error ("missing offset column for: " + columnName);
 
