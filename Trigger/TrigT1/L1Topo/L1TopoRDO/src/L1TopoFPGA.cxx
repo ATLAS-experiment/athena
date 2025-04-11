@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -14,12 +14,13 @@ namespace L1Topo {
   }
   
   void L1TopoFPGA::decode(){
-    m_fpgaBlockSize  = L1Topo::decode(m_fpgaTrailer1,32,0xffff);
+    // See https://twiki.cern.ch/twiki/bin/view/Atlas/L1CaloBytestreamDecoders#jFEX_System
+    m_fpgaBlockSize  = L1Topo::decode(m_fpgaTrailer1,0,0xffff);
     m_topoNumber   = L1Topo::decode(m_fpgaTrailer1,20,0x7);
     m_fpgaNumber   = L1Topo::decode(m_fpgaTrailer1,18,0x3);
     m_numSlices    = L1Topo::decode(m_fpgaTrailer1,24,0xf);
     m_sliceNumber  = L1Topo::decode(m_fpgaTrailer1,28,0xf);
-    m_crc          = L1Topo::decode(m_fpgaTrailer2,12,20);
+    m_crc          = L1Topo::decode(m_fpgaTrailer2,12,0xfffff);
     m_ct = (L1Topo::decode(m_fpgaTrailer2,5,1) & 0x1) != 0;
     m_sm = (L1Topo::decode(m_fpgaTrailer2,4,1) & 0x1) != 0;
     m_pe = (L1Topo::decode(m_fpgaTrailer2,3,1) & 0x1) != 0;
