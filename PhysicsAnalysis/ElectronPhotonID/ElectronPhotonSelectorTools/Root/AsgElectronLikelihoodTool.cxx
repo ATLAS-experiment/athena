@@ -958,7 +958,7 @@ AsgElectronLikelihoodTool::getFcalEt(const EventContext& ctx) const
   xAOD::HIEventShapeContainer::const_iterator es_end = HIESCont->end();
   for (; es_itr != es_end; ++es_itr) {
     double et = (*es_itr)->et();
-    const std::string name = SummaryAcc (**es_itr);
+    const std::string& name = SummaryAcc (**es_itr);
     if (name == "FCal")
       fcalEt = et * 1.e-6;
   }

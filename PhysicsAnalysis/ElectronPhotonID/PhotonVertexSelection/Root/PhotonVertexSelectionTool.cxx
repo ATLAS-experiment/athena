@@ -86,43 +86,57 @@ namespace CP {
 
   //____________________________________________________________________________
   //new additions for ONNX
-  float PhotonVertexSelectionTool::getScore(int nVars, const std::vector<std::vector<float>>& input_data, const std::shared_ptr<Ort::Session> sessionHandle, std::vector<int64_t> input_node_dims, std::vector<const char*> input_node_names, std::vector<const char*> output_node_names) const{
-     //*************************************************************************
-     // score the model using sample data, and inspect values
-     // loading input data
-     std::vector<std::vector<float>> input_tensor_values_ = input_data;
+  float PhotonVertexSelectionTool::getScore(
+      int nVars, const std::vector<std::vector<float>>& input_data,
+      const std::shared_ptr<Ort::Session>& sessionHandle,
+      std::vector<int64_t> input_node_dims,
+      std::vector<const char*> input_node_names,
+      std::vector<const char*> output_node_names) const {
+    //*************************************************************************
+    // score the model using sample data, and inspect values
+    // loading input data
+    std::vector<std::vector<float>> input_tensor_values_ = input_data;
 
      //preparing container to hold input data
      size_t input_tensor_size = nVars;
      std::vector<float> input_tensor_values(nVars);
      input_tensor_values = input_tensor_values_[0]; //0th element since only batch_size of 1, otherwise loop
 
-     // create input tensor object from data values
-     auto memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
-     // create tensor using info from inputs
-     Ort::Value input_tensor = Ort::Value::CreateTensor<float>(memory_info, input_tensor_values.data(), input_tensor_size, input_node_dims.data(), input_node_dims.size());
+    // create input tensor object from data values
+    auto memory_info =
+        Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+    // create tensor using info from inputs
+    Ort::Value input_tensor = Ort::Value::CreateTensor<float>(
+        memory_info, input_tensor_values.data(), input_tensor_size,
+        input_node_dims.data(), input_node_dims.size());
 
-     // check if input is of type tensor
-     assert(input_tensor.IsTensor());
+    // check if input is of type tensor
+    assert(input_tensor.IsTensor());
 
-     // run the inference
-     auto output_tensors = sessionHandle->Run(Ort::RunOptions{nullptr}, input_node_names.data(), &input_tensor, input_node_names.size(), output_node_names.data(), output_node_names.size());
+    // run the inference
+    auto output_tensors =
+        sessionHandle->Run(Ort::RunOptions{nullptr}, input_node_names.data(),
+                           &input_tensor, input_node_names.size(),
+                           output_node_names.data(), output_node_names.size());
 
-     // check size of output tensor
-     assert(output_tensors.size() == 1 && output_tensors.front().IsTensor());
+    // check size of output tensor
+    assert(output_tensors.size() == 1 && output_tensors.front().IsTensor());
 
-     // get pointer to output tensor float values
-     //float* floatarr = output_tensors.front().GetTensorMutableData<float>();
-     float* floatarr = output_tensors[0].GetTensorMutableData<float>();
+    // get pointer to output tensor float values
+    // float* floatarr = output_tensors.front().GetTensorMutableData<float>();
+    float* floatarr = output_tensors[0].GetTensorMutableData<float>();
 
-     int arrSize = sizeof(*floatarr)/sizeof(floatarr[0]);
-     ATH_MSG_DEBUG("The size of the array is: " << arrSize);
-     ATH_MSG_DEBUG("floatarr[0] = " << floatarr[0]);
-     return floatarr[0];
+    int arrSize = sizeof(*floatarr) / sizeof(floatarr[0]);
+    ATH_MSG_DEBUG("The size of the array is: " << arrSize);
+    ATH_MSG_DEBUG("floatarr[0] = " << floatarr[0]);
+    return floatarr[0];
   }
 
   //new additions for ONNX
-  std::tuple<std::vector<int64_t>, std::vector<const char*>> PhotonVertexSelectionTool::getInputNodes(const std::shared_ptr<Ort::Session> sessionHandle, Ort::AllocatorWithDefaultOptions& allocator){
+  std::tuple<std::vector<int64_t>, std::vector<const char*>>
+  PhotonVertexSelectionTool::getInputNodes(
+      const std::shared_ptr<Ort::Session>& sessionHandle,
+      Ort::AllocatorWithDefaultOptions& allocator) {
     // input nodes
     std::vector<int64_t> input_node_dims;
     size_t num_input_nodes = sessionHandle->GetInputCount();
@@ -153,7 +167,10 @@ namespace CP {
   }
 
   //new additions for ONNX
-  std::tuple<std::vector<int64_t>, std::vector<const char*>> PhotonVertexSelectionTool::getOutputNodes(const std::shared_ptr<Ort::Session> sessionHandle, Ort::AllocatorWithDefaultOptions& allocator){
+  std::tuple<std::vector<int64_t>, std::vector<const char*>>
+  PhotonVertexSelectionTool::getOutputNodes(
+      const std::shared_ptr<Ort::Session>& sessionHandle,
+      Ort::AllocatorWithDefaultOptions& allocator) {
     // output nodes
     std::vector<int64_t> output_node_dims;
     size_t num_output_nodes = sessionHandle->GetOutputCount();
@@ -183,7 +200,9 @@ namespace CP {
   }
 
   //new additions for ONNX
-  std::tuple<std::shared_ptr<Ort::Session>, Ort::AllocatorWithDefaultOptions> PhotonVertexSelectionTool::setONNXSession(Ort::Env& env, const std::string& modelFilePath){
+  std::tuple<std::shared_ptr<Ort::Session>, Ort::AllocatorWithDefaultOptions>
+  PhotonVertexSelectionTool::setONNXSession(Ort::Env& env,
+                                            const std::string& modelFilePath) {
     // Find the model file.
     const std::string modelFileName = PathResolverFindCalibFile( modelFilePath );
     ATH_MSG_INFO( "Using model file: " << modelFileName );
@@ -217,9 +236,9 @@ namespace CP {
         "logSumpt := log10(PrimaryVerticesAuxDyn.sumPt)"                            ,
         "logSumpt2 := log10(PrimaryVerticesAuxDyn.sumPt2)"
       };
-      auto mva1 = new TMVA::Reader(var_names, "!Silent:Color");
+      auto *mva1 = new TMVA::Reader(var_names, "!Silent:Color");
       mva1->BookMVA    ("MLP method", m_TMVAModelFilePath1 );
-      m_mva1 = std::unique_ptr<TMVA::Reader>( std::move(mva1) );
+      m_mva1 = std::unique_ptr<TMVA::Reader>( mva1 );
 
       auto mva2 = std::make_unique<TMVA::Reader>(var_names, "!Silent:Color");
       mva2->BookMVA    ("MLP method", m_TMVAModelFilePath2 );
@@ -313,9 +332,12 @@ namespace CP {
   }
 
   //____________________________________________________________________________
-  std::vector<std::pair<const xAOD::Vertex*, float> >
-  PhotonVertexSelectionTool::getVertex(const xAOD::EgammaContainer &egammas, bool ignoreConv, bool noDecorate, yyVtxType* vtxCasePtr, FailType* failTypePtr) const
-  {
+  std::vector<std::pair<const xAOD::Vertex*, float>>
+  PhotonVertexSelectionTool::getVertex(const xAOD::EgammaContainer& egammas,
+                                       bool ignoreConv,
+                                       bool noDecorate,
+                                       yyVtxType* vtxCasePtr,
+                                       FailType* failTypePtr) const {
     const xAOD::Vertex *vertex = nullptr;
     std::vector<std::pair<const xAOD::Vertex*, float> > vertexMLP;
     yyVtxType vtxCase = yyVtxType::Unknown;
@@ -342,12 +364,14 @@ namespace CP {
     return getVertexImp( egammas, prime_vertex, ignoreConv, false, vertexMLP, vtxcase, failType );
   }
 
-  StatusCode PhotonVertexSelectionTool::getVertexImp(const xAOD::EgammaContainer &egammas,
-                                                     const xAOD::Vertex* &prime_vertex,
-                                                     bool ignoreConv,
-                                                     bool noDecorate,
-                                                     std::vector<std::pair<const xAOD::Vertex*, float> >&  vertexMLP, yyVtxType& vtxCase, FailType& fail) const
-  {
+  StatusCode PhotonVertexSelectionTool::getVertexImp(
+      const xAOD::EgammaContainer& egammas,
+      const xAOD::Vertex*& prime_vertex,
+      bool ignoreConv,
+      bool noDecorate,
+      std::vector<std::pair<const xAOD::Vertex*, float>>& vertexMLP,
+      yyVtxType& vtxCase,
+      FailType& fail) const {
     // Set default vertex case and declare photon container
     vtxCase = yyVtxType::Unknown;
     const xAOD::PhotonContainer *photons = dynamic_cast<const xAOD::PhotonContainer*>(&egammas);

@@ -153,7 +153,7 @@ double get_MaterialResolutionEffect::getDelta(int particle_type, double energy,
     }
   }
 
-  auto& hist = response_type==0 ? m_hSystPeak : m_hSystResol;
+  const auto& hist = response_type==0 ? m_hSystPeak : m_hSystResol;
   if (m_interpolate) {
     return 0.01*interpolateTH1(hist.at(isyst).at(ieta).at(particle_type).get(), et, true);
   }
@@ -180,7 +180,7 @@ void get_MaterialResolutionEffect::store_IBL_PP0_YProjections()
 }
 
 //=========================================================================
-double get_MaterialResolutionEffect::interpolateTH1(TH1 *hist, double x, bool abs_bins) const
+double get_MaterialResolutionEffect::interpolateTH1(TH1 *hist, double x, bool abs_bins) 
 {
   if (!hist) return 0.;
   int nbins = hist->GetNbinsX();

@@ -725,9 +725,9 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
       std::string gain_tool_run_2_filename = PathResolverFindCalibFile(
           "ElectronPhotonFourMomentumCorrection/v29/"
           "gain_uncertainty_specialRun.root");
-      m_gain_tool_run2.reset(new egGain::GainUncertainty(
+      m_gain_tool_run2 = std::make_unique<egGain::GainUncertainty>(
           gain_tool_run_2_filename, false, "GainCorrection",
-          m_useGainInterpolation));
+          m_useGainInterpolation);
       m_gain_tool_run2->msg().setLevel(this->msg().level());
     }
   }
@@ -739,7 +739,7 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
       m_doADCLinearityCorrection = 1;
       std::string adcLinearityCorr_filename = PathResolverFindCalibFile(
           "ElectronPhotonFourMomentumCorrection/v25/linearity_ADC.root");
-      m_ADCLinearity_tool.reset(new LinearityADC(adcLinearityCorr_filename));
+      m_ADCLinearity_tool = std::make_shared<LinearityADC>(adcLinearityCorr_filename);
       m_ADCLinearity_tool->msg().setLevel(this->msg().level());
       m_rootTool->setADCTool(m_ADCLinearity_tool);
     } else {
