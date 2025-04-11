@@ -298,22 +298,11 @@ class FeatureHandler:
         #end loop over variables
         
         Variables = []
-        Variables += ["MaxDeltaRSumShotToConst"]
-        Variables += ["MinDeltaRSumShotToConst"]
-        Variables += ["MaxDeltaRSumShotToTau"]
-        Variables += ["MinDeltaRSumShotToTau"]
-        Variables += ["DeltaRAllShotsToTau"]
-        Variables += ["EtAllShotsOverEtTau"]
         Variables += ["NShotsInSeed"]
         Variables += ["NPhotonsInSeed"]
-        Variables += ["BestDiShotMass"]
-        Variables += ["MinDiShotMass"]
-        Variables += ["MaxDiShotMass"]
         for iVar in Variables:
             featName = iVar
             curDefVal = self.m_DefaultValues[self.m_VarTypeName_Shots]
-            if iVar == "BestDiShotMass" or iVar == "MinDiShotMass" or iVar == "MaxDiShotMass":
-                curDefVal = -200
             
             self.addToFeatures_FullName(self.m_ConstituentTypeName_Neutral + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)
             self.addToFeatures_FullName(self.m_ConstituentTypeName_Pi0Neut + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)

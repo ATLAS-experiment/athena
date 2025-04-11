@@ -530,47 +530,11 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
       if(tlv_Reference.Et() > 0.) tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtSumShotsOverTauEt_BDTSort_" + iConstStr, tlv_SumShots.Et() / tlv_Reference.Et());
             
     }//end loop over constituents in tau
-        
-    //delta R values
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_MaxDeltaRSumShotToConst", maxDeltaRSumShotToConst);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_MinDeltaRSumShotToConst", minDeltaRSumShotToConst);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_MaxDeltaRSumShotToTau", maxDeltaRSumShotToTau);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_MinDeltaRSumShotToTau", minDeltaRSumShotToTau);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_DeltaRAllShotsToTau", tlv_Reference.DeltaR(totalTLV_SumShots));
-        
-    //et ratio
-    if(tlv_Reference.Et() > 0.) tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtAllShotsOverEtTau", totalTLV_SumShots.Et() / tlv_Reference.Et());
-        
+    
     //number of shots in seed
     tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_NShotsInSeed", totalShotsInSeed);
     tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_NPhotonsInSeed", totalPhotonsInSeed);
-
-    //build di-Shot mass
-    double maxDiShotMass    = -200;
-    double minDiShotMass    = 99999;
-    double bestDiShotMass   = -200;
-    double bestPi0Diff      = 99999;
-    for(unsigned int iShot=0; iShot<allShotTLVs.size(); iShot++) {
-      TLorentzVector cur_iShot = allShotTLVs.at(iShot);
-            
-      for(unsigned int jShot=iShot+1; jShot<allShotTLVs.size(); jShot++) {
-	TLorentzVector cur_jShot = allShotTLVs.at(jShot);
-                
-	ATH_MSG_DEBUG("\t\tBuilding di-shot mass of shots " << iShot << " & " << jShot);
-	TLorentzVector          tlv_DiShot    = cur_iShot + cur_jShot;
-	double                  curDiShotMass = tlv_DiShot.M();
-	double                  curpi0Diff    = std::abs(curDiShotMass - 134.98);
-	ATH_MSG_DEBUG("\t\tit is: " << curDiShotMass);
-	if(curpi0Diff < bestPi0Diff) bestDiShotMass = curDiShotMass;
-	if(curDiShotMass > maxDiShotMass) maxDiShotMass = curDiShotMass;
-	if(curDiShotMass < minDiShotMass) minDiShotMass = curDiShotMass;
-      }
-    }
-
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_BestDiShotMass", bestDiShotMass);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_MaxDiShotMass", maxDiShotMass);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_MinDiShotMass", minDiShotMass);
-        
+ 
   }//end if check for shot info dumping
     
     
