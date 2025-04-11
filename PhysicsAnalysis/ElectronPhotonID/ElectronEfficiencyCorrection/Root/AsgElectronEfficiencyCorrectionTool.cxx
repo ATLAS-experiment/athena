@@ -322,11 +322,6 @@ AsgElectronEfficiencyCorrectionTool::initialize()
     ATH_MSG_ERROR("Could not configure for nominal settings");
     return StatusCode::FAILURE;
   }
-
-  if (m_useRandomRunNumber) {
-    resetAccessor (randomrunnumber, *this, "RandomRunNumber");
-  }
-  ATH_CHECK (initializeColumns());
   return StatusCode::SUCCESS;
 }
 
@@ -335,52 +330,51 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
   const xAOD::Electron& inputObject,
   double& efficiencyScaleFactor) const
 {
-  const xAOD::EventInfo* eventInfo = nullptr;
-  if (evtStore()->retrieve(eventInfo, m_eventInfoCollectionName).isFailure()) {
-    ATH_MSG_ERROR("Could not retrieve EventInfo object!");
-    return CP::CorrectionCode::Error;
-  }
-  return getEfficiencyScaleFactor(columnar::ElectronId(inputObject), efficiencyScaleFactor, columnar::EventInfoId (*eventInfo));
-}
-
-CP::CorrectionCode
-AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
-  columnar::ElectronId inputObject,
-  double& efficiencyScaleFactor,
-  columnar::EventInfoId eventInfo) const
-{
 
   efficiencyScaleFactor = 1;
   // Retrieve the proper random Run Number
   unsigned int runNumber = m_defaultRandomRunNumber;
   if (m_useRandomRunNumber) {
-    if (!randomrunnumber.isAvailable(eventInfo)) {
+    const xAOD::EventInfo* eventInfo =
+      evtStore()->retrieve<const xAOD::EventInfo>(m_eventInfoCollectionName);
+    if (!eventInfo) {
+      ATH_MSG_ERROR("Could not retrieve EventInfo object!");
+      return CP::CorrectionCode::Error;
+    }
+    static const SG::AuxElement::Accessor<unsigned int> randomrunnumber(
+      "RandomRunNumber");
+    if (!randomrunnumber.isAvailable(*eventInfo)) {
       ATH_MSG_WARNING(
         "Pileup tool not run before using ElectronEfficiencyTool! SFs do not "
         "reflect PU distribution in data");
       return CP::CorrectionCode::Error;
     }
-    runNumber = randomrunnumber(eventInfo);
+    runNumber = randomrunnumber(*(eventInfo));
   }
   //
   // Get the result
   //
   double cluster_eta(-9999.9);
 
-  auto cluster = caloClusterAcc (inputObject) [0].value();
+  const xAOD::CaloCluster* cluster = inputObject.caloCluster();
+  if (!cluster) {
+    ATH_MSG_ERROR("ERROR no cluster associated to the Electron \n");
+    return CP::CorrectionCode::Error;
+  }
 
   // we need to use different variables for central and forward electrons
+  static const SG::AuxElement::ConstAccessor<uint16_t> accAuthor("author");
   if (accAuthor.isAvailable(inputObject) &&
       accAuthor(inputObject) == xAOD::EgammaParameters::AuthorFwdElectron) {
-    cluster_eta = clusterEtaAcc (cluster);
+    cluster_eta = cluster->eta();
   } else {
-    cluster_eta = clusterEtaBEAcc (cluster, 2);
+    cluster_eta = cluster->etaBE(2);
   }
 
   // use et from cluster because it is immutable under syst variations of
   // electron energy scale
-  const double energy = clusterEAcc(cluster);
-  const double parEta = m_eta(inputObject);
+  const double energy = cluster->e();
+  const double parEta = inputObject.eta();
   const double coshEta = std::cosh(parEta);
   double et = (coshEta != 0.) ? energy / coshEta : 0.;
   // allow for a 5% margin at the lowest pT bin boundary (i.e. increase et by 5%
@@ -807,20 +801,17 @@ int
 AsgElectronEfficiencyCorrectionTool::systUncorrVariationIndex(
   const xAOD::Electron& inputObject) const
 {
-  return systUncorrVariationIndex (columnar::ElectronId (inputObject));
-}
-
-int
-AsgElectronEfficiencyCorrectionTool::systUncorrVariationIndex(
-  columnar::ElectronId inputObject) const
-{
   int currentSystRegion = -999;
   double cluster_eta(-9999.9);
   double et(0.0);
 
-  et = m_pt(inputObject);
-  const auto cluster = caloClusterAcc (inputObject) [0].value();
-  cluster_eta = clusterEtaBEAcc (cluster, 2);
+  et = inputObject.pt();
+  const xAOD::CaloCluster* cluster = inputObject.caloCluster();
+  if (!cluster) {
+    ATH_MSG_ERROR("ERROR no cluster associated to the Electron \n");
+    return currentSystRegion;
+  }
+  cluster_eta = cluster->etaBE(2);
   switch (m_correlation_model) {
     case correlationModel::SIMPLIFIED: {
       currentSystRegion = currentSimplifiedUncorrSystRegion(cluster_eta, et);
@@ -997,34 +988,3 @@ AsgElectronEfficiencyCorrectionTool::get_simType_from_metadata(
   }
 }
 
-
-
-void AsgElectronEfficiencyCorrectionTool::callSingleEvent (columnar::ElectronRange electrons, columnar::EventInfoId event) const
-{
-  for (columnar::ElectronId electron : electrons)
-  {
-    double sf = 0;
-    switch (getEfficiencyScaleFactor(electron, sf, event).code())
-    {
-      case CP::CorrectionCode::Ok:
-        m_sfDec(electron) = sf;
-        m_validDec(electron) = true;
-        break;
-      case CP::CorrectionCode::OutOfValidityRange:
-        m_sfDec(electron) = sf;
-        m_validDec(electron) = false;
-        break;
-      default:
-        throw std::runtime_error("Error in getEfficiencyScaleFactor");
-    }
-  }
-}
-
-void AsgElectronEfficiencyCorrectionTool::callEvents (columnar::EventContextRange events) const
-{
-  for (columnar::EventContextId event : events)
-  {
-    auto eventInfo = m_eventInfo(event);
-    callSingleEvent (m_electrons(event), eventInfo);
-  }
-}
