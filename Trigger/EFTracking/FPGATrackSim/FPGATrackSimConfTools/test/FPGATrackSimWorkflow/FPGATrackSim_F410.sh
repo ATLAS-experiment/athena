@@ -21,11 +21,18 @@ done
 
 source FPGATrackSim_CommonEnv.sh "${FWRD_ARGS[@]}"
 
+# Use the old 9L NN for the NN Track Tool, awaiting new training
+ONNX_INPUT_FAKE="${BANKS_9L}ClassificationHT_v5.onnx"
+ONNX_INPUT_PARAM="${BANKS_9L}ParamEstimationHT_v5.onnx"
+ONNX_INPUT_HIT="${BANKS_9L}Ath_Extrap_v51_6_superBig_0_outsideIN.onnx"
+ONNX_INPUT_VOL="${BANKS_9L}HT_detector_v6_3.onnx"
+
 echo "... Running ${TEST_LABEL} analysis"
 run_F410(){
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     --evtMax=$RDO_EVT_ANALYSIS \
     --filesInput=$RDO_ANALYSIS \
+    --skipEvents=$SKIP_EVENTS \
     Output.AODFileName=$xAODOutput \
     Trigger.FPGATrackSim.doEDMConversion=True \
     Trigger.FPGATrackSim.runCKF=$RUN_CKF \
@@ -35,6 +42,7 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.GNN.MLModelPath=$GNN_METRIC_LEARNING \
     Trigger.FPGATrackSim.GNN.GNNModelPath=$GNN_ONNX_MODEL \
     Trigger.FPGATrackSim.GNN.doGNNRootOutput=True \
+    Trigger.FPGATrackSim.GNN.doGNNTracking=True \
     Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
     Trigger.FPGATrackSim.mapsDir=$MAPS_9L_GNN \
     Trigger.FPGATrackSim.region=0 \

@@ -370,6 +370,7 @@ def createGNNFPGATrackSimConfigFlags():
     cf.addFlag("roadMakerTool", roadMakerTool.ConnectedComponents, type=roadMakerTool)
     cf.addFlag("edgeScoreCut",0.8)
     cf.addFlag("doGNNRootOutput",False)
+    cf.addFlag("doGNNTracking",False)
     
     return cf
 

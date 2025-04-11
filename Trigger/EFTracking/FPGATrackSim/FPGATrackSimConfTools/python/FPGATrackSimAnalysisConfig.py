@@ -405,10 +405,11 @@ def NNTrackToolCfg(flags):
     NNTrackTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     NNTrackTool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
     NNTrackTool.IdealGeoRoads = False
-    NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan
+    NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan and not flags.Trigger.FPGATrackSim.ActiveConfig.GNN
     NNTrackTool.SPRoadFilterTool = getSPRoadFilterTool(flags)
     NNTrackTool.MinNumberOfRealHitsInATrack = 5 if flags.Trigger.FPGATrackSim.ActiveConfig.genScan else 9
     NNTrackTool.useSectors = False
+    NNTrackTool.doGNNTracking = flags.Trigger.FPGATrackSim.GNN.doGNNTracking
     result.setPrivateTools(NNTrackTool)
     return result
 
@@ -634,7 +635,7 @@ if __name__ == "__main__":
     elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-4')):
         print("You are trying to run an F-4* pipeline! I am auto-configuring the GNN pattern recognition for you. Whether you wanted to or not")
         flags.Trigger.FPGATrackSim.Hough.GNN = True
-        flags.Trigger.FPGATrackSim.Hough.chi2cut = 25 # All of the track candidates have chi2 values around 20 for some reason. Needs further investigation. For now move the default cut value to 25
+        flags.Trigger.FPGATrackSim.Hough.chi2cut = 40 # All of the track candidates have chi2 values around 20 for some reason. Needs further investigation. For now move the default cut value to 40
     elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-6')):
         print("You are trying to run an F-6* pipeline! I am auto-configuring the Inside-Out for you. Whether you wanted to or not")
         flags.Trigger.FPGATrackSim.Hough.genScan=True
