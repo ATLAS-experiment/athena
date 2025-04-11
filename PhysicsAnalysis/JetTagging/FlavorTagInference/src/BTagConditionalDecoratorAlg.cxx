@@ -2,10 +2,10 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "FlavorTagDiscriminants/BTagConditionalDecoratorAlg.h"
+#include "FlavorTagInference/BTagConditionalDecoratorAlg.h"
 #include "CxxUtils/checker_macros.h"
 
-namespace FlavorTagDiscriminants {
+namespace FlavorTagInference {
   BTagConditionalDecoratorAlg::BTagConditionalDecoratorAlg(
     const std::string& name, ISvcLocator* svcloc):
     detail::BCondTag_t(name, svcloc)

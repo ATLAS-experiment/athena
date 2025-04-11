@@ -1,13 +1,13 @@
 // In case the extension is confusing, this is a -*- C++ -*- file
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/ReadDecorHandle.h"
 
 #include <exception>
 
-namespace FlavorTagDiscriminants {
+namespace FlavorTagInference {
   template <typename C, typename D, typename N>
   StatusCode DecoratorAlg<C,D,N>::initialize()
   {

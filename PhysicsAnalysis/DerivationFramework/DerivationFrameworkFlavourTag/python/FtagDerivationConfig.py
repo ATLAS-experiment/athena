@@ -90,7 +90,7 @@ def BTagLargeRDecoration(cfgFlags, jet_col):
         tagger_name = nnFile.split('/')[-3]
 
         acc.addEventAlgo(
-            CompFactory.FlavorTagDiscriminants.JetTagDecoratorAlg(
+            CompFactory.FlavorTagInference.JetTagDecoratorAlg(
                 f'{jet_col}{tagger_name}JetTagAlg',
                 container=jet_col,
                 constituentContainer=trackContainer,

@@ -5,21 +5,21 @@
 #ifndef B_TAG_CONDITIONALDECORATOR_ALG_H
 #define B_TAG_CONDITIONALDECORATOR_ALG_H
 
-#include "FlavorTagDiscriminants/DecoratorAlg.h"
+#include "FlavorTagInference/DecoratorAlg.h"
 #include "FlavorTagInference/IBTagConditionalDecorator.h"
 
 #include "xAODBTagging/BTaggingContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
 namespace detail {
-  using BCondTag_t = FlavorTagDiscriminants::DecoratorAlg<
+  using BCondTag_t = FlavorTagInference::DecoratorAlg<
     xAOD::BTaggingContainer,
     IBTagConditionalDecorator,
     xAOD::TrackParticleContainer
     >;
 }
 
-namespace FlavorTagDiscriminants {
+namespace FlavorTagInference {
   class BTagConditionalDecoratorAlg : public detail::BCondTag_t
   {
   public:
