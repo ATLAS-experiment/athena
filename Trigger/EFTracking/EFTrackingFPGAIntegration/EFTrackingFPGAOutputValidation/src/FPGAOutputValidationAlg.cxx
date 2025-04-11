@@ -5,39 +5,42 @@
 #include "EFTrackingFPGAOutputValidation/FPGAOutputValidationAlg.h"
 
 namespace {
-template <typename T>
-std::vector<const T*> findMatchingCluster(const T* cluster0, const DataVector<T>& clusters1) {
-  std::vector<const T*> matchedClusters{};
-  const xAOD::DetectorIDHashType hashId0 = cluster0->identifierHash();
+  template <typename T>
+  std::vector<const T*> findMatchingCluster(const T* cluster0, const std::unordered_multimap<xAOD::DetectorIdentType, const T*>& clusterMap,bool matchByID, const size_t& allowedMisses) {
+    std::vector<const T*> matchedClusters{};
 
-  std::vector<Identifier> rdoList0 = cluster0->rdoList();
-  std::sort(rdoList0.begin(), rdoList0.end()); 
-  
-  for (auto cluster1 : clusters1) {
-    const xAOD::DetectorIDHashType hashId1 = cluster1->identifierHash();
-
-    if (hashId0 != hashId1) {
-      continue;
+    std::unordered_set<Identifier> rdoSet0{};
+    for (const auto& rdo : cluster0->rdoList()) {
+      rdoSet0.insert(rdo);
+    }
+    const size_t rdoToMiss = (allowedMisses < rdoSet0.size()) ? allowedMisses : (rdoSet0.size()-1);
+    if (matchByID) {
+      auto range = clusterMap.equal_range(cluster0->identifier());
+      for (auto it = range.first; it != range.second; ++it) {
+        const auto& rdoList1 = it->second->rdoList();
+        size_t matchedRdoIDs=0;
+        for (const auto& rdo : rdoList1) {
+          matchedRdoIDs+= rdoSet0.count(rdo);
+          }
+        if (matchedRdoIDs >= rdoSet0.size() - rdoToMiss) {
+          matchedClusters.push_back(it->second);
+        }
+      }
+    } else {
+      for (const auto& [hash, cluster1] : clusterMap) {
+        const auto& rdoList1 = cluster1->rdoList();
+        size_t matchedRdoIDs=0;
+        for (const auto& rdo : rdoList1) {
+          matchedRdoIDs+= rdoSet0.count(rdo);
+        }
+        if (matchedRdoIDs >= rdoSet0.size() - rdoToMiss) {
+          matchedClusters.push_back(cluster1);
+        }
+      }
     }
 
-    std::vector<Identifier> rdoList1 = cluster1->rdoList();
-    std::sort(rdoList1.begin(), rdoList1.end());
-    std::vector<Identifier> rdoMatchList{};
-    std::set_intersection(rdoList0.begin(), 
-                          rdoList0.end(), 
-                          rdoList1.begin(), 
-                          rdoList1.end(), 
-                          back_inserter(rdoMatchList));
-
-    if (rdoMatchList.size() == 0) {
-      continue;
-    }
-
-    matchedClusters.push_back(cluster1);
+    return matchedClusters;
   }
-
-  return matchedClusters;
-}
 }
 
 FPGAOutputValidationAlg::FPGAOutputValidationAlg(
@@ -52,20 +55,31 @@ StatusCode FPGAOutputValidationAlg::initialize() {
 
   ATH_CHECK(m_monitoringTool.retrieve());
   
+  ATH_CHECK(m_chrono.retrieve());
   return StatusCode::SUCCESS;
 }
 
 StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const { 
   if (m_pixelKeys.size() == 2 && m_doDiffHistograms) { /// just compare two for now
+    m_chrono->chronoStart("FPGAOutputValidationAlg::pixel diff");
     const SG::ReadHandleKey<xAOD::PixelClusterContainer>& key0 = m_pixelKeys[0];
     const SG::ReadHandleKey<xAOD::PixelClusterContainer>& key1 = m_pixelKeys[1];
     SG::ReadHandle<xAOD::PixelClusterContainer> handle0{key0, ctx};
     ATH_CHECK(handle0.isValid());
     SG::ReadHandle<xAOD::PixelClusterContainer> handle1{key1, ctx};
     ATH_CHECK(handle1.isValid());
-    const xAOD::PixelClusterContainer pixelClusters1 = *handle1; 
+
+    const xAOD::PixelClusterContainer pixelClusters1 = *handle1;
+    std::unordered_multimap<xAOD::DetectorIdentType, const xAOD::PixelCluster*> pixelClustersMap1;
+    for (const auto* cluster1 : pixelClusters1) {
+      const xAOD::DetectorIdentType hashId1 = cluster1->identifier();
+      pixelClustersMap1.insert(std::make_pair(hashId1, cluster1));
+    }
+
     for (auto cluster0 : *handle0) {
-      const std::vector<const xAOD::PixelCluster*> matchedClusters = findMatchingCluster(cluster0, pixelClusters1);
+      const std::vector<const xAOD::PixelCluster*> matchedClusters = findMatchingCluster(cluster0, pixelClustersMap1,
+                                                                                         m_matchByID,
+                                                                                         m_allowedRdoMisses);
 
       Monitored::Group(
         m_monitoringTool,
@@ -74,6 +88,21 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
 
       if (matchedClusters.size() == 0) {
         continue;
+      }
+      if (matchedClusters.size() > 1) {
+        std::stringstream ss;
+        for (const auto& cluster : matchedClusters) {
+          ss << cluster->identifier()
+             << " x: " << cluster->globalPosition().x() 
+             << " y: " << cluster->globalPosition().y() 
+             << " z: " << cluster->globalPosition().z() << "\n";
+          for (const auto& rdo : cluster->rdoList()) {
+            ss << "\t" << rdo.get_compact() << "\n";
+          }
+          ss << "\n";
+        }
+        ATH_MSG_ERROR("Found " << matchedClusters.size() << " pixel cluster matches\n" << ss.str());
+        return StatusCode::FAILURE;
       }
 
       const xAOD::PixelCluster *cluster1 = matchedClusters[0];
@@ -95,18 +124,29 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
         Monitored::Scalar<float>("diff_pixel_tot",cluster0->totalToT() - cluster1->totalToT())
       );
     }
+    m_chrono->chronoStop("FPGAOutputValidationAlg::pixel diff");
   }
 
   if (m_stripKeys.size() == 2 && m_doDiffHistograms) { /// just compare two for now
+    m_chrono->chronoStart("FPGAOutputValidationAlg::strip diff");
     const SG::ReadHandleKey<xAOD::StripClusterContainer>& key0 = m_stripKeys[0];
     const SG::ReadHandleKey<xAOD::StripClusterContainer>& key1 = m_stripKeys[1];
     SG::ReadHandle<xAOD::StripClusterContainer> handle0{key0, ctx};
     ATH_CHECK(handle0.isValid());
     SG::ReadHandle<xAOD::StripClusterContainer> handle1{key1, ctx};
     ATH_CHECK(handle1.isValid());
+
     const xAOD::StripClusterContainer stripClusters1 = *handle1; 
+    std::unordered_multimap<xAOD::DetectorIdentType, const xAOD::StripCluster*> stripClustersMap1;
+    for (const auto *cluster1 : stripClusters1) {
+      const xAOD::DetectorIdentType hashId1 = cluster1->identifier();
+      stripClustersMap1.insert(std::make_pair(hashId1, cluster1));
+    }
+
     for (auto cluster0 : *handle0) {
-      const std::vector<const xAOD::StripCluster*> matchedClusters = findMatchingCluster(cluster0, stripClusters1);
+      const std::vector<const xAOD::StripCluster*> matchedClusters = findMatchingCluster(cluster0, stripClustersMap1,
+                                                                                         m_matchByID,
+                                                                                         m_allowedRdoMisses);
 
       Monitored::Group(
         m_monitoringTool,
@@ -115,6 +155,21 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
 
       if (matchedClusters.size() == 0) {
         continue;
+      }
+      if (matchedClusters.size() > 1) {
+        std::stringstream ss;
+        for (const auto& cluster : matchedClusters) {
+          ss << cluster->identifier()
+             << " x: " << cluster->globalPosition().x() 
+             << " y: " << cluster->globalPosition().y() 
+             << " z: " << cluster->globalPosition().z() << "\n";
+          for (const auto& rdo : cluster->rdoList()) {
+            ss << "\t" << rdo.get_compact() << "\n";
+          }
+          ss << "\n";
+        }
+        ATH_MSG_ERROR("Found " << matchedClusters.size() << " strip cluster matches\n" << ss.str());
+        return StatusCode::FAILURE;
       }
 
       const xAOD::StripCluster *cluster1 = matchedClusters[0];
@@ -129,6 +184,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
         Monitored::Scalar<float>("diff_strip_channelsphi",cluster0->channelsInPhi() - cluster1->channelsInPhi())
       );
     }
+    m_chrono->chronoStop("FPGAOutputValidationAlg::strip diff");
   }
 
   for (std::size_t index = 0; index < m_pixelKeys.size(); index++) {
