@@ -1,12 +1,12 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BucketDumperAlg.h"
 
 #include "StoreGate/ReadHandle.h"
 #include "MuonTesterTree/EventHashBranch.h"
-#include "MuonSpacePoint/SpacePointPerLayerSplitter.h"
+#include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 #include <fstream>
@@ -16,10 +16,11 @@
 
 namespace MuonR4{
     StatusCode BucketDumperAlg::initialize() {
-        ATH_CHECK(m_readKey.initialize());
+        ATH_CHECK(m_spacePointKeys.initialize());
+        ATH_CHECK(m_inSegmentKeys.initialize());
+
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_geoCtxKey.initialize());
-        ATH_CHECK(m_inSegmentKey.initialize(!m_inSegmentKey.empty()));
         m_tree.addBranch(std::make_shared<MuonVal::EventHashBranch>(m_tree.tree()));
         ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));        
         if (m_visionTool.empty()) {
@@ -39,22 +40,37 @@ namespace MuonR4{
     
     StatusCode BucketDumperAlg::execute(){
         const EventContext& ctx{Gaudi::Hive::currentContext()};
+        SG::ReadHandleKey<SegmentContainer> emptyKey{};
+        ATH_CHECK(emptyKey.initialize(SG::AllowEmpty));
+        for (unsigned  keyNum = 0 ; keyNum < m_spacePointKeys.size(); ++keyNum) {
+            ATH_CHECK(dumpContainer(ctx, m_spacePointKeys[keyNum], 
+                                    keyNum < m_inSegmentKeys.size() ? m_inSegmentKeys[keyNum] : emptyKey ));
+        }
+        return StatusCode::SUCCESS;
+    }
+    StatusCode BucketDumperAlg::dumpContainer(const EventContext& ctx,
+                                              const SG::ReadHandleKey<SpacePointContainer>& spacePointKey,
+                                              const SG::ReadHandleKey<SegmentContainer>& segmentKey) {
 
-        std::unordered_map <const SpacePointBucket*, std::vector<const MuonR4::Segment*>> segmentMap;  // MuonR4Segment 
+        std::unordered_map <const SpacePointBucket*, std::vector<const Segment*>> segmentMap;  // MuonR4Segment 
         
         const SegmentContainer* readSegment{nullptr};
-        ATH_CHECK(SG::get(readSegment, m_inSegmentKey, ctx));
-        for (const MuonR4::Segment* segment : *readSegment) {
-            segmentMap[segment->parent()->parentBucket()].push_back(segment);
+        ATH_CHECK(SG::get(readSegment, segmentKey, ctx));
+        if (readSegment) {
+            for (const Segment* segment : *readSegment) {
+                segmentMap[segment->parent()->parentBucket()].push_back(segment);
+            }
         }
 
         const ActsGeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
         const SpacePointContainer* spContainer{nullptr};
-        ATH_CHECK(SG::get(spContainer, m_readKey, ctx));
+        ATH_CHECK(SG::get(spContainer, spacePointKey, ctx));
 
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
+
+        const SpacePointPerLayerSorter layerSorter{m_idHelperSvc.get()};
 
         for(const SpacePointBucket* bucket : *spContainer) {
 
@@ -74,7 +90,7 @@ namespace MuonR4{
 
             if (match_itr != segmentMap.end()) {
                 unsigned int segIdx{0};
-                for (const MuonR4::Segment* segment : match_itr->second) {
+                for (const Segment* segment : match_itr->second) {
                     for (const auto& meas : segment->measurements()) {
                         if (meas->fitState() == CalibratedSpacePoint::State::Valid) {
                             spacePointToSegment[meas->spacePoint()].push_back(segIdx);
@@ -83,7 +99,7 @@ namespace MuonR4{
                     ++segIdx;
                 }
                 
-                for ( const MuonR4::Segment* segment: match_itr->second) {
+                for ( const Segment* segment: match_itr->second) {
                     m_segmentPos.push_back(segment->position());
                     m_segmentDir.push_back(segment->direction());
                     m_segment_chiSquared.push_back(segment->chi2());
@@ -91,104 +107,66 @@ namespace MuonR4{
                 }
             }
 
-            SpacePointPerLayerSplitter splitter{*bucket};
-            unsigned int layer{0};
+            std::unordered_map<Identifier, unsigned> layNumbers{};
 
-            for (const auto& hitsInLay : splitter.mdtHits()) {
-                for (const auto sp : hitsInLay){
+            for(const SpacePointBucket::value_type& sp : *bucket) {
+                const unsigned layer{layNumbers.insert(
+                                        std::make_pair(layerSorter.detectorLayerId(sp->identify()), 
+                                                       layNumbers.size())).first->second};
+    
+                const Identifier& id = sp->identify();
 
+                if (sp->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
                     const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(sp->primaryMeasurement());
                     if (dc->status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime){
                         continue;
                     }
-
-                    m_spoint_id.push_back(sp->identify());
-
-                    Identifier id = sp->identify();
-                    unsigned int mdt_ML = m_idHelperSvc->mdtIdHelper().multilayer(id);
-                    unsigned int mdt_TL = m_idHelperSvc->mdtIdHelper().tubeLayer(id);
-                    unsigned int mdt_nL = m_idHelperSvc->mdtIdHelper().tubeLayerMax(id);
-                    m_spoint_mdtLayer   = mdt_ML * (mdt_nL-1) + mdt_TL;
-                    m_spoint_mdtTube    = m_idHelperSvc->mdtIdHelper().tube(id);
-
-                    const std::vector<int16_t>& segIdxs = spacePointToSegment[sp];
-
-                    m_spoint_mat[m_spoint_mat.size()] = segIdxs;
-                    m_spoint_nSegments.push_back(segIdxs.size());
-                
-                    m_bucket_spacePoints = bucket->size();
-                    m_spoint_localPosition.push_back(sp->positionInChamber());
-                    m_spoint_adc.push_back(dc->adc());
-                    m_spoint_tdc.push_back(dc->tdc());
-                    m_spoint_covX.push_back(sp->covariance()(Amg::x, Amg::x));
-                    m_spoint_covY.push_back(sp->covariance()(Amg::y, Amg::y));
-                    m_spoint_covXY.push_back(sp->covariance()(Amg::x, Amg::y));
-                    m_spoint_covYX.push_back(sp->covariance()(Amg::y, Amg::x));
-                    m_spoint_driftR.push_back(sp->driftRadius());
-                    m_spoint_measuresEta.push_back(sp->measuresEta());
-                    m_spoint_measuresPhi.push_back(sp->measuresPhi());
-                    m_spoint_nEtaInstances.push_back(sp->nEtaInstanceCounts());
-                    m_spoint_nPhiInstances.push_back(sp->nPhiInstanceCounts());
-                    m_spoint_dimension.push_back(sp->dimension());
-                    m_spoint_layer.push_back(layer);
                     m_spoint_isMdt.push_back(true);
                     m_spoint_isStrip.push_back(false);
-                    if (m_visionTool.isEnabled()) {
-                        m_spoint_trueLabel.push_back(m_visionTool->isLabeled(*sp));
-                    }
-
-                    Amg::Vector3D globalPos = sp->msSector()->localToGlobalTrans(*gctx) * sp->positionInChamber();
-                    m_spoint_globalPosition.push_back( globalPos );
-
-                }
-                ++layer;
-
-            }
-
-            for (const auto& hitsInLay : splitter.stripHits()) {
-
-                for (const auto sp : hitsInLay){
-
-                    const std::vector<int16_t>& segIdxs = spacePointToSegment[sp];
-
-                    m_spoint_mat[m_spoint_mat.size()] = segIdxs;
-                    m_spoint_nSegments.push_back(segIdxs.size());
-
-                    m_spoint_id.push_back(sp->identify());
-                    m_bucket_spacePoints = bucket->size();
-                    m_spoint_localPosition.push_back(sp->positionInChamber());
-
-                    m_spoint_covX.push_back(sp->covariance()(Amg::x, Amg::x));
-                    m_spoint_covY.push_back(sp->covariance()(Amg::y, Amg::y));
-                    m_spoint_covXY.push_back(sp->covariance()(Amg::x, Amg::y));
-                    m_spoint_covYX.push_back(sp->covariance()(Amg::y, Amg::x));
-                    m_spoint_driftR.push_back(sp->driftRadius());
-                    m_spoint_measuresEta.push_back(sp->measuresEta());
-                    m_spoint_measuresPhi.push_back(sp->measuresPhi());
-                    m_spoint_nEtaInstances.push_back(sp->nEtaInstanceCounts());
-                    m_spoint_nPhiInstances.push_back(sp->nPhiInstanceCounts());
-                    m_spoint_dimension.push_back(sp->dimension());
-                    m_spoint_layer.push_back(layer);
-                    m_spoint_isStrip.push_back(true);
-                    m_spoint_isMdt.push_back(false);
-                    if (m_visionTool.isEnabled()) {
-                        m_spoint_trueLabel.push_back(m_visionTool->isLabeled(*sp));
-                    }
-
-                    Amg::Vector3D globalPos = sp->msSector()->localToGlobalTrans(*gctx) * sp->positionInChamber();
-                    m_spoint_globalPosition.push_back( globalPos );
-
+                    m_spoint_adc.push_back(dc->adc());
+                    m_spoint_tdc.push_back(dc->tdc());
+                } else {
                     // check the technology to fill channel, adc and tdc... pushing back 0 for now
                     m_spoint_adc.push_back(0); 
                     m_spoint_tdc.push_back(0);
+                    m_spoint_isMdt.push_back(false);
+                    m_spoint_isStrip.push_back(true);
                 }
-                ++layer;
+
+                m_spoint_id.push_back(id);
+
+
+                const std::vector<int16_t>& segIdxs = spacePointToSegment[sp.get()];
+
+                m_spoint_mat[m_spoint_mat.size()] = segIdxs;
+                m_spoint_nSegments.push_back(segIdxs.size());
+                
+                m_bucket_spacePoints = bucket->size();
+                m_spoint_localPosition.push_back(sp->positionInChamber());
+                m_spoint_covX.push_back(sp->covariance()(Amg::x, Amg::x));
+                m_spoint_covY.push_back(sp->covariance()(Amg::y, Amg::y));
+                m_spoint_covXY.push_back(sp->covariance()(Amg::x, Amg::y));
+                m_spoint_covYX.push_back(sp->covariance()(Amg::y, Amg::x));
+                m_spoint_driftR.push_back(sp->driftRadius());
+                m_spoint_measuresEta.push_back(sp->measuresEta());
+                m_spoint_measuresPhi.push_back(sp->measuresPhi());
+                m_spoint_nEtaInstances.push_back(sp->nEtaInstanceCounts());
+                m_spoint_nPhiInstances.push_back(sp->nPhiInstanceCounts());
+                m_spoint_dimension.push_back(sp->dimension());
+                m_spoint_layer.push_back(layer);
+                if (m_visionTool.isEnabled()) {
+                    m_spoint_trueLabel.push_back(m_visionTool->isLabeled(*sp));
+                }
+
+                Amg::Vector3D globalPos = sp->msSector()->localToGlobalTrans(*gctx) * sp->positionInChamber();
+                m_spoint_globalPosition.push_back( globalPos );
             }
 
-            m_bucket_layers = layer;
+            m_bucket_layers = layNumbers.size();
 
-            if (!m_tree.fill(ctx)) return StatusCode::FAILURE; 
-
+            if (!m_tree.fill(ctx)) {
+                return StatusCode::FAILURE; 
+            }
         }
 
         return StatusCode::SUCCESS;

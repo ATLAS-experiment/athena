@@ -83,11 +83,12 @@ StatusCode TruthSegmentCsvDumperAlg::execute(){
   file<<"phiLayers"<<delim;
   file<<"trigEtaLayers"<<delim;
   file<<std::endl;
-  SG::ReadHandle readTruthSegment{m_inSegmentKey, ctx};
-  ATH_CHECK(readTruthSegment.isPresent());
 
-  SG::ReadHandle gctxHandle{m_geoCtxKey, ctx};
-  ATH_CHECK(gctxHandle.isPresent());
+  const xAOD::MuonSegmentContainer* readTruthSegment{nullptr};
+  ATH_CHECK(SG::get(readTruthSegment, m_inSegmentKey, ctx));
+
+  const ActsGeometryContext* gctxHandle{nullptr};
+  ATH_CHECK(SG::get(gctxHandle, m_geoCtxKey, ctx));
 
   for (const xAOD::MuonSegment* segment : *readTruthSegment) {
     const MuonGMR4::SpectrometerSector* sector = msSector(*segment);
@@ -153,8 +154,8 @@ StatusCode TruthSegmentCsvDumperAlg::execute(){
     file<<seg_PhiLayers<<delim;
     file<<seg_TrigEtaLayers<<delim;
     file<<std::endl;
-    }
-    return StatusCode::SUCCESS;
+  }
+  return StatusCode::SUCCESS;
 }
 
 }
