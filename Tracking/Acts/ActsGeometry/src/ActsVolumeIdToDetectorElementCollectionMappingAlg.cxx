@@ -1,7 +1,9 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
   */
-#pragma GCC optimize ("O0")
+#if defined(__GNUC__) && !defined(__clang__)
+#  pragma GCC optimize ("O0")
+#endif
 #ifdef NDEBUG
 # undef NDEBUG
 #endif

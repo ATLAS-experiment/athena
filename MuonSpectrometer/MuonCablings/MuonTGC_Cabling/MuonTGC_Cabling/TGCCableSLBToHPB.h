@@ -38,7 +38,7 @@ class TGCCableSLBToHPB : public TGCCable
   virtual TGCModuleMap* getModuleIn(const TGCModuleId* hpb) const;
   virtual TGCModuleMap* getModuleInforHPB(const TGCModuleId* hpb, TGCId::ModuleType moduleType) const;
   virtual TGCModuleMap* getModuleOut(const TGCModuleId* slb) const;
-  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>, TGCId::MaxRegionType> m_database{nullptr};
+  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>, TGCId::MaxRegionType> m_database{{{nullptr}}};
 };
   
 }  // end of namespace

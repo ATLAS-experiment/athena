@@ -28,7 +28,7 @@ class TGCCableHPBToSL : public TGCCable {
   TGCCableHPBToSL(void) {}
   virtual TGCModuleMap* getModuleIn(const TGCModuleId* sl) const;
   virtual TGCModuleMap* getModuleOut(const TGCModuleId* hpt) const;
-  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxSignalType>, TGCId::MaxRegionType> m_database{nullptr};
+  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxSignalType>, TGCId::MaxRegionType> m_database{{{nullptr}}};
 };
   
 }  // end of namespace
