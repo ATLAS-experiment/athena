@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/hexdump_test.cxx
@@ -50,6 +50,7 @@ void test2()
   unsigned int len = 3*BLOCK;
 
   char* buf = reinterpret_cast<char*> (aligned_alloc (BLOCK, len));
+  if (!buf) std::abort();
 
   for (unsigned i=0; i < len; i++) {
     buf[i] = (i % 0x7f);
