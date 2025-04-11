@@ -19,6 +19,9 @@ FPGATrackSimOverlapRemovalTool::FPGATrackSimOverlapRemovalTool(const std::string
 StatusCode FPGATrackSimOverlapRemovalTool::initialize()
 {
   ATH_MSG_INFO( "FPGATrackSimOverlapRemovalTool::initialize()" );
+
+  if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
+
   // Check if this is 2nd stage
   if(m_do2ndStage)
   {
@@ -116,7 +119,9 @@ StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval(std::vector<FPGATra
   // Otherwise, proceed
   ATH_MSG_DEBUG("Beginning runOverlapRemoval()");
 
-  return ::runOverlapRemoval(tracks, m_minChi2, m_NumOfHitPerGrouping, getAlgorithm());
+  ATH_MSG_DEBUG("Tracks in event: " << tracks.size());
+
+  return ::runOverlapRemoval(tracks, m_minChi2, m_NumOfHitPerGrouping, getAlgorithm(), m_monTool);
 }
 
 

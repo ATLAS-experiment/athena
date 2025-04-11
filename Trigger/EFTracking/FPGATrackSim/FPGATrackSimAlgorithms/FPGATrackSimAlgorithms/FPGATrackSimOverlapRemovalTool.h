@@ -20,6 +20,8 @@
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimHough/FPGATrackSimHoughFunctions.h"
 
+#include "GaudiKernel/ToolHandle.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 
 #include <string>
 #include <vector>
@@ -64,6 +66,7 @@ private:
   Gaudi::Property <unsigned> m_imageSize_y { this, "nBins_y", 0, "number of bins in, eg, q/pT"};
   Gaudi::Property <std::string> m_algorithm { this, "ORAlgo", "Normal", "Overlap removal algorithm"};
   Gaudi::Property <bool> m_doFastOR { this, "doFastOR", false, "Use fast overlap removal algorithm instead of default"};
+  ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
 
   int m_totLayers = 0;                 //  Total number of layers used for a track
   ORAlgo m_algo{ORAlgo::Normal};       //  Internal ORAlgo enum for faster compare
