@@ -54,21 +54,23 @@ HanConfigGroup&
 HanConfigGroup::
 operator=( const HanConfigGroup& other )
 {
-  HanConfigAssessor::operator=(other);
-  m_pathName = other.m_pathName;
+  if (this != &other) {
+    HanConfigAssessor::operator=(other);
+    m_pathName = other.m_pathName;
   
-  TIter nextAssess( &other.m_assessors );
-  HanConfigAssessor* otherAssess;
-  while( (otherAssess = dynamic_cast<HanConfigAssessor*>( nextAssess() )) != 0 ) {
-    HanConfigAssessor* acpy = new HanConfigAssessor( *otherAssess );
-    m_assessors.Add( acpy );
-  }
+    TIter nextAssess( &other.m_assessors );
+    HanConfigAssessor* otherAssess;
+    while( (otherAssess = dynamic_cast<HanConfigAssessor*>( nextAssess() )) != 0 ) {
+      HanConfigAssessor* acpy = new HanConfigAssessor( *otherAssess );
+      m_assessors.Add( acpy );
+    }
   
-  TIter nextGroup( &other.m_groups );
-  HanConfigGroup* otherGroup;
-  while( (otherGroup = dynamic_cast<HanConfigGroup*>( nextGroup() )) != 0 ) {
-    HanConfigGroup* gcpy = new HanConfigGroup( *otherGroup );
-    m_groups.Add( gcpy );
+    TIter nextGroup( &other.m_groups );
+    HanConfigGroup* otherGroup;
+    while( (otherGroup = dynamic_cast<HanConfigGroup*>( nextGroup() )) != 0 ) {
+      HanConfigGroup* gcpy = new HanConfigGroup( *otherGroup );
+      m_groups.Add( gcpy );
+    }
   }
 
   return *this;
