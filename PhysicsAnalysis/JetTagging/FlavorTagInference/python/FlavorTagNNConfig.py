@@ -103,8 +103,8 @@ def FlavorTagNNCfg(
         FlipConfig="STANDARD",
         variableRemapping={}):
 
-    FTD = CompFactory.FlavorTagDiscriminants
-    alg = FTD.BTagDecoratorAlg
+    FTI = CompFactory.FlavorTagInference
+    alg = FTI.BTagDecoratorAlg
 
     acc = ComponentAccumulator()
 
@@ -179,15 +179,15 @@ def MultifoldGNNCfg(
     tp_assoc = 'BTagTrackToJetAssociator'
     ip_assoc = 'TracksForBTagging'
 
-    FTD = CompFactory.FlavorTagDiscriminants
+    FTI = CompFactory.FlavorTagInference
 
     if BTaggingCollection is not None:
-        Alg = FTD.BTagDecoratorAlg
+        Alg = FTI.BTagDecoratorAlg
         trackLinkType = 'TRACK_PARTICLE'
         container = BTaggingCollection
     elif JetCollection is not None:
         remapping.setdefault(tp_assoc, ip_assoc)
-        Alg = FTD.JetTagDecoratorAlg
+        Alg = FTI.JetTagDecoratorAlg
         trackLinkType = 'IPARTICLE'
         algname += '_Jet'
         container = JetCollection

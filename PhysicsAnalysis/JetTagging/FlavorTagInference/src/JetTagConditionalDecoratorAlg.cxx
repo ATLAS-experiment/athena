@@ -2,10 +2,10 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "FlavorTagDiscriminants/JetTagConditionalDecoratorAlg.h"
+#include "FlavorTagInference/JetTagConditionalDecoratorAlg.h"
 #include "CxxUtils/checker_macros.h"
 
-namespace FlavorTagDiscriminants {
+namespace FlavorTagInference {
   JetTagConditionalDecoratorAlg::JetTagConditionalDecoratorAlg(
     const std::string& name, ISvcLocator* svcloc):
     detail::JetCondTag_t(name, svcloc)

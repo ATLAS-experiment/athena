@@ -71,6 +71,10 @@ atlas_add_library( FlavorTagInference
 
 if (NOT XAOD_STANDALONE)
   atlas_add_component( FlavorTagInferenceLib
+    src/BTagDecoratorAlg.cxx
+    src/JetTagDecoratorAlg.cxx
+    src/BTagConditionalDecoratorAlg.cxx
+    src/JetTagConditionalDecoratorAlg.cxx
     src/FoldDecoratorAlg.cxx
     src/components/FlavorTagInference_entries.cxx
     LINK_LIBRARIES FlavorTagInference

@@ -135,35 +135,54 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
                 return StatusCode::FAILURE;
             }
         
-            float Total_Et = 0;
-            unsigned int countMasked = 0;
+            int Total_Et = 0;
+            float Total_Et_float = 0;
+            bool invalid = m_apply_masking&&m_isDATA; // the isDATA is because still waiting for a decision from LAr on whether we should be masking invalid cells in mc or not
+            bool masked = m_apply_masking;
             for (auto const& SCellID : it_TTower2SCells->second ) {
-                
                 //check that the SCell Identifier exists in the map
                 auto it_ScellID2ptr = map_ScellID2ptr.find(SCellID);
                 if(it_ScellID2ptr == map_ScellID2ptr.end()) {
                     if(m_isDATA) ATH_MSG_DEBUG("Scell ID: 0x"<<std::hex<< (SCellID >> 32) <<std::dec<< " not found in the CaloCell Container, skipping");
+                    // this is equivalent to treat the scell as a masked input, since masking takes precedence over invalidity
                     continue;
                 }
 
                 const CaloCell* myCell = it_ScellID2ptr->second;
-                
-                float et = myCell->et();
-                if( (myCell->provenance() >> 7 & 0x1) and m_apply_masking ) {
+                int val =  std::round(myCell->energy()/(12.5*std::cosh(myCell->eta()))); // 12.5 is b.c. energy is in units of 12.5MeV per count
+                bool isMasked = m_apply_masking ? ((myCell)->provenance()&0x80) : false;
+                bool isInvalid = m_apply_masking ? ((myCell)->provenance()&0x40) : false;
+                bool isSaturated = myCell->quality();
+
+                invalid &= isInvalid;
+                masked &= isMasked;
+                jTower_sat |= isSaturated;
+
+                if( isMasked ) {
                     //if masked then Et = 0
-                    et = 0.0;
-                    countMasked++;
+                    val = 0;
+                    //countMasked++;
+                } else if( isInvalid&&m_isDATA /* remove isDATA check when answer question above about MC treatment of invalid SCs*/ ) {
+                    val = 0;
                 }
                 
-                if(myCell->quality() == 1){
-                    jTower_sat = 1;
-                }
+                Total_Et += val;
+                if(val!=0) Total_Et_float += myCell->et();
                 
-                Total_Et += et;
-                
-            }      
-            
-            Total_Et_encoded = jFEXCompression::Compress( Total_Et, countMasked == (it_TTower2SCells->second).size() ? true : false ); 
+            }
+
+            // now must convert Total_Et int value into fex value: multi-level encoding
+            if(masked) {
+                Total_Et_encoded = 0; // no data
+            } else if(invalid) {
+                Total_Et_encoded = 4095; // invalid
+            } else {
+                Total_Et_encoded = jFEXCompression::Compress( Total_Et*12.5, false );
+            }
+
+            // leaving this commented while outstanding questions above about treatment of supercells
+            // using floating point for MC until determine correct procedure for MC values re invalid/masking
+            if(!m_isDATA) Total_Et_encoded = jFEXCompression::Compress( Total_Et_float, masked );
             
         }
         else{

@@ -268,6 +268,56 @@ def MuonReconstructionConfigTest(flags=None):
             import sys
             sys.exit("Execution failed")
 
+
+
+def MuonNCBTrackCfg(flags, cfg):
+   """ 
+        This config (made for r24.0 in Nov 2024) is used to:
+        1] Switch setup of the segment making in the NSW to loosen constrain on the IP
+        2] Adapt and switch off various criteria in TrackSteering/building to be able to reconstruct track from the non-standards (non-collision background) segments 
+   """
+
+    #Adapting NCB alg setup for the standard segment maker alg
+   cfg.getEventAlgo("MuonSegmentMaker").NSWSegmentMaker.SeedMMStereos=False
+   cfg.getEventAlgo("MuonSegmentMaker").NSWSegmentMaker.IPConstraint=False
+
+
+   #Most of the setup below is to suppress background which now we want to reconstruct
+   cfg.getEventAlgo("MuonCreatorAlg").MuonCreatorTool.RequireMSOEforSA=False
+   cfg.getEventAlgo("MuonCreatorAlg").MuonCreatorTool.RequireCaloForSA=False
+
+   cfg.getEventAlgo("MuonCombinedMuonCandidateAlg").MuonCandidateTool.ExtrapolationStrategy=1
+
+   #Loosen up segment criteria
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.SegSeedQCut = -2
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.Seg2ndQCut  = -2
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.SegOtherQCut  = -2 #by default already -2
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.UseTightSegmentMatching  = False
+
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.TrackBuilderTool.CandidateMatchingTool.DoTrackSegmentMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.MooBuilderTool.CandidateMatchingTool.DoTrackSegmentMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.TrackBuilderTool.CandidateMatchingTool.DoTrackSegmentMatching = False
+   #MuPatTrackBuilder.MuonTrackSteering.MooCandidateMatchingTool
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.CandidateMatchingTool.DoTrackSegmentMatching = False
+   #MuPatTrackBuilder.MuonTrackSteering.MooTrackBuilderTemplate.MooCandidateMatchingTool
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.TrackRefinementTool.CandidateMatchingTool.DoTrackSegmentMatching = False
+
+   #MuPatTrackBuilder.MuonTrackSteering.MooCandidateMatchingTool.MuonSegmentMatchingTool
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.CandidateMatchingTool.SegmentMatchingTool.UseEndcapExtrapolationMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.CandidateMatchingTool.SegmentMatchingTool.doThetaMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.CandidateMatchingTool.SegmentMatchingTool.doPhiMatching   = False
+
+   #MuPatTrackBuilder.MuonTrackSteering.MooMuonTrackBuilder.MuSt_MooCandidateMatchingTool.MuSt_MuonSegmentMatchingTool
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.TrackBuilderTool.CandidateMatchingTool.SegmentMatchingTool.UseEndcapExtrapolationMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.TrackBuilderTool.CandidateMatchingTool.SegmentMatchingTool.doThetaMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.TrackBuilderTool.CandidateMatchingTool.SegmentMatchingTool.doPhiMatching   = False
+
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.MooBuilderTool.CandidateMatchingTool.SegmentMatchingTool.UseEndcapExtrapolationMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.MooBuilderTool.CandidateMatchingTool.SegmentMatchingTool.doThetaMatching = False
+   cfg.getEventAlgo("MuPatTrackBuilder").TrackSteering.MooBuilderTool.CandidateMatchingTool.SegmentMatchingTool.doPhiMatching   = False
+
+
+
 if __name__ == "__main__":
     MuonReconstructionConfigTest()
 

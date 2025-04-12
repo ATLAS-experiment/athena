@@ -79,8 +79,7 @@ def FlavorTagDLNNCfg(
         FlipConfig="STANDARD",
         variableRemapping={}):
 
-    FTD = CompFactory.FlavorTagDiscriminants
-    alg = FTD.BTagDecoratorAlg
+    alg = CompFactory.FlavorTagInference.BTagDecoratorAlg
 
     acc = ComponentAccumulator()
 

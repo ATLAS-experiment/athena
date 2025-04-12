@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DECORATOR_ALG_H
@@ -10,7 +10,7 @@
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/ReadDecorHandleKey.h"
 
-namespace FlavorTagDiscriminants {
+namespace FlavorTagInference {
   template <typename CONTAINER, typename DECORATOR, typename CONSTITUENTS>
   class DecoratorAlg : public AthReentrantAlgorithm
   {

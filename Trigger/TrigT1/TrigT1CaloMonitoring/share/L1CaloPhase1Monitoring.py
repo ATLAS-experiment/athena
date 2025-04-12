@@ -75,7 +75,7 @@ Extra flags are specified after a " -- " and the following are most relevant boo
   Trigger.L1.doeFex          : controls efex simulation and monitoring [default: True]
   Trigger.L1.dojFex          : controls jfex simulation and monitoring [default: True]
   Trigger.L1.dogFex          : controls gfex simulation and monitoring [default: True]
-  Trigger.L1.doTopo          : controls topo simulation and monitoring [default: True]
+  Trigger.L1.doTopo          : controls topo simulation and monitoring [default: True] (from 2023 Onwards)
   DQ.useTrigger              : controls if JetEfficiency monitoring alg is run or not  [default: False]
   PerfMon.doFullMonMT        : print info about execution time of algorithms and memory use etc [default: False]
 
@@ -167,6 +167,7 @@ if flags.GeoModel.AtlasVersion is None:
   from AthenaConfiguration.TestDefaults import defaultGeometryTags
   flags.GeoModel.AtlasVersion = defaultGeometryTags.autoconfigure(flags)
 
+if (flags.Input.Format == Format.POOL): flags.Trigger.L1.doTopo = False #Deactivating L1Topo if Format is POOL
 if not flags.Trigger.L1.doTopo: flags.Trigger.L1.doMuon = False # don't do muons if not doing topo
 
 if flags.Trigger.enableL1CaloPhase1:
@@ -184,6 +185,7 @@ flags.lock()
 if flags.Exec.MaxEvents == 0: flags.dump(evaluate=True)
 
 if partition.isValid() and len(flags.Input.Files)==0:
+  flags.dump(evaluate=True)
   from ByteStreamEmonSvc.EmonByteStreamConfig import EmonByteStreamCfg
   cfg.merge(EmonByteStreamCfg(flags)) # setup EmonSvc
   bsSvc = cfg.getService("ByteStreamInputSvc")
@@ -276,6 +278,14 @@ if flags.Trigger.enableL1CaloPhase1:
   #   from SGComps.AddressRemappingConfig import InputRenameCfg
   #   acc.merge(InputRenameCfg('xAOD::TriggerTowerContainer', 'xAODTriggerTowers_rerun', 'xAODTriggerTowers'))
   cfg.merge(L1CaloFEXSimCfg(flags,outputSuffix="_ReSim" if flags.Input.Format == Format.POOL else ""))
+
+  # print the algoVersions of the eFex from menu:
+  from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
+  L1_menu = getL1MenuAccess(flags)
+  L1_menu.printSummary()
+  em_algoVersion = L1_menu.thresholdExtraInfo("eEM").get("algoVersion", 0)
+  tau_algoVersion = L1_menu.thresholdExtraInfo("eTAU").get("algoVersion", 0)
+  log.info(f"algoVersions: eEM: {em_algoVersion}, eTAU: {tau_algoVersion}")
 
   # scheduling simulation of topo
   if flags.Trigger.L1.doTopo:
@@ -392,13 +402,23 @@ if any([s.name=="AthenaEventLoopMgr" for s in cfg.getServices()]): cfg.getServic
 if any([s.name=="AvalancheSchedulerSvc" for s in cfg.getServices()]):
   cfg.getService("AvalancheSchedulerSvc").ShowDataDependencies=True
 
+# need to override a folder tag for LAr while testing v6 firmware...
+if not flags.Input.isMC:
+  from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+  runinfo = getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
+  if runinfo.FWversion()==6:
+    # need a dbOverride ... add it
+    if args.dbOverrides is None: args.dbOverrides = []
+    args.dbOverrides += ["/LAR/Identifier/LatomeMapping:LARIdentifierLatomeMapping-fw6"]
+
+
+
 if type(args.dbOverrides)==list:
   from IOVDbSvc.IOVDbSvcConfig import addOverride
   #examples:
   #cfg.merge( addOverride(flags, folder="/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib", db="sqlite://;schema=mytest.db;dbname=CONDBR2",tag="" ) )
   #cfg.merge( addOverride(flags, folder="/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts", db="sqlite://;schema=/afs/cern.ch/user/w/will/calib.sqlite;dbname=L1CALO",tag="" ) )
   for override in args.dbOverrides:
-    print(override)
     folderName,dbPath = override.split("=",1) if "=" in override else (override,"")
     if folderName == "": raise ValueError("Cannot parse dbOverride: " + override)
     db = ""
@@ -411,7 +431,7 @@ if type(args.dbOverrides)==list:
     if ":" in folderName:
       folderName,tag = folderName.split(":",1)
     if folderName[0] != "/": folderName = "/TRIGGER/L1Calo/V1/Calibration/" + folderName
-    log.info(" ".join(("Overriding COOL folder:",folderName,db,tag)))
+    log.info(" ".join(("Overriding COOL folder=",folderName,"db=",db,"tag=",tag)))
     if db=="":
       cfg.merge( addOverride(flags,folder=folderName,tag=tag))
     else:
@@ -497,13 +517,19 @@ for conf in args.postConfig:
   compName,propNameAndVal=conf.split(".",1)
   propName,propVal=propNameAndVal.split("=",1)
   applied = False
+  from collections import defaultdict
+  availableComps = defaultdict(list)
   for comp in [c for c in cfg._allComponents()]+cfg.getServices():
-    if comp.name==compName:
+    availableComps[comp.getType()] += [comp.getName()]
+    if comp.getName()==compName or comp.getType()==compName or comp.toStringProperty()==compName:
       applied = True
       exec(f"comp.{propNameAndVal}")
       break
   if not applied:
-    raise ValueError(f"postConfig {conf} had no effect ... typo?")
+    print("Available comps:")
+    for k,v in availableComps.items():
+      print(k,":",*v,sep="\n\t")
+    raise ValueError(f"postConfig {conf} had no effect ... typo? See list above of available components")
 
 # -------- CHANGES GO ABOVE ------------
 

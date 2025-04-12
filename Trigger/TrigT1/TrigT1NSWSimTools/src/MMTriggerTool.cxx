@@ -341,7 +341,7 @@ namespace NSWL1 {
         }
       }
       else {
-        ATH_MSG_WARNING("Available hits are " << ev_hits.size() << ", less than X+UV threshold, skipping digit collection");
+        ATH_MSG_DEBUG("Available hits are " << ev_hits.size() << ", less than X+UV threshold, skipping digit collection");
       }
     }
 

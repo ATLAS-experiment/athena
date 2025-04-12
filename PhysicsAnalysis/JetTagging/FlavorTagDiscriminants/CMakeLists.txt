@@ -69,8 +69,6 @@ set_target_properties( FlavorTagDiscriminants
 
 if (NOT XAOD_STANDALONE)
   atlas_add_component( FlavorTagDiscriminantsLib
-    src/BTagDecoratorAlg.cxx
-    src/JetTagDecoratorAlg.cxx
     src/BTagToJetLinkerAlg.cxx
     src/JetToBTagLinkerAlg.cxx
     src/BTagTrackLinkCopyAlg.cxx
@@ -78,8 +76,6 @@ if (NOT XAOD_STANDALONE)
     src/PoorMansIpAugmenterAlg.cxx
     src/HitDecoratorAlg.cxx
     src/JetHitAssociationAlg.cxx
-    src/BTagConditionalDecoratorAlg.cxx
-    src/JetTagConditionalDecoratorAlg.cxx
     src/TruthDecoratorHelpers.cxx
     src/TrackLeptonDecoratorAlg.cxx
     src/TruthParticleDecoratorAlg.cxx
