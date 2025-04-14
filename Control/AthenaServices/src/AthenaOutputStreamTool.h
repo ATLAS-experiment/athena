@@ -36,12 +36,9 @@ public:
    AthenaOutputStreamTool(const std::string& type,
 	   const std::string& name,
 	   const IInterface* parent);
-   /// Destructor
-   virtual ~AthenaOutputStreamTool();
 
    /// AthAlgTool Interface method implementations:
-   StatusCode initialize();
-   StatusCode finalize();
+   virtual StatusCode initialize() override;
 
    /// Specify which data store and conversion service to use
    /// and whether to extend provenance
@@ -68,7 +65,7 @@ public:
    ///   will fail if there is more than one
    typedef std::pair<std::string, std::string> TypeKeyPair;
    typedef std::vector<TypeKeyPair>            TypeKeyPairs;
-   virtual StatusCode streamObjects(const TypeKeyPairs& typeKeys, const std::string& outputName = "");
+   virtual StatusCode streamObjects(const TypeKeyPairs& typeKeys, const std::string& outputName = "") override;
 
    /// Stream out a vector of objects
    ///   Must convert to DataObject, e.g.
@@ -76,13 +73,13 @@ public:
    ///     T* obj = xxx;
    ///     DataObject* dataObject = SG::asStorable(obj);
    typedef std::vector<DataObject*> DataObjectVec;
-   virtual StatusCode streamObjects(const DataObjectVec& dataObjects, const std::string& outputName = "");
+   virtual StatusCode streamObjects(const DataObjectVec& dataObjects, const std::string& outputName = "") override;
 
-   virtual StatusCode getInputItemList(SG::IFolder* m_p2BWrittenFromTool);
+   virtual StatusCode getInputItemList(SG::IFolder* m_p2BWrittenFromTool) override;
 
 private:
    /// Do the real connection to services
-   virtual StatusCode connectServices();
+   StatusCode connectServices();
    /// copy provenance records when creating new DataHeaders
    void propagateProvenance( const DataHeader& src_dh );
 
@@ -96,8 +93,10 @@ private:
    StringProperty  m_metaDataOutputCollection{ this, "MetaDataOutputCollection", "", "custom container name prefix for MetaDataHeader: default = "" (will result in \"MetaDataHdr\")"};
    StringProperty  m_metaDataContainerPrefix{ this, "MetaDataPoolContainerPrefix", "", "prefix for top level MetaData container: default = "" (will result in \"MetaData\")"};
    StringProperty  m_branchNameHint{ this, "SubLevelBranchName", "0", "naming hint policy for POOL branching: default = \"0\"" };
-   std::string  m_outputAttributes{""};
-   std::string  m_metaDataOutputAttributes{""};
+   BooleanProperty m_extend{ this, "SaveDecisions", false, "Set to true to add streaming decisions to an attributeList"};
+
+   std::string  m_outputAttributes;
+   std::string  m_metaDataOutputAttributes;
    SG::ReadHandleKey<AthenaAttributeList>  m_attrListKey{this, "AttributeListKey", "", "optional key for AttributeList to be written as part of the DataHeader: default = \"\""};
    //SG::WriteHandleKey<AthenaAttributeList>  m_attrListWrite{this, "AttributeListWrite", "", "optional key for AttributeList to be written as part of the DataHeader: default = <AttributeListKey>+\"Decisions\""};
    std::string  m_attrListWrite{""};
@@ -110,12 +109,12 @@ private:
    /// Ref to DecisionSvc
    ServiceHandle<IDecisionSvc>   m_decSvc;
    /// Current DataHeader for streamed objects
-   DataHeader*          m_dataHeader;
+   DataHeader*          m_dataHeader{nullptr};
    /// Flag to tell whether connectOutput has been called
-   bool                 m_connectionOpen;
+   bool                 m_connectionOpen{false};
 
    /// Flag as to whether to extend provenance via the DataHeader
-   bool                 m_extendProvenanceRecord;
+   bool                 m_extendProvenanceRecord{false};
    /// RegEx string to match provenance tags to keep in the output DataHeader. Retrieved from an OutputStream property
    std::string          m_keepProvenancesStr;
    /// RegEx pattern created from m_keepProvenancesStr
@@ -123,9 +122,6 @@ private:
    /// Cache provenance RegEx matching result in a map
    std::map<std::string, bool>  m_keepProvenanceMatch;
 
-   /// Flag to extend attribute list with stream flags from DecisionSvc 
-   bool m_extend;
-   
    /// set of skipped item keys, because of missing CLID
    std::set<std::string> m_skippedItems;
 };

@@ -44,20 +44,9 @@ bool hasInputAlias (const SG::DataProxy& dp)
 AthenaOutputStreamTool::AthenaOutputStreamTool(const std::string& type,
 		const std::string& name,
 		const IInterface* parent) : base_class(type, name, parent),
-	m_store("DetectorStore", name),
 	m_conversionSvc("AthenaPoolCnvSvc", name),
 	m_clidSvc("ClassIDSvc", name),
-	m_decSvc("DecisionSvc/DecisionSvc", name),
-	m_dataHeader(nullptr),
-	m_connectionOpen(false),
-	m_extendProvenanceRecord(false) {
-   // Declare IAthenaOutputStreamTool interface
-   declareInterface<IAthenaOutputStreamTool>(this);
-
-   declareProperty("SaveDecisions",         m_extend = false, "Set to true to add streaming decisions to an attributeList");
-}
-//__________________________________________________________________________
-AthenaOutputStreamTool::~AthenaOutputStreamTool() {
+	m_decSvc("DecisionSvc/DecisionSvc", name) {
 }
 //__________________________________________________________________________
 StatusCode AthenaOutputStreamTool::initialize() {
@@ -126,17 +115,6 @@ StatusCode AthenaOutputStreamTool::initialize() {
    return(StatusCode::SUCCESS);
 }
 //__________________________________________________________________________
-StatusCode AthenaOutputStreamTool::finalize() {
-   m_decSvc.release().ignore();
-   if (m_conversionSvc.release().isFailure()) {
-      ATH_MSG_WARNING("Cannot release AthenaPoolCnvSvc");
-   }
-   if (m_clidSvc.release().isFailure()) {
-      ATH_MSG_WARNING("Cannot release the CLIDSvc");
-   }
-   return(StatusCode::SUCCESS);
-}
-//__________________________________________________________________________
 StatusCode AthenaOutputStreamTool::connectServices(const std::string& dataStore,
 	const std::string& cnvSvc,
 	bool extendProvenenceRecord) {
@@ -193,10 +171,7 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
    }
    // Connect services if not already available
    if (m_store == 0 || m_conversionSvc == 0) {
-      if (connectServices().isFailure()) {
-         ATH_MSG_ERROR("Unable to connect services");
-         return(StatusCode::FAILURE);
-      }
+     ATH_CHECK( connectServices() );
    }
    // Connect the output file to the service
    if (m_conversionSvc->connectOutput(m_outputName.value()).isFailure()) {
