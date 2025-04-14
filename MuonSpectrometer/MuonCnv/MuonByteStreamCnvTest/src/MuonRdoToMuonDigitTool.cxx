@@ -140,7 +140,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeMdtRDO(const EventContext& ctx, MdtDigi
     MdtDigitMap_t mdtDigitMap;
 
     // now decode RDO into digits
-    for (const MdtCsm* rdoColl : *rdoContainer) { ATH_CHECK(decodeMdt(*rdoColl, mdtDigitMap)); }
+    for (const MdtCsm* rdoColl : *rdoContainer) { ATH_CHECK(decodeMdt(ctx, *rdoColl, mdtDigitMap)); }
 
     for (auto& p : mdtDigitMap) { ATH_CHECK(mdtContainer->addCollection(p.second.release(), p.first)); }
 
@@ -276,7 +276,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeMM_RDO(const EventContext& ctx, MmDigit
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonRdoToMuonDigitTool::decodeMdt(const MdtCsm& rdoColl, MdtDigitMap_t& mdtDigitMap) const {
+StatusCode MuonRdoToMuonDigitTool::decodeMdt(const EventContext& ctx, const MdtCsm& rdoColl, MdtDigitMap_t& mdtDigitMap) const {
     IdContext mdtContext = m_idHelperSvc->mdtIdHelper().module_context();
 
     if (!rdoColl.empty()) {
@@ -289,7 +289,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeMdt(const MdtCsm& rdoColl, MdtDigitMap_
         // for each Csm, loop over AmtHit, converter AmtHit to digit
         // retrieve/create digit collection, and insert digit into collection
         for (const MdtAmtHit* amtHit : rdoColl) {
-            std::unique_ptr<MdtDigit> newDigit(m_mdtRdoDecoderTool->getDigit(amtHit, subdetId, mrodId, csmId, Gaudi::Hive::currentContext()));
+            std::unique_ptr<MdtDigit> newDigit(m_mdtRdoDecoderTool->getDigit(amtHit, subdetId, mrodId, csmId, ctx));
 
             if (!newDigit) {
                 ATH_MSG_WARNING("Error in MDT RDO decoder");
