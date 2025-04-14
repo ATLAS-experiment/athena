@@ -113,8 +113,7 @@ namespace MuonR4{
             }
             acc_truthOrigin(*trackPart) = xAOD::TruthHelpers::getParticleTruthOrigin(*bestMatch);
             acc_truthType(*trackPart) = xAOD::TruthHelpers::getParticleTruthType(*bestMatch);
-            const auto bestMatchCont = static_cast<const xAOD::TruthParticleContainer*>(bestMatch->container());
-            acc_truthLink(*trackPart) = TruthLink_t{bestMatchCont, bestMatch->index()};
+            acc_truthLink(*trackPart) = TruthLink_t{truthMuonCont, bestMatch->index()};
         }
         return StatusCode::SUCCESS;
     }

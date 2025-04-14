@@ -119,6 +119,13 @@ def SdoMultiTruthMakerCfg(flags):
 
     return result
 
+def RecoSegmentTruthAssocCfg(flags, **kwargs):
+    result = ComponentAccumulator()
+    ### Ensure that this configuration is always set externally
+    kwargs.setdefault("SegmentKey", "")
+    the_alg = CompFactory.MuonR4.RecoSegToTruthAssocAlg(**kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
 
 def TruthSegmentToTruthPartAssocCfg(flags, name="MuonTruthSegmentToTruthAssocAlg", **kwargs):
     result = ComponentAccumulator()

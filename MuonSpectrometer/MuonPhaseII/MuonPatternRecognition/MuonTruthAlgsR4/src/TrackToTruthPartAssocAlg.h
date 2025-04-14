@@ -17,8 +17,10 @@
 
 namespace MuonR4{
     /** @brief The TrackToTruthPartAssocAlg matches the reconstructed tracks to truth muons.
-     *         As baseline, the 
-     */
+      *        The SDO identifiers decorated to the TruthMuon are used for the matching algorithm.
+      *        Then, the algorithm navigates from the track particles to the corresponding `Trk::Track`
+      *        to collect the hit Identifiers from the TrackStatesOnSurface measurements. The truth particle
+      *        with the largest correspondence in hit counts is then associated with the TrackParticle. */
     class TrackToTruthPartAssocAlg : public AthReentrantAlgorithm {
         public:
             using AthReentrantAlgorithm::AthReentrantAlgorithm;
@@ -26,8 +28,6 @@ namespace MuonR4{
             StatusCode initialize() override final;
             StatusCode execute(const EventContext& ctx) const override final;
         private:
-            
-        
             /** @brief IdHelperSvc to decode the Identifiers */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Helper service to handle the Identifiers of measurements */

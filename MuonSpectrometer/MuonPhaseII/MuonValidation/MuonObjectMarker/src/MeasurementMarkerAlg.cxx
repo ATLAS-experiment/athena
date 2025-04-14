@@ -57,12 +57,12 @@ namespace MuonR4{
             ATH_CHECK(SG::get(measCont, decorKey.contHandleKey(), ctx));
             writeDecorMap.emplace(std::make_pair(measCont,  makeHandle(ctx, decorKey, false)));
         }
+
         for (const WriteDecorKey_t& key : m_writeSegLinkKeys) {
             const xAOD::UncalibratedMeasurementContainer* measCont{nullptr};
             ATH_CHECK(SG::get(measCont, key.contHandleKey(), ctx));
             linkDecorMap.emplace(std::make_pair(measCont,  makeHandle(ctx, key, SegLinkVec_t{})));
         }
-        
 
         for (const xAOD::MuonSegment* seg : *segments) {
             if (!readDecor(*seg)){
