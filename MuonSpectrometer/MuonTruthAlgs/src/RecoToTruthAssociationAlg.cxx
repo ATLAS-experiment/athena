@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonTruthAssociationAlg.h"
+#include "RecoToTruthAssociationAlg.h"
 
 #include "MuonCompetingRIOsOnTrack/CompetingMuonClustersOnTrack.h"
 #include "StoreGate/WriteDecorHandle.h"
@@ -25,21 +25,25 @@ namespace {
         else
             ++val;
     }
+    using TruthLink_t = ElementLink<xAOD::TruthParticleContainer>;
     const SG::ConstAccessor<int> acc_origin("truthOrigin");
     const SG::ConstAccessor<int> acc_type("truthType");
-    const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer> > acc_link("truthParticleLink");
+    const SG::ConstAccessor<TruthLink_t> acc_link("truthParticleLink");
     //
     const SG::Decorator<int> dec_origin("truthOrigin");
     const SG::Decorator<int> dec_type ("truthType");
-    const SG::Decorator<ElementLink<xAOD::TruthParticleContainer> > dec_link("truthParticleLink");
+    const SG::Decorator<TruthLink_t> dec_link("truthParticleLink");
+
+    static const SG::ConstAccessor<std::vector<unsigned long long>> truthMdtHitsAcc("truthMdtHits");
+    static const SG::ConstAccessor<std::vector<unsigned long long>> truthCscHitsAcc("truthCscHits");
+    static const SG::ConstAccessor<std::vector<unsigned long long>> truthRpcHitsAcc("truthRpcHits");
+    static const SG::ConstAccessor<std::vector<unsigned long long>> truthTgcHitsAcc("truthTgcHits");
     
 }  // namespace
-// Constructor with parameters:
-MuonTruthAssociationAlg::MuonTruthAssociationAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
 
+namespace Muon {
 // Initialize method:
-StatusCode MuonTruthAssociationAlg::initialize() {
+StatusCode RecoToTruthAssociationAlg::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_truthMuKey.initialize());
     ATH_CHECK(m_recoMuKey.initialize());
@@ -58,19 +62,21 @@ StatusCode MuonTruthAssociationAlg::initialize() {
     ATH_CHECK(m_muonTruthParticleNPhiMatched.initialize());
     ATH_CHECK(m_muonTruthParticleNTrigEtaMatched.initialize());
     for (const std::string& trk_coll : m_assocTrkContainers.value()){
-        m_trkTruthKeys.emplace_back(trk_coll + ".truthParticleLink");
+        m_inputDecorKey.emplace_back(trk_coll + ".truthParticleLink");
     }
-    ATH_CHECK(m_trkTruthKeys.initialize());
+
+    m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(acc_origin.auxid()));
+    m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(acc_type.auxid()));
+    m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(truthMdtHitsAcc.auxid()));
+
+    ATH_CHECK(m_inputDecorKey.initialize());
     return StatusCode::SUCCESS;
 }
 
 // Execute method:
-StatusCode MuonTruthAssociationAlg::execute(const EventContext& ctx) const {
-    SG::ReadHandle<xAOD::TruthParticleContainer> muonTruthContainer(m_truthMuKey , ctx);
-    if (!muonTruthContainer.isValid()) {
-        ATH_MSG_WARNING("truth particle container not valid");
-        return StatusCode::FAILURE;
-    }
+StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
+    const xAOD::TruthParticleContainer* muonTruthContainer{nullptr};
+    ATH_CHECK(SG::get(muonTruthContainer, m_truthMuKey , ctx));
     std::unique_ptr<SG::WriteDecorHandle<xAOD::TruthParticleContainer, ElementLink<xAOD::MuonContainer>>> muonTruthParticleRecoLink{};
     if (!m_muonTruthRecoLink.empty()) {
         muonTruthParticleRecoLink = std::make_unique<SG::WriteDecorHandle<xAOD::TruthParticleContainer, ElementLink<xAOD::MuonContainer>>>(m_muonTruthRecoLink, ctx);
@@ -244,11 +250,11 @@ StatusCode MuonTruthAssociationAlg::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
 }
 
-void MuonTruthAssociationAlg::count_chamber_layers(const xAOD::IParticle* truthParticle, const Trk::Track* ptrk,
+void RecoToTruthAssociationAlg::count_chamber_layers(const xAOD::IParticle* truthParticle, const Trk::Track* ptrk,
                                                    std::vector<unsigned int>& nprecHitsPerChamberLayer,
                                                    std::vector<unsigned int>& nphiHitsPerChamberLayer,
                                                    std::vector<unsigned int>& ntrigEtaHitsPerChamberLayer) const {
-    static const SG::ConstAccessor<std::vector<unsigned long long> > truthMdtHitsAcc ("truthMdtHits");
+
     if (!truthParticle || !truthMdtHitsAcc.isAvailable(*truthParticle)) {
         ATH_MSG_DEBUG("muon has no truth hits vector in the truth association alg");
         nprecHitsPerChamberLayer.clear();
@@ -258,12 +264,7 @@ void MuonTruthAssociationAlg::count_chamber_layers(const xAOD::IParticle* truthP
     }
     const std::vector<unsigned long long>& mdtTruth = truthMdtHitsAcc(*truthParticle);
     std::vector<unsigned long long> cscTruth;
-    static const SG::ConstAccessor<std::vector<unsigned long long> >
-      truthCscHitsAcc("truthCscHits");
-    static const SG::ConstAccessor<std::vector<unsigned long long> >
-      truthRpcHitsAcc("truthRpcHits");
-    static const SG::ConstAccessor<std::vector<unsigned long long> >
-      truthTgcHitsAcc("truthTgcHits");
+
     if (m_idHelperSvc->hasCSC()) cscTruth = truthCscHitsAcc(*truthParticle);
     const std::vector<unsigned long long>& rpcTruth = truthRpcHitsAcc(*truthParticle);
     const std::vector<unsigned long long>& tgcTruth = truthTgcHitsAcc(*truthParticle);
@@ -349,19 +350,28 @@ void MuonTruthAssociationAlg::count_chamber_layers(const xAOD::IParticle* truthP
     clear_dummys(rpcTruth, ntrigEtaHitsPerChamberLayer);
     clear_dummys(tgcTruth, ntrigEtaHitsPerChamberLayer);
 }
-void MuonTruthAssociationAlg::clear_dummys(const std::vector<unsigned long long>& identifiers, std::vector<unsigned int>& vec) const {
+void RecoToTruthAssociationAlg::clear_dummys(const std::vector<unsigned long long>& identifiers, std::vector<unsigned int>& vec) const {
     /// If the identifiers are empty then there
     /// is no change that a dummy value could be cleared from this list
     if (identifiers.empty()) { return; }
     for (unsigned int i = 0; i < vec.size(); ++i) {
         if (vec[i] != dummy_unsigned) continue;
         for (unsigned j = 0; j < identifiers.size(); ++j) {
-            Identifier id(identifiers[j]);
-            if ((m_idHelperSvc->measuresPhi(id) && m_idHelperSvc->phiIndex(id) == (Muon::MuonStationIndex::PhiIndex)i) ||
-                (!m_idHelperSvc->measuresPhi(id) && m_idHelperSvc->chamberIndex(id) == (Muon::MuonStationIndex::ChIndex)i)) {
-                vec[i] = 0;
-                break;
+            const Identifier id{identifiers[j]};
+            if (m_idHelperSvc->measuresPhi(id)) {
+                const auto phiIdx = static_cast<Muon::MuonStationIndex::PhiIndex>(i);
+                if (m_idHelperSvc->phiIndex(id) == phiIdx) {
+                    vec[i] = 0;
+                    break;
+                } 
+            } else {
+                const auto chIdx = static_cast<Muon::MuonStationIndex::ChIndex>(i);
+                if (m_idHelperSvc->chamberIndex(id) == chIdx) {
+                    vec[i] = 0;
+                    break;
+                }
             }
         }
     }
+}
 }

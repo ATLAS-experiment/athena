@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRUTHPARTICLEALGS_MUONTRUTHASSOCIATIONALG_H
-#define TRUTHPARTICLEALGS_MUONTRUTHASSOCIATIONALG_H
+#ifndef TRUTHPARTICLEALGS_RecoToTruthAssociationAlg_H
+#define TRUTHPARTICLEALGS_RecoToTruthAssociationAlg_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -13,21 +13,23 @@
 #include "xAODMuon/MuonContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 
-class MuonTruthAssociationAlg : public AthReentrantAlgorithm {
+
+namespace Muon {
+class RecoToTruthAssociationAlg : public AthReentrantAlgorithm {
 public:
     // Constructor with parameters:
-    MuonTruthAssociationAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     // Basic algorithm methods:
     StatusCode initialize() override;
     StatusCode execute(const EventContext& ctx) const override;
 
 private:
+    /** @brief Key to the filtered muon truth particles  */
    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthMuKey{
-        this, "MuonTruthParticleContainerName", "MuonTruthParticles",
-        "container name for muon truth particles; the full handle name, including the reco muon link auxdata, is set in initialize()"};
+        this, "MuonTruthParticleContainerName", "MuonTruthParticles"};
    
-   SG::ReadHandleKey<xAOD::MuonContainer> m_recoMuKey{
+    SG::ReadHandleKey<xAOD::MuonContainer> m_recoMuKey{
         this, "MuonContainerName", "Muons",
         "container name for muon truth particles; the full handle name, including the reco muon link auxdata, is set in initialize()"};
    
@@ -55,7 +57,7 @@ private:
         "muon vector of number of phi matched hits per chamber layer auxdata name; name will be reset in initialize() based on m_muonName"};
     
    
-    SG::ReadDecorHandleKeyArray<xAOD::TrackParticleContainer> m_trkTruthKeys{
+    SG::ReadDecorHandleKeyArray<xAOD::IParticleContainer> m_inputDecorKey{
         this, "TrkTruthLinkKeys", {},
         "Declare the decoration dependencies of this algorithm. Steer via TrackContainers property"};
     Gaudi::Property<std::vector<std::string>> m_assocTrkContainers{this, "TrackContainers", {"CombinedMuonTrackParticles",
@@ -74,5 +76,5 @@ private:
     void clear_dummys(const std::vector<unsigned long long>& identifiers, std::vector<unsigned int>& vec) const;
   
 };
-
+}
 #endif  // TRUTHPARTICLEALGS_MUONTRUTHDECORATIONALG_H
