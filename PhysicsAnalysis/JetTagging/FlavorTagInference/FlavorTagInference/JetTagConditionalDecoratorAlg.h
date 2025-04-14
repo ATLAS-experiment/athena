@@ -5,7 +5,7 @@
 #ifndef JET_TAG_CONDITIONALDECORATOR_ALG_H
 #define JET_TAG_CONDITIONALDECORATOR_ALG_H
 
-#include "FlavorTagDiscriminants/DecoratorAlg.h"
+#include "FlavorTagInference/DecoratorAlg.h"
 #include "FlavorTagInference/IJetTagConditionalDecorator.h"
 
 #include "StoreGate/ReadDecorHandleKeyArray.h"
@@ -14,14 +14,14 @@
 
 
 namespace detail {
-  using JetCondTag_t = FlavorTagDiscriminants::DecoratorAlg<
+  using JetCondTag_t = FlavorTagInference::DecoratorAlg<
     xAOD::JetContainer,
     IJetTagConditionalDecorator,
     xAOD::TrackParticleContainer
     >;
 }
 
-namespace FlavorTagDiscriminants {
+namespace FlavorTagInference {
   class JetTagConditionalDecoratorAlg : public detail::JetCondTag_t
   {
   public:

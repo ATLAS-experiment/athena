@@ -1,26 +1,26 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAG_DECORATOR_ALG_H
 #define BTAG_DECORATOR_ALG_H
 
 
-#include "FlavorTagDiscriminants/DecoratorAlg.h"
+#include "FlavorTagInference/DecoratorAlg.h"
 #include "FlavorTagInference/IBTagDecorator.h"
 
 #include "xAODBTagging/BTaggingContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
 namespace detail {
-  using BTag_t = FlavorTagDiscriminants::DecoratorAlg<
+  using BTag_t = FlavorTagInference::DecoratorAlg<
     xAOD::BTaggingContainer,
     IBTagDecorator,
     xAOD::TrackParticleContainer
     >;
 }
 
-namespace FlavorTagDiscriminants {
+namespace FlavorTagInference {
   class BTagDecoratorAlg : public detail::BTag_t
   {
   public:
