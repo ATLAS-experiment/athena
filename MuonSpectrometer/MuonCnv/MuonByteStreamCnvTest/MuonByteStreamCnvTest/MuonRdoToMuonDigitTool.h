@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRDOTOMUONDIGITTOOL_H
@@ -79,7 +79,7 @@ private:
     // private method for the decoding RDO --> digits
     using MdtDigitMap_t = std::unordered_map<IdentifierHash, std::unique_ptr<MdtDigitCollection> >;
     StatusCode decodeMdtRDO(const EventContext& ctx, MdtDigitContainer*) const;
-    StatusCode decodeMdt(const MdtCsm& rdoColl, MdtDigitMap_t& mdtDigitVec) const;
+    StatusCode decodeMdt(const EventContext& ctx, const MdtCsm& rdoColl, MdtDigitMap_t& mdtDigitVec) const;
 
     using CscDigitMap_t = std::unordered_map<IdentifierHash, std::unique_ptr<CscDigitCollection> >;
     StatusCode decodeCscRDO(const EventContext& ctx, CscDigitContainer*) const;
