@@ -5,7 +5,7 @@
 #include "../DetailedMuonPatternTruthBuilder.h"
 #include "../MuonDecayTruthTrajectoryBuilder.h"
 #include "../MuonSegmentTruthAssociationAlg.h"
-#include "../MuonTruthAssociationAlg.h"
+
 
 
 
@@ -19,6 +19,7 @@
 #include "../TruthMuonMakerAlg.h"
 #include "../TruthHitSummaryAlg.h"
 #include "../TruthTrackRecordsAlg.h"
+#include "../RecoToTruthAssociationAlg.h"
 using namespace Muon;
 using namespace Trk;
 
@@ -27,7 +28,7 @@ DECLARE_COMPONENT(MuonDetailedTrackTruthMaker)
 DECLARE_COMPONENT(MuonPatternCombinationDetailedTrackTruthMaker)
 
 DECLARE_COMPONENT(MuonTruthSegmentCreationAlg)
-DECLARE_COMPONENT(MuonTruthAssociationAlg)
+
 DECLARE_COMPONENT(MuonSegmentTruthAssociationAlg)
 
 DECLARE_COMPONENT(MuonTrackTruthTool)
@@ -38,3 +39,4 @@ DECLARE_COMPONENT(DetailedMuonPatternTruthBuilder)
 DECLARE_COMPONENT(Muon::TruthMuonMakerAlg)
 DECLARE_COMPONENT(Muon::TruthHitSummaryAlg)
 DECLARE_COMPONENT(Muon::TruthTrackRecordsAlg)
+DECLARE_COMPONENT(Muon::RecoToTruthAssociationAlg)

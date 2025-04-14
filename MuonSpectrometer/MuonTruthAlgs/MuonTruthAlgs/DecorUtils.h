@@ -25,8 +25,8 @@ namespace Muon{
                 return nullptr;
             }
             auto decorHandle = std::make_unique<SG::WriteDecorHandle<ContType, DataType>>(key, ctx);
-            if ((*decorHandle)->size()) {
-                (*decorHandle)(*(*decorHandle)->front()) = defVal;
+            for (const auto* obj : (**decorHandle)){
+                (*decorHandle)(*obj) = defVal;
             }
             return decorHandle;
     }

@@ -88,7 +88,7 @@ def MuonTruthSegmentCreationAlgCfg(flags, name="MuonTruthSegmentCreationAlg", **
 
 def MuonTruthAssociationAlgCfg(flags, name="MuonTruthAssociationAlg", **kwargs):
     result = ComponentAccumulator()
-    result.addEventAlgo(CompFactory.MuonTruthAssociationAlg(name, **kwargs))
+    result.addEventAlgo(CompFactory.Muon.RecoToTruthAssociationAlg(name, **kwargs))
     return result
 
 def MuonSegmentTruthAssociationAlgCfg(flags, name="MuonSegmentTruthAssociationAlg", **kwargs):
