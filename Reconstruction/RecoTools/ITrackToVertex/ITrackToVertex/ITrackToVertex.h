@@ -16,10 +16,7 @@
 // xAOD
 #include "xAODTracking/TrackParticleFwd.h"
 
-namespace Rec {
- class TrackParticle;
-}
- 
+
 namespace Trk {
  class Track;
  class StraightLineSurface;
@@ -34,20 +31,20 @@ class EventContext;
 namespace Reco {
 
   static const InterfaceID IID_ITrackToVertex("ITrackToVertex", 1, 0);
-  
-  /** 
+
+  /**
    @class ITrackToVertex
-   
+
    Interface class for the TrackToVertex AlgTool,
    for more detailed information, take a look at the header file of the actual
    implementation file
-       
+
    @author Andreas.Salzburger@cern.ch, Fredrik.Akesson@cern.ch
    */
-      
-      
+
+
   class ITrackToVertex : virtual public IAlgTool {
-     
+
      public:
        /** Virtual destructor */
        virtual ~ITrackToVertex()=default;
@@ -57,66 +54,40 @@ namespace Reco {
 
        /** Use this for MT Coding */
        virtual std::unique_ptr<Trk::StraightLineSurface> GetBeamLine(
-         const InDet::BeamSpotData*)
-         const = 0;
-
-
-       /** Interface method for use with TrackParticle and given vertex position
-        * - AOD */
-       virtual std::unique_ptr<Trk::Perigee> perigeeAtVertex(
-         const EventContext& ctx,
-         const Rec::TrackParticle& tp,
-         const Amg::Vector3D& gp) const = 0;
+           const InDet::BeamSpotData*) const = 0;
 
        /** Interface method for use with xAOD::Trackparticle and given vertex
-        * position - xAOD */
+        * position */
        virtual std::unique_ptr<Trk::Perigee> perigeeAtVertex(
          const EventContext& ctx,
          const xAOD::TrackParticle& tp,
          const Amg::Vector3D& gp) const = 0;
 
        /** Interface method for use with TrackParticle and default primary
-        * vertex from TrackParticle  - AOD */
-       virtual std::unique_ptr<Trk::Perigee> perigeeAtVertex(
-         const EventContext& ctx,
-         const Rec::TrackParticle& tp) const = 0;
-
-       /** Interface method for use with TrackParticle and default primary
-        * vertex from TrackParticle  - xAOD */
+        * vertex from TrackParticle */
        virtual std::unique_ptr<Trk::Perigee> perigeeAtVertex(
          const EventContext& ctx,
          const xAOD::TrackParticle& tp) const = 0;
 
-       /** Interface method for use with Track and given vertex position - ESD
-        */
+       /** Interface method for use with Track and given vertex position*/
        virtual std::unique_ptr<Trk::Perigee> perigeeAtVertex(
          const EventContext& ctx,
          const Trk::Track& trk,
          const Amg::Vector3D& gp) const = 0;
 
-
-       /** Interface method for use with Track and the beamline from the
-        * BeamSpotSvc - ESD */
+       /** Interface method for use with Track and the beamline*/
        virtual std::unique_ptr<Trk::Perigee> perigeeAtBeamline(
          const EventContext& ctx,
          const Trk::Track& trk,
          const InDet::BeamSpotData* beamSpotData) const = 0;
 
-      /** Interface method for use with TrackParticle and the beamline from the
-        * BeamSpotSvc - AOD*/
-       virtual std::unique_ptr<Trk::TrackParameters> trackAtBeamline(
-         const EventContext& ctx,
-         const Rec::TrackParticle& tp) const = 0;
-
-       /** Interface method for use with TrackParticle and the beamline from the
-        * BeamSpotSvc - xAOD*/
+       /** Interface method for use with TrackParticle and the beamline*/
        virtual std::unique_ptr<Trk::TrackParameters> trackAtBeamline(
          const EventContext& ctx,
          const xAOD::TrackParticle& tp,
          const InDet::BeamSpotData*) const = 0;
 
-       /** Interface method for use with Track and the beamline from the
-        * BeamSpotSvc - ESD */
+       /** Interface method for use with Track and the beamline*/
        virtual std::unique_ptr<Trk::TrackParameters> trackAtBeamline(
          const EventContext& ctx,
          const Trk::Track& trk,
@@ -129,7 +100,7 @@ namespace Reco {
          const Trk::TrackParameters& tpars,
          const Trk::StraightLineSurface*) const = 0;
   };
-} 
+}
 
 #endif // TRACKTOVERTEX_ITRACKTOVERTEX_H
 
