@@ -312,16 +312,9 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
     
   // ===> hlv for the leading EFOs and the summed HLV
   TLorentzVector              tlv_TypeConstituents;
-  // ===> Sum of DeltaR to jet axis
-  double                      sum_DRToReference             = 0;
-  double                      sum_DR2ToReference            = 0;
-  double                      sum_DRToLeading             = 0;
-  double                      sum_DR2ToLeading            = 0;
   // ===> Sum of Et, Et^2, E and E^2
   double                      sum_Et                      = 0;
   double                      sum_Et2                     = 0;
-  double                      sum_E                       = 0;
-  double                      sum_E2                      = 0;
   // ===> Sum of Et (and E) times DeltaR, DeltaR', Angle 
   double                      sum_EtxDR                   = 0;
   double                      sum_EtxDR2                  = 0;
@@ -358,25 +351,14 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
     //helpers to reduce function calls
     double hlp_Et               = tlv_curConst.Et();
     double hlp_Et2              = hlp_Et * hlp_Et;
-    double hlp_E                = tlv_curConst.E();
-    double hlp_E2               = hlp_E * hlp_E;
     double hlp_DeltaR           = tlv_Reference.DeltaR(tlv_curConst);
     double hlp_DeltaR2          = hlp_DeltaR * hlp_DeltaR;
-    double hlp_DeltaRLeading    = (tlv_1st_Et.Pt() == 0 ? 0 : tlv_1st_Et.DeltaR(tlv_curConst));
-    double hlp_DeltaR2Leading   = hlp_DeltaRLeading * hlp_DeltaRLeading;
     double hlp_DeltaRprime      = m_HelperFunctions.deltaRprime(tlv_Reference.Vect(), tlv_curConst.Vect());
     double hlp_Angle            = tlv_Reference.Angle(tlv_curConst.Vect());
-        
-    // update sum of DeltaR to jet axis
-    sum_DRToReference           += hlp_DeltaR;
-    sum_DR2ToReference          += hlp_DeltaR2;
-    sum_DRToLeading             += hlp_DeltaRLeading;
-    sum_DR2ToLeading            += hlp_DeltaR2Leading;
+
     // update Sum of Et, Et^2, E and E^2
     sum_Et                      += hlp_Et;
     sum_Et2                     += hlp_Et2;
-    sum_E                       += hlp_E;
-    sum_E2                      += hlp_E2;
     // update Sum of Et (and E) times DeltaR, DeltaR', Angle 
     sum_EtxDR                   += hlp_Et * hlp_DeltaR;
     sum_EtxDR2                  += hlp_Et * hlp_DeltaR2;
