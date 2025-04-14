@@ -38,7 +38,7 @@ StatusCode PhysValSecVtx::bookHistograms()
 
 StatusCode PhysValSecVtx::fillHistograms()
 {
-  ATH_MSG_INFO ("Filling hists " << name() << "...");
+  ATH_MSG_DEBUG ("Filling hists " << name() << "...");
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
 

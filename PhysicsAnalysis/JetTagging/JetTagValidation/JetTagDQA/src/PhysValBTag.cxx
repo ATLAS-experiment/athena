@@ -143,7 +143,7 @@ namespace JetTagDQA {
 
   StatusCode PhysValBTag::fillHistograms()
   {
-    ATH_MSG_INFO ("Filling hists " << name() << "...");
+    ATH_MSG_DEBUG ("Filling hists " << name() << "...");
     
     if (m_detailLevel < 10) return StatusCode::SUCCESS;
     

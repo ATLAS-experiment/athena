@@ -154,7 +154,7 @@ StatusCode InDetTrackPerfMonTool::bookHistograms()
 /// ------------------------------
 StatusCode InDetTrackPerfMonTool::fillHistograms() {
 
-  ATH_MSG_INFO( "Filling hists " << name() << " ..." );
+  ATH_MSG_DEBUG("Filling hists " << name() << " ...");
 
   /// Output TrackAnalysisInfo container writing
   SG::WriteHandle< xAOD::BaseContainer > outTrkAnaInfoContHandle( m_trkAnaInfoKey );

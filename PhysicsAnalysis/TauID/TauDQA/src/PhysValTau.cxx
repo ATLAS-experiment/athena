@@ -74,7 +74,7 @@ StatusCode PhysValTau::bookHistograms()
 
 StatusCode PhysValTau::fillHistograms()
 {
-  ATH_MSG_INFO ("Filling hists " << name() << "...");
+  ATH_MSG_DEBUG ("Filling hists " << name() << "...");
 
   // Retrieve tau container
   const xAOD::TauJetContainer* taus = nullptr;
