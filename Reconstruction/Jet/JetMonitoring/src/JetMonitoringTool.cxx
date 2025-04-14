@@ -67,7 +67,7 @@ StatusCode JetMonitoringTool::bookHistograms()
 
 StatusCode JetMonitoringTool::fillHistograms()
 {
-  //ATH_MSG_INFO ("Filling hists " << name() << "..." );
+  ATH_MSG_DEBUG ("Filling hists " << name() << "...");
 
   /// simply call fillHistosFromContainer() for each tool...
   int count = 0;
