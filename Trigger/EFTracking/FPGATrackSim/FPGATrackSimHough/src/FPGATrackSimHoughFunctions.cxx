@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "FPGATrackSimHough/FPGATrackSimHoughFunctions.h"
@@ -126,7 +126,7 @@ StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float
         ANA_MSG_DEBUG("track# = " << track_passOR_counter[i] << ": chi2 = " << tracks.at(i).getChi2ndof() << " barcodefrac = " << track_passOR_barcodefrac[i]);
     }
   }
-  ntrack_passOR_total =+ ntrack_passOR;
+  ntrack_passOR_total += ntrack_passOR;
   auto mon_ntrack_passOR = Monitored::Scalar<int>("ntrack_passOR", ntrack_passOR);
   auto mon_barcodeFrac_passOR = Monitored::Scalar<int>("barcodeFrac_passOR", tmp_TrueTrack_BCF);
   Monitored::Group(monTool, mon_ntrack_passOR);
