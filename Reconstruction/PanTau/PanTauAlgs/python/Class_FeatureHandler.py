@@ -246,7 +246,6 @@ class FeatureHandler:
         
         Sorts = []
         Sorts += ["BDTSort"]
-        Sorts += ["EtSort"]
         
         MaxNum = 4
         
@@ -323,26 +322,12 @@ class FeatureHandler:
         Variables += ["1stEtOverTypeEt"]
         Variables += ["1stBDTEtOverTypeEt"]
         Variables += ["EFOsOverTotalEFOs"]
-        Variables += ["Log1stEtOver2ndEt"]
-        Variables += ["Log1stEtOver3rdEt"]
-        Variables += ["Log2ndEtOver3rdEt"]
-        Variables += ["Log1stEtOver2ndEt_BDTSort"]
-        Variables += ["Log1stEtOver3rdEt_BDTSort"]
-        Variables += ["Log2ndEtOver3rdEt_BDTSort"]
         for iVar in Variables:
             self.addToFeatures_AllTypes(iVar, self.m_VarTypeName_Ratio, "F")
         #end loop over variables with energy types
     #end addTypeSpecificFeatures_Ratios
     
     def addTypeSpecificFeatures_StdDevs(self):
-        Variables = []
-        Variables += ["E"]
-        Variables += ["Et"]
-        Variables += ["DRToJetAxis"]
-        Variables += ["DRToLeading"]
-        for iVar in Variables:
-            self.addToFeatures_AllTypes(iVar, self.m_VarTypeName_StdDev, "F")
-        #end loop over variables
         
         Variables_WithEnergyTypes = []
         Variables_WithEnergyTypes += ["Et_Wrt"]
@@ -381,7 +366,6 @@ class FeatureHandler:
         VariablesVec += ["Constituents_m"]
         
         VariablesVecSort = []
-        VariablesVecSort += ["EtSort"]
         VariablesVecSort += ["BDTSort"]
         
         for iSort in VariablesVecSort:
@@ -459,7 +443,6 @@ class FeatureHandler:
         
         Variables = []
         Variables += [ ["InvMass", ""] ]
-        Variables += [ ["Angle1st2nd", ""] ]
         for iType in iTypes:
             for jType in jTypes:
                 

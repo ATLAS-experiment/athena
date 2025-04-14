@@ -234,23 +234,6 @@ StatusCode PanTau::Tool_FeatureExtractor::addConstituentMomenta(PanTau::PanTauSe
       tauFeatureMap->addFeature(name + "_SumPhi", tlv_TypeConstituents.Phi());
       tauFeatureMap->addFeature(name + "_SumM",   tlv_TypeConstituents.M());
     }
-        
-    //store 4-vectors of current type (et sort);
-    std::vector<double> curConsts_pt    = std::vector<double>(0);
-    std::vector<double> curConsts_eta   = std::vector<double>(0);
-    std::vector<double> curConsts_phi   = std::vector<double>(0);
-    std::vector<double> curConsts_m     = std::vector<double>(0);
-    for(unsigned int iConst=0; iConst<n_Constituents_Type; iConst++) {
-      TLorentzVector tlv_curConst = list_TypeConstituents[iConst]->p4();
-      curConsts_pt.push_back(tlv_curConst.Perp());
-      curConsts_eta.push_back(tlv_curConst.Eta());
-      curConsts_phi.push_back(tlv_curConst.Phi());
-      curConsts_m.push_back(tlv_curConst.M());
-    }
-    tauFeatureMap->addVecFeature(name + "_EtSort_Constituents_pt", curConsts_pt);
-    tauFeatureMap->addVecFeature(name + "_EtSort_Constituents_eta", curConsts_eta);
-    tauFeatureMap->addVecFeature(name + "_EtSort_Constituents_phi", curConsts_phi);
-    tauFeatureMap->addVecFeature(name + "_EtSort_Constituents_m", curConsts_m);
     
     //store 4-vectors of current type (bdt sort)
     std::vector<double> curConstsBDT_pt    = std::vector<double>(0);
@@ -293,7 +276,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   if (tauConstituentType == PanTau::TauConstituent::t_NoType) list_TypeConstituents = list_AllConstituents;
   if (!foundIt) return StatusCode::SUCCESS;
 
-  unsigned int                            n_Constituents_All              = list_AllConstituents.size();
   unsigned int                            n_Constituents_Type             = list_TypeConstituents.size();
         
   //sort the lists by Et
@@ -455,20 +437,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
     tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_BDTValuesSum_BDTSort_" + iConst, value_sumBDT_BDTSort);
   }
     
-  //sorted by highest Et
-  double value_sumBDT_EtSort = 0;
-  for(unsigned int iTypeConst=0; iTypeConst<n_Constituents_Type; iTypeConst++) {
-        
-    double value_BDT = list_TypeConstituents[iTypeConst]->getBDTValue();
-    if( std::isnan(value_BDT) || std::isinf(value_BDT) ) continue;
-        
-    value_sumBDT_EtSort += value_BDT;
-    std::string iConst = m_HelperFunctions.convertNumberToString((double)(iTypeConst+1));
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_BDTValues_EtSort_" + iConst, value_BDT);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_BDTValuesSum_EtSort_" + iConst, value_sumBDT_EtSort);
-  }
-    
-    
   //! Shot information ///////////////////////////////////////////
   prefixVARType = PanTau::Tool_FeatureExtractor::varTypeName_Shots();
   //only execute if the constituent type is neutral
@@ -551,41 +519,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   if(tlv_1st_Et.Pt() != 0 && sum_Et > 0.) tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_1stEtOverTypeEt",    tlv_1st_Et.Et() / sum_Et);
   if(tlv_1st_BDT.Pt() != 0 && sum_Et > 0.) tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_1stBDTEtOverTypeEt",    tlv_1st_BDT.Et() / sum_Et);    
     
-  if(n_Constituents_All != 0 && curTypeName != curTypeName_All)   tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EFOsOverTotalEFOs", (double)(((double)num_EFOs) / ((double)n_Constituents_All)));
-  if(tlv_1st_Et.Pt() != 0 && tlv_2nd_Et.Pt() != 0) {
-    if(tlv_1st_Et.Et() > 0. && tlv_2nd_Et.Et() > 0. ) {
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_Log1stEtOver2ndEt", std::log10(tlv_1st_Et.Et() / tlv_2nd_Et.Et()));
-    }
-  }
-  if(tlv_1st_Et.Pt() != 0 && tlv_3rd_Et.Pt() != 0) {
-    if(tlv_1st_Et.Et() > 0. && tlv_3rd_Et.Et() > 0.) {
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_Log1stEtOver3rdEt", std::log10(tlv_1st_Et.Et() / tlv_3rd_Et.Et()));
-    }
-  }
-  if(tlv_2nd_Et.Pt() != 0 && tlv_3rd_Et.Pt() != 0) {
-    if(tlv_2nd_Et.Et() > 0. && tlv_3rd_Et.Et() > 0.) {
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_Log2ndEtOver3rdEt", std::log10(tlv_2nd_Et.Et() / tlv_3rd_Et.Et()));
-    }
-  }
-    
-  //and for the BDT score ordered EFOs
-  if(tlv_1st_BDT.Pt() != 0 && tlv_2nd_BDT.Pt() != 0) {
-    if(tlv_1st_BDT.Et() > 0. && tlv_2nd_BDT.Et() > 0. ) {
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_Log1stEtOver2ndEt_BDTSort", std::log10(tlv_1st_BDT.Et() / tlv_2nd_BDT.Et()));
-    }
-  }
-  if(tlv_1st_BDT.Pt() != 0 && tlv_3rd_BDT.Pt() != 0) {
-    if(tlv_1st_BDT.Et() > 0. && tlv_3rd_BDT.Et() > 0.) {
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_Log1stEtOver3rdEt_BDTSort", std::log10(tlv_1st_BDT.Et() / tlv_3rd_BDT.Et()));
-    }
-  }
-  if(tlv_2nd_BDT.Pt() != 0 && tlv_3rd_BDT.Pt() != 0) {
-    if(tlv_2nd_BDT.Et() > 0. && tlv_3rd_BDT.Et() > 0.) {
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_Log2ndEtOver3rdEt_BDTSort", std::log10(tlv_2nd_BDT.Et() / tlv_3rd_BDT.Et()));
-    }
-  }
-    
-    
   //! EtRings  ///////////////////////////////////////////
   if(curTypeName == curTypeName_All) {
     prefixVARType = m_varTypeName_EtInRing;
@@ -622,16 +555,9 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   //! Standard deviations ///////////////////////////////////////////
   prefixVARType =  m_varTypeName_StdDev;
 
-  double stddev_E             = m_HelperFunctions.stddev(sum_E2, sum_E, num_EFOs);
   double stddev_Et            = m_HelperFunctions.stddev(sum_Et2, sum_Et, num_EFOs);
-  double stddev_DRToJetAxis   = m_HelperFunctions.stddev(sum_DR2ToReference, sum_DRToReference, num_EFOs);
-  double stddev_DRToLeading   = m_HelperFunctions.stddev(sum_DRToLeading, sum_DR2ToLeading, num_EFOs);
     
-  if(stddev_E > 0.)           tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_E",              stddev_E);
-  if(stddev_Et > 0.)          tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_Et",             stddev_Et);
   if(stddev_Et > 0.)          addFeatureWrtSeedEnergy(tauFeatureMap, inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_Et_Wrt", stddev_Et, variants_SeedEt);
-  if(stddev_DRToJetAxis > 0.) tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_DRToJetAxis",    stddev_DRToJetAxis);
-  if(stddev_DRToLeading > 0.) tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_DRToLeading",    stddev_DRToLeading);
     
   //! JetMoment ///////////////////////////////////////////
   //  Moment wrt X = Sum( Et * X ) / Sum(Et)
@@ -679,7 +605,6 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
   // get input objects to calc combined features
   bool tlv_Sys_OK[PanTau::TauConstituent::t_nTypes];
   bool tlv_1st_OK[PanTau::TauConstituent::t_nTypes];
-  bool tlv_2nd_OK[PanTau::TauConstituent::t_nTypes];  
     
   //initialize arrays with default values
   for(unsigned int iType=0; iType<(unsigned int)PanTau::TauConstituent::t_nTypes; iType++) {
@@ -690,7 +615,6 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
     tlv_2ndEFO[iType]   = TLorentzVector();
     tlv_Sys_OK[iType]   = false;
     tlv_1st_OK[iType]   = false;
-    tlv_2nd_OK[iType]   = false;
   }
     
   for(int iType=0; iType<(int)PanTau::TauConstituent::t_nTypes; iType++) {
@@ -714,11 +638,7 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
         
     if (typeConstituents.size() > 1) {
       tlv_2ndEFO[iType] = typeConstituents.at(1)->p4();
-      tlv_2nd_OK[iType] = true;
-    } else {
-      tlv_2nd_OK[iType] = false;
-    }
-        
+    } 
   }    
     
   // From the extracted input, calc combined features
@@ -811,12 +731,6 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
             
       //invariant masses
       tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_InvMass"  + name_cType + name_nType,   ( tlv_System[et_c]  +  tlv_System[et_n] ).M() );
-            
-      //angle 1st charged to second neutral
-      if(tlv_2nd_OK[et_n]) {
-	//Angles between 1st and 2nd EFO
-	tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_Angle1st2nd" + name_cType + name_nType, tlv_1stEFO[et_c].Angle( tlv_2ndEFO[et_n].Vect()) );
-      } //end check for valid 2nd EFOs
             
     }//end loop neutral types
   }//end loop charged types
