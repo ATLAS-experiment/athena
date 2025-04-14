@@ -126,6 +126,8 @@ namespace MuonR4{
             /** Cut on the segment chi2 / nDoF to launch the outlier removal */
             Gaudi::Property<double> m_outlierRemovalCut{this, "OutlierRemoval", 5.};
             Gaudi::Property<double> m_recoveryPull{this, "RecoveryPull", 5.};
+            /** @brief Minimum number of precision hits to accept the segment */
+            Gaudi::Property<unsigned> m_precHitCut{this, "PrecHitCut" , 3};
 
             std::unique_ptr<SegmentAmbiSolver> m_ambiSolver{};
 
