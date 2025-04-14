@@ -19,17 +19,11 @@
 #include <TString.h>
 
 // Infrastructure include(s):
-#ifdef XAOD_STANDALONE
 #include "xAODRootAccess/Init.h"
 #include "xAODRootAccess/TEvent.h"
-#else
-#include "POOLRootAccess/TEvent.h"
-#include "StoreGate/StoreGateSvc.h"
-#endif
 
 // EDM include(s):
 #include "xAODEventInfo/EventInfo.h"
-#include "xAODMuon/MuonContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticleAuxContainer.h"
@@ -40,12 +34,13 @@
 // Local include(s):
 #include "PixelToTPIDDualTool/PixelToTPIDDualTool.h"
 
-// Needed for Smart Slimming
-#include "xAODCore/tools/IOStats.h"
-#include "xAODCore/tools/ReadStats.h"
 
-/// Example of how to run the PixelToTPIDDualTool package to obtain information from muons
+/// Example of how to run the PixelToTPIDDualTool package to obtain cluster and dE/dx information
 int main(int argc, char* argv[]) {
+
+  // Whether or not to equalize.  Maybe make this an argument.
+  bool equalize = true;
+
   // The application's name:
   const char* APP_NAME = argv[0];
 
@@ -95,7 +90,7 @@ int main(int argc, char* argv[]) {
   pidTool->msg().setLevel(MSG::INFO);
 
   bool failed = false;
-  failed = failed || pidTool->setProperty("EqualizeClusterMeasurements",true).isFailure();
+  failed = failed || pidTool->setProperty("EqualizeClusterMeasurements", equalize).isFailure();
   failed = failed || pidTool->initialize().isFailure();
   if (failed) {
     Error( APP_NAME, "Failed to set up PixelToTPIDDualTool!");
@@ -130,7 +125,7 @@ int main(int argc, char* argv[]) {
       // Calculate dE/dx from clusters using tool
       int nUsedHits = -1;
       int nUsedIBLOverflowHits = -1;
-      float dEdx = pidTool->dEdx(*trkIt, nUsedHits, nUsedIBLOverflowHits); // * or **?
+      float dEdx = pidTool->dEdx(*trkIt, nUsedHits, nUsedIBLOverflowHits);
 
       // Get summary values for comparison
       float track_dEdx { 0 };
@@ -142,13 +137,22 @@ int main(int argc, char* argv[]) {
       // Only makes sense if pidTool is configured to return the raw dE/dx, not the equalized.
       float epsilon = 1e-3;
       if ( std::fabs(track_dEdx - dEdx) > epsilon ) {
-        Info(APP_NAME, "===== Entry: %i, Track number: %i", static_cast<int>(entry), static_cast<int>(trkCounter));
-        Info(APP_NAME, "Mismatch between recalculated track dE/dx and value stored in AOD.");
-        Info(APP_NAME, "Track dE/dx (orig):        %g ", track_dEdx);
-        Info(APP_NAME, "Track dE/dx (recalc):        %g ", dEdx);
-        Info(APP_NAME, "Track nUsedHits:        %d ", nUsedHits);
-        Info(APP_NAME, "Track nUsedHits (orig):        %u ", numberOfUsedHitsdEdx);
-        Info(APP_NAME, "Track nUsedIBLOverflowHits:        %d ", nUsedIBLOverflowHits);
+        if( dEdx < 0.) {
+          Info(APP_NAME, "===== Entry: %i, Track number: %i", static_cast<int>(entry), static_cast<int>(trkCounter));
+          Info(APP_NAME, "Could not calculate truncated mean dE/dx from clusters.");
+          Info(APP_NAME, "Clusters were likely not present or thinned away for this track.");
+        }
+        else if (!equalize) { // expect differences if equalizing.
+          Info(APP_NAME, "===== Entry: %i, Track number: %i", static_cast<int>(entry), static_cast<int>(trkCounter));
+          Info(APP_NAME, "Mismatch between recalculated track dE/dx and value stored in AOD.");
+          Info(APP_NAME, "Likely from a migration in the cluster (x,y) between reco (ESD) and now (xAOD).");
+          Info(APP_NAME, "Clusters too close to the edge of sensor not included in truncated mean.");
+          Info(APP_NAME, "Track dE/dx (orig):        %g ", track_dEdx);
+          Info(APP_NAME, "Track dE/dx (recalc):        %g ", dEdx);
+          Info(APP_NAME, "Track nUsedHits:        %d ", nUsedHits);
+          Info(APP_NAME, "Track nUsedHits (orig):        %u ", numberOfUsedHitsdEdx);
+          Info(APP_NAME, "Track nUsedIBLOverflowHits:        %d ", nUsedIBLOverflowHits);
+        }
       }
     } // done loop over tracks
     
@@ -161,12 +165,21 @@ int main(int argc, char* argv[]) {
     Info(APP_NAME, "Number of clusters: %i", static_cast<int>(clusters->size()));
 
     for (const xAOD::TrackMeasurementValidation* clusIt : *clusters  ) { 
-      float dEdxEq = 0.;
-      dEdxEq = (clusIt)->auxdataConst<float>("dEdxEq");
-      static const SG::AuxElement::ConstAccessor< float > dEdxEqAcc("dEdxEq");
-      if (dEdxEqAcc.isAvailable(*clusIt)) {
-        dEdxEq = dEdxEqAcc(*clusIt);
-        Info(APP_NAME, "cluster dEdxEq:        %g ", dEdxEq);
+      float clusdEdxRaw = 0.;
+      static const SG::AuxElement::ConstAccessor< float > clusdEdxRawAcc("dEdx");
+      if (clusdEdxRawAcc.isAvailable(*clusIt)) {
+        clusdEdxRaw = clusdEdxRawAcc(*clusIt);
+        Info(APP_NAME, "cluster dEdx:        %g ", clusdEdxRaw);
+      }
+      else {
+        Error( APP_NAME, "Could not find raw cluster dE/dx measurement!");
+        return 1;
+      }
+      float clusdEdxEq = 0.;
+      static const SG::AuxElement::ConstAccessor< float > clusdEdxEqAcc("dEdxEq");
+      if (clusdEdxEqAcc.isAvailable(*clusIt)) {
+        clusdEdxEq = clusdEdxEqAcc(*clusIt);
+        Info(APP_NAME, "cluster dEdxEq:        %g ", clusdEdxEq);
       }
     }
 

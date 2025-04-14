@@ -48,7 +48,8 @@
 // C++
 #include <optional> // since no default constructor for RDataFrame
 #include <cmath>
-
+#include <memory>
+#include <mutex>
 
 
 #ifndef XAOD_STANDALONE
@@ -129,13 +130,29 @@ namespace CP {
     Gaudi::Property<std::string> m_sfDirLocal {this, "SFDirLocal", ""};
 
     /// dE/dx equalization scale factor dataframe read from trees.
-    std::optional<ROOT::RDataFrame> m_df; 
-    std::unique_ptr<TFile> m_file;  // Keep the file open
+    std::shared_ptr<ROOT::RDataFrame> m_df;
+    std::shared_ptr<TFile> m_file;  // Keep the file open
 
-    /// Decorators
-    /// Start with equalized dE/dx measurement.  Safe to hardcode PixelCluster container?  Track container -> MSOS container is 1-to-1. Only 1 PixelCluster container...
-    /// Also include raw dE/dx?  Or the SF?  Or the SF error?
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxKey{this, "clusterdEdxKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
+    /// Map where key = run number, value is a filtered scale factor RDF (an RDF::RNode) with only the rows for that run number.
+    /// So not filtering everytime in execute().
+    /// Will be updated in execute, so must be mutable
+    mutable std::map<unsigned int, std::shared_ptr<ROOT::RDF::RNode>> m_filteredRDFMap;
+    mutable std::mutex m_mapMutex;
+
+    /// Decorators for xAOD EDM
+    /// Raw track-level truncated mean dE/dx:
+    ///    Returned by dEdx() if m_equalizeClusterMeasurements == false.
+    ///    Already AOD, calculated during reconstruction via this same tool using ESD EDM, stored by TrackParticleCreator.
+    ///    NB: dE/dx calculated from xAOD and ESD EDMs can differ, likely due to migrations of cluster local (x,y).
+    ///        Place cuts on cluster location when calculating dE/dx to avoid sensor edges.
+    ///        As a result, hits used for one EDM can be excluded in calculation for the other EDM.
+    /// Equalized track-level truncated mean dE/dx:
+    ///    Returned by dEdx() if m_equalizeClusterMeasurements == true.
+    ///    Called by PixelDEdxEqualizationAlg in TrackingAnalysisAlgorithms.  Decorate there instead.
+    /// Raw cluster dE/dx:
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxKey{this, "clusterdEdxKey", "PixelClusters.dEdx", "SG key for the raw pixel cluster dE/dx attribute"};
+    /// Equalized cluster dE/dx:
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxEqKey{this, "clusterdEdxEqKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
 
     /// For charge -> dE/dx calc.
     double m_conversionfactor;
@@ -143,7 +160,7 @@ namespace CP {
     float m_IBL_3D_sensorthickness; //230 microns IBL 3D
     float m_IBL_PLANAR_sensorthickness; // 200 microns IBL Planars
     
-    struct PixelCluster {  // Struct representing a pixel cluster to unify the two EDMs
+    struct PixelCluster {  // Struct representing a pixel cluster to abstract away the two EDMs
       double locx = -99.9;
       double locy = -99.9;
       int bec = -99;

@@ -39,6 +39,8 @@ namespace CP {
 
     ANA_CHECK ( m_clusterdEdxKey.initialize() );
     ATH_MSG_INFO("Will decorate PixelCluster container with variable " << m_clusterdEdxKey);
+    ANA_CHECK ( m_clusterdEdxEqKey.initialize() );
+    ATH_MSG_INFO("Will decorate PixelCluster container with variable " << m_clusterdEdxEqKey << " (if equalization is enabled).");
 
 #ifndef XAOD_STANDALONE
     ATH_CHECK(m_eventInfo.initialize());
@@ -85,21 +87,14 @@ namespace CP {
 
     ATH_MSG_INFO("Found scale factor tree file: " << filename);
 
-    m_file = std::make_unique<TFile>(filename.c_str(), "READ");
+    m_file = std::make_shared<TFile>(filename.c_str(), "READ");
     if (!m_file || m_file->IsZombie()) {
       ATH_MSG_ERROR("Failed to open file: " << filename);
       return StatusCode::FAILURE;
     }
-    m_df.emplace(m_sfTreeName.value().c_str(), m_file.get());
+    m_df = std::make_shared<ROOT::RDataFrame>(m_sfTreeName.value().c_str(), m_file.get());
 
     ATH_MSG_INFO("RDataFrame successfully initialized.");
-
-    /// Ideally, would filter the dataframe here only keeping the rows from the closest runNumber.
-    /// But we don't know the runNumber until execute...
-    /// Unless runNumber is included as a property...
-    /// Or the runNumber is cached the first time in execute:
-    ///    In .h:  std::optional<int> m_cachedRunNumber;
-    ///    In execute: if (!m_cachedRunNumber) m_cachedRunNumber = currentRunNumber;
 
     return StatusCode::SUCCESS;
   }
@@ -118,13 +113,13 @@ namespace CP {
                                   int& nUsedIBLOverflowHits) const
   {
     
-    int pixelhits = 0;
+    int goodPixelhits = 0;
 
     /// passed by ref, so will update here.  
     nUsedHits=0;
     nUsedIBLOverflowHits=0;
     
-    /// Get pixel clusters in this simple struct to unify the two EDMs.
+    /// Get pixel clusters in this simple struct to abstract away the two EDMs.
     std::vector<PixelCluster> clusters;
 
     ////second value keeps track if the cluster is in IBL and has at least an overflow hit
@@ -155,7 +150,7 @@ namespace CP {
           }
           if (pixclus) {
 
-            /// Build PixelCluster to unify EDMs.
+            /// Build PixelCluster to abstract away the EDMs.
             PixelCluster cluster;            
             cluster.locx=pixclus->localParameters()[Trk::locX];
             cluster.locy=pixclus->localParameters()[Trk::locY];
@@ -193,7 +188,7 @@ namespace CP {
             /// Apply all cuts here.  Don't forget abs(cosalpha).
             /// Make them configurable?
             
-            float clusterdEdx = getClusterdEdx(cluster, pixelhits, nUsedIBLOverflowHits); // returns -1 if bad cluster measurement.
+            float clusterdEdx = getClusterdEdx(cluster, goodPixelhits, nUsedIBLOverflowHits); // returns -1 if bad cluster measurement.
 
             /// Check if good measurement.
             if (clusterdEdx < 0.0) { continue; }
@@ -220,12 +215,12 @@ namespace CP {
     } // end if reco track states found.
 
     /// Always calculate raw truncated mean.
-    float averagedEdx = getTruncatedMean(clusters, nUsedHits, pixelhits);
+    float averagedEdx = getTruncatedMean(clusters, nUsedHits, goodPixelhits);
     
     /// Calculate equalized truncated mean.
     if(m_equalizeClusterMeasurements) {
       int nUsedHitsEq=0; // need separate counter or will double count if calculating both raw and equalized dE/dx
-      float averagedEdxEq = getTruncatedMean(clusters, nUsedHitsEq, pixelhits, true);
+      float averagedEdxEq = getTruncatedMean(clusters, nUsedHitsEq, goodPixelhits, true);
 
       /// Sanity check that nUsedHits and nUsedHitsEq are the same.
       if (nUsedHitsEq != nUsedHits) {
@@ -253,54 +248,85 @@ namespace CP {
 
     using StatesOnTrack = std::vector<ElementLink<xAOD::TrackStateValidationContainer>>;
 
-    int pixelhits = 0;
+    int goodPixelhits = 0;
+    int allPixelHits = 0;
 
     /// Passed by ref, so will update here.  
     nUsedHits=0;
     nUsedIBLOverflowHits=0;
 
-    /// Get pixel clusters in this simple struct to unify the two EDMs.
+    /// Get pixel clusters in this simple struct to abstract away the two EDMs.
     std::vector<PixelCluster> clusters;
 
     /// second value keeps track if the cluster is in IBL and has at least an overflow hit
     std::multimap<float,int> dEdxMap;
 
-    /// Get runNumber.  
-    /// Not ideal that this is happening in execute()
-    /// Would be nice to do this in initialize or to have it as a property 
+    /// Determine if data or MC.  Ideally this would be done in initialize...
+    /// If data, get the run number for scale factor determination.  
+    /// If MC, do not allow m_equalizeClusterMeasurements to be true.
+    ///    Not supporting dE/dx equalization for  MC at this time.
+    ///    The radiation damage is modeled in MC23, but not MC20.
+    ///    Eventually, can apply scale factors to "undo" MC23 rad damage modeling.
+    ///    For now, only allow m_equalizeClusterMeasurements == false.
+    ////   Still useful to decorate the clusters with their raw dE/dx measurements.
     int runNumber = 0;
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);        
-    /// Case of data
-    if (!eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) {
-      ATH_MSG_DEBUG("The current event is a data event. Return runNumber.");
+    if (eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) { //MC
+      ATH_MSG_DEBUG("The current event is simulation.");
+      if( m_equalizeClusterMeasurements ) {
+        ATH_MSG_ERROR("Requested to equalize the dE/dx, but this is not yet supported for MC.");
+        ATH_MSG_ERROR("Eventually, can apply scale factors to \"undo\" the radiation modeling in MC23.");
+        
+        /// Throw runtime error since not returning a status code.
+        throw std::runtime_error("Cannot set EqualizeClusterMeasurements to true for MC (for now).");
+      }
+    }
+    else { // Data
+      ATH_MSG_DEBUG("The current event is data.  Getting run number.");
       runNumber =  eventInfo->runNumber();
     }
-    /// Case of MC (to write).
-
+    
     /// If using SFs from trees, get the closest run.
     /// Ideally, would filter the dataframe in initialize, only keeping the rows from the closest runNumber.
     /// But we don't know the runNumber until execute...
     int closestRunNumber = 0;
 
-    std::optional<ROOT::RDF::RNode> filtered_df; // since no default constructor.
+    std::shared_ptr<ROOT::RDF::RNode> filtered_df;
 
     if( m_equalizeClusterMeasurements ) {
       
-      ROOT::RDataFrame df = *m_df;
+      // First, try to find it (lock the map while accessing)
+      {
+        std::lock_guard<std::mutex> lock(m_mapMutex);
 
-      /// Get closest run number in SF RDataFrame
-      auto runNumbers = df.Take<int>("runNumber");
-      closestRunNumber = *std::min_element(runNumbers.begin(), runNumbers.end(), 
-                                           [runNumber](int a, int b) {
-                                             return std::abs(a - runNumber) < std::abs(b - runNumber); });
-      ATH_MSG_INFO("Closest run number:" << closestRunNumber);
+        auto it = m_filteredRDFMap.find(runNumber);
+        if (it != m_filteredRDFMap.end()) {
+          ATH_MSG_DEBUG("SFs for this run " << runNumber << " already cached!");
+          filtered_df = it->second;
+        }
+      }
 
-      /// Filter the RDataFrame to just keep this run:
-      filtered_df = df.Filter([closestRunNumber](int run) { return run == closestRunNumber; }, {"runNumber"});
+      if (!filtered_df) {
+        ATH_MSG_DEBUG("SFs for run " << runNumber << " are NOT already cached.  Will filter RDF and cache now.");
+        auto df = std::make_shared<ROOT::RDataFrame>(*m_df);
+        auto runNumbers = df->Take<int>("runNumber");
+        closestRunNumber = *std::min_element(runNumbers.begin(), runNumbers.end(),
+                                             [runNumber](int a, int b) {
+                                               return std::abs(a - runNumber) < std::abs(b - runNumber); });
+        ATH_MSG_INFO("Closest run number:" << closestRunNumber);
+        auto filtered = std::make_shared<ROOT::RDF::RNode>(df->Filter([closestRunNumber](int run) { return run == closestRunNumber; }, {"runNumber"}));
+        // Store it in the map (lock again)
+        {
+          std::lock_guard<std::mutex> lock(m_mapMutex);
+          m_filteredRDFMap[runNumber] = filtered;
+        }
+        filtered_df = filtered;
+      }
     }
 
-    /// Declare decorator here, but only use if m_equalizeClusterMeasurements == True
-    SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > dEdxEqHandle(m_clusterdEdxKey); // no ctx?
+    /// Declare decorators here
+    SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > dEdxHandle(m_clusterdEdxKey); // no ctx?
+    SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > dEdxEqHandle(m_clusterdEdxEqKey); // no ctx?
 
     /// Check for track states:
     static const SG::AuxElement::ConstAccessor< StatesOnTrack > trackStateAcc(m_msosLink);
@@ -313,11 +339,12 @@ namespace CP {
     /// Loop over MSOS.
     for( const ElementLink<xAOD::TrackStateValidationContainer>& msos : measurementsOnTrack) {
       if (not msos.isValid()) {
-        continue; //not a valid link
+        continue; //not a valid link.  Can happen if clusters are thinned away via ThinInDetClustersAlg.
       }
       if ((int) (*msos)->detType() != 1) {
         continue; // not a pixel cluster. See Tracking/TrkEvent/TrkEventPrimitives/TrkEventPrimitives/TrackStateDefs.h
       }
+      allPixelHits++;
       if ( (*msos)->type()!=0) {
         continue; // not fittable.  See Tracking/TrkEvent/TrkEventPrimitives/TrkEventPrimitives/TrackStateDefs. Want this?
       }
@@ -333,7 +360,7 @@ namespace CP {
         continue; //not linking to a valid object -- is it necessary?
       }
       
-      /// Build PixelCluster to unify EDMs.
+      /// Build PixelCluster to abstract away the EDMs.
       PixelCluster cluster;
       static const SG::AuxElement::ConstAccessor< float > localXAcc("localX");
       if (localXAcc.isAvailable(**pixclus)) {
@@ -416,7 +443,7 @@ namespace CP {
       if (std::abs(cluster.cosalpha)<0.16) { continue; }
       
       /// Get raw cluster dE/dx
-      float clusterdEdx = getClusterdEdx(cluster, pixelhits, nUsedIBLOverflowHits); // returns -1 if bad cluster measurement.
+      float clusterdEdx = getClusterdEdx(cluster, goodPixelhits, nUsedIBLOverflowHits); // returns -1 if bad cluster measurement.
 
       /// Check if good measurement.
       if (clusterdEdx < 0.0) { continue; }
@@ -424,6 +451,10 @@ namespace CP {
       /// Store
       cluster.dEdx = clusterdEdx;
     
+      /// Decorate pixel cluster on track with raw dE/dx.
+      ATH_MSG_DEBUG("Will decorate  variable " << m_clusterdEdxKey << " with value " << cluster.dEdx);
+      dEdxHandle(**pixclus) = cluster.dEdx;
+
       /// Apply cluster-level equalization.
       /// Read from trees on CVMFS or from conditions database.
       if(m_equalizeClusterMeasurements){
@@ -451,8 +482,8 @@ namespace CP {
         /// Apply scale factor and store
         cluster.dEdxEq = clusterdEdx * SF;
 
-        /// Decorate PixelClusterOnTrack.  Might not want to for ESD.  Definitely want to for xAOD.
-        ATH_MSG_DEBUG("Will decorate  variable " << m_clusterdEdxKey << " with value " << cluster.dEdxEq);
+        /// Decorate pixel cluster on track with equalized dE/dx.
+        ATH_MSG_DEBUG("Will decorate  variable " << m_clusterdEdxEqKey << " with value " << cluster.dEdxEq);
         dEdxEqHandle(**pixclus) = cluster.dEdxEq;
       }
      
@@ -461,11 +492,11 @@ namespace CP {
     } // MSOS iterator
   
     /// Always calculate raw truncated mean.
-    float averagedEdx = getTruncatedMean(clusters, nUsedHits, pixelhits);
+    float averagedEdx = getTruncatedMean(clusters, nUsedHits, goodPixelhits);
 
     /// Sanity check that the recalculated raw dE/dx matches what was calculated during reco and stored as a track summary variable.    
     float stored_dEdx { 0 };
-    unsigned char stored_numberOfUsedHitsdEdx = -1;
+    unsigned char stored_numberOfUsedHitsdEdx = 99;
     float epsilon = 1e-3;
     track.summaryValue(stored_dEdx, xAOD::pixeldEdx);
     static const SG::AuxElement::ConstAccessor< unsigned char > nUsedAcc("numberOfUsedHitsdEdx");
@@ -474,19 +505,27 @@ namespace CP {
     } else {
       ATH_MSG_WARNING("numberOfUsedHitsdEdx auxdata is missing!");
     }
-    if ( std::fabs(stored_dEdx - averagedEdx) > epsilon ) {
-      ATH_MSG_WARNING("The track dE/dx stored in the AOD as summary variable (" << stored_dEdx << ") does not match the value calculated here (" << averagedEdx << ")!");
-      ATH_MSG_WARNING("This may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
+    if(allPixelHits == 0) {
+      ATH_MSG_DEBUG("No pixel clusters found on track, so cannot compare calculated dE/dx with value stored in AOD."
+                    << "\nThis can occur when pixel clusters are not saved to the AOD, or if they are thinned.");
     }
-    if ( (int)stored_numberOfUsedHitsdEdx != nUsedHits ) {
-      ATH_MSG_WARNING("The numberOfUsedHitsdEdx stored in the AOD ("<< stored_numberOfUsedHitsdEdx <<") does not match the value calculated here ("<< nUsedHits <<")!");
-      ATH_MSG_WARNING("This may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
+    else {
+      if ( std::fabs(stored_dEdx - averagedEdx) > epsilon ) {
+        ATH_MSG_WARNING("The track dE/dx stored in the AOD as summary variable (" << stored_dEdx
+                        << ") does not match the value calculated here (" << averagedEdx << ")!"
+                        << "\nThis may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
+      }
+      if ( (int) stored_numberOfUsedHitsdEdx != nUsedHits ) {
+        ATH_MSG_WARNING("The numberOfUsedHitsdEdx stored in the AOD ("<< (int) stored_numberOfUsedHitsdEdx
+                        << ") does not match the value calculated here ("<< nUsedHits <<")!"
+                        << "\nThis may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
+      }
     }
 
     /// Calculate equalized truncated mean.
     if(m_equalizeClusterMeasurements) {
       int nUsedHitsEq=0; // need separate counter or will double count if calculating both raw and equalized dE/dx
-      float averagedEdxEq = getTruncatedMean(clusters, nUsedHitsEq, pixelhits, true);
+      float averagedEdxEq = getTruncatedMean(clusters, nUsedHitsEq, goodPixelhits, true);
       
       /// Sanity check that nUsedHits and nUsedHitsEq are the same.
       if (nUsedHitsEq != nUsedHits) {
