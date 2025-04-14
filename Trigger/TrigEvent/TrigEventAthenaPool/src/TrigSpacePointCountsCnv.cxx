@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSpacePointCountsCnv.h"
@@ -57,22 +57,11 @@ TrigSpacePointCounts* TrigSpacePointCountsCnv::createTransient() {
 
 }
 
-namespace {
-  // Helper to be able to call thread-unsafe code during initialize as we
-  // currently cannot mark Converter::initialize() as thread-unsafe.
-  StatusCode loadConverter ATLAS_NOT_THREAD_SAFE() {
-    static TrigSpacePointCounts_p1_old_cnv cnv;
-    TConverterRegistry::Instance()->AddConverter (&cnv);
-    return StatusCode::SUCCESS;
-  }
-}
 
-StatusCode TrigSpacePointCountsCnv::initialize()
+StatusCode TrigSpacePointCountsCnv::initialize ATLAS_NOT_THREAD_SAFE ()
 {
-  [[maybe_unused]] static const bool did_rootcnv = []{
-    StatusCode sc ATLAS_THREAD_SAFE = loadConverter();
-    return sc.isSuccess();
-  }();
+  static TrigSpacePointCounts_p1_old_cnv cnv;
+  TConverterRegistry::Instance()->AddConverter (&cnv);
 
   return TrigSpacePointCountsCnvBase::initialize();
 }
