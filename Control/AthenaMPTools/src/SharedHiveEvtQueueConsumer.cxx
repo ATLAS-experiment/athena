@@ -42,15 +42,8 @@ SharedHiveEvtQueueConsumer::SharedHiveEvtQueueConsumer(const std::string& type
 						       , const std::string& name
 						       , const IInterface* parent)
   : AthenaMPToolBase(type,name,parent)
-  , m_rankId(-1)
   , m_chronoStatSvc("ChronoStatSvc", name)
-  , m_evtSelSeek(0)
-  , m_evtContext(0)
-  , m_sharedEventQueue(0)
-  , m_sharedRankQueue(0)
 {
-  declareInterface<IAthenaMPTool>(this);
-
   m_subprocDirPrefix = "worker_";
 }
 
@@ -66,9 +59,7 @@ StatusCode SharedHiveEvtQueueConsumer::initialize()
 {
   ATH_MSG_DEBUG("In initialize");
 
-  StatusCode sc = AthenaMPToolBase::initialize();
-  if(!sc.isSuccess())
-    return sc;
+  ATH_CHECK( AthenaMPToolBase::initialize() );
 
   m_evtSelSeek = serviceLocator()->service(m_evtSelName);
   ATH_CHECK( m_evtSelSeek.isValid() );
@@ -98,7 +89,6 @@ SharedHiveEvtQueueConsumer::finalize()
     m_evtContext = nullptr;
   }
 
-  delete m_sharedRankQueue;
   return StatusCode::SUCCESS;
 }
 
@@ -132,7 +122,7 @@ SharedHiveEvtQueueConsumer::makePool(int, int nprocs, const std::string& topdir)
 
 
   // Create rank queue and fill it
-  m_sharedRankQueue = new AthenaInterprocess::SharedQueue("SharedHiveEvtQueueConsumer_RankQueue_"+m_randStr,m_nprocs,sizeof(int));
+  m_sharedRankQueue = std::make_unique<AthenaInterprocess::SharedQueue>("SharedHiveEvtQueueConsumer_RankQueue_"+m_randStr,m_nprocs,sizeof(int));
   for(int i=0; i<m_nprocs; ++i)
     if(!m_sharedRankQueue->send_basic<int>(i)) {
       ATH_MSG_ERROR("Unable to send int to the ranks queue!");
@@ -330,25 +320,12 @@ SharedHiveEvtQueueConsumer::bootstrap_func()
   }
 
   // ________________________ I/O reinit ________________________
-  if(!m_ioMgr->io_reinitialize().isSuccess()) {
-    ATH_MSG_ERROR("Failed to reinitialize I/O");
-    return outwork;
-  } else {
-    ATH_MSG_DEBUG("Successfully reinitialized I/O");
-  }
+  ATH_CHECK( m_ioMgr->io_reinitialize(), outwork );
 
   // ________________________ Event selector restart ________________________
   SmartIF<IService> evtSelSvc(m_evtSelector);
-  if(!evtSelSvc) {
-    ATH_MSG_ERROR("Failed to dyncast event selector to IService");
-    return outwork;
-  }
-  if(!evtSelSvc->start().isSuccess()) {
-    ATH_MSG_ERROR("Failed to restart the event selector");
-    return outwork;
-  } else {
-    ATH_MSG_DEBUG("Successfully restarted the event selector");
-  }
+  ATH_CHECK( evtSelSvc.isValid(), outwork );
+  ATH_CHECK( evtSelSvc->start(), outwork );
 
   // ________________________ Worker dir: chdir ________________________
   if(chdir(worker_rundir.string().c_str())==-1) {

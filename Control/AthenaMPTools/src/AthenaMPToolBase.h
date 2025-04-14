@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAMPTOOLS_ATHENAMPTOOLBASE_H
@@ -20,9 +20,8 @@
 
 class IEvtSelector;
 
-class AthenaMPToolBase : public AthAlgTool
-  , public IAthenaMPTool
-  , public AthenaInterprocess::IMessageDecoder
+class AthenaMPToolBase : public extends<AthAlgTool, IAthenaMPTool>,
+                         public AthenaInterprocess::IMessageDecoder
 {
  public:
   AthenaMPToolBase(const std::string& type
@@ -83,13 +82,13 @@ class AthenaMPToolBase : public AthAlgTool
 
   IEvtSelector* evtSelector() { return m_evtSelector; }
 
-  int         m_nprocs;           // Number of workers spawned by the master process
-  int         m_maxEvt;           // Maximum number of events assigned to the job
-  std::string m_subprocTopDir;    // Top run directory for subprocesses
-  std::string m_subprocDirPrefix; // For ex. "worker__"
-  std::string m_evtSelName;       // Name of the event selector
+  int         m_nprocs{-1};       ///< Number of workers spawned by the master process
+  int         m_maxEvt{-1};       ///< Maximum number of events assigned to the job
+  std::string m_subprocTopDir;    ///< Top run directory for subprocesses
+  std::string m_subprocDirPrefix; ///< For ex. "worker__"
+  std::string m_evtSelName;       ///< Name of the event selector
 
-  AthenaInterprocess::ProcessGroup* m_processGroup;
+  AthenaInterprocess::ProcessGroup* m_processGroup{nullptr};
   const AthenaInterprocess::IMPRunStop* m_mpRunStop{nullptr};
 
   ServiceHandle<IEventProcessor> m_evtProcessor;
