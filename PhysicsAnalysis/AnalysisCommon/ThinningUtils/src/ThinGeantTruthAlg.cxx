@@ -88,10 +88,8 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
   ++m_nEventsProcessed;
 
   // Retrieve truth and vertex containers
-  SG::ThinningHandle<xAOD::TruthParticleContainer> truthParticles(
-    m_truthParticlesKey, ctx);
-  SG::ThinningHandle<xAOD::TruthVertexContainer> truthVertices(
-    m_truthVerticesKey, ctx);
+  SG::ThinningHandle truthParticles{m_truthParticlesKey, ctx};
+  SG::ThinningHandle truthVertices{m_truthVerticesKey, ctx};
   if (!truthParticles.isValid()) {
     ATH_MSG_FATAL("No TruthParticleContainer with key " << m_truthParticlesKey.key() << " found.");
     return StatusCode::FAILURE;
@@ -108,15 +106,15 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
 
   // Muons
   if (m_keepMuons) {
-    SG::ReadHandle<xAOD::MuonContainer> muons(m_muonsKey, ctx);
-    // Retrieve muons, electrons and photons
-    if (!muons.isValid()) {
-      ATH_MSG_WARNING("No muon container with key " << m_muonsKey.key() << " found.");
-    }
+    const xAOD::MuonContainer* muons{nullptr};
+    ATH_CHECK(SG::get(muons, m_muonsKey, ctx));
     for (const xAOD::Muon* muon : *muons) {
       const xAOD::TruthParticle* truthMuon = xAOD::TruthHelpers::getTruthParticle(*muon);
       if (truthMuon) {
-        recoParticleTruthIndices.push_back(truthMuon->index());
+        truthMuon = xAOD::TruthHelpers::getTruthParticle(*truthMuon);
+        if (truthMuon) {
+          recoParticleTruthIndices.push_back(truthMuon->index());
+        }
       }
     }
   }
@@ -125,10 +123,9 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
   if (m_keepEGamma) {
 
     // Electrons
-    SG::ReadHandle<xAOD::ElectronContainer> electrons(m_electronsKey, ctx);
-    if (!electrons.isValid()) {
-      ATH_MSG_WARNING("No electron container with key " << m_electronsKey.key() << " found.");
-    }
+    const xAOD::ElectronContainer* electrons{nullptr};
+    ATH_CHECK(SG::get(electrons, m_electronsKey, ctx));
+   
     for (const xAOD::Electron* electron : *electrons) {
       const xAOD::TruthParticle* truthElectron =
         xAOD::TruthHelpers::getTruthParticle(*electron);
@@ -138,13 +135,10 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
     }
 
     // Forward Electrons
-    if (!m_fwdElectronsKey.empty()) {
-      SG::ReadHandle<xAOD::ElectronContainer> fwdElectrons(m_fwdElectronsKey,
-                                                           ctx);
-      if (!fwdElectrons.isValid()) {
-        ATH_MSG_WARNING("No forward electron container with key "
-                        << m_fwdElectronsKey.key() << " found.");
-      }
+    const xAOD::ElectronContainer* fwdElectrons{nullptr};
+    ATH_CHECK(SG::get(fwdElectrons, m_fwdElectronsKey, ctx));
+    if (fwdElectrons) {
+      
       for (const xAOD::Electron* electron : *fwdElectrons) {
         const xAOD::TruthParticle* truthElectron =
           xAOD::TruthHelpers::getTruthParticle(*electron);
@@ -155,11 +149,8 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
     }
 
     // Photons
-    SG::ReadHandle<xAOD::PhotonContainer> photons(m_photonsKey, ctx);
-    if (!photons.isValid()) {
-      ATH_MSG_WARNING("No photon container with key " << m_photonsKey.key() << " found.");
-    }
-
+    const xAOD::PhotonContainer* photons{nullptr};
+    ATH_CHECK(SG::get(photons, m_photonsKey, ctx));
     for (const xAOD::Photon* photon : *photons) {
       const xAOD::TruthParticle* truthPhoton =
         xAOD::TruthHelpers::getTruthParticle(*photon);
@@ -169,11 +160,8 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
     }
 
     // egamma Truth Particles
-    SG::ReadHandle<xAOD::TruthParticleContainer> egammaTruthParticles(
-      m_egammaTruthKey, ctx);
-    if (!egammaTruthParticles.isValid()) {
-      ATH_MSG_WARNING("No e-gamma truth container with key " << m_egammaTruthKey.key() << " found.");
-    }
+    const xAOD::TruthParticleContainer* egammaTruthParticles{nullptr};
+    ATH_CHECK(SG::get(egammaTruthParticles, m_egammaTruthKey, ctx));
 
     for (const xAOD::TruthParticle* egTruthParticle : *egammaTruthParticles) {
 

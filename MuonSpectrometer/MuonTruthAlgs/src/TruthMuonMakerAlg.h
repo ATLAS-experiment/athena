@@ -38,7 +38,7 @@ namespace Muon {
         SG::WriteHandleKey<xAOD::TruthParticleContainer> m_outTruthMuonKey{this, "MuonTruthParticleContainerName","MuonTruthParticles"};
         SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthOriginKey{this, "truthOriginKey", m_outTruthMuonKey, "truthOrigin"};
         SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthTypeKey{this, "truthTypeKey", m_outTruthMuonKey, "truthType"};
-
+        SG:: WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthLinkKey{this, "truthLinkKey", m_outTruthMuonKey, "truthParticleLink"};
         Gaudi::Property<float> m_pt{this, "ptCut", 1000.};
 
         Gaudi::Property<std::set<int>> m_pdgIds{this, "pdgIds", {13,}};

@@ -9,6 +9,9 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "TruthUtils/HepMCHelpers.h"
 
+namespace {
+    using TruthLink_t = ElementLink<xAOD::TruthParticleContainer>;
+}
 namespace Muon {
 
     // Initialize method:
@@ -17,6 +20,7 @@ namespace Muon {
         ATH_CHECK(m_outTruthMuonKey.initialize());
         ATH_CHECK(m_truthOriginKey.initialize());
         ATH_CHECK(m_truthTypeKey.initialize());
+        ATH_CHECK(m_truthLinkKey.initialize());
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_truthClassifier.retrieve());
         return StatusCode::SUCCESS;
@@ -25,9 +29,8 @@ namespace Muon {
     // Execute method:
     StatusCode TruthMuonMakerAlg::execute(const EventContext& ctx) const {
         // skip if no input data found
-        SG::ReadHandle truthContainer(m_truthRecordKey, ctx);
-        ATH_CHECK(truthContainer.isValid());
-
+        const xAOD::TruthParticleContainer* truthContainer{nullptr};
+        ATH_CHECK(SG::get(truthContainer,m_truthRecordKey, ctx));
         // create output container
         SG::WriteHandle muonTruthContainer(m_outTruthMuonKey, ctx);
         ATH_CHECK(muonTruthContainer.record(std::make_unique<xAOD::TruthParticleContainer>(),
@@ -36,6 +39,8 @@ namespace Muon {
 
         SG::WriteDecorHandle<xAOD::TruthParticleContainer, int> truthOrigin{m_truthOriginKey, ctx};
         SG::WriteDecorHandle<xAOD::TruthParticleContainer, int> truthType{m_truthTypeKey, ctx};
+        SG::WriteDecorHandle<xAOD::TruthParticleContainer, TruthLink_t> truthLink{m_truthLinkKey, ctx};
+
         // loop over truth coll
         for (const xAOD::TruthParticle* truth : *truthContainer) {
             if (!MC::isStable(truth)	 || !m_pdgIds.value().count(truth->absPdgId()) || truth->pt() < m_pt) continue;
@@ -49,14 +54,15 @@ namespace Muon {
             truthParticle->setE(truth->e());
             truthParticle->setM(truth->m());
             if (truth->hasProdVtx()) truthParticle->setProdVtxLink(truth->prodVtxLink());
-            ElementLink<xAOD::TruthParticleContainer> truthLink(*muonTruthContainer, muonTruthContainer->size() - 1);
-            truthLink.toPersistent();
+            
+            TruthLink_t itruthLink(*truthContainer, truth->index());
+            itruthLink.toPersistent();
+            truthLink(*truthParticle) = itruthLink;
             ATH_MSG_DEBUG("Found stable muon: " << truth->pt() << " eta " << truth->eta() << " phi " << truth->phi() << " mass "
                           << truth->m() << " barcode " << HepMC::barcode(truth) << " truthParticle->barcode "
-                          << HepMC::barcode(truthParticle) << " (*truthLink)->barcode " << HepMC::barcode(*truthLink) << " "
-                                                << truthLink); // FIXME barcode-based
-            int iType = 0;
-            int iOrigin = 0;
+                          << HepMC::barcode(truthParticle) << " (*truthLink)->barcode " << HepMC::barcode(*itruthLink) << " "
+                                                << itruthLink); // FIXME barcode-based
+            int iType{0}, iOrigin{0};
 
             // if configured look up truth classification
             if (!m_truthClassifier.empty()) {
