@@ -28,11 +28,6 @@ BuildTruthTaus::BuildTruthTaus( const std::string& name )
   : AsgMetadataTool(name)
   , m_tMCTruthClassifier("MCTruthClassifier", this)
 {
-  declareProperty( "WriteInvisibleFourMomentum", m_bWriteInvisibleFourMomentum = false);
-  declareProperty( "WriteVisibleChargedFourMomentum", m_bWriteVisibleChargedFourMomentum = false);
-  declareProperty( "WriteVisibleNeutralFourMomentum", m_bWriteVisibleNeutralFourMomentum = false);
-  declareProperty( "WriteDecayModeVector", m_bWriteDecayModeVector = true);
-  declareProperty( "WriteVertices", m_bWriteVertices = true); 
 }
 
 //______________________________________________________________________________
