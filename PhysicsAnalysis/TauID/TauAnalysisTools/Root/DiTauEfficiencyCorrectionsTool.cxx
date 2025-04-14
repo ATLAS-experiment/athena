@@ -28,12 +28,7 @@ DiTauEfficiencyCorrectionsTool::DiTauEfficiencyCorrectionsTool( const std::strin
   , m_bIsData(false)
   , m_bIsConfigured(false)
 {
-  declareProperty( "EfficiencyCorrectionTypes",    m_vEfficiencyCorrectionTypes    = {} );
-  declareProperty( "InputFilePathJetIDHadTau",     m_sInputFilePathJetIDHadTau     = "" );
-  declareProperty( "VarNameJetIDHadTau",           m_sVarNameJetIDHadTau           = "" );
-  declareProperty( "RecommendationTag",            m_sRecommendationTag            = "2017-moriond" );
-  declareProperty( "JetIDLevel",                   m_iJetIDLevel                   = (int)JETIDBDTTIGHT );
-  declareProperty( "SkipTruthMatchCheck",          m_bSkipTruthMatchCheck          = false );
+    declareProperty( "EfficiencyCorrectionTypes",    m_vEfficiencyCorrectionTypes    = {} );	
 }
 
 
