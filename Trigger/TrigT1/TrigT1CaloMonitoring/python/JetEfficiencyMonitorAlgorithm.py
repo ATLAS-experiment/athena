@@ -79,22 +79,18 @@ def JetEfficiencyMonitoringConfig(flags):
     GeV = 1000
 
     # add monitoring algorithm to group, with group name and main directory
-    single_triggers = []
-    LR_triggers = []
-    
     gfex_SR_triggers = ['L1_gJ20p0ETA25', 'L1_gJ50p0ETA25', 'L1_gJ100p0ETA25', 'L1_gJ400p0ETA25']
     gfex_LR_triggers = ['L1_gLJ80p0ETA25', 'L1_gLJ100p0ETA25', 'L1_gLJ140p0ETA25', 'L1_gLJ160p0ETA25']
 
     jfex_SR_triggers = ['L1_jJ30','L1_jJ40','L1_jJ50', 'L1_jJ60', 'L1_jJ80','L1_jJ90', 'L1_jJ125','L1_jJ140','L1_jJ160', 'L1_jJ180']
     jfex_LR_triggers = ['L1_SC111-CjJ40']
     
-
-    all_SR_singletriggers = single_triggers + gfex_SR_triggers + jfex_SR_triggers
-    all_LR_singletriggers = LR_triggers + gfex_LR_triggers + jfex_LR_triggers
+    all_SR_triggers =  gfex_SR_triggers + jfex_SR_triggers
+    all_LR_triggers = gfex_LR_triggers + jfex_LR_triggers
 
     # if the trigger isnt included in the menu, then we dont actually want to fill anything into the histograms (it looks weird)
-    JetEfficiencyMonAlg.SmallRadiusJetTriggers_phase1 = [trigger for trigger in all_SR_singletriggers if trigger in l1menu]
-    JetEfficiencyMonAlg.LargeRadiusJetTriggers_phase1 = [trigger for trigger in all_LR_singletriggers if trigger in l1menu]
+    JetEfficiencyMonAlg.SmallRadiusJetTriggers_phase1 = [trigger for trigger in all_SR_triggers if trigger in l1menu]
+    JetEfficiencyMonAlg.LargeRadiusJetTriggers_phase1 = [trigger for trigger in all_LR_triggers if trigger in l1menu]
     # if a trigger isnt in the menu, but its a gfex trigger so we can emulate the efficiemcy using the gFEX TOBs
     JetEfficiencyMonAlg.SmallRadiusJetTriggers_gFEX = [trigger for trigger in gfex_SR_triggers if trigger not in l1menu]
     JetEfficiencyMonAlg.LargeRadiusJetTriggers_gFEX = [trigger for trigger in gfex_LR_triggers if trigger not in l1menu]

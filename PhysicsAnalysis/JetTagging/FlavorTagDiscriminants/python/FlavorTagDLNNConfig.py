@@ -3,6 +3,8 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+from FlavorTagInference.FlavorTagNNConfig import getStaticTrackVars
+
 def DL2ToolCfg(flags, NNFile, **options):
     acc = ComponentAccumulator()
 
@@ -101,6 +103,7 @@ def FlavorTagDLNNCfg(
         name = name + FlipConfig
 
     veto_list = getUndeclaredBtagVars(BTaggingCollection)
+    veto_list += getStaticTrackVars(TrackCollection)
 
     decorAlg = alg(
         name=name,
