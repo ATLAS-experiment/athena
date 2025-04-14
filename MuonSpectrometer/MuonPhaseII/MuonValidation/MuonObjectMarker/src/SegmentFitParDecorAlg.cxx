@@ -13,9 +13,6 @@
 namespace MuonR4 {
     using namespace SegmentFit;
     using SegPars = xAOD::MeasVector<toInt(ParamDefs::nPars)>;
-    using PrdCont_t = xAOD::UncalibratedMeasurementContainer;
-    using PrdLink_t = ElementLink<PrdCont_t>;
-    using PrdLinkVec = std::vector<PrdLink_t>;
     using TechIdx_t = Muon::MuonStationIndex::TechnologyIndex;
 
     StatusCode SegmentFitParDecorAlg::initialize() {
@@ -53,70 +50,67 @@ namespace MuonR4 {
         }
         return StatusCode::SUCCESS;
     }
+    StatusCode SegmentFitParDecorAlg::addLink(const EventContext& ctx,
+                                              const Identifier& rotId,
+                                              PrdLinkVec& prdLinks) const {
+        const xAOD::UncalibratedMeasurement* prd{nullptr};
+        switch(m_idHelperSvc->technologyIndex(rotId)){
+            case TechIdx_t::MDT:
+                ATH_CHECK(fetchMeasurement(ctx, m_keyMdt, rotId, prd));
+                break;
+            case TechIdx_t::RPC:
+                ATH_CHECK(fetchMeasurement(ctx, m_keyRpc, rotId, prd));
+                break;
+            case TechIdx_t::TGC:
+                ATH_CHECK(fetchMeasurement(ctx, m_keyTgc, rotId, prd));
+                break;
+            case TechIdx_t::MM:
+                ATH_CHECK(fetchMeasurement(ctx, m_keyMM, rotId, prd));
+                break;
+            case TechIdx_t::STGC:
+                ATH_CHECK(fetchMeasurement(ctx, m_keysTgc, rotId, prd));
+                break;
+            default:
+                break;
+        };
+        if (!prd) {
+            return StatusCode::SUCCESS;
+        }
+        ATH_MSG_VERBOSE("Link new measurement "<<m_idHelperSvc->toString(rotId));
+        PrdLink_t link{*static_cast<const PrdCont_t*>(prd->container()), 
+                        prd->index()};
+        prdLinks.push_back(std::move(link));
+        return StatusCode::SUCCESS;
+    }
+
 
     StatusCode SegmentFitParDecorAlg::execute(const EventContext& ctx) const {
         const xAOD::MuonSegmentContainer* segmentContainer{nullptr};
-        ATH_CHECK(SG::get(segmentContainer, m_segmentKey, ctx));
         const ActsGeometryContext* gctx{nullptr};
+
+        ATH_CHECK(SG::get(segmentContainer, m_segmentKey, ctx));
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
+
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegPars> parDecor{m_locParKey, ctx};
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, PrdLinkVec> prdLinkDecor{m_prdLinkKey, ctx};
         for (const xAOD::MuonSegment* seg : *segmentContainer) {
             PrdLinkVec& prdLinks{prdLinkDecor(*seg)};
             const Trk::Segment* trkSeg{*seg->muonSegment()};
-            Identifier rotId{};
-
-            auto addLink = [&, this](const Trk::RIO_OnTrack* rot) ->StatusCode{
-                if (!rot) {
-                    return StatusCode::SUCCESS;;
-                }
-                if (!rotId.is_valid()) {
-                    rotId = rot->identify();
-                }
-                const xAOD::UncalibratedMeasurement* prd{nullptr};
-                switch(m_idHelperSvc->technologyIndex(rot->identify())){
-                    case TechIdx_t::MDT:
-                        ATH_CHECK(fetchMeasurement(ctx, m_keyMdt, rot->identify(), prd));
-                        break;
-                    case TechIdx_t::RPC:
-                        ATH_CHECK(fetchMeasurement(ctx, m_keyRpc, rot->identify(), prd));
-                        break;
-                    case TechIdx_t::TGC:
-                        ATH_CHECK(fetchMeasurement(ctx, m_keyTgc, rot->identify(), prd));
-                        break;
-                    case TechIdx_t::MM:
-                        ATH_CHECK(fetchMeasurement(ctx, m_keyMM, rot->identify(), prd));
-                        break;
-                    case TechIdx_t::STGC:
-                        ATH_CHECK(fetchMeasurement(ctx, m_keysTgc, rot->identify(), prd));
-                        break;
-                    default:
-                        break;
-                };
-                if (!prd) {
-                    return StatusCode::SUCCESS;
-                }
-                ATH_MSG_VERBOSE("Link new measurement "<<m_idHelperSvc->toString(rot->identify()));
-                PrdLink_t link{*static_cast<const PrdCont_t*>(prd->container()), 
-                               prd->index()};
-                prdLinks.push_back(std::move(link));
-                return StatusCode::SUCCESS;
-            };
 
             for (const Trk::MeasurementBase* meas : trkSeg->containedMeasurements()) {
                 const auto* rot = dynamic_cast<const Trk::RIO_OnTrack*>(meas);
                 if (rot) {
-                    ATH_CHECK(addLink(rot));
+                    ATH_CHECK(addLink(ctx, rot->identify(), prdLinks));
                     continue;
                 }
                 const auto* cRot = dynamic_cast<const Trk::CompetingRIOsOnTrack*>(meas);
                 if (cRot) {                    
                     for (unsigned int r = 0 ; r < cRot->numberOfContainedROTs(); ++r){
-                        ATH_CHECK(addLink(&cRot->rioOnTrack(r)));
+                        ATH_CHECK(addLink(ctx, cRot->rioOnTrack(r).identify(), prdLinks));
                     }
                 }
             }
-            const MuonGMR4::SpectrometerSector* chamber = m_detMgr->getSectorEnvelope(rotId);
+            const MuonGMR4::SpectrometerSector* chamber = m_detMgr->getSectorEnvelope(xAOD::identify(*prdLinks.front()));
             const Amg::Transform3D globToLoc{chamber->globalToLocalTrans(*gctx)};
 
             SegPars& locPars{parDecor(*seg)};
@@ -131,10 +125,9 @@ namespace MuonR4 {
             locPars[toInt(ParamDefs::y0)]    = atCentre[toInt(AxisDefs::eta)];
             locPars[toInt(ParamDefs::theta)] = locDir.theta();
             locPars[toInt(ParamDefs::phi)]   = locDir.phi();
-            ATH_MSG_VERBOSE("Segment "<<m_idHelperSvc->toStringChamber(rotId)<<" at chamber centre "
-                        <<Amg::toString(atCentre)<<" + x *"<<Amg::toString(locDir));
+            ATH_MSG_VERBOSE("Segment "<<chamber->identString()<<" at chamber centre "<<Amg::toString(atCentre)
+                          <<" + x *"<<Amg::toString(locDir));
         }
         return StatusCode::SUCCESS;
-    }
- 
+    } 
 }

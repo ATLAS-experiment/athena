@@ -16,6 +16,11 @@
 
 
 namespace MuonR4{
+    /** @brief The TruthSegToTruthPartAssocAlg associates the TruthSegments with the primary TruthParticle
+     *         from the IP. At the same time, the truth particles are linked to all the associated segment candidates.
+     *         
+     *         To perform the matching, the SDO identifiers decorated to the TruthParticle are compared with the SDO
+     *         identifiers of the truth hits making up the truth segment.  */
     class TruthSegToTruthPartAssocAlg: public AthReentrantAlgorithm {
         public:
             using AthReentrantAlgorithm::AthReentrantAlgorithm;
@@ -40,6 +45,4 @@ namespace MuonR4{
 
     };
 }
-
-
 #endif

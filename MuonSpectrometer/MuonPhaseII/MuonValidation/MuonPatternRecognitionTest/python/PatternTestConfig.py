@@ -68,7 +68,7 @@ def LegacyMuonRecoChainCfg(flags):
                                     name = "UnAssocMuonSegmentAlg",
                                     SegmentContainerName="UnAssocMuonTrkSegments",
                                     xAODContainerName="UnAssocMuonSegments"))
-    
+
     #### Create the xAOD::Muon from the MSOE tracks
     from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg
     result.merge(MuonCreatorAlgCfg(flags, TagMaps=[], CreateSAmuons = True, MakeClusters= False,  
@@ -95,11 +95,22 @@ def LegacyMuonRecoChainCfg(flags):
     result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="SegmentParDecorAlgUnAssoc", 
                                               SegmentKey="UnAssocMuonSegments"))
 
+    if flags.Input.isMC:
+        from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg
+        result.merge(RecoSegmentTruthAssocCfg(flags,
+                                              name="TrkMuonSegmentsTruthMatchingAlg",
+                                              SegmentKey="MuonSegments"))
+        result.merge(RecoSegmentTruthAssocCfg(flags,
+                                              name="UnAssocSegmentsTruthMatchingAlg",
+                                              SegmentKey="UnAssocMuonSegments"))
+    
     #### Build a view container for later n-tuple dumping
     from xAODMuonViewAlgs.ViewAlgsConfig import SegmentViewAlgCfg
     result.merge(SegmentViewAlgCfg(flags, 
                                    SegmentsKeys=["UnAssocMuonSegments", "MuonSegments"], 
-                                   ViewKey="LegacyChainSegments"))
+                                   ViewKey="LegacyChainSegments",
+                                   ExtraInputs = [] if not flags.Input.isMC else [( "SG::AuxVectorBase", "UnAssocMuonSegments.truthParticleLink"),
+                                                                                  ( "SG::AuxVectorBase", "MuonSegments.truthParticleLink")]))
     
     return result
 
@@ -133,6 +144,11 @@ def MuonR4PatternRecoChainCfg(flags):
     from MuonObjectMarker.ObjectMarkerConfig import MuonSegmentFitParDecorAlgCfg
     result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="SegmentParDecorAlgHougR4", 
                                               SegmentKey="MuonSegmentsFromHoughR4"))
+    if flags.Input.isMC:
+        from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg
+        result.merge(RecoSegmentTruthAssocCfg(flags,
+                                              name="MuonSegmentsFromHoughR4TruthMatching",
+                                              SegmentKey="MuonSegmentsFromHoughR4"))
     return result
 
 def MuonR4SegmentRecoChainCfg(flags):
@@ -163,7 +179,11 @@ def MuonR4SegmentRecoChainCfg(flags):
     result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="SegmentParDecorAlgFromR4", 
                                                      SegmentKey="MuonSegmentsFromR4"))
 
-
+    if flags.Input.isMC:
+        from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg
+        result.merge(RecoSegmentTruthAssocCfg(flags,
+                                              name="MuonSegmentsFromR4TruthMatching",
+                                              SegmentKey="MuonSegmentsFromR4"))
     return result 
 
 def TrackTruthMatchCfg(flags):

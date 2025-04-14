@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONOBJECTMARKER_TRUTHMEASMARKER_H
 #define MUONOBJECTMARKER_TRUTHMEASMARKER_H
@@ -29,7 +29,6 @@ namespace MuonR4{
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Key to the primary muon container to select the muon from  */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segKey{this, "SegmentKey", "TruthSegmentsR4" };
-            
             /** @brief Key that's decorated to mark the uncalibrated measurement */
             Gaudi::Property<std::string> m_writeMarker{this, "writeMarker", "matchedToTruthSeg"};
             /** @brief Key to indicate the associated MuonSegment link */

@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <MuonTruthHelpers/MuonSimHitHelpers.h>
 #include <xAODMuonSimHit/MuonSimHitContainer.h>
+#include <xAODTruth/TruthParticleContainer.h>
+#include <xAODMeasurementBase/UncalibratedMeasurementContainer.h>
 #include <MuonSpacePoint/SpacePoint.h>
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
 #include <MuonPatternEvent/Segment.h>
@@ -22,18 +24,29 @@ namespace MuonR4 {
     }
 
     std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const xAOD::MuonSegment& segment) {
-        using SimHitLinkVec = std::vector<ElementLink<xAOD::MuonSimHitContainer>>; 
-        static const SG::ConstAccessor<SimHitLinkVec> acc{"simHitLinks"};
+        
+        using SimHitLinkVec_t = std::vector<ElementLink<xAOD::MuonSimHitContainer>>;
+        using PrdLink_t = ElementLink<xAOD::UncalibratedMeasurementContainer>;
+        using PrdLinkVec_t = std::vector<PrdLink_t>;
+        
+        static const SG::ConstAccessor<SimHitLinkVec_t> acc_simLink{"simHitLinks"};
+        static const SG::ConstAccessor<PrdLinkVec_t> acc_prdLink{"prdLinks"};
         std::unordered_set<const xAOD::MuonSimHit*> hits{};
-        if (!acc.isAvailable(segment)){
-            return hits;
-        }
-        hits.reserve(acc(segment).size());
-        for (const ElementLink<xAOD::MuonSimHitContainer>& link : acc(segment)) {
-            if (link.isValid()) {
-                hits.insert(*link);
+        if (acc_simLink.isAvailable(segment)){
+            hits.reserve(acc_simLink(segment).size());
+            for (const ElementLink<xAOD::MuonSimHitContainer>& link : acc_simLink(segment)) {
+                if (link.isValid()) {
+                    hits.insert(*link);
+                }
             }
-        }
+        } else if (acc_prdLink.isAvailable(segment)){
+            for (const PrdLink_t& link : acc_prdLink(segment)) {
+                const xAOD::MuonSimHit* hit = getTruthMatchedHit(**link);
+                if (hit){
+                    hits.insert(hit);
+                }
+            }
+        }      
         return hits;
     }
 
@@ -82,6 +95,13 @@ namespace MuonR4 {
     }
     std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const SegmentSeed& seed) {
         return getMatchingSimHits(seed.getHitsInMax());
+    }
+    const xAOD::TruthParticle* getTruthMatchedParticle(const xAOD::MuonSegment& segment){
+        static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> acc{"truthParticleLink"};
+        if (acc.isAvailable(segment) && acc(segment).isValid()) {
+            return (*acc(segment));
+        }
+        return nullptr;
     }
 }
 

@@ -134,5 +134,3 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
 }
-
-
