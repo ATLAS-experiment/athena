@@ -1,184 +1,148 @@
-# Copyright 2020-2024 Bytes Mess <b110011@pm.me>.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-.build-cpp:
+# You can override the included template(s) by including variable overrides
+# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/pipeline/#customization
+# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
+# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
+# Note that environment variables can be set in several places
+# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
+".build-cpp":
   stage: build
-  extends: .only-review-cpp
+  extends: ".only-review-cpp"
   interruptible: false
   variables:
-    # Use prefixed CMake options to avoid UB while executing 'conan install'.
-    BPROTO_CI_CMAKE_BUILD_TYPE: "Debug"
-    # This can be defined global wide.
+    BPROTO_CI_CMAKE_BUILD_TYPE: Debug
     CMAKE_GENERATOR: Unix Makefiles
   before_script:
-    # nproc on GNU/Linux, sysctl on macOS
-    - NPROC=$(nproc || sysctl -n hw.physicalcpu) 2>/dev/null
-    # Download all Conan packages
-    - |-
-      if [[ -f "${CI_PROJECT_DIR}/conanfile.py" || -f "${CI_PROJECT_DIR}/conanfile.txt" ]]; then
-        conan install . -if build -of build --build=missing \
-          -pr:b "${CC}" \
-          -pr:h "${CC}" \
-          -s:b build_type="${BPROTO_CI_CMAKE_BUILD_TYPE}" \
-          -s:h build_type="${BPROTO_CI_CMAKE_BUILD_TYPE}"
+  - NPROC=$(nproc || sysctl -n hw.physicalcpu) 2>/dev/null
+  - |-
+    if [[ -f "${CI_PROJECT_DIR}/conanfile.py" || -f "${CI_PROJECT_DIR}/conanfile.txt" ]]; then
+      conan install . -if build -of build --build=missing \
+        -pr:b "${CC}" \
+        -pr:h "${CC}" \
+        -s:b build_type="${BPROTO_CI_CMAKE_BUILD_TYPE}" \
+        -s:h build_type="${BPROTO_CI_CMAKE_BUILD_TYPE}"
 
-        # Conan will generate this for us.
-        export BPROTO_CI_CMAKE_TOOLCHAIN_FILE="-DCMAKE_TOOLCHAIN_FILE='conan_toolchain.cmake'"
-      fi
-    - export BPROTO_CI_CMAKE_BUILD_TYPE="-DCMAKE_BUILD_TYPE=${BPROTO_CI_CMAKE_BUILD_TYPE}"
-    - |-
-      echo -e "BPROTO_CI_CMAKE_BUILD_TYPE:\n\t${BPROTO_CI_CMAKE_BUILD_TYPE}"
-      echo -e "BPROTO_CI_CMAKE_ARGS:\n\t${BPROTO_CI_CMAKE_ARGS}"
-      echo -e "BPROTO_CI_CMAKE_EXTRA_ARGS:\n\t${BPROTO_CI_CMAKE_EXTRA_ARGS}"
-      echo -e "BPROTO_CI_CMAKE_TOOLCHAIN_FILE:\n\t${BPROTO_CI_CMAKE_TOOLCHAIN_FILE}"
+      # Conan will generate this for us.
+      export BPROTO_CI_CMAKE_TOOLCHAIN_FILE="-DCMAKE_TOOLCHAIN_FILE='conan_toolchain.cmake'"
+    fi
+  - export BPROTO_CI_CMAKE_BUILD_TYPE="-DCMAKE_BUILD_TYPE=${BPROTO_CI_CMAKE_BUILD_TYPE}"
+  - |-
+    echo -e "BPROTO_CI_CMAKE_BUILD_TYPE:\n\t${BPROTO_CI_CMAKE_BUILD_TYPE}"
+    echo -e "BPROTO_CI_CMAKE_ARGS:\n\t${BPROTO_CI_CMAKE_ARGS}"
+    echo -e "BPROTO_CI_CMAKE_EXTRA_ARGS:\n\t${BPROTO_CI_CMAKE_EXTRA_ARGS}"
+    echo -e "BPROTO_CI_CMAKE_TOOLCHAIN_FILE:\n\t${BPROTO_CI_CMAKE_TOOLCHAIN_FILE}"
   script:
-    - mkdir -p build
-    - |-
-      cmake -S. -Bbuild \
-        ${BPROTO_CI_CMAKE_BUILD_TYPE} \
-        ${BPROTO_CI_CMAKE_ARGS} \
-        ${BPROTO_CI_CMAKE_EXTRA_ARGS} \
-        ${BPROTO_CI_CMAKE_TOOLCHAIN_FILE} \
-          2>&1 | tee build/ConfigurationLog.txt
-    - cmake --build build -j${NPROC} 2>&1 | tee build/CompilationLog.txt
+  - mkdir -p build
+  - |-
+    cmake -S. -Bbuild \
+      ${BPROTO_CI_CMAKE_BUILD_TYPE} \
+      ${BPROTO_CI_CMAKE_ARGS} \
+      ${BPROTO_CI_CMAKE_EXTRA_ARGS} \
+      ${BPROTO_CI_CMAKE_TOOLCHAIN_FILE} \
+        2>&1 | tee build/ConfigurationLog.txt
+  - cmake --build build -j${NPROC} 2>&1 | tee build/CompilationLog.txt
   artifacts:
     expire_in: 2 hrs
     when: always
     paths:
-      # Different logs are needed if something happens.
-      - build/CMakeFiles/CMakeError.log
-      - build/CMakeFiles/CMakeOutput.log
-      - build/ConfigurationLog.txt
-      - build/CompilationLog.txt
-
-      # The main binaries.
-      - build/bin/
-
-      # The cache is needed for the installation test.
-      - build/CMakeCache.txt
-
-      # CTest files are needed for the installation test.
-      - build/CTestTestfile.cmake
-      - build/**/CTestTestfile.cmake
-
-      # Dart files are needed for the tests with valgrind.
-      - build/DartConfiguration.tcl
-
-      # Test stage doesn't checkout repo and use only artifacts.
-      # So include test configs to an artifact too.
-      - tools/*
-
-.test-cpp:
+    - build/CMakeFiles/CMakeError.log
+    - build/CMakeFiles/CMakeOutput.log
+    - build/ConfigurationLog.txt
+    - build/CompilationLog.txt
+    - build/bin/
+    - build/CMakeCache.txt
+    - build/CTestTestfile.cmake
+    - build/**/CTestTestfile.cmake
+    - build/DartConfiguration.tcl
+    - tools/*
+".test-cpp":
   stage: test
-  extends: .only-review-cpp
+  extends: ".only-review-cpp"
   when: on_success
   variables:
-    # Boost settings
-    BOOST_TEST_LOGGER: "JUNIT,all,test_results.xml:HRF,warning"
-    # CTest settings
+    BOOST_TEST_LOGGER: JUNIT,all,test_results.xml:HRF,warning
     CTEST_OUTPUT_ON_FAILURE: 1
-    # GIT settings
-    GIT_CHECKOUT: "false"
+    GIT_CHECKOUT: 'false'
     GIT_STRATEGY: none
-    # Sanitizers settings
-    ASAN_OPTIONS: "log_threads=1:verbosity=1"
-    LSAN_OPTIONS: "log_threads=1:verbosity=1"
-    TSAN_OPTIONS: "log_threads=1:verbosity=1"
+    ASAN_OPTIONS: log_threads=1:verbosity=1
+    LSAN_OPTIONS: log_threads=1:verbosity=1
+    TSAN_OPTIONS: log_threads=1:verbosity=1
   before_script:
-    # nproc on GNU/Linux, sysctl on macOS
-    - NPROC=$(nproc || sysctl -n hw.physicalcpu) 2>/dev/null
-    - |-
-      asan_supp_file="${CI_PROJECT_DIR}/tools/asan.supp"
-      if [[ -f "${asan_supp_file}" ]]; then
-        export ASAN_OPTIONS="${ASAN_OPTIONS}:suppressions=${asan_supp_file}"
-      fi
-    - |-
-      lsan_supp_file="${CI_PROJECT_DIR}/tools/lsan.supp"
-      if [[ -f "${lsan_supp_file}" ]]; then
-        export LSAN_OPTIONS="${ASAN_OPTIONS}:suppressions=${lsan_supp_file}"
-      fi
-    - |-
-      tsan_supp_file="${CI_PROJECT_DIR}/tools/tsan.supp"
-      if [[ -f "${tsan_supp_file}" ]]; then
-        export TSAN_OPTIONS="${ASAN_OPTIONS}:suppressions=${tsan_supp_file}"
-      fi
+  - NPROC=$(nproc || sysctl -n hw.physicalcpu) 2>/dev/null
+  - |-
+    asan_supp_file="${CI_PROJECT_DIR}/tools/asan.supp"
+    if [[ -f "${asan_supp_file}" ]]; then
+      export ASAN_OPTIONS="${ASAN_OPTIONS}:suppressions=${asan_supp_file}"
+    fi
+  - |-
+    lsan_supp_file="${CI_PROJECT_DIR}/tools/lsan.supp"
+    if [[ -f "${lsan_supp_file}" ]]; then
+      export LSAN_OPTIONS="${ASAN_OPTIONS}:suppressions=${lsan_supp_file}"
+    fi
+  - |-
+    tsan_supp_file="${CI_PROJECT_DIR}/tools/tsan.supp"
+    if [[ -f "${tsan_supp_file}" ]]; then
+      export TSAN_OPTIONS="${ASAN_OPTIONS}:suppressions=${tsan_supp_file}"
+    fi
   script:
-    - ctest -j${NPROC} --test-dir build
+  - ctest -j${NPROC} --test-dir build
   artifacts:
     reports:
       junit:
-        - build/**/test_results.xml
-
-# If build job failed, upload compilation logs in an easily downloadable form.
-.report-build-cpp:
+      - build/**/test_results.xml
+".report-build-cpp":
   extends:
-    - .only-review-cpp
-    - .report
+  - ".only-review-cpp"
+  - ".report"
   script:
-    - cp /build/CMakeFiles/CMakeError.log .
-    - cp /build/CMakeFiles/CMakeOutput.log .
+  - cp /build/CMakeFiles/CMakeError.log .
+  - cp /build/CMakeFiles/CMakeOutput.log .
   artifacts:
     expire_in: 1 day
-    expose_as: 'Build log'
-    name: "BuildLog-$CI_COMMIT_REF_SLUG"
+    expose_as: Build log
+    name: BuildLog-$CI_COMMIT_REF_SLUG
     paths:
-      - CMakeError.log
-      - CMakeOutput.log
-      - ConfigurationLog.txt
-      - CompilationLog.txt
-
-
+    - CMakeError.log
+    - CMakeOutput.log
+    - ConfigurationLog.txt
+    - CompilationLog.txt
 check:cpp:cppcheck:
-  image: $BPROTO_CI_IMAGES_REGISTRY/ubuntu2304:latest
+  image: "$BPROTO_CI_IMAGES_REGISTRY/ubuntu2304:latest"
   stage: check
   extends:
-    - .build-cpp
+  - ".build-cpp"
   dependencies: []
   needs: []
   when: manual
   variables:
-    BPROTO_CI_CMAKE_ARGS: >-
-      -DCMOPTS_ENABLE_CPPCHECK=ON
-      -DCMOPTS_CPPCHECK_REPORT_TYPE=HTML
+    BPROTO_CI_CMAKE_ARGS: "-DCMOPTS_ENABLE_CPPCHECK=ON -DCMOPTS_CPPCHECK_REPORT_TYPE=HTML"
     CC: gcc
     CXX: g++
   script:
-    - |-
-      cmake -S. -Bbuild \
-        ${BPROTO_CI_CMAKE_BUILD_TYPE} \
-        ${BPROTO_CI_CMAKE_ARGS} \
-        ${BPROTO_CI_CMAKE_EXTRA_ARGS} \
-        ${BPROTO_CI_CMAKE_TOOLCHAIN_FILE}
-    - cmake --build build --target cppcheck-html
+  - |-
+    cmake -S. -Bbuild \
+      ${BPROTO_CI_CMAKE_BUILD_TYPE} \
+      ${BPROTO_CI_CMAKE_ARGS} \
+      ${BPROTO_CI_CMAKE_EXTRA_ARGS} \
+      ${BPROTO_CI_CMAKE_TOOLCHAIN_FILE}
+  - cmake --build build --target cppcheck-html
   artifacts:
     expire_in: 2 hrs
     when: on_success
     paths:
-      - build/cppcheck_results/
-
+    - build/cppcheck_results/
 report:cpp:cppcheck:
   extends:
-    - .only-review-cpp
-    - .report
+  - ".only-review-cpp"
+  - ".report"
   allow_failure: true
   when: on_success
   needs:
-    - job: check:cpp:cppcheck
-      artifacts: true
+  - job: check:cpp:cppcheck
+    artifacts: true
   script:
-    - mv build/cppcheck_results/* .
-    - rm -rf build
+  - mv build/cppcheck_results/* .
+  - rm -rf build
   environment:
     name: cppcheck-html-docs-$CI_COMMIT_REF_SLUG
     url: https://${CI_PROJECT_ROOT_NAMESPACE}.${CI_PAGES_DOMAIN}/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/index.html
@@ -186,10 +150,15 @@ report:cpp:cppcheck:
   artifacts:
     when: always
     expire_in: 1 day
-    expose_as: 'CppCheck HTML Report'
-    name: "CppCheckHtmlReport-$CI_COMMIT_REF_SLUG"
+    expose_as: CppCheck HTML Report
+    name: CppCheckHtmlReport-$CI_COMMIT_REF_SLUG
     exclude:
-      - '**/*.xml'
+    - "**/*.xml"
     paths:
-      - ./
-
+    - "./"
+stages:
+- test
+sast:
+  stage: test
+include:
+- template: Security/SAST.gitlab-ci.yml
