@@ -78,7 +78,6 @@ class FPGATrackSimLayerStudyAlg : public AthAlgorithm
 
         // internal counters
         double m_evt = 0; // number of events passing event selection, independent of truth
-        double m_evt_truth = 0; // number of events passing event selection and having a truth object
 
         // Read hits from data prep algorithm-- note, not regonalized.
         SG::ReadHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey {this, "FPGATrackSimHitKey","FPGAHits", "FPGATrackSim hits key"};
