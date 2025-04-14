@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASHAREDMEMORYTOOL_H
@@ -14,6 +14,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/IAthenaIPCTool.h"
 
+#include <memory>
 #include <set>
 #include <string>
 
@@ -30,7 +31,7 @@ namespace boost {
 /** @class AthenaSharedMemoryTool
  *  @brief This class provides the IPCTool for SharedMemory objects
  **/
-class AthenaSharedMemoryTool : public ::AthAlgTool, virtual public IAthenaIPCTool {
+class AthenaSharedMemoryTool : public extends<::AthAlgTool, IAthenaIPCTool> {
 public: 
    /// Standard Service Constructor
    AthenaSharedMemoryTool(const std::string& type, const std::string& name, const IInterface* parent);
@@ -38,36 +39,37 @@ public:
    virtual ~AthenaSharedMemoryTool();
 
    /// Gaudi Service Interface method implementations:
-   StatusCode initialize();
-   StatusCode stop();
-   StatusCode finalize();
+   virtual StatusCode initialize() override;
+   virtual StatusCode stop() override;
+   virtual StatusCode finalize() override;
 
-   StatusCode makeServer(int num, const std::string& streamPortSuffix);
-   bool isServer() const;
-   StatusCode makeClient(int num, std::string& streamPortSuffix);
-   bool isClient() const;
+   virtual StatusCode makeServer(int num, const std::string& streamPortSuffix) override;
+   virtual bool isServer() const override;
+   virtual StatusCode makeClient(int num, std::string& streamPortSuffix) override;
+   virtual bool isClient() const override;
 
-   StatusCode putEvent ATLAS_NOT_THREAD_SAFE (long eventNumber, const void* source, size_t nbytes, unsigned int status) const;
-   StatusCode getLockedEvent(void** target, unsigned int& status) const;
-   StatusCode lockEvent(long eventNumber) const;
+   virtual StatusCode putEvent ATLAS_NOT_THREAD_SAFE (long eventNumber, const void* source, size_t nbytes, unsigned int status) const override;
+   virtual StatusCode getLockedEvent(void** target, unsigned int& status) const override;
+   virtual StatusCode lockEvent(long eventNumber) const override;
 
-   StatusCode putObject(const void* source, size_t nbytes, int num = 0);
-   StatusCode getObject(void** target, size_t& nbytes, int num = 0);
-   StatusCode clearObject(const char** tokenString, int& num);
-   StatusCode lockObject(const char* tokenString, int num = 0);
+   virtual StatusCode putObject(const void* source, size_t nbytes, int num = 0) override;
+   virtual StatusCode getObject(void** target, size_t& nbytes, int num = 0) override;
+   virtual StatusCode clearObject(const char** tokenString, int& num) override;
+   virtual StatusCode lockObject(const char* tokenString, int num = 0) override;
 
 private:
-   StringProperty m_sharedMemory;
-   const size_t m_maxSize;
-   const int m_maxDataClients;
-   int m_num;
-   int m_lastClient;
+   Gaudi::Property<std::string> m_sharedMemory{this, "SharedMemoryName", {}};
+
+   const size_t m_maxSize{64 * 1024 * 1024};
+   const int m_maxDataClients{256};
+   int m_num{-1};
+   int m_lastClient{-1};
    std::set<int> m_dataClients;
-   boost::interprocess::mapped_region* m_payload;
-   boost::interprocess::mapped_region* m_status;
-   long m_fileSeqNumber;
-   bool m_isServer;
-   bool m_isClient;
+   std::unique_ptr<boost::interprocess::mapped_region> m_payload;
+   std::unique_ptr<boost::interprocess::mapped_region> m_status;
+   long m_fileSeqNumber{0};
+   bool m_isServer{false};
+   bool m_isClient{false};
    ServiceHandle<IIncidentSvc> m_incidentSvc;
 };
 
