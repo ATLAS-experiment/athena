@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonPatternHelpers/SegmentAmbiSolver.h>
 #include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
@@ -80,6 +80,7 @@ namespace MuonR4 {
                     std::swap(goodSeg, resolveMe);
                     std::swap(resolvedM, testMeas);
                     existSigns = driftSigns(gctx, *resolveMe, resolveMe->measurements());
+                    break;
                 } else if (reso == Resolution::subSet) {
                     break;
                 }

@@ -81,7 +81,7 @@ namespace MuonR4{
             // target resolution in the angle
             DoubleProperty m_targetResoTanTheta{this, "ResolutionTargetTanTheta", 0.05};
             // target resolution in the y intercept
-            DoubleProperty m_targetResoIntercept{this, "ResolutionTargetIntercept", 10};
+            DoubleProperty m_targetResoIntercept{this, "ResolutionTargetIntercept", 10.};
             // minimum search window half width, tan(theta) 
             // - in multiples of the target resolution
             DoubleProperty m_minSigmasSearchTanTheta{this, "minSigmasSearchTanTheta", 2.0};

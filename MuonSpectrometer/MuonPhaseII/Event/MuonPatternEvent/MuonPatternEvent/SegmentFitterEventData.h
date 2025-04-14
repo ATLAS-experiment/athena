@@ -66,14 +66,16 @@ namespace MuonR4{
         double chi2{0.};
         /** @brief degrees of freedom */
         int nDoF{0};
+        /** @brief Number of precision hits */
+        unsigned nPrecMeas{0};
         /** @brief How many phi measurements */
-        unsigned int nPhiMeas{0};
+        unsigned nPhiMeas{0};
         /** @brief How many measurements give time constaint */
-        unsigned int nTimeMeas{0};
+        unsigned nTimeMeas{0};
         /** @brief Is the fit converged */
         bool converged{false};
         /** @brief Number of iterations called to reach the minimum */
-        unsigned int nIter{0};
+        unsigned nIter{0};
 
         /** @brief Returns the defining parameters as a pair of Amg::Vector3D
          *         The first part is the position expressed at the chamber centre

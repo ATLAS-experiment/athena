@@ -203,7 +203,6 @@ namespace MuonR4 {
             }
             seedLines.push_back(drawLabel(std::format("possible seeds: {:d}",  drawMe.numGenerated()), 0.2, 0.85, 14));
             m_visionTool->visualizeSeed(ctx, *patternSeed, "pattern", std::move(seedLines));
-
         }
 
         MdtSegmentSeedGenerator seedGen{name(), patternSeed, std::move(genCfg)};
@@ -261,7 +260,7 @@ namespace MuonR4 {
                                            SegmentFitResult& data) const {
         
         /** If no degree of freedom is in the segment fit then try to plug the holes  */
-        if (data.nDoF<=0 || data.calibMeasurements.empty()) {
+        if (data.nDoF<=0 || data.calibMeasurements.empty() || data.nPrecMeas < m_precHitCut) {
             ATH_MSG_VERBOSE("No degree of freedom available. What shall be removed?!. nDoF: "
                             <<data.nDoF<<", n-meas: "<<data.calibMeasurements);
             return false;
@@ -284,7 +283,7 @@ namespace MuonR4 {
         }
 
         /** Next sort the measurements by chi2 */
-        std::sort(data.calibMeasurements.begin(), data.calibMeasurements.end(),
+        std::ranges::sort(data.calibMeasurements,
                   [&, this](const HitVec::value_type& a, const HitVec::value_type& b){
                     return SegmentFitHelpers::chiSqTerm(segPos, segDir, data.segmentPars[toInt(ParamDefs::time)], std::nullopt, *a, msgStream()) <
                            SegmentFitHelpers::chiSqTerm(segPos, segDir, data.segmentPars[toInt(ParamDefs::time)], std::nullopt, *b, msgStream());
