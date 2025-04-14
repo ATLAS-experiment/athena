@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMPToolBase.h"
@@ -32,21 +32,12 @@ namespace AthenaMPToolBase_d {
 AthenaMPToolBase::AthenaMPToolBase(const std::string& type
 				   , const std::string& name
 				   , const IInterface* parent)
-  : AthAlgTool(type,name,parent)
-  , m_nprocs(-1)
-  , m_maxEvt(-1)
-  , m_subprocTopDir("")
-  , m_subprocDirPrefix("")     // To be set in the derived classes
-  , m_evtSelName("")
-  , m_processGroup(0)
+  : base_class(type,name,parent)
   , m_evtProcessor("AthenaEventLoopMgr",name)
   , m_appMgr("ApplicationMgr",name)
   , m_fileMgr("FileMgr",name)
   , m_ioMgr("IoComponentMgr",name)
-  , m_evtSelector(0)
-  , m_fileMgrLog("")
 {
-  declareInterface<IAthenaMPTool>(this);
 }
 
 AthenaMPToolBase::~AthenaMPToolBase()
@@ -86,13 +77,8 @@ StatusCode AthenaMPToolBase::initialize()
   ATH_CHECK(m_fileMgr.retrieve());
 
   SmartIF<IProperty> prpMgr1(m_fileMgr.get());
-  if(prpMgr1.isValid()) {
-    m_fileMgrLog = prpMgr1->getProperty("LogFile").toString();
-  }
-  else {
-    ATH_MSG_ERROR("IProperty interface not found in FileMgr");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(prpMgr1.isValid());
+  m_fileMgrLog = prpMgr1->getProperty("LogFile").toString();
 
   return StatusCode::SUCCESS;
 }
@@ -318,16 +304,13 @@ int AthenaMPToolBase::redirectLog(const std::string& rundir, bool addTimeStamp)
     else {
       oldFormat = formatProp.value();
       if(oldFormat.find("%t")==std::string::npos) {
-	// Add time stamps
-	std::string newFormat("%t " + oldFormat);
-	StringProperty newFormatProp(propertyName,newFormat);
-	if(propertyServer->setProperty(newFormatProp).isFailure()) {
-	  ATH_MSG_ERROR("Unable to set new Format property on the Message Service");
-	  return -1;
-	}
+        // Add time stamps
+        std::string newFormat("%t " + oldFormat);
+        StringProperty newFormatProp(propertyName,newFormat);
+        ATH_CHECK(propertyServer->setProperty(newFormatProp), -1);
       }
       else {
-	ATH_MSG_DEBUG("MsgSvc format already contains timestamps. Nothing to be done");
+        ATH_MSG_DEBUG("MsgSvc format already contains timestamps. Nothing to be done");
       }
     }
   }
@@ -337,21 +320,11 @@ int AthenaMPToolBase::redirectLog(const std::string& rundir, bool addTimeStamp)
 
 int AthenaMPToolBase::updateIoReg(const std::string& rundir)
 {
-  if (!m_ioMgr.retrieve().isSuccess()) {
-    ATH_MSG_ERROR("Error retrieving IoComponentMgr");
-    return -1;
-  } else {
-    ATH_MSG_DEBUG("Successfully retrieved IoComponentMgr");
-  }
+  ATH_CHECK(m_ioMgr.retrieve(), -1);
 
   // update the IoRegistry for the new workdir - make sure we use absolute path
   std::filesystem::path abs_rundir = std::filesystem::absolute(rundir);
-  if(!m_ioMgr->io_update_all(abs_rundir.string()).isSuccess()) {
-    ATH_MSG_ERROR("Error updating IoRegistry");
-    return -1;
-  } else {
-    ATH_MSG_DEBUG("Successfully updated IoRegistry");
-  }
+  ATH_CHECK(m_ioMgr->io_update_all(abs_rundir.string()), -1);
 
   return 0;
 }

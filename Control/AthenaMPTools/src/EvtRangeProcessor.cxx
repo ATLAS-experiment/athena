@@ -34,26 +34,9 @@ EvtRangeProcessor::EvtRangeProcessor(const std::string& type
 				     , const std::string& name
 				     , const IInterface* parent)
   : AthenaMPToolBase(type,name,parent)
-  , m_rankId(-1)
-  , m_nEventsBeforeFork(0)
-  , m_activeWorkers(0)
-  , m_inpFile("")
   , m_chronoStatSvc("ChronoStatSvc", name)
   , m_incidentSvc("IncidentSvc", name)
-  , m_evtSeek(nullptr)
-  , m_channel2Scatterer("")
-  , m_channel2EvtSel("")
-  , m_sharedRankQueue(0)
-  , m_sharedFailedPidQueue(0)
-  , m_debug(false)
 {
-  declareInterface<IAthenaMPTool>(this);
-
-  declareProperty("EventsBeforeFork",m_nEventsBeforeFork);
-  declareProperty("Channel2Scatterer", m_channel2Scatterer);
-  declareProperty("Channel2EvtSel", m_channel2EvtSel);
-  declareProperty("Debug", m_debug);
-
   m_subprocDirPrefix = "worker_";
 }
 
@@ -71,12 +54,6 @@ StatusCode EvtRangeProcessor::initialize()
   ATH_CHECK(m_chronoStatSvc.retrieve());
   ATH_CHECK(m_incidentSvc.retrieve());
   
-  return StatusCode::SUCCESS;
-}
-
-StatusCode EvtRangeProcessor::finalize()
-{
-  delete m_sharedRankQueue;
   return StatusCode::SUCCESS;
 }
 
@@ -101,7 +78,7 @@ int EvtRangeProcessor::makePool(int, int nprocs, const std::string& topdir)
   // Create rank queue and fill it
   std::ostringstream rankQueueName;
   rankQueueName << "EvtRangeProcessor_RankQueue_" << getpid() << "_" << m_randStr;
-  m_sharedRankQueue = new AthenaInterprocess::SharedQueue(rankQueueName.str(),m_nprocs,sizeof(int));
+  m_sharedRankQueue = std::make_unique<AthenaInterprocess::SharedQueue>(rankQueueName.str(),m_nprocs,sizeof(int));
   for(int i=0; i<m_nprocs; ++i)
     if(!m_sharedRankQueue->send_basic<int>(i)) {
       ATH_MSG_ERROR("Unable to send int to the ranks queue!");

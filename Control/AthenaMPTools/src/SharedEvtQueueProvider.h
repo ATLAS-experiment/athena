@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAMPTOOLS_SHAREDEVTQUEUEPROVIDER_H
@@ -11,8 +11,7 @@
 
 class IEventShare;
 
-class SharedEvtQueueProvider final : public AthenaMPToolBase
-  , public IIncidentListener
+class SharedEvtQueueProvider final : public extends<AthenaMPToolBase, IIncidentListener>
 {
  public:
   SharedEvtQueueProvider(const std::string& type
@@ -20,8 +19,8 @@ class SharedEvtQueueProvider final : public AthenaMPToolBase
 			 , const IInterface* parent);
 
   virtual ~SharedEvtQueueProvider() override;
-  
-  // _________IAthenaMPTool_________   
+
+  // _________IAthenaMPTool_________
   virtual int makePool ATLAS_NOT_THREAD_SAFE (int maxevt, int nprocs, const std::string& topdir) override;
   virtual StatusCode exec ATLAS_NOT_THREAD_SAFE() override;
 
@@ -41,20 +40,23 @@ class SharedEvtQueueProvider final : public AthenaMPToolBase
   SharedEvtQueueProvider(const SharedEvtQueueProvider&);
   SharedEvtQueueProvider& operator= (const SharedEvtQueueProvider&);
 
-  // Properties
-  int  m_nprocesses;      // We use this data member for adding negative numbers at the end of the event queue
-                          // We cannot use m_nprocs for this purpose in order to avoid generating Output File Reports by Shared Queue Providers
-  bool m_useSharedReader; // Are we doing the reading?
-  int  m_nEventsBeforeFork;
-  int  m_nChunkSize;
-  int  m_nChunkStart;      // The beginning of the current chunk
-  int  m_nPositionInChunk; // Position within the current chunk
-  
+  Gaudi::Property<bool> m_useSharedReader{this, "UseSharedReader", false, "Use shared reader"};
+  Gaudi::Property<int>  m_nEventsBeforeFork{this, "EventsBeforeFork", 0, "Number of events before forking"};
+  Gaudi::Property<int>  m_nChunkSize{this, "ChunkSize", 1};
 
-  int  m_nEvtRequested;    // Max event received from AppMgr
-  int  m_nEvtCounted;      // The number of events this tool has counted itself in the input files 
+  /**
+   * We use this data member for adding negative numbers at the end of the event queue.
+   * We cannot use m_nprocs for this purpose in order to avoid generating Output File
+   * Reports by Shared Queue Providers.
+   */
+  int  m_nprocesses{-1};
+  int  m_nChunkStart{0};      ///< The beginning of the current chunk
+  int  m_nPositionInChunk{0}; ///< Position within the current chunk
+
+  int  m_nEvtRequested{-1};    ///< Max event received from AppMgr
+  int  m_nEvtCounted{0};       ///< The number of events this tool has counted itself in the input files
   
-  AthenaInterprocess::SharedQueue*  m_sharedEventQueue;          
+  AthenaInterprocess::SharedQueue*  m_sharedEventQueue{nullptr};
   SmartIF<IEventShare>              m_evtShare;
 
   // Add next event chunk to the queue

@@ -27,24 +27,8 @@
 SharedEvtQueueProvider::SharedEvtQueueProvider(const std::string& type
 					       , const std::string& name
 					       , const IInterface* parent)
-  : AthenaMPToolBase(type,name,parent)
-  , m_nprocesses(-1)
-  , m_useSharedReader(false)
-  , m_nEventsBeforeFork(0)
-  , m_nChunkSize(1)
-  , m_nChunkStart(0)
-  , m_nPositionInChunk(0)
-  , m_nEvtRequested(-1)
-  , m_nEvtCounted(0)
-  , m_sharedEventQueue(0)
-  , m_evtShare(0)
+  : base_class(type,name,parent)
 {
-  declareInterface<IAthenaMPTool>(this);
-
-  declareProperty("UseSharedReader",m_useSharedReader);
-  declareProperty("EventsBeforeFork",m_nEventsBeforeFork);
-  declareProperty("ChunkSize",m_nChunkSize);
-
   m_subprocDirPrefix = "evt_counter";
 }
 
@@ -78,11 +62,7 @@ int SharedEvtQueueProvider::makePool(int maxevt, int nprocs, const std::string& 
 
   // Create event queue
   ATH_MSG_DEBUG( "Event queue name " << "AthenaMPEventQueue_" << m_randStr );
-  StatusCode sc = detStore()->retrieve(m_sharedEventQueue,"AthenaMPEventQueue_"+m_randStr);
-  if(sc.isFailure()) {
-    ATH_MSG_ERROR( "Unable to retrieve the pointer to Shared Event Queue" );
-    return -1;
-  }
+  ATH_CHECK( detStore()->retrieve(m_sharedEventQueue,"AthenaMPEventQueue_"+m_randStr), -1);
 
   // Create the process group and map_async bootstrap
   m_processGroup = new AthenaInterprocess::ProcessGroup(1);
