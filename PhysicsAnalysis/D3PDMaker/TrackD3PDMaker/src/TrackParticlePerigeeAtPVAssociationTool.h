@@ -29,10 +29,10 @@ namespace D3PD {
  * @brief Associate from a VxCandidate to its perigee at primary vertex.
  */
 class TrackParticlePerigeeAtPVAssociationTool
-  : public SingleAssociationTool<Types<Rec::TrackParticle, xAOD::TrackParticle>, Trk::TrackParameters>
+  : public SingleAssociationTool<Types<xAOD::TrackParticle>, Trk::TrackParameters>
 {
 public:
-  typedef SingleAssociationTool<Types<Rec::TrackParticle, xAOD::TrackParticle>, Trk::TrackParameters> Base;
+  typedef SingleAssociationTool<Types<xAOD::TrackParticle>, Trk::TrackParameters> Base;
 
   /**
    * @brief Standard Gaudi tool constructor.
@@ -46,16 +46,6 @@ public:
 
 
   virtual StatusCode initialize() override;
-
-
-  /**
-   * @brief Return the target object.
-   * @param p The source object for the association.
-   *
-   * Return the target of the association, or 0.
-   */
-  virtual const Trk::TrackParameters* get (const Rec::TrackParticle& p) override;
-
 
   /**
    * @brief Return the target object.
