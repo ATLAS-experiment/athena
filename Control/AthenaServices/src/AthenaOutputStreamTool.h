@@ -45,20 +45,20 @@ public:
    ///   Only use if one wants to override jobOptions
    StatusCode connectServices(const std::string& dataStore,
 	   const std::string& cnvSvc,
-	   bool extendProvenenceRecord);
+	   bool extendProvenenceRecord) override;
 
    /// Connect to the output stream
    ///   Must connectOutput BEFORE streaming
    ///   Only specify "outputName" if one wants to override jobOptions
-   StatusCode connectOutput(const std::string& outputName = "");
+   StatusCode connectOutput(const std::string& outputName = "") override;
 
    /// Commit the output stream after having streamed out objects
    ///   Must commitOutput AFTER streaming
-   StatusCode commitOutput(bool doCommit = false);
+   StatusCode commitOutput(bool doCommit = false) override;
 
    /// Finalize the output stream after the last commit, e.g. in
    /// finalize
-   StatusCode finalizeOutput();
+   StatusCode finalizeOutput() override;
 
    /// Stream out objects. Provide vector of typeName/key pairs.
    ///   If key is empty, assumes only one object and this
