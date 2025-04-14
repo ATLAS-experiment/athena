@@ -22,6 +22,8 @@ namespace FlavorTagInference {
   StatusCode FoldDecoratorAlg::initialize()
   {
     ATH_CHECK(m_mcEventNumberKey.initialize());
+    // event info is usually not decorated, renounce the dependency
+    renounce(m_mcEventNumberKey);
     if (m_jetCollection.empty()) {
       ATH_MSG_ERROR("jet collection not specified");
       return StatusCode::FAILURE;
@@ -34,10 +36,15 @@ namespace FlavorTagInference {
       key = m_jetCollection + "." + key.key();
     }
     ATH_CHECK(m_jetAssociations.initialize());
+    // most the associations also aren't decorated, renounce these
+    // dependencies too
+    renounceArray(m_jetAssociations);
     for (auto& key: m_jetInts) {
       key = m_jetCollection + "." + key.key();
     }
     ATH_CHECK(m_jetInts.initialize());
+    // same with jetInts: usually not decorated
+    renounceArray(m_jetInts);
 
     // set up some salts for other sources of entropy
     std::map<std::string, uint32_t> fullSeeds;
