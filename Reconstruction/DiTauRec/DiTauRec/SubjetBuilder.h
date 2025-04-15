@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DITAUREC_SUBJETBUILDER_H
 #define DITAUREC_SUBJETBUILDER_H
 
 #include "DiTauToolBase.h"
+
+#include "AsgTools/PropertyWrapper.h"
 
 #include "fastjet/tools/Filter.hh"
 
@@ -32,8 +34,8 @@ class SubjetBuilder : public DiTauToolBase {
 
  private:
 
-  float m_Rsubjet;
-  float m_ptmin;
+  Gaudi::Property<float> m_Rsubjet{this, "Rsubjet", 0.2};
+  Gaudi::Property<float> m_ptmin{this, "ptminsubjet", 10000};
 
 };
 

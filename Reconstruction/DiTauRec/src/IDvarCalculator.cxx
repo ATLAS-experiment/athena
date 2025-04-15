@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRec/IDVarCalculator.h"
@@ -7,11 +7,9 @@
 IDVarCalculator::IDVarCalculator(const std::string& type,
 				 const std::string& name,
 				 const IInterface * parent) :
-  DiTauToolBase(type, name, parent),
-  m_useCells(true)
+  DiTauToolBase(type, name, parent)
 {
   declareInterface<DiTauToolBase > (this);
-  declareProperty("useCells", m_useCells);
 }
 
 

@@ -11,17 +11,9 @@
 DiTauTrackFinder::DiTauTrackFinder(const std::string& type,
 				   const std::string& name,
 				   const IInterface * parent) :
-  DiTauToolBase(type, name, parent),
-  m_MaxDrJet(1.0),
-  m_MaxDrSubjet(0.2),
-  m_MaxNTracksSubjet(-1),
-  m_TrackSelectorTool("")
+  DiTauToolBase(type, name, parent)
 {
   declareInterface<DiTauToolBase > (this);
-  declareProperty("MaxDrJet", m_MaxDrJet);
-  declareProperty("MaxDrSubjet", m_MaxDrSubjet);
-  declareProperty("MaxNTracksSubjet", m_MaxNTracksSubjet);
-  declareProperty("TrackSelectorTool", m_TrackSelectorTool);
 }
 
 

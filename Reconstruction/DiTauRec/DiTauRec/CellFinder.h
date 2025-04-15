@@ -7,6 +7,8 @@
 
 #include "DiTauToolBase.h"
 
+#include "AsgTools/PropertyWrapper.h"
+
 #include "GaudiKernel/ToolHandle.h"
 
 
@@ -26,7 +28,8 @@ class CellFinder : public DiTauToolBase {
 
 
  private:
-  float m_Rsubjet;
+
+  Gaudi::Property<float> m_Rsubjet{this, "Rsubjet", 0.2}; 
 
 };
 
