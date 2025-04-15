@@ -37,7 +37,7 @@ public:
   {}
 
   /**Virtual Destructor*/
-  virtual ~CompactBinnedArray() {}
+  virtual ~CompactBinnedArray() = default;
 
   /** Implicit constructor */
   virtual CompactBinnedArray* clone() const = 0;

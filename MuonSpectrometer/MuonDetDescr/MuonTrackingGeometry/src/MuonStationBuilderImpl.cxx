@@ -210,7 +210,7 @@ void MuonStationBuilderImpl::identifyLayers(
                     is_valid);
                 if (!is_valid)
                     continue;
-                auto stripSurf = dynamic_cast<const Trk::PlaneSurface*>(&(cscRE->surface(idi)));
+                const auto *stripSurf = dynamic_cast<const Trk::PlaneSurface*>(&(cscRE->surface(idi)));
                 const Amg::Vector3D& gpi = stripSurf->center();
                 Trk::TrackingVolume* assocVol =
                     station->trackingVolume()->associatedSubVolume(gpi);
@@ -314,7 +314,7 @@ void MuonStationBuilderImpl::identifyLayers(
                         layers[il]->setLayerType(id);
                         // validation
                         Identifier checkId(layers[il]->layerType());
-                        auto stripSurf = dynamic_cast<const Trk::PlaneSurface*>(&(tgc->surface(checkId)));
+                        const auto *stripSurf = dynamic_cast<const Trk::PlaneSurface*>(&(tgc->surface(checkId)));
                         if ((layers[il]->surfaceRepresentation().transform().inverse() * stripSurf->center()).mag() > 0.001)
                             ATH_MSG_DEBUG("TGC strip plane shifted:"<< st << "," << eta << "," << phi
                                           << ":"<< layers[il]->surfaceRepresentation().transform().inverse() * stripSurf->center());
@@ -710,7 +710,7 @@ void MuonStationBuilderImpl::getNSWStationsForTranslation(const GeoVPhysVol* pv,
                     (childName == "MM_Frame" || childName == "sTGC_Frame")) {
                     Trk::MaterialProperties matComb(0., 10.e10, 10.e10, 13.,
                                                     26., 0.);
-                    Trk::Material newMat = m_materialConverter.convert(
+                    Trk::Material newMat = Trk::GeoMaterialConverter::convert(
                         pv->getLogVol()->getMaterial());
                     matComb.addMaterial(newMat, thick / newMat.x0());
                     ATH_MSG_VERBOSE(" use mother volume thickness, x0: "
@@ -753,8 +753,8 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
     
 
     // NSW stations first to avoid double-counting
-    const GeoVPhysVol* sTGC_top = m_gmBrowser.findTopBranch(top, "sTGC_1");
-    const GeoVPhysVol* MM_top = m_gmBrowser.findTopBranch(top, "MM_1");
+    const GeoVPhysVol* sTGC_top = Trk::GMTreeBrowser::findTopBranch(top, "sTGC_1");
+    const GeoVPhysVol* MM_top = Trk::GMTreeBrowser::findTopBranch(top, "MM_1");
     if (sTGC_top && sTGC_top != top) {
         ATH_MSG_DEBUG("sTGC GeoModel branch found:" << sTGC_top->getLogVol()->getName());
         GeoVolumeCursor vol(sTGC_top);
@@ -777,9 +777,8 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
 
             if (it == sensitive.end()) {
                 std::vector<std::pair<Amg::Transform3D, int>> cloneList;
-                cloneList.push_back(
-                    std::make_pair(vol.getTransform(), 0));
-                sensitive.push_back(std::make_pair(cv, cloneList));
+                cloneList.emplace_back(vol.getTransform(), 0);
+                sensitive.emplace_back(cv, cloneList);
             } else {
                 Amg::Transform3D transf = vol.getTransform();
                 // order transforms to position prototype at phi=0/ 0.125 pi
@@ -788,7 +787,7 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
                     (*it).second.insert((*it).second.begin(),
                                         std::make_pair(vol.getTransform(), 0));
                 else
-                    (*it).second.push_back(std::make_pair(vol.getTransform(), 0));
+                    (*it).second.emplace_back(vol.getTransform(), 0);
             }
             vol.next();
         }
@@ -816,8 +815,8 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
 
             if (it == sensitive.end()) {
                 std::vector<std::pair<Amg::Transform3D, int>> cloneList;
-                cloneList.push_back(std::make_pair(vol.getTransform(), 0));
-                sensitive.push_back(std::make_pair(cv, cloneList));
+                cloneList.emplace_back(vol.getTransform(), 0);
+                sensitive.emplace_back(cv, cloneList);
             } else {
                 Amg::Transform3D transf = vol.getTransform();
                 // order transforms to position prototype at phi=0/ 0.125 pi
@@ -825,7 +824,7 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
                 if (phiTr > -0.001 && phiTr < 0.4)
                     (*it).second.insert((*it).second.begin(), std::make_pair(vol.getTransform(), 0));
                 else
-                    (*it).second.push_back(std::make_pair(vol.getTransform(), 0));
+                    (*it).second.emplace_back(vol.getTransform(), 0);
             }
             vol.next();
         }
@@ -863,8 +862,8 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
 
                 if (it == sensitive.end()) {
                     std::vector<std::pair<Amg::Transform3D, int>> cloneList;
-                    cloneList.push_back(std::make_pair(transform, vol.getId().value()));
-                    sensitive.push_back(std::make_pair(tv, cloneList));
+                    cloneList.emplace_back(transform, vol.getId().value());
+                    sensitive.emplace_back(tv, cloneList);
                 } else {
                     Amg::Transform3D transf = transform;
                     // order transforms to position prototype at phi=0/ 0.125 pi
@@ -874,7 +873,7 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
 					  std::make_pair(transform, vol.getId().value()));
 		    }
                     else {
-		      (*it).second.push_back(std::make_pair(transform, vol.getId().value()));
+		      (*it).second.emplace_back(transform, vol.getId().value());
 		    }
                 }
 
@@ -894,8 +893,8 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
 
             if (it == sensitive.end()) {
                 std::vector<std::pair<Amg::Transform3D, int>> cloneList;
-                cloneList.push_back(std::make_pair(vol.getTransform(), vol.getId().value()));
-                sensitive.push_back(std::make_pair(cv, cloneList));
+                cloneList.emplace_back(vol.getTransform(), vol.getId().value());
+                sensitive.emplace_back(cv, cloneList);
             } else {
                 Amg::Transform3D transf = vol.getTransform();
                 // order transforms to position prototype at phi=0/ 0.125 pi
@@ -905,7 +904,7 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
 				      std::make_pair(vol.getTransform(), vol.getId().value()));
 		}
                 else {
-		  (*it).second.push_back(std::make_pair(vol.getTransform(), vol.getId().value()));
+		  (*it).second.emplace_back(vol.getTransform(), vol.getId().value());
 		}
             }
         }  // end non-TGC
@@ -920,7 +919,7 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
 std::unique_ptr<Trk::DetachedTrackingVolume>
 MuonStationBuilderImpl::buildDetachedTrackingVolumeType(const MuonGM::MuonDetectorManager* muonMgr, 
                                                               const GeoVPhysVol* cv,
-                                                              GMInfo gmInfo) const {
+                                                              const GMInfo& gmInfo) const {
     const GeoLogVol* clv = cv->getLogVol();
     const std::string& vname = clv->getName();
     ATH_MSG_DEBUG(name() << " building station prototype for " << cv->getLogVol()->getName());
@@ -1102,7 +1101,7 @@ MuonStationBuilderImpl::buildDetachedTrackingVolumeType(const MuonGM::MuonDetect
     return typeStat;
 }
 
-Identifier MuonStationBuilderImpl::resolveId(std::string vname, GMInfo gm_info, int& eta, int& phi,
+Identifier MuonStationBuilderImpl::resolveId(const std::string& vname, const GMInfo& gm_info, int& eta, int& phi,
                                                    const MuonGM::MuonDetectorManager* muonMgr) const {
 
     Identifier stId(0);

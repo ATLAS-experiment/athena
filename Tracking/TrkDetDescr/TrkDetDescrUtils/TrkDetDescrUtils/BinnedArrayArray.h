@@ -36,22 +36,22 @@ class BinnedArrayArray final : public BinnedArray<T>
 {
 
 public:
-  /**Default Constructor  */
+
   BinnedArrayArray(
     const std::vector<std::pair<BinnedArray<T>*, Amg::Vector3D>>& tbas,
-    BinUtility* bUtility)
+    const BinUtility& bUtility)
     : m_binUtility(bUtility)
-    , m_binnedArrays(bUtility->bins(0), nullptr)
+    , m_binnedArrays(bUtility.bins(0), nullptr)
     , m_arrayObjects()
   {
     // the array objects
-    m_arrayObjects.reserve(tbas.size() * bUtility->bins(0));
+    m_arrayObjects.reserve(tbas.size() * bUtility.bins(0));
     // looping over the contained binned arraysa
     for (auto& barray : tbas) {
       // binned array ordering
-      m_binnedArrays[bUtility->bin(barray.second, 0)] = barray.first;
+      m_binnedArrays[bUtility.bin(barray.second, 0)] = barray.first;
       // get the array objects
-      BinnedArraySpan<T * const > aObjects = barray.first->arrayObjects();
+      BinnedArraySpan<T* const> aObjects = barray.first->arrayObjects();
       for (auto& o : aObjects)
         m_arrayObjects.push_back(o);
     }
@@ -59,29 +59,19 @@ public:
 
   /** Copy Constructor */
   BinnedArrayArray(const BinnedArrayArray& baa)
-    : m_binUtility(baa.m_binUtility->clone())
+    : m_binUtility(baa.m_binUtility)
     , m_arrayObjects(baa.m_arrayObjects)
   {
     copyBinnedArrays(baa.m_binnedArrays);
-  }
-
-  /**Virtual Destructor*/
-  virtual ~BinnedArrayArray()
-  {
-    delete m_binUtility;
-    deleteBinnedArrays();
   }
 
   /** assignment operator matching the copy constructor */
   BinnedArrayArray& operator=(const BinnedArrayArray& baa)
   {
     if (&baa != this) {
-      delete m_binUtility;
-      m_binUtility = baa.m_binUtility->clone();
-
+      m_binUtility = baa.m_binUtility;
       deleteBinnedArrays();
       copyBinnedArrays(baa.m_binnedArrays);
-
       m_arrayObjects = baa.m_arrayObjects;
     }
     return *this;
@@ -93,14 +83,21 @@ public:
     return new BinnedArrayArray(*this);
   }
 
+  /**Virtual Destructor*/
+  virtual ~BinnedArrayArray()
+  {
+    deleteBinnedArrays();
+  }
+
   /** Returns the pointer to the templated class object from the
      BinnedArrayArray, it returns 0 if not defined, takes local position */
   virtual T* object(const Amg::Vector2D& lp) const override
   {
-    if (m_binUtility->inside(lp)) {
-      BinnedArray<T>* ba = m_binnedArrays[m_binUtility->bin(lp, 0)];
-      if (ba)
+    if (m_binUtility.inside(lp)) {
+      BinnedArray<T>* ba = m_binnedArrays[m_binUtility.bin(lp, 0)];
+      if (ba){
         return ba->object(lp);
+      }
     }
     return nullptr;
   }
@@ -109,10 +106,11 @@ public:
      BinnedArrayArray it returns 0 if not defined, takes global position */
   virtual T* object(const Amg::Vector3D& gp) const override
   {
-    if (m_binUtility->inside(gp)) {
-      BinnedArray<T>* ba = m_binnedArrays[m_binUtility->bin(gp, 0)];
-      if (ba)
+    if (m_binUtility.inside(gp)) {
+      BinnedArray<T>* ba = m_binnedArrays[m_binUtility.bin(gp, 0)];
+      if (ba){
         return ba->object(gp);
+      }
     }
     return nullptr;
   }
@@ -152,7 +150,7 @@ public:
   };
 
   /** Return the BinUtility*/
-  virtual const BinUtility* binUtility() const override { return m_binUtility; }
+  virtual const BinUtility* binUtility() const override { return &m_binUtility; }
 
 private:
   /** cleanup the array of binned arrays.
@@ -178,9 +176,9 @@ private:
     }
   }
 
-  BinUtility* m_binUtility;
-  std::vector<BinnedArray<T>*> m_binnedArrays;
-  std::vector<T*> m_arrayObjects;
+  BinUtility  m_binUtility {};
+  std::vector<BinnedArray<T>*> m_binnedArrays{};
+  std::vector<T*> m_arrayObjects {};
 };
 } // end of namespace Trk
 

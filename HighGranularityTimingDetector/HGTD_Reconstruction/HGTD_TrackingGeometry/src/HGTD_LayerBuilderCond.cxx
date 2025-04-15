@@ -1,4 +1,4 @@
- 
+
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
@@ -19,14 +19,13 @@
 // Trk inlcude
 #include "TrkDetDescrUtils/BinUtility.h"
 #include "TrkDetDescrUtils/BinnedArray1D1D.h"
-#include "TrkGeometry/LayerMaterialProperties.h"
 #include "TrkGeometry/BinnedLayerMaterial.h"
-#include "TrkGeometry/HomogeneousLayerMaterial.h"
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/DiscLayer.h"
-#include "TrkGeometry/DiscLayer.h"
-#include "TrkSurfaces/Surface.h"
+#include "TrkGeometry/HomogeneousLayerMaterial.h"
+#include "TrkGeometry/LayerMaterialProperties.h"
 #include "TrkSurfaces/DiscBounds.h"
+#include "TrkSurfaces/Surface.h"
 // STL
 #include <map>
 
@@ -69,10 +68,10 @@ StatusCode HGTD_LayerBuilderCond::initialize()
     // get HGTD Detector Description Manager and HGTD Helper
     ATH_CHECK(detStore()->retrieve(m_hgtdMgr, "HGTD"));
     ATH_CHECK(detStore()->retrieve(m_hgtdHelper, "HGTD_ID"));
-    
+
     // get HGTD detector element collection
     ATH_CHECK(m_HGTD_ReadKey.initialize());
-    
+
     return StatusCode::SUCCESS;
 }
 
@@ -93,13 +92,13 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
                                   SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const
 {
   ATH_MSG_DEBUG( "calling HGTD_LayerBuilderCond::discLayers()" );
-  
+
   // sanity check for HGTD Helper
   if (!m_hgtdHelper){
     ATH_MSG_ERROR("HGTD Detector Manager or ID Helper could not be retrieved - giving up.");
     return nullptr;
-  } 
-  
+  }
+
   // get general layout
   SG::ReadCondHandle<InDetDD::HGTD_DetectorElementCollection> readHandle = retrieveHGTDdetElements(ctx);
   if(*readHandle == nullptr){
@@ -109,7 +108,7 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
 
   const InDetDD::HGTD_DetectorElementCollection* readCdo{*readHandle};
   InDetDD::HGTD_DetectorElementCollection::const_iterator hgtdDetIter = readCdo->begin();
-    
+
   // loop on all modules (selecting only one endcap side)
   // and evaluates the number of discs
   // assuming you have the same number of modules on both sides
@@ -119,27 +118,27 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
     // skipping negative side
     if (m_hgtdHelper->endcap(currentId)<0) continue;
     if (m_hgtdHelper->layer(currentId)>nlayers)
-      nlayers++;    
+      nlayers++;
   }
   // adding one layer offset
   nlayers+=1;
-  
+
   ATH_MSG_DEBUG( "Configured to build " << nlayers << " *2 disc-like layers  (+ additional support layers)." );
-  
+
   // prepare the vectors
   std::vector<float>                                     discZpos(2*nlayers,0.);
-  std::vector< std::vector<Trk::SurfaceOrderPosition> >  discSurfaces(2*nlayers, std::vector<Trk::SurfaceOrderPosition>()); 
-  
+  std::vector< std::vector<Trk::SurfaceOrderPosition> >  discSurfaces(2*nlayers, std::vector<Trk::SurfaceOrderPosition>());
+
   int hgtdModules = 0;
   int sumCheckhgtdModules = 0;
   unsigned int currentlayer = 0;
   float maxRmax = -std::numeric_limits<float>::max();
   float minRmin =  std::numeric_limits<float>::max();
-  
+
   // get the missing dimensions by loop over DetElements
   hgtdDetIter = readCdo->begin();
   for (; hgtdDetIter != readCdo->end(); ++hgtdDetIter){
-  // take it - if 
+  // take it - if
   // a) you have a detector element ... protection
   if ( (*hgtdDetIter) ) {
      // get the identifier
@@ -152,38 +151,38 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
 
      // increase the counter of HGTD modules
      hgtdModules++;
-     
+
      // parse all z positions for the mean value of the discs
      float currentZ = (*hgtdDetIter)->center().z();
-     //calculate current layer and current disk from it     
+     //calculate current layer and current disk from it
      currentlayer  = m_hgtdHelper->layer(currentId);
      // adding the numbe of layers per side as offset
      currentlayer += currentZ > 0. ? nlayers : 0;
      ATH_MSG_DEBUG( " ----  layer: " << currentlayer );
-     
+
      // evaluate the z-position per layer
      // all modules on the same HGTD layer have the same z
-     discZpos[currentlayer] = currentZ;     
+     discZpos[currentlayer] = currentZ;
 
      // evaluate the r-extension per layer
      float currentRmin = (*hgtdDetIter)->rMin();
      float currentRmax = (*hgtdDetIter)->rMax();
      ATH_MSG_DEBUG( " ----  rmin/rmax: " << currentRmin << "/" << currentRmax );
-     if (maxRmax<currentRmax)  
+     if (maxRmax<currentRmax)
        maxRmax = currentRmax;
-     if (minRmin>currentRmin)  
+     if (minRmin>currentRmin)
        minRmin = currentRmin;
-     
+
      // fill the elements for the layers into the surface arrays
      // get the center position
      const Amg::Vector3D& orderPosition = (*hgtdDetIter)->center();
-     
+
      // register the chosen side in the object array
-     // This line is problematic for MT  . 
-     // Something like 
+     // This line is problematic for MT  .
+     // Something like
      // Trk::SharedObject<Trk::Surface>  = std::make_shared<Trk::Surface>((*hgtdDetIter)) could be fine
      //
-     // As things are now 
+     // As things are now
      // 1) Notice that basically we couple the DetElement owned surface to the Tracking Geometry
      // passing a no-op deleter (no delete happens) to the shared_ptr(SharedObject is typedef of shared_ptr)
      // 2)
@@ -194,57 +193,57 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
        [](Trk::Surface*) {});
      Trk::SurfaceOrderPosition surfaceOrder(sharedSurface, orderPosition);
 
-     discSurfaces[currentlayer].push_back(surfaceOrder);    
-     
+     discSurfaces[currentlayer].push_back(surfaceOrder);
+
    } else if (!(*hgtdDetIter))
        ATH_MSG_WARNING("Not valid pointer to HGTD Detector element... something wrong with the Id dictionary?");
   }
 
   // adding some envelope
   maxRmax += m_discEnvelopeR;
-  minRmin -= m_discEnvelopeR;  
-  
+  minRmin -= m_discEnvelopeR;
+
   // construct the layers
   auto discLayers = std::make_unique<std::vector<Trk::DiscLayer*> >();
-  
+
   double thickness = m_discThickness;
-  
+
   int discCounter = 0;
-  for (auto& thisDiscZpos : discZpos) {    
-    // screen output           
+  for (auto& thisDiscZpos : discZpos) {
+    // screen output
     ATH_MSG_DEBUG( "Building a DiscLayer: " );
     ATH_MSG_DEBUG( "  -> At Z - Position      :  " << thisDiscZpos );
     ATH_MSG_DEBUG( "  -> With Thickness       :  " << thickness   << " i- ncludes envelope tolerance : " << m_discEnvelopeR );
     ATH_MSG_DEBUG( "  -> With Rmin/Rmax (est) :  " << minRmin << " / " << maxRmax );
-    
+
     ATH_MSG_DEBUG( "... creating binned array ... ");
-    
+
     std::vector<float> rBins = {minRmin};
     std::vector<std::vector<float>> phiBins = {{}};
-    
+
     evaluateBestBinning(discSurfaces[discCounter], rBins, maxRmax, phiBins);
-    
+
     // Build the BinUtilities using the bins defined at construction
     // the extension is provided in the previous loop
-    Trk::BinUtility* BinUtilityR = new Trk::BinUtility(rBins, Trk::open, Trk::binR);
-    std::vector<Trk::BinUtility*>* subBinUtilitiesPhi = new std::vector<Trk::BinUtility*>;
-    ATH_MSG_DEBUG("BinUtilityR --> " << *BinUtilityR );
-    
+    auto BinUtilityR = Trk::BinUtility(rBins, Trk::open, Trk::binR);
+    auto subBinUtilitiesPhi =  std::vector<Trk::BinUtility>();
+    ATH_MSG_DEBUG("BinUtilityR --> " << BinUtilityR );
+
     for (unsigned int bin = 0; bin < rBins.size()-1; bin++) {
-      Trk::BinUtility* BinUtilityY = new Trk::BinUtility(phiBins.at(bin), Trk::closed, Trk::binPhi);
-      subBinUtilitiesPhi->push_back(BinUtilityY);
-      ATH_MSG_DEBUG(bin << ") BinUtilityPhi --> " << *BinUtilityY );
+      auto BinUtilityY = Trk::BinUtility(phiBins.at(bin), Trk::closed, Trk::binPhi);
+      subBinUtilitiesPhi.push_back(BinUtilityY);
+      ATH_MSG_DEBUG(bin << ") BinUtilityPhi --> " << BinUtilityY );
     }
-    
+
     // prepare the binned array, it can be with one to several rings
     auto currentBinnedArray =
         std::make_unique<Trk::BinnedArray1D1D<Trk::Surface>>(
             discSurfaces[discCounter], BinUtilityR, subBinUtilitiesPhi);
 
-    ATH_MSG_DEBUG( "... done!" ); 
-    
+    ATH_MSG_DEBUG( "... done!" );
+
     int discSurfacesNum = (discSurfaces[discCounter]).size();
-    
+
     ATH_MSG_DEBUG( "Constructed BinnedArray for DiscLayer with "<< discSurfacesNum << " SubSurfaces." );
 
     // always run the geometry validation to catch flaws
@@ -276,16 +275,16 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
                           << lastPhi << " --> discCounter: " << discCounter);
         }
       }
-      sumCheckhgtdModules +=  dsumCheckSurfaces;   
+      sumCheckhgtdModules +=  dsumCheckSurfaces;
     }
 
     // get the layer material from the helper method
     const Trk::LayerMaterialProperties& layerMaterial = discLayerMaterial(minRmin,maxRmax);
-    
+
     /// position & bounds of the active Layer
     Amg::Transform3D activeLayerTransform ;
     activeLayerTransform = Amg::Translation3D(0.,0.,thisDiscZpos);
-      
+
     Trk::DiscBounds* activeLayerBounds = new Trk::DiscBounds(minRmin, maxRmax);
 
     auto olDescriptor = std::make_unique<HGTD_OverlapDescriptor>(
@@ -301,25 +300,25 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
                                                      layerMaterial,
                                                      thickness,
                                                      std::move(olDescriptor));
-    
+
     registerSurfacesToLayer(layerSurfaces,*activeLayer);
     discLayers->push_back(activeLayer);
     // increase the disc counter by one
-    ++discCounter;     
-  }  
+    ++discCounter;
+  }
 
-  // 
+  //
   ATH_MSG_DEBUG( hgtdModules << " HGTD Modules parsed for Disc Layer dimensions." );
   if (m_runGeometryValidation) {
     ATH_MSG_DEBUG( sumCheckhgtdModules << " HGTD Modules filled in Disc Layer Arrays." );
     if ( hgtdModules-sumCheckhgtdModules )
-      ATH_MSG_WARNING( hgtdModules-sumCheckhgtdModules << " Modules not registered properly in binned array." );       
+      ATH_MSG_WARNING( hgtdModules-sumCheckhgtdModules << " Modules not registered properly in binned array." );
   }
 
   // sort the vector
   Trk::DiscLayerSorterZ zSorter;
   std::sort(discLayers->begin(), discLayers->end(), zSorter);
- 
+
   return discLayers;
 }
 
@@ -328,15 +327,15 @@ const Trk::BinnedLayerMaterial HGTD_LayerBuilderCond::discLayerMaterial(double r
   Trk::BinUtility layerBinUtilityR(m_rBins, rMin, rMax, Trk::open, Trk::binR);
   Trk::BinUtility layerBinUtilityPhi(m_phiBins, -M_PI, M_PI, Trk::closed, Trk::binPhi);
   layerBinUtilityR += layerBinUtilityPhi;
-  return Trk::BinnedLayerMaterial(layerBinUtilityR);  
-}     
+  return Trk::BinnedLayerMaterial(layerBinUtilityR);
+}
 
 void HGTD_LayerBuilderCond::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface * const>& layerSurfaces, const Trk::Layer& lay) const
 {
-   if (!m_setLayerAssociation) return;    
+   if (!m_setLayerAssociation) return;
    // register the surfaces to the layer
    for (const auto & surfaces : layerSurfaces) {
-     if (surfaces) { 
+     if (surfaces) {
        // register the current surfaces
        (*surfaces).associateLayer(lay);
      }
@@ -345,7 +344,7 @@ void HGTD_LayerBuilderCond::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Su
 
 void HGTD_LayerBuilderCond::evaluateBestBinning(std::vector<Trk::SurfaceOrderPosition>& surfaces,
                                                 std::vector<float>& rBins, float& maxRadius,
-                                                std::vector<std::vector<float>>& phiBins) 
+                                                std::vector<std::vector<float>>& phiBins)
 {
   // get all the centers (r,phi), as you want to play with them
   std::vector < std::pair< float, float> > centers = {};
@@ -353,13 +352,13 @@ void HGTD_LayerBuilderCond::evaluateBestBinning(std::vector<Trk::SurfaceOrderPos
   for ( auto& orderedSurface : surfaces) {
     centers.emplace_back(orderedSurface.second.perp(), orderedSurface.second.phi());
   }
-  
+
   // sorting the centers accordingly to r
-  std::sort(centers.begin(), centers.end(), 
+  std::sort(centers.begin(), centers.end(),
             [](const std::pair< float, float>& a, const std::pair< float, float>& b) -> bool {
-              return a.first < b.first; 
+              return a.first < b.first;
             });
-  
+
   // at the beginning use a fine binning in phi
   // it is updated later to fit the amount of surfaces
   // once you have defined a bin in radius
@@ -367,22 +366,22 @@ void HGTD_LayerBuilderCond::evaluateBestBinning(std::vector<Trk::SurfaceOrderPos
   float step = 2*M_PI/float(bins);
   std::vector<float> finerBinning = {};
   finerBinning.reserve(bins);
-  
+
   for (int bin = 0; bin<=bins; bin++) {
     finerBinning.push_back(-M_PI+step*bin);
   }
-  
-  // use this vector to save the indices and 
-  // guess when you have to add 
+
+  // use this vector to save the indices and
+  // guess when you have to add
   // an additional bin in r
   std::vector<int> phiIndices = {};
   std::vector<float> tmpRadii = {};
-  
+
   for (auto& center : centers) {
     float phi = center.second;
     const auto boundVal =  std::lower_bound(finerBinning.begin(), finerBinning.end(), phi);
     int phiIndex = std::distance(finerBinning.begin(), boundVal);
-    // if the element fits in the given r bin, add it, 
+    // if the element fits in the given r bin, add it,
     // otherwise reset the indices and start a new r bin
     if (std::find(phiIndices.begin(), phiIndices.end(), phiIndex)==phiIndices.end()) {
       phiIndices.push_back(phiIndex);
@@ -405,13 +404,13 @@ void HGTD_LayerBuilderCond::evaluateBestBinning(std::vector<Trk::SurfaceOrderPos
       }
     }
   }
-  
+
   rBins.push_back(maxRadius);
-  
+
   // now we have the best binning in r and want to
-  // map the centers accordingly to this  
+  // map the centers accordingly to this
   std::vector< std::vector < float > > binnedCenters = {{}};
-  
+
   for (auto& center : centers) {
     float r = center.first;
     float phi = center.second;
@@ -419,11 +418,11 @@ void HGTD_LayerBuilderCond::evaluateBestBinning(std::vector<Trk::SurfaceOrderPos
     int rIndex = std::distance(rBins.begin(), boundVal);
     if (int(binnedCenters.size())<rIndex)
       binnedCenters.push_back({phi});
-    else 
+    else
       binnedCenters.back().push_back(phi);
   }
-  
-  // now that we have the centers binned in r, we evaluate the best 
+
+  // now that we have the centers binned in r, we evaluate the best
   // bin in phi for each of those bins
   bool isFirst = true;
   for (auto& centersInBin : binnedCenters) {
@@ -436,7 +435,7 @@ void HGTD_LayerBuilderCond::evaluateBestBinning(std::vector<Trk::SurfaceOrderPos
     for (unsigned int index = 0; index<(centersInBin.size()-1); index++) {
       float phi = 0.5*(centersInBin.at(index)+centersInBin.at(index+1));
       phiBins.back().push_back(phi);
-    }  
+    }
   }
-    
+
   }

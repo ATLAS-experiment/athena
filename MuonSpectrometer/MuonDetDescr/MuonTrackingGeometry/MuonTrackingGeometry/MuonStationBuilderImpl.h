@@ -61,7 +61,7 @@ class MuonStationBuilderImpl : public AthAlgTool {
 
     std::unique_ptr<Trk::DetachedTrackingVolume>
     buildDetachedTrackingVolumeType(const MuonGM::MuonDetectorManager* muonMgr,
-                                    const GeoVPhysVol* gv, GMInfo info) const;
+                                    const GeoVPhysVol* gv, const GMInfo& info) const;
 
     void glueComponents(Trk::DetachedTrackingVolume*) const;
     void encloseLayers(const Trk::DetachedTrackingVolume*) const;
@@ -75,7 +75,7 @@ class MuonStationBuilderImpl : public AthAlgTool {
                            const Amg::Transform3D& transf,
                            const MuonGM::MuonDetectorManager* muonMgr) const;
 
-    Identifier resolveId(std::string vname, GMInfo gm_info, int& eta, int& phi,
+    Identifier resolveId(const std::string& vname, const GMInfo& gm_info, int& eta, int& phi,
                          const MuonGM::MuonDetectorManager* muonMgr) const;
     void checkLayerId(std::string_view comment,
                       const MuonGM::MuonDetectorManager* muonMgr, Identifier id,

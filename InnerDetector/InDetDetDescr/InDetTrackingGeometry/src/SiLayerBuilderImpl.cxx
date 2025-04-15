@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackingGeometry/SiLayerBuilderImpl.h"
@@ -240,11 +240,11 @@ InDet::SiLayerBuilderImpl::createRingLayersImpl(const InDetDD::SiDetectorElement
                      << minPhiCorrected << " / " << maxPhiCorrected
                      << " (" << discPhiSectors[discCounter] << ")");
 
-    Trk::BinUtility* currentBinUtility = new Trk::BinUtility(discPhiSectors[discCounter],
-                                                             minPhiCorrected,
-                                                             maxPhiCorrected,
-                                                             Trk::closed,
-                                                             Trk::binPhi);
+    auto currentBinUtility = Trk::BinUtility(discPhiSectors[discCounter],
+                                             minPhiCorrected,
+                                             maxPhiCorrected,
+                                             Trk::closed,
+                                             Trk::binPhi);
 
     // a one-dimensional BinnedArray is sufficient
     currentBinnedArray = std::make_unique<Trk::BinnedArray1D<Trk::Surface>>(discSurfaces[discCounter],currentBinUtility);
@@ -286,7 +286,7 @@ InDet::SiLayerBuilderImpl::createRingLayersImpl(const InDetDD::SiDetectorElement
     activeLayerTransform = Amg::Translation3D(0.,0.,discZpos[discCounter]);
 
     Trk::DiscBounds* activeLayerBounds    = new Trk::DiscBounds(discRmin[discCounter],discRmax[discCounter]);
-    std::vector<Trk::BinUtility*>* binUtils = new std::vector<Trk::BinUtility*>;
+    std::vector<Trk::BinUtility> binUtils = std::vector<Trk::BinUtility>();
     // prepare the right overlap descriptor
     auto olDescriptor = std::make_unique<InDet::DiscOverlapDescriptor>(currentBinnedArray.get(), binUtils, true);
     Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = currentBinnedArray->arrayObjects();
@@ -617,8 +617,7 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
 
        // prepare the binned array, it can be with one to several rings
        std::unique_ptr<Trk::BinnedArray<Trk::Surface>> currentBinnedArray = nullptr;
-       std::vector<Trk::BinUtility*>* singleBinUtils = new std::vector<Trk::BinUtility*>;
-       bool weOwnSingleBinUtils{true};
+       auto singleBinUtils = std::vector<Trk::BinUtility>();
        if (discRsectors==1){
             double halfPhiStep = M_PI/discPhiSectors[discCounter][0];
             // protection in case phi value was fluctuating around 0 or M_PI in parsing
@@ -642,34 +641,34 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
                 << minPhiCorrected << " / " << maxPhiCorrected
                 << " (" << discPhiSectors[discCounter][0] << ")");
             // an easier bin utility can be used
-            Trk::BinUtility* currentBinUtility = new Trk::BinUtility(discPhiSectors[discCounter][0] ,
-                                                                     minPhiCorrected,
-                                                                     maxPhiCorrected,
-                                                                     Trk::closed,
-                                                                     Trk::binPhi);
+            auto currentBinUtility = Trk::BinUtility(discPhiSectors[discCounter][0] ,
+                                                     minPhiCorrected,
+                                                     maxPhiCorrected,
+                                                     Trk::closed,
+                                                     Trk::binPhi);
             // a one-dimensional BinnedArray is sufficient
             currentBinnedArray = std::make_unique<Trk::BinnedArray1D<Trk::Surface>>(discSurfaces[discCounter],currentBinUtility);
         } else {
             ATH_MSG_VERBOSE("Constructing a two-dimensional BinnedArray.");
             // get the binning in R first (can still be improved with non-aequidistant binning)
-            Trk::BinUtility* currentSteerBinUtility = nullptr;
+            Trk::BinUtility currentSteerBinUtility{};
             if (m_endcapComplexRingBinning && discRsectors > 1 ){
                 // respecting the actual element boundaires
                 ATH_MSG_VERBOSE("Non-equidistant binning detected.");
                 // now create the bin utility
-                currentSteerBinUtility = new Trk::BinUtility(discRboundaries,
-                                                                    Trk::open,
-                                                                    Trk::binR);
+                currentSteerBinUtility = Trk::BinUtility(discRboundaries,
+                                                         Trk::open,
+                                                         Trk::binR);
              } else
-                currentSteerBinUtility =  new Trk::BinUtility(discRsectors,
-                                                              discRmin[discCounter],
-                                                              discRmax[discCounter],
-                                                              Trk::open,
-                                                              Trk::binR);
-            ATH_MSG_VERBOSE("Steering bin utility constructed as : " << *currentSteerBinUtility);
+                currentSteerBinUtility =  Trk::BinUtility(discRsectors,
+                                                          discRmin[discCounter],
+                                                          discRmax[discCounter],
+                                                          Trk::open,
+                                                          Trk::binR);
+            ATH_MSG_VERBOSE("Steering bin utility constructed as : " << currentSteerBinUtility);
             // the single phi bin utilities
             //std::vector<Trk::BinUtility*>* singleBinUtils = new std::vector<Trk::BinUtility*>;
-            singleBinUtils->reserve(discRsectors);
+            singleBinUtils.reserve(discRsectors);
             for (size_t irings=0; irings < discRsectors; ++irings){
                     double halfPhiStep = M_PI/discPhiSectors[discCounter][irings];
                     ATH_MSG_VERBOSE("    min phi / max phi detected  : " << discPhiMin[discCounter][irings] << " / " << discPhiMax[discCounter][irings] );
@@ -683,14 +682,13 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
                     ATH_MSG_VERBOSE("    min phi / max phi corrected : " << minPhiCorrected << " / " << maxPhiCorrected );
                     ATH_MSG_VERBOSE("Constructing for ring " << irings << " phi utility with phiMin / phiMax (bins) = "
                         <<  minPhiCorrected << " / " << maxPhiCorrected << " (" << discPhiSectors[discCounter][irings] << ")") ;
-                    singleBinUtils->push_back(new Trk::BinUtility(discPhiSectors[discCounter][irings],
-                                                                  minPhiCorrected,
-                                                                  maxPhiCorrected,
-                                                                  Trk::closed,
-                                                                  Trk::binPhi));
+                    singleBinUtils.emplace_back(discPhiSectors[discCounter][irings],
+                                                             minPhiCorrected,
+                                                             maxPhiCorrected,
+                                                             Trk::closed,
+                                                             Trk::binPhi);
             }
-            // a two-dimensional BinnedArray is needed ; takes possession of singleBinUtils and
-            weOwnSingleBinUtils = false;
+            // a two-dimensional BinnedArray is needed
             currentBinnedArray =
                 std::make_unique<Trk::BinnedArray1D1D<Trk::Surface>>(
                     discSurfaces[discCounter], currentSteerBinUtility,
@@ -701,7 +699,6 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
         ATH_MSG_DEBUG( "Constructed BinnedArray for DiscLayer with "<< discSurfacesNum << " SubSurfaces." );
 
         // always run the geometry validation to catch flaws
-
         // checking for :
         //   - empty surface bins
         //   - doubly filled bins
@@ -739,13 +736,11 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
         if (m_pixelCase){
             olDescriptor = std::make_unique<InDet::PixelOverlapDescriptor>();
         } else {
-            std::vector<Trk::BinUtility*>* binUtils =
-                new std::vector<Trk::BinUtility*>;
-            if (singleBinUtils) {
-                std::vector<Trk::BinUtility*>::iterator binIter =
-                    singleBinUtils->begin();
-                for (; binIter != singleBinUtils->end(); ++binIter) {
-                    binUtils->push_back((*binIter)->clone());
+            auto binUtils = std::vector<Trk::BinUtility>();
+            if (!singleBinUtils.empty()) {
+                auto binIter = singleBinUtils.begin();
+                for (; binIter != singleBinUtils.end(); ++binIter) {
+                    binUtils.push_back((*binIter));
                 }
             }
             // DiscOverlapDescriptor takes possession of binUtils, will delete
@@ -767,10 +762,6 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
         discLayers->push_back(activeLayer);
        // increase the disc counter by one
        ++discCounter;
-       if (weOwnSingleBinUtils){
-         delete singleBinUtils;
-         singleBinUtils=nullptr;
-       }
   }
 
   // multiply the check modules for SCT case
@@ -1074,23 +1065,23 @@ InDet::SiLayerBuilderImpl::cylindricalLayersImpl(const InDetDD::SiDetectorElemen
       ATH_MSG_VERBOSE("    min phi / max phi corrected : " << minPhiCorrected << " / " << maxPhiCorrected );
 
 
-      Trk::BinUtility* currentBinUtility   =  new Trk::BinUtility(layerPhiSectors[layerCounter],
-                                                                                              minPhiCorrected,
-                                                                                              maxPhiCorrected,
-                                                                                              Trk::closed, Trk::binPhi);
+      auto currentBinUtility  = Trk::BinUtility(layerPhiSectors[layerCounter],
+                                                minPhiCorrected,
+                                                maxPhiCorrected,
+                                                Trk::closed, Trk::binPhi);
       if (nonEquidistantBinning)
-          (*currentBinUtility) += Trk::BinUtility(layerZboundaries[layerCounter],
-                                                  Trk::open,
-                                                  Trk::binZ);
+          currentBinUtility += Trk::BinUtility(layerZboundaries[layerCounter],
+                                               Trk::open,
+                                               Trk::binZ);
       else
-          (*currentBinUtility) += Trk::BinUtility(layerZsectors[layerCounter],
-                                                  layerMinZ[layerCounter],
-                                                  layerMaxZ[layerCounter],
-                                                  Trk::open,
-                                                  Trk::binZ);
+          currentBinUtility += Trk::BinUtility(layerZsectors[layerCounter],
+                                               layerMinZ[layerCounter],
+                                               layerMaxZ[layerCounter],
+                                               Trk::open,
+                                               Trk::binZ);
       // creating the binned array output
       ATH_MSG_VERBOSE("Creating the binned array for the sensitive detector elements with BinUtility :");
-      ATH_MSG_VERBOSE( *currentBinUtility );
+      ATH_MSG_VERBOSE( currentBinUtility );
       // the binned array for the senstive surfaces to be built
       auto currentBinnedArray =
           std::make_unique<Trk::BinnedArray2D<Trk::Surface>>(

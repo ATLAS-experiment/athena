@@ -321,8 +321,8 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
           phiMax += 0.5*phiStep;
           // correct for the +pi/-pi module
           // now create the BinUtility
-          Trk::BinUtility* layerStrawPhiZUtility     = new Trk::BinUtility(sectorStraws/2,phiMin,phiMax,Trk::open, Trk::binPhi);
-          (*layerStrawPhiZUtility)  += Trk::BinUtility(2,-layerZmax, layerZmax, Trk::open, Trk::binZ);
+          auto layerStrawPhiZUtility = Trk::BinUtility(sectorStraws/2,phiMin,phiMax,Trk::open, Trk::binPhi);
+          layerStrawPhiZUtility  += Trk::BinUtility(2,-layerZmax, layerZmax, Trk::open, Trk::binZ);
           // create the 2D BinnedArray
           Trk::BinnedArray2D<Trk::Surface>* layerStrawPhiSector = new Trk::BinnedArray2D<Trk::Surface>(strawsPerPhiSecLayer,layerStrawPhiZUtility);
           ATH_MSG_VERBOSE("---> Sector " << phisec << " - BinnedArray for straws prepared for " << strawsPerPhiSecLayer.size() << " straws.");
@@ -358,15 +358,15 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
         ATH_MSG_VERBOSE("    min phi / max phi corrected : " << layerPhiMinCorrected << " / " << layerPhiMaxCorrected );
 
         // the sector surfaces
-        Trk::BinUtility* layerSectorBinUtility = new Trk::BinUtility(nBarrelPhiSectors,layerPhiMinCorrected,layerPhiMaxCorrected,Trk::closed,Trk::binPhi);
+        auto layerSectorBinUtility = Trk::BinUtility(nBarrelPhiSectors,layerPhiMinCorrected,layerPhiMaxCorrected,Trk::closed,Trk::binPhi);
         auto strawArray = std::make_unique<Trk::BinnedArrayArray<Trk::Surface>>(layerSectorArrays, layerSectorBinUtility );
 
         ATH_MSG_VERBOSE("--> Layer " << layer << " has been built with " << strawArray->arrayObjects().size() << " straws.");
 
         // ApproachDescriptor
         // build a BinUtility for the ApproachDescritptor
-        Trk::BinUtility* aDescriptorBinUtility = new Trk::BinUtility(nBarrelPhiSectors,layerPhiMinCorrected,layerPhiMaxCorrected,Trk::closed,Trk::binPhi);
-        (*aDescriptorBinUtility) += Trk::BinUtility(2,-layerHalflength,layerHalflength,Trk::open, Trk::binZ);
+        auto aDescriptorBinUtility = Trk::BinUtility(nBarrelPhiSectors,layerPhiMinCorrected,layerPhiMaxCorrected,Trk::closed,Trk::binPhi);
+        aDescriptorBinUtility += Trk::BinUtility(2,-layerHalflength,layerHalflength,Trk::open, Trk::binZ);
 
         auto aDescriptorBinnedArray = std::make_unique<Trk::BinnedArray2D<const Trk::ApproachSurfaces>> (layerApproachSurfaces, aDescriptorBinUtility);
 
@@ -621,7 +621,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
               if (!numberOfStraws){
                 return nullptr;
               }
-              Trk::BinUtility* currentBinUtility = new Trk::BinUtility(numberOfStraws, -M_PI, M_PI, Trk::closed, Trk::binPhi);
+              auto currentBinUtility = Trk::BinUtility(numberOfStraws, -M_PI, M_PI, Trk::closed, Trk::binPhi);
               auto strawArray = std::make_unique<Trk::BinnedArray1D<Trk::Surface>>(strawPerEndcapLayer, currentBinUtility);
               Trk::DiscLayer* currentLayer = nullptr;
 

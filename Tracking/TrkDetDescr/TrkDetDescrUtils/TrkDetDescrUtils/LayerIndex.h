@@ -29,7 +29,7 @@ namespace Trk {
 
    LayerIndex for the identification of layers in a
    simplified detector geometry of Cylinders and Discs.
-   
+
    @author Andreas.Salzburger@cern.ch
   */
 
