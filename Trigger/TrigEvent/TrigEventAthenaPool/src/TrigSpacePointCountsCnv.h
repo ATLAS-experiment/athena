@@ -41,8 +41,8 @@ public:
   ~TrigSpacePointCountsCnv();
 
 protected:
-  virtual TrigSpacePointCounts_PERS  *createPersistent(TrigSpacePointCounts *transObj);
-  virtual TrigSpacePointCounts       *createTransient();
+  virtual TrigSpacePointCounts_PERS  *createPersistent(TrigSpacePointCounts *transObj) override;
+  virtual TrigSpacePointCounts       *createTransient() override;
 
 private:
   TrigSpacePointCountsCnv_p1 m_converter_p1;
