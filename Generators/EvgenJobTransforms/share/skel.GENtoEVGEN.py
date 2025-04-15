@@ -513,8 +513,8 @@ else:
 # Propagate DSID and seed to the generators
    include("EvgenJobTransforms/Generate_dsid_ranseed.py")
 
-## Purge unstable particle w/o end vertex occasionally produced by Hijing
-if 'Hijing' in evgenConfig.generators:
+## Purge unstable particle w/o end vertex occasionally produced by Hijing or Herwig
+if 'Hijing' in evgenConfig.generators or 'Herwig7' in evgenConfig.generators:
     fixSeq.FixHepMC.PurgeUnstableWithoutEndVtx = True
 
 ## Propagate debug output level requirement to generators
