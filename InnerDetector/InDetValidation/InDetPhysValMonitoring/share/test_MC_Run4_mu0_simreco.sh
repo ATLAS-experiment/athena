@@ -4,6 +4,10 @@
 #
 # Steering script for IDPVM ART Run 4 configuration, ITK only recontruction, acts activated
 
+# Fix ordering of output in logfile
+exec 2>&1
+run() { (set -x; exec "$@") }
+
 dcuberef_sim=$1
 dcuberef_rdo=$2
 dcuberef_rec=$3
@@ -43,19 +47,7 @@ if [ -z "$dcubeXmlAbsPath" ]; then
     exit 1
 fi
 
-run () {
-    name="${1}"
-    cmd=("${@:2}")
-    ############
-    echo "Running ${name}..."
-    time "${cmd[@]}"
-    rc=$?
-    echo "art-result: $rc ${name}"
-    return $rc
-}
-
-run "Simulation" \
-    Sim_tf.py \
+run Sim_tf.py \
     --CA \
     --conditionsTag "default:${condition}" \
     --simulator 'FullG4MT' \
@@ -66,30 +58,32 @@ run "Simulation" \
     --outputHITSFile $hits \
     --maxEvents ${maxEvents} \
     --imf False
+sim_tf_exit_code=$?
+echo "art-result: $sim_tf_exit_code sim"
 
-echo "download latest result"
-run art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
-run ls -la "$lastref_dir"
+if [ $sim_tf_exit_code -eq 0 ]  ;then
+ echo "download latest result"
+ run art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
+ run ls -la "$lastref_dir"
 
-# DCube Sim hit plots
-# To be enabled when references are available
-#$art_dcube \
-#    -p -x ${dcube_sim_fixref} \
-#    -c ${dcubecfg_sim} \
-#    -r ${dcuberef_sim} \
-#    ${dcubemon_sim}
-#echo "art-result: $? dcube_sim"
+ # DCube Sim hit plots
+ # To be enabled when references are available
+ #$art_dcube \
+ #    -p -x ${dcube_sim_fixref} \
+ #    -c ${dcubecfg_sim} \
+ #    -r ${dcuberef_sim} \
+ #    ${dcubemon_sim}
+ #echo "art-result: $? dcube_sim"
 
-$art_dcube \
+ $art_dcube \
     -p -x ${dcube_sim_lastref} \
     -c ${dcubecfg_sim} \
     -r ${lastref_dir}/${dcubemon_sim} \
     ${dcubemon_sim}
-echo "art-result: $? dcube_sim_last"
+ echo "art-result: $? dcube_sim_last"
 
 
-run "Digitization"\
-    Digi_tf.py \
+ run Digi_tf.py \
     --CA \
     --conditionsTag "default:${condition}" \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
@@ -100,62 +94,61 @@ run "Digitization"\
     --outputRDOFile $rdo \
     --preInclude 'HITtoRDO:Campaigns.PhaseIINoPileUp' \
     --postInclude 'PyJobTransforms.UseFrontier'
+ echo "art-result: $? digi"
 
-run "RDOAnalysis" \
-    RunRDOAnalysis.py \
+ run RunRDOAnalysis.py \
     -i $rdo \
     ITkPixel ITkStrip
-echo "art-result: $? RDOAnalysis"
+ echo "art-result: $? RDOAnalysis"
 
-# To be enabled when references are available
-#echo "compare with a fixed reference for RDOAnalysis"
-#$art_dcube \
-#    -p -x ${dcube_rdo_fixref} \
-#    -c ${dcubecfg_rdo} \
-#    -r ${dcuberef_rdo} \
-#    ${dcubemon_rdo}
-#echo "art-result: $? dcube_rdo"
+ # To be enabled when references are available
+ #echo "compare with a fixed reference for RDOAnalysis"
+ #$art_dcube \
+ #    -p -x ${dcube_rdo_fixref} \
+ #    -c ${dcubecfg_rdo} \
+ #    -r ${dcuberef_rdo} \
+ #    ${dcubemon_rdo}
+ #echo "art-result: $? dcube_rdo"
 
-echo "compare with last build"
-$art_dcube \
+ echo "compare with last build"
+ $art_dcube \
     -p -x ${dcube_rdo_lastref} \
     -c ${dcubecfg_rdo} \
     -r ${lastref_dir}/${dcubemon_rdo} \
     ${dcubemon_rdo}
-echo "art-result: $? dcube_rdo_last"
+ echo "art-result: $? dcube_rdo_last"
 
-run "Reconstruction" \
-    Reco_tf.py --CA \
+ run Reco_tf.py --CA \
     --inputRDOFile $rdo \
     --outputAODFile $aod \
     --steering doRAWtoALL \
+ rec_tf_exit_code=$?
+ echo "art-result: $rec_tf_exit_code reco"
 
-run "IDPVM" \
-    runIDPVM.py \
+ runIDPVM.py \
     --filesInput $aod \
     --outputFile idpvm.root \
     --doTightPrimary \
     --OnlyTrackingPreInclude \
     --doHitLevelPlots
+ idpvm_tf_exit_code=$?
+ echo "art-result: $idpvm_tf_exit_code idpvm"
 
-reco_rc=$?
-if [ $reco_rc != 0 ]; then
-    exit $reco_rc
-fi
+ if [ $rec_tf_exit_code -eq 0 ]  ;then
 
-# To be enabled when references are available
-#echo "compare with a fixed reference"
-#$art_dcube \
-#    -p -x ${dcube_rec_fixref} \
-#    -c ${dcubeshiftercfg_rec} \
-#    -r ${dcuberef_rec} \
-#    ${dcubemon_rec}
-#echo "art-result: $? dcube_rec"
+   # To be enabled when references are available
+   #echo "compare with a fixed reference"
+   #$art_dcube \
+   #    -p -x ${dcube_rec_fixref} \
+   #    -c ${dcubeshiftercfg_rec} \
+   #    -r ${dcuberef_rec} \
+   #    ${dcubemon_rec}
+   #echo "art-result: $? dcube_rec"
 
-echo "compare with last build"
-$art_dcube \
-    -p -x ${dcube_rec_lastref} \
-    -c ${dcubeshiftercfg_rec} \
-    -r ${lastref_dir}/${dcubemon_rec} \
-    ${dcubemon_rec}
-echo "art-result: $? dcube_rec_last"
+   echo "compare with last build"
+   $art_dcube \
+     -p -x ${dcube_rec_lastref} \
+     -c ${dcubeshiftercfg_rec} \
+     -r ${lastref_dir}/${dcubemon_rec} \
+     ${dcubemon_rec}
+   echo "art-result: $? dcube_rec_last"
