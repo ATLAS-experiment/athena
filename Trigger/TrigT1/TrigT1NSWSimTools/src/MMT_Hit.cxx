@@ -4,23 +4,16 @@
 
 #include "TrigT1NSWSimTools/MMT_Hit.h"
 
-MMT_Hit::MMT_Hit(const Identifier &id, const std::string_view stName, const int stEta, const int stPhi, const int sectorPhi, const int multiplet, const int gasGap, const int channel, const float stripTime, const int BC, const MuonGM::MuonDetectorManager* detManager) {
+MMT_Hit::MMT_Hit(const Identifier &id, const std::string_view stName, const int stEta, const int stPhi, const int sectorPhi, const int multiplet, const int gasGap, const int channel, const float stripTime, const int BC, const MuonGM::MuonDetectorManager* detManager)
+  : m_station_name(stName), m_station_eta(stEta), m_station_phi(stPhi), m_sector_phi(sectorPhi), m_multiplet(multiplet), m_gasgap(gasGap), m_strip(channel),
+    m_BC_time(BC), m_age(BC), m_time(stripTime)
+ {
   m_sector = stName[2];
-  m_station_name = stName;
-  m_station_eta = stEta;
-  m_station_phi = stPhi;
-  m_sector_phi = sectorPhi;
-  m_multiplet = multiplet;
-  m_gasgap = gasGap;
   m_plane = (multiplet-1)*4 + gasGap-1;
-  m_strip = channel;
-  m_BC_time = BC;
-  m_age = BC;
   m_Z = -1.;
   m_R = -1.;
   m_Rp = -1.;
   m_isNoise = false;
-  m_time = stripTime;
   m_RZslope = -1.;
   m_PitchOverZ = -1.;
   m_shift = -1.;
