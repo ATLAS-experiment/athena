@@ -17,25 +17,8 @@ TauJetRNNEvaluator::TauJetRNNEvaluator(const std::string &name):
   m_net_1p(nullptr),
   m_net_2p(nullptr),
   m_net_3p(nullptr) {
-    
-  declareProperty("NetworkFile0P", m_weightfile_0p = "");
-  declareProperty("NetworkFile1P", m_weightfile_1p = "");
-  declareProperty("NetworkFile2P", m_weightfile_2p = "");
-  declareProperty("NetworkFile3P", m_weightfile_3p = "");
-  declareProperty("OutputVarname", m_output_varname = "RNNJetScore");
-  declareProperty("MaxTracks", m_max_tracks = 10);
-  declareProperty("MaxClusters", m_max_clusters = 6);
-  declareProperty("MaxClusterDR", m_max_cluster_dr = 1.0f);
-  declareProperty("VertexCorrection", m_doVertexCorrection = true);
-  declareProperty("TrackClassification", m_doTrackClassification = true);
+}
 
-  // Naming conventions for the network weight files:
-  declareProperty("InputLayerScalar", m_input_layer_scalar = "scalar");
-  declareProperty("InputLayerTracks", m_input_layer_tracks = "tracks");
-  declareProperty("InputLayerClusters", m_input_layer_clusters = "clusters");
-  declareProperty("OutputLayer", m_output_layer = "rnnid_output");
-  declareProperty("OutputNode", m_output_node = "sig_prob");
-  }
 
 TauJetRNNEvaluator::~TauJetRNNEvaluator() {}
 

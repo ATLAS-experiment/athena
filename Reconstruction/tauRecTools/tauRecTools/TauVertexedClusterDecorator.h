@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUVERTEXEDCLUSTERDECORATOR_H
 #define TAURECTOOLS_TAUVERTEXEDCLUSTERDECORATOR_H
 
 #include "tauRecTools/TauRecToolBase.h"
+#include "AsgTools/PropertyWrapper.h"
 
 #include "xAODJet/Jet.h"
 
@@ -31,8 +32,7 @@ public:
   
 private:
 
-  /// Name of the seed jet
-  std::string m_seedJet;  
+  Gaudi::Property<std::string> m_seedJet{this, "SeedJet", ""};  
   
   /// Calibration state of cluster
   xAOD::CaloCluster::State m_clusterState; //!

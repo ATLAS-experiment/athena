@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -19,7 +19,6 @@
 
 TauCommonCalcVars::TauCommonCalcVars(const std::string &name) :
   TauRecToolBase(name) {
-  //if TauTrackClassifier is not run, wide&passTrkSelector==classifiedIsolation==modifiedIsolationTrack
   declareProperty("isolationTrackType", m_isolationTrackType=xAOD::TauJetParameters::modifiedIsolationTrack);
 }
 

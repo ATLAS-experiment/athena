@@ -23,7 +23,6 @@ using namespace tauRecTools;
 //______________________________________________________________________________
 TauTrackRNNClassifier::TauTrackRNNClassifier(const std::string& name)
   : TauRecToolBase(name) {
-  declareProperty("classifyLRT", m_classifyLRT = true);
 }
 
 //______________________________________________________________________________
@@ -127,10 +126,7 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
 //______________________________________________________________________________
 TrackRNN::TrackRNN(const std::string& name)
   : TauRecToolBase(name)
-  , m_inputWeightsPath("")
 {
-  declareProperty("InputWeightsPath", m_inputWeightsPath = "");
-  declareProperty("MaxNtracks", m_nMaxNtracks = 0);
 }
 
 //______________________________________________________________________________

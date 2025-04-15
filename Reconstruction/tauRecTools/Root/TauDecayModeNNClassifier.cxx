@@ -27,16 +27,6 @@ using InputSequenceMap = std::map<std::string, VectorMap>;
 TauDecayModeNNClassifier::TauDecayModeNNClassifier(const std::string &name)
     : TauRecToolBase(name)
 {
-  declareProperty("OutputName", m_outputName = "NNDecayMode");
-  declareProperty("ProbPrefix", m_probPrefix = "NNDecayModeProb_");
-  declareProperty("WeightFile", m_weightFile = "");
-  declareProperty("MaxTauTracks", m_maxTauTracks = 3);
-  declareProperty("MaxNeutralPFOs", m_maxNeutralPFOs = 8);
-  declareProperty("MaxShotPFOs", m_maxShotPFOs = 6);
-  declareProperty("MaxConvTracks", m_maxConvTracks = 4);
-  declareProperty("NeutralPFOPtCut", m_neutralPFOPtCut = 1.5);
-  declareProperty("EnsureTrackConsistency", m_ensureTrackConsistency = true);
-  declareProperty("DecorateProb", m_decorateProb = true);
 }
 
 TauDecayModeNNClassifier::~TauDecayModeNNClassifier()

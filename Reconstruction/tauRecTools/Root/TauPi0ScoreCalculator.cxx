@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauPi0ScoreCalculator.h"
@@ -10,7 +10,6 @@
 
 TauPi0ScoreCalculator::TauPi0ScoreCalculator(const std::string& name) :
     TauRecToolBase(name) {
-  declareProperty("BDTWeightFile", m_weightfile = "");
 }
 
 
