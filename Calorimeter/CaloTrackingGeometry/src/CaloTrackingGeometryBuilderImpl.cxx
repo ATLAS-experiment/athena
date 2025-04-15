@@ -1042,30 +1042,28 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolum
   // if TileGap3 goes above 1.6 in eta - it's RUN3 geometry
   int nbins =
       (caloDDM->is_in(1.65, 0.0, CaloCell_ID::TileGap3, etadist)) ? 6 : 3;
-  Trk::BinUtility* bun =
-      new Trk::BinUtility(nbins, -1.8, -1.2, Trk::open, Trk::binEta);
-  Trk::BinUtility* bup =
-      new Trk::BinUtility(nbins, 1.2, 1.8, Trk::open, Trk::binEta);
+  auto bun = Trk::BinUtility(nbins, -1.8, -1.2, Trk::open, Trk::binEta);
+  auto bup = Trk::BinUtility(nbins, 1.2, 1.8, Trk::open, Trk::binEta);
   // array of indices
   std::vector<std::vector<size_t>> indexP;
   std::vector<std::vector<size_t>> indexN;
   // binned material for LAr : layer depth per eta bin
-  std::vector<Trk::BinUtility*> layDN(bun->bins());
-  std::vector<Trk::BinUtility*> layUP(bup->bins());
+  std::vector<Trk::BinUtility> layDN(bun.bins());
+  std::vector<Trk::BinUtility> layUP(bup.bins());
   double crackZ1 = 3532.;
   double crackZ2 = 3540.;
   // construct bin utilities
   std::vector<float> steps;
-  for (unsigned int i = 0; i < bup->bins(); i++) {
+  for (unsigned int i = 0; i < bup.bins(); i++) {
     steps.clear();
     std::vector<size_t> indx;
     indx.clear();
     steps.push_back(crackZ1);
-    indx.push_back(i < bup->bins() - 1 ? 0 : 1);
+    indx.push_back(i < bup.bins() - 1 ? 0 : 1);
     steps.push_back(crackZ2);
     indx.push_back(2);
     steps.push_back(keyDim.back().second);
-    Trk::BinUtility* zBU = new Trk::BinUtility(steps, Trk::open, Trk::binZ);
+    Trk::BinUtility zBU = Trk::BinUtility(steps, Trk::open, Trk::binZ);
     layUP[i] = zBU;
     indexP.push_back(indx);
   }
@@ -1086,7 +1084,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolum
       crackPosTransform, align, crackBoundsPos, crackBinPos, 17,
       "Calo::Detectors::Tile::CrackPos");
 
-  for (unsigned int i = 0; i < bun->bins(); i++) {
+  for (unsigned int i = 0; i < bun.bins(); i++) {
     steps.clear();
     std::vector<size_t> indx;
     indx.clear();
@@ -1095,7 +1093,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolum
     steps.push_back(-crackZ2);
     indx.push_back(i > 0 ? 0 : 1);
     steps.push_back(-crackZ1);
-    Trk::BinUtility* zBU = new Trk::BinUtility(steps, Trk::open, Trk::binZ);
+    Trk::BinUtility zBU = Trk::BinUtility(steps, Trk::open, Trk::binZ);
     layDN[i] = zBU;
     indexN.push_back(indx);
   }

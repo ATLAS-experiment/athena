@@ -57,7 +57,7 @@ class MuonInertMaterialBuilderImpl : public AthAlgTool,
     virtual StatusCode initialize() override;
     using DetachedVolVec = std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>;
     
-    DetachedVolVec buildDetachedTrackingVolumesImpl(const PVConstLink treeTop,
+    DetachedVolVec buildDetachedTrackingVolumesImpl(const PVConstLink& treeTop,
                                                     bool blend) const;
 
    protected:
@@ -70,7 +70,7 @@ class MuonInertMaterialBuilderImpl : public AthAlgTool,
         std::vector<std::pair<std::unique_ptr<Trk::DetachedTrackingVolume>, 
                               std::vector<Amg::Transform3D>>>;
     
-    DetachedVolumeVecWithTrfs buildDetachedTrackingVolumeTypes(const PVConstLink top,
+    DetachedVolumeVecWithTrfs buildDetachedTrackingVolumeTypes(const PVConstLink& top,
                                                                bool blend) const;
 
     /** Method extracting material objects from GeoModel tree */

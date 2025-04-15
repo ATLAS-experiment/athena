@@ -144,7 +144,7 @@ class MuonStationTypeBuilder : public AthAlgTool {
     // used to be private ..
     double get_x_size(const GeoVPhysVol*) const;
     double decodeX(const GeoShape*) const;
-    double envelopeThickness(const Trk::VolumeBounds& vb) const;
+    static double envelopeThickness(const Trk::VolumeBounds& vb) ;
     Trk::MaterialProperties getAveragedLayerMaterial(const GeoVPhysVol*, double,
                                                      double) const;
     Trk::MaterialProperties collectStationMaterial(const Trk::TrackingVolume& trVol, double) const;
@@ -154,10 +154,10 @@ class MuonStationTypeBuilder : public AthAlgTool {
                            const Trk::VolumeBounds& vb) const;
 
     // derive layer bounds from the station envelope
-    std::unique_ptr<Trk::SurfaceBounds> getLayerBoundsFromEnvelope(const Trk::Volume& envelope) const;
+    static std::unique_ptr<Trk::SurfaceBounds> getLayerBoundsFromEnvelope(const Trk::Volume& envelope) ;
 
     // calculate area defined by (planar) surface bounds
-    double area(const Trk::SurfaceBounds& sb) const;
+    static double area(const Trk::SurfaceBounds& sb) ;
 
 
     Gaudi::Property<bool> m_multilayerRepresentation{this, "BuildMultilayerRepresentation", true};

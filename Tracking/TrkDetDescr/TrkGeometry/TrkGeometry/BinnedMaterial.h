@@ -47,13 +47,13 @@ class BinnedMaterial final: public Material {
       : Material(iX0, iL0, iA, iZ, iRho), m_matBins(binMat) {}
 
   /** Constructor with averaged material and binning in 1D*/
-  BinnedMaterial(const Material* mat, BinUtility*& bu,
+  BinnedMaterial(const Material* mat, const BinUtility& bu,
                  const std::vector<size_t>& index,
                  const std::vector<IdentifiedMaterial>& detailedMat);
 
   /** Constructor with averaged material and binning in 2D*/
-  BinnedMaterial(const Material* mat, BinUtility*& bu,
-                 std::vector<Trk::BinUtility*>& bVec,
+  BinnedMaterial(const Material* mat, const BinUtility& bu,
+                 const std::vector<Trk::BinUtility>& bVec,
                  const std::vector<std::vector<size_t> >& index,
                  const std::vector<IdentifiedMaterial>& detailedMat);
 
