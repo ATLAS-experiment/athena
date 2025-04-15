@@ -13,23 +13,19 @@
 
 namespace DerivationFramework {
 
-  static const InterfaceID IID_IAugmentationTool("IAugmentationTool", 1, 0);
-   
   /**
    @class IAugmentationTool
        
    @author James.Catmore-at-cern.ch
    */
      
-  class IAugmentationTool : virtual public IAlgTool {
+  class IAugmentationTool : virtual public extend_interfaces<IAlgTool> {
      public:
-     
+       DeclareInterfaceID(IAugmentationTool, 1, 0);
+
        /** Virtual destructor */
        virtual ~IAugmentationTool(){}
 
-       /** AlgTool interface methods */
-       static const InterfaceID& interfaceID() { return IID_IAugmentationTool; }
-       
        /** Pass the thinning service  */
        virtual StatusCode addBranches() const = 0;  	
   };

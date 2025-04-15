@@ -8,7 +8,7 @@ atlas_add_library( DerivationFrameworkInterfaces
    DerivationFrameworkInterfaces/*.h
    INTERFACE
    PUBLIC_HEADERS DerivationFrameworkInterfaces
-   LINK_LIBRARIES GaudiKernel )
+   LINK_LIBRARIES ExpressionEvaluationLib GaudiKernel StoreGateLib xAODBase )
 
 atlas_add_dictionary( DerivationFrameworkInterfacesDict
    DerivationFrameworkInterfaces/DerivationFrameworkInterfacesDict.h

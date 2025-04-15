@@ -17,7 +17,7 @@
  * 
  * @author Jon Burr
  */
-class IForwardParentThinningTool : virtual public IAlgTool {
+class IForwardParentThinningTool : virtual public extend_interfaces<IAlgTool> {
   public:
     /// AlgTool interface ID
     DeclareInterfaceID(IForwardParentThinningTool, 1, 0);
