@@ -866,7 +866,6 @@ if (hasattr( runArgs, "allowOldFilter") and runArgs.allowOldFilter):
      if filtName not in excludedNames:
         if not any(ex in filtName for ex in exceptName):  
            alg.AllowOldFilter=True
-           print("eA old filter allowed via transform param.")
 
 ##==============================================================
 ## Dump evgenConfig so it can be recycled in post-run actions
