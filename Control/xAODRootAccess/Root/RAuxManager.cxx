@@ -4,7 +4,7 @@
 #include "xAODRootAccess/tools/RAuxManager.h"
 
 #include "xAODRootAccess/RAuxStore.h"
-#include "xAODRootAccess/tools/Message.h"
+
 
 namespace xAOD {
 
