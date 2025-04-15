@@ -6,18 +6,13 @@
 #define MMLOADVARIABLES_H
 
 #include "AthenaBaseComps/AthMessaging.h"
-#include "AthenaKernel/getMessageSvc.h"
-#include "AtlasHepMC/GenEvent.h"
-#include "GeneratorObjects/McEventCollection.h"
-#include "TrackRecord/TrackRecordCollection.h"
+#include "TrackRecord/TrackRecordCollection.h" //typedef
 #include <Math/Vector3D.h>
-#include "Math/Vector4D.h"
-#include "FourMomUtils/xAODP4Helpers.h"
 #include <map>
-#include <vector>
-#include <string>
-#include <cmath>
-#include <stdexcept>
+#include <cstdint>
+
+class McEventCollection;
+class EventContext;
 
 struct evInf_entry{
   evInf_entry(uint64_t event=0,int pdg=0,double e=0,double p=0,double ieta=0,double peta=0,double eeta=0,double iphi=0,double pphi=0,double ephi=0,
