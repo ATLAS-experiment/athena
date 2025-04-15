@@ -21,7 +21,7 @@ namespace ExpressionParsing {
 
 namespace DerivationFramework {
 
-  class NTUPStringSkimmingTool : public AthAlgTool, public ISkimmingTool {
+  class NTUPStringSkimmingTool : public extends<AthAlgTool, ISkimmingTool> {
     public: 
       NTUPStringSkimmingTool(const std::string& t, const std::string& n, const IInterface* p);
 

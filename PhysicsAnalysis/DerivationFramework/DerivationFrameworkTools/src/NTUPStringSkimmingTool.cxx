@@ -23,10 +23,9 @@ namespace DerivationFramework {
   NTUPStringSkimmingTool::NTUPStringSkimmingTool(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_expression("true")
   {
-    declareInterface<DerivationFramework::ISkimmingTool>(this);
     declareProperty("expression", m_expression);
   }
 

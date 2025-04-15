@@ -15,7 +15,7 @@
 
 namespace DerivationFramework {
 
-  class AsgSelectionToolWrapper : public AthAlgTool, public IAugmentationTool {
+  class AsgSelectionToolWrapper : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       AsgSelectionToolWrapper(const std::string& t, const std::string& n, const IInterface* p);
 

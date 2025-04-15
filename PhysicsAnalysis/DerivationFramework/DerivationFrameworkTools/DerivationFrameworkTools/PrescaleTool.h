@@ -17,7 +17,7 @@
 
 namespace DerivationFramework {
 
-  class PrescaleTool : public AthAlgTool, public ISkimmingTool {
+  class PrescaleTool : public extends<AthAlgTool, ISkimmingTool> {
     public: 
       PrescaleTool(const std::string& t, const std::string& n, const IInterface* p);
 

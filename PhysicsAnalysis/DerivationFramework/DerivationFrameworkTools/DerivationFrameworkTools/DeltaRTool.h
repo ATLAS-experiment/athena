@@ -23,7 +23,7 @@
 namespace DerivationFramework {
 
   enum EDeltaRToolParser {kDeltaRToolParser1,kDeltaRToolParser2,kDeltaRToolParserNum};
-  class DeltaRTool : public ExpressionParserUser<AthAlgTool,kDeltaRToolParserNum>, public IAugmentationTool {
+  class DeltaRTool : public extends<ExpressionParserUser<AthAlgTool,kDeltaRToolParserNum>, IAugmentationTool> {
     public:
       DeltaRTool(const std::string& t, const std::string& n, const IInterface* p);
 
