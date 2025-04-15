@@ -3,7 +3,13 @@
 */
 
 #include "TrigT1NSWSimTools/MMLoadVariables.h"
+#include "GeneratorObjects/McEventCollection.h"
+#include "FourMomUtils/xAODP4Helpers.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "AthenaKernel/getMessageSvc.h"
+#include "Math/Vector4D.h"
+#include <cmath>
+#include <vector>
 
 MMLoadVariables::MMLoadVariables() : AthMessaging(Athena::getMessageSvc(), "MMLoadVariables") {}
 
@@ -96,7 +102,7 @@ StatusCode MMLoadVariables::getTruthInfo(const EventContext& ctx,
                     truthParticles[i].Phi(), truthParticles_pos[i].Phi(), truthParticles_ent[i].Phi(),
                     truthParticles[i].Theta(), truthParticles_pos[i].Theta(), truthParticles_ent[i].Theta(), truthParticles_ent[i].Theta()-truthParticles_pos[i].Theta(),
                     j,MuEntry_Particle_n,vertex[i]);
-        Event_Info[std::make_pair(event,i)] = particle_info;
+        Event_Info[{event,i}] = std::move(particle_info);
       }
 
     return StatusCode::SUCCESS;
