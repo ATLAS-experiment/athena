@@ -12,12 +12,9 @@
 #include "TBranchAuxDynReader.h"
 #include "TBranchAuxDynWriter.h"
 
-#include "TFile.h"
 #include "TBranch.h"
 #include "TClass.h"
 #include "TROOT.h"
-#include "TDictAttributeMap.h"
-
 
 #include <ROOT/RNTuple.hxx>
 
@@ -80,7 +77,7 @@ namespace RootAuxDynIO
    }
 
    std::unique_ptr<RootAuxDynIO::IRootAuxDynReader>
-   getNTupleAuxDynReader(const std::string& field_name, const std::string& field_type, RNTupleReader* reader) {
+   getNTupleAuxDynReader(const std::string& field_name, const std::string& field_type, ROOT::RNTupleReader* reader) {
       return std::make_unique<RNTupleAuxDynReader>(field_name, field_type, reader);
    }
 

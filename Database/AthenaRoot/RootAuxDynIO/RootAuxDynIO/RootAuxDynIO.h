@@ -12,6 +12,7 @@
 #include <vector>
 #include <mutex>
 #include <tuple>
+
 #include "RootAuxDynIO/RootAuxDynDefs.h"
 
 class TBranch;
@@ -25,6 +26,8 @@ class TClass;
 #else
    namespace ROOT::Experimental { class RFieldBase; }
    namespace ROOT::Experimental { class RNTupleReader; }
+   namespace ROOT { using RFieldBase = ROOT::Experimental::RFieldBase; }
+   namespace ROOT { using RNTupleReader = ROOT::Experimental::RNTupleReader; }
 #endif
 
 namespace SG { class IAuxStoreIO;  class auxid_set_t; }
@@ -32,14 +35,6 @@ namespace SG { class IAuxStoreIO;  class auxid_set_t; }
 
 namespace RootAuxDynIO
 {
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-   using ROOT::RFieldBase;
-   using ROOT::RNTupleReader;
-#else
-   using ROOT::Experimental::RFieldBase;
-   using ROOT::Experimental::RNTupleReader;
-#endif
-
    class IRootAuxDynReader;
    class IRootAuxDynWriter;
    class IRNTupleAuxDynWriter;
@@ -64,7 +59,7 @@ namespace RootAuxDynIO
    std::unique_ptr<IRootAuxDynWriter> getBranchAuxDynWriter(TTree*, int bufferSize, int splitLevel,
                                                               int offsettab_len, bool do_branch_fill);
    
-   std::unique_ptr<IRootAuxDynReader>    getNTupleAuxDynReader(const std::string& field_name, const std::string& field_type, RNTupleReader* reader);
+   std::unique_ptr<IRootAuxDynReader>    getNTupleAuxDynReader(const std::string& field_name, const std::string& field_type, ROOT::RNTupleReader* reader);
    std::unique_ptr<IRNTupleAuxDynWriter> getNTupleAuxDynWriter();
    std::unique_ptr<IRNTupleWriter>       getNTupleWriter(TFile*,  const std::string& ntupleName, bool enableBufferedWrite, bool enableMetrics);
 

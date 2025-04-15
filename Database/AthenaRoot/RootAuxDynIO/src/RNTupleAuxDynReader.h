@@ -15,20 +15,15 @@
 #include <optional>
 #include <string>
 
-namespace ROOT{ class RNTupleReader; }
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
+   namespace ROOT { using ROOT::Experimental::RNTupleView; }
+#endif
+
 
 class TClass;
 
 namespace RootAuxDynIO
 {
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-   using ROOT::RNTupleView;
-   using ROOT::RNTupleReader;
-#else
-   using ROOT::Experimental::RNTupleView;
-   using ROOT::Experimental::RNTupleReader;
-#endif
-
    class RNTupleAuxDynReader : public AthMessaging, public IRootAuxDynReader
    {
    public :
@@ -47,12 +42,12 @@ namespace RootAuxDynIO
          SG::auxid_t   auxid;
          std::string   attribName;
          std::string   fieldName;
-         std::optional< RNTupleView<void> > view;
+         std::optional< ROOT::RNTupleView<void> > view;
       };
 
 
       /// create Reader for Aux attributes of an AuxContainer object stored in a given field
-      RNTupleAuxDynReader(const std::string& field_name, const std::string& field_type, RNTupleReader* reader);
+      RNTupleAuxDynReader(const std::string& field_name, const std::string& field_type, ROOT::RNTupleReader* reader);
 
       /// initialize once the mode of the Aux store is known
       void init(bool standalone);
@@ -72,7 +67,7 @@ namespace RootAuxDynIO
       /// get field informatino for @c auxid
       FieldInfo& getFieldInfo(const SG::auxid_t& auxid, const SG::AuxStoreInternal& store);
 
-      RNTupleReader* getNativeReader();
+      ROOT::RNTupleReader* getNativeReader();
 
       virtual ~RNTupleAuxDynReader() {}
 
@@ -92,7 +87,7 @@ namespace RootAuxDynIO
       std::map<SG::auxid_t, FieldInfo>  m_fieldInfos;
 
       // not owned
-      RNTupleReader*                    m_ntupleReader;
+      ROOT::RNTupleReader*                    m_ntupleReader;
    };
 
 
@@ -113,7 +108,7 @@ namespace RootAuxDynIO
       return m_auxids;
    }
 
-   inline  RNTupleReader* RNTupleAuxDynReader::getNativeReader() {
+   inline ROOT::RNTupleReader* RNTupleAuxDynReader::getNativeReader() {
       return m_ntupleReader;
    }
 

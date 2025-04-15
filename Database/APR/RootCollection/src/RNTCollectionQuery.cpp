@@ -15,25 +15,16 @@
 
 #include "POOLCore/Exception.h"
 
-#include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
-#include "CoralBase/MessageStream.h"
 
 #include <ROOT/RNTuple.hxx>
 #include <ROOT/RNTupleModel.hxx>
 
-
 using namespace pool::RootCollection;
-// Import classes from experimental namespace for the time being
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-  using RNTupleModel = ROOT::RNTupleModel;
-#else
-  using RNTupleModel = ROOT::Experimental::RNTupleModel;
-#endif
 
 
 RNTCollectionQuery::RNTCollectionQuery( const pool::ICollectionDescription& description, 
-                                          RNTupleReader *reader ) :
+                                        ROOT::RNTupleReader *reader ) :
    AthMessaging(std::string("RNTCollectionQuery[") + description.name() + "]"),
    m_description( description ),
    m_reader( reader ),

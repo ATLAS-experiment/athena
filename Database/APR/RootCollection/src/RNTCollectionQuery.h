@@ -29,7 +29,7 @@ namespace pool::RootCollection {
    {
    public:
       /// Constructor
-      RNTCollectionQuery( const pool::ICollectionDescription& description, RNTupleReader *reader );
+      RNTCollectionQuery( const pool::ICollectionDescription& description, ROOT::RNTupleReader *reader );
     
       /// Destructor
       virtual ~RNTCollectionQuery();
@@ -98,8 +98,8 @@ namespace pool::RootCollection {
       void                addToAttributeOutputList( const std::string& columnName );
         
         
-      const ICollectionDescription    &m_description;
-      RNTupleReader                  *m_reader {nullptr};   // owned by the Collection
+      const ICollectionDescription   &m_description;
+      ROOT::RNTupleReader            *m_reader {nullptr};   // owned by the Collection
 
       RNTCollectionCursor            *m_cursor {nullptr};
 

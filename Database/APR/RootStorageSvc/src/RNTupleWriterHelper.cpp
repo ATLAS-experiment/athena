@@ -15,7 +15,7 @@ RNTupleWriterHelper::RNTupleWriterHelper(TFile* file,
                                          bool enableBufferedWrite,
                                          bool enableMetrics)
     : AthMessaging(std::string("RNTupleWriterHelper[") + ntupleName + "]"),
-      m_model(RNTupleModel::Create()),
+      m_model(ROOT::RNTupleModel::Create()),
       m_ntupleName(ntupleName),
       m_tfile(file),
       m_collectMetrics(enableMetrics) {
@@ -35,7 +35,7 @@ void RNTupleWriterHelper::makeNewEntry() {
       // write into existing file
       ATH_MSG_DEBUG("Creating RNTuple " << m_tfile->GetName() << "/"
                                         << m_ntupleName);
-      m_ntupleWriter = RNTupleWriter::Append(std::move(m_model), m_ntupleName,
+      m_ntupleWriter = ROOT::RNTupleWriter::Append(std::move(m_model), m_ntupleName,
                                              *m_tfile, m_opts);
       if (m_collectMetrics)
         m_ntupleWriter->EnableMetrics();
@@ -66,7 +66,7 @@ void RNTupleWriterHelper::addField(const std::string& field_name,
   }
   ATH_MSG_DEBUG("Adding new object column, name=" << field_name << " of type "
                                                   << attr_type);
-  auto field = RFieldBase::Create(field_name, attr_type).Unwrap();
+  auto field = ROOT::RFieldBase::Create(field_name, attr_type).Unwrap();
   if (!m_model) {
     // first write was already done, need to update the model
     ATH_MSG_DEBUG("Adding late attribute " << field_name);
