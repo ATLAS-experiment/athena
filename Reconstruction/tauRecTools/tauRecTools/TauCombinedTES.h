@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUCOMBINEDTES_H
 #define TAURECTOOLS_TAUCOMBINEDTES_H
 
 #include "tauRecTools/TauRecToolBase.h"
+
+#include "AsgTools/PropertyWrapper.h"
 
 #include "xAODTau/TauJet.h"
 
@@ -34,15 +36,10 @@ public:
 
 private:
     
-  /// Switch for decorating the intermediate results, for combined TES tuning
-  bool m_addCalibrationResultVariables;
-  
-  /// Name of the calibration file 
-  std::string m_calFileName;
+  Gaudi::Property<bool> m_addCalibrationResultVariables{this, "addCalibrationResultVariables", false};
+  Gaudi::Property<std::string> m_calFileName{this, "WeightFileName", ""};
+  Gaudi::Property<bool> m_useMvaResolution{this, "useMvaResolution", false};  
 
-  /// Use MVA TES resolution (for MET significance)
-  bool m_useMvaResolution;
-  
   struct Variables
   {
     double pt_constituent{0.0};

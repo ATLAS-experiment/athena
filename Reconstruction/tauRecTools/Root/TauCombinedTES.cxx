@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauCombinedTES.h"
@@ -12,9 +12,6 @@
 
 TauCombinedTES::TauCombinedTES(const std::string& name) :
   TauRecToolBase(name) {
-  declareProperty("addCalibrationResultVariables", m_addCalibrationResultVariables = false);
-  declareProperty("WeightFileName", m_calFileName = "");
-  declareProperty("useMvaResolution", m_useMvaResolution = false);
 }
 
 

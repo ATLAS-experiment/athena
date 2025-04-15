@@ -16,9 +16,7 @@
 
 MvaTESVariableDecorator::MvaTESVariableDecorator(const std::string& name) 
   : TauRecToolBase(name) {
-  declareProperty("VertexCorrection", m_doVertexCorrection = true);
 }
-
 
 
 StatusCode MvaTESVariableDecorator::initialize() {

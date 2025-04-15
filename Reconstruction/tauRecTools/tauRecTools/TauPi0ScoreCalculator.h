@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUPI0SCORECALCULATOR_H
@@ -9,6 +9,7 @@
 #include "tauRecTools/BDTHelper.h"
 
 #include "xAODPFlow/PFO.h"
+#include "AsgTools/PropertyWrapper.h"
 
 #include <string>
 
@@ -35,10 +36,11 @@ public:
 
 private:
   
+  Gaudi::Property<std::string> m_weightfile{this, "BDTWeightFile", ""}; 
+
   /** @brief Calculate pi0 BDT score */
   float calculateScore(const xAOD::PFO* neutralPFO) const;
 
-  std::string m_weightfile = "";
   std::unique_ptr<tauRecTools::BDTHelper> m_mvaBDT = nullptr;
 };
 
