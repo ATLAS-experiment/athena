@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_JETM12.py
 #====================================================================
@@ -241,8 +241,8 @@ def JETM12KernelCfg(flags, name='JETM12Kernel', **kwargs):
     thinningTools.append(JETM12CaloThinningTool)
 
     if flags.Input.isMC:
-        truth_cond_status    = "( (TruthParticles.status == 1) && (TruthParticles.barcode < 200000) && (TruthParticles.pt > 8*GeV) )"       # high pt pions for E/p
-        truth_cond_Lepton = "((abs(TruthParticles.pdgId) >= 11) && (abs(TruthParticles.pdgId) <= 16) && (TruthParticles.barcode < 200000))" # Leptons
+        truth_cond_status    = "( (TruthParticles.isGenStable) && (TruthParticles.pt > 8*GeV) )"       # high pt pions for E/p
+        truth_cond_Lepton = "((abs(TruthParticles.pdgId) >= 11) && (abs(TruthParticles.pdgId) <= 16) && !(TruthParticles.isSimulationParticle))" # Leptons
         truth_expression = '('+truth_cond_status+' || '+truth_cond_Lepton +')'
 
         JETM12TruthThinningTool = CompFactory.DerivationFramework.GenericTruthThinning(name = "JETM12TruthThinningTool",
