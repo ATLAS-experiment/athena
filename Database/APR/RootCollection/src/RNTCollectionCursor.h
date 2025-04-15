@@ -5,7 +5,6 @@
 #ifndef RNTCOLLECTIONCURSOR_H
 #define RNTCOLLECTIONCURSOR_H
 
-
 #include "PersistentDataModel/Token.h"
 
 #include "CollectionBase/CollectionRowBuffer.h"
@@ -16,30 +15,27 @@
 #include "AthenaKernel/ICollectionSize.h"
 
 #include <memory>
-#include <map>
 
 #include "RVersion.h"
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-   namespace ROOT { class REntry; }
-   namespace ROOT { class RNTupleReader; }
+namespace ROOT {
+   class REntry;
+   class RNTupleReader;
+}
 #else
 namespace ROOT::Experimental {
-   class RNTupleReader;
    class REntry;
+   class RNTupleReader;
+}
+namespace ROOT {
+   using REntry = ROOT::Experimental::REntry;
+   using RNTupleReader = ROOT::Experimental::RNTupleReader;
 }
 #endif
 
 namespace pool {
    namespace RootCollection {
-
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-      using ROOT::REntry;
-      using ROOT::RNTupleReader;
-#else
-      using ROOT::Experimental::REntry;
-      using ROOT::Experimental::RNTupleReader;
-#endif
 
       /** 
        * @class RNTCollectionCursor RNTCollectionCursor.h Rootcollection/RNTCollectionCursor.h
@@ -56,7 +52,7 @@ namespace pool {
          RNTCollectionCursor(
             const pool::ICollectionDescription& description,
             const pool::CollectionRowBuffer& collectionRowBuffer,
-            RNTupleReader* reader );
+            ROOT::RNTupleReader* reader );
 
         
          /// Advances the cursor to the next row of the query result set.
@@ -83,10 +79,10 @@ namespace pool {
 
          const ICollectionDescription&  m_description;
 
-         RNTupleReader*                 m_RNTReader;
+         ROOT::RNTupleReader*                 m_RNTReader;
 
          /// RNtuple row with Field addresses set to collectionRowBuffer attributes
-         std::unique_ptr< REntry >      m_RNTEntry;
+         std::unique_ptr< ROOT::REntry >      m_RNTEntry;
 
          /// Row buffer containing Tokens and Attributes selected by query.
          pool::CollectionRowBuffer      m_collectionRowBuffer;

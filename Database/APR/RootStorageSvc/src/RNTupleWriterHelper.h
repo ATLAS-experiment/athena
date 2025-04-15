@@ -6,6 +6,7 @@
 #define RNTUPLEWRITERHELPER_H
 
 #include "AthenaBaseComps/AthMessaging.h"
+
 #include "ROOT/REntry.hxx"
 #include "ROOT/RField.hxx"
 #include "ROOT/RNTuple.hxx"
@@ -14,21 +15,17 @@
 
 #include <tuple>
 
-
-namespace RootStorageSvc {
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-  using REntry = ROOT::REntry;
-  using RNTupleWriter = ROOT::RNTupleWriter;
-  using RNTupleWriteOptions = ROOT::RNTupleWriteOptions;
-  using RNTupleModel = ROOT::RNTupleModel;
-  using RFieldBase = ROOT::RFieldBase;
-#else
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
+namespace ROOT {
   using REntry = ROOT::Experimental::REntry;
   using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
   using RNTupleWriteOptions = ROOT::Experimental::RNTupleWriteOptions;
   using RNTupleModel = ROOT::Experimental::RNTupleModel;
   using RFieldBase = ROOT::Experimental::RFieldBase;
+}
 #endif
+
+namespace RootStorageSvc {
 
 class RNTupleWriterHelper : public AthMessaging {
  public:
@@ -82,17 +79,17 @@ class RNTupleWriterHelper : public AthMessaging {
   /// Before first commit the fields are added to the model
   /// At the first commit the model passed to the RNTupleWriter
   /// which takes its ownership
-  std::unique_ptr<RNTupleModel> m_model;
+  std::unique_ptr<ROOT::RNTupleModel> m_model;
 
   /// Internal cache for the RNEntry
-  std::unique_ptr<REntry> m_entry;
+  std::unique_ptr<ROOT::REntry> m_entry;
 
   /// Internal cache for the native RNTupleWriter
-  std::unique_ptr<RNTupleWriter> m_ntupleWriter;
+  std::unique_ptr<ROOT::RNTupleWriter> m_ntupleWriter;
 
   std::string m_ntupleName;
   TFile* m_tfile;
-  RNTupleWriteOptions m_opts;
+  ROOT::RNTupleWriteOptions m_opts;
   int m_rowN = 0;
 
   /// Count how many APR Containers are writing to this RNTuple (more than one

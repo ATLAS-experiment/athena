@@ -16,7 +16,6 @@
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IFileMgr.h"
-#include "GaudiKernel/IService.h"
 
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
@@ -32,23 +31,16 @@
 #include "ROOT/RNTupleWriteOptions.hxx"
 
 #include <map>
-#include <vector>
-#include <ctype.h>
-
-#include <iostream>
 
 using namespace std;
 using namespace pool::RootCollection;
 using namespace pool::CollectionBaseNames;
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-   using REntry = ROOT::REntry;
-   using RFieldBase = ROOT::RFieldBase;
-   using RNTupleWriteOptions = ROOT::RNTupleWriteOptions;
-#else
-   using REntry = ROOT::Experimental::REntry;
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
+namespace ROOT {
    using RFieldBase = ROOT::Experimental::RFieldBase;
    using RNTupleWriteOptions = ROOT::Experimental::RNTupleWriteOptions;
+}
 #endif
 
 RNTCollection::RNTCollection(
@@ -95,10 +87,10 @@ void  RNTCollection::delayedFileOpen( const std::string& method )
    }
 }
 
-std::unique_ptr< RNTupleReader > RNTCollection::getCollectionRNTuple()
+std::unique_ptr< ROOT::RNTupleReader > RNTCollection::getCollectionRNTuple()
 {
    if( m_file ) {
-      auto reader = RNTupleReader::Open( APRDefaults::RNTupleNames::EventTag, m_fileName );
+      auto reader = ROOT::RNTupleReader::Open( APRDefaults::RNTupleNames::EventTag, m_fileName );
       if( reader )
          m_poolOut << coral::Debug << "Retrieved Collection RNTuple  \""
                    << reader->GetDescriptor().GetName() << "\" from file " << m_fileName
@@ -412,7 +404,7 @@ void RNTCollection::open()  try
          m_file->Delete( (rntupleName+";*").c_str() );
       }
       // (Create Schema)
-      auto model { RNTupleModel::Create() };
+      auto model { ROOT::RNTupleModel::Create() };
       model->SetDescription( rntupleName );
       for( int col_id = 0; col_id < m_description.numberOfTokenColumns(); col_id++ ) {
          std::string columnName = m_description.tokenColumn(col_id).name();
@@ -423,11 +415,11 @@ void RNTCollection::open()  try
          addField( model.get(), column.name(), column.type() );
       }
 
-      RNTupleWriteOptions opts;
+      ROOT::RNTupleWriteOptions opts;
       opts.SetCompression( m_file->GetCompressionSettings() );
       opts.SetUseBufferedWrite( true );
       // MN: TODO : add support for OVERWRITE?
-      m_rntupleWriter = RNTupleWriter::Append(std::move(model), rntupleName, *m_file, opts);
+      m_rntupleWriter = ROOT::RNTupleWriter::Append(std::move(model), rntupleName, *m_file, opts);
 
       m_poolOut << coral::Debug
                 << "Created RNTCollection, collection file will be "
@@ -463,12 +455,12 @@ void RNTCollection::open()  try
 }
 
 
-void RNTCollection::addField(RNTupleModel* model, const std::string& field_name, const std::string& field_type)
+void RNTCollection::addField(ROOT::RNTupleModel* model, const std::string& field_name, const std::string& field_type)
 {
    m_poolOut << coral::Debug << "Adding new column: name=" << field_name
              << " of type " << field_type << corENDL;
    const std::string actual_type = (field_type == tokenTypeName? "std::string" : field_type);
-   auto field = RFieldBase::Create(field_name, actual_type).Unwrap();
+   auto field = ROOT::RFieldBase::Create(field_name, actual_type).Unwrap();
    model->AddField( std::move(field) );
 }
 

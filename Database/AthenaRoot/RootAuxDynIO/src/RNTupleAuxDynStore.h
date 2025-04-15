@@ -15,15 +15,6 @@
 #include "RootAuxDynStore.h"
 namespace RootAuxDynIO { class RNTupleAuxDynReader; }
 
-#include "RVersion.h"
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-namespace ROOT { class RNTupleReader; }
-using RNTupleReader   = ROOT::RNTupleReader;
-#else
-namespace ROOT::Experimental { class RNTupleReader; }
-using RNTupleReader   = ROOT::Experimental::RNTupleReader;
-#endif
-
 class RNTupleAuxDynStore : public RootAuxDynStore
 {
 public:

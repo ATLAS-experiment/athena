@@ -10,36 +10,35 @@
 #define POOL_RNTUPLECONTAINER_H 1
 
 // Framework include files
-
-
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbContainerImp.h"
 #include "StorageSvc/DbDatabase.h"
-#include <vector>
+
+#include "ROOT/RNTupleView.hxx"
+
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 // Forward declarations
 class TClass;
 namespace SG { class IAuxStoreIO; }
 namespace RootAuxDynIO { class IRootAuxDynReader; class IRNTupleAuxDynWriter; }
 namespace RootStorageSvc { class RNTupleWriterHelper; }
-namespace ROOT { class RNTupleReader; }
 
-#include "ROOT/RNTupleView.hxx"
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
+namespace ROOT { using ROOT::Experimental::RNTupleView; }
+namespace ROOT::Experimental { class RNTupleReader; }
+namespace ROOT { using ROOT::Experimental::RNTupleReader; }
+#else
+namespace ROOT { class RNTupleReader; }
+#endif
+
 /*
  * POOL namespace declaration
  */
 namespace pool {
-
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-   using ROOT::RNTupleView;
-   using ROOT::RNTupleReader;
-#else
-   using ROOT::Experimental::RNTupleView;
-   using ROOT::Experimental::RNTupleReader;
-#endif
 
 // Forward declaration
 class DbColumn;
@@ -59,7 +58,7 @@ class RNTupleContainer : public DbContainerImp
   struct FieldDesc : public DbColumn
   {
     std::string fieldname;
-    std::optional< RNTupleView<void> > view;
+    std::optional< ROOT::RNTupleView<void> > view;
     std::string sgkey;
     TClass*     clazz = nullptr;
     void*       object = nullptr;
@@ -121,7 +120,7 @@ class RNTupleContainer : public DbContainerImp
    RootStorageSvc::RNTupleWriterHelper*     m_ntupleWriter = nullptr;
 
    /// Internal cache of the native RNTupleReader
-   RNTupleReader*       m_ntupleReader{};
+   ROOT::RNTupleReader*       m_ntupleReader{};
 
  public:
    /// Standard constructor
