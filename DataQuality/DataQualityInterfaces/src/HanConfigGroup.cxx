@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -244,6 +244,7 @@ Accept( Visitor& visitor, boost::shared_ptr<dqm_core::Region> dqParent ) const
     }
   } catch (std::exception& s) {
     std::cout << "Assess: Caught exception " << s.what() << std::endl;
+    std::abort();
   }
 
   try {
@@ -254,6 +255,7 @@ Accept( Visitor& visitor, boost::shared_ptr<dqm_core::Region> dqParent ) const
     }
   } catch (std::exception& s) {
     std::cout << "Group: Caught exception " << s.what() << std::endl;
+    std::abort();
   }
 }
 
