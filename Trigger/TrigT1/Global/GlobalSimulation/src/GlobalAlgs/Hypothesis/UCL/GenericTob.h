@@ -37,7 +37,9 @@ namespace GlobalSim {
       GenericOverflowWidth;
     
     GenericTob(){};
+    GenericTob(const eEmTob& in_tob);
     GenericTob(const eEmTobPtr& in_tob);
+    GenericTob(const eTauTob& in_tob);
     GenericTob(const eTauTobPtr& in_tob);
     GenericTob(const std::string&);
 

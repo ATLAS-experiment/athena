@@ -9,18 +9,35 @@
 #include <sstream>
 
 namespace GlobalSim {
+  std::bitset<9> genEtaFromTobEta(const std::bitset<8>& in_eta) {
+    auto result = std::bitset<9>();
+
+    int val  = (-0x64 + bitSetToInt(in_eta));
+    std::bitset<8> bs = val;
+  
+    bool neg{val < 0};
+
+    for(std::size_t i{0}; i != bs.size(); ++i) {result[i] = bs[i];}
     
-  GenericTob::GenericTob(const eEmTobPtr& in_tob) {
+    if (neg) {
+      result.set(8);
+    }
+
+    return result;
+  }
+  
+    
+  GenericTob::GenericTob(const eEmTob& in_tob) {
 
     {
-      const auto& in = in_tob->Et_bits();
+      const auto& in = in_tob.Et_bits();
       auto sz = in.size();
       for (auto i = 0U; i != sz; ++i) {m_Et_bits[i] = in[i];}
     }
 
     
     {
-      const auto& in = in_tob->Eta_bits();
+      const auto& in = in_tob.Eta_bits();
       
       // vhdl etaL to_signed(unsigned(-100 + in, GenericEtaBitWidth)
       int val = (-0x64 + bitSetToInt(in));
@@ -31,38 +48,31 @@ namespace GlobalSim {
     }
 
     {
-      const auto& in = in_tob->Phi_bits();
+      const auto& in = in_tob.Phi_bits();
       m_Phi_bits = 2*(bitSetToInt(in)+2);
     }
 
   }
 
-  GenericTob::GenericTob(const eTauTobPtr& in_tob) {
+  GenericTob::GenericTob(const eEmTobPtr& in_tob): GenericTob(*in_tob){}
+
+
+  GenericTob::GenericTob(const eTauTob& in_tob) {
     
-    {
-      const auto& in = in_tob->Et_bits();
-      auto sz = in.size();
-      for (auto i = 0U; i != sz; ++i) {m_Et_bits[i] = in[i];}
-    }
-
+    const auto& etob_et = in_tob.Et_bits();
+    auto sz = etob_et.size();
+    for (auto i = 0U; i != sz; ++i) {m_Et_bits[i] = etob_et[i];}
     
-    {
-      const auto& in = in_tob->Eta_bits();
-      
-      // vhdl etaL to_signed(unsigned(-100 + in, GenericEtaBitWidth)
-      int val = (-0x64 + bitSetToInt(in));
-
-      bool neg{val < 0};
-      m_Eta_bits = std::abs(val);
-      if (neg) {m_Eta_bits = m_Eta_bits.flip().to_ulong()+1;}
-    }
-
-    {
-      const auto& in = in_tob->Phi_bits();
-      m_Phi_bits = 2*(bitSetToInt(in)+2);
-    }
+    
+    const auto& etob_eta = in_tob.Eta_bits();
+    m_Eta_bits = genEtaFromTobEta(etob_eta);
+    
+    const auto& etob_phi = in_tob.Phi_bits();
+    m_Phi_bits = 2*(bitSetToInt(etob_phi)+2);
 
   }
+
+  GenericTob::GenericTob(const eTauTobPtr& in_tob) : GenericTob(*in_tob) {}
 
 
   GenericTob::GenericTob(const std::string& bit_string) {
