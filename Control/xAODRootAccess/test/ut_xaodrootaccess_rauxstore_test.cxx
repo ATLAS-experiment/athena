@@ -309,8 +309,8 @@ int main() {
   ::Info(APP_NAME, "Created input RNTuple for the test");
 
   // Read the RNTuple
-  auto inputNtuple = ROOT::Experimental::RNTupleReader::Open(INPUT_NTUPLE_NAME,
-                                                             INPUT_FILE_NAME);
+  auto inputNtuple = ROOT::RNTupleReader::Open(INPUT_NTUPLE_NAME,
+                                                                       INPUT_FILE_NAME);
   inputNtuple->PrintInfo();
 
   // Create the store and tell it to load entry 0

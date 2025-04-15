@@ -14,11 +14,7 @@
 // Athena include(s).
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/AuxTypeRegistry.h"
-#include "AthContainers/exceptions.h"
 #include "AthContainers/tools/AuxVectorInterface.h"
-#include "CxxUtils/as_const_ptr.h"
-#include "xAODCore/tools/IOStats.h"
-#include "xAODCore/tools/ReadStats.h"
 
 // ROOT include(s).
 #include <TClass.h>
@@ -26,7 +22,6 @@
 
 // System include(s).
 #include <cassert>
-#include <functional>
 #include <memory>
 #include <string>
 
@@ -617,7 +612,7 @@ void RAuxStore::setPrefix(std::string_view prefix) {
 /// @returns @c StatusCode::SUCCESS if the function was
 ///          successful, something else otherwise
 ///
-StatusCode RAuxStore::readFrom(RNTupleReader& reader) {
+StatusCode RAuxStore::readFrom(ROOT::RNTupleReader& reader) {
 
   assert(m_impl);
 
