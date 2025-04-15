@@ -127,10 +127,20 @@ namespace MC
   template <class C, class T>  T findMatching(C TruthContainer, T p) {
     T ptrPart = nullptr;
     if (!p) return ptrPart;
-    for (T truthParticle : *TruthContainer) {
-      if (HepMC::is_sim_descendant(p,truthParticle)) {
-        ptrPart = truthParticle;
-        break;
+    if constexpr (std::is_pointer_v<C> || HepMC::is_smart_ptr_v<C>){ //C is ptr
+      for (T truthParticle : *TruthContainer) {
+        if (HepMC::is_sim_descendant(p,truthParticle)) {
+          ptrPart = truthParticle;
+          break;
+        }
+      }
+    }
+    else {
+      for (T truthParticle : TruthContainer) {
+        if (HepMC::is_sim_descendant(p,truthParticle)) {
+          ptrPart = truthParticle;
+          break;
+        }
       }
     }
     return ptrPart;
