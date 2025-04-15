@@ -59,7 +59,7 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
                             "((abs(TruthParticles.pdgId) ==  6))",                                       # Top quark
                             "((abs(TruthParticles.pdgId) == 22) && (TruthParticles.pt > 1*GeV))",        # Photon
                             "(abs(TruthParticles.pdgId) >=  1000000)",                                   # BSM
-                            "(TruthParticles.status == 1 && TruthParticles.barcode < 200000)"]           # stable particles
+                            "(TruthParticles.isGenStable)"]           # stable particles
         truth_expression = f'({" || ".join(truth_conditions)})'
 
         HIGG1D1GenericTruthThinningTool   = acc.getPrimaryAndMerge(GenericTruthThinningCfg(

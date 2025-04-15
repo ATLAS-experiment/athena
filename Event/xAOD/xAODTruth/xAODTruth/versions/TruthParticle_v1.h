@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRUTH_VERSIONS_TRUTHPARTICLE_V1_H
@@ -307,6 +307,10 @@ namespace xAOD {
       bool isBSM() const;
       /// Check if this is generator stable particle
       bool isGenStable() const;
+      /// Check if this is a stable particle (generator or simulation produced)
+      bool isStable() const;
+      /// Check if this particle was produced during the simulation
+      bool isSimulationParticle() const;
 
       /// @}
 

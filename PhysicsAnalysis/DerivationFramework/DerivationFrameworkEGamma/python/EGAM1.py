@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # ====================================================================
 # EGAM1.py
 # This defines DAOD_EGAM1, a skimmed DAOD format for Run 3.
@@ -427,9 +427,7 @@ def EGAM1KernelCfg(flags, name="EGAM1Kernel", **kwargs):
             ["(abs(TruthParticles.pdgId) == 22)", "(TruthParticles.pt > 1*GeV)"]
         )
         # stable particles
-        truth_cond_finalState = " && ".join(
-            ["(TruthParticles.status == 1)", "(TruthParticles.barcode < 200000)"]
-        )
+        truth_cond_finalState = "(TruthParticles.isGenStable)"
         truth_expression = (
             "( "
             + truth_cond_WZH

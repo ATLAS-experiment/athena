@@ -30,7 +30,7 @@ def DFCommonTruthMuonToolCfg(flags):
                                    name                    = "DFCommonTruthMuonTool",
                                    NewCollectionName       = "TruthMuons",
                                    KeepNavigationInfo      = False,
-                                   ParticleSelectionString = f"(abs(TruthParticles.pdgId) == 13) && (TruthParticles.status == 1) && TruthParticles.barcode < {flags.Sim.SimBarcodeOffset}")
+                                   ParticleSelectionString = "(abs(TruthParticles.pdgId) == 13) && TruthParticles.isGenStable")
 
 def DFCommonTruthElectronToolCfg(flags):
     """Electron truth collection maker"""
@@ -38,7 +38,7 @@ def DFCommonTruthElectronToolCfg(flags):
                                    name                    = "DFCommonTruthElectronTool",
                                    NewCollectionName       = "TruthElectrons",
                                    KeepNavigationInfo      = False,
-                                   ParticleSelectionString = f"(abs(TruthParticles.pdgId) == 11) && (TruthParticles.status == 1) && TruthParticles.barcode < {flags.Sim.SimBarcodeOffset}")
+                                   ParticleSelectionString = "(abs(TruthParticles.pdgId) == 11) && TruthParticles.isGenStable")
 
 def DFCommonTruthPhotonToolCfg(flags):
     """Photon truth collection maker"""
@@ -46,7 +46,7 @@ def DFCommonTruthPhotonToolCfg(flags):
                                    name                    = "DFCommonTruthPhotonTool",
                                    NewCollectionName       = "TruthPhotons",
                                    KeepNavigationInfo      = False,
-                                   ParticleSelectionString = f"(abs(TruthParticles.pdgId) == 22) && (TruthParticles.status == 1) && TruthParticles.barcode < {flags.Sim.SimBarcodeOffset}")
+                                   ParticleSelectionString = "(abs(TruthParticles.pdgId) == 22) && TruthParticles.isGenStable")
 
 # this tool is needed for making TruthPhotons from sim samples, where extra cuts are needed. Origin 42 (pi0) and 23 (light meson) cut way down uninteresting photons
 def DFCommonTruthPhotonToolSimCfg(flags):
@@ -55,11 +55,11 @@ def DFCommonTruthPhotonToolSimCfg(flags):
                                    name                    = "DFCommonTruthPhotonToolSim",
                                    NewCollectionName       = "TruthPhotons",
                                    KeepNavigationInfo      = False,
-                                   ParticleSelectionString = f"(abs(TruthParticles.pdgId) == 22) && (TruthParticles.status == 1) && ((TruthParticles.classifierParticleOrigin != 42 && TruthParticles.classifierParticleOrigin !=23) || (TruthParticles.pt > 20.0*GeV)) && ( TruthParticles.barcode < {flags.Sim.SimBarcodeOffset} )") 
+                                   ParticleSelectionString = "(abs(TruthParticles.pdgId) == 22) && TruthParticles.isGenStable && ((TruthParticles.classifierParticleOrigin != 42 && TruthParticles.classifierParticleOrigin !=23) || (TruthParticles.pt > 20.0*GeV))")
 
 def DFCommonTruthNeutrinoToolCfg(flags):
     """Neutrino truth collection maker"""
-    neutrinoexpression = f"(TruthParticles.isNeutrino && TruthParticles.status == 1) && TruthParticles.barcode < {flags.Sim.SimBarcodeOffset}"
+    neutrinoexpression = "(TruthParticles.isNeutrino && TruthParticles.isGenStable)"
     return TruthCollectionMakerCfg(flags,
                                    name = "DFCommonTruthNeutrinoTool",
                                    NewCollectionName       = "TruthNeutrinos",
@@ -83,7 +83,7 @@ def DFCommonTruthTopToolCfg(flags):
                                    KeepNavigationInfo      = False,
                                    ParticleSelectionString = "(abs(TruthParticles.pdgId) == 6)",
                                    Do_Compress             = True)
-                                   
+
 def DFCommonTruthBosonToolCfg(flags):
     """Gauge bosons and Higgs truth collection maker"""
     return TruthCollectionMakerCfg(flags,
@@ -110,8 +110,8 @@ def DFCommonTruthForwardProtonToolCfg(flags):
                                    name                    = "DFCommonTruthForwardProtonTool",
                                    NewCollectionName       = "TruthForwardProtons",
                                    KeepNavigationInfo      = False,
-                                   ParticleSelectionString = "(TruthParticles.status==1) && (abs(TruthParticles.pdgId)==2212) && (TruthParticles.e>0.8*"+str(beam_energy)+")",
-                                   Do_Compress             = True) 
+                                   ParticleSelectionString = "(TruthParticles.isStable) && (abs(TruthParticles.pdgId)==2212) && (TruthParticles.e>0.8*"+str(beam_energy)+")", # TODO Check whether isGenStable was intended here.
+                                   Do_Compress             = True)
 
 #==============================================================================
 # Decoration tools
@@ -143,16 +143,16 @@ def MuonTruthClassifierFallbackCfg(flags, name, **kwargs):
             MCTruthClassifierCfg(flags, name = "MuonTruthClassifierFallbackMCTruthClassifier")))
 
     MuonTruthClassifierFallback = CompFactory.DerivationFramework.MuonTruthClassifierFallback
-    acc.addPublicTool(MuonTruthClassifierFallback(name = name, **kwargs), 
+    acc.addPublicTool(MuonTruthClassifierFallback(name = name, **kwargs),
                       primary = True)
-    return acc                            
+    return acc
 
 def TruthDressingToolCfg(flags, name, **kwargs):
     """Configure the TruthDressingTool"""
     acc = ComponentAccumulator()
     TruthDressingTool = CompFactory.DerivationFramework.TruthDressingTool
     acc.addPublicTool(TruthDressingTool( name = name, **kwargs),
-                      primary = True)   
+                      primary = True)
     return acc
 
 def TruthIsolationToolCfg(flags, name, **kwargs):
@@ -161,7 +161,7 @@ def TruthIsolationToolCfg(flags, name, **kwargs):
     TruthIsolationTool = CompFactory.DerivationFramework.TruthIsolationTool
     acc.addPublicTool(TruthIsolationTool(name = name, **kwargs),
                       primary = True)
-    return acc 
+    return acc
 
 def MuonTruthIsolationDecorAlgCfg(flags, name, **kwargs):
     """Configure the MuonTruthIsolationTool"""
@@ -299,7 +299,7 @@ def DFCommonTruthMuonIsolationTool1Cfg(flags):
                                  particleIDsToCalculate = [13],
                                  IsolationConeSizes     = [0.2],
                                  IsolationVarNamePrefix = 'etcone',
-                                 ChargedParticlesOnly   = False) 
+                                 ChargedParticlesOnly   = False)
 
 def DFCommonTruthMuonIsolationTool2Cfg(flags):
     """Configure the muon isolation tool, cone=0.3"""
@@ -321,7 +321,7 @@ def DFCommonTruthPhotonIsolationTool1Cfg(flags):
                                  particleIDsToCalculate = [22],
                                  IsolationConeSizes     = [0.2],
                                  IsolationVarNamePrefix = 'etcone',
-                                 ChargedParticlesOnly   = False)    
+                                 ChargedParticlesOnly   = False)
 
 
 def DFCommonTruthPhotonIsolationTool2Cfg(flags):
@@ -357,7 +357,7 @@ def DFCommonTruthDressedWZQGLabelToolCfg(flags):
 # Truth thinning
 #==============================================================================
 
-# Menu truth thinning: removes truth particles on the basis of a menu of 
+# Menu truth thinning: removes truth particles on the basis of a menu of
 # options (rather than a string)
 def MenuTruthThinningCfg(flags, name, **kwargs):
     """Configure the menu truth thinning tool"""
@@ -368,9 +368,9 @@ def MenuTruthThinningCfg(flags, name, **kwargs):
     return acc
 
 #==============================================================================
-# Other tools 
+# Other tools
 #==============================================================================
-# Truth links on some objects point to the main truth particle container. 
+# Truth links on some objects point to the main truth particle container.
 # This re-points the links from the old container to the new container
 def TruthLinkRepointToolCfg(flags, name, **kwargs):
     """Configure the truth link repointing tool"""
@@ -378,7 +378,7 @@ def TruthLinkRepointToolCfg(flags, name, **kwargs):
     TruthLinkRepointTool = CompFactory.DerivationFramework.TruthLinkRepointTool
     acc.addPublicTool(TruthLinkRepointTool(name, **kwargs),
                       primary = True)
-    return acc   
+    return acc
 
 # Makes a small collection of 'primary' vertices, one per event
 # A bit like a collection of 'reconstructable' vertices
