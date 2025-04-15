@@ -16,7 +16,7 @@
 
 namespace DerivationFramework {
 
-  class SaturatedTriggerTower : public AthAlgTool, public ISkimmingTool {
+  class SaturatedTriggerTower : public extends<AthAlgTool, ISkimmingTool> {
     public: 
       SaturatedTriggerTower(const std::string& t, const std::string& n, const IInterface* p);
 

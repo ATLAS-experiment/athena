@@ -20,11 +20,10 @@ namespace DerivationFramework {
     SaturatedTriggerTower::SaturatedTriggerTower(const std::string& t,
                                                  const std::string& n,
                                                  const IInterface* p) :
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_adcThreshold(0),
     m_collName("xAODTriggerTowers")
     {
-        declareInterface<DerivationFramework::ISkimmingTool>(this);
 	declareProperty("TriggerTowerContainer",m_collName);
 	declareProperty("adcThreshold",m_adcThreshold);
     }
