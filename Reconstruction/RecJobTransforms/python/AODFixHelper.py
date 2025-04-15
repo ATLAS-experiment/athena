@@ -11,7 +11,7 @@ def releaseInRange(flags,rel1,rel2):
 
     #This regex matches 3 and 4 digit release numbers
     #It also matches only something that start with Athena-xx
-    relPattern=re.compile("^Athena-(\d+(\.\d+){2,3}(\.\*)?)$") # noqa: W605
+    relPattern=re.compile(r"^Athena-(\d+(\.\d+){2,3}(\.\*)?)$")
 
     for r in (rel1,rel2):
         if not relPattern.match(r):
