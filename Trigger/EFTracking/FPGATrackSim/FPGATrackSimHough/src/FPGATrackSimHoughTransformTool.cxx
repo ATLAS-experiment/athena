@@ -28,15 +28,6 @@ static inline double unquant(double min, double max, unsigned nSteps, int step);
 template <typename T>
 static inline std::string to_string(const std::vector<T> &v);
 
-///////////////////////////////////////////////////////////////////////////////
-// AthAlgTool
-
-FPGATrackSimHoughTransformTool::FPGATrackSimHoughTransformTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
-  base_class(algname, name, ifc)
-{
-  declareInterface<IFPGATrackSimRoadFinderTool>(this);
-}
-
 
 StatusCode FPGATrackSimHoughTransformTool::initialize()
 {

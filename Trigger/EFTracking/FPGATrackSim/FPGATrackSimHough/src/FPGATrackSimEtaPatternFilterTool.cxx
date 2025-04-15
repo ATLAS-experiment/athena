@@ -32,16 +32,6 @@ inline bool operator <(const FPGATrackSimEtaPatternFilterTool::ModuleId& lhs, co
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-// AthAlgTool
-
-FPGATrackSimEtaPatternFilterTool::FPGATrackSimEtaPatternFilterTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
-  base_class(algname, name, ifc)
-{
-    declareInterface<IFPGATrackSimRoadFilterTool>(this);
-}
-
-
 StatusCode FPGATrackSimEtaPatternFilterTool::initialize()
 {
     // Retrieve info

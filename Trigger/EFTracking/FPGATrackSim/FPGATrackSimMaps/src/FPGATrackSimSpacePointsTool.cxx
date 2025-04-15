@@ -11,11 +11,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "TH1.h"
 
-FPGATrackSimSpacePointsTool::FPGATrackSimSpacePointsTool(const std::string &algname, const std::string &name, const IInterface *ifc)
-    : base_class(algname, name, ifc)
-{
-    declareInterface<FPGATrackSimSpacePointsToolI>(this);
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode FPGATrackSimSpacePointsTool::initialize()

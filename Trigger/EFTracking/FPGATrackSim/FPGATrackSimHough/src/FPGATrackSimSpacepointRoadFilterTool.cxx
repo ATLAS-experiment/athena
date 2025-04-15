@@ -27,15 +27,6 @@
 
 // TODO all this code should be rewritten once duplication is removed.
 
-///////////////////////////////////////////////////////////////////////////////
-// AthAlgTool
-
-FPGATrackSimSpacepointRoadFilterTool::FPGATrackSimSpacepointRoadFilterTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
-    base_class(algname, name, ifc)
-{
-    declareInterface<IFPGATrackSimRoadFilterTool>(this);
-}
-
 
 StatusCode FPGATrackSimSpacepointRoadFilterTool::initialize()
 {

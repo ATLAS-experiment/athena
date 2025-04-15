@@ -17,11 +17,6 @@
 #include <cmath>
 #include <algorithm>
 
-FPGATrackSimNNPathfinderExtensionTool::FPGATrackSimNNPathfinderExtensionTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
-    base_class(algname, name, ifc) {
-        declareInterface<IFPGATrackSimTrackExtensionTool>(this);
-    }
-
 
 StatusCode FPGATrackSimNNPathfinderExtensionTool::initialize() {
 

@@ -26,7 +26,8 @@ class FPGATrackSimLLPDoubletHoughTransformTool : public extends <AthAlgTool, IFP
 {
 
 public:
-    FPGATrackSimLLPDoubletHoughTransformTool(const std::string&, const std::string&, const IInterface*);
+    /// Constructor
+    using base_class::base_class;
 
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
