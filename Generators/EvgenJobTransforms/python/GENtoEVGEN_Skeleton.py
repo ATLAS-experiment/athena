@@ -240,7 +240,8 @@ def fromRunArgs(runArgs):
     # Fix non-standard event features
     from EvgenProdTools.EvgenProdToolsConfig import FixHepMCCfg
     cfg.merge(FixHepMCCfg(flags, 
-                          PurgeUnstableWithoutEndVtx = "Hijing" in sample.generators))
+                          PurgeUnstableWithoutEndVtx = "Hijing" in sample.generators or \
+                                                       "Herwig7" in sample.generators))
 
     ## Sanity check the event record (not appropriate for all generators)
     from GeneratorConfig.GenConfigHelpers import gens_testhepmc
