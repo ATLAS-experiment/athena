@@ -50,7 +50,7 @@ namespace AthOnnx {
         ServiceHandle<IOnnxRuntimeSvc> m_onnxRuntimeSvc{this, "OnnxRuntimeSvc", "AthOnnx::OnnxRuntimeSvc/OnnxRuntimeSvc", "The Onnx runtime service"};
         ToolHandle<IOnnxRuntimeSessionTool> m_onnxSessionTool{
             this, "ORTSessionTool", 
-            "AthOnnx::OnnxRuntimeSessionToolCPU",
+            "AthOnnx::OnnxRuntimeSessionToolCPU/OnnxRuntimeSessionTool",
             "The Onnx session tool"
         };        
         std::vector<std::string> m_inputNodeNames;
