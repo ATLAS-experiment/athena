@@ -18,13 +18,12 @@ namespace DerivationFramework {
   InvariantMassTool::InvariantMassTool(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    ExpressionParserUser<AthAlgTool,kInvariantMassToolParserNum>(t,n,p),
+    base_class(t,n,p),
     m_expression("true"),
     m_expression2(""), 
     m_massHypothesis(0.0),
     m_massHypothesis2(0.0)
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("ObjectRequirements", m_expression);
     declareProperty("SecondObjectRequirements", m_expression2);
     declareProperty("MassHypothesis", m_massHypothesis);

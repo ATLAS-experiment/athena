@@ -17,7 +17,7 @@
 
 namespace DerivationFramework {
 
-  class TriggerSkimmingTool : public AthAlgTool, public ISkimmingTool {
+  class TriggerSkimmingTool : public extends<AthAlgTool, ISkimmingTool> {
     public: 
       TriggerSkimmingTool(const std::string& t, const std::string& n, const IInterface* p);
 

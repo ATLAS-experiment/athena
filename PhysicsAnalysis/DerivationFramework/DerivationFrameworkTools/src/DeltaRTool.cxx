@@ -18,11 +18,10 @@ namespace DerivationFramework {
   DeltaRTool::DeltaRTool(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    ExpressionParserUser<AthAlgTool,kDeltaRToolParserNum>(t,n,p),
+    base_class(t,n,p),
     m_expression(""),
     m_2ndExpression("")
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("ObjectRequirements", m_expression);
     declareProperty("SecondObjectRequirements", m_2ndExpression); 
   }
