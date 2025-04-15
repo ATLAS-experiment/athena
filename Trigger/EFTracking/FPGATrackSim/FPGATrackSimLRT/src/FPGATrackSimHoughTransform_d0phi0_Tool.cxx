@@ -39,7 +39,6 @@ FPGATrackSimHoughTransform_d0phi0_Tool::FPGATrackSimHoughTransform_d0phi0_Tool(c
   m_name(instance_name(name)),
   m_monitorFile((m_name + ".root").c_str(), "RECREATE")
 {
-  declareInterface<IFPGATrackSimRoadFinderTool>(this);
 }
 
 

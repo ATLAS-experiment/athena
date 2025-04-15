@@ -54,16 +54,6 @@ std::ostream& operator<<(std::ostream &os, const FPGATrackSimGenScanTool::Stored
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-// AthAlgTool
-
-FPGATrackSimGenScanTool::FPGATrackSimGenScanTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
-  base_class(algname, name, ifc)
-{
-  declareInterface<IFPGATrackSimRoadFinderTool>(this);
-}
-
-
 StatusCode FPGATrackSimGenScanTool::initialize()
 {
   // Dump the configuration to make sure it propagated through right

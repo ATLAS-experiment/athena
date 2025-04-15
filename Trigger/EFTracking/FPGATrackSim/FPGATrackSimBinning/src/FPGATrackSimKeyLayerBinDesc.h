@@ -44,11 +44,8 @@ using FPGATrackSimBinUtil::StoredHit;
 class FPGATrackSimKeyLayerBinDesc : public  extends<AthAlgTool, IFPGATrackSimBinDesc> {
 
 public:
-    FPGATrackSimKeyLayerBinDesc(const std::string& algname, const std::string &name, const IInterface *ifc) :
-    base_class(algname, name, ifc), m_parNames({"zR1", "zR2", "phiR1", "phiR2", "xm"})
-    {
-      declareInterface<IFPGATrackSimBinDesc>(this);
-    }
+    /// Constructor
+    using base_class::base_class;
 
     virtual StatusCode initialize() override;
 
@@ -99,7 +96,7 @@ public:
 
     // Internal
     FPGATrackSimKeyLayerTool m_keylyrtool;
-    const std::vector<std::string> m_parNames;
+    const std::vector<std::string> m_parNames{"zR1", "zR2", "phiR1", "phiR2", "xm"};
 
     const std::vector<unsigned> m_phipars{2, 3, 4};
     const std::vector<unsigned> m_etapars{1, 2};

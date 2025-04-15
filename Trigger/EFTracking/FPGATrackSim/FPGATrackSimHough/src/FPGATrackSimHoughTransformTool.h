@@ -90,11 +90,8 @@
 class FPGATrackSimHoughTransformTool : public extends <AthAlgTool, IFPGATrackSimRoadFinderTool>
 {
     public:
-
-        ///////////////////////////////////////////////////////////////////////
-        // AthAlgTool
-
-        FPGATrackSimHoughTransformTool(const std::string&, const std::string&, const IInterface*);
+        /// Constructor
+        using base_class::base_class;
 
         virtual StatusCode initialize() override;
 
