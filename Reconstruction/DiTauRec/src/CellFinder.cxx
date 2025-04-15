@@ -8,11 +8,9 @@
 CellFinder::CellFinder(const std::string& type,
 		       const std::string& name,
 		       const IInterface * parent) :
-  DiTauToolBase(type, name, parent),
-  m_Rsubjet(0.2)
+  DiTauToolBase(type, name, parent)
 {
   declareInterface<DiTauToolBase > (this);
-  declareProperty("Rsubjet", m_Rsubjet);
 }
 
 

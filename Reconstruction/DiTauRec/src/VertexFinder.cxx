@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRec/VertexFinder.h"
@@ -9,11 +9,9 @@
 VertexFinder::VertexFinder(const std::string& type,
 			   const std::string& name,
 			   const IInterface * parent) :
-  DiTauToolBase(type, name, parent),
-  m_assocTracksName("GhostTrack")
+  DiTauToolBase(type, name, parent)
 {
   declareInterface<DiTauToolBase > (this);
-  declareProperty("AssociatedTracks", m_assocTracksName);
 }
 
 

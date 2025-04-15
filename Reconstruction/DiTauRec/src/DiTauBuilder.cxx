@@ -5,21 +5,8 @@
 #include "DiTauRec/DiTauBuilder.h"
 
 DiTauBuilder::DiTauBuilder( const std::string& name, ISvcLocator* pSvcLocator ) : 
-  AthReentrantAlgorithm( name, pSvcLocator ),
-  m_minPt(10000),
-  m_maxEta(2.5),
-  m_Rjet(1.0),
-  m_Rsubjet(0.2),
-  m_Rcore(0.1),
-  m_tools(this)
+  AthReentrantAlgorithm( name, pSvcLocator )
 {
-  declareProperty("minPt", m_minPt);
-  declareProperty("maxEta", m_maxEta);
-  declareProperty("Rjet", m_Rjet);
-  declareProperty("Rsubjet", m_Rsubjet);
-  declareProperty("Rcore", m_Rcore);
-  declareProperty("Tools", m_tools ); 
-
 }
 
 
