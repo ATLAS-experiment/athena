@@ -49,14 +49,14 @@ if __name__=="__main__":
         cfg.merge(addOverride(flags, "/MDT/TWINMAPPING", "MDTTwinMapping_compactFormat_Run123"))
 
     
-    cfg.merge(MuonHoughTransformTesterCfg(flags,
-                                          VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
+        cfg.merge(MuonHoughTransformTesterCfg(flags,
+                                              VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
 
     if not args.noMonitorPlots and (flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC):
         cfg.getEventAlgo("MuonEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="EtaHoughPlotValid",
                                                                                                 AllCanvasName="AllEtaHoughiDiPuffPlots", doPhiBucketViews = False,
-                                                                                                displayTruthOnly = True, saveSinglePDFs = False, saveSummaryPDF= False))
+                                                                                                displayTruthOnly = True, saveSinglePDFs = True, saveSummaryPDF= False))
         cfg.getEventAlgo("MuonPhiHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="PhiHoughPlotValid",
                                                                                                 AllCanvasName="AllPhiHoughiDiPuffPlots",doEtaBucketViews = False,
