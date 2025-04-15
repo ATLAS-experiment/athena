@@ -203,12 +203,11 @@ BuildMonitorsNewRoot( std::string configName, HanInputRootFile& input, dqm_core:
   } else {
     TPython::Exec("logLevel('DEBUG')");
   }
-  std::cout << "Step 1" << std::endl;
+
   HanConfigGroup* new_top_level = TPython::Eval("FixRegion(config, top_level, path)");
   delete m_top_level;
   m_top_level = new_top_level;
-  std::cout << "Step 2" << std::endl;
-  
+
   std::string algName( m_top_level->GetAlgName() );
   std::string algLibName( m_top_level->GetAlgLibName() );
   if( algLibName != "" ) {
@@ -219,15 +218,11 @@ BuildMonitorsNewRoot( std::string configName, HanInputRootFile& input, dqm_core:
       //std::cout << "Can't load library " << algLibName << ". Continuing regardless ..." << std::endl;
     }
   }
-  std::cout << "Step 3" << std::endl;
   dqm_core::RegionConfig regc( algName, 1.0 );
-  std::cout << "Step 4" << std::endl;
   boost::shared_ptr<dqm_core::Region> retval(dqm_core::Region::createRootRegion( "top_level", input, output, regc ));
-  std::cout << "Step 5" << std::endl;
+
   ConfigVisitor confvisitor( m_config, &output );
-  std::cout << "Step 6" << std::endl;
   m_top_level->Accept( confvisitor, retval );
-  std::cout << "Step 7" << std::endl;
   return retval;
 }
 
