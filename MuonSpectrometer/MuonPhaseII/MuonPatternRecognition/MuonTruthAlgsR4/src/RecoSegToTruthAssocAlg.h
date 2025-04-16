@@ -42,7 +42,7 @@ namespace MuonR4{
             /** @brief Key to the associated uncalibrated measurement decoration */
             SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_segPrdLinkKey{this, "SegPrdLinkKey", m_segmentKey, "prdLinks"};
             /** @brief Output key to the associated truth segment link decoration */
-            SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_segTruthSegLinkKey{this, "SegToTruthSegLinkKey", m_segmentKey, "truthSegLink"};
+            SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_segTruthSegLinkKey{this, "SegToTruthSegLinkKey", m_segmentKey, "truthSegmentLink"};
             /** @brief Output key to the associated truth particle decoration */
             SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_segTruthLinkKey{this, "SegTruthLinkKey", m_segmentKey, "truthParticleLink"};
     };

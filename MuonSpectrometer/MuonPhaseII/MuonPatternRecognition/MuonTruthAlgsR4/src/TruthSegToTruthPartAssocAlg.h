@@ -37,7 +37,7 @@ namespace MuonR4{
             /** @brief Declaration of the dependency on the simHit decorations */
             SG::ReadDecorHandleKeyArray<xAOD::TruthParticleContainer> m_simHitKeys{this, "TruthSimHitIdKeys", {}};
             /** @brief Declaration of the segmentLink to the truth particle */
-            SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_segLinkKey{this, "SegmentToPartKey", m_truthKey, "truthSegLinks"};
+            SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_segLinkKey{this, "SegmentToPartKey", m_truthKey, "truthSegmentLinks"};
             /** @brief Key to the truth segment container to associate */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentKey", "TruthSegmentsR4"};
             /** @brief Key of the truthParticleLink decorated onto the segment */
