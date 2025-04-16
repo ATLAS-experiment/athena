@@ -168,7 +168,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
     return std::make_pair(Neutrino, partOrig);
   }
 
-  if (thePart&& info.Mother() && HepMC::is_same_generator_particle(thePart,info.Mother()))
+  if (thePart && info.Mother() && HepMC::is_same_generator_particle(thePart,info.Mother()))
     return std::make_pair(NonPrimary, partOrig);
 
   if (isPartHadr) return std::make_pair(Hadron, partOrig);
@@ -246,17 +246,15 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
 
   const xAOD::TruthParticle* mother = MC::findMother(thePriPart);
   info.setMotherProperties(mother);
-  if (!mother) {
-    return NonDefined;
-  }
+  if (!mother) { return NonDefined; } // mother is not a nullptr beyond this point
+
   int motherPDG = mother->pdgId();
-  info.setMotherProperties(mother);
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
 
   bool samePart = false;
   for (const auto& theDaug: partOriVert->particles_out()) {
     if (!theDaug)  continue;
-    if (motherPDG == theDaug->pdgId() && info.Mother() && HepMC::is_same_generator_particle(theDaug, info.Mother())) samePart = true;
+    if (motherPDG == theDaug->pdgId() && HepMC::is_same_generator_particle(theDaug, mother)) samePart = true;
   }
 
   // to resolve Sherpa loop
@@ -339,7 +337,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     else if (MC::isTau(DaugType)) NumOfTau++;
     else if (abs(DaugType) == MC::NU_TAU) NumOfTauNeut++;
     else if (MC::isLeptoQuark(DaugType)) NumOfLQ++;
-    if (abs(DaugType) == abs(motherPDG) && theDaug && info.Mother() && HepMC::is_same_generator_particle(theDaug, info.Mother() )) samePart = true;
+    if (abs(DaugType) == abs(motherPDG) && theDaug && HepMC::is_same_generator_particle(theDaug, mother )) samePart = true;
     if (numOfParents == 1 &&
         (MC::isPhoton(motherPDG) || MC::isElectron(motherPDG) || MC::isMuon(motherPDG) || abs(motherPDG) == MC::PIPLUS) &&
         (MC::isNucleus(DaugType) || DaugType == 0 || DaugType == MC::PROTON || DaugType == MC::NEUTRON ||
@@ -546,9 +544,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
 
   const xAOD::TruthParticle* mother = MC::findMother(thePriPart);
   info.setMotherProperties(mother);
-  if (!mother) {
-    return NonDefined;
-  }
+  if (!mother) { return NonDefined; } // mother is not a nullptr beyond this point
 
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   int motherPDG = mother->pdgId();
@@ -758,7 +754,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
 
 ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                 const xAOD::TruthParticle* thePart,
-                                int motherPDG,
+                                int motherPDGin,
                                 MCTruthPartClassifier::Info& info) const
 {
   ATH_MSG_DEBUG("Executing DefOrigOfTau ");
@@ -778,15 +774,13 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
 
   const xAOD::TruthParticle* mother = MC::findMother(thePriPart);
   info.setMotherProperties(mother);
-  if (!mother) {
-    return NonDefined;
-  }
+  if (!mother) { return NonDefined; } // mother is not a nullptr beyond this point
 
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
 
   const xAOD::TruthParticle* MotherParent(nullptr);
 
-  if (MC::isW(motherPDG) && mothOriVert != nullptr) {
+  if (MC::isW(motherPDGin) && mothOriVert != nullptr) { // FIXME motherPDGin here could in principle be inconsistent with mothOriVert
     MotherParent = MC::findMother(mother);
     int pPDG(0);
 
@@ -799,11 +793,11 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
     }
   }
 
-  motherPDG = mother->pdgId();
+  int motherPDG = mother->pdgId();
   info.setMotherProperties(mother);
   mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   partOriVert = mother->decayVtx();
-  if (!partOriVert) return NonDefined;
+  if (!partOriVert) return NonDefined; // FIXME not sure this could ever be true?
 
   numOfParents = partOriVert->nIncomingParticles();
   auto DP = DecayProducts(partOriVert);
@@ -957,10 +951,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
 
   const xAOD::TruthParticle* mother = MC::findMother(thePriPart);
   info.setMotherProperties(mother);
-  if (!mother) return NonDefined;
+  if (!mother) { return NonDefined; } // mother is not a nullptr beyond this point
+
   int motherPDG = mother->pdgId();
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
-  info.setMotherProperties(mother);
   partOriVert = mother->decayVtx();
   numOfParents = partOriVert->nIncomingParticles();
   int numOfDaug = partOriVert->nOutgoingParticles();
@@ -998,12 +992,12 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
 
   bool foundISR = false;
   bool foundFSR = false;
-  if (numOfParents == 1 && numOfDaug == 2 &&  Daug && info.Mother() && HepMC::is_same_generator_particle(Daug, info.Mother())) return BremPhot;
+  if (numOfParents == 1 && numOfDaug == 2 &&  Daug && HepMC::is_same_generator_particle(Daug, mother)) return BremPhot;
   if (numOfParents == 1 && numOfDaug == 2 && MC::isElectron(motherPDG) && NumOfPht == 2) return ElMagProc;
 
   // decay of W,Z and Higgs to lepton with FSR generated by Pythia
   if (numOfParents == 1 && numOfDaug == 2 && (MC::isElectron(motherPDG) || MC::isMuon(motherPDG) || MC::isTau(motherPDG)) &&
-      !(Daug && info.Mother() && HepMC::is_same_generator_particle(Daug, info.Mother())) && mothOriVert != nullptr &&
+      !(Daug && HepMC::is_same_generator_particle(Daug, mother)) && mothOriVert != nullptr &&
       mothOriVert->nIncomingParticles() == 1) {
     int itr = 0;
     int PartPDG = 0;
@@ -1041,7 +1035,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   if (MC::isMuon(motherPDG) && NumOfMu == 0) return Mu;
   if (MC::isTau(motherPDG) && NumOfTau == 0) return TauLep;
 
-  if (numOfParents == 1 && mother && mother->status() == 3) return (foundISR)? ISRPhot:UndrPhot;
+  if (numOfParents == 1 && mother->status() == 3) return (foundISR)? ISRPhot:UndrPhot;
 
   //-- to find initial and final state raiation and underline photons
   //-- SUSY
@@ -1072,7 +1066,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
 
   //-- Exotics - CompHep
   if (MC::isElectron(motherPDG) && numOfParents == 1 && numOfDaug == 2 && (NumOfEl == 1 || NumOfPos == 1) && NumOfPht == 1 &&
-      !( Daug && info.Mother() && HepMC::is_same_generator_particle(Daug, info.Mother())) && !HepMC::is_simulation_particle(Daug) && !HepMC::is_simulation_particle(info.Mother()))
+      !( Daug && HepMC::is_same_generator_particle(Daug, mother)) && !HepMC::is_simulation_particle(Daug) && !HepMC::is_simulation_particle(mother))
     return FSRPhot;
 
   // FSR  from Photos
@@ -1207,8 +1201,9 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
   if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfNeutrino:: neutrino  has more than one mother ");
 
   const xAOD::TruthParticle* mother = MC::findMother(thePriPart);
-  info.mother = mother; // FIXME why isn't info.setMotherProperties(mother) used here??
-  if (!mother) return NonDefined;
+  info.setMotherProperties(mother);
+  if (!mother) { return NonDefined; } // mother is not a nullptr beyond this point
+
   int motherPDG = mother->pdgId();
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
 
@@ -1264,7 +1259,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
     }
   }
   //if mother is still nullptr, we have a problem
-  if (!mother) return NonDefined;
+  if (!mother) return NonDefined; // FIXME it should not be possible for mother to be nullptr at this point???
 
   motherPDG = mother->pdgId();
   partOriVert = mother->decayVtx();
@@ -1299,7 +1294,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
     else if (MC::isMuon(DaugType)) NumOfMu++;
     else if (MC::isTau(DaugType)) NumOfTau++;
     else if (MC::isLeptoQuark(DaugType)) NumOfLQ++;
-    if (std::abs(DaugType) == std::abs(motherPDG) && theDaug && info.Mother() && HepMC::is_same_generator_particle(theDaug,info.Mother())) samePart = true;
+    if (std::abs(DaugType) == std::abs(motherPDG) && theDaug && HepMC::is_same_generator_particle(theDaug,mother)) samePart = true;
   }
 
   // Quark weak decay
