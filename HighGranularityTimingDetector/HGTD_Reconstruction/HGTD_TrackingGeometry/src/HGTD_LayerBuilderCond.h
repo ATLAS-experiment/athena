@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -45,8 +45,7 @@ namespace Trk {
 
    */
 
-class ATLAS_NOT_THREAD_SAFE HGTD_LayerBuilderCond :
-public AthAlgTool, virtual public Trk::ILayerBuilderCond {
+class ATLAS_NOT_THREAD_SAFE HGTD_LayerBuilderCond : public extends<AthAlgTool, Trk::ILayerBuilderCond> {
 
   public:
 
