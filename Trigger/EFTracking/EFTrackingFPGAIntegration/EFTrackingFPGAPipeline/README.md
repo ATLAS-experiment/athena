@@ -69,7 +69,7 @@ Once the enviroment is ready, go to the directory that includes the `athena`
 ```bash
 mkdir build run
 # Now, ls should show athena, build, run
-echo $'+ Trigger/EFTracking/EFTrackingFPGAIntegration\n+ Control/AthXRT/AthXRTInterfaces\n+ Control/AthXRT/AthXRTServices\n- .*' > package_filter_EFT.txt
+echo $'+ Trigger/EFTracking/EFTrackingFPGAIntegration/.*\n+ Control/AthXRT/AthXRTInterfaces\n+ Control/AthXRT/AthXRTServices\n- .*' > package_filter_EFT.txt
 cd build
 setupATLAS
 source /opt/xilinx/xrt/setup.sh ; source /opt/xilinx/Vitis/2024.1/settings64.sh # this is on the testbed, otherwise setup your own xrt and xilinx
@@ -93,7 +93,7 @@ Once the pakcage is built successfully, modify the file `python/BenchmarkConfig.
 
 To run
 ```
-python -m EFTrackingFPGAIntegration.BenchmarkConfig FPGADataPrep.DoActs=True FPGADataPrep.RunPassThrough=False
+python -m EFTrackingFPGAPipeline.BenchmarkConfig FPGADataPrep.DoActs=True FPGADataPrep.RunPassThrough=False
 ```
 If `FPGADataPrep.DoActs` is set to False, the algorithm will stop at the cluster level, otherwise it runs the ACTS spacepoint formation, seeding, and tracking. If `RunPassThrough` is set to True, only the EDMPrep kernel will be executed on the FPGA.
 
