@@ -68,6 +68,7 @@ if __name__ == "__main__":
     flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root"]
     # flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"]
     flags.Output.AODFileName = "FPGA.Benchmark.AOD.pool.root"
+    flags.Debug.DumpEvtStore=False
     flags.fillFromArgs()
     flags.lock()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass", keepOriginal=True)
@@ -105,18 +106,36 @@ if __name__ == "__main__":
     
     # Connection to ACTS
     if flags.FPGADataPrep.DoActs:
-        from EFTrackingFPGAUtility.DataPrepToActsConfig import DataPrepToActsCfg
-        cfg.merge(DataPrepToActsCfg(flags, **kwarg))
+        
+        # convert xAOD Clusters to SPs
+        from EFTrackingFPGAUtility.DataPrepToActsConfig import UseActsSpacePointFormationCfg
+        cfg.merge(UseActsSpacePointFormationCfg(flags))
+                
+        # Run the ACTS Fast Tracking on FPGA clusters
+        from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimDataPrepConnectToFastTracking
+        cfg.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks="FPGA",
+                            **{'PixelSeedingAlg.InputSpacePoints' : ['FPGAPixelSpacePoints'],
+                                'StripSeedingAlg.InputSpacePoints' : [''],
+                                'TrackFindingAlg.UncalibratedMeasurementContainerKeys' : ["FPGAPixelClusters","FPGAStripClusters"],
+                                'PixelClusterToTruthAssociationAlg.Measurements' : 'FPGAPixelClusters',
+                                'StripClusterToTruthAssociationAlg.Measurements' : 'FPGAStripClusters'}))
+        
+        # Run the ACTS Fast Tracking (C-100) as an additional reference
+        cfg.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks="ActsFast"))
+        
         OutputItemList += [
                     "xAOD::TrackParticleContainer#FPGATrackParticles",
                     "xAOD::TrackParticleAuxContainer#FPGATrackParticlesAux."
                     ]
-    
+
     from EFTrackingFPGAOutputValidation.FPGAOutputValidationConfig import FPGAOutputValidationCfg
     cfg.merge(FPGAOutputValidationCfg(flags, **{
         "pixelKeys": ["FPGAPixelClusters", "ITkPixelClusters"],
         "stripKeys": ["FPGAStripClusters", "ITkStripClusters"],
-    }))
+        'doDiffHistograms':True,
+        'matchByID' : True,
+        'allowedRdoMisses': 1000}))
+    
     
     # Prepare output
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
