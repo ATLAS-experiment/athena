@@ -116,7 +116,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "JetAssociatedPixelClusters",
             "JetAssociatedSCTClusters",
             "PixelClusters",
-            "SCTClusters",
+            "SCT_Clusters",
     ]
     
     if flags.GeoModel.Run >= LHCPeriod.Run4:
