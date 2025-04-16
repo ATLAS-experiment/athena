@@ -14,12 +14,11 @@
 namespace DerivationFramework {
 
   UsedInVertexFitTrackDecorator::UsedInVertexFitTrackDecorator(const std::string& type, const std::string& name, const IInterface* parent) : 
-    AthAlgTool(type, name, parent),
+    base_class(type, name, parent),
     m_decoTool("InDet::InDetUsedInFitTrackDecoratorTool/" + name + "_IDUsedInFitDecoratorTool", this)
   {
     // Property declarations
     declareProperty("UsedInFitDecoratorTool", m_decoTool, "IInDetUsedInFitTrackDecoratorTool for decorating tracks");
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
   }
 
   StatusCode UsedInVertexFitTrackDecorator::initialize()

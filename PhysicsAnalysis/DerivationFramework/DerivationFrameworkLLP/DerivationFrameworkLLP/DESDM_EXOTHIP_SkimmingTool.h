@@ -28,7 +28,7 @@
 
 namespace DerivationFramework {
   
-  class DESDM_EXOTHIP_SkimmingTool : public AthAlgTool, public ISkimmingTool {
+  class DESDM_EXOTHIP_SkimmingTool : public extends<AthAlgTool, ISkimmingTool> {
   
   public:
   /* Constructor with parameter */

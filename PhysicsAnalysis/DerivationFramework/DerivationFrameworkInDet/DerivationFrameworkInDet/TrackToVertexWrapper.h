@@ -23,7 +23,7 @@
 
 namespace DerivationFramework {
 
-  class TrackToVertexWrapper : public AthAlgTool, public IAugmentationTool {
+  class TrackToVertexWrapper : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       TrackToVertexWrapper(const std::string& t, const std::string& n, const IInterface* p);
 

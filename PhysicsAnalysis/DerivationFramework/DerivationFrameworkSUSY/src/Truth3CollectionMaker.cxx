@@ -20,7 +20,7 @@
 DerivationFramework::Truth3CollectionMaker::Truth3CollectionMaker(const std::string& t,
                                                                   const std::string& n,
                                                                   const IInterface* p ) :
-ExpressionParserUser<AthAlgTool>(t,n,p),
+base_class(t,n,p),
 //m_ntotvtx(0),
 m_ntotpart(0),
 //m_npassvtx(0),
@@ -32,7 +32,6 @@ m_partString(""),
 m_classifier("MCTruthClassifier/MCTruthClassifier"),
 m_runClassifier(true)
 {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("ParticlesKey", m_particlesKey);
     //declareProperty("VerticesKey", m_verticesKey);
     declareProperty("NewCollectionName", m_collectionName);

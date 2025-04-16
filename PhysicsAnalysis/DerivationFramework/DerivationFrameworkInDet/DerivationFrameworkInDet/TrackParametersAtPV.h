@@ -32,7 +32,7 @@ namespace DerivationFramework {
 
       @author James Catmore -at- cern.ch
      */
-  class TrackParametersAtPV : public AthAlgTool, public IAugmentationTool {
+  class TrackParametersAtPV : public extends<AthAlgTool, IAugmentationTool> {
    
   public: 
     /** Constructor with parameters */

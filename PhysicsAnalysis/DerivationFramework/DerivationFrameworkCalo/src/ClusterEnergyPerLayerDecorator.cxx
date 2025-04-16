@@ -20,9 +20,8 @@ DerivationFramework::ClusterEnergyPerLayerDecorator::
   ClusterEnergyPerLayerDecorator(const std::string& t,
                                  const std::string& n,
                                  const IInterface* p)
-  : AthAlgTool(t, n, p)
+  : base_class(t, n, p)
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
   declareProperty("neta", m_eta_size);
   declareProperty("nphi", m_phi_size);
   declareProperty("layers", m_layers = { 0, 1, 2, 3 });

@@ -15,8 +15,7 @@
 namespace DerivationFramework
 {
     HICentralityDecorationTool::HICentralityDecorationTool(const std::string& type, const std::string& name, const IInterface* parent)
-        : AthAlgTool(type, name, parent) {
-            declareInterface<DerivationFramework::IAugmentationTool>(this);
+        : base_class(type, name, parent) {
         }
   
         // Athena initialize and finalize

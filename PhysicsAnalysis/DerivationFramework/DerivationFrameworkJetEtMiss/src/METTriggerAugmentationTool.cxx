@@ -18,9 +18,8 @@ namespace DerivationFramework {
   METTriggerAugmentationTool::METTriggerAugmentationTool(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    AthAlgTool(t,n,p)
+    base_class(t,n,p)
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("OutputName", m_outputName = "LVL1EnergySumRoI_KF");
     declareProperty("LUTFile", m_LUTFileName = "LUT_data15.root");
     declareProperty("L1METName", m_L1METName = "LVL1EnergySumRoI");

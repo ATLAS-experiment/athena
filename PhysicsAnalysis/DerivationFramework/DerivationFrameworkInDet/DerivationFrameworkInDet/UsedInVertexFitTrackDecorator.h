@@ -22,9 +22,7 @@
 
 namespace DerivationFramework {
 
-  class UsedInVertexFitTrackDecorator :
-    public AthAlgTool,
-    public IAugmentationTool
+  class UsedInVertexFitTrackDecorator : public extends<AthAlgTool, IAugmentationTool>
   {
     ///////////////////////////////////////////////////////////////////
     // Public methods:

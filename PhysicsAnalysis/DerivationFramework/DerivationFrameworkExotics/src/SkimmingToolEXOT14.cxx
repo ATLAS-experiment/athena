@@ -23,7 +23,7 @@
 DerivationFramework::SkimmingToolEXOT14::SkimmingToolEXOT14(const std::string& t,
 							    const std::string& n,
 							    const IInterface* p) : 
-  AthAlgTool(t, n, p),
+  base_class(t, n, p),
   m_trigDecisionTool("Trig::TrigDecisionTool/TrigDecisionTool"),
   m_n_tot(0),
   m_n_passGRL(0),
@@ -37,7 +37,6 @@ DerivationFramework::SkimmingToolEXOT14::SkimmingToolEXOT14(const std::string& t
   m_n_pass(0)
 {
 
-  declareInterface<DerivationFramework::ISkimmingTool>(this);
 
   declareProperty("JetContainer",          m_jetSGKey = "AntiKt4LCTopoJets");
 

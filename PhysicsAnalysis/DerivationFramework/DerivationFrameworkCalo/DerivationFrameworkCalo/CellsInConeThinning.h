@@ -26,9 +26,7 @@
 
 namespace DerivationFramework {
 
-class CellsInConeThinning
-  : public ExpressionParserUser<AthAlgTool>
-  , public IAugmentationTool
+class CellsInConeThinning : public extends<ExpressionParserUser<AthAlgTool>, IAugmentationTool>
 {
 public:
   CellsInConeThinning(const std::string& type,

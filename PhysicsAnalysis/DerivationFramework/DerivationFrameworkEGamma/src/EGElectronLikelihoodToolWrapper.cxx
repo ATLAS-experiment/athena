@@ -23,14 +23,13 @@ EGElectronLikelihoodToolWrapper::EGElectronLikelihoodToolWrapper(
   const std::string& t,
   const std::string& n,
   const IInterface* p)
-  : AthAlgTool(t, n, p)
+  : base_class(t, n, p)
   , m_cut("")
   , m_sgName("")
   , m_storeTResult(false)
   , m_sgMultipleNames({})
   , m_storeMultipleOutputs(false)
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
   declareProperty("CutType", m_cut);
   declareProperty("StoreGateEntryName", m_sgName);
   declareProperty("StoreTResult", m_storeTResult);

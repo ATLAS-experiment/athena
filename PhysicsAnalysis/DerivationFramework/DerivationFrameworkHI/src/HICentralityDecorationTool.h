@@ -19,7 +19,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 namespace DerivationFramework {
 
-  class HICentralityDecorationTool : public AthAlgTool, public IAugmentationTool {
+  class HICentralityDecorationTool : public extends<AthAlgTool, IAugmentationTool> {
 
   public:
     HICentralityDecorationTool(const std::string& type, const std::string& name, const IInterface* parent);

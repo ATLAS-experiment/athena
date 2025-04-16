@@ -20,9 +20,7 @@
 
 namespace DerivationFramework {
 
-class TruthCaloShowerDecorator
-  : public AthAlgTool
-  , public IAugmentationTool
+class TruthCaloShowerDecorator : public extends<AthAlgTool, IAugmentationTool>
 {
 public:
   TruthCaloShowerDecorator(const std::string& t,
