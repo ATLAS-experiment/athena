@@ -158,13 +158,7 @@ def MuonR4SegmentRecoChainCfg(flags):
     from MuonSegmentCnv.MuonSegmentCnvConfig import MuonR4SegmentCnvAlgCfg
     result.merge(MuonR4SegmentCnvAlgCfg(flags))
     
-    from MuonConfig.MuonSegmentFindingConfig import MuonSegmentCnvAlgCfg
-    result.merge(MuonSegmentCnvAlgCfg(flags, "MuonSegmentCnvAlgR4Chain",
-                                            SegmentContainerName="TrackMuonSegmentsR4",
-                                            xAODContainerName="MuonSegmentsFromR4"))
-
     from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg
-
     result.merge(MuPatTrackBuilderCfg(flags, name="TrackBuildingFromR4Segments",
                                              MuonSegmentCollection = "TrackMuonSegmentsR4",
                                              SpectrometerTrackOutputLocation="MuonTracksR4"))
@@ -173,11 +167,6 @@ def MuonR4SegmentRecoChainCfg(flags):
     result.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags,name="MuonXAODParticleConvR4",
                                                       TrackContainerName="MuonTracksR4",
                                                       xAODTrackParticlesFromTracksContainerName="MuonSpectrometerTrackParticlesR4"))
-    
-    from MuonObjectMarker.ObjectMarkerConfig import MuonSegmentFitParDecorAlgCfg
-
-    result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="SegmentParDecorAlgFromR4", 
-                                                     SegmentKey="MuonSegmentsFromR4"))
 
     if flags.Input.isMC:
         from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg

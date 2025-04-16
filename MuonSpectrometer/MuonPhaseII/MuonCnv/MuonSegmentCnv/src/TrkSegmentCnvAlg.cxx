@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include "SegmentCnvAlg.h"
+#include "TrkSegmentCnvAlg.h"
 #include "MuonSegment/MuonSegment.h"
 
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
@@ -14,7 +14,7 @@
 
 namespace MuonR4{
     
-    StatusCode SegmentCnvAlg::initialize() {
+    StatusCode TrkSegmentCnvAlg::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
 
         ATH_CHECK(m_keyTgc.initialize(!m_keyTgc.empty()));
@@ -31,7 +31,7 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     
-    StatusCode SegmentCnvAlg::execute(const EventContext& ctx) const {
+    StatusCode TrkSegmentCnvAlg::execute(const EventContext& ctx) const {
 
         auto translatedSegments = std::make_unique<Trk::SegmentCollection>();
         for (const SG::ReadHandleKey<SegmentContainer>& key : m_readKeys) {
@@ -49,7 +49,7 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     template <class PrdType> 
-        const PrdType* SegmentCnvAlg::fetchPrd(const Identifier& prdId,
+        const PrdType* TrkSegmentCnvAlg::fetchPrd(const Identifier& prdId,
                                                const Muon::MuonPrepDataContainerT<PrdType>* prdContainer) const {
         if (!prdContainer) {
             ATH_MSG_ERROR("Cannot fetch a prep data object as the container given for "<<
@@ -71,10 +71,10 @@ namespace MuonR4{
         return nullptr;    
     }
     template <class PrdType>
-        StatusCode SegmentCnvAlg::convertMeasurement(const MuonR4::Segment& segment,
-                                                     const CalibratedSpacePoint& spacePoint,
-                                                     const Muon::MuonPrepDataContainerT<PrdType>* prdContainer,
-                                                     std::vector<std::unique_ptr<Trk::RIO_OnTrack>>& convMeasVec) const {
+        StatusCode TrkSegmentCnvAlg::convertMeasurement(const MuonR4::Segment& segment,
+                                                        const CalibratedSpacePoint& spacePoint,
+                                                        const Muon::MuonPrepDataContainerT<PrdType>* prdContainer,
+                                                        std::vector<std::unique_ptr<Trk::RIO_OnTrack>>& convMeasVec) const {
         bool added{false};
 
         for (const xAOD::UncalibratedMeasurement* uncalib: {spacePoint.spacePoint()->primaryMeasurement(), 
@@ -114,9 +114,9 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
 
-    StatusCode SegmentCnvAlg::convert(const EventContext& ctx,
-                                      const MuonR4::Segment& segment,
-                                      Trk::SegmentCollection& outContainer) const {
+    StatusCode TrkSegmentCnvAlg::convert(const EventContext& ctx,
+                                         const MuonR4::Segment& segment,
+                                         Trk::SegmentCollection& outContainer) const {
 
         const Muon::RpcPrepDataContainer* rpcPrds{nullptr};
         const Muon::MdtPrepDataContainer* mdtPrds{nullptr};
@@ -137,7 +137,7 @@ namespace MuonR4{
         unsigned int nPrec{0};
         for (const Segment::MeasType& spacePoint : segment.measurements()){
             if (spacePoint->fitState() != CalibratedSpacePoint::State::Valid) {
-                // ATH_MSG_VERBOSE("Reject in")
+                ATH_MSG_VERBOSE("'Reject invalid measurement'");
                 continue;
             }
             switch (spacePoint->type()) {
