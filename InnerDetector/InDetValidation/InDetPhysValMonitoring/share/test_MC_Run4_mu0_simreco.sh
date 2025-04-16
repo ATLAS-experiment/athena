@@ -152,3 +152,6 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
      -r ${lastref_dir}/${dcubemon_rec} \
      ${dcubemon_rec}
    echo "art-result: $? dcube_rec_last"
+ fi
+
+fi
