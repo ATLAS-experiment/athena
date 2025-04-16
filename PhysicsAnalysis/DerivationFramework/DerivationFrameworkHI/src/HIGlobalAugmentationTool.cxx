@@ -17,9 +17,8 @@ namespace DerivationFramework
 {
   HIGlobalAugmentationTool::HIGlobalAugmentationTool( 	const std::string& t,
 								const std::string& n,
-								const IInterface* p ) :   AthAlgTool(t,n,p)
+								const IInterface* p ) :   base_class(t,n,p)
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("InDetTrackParticlesKey", m_TP_key="InDetTrackParticles");
     declareProperty("TrackSelectionTools", m_trkSelTools, "Track selection tools" );
     declareProperty("cutLevels", m_cutLevels, "Cut levels");

@@ -20,9 +20,7 @@
 
 namespace DerivationFramework {
 
-class BkgElectronClassification
-  : public AthAlgTool
-  , public IAugmentationTool
+class BkgElectronClassification : public extends<AthAlgTool, IAugmentationTool>
 {
 public:
   BkgElectronClassification(const std::string& t,

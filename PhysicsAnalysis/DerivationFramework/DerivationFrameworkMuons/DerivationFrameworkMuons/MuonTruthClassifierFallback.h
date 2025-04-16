@@ -19,7 +19,7 @@
 #include "xAODTruth/TruthPileupEventContainer.h"
 
 namespace DerivationFramework {
-    class MuonTruthClassifierFallback : public AthAlgTool, public IAugmentationTool {
+    class MuonTruthClassifierFallback : public extends<AthAlgTool, IAugmentationTool> {
     public:
         /** Constructor with parameters */
         MuonTruthClassifierFallback(const std::string& t, const std::string& n, const IInterface* p);

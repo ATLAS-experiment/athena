@@ -25,7 +25,7 @@
 namespace DerivationFramework {
 
   /** @brief Class-algorithm for track particle collection merging*/
-  class MergerTester : public AthAlgTool, public IAugmentationTool 
+  class MergerTester : public extends<AthAlgTool, IAugmentationTool> 
     {
       
     public:

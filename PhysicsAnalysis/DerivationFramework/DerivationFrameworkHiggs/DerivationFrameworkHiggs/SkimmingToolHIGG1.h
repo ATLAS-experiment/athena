@@ -43,7 +43,7 @@ namespace DerivationFramework {
   
  
  
-  class SkimmingToolHIGG1 : public AthAlgTool, public ISkimmingTool {
+  class SkimmingToolHIGG1 : public extends<AthAlgTool, ISkimmingTool> {
    
 
 

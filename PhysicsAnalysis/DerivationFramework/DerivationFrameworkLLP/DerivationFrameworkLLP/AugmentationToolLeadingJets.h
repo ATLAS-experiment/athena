@@ -19,7 +19,7 @@
 
 namespace DerivationFramework {
 
-  class AugmentationToolLeadingJets : public AthAlgTool, public IAugmentationTool {
+  class AugmentationToolLeadingJets : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       AugmentationToolLeadingJets(const std::string& t, const std::string& n, const IInterface* p);
       virtual StatusCode initialize() override;

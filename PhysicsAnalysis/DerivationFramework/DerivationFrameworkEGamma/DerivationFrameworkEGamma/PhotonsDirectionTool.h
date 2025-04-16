@@ -18,9 +18,7 @@
 #include <vector>
 namespace DerivationFramework {
 
-class PhotonsDirectionTool
-  : public AthAlgTool
-  , public IAugmentationTool
+class PhotonsDirectionTool : public extends<AthAlgTool, IAugmentationTool>
 {
 public:
   PhotonsDirectionTool(

@@ -28,7 +28,7 @@
 namespace DerivationFramework {
   
   /** @brief Class-algorithm for pseudo track selection */
-  class PseudoTrackSelector : public AthAlgTool, public IAugmentationTool
+  class PseudoTrackSelector : public extends<AthAlgTool, IAugmentationTool>
     {
     public:      
       ///////////////////////////////////////////////////////////////////

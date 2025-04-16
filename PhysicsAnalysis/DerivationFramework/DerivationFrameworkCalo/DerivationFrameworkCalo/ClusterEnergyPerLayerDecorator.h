@@ -27,9 +27,7 @@ namespace DerivationFramework {
 /** Decorate egamma objects with the energy per layer for a rectangular cluster
  * of size neta X nphi built on the fly
  **/
-class ClusterEnergyPerLayerDecorator
-  : public AthAlgTool
-  , public IAugmentationTool
+class ClusterEnergyPerLayerDecorator : public extends<AthAlgTool, IAugmentationTool>
 {
 public:
   ClusterEnergyPerLayerDecorator(const std::string& t,

@@ -18,7 +18,7 @@
 #include "xAODMuon/MuonContainer.h"
 
 namespace DerivationFramework {
-    class MuonJetDrTool : public AthAlgTool, public IAugmentationTool {
+    class MuonJetDrTool : public extends<AthAlgTool, IAugmentationTool> {
     public:
         /** Constructor with parameters */
         MuonJetDrTool(const std::string& t, const std::string& n, const IInterface* p);

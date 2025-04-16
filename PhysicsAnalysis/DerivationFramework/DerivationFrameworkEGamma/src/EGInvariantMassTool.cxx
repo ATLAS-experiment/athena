@@ -21,7 +21,7 @@ namespace DerivationFramework {
 EGInvariantMassTool::EGInvariantMassTool(const std::string& t,
                                          const std::string& n,
                                          const IInterface* p)
-  : ExpressionParserUser<AthAlgTool, kNumEGInvariantMassToolParser>(t, n, p)
+  : base_class(t, n, p)
   , m_expression1("true")
   , m_expression2("true")
   , m_mass1Hypothesis(0.0)
@@ -30,7 +30,6 @@ EGInvariantMassTool::EGInvariantMassTool(const std::string& t,
   , m_checkCharge(true)
   , m_doTransverseMass(false)
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
   declareProperty("Object1Requirements", m_expression1);
   declareProperty("Object2Requirements", m_expression2);
   declareProperty("Mass1Hypothesis", m_mass1Hypothesis);

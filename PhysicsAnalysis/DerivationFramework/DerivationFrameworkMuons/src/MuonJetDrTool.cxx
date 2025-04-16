@@ -8,8 +8,7 @@
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "StoreGate/WriteDecorHandle.h"
 // Constructor
-DerivationFramework::MuonJetDrTool::MuonJetDrTool(const std::string& t, const std::string& n, const IInterface* p) : AthAlgTool(t, n, p) {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
+DerivationFramework::MuonJetDrTool::MuonJetDrTool(const std::string& t, const std::string& n, const IInterface* p) : base_class(t, n, p) {
 }
 StatusCode DerivationFramework::MuonJetDrTool::initialize() {
     ATH_CHECK(m_muonSGKey.initialize());

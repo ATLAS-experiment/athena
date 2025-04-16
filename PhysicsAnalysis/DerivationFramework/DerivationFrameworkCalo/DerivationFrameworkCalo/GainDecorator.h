@@ -24,9 +24,7 @@
 
 namespace DerivationFramework {
 
-class GainDecorator
-  : public AthAlgTool
-  , public IAugmentationTool
+class GainDecorator : public extends<AthAlgTool, IAugmentationTool>
 {
 public:
   GainDecorator(const std::string& t,

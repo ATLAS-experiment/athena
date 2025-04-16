@@ -32,7 +32,7 @@ namespace DerivationFramework {
   /** @class SkimmingToolHIGG2
       @author Susumu.Oda@cern.ch
      */
-  class SkimmingToolHIGG2 : public AthAlgTool, public ISkimmingTool {
+  class SkimmingToolHIGG2 : public extends<AthAlgTool, ISkimmingTool> {
     
   public: 
     /** Constructor with parameters */

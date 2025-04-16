@@ -13,11 +13,10 @@
 namespace DerivationFramework {
 
   TauTruthMatchingWrapper::TauTruthMatchingWrapper(const std::string& t, const std::string& n, const IInterface* p) : 
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_tauKey("TauJets"),
     m_tTauTruthMatchingTool("TauAnalysisTools::TauTruthMatchingTool")
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("TauContainerName", m_tauKey);
     declareProperty("TauTruthMatchingTool", m_tTauTruthMatchingTool);
   }

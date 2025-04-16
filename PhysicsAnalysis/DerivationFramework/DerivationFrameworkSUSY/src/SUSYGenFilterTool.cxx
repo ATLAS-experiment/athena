@@ -17,11 +17,10 @@ namespace DerivationFramework {
   static const SG::AuxElement::Decorator<float> dec_genFiltMET("GenFiltMET");
 
   SUSYGenFilterTool::SUSYGenFilterTool(const std::string& t, const std::string& n, const IInterface* p):
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_classif("MCTruthClassifier/SUSYGenFilt_MCTruthClassifier")
   {
     
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     
     declareProperty("EventInfoName",m_eventInfoName="EventInfo");
     declareProperty("MCCollectionName",m_mcName="TruthParticles");

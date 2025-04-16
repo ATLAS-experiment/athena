@@ -29,7 +29,7 @@
 
 namespace DerivationFramework {
 
-  class UnassociatedHitsDecorator : public AthAlgTool, public IAugmentationTool {
+  class UnassociatedHitsDecorator : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       UnassociatedHitsDecorator(const std::string& type, const std::string& name, const IInterface* parent);
 

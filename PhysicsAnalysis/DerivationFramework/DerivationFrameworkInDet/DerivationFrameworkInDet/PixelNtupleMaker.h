@@ -26,7 +26,7 @@
 
 namespace DerivationFramework {
 
-  class PixelNtupleMaker : public AthAlgTool, public IAugmentationTool {
+  class PixelNtupleMaker : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       PixelNtupleMaker(const std::string& t, const std::string& n, const IInterface* p);
 

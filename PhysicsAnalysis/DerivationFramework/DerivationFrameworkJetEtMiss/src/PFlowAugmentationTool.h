@@ -26,7 +26,7 @@
 
 namespace DerivationFramework {
 
-  class PFlowAugmentationTool : public AthAlgTool, public IAugmentationTool {
+  class PFlowAugmentationTool : public extends<AthAlgTool, IAugmentationTool> {
   public: 
     PFlowAugmentationTool(const std::string& t, const std::string& n, const IInterface* p);
 

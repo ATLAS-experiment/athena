@@ -24,7 +24,7 @@
 
 namespace DerivationFramework {
 
-  class TauIDDecoratorWrapper : public AthAlgTool, public IAugmentationTool {
+  class TauIDDecoratorWrapper : public extends<AthAlgTool, IAugmentationTool> {
     public:
       TauIDDecoratorWrapper(const std::string& t, const std::string& n, const IInterface* p);
 

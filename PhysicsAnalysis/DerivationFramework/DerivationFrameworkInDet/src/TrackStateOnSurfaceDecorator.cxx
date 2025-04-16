@@ -77,7 +77,6 @@ namespace DerivationFramework {
     m_trtcaldbTool("TRT_CalDbTool",this),
     m_TRTdEdxTool("InDet::TRT_ElectronPidTools/TRT_ToT_dEdx")
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     // --- Steering and configuration flags
     declareProperty("IsSimulation",           m_isSimulation=true);
 

@@ -19,12 +19,11 @@
 DerivationFramework::SkimmingToolHIGG5VBF::SkimmingToolHIGG5VBF(const std::string& t,
 								const std::string& n,
 								const IInterface* p) : 
-  AthAlgTool(t, n, p),
+  base_class(t, n, p),
   m_trigDecisionTool("Trig::TrigDecisionTool/TrigDecisionTool"),
   m_ntot(0),
   m_npass(0) 
 {
-  declareInterface<DerivationFramework::ISkimmingTool>(this);  
   
   // for jet multiplicity requirement
   declareProperty("JetContainerKey", m_jetSGKey="AntiKt4EMTopoJets");

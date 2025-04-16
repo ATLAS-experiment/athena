@@ -42,7 +42,7 @@ namespace DerivationFramework {
   /** @class SkimmingToolEXOT14
       @author jsaxon@cern.ch (adapted from Susumu Oda)
      */
-  class SkimmingToolEXOT14 : public AthAlgTool, public ISkimmingTool {
+  class SkimmingToolEXOT14 : public extends<AthAlgTool, ISkimmingTool> {
 
     public: 
       /** Constructor with parameters */
