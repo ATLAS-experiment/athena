@@ -216,7 +216,16 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
         name = 'm_trt_ec_phi,m_trt_ec_lrVsPhiSec;trt_ec_lrVsPhiSec_' + layer
         tool.defineHistogram(name, title = title, type = 'TProfile', xbins = m_TRTEC_nPhiBins, xmin = -0.5 , xmax = m_TRTEC_nPhiBins - 0.5)
 
-        
+    # TRT residuals vs pt-wheel for end-caps
+    residualECTRT2DProfArray = helper.addArray([len(layersTRTEC)], alg, 'TRTResECvspT_2DProf', topPath = pathResiduals)
+    for postfix, tool in residualECTRT2DProfArray.Tools.items():
+        layer = layersTRTEC[int(postfix.split('_')[1])]
+        title = ('Residual vs pT-Wheel TRT %s; Wheel; Momentum p_{T}; Residual [mm]' % layer.upper()) 
+        name = 'm_layer_or_wheel,m_pT,m_trt_ec_residualR;trt_ec_resVsqPtWheel_' + layer
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = 20, xmin = - 0.5, xmax = 20 - 0.5,
+                                                  ybins = 80, ymin = -40, ymax = 40,
+                                                  zmin = m_minTRTResWindow, zmax = m_maxTRTResWindow)
+
     #Silicon Plots
     #Common for Pixel and SCT, barrel and Endcaps
     varName = 'm_si_residualx;si_residualx'
