@@ -65,7 +65,7 @@
 #include "AthContainers/DataVector.h"
 #include "AthLinks/ElementLink.h"
 #include <initializer_list>
-
+#include <boost/type_traits.hpp>
 
 /**
  * @brief @c DataVector adapter that acts like it holds const pointers.
