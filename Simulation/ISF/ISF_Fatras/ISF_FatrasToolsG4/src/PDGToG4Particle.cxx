@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -25,23 +25,6 @@
 #include "Gauginos/G4Neutralino.hh"
 
 #endif
-
-/*=========================================================================
- *  DESCRIPTION OF FUNCTION:
- *  ==> see headerfile
- *=======================================================================*/
-iFatras::PDGToG4Particle::PDGToG4Particle(const std::string& t,
-                                          const std::string& n,
-                                          const IInterface* p)
-  : AthAlgTool(t,n,p),
-    m_pdgG4ParticleMap()
-{
-  declareInterface<iFatras::PDGToG4Particle>(this);
-
-  declareProperty("UseParticles", m_useParticles);
-  declareProperty("PrintList",    m_printList=false);
-
-}
 
 
 /*=========================================================================
