@@ -301,15 +301,6 @@ class MonitorDef:
                     # AFP
                     "L1_AFP_A_OR_C", "L1_AFP_A_AND_C",
                     # AFP combined
-                    "L1_AFP_A_AND_C_J12",
-                    "L1_AFP_A_AND_C_TOF_J20",
-                    "L1_AFP_A_AND_C_TOF_J30",
-                    "L1_AFP_A_AND_C_TOF_J50",
-                    "L1_AFP_A_AND_C_TOF_J75",
-                    "L1_AFP_A_AND_C_TOF_T0T1_J20",
-                    "L1_AFP_A_AND_C_TOF_T0T1_J30",
-                    "L1_AFP_A_AND_C_TOF_T0T1_J50",
-                    "L1_AFP_A_AND_C_TOF_T0T1_J75",
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ125",
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ50",
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ60",
@@ -320,7 +311,6 @@ class MonitorDef:
                     "L1_AFP_A_AND_C_TOF_jJ90",
                     "L1_AFP_A_AND_C_jJ20",
                     "L1_AFP_A_AND_C_jJ30",
-                    "L1_AFP_A_OR_C_J12",
                     "L1_AFP_A_OR_C_jJ20",
                     "L1_AFP_A_OR_C_jJ30",
                     # ZDC
