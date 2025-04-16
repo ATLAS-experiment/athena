@@ -10,9 +10,7 @@
 #define HGTD_TRACKINGGEOMETRY_HGTDLAYERBUILDERCOND_H
 
 // Athena
-// Athena
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "CxxUtils/checker_macros.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElementCollection.h"
 
 // Amg
@@ -45,7 +43,7 @@ namespace Trk {
 
    */
 
-class ATLAS_NOT_THREAD_SAFE HGTD_LayerBuilderCond : public extends<AthAlgTool, Trk::ILayerBuilderCond> {
+class HGTD_LayerBuilderCond : public extends<AthAlgTool, Trk::ILayerBuilderCond> {
 
   public:
 

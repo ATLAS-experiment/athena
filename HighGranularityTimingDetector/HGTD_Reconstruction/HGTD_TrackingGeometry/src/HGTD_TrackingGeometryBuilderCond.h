@@ -28,8 +28,7 @@ namespace Trk {
 
 class IEnvelopeDefSvc;
 
-class ATLAS_NOT_THREAD_SAFE HGTD_TrackingGeometryBuilderCond //not safe indexStaticLayers
-  : public extends<AthAlgTool, Trk::IGeometryBuilderCond>
+class HGTD_TrackingGeometryBuilderCond : public extends<AthAlgTool, Trk::IGeometryBuilderCond>
 {
 
 public:
