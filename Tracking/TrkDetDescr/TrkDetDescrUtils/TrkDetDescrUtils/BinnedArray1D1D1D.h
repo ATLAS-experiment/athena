@@ -12,6 +12,7 @@
 #include "TrkDetDescrUtils/BinUtility.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkDetDescrUtils/SharedObject.h"
+#include "CxxUtils/CachedUniquePtr.h"
 //
 // STL
 #include <cassert>
