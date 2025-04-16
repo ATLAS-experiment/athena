@@ -170,7 +170,6 @@ class MuonStationTypeBuilder : public AthAlgTool {
                                                             "Trk::TrackingVolumeArrayCreator/TrackingVolumeArrayCreator"};  
 
     std::unique_ptr<const Trk::Material> m_muonMaterial;  //!< the material
-    Trk::GeoMaterialConverter m_materialConverter;
     Trk::GeoShapeConverter m_geoShapeConverter;
     Trk::VolumeConverter m_volumeConverter;
 };
