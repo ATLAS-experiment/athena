@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMPARAMETRIZATION_FASTCALOSIMGEOMETRYHELPER_H
@@ -13,7 +13,8 @@
 
 class CaloDetDescrManager;
 
-class FastCaloSimGeometryHelper:public AthAlgTool, public CaloGeometry, virtual public IFastCaloSimGeometryHelper {
+class FastCaloSimGeometryHelper: public extends<AthAlgTool, IFastCaloSimGeometryHelper>,
+                                 public CaloGeometry {
  public :
   /** Constructor with parameters */
   FastCaloSimGeometryHelper( const std::string& t, const std::string& n, const IInterface* p );
