@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -27,29 +27,30 @@ namespace DerivationFramework {
 
       @author James Catmore -at- cern.ch
      */
-  class SkimmingToolExample : public AthAlgTool, public ISkimmingTool {
+  class SkimmingToolExample : public extends<AthAlgTool, ISkimmingTool> {
     
   public: 
-    /** Constructor with parameters */
-    SkimmingToolExample( const std::string& t, const std::string& n, const IInterface* p );
-    
-    /** Destructor */
-    ~SkimmingToolExample();
-    
-    // Athena algtool's Hooks
-    virtual StatusCode initialize() override;
+    /** Use constructor from base class */
+    using base_class::base_class;
+
+    /** Athena algtool's Hooks */
     virtual StatusCode finalize() override;
     
     /** Check that the current event passes this filter */
     virtual bool eventPassesFilter() const override;
     
   private:
-    mutable std::atomic<unsigned int> m_ntot;
-    mutable std::atomic<unsigned int> m_npass;
-    std::string m_muonSGKey;
-    unsigned int m_nMuons;
-    double m_muonPtCut;
+    Gaudi::Property<std::string> m_muonSGKey
+      {this, "MuonContainerKey", "Muons", "Key for muon container"};
 
+    Gaudi::Property<unsigned int> m_nMuons
+      {this, "NumberOfMuons", 2, "Minimum number of muons"};
+
+    Gaudi::Property<double> m_muonPtCut
+      {this, "MuonPtCut", 10000.0, "p_T cut on muon in MeV"};
+
+    mutable std::atomic<unsigned int> m_ntot{0};
+    mutable std::atomic<unsigned int> m_npass{0};
   }; 
   
 }

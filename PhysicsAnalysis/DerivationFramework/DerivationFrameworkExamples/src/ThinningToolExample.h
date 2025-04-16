@@ -1,20 +1,15 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// ThinningToolExample.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 #ifndef DERIVATIONFRAMEWORK_THINNINGTOOLEXAMPLE_H
-#define DERIVATIONFRAMEWORK_THINNINGTOOLEXAMPLE_H 1
+#define DERIVATIONFRAMEWORK_THINNINGTOOLEXAMPLE_H
 
-#include<string>
-#include<atomic>
+#include <string>
+#include <atomic>
 
 // Gaudi & Athena basics
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "StoreGate/ThinningHandleKey.h"
 
@@ -31,9 +26,9 @@ namespace DerivationFramework {
   class ThinningToolExample : public extends<AthAlgTool, IThinningTool> {
     
   public: 
-    /** Constructor with parameters */
-    ThinningToolExample( const std::string& t, const std::string& n, const IInterface* p );
-    
+    /** Use constructor from base class */
+    using base_class::base_class;
+
     /** Destructor */
     virtual ~ThinningToolExample();
     
@@ -45,17 +40,20 @@ namespace DerivationFramework {
     virtual StatusCode doThinning() const override;
  
   private:
-    StringProperty m_streamName
-    { this, "StreamName", "", "Name of the stream being thinned" };
-    SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_inDetSGKey
-      { this, "InDetTrackParticlesKey", "InDetTrackParticles", "" };
+    Gaudi::Property<std::string> m_streamName
+      { this, "StreamName", "", "Name of the stream being thinned" };
 
-    mutable std::atomic<unsigned int> m_ntot;
-    mutable std::atomic<unsigned int> m_npass;
-    double m_trackPtCut;
+    Gaudi::Property<double> m_trackPtCut
+      { this, "TrackPtCut", 20.0, "Track p_T cut in GeV" };
+
+    SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_inDetSGKey
+      { this, "InDetTrackParticlesKey", "InDetTrackParticles", "Key for track particle container" };
+
+    mutable std::atomic<unsigned int> m_ntot{0};
+    mutable std::atomic<unsigned int> m_npass{0};
+
   }; 
   
 }
-
 
 #endif
