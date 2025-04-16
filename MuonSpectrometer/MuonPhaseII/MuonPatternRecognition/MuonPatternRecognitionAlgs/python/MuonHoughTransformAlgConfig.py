@@ -52,4 +52,6 @@ def MuonPatternRecognitionCfg(flags):
         result.merge(MuonEtaHoughTransformAlgCfg(flags))
         result.merge(MuonPhiHoughTransformAlgCfg(flags))
         result.merge(MuonSegmentFittingAlgCfg(flags))
+        from MuonSegmentCnv.MuonSegmentCnvConfig import xAODSegmentCnvAlgCfg
+        result.merge(xAODSegmentCnvAlgCfg(flags))
     return result

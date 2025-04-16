@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef MUONSEGMENTCNV_SEGMENTCNVALG_H
-#define MUONSEGMENTCNV_SEGMENTCNVALG_H
+#ifndef MUONSEGMENTCNV_TRKSEGMENTCNVALG_H
+#define MUONSEGMENTCNV_TRKSEGMENTCNVALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -19,16 +19,15 @@
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
 
 namespace MuonR4{
-    /** @brief The SegmentCnvAlg converts the SegmentSeeds produced by the R4 pattern recognition chain
+    /** @brief The TrkSegmentCnvAlg converts the SegmentSeeds produced by the R4 pattern recognition chain
      *         into the segment seeds that can be consumed by the legacy muon segment maker
      */
-    class SegmentCnvAlg : public AthReentrantAlgorithm{
+    class TrkSegmentCnvAlg : public AthReentrantAlgorithm {
         public:
 
             using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
             StatusCode initialize() override final;
-
             StatusCode execute(const EventContext& ctx) const override final;
     
         private:
