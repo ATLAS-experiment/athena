@@ -71,6 +71,9 @@ Available properties
 Overview
 ========
 
+Documentation about the uncertainties and the tool setup can be also found in `TWiki
+<https://twiki.cern.ch/twiki/bin/view/AtlasProtected/TauRecommendationsR22>`_ 
+
 The tool can be used to apply tau pt smearing for a specific
 ``RecommendationTag``:
 
@@ -86,9 +89,9 @@ The tool can be used to apply tau pt smearing for a specific
    * - ``RecommendationTag``
      - ``std::string``
      - ``"2022-prerec"``
-     - ``"-"``
+     - ``"2025-prerec"``
 
-The following table lists other properties for further configurations:
+The following table lists other properties for further configurations for "2022-prerec" tag:
 
 
 .. list-table::
@@ -113,7 +116,30 @@ The following table lists other properties for further configurations:
      - ``true``
      - apply a compatibility check between calo TES and MVA TES and decorate the tau with a boolean "TESCompatibility" with the check results.
 
-Release Specific Configuration
+
+The following table lists other properties for further configurations for "2025-prerec" tag:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 15 10 20 55
+      
+   * - property name
+     - type
+     - default(alt) value
+     - comment
+
+   * - ``Campaign``
+     - ``std::string``
+     - ``"mc23"("mc20")``
+     - For ``2025-prerec``, toggle between run-2 (``"mc20"``) and run-3 (``"mc23"``) pre-recommendations
+   * - ``MVATESQualityCheck``
+     - ``bool``
+     - ``true``
+     - apply a compatibility check between calo TES and MVA TES and decorate the tau with a boolean "TESCompatibility" with the check results.
+
+
+
+Release Specific Configuration for "2022-prerec" tag: 
 ==============================
 .. list-table::
    :header-rows: 1

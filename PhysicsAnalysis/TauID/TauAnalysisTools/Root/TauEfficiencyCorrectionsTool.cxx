@@ -319,10 +319,9 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
         }
 
 	if(m_sCampaign=="mc23"){  
-            m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_mc23_v0.root";
-        } else if (m_sCampaign=="mc20"){ 
-            ATH_MSG_ERROR("SFs for Run2 not available, please check the Campaign option in the tool configuration");
-            return StatusCode::FAILURE;
+            m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_mc23_v1.root";
+        } else if (m_sCampaign=="mc20"){
+	    m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_mc20_v0.root";   	
         }
       }
       if (m_sVarNameJetIDHadTau.empty()) m_sVarNameJetIDHadTau = "TauScaleFactorJetIDHadTau";
@@ -420,7 +419,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
             return StatusCode::FAILURE;
           }
         } else if (m_sCampaign=="mc20"){
-            ATH_MSG_ERROR("SFs for Run2 not available, please check the Campaign option in the tool configuration");
+            ATH_MSG_ERROR("SFs for Run2 not available, please check the Campaign option in the tool configuration. If the config is correct, then please contact the tau trigger coordinators");
 	    return StatusCode::FAILURE;
 	}
       }
