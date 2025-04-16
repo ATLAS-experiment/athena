@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_FrontEndTool.h
  *
@@ -21,7 +21,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "SiDigitization/SiChargedDiodeCollection.h"
 
-class HGTD_FrontEndTool : public AthAlgTool, virtual public IFrontEnd {
+class HGTD_FrontEndTool : public extends<AthAlgTool, IFrontEnd> {
 
 public:
   /**  constructor */
