@@ -99,8 +99,8 @@ public:
   {
     if (this != &barr) {
       m_arrayObjects.release();
-      m_singleBinUtilities = barr.m_steeringBinUtility;
       m_steeringBinUtility = barr.m_steeringBinUtility;
+      m_singleBinUtilities = barr.m_singleBinUtilities;
       // prepare the binned Array
       if (m_singleBinUtilities.size()) {
         // prepare the array

@@ -31,62 +31,42 @@ namespace Trk {
 template<class T>
 class CompactBinnedArray1D final : public CompactBinnedArray<T>
 {
-
 public:
-  CompactBinnedArray1D() = default;
-  ~CompactBinnedArray1D() = default;
 
-  /**Constructor with std::vector and a BinUtility */
-  CompactBinnedArray1D(const std::vector<T*>& tclassvector,
-                       const std::vector<size_t>& indexvector,
-                       const BinUtility& bingen)
-    : CompactBinnedArray<T>()
-    , m_array(indexvector)
-    , m_arrayObjects(tclassvector)
-    , m_binUtility(bingen)
-  {
-    // maximal index must stay within the range of available objects
-    unsigned int iMax = 0;
-    for (unsigned int i = 0; i < indexvector.size(); i++){
-      if (indexvector[i] > iMax){
-        iMax = indexvector[i];
-      }
-    }
-  }
+ //Rule of 0 for default ctors
 
-  /**Copy Constructor - copies only pointers !*/
-  CompactBinnedArray1D(const CompactBinnedArray1D& barr)
-    : CompactBinnedArray<T>()
-    , m_binUtility(barr.m_binUtility)
-  {
-    m_array = barr.m_array;
-    m_arrayObjects = barr.m_arrayObjects;
-  }
-  /**Assignment operator*/
-  CompactBinnedArray1D& operator=(const CompactBinnedArray1D& barr)
-  {
-    if (this != &barr) {
-      // now refill
-      m_binUtility = (barr.m_binUtility);
-      m_array = barr.m_array;
-      m_arrayObjects = barr.m_arrayObjects;
-    }
-    return *this;
-  }
-  /** Implicit Constructor */
-  CompactBinnedArray1D* clone() const
-  {
-    return new CompactBinnedArray1D(m_arrayObjects, m_array, m_binUtility);
-  }
+ /**Constructor with arguents. Note that we do not take ownership
+  of pointersy */
+ CompactBinnedArray1D(const std::vector<T*>& tclassvector,
+                      const std::vector<size_t>& indexvector,
+                      const BinUtility& bingen)
+     : CompactBinnedArray<T>(),
+       m_array(indexvector),
+       m_arrayObjects(tclassvector),
+       m_binUtility(bingen) {}
 
-  CompactBinnedArray1D* clone(const std::vector<T*>& ptrs) const
-  {
-    assert(ptrs.size() == m_arrayObjects.size());
-    return new CompactBinnedArray1D(ptrs, m_array, m_binUtility);
-  }
+ CompactBinnedArray1D(const std::vector<T*>& tclassvector,
+                      std::vector<size_t>&& indexvector,
+                      BinUtility&& bingen)
+     : CompactBinnedArray<T>(),
+       m_array(std::move(indexvector)),
+       m_arrayObjects(tclassvector),
+       m_binUtility(std::move(bingen)) {}
+
+ /** Implicit Constructor */
+ CompactBinnedArray1D* clone() const
+ {
+   return new CompactBinnedArray1D(m_arrayObjects, m_array, m_binUtility);
+ }
+
+ CompactBinnedArray1D* clone(const std::vector<T*>& ptrs) const
+ {
+   assert(ptrs.size() == m_arrayObjects.size());
+   return new CompactBinnedArray1D(ptrs, m_array, m_binUtility);
+ }
 
   /** Returns the pointer to the templated class object from the BinnedArray,
-      it returns 0 if not defined;
+      it returns nullptr  if not defined;
    */
   T* object(const Amg::Vector2D& lp) const
   {
@@ -97,7 +77,7 @@ public:
   }
 
   /** Returns the pointer to the templated class object from the BinnedArray
-      it returns 0 if not defined;
+      it returns nullptr if not defined;
    */
   T* object(const Amg::Vector3D& gp) const
   {
@@ -156,9 +136,9 @@ public:
   }
 
 private:
-  std::vector<size_t> m_array{};       //!< vector of indices to objects
-  std::vector<T*> m_arrayObjects{};    //!< objects
-  BinUtility m_binUtility{};          //!< binUtility
+  std::vector<size_t> m_array{};    //!< vector of indices to objects
+  std::vector<T*> m_arrayObjects{}; //!< not owning pointers to objects
+  BinUtility m_binUtility{};        //!< binUtility
 };
 
 } // end of namespace Trk
