@@ -19,7 +19,7 @@ using namespace MuonPRDTest;
 
 namespace{
     using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
-    static const SG::ConstAccessor<SegLink_t> acc_truthSegLink{"truthSegLink"};
+    static const SG::ConstAccessor<SegLink_t> acc_truthSegLink{"truthSegmentLink"};
 }
 
 

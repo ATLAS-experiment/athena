@@ -3,6 +3,7 @@
 */
 
 #include <MuonTruthHelpers/MuonSimHitHelpers.h>
+#include <xAODMuon/MuonSegmentContainer.h>
 #include <xAODMuonSimHit/MuonSimHitContainer.h>
 #include <xAODTruth/TruthParticleContainer.h>
 #include <xAODMeasurementBase/UncalibratedMeasurementContainer.h>
@@ -97,9 +98,24 @@ namespace MuonR4 {
         return getMatchingSimHits(seed.getHitsInMax());
     }
     const xAOD::TruthParticle* getTruthMatchedParticle(const xAOD::MuonSegment& segment){
-        static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> acc{"truthParticleLink"};
-        if (acc.isAvailable(segment) && acc(segment).isValid()) {
-            return (*acc(segment));
+        using TruthLink_t = ElementLink<xAOD::TruthParticleContainer>;
+        static const SG::ConstAccessor<TruthLink_t> acc{"truthParticleLink"};
+        if (acc.isAvailable(segment)){
+            const TruthLink_t& link {acc(segment)};
+            if (link.isValid()) {
+                return *link;
+            }
+        }
+        return nullptr;
+    }
+    const xAOD::MuonSegment* getMatchedTruthSegment(const xAOD::MuonSegment& segment) {
+        using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
+        static const SG::ConstAccessor<SegLink_t> acc{"truthSegmentLink"};
+        if (acc.isAvailable(segment)) {
+            const SegLink_t& link{acc(segment)};
+            if (link.isValid()){
+                return *link;
+            }
         }
         return nullptr;
     }

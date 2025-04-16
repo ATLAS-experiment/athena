@@ -168,11 +168,6 @@ def MuonR4SegmentRecoChainCfg(flags):
                                                       TrackContainerName="MuonTracksR4",
                                                       xAODTrackParticlesFromTracksContainerName="MuonSpectrometerTrackParticlesR4"))
 
-    if flags.Input.isMC:
-        from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg
-        result.merge(RecoSegmentTruthAssocCfg(flags,
-                                              name="MuonSegmentsFromR4TruthMatching",
-                                              SegmentKey="MuonSegmentsFromR4"))
     return result 
 
 def TrackTruthMatchCfg(flags):

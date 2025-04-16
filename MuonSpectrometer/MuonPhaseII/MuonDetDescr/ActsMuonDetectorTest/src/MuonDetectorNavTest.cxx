@@ -34,7 +34,7 @@ using namespace Acts::UnitLiterals;
 namespace {
 
 using SegLink_t = std::vector<ElementLink<xAOD::MuonSegmentContainer>>;
-static const SG::ConstAccessor<SegLink_t> segAcc{"truthSegLinks"};
+static const SG::ConstAccessor<SegLink_t> segAcc{"truthSegmentLinks"};
 static const Amg::Vector3D dummyPos{100.*Gaudi::Units::m, 100.*Gaudi::Units::m, 100.*Gaudi::Units::m};
 struct PropagatorRecorder{
     /// @brief Position obtained by the ACTS propagator

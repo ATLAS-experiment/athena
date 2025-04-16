@@ -56,7 +56,7 @@ namespace ActsTrk {
 
         SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleKey{this, "TruthKey", "MuonTruthParticles"};
 
-        SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthSegLinkKey{this, "TruthKeyToSeg", m_truthParticleKey, "truthSegLinks", "TruthParticle to TruthSegment link"};
+        SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthSegLinkKey{this, "TruthKeyToSeg", m_truthParticleKey, "truthSegmentLinks", "TruthParticle to TruthSegment link"};
 
         const MuonGMR4::MuonDetectorManager* m_r4DetMgr{nullptr};
 

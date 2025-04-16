@@ -37,6 +37,8 @@ namespace MuonR4 {
     std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const SpacePointBucket& bucket);
     /** @brief Returns the particle truth-matched to the segment */
     const xAOD::TruthParticle* getTruthMatchedParticle(const xAOD::MuonSegment& segment);
+    /** @brief Returns the truth-matched segment */
+    const xAOD::MuonSegment* getMatchedTruthSegment(const xAOD::MuonSegment& segment);
 }
 
 #endif
