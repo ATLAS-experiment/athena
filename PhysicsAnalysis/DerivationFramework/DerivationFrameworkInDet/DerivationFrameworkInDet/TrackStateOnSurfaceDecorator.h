@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -114,15 +114,6 @@ namespace DerivationFramework {
          { this, "SctMsosName", "SCT_MSOSs", "" };
       SG::WriteHandleKey<xAOD::TrackStateValidationContainer> m_trtMsosName
          { this, "TrtMsosName",  "TRT_MSOSs", ""};
-
-      SG::ReadDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_readDecSiWidthKey
-	 { this, "ReadSiWidthKey", m_sctClustersName, "SiWidth" };
-      SG::ReadDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_readDecRdoStripKey
-	 { this, "ReadRdoStripKey", m_sctClustersName, "rdo_strip" };
-      SG::WriteDecorHandleKey< xAOD::TrackStateValidationContainer > m_writeDecSiWidthKey
-	 { this, "WriteSiWidthKey", m_sctMsosName, "SiWidth" };
-      SG::WriteDecorHandleKey< xAOD::TrackStateValidationContainer > m_writeDecFirstStripKey
-	 { this, "WriteRdoStripKey", m_sctMsosName, "first_strip" };
 
 
       // --- Read Cond Handle Key

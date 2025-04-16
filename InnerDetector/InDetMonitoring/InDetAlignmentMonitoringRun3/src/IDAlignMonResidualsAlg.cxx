@@ -135,6 +135,7 @@ StatusCode IDAlignMonResidualsAlg::initialize()
   m_trtECResVsEta= Monitored::buildToolMap<int>(m_tools, "TRTResVsEtaEC", m_nTRTEClayers);
   m_trtECResVsPhiSec= Monitored::buildToolMap<int>(m_tools, "TRTResVsPhiEC", m_nTRTEClayers);
   m_trtECLRVsPhiSec= Monitored::buildToolMap<int>(m_tools, "TRTLRVsPhiEC", m_nTRTEClayers);
+  m_trtECResVsPt_2DProf= Monitored::buildToolMap<int>(m_tools, "TRTResECvspT_2DProf", m_nTRTEClayers);
 
   ATH_MSG_DEBUG("initialize() -- completed --");
   return AthMonitorAlgorithm::initialize();
@@ -207,6 +208,12 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
     
     int nHits =  0; //counts number of tsos from which we can define residual/pull
     int nTSOS = -1; //counts all TSOS on the track
+
+    const Trk::Perigee* measPer = trksItr->perigeeParameters();
+    float charge = 1; if (measPer->charge() < 0) charge = -1;
+    float trkpt  = -999;
+    trkpt = measPer->pT()/1000.; 
+    float qpT = charge*trkpt;
     
     //looping over the hits of the track
     for (const Trk::TrackStateOnSurface* tsos : *trksItr->trackStateOnSurfaces()) {
@@ -267,6 +274,8 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       int   detType    = 99;
       int   barrelEC   = 99;
       int   layerDisk  = 99;
+      int   barrel_ec = 99; 
+      int   layer_or_wheel = 99; 
       int   sctSide = 99;
       int   modEta = 9999;
       int   modPhi = 9999;
@@ -298,8 +307,8 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
         float pullR = -9.9;
 	
         const Identifier& id = m_trtID->layer_id(hitId);
-        int barrel_ec = m_trtID->barrel_ec(id);
-        int layer_or_wheel = m_trtID->layer_or_wheel(id);
+        barrel_ec = m_trtID->barrel_ec(id);
+        layer_or_wheel = m_trtID->layer_or_wheel(id);
         int phi_module = m_trtID->phi_module(id);
 	
         
@@ -352,7 +361,8 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       	  		    , residualR
       	  		    , pullR
       	  		    , isTubeHit
-      	  		    , trketa);
+      	  		    , trketa
+                  , qpT); 
       	}
       }//end-TRT hit
       
@@ -771,7 +781,7 @@ StatusCode  IDAlignMonResidualsAlg::getSiResiduals(const Trk::Track* track, cons
 }
 
 
-void IDAlignMonResidualsAlg::fillTRTHistograms(int barrel_ec, int layer_or_wheel, int phi_module, float predictR, float hitR, float residualR, float pullR, bool isTubeHit, float trketa) const {
+void IDAlignMonResidualsAlg::fillTRTHistograms(int barrel_ec, int layer_or_wheel, int phi_module, float predictR, float hitR, float residualR, float pullR, bool isTubeHit, float trketa, float qpT) const {
   bool LRcorrect = (predictR * hitR > 0);
   
   //Need to correct the TRT residual on the C-side.
@@ -794,6 +804,7 @@ void IDAlignMonResidualsAlg::fillTRTHistograms(int barrel_ec, int layer_or_wheel
   /** Filling EndCapA histograms */
   if (barrel_ec == 2 || barrel_ec == -2)
     fillTRTEndcapHistograms(barrel_ec
+            , layer_or_wheel
   			    , phi_module
   			    , predictR
   			    , hitR
@@ -801,7 +812,8 @@ void IDAlignMonResidualsAlg::fillTRTHistograms(int barrel_ec, int layer_or_wheel
   			    , pullR
   			    , LRcorrect
   			    , isTubeHit
-  			    , trketa);
+  			    , trketa
+            , qpT);
   
   return;
 }
@@ -854,7 +866,7 @@ void IDAlignMonResidualsAlg::fillTRTBarrelHistograms(int barrel_ec, int layer_or
   return;
 }//fillTRTBarrelHistograms
 
-void IDAlignMonResidualsAlg::fillTRTEndcapHistograms(int barrel_ec, int phi_module, float predictR, float hitR, float residualR, float pullR, bool LRcorrect, bool isTubeHit, float trketa) const {
+void IDAlignMonResidualsAlg::fillTRTEndcapHistograms(int barrel_ec, int layer_or_wheel, int phi_module, float predictR, float hitR, float residualR, float pullR, bool LRcorrect, bool isTubeHit, float trketa, float qpT) const {
   for (unsigned int endcap = 0; endcap < 2; ++endcap) {
     bool doFill = false;
     if (!endcap && barrel_ec == 2) doFill = true;
@@ -870,6 +882,11 @@ void IDAlignMonResidualsAlg::fillTRTEndcapHistograms(int barrel_ec, int phi_modu
     fill(m_tools[m_trtECResidualR[endcap]], trt_ec_residualR_m);
     auto trt_ec_pullR_m = Monitored::Scalar<float>( "m_trt_ec_pullR", pullR);
     fill(m_tools[m_trtECPullR[endcap]], trt_ec_pullR_m);
+
+    //Filling TRT 2Dprof histograms
+    auto layer_or_wheel_m = Monitored::Scalar<float>("m_layer_or_wheel", layer_or_wheel);
+    auto pT_m = Monitored::Scalar<float>( "m_pT", qpT );
+    fill(m_tools[m_trtECResVsPt_2DProf[endcap]], layer_or_wheel_m, pT_m, trt_ec_residualR_m);
     
     if (!isTubeHit) {
       auto trt_ec_pullR_notube_m = Monitored::Scalar<float>( "m_trt_ec_pullR_notube", pullR);
