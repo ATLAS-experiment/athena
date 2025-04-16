@@ -330,7 +330,7 @@ namespace DerivationFramework {
 
     // Set up a mask with the same entries as the full TrackParticle collection
     std::vector<bool> mask;
-    mask.assign(nTracks,false); // default: don't keep any tracks
+    mask.assign(nTracks,true); // default: keep all the tracks
     if (m_parser) {
       std::vector<int> entries =  m_parser->evaluateAsVector();
       unsigned int nEntries = entries.size();
@@ -340,7 +340,7 @@ namespace DerivationFramework {
 	return StatusCode::FAILURE;
       } else {
 	// set mask
-	for (unsigned int i=0; i<nTracks; ++i) if (entries[i]==1) mask[i]=true;
+	for (unsigned int i=0; i<nTracks; ++i) if (entries[i]!=1) mask[i]=false;
       }
     }
     
