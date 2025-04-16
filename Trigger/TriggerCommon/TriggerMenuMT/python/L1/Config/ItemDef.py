@@ -1327,6 +1327,11 @@ class ItemDef:
         MenuItem('L1_ZDC_A_C_VTE50'   ).setLogic( ZDC_A_C & Not(d.TE50) & physcond)
         MenuItem('L1_ZDC_A_C_TE50'    ).setLogic( ZDC_A_C & d.TE50 & physcond)
         MenuItem('L1_ZDC_A_C_VjTE50'   ).setLogic( ZDC_A_C & Not(d.jTE50) & physcond)
+        MenuItem('L1_ZDC_OR_VjTE50' ).setLogic(ZDC_OR  & Not(d.jTE50) & physcond)
+        MenuItem('L1_ZDC_XOR_VjTE50').setLogic(ZDC_XOR & Not(d.jTE50) & physcond)
+        MenuItem('L1_TRT_ZDC_OR_VjTE50' ).setLogic(d.NIMTRT & ZDC_XOR & Not(d.jTE50) & physcond)
+        MenuItem('L1_TRT_ZDC_A_C_VjTE50').setLogic(d.NIMTRT & ZDC_A_C & Not(d.jTE50) & physcond)
+        MenuItem('L1_TRT_ZDC_XOR_VjTE50').setLogic(d.NIMTRT & ZDC_XOR & Not(d.jTE50) & physcond)
 
         MenuItem('L1_ZDC_A_C_VTE50_PEB').setLogic( ZDC_A_C & Not(d.TE50) & physcond)
 
