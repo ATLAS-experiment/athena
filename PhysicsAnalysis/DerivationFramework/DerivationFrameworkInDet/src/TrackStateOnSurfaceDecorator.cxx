@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -54,6 +54,7 @@
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "DerivationFrameworkInDet/DecoratorUtils.h"
+#include "AthContainers/Accessor.h"
 
 #include <vector>
 #include <string>
@@ -183,11 +184,6 @@ namespace DerivationFramework {
     ATH_CHECK( m_pixelMsosName.initialize(m_storePixel && m_addPRD) );
     ATH_CHECK( m_sctMsosName.initialize(m_storeSCT && m_addPRD) );
     ATH_CHECK( m_trtMsosName.initialize(m_storeTRT && m_addPRD) );
-
-    ATH_CHECK( m_readDecSiWidthKey.initialize() );
-    ATH_CHECK( m_readDecRdoStripKey.initialize() );
-    ATH_CHECK( m_writeDecSiWidthKey.initialize() );
-    ATH_CHECK( m_writeDecFirstStripKey.initialize() );
 
     if (m_storePixel){
        std::vector<std::string> names;
@@ -783,18 +779,20 @@ namespace DerivationFramework {
           }
         }
 
-	if (m_storeSCT) {
-	  SG::ReadDecorHandle<xAOD::TrackMeasurementValidationContainer, int> readDecSiWidth(m_readDecSiWidthKey, ctx);
-	  SG::ReadDecorHandle<xAOD::TrackMeasurementValidationContainer, std::vector<int>> readDecRdoStrip(m_readDecRdoStripKey, ctx);
-	  SG::WriteDecorHandle<xAOD::TrackStateValidationContainer, int> writeDecSiWidth(m_writeDecSiWidthKey, ctx);
-	  SG::WriteDecorHandle<xAOD::TrackStateValidationContainer, int> writeDecFirstStrip(m_writeDecFirstStripKey, ctx);
+	if (m_storeSCT && isSCT) {
+	  // We use accessors because the aux variable is added directly in the TrackMeasurementValidation cluster producer
+	  // and we are decorating the MSOS in the TrackStateValidationContainer producer here
+	  static const SG::Accessor<int> SiWidthAcc("SiWidth");
+	  static const SG::Accessor<int> firstStripAcc("first_strip");
+	  static const SG::Accessor<std::vector<int>> rdoStripAcc("rdo_strip");
+
 	  if(  msos->trackMeasurementValidationLink().isValid() && *(msos->trackMeasurementValidationLink()) ){
 	    const xAOD::TrackMeasurementValidation* sctCluster =  *(msos->trackMeasurementValidationLink());
-	    writeDecSiWidth(*msos) = readDecSiWidth(*sctCluster);
-	    writeDecFirstStrip(*msos) = (readDecRdoStrip(*sctCluster)).at(0);
+	    SiWidthAcc(*msos) = SiWidthAcc(*sctCluster);
+	    firstStripAcc(*msos) = (rdoStripAcc(*sctCluster)).at(0);
 	  } else {
-	    writeDecSiWidth(*msos) = -1;
-	    writeDecFirstStrip(*msos) = -1;
+	    SiWidthAcc(*msos) = -1;
+	    firstStripAcc(*msos) = -1;
 	  }
 	}
 
