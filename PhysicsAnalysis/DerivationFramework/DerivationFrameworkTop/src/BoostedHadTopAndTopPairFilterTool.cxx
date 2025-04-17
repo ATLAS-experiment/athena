@@ -12,7 +12,6 @@ BoostedHadTopAndTopPairFilterTool::BoostedHadTopAndTopPairFilterTool(const std::
   : AthAlgTool(t,n,p)
 {
 
-  declareInterface<DerivationFramework::BoostedHadTopAndTopPairFilterTool>(this);
   declareProperty("MCCollectionName",m_mcName     ="TruthEvents");
   declareProperty("cutPtOf",         m_cutPtOf    = 0);
   // use values directly in filterFlag to make tool more flexible for now...

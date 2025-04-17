@@ -50,8 +50,6 @@ namespace DerivationFramework {
 
     StatusCode decorate(const std::map<const xAOD::IParticle*, std::vector<const CaloCell*>>& muonCellsMap, const EventContext& ctx) const;
 
-    static const InterfaceID& interfaceID();
-
     private:
 
       Gaudi::Property<std::string> m_prefix{this, "Prefix", "TCAL1_"};

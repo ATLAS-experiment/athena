@@ -28,8 +28,7 @@ class TileTBID;
 
 namespace DerivationFramework {
 
-  class MbtsToVectorsTool: virtual public IAugmentationTool
-                         , public AthAlgTool
+  class MbtsToVectorsTool: public extends<AthAlgTool, IAugmentationTool>
   { 
     
     public: 
