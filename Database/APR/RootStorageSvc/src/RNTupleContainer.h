@@ -14,6 +14,8 @@
 #include "StorageSvc/DbContainerImp.h"
 #include "StorageSvc/DbDatabase.h"
 
+#include "RootAuxDynIO/IRootAuxDynIO.h"
+
 #include "ROOT/RNTupleView.hxx"
 
 #include <memory>

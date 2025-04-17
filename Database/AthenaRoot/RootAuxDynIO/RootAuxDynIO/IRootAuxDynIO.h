@@ -89,6 +89,8 @@ namespace RootAuxDynIO
    class IFactoryTool
    {
    public:
+      virtual ~IFactoryTool() = default;
+
       virtual std::unique_ptr<IRootAuxDynReader>
       getBranchAuxDynReader(TTree*, TBranch*) const = 0;
 
