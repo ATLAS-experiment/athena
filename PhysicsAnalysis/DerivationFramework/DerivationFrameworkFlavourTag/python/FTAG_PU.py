@@ -130,6 +130,8 @@ def FTAG_PUCfg(flags):
                                           "EventInfo",
                                           "PrimaryVertices",
                                           "InDetTrackParticles",
+                                          "TruthParticles",
+                                          "TruthVertices"
                                         ]
     
     # Add truth containers
@@ -172,7 +174,7 @@ def FTAG_PUCfg(flags):
 
     # Flavour tagging 
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
-    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowByVertexJets"], ByVertex=True, dzCut_vec=[5, 4], useMinZ0Vertex_vec=[True,False]))
+    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowByVertexJets"], ByVertex=True, dzCut_vec=[5, 4, 3, 2], useMinZ0Vertex_vec=[True,False]))
     acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]))
 
     # Output stream
