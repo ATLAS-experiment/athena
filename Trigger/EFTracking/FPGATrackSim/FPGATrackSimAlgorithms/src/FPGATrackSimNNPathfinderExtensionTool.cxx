@@ -240,7 +240,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             for (const std::shared_ptr<const FPGATrackSimHit>& hit: hits) {
                 if (m_doOutsideIn && (hit->getR() > lastHitR)) continue;
                 if (!m_doOutsideIn && (hit->getR() < lastHitR)) continue;
-                if ((hit->getHitType() == HitType::spacepoint) && ((hit->getPhysLayer()) %2 == 1)) continue; // ignore outer parts of SP, they get added separately
+                if ((hit->getHitType() == HitType::spacepoint) && ((hit->getPhysLayer(true)) %2 == 1)) continue; // ignore outer parts of SP, they get added separately
                 if(m_debugEvent) {
                     ATH_MSG_DEBUG("In the hit loop hit at: " << hit->getX() << " " << hit->getY() << " " << hit->getZ());
                 }
@@ -286,7 +286,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                             guessedSecondHitPtr->setX(0);
                             guessedSecondHitPtr->setY(0);
                             guessedSecondHitPtr->setZ(0);
-                            guessedSecondHitPtr->setPhysLayer(lastHit->getPhysLayer()+1);
+                            guessedSecondHitPtr->setPhysLayer(lastHit->getPhysLayer(true)+1);
                             guessedSecondHitPtr->setHitType(HitType::undefined);
                             if(isFineIDInStrip(fineID))  guessedSecondHitPtr->setDetType(SiliconTech::strip);
                             else  guessedSecondHitPtr->setDetType(SiliconTech::pixel);

@@ -56,21 +56,31 @@ void FPGATrackSimHit::setPhysLayer(unsigned v)
 {
     if (m_detType == SiliconTech::strip)
     {
+        m_layer_disk_old = m_layer_disk;
+        m_side_old = m_side;
         m_layer_disk = v / 2;
         m_side = v % 2;
     }
     else
     {
+        m_layer_disk_old = m_layer_disk;
         m_layer_disk = v;
     }
 }
 
 // Returns the physical layer index as defined by FPGATrackSimPlaneMap
-unsigned FPGATrackSimHit::getPhysLayer() const
+unsigned FPGATrackSimHit::getPhysLayer(bool old) const
 {
-    if (m_detType == SiliconTech::strip)
-        return 2 * m_layer_disk + m_side;
-    return m_layer_disk;
+    if (old && isRemapped()) {
+        if (m_detType == SiliconTech::strip)
+            return 2 * m_layer_disk_old + m_side_old;
+        return m_layer_disk_old;
+    }
+    else {
+        if (m_detType == SiliconTech::strip)
+            return 2 * m_layer_disk + m_side;
+        return m_layer_disk;
+    }
 }
 
 

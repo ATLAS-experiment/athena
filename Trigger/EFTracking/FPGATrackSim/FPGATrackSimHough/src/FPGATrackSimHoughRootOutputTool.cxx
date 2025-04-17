@@ -259,7 +259,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
         tmp_hits_z.push_back(hit->getZ());
         tmp_hits_R.push_back(hit->getR());
         tmp_hits_phi.push_back(hit->getGPhi());
-        tmp_hits_layer_disk.push_back(hit->getLayerDisk());
+        tmp_hits_layer_disk.push_back(hit->getLayerDisk(true));
         tmp_hits_volumeID.push_back(getVolumeID(*hit));
         tmp_hits_mapped.push_back(hit->isMapped());
         tmp_hits_isPixel.push_back(hit->isPixel());
@@ -452,8 +452,8 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
       m_z.push_back(hit.getZ());
       m_volumeID.push_back(getVolumeID(*hit_ptr));
       m_custom_layerID.push_back(getFineID(*hit_ptr));
-      m_layerID.push_back(hit.getLayerDisk());
-      m_etaID.push_back(hit.getEtaModule());
+      m_layerID.push_back(hit.getLayerDisk(true));
+      m_etaID.push_back(hit.getEtaModule(true));
 
       m_gphi.push_back(hit.getGPhi());
       m_zIdeal.push_back(idealized_coords[0]);
@@ -463,10 +463,10 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
       m_isBarrel.push_back(hit.isBarrel() ? 1 : 0);
       m_etawidth.push_back(hit.getEtaWidth());
       m_phiwidth.push_back(hit.getPhiWidth());
-      m_etamodule.push_back(hit.getEtaModule());
+      m_etamodule.push_back(hit.getEtaModule(true));
       m_phimodule.push_back(hit.getPhiModule());
       m_ID.push_back(hit.getIdentifierHash());
-      m_diskLayer.push_back(hit.getLayerDisk());
+      m_diskLayer.push_back(hit.getLayerDisk(true));
     }
 
     // done looping over hits, now we do the truth calculation for this track candidate

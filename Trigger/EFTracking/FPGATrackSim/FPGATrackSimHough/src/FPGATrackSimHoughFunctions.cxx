@@ -337,7 +337,7 @@ void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack 
                 // Here we "reject" it by marking the candidate as "invalid", to be rejected later.
                 // That require another field on the track object, but it avoids having to change the sizes
                 // of arrays computed above.
-                if (hit->getHitType() == HitType::spacepoint && (hit->getPhysLayer() % 2) == 1) {
+                if (hit->getHitType() == HitType::spacepoint && (hit->getPhysLayer(true) % 2) == 1) {
                     if (layer == 0) throw (std::out_of_range("makeTrackCandidates: Attempt to access vector at element -1"));
                     const FPGATrackSimHit & inner_hit = track_cands[icomb].getFPGATrackSimHits().at(layer - 1);
                     if ((abs(hit->getX() - inner_hit.getX()) > EPSILON) || (abs(hit->getY() - inner_hit.getY()) > EPSILON) || (abs(hit->getZ() - inner_hit.getZ()) > EPSILON)) {
@@ -454,8 +454,8 @@ long getFineID(const FPGATrackSimHit & hit)
   // Otherwise return convention defined in getCoarseID.
 
   long volumeID = getVolumeID(hit);
-  unsigned layerID = hit.getLayerDisk();
-  int etaID = hit.getEtaModule();
+  unsigned layerID = hit.getLayerDisk(true);
+  int etaID = hit.getEtaModule(true);
 
   long offset = -1000;
 
