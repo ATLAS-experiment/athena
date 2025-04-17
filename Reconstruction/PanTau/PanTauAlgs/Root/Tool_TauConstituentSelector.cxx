@@ -9,11 +9,8 @@
 
 
 PanTau::Tool_TauConstituentSelector::Tool_TauConstituentSelector(const std::string& name) :
-  asg::AsgTool(name),
-  m_Tool_InformationStore("PanTau::Tool_InformationStore/Tool_InformationStore")
+  asg::AsgTool(name)
 {
-  declareProperty("Tool_InformationStore", m_Tool_InformationStore, "Link to tool with all information");
-  declareProperty("Tool_InformationStoreName", m_Tool_InformationStoreName, "Link to tool with all information");
 }
 
 

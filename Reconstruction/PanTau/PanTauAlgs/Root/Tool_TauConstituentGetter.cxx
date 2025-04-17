@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/Tool_TauConstituentGetter.h"
@@ -11,14 +11,8 @@
 #include "xAODPFlow/PFO.h"
 
 PanTau::Tool_TauConstituentGetter::Tool_TauConstituentGetter(const std::string& name) :
-  asg::AsgTool(name),
-  m_Tool_InformationStore("PanTau::Tool_InformationStore/Tool_InformationStore"),
-  m_Tool_InputConverter("PanTau::Tool_InputConverter/Tool_InputConverter", this)
+  asg::AsgTool(name)
 {
-  declareProperty("Tool_InformationStore",    m_Tool_InformationStore,   "Link to tool with all information");
-  declareProperty("Tool_InputConverter",      m_Tool_InputConverter,     "Link to tool to convert into TauConstituents");
-  declareProperty("Tool_InformationStoreName",    m_Tool_InformationStoreName,   "Link to tool with all information");
-  declareProperty("Tool_InputConverterName",      m_Tool_InputConverterName,     "Link to tool to convert into TauConstituents");
 }
 
 PanTau::Tool_TauConstituentGetter::~Tool_TauConstituentGetter() = default;

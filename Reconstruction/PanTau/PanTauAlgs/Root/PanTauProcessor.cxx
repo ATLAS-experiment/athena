@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/PanTauProcessor.h"
@@ -16,33 +16,8 @@
 
 
 PanTau::PanTauProcessor::PanTauProcessor(const std::string& name)
-  : TauRecToolBase(name),
-    m_Name_InputAlg(""),
-        
-    //Initialise members for tools
-    m_Tool_InformationStore("PanTau::Tool_InformationStore/Tool_InformationStore"),
-    m_Tool_TauConstituentGetter("PanTau::Tool_TauConstituentGetter/Tool_TauConstituentGetter", this),
-    m_Tool_TauConstituentSelector("PanTau::Tool_TauConstituentSelector/Tool_TauConstituentSelector", this),
-    m_Tool_FeatureExtractor("PanTau::Tool_FeatureExtractor/Tool_FeatureExtractor", this),
-    m_Tool_DecayModeDeterminator("PanTau::Tool_DecayModeDeterminator/Tool_DecayModeDeterminator", this),
-    m_Tool_DetailsArranger("PanTau::Tool_DetailsArranger/Tool_DetailsArranger", this)
+  : TauRecToolBase(name)
 {
-    
-  //Connect python variables to member functions...
-  declareProperty("Name_InputAlg",                m_Name_InputAlg,                "Name of input algorithm for this instance");
-  declareProperty("Tool_InformationStore",        m_Tool_InformationStore,        "Tool handle to Tool_InformationStore");
-  declareProperty("Tool_TauConstituentGetter",    m_Tool_TauConstituentGetter,    "Tool handle to Tool_TauConstituentGetter");
-  declareProperty("Tool_TauConstituentSelector",  m_Tool_TauConstituentSelector,  "Tool handle to Tool_TauConstituentSelector");
-  declareProperty("Tool_FeatureExtractor",        m_Tool_FeatureExtractor,        "Tool handle to Tool_FeatureExtractor");
-  declareProperty("Tool_DecayModeDeterminator",   m_Tool_DecayModeDeterminator,   "Tool handle to Tool_DecayModeDeterminator");
-  declareProperty("Tool_DetailsArranger",         m_Tool_DetailsArranger,         "Tool handle to Tool_DetailsArranger");
-
-  declareProperty("Tool_InformationStoreName",        m_Tool_InformationStoreName="",        "Tool handle to Tool_InformationStore");
-  declareProperty("Tool_TauConstituentGetterName",    m_Tool_TauConstituentGetterName="",    "Tool handle to Tool_TauConstituentGetter");
-  declareProperty("Tool_TauConstituentSelectorName",  m_Tool_TauConstituentSelectorName="",  "Tool handle to Tool_TauConstituentSelector");
-  declareProperty("Tool_FeatureExtractorName",        m_Tool_FeatureExtractorName="",        "Tool handle to Tool_FeatureExtractor");
-  declareProperty("Tool_DecayModeDeterminatorName",   m_Tool_DecayModeDeterminatorName="",   "Tool handle to Tool_DecayModeDeterminator");
-  declareProperty("Tool_DetailsArrangerName",         m_Tool_DetailsArrangerName="",         "Tool handle to Tool_DetailsArranger");
 }
 
 
