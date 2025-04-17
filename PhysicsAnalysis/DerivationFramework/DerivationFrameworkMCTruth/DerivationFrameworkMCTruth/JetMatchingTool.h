@@ -25,8 +25,6 @@
 
 namespace DerivationFramework{
   
-  static const InterfaceID IID_JetMatchingTool("JetMatchingTool", 1, 0);
-
   // Declare the class that matches hadrons with jets.
 
   class JetMatchingTool: public AthAlgTool {
@@ -48,8 +46,6 @@ namespace DerivationFramework{
 
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
-
-    static const InterfaceID& interfaceID() { return IID_JetMatchingTool; }
 
     // Declare a set of functions to change cuts on the particles:
     //  -jetPtCut:  Save a given float value as a cut on the pt of the jets.

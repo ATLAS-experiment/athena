@@ -29,12 +29,11 @@
 DerivationFramework::TruthCollectionMaker::TruthCollectionMaker(const std::string& t,
                                                                 const std::string& n,
                                                                 const IInterface* p)
-  : ExpressionParserUser<AthAlgTool>(t,n,p)
+  : base_class(t,n,p)
   , m_ntotpart(0)
   , m_npasspart(0)
   , m_metaStore( "MetaDataStore", n )
 {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("MetaDataStore", m_metaStore );
 }
 

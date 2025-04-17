@@ -31,7 +31,7 @@ class IMCTruthClassifier;
 
 namespace DerivationFramework {
 
-  class GenFilterTool : public AthAlgTool, public IAugmentationTool {
+  class GenFilterTool : public extends<AthAlgTool, IAugmentationTool> {
 
   public:
     GenFilterTool(const std::string& t, const std::string& n, const IInterface* p);

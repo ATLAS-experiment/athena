@@ -24,8 +24,6 @@
 namespace DerivationFramework{
 
 
-  static const InterfaceID IID_HadronOriginClassifier("HadronOriginClassifier", 1, 0);
-
   class HadronOriginClassifier: public AthAlgTool {
 
 
@@ -35,9 +33,6 @@ namespace DerivationFramework{
     
     virtual StatusCode initialize() override;
 
-    static const InterfaceID& interfaceID() { return IID_HadronOriginClassifier; }
-
-    
     typedef enum {extrajet=0,
 		  c_MPI     =-1, b_MPI      =1,
 		  c_FSR     =-2, b_FSR      =2,

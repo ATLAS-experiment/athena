@@ -14,9 +14,8 @@ namespace DerivationFramework {
   static const SG::AuxElement::Accessor<float> acc_Density("Density");
 
   TruthEDDecorator::TruthEDDecorator(const std::string& t, const std::string& n, const IInterface* p)
-    : AthAlgTool(t,n,p)
+    : base_class(t,n,p)
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     
     declareProperty("EventInfoName",m_eventInfoName="EventInfo");
     declareProperty("EnergyDensityKeys",m_edKeys={"TruthIsoCentralEventShape","TruthIsoForwardEventShape"});
