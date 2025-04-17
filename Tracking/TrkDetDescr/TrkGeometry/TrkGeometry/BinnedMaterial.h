@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,19 +9,14 @@
 #ifndef TRKGEOMETRY_BINNEDMATERIAL_H
 #define TRKGEOMETRY_BINNEDMATERIAL_H
 
-#include <climits>
-#include <iomanip>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <utility>
-#include <vector>
-
 #include "TrkDetDescrUtils/CompactBinnedArray.h"
 #include "TrkDetDescrUtils/CompactBinnedArray1D.h"
 #include "TrkDetDescrUtils/CompactBinnedArray2D.h"
 #include "TrkGeometry/Material.h"
+
+#include <memory>
+#include <vector>
+
 
 namespace Trk {
 
@@ -30,21 +25,22 @@ typedef std::pair<const Material*, int> IdentifiedMaterial;
 class BinUtility;
 
 /** @class BinnedMaterial
-
  for description of non-homogenous dense volumes
-
  @author sarka.todorova@cern.ch
 */
 class BinnedMaterial final: public Material {
  public:
-  /** Default Constructor needed for POOL */
-  BinnedMaterial() = default;
+  using binsPtr_t = std::unique_ptr<const CompactBinnedArray<const IdentifiedMaterial> >;
 
-  /** Constructor with arguments */
-  BinnedMaterial(
-      float iX0, float iL0, float iA, float iZ, float iRho,
-      const CompactBinnedArray<const IdentifiedMaterial>* binMat = nullptr)
-      : Material(iX0, iL0, iA, iZ, iRho), m_matBins(binMat) {}
+  /** Default Constructors */
+  BinnedMaterial() = default;
+  BinnedMaterial& operator=(BinnedMaterial&&) = default;
+  BinnedMaterial(BinnedMaterial&&) = default;
+  virtual ~BinnedMaterial() = default;
+
+  //These can not be defaulted due to unique_ptr.
+  BinnedMaterial(const BinnedMaterial& amc);
+  BinnedMaterial& operator=(const BinnedMaterial& amc);
 
   /** Constructor with averaged material and binning in 1D*/
   BinnedMaterial(const Material* mat, const BinUtility& bu,
@@ -57,14 +53,6 @@ class BinnedMaterial final: public Material {
                  const std::vector<std::vector<size_t> >& index,
                  const std::vector<IdentifiedMaterial>& detailedMat);
 
-  /** Copy Constructor */
-  BinnedMaterial(const BinnedMaterial& amc);
-
-  /** Destructor - delete the composition if there */
-  virtual ~BinnedMaterial() = default;
-
-  /** Assignment operator */
-  BinnedMaterial& operator=(const BinnedMaterial& amc);
 
   /** access to layer bin utility */
   const Trk::BinUtility* layerBinUtility(const Amg::Vector3D& position) const;
@@ -79,13 +67,14 @@ class BinnedMaterial final: public Material {
                                          bool layOnly) const;
 
  private:
+  //utility to return pointers to the elements of m_matVec
   std::vector<const Trk::IdentifiedMaterial*> ptrs() const;
+
+  //The vector that actual owns the IdentifiedMaterial elements
   std::vector<IdentifiedMaterial> m_matVec;
-  using binsPtr_t =
-      std::unique_ptr<const CompactBinnedArray<const IdentifiedMaterial> >;
+  // Binned arrays of IdentifiedMaterial elements
   binsPtr_t m_matBins;
 };
-
 }  // namespace Trk
 
 inline const Trk::BinUtility* Trk::BinnedMaterial::layerBinUtility(
