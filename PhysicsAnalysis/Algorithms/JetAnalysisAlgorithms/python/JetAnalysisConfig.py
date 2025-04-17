@@ -210,12 +210,18 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 if config.dataType() is DataType.FastSim:
                     config_file = "rel22/Fall2024_PreRec/" + config_file
                 else:
-                    config_file = "rel22/Summer2023_PreRec/" + config_file
+                    if self.jetInput == "HI":
+                        config_file = "HIJetUncertainties/Spring2023/HI" + config_file
+                    else:
+                        config_file = "rel22/Summer2023_PreRec/" + config_file
             else:
                 if config.dataType() is DataType.FastSim:
                     config_file = "rel22/Winter2025_AF3_PreRec/" + config_file
                 else:
-                    config_file = "rel22/Winter2025_PreRec/" + config_file
+                    if self.jetInput == "HI":
+                        config_file = "HIJetUncertainties/Spring2023/HI" + config_file
+                    else:
+                        config_file = "rel22/Winter2025_PreRec/" + config_file
 
         # MC type:
         mc_type = None
@@ -231,7 +237,10 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 if config.dataType() is DataType.FastSim:
                     mc_type = "MC23AF3"
                 else:
-                    mc_type = "MC23"
+                    if self.jetInput == "HI":
+                        mc_type = "MC16"
+                    else:
+                        mc_type = "MC23"
 
         return config_file, calib_area, mc_type
 
@@ -282,7 +291,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         if(self.jetCollection=="AnalysisLargeRJets") :
             jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
 
-        if self.jetInput not in ["EMTopo", "EMPFlow"]:
+        if self.jetInput not in ["EMTopo", "EMPFlow", "HI"]:
             raise ValueError(
                 "Unsupported input type '{0}' for R=0.4 jets!".format(self.jetInput) )
 
@@ -307,6 +316,12 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 elif config.geometry() >= LHCPeriod.Run3:
                     configFile = "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config"
                     alg.calibrationTool.CalibArea = "00-04-83"
+            elif self.jetInput == "HI":
+                if config.geometry() is LHCPeriod.Run2:
+                    configFile = "JES_MC16_HI_Jan2021_5TeV.config"
+                if config.geometry() is LHCPeriod.Run3:
+                    configFile = "AntiKt4HI_JES_constants_11-05-2024_13p6TeVFinalConfiguration.config"
+                    alg.calibrationTool.CalibArea = "00-04-83"
             else:
                 if config.dataType() is DataType.FastSim:
                     configFile = "JES_MC16Recommendation_AFII_{0}_Apr2019_Rel21.config"
@@ -319,10 +334,18 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 configFile = self.calibToolConfigFile
             alg.calibrationTool.ConfigFile = configFile
             if config.dataType() is DataType.Data:
-                alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Insitu'
+                if self.jetInput == "HI":
+                    if config.geometry() is LHCPeriod.Run2:
+                        alg.calibrationTool.CalibSequence = 'EtaJES_Insitu'
+                    if config.geometry() is LHCPeriod.Run3:
+                        alg.calibrationTool.CalibSequence = 'EtaJES'
+                else:
+                    alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Insitu'
             else:
                 if self.jetInput == "EMPFlow":
                     alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC'
+                elif self.jetInput == "HI":
+                    alg.calibrationTool.CalibSequence = 'EtaJES'
                 else:
                     alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
             if self.calibToolCalibSeq is not None:
@@ -879,7 +902,7 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection,
 
     # interpret the jet collection
     collection_pattern = re.compile(
-        r"AntiKt(\d+)(EMTopo|EMPFlow|LCTopo|TrackCaloCluster|UFO|Track)(TrimmedPtFrac5SmallR20|CSSKSoftDropBeta100Zcut10)?Jets")
+        r"AntiKt(\d+)(EMTopo|EMPFlow|LCTopo|TrackCaloCluster|UFO|Track|HI)(TrimmedPtFrac5SmallR20|CSSKSoftDropBeta100Zcut10)?Jets")
     match = collection_pattern.match(jetCollectionName)
     if not match:
         raise ValueError(
@@ -942,7 +965,7 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection, jetInput,
         systematicsModelJER -- Which variant of the systematicsModelJES should be used (All, Full, Simple). Note that not all combinations of systematicsModelJES and systematicsModelJER are valid!
     """
 
-    if jetInput not in ["EMTopo", "EMPFlow"]:
+    if jetInput not in ["EMTopo", "EMPFlow", "HI"]:
         raise ValueError(
             "Unsupported input type '{0}' for R=0.4 jets!".format(jetInput) )
 
