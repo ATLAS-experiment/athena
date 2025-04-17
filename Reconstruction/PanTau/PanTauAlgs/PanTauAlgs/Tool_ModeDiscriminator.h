@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAUALGS_TOOL_MODEDISCRIMINATOR_H
@@ -8,6 +8,7 @@
 //! ASG
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 //! PanTau
 #include "PanTauAlgs/HelperFunctions.h"
@@ -50,11 +51,12 @@ namespace PanTau {
         
     void                                        updateReaderVariables(PanTau::PanTauSeed* inSeed, std::vector<float>& list_BDTVariableValues) const;
         
-    std::string                                 m_calib_path; //<! cvmfs folder for data files
-    std::string                                 m_Name_InputAlg;
-    std::string                                 m_Name_ModeCase;
-    ToolHandle<PanTau::ITool_InformationStore>  m_Tool_InformationStore;
-    std::string                                 m_Tool_InformationStoreName;
+    ToolHandle<PanTau::ITool_InformationStore>  m_Tool_InformationStore{this, "Tool_InformationStore", "PanTau::Tool_InformationStore/Tool_InformationStore", "Handle to the information store tool"}; 
+    Gaudi::Property<std::string> m_calib_path{this, "calibFolder", "", "Location of calib files in cvmfs"};
+    Gaudi::Property<std::string> m_Name_InputAlg{this, "Name_InputAlg", "InvalidInputAlg", "Name of the input algorithm for this instance"};
+    Gaudi::Property<std::string> m_Name_ModeCase{this, "Name_ModeCase", "InvalidModeCase", "Name of the two modes to be distinguished for this instance"};
+    Gaudi::Property<std::string> m_Tool_InformationStoreName{this, "Tool_InformationStoreName", "PanTau::Tool_InformationStore/Tool_InformationStore", "Handle to the information store tool"};
+
     PanTau::HelperFunctions   m_HelperFunctions;
     std::vector<std::unique_ptr<MVAUtils::BDT> > m_MVABDT_List;
         

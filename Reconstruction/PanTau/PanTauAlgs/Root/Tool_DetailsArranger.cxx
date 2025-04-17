@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODTau/TauJet.h"
@@ -19,11 +19,8 @@ bool sortBDTscore(const ElementLink< xAOD::PFOContainer >& i, const ElementLink<
 
 
 PanTau::Tool_DetailsArranger::Tool_DetailsArranger(const std::string& name) :
-  asg::AsgTool(name),
-  m_Tool_InformationStore("PanTau::Tool_InformationStore/Tool_InformationStore")
+  asg::AsgTool(name)
 {
-  declareProperty("Tool_InformationStore",            m_Tool_InformationStore,            "Tool handle to the information store tool");
-  declareProperty("Tool_InformationStoreName",            m_Tool_InformationStoreName,            "Tool handle to the information store tool");
 }
 
 

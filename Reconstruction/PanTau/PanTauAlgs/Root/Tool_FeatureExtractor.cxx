@@ -32,12 +32,8 @@ bool sortTauConstituentEt(const PanTau::TauConstituent* u, const PanTau::TauCons
 
 
 PanTau::Tool_FeatureExtractor::Tool_FeatureExtractor(const std::string& name) :
-  asg::AsgTool(name),
-  m_Tool_InformationStore("PanTau::Tool_InformationStore/Tool_InformationStore"){
-
-  declareProperty("Tool_InformationStore",            m_Tool_InformationStore,            "Tool handle to the information store tool");
-  declareProperty("Tool_InformationStoreName",        m_Tool_InformationStoreName,            "Tool handle to the information store tool");
-    
+  asg::AsgTool(name)
+{
 }
 
 

@@ -12,6 +12,7 @@
 //! ASG
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 #include "PanTauAlgs/ITool_InformationStore.h"
 #include "PanTauAlgs/ITool_TauConstituentSelector.h"
@@ -46,8 +47,8 @@ namespace PanTau {
         
         
     //member variables 
-    ToolHandle<PanTau::ITool_InformationStore> m_Tool_InformationStore;
-    std::string  m_Tool_InformationStoreName;
+    ToolHandle<PanTau::ITool_InformationStore> m_Tool_InformationStore{this, "Tool_InformationStore", "PanTau::Tool_InformationStore/Tool_InformationStore","Link to tool with all information"};
+    Gaudi::Property<std::string> m_Tool_InformationStoreName{this, "Tool_InformationStoreName", "", "Link to tool with all information"};
         
     double                  m_MaxEta = 0.0;
     std::vector<double>     m_BinEdges_Eta;
