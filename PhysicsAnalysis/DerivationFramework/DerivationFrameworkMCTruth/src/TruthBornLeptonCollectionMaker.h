@@ -28,7 +28,7 @@ class StoreGateSvc;
 
 namespace DerivationFramework {
 
-  class TruthBornLeptonCollectionMaker : public AthAlgTool, public IAugmentationTool {
+  class TruthBornLeptonCollectionMaker : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       TruthBornLeptonCollectionMaker(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthBornLeptonCollectionMaker();

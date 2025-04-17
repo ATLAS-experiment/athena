@@ -26,7 +26,7 @@ class StoreGateSvc;
 
 namespace DerivationFramework {
 
-  class TruthCollectionMaker : public ExpressionParserUser<AthAlgTool>, public IAugmentationTool {
+  class TruthCollectionMaker : public extends<ExpressionParserUser<AthAlgTool>, IAugmentationTool> {
     public: 
       TruthCollectionMaker(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthCollectionMaker();

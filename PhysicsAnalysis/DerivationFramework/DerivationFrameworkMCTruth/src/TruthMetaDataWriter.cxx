@@ -24,11 +24,10 @@
 DerivationFramework::TruthMetaDataWriter::TruthMetaDataWriter(const std::string& t,
                                                               const std::string& n,
                                                               const IInterface* p)
-  : AthAlgTool(t,n,p)
+  : base_class(t,n,p)
   , m_metaStore( "MetaDataStore", n )
   , m_weightSvc( "HepMCWeightSvc/HepMCWeightSvc" , n )
 {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty( "MetaObjectName", m_metaName = "TruthMetaData" );
     declareProperty( "MetaDataStore", m_metaStore );
 }

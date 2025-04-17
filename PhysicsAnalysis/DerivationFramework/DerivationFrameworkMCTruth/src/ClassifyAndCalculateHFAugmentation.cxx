@@ -25,12 +25,11 @@ namespace DerivationFramework {
   */
 
   ClassifyAndCalculateHFAugmentation::ClassifyAndCalculateHFAugmentation(const std::string& t, const std::string& n, const IInterface* p) : 
-  AthAlgTool(t,n,p),                 // Athena tool.
+  base_class(t,n,p),                 // Athena tool.
   m_JetMatchingTool_Tool(""),        // Hadron-jet matching tool.
   m_HFClassification_tool(""),       // HF classifier tool.
   m_HadronOriginClassifier_Tool("")  // HF hadron origin tool.
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     
     // Declare a set of tool properties to set them exertanally:
     //  -m_HFClassification_tool:       The tool to compute the HF classifier.

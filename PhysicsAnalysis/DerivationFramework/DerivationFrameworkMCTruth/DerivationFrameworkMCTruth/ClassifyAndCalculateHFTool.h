@@ -34,8 +34,6 @@
 
 namespace DerivationFramework {
 
-  static const InterfaceID IID_ClassifyAndCalculateHFTool("ClassifyAndCalculateHFTool", 1, 0);
-  
   // Declare the class that computes the HF classifier.
 
   class ClassifyAndCalculateHFTool: public AthAlgTool {
@@ -58,8 +56,6 @@ namespace DerivationFramework {
       virtual StatusCode initialize() override;
       virtual StatusCode finalize() override;
       
-      static const InterfaceID& interfaceID() { return IID_ClassifyAndCalculateHFTool; }
-
       // Declare a set of functions to change cuts on the particles:
       //  -jetPtCut:                Save a given float value as a cut on the pt of the jets.
       //  -jetEtaCut:               Save a given float value as a cut on the eta of the jets.

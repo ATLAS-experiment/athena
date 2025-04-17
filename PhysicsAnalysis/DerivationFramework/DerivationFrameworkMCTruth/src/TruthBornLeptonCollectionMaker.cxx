@@ -27,10 +27,9 @@
 DerivationFramework::TruthBornLeptonCollectionMaker::TruthBornLeptonCollectionMaker(const std::string& t,
                                 const std::string& n,
                                 const IInterface* p)
-  : AthAlgTool(t,n,p)
+  : base_class(t,n,p)
   , m_metaStore( "MetaDataStore", n )
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
   declareProperty( "MetaDataStore", m_metaStore );
 }
 
