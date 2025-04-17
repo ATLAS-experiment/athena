@@ -35,57 +35,47 @@ class BinnedArray1D final : public BinnedArray<T>
 {
 
 public:
-  BinnedArray1D() = default;
-  ~BinnedArray1D() = default;
-
-  /**Constructor with std::vector and a  BinUtility*/
+ //defaults, copy assignment can not be defaulted (CachedPtr)
+ BinnedArray1D() = default;
+ BinnedArray1D(BinnedArray1D&&) = default;
+ BinnedArray1D& operator=(BinnedArray1D&&) = default;
+ ~BinnedArray1D() = default;
+ /** ctors with arguments*/
+ BinnedArray1D(
+     const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
+     const BinUtility& bingen)
+     : BinnedArray<T>(),
+       m_array{},
+       m_arrayObjects(nullptr),
+       m_binUtility(bingen) {
+   initialize(tclassvector);
+  }
   BinnedArray1D(
     const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
-    const BinUtility& bingen)
+    BinUtility&& bingen)
     : BinnedArray<T>()
     , m_array{}
     , m_arrayObjects(nullptr)
-    , m_binUtility(bingen)
+    , m_binUtility(std::move(bingen))
   {
-    // prepare the binned Array
-    size_t vecsize = tclassvector.size();
-    m_array = std::vector<SharedObject<T>>(vecsize);
-    for (size_t ivec = 0; ivec < vecsize; ++ivec) {
-      const Amg::Vector3D currentGlobal(((tclassvector[ivec]).second));
-      if (m_binUtility.inside(currentGlobal)) {
-        m_array[m_binUtility.bin(currentGlobal, 0)] =
-            ((tclassvector)[ivec]).first;
-      } else
-        throw GaudiException("BinnedArray1D constructor",
-                             "Object outside bounds", StatusCode::FAILURE);
-    }
+    initialize(tclassvector);
   }
-
-  /**Copy Constructor !*/
+  /**Copy */
   BinnedArray1D(const BinnedArray1D& barr)
     : BinnedArray<T>()
-    , m_array{}
+    , m_array{barr.m_array}
     , m_arrayObjects(nullptr)
     , m_binUtility(barr.m_binUtility)
   {
-    m_array = std::vector<SharedObject<T>>(barr.m_array.size());
-    for (unsigned int ient = 0; ient < barr.m_array.size(); ++ient) {
-      m_array[ient] = barr.m_array[ient];
-    }
   }
-  /**Assignment operator*/
+  /**Assignment */
   BinnedArray1D& operator=(const BinnedArray1D& barr)
   {
     if (this != &barr) {
       m_binUtility = barr.m_binUtility;
-      //clear array and cache
       m_array.clear();
       m_arrayObjects.release();
-      // now refill
-      m_array = std::vector<SharedObject<T>>(barr.m_array.size());
-      for (unsigned int ient = 0; ient < barr.m_array.size(); ++ient) {
-        m_array[ient] = barr.m_array[ient];
-      }
+      m_array = barr.m_array;
     }
     return *this;
   }
@@ -93,7 +83,7 @@ public:
   BinnedArray1D* clone() const { return new BinnedArray1D(*this); }
 
   /** Returns the pointer to the templated class object from the BinnedArray,
-      it returns 0 if not defined;
+      it returns nullptr if not defined;
    */
   T* object(const Amg::Vector2D& lp) const
   {
@@ -104,7 +94,7 @@ public:
   }
 
   /** Returns the pointer to the templated class object from the BinnedArray
-      it returns 0 if not defined;
+      it returns nullptr if not defined;
    */
   T* object(const Amg::Vector3D& gp) const
   {
@@ -164,6 +154,20 @@ private:
     }
   }
 
+  void initialize(const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector) {
+    // prepare the binned Array
+    size_t vecsize = tclassvector.size();
+    m_array = std::vector<SharedObject<T>>(vecsize);
+    for (size_t ivec = 0; ivec < vecsize; ++ivec) {
+      const Amg::Vector3D currentGlobal(((tclassvector[ivec]).second));
+      if (m_binUtility.inside(currentGlobal)) {
+        m_array[m_binUtility.bin(currentGlobal, 0)] =
+            ((tclassvector)[ivec]).first;
+      } else
+        throw GaudiException("BinnedArray1D constructor",
+                             "Object outside bounds", StatusCode::FAILURE);
+    }
+  }
   //!< vector of pointers to the class T
   std::vector<SharedObject<T>> m_array{};
   //!< 1D vector of cached not owning pointers to class T
