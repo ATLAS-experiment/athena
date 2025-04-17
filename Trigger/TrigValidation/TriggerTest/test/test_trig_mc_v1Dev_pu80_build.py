@@ -8,18 +8,11 @@
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TriggerTest.MCExecStep import MCBuildStep
+from TrigValTools.TrigValSteering import Test, CheckSteps
 
-from AthenaConfiguration.TestDefaults import defaultConditionsTags
-conditions = defaultConditionsTags.RUN3_MC
-
-ex = ExecStep.ExecStep()
-ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT.py'
+ex = MCBuildStep(menu='Dev_pp_run3_v1_TriggerValidation_prescale')
 ex.input = 'ttbar_pu80'
-ex.threads = 1
-ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
-            'IOVDb.GlobalTag="' + conditions + '"']
 # the conditions override is needed because the RDO was produced with a single beamspot
 ex.args += ' --postExec \'from IOVDbSvc.IOVDbSvcConfig import addOverride; cfg.merge(addOverride(flags, "/Indet/Beampos", "IndetBeampos-RunDep-MC21-BestKnowledge-002"));\''
 

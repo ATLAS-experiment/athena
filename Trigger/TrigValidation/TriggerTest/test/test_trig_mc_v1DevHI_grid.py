@@ -20,23 +20,19 @@
 # art-output: prmon*
 # art-output: *.check*
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TriggerTest.MCExecStep import MCGridStep
+from TrigValTools.TrigValSteering import Test, CheckSteps
 
-from AthenaConfiguration.TestDefaults import defaultConditionsTags
-conditions = defaultConditionsTags.RUN3_MC
-
-ex = ExecStep.ExecStep()
-ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT.py'
+ex = MCGridStep(
+    menu='Dev_HI_run3_v1_TriggerValidation_prescale',
+    mc_campaign='Campaigns.MC23HeavyIons2024',    
+)
 ex.input = 'ttbar' # TODO restore to 'pbpb' once it has supercells 
-ex.threads = 8
-ex.concurrent_events = 8
 ex.max_events = 500
-ex.flags = ['Trigger.triggerMenuSetup="Dev_HI_run3_v1_TriggerValidation_prescale"',
-            'IOVDb.GlobalTag="' + conditions + '"',
-            'Trigger.doRuntimeNaviVal=True',
-            'Trigger.L1.Menu.doHeavyIonTobThresholds=True'            
-            ]
+ex.flags += [
+    'Trigger.doRuntimeNaviVal=True',
+    'Trigger.L1.Menu.doHeavyIonTobThresholds=True',
+]
 
 test = Test.Test()
 test.art_type = 'grid'

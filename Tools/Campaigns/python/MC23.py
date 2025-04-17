@@ -111,7 +111,6 @@ def MC23HeavyIons2023NoPileUp(flags):
     #all
     flags.Trigger.AODEDMSet = 'AODFULL'
     flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
-    flags.Trigger.L1.doAlfaCtpin = True
 
 
 def MC23HeavyIons2023(flags):
@@ -143,7 +142,6 @@ def MC23HeavyIons2023(flags):
     #all
     flags.Trigger.AODEDMSet = 'AODFULL'
     flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
-    flags.Trigger.L1.doAlfaCtpin = True
 
 
 def MC23e(flags):
@@ -236,7 +234,6 @@ def MC23ppReferenceRun2024(flags): # FIXME This configuration is a placeholder
     #all
     flags.Trigger.AODEDMSet = 'AODFULL'
     flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
-    flags.Trigger.L1.doAlfaCtpin = True
 
 
 def MC23HeavyIons2024NoPileUp(flags): # FIXME This configuration is a placeholder
@@ -261,7 +258,6 @@ def MC23HeavyIons2024NoPileUp(flags): # FIXME This configuration is a placeholde
     #all
     flags.Trigger.AODEDMSet = 'AODFULL'
     flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
-    flags.Trigger.L1.doAlfaCtpin = True
 
 
 def MC23HeavyIons2024(flags): # FIXME This configuration is a placeholder
@@ -293,7 +289,6 @@ def MC23HeavyIons2024(flags): # FIXME This configuration is a placeholder
     #all
     flags.Trigger.AODEDMSet = 'AODFULL'
     flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
-    flags.Trigger.L1.doAlfaCtpin = True
 
 
 def MC23aSingleBeamspot(flags):
