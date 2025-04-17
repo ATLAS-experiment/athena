@@ -3,7 +3,7 @@
 */
 // Runs on muons without a truth particle link.
 // Finds the nearest stable truth particle and adds its info to the muon.
-#include "DerivationFrameworkMuons/MuonTruthClassifierFallback.h"
+#include "MuonTruthClassifierFallback.h"
 
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "TruthUtils/HepMCHelpers.h"
