@@ -14,7 +14,6 @@ ex = ExecStep.ExecStep()
 ex.type = 'athena'
 ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'data_cos'
-ex.threads = 1
 ex.flags = ['Trigger.triggerMenuSetup="Cosmic_run3_v1"',
             'Beam.Type=BeamType.Cosmics',
             'Trigger.forceEnableAllChains=True']

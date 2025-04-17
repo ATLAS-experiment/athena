@@ -20,22 +20,16 @@
 # art-output: prmon*
 # art-output: *.check*
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, Step
 from TrigValTools.TrigValSteering.Common import find_file
+from TriggerTest.MCExecStep import MCGridStep
+from TrigValTools.TrigValSteering import Test, CheckSteps, Step
 
-from AthenaConfiguration.TestDefaults import defaultConditionsTags
-conditions = defaultConditionsTags.RUN3_MC
-
-ex = ExecStep.ExecStep()
-ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT.py'
+ex = MCGridStep(menu='Dev_pp_run3_v1_TriggerValidation_prescale')
 ex.input = 'ttbar'
-ex.threads = 8
-ex.concurrent_events = 8
-ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
-            'IOVDb.GlobalTag="' + conditions + '"',
-            'Trigger.writeBS=True',
-            'Trigger.doRuntimeNaviVal=True']
+ex.flags += [
+    'Trigger.writeBS=True',
+    'Trigger.doRuntimeNaviVal=True'
+]
 
 checkBS = Step.Step("CheckBS")
 checkBS.executable = 'trigbs_dumpHLTContentInBS_run3.py'
