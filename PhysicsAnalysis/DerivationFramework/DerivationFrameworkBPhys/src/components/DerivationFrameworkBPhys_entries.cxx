@@ -12,20 +12,10 @@
 #include "DerivationFrameworkBPhys/BdKstarMuMu_metadata.h"
 #include "DerivationFrameworkBPhys/MuPlusDpstCascade.h"
 #include "DerivationFrameworkBPhys/MuPlusDsCascade.h"
-//#include "DerivationFrameworkBPhys/CfAthAlgTool.h"
-#include "DerivationFrameworkBPhys/Bmumu_reco_mumu.h"
 #include "DerivationFrameworkBPhys/Reco_mumu.h"
 #include "DerivationFrameworkBPhys/FourMuonTool.h"
 #include "DerivationFrameworkBPhys/AnyVertexSkimmingTool.h"
-//#include "DerivationFrameworkBPhys/BPhysAddMuonBasedInvMass.h"
-//#include "DerivationFrameworkBPhys/BPhysVertexTrackBase.h"
-//#include "DerivationFrameworkBPhys/BVertexTrackIsoTool.h"
-//#include "DerivationFrameworkBPhys/BMuonTrackIsoTool.h"
-//#include "DerivationFrameworkBPhys/BVertexClosestTrackTool.h"
 #include "DerivationFrameworkBPhys/BTrackVertexMapLogger.h"
-//#include "DerivationFrameworkBPhys/Select_Bmumu.h"
-//#include "DerivationFrameworkBPhys/BPhysVarBlinder.h"
-//#include "DerivationFrameworkBPhys/BmumuThinningTool.h"
 #include "DerivationFrameworkBPhys/VertexPlus1TrackCascade.h"
 #include "DerivationFrameworkBPhys/TriggerCountToMetadata.h"
 #include "DerivationFrameworkBPhys/MuonExtrapolationTool.h"
@@ -63,17 +53,8 @@ DECLARE_COMPONENT( BdKstarMuMu_metadata )
 DECLARE_COMPONENT( MuPlusDpstCascade )
 DECLARE_COMPONENT( MuPlusDsCascade )
 DECLARE_COMPONENT( AnyVertexSkimmingTool )
-//DECLARE_COMPONENT( CfAthAlgTool )
-//DECLARE_COMPONENT( Bmumu_reco_mumu )
 DECLARE_COMPONENT( FourMuonTool )
-//DECLARE_COMPONENT( BPhysAddMuonBasedInvMass )
-//DECLARE_COMPONENT( BPhysVertexTrackBase )
-//DECLARE_COMPONENT( BVertexTrackIsoTool )
-//DECLARE_COMPONENT( BMuonTrackIsoTool )
-//DECLARE_COMPONENT( BVertexClosestTrackTool )
 DECLARE_COMPONENT( BTrackVertexMapLogger )
-//DECLARE_COMPONENT( Select_Bmumu )
-//DECLARE_COMPONENT( BPhysVarBlinder )
 DECLARE_COMPONENT( PsiPlusPsiCascade )
 DECLARE_COMPONENT( VertexPlus1TrackCascade )
 DECLARE_COMPONENT( TriggerCountToMetadata )
