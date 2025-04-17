@@ -244,7 +244,7 @@ Accept( Visitor& visitor, boost::shared_ptr<dqm_core::Region> dqParent ) const
     }
   } catch (std::exception& s) {
     std::cout << "Assess: Caught exception " << s.what() << std::endl;
-    std::abort();
+    throw;
   }
 
   try {
@@ -255,7 +255,7 @@ Accept( Visitor& visitor, boost::shared_ptr<dqm_core::Region> dqParent ) const
     }
   } catch (std::exception& s) {
     std::cout << "Group: Caught exception " << s.what() << std::endl;
-    std::abort();
+    throw;
   }
 }
 
