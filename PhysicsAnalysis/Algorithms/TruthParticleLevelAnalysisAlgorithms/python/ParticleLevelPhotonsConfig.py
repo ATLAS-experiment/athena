@@ -47,7 +47,7 @@ class ParticleLevelPhotonsBlock(ConfigBlock):
             config.addSelection (self.containerName, self.selectionName, alg.isolation+',as_char')
 
         # output branches to be scheduled only once
-        if ParticleLevelPhotonsBlock.get_instance_count() == 1:
+        if ParticleLevelPhotonsBlock.get_instance_count() == 1 or 'pt' not in config.getOutputVars(self.containerName):
             outputVars = [
                 ['pt', 'pt'],
                 ['eta', 'eta'],

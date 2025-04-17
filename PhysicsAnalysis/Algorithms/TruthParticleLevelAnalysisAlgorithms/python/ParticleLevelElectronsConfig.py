@@ -45,7 +45,7 @@ class ParticleLevelElectronsBlock(ConfigBlock):
             config.addSelection (self.containerName, self.selectionName, alg.notTauOrigin+',as_char')
 
         # output branches to be scheduled only once
-        if ParticleLevelElectronsBlock.get_instance_count() == 1:
+        if ParticleLevelElectronsBlock.get_instance_count() == 1 or 'pt' not in config.getOutputVars(self.containerName):
             outputVars = [
                 ['pt_dressed', 'pt'],
                 ['eta_dressed', 'eta'],
