@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////
 // Runs on muons without a truth particle link.
 // Finds the nearest stable truth particle and adds its info to the muon.
-#include "DerivationFrameworkMuons/MuonTruthIsolationDecorAlg.h"
+#include "MuonTruthIsolationDecorAlg.h"
 
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"

@@ -3,7 +3,7 @@
 */
 
 // Finds the nearest jet and adds its info to the muon.
-#include "DerivationFrameworkMuons/MuonJetDrTool.h"
+#include "MuonJetDrTool.h"
 
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "StoreGate/WriteDecorHandle.h"
