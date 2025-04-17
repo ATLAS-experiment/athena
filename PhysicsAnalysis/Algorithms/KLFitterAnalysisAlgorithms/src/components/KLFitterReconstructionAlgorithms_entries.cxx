@@ -8,5 +8,5 @@
 #include <KLFitterAnalysisAlgorithms/RunKLFitterAlg.h>
 #include <KLFitterAnalysisAlgorithms/KLFitterFinalizeOutputAlg.h>
 
-DECLARE_COMPONENT (EventReco::KLFitterFinalizeOutputAlg)
 DECLARE_COMPONENT (EventReco::RunKLFitterAlg)
+DECLARE_COMPONENT (EventReco::KLFitterFinalizeOutputAlg)
