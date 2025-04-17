@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -28,10 +28,10 @@ class TTree;
 class TLeaf;
 class TClass;
 
-namespace SG { class IAuxStoreIO; }
 namespace RootAuxDynIO {
    class IRootAuxDynWriter;
    class IRootAuxDynReader;
+   class IFactoryTool;
 }
      
 
@@ -87,7 +87,6 @@ namespace pool  {
 
       BranchDesc& operator=(BranchDesc const& other) = delete;
       BranchDesc& operator=(BranchDesc && other) = default;
-      SG::IAuxStoreIO* getIOStorePtr();
     };
 
     /// Definition of the branch container
@@ -111,6 +110,9 @@ namespace pool  {
     bool               m_treeFillMode;
     /// flag set when a branch container was updated (but the branch was not Filled)
     bool               m_isDirty;
+
+    /// Factory object from AuxDynIO plugin that creates AuxDyn readers and writers
+    std::unique_ptr<RootAuxDynIO::IFactoryTool>       m_auxDynTool;
 
   private:
 

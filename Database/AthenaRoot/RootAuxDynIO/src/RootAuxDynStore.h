@@ -1,21 +1,22 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ROOTAUXDYNSTORE_H
 #define ROOTAUXDYNSTORE_H
 
 #include "AthContainers/AuxStoreInternal.h" 
+#include "RootAuxDynReader.h" 
 
 #include <string>
 #include <mutex>
 
-namespace RootAuxDynIO { class IRootAuxDynReader; }
+class RootAuxDynReader;
 
 class RootAuxDynStore : public SG::AuxStoreInternal
 {
 public:
-   RootAuxDynStore(RootAuxDynIO::IRootAuxDynReader& reader, long long entry,
+   RootAuxDynStore(RootAuxDynReader& reader, long long entry,
                    bool standalone, std::recursive_mutex* iomtx = nullptr);
   
   virtual ~RootAuxDynStore() {}

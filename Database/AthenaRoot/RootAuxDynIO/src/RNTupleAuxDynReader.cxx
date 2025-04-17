@@ -7,16 +7,15 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/tools/error.h"
 #include "AthContainers/exceptions.h"
+#include "AthContainersRoot/getDynamicAuxID.h"
 #include "RootUtils/Type.h"
 
 #include "RNTupleAuxDynReader.h"
 #include "RNTupleAuxDynStore.h"
-#include "AthContainersRoot/getDynamicAuxID.h"
 
 #include "TClass.h"
 #include "TClassEdit.h"
 #include "TVirtualCollectionProxy.h"
-#include "TROOT.h"
 
 #include "ROOT/RNTuple.hxx"
 #include "ROOT/RNTupleReader.hxx"
@@ -209,7 +208,7 @@ namespace RootAuxDynIO
             // add AuxID to the list
             // May still be null if we don't have a dictionary for this field
             if( auxid != SG::null_auxid ) {
-               m_auxids.insert(auxid);
+               addAuxID(auxid);
                m_fieldInfos[auxid].fieldName = field_name;
                m_fieldInfos[auxid].view = m_ntupleReader->GetView<void>(field_name, nullptr);
             } else {
