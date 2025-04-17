@@ -54,7 +54,7 @@ JetParticleOriginVertexAssociation::match(const xAOD::JetContainer& jets, const 
         }
       }
       // loop through vertices
-      for (auto iVtx=0; iVtx < z0SinTheta_vec.size(); iVtx++){
+      for (unsigned int iVtx=0; iVtx < z0SinTheta_vec.size(); iVtx++){
         // if we want to do exclusive, only use the vertex with the min(z0)
         if (m_useMinZ0Vertex && selectedVertexIndex!=iVtx) continue;
         // retrieve vertex link
