@@ -229,7 +229,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: Road Filtering");
     // Spacepoint road filter tool. Needed when fitting to spacepoints.
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> post_spfilter_roads;
-    if (m_doSpacepoints & !m_doNNPathFinder) {
+    if (m_doSpacepoints && !m_doNNPathFinder) {
         ATH_CHECK(m_spRoadFilterTool->filterRoads(roads, post_spfilter_roads));
         roads = std::move(post_spfilter_roads);
     }
