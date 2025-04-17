@@ -1,11 +1,10 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+#ifndef IROOTAUXDYN_IO_H
+#define IROOTAUXDYN_IO_H
 
-#ifndef ROOTAUXDYN_IO_H
-#define ROOTAUXDYN_IO_H
-
-#include "RVersion.h"
+#include "RootAuxDynIO/RootAuxDynDefs.h"
 
 #include <string>
 #include <memory>
@@ -13,56 +12,23 @@
 #include <mutex>
 #include <tuple>
 
-#include "RootAuxDynIO/RootAuxDynDefs.h"
+#include "RVersion.h"
 
 class TBranch;
 class TTree;
 class TFile;
 class TClass;
 
+
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-   namespace ROOT { class RFieldBase; }
    namespace ROOT { class RNTupleReader; }
 #else
-   namespace ROOT::Experimental { class RFieldBase; }
    namespace ROOT::Experimental { class RNTupleReader; }
-   namespace ROOT { using RFieldBase = ROOT::Experimental::RFieldBase; }
    namespace ROOT { using RNTupleReader = ROOT::Experimental::RNTupleReader; }
 #endif
 
-namespace SG { class IAuxStoreIO;  class auxid_set_t; }
-
-
 namespace RootAuxDynIO
 {
-   class IRootAuxDynReader;
-   class IRootAuxDynWriter;
-   class IRNTupleAuxDynWriter;
-   class IRNTupleWriter;
-
-   /// check if a field/branch with fieldname and type tc has IAuxStore interface
-   bool hasAuxStore(std::string_view fieldname, TClass *tc);
-
-  /**
-   * @brief Check is a branch holds AuxStore objects
-   * @param branch TBranch to check
-   */
-   bool isAuxDynBranch(TBranch *branch);
-
-  /**
-   * @brief Exctract the Aux object SG Key from the branch name
-   * @param branch TBranch with Key in its name
-   */
-   std::string getKeyFromBranch(TBranch* branch);
-
-   std::unique_ptr<IRootAuxDynReader> getBranchAuxDynReader(TTree*, TBranch*);
-   std::unique_ptr<IRootAuxDynWriter> getBranchAuxDynWriter(TTree*, int bufferSize, int splitLevel,
-                                                              int offsettab_len, bool do_branch_fill);
-   
-   std::unique_ptr<IRootAuxDynReader>    getNTupleAuxDynReader(const std::string& field_name, const std::string& field_type, ROOT::RNTupleReader* reader);
-   std::unique_ptr<IRNTupleAuxDynWriter> getNTupleAuxDynWriter();
-   std::unique_ptr<IRNTupleWriter>       getNTupleWriter(TFile*,  const std::string& ntupleName, bool enableBufferedWrite, bool enableMetrics);
-
    // The convention for the tuple is <name, type, data>
    typedef std::tuple<std::string, std::string, void*> attrDataTuple;
 
@@ -79,8 +45,6 @@ namespace RootAuxDynIO
       */
       virtual void addReaderToObject(void* object, size_t row, std::recursive_mutex* iomtx = nullptr) = 0;
 
-      virtual const SG::auxid_set_t& auxIDs() const = 0;
-
       virtual size_t getBytesRead() const = 0;
 
       virtual void resetBytesRead() = 0; 
@@ -92,12 +56,12 @@ namespace RootAuxDynIO
    /// Interface for an AuxDyn Writer - TTree based 
    class IRootAuxDynWriter {
    public:
-      virtual ~IRootAuxDynWriter() {}
+      virtual ~IRootAuxDynWriter() = default;
 
       /// handle writing of dynamic xAOD attributes of an AuxContainer - called from RootTreeContainer::writeObject()
       /// may report bytes written (see concrete implementation)
       //  may throw exceptions
-      virtual int writeAuxAttributes(const std::string& base_branch, SG::IAuxStoreIO* store, size_t rows_written ) = 0;
+      virtual int writeAuxAttributes(const std::string& base_branch, void* object, size_t rows_written ) = 0;
 
       /// is there a need to call commit()?
       virtual bool needsCommit() = 0;
@@ -117,9 +81,43 @@ namespace RootAuxDynIO
       virtual ~IRNTupleAuxDynWriter() = default;
 
       /// Collect Aux data information to be writting out
-      virtual std::vector<attrDataTuple> collectAuxAttributes( const std::string& base_branch, SG::IAuxStoreIO* store ) = 0;
+      virtual std::vector<attrDataTuple> collectAuxAttributes( const std::string& base_branch, void* object ) = 0;
+   };
+
+
+
+   class IFactoryTool
+   {
+   public:
+      virtual std::unique_ptr<IRootAuxDynReader>
+      getBranchAuxDynReader(TTree*, TBranch*) const = 0;
+
+      virtual std::unique_ptr<IRootAuxDynWriter>
+      getBranchAuxDynWriter(TTree&, TClass&, int bufferSize, int splitLevel,
+                            int offsettab_len, bool do_branch_fill) const = 0;
+
+      virtual std::unique_ptr<IRNTupleAuxDynWriter>
+      getNTupleAuxDynWriter(TClass &tc) const = 0;
+
+      virtual std::unique_ptr<IRootAuxDynReader>
+      getNTupleAuxDynReader(const std::string& field_name, const std::string& field_type,
+                            ROOT::RNTupleReader* reader) const = 0;
+
+
+      /// check if a field/branch with fieldname and type tc has IAuxStore interface
+      virtual bool hasAuxStore(std::string_view fieldname, TClass *tc) const = 0;
+
+      /// check if the type tc has IAuxStoreIO interface
+      virtual bool hasAuxStoreIO(TClass *tc) const = 0;
+
+      /**
+       * @brief Check is a branch holds AuxStore objects
+       * @param branch TBranch to check
+       */
+      virtual bool isAuxDynBranch(TBranch *branch) const = 0;
    };
 
 } // namespace
 
 #endif
+

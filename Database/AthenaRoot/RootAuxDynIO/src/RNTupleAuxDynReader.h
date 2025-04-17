@@ -7,7 +7,7 @@
 
 #include "AthenaBaseComps/AthMessaging.h"
 #include "AthContainers/AuxStoreInternal.h" 
-#include "RootAuxDynIO/RootAuxDynIO.h" 
+#include "RootAuxDynReader.h"
 
 #include "ROOT/RNTupleView.hxx"
 
@@ -16,7 +16,10 @@
 #include <string>
 
 #if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
-   namespace ROOT { using ROOT::Experimental::RNTupleView; }
+   namespace ROOT {
+      using ROOT::Experimental::RNTupleView;
+      using ROOT::Experimental::RNTupleReader;
+   }
 #endif
 
 
@@ -24,7 +27,7 @@ class TClass;
 
 namespace RootAuxDynIO
 {
-   class RNTupleAuxDynReader : public AthMessaging, public IRootAuxDynReader
+   class RNTupleAuxDynReader : public AthMessaging, public RootAuxDynReader
    {
    public :
 
@@ -55,29 +58,15 @@ namespace RootAuxDynIO
       /// attach RNTupleAuxStore to the current Aux container @object
       virtual void addReaderToObject(void* object, size_t row, std::recursive_mutex* iomtx = nullptr ) override final;
 
-      /// Aux IDs of all the Aux attributes belonging to the Aux container being read
-      virtual const SG::auxid_set_t& auxIDs() const override final;
-
-      void addBytes(size_t bytes);
-
-      virtual size_t getBytesRead() const override final;
-
-      virtual void resetBytesRead() override final;
-
       /// get field informatino for @c auxid
       FieldInfo& getFieldInfo(const SG::auxid_t& auxid, const SG::AuxStoreInternal& store);
 
       ROOT::RNTupleReader* getNativeReader();
 
-      virtual ~RNTupleAuxDynReader() {}
+      virtual ~RNTupleAuxDynReader() = default;
 
    protected:
-      // auxids that could be found in registry for attribute names from the file
-      SG::auxid_set_t                   m_auxids;
-  
       std::string                       m_storeFieldName;
-      // counter for bytes read
-      size_t                            m_bytesRead = 0;
       // offset of the AxuStoreHolder base class in the objects read by the Reader
       int                               m_storeHolderOffset = -1;
       bool                              m_initialized = false;
@@ -90,23 +79,6 @@ namespace RootAuxDynIO
       ROOT::RNTupleReader*                    m_ntupleReader;
    };
 
-
-
-   inline void  RNTupleAuxDynReader::addBytes(size_t bytes) {
-      m_bytesRead += bytes;
-   }
-
-   inline size_t RNTupleAuxDynReader::getBytesRead() const {
-      return m_bytesRead;
-   }
-
-   inline void RNTupleAuxDynReader::resetBytesRead() {
-      m_bytesRead = 0;
-   }
-
-   inline const SG::auxid_set_t& RNTupleAuxDynReader::auxIDs() const {
-      return m_auxids;
-   }
 
    inline ROOT::RNTupleReader* RNTupleAuxDynReader::getNativeReader() {
       return m_ntupleReader;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBranchAuxDynWriter.h"
@@ -39,9 +39,10 @@ namespace RootAuxDynIO
    }
 
 
-   TBranchAuxDynWriter::TBranchAuxDynWriter( TTree* tree, int bufferSize, int splitLevel, int offsettab_len, bool branch_fill ) :
-      AthMessaging ("TBranchAuxDynWriter"),
-      m_ttree( tree ),
+   TBranchAuxDynWriter::TBranchAuxDynWriter( TTree& tree, TClass& cls, int bufferSize, int splitLevel,
+                                             int offsettab_len, bool branch_fill ) :
+      AthMessaging ("TBranchAuxDynWriter"), AuxDynAttrAccess(cls),
+      m_ttree( &tree ),
       m_bufferSize( bufferSize ),
       m_splitLevel( splitLevel ),
       m_branchOffsetTabLen( offsettab_len ),
@@ -71,7 +72,7 @@ namespace RootAuxDynIO
          auto createBasicAuxBranch = [&](const char* typeopt) {
             info.is_basic_type = true;
             info.branch = m_ttree->Branch(info.branch_name.c_str(), info.buffer, (info.name+typeopt).c_str(), 2048);
-            ATH_MSG_VERBOSE("MN: Created branch with name=" << info.branch_name << "  type: " << info.name+typeopt);
+            ATH_MSG_VERBOSE("Created branch with name=" << info.branch_name << "  type: " << info.name+typeopt);
          };
          if     ( ti == typeid(UInt_t) )    createBasicAuxBranch("/i");
          else if( ti == typeid(Int_t) )     createBasicAuxBranch("/I");
@@ -101,7 +102,7 @@ namespace RootAuxDynIO
                                               (void*)&info.buffer,       // Object address
                                               m_bufferSize,                // Buffer size
                                               split);                    // Split Mode (Levels)
-            ATH_MSG_VERBOSE("MN: Created branch with name=" << info.branch_name << "  type: " << cl->GetName());
+            ATH_MSG_VERBOSE("Created branch with name=" << info.branch_name << "  type: " << cl->GetName());
             }
          }
       } catch( const std::exception& e ) {
@@ -125,9 +126,10 @@ namespace RootAuxDynIO
    /// handle writing of dynamic xAOD attributes of an object - called from RootTreeContainer::writeObject()
    //  throws exceptions
    int TBranchAuxDynWriter::writeAuxAttributes( const std::string& base_branchname,
-                                                SG::IAuxStoreIO *store,
+                                                void* object,
                                                 size_t backfill_nrows ) 
    {
+      SG::IAuxStoreIO *store = castIOStore(object);
       int bytes_written = 0;
       const SG::auxid_set_t selection = store->getSelectedAuxIDs();
       ATH_MSG_DEBUG("Writing " << base_branchname << " with " << selection.size() << " Dynamic attributes");
@@ -144,18 +146,9 @@ namespace RootAuxDynIO
             attrInfo.type_name = SG::normalizedTypeinfoName( *attrInfo.typeinfo );
             attrInfo.name = SG::AuxTypeRegistry::instance().getName(id);
             attrInfo.branch_name = RootAuxDynIO::auxBranchName(attrInfo.name, base_branchname);
-           /*  
-           // MN: this part can be used to reject late attribs and not do backfilling, to be compatible with current RNTuple behavior
-            static std::set<std::string> bad_branches;
-            std::string bnam =  attrInfo.branch_name + ":" + attrInfo.name;
-            if( bad_branches.count(bnam) > 0 ) continue;
-            if( backfill_nrows ) {
-               bad_branches.insert(bnam);
-               if(mn) cout << "MN: ignoring late attribute: " << bnam << " type: " <<  attrInfo.type_name<< endl;
-               continue;
-            }
-            */
-            ATH_MSG_DEBUG("Creating branch for new dynamic attribute, Id=" << id << ": type=" << attrInfo.type_name << ",  branch=" << attrInfo.branch_name );
+
+            ATH_MSG_DEBUG("Creating branch for new dynamic attribute, Id=" << id << ": type=" << attrInfo.type_name
+                          << ",  branch=" << attrInfo.branch_name );
             createAuxBranch( attrInfo );
             // backfill here
             if( backfill_nrows ) {
@@ -181,16 +174,13 @@ namespace RootAuxDynIO
 
       for( auto& aux_info_entry : m_auxInfoMap ) {
          AuxInfo& attrInfo = aux_info_entry.second;
-         // cout << "MN: AuxInfo loop:  branch name=" << attrInfo.branch_name  << "  branch addr=" << attrInfo.branch<< endl;
          // if an attribute was not written create a default object for it
          if( !attrInfo.written ) {
             attrInfo.setDummyAddr();
             ATH_MSG_DEBUG("Default object added to branch: " << attrInfo.branch_name);
-            // cout << "Default object added to branch: " << attrInfo.branch_name << " Tree size=" << m_ttree->GetEntries() << "  branch size:" << attrInfo.branch->GetEntries() << endl;
          }
          // if writing to branches independently, do it now
          if( m_branchFillMode ) {
-            // cout << "MN: BranchFill for " << attrInfo.branch_name << endl;
             bytes_written += attrInfo.branch->Fill();
          } else {
             m_needsFill = true;

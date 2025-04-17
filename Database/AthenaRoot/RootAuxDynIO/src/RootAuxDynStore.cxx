@@ -1,15 +1,15 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainers/exceptions.h"
 #include "AthContainersInterfaces/IAuxTypeVector.h"
 
 #include "RootAuxDynStore.h"
-#include "RootAuxDynIO/RootAuxDynIO.h"
+#include "RootAuxDynReader.h"
 
 
-RootAuxDynStore::RootAuxDynStore(RootAuxDynIO::IRootAuxDynReader& reader,
+RootAuxDynStore::RootAuxDynStore(RootAuxDynReader& reader,
                                  long long entry, bool standalone, std::recursive_mutex* iomtx)
   : SG::AuxStoreInternal( standalone ),
     m_entry(entry),

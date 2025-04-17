@@ -17,7 +17,7 @@
 #include "StorageSvc/DbDomain.h"
 #include "POOLCore/DbPrint.h"
 #include "RootUtils/APRDefaults.h"
-#include "RootAuxDynIO/RootAuxDynIO.h"
+#include "RootAuxDynIO/IRootAuxDynIO.h"
 #include "RNTupleWriterHelper.h"
 #include "RootUtils/APRDefaults.h"
 
