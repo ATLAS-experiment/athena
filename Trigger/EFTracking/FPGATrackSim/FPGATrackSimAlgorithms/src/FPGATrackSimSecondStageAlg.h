@@ -87,7 +87,7 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         Gaudi::Property<bool> m_writeOutNonSPStripHits {this, "writeOutNonSPStripHits", true, "Write tracks to RootOutput if they have strip hits which are not SPs"};
         Gaudi::Property<int> m_NumOfHitPerGrouping { this, "NumOfHitPerGrouping", 5, "Number of minimum overlapping hits for a track candidate to be removed in the HoughRootOutputTool"};
         Gaudi::Property<bool> m_passLowestChi2TrackOnly {this, "passLowestChi2TrackOnly", false};
-
+        Gaudi::Property<bool> m_doNNPathFinder {this, "doNNPathFinder", false};
 
 
 
