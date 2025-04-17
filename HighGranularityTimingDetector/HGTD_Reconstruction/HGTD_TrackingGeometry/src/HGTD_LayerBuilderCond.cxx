@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@
 
 // constructor
 HGTD_LayerBuilderCond::HGTD_LayerBuilderCond(const std::string& t, const std::string& n, const IInterface* p) :
-  AthAlgTool(t,n,p),
+  base_class(t,n,p),
   m_hgtdMgr(nullptr),
   m_hgtdHelper(nullptr),
   m_setLayerAssociation(true),
@@ -42,7 +42,6 @@ HGTD_LayerBuilderCond::HGTD_LayerBuilderCond(const std::string& t, const std::st
   m_discThickness(0.2),
   m_runGeometryValidation(true)
 {
-  declareInterface<Trk::ILayerBuilderCond>(this);
   // general steering
   declareProperty("SetLayerAssociation"           , m_setLayerAssociation);
   // identification
