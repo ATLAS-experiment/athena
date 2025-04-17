@@ -163,6 +163,7 @@ def FPGATrackSimSecondStageAlgCfg(inputFlags):
     theFPGATrackSimSecondStageAlg.DoNNTrack_2nd = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd
     theFPGATrackSimSecondStageAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))
     theFPGATrackSimSecondStageAlg.TrackScoreCut = flags.Trigger.FPGATrackSim.ActiveConfig.secondChi2Cut
+    theFPGATrackSimSecondStageAlg.doNNPathFinder = flags.Trigger.FPGATrackSim.doNNPathFinder
 
     FPGATrackSimMapping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     theFPGATrackSimSecondStageAlg.FPGATrackSimMapping = FPGATrackSimMapping
