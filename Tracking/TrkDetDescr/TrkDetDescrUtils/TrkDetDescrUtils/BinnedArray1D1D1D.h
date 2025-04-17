@@ -36,115 +36,57 @@ template<class T>
 class BinnedArray1D1D1D final : public BinnedArray<T>
 {
 public:
-   BinnedArray1D1D1D() = default;
-  ~BinnedArray1D1D1D() = default;
+ //defaults, copy assignment can not be defaulted (CachedPtr)
+ BinnedArray1D1D1D() = default;
+ BinnedArray1D1D1D(BinnedArray1D1D1D&&) = default;
+ BinnedArray1D1D1D& operator=(BinnedArray1D1D1D&&) = default;
+ ~BinnedArray1D1D1D() = default;
 
-  /**Constructor with std::vector and a  BinUtility */
-  BinnedArray1D1D1D(
-    const std::vector<std::pair<SharedObject<T>,
-    Amg::Vector3D>>& tclassvector,
-    const BinUtility& binUtil1,
-    const BinUtility& binUtil2,
-    const std::vector<std::vector<BinUtility>>& binUtilVec)
-    : BinnedArray<T>()
-    , m_array{}
-    , m_arrayObjects(nullptr)
-    , m_binUtil1(binUtil1)
-    , m_binUtil2(binUtil2)
-    , m_binUtilArray(binUtilVec)
-  {
-    {
-      int v1Size = binUtil1.bins();
-      int v2Size = binUtil2.bins();
-      m_array = std::vector<std::vector<std::vector<SharedObject<T>>>>(v1Size);
-      for (int i = 0; i < v1Size; ++i) {
-        m_array[i] = std::vector<std::vector<SharedObject<T>>>(v2Size);
-        for (int j = 0; j < v2Size; ++j) {
-          m_array[i][j] =
-            std::vector<SharedObject<T>>((binUtilVec)[i][j].bins());
-        }
-      }
-    }
-    // fill the Volume vector into the array
-    int vecsize(tclassvector.size());
-    for (int ivec = 0; ivec < vecsize; ++ivec) {
-      Amg::Vector3D currentGlobal((tclassvector[ivec]).second);
-      if (binUtil1.inside(currentGlobal) && binUtil2.inside(currentGlobal)) {
-        int bin1 = binUtil1.bin(currentGlobal);
-        int bin2 = binUtil2.bin(currentGlobal);
-        assert((*binUtilVec)[bin1][bin2]);
-        int bin3 = (binUtilVec)[bin1][bin2].bin(currentGlobal);
-        std::vector<std::vector<SharedObject<T>>>& currArr = m_array[bin1];
-        std::vector<SharedObject<T>>& curVec = currArr[bin2];
-        curVec[bin3] = ((tclassvector)[ivec]).first;
-      } else
-        throw GaudiException(
-          "BinnedArray1D1D1D", "Object outside bounds", StatusCode::FAILURE);
-    }
-  }
+ /**ctors */
+ BinnedArray1D1D1D(
+     const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
+     const BinUtility& binUtil1, const BinUtility& binUtil2,
+     const std::vector<std::vector<BinUtility>>& binUtilVec)
+     : BinnedArray<T>(),
+       m_array{},
+       m_arrayObjects(nullptr),
+       m_binUtil1(binUtil1),
+       m_binUtil2(binUtil2),
+       m_binUtilArray(binUtilVec) {
+   initialize(tclassvector);
+ }
+ BinnedArray1D1D1D(
+     const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
+     BinUtility&& binUtil1,
+     BinUtility&& binUtil2,
+     std::vector<std::vector<BinUtility>>&& binUtilVec)
+     : BinnedArray<T>(),
+       m_array{},
+       m_arrayObjects(nullptr),
+       m_binUtil1(std::move(binUtil1)),
+       m_binUtil2(std::move(binUtil2)),
+       m_binUtilArray(std::move(binUtilVec)) {
+   initialize(tclassvector);
+ }
 
-  /** Copy Constructor*/
-  BinnedArray1D1D1D(const BinnedArray1D1D1D& barr)
-    : BinnedArray<T>()
-    , m_array{}
-    , m_arrayObjects(nullptr)
-    , m_binUtil1(barr.m_binUtil1)
-    , m_binUtil2(barr.m_binUtil2)
-    , m_binUtilArray(barr.m_binUtilArray)
-  {
-    // prepare the binned Array
-    if (m_binUtilArray.size()) {
-      int v1Size = m_binUtil1.bins();
-      int v2Size = m_binUtil2.bins();
-      m_array = std::vector<std::vector<std::vector<SharedObject<T>>>>(v1Size);
-      for (int i = 0; i < v1Size; ++i) {
-        m_array[i] = std::vector<std::vector<SharedObject<T>>>(v2Size);
-        for (int j = 0; j < v2Size; ++j){
-          m_array[i][j] =
-            std::vector<SharedObject<T>>((m_binUtilArray)[i][j].bins());
-        }
-      }
-      // assign the items
-      for (int ibin1 = 0; ibin1 < v1Size; ++ibin1) {
-        for (int ibin2 = 0; ibin2 < v2Size; ++ibin2) {
-          for (size_t ibin3 = 0; ibin3 < (m_binUtilArray)[ibin1][ibin2].bins(); ++ibin3) {
-            m_array[ibin1][ibin2][ibin3] = (barr.m_array)[ibin1][ibin2][ibin3];
-          }
-        }
-      }
-    }
-  }
+ /** Copy */
+ BinnedArray1D1D1D(const BinnedArray1D1D1D& barr)
+     : BinnedArray<T>(),
+       m_array{barr.m_array},
+       m_arrayObjects(nullptr),
+       m_binUtil1(barr.m_binUtil1),
+       m_binUtil2(barr.m_binUtil2),
+       m_binUtilArray(barr.m_binUtilArray) {}
 
-  /** Assignment operator */
-  BinnedArray1D1D1D& operator=(const BinnedArray1D1D1D& barr)
-  {
-    if (this != &barr) {
-      // bin utilities
-      m_binUtil1 = (barr.m_binUtil1);
-      m_binUtil2 = (barr.m_binUtil2);
-      m_binUtilArray = (barr.m_binUtilArray);
-      size_t v1Size = m_binUtil1.bins();
-      size_t v2Size = m_binUtil2.bins();
-      //cached ptr release
-      m_arrayObjects.release();
-      // prepare the binned Array
-      if (m_binUtilArray.size()) {
-       m_array = std::vector<std::vector<std::vector<SharedObject<T>>>>(v1Size);
-        for (size_t i = 0; i < v1Size; ++i) {
-          m_array[i] = std::vector<std::vector<SharedObject<T>>>(v2Size);
-          for (size_t j = 0; j < v2Size; ++j){
-            m_array[i][j] = std::vector<SharedObject<T>>((m_binUtilArray)[i][j].bins());
-          }
-        }
-        // assign the items
-        for (size_t ibin1 = 0; ibin1 < v1Size; ++ibin1) {
-          for (size_t ibin2 = 0; ibin2 < v2Size; ++ibin2) {
-            for (size_t ibin3 = 0; ibin3 < m_binUtilArray[ibin1][ibin2].bins(); ++ibin3) {
-              m_array[ibin1][ibin2][ibin3] = barr.m_array[ibin1][ibin2][ibin3];
-            }
-          }
-        }
-      }
+ /** Assignment operator */
+ BinnedArray1D1D1D& operator=(const BinnedArray1D1D1D& barr) {
+   if (this != &barr) {
+     // bin utilities
+     m_binUtil1 = barr.m_binUtil1;
+     m_binUtil2 = barr.m_binUtil2;
+     m_binUtilArray = barr.m_binUtilArray;
+     m_array = barr.m_array;
+     m_arrayObjects.release();
     }
     return *this;
   }
@@ -152,16 +94,17 @@ public:
   BinnedArray1D1D1D* clone() const { return new BinnedArray1D1D1D(*this); }
 
   /** Returns the pointer to the templated class object from the BinnedArray,
-      it returns 0 if not defined
+      it returns nullptr if not defined
    */
   T* object(const Amg::Vector2D& lp) const
   {
-    if (!m_binUtil1.inside(lp) || !m_binUtil2.inside(lp))
-      return 0;
+    if (!m_binUtil1.inside(lp) || !m_binUtil2.inside(lp)){
+      return nullptr;
+    }
     int bin1 = m_binUtil1.bin(lp);
     int bin2 = m_binUtil2.bin(lp);
     if (!std::as_const(m_binUtilArray)[bin1][bin2].inside(lp)){
-      return 0;
+      return nullptr;
     }
     int bin3 = std::as_const(m_binUtilArray)[bin1][bin2].bin(lp);
 
@@ -169,23 +112,22 @@ public:
   }
 
   /** Returns the pointer to the templated class object from the BinnedArray,
-      it returns 0 if not defined
+      it returns nullptr if not defined
    */
   T* object(const Amg::Vector3D& gp) const
   {
-    if (!m_binUtil1.inside(gp) || !m_binUtil2.inside(gp))
-      return 0;
+    if (!m_binUtil1.inside(gp) || !m_binUtil2.inside(gp)){
+      return nullptr;
+    }
     int bin1 = m_binUtil1.bin(gp);
     int bin2 = m_binUtil2.bin(gp);
     if (!std::as_const(m_binUtilArray)[bin1][bin2].inside(gp)){
-      return 0;
+      return nullptr;
     }
     unsigned int bin3 = std::as_const(m_binUtilArray)[bin1][bin2].bin(gp);
-
     if (bin3 >= std::as_const(m_binUtilArray)[bin1][bin2].bins()){
-      return 0;
+      return nullptr;
     }
-
     return (m_array[bin1][bin2][bin3]).get();
   }
 
@@ -203,7 +145,7 @@ public:
       dummy for multidimensional arrays      */
   T* nextObject(const Amg::Vector3D&, const Amg::Vector3D&, bool) const
   {
-    return 0;
+    return nullptr;
   }
 
   /** Return all objects of the Array const T*/
@@ -227,20 +169,47 @@ public:
   const BinUtility* binUtility() const { return &m_binUtil1; }
 
 private:
-  void createArrayCache() const
-  {
-    if (!m_arrayObjects) {
-      std::unique_ptr<std::vector<T*>> arrayObjects = std::make_unique<std::vector<T*>>();
-      for (size_t ibin1 = 0; ibin1 < m_binUtil1.bins(); ++ibin1) {
-        for (size_t ibin2 = 0; ibin2 < m_binUtil2.bins(); ++ibin2) {
-          for (size_t ibin3 = 0; ibin3 < std::as_const(m_binUtilArray)[ibin1][ibin2].bins(); ++ibin3) {
-            arrayObjects->push_back((m_array[ibin1][ibin2][ibin3]).get());
-          }
-        }
+ void createArrayCache() const {
+   if (!m_arrayObjects) {
+     std::unique_ptr<std::vector<T*>> arrayObjects = std::make_unique<std::vector<T*>>();
+     for (size_t ibin1 = 0; ibin1 < m_binUtil1.bins(); ++ibin1) {
+       for (size_t ibin2 = 0; ibin2 < m_binUtil2.bins(); ++ibin2) {
+         for (size_t ibin3 = 0; ibin3 < std::as_const(m_binUtilArray)[ibin1][ibin2].bins(); ++ibin3) {
+           arrayObjects->push_back((m_array[ibin1][ibin2][ibin3]).get());
+         }
+       }
+     }
+     m_arrayObjects.set(std::move(arrayObjects));
+   }
+ }
+
+  void initialize(const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector) {
+    int v1Size = m_binUtil1.bins();
+    int v2Size = m_binUtil2.bins();
+    m_array = std::vector<std::vector<std::vector<SharedObject<T>>>>(v1Size);
+    for (int i = 0; i < v1Size; ++i) {
+      m_array[i] = std::vector<std::vector<SharedObject<T>>>(v2Size);
+      for (int j = 0; j < v2Size; ++j) {
+        m_array[i][j] = std::vector<SharedObject<T>>(m_binUtilArray[i][j].bins());
       }
-      m_arrayObjects.set(std::move(arrayObjects));
+    }
+    // fill the Volume vector into the array
+    int vecsize(tclassvector.size());
+    for (int ivec = 0; ivec < vecsize; ++ivec) {
+      Amg::Vector3D currentGlobal((tclassvector[ivec]).second);
+      if (m_binUtil1.inside(currentGlobal) && m_binUtil2.inside(currentGlobal)) {
+        int bin1 = m_binUtil1.bin(currentGlobal);
+        int bin2 = m_binUtil2.bin(currentGlobal);
+        int bin3 = m_binUtilArray[bin1][bin2].bin(currentGlobal);
+        std::vector<std::vector<SharedObject<T>>>& currArr = m_array[bin1];
+        std::vector<SharedObject<T>>& curVec = currArr[bin2];
+        curVec[bin3] = (tclassvector[ivec]).first;
+      } else
+        throw GaudiException("BinnedArray1D1D1D", "Object outside bounds",
+                             StatusCode::FAILURE);
     }
   }
+
   //!< vector of pointers to the class T
   std::vector<std::vector<std::vector<SharedObject<T>>>> m_array{};
   //!<  1D cache of non owning pointers to class T

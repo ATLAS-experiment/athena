@@ -34,91 +34,54 @@ class BinnedArray1D1D final : public BinnedArray<T>
 {
 
 public:
-  BinnedArray1D1D() = default;
-  ~BinnedArray1D1D() = default;
-  /** Constructor with std::vector and a  BinUtility */
-  BinnedArray1D1D(
-    const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
-    const BinUtility& steeringBinGen1D,
-    const std::vector<BinUtility>& singleBinGen)
-    : BinnedArray<T>()
-    , m_array{}
-    , m_arrayObjects(nullptr)
-    , m_steeringBinUtility(steeringBinGen1D)
-    , m_singleBinUtilities(singleBinGen)
-    {
-    // prepare the binned Array
-    m_array =std::vector<std::vector<SharedObject<T>>>(steeringBinGen1D.bins());
-    for (size_t i = 0; i < steeringBinGen1D.bins(); ++i) {
-        size_t sizeOfSubBin = ((m_singleBinUtilities)[i]).bins();
-        m_array[i] = std::vector<SharedObject<T>>(sizeOfSubBin);
-      }
-      // fill the Volume vector into the array
-      int vecsize(tclassvector.size());
-      for (int ivec = 0; ivec < vecsize; ++ivec) {
-        const Amg::Vector3D currentGlobal((tclassvector[ivec]).second);
-        if (steeringBinGen1D.inside(currentGlobal)) {
-          int steeringBin = steeringBinGen1D.bin(currentGlobal, 0);
-          int singleBin = ((m_singleBinUtilities)[steeringBin]).bin(currentGlobal, 0);
-          std::vector<SharedObject<T>>& curVec = m_array[steeringBin];
-          curVec[singleBin] = ((tclassvector)[ivec]).first;
-        } else{
-          throw GaudiException(
-            "BinnedArray1D1D", "Object outside bounds", StatusCode::FAILURE);
-        }
-      }
-  }
-  /** Copy Constructor */
-  BinnedArray1D1D(const BinnedArray1D1D& barr)
-    : BinnedArray<T>()
-    , m_array{}
-    , m_arrayObjects(nullptr)
-    , m_steeringBinUtility(barr.m_steeringBinUtility)
-    , m_singleBinUtilities(barr.m_singleBinUtilities)
-  {
-    // prepare the binned Array
-    if (!m_singleBinUtilities.empty()) {
-      // prepare the array
-      m_array = std::vector<std::vector<SharedObject<T>>>(m_steeringBinUtility.bins(0));
-      for (size_t i = 0; i < m_steeringBinUtility.bins(0); ++i) {
-        size_t sizeOfSubBin = (m_singleBinUtilities[i]).bins(0);
-        m_array[i] = std::vector<SharedObject<T>>(sizeOfSubBin, nullptr);
-      }
+ // defaults, copy assignment can not be defaulted (CachedPtr)
+ BinnedArray1D1D() = default;
+ BinnedArray1D1D(BinnedArray1D1D&&) = default;
+ BinnedArray1D1D& operator=(BinnedArray1D1D&&) = default;
+ ~BinnedArray1D1D() = default;
+ /** ctors with arguments*/
+ /** Constructor with std::vector and a  BinUtility */
+ BinnedArray1D1D(
+     const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
+     const BinUtility& steeringBinGen1D,
+     const std::vector<BinUtility>& singleBinGen)
+     : BinnedArray<T>(),
+       m_array{},
+       m_arrayObjects(nullptr),
+       m_steeringBinUtility(steeringBinGen1D),
+       m_singleBinUtilities(singleBinGen) {
+   initialize(tclassvector);
+ }
+ BinnedArray1D1D(
+     const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
+     BinUtility&& steeringBinGen1D,
+     std::vector<BinUtility>&& singleBinGen)
+     : BinnedArray<T>(),
+       m_array{},
+       m_arrayObjects(nullptr),
+       m_steeringBinUtility(std::move(steeringBinGen1D)),
+       m_singleBinUtilities(std::move(singleBinGen)) {
+   initialize(tclassvector);
+ }
 
-      // assign the items
-      for (size_t isteer = 0; isteer < m_steeringBinUtility.bins(0); ++isteer) {
-        for (size_t isingle = 0; isingle < (m_singleBinUtilities)[isteer].bins(0); ++isingle) {
-          m_array[isteer][isingle] = (barr.m_array)[isteer][isingle];
-        }
-      }
-    }
-  }
+ /** Copy Constructor */
+ BinnedArray1D1D(const BinnedArray1D1D& barr)
+     : BinnedArray<T>(),
+       m_array{barr.m_array},
+       m_arrayObjects(nullptr),
+       m_steeringBinUtility(barr.m_steeringBinUtility),
+       m_singleBinUtilities(barr.m_singleBinUtilities) {}
 
-  /** Assignment operator */
-  BinnedArray1D1D& operator=(const BinnedArray1D1D& barr)
-  {
-    if (this != &barr) {
-      m_arrayObjects.release();
-      m_steeringBinUtility = barr.m_steeringBinUtility;
-      m_singleBinUtilities = barr.m_singleBinUtilities;
-      // prepare the binned Array
-      if (m_singleBinUtilities.size()) {
-        // prepare the array
-        m_array = std::vector<std::vector<SharedObject<T>>>(m_steeringBinUtility.bins(0));
-        for (int i = 0; i < m_steeringBinUtility.bins(0); ++i) {
-          unsigned int sizeOfSubBin = (m_singleBinUtilities[i]).bins(0);
-          m_array[i] = std::vector<SharedObject<T>>(sizeOfSubBin);
-        }
-        // assign the items
-        for (int isteer = 0; isteer < m_steeringBinUtility.bins(0); ++isteer) {
-          for (int isingle = 0; isingle < m_singleBinUtilities[isteer].bins(0); ++isingle) {
-            m_array[isteer][isingle] = (barr.m_array)[isteer][isingle];
-          }
-        }
-      }
-    }
-    return *this;
-  }
+ /** Assignment operator */
+ BinnedArray1D1D& operator=(const BinnedArray1D1D& barr) {
+   if (this != &barr) {
+     m_arrayObjects.release();
+     m_steeringBinUtility = barr.m_steeringBinUtility;
+     m_singleBinUtilities = barr.m_singleBinUtilities;
+     m_array = barr.m_array;
+   }
+   return *this;
+ }
 
   /** Implicit Constructor */
   BinnedArray1D1D* clone() const { return new BinnedArray1D1D(*this); }
@@ -192,6 +155,29 @@ private:
       m_arrayObjects.set(std::move(arrayObjects));
     }
   }
+
+  void initialize(const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector) {
+    m_array = std::vector<std::vector<SharedObject<T>>>(m_steeringBinUtility.bins());
+    for (size_t i = 0; i < m_steeringBinUtility.bins(); ++i) {
+      size_t sizeOfSubBin = ((m_singleBinUtilities)[i]).bins();
+      m_array[i] = std::vector<SharedObject<T>>(sizeOfSubBin);
+    }
+    // fill the Volume vector into the array
+    int vecsize(tclassvector.size());
+    for (int ivec = 0; ivec < vecsize; ++ivec) {
+      const Amg::Vector3D currentGlobal((tclassvector[ivec]).second);
+      if (m_steeringBinUtility.inside(currentGlobal)) {
+        int steeringBin = m_steeringBinUtility.bin(currentGlobal, 0);
+        int singleBin = (m_singleBinUtilities[steeringBin]).bin(currentGlobal, 0);
+        std::vector<SharedObject<T>>& curVec = m_array[steeringBin];
+        curVec[singleBin] = ((tclassvector)[ivec]).first;
+      } else {
+        throw GaudiException("BinnedArray1D1D", "Object outside bounds",
+                             StatusCode::FAILURE);
+      }
+    }
+  }
+
   //!< vector of pointers to the class T
   std::vector<std::vector<SharedObject<T>>> m_array{};
   //!< forced 1D vector of pointers to class T

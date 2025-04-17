@@ -546,12 +546,9 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
 
   if (phiSector > 0.) { // overall equidistant binning
 
-    std::vector<double> phi;
-    std::vector<int> phiSect;
-    for (unsigned int i = 0; i < rSteps.size() - 1; ++i)
-      phi.push_back(M_PI);
-    for (unsigned int i = 0; i < rSteps.size() - 1; ++i)
-      phiSect.push_back(int(M_PI / phiSector));
+    const int rStepsSizem1 = rSteps.size() - 1;
+    std::vector<double> phi(rStepsSizem1, M_PI);
+    std::vector<int> phiSect(rStepsSizem1,int(M_PI / phiSector));
 
     // simplify if possible
     if (rSteps.size() == 1) {
@@ -729,12 +726,9 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<VolumeP
 
   if (phiSector > 0.) { // overall equidistant binning
 
-    std::vector<float> phi;
-    std::vector<int> phiSect;
-    for (unsigned int i = 0; i < zSteps.size() - 1; ++i)
-      phi.push_back(M_PI);
-    for (unsigned int i = 0; i < zSteps.size() - 1; ++i)
-      phiSect.push_back(int(M_PI / phiSector));
+    const int zStepsSizem1 = zSteps.size() - 1;
+    std::vector<double> phi(zStepsSizem1, M_PI);
+    std::vector<int> phiSect(zStepsSizem1,int(M_PI / phiSector));
 
     // simplify if possible
     if (phiSector == M_PI) {
