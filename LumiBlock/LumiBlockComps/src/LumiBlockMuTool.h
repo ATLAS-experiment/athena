@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -28,10 +28,8 @@
 class LumiBlockMuTool: public extends<AthAlgTool, ILumiBlockMuTool> {
 
  public:
-
-  LumiBlockMuTool(const std::string& type,
-		  const std::string& name,
-		  const IInterface* parent);
+  // Use base class constructor
+  using base_class::base_class;
 
   // ---------------- user interface -------------------
 
