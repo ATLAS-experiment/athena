@@ -53,8 +53,8 @@ namespace DerivationFramework {
   typedef std::vector<const xAOD::Muon*>          MuonBag;
   typedef InDet::IInDetTrackSelectionTool         TrkSelTool;
   
-  class ATLAS_NOT_THREAD_SAFE BPhysVertexTrackBase : public AthAlgTool,
-    virtual public IAugmentationTool {
+  class ATLAS_NOT_THREAD_SAFE BPhysVertexTrackBase : 
+    public extends<AthAlgTool, IAugmentationTool> {
 
   protected:
     class BaseItem {

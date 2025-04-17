@@ -32,7 +32,7 @@ namespace Trig{
 
 namespace DerivationFramework {
 
-  class ATLAS_NOT_THREAD_SAFE TriggerCountToMetadata : virtual public CfAthAlgTool, virtual public IAugmentationTool {
+  class ATLAS_NOT_THREAD_SAFE TriggerCountToMetadata : public extends<CfAthAlgTool, IAugmentationTool> {
 
     public: 
       TriggerCountToMetadata(const std::string& t, const std::string& n, const IInterface* p);

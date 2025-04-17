@@ -26,13 +26,12 @@ using namespace xAOD;
 DerivationFramework::BPhysPVThinningTool::BPhysPVThinningTool(const std::string& t,
         const std::string& n,
         const IInterface* p ) :
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_TrackContainerName("InDetTrackParticles"),
     m_PVContainerName("PrimaryVertices"),
     m_ntot(0),
     m_npass(0), m_tracks_kept(0), m_keepTracks(false)
 {
-    declareInterface<DerivationFramework::IThinningTool>(this);
     declareProperty("CandidateCollections" , m_BPhyCandList);
     declareProperty("KeepPVTracks", m_keepTracks);
     declareProperty("TrackParticleContainerName", m_TrackContainerName);

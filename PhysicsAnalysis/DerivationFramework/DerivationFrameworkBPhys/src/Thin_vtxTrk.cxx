@@ -17,7 +17,7 @@
 #include <string>
 // Constructor
 DerivationFramework::Thin_vtxTrk::Thin_vtxTrk(const std::string& t, const std::string& n, const IInterface* p ) :
-  AthAlgTool(t,n,p),
+  base_class(t,n,p),
   m_ntot(0),
   m_npass(0),
   m_acceptanceR(-1.),  // Do not add tracks within a cone from the vertex by default
@@ -25,8 +25,6 @@ DerivationFramework::Thin_vtxTrk::Thin_vtxTrk(const std::string& t, const std::s
   m_nVtxPass(0),
   m_noFlags(false)
 {
-  declareInterface<DerivationFramework::IThinningTool>(this);
-  
   declareProperty("TrackParticleContainerName", m_trackParticleContainerName = "InDetTrackParticles");
   declareProperty("VertexContainerNames"      , m_vertexContainerName);
   declareProperty("PassFlags"                 , m_passFlags);

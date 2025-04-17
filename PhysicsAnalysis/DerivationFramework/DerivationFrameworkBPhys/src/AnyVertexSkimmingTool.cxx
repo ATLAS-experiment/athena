@@ -8,7 +8,7 @@
 namespace DerivationFramework {
 
 
-AnyVertexSkimmingTool::AnyVertexSkimmingTool(const std::string& t, const std::string& n, const IInterface* p)  : AthAlgTool(t,n,p)
+AnyVertexSkimmingTool::AnyVertexSkimmingTool(const std::string& t, const std::string& n, const IInterface* p)  : base_class(t,n,p)
 {}
 
 AnyVertexSkimmingTool::~AnyVertexSkimmingTool() = default;

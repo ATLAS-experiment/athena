@@ -19,7 +19,7 @@
 
 namespace DerivationFramework {
 
-  class Reco_V0Finder : public AthAlgTool, public IAugmentationTool {
+  class Reco_V0Finder : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       Reco_V0Finder(const std::string& t, const std::string& n, const IInterface* p);
 

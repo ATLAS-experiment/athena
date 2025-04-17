@@ -59,7 +59,7 @@ namespace DerivationFramework {
   VertexCaloIsolation::VertexCaloIsolation(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_caloIsoTool("xAOD::CaloIsolationTool/CaloIsolationTool"),
     m_trackContainerName("InDetTrackParticles"),
     m_vertexContainerName("NONE"),
@@ -71,7 +71,6 @@ namespace DerivationFramework {
     m_vertexType(7)
   {
         ATH_MSG_DEBUG("in constructor");
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     
     // Declare tools                      
     declareProperty("CaloIsoTool" , m_caloIsoTool);

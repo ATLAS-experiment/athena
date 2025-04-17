@@ -21,12 +21,9 @@ namespace Trk {
 
 namespace DerivationFramework {
 
-  static const InterfaceID IID_PsiPlusPsiSingleVertex("PsiPlusPsiSingleVertex", 1, 0);
-
-  class PsiPlusPsiSingleVertex : virtual public AthAlgTool, public IAugmentationTool
+  class PsiPlusPsiSingleVertex : public extends<AthAlgTool, IAugmentationTool>
   {
   public:
-    static const InterfaceID& interfaceID() { return IID_PsiPlusPsiSingleVertex;}
     PsiPlusPsiSingleVertex(const std::string& t, const std::string& n, const IInterface* p);
     virtual ~PsiPlusPsiSingleVertex() = default;
     virtual StatusCode initialize() override;

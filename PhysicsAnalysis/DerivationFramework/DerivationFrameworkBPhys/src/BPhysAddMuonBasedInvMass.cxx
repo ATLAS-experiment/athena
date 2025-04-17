@@ -44,9 +44,8 @@ namespace DerivationFramework {
   BPhysAddMuonBasedInvMass::BPhysAddMuonBasedInvMass(const std::string& t,
 						     const std::string& n,
 						     const IInterface*  p)
-    : AthAlgTool(t,n,p), m_trackToVertexTool("Reco::TrackToVertex") {
+    : base_class(t,n,p), m_trackToVertexTool("Reco::TrackToVertex") {
 
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     
     // Declare branch prefix
     declareProperty("BranchPrefix", m_branchPrefix = "_NONE_");

@@ -99,7 +99,6 @@ namespace DerivationFramework {
 				       const IInterface*  p)
     : BPhysVertexTrackBase(t,n,p) {
     
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
 
     declareProperty("MuonContainerName"     , m_muonContainerName="");
     declareProperty("IsolationConeSizes"    , m_isoConeSizes);

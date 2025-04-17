@@ -22,8 +22,7 @@ namespace DerivationFramework {
   Reco_mumu::Reco_mumu(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    AthAlgTool(t,n,p) {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
+    base_class(t,n,p) {
   }
 
   // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 

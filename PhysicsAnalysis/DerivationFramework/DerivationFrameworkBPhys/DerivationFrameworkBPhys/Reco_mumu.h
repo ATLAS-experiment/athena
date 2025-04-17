@@ -24,7 +24,7 @@ namespace Trk {
  */
 namespace DerivationFramework {
 
-  class Reco_mumu : public AthAlgTool, public IAugmentationTool {
+  class Reco_mumu : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       Reco_mumu(const std::string& t, const std::string& n, const IInterface* p);
 

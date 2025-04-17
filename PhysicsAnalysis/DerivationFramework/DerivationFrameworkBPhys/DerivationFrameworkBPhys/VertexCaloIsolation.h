@@ -44,7 +44,7 @@
  */
 namespace DerivationFramework {
 
-  class VertexCaloIsolation : public AthAlgTool, public IAugmentationTool {
+  class VertexCaloIsolation : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       VertexCaloIsolation(const std::string& t, const std::string& n, const IInterface* p);
 

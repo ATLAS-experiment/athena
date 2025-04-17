@@ -31,8 +31,6 @@ namespace Trk {
 
 namespace DerivationFramework {
     
-    static const InterfaceID IID_FourMuonTool("FourMuonTool", 1, 0);
-    
     // Struct and enum to associate muon pairs with track pairs
     // and make the program flow more straightforward
     struct Combination
@@ -131,14 +129,12 @@ namespace DerivationFramework {
         
     };
     
-    class FourMuonTool:  virtual public AthAlgTool
+    class FourMuonTool:  public AthAlgTool
     {
     public:
         FourMuonTool(const std::string& t, const std::string& n, const IInterface*  p);
         ~FourMuonTool();
         StatusCode initialize();
-        
-        static const InterfaceID& interfaceID() { return IID_FourMuonTool;}
         
         //-------------------------------------------------------------------------------------
         //Doing Calculation and inline functions

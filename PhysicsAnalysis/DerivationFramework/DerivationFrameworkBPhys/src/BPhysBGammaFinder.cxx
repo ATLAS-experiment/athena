@@ -18,7 +18,7 @@ using VertexLink = ElementLink<xAOD::VertexContainer>;
 namespace DerivationFramework {
 
 BPhysBGammaFinder::BPhysBGammaFinder(const std::string& t, const std::string& n, const IInterface* p)
-    : AthAlgTool(t,n,p),
+    : base_class(t,n,p),
       m_v0Tools("Trk::V0Tools"),
       m_vertexFitter("Trk::TrkVKalVrtFitter"),
       m_vertexEstimator("InDet::VertexPointEstimator"),
@@ -33,7 +33,6 @@ BPhysBGammaFinder::BPhysBGammaFinder(const std::string& t, const std::string& n,
       m_Chi2Cut(20.0),
       m_maxGammaMass(100.0) {
 
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
 
   // Declare user-defined properties
   declareProperty("BVertexContainers", m_BVertexCollectionsToCheck);

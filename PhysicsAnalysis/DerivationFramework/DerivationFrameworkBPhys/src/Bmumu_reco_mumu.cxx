@@ -32,8 +32,7 @@ namespace DerivationFramework {
   Bmumu_reco_mumu::Bmumu_reco_mumu(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    CfAthAlgTool(t,n,p){
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
+    base_class(t,n,p){
     
   }
 

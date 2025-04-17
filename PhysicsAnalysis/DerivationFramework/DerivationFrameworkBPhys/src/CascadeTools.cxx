@@ -14,7 +14,6 @@ namespace DerivationFramework {
 CascadeTools::CascadeTools(const std::string& t, const std::string& n, const IInterface* p) :
   AthAlgTool(t,n,p)
 {
-  declareInterface<CascadeTools>(this);
 }
 
 CascadeTools::~CascadeTools() {}

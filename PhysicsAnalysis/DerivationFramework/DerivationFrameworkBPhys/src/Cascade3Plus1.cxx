@@ -42,7 +42,7 @@ GenVecFourMom_t SumVector(const std::array<GenVecFourMom_t, N> &vectors) {
     return total;
 }
 
-Cascade3Plus1::Cascade3Plus1(const std::string& t, const std::string& n, const IInterface* p)  : AthAlgTool(t,n,p),
+Cascade3Plus1::Cascade3Plus1(const std::string& t, const std::string& n, const IInterface* p)  : base_class(t,n,p),
     m_trkSelector("InDet::TrackSelectorTool"),
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
     m_V0Tools("Trk::V0Tools"),

@@ -15,10 +15,9 @@ namespace DerivationFramework {
 
 MuonExtrapolationTool::MuonExtrapolationTool(const std::string &t, const std::string& n, const IInterface* p)
   : 
-    AthAlgTool(t, n, p),
+    base_class(t, n, p),
     m_extrapolator("Trk::Extrapolator/AtlasExtrapolator")
 {    
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
   declareProperty("EndcapPivotPlaneZ",             m_endcapPivotPlaneZ = 15525.);// z position of pivot plane in endcap region
   declareProperty("EndcapPivotPlaneMinimumRadius", m_endcapPivotPlaneMinimumRadius = 0.);// minimum radius of pivot plane in endcap region
   declareProperty("EndcapPivotPlaneMaximumRadius", m_endcapPivotPlaneMaximumRadius = 11977.); // maximum radius of pivot plane in endcap region

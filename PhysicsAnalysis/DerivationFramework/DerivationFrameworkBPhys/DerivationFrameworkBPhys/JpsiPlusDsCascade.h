@@ -31,12 +31,9 @@ namespace DerivationFramework {
 
 namespace DerivationFramework {
 
-    static const InterfaceID IID_JpsiPlusDsCascade("JpsiPlusDsCascade", 1, 0);
-
-    class JpsiPlusDsCascade : virtual public AthAlgTool, public IAugmentationTool
+    class JpsiPlusDsCascade : public extends<AthAlgTool, IAugmentationTool>
     {
       public:
-        static const InterfaceID& interfaceID() { return IID_JpsiPlusDsCascade;}
         JpsiPlusDsCascade(const std::string& t, const std::string& n, const IInterface*  p);
         ~JpsiPlusDsCascade();
         virtual StatusCode initialize() override;

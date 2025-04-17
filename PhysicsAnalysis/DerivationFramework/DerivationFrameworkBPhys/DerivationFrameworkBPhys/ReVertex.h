@@ -39,7 +39,7 @@ namespace InDet { class VertexPointEstimator; }
 
 namespace DerivationFramework {
 
-class ReVertex : public AthAlgTool, public IAugmentationTool {
+class ReVertex : public extends<AthAlgTool, IAugmentationTool> {
 public:
 
     ReVertex(const std::string& t, const std::string& n, const IInterface* p);

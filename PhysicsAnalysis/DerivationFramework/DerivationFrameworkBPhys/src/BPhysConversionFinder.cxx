@@ -22,7 +22,7 @@ namespace DerivationFramework {
   BPhysConversionFinder::BPhysConversionFinder(const std::string& t,
       const std::string& n,
       const IInterface* p) :
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_v0Tools("Trk::V0Tools"),
     m_vertexFitter("Trk::TrkVKalVrtFitter"),
     m_vertexEstimator("InDet::VertexPointEstimator"),
@@ -36,7 +36,6 @@ namespace DerivationFramework {
     m_requireDeltaM(true),
     m_maxDeltaM(3000.0)
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
 
     // Declare user-defined properties
     declareProperty("DiMuonVertexContainer", m_diMuonCollectionToCheck);

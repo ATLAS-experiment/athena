@@ -31,12 +31,10 @@ namespace DerivationFramework {
 }
 
 namespace DerivationFramework {
-    static const InterfaceID IID_Cascade3Plus1("Cascade3Plus1", 1, 0);
-class Cascade3Plus1 : virtual public AthAlgTool, public IAugmentationTool
+class Cascade3Plus1 : public extends<AthAlgTool, IAugmentationTool>
 {
 
 public:
-    static const InterfaceID& interfaceID() { return IID_Cascade3Plus1;}
     Cascade3Plus1(const std::string& t, const std::string& n, const IInterface*  p);
     virtual ~Cascade3Plus1();
     virtual StatusCode initialize() override;

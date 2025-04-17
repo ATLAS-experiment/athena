@@ -34,9 +34,7 @@ namespace DerivationFramework {
 
 namespace DerivationFramework {
 
-    static const InterfaceID IID_JpsiPlusV0Cascade("JpsiPlusV0Cascade", 1, 0);
-
-    class JpsiPlusV0Cascade : virtual public AthAlgTool, public IAugmentationTool
+    class JpsiPlusV0Cascade : public extends<AthAlgTool, IAugmentationTool>
     {
 
         std::string m_vertexContainerKey;
@@ -85,7 +83,6 @@ namespace DerivationFramework {
         size_t      m_PV_minNTracks;
 
     public:
-        static const InterfaceID& interfaceID() { return IID_JpsiPlusV0Cascade;}
         JpsiPlusV0Cascade(const std::string& t, const std::string& n, const IInterface*  p);
         ~JpsiPlusV0Cascade();
         StatusCode initialize() override;
