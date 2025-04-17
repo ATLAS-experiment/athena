@@ -11,8 +11,6 @@ TTbarPlusHeavyFlavorFilterTool::TTbarPlusHeavyFlavorFilterTool(const std::string
   : AthAlgTool(t,n,p)
 {
 
-  declareInterface<DerivationFramework::TTbarPlusHeavyFlavorFilterTool>(this);
-
   declareProperty("MCCollectionName",m_mcName="TruthEvents");
   declareProperty("UsePileUp",m_usePileUp=false); /// of course doesn't work if pu is not available e.g. generation level
   declareProperty("UseFinalStateHadrons",m_useFinalStateHadrons=false);

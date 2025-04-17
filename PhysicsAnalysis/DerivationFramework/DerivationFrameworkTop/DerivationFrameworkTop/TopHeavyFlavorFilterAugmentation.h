@@ -23,7 +23,7 @@ namespace DerivationFramework {
 
   class TTbarPlusHeavyFlavorFilterTool;
   
-  class TopHeavyFlavorFilterAugmentation : public AthAlgTool, public IAugmentationTool {
+  class TopHeavyFlavorFilterAugmentation : public extends<AthAlgTool, IAugmentationTool> {
 
 
   public:
