@@ -15,6 +15,7 @@
 
 #include "Acts/Utilities/KDTree.hpp"
 #include <array>
+#include <format>
 #include <sstream>
 
 
