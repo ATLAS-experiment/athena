@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -25,7 +25,7 @@ class CaloCell_ID;
  */
 
 class CaloCellsCounterCPU :
-  public AthAlgTool, virtual public CaloClusterCollectionProcessor
+  public extends<AthAlgTool, CaloClusterCollectionProcessor>
 {
  public:
 
