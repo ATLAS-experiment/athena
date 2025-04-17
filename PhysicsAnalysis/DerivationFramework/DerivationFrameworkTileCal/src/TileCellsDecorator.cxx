@@ -29,14 +29,10 @@
 
 namespace DerivationFramework {
 
-  static const InterfaceID IID_TileCellsDecorator("TileCellsDecorator", 1, 0);
-  const InterfaceID& TileCellsDecorator::interfaceID( ) {  return IID_TileCellsDecorator; }
-
 
   TileCellsDecorator::TileCellsDecorator( const std::string& type, const std::string& name, const IInterface* parent )
     : AthAlgTool(type, name, parent)
   {
-    declareInterface<TileCellsDecorator>(this);
   }
 
 
