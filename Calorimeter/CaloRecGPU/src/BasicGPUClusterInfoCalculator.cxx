@@ -14,10 +14,9 @@ using namespace CaloRecGPU;
 using namespace BasicClusterInfoCalculator;
 
 BasicGPUClusterInfoCalculator::BasicGPUClusterInfoCalculator(const std::string & type, const std::string & name, const IInterface * parent):
-  AthAlgTool(type, name, parent),
+  base_class(type, name, parent),
   CaloGPUTimed(this)
 {
-  declareInterface<CaloClusterGPUProcessor> (this);
 }
 
 StatusCode BasicGPUClusterInfoCalculator::initialize_non_CUDA()

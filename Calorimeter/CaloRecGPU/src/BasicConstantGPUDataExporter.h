@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -26,7 +26,7 @@
  */
 
 class BasicConstantGPUDataExporter :
-  public AthAlgTool, virtual public ICaloClusterGPUConstantTransformer, public CaloGPUTimed
+  public extends<AthAlgTool, ICaloClusterGPUConstantTransformer>, public CaloGPUTimed
 {
  public:
 
