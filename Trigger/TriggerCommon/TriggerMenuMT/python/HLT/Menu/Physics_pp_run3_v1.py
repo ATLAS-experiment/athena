@@ -1734,7 +1734,6 @@ ChainProp(name='HLT_e140_dnnloose_L1eEM26M', groups=PrimaryPhIGroup+SingleElectr
 
 
         # Single tau support chains
-        ChainProp(name="HLT_tau0_ptonly_L1eTAU12", stream=[PhysicsStream], groups=SingleTauGroup+SupportPhIGroup+['RATE:CPS_eTAU12']),
         ChainProp(name="HLT_tau20_idperf_tracktwoMVA_L1eTAU12", stream=[PhysicsStream, 'express'], groups=SingleTauGroup+SupportPhIGroup+['RATE:CPS_eTAU12'], monGroups=['tauMon:online','tauMon:shifter','idMon:shifter']), #ATR-27013
         ChainProp(name="HLT_tau20_perf_tracktwoMVA_L1eTAU12", stream=[PhysicsStream, 'express'], groups=SingleTauGroup+SupportPhIGroup+['RATE:CPS_eTAU12'], monGroups=['tauMon:online','tauMon:shifter']), #ATR-27013
         ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_L1eTAU12', stream=[PhysicsStream, 'express'], groups=SupportPhIGroup+SingleTauGroup+['RATE:CPS_eTAU12'], monGroups=['tauMon:online','tauMon:shifter']),
@@ -1779,7 +1778,6 @@ ChainProp(name='HLT_e140_dnnloose_L1eEM26M', groups=PrimaryPhIGroup+SingleElectr
         ChainProp(name='HLT_tau70_mediumRNN_L1eTAU70', groups=SupportPhIGroup+SingleTauGroup+['RATE:CPS_eTAU70'], monGroups=['tauMon:t0']),
         ChainProp(name='HLT_tau70_mediumGNTau_L1eTAU70', groups=SupportPhIGroup+SingleTauGroup+['RATE:CPS_eTAU70'], monGroups=['tauMon:t0']),
 
-        ChainProp(name="HLT_tau0_ptonly_L1eTAU80", stream=[PhysicsStream,'express'], groups=SingleTauGroup+SupportPhIGroup+['RATE:CPS_eTAU80'], monGroups=['tauMon:online']),
         ChainProp(name="HLT_tau80_idperf_tracktwoMVA_L1eTAU80", stream=[PhysicsStream,'express'], groups=SingleTauGroup+SupportPhIGroup+['RATE:CPS_eTAU80'], monGroups=['idMon:t0']),
         ChainProp(name='HLT_tau80_mediumRNN_tracktwoMVA_L1eTAU80', groups=SupportPhIGroup+SingleTauGroup+['RATE:CPS_eTAU80'], monGroups=['tauMon:t0']),
         ChainProp(name='HLT_tau80_mediumGNTau_L1eTAU80', groups=SupportPhIGroup+SingleTauGroup+['RATE:CPS_eTAU80'], monGroups=['tauMon:t0']),

@@ -55,7 +55,7 @@ def TileAANtupleCfg(flags, outputFile='', saveTMDB=True, **kwargs):
     kwargs.setdefault('CheckDCS', flags.Tile.useDCS)
     kwargs.setdefault('BSInput', flags.Input.Format is Format.BS and not physicsRun)
     kwargs.setdefault('CalibMode', pedestalRun or cisRun)
-    kwargs.setdefault('CalibrateEnergy', flags.Input.isMC or useDspUnits or not (cisRun or physicsRun))
+    kwargs.setdefault('CalibrateEnergy', flags.Input.isMC or useDspUnits or not cisRun)
     kwargs.setdefault('OfflineUnits', offlineUnits)
 
     acc = ComponentAccumulator()

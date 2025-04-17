@@ -412,6 +412,10 @@ def getMCSignatures():
         ChainProp(name="HLT_tau25_idperf_tracktwoMVA_L1eTAU20M",  stream=[PhysicsStream], groups=SupportPhIGroup+SingleTauGroup+['RATE:CPS_eTAU20M'], monGroups=['tauMon:online','tauMon:shifter']), #ATR-27013
         ChainProp(name="HLT_tau25_perf_tracktwoMVA_L1eTAU20M",  stream=[PhysicsStream], groups=SupportPhIGroup+SingleTauGroup+['RATE:CPS_eTAU20M'], monGroups=['tauMon:online','tauMon:shifter']), #ATR-27013
         ChainProp(name="HLT_tau25_mediumRNN_tracktwoMVA_L1eTAU20M",  stream=[PhysicsStream,'express'], groups=SupportPhIGroup+SingleTauGroup+['RATE:CPS_eTAU20M'], monGroups=['tauMon:online','tauMon:shifter']),
+
+        # ATR-31149
+        ChainProp(name="HLT_tau0_ptonly_L1eTAU12", groups=SingleTauGroup+SupportPhIGroup+['RATE:CPS_eTAU12']),
+        ChainProp(name="HLT_tau0_ptonly_L1eTAU80", groups=SingleTauGroup+SupportPhIGroup+['RATE:CPS_eTAU80']),
     ]
 
     chains['Bphysics'] = [

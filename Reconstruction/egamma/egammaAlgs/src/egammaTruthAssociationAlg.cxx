@@ -216,9 +216,16 @@ egammaTruthAssociationAlg::isPromptEgammaParticle(
   MCTruthPartClassifier::Info mcinfo(ctx);
   auto type = m_mcTruthClassifier->particleTruthClassifier(truth, &mcinfo);
 
-  // Isolated electron or photon
+  // Isolated electron or photons are kept
   if (type.first == MCTruthPartClassifier::IsoElectron ||
       type.first == MCTruthPartClassifier::IsoPhoton) {
+    return true;
+  }
+
+  //In UPC mode (e.g \gamma \gamma -> e e )
+  // keep (non-Geant see above) electrons from photons (Bkg)
+  if (m_UPCmode &&
+      type.first == MCTruthPartClassifier::BkgElectron) {
     return true;
   }
 

@@ -218,6 +218,10 @@ def CopyPixelClusterContainerAlgCfg(flags, **kwargs):
     kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"PixelClusters")
     kwargs.setdefault("ExtraInputs", {('InDetDD::SiDetectorElementCollection', 'ConditionStore+PixelDetectorElementCollection')})
 
+    if kwargs["InputKey"] in flags.Input.Collections:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'InDet::PixelClusterContainer#{kwargs["InputKey"]}']))
+
     alg = CompFactory.CopyPixelClusterContainer("CopyPixelClusterContainer", **kwargs)
     acc.addEventAlgo(alg)
 
@@ -230,6 +234,10 @@ def CopyITkPixelClusterContainerAlgCfg(flags, **kwargs):
     kwargs.setdefault("InputKey", "ITkPixelClusters")
     kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"ITkPixelClusters")
     kwargs.setdefault("ExtraInputs", [('InDetDD::SiDetectorElementCollection', 'ConditionStore+ITkPixelDetectorElementCollection')])
+
+    if kwargs["InputKey"] in flags.Input.Collections:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'InDet::PixelClusterContainer#{kwargs["InputKey"]}']))
 
     alg = CompFactory.CopyPixelClusterContainer("CopyPixelClusterContainer", **kwargs)
     acc.addEventAlgo(alg)
@@ -244,6 +252,10 @@ def CopySCT_ClusterContainerAlgCfg(flags, **kwargs):
     kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"SCT_Clusters")
     kwargs.setdefault("ExtraInputs", {('InDetDD::SiDetectorElementCollection', 'ConditionStore+SCT_DetectorElementCollection')})
 
+    if kwargs["InputKey"] in flags.Input.Collections:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'InDet::SCT_ClusterContainer#{kwargs["InputKey"]}']))
+
     alg = CompFactory.CopySCT_ClusterContainer("CopySCT_ClusterContainer", **kwargs)
     acc.addEventAlgo(alg)
 
@@ -257,6 +269,10 @@ def CopyITkStripClusterContainerAlgCfg(flags, **kwargs):
     kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"ITkStripClusters")
     kwargs.setdefault("ExtraInputs", [('InDetDD::SiDetectorElementCollection', 'ConditionStore+ITkStripDetectorElementCollection')])
 
+    if kwargs["InputKey"] in flags.Input.Collections:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'InDet::SCT_ClusterContainer#{kwargs["InputKey"]}']))
+
     alg = CompFactory.CopySCT_ClusterContainer("CopySCT_ClusterContainer", **kwargs)
     acc.addEventAlgo(alg)
 
@@ -269,6 +285,10 @@ def CopyTRT_DriftCircleContainerAlgCfg(flags, **kwargs):
     kwargs.setdefault("InputKey", "TRT_DriftCircles")
     kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"TRT_DriftCircles")
     kwargs.setdefault("ExtraInputs", {('InDetDD::TRT_DetElementContainer' , 'ConditionStore+TRT_DetElementContainer')})
+
+    if kwargs["InputKey"] in flags.Input.Collections:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'InDet::TRT_DriftCircleContainer#{kwargs["InputKey"]}']))
 
     alg = CompFactory.CopyTRT_DriftCircleContainer("CopyTRT_DriftCircleContainer", **kwargs)
     acc.addEventAlgo(alg)
@@ -295,6 +315,10 @@ def CopyTrackCollectionAlgCfg(flags, collectionName, **kwargs):
         extra_inputs.add(( 'InDetDD::SiDetectorElementCollection' , 'ConditionStore+ITkStripDetectorElementCollection' ))
 
     kwargs.setdefault("ExtraInputs", extra_inputs)
+
+    if kwargs["InputKey"] in flags.Input.Collections:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'TrackCollection#{kwargs["InputKey"]}']))
 
     alg = CompFactory.CopyTrackCollection("CopyTrackCollection"+collectionName, **kwargs)
     acc.addEventAlgo(alg)

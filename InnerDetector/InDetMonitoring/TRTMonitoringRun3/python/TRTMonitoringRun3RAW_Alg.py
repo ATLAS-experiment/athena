@@ -28,6 +28,12 @@ def TRTMonitoringRun3RAW_AlgConfig(flags):
     algTRTMonitoringRun3RAW.InDetTRTStrawStatusSummaryTool = (
         rv.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))
 
+    #  In Online TRTViewer expects some histograms to be created regardles if they filled or not. It is not needed for Offline                                                      
+    TRTViewer_opt='' #Offline Case                                                                                                                                                  
+    if flags.DQ.Environment in ('online'):
+            TRTViewer_opt='kAlwaysCreate'  #Online Case 
+
+    
     maxLumiBlockSummary  = 3000
     maxLumiBlockShift    = 3000
     numberOfBarrelStacks = 32
@@ -62,33 +68,33 @@ def TRTMonitoringRun3RAW_AlgConfig(flags):
                 elif i >= numberOfStacks[ibe]:
                     oss = 'TRT/EndcapC/Sector' + str(i + 1 - 32)
 
-            rdoStackGroup.defineHistogram('strawNumber,HitWMapS_passed;hHitWMapS',cutmask='HitWMapS_cut',type='TProfile',title='Leading Edge in Time Window: Straws;Straw Number in Stack;Probability per Event',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('strawNumber,HitTrWMapS_y;hHitTrWMapS',cutmask='HitTrWMapS_cut',type='TProfile',title='Mean Trailing Edge in Time Window: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('strawNumber,HitTrMapS_y;hHitTrMapS',type='TProfile',title='Mean Trailing Edge: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('strawNumber,HitAWMapS_passed;hHitAWMapS',cutmask='HitAWMapS_cut',type='TProfile',title='LL in Time Window: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('strawNumber,HitAMapS_passed;hHitAMapS',cutmask='HitAMapS_cut',type='TProfile',title='Any LL Bit: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('strawNumber;unscaled_hHitAMapS',cutmask='HitAMapS_cut',type='TH1F',title='Any LL Bit: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('strawNumber,HitToTMapS_y;hHitToTMapS',type='TProfile',title='Mean ToT: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('strawNumber,HitToTMapS_y;hHitToTLongMapS',cutmask='HitToTLong_cut',type='TProfile',title='Mean ToT for Straws with ToT > LongToTCut: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('strawNumber,HitTrMapS_y;hHitToTLongTrMapS',cutmask='HitToTLong_cut',type='TProfile',title='Mean Trailing Edge for Straws with ToT > LongToTCut: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('strawNumber,HitHMapS_passed;hHitHMapS',cutmask='HitHMapS_cut',type='TProfile',title='Any HL Bit: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('strawNumber,HitHWMapS_passed;hHitHWMapS',cutmask='HitHWMapS_cut',type='TProfile',title='HL in Time Window: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('HtoLMapS,HtoLMapS_passed;hHtoLMapS',type='TProfile',title='HL/LL Ratio: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
+            rdoStackGroup.defineHistogram('strawNumber,HitWMapS_passed;hHitWMapS',cutmask='HitWMapS_cut',type='TProfile',title='Leading Edge in Time Window: Straws;Straw Number in Stack;Probability per Event',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('strawNumber,HitTrWMapS_y;hHitTrWMapS',cutmask='HitTrWMapS_cut',type='TProfile',title='Mean Trailing Edge in Time Window: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('strawNumber,HitTrMapS_y;hHitTrMapS',type='TProfile',title='Mean Trailing Edge: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('strawNumber,HitAWMapS_passed;hHitAWMapS',cutmask='HitAWMapS_cut',type='TProfile',title='LL in Time Window: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('strawNumber,HitAMapS_passed;hHitAMapS',cutmask='HitAMapS_cut',type='TProfile',title='Any LL Bit: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('strawNumber;unscaled_hHitAMapS',cutmask='HitAMapS_cut',type='TH1F',title='Any LL Bit: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('strawNumber,HitToTMapS_y;hHitToTMapS',type='TProfile',title='Mean ToT: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('strawNumber,HitToTMapS_y;hHitToTLongMapS',cutmask='HitToTLong_cut',type='TProfile',title='Mean ToT for Straws with ToT > LongToTCut: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('strawNumber,HitTrMapS_y;hHitToTLongTrMapS',cutmask='HitToTLong_cut',type='TProfile',title='Mean Trailing Edge for Straws with ToT > LongToTCut: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('strawNumber,HitHMapS_passed;hHitHMapS',cutmask='HitHMapS_cut',type='TProfile',title='Any HL Bit: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('strawNumber,HitHWMapS_passed;hHitHWMapS',cutmask='HitHWMapS_cut',type='TProfile',title='HL in Time Window: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('HtoLMapS,HtoLMapS_passed;hHtoLMapS',type='TProfile',title='HL/LL Ratio: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
 
-            rdoStackGroup.defineHistogram('chipNumber,HitWMapC_passed;hHitWMapC',cutmask='HitWMapC_cut',type='TProfile',title='Leading Edge in Time Window: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('chipNumber,HitTrMapC_y;hHitTrMapC',type='TProfile',title='Mean Trailing Edge: Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('chipNumber,HitTrMapC_y;hHitTrWMapC',cutmask='HitTrWMapC_cut',type='TProfile',title='Mean Trailing Edge in Time Window: Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('chipNumber,HitAWMapC_passed;hHitAWMapC',cutmask='HitAWMapC_cut',type='TProfile',title='LL in Time Window: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('chipNumber,HitAMapC_passed;hHitAMapC',cutmask='HitAMapC_cut',type='TProfile',title='Any LL Bit: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('chipNumber;unscaled_hHitAMapC',cutmask='HitAMapC_cut',type='TH1F',title='Any LL Bit: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('chipNumber,HitToTMapC_y;hHitToTMapC',type='TProfile',title='Mean ToT: Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('chipNumber,HitHMapC_passed;hHitHMapC',cutmask='HitHMapC_cut',type='TProfile',title='Any HL Bit: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('chipNumber,HitHWMapC_passed;hHitHWMapC',cutmask='HitHWMapC_cut',type='TProfile',title='HL in Time Window: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('HtoLMapC,HtoLMapC_passed;hHtoLMapC',type='TProfile',title='HL/LL Ratio: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-            rdoStackGroup.defineHistogram('HtoBCMapC_x,chipNumber;hHtoBCMapC',cutmask='HtoBCMap_cut',type='TH2F',title='HL in BC: Chips;Bunch Crossing ID;Chip Number in Stack',path=oss,xbins=3,xmin=0,xmax=3,ybins=iChipMax[ibe],ymin=0,ymax=iChipMax[ibe],opt='kAlwaysCreate')
+            rdoStackGroup.defineHistogram('chipNumber,HitWMapC_passed;hHitWMapC',cutmask='HitWMapC_cut',type='TProfile',title='Leading Edge in Time Window: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('chipNumber,HitTrMapC_y;hHitTrMapC',type='TProfile',title='Mean Trailing Edge: Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('chipNumber,HitTrMapC_y;hHitTrWMapC',cutmask='HitTrWMapC_cut',type='TProfile',title='Mean Trailing Edge in Time Window: Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('chipNumber,HitAWMapC_passed;hHitAWMapC',cutmask='HitAWMapC_cut',type='TProfile',title='LL in Time Window: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('chipNumber,HitAMapC_passed;hHitAMapC',cutmask='HitAMapC_cut',type='TProfile',title='Any LL Bit: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('chipNumber;unscaled_hHitAMapC',cutmask='HitAMapC_cut',type='TH1F',title='Any LL Bit: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('chipNumber,HitToTMapC_y;hHitToTMapC',type='TProfile',title='Mean ToT: Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('chipNumber,HitHMapC_passed;hHitHMapC',cutmask='HitHMapC_cut',type='TProfile',title='Any HL Bit: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('chipNumber,HitHWMapC_passed;hHitHWMapC',cutmask='HitHWMapC_cut',type='TProfile',title='HL in Time Window: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('HtoLMapC,HtoLMapC_passed;hHtoLMapC',type='TProfile',title='HL/LL Ratio: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+            rdoStackGroup.defineHistogram('HtoBCMapC_x,chipNumber;hHtoBCMapC',cutmask='HtoBCMap_cut',type='TH2F',title='HL in BC: Chips;Bunch Crossing ID;Chip Number in Stack',path=oss,xbins=3,xmin=0,xmax=3,ybins=iChipMax[ibe],ymin=0,ymax=iChipMax[ibe],opt=TRTViewer_opt)
 
-            if   ibe == 0: rdoStackGroup.defineHistogram('HtoBCMapB_x,HtoBCMapB_y;hHtoBCMapB',type='TH2F',title='HL in BC: Boards;Bunch Crossing ID;Board Number in Stack',path=oss,xbins=3,xmin=0,xmax=3,ybins=9,ymin=0,ymax=9,opt='kAlwaysCreate')
-            elif ibe == 1: rdoStackGroup.defineHistogram('HtoBCMapB_x,HtoBCMapB_y;hHtoBCMapB',type='TH2F',title='HL in BC: Boards;Bunch Crossing ID;Board Number in Stack',path=oss,xbins=3,xmin=0,xmax=3,ybins=20,ymin=-0.5,ymax=19.5,opt='kAlwaysCreate')
+            if   ibe == 0: rdoStackGroup.defineHistogram('HtoBCMapB_x,HtoBCMapB_y;hHtoBCMapB',type='TH2F',title='HL in BC: Boards;Bunch Crossing ID;Board Number in Stack',path=oss,xbins=3,xmin=0,xmax=3,ybins=9,ymin=0,ymax=9,opt=TRTViewer_opt)
+            elif ibe == 1: rdoStackGroup.defineHistogram('HtoBCMapB_x,HtoBCMapB_y;hHtoBCMapB',type='TH2F',title='HL in BC: Boards;Bunch Crossing ID;Board Number in Stack',path=oss,xbins=3,xmin=0,xmax=3,ybins=20,ymin=-0.5,ymax=19.5,opt=TRTViewer_opt)
 
     ### Registering Collisions Histograms ###
     for ibe in range(2):
@@ -151,8 +157,8 @@ def TRTMonitoringRun3RAW_AlgConfig(flags):
                 elif ibe == 1:
                     oss = 'TRT/Endcap' + str(sideId[iside]) + '/Sector' + str(i + 1 - 32*iside) 
                 effStrawChipGroup = helper.addGroup(algTRTMonitoringRun3RAW,'TRTEfficiencyHistograms{0}{1}'.format(ibe,i))
-                effStrawChipGroup.defineHistogram('EfficiencyS,EfficiencyS_passed;hHitEfficiencyS',type='TProfile',title='Straw Efficiency Map;Straw Number;Efficiency',path=oss,xbins=strawMax[ibe],xmin=0.5,xmax=strawMax[ibe],opt='kAlwaysCreate')
-                effStrawChipGroup.defineHistogram('EfficiencyC,EfficiencyC_passed;hHitEfficiencyC',type='TProfile',title='Chip Efficiency Map;Chip Number;Efficiency',  path=oss,xbins=iChipMax[ibe],xmin=0.5,xmax=iChipMax[ibe],opt='kAlwaysCreate')
+                effStrawChipGroup.defineHistogram('EfficiencyS,EfficiencyS_passed;hHitEfficiencyS',type='TProfile',title='Straw Efficiency Map;Straw Number;Efficiency',path=oss,xbins=strawMax[ibe],xmin=0.5,xmax=strawMax[ibe],opt=TRTViewer_opt)
+                effStrawChipGroup.defineHistogram('EfficiencyC,EfficiencyC_passed;hHitEfficiencyC',type='TProfile',title='Chip Efficiency Map;Chip Number;Efficiency',  path=oss,xbins=iChipMax[ibe],xmin=0.5,xmax=iChipMax[ibe],opt=TRTViewer_opt)
     ## Finished Booking TRT RDO Histograms ###
 
     ### Booking TRT Hits Histograms ###
@@ -178,27 +184,27 @@ def TRTMonitoringRun3RAW_AlgConfig(flags):
                         nBarrelModules = i + 1 - 32
                         oss = 'TRT/EndcapC/Sector{0}'.format(nBarrelModules)      
 
-                trackGroup.defineHistogram('HitWonTMapS;unscaled_hHitWonTMapS',type='TH1F',title='Leading Edge on Track in Time Window: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HitAonTMapS;unscaled_hHitAonTMapS',type='TH1F',title='Any LL Bit on Track: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HitHonTMapS;unscaled_hHitHonTMapS',type='TH1F',title='HL Hit on Track: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HitHWonTMapS;unscaled_hHitHWonTMapS',type='TH1F',title='HL Hit(In Time Window) on Track: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HitAWonTMapS;unscaled_hHitAWonTMapS',type='TH1F',title='Any LL Bit on Track in Time Window: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-                trackGroup.defineHistogram('EfficiencyS,EfficiencyS_passed;hEfficiencyS',type='TProfile',title='Straw Efficiency with {0} mm Cut;Straw Number in Stack;Efficiency'.format(distance),path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-                trackGroup.defineHistogram('EfficiencyC,EfficiencyC_passed;hEfficiencyC',type='TProfile',title='Chip Efficiency with {0} mm Cut;Chip Number in Stack;Efficiency'.format(distance),path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HitWonTMapC;unscaled_hHitWonTMapC',type='TH1F',title='Leading Edge on Track in Time Window: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HitAonTMapC;unscaled_hHitAonTMapC',type='TH1F',title='Any LL Bit on Track: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HitAWonTMapC;unscaled_hHitAWonTMapC',type='TH1F',title='Any LL Bit on Track in Time Window: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HitHonTMapC;unscaled_hHitHonTMapC',type='TH1F',title='HL Hit on Track: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HitHWonTMapC;unscaled_hHitHWonTMapC',type='TH1F',title='HL Hit(In time Window) on Track: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HtoLonTMapS,HtoLonTMapS_passed;hHtoLonTMapS',type='TProfile',title='HL/LL Ratio on Track: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HtoLWonTMapS,HtoLWonTMapS_passed;hHtoLWonTMapS',type='TProfile',title='HL/LL (In Time Window) Ratio on Track: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HtoLWonTMapC,HtoLWonTMapC_passed;hHtoLWonTMapC',type='TProfile',title='HL/LL(In Time Window) Ratio on Track: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HtoLonTMapC,HtoLonTMapC_passed;hHtoLonTMapC',type='TProfile',title='HL/LL Ratio on Track: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
+                trackGroup.defineHistogram('HitWonTMapS;unscaled_hHitWonTMapS',type='TH1F',title='Leading Edge on Track in Time Window: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HitAonTMapS;unscaled_hHitAonTMapS',type='TH1F',title='Any LL Bit on Track: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HitHonTMapS;unscaled_hHitHonTMapS',type='TH1F',title='HL Hit on Track: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HitHWonTMapS;unscaled_hHitHWonTMapS',type='TH1F',title='HL Hit(In Time Window) on Track: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HitAWonTMapS;unscaled_hHitAWonTMapS',type='TH1F',title='Any LL Bit on Track in Time Window: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+                trackGroup.defineHistogram('EfficiencyS,EfficiencyS_passed;hEfficiencyS',type='TProfile',title='Straw Efficiency with {0} mm Cut;Straw Number in Stack;Efficiency'.format(distance),path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+                trackGroup.defineHistogram('EfficiencyC,EfficiencyC_passed;hEfficiencyC',type='TProfile',title='Chip Efficiency with {0} mm Cut;Chip Number in Stack;Efficiency'.format(distance),path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HitWonTMapC;unscaled_hHitWonTMapC',type='TH1F',title='Leading Edge on Track in Time Window: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HitAonTMapC;unscaled_hHitAonTMapC',type='TH1F',title='Any LL Bit on Track: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HitAWonTMapC;unscaled_hHitAWonTMapC',type='TH1F',title='Any LL Bit on Track in Time Window: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HitHonTMapC;unscaled_hHitHonTMapC',type='TH1F',title='HL Hit on Track: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HitHWonTMapC;unscaled_hHitHWonTMapC',type='TH1F',title='HL Hit(In time Window) on Track: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HtoLonTMapS,HtoLonTMapS_passed;hHtoLonTMapS',type='TProfile',title='HL/LL Ratio on Track: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HtoLWonTMapS,HtoLWonTMapS_passed;hHtoLWonTMapS',type='TProfile',title='HL/LL (In Time Window) Ratio on Track: Straws;Straw Number in Stack;Probability',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HtoLWonTMapC,HtoLWonTMapC_passed;hHtoLWonTMapC',type='TProfile',title='HL/LL(In Time Window) Ratio on Track: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HtoLonTMapC,HtoLonTMapC_passed;hHtoLonTMapC',type='TProfile',title='HL/LL Ratio on Track: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt=TRTViewer_opt)
 
-                trackGroup.defineHistogram('HitTronTMapS_x,HitTronTMapS_y;hHitTronTMapS',type='TProfile',title='Mean Trailing Edge on Track: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HitToTonTMapS_x,HitToTonTMapS_y;hHitToTonTMapS',type='TProfile',title='Mean ToT on Track: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HitTronTMapC_x,HitTronTMapC_y;hHitTronTMapC',type='TProfile',title='Mean Trailing Edge on Track: Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt='kAlwaysCreate')
-                trackGroup.defineHistogram('HitToTonTMapC_x,HitToTonTMapC_y;hHitToTonTMapC',type='TProfile',title='Chip Number in Stack;Time (ns);Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt='kAlwaysCreate')
+                trackGroup.defineHistogram('HitTronTMapS_x,HitTronTMapS_y;hHitTronTMapS',type='TProfile',title='Mean Trailing Edge on Track: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HitToTonTMapS_x,HitToTonTMapS_y;hHitToTonTMapS',type='TProfile',title='Mean ToT on Track: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HitTronTMapC_x,HitTronTMapC_y;hHitTronTMapC',type='TProfile',title='Mean Trailing Edge on Track: Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt=TRTViewer_opt)
+                trackGroup.defineHistogram('HitToTonTMapC_x,HitToTonTMapC_y;hHitToTonTMapC',type='TProfile',title='Chip Number in Stack;Time (ns);Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt=TRTViewer_opt)
 
     for ibe in range(2):
         if ibe == 0:

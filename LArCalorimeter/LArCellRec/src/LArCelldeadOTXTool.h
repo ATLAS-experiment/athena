@@ -53,6 +53,9 @@ public:
   
   mutable std::unordered_map<int,std::pair<float,int> > m_testMap ATLAS_THREAD_SAFE; //Only used in testMode + mtx-protected
   mutable std::mutex m_mtx;
+
+  mutable std::atomic<int> m_nWarnings{0};
+
 };
 
 #endif     

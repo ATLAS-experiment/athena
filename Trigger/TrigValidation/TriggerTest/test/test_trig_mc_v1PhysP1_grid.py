@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the PhysicsP1_pp_run3_v1 menu
 # art-type: grid
@@ -20,19 +20,11 @@
 # art-output: prmon*
 # art-output: *.check*
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TriggerTest.MCExecStep import MCGridStep
+from TrigValTools.TrigValSteering import Test, CheckSteps
 
-from AthenaConfiguration.TestDefaults import defaultConditionsTags
-conditions = defaultConditionsTags.RUN3_MC
-
-ex = ExecStep.ExecStep()
-ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT.py'
+ex = MCGridStep(menu='PhysicsP1_pp_run3_v1')
 ex.input = 'ttbar'
-ex.threads = 8
-ex.concurrent_events = 8
-ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1"',
-            'IOVDb.GlobalTag="' + conditions + '"']
 
 test = Test.Test()
 test.art_type = 'grid'

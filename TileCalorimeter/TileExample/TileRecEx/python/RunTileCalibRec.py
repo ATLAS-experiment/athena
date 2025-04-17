@@ -366,6 +366,9 @@ if __name__=='__main__':
             tileNtuple.TileRawChannelContainer = ""
         if args.offline_units:
             tileNtuple.OfflineUnits = args.offline_units
+            tileNtuple.CalibrateEnergy = True
+        elif args.calibrate is not None:
+            tileNtuple.CalibrateEnergy = args.calibrate
         if flags.Tile.RunType in [TileRunType.GAPLAS, TileRunType.GAPCIS]:
             tileNtuple.TileDigitsContainerFlt = "TileDigitsCnt"
             tileNtuple.TileDigitsContainer = "" # do not save various error bits

@@ -20,21 +20,12 @@
 # art-output: prmon*
 # art-output: *.check*
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TriggerTest.MCExecStep import MCGridStep
+from TrigValTools.TrigValSteering import Test, CheckSteps
 
-from AthenaConfiguration.TestDefaults import defaultConditionsTags
-conditions = defaultConditionsTags.RUN3_MC
-
-ex = ExecStep.ExecStep()
-ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT.py'
+ex = MCGridStep(menu='Dev_pp_run3_v1',signatures=['Muon'])
 ex.input = 'ttbar'
-ex.threads = 8
-ex.concurrent_events = 8
 ex.imf = False
-ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
-            'IOVDb.GlobalTag="' + conditions + '"',
-            'Trigger.enabledSignatures=[\\\"Muon\\\"]']
 
 test = Test.Test()
 test.art_type = 'grid'
