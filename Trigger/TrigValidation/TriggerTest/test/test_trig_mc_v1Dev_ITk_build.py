@@ -15,7 +15,7 @@ from AthenaConfiguration.TestDefaults import defaultConditionsTags
 run = MCBuildStep(
     menu='MC_pp_run4_v1',
     global_tag=defaultConditionsTags.RUN4_MC,
-    mc_campaign='Campaign.PhaseIINoPileUp'
+    mc_campaign='Campaigns.PhaseIINoPileUp'
 )
 run.input = 'Single_mu_Run4'
 
