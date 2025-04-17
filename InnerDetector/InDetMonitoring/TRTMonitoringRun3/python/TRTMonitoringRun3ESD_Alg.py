@@ -30,6 +30,11 @@ def TRTMonitoringRun3ESD_AlgConfig(flags):
     if not flags.DQ.triggerDataAvailable:
         algTRTMonitoringRun3ESD.TrigDecisionObjectName = ''
 
+    #  In Online TRTViewer expects some histograms to be created regardles if they filled or not. It is not needed for Offline
+    TRTViewer_opt='' #Offline Case
+    if flags.DQ.Environment in ('online'):
+            TRTViewer_opt='kAlwaysCreate'  #Online Case
+        
     from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
 
     result.merge(addFoldersSplitOnline(flags, "TRT","/TRT/Onl/Calib/errors2d","/TRT/Calib/errors2d",className="TRTCond::RtRelationMultChanContainer"))
@@ -102,11 +107,11 @@ def TRTMonitoringRun3ESD_AlgConfig(flags):
                     nBarrelModules = i + 1 - 32
                     oss = 'TRT/EndcapC/Sector{0}'.format(nBarrelModules)
 
-            trackGroup.defineHistogram('ValidRawDriftTimeonTrkS_x,ValidRawDriftTimeonTrkS_y;hValidRawDriftTimeonTrkS',type='TProfile',title='Valid Raw Drift Time on Track: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt='kAlwaysCreate')
-            trackGroup.defineHistogram('HitTronTwEPCMapS_x,HitTronTwEPCMapS_y;hHitTronTwEPCMapS',type='TProfile',title='Mean Trailing Edge on Track (with Event Phase Correction): Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt='kAlwaysCreate')
+            trackGroup.defineHistogram('ValidRawDriftTimeonTrkS_x,ValidRawDriftTimeonTrkS_y;hValidRawDriftTimeonTrkS',type='TProfile',title='Valid Raw Drift Time on Track: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt=TRTViewer_opt)
+            trackGroup.defineHistogram('HitTronTwEPCMapS_x,HitTronTwEPCMapS_y;hHitTronTwEPCMapS',type='TProfile',title='Mean Trailing Edge on Track (with Event Phase Correction): Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt=TRTViewer_opt)
 
-            trackGroup.defineHistogram('ValidRawDriftTimeonTrkC_x,ValidRawDriftTimeonTrkC_y;hValidRawDriftTimeonTrkC',type='TProfile',title='Valid Raw Drift Time on Track: Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt='kAlwaysCreate')
-            trackGroup.defineHistogram('HitTronTwEPCMapC_x,HitTronTwEPCMapC_y;hHitTronTwEPCMapC',type='TProfile',title='Mean Trailing Edge on Track (with Event Phase Correction): Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt='kAlwaysCreate')
+            trackGroup.defineHistogram('ValidRawDriftTimeonTrkC_x,ValidRawDriftTimeonTrkC_y;hValidRawDriftTimeonTrkC',type='TProfile',title='Valid Raw Drift Time on Track: Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt=TRTViewer_opt)
+            trackGroup.defineHistogram('HitTronTwEPCMapC_x,HitTronTwEPCMapC_y;hHitTronTwEPCMapC',type='TProfile',title='Mean Trailing Edge on Track (with Event Phase Correction): Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt=TRTViewer_opt)
 
     # Arrays for Aging
     gas = ('in_A', 'in_B', 'out_A', 'out_B')
