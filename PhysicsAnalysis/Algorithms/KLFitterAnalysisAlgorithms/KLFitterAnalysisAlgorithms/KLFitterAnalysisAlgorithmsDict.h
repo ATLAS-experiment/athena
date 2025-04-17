@@ -8,11 +8,11 @@
 #ifndef KLFITTERANALYSIS_ALGORITHMS_DICT_H
 #define KLFITTERANALYSIS_ALGORITHMS_DICT_H
 
+#include "KLFitterAnalysisAlgorithms/RunKLFitterAlg.h"
 #include "KLFitterAnalysisAlgorithms/KLFitterFinalizeOutputAlg.h"
 #include "KLFitterAnalysisAlgorithms/KLFitterResult.h"
 #include "KLFitterAnalysisAlgorithms/KLFitterResultAuxContainer.h"
 #include "KLFitterAnalysisAlgorithms/KLFitterResultContainer.h"
-#include "KLFitterAnalysisAlgorithms/RunKLFitterAlg.h"
 
 // EDM include(s).
 #include "xAODCore/tools/DictHelpers.h"

@@ -611,6 +611,11 @@ class ConfigAccumulator :
         self._outputContainers[outputContainerName] = containerName
 
 
+    def checkOutputContainer (self, containerName) :
+        """check whether a given container has been registered in outputs"""
+        return containerName in self._outputContainers.values()
+
+
     def getOutputContainerOrigin (self, outputContainerName) :
         """Get the name of the actual container, for which an output is registered"""
         try:
