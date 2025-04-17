@@ -57,7 +57,7 @@ namespace DerivationFramework {
   /// </td>
   /// </table>
   ///
-  class AugOriginalCounts : public AthAlgTool, public IAugmentationTool {
+  class AugOriginalCounts : public extends<AthAlgTool, IAugmentationTool> {
   public:
     /// @brief Main constructor
     AugOriginalCounts(const std::string& t, const std::string& n,

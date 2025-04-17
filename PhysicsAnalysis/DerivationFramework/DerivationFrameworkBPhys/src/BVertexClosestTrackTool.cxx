@@ -245,7 +245,6 @@ namespace DerivationFramework {
     : BPhysVertexTrackBase(t,n,p), m_lastRunNumber(0), m_lastEvtNumber(0),
       m_svIdx(0) {
     
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
 
     declareProperty("CloseTrackChi2SetName", m_closeTrackChi2SetName = {"def"});
     declareProperty("CloseTrackCorrChi2"   , m_closeTrackCorrChi2    = {0});

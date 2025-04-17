@@ -29,7 +29,7 @@ namespace xAOD {
  */
 namespace DerivationFramework {
 
-  class Select_onia2mumu : public AthAlgTool, public IAugmentationTool {
+  class Select_onia2mumu : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       Select_onia2mumu(const std::string& t, const std::string& n, const IInterface* p);
 

@@ -40,8 +40,7 @@
 
 namespace DerivationFramework {
 
-  class BPhysMetadataBase : virtual public AthAlgTool,
-    virtual public IAugmentationTool {
+  class BPhysMetadataBase : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       BPhysMetadataBase(const std::string& t, const std::string& n,
 			const IInterface* p);

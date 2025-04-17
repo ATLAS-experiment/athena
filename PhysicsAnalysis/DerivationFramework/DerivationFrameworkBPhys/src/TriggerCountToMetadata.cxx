@@ -28,10 +28,8 @@ namespace DerivationFramework {
   TriggerCountToMetadata::TriggerCountToMetadata(const std::string& t,
 				       const std::string& n,
 				       const IInterface*  p)
-    : CfAthAlgTool(t,n,p),   m_trigDecisionTool( "Trig::TrigDecisionTool/TrigDecisionTool" )
+    : base_class(t,n,p),   m_trigDecisionTool( "Trig::TrigDecisionTool/TrigDecisionTool" )
  {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
-    
     declareProperty("TrigDecisionTool", m_trigDecisionTool );
     declareProperty("FolderName",       m_folderName = "DerivationLevel");
     declareProperty("TriggerList",      m_triggerList);

@@ -20,14 +20,12 @@
 #include "StoreGate/ThinningHandle.h"
 // Constructor
 DerivationFramework::Thin_vtxDuplicates::Thin_vtxDuplicates(const std::string& t, const std::string& n, const IInterface* p ) :
-  AthAlgTool(t,n,p),
+  base_class(t,n,p),
  // m_acceptanceR(-1.),
   m_noFlags(false),
   m_nVtxTot(0),
   m_nVtxPass(0)
 {
-  declareInterface<DerivationFramework::IThinningTool>(this);
-  
   declareProperty("VertexContainerName"      , m_vertexContainerNames);
   declareProperty("PassFlags"                 , m_passFlags);
   //declareProperty("AcceptanceRadius"          , m_acceptanceR);

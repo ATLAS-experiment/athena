@@ -21,7 +21,7 @@
  */
 namespace DerivationFramework {
 
-  class VertexTrackIsolation : public AthAlgTool, public IAugmentationTool {
+  class VertexTrackIsolation : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       VertexTrackIsolation(const std::string& t, const std::string& n, const IInterface* p);
 

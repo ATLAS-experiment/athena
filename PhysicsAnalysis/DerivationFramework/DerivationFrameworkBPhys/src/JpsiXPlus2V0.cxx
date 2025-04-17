@@ -26,7 +26,7 @@ namespace DerivationFramework {
 
   using Analysis::JpsiUpsilonCommon;
 
-  JpsiXPlus2V0::JpsiXPlus2V0(const std::string& type, const std::string& name, const IInterface* parent) : AthAlgTool(type,name,parent),
+  JpsiXPlus2V0::JpsiXPlus2V0(const std::string& type, const std::string& name, const IInterface* parent) : base_class(type,name,parent),
     m_vertexJXContainerKey("InputJXVertices"),
     m_vertexV0ContainerKey{""},
     m_cascadeOutputKeys({"JpsiXPlus2V0_SubVtx1", "JpsiXPlus2V0_SubVtx2", "JpsiXPlus2V0_SubVtx3", "JpsiXPlus2V0_MainVtx"}),

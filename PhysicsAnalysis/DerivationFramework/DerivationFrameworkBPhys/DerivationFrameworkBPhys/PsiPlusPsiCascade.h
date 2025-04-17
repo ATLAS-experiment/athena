@@ -28,12 +28,9 @@ namespace DerivationFramework {
 
 namespace DerivationFramework {
 
-  static const InterfaceID IID_PsiPlusPsiCascade("PsiPlusPsiCascade", 1, 0);
-
-  class PsiPlusPsiCascade : virtual public AthAlgTool, public IAugmentationTool
+  class PsiPlusPsiCascade : public extends<AthAlgTool, IAugmentationTool>
   {
   public:
-    static const InterfaceID& interfaceID() { return IID_PsiPlusPsiCascade;}
     PsiPlusPsiCascade(const std::string& type, const std::string& name, const IInterface* parent);
     virtual ~PsiPlusPsiCascade() = default;
     virtual StatusCode initialize() override;

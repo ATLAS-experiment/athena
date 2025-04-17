@@ -51,7 +51,7 @@ namespace SG {
  */
 namespace DerivationFramework {
 
-  class ATLAS_NOT_THREAD_SAFE Select_Bmumu : public CfAthAlgTool, public IAugmentationTool {
+  class ATLAS_NOT_THREAD_SAFE Select_Bmumu : public extends<CfAthAlgTool, IAugmentationTool> {
     public: 
       Select_Bmumu(const std::string& t, const std::string& n, const IInterface* p);
 

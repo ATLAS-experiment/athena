@@ -365,7 +365,7 @@ namespace DerivationFramework {
     }
 
 
-    JpsiPlusV0Cascade::JpsiPlusV0Cascade(const std::string& t, const std::string& n, const IInterface* p)  : AthAlgTool(t,n,p),
+    JpsiPlusV0Cascade::JpsiPlusV0Cascade(const std::string& t, const std::string& n, const IInterface* p)  : base_class(t,n,p),
     m_vertexContainerKey(""),
     m_vertexV0ContainerKey(""),
     m_cascadeOutputsKeys{ "JpsiPlusV0CascadeVtx1", "JpsiPlusV0CascadeVtx2" },

@@ -33,12 +33,9 @@ namespace DerivationFramework {
 
 namespace DerivationFramework {
 
-    static const InterfaceID IID_MuPlusDpstCascade("MuPlusDpstCascade", 1, 0);
-
-    class MuPlusDpstCascade : virtual public AthAlgTool, public IAugmentationTool
+    class MuPlusDpstCascade : public extends<AthAlgTool, IAugmentationTool>
     {
       public:
-        static const InterfaceID& interfaceID() { return IID_MuPlusDpstCascade;}
         MuPlusDpstCascade(const std::string& t, const std::string& n, const IInterface*  p);
         ~MuPlusDpstCascade();
         virtual StatusCode initialize() override;

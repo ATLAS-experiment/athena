@@ -53,7 +53,7 @@ namespace DerivationFramework {
     return m_vector;
   }
 
-  JpsiXPlusDisplaced::JpsiXPlusDisplaced(const std::string& type, const std::string& name, const IInterface* parent) : AthAlgTool(type,name,parent),
+  JpsiXPlusDisplaced::JpsiXPlusDisplaced(const std::string& type, const std::string& name, const IInterface* parent) : base_class(type,name,parent),
     m_vertexJXContainerKey("InputJXVertices"),
     m_vertexV0ContainerKey(""),
     m_cascadeOutputKeys({"JpsiXPlusDisVtx1_sub", "JpsiXPlusDisVtx1", "JpsiXPlusDisVtx2", "JpsiXPlusDisVtx3"}),

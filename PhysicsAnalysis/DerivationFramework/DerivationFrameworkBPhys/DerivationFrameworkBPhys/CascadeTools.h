@@ -16,8 +16,6 @@
 
 namespace DerivationFramework {
 
-  static const InterfaceID IID_CascadeTools("CascadeTools", 1, 1);
-
   class CascadeTools : public AthAlgTool{
 
     public:
@@ -38,15 +36,6 @@ namespace DerivationFramework {
     //Nothing done not needed
     //StatusCode initialize() override;
     //StatusCode finalize() override;
-
-/**   
- * AlgTool interface methods 
- */
-  static const InterfaceID& interfaceID()
-  {
-   return IID_CascadeTools;
-  }
-
 
     Amg::Vector3D momentum(const std::vector<TLorentzVector> &particleMom) const;
     Amg::Vector3D pca(const std::vector<TLorentzVector> &particleMom, const xAOD::Vertex* SV, const xAOD::Vertex* PV) const;

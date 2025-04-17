@@ -24,10 +24,9 @@ namespace DerivationFramework {
   Select_onia2mumu::Select_onia2mumu(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_v0Tools("Trk::V0Tools")
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
 
     // Declare tools    
     declareProperty("V0Tools", m_v0Tools);

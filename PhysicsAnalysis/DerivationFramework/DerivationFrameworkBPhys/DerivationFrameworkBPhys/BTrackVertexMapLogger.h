@@ -27,8 +27,7 @@
 
 namespace DerivationFramework {
   
-  class BTrackVertexMapLogger : virtual public AthAlgTool,
-    virtual public IAugmentationTool {
+  class BTrackVertexMapLogger : public extends<AthAlgTool, IAugmentationTool> {
   public: 
       BTrackVertexMapLogger(const std::string& t, const std::string& n,
 			    const IInterface* p);

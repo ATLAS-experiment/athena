@@ -36,9 +36,7 @@ namespace DerivationFramework {
 
 namespace DerivationFramework {
 
-  static const InterfaceID IID_JpsiXPlusDisplaced("JpsiXPlusDisplaced", 1, 0);
-
-  class JpsiXPlusDisplaced : virtual public AthAlgTool, public IAugmentationTool
+  class JpsiXPlusDisplaced : public extends<AthAlgTool, IAugmentationTool>
   {
   public:
     enum V0Enum{ UNKNOWN=0, LAMBDA=1, LAMBDABAR=2, KS=3 };
@@ -75,7 +73,6 @@ namespace DerivationFramework {
       std::vector<MesonCandidate> m_vector;
     };
 
-    static const InterfaceID& interfaceID() { return IID_JpsiXPlusDisplaced;}
     JpsiXPlusDisplaced(const std::string& type, const std::string& name, const IInterface* parent);
     virtual ~JpsiXPlusDisplaced() = default;
     virtual StatusCode initialize() override;

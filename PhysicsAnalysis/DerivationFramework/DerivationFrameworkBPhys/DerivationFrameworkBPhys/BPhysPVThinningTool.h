@@ -20,7 +20,7 @@
 namespace DerivationFramework {
 
   
-  class BPhysPVThinningTool : public AthAlgTool, public IThinningTool {
+  class BPhysPVThinningTool : public extends<AthAlgTool, IThinningTool> {
     
   public: 
     /** Constructor with parameters */

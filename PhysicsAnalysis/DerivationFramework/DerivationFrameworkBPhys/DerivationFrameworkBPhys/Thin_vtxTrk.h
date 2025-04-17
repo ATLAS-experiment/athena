@@ -26,7 +26,7 @@ namespace SG{
 
 namespace DerivationFramework {
 
-  class Thin_vtxTrk : public AthAlgTool, public IThinningTool {
+  class Thin_vtxTrk : public extends<AthAlgTool, IThinningTool> {
     public: 
       Thin_vtxTrk(const std::string& t, const std::string& n, const IInterface* p);
       ~Thin_vtxTrk();

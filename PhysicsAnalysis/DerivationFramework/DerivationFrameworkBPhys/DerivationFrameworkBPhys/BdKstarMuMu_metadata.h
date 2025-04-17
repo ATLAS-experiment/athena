@@ -31,7 +31,7 @@ namespace DerivationFramework {
   /// Store JO metadata specific to the Bd->KstarMuMu analysis in the output file.
   /// This class inherits from BPhysMetadataBase.
   ///
-  class BdKstarMuMu_metadata : virtual public BPhysMetadataBase {
+  class BdKstarMuMu_metadata : public BPhysMetadataBase {
     public:
     /// @brief Main constructor
     BdKstarMuMu_metadata(const std::string& t,
