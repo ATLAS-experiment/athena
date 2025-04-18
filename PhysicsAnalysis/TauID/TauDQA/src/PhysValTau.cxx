@@ -26,17 +26,8 @@
 PhysValTau::PhysValTau(const std::string& type, 
 		       const std::string& name, 
                        const IInterface* parent) : 
-  ManagedMonitorToolBase(type, name, parent),
-  m_truthTool("TauAnalysisTools::TauTruthMatchingTool/TauTruthMatchingTool", this),
-  m_primTauSel("TauAnalysisTools::TauSelectionTool/PrimitiveTauSelectionTool", this),
-  m_nomiTauSel("TauAnalysisTools::TauSelectionTool/NominalTauSelectionTool", this)
+  ManagedMonitorToolBase(type, name, parent)
 {
-  declareProperty("TauContainerName", m_TauJetContainerName = "TauJets");
-  declareProperty("TruthParticleContainerName", m_TruthParticleContainerName = "TruthParticles");
-  declareProperty("isMC", m_isMC = false);
-  declareProperty("TauTruthMatchingTool", m_truthTool);
-  declareProperty("PrimitiveTauSelectionTool", m_primTauSel);
-  declareProperty("NominalTauSelectionTool", m_nomiTauSel);
 }
 
 
