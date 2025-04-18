@@ -338,7 +338,7 @@ def SimHitContainerListCfg(flags):
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ID', True)):
             writtenContainers += [("SiHitCollection", "BCMHits_G4")]
             writtenContainers += [("SiHitCollection", "BLMHits_G4")]
-    else:
+        else:
             writtenContainers += [("SiHitCollection", "BCMHits")]
             writtenContainers += [("SiHitCollection", "BLMHits")]
     if flags.Detector.EnablePixel:

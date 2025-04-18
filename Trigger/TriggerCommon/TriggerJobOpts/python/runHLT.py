@@ -13,6 +13,7 @@ Usage:
 """
 
 from AthenaConfiguration.ComponentFactory import CompFactory
+from PyJobTransforms.TransformUtils import processPreExec, processPostExec, processPreInclude, processPostInclude
 
 def lock_and_restrict(flags):
    """Deny access to a few flags and lock"""
@@ -153,8 +154,14 @@ def athenaCfg(flags, parser=None):
    # Add options to command line parser
    if not parser:
       parser = flags.getArgumentParser()
-   parser.add_argument('--postExec', metavar='CMD',
+   parser.add_argument('--preExec', metavar='CMD', nargs='+', 
+                       help='Commands executed before Python configuration')
+   parser.add_argument('--postExec', metavar='CMD', nargs='+',
                        help='Commands executed after Python configuration')
+   parser.add_argument('--preInclude', metavar='CMD', nargs='+',
+                       help='Module to execute before Python configuration')
+   parser.add_argument('--postInclude', metavar='CMD', nargs='+',
+                       help='Module to execute after Python configuration')
 
    # Fill flags from command line
    args = flags.fillFromArgs(parser=parser)
@@ -172,6 +179,9 @@ def athenaCfg(flags, parser=None):
       flags.Scheduler.ShowControlFlow = True
       flags.Scheduler.ShowDataDeps = True
 
+   processPreInclude(args, flags)
+   processPreExec(args, flags)
+   
    # Configure main services
    _allflags = flags.clone()   # copy including Concurrency flags
    _allflags.lock()
@@ -195,9 +205,12 @@ def athenaCfg(flags, parser=None):
    # Configure HLT
    cfg.merge(runHLTCfg(flags, checkMT=False))  # MT check already done above
 
-   if args.postExec:
-      exec(args.postExec)
+   # Post-include
+   processPostInclude(args, flags, cfg)
 
+   # Post-exec
+   processPostExec(args, flags, cfg)
+  
    # Apply flags.Exec.XXXMessageComponents logic to configured job
    from AthenaConfiguration.Utils import setupLoggingLevels
    setupLoggingLevels(flags, cfg)
