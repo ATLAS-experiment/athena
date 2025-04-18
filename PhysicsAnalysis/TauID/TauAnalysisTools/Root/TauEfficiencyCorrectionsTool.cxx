@@ -380,7 +380,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
             if( m_iJetIDLevel == (int)JETIDRNNLOOSE){
                 m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_SF_Run2_looseRNNTauID_1p.root";
             } else if( m_iJetIDLevel == (int)JETIDRNNMEDIUM){
-                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_SF_Run2_mediumRNNTauID_1p.root";
+                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_SF_Run2_mediumRNNTauID_1p_v1.root";
             }
         }
       }
