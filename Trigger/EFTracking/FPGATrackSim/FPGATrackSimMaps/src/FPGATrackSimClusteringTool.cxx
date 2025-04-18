@@ -357,7 +357,7 @@ void FPGATrackSimClusteringTool::normaliseClusters(std::vector<FPGATrackSimClust
         if(clusterEquiv.isStrip()){
             //Clear the groupsize, set this to be one as we are only clustering one row.
             clusterEquiv.setEtaWidth(1);
-            clusterEquiv.setPhiIndex(clusterEquiv.getPhiIndex()/fpgatracksim::scaleHitFactor);
+            clusterEquiv.setCentroidPhiIndex(clusterEquiv.getCentroidPhiIndex()/fpgatracksim::scaleHitFactor);
             clusterEquiv.setPhiWidth(clusterEquiv.getPhiWidth()+1);
         } else {
             // Nothing to normalise for pixel clusters
@@ -551,7 +551,8 @@ bool FPGATrackSimCLUSTERING::updateStripCluster(FPGATrackSimCluster &currentClus
         //Double the precision of the strip positions.
         int tempCentroid = incomingHit.getPhiIndex()*fpgatracksim::scaleHitFactor;
         // Now shift the centroid phi+phiWidth, and store the width (put it back in the PhiWidth)
-        newHit.setPhiIndex(tempCentroid+tempWidth);
+        newHit.setPhiIndex(incomingHit.getPhiIndex());
+        newHit.setCentroidPhiIndex(tempCentroid+tempWidth);
         newHit.setPhiWidth(tempWidth);
         //Set the initial clusterEquiv to be the incoming hit with double precision
         currentCluster.setClusterEquiv(newHit);
@@ -567,7 +568,7 @@ bool FPGATrackSimCLUSTERING::updateStripCluster(FPGATrackSimCluster &currentClus
         FPGATrackSimHit clusterEquiv = currentCluster.getClusterEquiv();
         int clusterRow = clusterEquiv.getEtaIndex();
         int clusterRowWidth = clusterEquiv.getEtaWidth();
-        int clusterCol = clusterEquiv.getPhiIndex();
+        int clusterCol = clusterEquiv.getCentroidPhiIndex();
         int clusterColWidth = clusterEquiv.getPhiWidth();
 
         //Looking for a neighbour to the right. i.e. find the end of the current cluster (Col+width) and look in the next cell (+2). Compare this to the start of the new cluster. This is unlikely/impossible(?) to happen due to preclustering.
@@ -624,7 +625,7 @@ bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentC
     } else {
         clusterEquiv.setEtaIndex(clusterRow);
         clusterEquiv.setEtaWidth(clusterRowWidth);
-        clusterEquiv.setPhiIndex(clusterCol);
+        clusterEquiv.setCentroidPhiIndex(clusterCol);
         clusterEquiv.setPhiWidth(clusterColWidth);
     }
 
