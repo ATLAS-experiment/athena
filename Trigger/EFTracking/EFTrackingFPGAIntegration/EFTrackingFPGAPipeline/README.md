@@ -61,7 +61,7 @@ To compile and run this package, you must have AlmaLinux9 + XRT 2024.1 (or above
 ```bash
 # This needs to be done on EFTracking FPGA testbed to use the right OpenCL library
 cd athena
-git apply /scratch/small/zhcui/testbed-cmake.patch 
+git apply /scratch/medium/sabidi/testbed-cmake.patch 
 ```
 
 ### Structure setup and compilation
@@ -71,6 +71,8 @@ mkdir build run
 # Now, ls should show athena, build, run
 echo $'+ Trigger/EFTracking/EFTrackingFPGAIntegration/.*\n+ Control/AthXRT/AthXRTInterfaces\n+ Control/AthXRT/AthXRTServices\n- .*' > package_filter_EFT.txt
 cd build
+export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
+alias setupATLAS='source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh'
 setupATLAS
 source /opt/xilinx/xrt/setup.sh ; source /opt/xilinx/Vitis/2024.1/settings64.sh # this is on the testbed, otherwise setup your own xrt and xilinx
 asetup Athena,main,latest
@@ -115,6 +117,28 @@ Use the script `script/run_FPGADataPrep_IDTPM.sh`. You can adjust the path to th
 run_FPGADataPrep_IDTPM.sh FPGA.Benchmark.AOD.pool.root
 ```
 The output of this is a file named `IDTPM.DataPrep.HIST.root`, which includes tracks from FPGA+ACTS and offline.
+
+## For Running F6X0 integration 
+Follow the same instruction to checkout and compile the code. The instruction to run are
+```
+MAPS_5L=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/maps_5L/InsideOut/v0.22/
+BANKS_5L=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/banks_5L/v0.22/     
+
+python -m EFTrackingFPGAPipeline.F600IntegrationConfig \
+        Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
+        Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
+        Trigger.FPGATrackSim.region=34 \
+        Trigger.FPGATrackSim.pipeline='F-600' \
+        Trigger.FPGATrackSim.tracking=True \
+        Trigger.FPGATrackSim.doEDMConversion=False \
+        Trigger.FPGATrackSim.doOverlapRemoval=False \
+        Trigger.FPGATrackSim.Hough.secondStage=False \
+        Trigger.FPGATrackSim.writeToAOD=False \
+        Trigger.FPGATrackSim.writeAdditionalOutputData=False \
+        Trigger.FPGATrackSim.outputMonitorFile="monitoring_F600.root" \
+        Output.AODFileName=aod.root \
+        --evtMax 20
+```
 
 ### TL;DR Run the full ITk Pass-though Chain
 <details>
