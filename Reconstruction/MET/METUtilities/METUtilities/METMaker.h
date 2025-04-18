@@ -67,13 +67,13 @@ namespace met {
       xAOD::MissingETContainer* metCont,
       const xAOD::IParticleContainer* collection,
       xAOD::MissingETAssociationHelper& helper,
-      MissingETBase::UsageHandler::Policy objScale) override final;
+      MissingETBase::UsageHandler::Policy objScale) const override final;
     //
     virtual StatusCode rebuildMET(
       xAOD::MissingET* met,
       const xAOD::IParticleContainer* collection,
       xAOD::MissingETAssociationHelper& helper,
-      MissingETBase::UsageHandler::Policy objScale) override final;
+      MissingETBase::UsageHandler::Policy objScale) const override final;
     //
     virtual StatusCode rebuildMET(
       xAOD::MissingET* met,
@@ -81,7 +81,7 @@ namespace met {
       xAOD::MissingETAssociationHelper& helper,
       MissingETBase::UsageHandler::Policy p,
       bool removeOverlap,
-      MissingETBase::UsageHandler::Policy objScale) override final;
+      MissingETBase::UsageHandler::Policy objScale) const override final;
 
     virtual StatusCode rebuildJetMET(
       const std::string& metJetKey,
@@ -91,7 +91,7 @@ namespace met {
       const xAOD::JetContainer* jets,
       const xAOD::MissingETContainer* metCoreCont,
       xAOD::MissingETAssociationHelper& helper,
-      bool doJetJVT) override final;
+      bool doJetJVT) const override final;
 
     virtual StatusCode rebuildJetMET(
       const std::string& metJetKey,
@@ -100,7 +100,7 @@ namespace met {
       const xAOD::JetContainer* jets,
       const xAOD::MissingETContainer* metCoreCont,
       xAOD::MissingETAssociationHelper& helper,
-      bool doJetJVT) override final;
+      bool doJetJVT) const override final;
 
     virtual StatusCode rebuildJetMET(
       xAOD::MissingET* metJet,
@@ -112,7 +112,7 @@ namespace met {
       const xAOD::MissingET* coreSoftTrk,
       bool doJetJVT,
       bool tracksForHardJets = false,
-      std::vector<const xAOD::IParticle*>* softConst = 0) override final;
+      std::vector<const xAOD::IParticle*>* softConst = 0) const override final;
 
     virtual StatusCode rebuildTrackMET(
       const std::string& metJetKey,
@@ -121,19 +121,19 @@ namespace met {
       const xAOD::JetContainer* jets,
       const xAOD::MissingETContainer* metCoreCont,
       xAOD::MissingETAssociationHelper& helper,
-      bool doJetJVT) override final;
+      bool doJetJVT) const override final;
 
     virtual StatusCode rebuildTrackMET(xAOD::MissingET* metJet,
                                        const xAOD::JetContainer* jets,
                                        xAOD::MissingETAssociationHelper& helper,
                                        xAOD::MissingET* metSoftTrk,
                                        const xAOD::MissingET* coreSoftTrk,
-                                       bool doJetJVT) override final;
+                                       bool doJetJVT) const override final;
 
     virtual StatusCode markInvisible(
       const xAOD::IParticleContainer* collection,
       xAOD::MissingETAssociationHelper& helper,
-      xAOD::MissingETContainer* metCont) override final;
+      xAOD::MissingETContainer* metCont) const override final;
 
     ///////////////////////////////////////////////////////////////////
     // Private data:
