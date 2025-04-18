@@ -4,7 +4,7 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
 
 class ParticleLevelOverlapRemovalBlock(ConfigBlock):
-    """ConfigBlock for particle-level truth taus"""
+    """ConfigBlock for particle-level overlap removal"""
 
     def __init__(self):
         super(ParticleLevelOverlapRemovalBlock, self).__init__()
