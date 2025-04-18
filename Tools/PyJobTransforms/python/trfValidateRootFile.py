@@ -14,7 +14,10 @@ import logging
 from PyUtils import RootUtils
 ROOT = RootUtils.import_root()
 from ROOT import TFile, TTree, TDirectory, TStopwatch
-from ROOT.Experimental import RNTupleReader
+try:
+    from ROOT import RNTupleReader
+except ImportError:
+    from ROOT.Experimental import RNTupleReader
 from PyUtils.PoolFile import isRNTuple
 
 msg = logging.getLogger(__name__)

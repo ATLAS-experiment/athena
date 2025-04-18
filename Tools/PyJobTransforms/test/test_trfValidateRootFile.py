@@ -7,10 +7,16 @@ import unittest
 
 import ROOT
 
-RNTupleModel = ROOT.Experimental.RNTupleModel
-RNTupleReader = ROOT.Experimental.RNTupleReader
-RNTupleWriter = ROOT.Experimental.RNTupleWriter
-RNTupleWriteOptions = ROOT.Experimental.RNTupleWriteOptions
+try:
+    RNTupleModel = ROOT.RNTupleModel
+    RNTupleReader = ROOT.RNTupleReader
+    RNTupleWriter = ROOT.RNTupleWriter
+    RNTupleWriteOptions = ROOT.RNTupleWriteOptions
+except AttributeError:
+    RNTupleModel = ROOT.Experimental.RNTupleModel
+    RNTupleReader = ROOT.Experimental.RNTupleReader
+    RNTupleWriter = ROOT.Experimental.RNTupleWriter
+    RNTupleWriteOptions = ROOT.Experimental.RNTupleWriteOptions
 
 from PyJobTransforms.trfLogger import logging, msg
 
