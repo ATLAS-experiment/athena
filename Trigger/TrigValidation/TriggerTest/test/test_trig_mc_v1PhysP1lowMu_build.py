@@ -10,14 +10,16 @@
 
 from TriggerTest.MCExecStep import MCBuildStep
 from TrigValTools.TrigValSteering import Test, CheckSteps
-from TrigValTools.TrigMCCommonParams import mcDefaults
 
 ex = MCBuildStep(
     menu='PhysicsP1_pp_lowMu_run3_v1',
-    mc_campaign=mcDefaults.mc_campaign+'LowMu',
+    mc_campaign='Campaigns.MC23LowMu',
 )
 ex.input = 'minbias'
-ex.flags.append('Trigger.doRuntimeNaviVal=True')
+# the MC23LowMu campaign is based on MC23a, MC23eLowMu doesn't exist, need to override relevant settings
+ex.flags.extend(['Input.MCCampaign=Campaign.MC23e',
+                 'Input.ConditionsRunNumber=470000',
+                 'Trigger.doRuntimeNaviVal=True'])
 
 test = Test.Test()
 test.art_type = 'build'
