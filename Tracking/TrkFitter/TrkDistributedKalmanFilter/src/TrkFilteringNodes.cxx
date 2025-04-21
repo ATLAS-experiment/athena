@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 //////////////////////////////////////////////////////////////////
@@ -145,9 +145,11 @@ namespace Trk
   }
 
   void TrkClusterNode::serialize(char fileName[]) {
-    FILE* pFile;
-
-    pFile = fopen(fileName, "a");
+    FILE* pFile = fopen(fileName, "a");
+    if (!pFile) {
+      std::cerr << "Cannot open file " << fileName << " for write.\n";
+      std::abort();
+    }
     fclose(pFile);
   }
 
@@ -241,9 +243,11 @@ namespace Trk
   }
 
   void TrkEndCapClusterNode::serialize(char fileName[]) {
-    FILE* pFile;
-
-    pFile = fopen(fileName, "a");
+    FILE* pFile = fopen(fileName, "a");
+    if (!pFile) {
+      std::cerr << "Cannot open file " << fileName << " for write.\n";
+      std::abort();
+    }
     fclose(pFile);
   }
 
@@ -322,9 +326,11 @@ namespace Trk
   }
 
   void TrkPixelNode::serialize(char fileName[]) {
-    FILE* pFile;
-
-    pFile = fopen(fileName, "a");
+    FILE* pFile = fopen(fileName, "a");
+    if (!pFile) {
+      std::cerr << "Cannot open file " << fileName << " for write.\n";
+      std::abort();
+    }
     fclose(pFile);
   }
 
@@ -421,9 +427,11 @@ namespace Trk
   }
 
   void TrkTrtNode::serialize(char fileName[]) {
-    FILE* pFile;
-
-    pFile = fopen(fileName, "a");
+    FILE* pFile = fopen(fileName, "a");
+    if (!pFile) {
+      std::cerr << "Cannot open file " << fileName << " for write.\n";
+      std::abort();
+    }
     fclose(pFile);
   }
 
