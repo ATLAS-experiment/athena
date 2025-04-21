@@ -14,7 +14,6 @@
 #include "TrkSurfaces/TrapezoidBounds.h"
 #include "TrkSurfaces/CylinderBounds.h"
 #include "TrkSurfaces/CylinderSurface.h"
-#include "TrkSurfaces/RectangleBounds.h"
 #include "TrkSurfaces/DiscBounds.h"
 #include "TrkSurfaces/DiamondBounds.h"
 
@@ -105,9 +104,9 @@ namespace {
       float phi_step = (phi_end - phi_start) / n;
       float phi=phi_start;
       for (unsigned int i=0; i<=n; ++i) {
-         bound_out.emplace_back(Amg::Vector3D{radius_x * cos(phi),
+         bound_out.emplace_back(radius_x * cos(phi),
                                               radius_y * sin(phi),
-                                              offset_z});
+                                              offset_z);
          phi += phi_step;
       }
    }
@@ -139,10 +138,10 @@ namespace {
       vertices.reserve(4);
       double delta_x = std::min(bounds.halflengthX()*relative_tolerance,abs_dist_tolerance);
       double delta_y = std::min(bounds.halflengthY()*relative_tolerance,abs_dist_tolerance);
-      vertices.emplace_back(Amg::Vector3D{-bounds.halflengthX()+delta_x, -bounds.halflengthY()+delta_y,0. });
-      vertices.emplace_back(Amg::Vector3D{-bounds.halflengthX()+delta_x,  bounds.halflengthY()-delta_y,0. });
-      vertices.emplace_back(Amg::Vector3D{ bounds.halflengthX()-delta_x,  bounds.halflengthY()-delta_y,0. });
-      vertices.emplace_back(Amg::Vector3D{ bounds.halflengthX()-delta_x, -bounds.halflengthY()+delta_y,0. });
+      vertices.emplace_back(-bounds.halflengthX()+delta_x, -bounds.halflengthY()+delta_y,0. );
+      vertices.emplace_back(-bounds.halflengthX()+delta_x,  bounds.halflengthY()-delta_y,0. );
+      vertices.emplace_back( bounds.halflengthX()-delta_x,  bounds.halflengthY()-delta_y,0. );
+      vertices.emplace_back( bounds.halflengthX()-delta_x, -bounds.halflengthY()+delta_y,0. );
       return checkVertices(volume, surface, vertices, vertex_sum );
    }
    template <>
@@ -155,10 +154,10 @@ namespace {
       double delta_minx = std::min(bounds.minHalflengthX()*relative_tolerance,abs_dist_tolerance);
       double delta_maxx = std::min(bounds.maxHalflengthX()*relative_tolerance,abs_dist_tolerance);
       double delta_y = std::min(bounds.halflengthY()*relative_tolerance,abs_dist_tolerance);
-      vertices.emplace_back(Amg::Vector3D{-bounds.minHalflengthX()+delta_minx, -bounds.halflengthY()+delta_y,0. });
-      vertices.emplace_back(Amg::Vector3D{-bounds.maxHalflengthX()+delta_maxx,  bounds.halflengthY()-delta_y,0. });
-      vertices.emplace_back(Amg::Vector3D{ bounds.maxHalflengthX()-delta_maxx,  bounds.halflengthY()-delta_y,0. });
-      vertices.emplace_back(Amg::Vector3D{ bounds.minHalflengthX()-delta_minx, -bounds.halflengthY()+delta_y,0. });
+      vertices.emplace_back(-bounds.minHalflengthX()+delta_minx, -bounds.halflengthY()+delta_y,0. );
+      vertices.emplace_back(-bounds.maxHalflengthX()+delta_maxx,  bounds.halflengthY()-delta_y,0. );
+      vertices.emplace_back( bounds.maxHalflengthX()-delta_maxx,  bounds.halflengthY()-delta_y,0. );
+      vertices.emplace_back( bounds.minHalflengthX()-delta_minx, -bounds.halflengthY()+delta_y,0. );
 
       return checkVertices(volume, surface, vertices, vertex_sum);
 
@@ -173,10 +172,10 @@ namespace {
       double delta_miny = std::min(bounds.minHalflengthY()*relative_tolerance,abs_dist_tolerance);
       double delta_maxy = std::min(bounds.maxHalflengthY()*relative_tolerance,abs_dist_tolerance);
       vertices.reserve(4);
-      vertices.emplace_back(Amg::Vector3D{-bounds.halflengthX()+delta_x, -bounds.minHalflengthY()+delta_miny,0. });
-      vertices.emplace_back(Amg::Vector3D{-bounds.halflengthX()+delta_x,  bounds.minHalflengthY()-delta_miny,0. });
-      vertices.emplace_back(Amg::Vector3D{ bounds.halflengthX()-delta_x,  bounds.maxHalflengthY()-delta_maxy,0. });
-      vertices.emplace_back(Amg::Vector3D{ bounds.halflengthX()-delta_x, -bounds.maxHalflengthY()+delta_maxy,0. });
+      vertices.emplace_back(-bounds.halflengthX()+delta_x, -bounds.minHalflengthY()+delta_miny,0. );
+      vertices.emplace_back(-bounds.halflengthX()+delta_x,  bounds.minHalflengthY()-delta_miny,0. );
+      vertices.emplace_back( bounds.halflengthX()-delta_x,  bounds.maxHalflengthY()-delta_maxy,0. );
+      vertices.emplace_back( bounds.halflengthX()-delta_x, -bounds.maxHalflengthY()+delta_maxy,0. );
 
       return checkVertices(volume, surface, vertices,vertex_sum);
 
@@ -191,12 +190,12 @@ namespace {
       double delta_minx = std::min(bounds.minHalflengthX()*1e-5,1e-3);
       double delta_maxx = std::min(bounds.maxHalflengthX()*1e-5,1e-3);
       double delta_y = std::min(std::min(bounds.halflengthY1(),bounds.halflengthY2())*1e-5,1e-3);
-      vertices.emplace_back(Amg::Vector3D{-bounds.minHalflengthX()+delta_minx, -2*bounds.halflengthY1()+delta_y,0. });
-      vertices.emplace_back(Amg::Vector3D{-bounds.medHalflengthX()+delta_maxx,  0.,0. });
-      vertices.emplace_back(Amg::Vector3D{-bounds.maxHalflengthX()+delta_maxx,  2*bounds.halflengthY2()-delta_y,0. });
-      vertices.emplace_back(Amg::Vector3D{ bounds.maxHalflengthX()-delta_maxx,  2*bounds.halflengthY2()-delta_y,0. });
-      vertices.emplace_back(Amg::Vector3D{ bounds.medHalflengthX()-delta_maxx,  0.,0. });
-      vertices.emplace_back(Amg::Vector3D{ bounds.minHalflengthX()-delta_minx, -2*bounds.halflengthY1()+delta_y,0. });
+      vertices.emplace_back(-bounds.minHalflengthX()+delta_minx, -2*bounds.halflengthY1()+delta_y,0. );
+      vertices.emplace_back(-bounds.medHalflengthX()+delta_maxx,  0.,0. );
+      vertices.emplace_back(-bounds.maxHalflengthX()+delta_maxx,  2*bounds.halflengthY2()-delta_y,0. );
+      vertices.emplace_back( bounds.maxHalflengthX()-delta_maxx,  2*bounds.halflengthY2()-delta_y,0. );
+      vertices.emplace_back( bounds.medHalflengthX()-delta_maxx,  0.,0. );
+      vertices.emplace_back( bounds.minHalflengthX()-delta_minx, -2*bounds.halflengthY1()+delta_y,0. );
 
       return checkVertices(volume, surface, vertices,vertex_sum);
     }
@@ -399,8 +398,7 @@ void   test_CylinderVolumeBounds() {
       test_CylinderVolumeBounds(cylinder_volume_bounds, rotation, center);
    }
 
-   return;
-}
+   }
 
 void  test_TrapezoidVolumeBounds2() {
    Trk::TrapezoidVolumeBounds trapezoid_bounds(1596.7500305, 728.3492804, 48.5280521, 1.7195152, 1.7195152);
