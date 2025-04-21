@@ -398,7 +398,7 @@ public:
   SurfaceOwner owner() const;
 
   /** set material layer */
-  void setMaterialLayer(std::shared_ptr<Layer> mlay);
+  void setMaterialLayer(const std::shared_ptr<Layer>& mlay);
 
   /** Output Method for MsgStream, to be overloaded by child classes */
   virtual MsgStream& dump(MsgStream& sl) const;

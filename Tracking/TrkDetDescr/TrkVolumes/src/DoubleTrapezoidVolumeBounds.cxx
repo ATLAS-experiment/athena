@@ -132,7 +132,7 @@ const std::vector<const Trk::Surface*>*
     Amg::AngleAxis3D(-90 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
     Amg::AngleAxis3D(90 * Gaudi::Units::deg, Amg::Vector3D(0., 0., 1.)));
   RectangleBounds* faceAlpha1Bounds = this->faceAlpha1RectangleBounds();
-  Amg::Vector3D faceAlpha1Position(A);
+  const Amg::Vector3D& faceAlpha1Position(A);
   retsf->push_back(new Trk::PlaneSurface(
    Amg::Transform3D(
     transform * Amg::Translation3D(faceAlpha1Position) * Amg::Transform3D(alpha1Rotation) ),
@@ -146,7 +146,7 @@ const std::vector<const Trk::Surface*>*
     Amg::AngleAxis3D(90 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
     Amg::AngleAxis3D(90 * Gaudi::Units::deg, Amg::Vector3D(0., 0., 1.)));
   RectangleBounds* faceBeta1Bounds = this->faceBeta1RectangleBounds();
-  Amg::Vector3D faceBeta1Position(B);
+  const Amg::Vector3D& faceBeta1Position(B);
   retsf->push_back(new Trk::PlaneSurface(
     transform * Amg::Translation3D(faceBeta1Position) * Amg::Transform3D(beta1Rotation) ,
     faceBeta1Bounds));
@@ -161,7 +161,7 @@ const std::vector<const Trk::Surface*>*
     Amg::AngleAxis3D(-90 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
     Amg::AngleAxis3D(-90 * Gaudi::Units::deg, Amg::Vector3D(0., 0., 1.)));
   RectangleBounds* faceAlpha2Bounds = this->faceAlpha2RectangleBounds();
-  Amg::Vector3D faceAlpha2Position(
+  const Amg::Vector3D& faceAlpha2Position(
     AA);
   retsf->push_back(new Trk::PlaneSurface(
     Amg::Transform3D(
@@ -176,7 +176,7 @@ const std::vector<const Trk::Surface*>*
     Amg::AngleAxis3D(90 * Gaudi::Units::deg, Amg::Vector3D(0., 1., 0.)) *
     Amg::AngleAxis3D(-90 * Gaudi::Units::deg, Amg::Vector3D(0., 0., 1.)));
   RectangleBounds* faceBeta2Bounds = this->faceBeta2RectangleBounds();
-  Amg::Vector3D faceBeta2Position(BB);
+  const Amg::Vector3D& faceBeta2Position(BB);
   retsf->push_back(new Trk::PlaneSurface(
     transform * Amg::Translation3D(faceBeta2Position) * Amg::Transform3D(beta2Rotation),
     faceBeta2Bounds));
