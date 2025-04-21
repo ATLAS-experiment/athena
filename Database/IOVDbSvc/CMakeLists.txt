@@ -177,7 +177,7 @@ if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
       POST_EXEC_SCRIPT "nopost.sh" )
 
 atlas_add_executable( cool_crest_compare
-   test/CoolCrestCompare.cxx test/*.h src/*.h src/IOVDbFolder.cxx
+   test/CoolCrestCompare.cxx test/*.h src/*.h src/IOVDbFolder.cxx src/CoralCrestManager.cxx
    src/FolderTypes.cxx src/IOVDbStringFunctions.cxx src/IOVDbParser.cxx src/IOVDbConn.cxx
    src/IovStore.cxx src/ReadFromFileMetaData.cxx src/IOVDbCoolFunctions.cxx src/TagFunctions.cxx
    src/Cool2Json.cxx src/Base64Codec.cxx src/Json2Cool.cxx src/BasicFolder.cxx src/CrestFunctions.cxx src/IOVDbJsonStringFunctions.cxx  #src/*.cxx

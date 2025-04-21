@@ -109,7 +109,7 @@ namespace Muon {
         */
         virtual void find(const Amg::Vector3D& gpos, const Amg::Vector3D& gdir, const std::vector<const MdtDriftCircleOnTrack*>& mdts,
                           const std::vector<const MuonClusterOnTrack*>& clusters, bool updatePhi = false,
-                          Trk::SegmentCollection* segColl = nullptr, double momentum = 1e9, double sinAngleCut = 0.) const = 0;
+                          Trk::SegmentCollection* segColl = nullptr, double momentum = 1e9, double sinAngleCut = 0., double beta = 1.) const = 0;
 
         /** @brief seeded segment search starting from a list of MdtDriftCircleOnTrack objects and a list of MuonClusterOnTrack objects
             @param road an estimate of the position and direction of the muon in the chamber

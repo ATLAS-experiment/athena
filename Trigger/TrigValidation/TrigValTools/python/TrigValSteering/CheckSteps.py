@@ -525,7 +525,7 @@ class CheckFileStep(InputDependentStep):
 
     def __init__(self, name='CheckFile'):
         super(CheckFileStep, self).__init__(name)
-        self.input_file = 'AOD.pool.root,ESD.pool.root,RDO_TRIG.pool.root'
+        self.input_file = 'AOD.pool.root,ESD.pool.root,RDO_TRIG.pool.root,DAOD_PHYS.DAOD.pool.root,DAOD_TLA.pool.root,DAOD_TLAFTAGPEB.pool.root'
         self.executable = 'checkFile.py,checkxAOD.py'
         self.__executables__ = None
         self.__input_files__ = None
@@ -534,10 +534,10 @@ class CheckFileStep(InputDependentStep):
         # Skip the check if all test steps are athenaHLT (no POOL files)
         test_types = [step.type for step in test.exec_steps]
         num_athenaHLT = sum(1 for tt in test_types if tt == 'athenaHLT')
-        if num_athenaHLT == test_types:
+        if num_athenaHLT == len(test_types):
             self.log.debug('%s will be skipped because all exec steps use athenaHLT')
-            self.__executables__ = None
-            self.__input_files__ = None
+            self.__executables__ = []
+            self.__input_files__ = []
             return
         self.__executables__ = self.executable.split(',')
         self.__input_files__ = self.input_file.split(',')
@@ -559,14 +559,12 @@ class CheckFileStep(InputDependentStep):
 
         # Merge executed commands for logging
         merged_cmd = ''
-        if len(commands) == 1:
-            merged_cmd = commands[0]
-        else:
-            for cmd in commands:
-                if '(internal)' not in cmd:
-                    merged_cmd += cmd+'; '
-        if len(merged_cmd) == 0:
-            merged_cmd = commands[-1]
+        for cmd in commands:
+            if '(internal)' not in cmd:
+                merged_cmd += cmd+'; '
+        if len(merged_cmd) == 0: # can happen if all exec steps are type athenaHLT
+             merged_cmd = '# (internal) {} -> skipped'.format(self.name)
+             ret_codes.append(0)
 
         return max(ret_codes), merged_cmd
 

@@ -1,6 +1,7 @@
-#include "DerivationFrameworkExamples/SkimmingToolExample.h"
-#include "DerivationFrameworkExamples/ThinningToolExample.h"
-#include "DerivationFrameworkExamples/AugmentationToolExample.h"
+#include "../SkimmingToolExample.h"
+#include "../ThinningToolExample.h"
+#include "../AugmentationToolExample.h"
+
 using namespace DerivationFramework;
 
 DECLARE_COMPONENT( SkimmingToolExample )

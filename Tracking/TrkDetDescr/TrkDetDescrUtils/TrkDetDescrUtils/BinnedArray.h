@@ -38,11 +38,13 @@ class BinnedArray
 {
 
 public:
-  /**Default Constructor - needed for inherited classes */
-  BinnedArray() {}
-
-  /**Virtual Destructor*/
-  virtual ~BinnedArray() {}
+  //Make sure derived classes can get everything
+  BinnedArray() = default;
+  BinnedArray(const BinnedArray&) = default;
+  BinnedArray(BinnedArray&&) = default;
+  BinnedArray& operator=(const BinnedArray&) = default;
+  BinnedArray& operator=(BinnedArray&&) = default;
+  virtual ~BinnedArray() = default;
 
   /** Implicit constructor */
   virtual BinnedArray* clone() const = 0;

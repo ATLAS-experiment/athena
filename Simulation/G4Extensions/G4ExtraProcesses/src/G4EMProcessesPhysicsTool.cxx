@@ -39,28 +39,26 @@ G4EMProcessesPhysicsTool::G4EMProcessesPhysicsTool(const std::string &type,
 StatusCode G4EMProcessesPhysicsTool::initialize()
 {
   ATH_MSG_DEBUG("initializing...");
-  this->SetPhysicsName(this->name());
   return StatusCode::SUCCESS;
 }
 
 //=============================================================================
 // GetPhysicsOption
 //=============================================================================
-G4EMProcessesPhysicsTool *G4EMProcessesPhysicsTool::GetPhysicsOption()
-{
-  return this;
+auto G4EMProcessesPhysicsTool::GetPhysicsOption() -> UPPhysicsConstructor {
+  return std::make_unique<G4EMProcessesPhysicsTool::PhysicsConstructor>(
+      name(), msgLevel(), m_particleList);
 }
 
 //=============================================================================
 // ConstructParticle
 //=============================================================================
-void G4EMProcessesPhysicsTool::ConstructParticle() {}
+void G4EMProcessesPhysicsTool::PhysicsConstructor::ConstructParticle() {}
 
 //=============================================================================
 // ConstructProcess
 //=============================================================================
-void G4EMProcessesPhysicsTool::ConstructProcess()
-{
+void G4EMProcessesPhysicsTool::PhysicsConstructor::ConstructProcess() {
   ATH_MSG_DEBUG("G4EMProcessesPhysicsTool::ConstructProcess() - start");
   ATH_MSG_DEBUG("G4EMProcessesPhysicsTool::ConstructProcess() - m_particleList = " << m_particleList);
   G4ParticleTable::G4PTblDicIterator *particleIterator = G4ParticleTable::GetParticleTable()->GetIterator();

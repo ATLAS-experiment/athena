@@ -31,12 +31,8 @@ namespace InDet {
     virtual StatusCode initialize() = 0;
     virtual void prepare() = 0; // not sure if/why this function is necessary - felix
 
-    // "standard" accept method - if appropriate systematic is activated, will call mu-dependent version (below) using mu value from EventInfo, otherwise will use truth info
+    // standard accept method to determine if a track should be kept or not
     virtual bool accept(const xAOD::TrackParticle* track) const = 0;
-
-    // This is a version of the accept method that takes a value of mu (i.e. mean interactions per crossing) in order to calculate a probability that a givent track at that mu is a fake,
-    // and so should be considered for being dropped for the fake systematic variation - this version does not rely on truth information
-    virtual bool accept(const xAOD::TrackParticle* track, float mu) const = 0;
 
     // implement the CP::ISystematicTool interface
 

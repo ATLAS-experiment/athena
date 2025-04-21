@@ -24,13 +24,9 @@ namespace MuonVal{
     }
     void LinkerBranch::push_back(const xAOD::IParticle* p) {
         const xAOD::IParticle* related = m_linkerFunc(p);
-        if (related) {
-            ParticleBranch_ptr linkColl = m_linkColl.lock();
-            linkColl->push_back(related);
-            VectorBranch<unsigned short>::push_back(linkColl->find(related));
-        } else {
-            VectorBranch<unsigned short>::push_back(-1);
-        }
+        ParticleBranch_ptr linkColl = m_linkColl.lock();
+        linkColl->push_back(related);
+        VectorBranch<unsigned short>::push_back(linkColl->find(related));
     }
 
     
@@ -67,7 +63,6 @@ namespace MuonVal{
         push_back(p);
     }          
     bool BilateralLinkerBranch::fill(const EventContext& ctx) {
-        ATH_MSG_VERBOSE("Fill "<<name()<<", size: "<<m_parent.size()<<", "<<m_parent.name());
         if (m_parent.size()) {
             /** Allocate the memory */
             get(m_parent.size() -1);
@@ -80,6 +75,7 @@ namespace MuonVal{
                 }
             }
         }
+        ATH_MSG_VERBOSE("Fill "<<name()<<", size: "<<m_parent.size()<<"/"<<size()<<", "<<m_parent.name());
         return VectorBranch<unsigned short>::fill(ctx);
     }
 }

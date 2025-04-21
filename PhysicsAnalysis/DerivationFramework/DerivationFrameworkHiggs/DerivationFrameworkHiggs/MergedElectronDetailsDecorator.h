@@ -34,7 +34,7 @@ class IEMExtrapolationTools;
 
 namespace DerivationFramework {
 
-  class MergedElectronDetailsDecorator : public AthAlgTool, public IAugmentationTool {
+  class MergedElectronDetailsDecorator : public extends<AthAlgTool, IAugmentationTool> {
 
   public:
     MergedElectronDetailsDecorator(const std::string& t, const std::string& n, const IInterface* p);

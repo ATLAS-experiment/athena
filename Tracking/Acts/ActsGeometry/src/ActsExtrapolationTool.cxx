@@ -179,7 +179,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
 
 
 
-std::optional<const Acts::CurvilinearTrackParameters>
+std::optional<const Acts::BoundTrackParameters>
 ActsExtrapolationTool::propagate(const EventContext& ctx,
                                  const Acts::BoundTrackParameters& startParameters,
                                  Acts::Direction navDir /*= Acts::Direction::Forward()*/,
@@ -192,7 +192,7 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
     = m_trackingGeometryTool->getGeometryContext(ctx);
   auto anygctx = geo_ctx.context();
 
-  auto parameters = boost::apply_visitor([&](const auto& propagator) -> std::optional<const Acts::CurvilinearTrackParameters> {
+  auto parameters = boost::apply_visitor([&](const auto& propagator) -> std::optional<const Acts::BoundTrackParameters> {
       using Propagator = std::decay_t<decltype(propagator)>;
 
       // Action list and abort list

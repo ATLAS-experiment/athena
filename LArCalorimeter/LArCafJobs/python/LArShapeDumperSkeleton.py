@@ -37,6 +37,8 @@ def fromRunArgs(runArgs):
     if hasattr(runArgs,"outputNTUP_HECNOISEFile"):
         flags.LArShapeDump.HECNoiseNtup=runArgs.outputNTUP_HECNOISEFile
         
+    flags.LArShapeDump.digitsKeySC = "SC_ADC_BAS" if runArgs.doSC else ""
+
     # To respect --athenaopts 
     flags.fillFromArgs()
 

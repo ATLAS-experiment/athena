@@ -47,9 +47,9 @@ namespace GlobalSim {
     // All values set to EM5 for now
     
     m_count_EtMin =
-      std::vector<std::vector<unsigned int>> (s_NumCnt,
-					      std::vector<unsigned int>(s_NumEtaRanges,
-									0x019));
+      std::vector<std::vector<int>> (s_NumCnt,
+				     std::vector<int>(s_NumEtaRanges,
+						      0x019));
 
 
     // Eta min is tricky:

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # ====================================================================
 # IDTRKVALID.py
 # Component accumulator version - replaces IDTRKVALID
@@ -74,27 +74,28 @@ def IDTRKVALIDKernelCommonCfg(flags, name='IDTRKVALIDKernel'):
     # ====================================================================
     augmentationTools = []
 
-    # Add unbiased track parameters to track particles
-    from DerivationFrameworkInDet.InDetToolsConfig import (
-        TrackToVertexWrapperCfg)
-    IDTRKVALIDTrackToVertexWrapper = acc.getPrimaryAndMerge(
-        TrackToVertexWrapperCfg(
-            flags, name="IDTRKVALIDTrackToVertexWrapper",
-            DecorationPrefix="IDTRKVALID"))
-    augmentationTools.append(IDTRKVALIDTrackToVertexWrapper)
+    if flags.Tracking.doVertexFinding:
+        # Add unbiased track parameters to track particles
+        from DerivationFrameworkInDet.InDetToolsConfig import (
+            TrackToVertexWrapperCfg)
+        IDTRKVALIDTrackToVertexWrapper = acc.getPrimaryAndMerge(
+            TrackToVertexWrapperCfg(
+                flags, name="IDTRKVALIDTrackToVertexWrapper",
+                DecorationPrefix="IDTRKVALID"))
+        augmentationTools.append(IDTRKVALIDTrackToVertexWrapper)
 
-    from DerivationFrameworkInDet.InDetToolsConfig import (
-        UsedInVertexFitTrackDecoratorCfg)
-    IDTRKVALIDUsedInFitDecorator = acc.getPrimaryAndMerge(
-        UsedInVertexFitTrackDecoratorCfg(flags))
-    augmentationTools.append(IDTRKVALIDUsedInFitDecorator)
+        from DerivationFrameworkInDet.InDetToolsConfig import (
+            UsedInVertexFitTrackDecoratorCfg)
+        IDTRKVALIDUsedInFitDecorator = acc.getPrimaryAndMerge(
+            UsedInVertexFitTrackDecoratorCfg(flags))
+        augmentationTools.append(IDTRKVALIDUsedInFitDecorator)
 
-    # @TODO eventually computed for other extra outputs. Possible to come  up with a solution to use a common Z0AtPV if there is more than one client ?
-    from DerivationFrameworkInDet.InDetToolsConfig import TrackParametersAtPVCfg
-    DFCommonZ0AtPV = acc.getPrimaryAndMerge(TrackParametersAtPVCfg(
-        flags, name="IDTRKVALID_DFCommonZ0AtPV",
-        Z0SGEntryName="IDTRKVALIDInDetTrackZ0AtPV"))
-    augmentationTools.append(DFCommonZ0AtPV)
+        # @TODO eventually computed for other extra outputs. Possible to come  up with a solution to use a common Z0AtPV if there is more than one client ?
+        from DerivationFrameworkInDet.InDetToolsConfig import TrackParametersAtPVCfg
+        DFCommonZ0AtPV = acc.getPrimaryAndMerge(TrackParametersAtPVCfg(
+            flags, name="IDTRKVALID_DFCommonZ0AtPV",
+            Z0SGEntryName="IDTRKVALIDInDetTrackZ0AtPV"))
+        augmentationTools.append(DFCommonZ0AtPV)
 
     # ====================================================================
     # SKIMMING TOOLS

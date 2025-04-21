@@ -133,18 +133,22 @@ def getRawTriggerEDMList(flags, runVersion=-1):
     if runVersion == 3:
         edmListCopy = TriggerHLTListRun3.copy()
     elif runVersion == 4:
-        edmListCopy  = TriggerHLTListRun3.copy()
+        edm4ListCopy = TriggerHLTListRun4.copy()
+        edm3ListCopy = TriggerHLTListRun3.copy()
         log.debug("Removing duplicated item between TriggerHLTListRun3 and TriggerHLTListRun4.")
-        for i in range(len(edmListCopy)-1, -1, -1): # Back iterate by index, we might be removing as we go
-            for r4item in TriggerHLTListRun4:
-                if edmListCopy[i][0] == r4item[0]:
-                    del edmListCopy[i]
+        for i in range(len(edm3ListCopy)-1, -1, -1): # Back iterate by index, we might be removing as we go
+            for r4item in edm4ListCopy:
+                if edm3ListCopy[i][0] == r4item[0]:
+                    del edm3ListCopy[i]
                     log.debug(f"- Dupe: {r4item} is removed from TriggerHLTListRun3 to be updated by TriggerHLTListRun4")
                     break
-        lenPreMerge = len(edmListCopy)
-        edmListCopy.extend(TriggerHLTListRun4)
-        lenPostMerge = len(edmListCopy)
+        lenPreMerge = len(edm3ListCopy)
+        edm4ListCopy.extend(edm3ListCopy)
+        lenPostMerge = len(edm4ListCopy)
+        edmListCopy = edm4ListCopy
         log.info(f"Added TriggerHLTListRun4 to TriggerHLTListRun3. EDM entries {lenPreMerge} -> {lenPostMerge}")
+        if testEDMList(edmListCopy, error_on_edmdetails=False):
+            log.error("edmList contains inconsistencies!")
     else:
         errMsg="ERROR the getRawTriggerEDMList function supports runs 3 and 4."
         log.error(errMsg)

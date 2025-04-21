@@ -13,6 +13,7 @@ int JetPartonTruthLabel::modifyJet(xAOD::Jet &jet) const {
   ATH_MSG_VERBOSE("In " << name() << "::modifyJet()");
 
 	int label = -1;
+	int extended_label = -1;
 	double e_max = 0;
 	double pt_max = 0;
 	double dr_max = 0;
@@ -25,6 +26,7 @@ int JetPartonTruthLabel::modifyJet(xAOD::Jet &jet) const {
 
 			if((*it)->e() > e_max) {
 				label = (*it)->absPdgId();
+				extended_label = (*it)->pdgId();
 				e_max = (*it)->e();
 				pt_max = (*it)->pt();
 				dr_max = (*it)->p4().DeltaR(jet.p4());
@@ -33,6 +35,7 @@ int JetPartonTruthLabel::modifyJet(xAOD::Jet &jet) const {
 	}
 
   jet.setAttribute("PartonTruthLabelID", label);
+  jet.setAttribute("PartonExtendedTruthLabelID", extended_label);
   jet.setAttribute("PartonTruthLabelPt", pt_max);
   jet.setAttribute("PartonTruthLabelEnergy", e_max);
   jet.setAttribute("PartonTruthLabelDR", dr_max);

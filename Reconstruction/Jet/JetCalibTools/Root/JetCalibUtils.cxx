@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "JetCalibTools/JetCalibUtils.h"
 
@@ -24,12 +24,13 @@ namespace JetCalibUtils {
 
   VecD VectorizeD(const TString& str, const TString& sep)
   {
-    VecD result;
-    TObjArray* tokens = str.Tokenize(sep);
-    TIter istr(tokens);
-    while (TObjString* os=(TObjString*)istr())
+    std::vector<double> result;
+    std::unique_ptr<TObjArray> tokens(str.Tokenize(sep));
+    std::unique_ptr<TIter> istr(new TIter(tokens.get()));
+    while (TObjString* os = dynamic_cast<TObjString*>(istr->Next())) {
       result.push_back(atof(os->GetString()));
-    delete tokens;
+    }  
+    
     return result;
   }
 

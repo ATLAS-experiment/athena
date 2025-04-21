@@ -34,8 +34,8 @@ namespace LArSamples {
     public:
    
       /** @brief Constructor  */
-      TreeAccessor(TTree& cellTree, TTree& eventTree, TTree* runTree, TFile* file) 
-       : PersistentAccessor(cellTree, eventTree, runTree, file) { }
+      TreeAccessor(TTree& cellTree, TTree& scTree, TTree& eventTree, TTree* runTree, TFile* file) 
+       : PersistentAccessor(cellTree, scTree, eventTree, runTree, file) { }
 
       TreeAccessor(const TString& fileName) : PersistentAccessor(fileName) { }
       
@@ -59,6 +59,7 @@ namespace LArSamples {
       bool writeToFile(const TString& fileName) const;
 
       unsigned int historySize(unsigned int i) const { return PersistentAccessor::historySize(i); }
+      unsigned int historySizeSC(unsigned int i) const { return PersistentAccessor::historySizeSC(i); }
 
       unsigned int nEvents() const { return PersistentAccessor::nEvents(); }
       const EventData* eventData(unsigned int i) const { return PersistentAccessor::eventData(i); }
@@ -70,7 +71,9 @@ namespace LArSamples {
 
       
       const History* getCellHistory(unsigned int i) const;      
+      const History* getSCHistory(unsigned int i) const;      
       const CellInfo* getCellInfo(unsigned int i) const;      
+      const CellInfo* getSCInfo(unsigned int i) const;      
       
   };
 }

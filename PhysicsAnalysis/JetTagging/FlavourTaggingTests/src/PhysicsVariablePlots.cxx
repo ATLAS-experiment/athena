@@ -13,7 +13,7 @@
 
 #include "CxxUtils/phihelper.h"
 
-#include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
+#include "FlavorTagInference/BTagTrackIpAccessor.h"
 
 namespace FTAGValidation {
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCafJobs/DataStore.h"
@@ -23,7 +23,9 @@ using std::endl;
 using namespace LArSamples;
 
 
-DataStore::DataStore() : m_cellHistories(nChannels(), nullptr)
+DataStore::DataStore(): 
+   m_cellHistories(nChannels(), nullptr), 
+   m_cellHistoriesSC(nChannelsSC(), nullptr)
 {
 }
   
@@ -43,10 +45,25 @@ HistoryContainer* DataStore::makeNewHistory(const IdentifierHash& hash, CellInfo
   return histCont;
 }
 
+HistoryContainer* DataStore::makeNewHistorySC(const IdentifierHash& hash, CellInfo* info)
+{
+  HistoryContainer*& histCont = hist_cont_sc(hash);
+  if (histCont) return histCont;
+  histCont = new HistoryContainer(info);
+  return histCont;
+}
+
 
 bool DataStore::addData(const IdentifierHash& hash, DataContainer* data)
 {
   HistoryContainer*& histCont = hist_cont(hash);
+  histCont->add(data);
+  return true;
+}
+
+bool DataStore::addDataSC(const IdentifierHash& hash, DataContainer* data)
+{
+  HistoryContainer*& histCont = hist_cont_sc(hash);
   histCont->add(data);
   return true;
 }
@@ -76,6 +93,12 @@ unsigned int DataStore::size() const
    size += hist->nDataContainers();
  }
  
+ for (unsigned int i = 0; i < nChannelsSC(); i++) {
+   const HistoryContainer* hist = historyContainerSC(i);
+   if (!hist) continue;
+   size += hist->nDataContainers();
+ }
+ 
  return size;
 }
 
@@ -93,12 +116,31 @@ unsigned int DataStore::nFilledChannels() const
  return n;
 }
 
+unsigned int DataStore::nFilledChannelsSC() const
+{
+  unsigned int n = 0;
+ 
+ for (unsigned int i = 0; i < nChannelsSC(); i++) {
+   const HistoryContainer* hist = historyContainerSC(i);
+   if (!hist) continue;
+   n++;
+ }
+ 
+ return n;
+}
+
 
 double DataStore::footprint() const 
 {  
   double fp = sizeof(*this); 
   for (unsigned int i = 0; i < nChannels(); i++) {
     const HistoryContainer* hist = historyContainer(i);
+    if (!hist) continue;
+    fp += hist->footprint();
+  }
+    
+  for (unsigned int i = 0; i < nChannelsSC(); i++) {
+    const HistoryContainer* hist = historyContainerSC(i);
     if (!hist) continue;
     fp += hist->footprint();
   }
@@ -129,7 +171,14 @@ bool DataStore::writeTrees(const char* fileName)
     delete hc; hc = nullptr;
   }
 
+  for (unsigned int i = 0; i < nChannelsSC(); i++) {
+    HistoryContainer*& hc = hist_cont_sc(i);
+    acc->addSC(hc);	
+    delete hc; hc = nullptr;
+  }
+
   bool result = acc->save();
   delete acc;
   return result;
 }
+

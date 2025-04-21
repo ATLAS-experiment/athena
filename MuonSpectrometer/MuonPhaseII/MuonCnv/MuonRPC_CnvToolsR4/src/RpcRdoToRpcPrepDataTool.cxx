@@ -13,17 +13,10 @@
 
 
 namespace MuonR4{
-    RpcRdoToRpcPrepDataTool::RpcRdoToRpcPrepDataTool(const std::string& type,
-                                                     const std::string& name,
-                                                     const IInterface* parent): 
-        base_class(type, name, parent) {}
-
-
     StatusCode RpcRdoToRpcPrepDataTool::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_rdoKey.initialize());
         ATH_CHECK(m_cablingKey.initialize());
-        ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_writeKeyBI.initialize(m_decode2DStrips));
@@ -34,12 +27,12 @@ namespace MuonR4{
                                                const std::vector<IdentifierHash>& idVect) const {
         
         
-        SG::ReadHandle rdoContainer{m_rdoKey, ctx};
-        ATH_CHECK(rdoContainer.isPresent());
-        
-        SG::ReadCondHandle cablingMap{m_cablingKey, ctx};
-        ATH_CHECK(cablingMap.isValid());
-        
+        const xAOD::NRPCRDOContainer* rdoContainer{nullptr};
+        ATH_CHECK(SG::get(rdoContainer, m_rdoKey, ctx));
+
+        const Muon::RpcCablingMap* cablingMap{nullptr};
+        ATH_CHECK(SG::get(cablingMap, m_cablingKey, ctx));
+
         const std::unordered_set<IdentifierHash> hashToSelect(idVect.begin(), idVect.end());        
         using RdoPairs = std::array<const xAOD::NRPCRDO*, 2>;
         std::map<Identifier, RdoPairs, Muon::IdentifierByDetElSorter> sortedRdos{Muon::IdentifierByDetElSorter{m_idHelperSvc.get()}};

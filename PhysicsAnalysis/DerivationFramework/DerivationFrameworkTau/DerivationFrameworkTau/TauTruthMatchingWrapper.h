@@ -25,7 +25,7 @@
 
 namespace DerivationFramework {
 
-  class TauTruthMatchingWrapper : public AthAlgTool, public IAugmentationTool {
+  class TauTruthMatchingWrapper : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       TauTruthMatchingWrapper(const std::string& t, const std::string& n, const IInterface* p);
 

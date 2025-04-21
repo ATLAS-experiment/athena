@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "QratCscClusterFitter.h"
@@ -15,6 +15,7 @@
 #include "MuonReadoutGeometry/CscReadoutElement.h"
 #include "TrkEventPrimitives/LocalDirection.h"
 #include "TrkEventPrimitives/ParamDefs.h"
+#include "CxxUtils/trapping_fp.h"
 
 using Muon::CscClusterStatus;
 using Muon::CscPrepData;
@@ -397,6 +398,8 @@ Results QratCscClusterFitter::fit(const StripFitList& sfits, double tantheta) co
     unsigned int istrip_peak = 0;  // strip number within cluster
     // Loop over strips excluding the edges.
     for (unsigned int istrip = 1; istrip < nstrip - 1; ++istrip) {
+        // Tell clang to optimize assuming that FP operations may trap.
+        CXXUTILS_TRAPPING_FP;
         StripFit sfit = sfits[istrip];
         float qthis = sfit.charge;
         float qlast = sfits[istrip - 1].charge;

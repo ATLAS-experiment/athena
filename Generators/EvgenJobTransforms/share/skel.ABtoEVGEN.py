@@ -80,7 +80,7 @@ if not hasattr(runArgs, "outputEVNTFile") and not hasattr(runArgs, "outputEVNT_P
 if not hasattr(runArgs, "ecmEnergy"):
     raise RuntimeError("No center of mass energy provided.")
 else:
-    evgenLog.info(' ecmEnergy = ' + str(runArgs.ecmEnergy) )
+    evgenLog.info('ecmEnergy = ' + str(runArgs.ecmEnergy) )
 if not hasattr(runArgs, "randomSeed"):
     raise RuntimeError("No random seed provided.")
 if not hasattr(runArgs, "firstEvent"):
@@ -395,6 +395,12 @@ if len(evgenConfig.keywords)>0:
 # Set AMITag in in-file metadata
 from PyUtils import AMITagHelper
 AMITagHelper.SetAMITag(runArgs=runArgs)
+
+## Propagete EventStreamInfo metadata
+from OutputStreamAthenaPool.OutputStreamAthenaPoolConf import CopyEventStreamInfo
+streamInfoTool = CopyEventStreamInfo( "StreamEVGEN_CopyEventStreamInfo" )
+ToolSvc += streamInfoTool
+svcMgr.MetaDataSvc.MetaDataTools += [ streamInfoTool ]
 
 ## Propagate energy argument to the generators
 # TODO: Standardise energy setting in the GenModule interface

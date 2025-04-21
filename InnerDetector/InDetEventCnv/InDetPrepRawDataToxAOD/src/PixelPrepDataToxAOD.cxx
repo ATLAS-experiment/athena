@@ -259,15 +259,11 @@ StatusCode PixelPrepDataToxAOD::execute()
       xprd->setLocalPosition( locpos.x(),  locpos.y() ); 
       
       const Amg::MatrixX& localCov = prd->localCovariance();
-      //std::cout << localCov <<  std::endl;
       if(localCov.size() == 1){
-        //std::cout << "Size  == 1" << std::endl;
         xprd->setLocalPositionError( localCov(0,0), 0., 0. ); 
       } else if(localCov.size() == 4){
-        //std::cout << "Size  == 2" << std::endl;
         xprd->setLocalPositionError( localCov(0,0), localCov(1,1), localCov(0,1) );     
       } else {
-        //std::cout << "Size  == "<< localCov.size() << std::endl;
         xprd->setLocalPositionError(0.,0.,0.);
       }
 
@@ -372,7 +368,7 @@ StatusCode PixelPrepDataToxAOD::execute()
          auto range{prdmtColl->equal_range(clusterId)};
          if (truth_particle_links) {
             std::vector<unsigned int> tp_indices;
-            for (auto& i{range.first}; i!=range.second; ++i) {
+            for (auto i{range.first}; i!=range.second; ++i) {
                ElementLink<xAOD::TruthParticleContainer> a_truth_particle_link = truth_particle_links->find(i->second);
                if (a_truth_particle_link) {
                   const xAOD::TruthParticle *truth_particle = *a_truth_particle_link;
@@ -392,12 +388,12 @@ StatusCode PixelPrepDataToxAOD::execute()
             // @TODO provide possibility to move tp_indices to its final destination
             AUXDATA(xprd,std::vector<unsigned int>, truth_index) = tp_indices;
          }
-         std::vector<int> barcodes; // FIXME  barcode-based - requires xAOD::TrackMeasurementValidation to be migrated away from barcodes
+         std::vector<unsigned int> barcodes; // FIXME  barcode-based - requires xAOD::TrackMeasurementValidation to be migrated away from barcodes
          for (auto i = range.first; i != range.second; ++i) {
            barcodes.push_back( HepMC::barcode(i->second) );
          }
          // @TODO move vector
-         AUXDATA(xprd,std::vector<int>, truth_barcode) = barcodes;
+         AUXDATA(xprd,std::vector<unsigned int>, truth_barcode) = barcodes;
       }
       
       std::vector< std::vector< int > > sdo_tracks;

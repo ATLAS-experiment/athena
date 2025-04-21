@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // --------------------------------------------------
-// 
+//
 // File:  GeneratorFilters/LeptonFilter.h
 // Description: Filters based on presence of charged leptons
 //
@@ -15,36 +15,21 @@
 #define GENERATORFILTERS_XAODLEPTONFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
-#include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
-#include "xAODTruth/TruthParticleAuxContainer.h"
 
 /// Filter events based on presence of charged leptons
 class xAODLeptonFilter : public GenFilter {
 
 public:
+  using GenFilter::GenFilter;
 
-  /// Constructor
-  xAODLeptonFilter(const std::string& name, ISvcLocator* pSvcLocator);
-
-  /// Destructor
-  virtual ~xAODLeptonFilter() { }
-
-  /// Initialize
-  virtual StatusCode filterInitialize() {
-    return StatusCode::SUCCESS;
-  }
-
-  /// Finalize
-  virtual StatusCode filterFinalize() {
-    return StatusCode::SUCCESS;
-  }
-
-  /// Do the filtering
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterInitialize() override final;
+  virtual StatusCode filterEvent() override final;
 
 
 private:
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthElectronContKey{this, "TruthElectronContainerKey", "TruthElectrons"};
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthMuonContKey{this, "TruthMuonContainerKey", "TruthMuons"};
 
   // Declare filter variables
   Gaudi::Property<double> m_Ptmin{this,"Ptcut",10000.0,"Minimum pT for a lepton to count"};

@@ -116,12 +116,12 @@ def getEBnoL1PSSeed(l1items, l1seedname):
             'L1_eEM24L_3eEM12L',
             'L1_4jJ40', 'L1_jJ160', 'L1_jXE100', 'L1_2jJ40_jXE110',
             'L1_eTAU140',
-            'L1_MU8F_cTAU30M', 'L1_MU14FCH', 'L1_MU18VFCH', 'L1_MU10BOM',
+            'L1_cTAU30M_3DR35-MU8F-eTAU30', 'L1_MU14FCH', 'L1_MU18VFCH', 'L1_MU10BOM',
             'L1_5jJ40p0ETA25',
             'L1_3MU5VF','L1_MU8F_2jJ40_jJ50',
             'L1_jJ55p0ETA23_2jJ40p30ETA49', 'L1_jJ125p30ETA49', 'L1_jJ80p0ETA25_2jJ55_jJ50p30ETA49',
             'L1_2MU5VF_3MU3V','L1_MU8VF_2MU5VF',
-            'L1_jMJJ-500-NFF', 'L1_jJ85p0ETA21_3jJ40p0ETA25', 'L1_SC111-CjJ40',
+            'L1_jMJJ-500-NFF', 'L1_jJ85p0ETA21_3jJ40p0ETA25', 'L1_SC175-SCjJ10',
             'L1_HT190-jJ40s5pETA21', 'L1_cTAU30M_2cTAU20M_4jJ30p0ETA25', #'L1_TAU20IM_2TAU12IM_4J12p0ETA25', 
             'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', 'L1_eEM18M_2cTAU20M_jXE70',
         ],
@@ -159,16 +159,15 @@ def getL1LowLumi():
         'L1_2MU5VF', 'L1_3MU3V',
         'L1_eEM18L_MU8F',
         'L1_2eEM10L_MU8F',
-        'L1_TAU60', 'L1_eTAU30M_2eTAU20M_jJ55_2jJ50_3jJ30',
+        'L1_TAU60',
+        'L1_cTAU30M_2cTAU20M_jJ55_2jJ50_3jJ30',
         'L1_EM15HI_2TAU12IM_XE35', 
-        'L1_MU8F_eTAU20M_jXE70',
         'L1_MU8F_cTAU20M_jXE70',
         'L1_TAU20_2TAU12_XE35', 
-        'L1_eTAU30M_2eTAU20M_jXE70',
+        'L1_cTAU30M_2cTAU20M_jXE70',
         'L1_EM15HI_2TAU12IM', 'L1_EM15HI_2TAU12IM_J25_3J12',
         'L1_EM15HI_TAU40_2TAU15',
-        'L1_MU8F_eTAU20M_jJ55_2jJ30',
-        'L1_MU8F_eTAU20M',
+        'L1_MU8F_cTAU20M_jJ55_2jJ30',
         'L1_MU8F_cTAU20M',
         'L1_J75', #'L1_4J15',
         'L1_XE50', 'L1_3J25p0ETA23',
@@ -180,20 +179,17 @@ def getL1LowLumi():
 def getL1BKeePrimary():
 
     return [
-        'L1_JPSI-1M5-eEM9', 'L1_JPSI-1M5-eEM15',
-        'L1_BPH-0M9-eEM9-eEM7_MU5VF', # legacy 'L1_BPH-0M9-EM7-EM5_MU5VF'
         'L1_eEM24L_3eEM12L',
         'L1_eEM22M_jMJJ-300', # legacy 'L1_EM18VHI_MJJ-300'
         'L1_eEM18L_MU8F',
         'L1_BPH-0M9-eEM9-eEM7_2MU3V', # legacy 'L1_BPH-0M9-EM7-EM5_2MU3V'
         'L1_MU14FCH',
-        'L1_MU8F_2MU5VF',
-        'L1_MU8F_eTAU30M', # legacy 'L1_MU8F_TAU20IM'
-        'L1_MU8F_cTAU30M',
-        'L1_MU8F_eTAU20M_3jJ30', # legacy 'L1_MU8F_TAU12IM_3J12'
+        'L1_MU8VF_2MU5VF', # Replacing 'L1_MU8F_2MU5VF'
+        'L1_BPH-2M9-2DR15-2MU5VF',
+        'L1_cTAU30M_3DR35-MU8F-eTAU30',
         'L1_MU8F_cTAU20M_3jJ30',
         'L1_jXE100', # legacy 'L1_XE50',
-        #'L1_eTAU60_2cTAU20M_jXE80', # legacy 'L1_TAU40_2TAU12IM_XE40', TriggerMenuMT:L1Seeds ERROR L1 item L1_eTAU60_2cTAU20M_jXE80 from L1_BKeePrimary seeds is not in current L1 menu
+        'L1_eTAU60_2cTAU20M_jXE80', # legacy 'L1_TAU40_2TAU12IM_XE40', TriggerMenuMT:L1Seeds ERROR L1 item L1_eTAU60_2cTAU20M_jXE80 from L1_BKeePrimary seeds is not in current L1 menu
         'L1_eEM18M_2cTAU20M_jXE70', # legacy 'L1_EM15VHI_2TAU12IM_XE35'
         'L1_cTAU35M_2cTAU30M_2jJ55_3jJ50', # legacy 'L1_TAU25IM_2TAU20IM_2J25_3J20'
         'L1_cTAU30M_2cTAU20M_4jJ30p0ETA25', # legacy 'L1_TAU20IM_2TAU12IM_4J12p0ETA25'
@@ -206,10 +202,10 @@ def getL1BKeePrimary():
         'L1_jJ160', # legacy 'L1_J100'
         'L1_4jJ40', # legacy 'L1_4J15'
         'L1_3jJ70p0ETA23', # legacy 'L1_3J35p0ETA23'
-        # legacy 'L1_3J15p0ETA25_XE40',
+        'L1_3jJ40p0ETA25_jXE80', # legacy 'L1_3J15p0ETA25_XE40'
         'L1_2eEM24L',
-        'L1_eEM18','L1_2eEM18', 'L1_2eEM18M', 'L1_2eEM18L',
-        'L1_eEM26M', 'L1_eEM26L',
+        'L1_2eEM18', 'L1_2eEM18M',
+        'L1_eEM26M',
         'L1_eEM28M',
         'L1_2eEM10L_MU8F',
         'L1_MU18VFCH',
@@ -268,9 +264,10 @@ def getL1BKeePrescaled():
 
     return [
         'L1_LFV-MU5VF',
-        'L1_BPH-2M9-0DR15-MU5VFMU3V',
-        'L1_BPH-2M9-0DR15-2MU3V',
-        'L1_BPH-2M9-0DR15-2MU3V',
+        'L1_BPH-2M9-0DR15-MU5VFMU3V', # disabled
+        'L1_BPH-2M9-0DR15-C-MU5VFMU3V',
+        'L1_BPH-2M9-0DR15-2MU3V', #disabled
+        'L1_BPH-2M9-0DR15-2MU3VF',
         'L1_BPH-0M9-eEM9-eEM7_MU5VF', # legacy 'L1_BPH-0M9-EM7-EM5_MU5VF',
         'L1_BPH-0DR3-eEM9jJ40_MU5VF', # legacy 'L1_BPH-0DR3-EM7J15_MU5VF'
         'L1_BPH-0DR3-eEM9jJ40_2MU3V', # legacy 'L1_BPH-0DR3-EM7J15_2MU3V'
@@ -279,9 +276,7 @@ def getL1BKeePrescaled():
         'L1_jJ90', # legacy 'L1_J50'
         'L1_jJ90_DETA20-jJ90J', # legacy 'L1_J50_DETA20-J50J'
         'L1_jJ80', # legacy 'L1_J40'
-        # 'L1_3J25p0ETA23', # exist in menu, but currently not used at HLT. We may drop as CTP output
-        # 'L1_EM20VH_3J20', # exist in menu, but currently not used at HLT. We may drop as CTP output
-        # 'L1_EM18VHI_3J20', # exist in menu, but currently not used at HLT. We may drop as CTP output
+        'L1_3jJ55p0ETA23', # 'L1_3J25p0ETA23', # exist in menu
         'L1_eEM22M_3jJ50', # legacy L1_EM18VHI_3J20
         'L1_eEM24L_3jJ50', # legacy L1_EM20VH_3J20 
         'L1_eTAU80',

@@ -256,6 +256,15 @@ private:
     "Minimum Pt for FSR to enter egamma truth particle container"
   };
 
+  /** @brief Allow electron from photon in egamma truth particle container **/
+  Gaudi::Property<bool> m_UPCmode{
+    this,
+    "UPCmode",
+    false,
+    "Allow electron from photon in egamma truth particle container"
+  };
+
+
   /** @brief MCTruthClassifier **/
   ToolHandle<IMCTruthClassifier> m_mcTruthClassifier{
     this,

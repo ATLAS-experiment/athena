@@ -23,7 +23,6 @@ namespace DerivationFramework {
   */
 
   ClassifyAndCalculateHFTool::ClassifyAndCalculateHFTool(const std::string& t, const std::string& n, const IInterface* p) : AthAlgTool(t,n,p){
-    declareInterface<DerivationFramework::ClassifyAndCalculateHFTool>(this);
   }
 
   ClassifyAndCalculateHFTool::~ClassifyAndCalculateHFTool(){

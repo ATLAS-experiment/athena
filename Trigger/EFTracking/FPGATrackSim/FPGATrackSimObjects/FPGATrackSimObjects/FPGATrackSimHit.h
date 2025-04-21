@@ -73,18 +73,18 @@ public:
     void setLayerDisk(unsigned v) { m_layer_disk = v; } // ITk layer number
     void setSide(unsigned v) { m_side = v; }
     void setPhysLayer(unsigned v); // Sets using the FPGATrackSim-defined physical layer index (see FPGATrackSimPlaneMap.h)
-    void setEtaModule(int v) { m_etaModule = v; }
+    void setEtaModule(int v) { m_etaModule_old = m_etaModule; m_etaModule = v; };
     void setPhiModule(unsigned v) { m_phiModule = v; }
     void setEtaWidth(unsigned v) { m_etaWidth = v; }
     void setPhiWidth(unsigned v) { m_phiWidth = v; }
     unsigned int getIdentifier() const { return m_identifier; } // 32 bit (short) module identifier
     unsigned getIdentifierHash() const { return m_identifierHash; } // TODO note this might break things in the same way as getSide() a few lines below. If so, recomment.
-    unsigned getLayerDisk() const { return m_layer_disk; } // ITk layer number
+    unsigned getLayerDisk(bool old=false) const { if (old && isRemapped()) return m_layer_disk_old; else return m_layer_disk;} // ITk layer number
     unsigned getSide() const { return m_side; } // strip side TODO note this has been uncommented on 4/20/21. If wrappers suddenly break, recomment this. Same for getIdentifierHash above.
-    unsigned getPhysLayer() const; // Returns the FPGATrackSim-defined physical layer index (see FPGATrackSimPlaneMap.h)
+    unsigned getPhysLayer(bool old=false) const; // Returns the FPGATrackSim-defined physical layer index (see FPGATrackSimPlaneMap.h)
     unsigned getEtaWidth() const { return m_etaWidth; }
     unsigned getPhiWidth() const { return m_phiWidth; }
-    int getEtaModule() const { return m_etaModule; }
+    int getEtaModule(bool old=false) const { if (old && isRemapped()) return m_etaModule_old; else return m_etaModule; }
     unsigned getPhiModule() const { return m_phiModule; }
 
     // --- Mapped Location ---
@@ -212,8 +212,11 @@ protected:
     unsigned int m_identifier = 0; // Global module ID, from offline (32 bit variant)
     unsigned m_identifierHash = 0; // Global module ID hash, from ITk
     unsigned m_layer_disk = 0;     // ITk layer number
+    unsigned m_layer_disk_old = 0;     // ITk layer number
     unsigned m_side = 0;           // Side of the strip module
+    unsigned m_side_old = 0;           // Side of the strip module
     int m_etaModule = 0; // eta index of the module that the hit is located on
+    int m_etaModule_old = 0; // eta index of the module that the hit is located on
     unsigned m_phiModule = 0; // phi index of the module that the hit is located on
     unsigned m_etaWidth = 0;  // clustering width along eta
     unsigned m_phiWidth = 0;  // clustering width in phi direction
@@ -288,8 +291,8 @@ protected:
 
     std::vector<unsigned> m_IDhashVec; // for a cluster, when we get the equivalent hit info we want to store all the ID hash containing it
     std::vector<int> m_PhiIndexVec; // for a cluster, all the phi indices in it
-    std::vector<int> m_EtaIndexVec; // for a cluster, all the eta indices in it  
-    ClassDefNV(FPGATrackSimHit, 12);
+    std::vector<int> m_EtaIndexVec; // for a cluster, all the eta indices in it
+    ClassDefNV(FPGATrackSimHit, 13);
 };
 
 // Container of <FPGATrackSimHit const *>

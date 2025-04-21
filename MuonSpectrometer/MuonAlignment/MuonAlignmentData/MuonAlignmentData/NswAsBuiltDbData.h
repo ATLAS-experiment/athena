@@ -20,15 +20,11 @@ public:
 #ifndef SIMULATIONBASE
     /// Storage to the micromega as built calculator
     using MmAsBuiltPtr  = GeoModel::TransientConstSharedPtr<NswAsBuilt::StripCalculator>;
-    using sTgcAsBuiltPtr = GeoModel::TransientConstSharedPtr<NswAsBuilt::StgcStripCalculator>;
 #else
     /// Define a dummy pointer object if the project is AthSimulation
     using MmAsBuiltPtr = char;
-    using sTgcAsBuiltPtr = char;
 #endif
     MmAsBuiltPtr microMegaData{};
-    /// Storage to the stgc as built calculator
-    sTgcAsBuiltPtr sTgcData{};
 
     NswAsBuiltDbData() = default;
     ~NswAsBuiltDbData() = default;

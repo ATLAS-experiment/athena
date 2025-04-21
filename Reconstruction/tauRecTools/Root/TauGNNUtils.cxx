@@ -116,7 +116,7 @@ std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scala
     auto calc = std::make_unique<GNNVarCalc>();
 
     // Scalar variable calculator functions
-    calc->insert("absEta", Variables::absEta, scalar_vars);
+    //calc->insert("absEta", Variables::absEta, scalar_vars);
     calc->insert("isolFrac", Variables::isolFrac, scalar_vars);
     calc->insert("centFrac", Variables::centFrac, scalar_vars);
     calc->insert("etOverPtLeadTrk", Variables::etOverPtLeadTrk, scalar_vars);
@@ -131,9 +131,9 @@ std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scala
     calc->insert("trFlightPathSig", Variables::trFlightPathSig, scalar_vars);
     calc->insert("massTrkSys", Variables::massTrkSys, scalar_vars);
     calc->insert("pt", Variables::pt, scalar_vars);
-    calc->insert("pt_tau_log", Variables::pt_tau_log, scalar_vars);
-    calc->insert("ptDetectorAxis", Variables::ptDetectorAxis, scalar_vars);
-    calc->insert("ptIntermediateAxis", Variables::ptIntermediateAxis, scalar_vars);
+    //calc->insert("pt_tau_log", Variables::pt_tau_log, scalar_vars);
+    //calc->insert("ptDetectorAxis", Variables::ptDetectorAxis, scalar_vars);
+    //calc->insert("ptIntermediateAxis", Variables::ptIntermediateAxis, scalar_vars);
     //---added for the eVeto
     /*calc->insert("ptJetSeed_log",              Variables::ptJetSeed_log, scalar_vars);
     calc->insert("absleadTrackEta",            Variables::absleadTrackEta, scalar_vars);
@@ -154,8 +154,8 @@ std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scala
     calc->insert("trackPt", Variables::Track::trackPt, track_vars);
     calc->insert("trackEta", Variables::Track::trackEta, track_vars);
     calc->insert("trackPhi", Variables::Track::trackPhi, track_vars);
-    calc->insert("pt_tau_log", Variables::Track::pt_tau_log, track_vars);
-    calc->insert("pt_jetseed_log", Variables::Track::pt_jetseed_log, track_vars);
+    //calc->insert("pt_tau_log", Variables::Track::pt_tau_log, track_vars);
+    //calc->insert("pt_jetseed_log", Variables::Track::pt_jetseed_log, track_vars);
     calc->insert("d0_abs_log", Variables::Track::d0_abs_log, track_vars);
     calc->insert("z0sinThetaTJVA_abs_log", Variables::Track::z0sinThetaTJVA_abs_log, track_vars);
     calc->insert("z0sinthetaTJVA", Variables::Track::z0sinthetaTJVA, track_vars);
@@ -168,8 +168,8 @@ std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scala
     calc->insert("dPhiJetSeedAxis", Variables::Track::dPhiJetSeedAxis, track_vars);
     calc->insert("nInnermostPixelHits", Variables::Track::nInnermostPixelHits, track_vars);
     calc->insert("nPixelHits", Variables::Track::nPixelHits, track_vars);
-    calc->insert("nSCTHits", Variables::Track::nSCTHits, track_vars);
-    calc->insert("nIBLHitsAndExp", Variables::Track::nIBLHitsAndExp, track_vars);
+    //calc->insert("nSCTHits", Variables::Track::nSCTHits, track_vars);
+    //calc->insert("nIBLHitsAndExp", Variables::Track::nIBLHitsAndExp, track_vars);
     calc->insert("nPixelHitsPlusDeadSensors", Variables::Track::nPixelHitsPlusDeadSensors, track_vars);
     calc->insert("nSCTHitsPlusDeadSensors", Variables::Track::nSCTHitsPlusDeadSensors, track_vars);
     /* Development variables 
@@ -211,9 +211,9 @@ std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scala
     */
 
     // Cluster variable calculator functions
-    calc->insert("et_log", Variables::Cluster::et_log, cluster_vars);
-    calc->insert("pt_tau_log", Variables::Cluster::pt_tau_log, cluster_vars);
-    calc->insert("pt_jetseed_log", Variables::Cluster::pt_jetseed_log, cluster_vars);
+    //calc->insert("et_log", Variables::Cluster::et_log, cluster_vars);
+    //calc->insert("pt_tau_log", Variables::Cluster::pt_tau_log, cluster_vars);
+    //calc->insert("pt_jetseed_log", Variables::Cluster::pt_jetseed_log, cluster_vars);
     calc->insert("dEta", Variables::Cluster::dEta, cluster_vars);
     calc->insert("dPhi", Variables::Cluster::dPhi, cluster_vars);
     calc->insert("SECOND_R", Variables::Cluster::SECOND_R, cluster_vars);
@@ -226,7 +226,7 @@ std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scala
     */
 
     //Extension - Variables for GNTau
-    calc->insert("e", Variables::Cluster::e, cluster_vars);
+    //calc->insert("e", Variables::Cluster::e, cluster_vars);
     calc->insert("et", Variables::Cluster::et, cluster_vars);
     
     /*Development variables

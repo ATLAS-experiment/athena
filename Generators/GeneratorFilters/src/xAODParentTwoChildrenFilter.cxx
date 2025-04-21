@@ -1,20 +1,14 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODParentTwoChildrenFilter.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "CxxUtils/BasicTypes.h"
-#include "xAODTruth/TruthVertexContainer.h"
-
-xAODParentTwoChildrenFilter::xAODParentTwoChildrenFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name,pSvcLocator)
-{
-  
-}
-
+#include "xAODTruth/TruthVertex.h"
 
 StatusCode xAODParentTwoChildrenFilter::filterInitialize() {
+ CHECK(m_truthPartContKey.initialize());
  if (m_PDGParent.size() == 0) ATH_MSG_ERROR("PDGParent[] not set ");
  if (m_PDGChild.size() == 0) ATH_MSG_ERROR("PDGChild[] not set ");
  for (int i=0; i < int(m_PDGParent.size()); i++) ATH_MSG_DEBUG("PDGParent["<<i<<"] = " << m_PDGParent[i]);
@@ -39,17 +33,11 @@ StatusCode xAODParentTwoChildrenFilter::filterEvent() {
 
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
 // duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
   // Loop over all particles in the event and build up the grid
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-          const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
-
+  for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
           int id = pitr->pdgId();
 	  if (std::abs(id) != m_PDGParent[0]) continue;
     	  if (pitr->pt() < m_PtMinParent) continue;

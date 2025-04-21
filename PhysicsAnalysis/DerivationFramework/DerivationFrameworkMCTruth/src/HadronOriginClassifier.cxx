@@ -30,7 +30,6 @@ namespace DerivationFramework{
   HadronOriginClassifier::HadronOriginClassifier(const std::string& t, const std::string& n, const IInterface* p):
     AthAlgTool(t,n,p)
     {
-      declareInterface<DerivationFramework::HadronOriginClassifier>(this);
     }
 
   HadronOriginClassifier::~HadronOriginClassifier(){}

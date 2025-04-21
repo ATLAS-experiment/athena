@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-/*---------------------------------------------------------
+/**
  * @file TRT_HWMappingSvc.cxx
  * @Service to provide offline -> hardware mapping
  * @author Denver Whittington <Denver.Whittington@cern.ch>
  * updated March 2019 Peter Hansen <phansen@nbi.dk>
- *///------------------------------------------------------
+ */
 
 // Header Includes
 #include "TRT_HWMappingSvc.h"

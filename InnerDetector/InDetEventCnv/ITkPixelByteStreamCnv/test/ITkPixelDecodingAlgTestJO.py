@@ -8,11 +8,6 @@ if __name__=="__main__":
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
    flags = initConfigFlags()
 
-   # make logging more verbose
-   from AthenaCommon.Logging import log
-   from AthenaCommon.Constants import DEBUG
-   # log.setLevel(DEBUG)
-   
    # --- set flags
    # the input file
 
@@ -41,7 +36,7 @@ if __name__=="__main__":
    
    cfg.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
  
-   sys.exit(cfg.run(15).isFailure())
+   cfg.run(15)
 
 
 

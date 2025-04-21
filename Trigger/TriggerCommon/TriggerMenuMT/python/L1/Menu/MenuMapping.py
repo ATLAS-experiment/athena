@@ -24,6 +24,7 @@ menuMap = {
 
     # low mu
     "PhysicsP1_pp_lowMu_run3_v1"                : ["Physics_HI_run3_v1", "Physics_HI_run3_v1_inputs", "Physics_HI_run3_v1_inputs_legacy"],
+    "Dev_pp_lowMu_run3_v1"                      : ["Physics_HI_run3_v1", "Physics_HI_run3_v1_inputs", "Physics_HI_run3_v1_inputs_legacy"],
 
     # cosmics
     "Cosmic_run3_v1"                            : ["Physics_pp_run3_v1","Physics_pp_run3_v1_inputs","Physics_pp_run3_v1_inputs_legacy"],

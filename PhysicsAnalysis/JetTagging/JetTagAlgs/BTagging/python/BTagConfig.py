@@ -17,10 +17,11 @@ from BTagging.JetSecVtxFindingAlgConfig import JetSecVtxFindingAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 from FlavorTagDiscriminants.BTagJetAugmenterAlgConfig import BTagJetAugmenterAlgCfg
 from FlavorTagDiscriminants.BTagMuonAugmenterAlgConfig import BTagMuonAugmenterAlgCfg
-from FlavorTagDiscriminants.FlavorTagNNConfig import (
+from FlavorTagInference.FlavorTagNNConfig import (
     FlavorTagNNCfg,
     MultifoldGNNCfg,
 )
+from FlavorTagDiscriminants.FlavorTagDLNNConfig import FlavorTagDLNNCfg
 from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
 from JetHitAssociation.JetHitAssociationConfig import JetHitAssociationCfg
@@ -57,6 +58,7 @@ def GetTaggerTrainingMap(inputFlags, jet_col):
             "BTagging/20230413/gn2xwithmassv00/antikt10ufo/network.onnx",
             "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx",
             "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx",
+            "BTagging/20250310/antikt10ufo/GN2XTauV00.onnx",
             "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/MC20_bbJES_ak10csskufo_Sep24_calibFactors.onnx", # bJR10v00
             "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20250212.onnx", # bJR10v00Ext
             "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx" # bJR10v01
@@ -204,6 +206,9 @@ def _track_measurement_list(container_name):
         f'xAOD::TrackMeasurementValidationAuxContainer#{container_name}Aux.'
     ]
 
+def GNN_or_DL_cfg(nn_path):
+    """Use the correct configuration for the NN based on the path"""
+    return FlavorTagNNCfg if ('GN' in nn_path or 'gn' in nn_path) else FlavorTagDLNNCfg
 
 def BTagAlgsCfg(
     inputFlags,
@@ -354,6 +359,7 @@ def BTagAlgsCfg(
     # Add the final taggers based on neural networks
     for nn_path in nnList:
         # add standard (unflipped) taggers
+        NN_cfg_func = GNN_or_DL_cfg(nn_path)
         output_remapping={}
         if  '20240122trig' in nn_path:
             output_remapping={
@@ -364,7 +370,7 @@ def BTagAlgsCfg(
             }
 
         result.merge(
-            FlavorTagNNCfg(
+            NN_cfg_func(
                 inputFlags,
                 BTaggingCollection=BTagCollection,
                 TrackCollection=trackCollection,
@@ -375,7 +381,7 @@ def BTagAlgsCfg(
         if inputFlags.BTagging.RunFlipTaggers:
             for flip_config in _get_flip_config(nn_path):
                 result.merge(
-                    FlavorTagNNCfg(
+                    NN_cfg_func(
                         inputFlags,
                         BTaggingCollection=BTagCollection,
                         TrackCollection=trackCollection,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/Tool_InputConverter.h"
@@ -13,11 +13,8 @@
 
 
 PanTau::Tool_InputConverter::Tool_InputConverter( const std::string& name ) :
-  asg::AsgTool(name),
-  m_Tool_InformationStore("PanTau::Tool_InformationStore/Tool_InformationStore")
+  asg::AsgTool(name)
 {
-  declareProperty("Tool_InformationStore",     m_Tool_InformationStore, "Link to tool with all information");
-  declareProperty("Tool_InformationStoreName", m_Tool_InformationStoreName="", "Optional Name for InformationStore insance in ABR");
 }
 
 PanTau::Tool_InputConverter::~Tool_InputConverter() = default;
@@ -32,7 +29,6 @@ StatusCode PanTau::Tool_InputConverter::initialize() {
   ATH_CHECK( m_Tool_InformationStore.retrieve() );
     
   ATH_CHECK( m_Tool_InformationStore->getInfo_Int("TauConstituents_UsePionMass", m_Config_UsePionMass) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_Int("TauConstituents_UseShrinkingCone", m_Config_TauConstituents_UseShrinkingCone) );        
   ATH_CHECK( m_Tool_InformationStore->getInfo_Double("TauConstituents_Types_DeltaRCore", m_Config_TauConstituents_Types_DeltaRCore) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_Double("TauConstituents_PreselectionMinEnergy", m_Config_TauConstituents_PreselectionMinEnergy) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("CellBased_BinEdges_Eta", m_Config_CellBased_BinEdges_Eta) );
@@ -114,8 +110,6 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
     }
     else {
       typeFlags.at((int)PanTau::TauConstituent::t_Neutral) = 1;
-      typeFlags.at((int)PanTau::TauConstituent::t_NeutLowA) = 1;
-      typeFlags.at((int)PanTau::TauConstituent::t_NeutLowB) = 1;
             
       //neutral PFO arranging --- check for pi0 tag
       mvaValue = pfo->bdtPi0Score();

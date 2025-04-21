@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, Format, FlagEnum
@@ -10,6 +10,7 @@ class TileRunType(FlagEnum):
      CIS = 'CIS'
      MONOCIS = 'MONOCIS'
      GAPCIS = 'GAP/CIS'
+     L1CALO = 'L1CALO'
      LAS = 'LAS'
      BILAS = 'BILAS'
      GAPLAS = 'GAP/LAS'
@@ -21,18 +22,22 @@ class TileRunType(FlagEnum):
                commonType = TileRunType.PHY
           elif self in [TileRunType.LAS, TileRunType.BILAS, TileRunType.GAPLAS]:
                commonType = TileRunType.LAS
-          elif self in [TileRunType.CIS, TileRunType.MONOCIS, TileRunType.GAPCIS]:
+          elif self in [TileRunType.CIS, TileRunType.MONOCIS, TileRunType.GAPCIS, TileRunType.L1CALO]:
                commonType = TileRunType.CIS
           return commonType
 
      def getTimingType(self):
-          return self if self in [TileRunType.GAPLAS] else self.getCommonType()
+          if self is TileRunType.L1CALO:
+               return TileRunType.PHY
+          else:
+               return self if self in [TileRunType.GAPLAS] else self.getCommonType()
 
      def getIntValue(self):
           _runTypeInt = {TileRunType.PHY: 1, TileRunType.LAS: 2,
                          TileRunType.GAPLAS: 2, TileRunType.BILAS: 2,
                          TileRunType.PED: 4, TileRunType.CIS: 8,
-                         TileRunType.GAPCIS: 8, TileRunType.MONOCIS: 9}
+                         TileRunType.GAPCIS: 8, TileRunType.MONOCIS: 9,
+                         TileRunType.L1CALO: 9}
           return _runTypeInt.get(self, 0)
 
      def isBiGain(self):

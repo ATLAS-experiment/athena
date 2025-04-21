@@ -33,15 +33,6 @@ static inline boost::dynamic_bitset<> rshift(boost::dynamic_bitset<> const & b, 
 static inline void updateBinHits(std::vector<boost::dynamic_bitset<>> & binHits, unsigned layer, boost::dynamic_bitset<> const & b);
 static inline int layersHit(FPGATrackSimRoad& r);
 
-///////////////////////////////////////////////////////////////////////////////
-// AthAlgTool
-
-FPGATrackSimHough1DShiftTool::FPGATrackSimHough1DShiftTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
-  base_class(algname, name, ifc)
-{
-  declareInterface<IFPGATrackSimRoadFinderTool>(this);
-}
-
 
 StatusCode FPGATrackSimHough1DShiftTool::initialize()
 {

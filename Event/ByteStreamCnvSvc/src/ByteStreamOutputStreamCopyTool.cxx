@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ByteStreamOutputStreamCopyTool.cxx
@@ -9,24 +9,6 @@
 
 #include "ByteStreamOutputStreamCopyTool.h"
 
-// Gaudi
-#include "GaudiKernel/GaudiException.h"
-#include "GaudiKernel/ISvcLocator.h"
-
-/// Constructor
-ByteStreamOutputStreamCopyTool::ByteStreamOutputStreamCopyTool(
-		  const std::string& type,
-		  const std::string& name,
-		  const IInterface* parent) 
-  : base_class(type, name, parent),
-    m_outputSvc("ByteStreamEventStorageOutputSvc", name),
-    m_inputSvc("ByteStreamEventStorageInputSvc", name)
-{
-   // Declare IAthenaOutputStreamTool interface
-   declareInterface<IAthenaOutputStreamTool>(this);
-   declareProperty("ByteStreamOutputSvc", m_outputSvc);
-   declareProperty("ByteStreamInputSvc",  m_inputSvc);
-}
 
 //__________________________________________________________________________
 StatusCode ByteStreamOutputStreamCopyTool::initialize() {

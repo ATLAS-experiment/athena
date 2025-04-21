@@ -65,7 +65,7 @@ public:
   BinningData& operator=(const BinningData&) = default;
   BinningData& operator=(BinningData&&) = default;
   ~BinningData() = default;
-  
+
   /** Constructor with arguments*/
   BinningData(BinningType bType,
               BinningOption bOption,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/VarHandleKey_test.cxx
@@ -55,6 +55,7 @@ void test1()
   assert (k1.mode() == Gaudi::DataHandle::Reader);
   assert (k1.storeHandle().name() == "StoreGateSvc");
   assert (k1.storeHandle().isSet());
+  assert (k1.hashedKey() == pool.stringToKey ("aab", 1234));
 
   assert (k1.assign ("FeeSvc+aac").isSuccess());
   assert (k1.clid() == 1234);
@@ -62,6 +63,7 @@ void test1()
   assert (k1.mode() == Gaudi::DataHandle::Reader);
   assert (k1.storeHandle().name() == "FeeSvc");
   assert (!k1.storeHandle().isSet());
+  assert (k1.hashedKey() == 0);  // because store was changed after initialize
 
   assert (k1.assign ("ConditionStore+Feedir/aac").isSuccess());
   assert (k1.clid() == 1234);
@@ -69,6 +71,7 @@ void test1()
   assert (k1.mode() == Gaudi::DataHandle::Reader);
   assert (k1.storeHandle().name() == "ConditionStore");
   assert (!k1.storeHandle().isSet());
+  assert (k1.hashedKey() == 0);
 
   assert (k1.assign ("FeeSvc+foo/aac").isFailure());
   EXPECT_EXCEPTION (SG::ExcBadHandleKey,
@@ -83,6 +86,7 @@ void test1()
   assert (k2.initialize().isFailure());
   assert (!k2.storeHandle().isSet());
   assert (k2.isCondition());
+  assert (k1.hashedKey() == 0);
 
   SG::VarHandleKey k3 (1237, "", Gaudi::DataHandle::Reader);
   assert (k3.clid() == 1237);
@@ -94,6 +98,7 @@ void test1()
   assert (k3.initialize(false).isSuccess());
   assert (k3.initialize(SG::AllowEmpty).isSuccess());
   assert (k3.empty());
+  assert (k1.hashedKey() == 0);
 
   EXPECT_EXCEPTION (SG::ExcBadHandleKey,
                     SG::VarHandleKey (1237, "a/b/c", Gaudi::DataHandle::Reader));
@@ -102,6 +107,7 @@ void test1()
   assert (k4.key() == "ccc");
   assert (k4.initialize(false).isSuccess());
   assert (k4.key() == "");
+  assert (k1.hashedKey() == 0);
 
   assert (k4.owningHandle() == nullptr);
   SG::VarHandleBase base;

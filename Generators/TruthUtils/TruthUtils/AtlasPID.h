@@ -80,7 +80,15 @@ static const int PHOTON = 22;
 static const int Z0BOSON = 23;
 static const int WPLUSBOSON = 24;
 static const int HIGGSBOSON = 25;
+static const int ZPRIME = 32; // Z′/Z^0_2
+static const int ZDBLPRIME = 33; // Z′′/Z^0_3
+static const int WPLUSPRIME = 34; // W ′/W^+_2
+static const int HIGGS2 = 35; // H^0/H^0_2  FIXME Any better ideas?
+static const int HIGGS3 = 36; // A^0/H^0_3 FIXME Any better ideas?
+static const int HIGGSPLUS = 37; // H^+
+static const int HIGGSPLUSPLUS = 38; // H^++
 static const int GRAVITON = 39;
+static const int HIGGS4 = 40; // a^0/H^0_4 FIXME Any better ideas?
 static const int LEPTOQUARK = 42;
 
 /// PDG Ids for Mavtop madgraph UFO model found under DarkX. The
@@ -111,6 +119,16 @@ static const int LAMBDA0 = 3122;
 static const int LAMBDACPLUS = 4122;
 static const int LAMBDAB0 = 5122;
 static const int PSI2S = 20443;
+
+/// PDG Rule 12:
+/// Generator defined PDG ID values for right handed neutrinos and
+/// corresponding W+ boson from a Left-Right symmetric Standard Model
+/// extension. (Defined for some MadGraph+Pythia8 samples and
+/// referenced in MCTruthClassifierGen.cxx)
+static const int  RH_NU_E = 9900012;
+static const int  RH_NU_MU = 9900014;
+static const int  RH_NU_TAU = 9900016;
+static const int  WBOSON_LRSM = 9900024;
 
 static const int LEAD = 1000822080;
 static const int OXYGEN = 1000080160;
@@ -337,9 +355,17 @@ template<> inline bool isZ(const int& p){ return p == Z0BOSON; }
 template<class T> inline bool isW(const T& p){return isW(p->pdg_id());}
 template<> inline bool isW(const int& p){ return std::abs(p) == WPLUSBOSON; }
 
+/// APID: Additional "Heavy"/"prime" versions of W and Z bosons (Used in MCTruthClassifier)
+template<class T> inline bool isHeavyBoson(const T& p){return isHeavyBoson(p->pdg_id());}
+template<> inline bool isHeavyBoson(const int& p){ return p == ZPRIME || p == ZDBLPRIME || std::abs(p) == WPLUSPRIME; }
+
 /// APID: HIGGS boson is only one particle.
 template<class T> inline bool isHiggs(const T& p){return isHiggs(p->pdg_id());}
 template<> inline bool isHiggs(const int& p){ return p == HIGGSBOSON; }
+
+/// APID: Additional Higgs bosons for MSSM (Used in MCTruthClassifier)
+template<class T> inline bool isMSSMHiggs(const T& p){return isMSSMHiggs(p->pdg_id());}
+template<> inline bool isMSSMHiggs(const int& p){ return p == HIGGS2 || p == HIGGS3 || std::abs(p) == HIGGSPLUS; }
 
 template<class T> inline bool isGraviton(const T& p) {return isGraviton(p->pdg_id());}
 template<> inline bool isGraviton(const int& p){ return p == GRAVITON; }
@@ -358,6 +384,14 @@ template<> inline bool isLeptoQuark(const int& p){ return std::abs(p) == LEPTOQU
 template<class T> inline bool isPythia8Specific(const T& p){return isPythia8Specific(p->pdg_id());}
 template<> inline bool isPythia8Specific(const DecodedPID& p){ return (p.ndigits() == 7 && p(0) == 9 && p(1) == 9);}
 template<> inline bool isPythia8Specific(const int& p){ auto value_digits = DecodedPID(p); return isPythia8Specific(value_digits);}
+
+/// PDG Rule 12:
+/// APID: Helper function for right-handed neutrino states
+/// These are generator defined PDG ID values for right handed
+/// neutrinos. (Defined for some MadGraph+Pythia8 samples and
+/// referenced in MCTruthClassifierGen.cxx)
+template<class T> inline bool isNeutrinoRH(const T& p){return isNeutrinoRH(p->pdg_id());}
+template<> inline bool isNeutrinoRH(const int& p){ return (std::abs(p) ==  RH_NU_E || std::abs(p) ==  RH_NU_MU|| std::abs(p) ==  RH_NU_TAU);}
 
 /// Main Table
 /// for MC internal use 81–100,901–930,998-999,1901–1930,2901–2930, and 3901–3930

@@ -61,7 +61,7 @@ MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr theGenPart
           theGenPart->status() != truthParticle->status() ||
           HepMC::is_same_particle(theGenPart,truthParticle)) {
         ATH_MSG_DEBUG(
-            "HepMC::GenParticle and xAOD::TruthParticle do not match");
+                      "HepMC::GenParticle and xAOD::TruthParticle do not match");
         return std::make_pair(partType, partOrig);
       }
       return particleTruthClassifier(truthParticle, info);
@@ -73,22 +73,20 @@ MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr theGenPart
 
 std::pair<ParticleType, ParticleOrigin>
 MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, MCTruthPartClassifier::Info* infoin /*= nullptr*/) const {
-  MCTruthPartClassifier::Info* info = infoin;
+  MCTruthPartClassifier::Info tmpinfo;
+  MCTruthPartClassifier::Info& info = (infoin) ? *infoin : tmpinfo;
+
   ATH_MSG_DEBUG("Executing particleTruthClassifier");
 
   ParticleType partType = Unknown;
   ParticleOrigin partOrig = NonDefined;
-  if (!thePart){
+  if (!thePart) {
     return std::make_pair(partType, partOrig);
   }
-
-  const EventContext& ctx = info ? info->eventContext : Gaudi::Hive::currentContext();
-  MCTruthPartClassifier::Info tmpinfo;
-  if (!info) { info = &tmpinfo; }
-  info->genPart = thePart;
+  info.genPart = thePart;
 
   // retrieve collection and get a pointer
-  SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(m_truthParticleContainerKey,ctx);
+  SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(m_truthParticleContainerKey,info.eventContext);
   if (!truthParticleContainerReadHandle.isValid()) {
     ATH_MSG_WARNING( " Invalid ReadHandle for xAOD::TruthParticleContainer with key: " << truthParticleContainerReadHandle.key());
     return std::make_pair(partType, partOrig);
@@ -99,14 +97,14 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
   if (!MC::isStable(thePart) && !MC::isDecayed(thePart)) {
     return std::make_pair(GenParticle, partOrig);
   }
-  bool isPartHadr = MC::isHadron(thePart)&&!MC::isBeam(thePart);
+  const bool isPartHadr = MC::isHadron(thePart) && !MC::isBeam(thePart);
   if (MC::isDecayed(thePart) && (!MC::isTau(thePart) && !isPartHadr)) return std::make_pair(GenParticle, partOrig);
 
-  // SUSY datasets: tau(satus==2)->tau(satus==2)
+  // SUSY datasets: tau(status==2)->tau(status==2)
   if (MC::isDecayed(thePart) && MC::isTau(thePart)) {
     const xAOD::TruthVertex* endVert = thePart->decayVtx();
-    if (endVert != nullptr) {
-      int numOfDaught = endVert->nOutgoingParticles();
+    if (endVert) {
+      const int numOfDaught = endVert->nOutgoingParticles();
       if (numOfDaught == 1 && MC::isTau(endVert->outgoingParticle(0))) {
         return std::make_pair(GenParticle, partOrig);
       }
@@ -123,53 +121,54 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
       !isPartHadr)
     return std::make_pair(GenParticle, partOrig);
 
-  if (abs(thePart->pdg_id()) > 1000000000) return std::make_pair(NuclFrag, partOrig);
+  // FIXME vetoing protons here to preserve previous behaviour
+  if (MC::isNucleus(thePart) && std::abs(thePart->pdgId()) != MC::PROTON) return std::make_pair(NuclFrag, partOrig);
 
   if ( !MC::isSMLepton(thePart) && !MC::isPhoton(thePart)  && !isPartHadr) return std::make_pair(partType, partOrig);
-  // don't consider  generator particles
+  // don't consider generator particles
 
   const xAOD::TruthVertex* partOriVert = thePart->hasProdVtx() ? thePart->prodVtx() : nullptr;
 
   const xAOD::TruthParticle* theMoth{};
-  if (partOriVert != nullptr) {
+  if (partOriVert) {
     for (const auto& temp: partOriVert->particles_in()) {if (temp)  theMoth = temp;}
   }
-  int motherPDG = theMoth?theMoth->pdg_id():0;
-  info->setMotherProperties(theMoth);
+  const int motherPDG = theMoth?theMoth->pdg_id():0;
+  info.setMotherProperties(theMoth);
 
   if (!partOriVert && HepMC::is_simulation_particle(thePart)) {
     return std::make_pair(NonPrimary, partOrig);
   }
   if (!partOriVert && MC::isElectron(thePart)) {
-    // to define electron out come  status
-    bool isPrompt = false;
-    partOrig = defOrigOfElectron(truthParticleContainerReadHandle.ptr(), thePart, isPrompt, info);
+    // to define electron outcome status
+    bool isPrompt = false; // updated by defOrigOfElectron
+    partOrig = defOrigOfElectron(*truthParticleContainerReadHandle, thePart, isPrompt, info);
     return std::make_pair(UnknownElectron, partOrig);
   }
   if (!partOriVert && MC::isMuon(thePart)) {
-    // to define electron out come  status
-    bool isPrompt = false;
-    partOrig = defOrigOfMuon(truthParticleContainerReadHandle.ptr(), thePart, isPrompt, info);
+    // to define electron outcome status
+    bool isPrompt = false; // updated by defOrigOfMuon
+    partOrig = defOrigOfMuon(*truthParticleContainerReadHandle, thePart, isPrompt, info);
     return std::make_pair(UnknownMuon, partOrig);
   }
   if (!partOriVert && MC::isTau(thePart)) {
-    // to define electron out come  status
-    partOrig = defOrigOfTau(truthParticleContainerReadHandle.ptr(), thePart, motherPDG, info);
+    // to define electron outcome status
+    partOrig = defOrigOfTau(*truthParticleContainerReadHandle, thePart, motherPDG, info);
     return std::make_pair(UnknownTau, partOrig);
   }
   if (!partOriVert && MC::isPhoton(thePart)) {
-    // to define photon out come
-    bool isPrompt = false;
-    partOrig = defOrigOfPhoton(truthParticleContainerReadHandle.ptr(), thePart, isPrompt, info);
+    // to define photon outcome
+    bool isPrompt = false; // updated by defOrigOfPhoton
+    partOrig = defOrigOfPhoton(*truthParticleContainerReadHandle, thePart, isPrompt, info);
     return std::make_pair(UnknownPhoton, partOrig);
   }
   if (!partOriVert && MC::isNeutrino(thePart)) {
     // to define neutrino outcome
-    info->particleOutCome = NonInteract;
+    info.particleOutCome = NonInteract;
     return std::make_pair(Neutrino, partOrig);
   }
 
-  if (thePart&& info && info->Mother() && HepMC::is_same_generator_particle(thePart,info->Mother()))
+  if (thePart && info.Mother() && HepMC::is_same_generator_particle(thePart,info.Mother()))
     return std::make_pair(NonPrimary, partOrig);
 
   if (isPartHadr) return std::make_pair(Hadron, partOrig);
@@ -177,19 +176,19 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
   if (partOriVert  && motherPDG == 0 && partOriVert->nOutgoingParticles() == 1 &&
       partOriVert->nIncomingParticles() == 0) {
     if (MC::isElectron(thePart)) {
-      info->particleOutCome = defOutComeOfElectron(thePart);
+      info.particleOutCome = defOutComeOfElectron(thePart);
       return std::make_pair(IsoElectron, SingleElec);
     }
     if (MC::isMuon(thePart)) {
-      info->particleOutCome = defOutComeOfMuon(thePart);
+      info.particleOutCome = defOutComeOfMuon(thePart);
       return std::make_pair(IsoMuon, SingleMuon);
     }
     if (MC::isTau(thePart)) {
-      info->particleOutCome = defOutComeOfTau(thePart);
+      info.particleOutCome = defOutComeOfTau(thePart);
       return std::make_pair(IsoTau, SingleTau);
     }
     if (MC::isPhoton(thePart)) {
-      info->particleOutCome = defOutComeOfPhoton(thePart);
+      info.particleOutCome = defOutComeOfPhoton(thePart);
       return std::make_pair(IsoPhoton, SinglePhot);
     }
   }
@@ -197,23 +196,23 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
   if (motherPDG == thePart->pdg_id() &&  theMoth && theMoth->status() == 3 && MC::isDecayed(thePart)) return std::make_pair(GenParticle, partOrig);
 
   if (MC::isElectron(thePart)) {
-    bool isPrompt = false;
-    partOrig = defOrigOfElectron(truthParticleContainerReadHandle.ptr(), thePart, isPrompt, info);
+    bool isPrompt = false; // updated by defOrigOfElectron
+    partOrig = defOrigOfElectron(*truthParticleContainerReadHandle, thePart, isPrompt, info);
     partType = defTypeOfElectron(partOrig, isPrompt);
   } else if (MC::isMuon(thePart)) {
-    bool isPrompt = false;
-    partOrig = defOrigOfMuon(truthParticleContainerReadHandle.ptr(), thePart, isPrompt, info);
+    bool isPrompt = false; // updated by defOrigOfMuon
+    partOrig = defOrigOfMuon(*truthParticleContainerReadHandle, thePart, isPrompt, info);
     partType = defTypeOfMuon(partOrig, isPrompt);
   } else if (MC::isTau(thePart)) {
-    partOrig = defOrigOfTau(truthParticleContainerReadHandle.ptr(), thePart, motherPDG, info);
+    partOrig = defOrigOfTau(*truthParticleContainerReadHandle, thePart, motherPDG, info);
     partType = defTypeOfTau(partOrig);
   } else if (MC::isPhoton(thePart)) {
-    bool isPrompt = false;
-    partOrig = defOrigOfPhoton(truthParticleContainerReadHandle.ptr(), thePart, isPrompt, info);
+    bool isPrompt = false; // updated by defOrigOfPhoton
+    partOrig = defOrigOfPhoton(*truthParticleContainerReadHandle, thePart, isPrompt, info);
     partType = defTypeOfPhoton(partOrig);
   } else if (MC::isNeutrino(thePart)) {
-    bool isPrompt = false;
-    partOrig = defOrigOfNeutrino(truthParticleContainerReadHandle.ptr(), thePart, isPrompt, info);
+    bool isPrompt = false; // updated by defOrigOfNeutrino
+    partOrig = defOrigOfNeutrino(*truthParticleContainerReadHandle, thePart, isPrompt, info);
     partType = Neutrino;
   }
 
@@ -223,65 +222,60 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
 
 
 
-ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruthTES,
-                                     const xAOD::TruthParticle* thePart,
-                                     bool& isPrompt,
-                                     MCTruthPartClassifier::Info* infoin) const
+ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer& xTruthParticleContainer,
+                                                    const xAOD::TruthParticle* thePart,
+                                                    bool& isPrompt,
+                                                    MCTruthPartClassifier::Info& info) const
 {
-  MCTruthPartClassifier::Info* info = infoin;
   ATH_MSG_DEBUG("Executing DefOrigOfElectron ");
 
-  const xAOD::TruthParticle* thePriPart = MC::findMatching(mcTruthTES, thePart);
+  // Find the first copy of this particle stored in the xAOD::TruthParticleContainer (i.e. the particle prior to any interactions)
+  const xAOD::TruthParticle* thePriPart = MC::findMatching(xTruthParticleContainer, thePart);
   if (!thePriPart) return NonDefined;
   if (!MC::isElectron(thePriPart)) return NonDefined;
 
   const xAOD::TruthVertex* partOriVert = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
 
   //-- to define electron outcome status
-  if (info) info->particleOutCome = defOutComeOfElectron(thePriPart);
-  MCTruthPartClassifier::Info tmpinfo;
-  if (!info) { info = &tmpinfo; }
+  info.particleOutCome = defOutComeOfElectron(thePriPart);
 
   if (!partOriVert) return NonDefined;
 
-  int numOfParents = -1;
-  numOfParents = partOriVert->nIncomingParticles();
-  if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfElectron:: electron  has more than one mother ");
+  int numOfParents = partOriVert->nIncomingParticles();
+  if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfElectron:: electron has more than one mother ");
 
   const xAOD::TruthParticle* mother = MC::findMother(thePriPart);
-  if (info) info->setMotherProperties(mother);
-  if (!mother) {
-    return NonDefined;
-  }
+  info.setMotherProperties(mother);
+  if (!mother) { return NonDefined; } // mother is not a nullptr beyond this point
+
   int motherPDG = mother->pdgId();
-  if (info) info->setMotherProperties(mother);
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
 
   bool samePart = false;
   for (const auto& theDaug: partOriVert->particles_out()) {
     if (!theDaug)  continue;
-    if (motherPDG == theDaug->pdgId() &&  info && info->Mother() && HepMC::is_same_generator_particle(theDaug, info->Mother())) samePart = true;
+    if (motherPDG == theDaug->pdgId() && HepMC::is_same_generator_particle(theDaug, mother)) samePart = true;
   }
 
   // to resolve Sherpa loop
   if (mothOriVert && HepMC::is_same_vertex(mothOriVert,partOriVert)) samePart = true;
   //
 
-  if ((MC::isMuon(motherPDG) || MC::isTau(motherPDG) || MC::isW(motherPDG)) && mothOriVert != nullptr && !samePart) {
+  if ((MC::isMuon(motherPDG) || MC::isTau(motherPDG) || MC::isW(motherPDG)) && mothOriVert && !samePart) {
     int pPDG(0);
-    const xAOD::TruthParticle* MotherParent(nullptr);
+    const xAOD::TruthParticle* MotherParent{};
     do {
       pPDG = 0;
       MotherParent = MC::findMother(mother);
       // to prevent Sherpa loop
-      const xAOD::TruthVertex* mother_prdVtx(nullptr);
-      const xAOD::TruthVertex* mother_endVtx(nullptr);
+      const xAOD::TruthVertex* mother_prdVtx{};
+      const xAOD::TruthVertex* mother_endVtx{};
       if (mother) {
         mother_prdVtx = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
         mother_endVtx = mother->decayVtx();
       }
-      const xAOD::TruthVertex* parent_prdVtx(nullptr);
-      const xAOD::TruthVertex* parent_endVtx(nullptr);
+      const xAOD::TruthVertex* parent_prdVtx{};
+      const xAOD::TruthVertex* parent_endVtx{};
       if (MotherParent) {
         parent_prdVtx = MotherParent->hasProdVtx() ? MotherParent->prodVtx() : nullptr;
         parent_endVtx = MotherParent->decayVtx();
@@ -299,19 +293,19 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     } while ((MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)));
 
     if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
-        abs(pPDG) == 35 || abs(pPDG) == 36 || abs(pPDG) == 37 || abs(pPDG) == 32 || abs(pPDG) == 33 ||
-        abs(pPDG) == 34 || MC::isTop(pPDG) || abs(pPDG) == 9900024 || abs(pPDG) == 9900012 || abs(pPDG) == 9900014 ||
-        abs(pPDG) == 9900016 || (abs(pPDG) < 2000040 && abs(pPDG) > 1000001))
-      mother = MotherParent;
+        MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
+        abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) || // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
+        MC::isSUSY(pPDG))
+      mother = MotherParent; // FIXME difference in behaviour compared to MCTruthClassifier::defOrigOfMuon/Neutrino
   }
 
   motherPDG = mother->pdgId();
   partOriVert = mother->decayVtx();
   mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   numOfParents = partOriVert->nIncomingParticles();
-  int numOfDaug = partOriVert->nOutgoingParticles();
+  const int numOfDaug = partOriVert->nOutgoingParticles();
 
-  if (info) info->setMotherProperties(mother);
+  info.setMotherProperties(mother);
 
   int NumOfPhot(0);
   int NumOfEl(0);
@@ -332,30 +326,30 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     if (!theDaug) continue;
     int DaugType = theDaug->pdgId();
     if (MC::isSMQuark(DaugType)) NumOfquark++;
-    if (MC::isGluon(DaugType)) NumOfgluon++;
-    if (abs(DaugType) == MC::NU_E) NumOfElNeut++;
-    if (abs(DaugType) == MC::NU_MU) NumOfMuNeut++;
-    if (MC::isPhoton(DaugType)) NumOfPhot++;
-    if (DaugType == MC::ELECTRON) NumOfEl++;
-    if (DaugType == MC::POSITRON) NumOfPos++;
-    if (DaugType == MC::MUON) NumOfMuMin++;
-    if (DaugType == -MC::MUON) NumOfMuPl++;
-    if (MC::isTau(DaugType)) NumOfTau++;
-    if (abs(DaugType) == MC::NU_TAU) NumOfTauNeut++;
-    if (MC::isLeptoQuark(DaugType)) NumOfLQ++;
-    if (abs(DaugType) == abs(motherPDG) && theDaug &&  info && info->Mother() && HepMC::is_same_generator_particle(theDaug, info->Mother() )) samePart = true;
+    else if (MC::isGluon(DaugType)) NumOfgluon++;
+    else if (abs(DaugType) == MC::NU_E) NumOfElNeut++;
+    else if (abs(DaugType) == MC::NU_MU) NumOfMuNeut++;
+    else if (MC::isPhoton(DaugType)) NumOfPhot++;
+    else if (DaugType == MC::ELECTRON) NumOfEl++;
+    else if (DaugType == MC::POSITRON) NumOfPos++;
+    else if (DaugType == MC::MUON) NumOfMuMin++;
+    else if (DaugType == -MC::MUON) NumOfMuPl++;
+    else if (MC::isTau(DaugType)) NumOfTau++;
+    else if (abs(DaugType) == MC::NU_TAU) NumOfTauNeut++;
+    else if (MC::isLeptoQuark(DaugType)) NumOfLQ++;
+    if (abs(DaugType) == abs(motherPDG) && theDaug && HepMC::is_same_generator_particle(theDaug, mother )) samePart = true;
     if (numOfParents == 1 &&
         (MC::isPhoton(motherPDG) || MC::isElectron(motherPDG) || MC::isMuon(motherPDG) || abs(motherPDG) == MC::PIPLUS) &&
-        (DaugType > 1000000000 || DaugType == 0 || DaugType == MC::PROTON || DaugType == MC::NEUTRON || abs(DaugType) == MC::PIPLUS ||
-         abs(DaugType) == MC::PI0))
+        (MC::isNucleus(DaugType) || DaugType == 0 || DaugType == MC::PROTON || DaugType == MC::NEUTRON ||
+         abs(DaugType) == MC::PIPLUS || abs(DaugType) == MC::PI0))
       NumOfNucFr++;
   }
 
-  if (MC::isPhoton(motherPDG) && mothOriVert != nullptr) {
+  if (MC::isPhoton(motherPDG) && mothOriVert) {
+    if (mothOriVert->nIncomingParticles() > 1) { ATH_MSG_DEBUG("DefOrigOfElectron:: photon has more than one parent.");  }
     for (const auto& theMother: mothOriVert->particles_in()) {
       if (!theMother) continue;
-      if (!info) continue;
-      info->photonMother = theMother;
+      info.photonMother = theMother; // FIXME Just taking the first one...
     }
   }
 
@@ -396,19 +390,19 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
 
   if (MC::isTop(motherPDG)) return top;
 
-  if (MC::isW(motherPDG) && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
+  if (MC::isW(motherPDG) && mothOriVert && mothOriVert->nIncomingParticles() != 0) {
 
     const xAOD::TruthVertex* prodVert = mothOriVert;
     const xAOD::TruthParticle* ptrPart;
     do {
-      ptrPart = prodVert->incomingParticle(0);
+      ptrPart = prodVert->incomingParticle(0); // FIXME just taking the first one
       prodVert = ptrPart->hasProdVtx() ? ptrPart->prodVtx() : nullptr;
-    } while (MC::isW(ptrPart) && prodVert != nullptr);
+    } while (MC::isW(ptrPart) && prodVert);
 
     if (prodVert && prodVert->nIncomingParticles() == 1) {
-      if (abs(ptrPart->pdgId()) == 9900012) return NuREle;
-      if (abs(ptrPart->pdgId()) == 9900014) return NuRMu;
-      if (abs(ptrPart->pdgId()) == 9900016) return NuRTau;
+      if (abs(ptrPart->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+      if (abs(ptrPart->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+      if (abs(ptrPart->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
     }
     return WBoson;
   }
@@ -419,8 +413,8 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   if (numOfParents == 1 && numOfDaug > 4 && (MC::isSMQuark(motherPDG) || MC::isGluon(motherPDG))) {
 
     const xAOD::TruthParticle* thePartToCheck = thePriPart;
-    const xAOD::TruthParticle* theMother = thePriPart->hasProdVtx() ? thePriPart->prodVtx()->incomingParticle(0) : nullptr;
-    if (theMother != nullptr && MC::isElectron(theMother) && MC::isDecayed(theMother)) thePartToCheck = theMother;
+    const xAOD::TruthParticle* theMother = thePriPart->hasProdVtx() ? thePriPart->prodVtx()->incomingParticle(0) : nullptr; // FIXME just taking the first one
+    if (theMother && MC::isElectron(theMother) && MC::isDecayed(theMother)) thePartToCheck = theMother;
 
     bool isZboson = false;
     bool isWboson = false;
@@ -432,7 +426,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
       const xAOD::TruthParticle* theNextDaug = nullptr;
       for (unsigned int ipOut1 = ipOut + 1; ipOut1 < partOriVert->nOutgoingParticles(); ipOut1++) {
         theNextDaug = partOriVert->outgoingParticle(ipOut1);
-        if (theNextDaug != nullptr) break;
+        if (theNextDaug) break;
       }
       if (!theNextDaug) continue;
       if (skipnext) {
@@ -462,23 +456,23 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   if (numOfParents == 2) {
     const int pdg1 = partOriVert->incomingParticle(0)->pdgId();
     const int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-  //--Sherpa Z->ee
-  if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfEl == 1 && NumOfPos == 1) return ZBoson;
+    //--Sherpa Z->ee
+    if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfEl == 1 && NumOfPos == 1) return ZBoson;
 
-  //--Sherpa W->enu ??
-  if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && (NumOfEl == 1 || NumOfPos == 1) && NumOfElNeut == 1) return WBoson;
+    //--Sherpa W->enu ??
+    if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && (NumOfEl == 1 || NumOfPos == 1) && NumOfElNeut == 1) return WBoson;
 
-  //--Sherpa ZZ,ZW
-  if ((numOfDaug - NumOfquark - NumOfgluon) == 4 && (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
-      (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
+    //--Sherpa ZZ,ZW
+    if ((numOfDaug - NumOfquark - NumOfgluon) == 4 && (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
+        (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
 
-  //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
-  if ((numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 && (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
-      (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
+    //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
+    if ((numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 && (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
+        (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
   }
 
   // New Sherpa Z->ee
-  if (partOriVert == mothOriVert && partOriVert != nullptr) {
+  if (partOriVert == mothOriVert && partOriVert) {
     int NumOfEleLoop = 0;
     int NumOfLepLoop = 0;
     int NumOfEleNeuLoop = 0;
@@ -488,7 +482,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
         if (!pin) continue;
         if (!HepMC::is_same_particle(pout,pin)) continue;
         if (MC::isElectron(pout)) NumOfEleLoop++;
-        if (std::abs(pin->pdgId()) == MC::NU_E) NumOfEleNeuLoop++;
+        if (std::abs(pin->pdgId()) == MC::NU_E) NumOfEleNeuLoop++; // FIXME pin vs pout difference in behaviour compared to MCTruthClassifier::defOrigOfMuon
         if (MC::isSMLepton(pout)) NumOfLepLoop++;
       }
     }
@@ -504,79 +498,75 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
 
   if (MC::isHiggs(motherPDG)) return Higgs;
 
-  if (abs(motherPDG) == 35 || abs(motherPDG) == 36 || abs(motherPDG) == 37) return HiggsMSSM;
+  if (MC::isMSSMHiggs(motherPDG)) return HiggsMSSM; // MSSM Higgs bosons
 
-  if (abs(motherPDG) == 32 || abs(motherPDG) == 33 || abs(motherPDG) == 34) return HeavyBoson;
+  if (MC::isHeavyBoson(motherPDG)) return HeavyBoson;  // Heavy bosons( Z', Z'', W'+)
 
   if (MC::isMuon(motherPDG)) return Mu;
   if (MC::isTau(motherPDG)) {
-    ParticleOrigin tauOrig = defOrigOfTau(mcTruthTES, mother, motherPDG, info);
-    ParticleType tautype = defTypeOfTau(tauOrig);
+    const ParticleOrigin tauOrig = defOrigOfTau(xTruthParticleContainer, mother, motherPDG, info);
+    const ParticleType tautype = defTypeOfTau(tauOrig);
     return (tautype == IsoTau)?tauOrig:TauLep;
   }
 
-  if (abs(motherPDG) == 9900024) return WBosonLRSM;
-  if (abs(motherPDG) == 9900012) return NuREle;
-  if (abs(motherPDG) == 9900014) return NuRMu;
-  if (abs(motherPDG) == 9900016) return NuRTau;
+  if (abs(motherPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
   if (MC::isLeptoQuark(motherPDG) || NumOfLQ != 0) return LQ;
   if (MC::isSUSY(motherPDG)) return SUSY;
   if (MC::isBSM(motherPDG)) return OtherBSM;
-  ParticleType pType = defTypeOfHadron(motherPDG);
-  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatteringVertex(mothOriVert)) isPrompt = true;
+  const ParticleType pType = defTypeOfHadron(motherPDG);
+  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert && MC::isHardScatteringVertex(mothOriVert)) isPrompt = true;
   return convHadronTypeToOrig(pType, motherPDG);
 }
 
 
-ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
-                                 const xAOD::TruthParticle* thePart,
-                                 bool& isPrompt,
-                                 MCTruthPartClassifier::Info* infoin) const
+ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer& xTruthParticleContainer,
+                                                const xAOD::TruthParticle* thePart,
+                                                bool& isPrompt,
+                                                MCTruthPartClassifier::Info& info) const
 {
-  MCTruthPartClassifier::Info* info = infoin;
   ATH_MSG_DEBUG("Executing DefOrigOfMuon ");
 
-  const xAOD::TruthParticle* thePriPart = MC::findMatching(mcTruthTES, thePart);
+  // Find the first copy of this particle stored in the xAOD::TruthParticleContainer (i.e. the particle prior to any interactions)
+  const xAOD::TruthParticle* thePriPart = MC::findMatching(xTruthParticleContainer, thePart);
   if (!thePriPart) return NonDefined;
   if (!MC::isMuon(thePriPart)) return NonDefined;
 
   const xAOD::TruthVertex* partOriVert = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
 
   //-- to define muon  outcome status
-  if (info) info->particleOutCome = defOutComeOfMuon(thePriPart);
+  info.particleOutCome = defOutComeOfMuon(thePriPart);
 
-  MCTruthPartClassifier::Info tmpinfo;
-  if (!info) { info = &tmpinfo; }
   if (!partOriVert) return NonDefined;
 
   int numOfParents = partOriVert->nIncomingParticles();
-  if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfMuon:: muon  has more than one mother ");
+  if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfMuon:: muon has more than one mother ");
 
   const xAOD::TruthParticle* mother = MC::findMother(thePriPart);
-  if (info) info->setMotherProperties(mother);
-  if (!mother) {
-    return NonDefined;
-  }
+  info.setMotherProperties(mother);
+  if (!mother) { return NonDefined; } // mother is not a nullptr beyond this point
 
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   int motherPDG = mother->pdgId();
 
-  if ((MC::isTau(motherPDG)|| MC::isW(motherPDG)) && mothOriVert != nullptr) {
+  if ((MC::isTau(motherPDG)|| MC::isW(motherPDG)) && mothOriVert) {
     int pPDG(0);
-    const xAOD::TruthParticle* MotherParent(nullptr);
+    const xAOD::TruthParticle* MotherParent{};
     do {
       //
       pPDG = 0;
       //
-      const xAOD::TruthVertex* mother_prdVtx(nullptr);
-      const xAOD::TruthVertex* mother_endVtx(nullptr);
+      const xAOD::TruthVertex* mother_prdVtx{};
+      const xAOD::TruthVertex* mother_endVtx{};
       MotherParent = MC::findMother(mother);
       // to prevent Sherpa loop
       mother_prdVtx = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
       mother_endVtx = mother->decayVtx();
       //
-      const xAOD::TruthVertex* parent_prdVtx(nullptr);
-      const xAOD::TruthVertex* parent_endVtx(nullptr);
+      const xAOD::TruthVertex* parent_prdVtx{};
+      const xAOD::TruthVertex* parent_endVtx{};
       if (MotherParent) {
         parent_prdVtx = MotherParent->hasProdVtx() ? MotherParent->prodVtx() : nullptr;
         parent_endVtx = MotherParent->decayVtx();
@@ -596,16 +586,16 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
         pPDG = MotherParent->pdgId();
         if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)) {
           mother = MotherParent;
-          if (info) info->setMotherProperties(mother);
+          info.setMotherProperties(mother);
         }
       }
-    } while ((MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)));
+    } while ((MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG))); // FIXME should this be (MC::isTau(pPDG) || MC::isW(pPDG)) ???
 
-    if (MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) || abs(pPDG) == 35 ||
-        abs(pPDG) == 36 || abs(pPDG) == 37 || abs(pPDG) == 32 || abs(pPDG) == 33 || abs(pPDG) == 34 || MC::isTop(pPDG) ||
-        abs(pPDG) == 9900024 || abs(pPDG) == 9900012 || abs(pPDG) == 9900014 || abs(pPDG) == 9900016 ||
-        (abs(pPDG) < 2000040 && abs(pPDG) > 1000001)) {
-      if (info) info->setMotherProperties(mother);
+    if (MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
+        MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
+        abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) ||  // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
+        MC::isSUSY(pPDG)) {
+      info.setMotherProperties(mother); // FIXME difference in behaviour compared to MCTruthClassifier::defOrigOfElectron
     }
   }
 
@@ -613,27 +603,27 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   partOriVert = mother->decayVtx();
   numOfParents = partOriVert->nIncomingParticles();
-  int numOfDaug = partOriVert->nOutgoingParticles();
+  const int numOfDaug = partOriVert->nOutgoingParticles();
 
-  if (info) info->setMotherProperties(mother);
+  info.setMotherProperties(mother);
   auto DP = DecayProducts(partOriVert);
-  int NumOfPhot = DP.pd(MC::PHOTON);
-  int NumOfEl = DP.pd(MC::ELECTRON);
-  int NumOfPos = DP.pd(MC::POSITRON);
-  int NumOfElNeut = DP.apd(MC::NU_E);
-  int NumOfMuNeut = DP.apd(MC::NU_MU);
-  int NumOfLQ = DP.apd(MC::LEPTOQUARK);
-  int NumOfquark = DP.apd({MC::DQUARK,MC::UQUARK,MC::SQUARK,MC::CQUARK,MC::BQUARK,MC::TQUARK});
-  int NumOfgluon = DP.apd(MC::GLUON);
-  int NumOfMuPl = DP.pd(-MC::MUON);
-  int NumOfMuMin = DP.pd(MC::MUON);
-  int NumOfTau = DP.apd(MC::TAU);
-  int NumOfTauNeut = DP.apd(MC::NU_TAU);
+  const int NumOfPhot = DP.pd(MC::PHOTON);
+  const int NumOfEl = DP.pd(MC::ELECTRON);
+  const int NumOfPos = DP.pd(MC::POSITRON);
+  const int NumOfElNeut = DP.apd(MC::NU_E);
+  const int NumOfMuNeut = DP.apd(MC::NU_MU);
+  const int NumOfLQ = DP.apd(MC::LEPTOQUARK);
+  const int NumOfquark = DP.apd({MC::DQUARK,MC::UQUARK,MC::SQUARK,MC::CQUARK,MC::BQUARK,MC::TQUARK});
+  const int NumOfgluon = DP.apd(MC::GLUON);
+  const int NumOfMuPl = DP.pd(-MC::MUON);
+  const int NumOfMuMin = DP.pd(MC::MUON);
+  const int NumOfTau = DP.apd(MC::TAU);
+  const int NumOfTauNeut = DP.apd(MC::NU_TAU);
   if (std::abs(motherPDG) == MC::PIPLUS && numOfDaug == 2 && NumOfMuNeut == 1) return PionDecay;
   if (std::abs(motherPDG) == MC::KPLUS && numOfDaug == 2 && NumOfMuNeut == 1) return KaonDecay;
   if (MC::isTau(motherPDG)) {
-    ParticleOrigin tauOrig = defOrigOfTau(mcTruthTES, mother, motherPDG, info);
-    ParticleType tautype = defTypeOfTau(tauOrig);
+    const ParticleOrigin tauOrig = defOrigOfTau(xTruthParticleContainer, mother, motherPDG, info);
+    const ParticleType tautype = defTypeOfTau(tauOrig);
     return  (tautype == IsoTau)?tauOrig:TauLep;
   }
 
@@ -641,18 +631,18 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   // Quark weak decay
   if (MC::isSMQuark(motherPDG) && numOfParents == 1 && numOfDaug == 3 && NumOfquark == 1 && NumOfMuNeut == 1) return QuarkWeakDec;
 
-  if (MC::isW(motherPDG) && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
+  if (MC::isW(motherPDG) && mothOriVert && mothOriVert->nIncomingParticles() != 0) {
     const xAOD::TruthVertex* prodVert = mothOriVert;
     const xAOD::TruthParticle* itrP;
     do {
-      itrP = prodVert->incomingParticle(0);
+      itrP = prodVert->incomingParticle(0); // FIXME just taking the first one
       prodVert = itrP->hasProdVtx() ? itrP->prodVtx() : nullptr;
-    } while (MC::isW(itrP) && prodVert != nullptr);
+    } while (MC::isW(itrP) && prodVert);
 
     if (prodVert && prodVert->nIncomingParticles() == 1) {
-      if (abs(itrP->pdgId()) == 9900012) return NuREle;
-      if (abs(itrP->pdgId()) == 9900014) return NuRMu;
-      if (abs(itrP->pdgId()) == 9900016) return NuRTau;
+      if (abs(itrP->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+      if (abs(itrP->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+      if (abs(itrP->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
     }
     return WBoson;
   }
@@ -674,10 +664,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
       }
       const xAOD::TruthParticle* theDaug = partOriVert->outgoingParticle(ipOut);
       if (!theDaug) continue;
-      const xAOD::TruthParticle* theNextDaug = nullptr;
+      const xAOD::TruthParticle* theNextDaug{};
       for (unsigned int ipOut1 = ipOut + 1; ipOut1 < partOriVert->nOutgoingParticles(); ipOut1++) {
         theNextDaug = partOriVert->outgoingParticle(ipOut1);
-        if (theNextDaug != nullptr) break;
+        if (theNextDaug) break;
       }
       if (!theNextDaug) continue;
       if (MC::isMuon(theDaug) && MC::isMuon(theNextDaug)) {
@@ -700,25 +690,25 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     if (isZboson) return ZBoson;
   }
   if (numOfParents == 2 ) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-  //--Sherpa Z->mumu
-  if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfMuPl == 1 && NumOfMuMin == 1) return ZBoson;
+    const int pdg1 = partOriVert->incomingParticle(0)->pdgId();
+    const int pdg2 = partOriVert->incomingParticle(1)->pdgId();
+    //--Sherpa Z->mumu
+    if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfMuPl == 1 && NumOfMuMin == 1) return ZBoson;
 
-  //--Sherpa W->munu ??
-  // if(numOfParents==2&&(numOfDaug-NumOfquark-NumOfgluon)==2&&(NumOfEl==1||NumOfPos==1)&&NumOfElNeut==1) return WBoson;
-  if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && (NumOfMuPl == 1 || NumOfMuMin == 1) && NumOfMuNeut == 1) return WBoson;
+    //--Sherpa W->munu ??
+    // if(numOfParents==2&&(numOfDaug-NumOfquark-NumOfgluon)==2&&(NumOfEl==1||NumOfPos==1)&&NumOfElNeut==1) return WBoson;
+    if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && (NumOfMuPl == 1 || NumOfMuMin == 1) && NumOfMuNeut == 1) return WBoson;
 
-  //--Sherpa ZZ,ZW
-  if ((numOfDaug - NumOfquark - NumOfgluon) == 4 &&
-      (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
-      (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
+    //--Sherpa ZZ,ZW
+    if ((numOfDaug - NumOfquark - NumOfgluon) == 4 &&
+        (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
+        (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
 
-  //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
-  if ((numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 &&
-      (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
-      (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
-}
+    //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
+    if ((numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 &&
+        (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
+        (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
+  }
 
   //--New Sherpa Z->mumu
   if (partOriVert == mothOriVert) {
@@ -731,7 +721,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
         if (!pin) continue;
         if (HepMC::is_same_particle(pout,pin)) {
           if (MC::isMuon(pout)) NumOfMuLoop++;
-          if (std::abs(pout->pdg_id()) == MC::NU_MU) NumOfMuNeuLoop++;
+          if (std::abs(pout->pdg_id()) == MC::NU_MU) NumOfMuNeuLoop++; // FIXME pin vs pout difference in behaviour compared to MCTruthClassifier::defOrigOfElectron
           if (MC::isSMLepton(pout)) NumOfLepLoop++;
         }
       }
@@ -746,58 +736,54 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
 
   if (MC::isHiggs(motherPDG)) return Higgs;
 
-  if (abs(motherPDG) == 35 || abs(motherPDG) == 36 || abs(motherPDG) == 37) return HiggsMSSM;
+  if (MC::isMSSMHiggs(motherPDG)) return HiggsMSSM; // MSSM Higgs bosons
 
-  if (abs(motherPDG) == 32 || abs(motherPDG) == 33 || abs(motherPDG) == 34)  return HeavyBoson;
+  if (MC::isHeavyBoson(motherPDG))  return HeavyBoson;  // Heavy bosons( Z', Z'', W'+)
 
-  if (abs(motherPDG) == 9900024) return WBosonLRSM;
-  if (abs(motherPDG) == 9900012) return NuREle;
-  if (abs(motherPDG) == 9900014) return NuRMu;
-  if (abs(motherPDG) == 9900016) return NuRTau;
+  if (abs(motherPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
   if (MC::isLeptoQuark(motherPDG) || NumOfLQ != 0) return LQ;
   if (MC::isSUSY(motherPDG)) return SUSY;
   if (MC::isBSM(motherPDG)) return OtherBSM;
 
-  ParticleType pType = defTypeOfHadron(motherPDG);
-  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatteringVertex(mothOriVert)) isPrompt = true;
+  const ParticleType pType = defTypeOfHadron(motherPDG);
+  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert && MC::isHardScatteringVertex(mothOriVert)) isPrompt = true;
 
   return convHadronTypeToOrig(pType, motherPDG);
 }
 
-ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
-                                const xAOD::TruthParticle* thePart,
-                                int motherPDG,
-                                MCTruthPartClassifier::Info* infoin) const
+ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer& xTruthParticleContainer,
+                                               const xAOD::TruthParticle* thePart,
+                                               int motherPDGin,
+                                               MCTruthPartClassifier::Info& info) const
 {
-  MCTruthPartClassifier::Info* info = infoin;
   ATH_MSG_DEBUG("Executing DefOrigOfTau ");
-  const xAOD::TruthParticle* thePriPart = MC::findMatching(mcTruthTES, thePart);
+  // Find the first copy of this particle stored in the xAOD::TruthParticleContainer (i.e. the particle prior to any interactions)
+  const xAOD::TruthParticle* thePriPart = MC::findMatching(xTruthParticleContainer, thePart);
   if (!thePriPart) return NonDefined;
   if (!MC::isTau(thePriPart)) return NonDefined;
 
   const xAOD::TruthVertex* partOriVert = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
 
   //-- to define tau  outcome status
-  if (MC::isPhysical(thePriPart) && info) info->particleOutCome = defOutComeOfTau(thePriPart);
+  if (MC::isPhysical(thePriPart)) info.particleOutCome = defOutComeOfTau(thePriPart); // FIXME why do we need the additional check on MC::isPhysical here c.f. defOrigOfElectron and defOrigOfMuon?
 
-  MCTruthPartClassifier::Info tmpinfo;
-  if (!info) { info = &tmpinfo; }
   if (!partOriVert) return NonDefined;
 
   int numOfParents = partOriVert->nIncomingParticles();
-  if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfTau:: tau  has more than one mother ");
+  if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfTau:: tau has more than one mother ");
 
   const xAOD::TruthParticle* mother = MC::findMother(thePriPart);
-  if (info) info->setMotherProperties(mother);
-  if (!mother) {
-    return NonDefined;
-  }
+  info.setMotherProperties(mother);
+  if (!mother) { return NonDefined; } // mother is not a nullptr beyond this point
 
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
 
-  const xAOD::TruthParticle* MotherParent(nullptr);
+  const xAOD::TruthParticle* MotherParent{};
 
-  if (MC::isW(motherPDG) && mothOriVert != nullptr) {
+  if (MC::isW(motherPDGin) && mothOriVert) { // FIXME motherPDGin here could in principle be inconsistent with mothOriVert
     MotherParent = MC::findMother(mother);
     int pPDG(0);
 
@@ -805,46 +791,46 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
       pPDG = MotherParent->pdgId();
       if (MC::isTop(pPDG)) {
         mother = MotherParent; //...so mother cannot be nullptr
-        if (info) info->setMotherProperties(mother);
+        info.setMotherProperties(mother);
       }
     }
   }
 
-  motherPDG = mother->pdgId();
-  if (info) info->setMotherProperties(mother);
+  int motherPDG = mother->pdgId();
+  info.setMotherProperties(mother);
   mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   partOriVert = mother->decayVtx();
-  if (!partOriVert) return NonDefined;
+  if (!partOriVert) return NonDefined; // FIXME not sure this could ever be true?
 
   numOfParents = partOriVert->nIncomingParticles();
   auto DP = DecayProducts(partOriVert);
-  int numOfDaug = DP.size();
-  int NumOfPhot = DP.pd(MC::PHOTON);
-  int NumOfEl = DP.pd(MC::ELECTRON);
-  int NumOfPos = DP.pd(MC::POSITRON);
-  int NumOfElNeut = DP.apd(MC::NU_E);
-  int NumOfMuNeut = DP.apd(MC::NU_MU);
-  /* int NumOfLQ = DP.apd(MC::LEPTOQUARK); */
-  int NumOfquark = DP.apd({MC::DQUARK,MC::UQUARK,MC::SQUARK,MC::CQUARK,MC::BQUARK,MC::TQUARK});
-  int NumOfgluon = DP.apd(MC::GLUON);
-  int NumOfMuPl = DP.pd(-MC::MUON);
-  int NumOfMuMin = DP.pd(MC::MUON);
-  int NumOfTau = DP.apd(MC::TAU);
-  int NumOfTauNeut = DP.apd(MC::NU_TAU);
+  const int numOfDaug = DP.size();
+  const int NumOfPhot = DP.pd(MC::PHOTON);
+  const int NumOfEl = DP.pd(MC::ELECTRON);
+  const int NumOfPos = DP.pd(MC::POSITRON);
+  const int NumOfElNeut = DP.apd(MC::NU_E);
+  const int NumOfMuNeut = DP.apd(MC::NU_MU);
+  /* const int NumOfLQ = DP.apd(MC::LEPTOQUARK); */ // FIXME Leptoquarks not an option?
+  const int NumOfquark = DP.apd({MC::DQUARK,MC::UQUARK,MC::SQUARK,MC::CQUARK,MC::BQUARK,MC::TQUARK});
+  const int NumOfgluon = DP.apd(MC::GLUON);
+  const int NumOfMuPl = DP.pd(-MC::MUON);
+  const int NumOfMuMin = DP.pd(MC::MUON);
+  const int NumOfTau = DP.apd(MC::TAU);
+  const int NumOfTauNeut = DP.apd(MC::NU_TAU);
 
   if (MC::isTop(motherPDG)) return top;
-  if (MC::isW(motherPDG) && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
+  if (MC::isW(motherPDG) && mothOriVert && mothOriVert->nIncomingParticles() != 0) {
     const xAOD::TruthVertex* prodVert = mothOriVert;
     const xAOD::TruthParticle* itrP;
     do {
-      itrP = prodVert->incomingParticle(0);
+      itrP = prodVert->incomingParticle(0); // FIXME just taking the first one
       prodVert = itrP->hasProdVtx() ? itrP->prodVtx() : nullptr;
-    } while (MC::isW(itrP) && prodVert != nullptr);
+    } while (MC::isW(itrP) && prodVert);
 
     if (prodVert && prodVert->nIncomingParticles() == 1 ) {
-      if (abs(itrP->pdgId()) == 9900012) return NuREle;
-      if (abs(itrP->pdgId()) == 9900014) return NuRMu;
-      if (abs(itrP->pdgId()) == 9900016) return NuRTau;
+      if (abs(itrP->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+      if (abs(itrP->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+      if (abs(itrP->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
     }
     return WBoson;
   }
@@ -861,10 +847,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
       }
       const xAOD::TruthParticle* theDaug = partOriVert->outgoingParticle(ipOut);
       if (!theDaug) continue;
-      const xAOD::TruthParticle* theNextDaug = nullptr;
+      const xAOD::TruthParticle* theNextDaug{};
       for (unsigned int ipOut1 = ipOut + 1; ipOut1 < partOriVert->nOutgoingParticles(); ipOut1++) {
         theNextDaug = partOriVert->outgoingParticle(ipOut1);
-        if (theNextDaug != nullptr) break;
+        if (theNextDaug) break;
       }
       if (!theNextDaug) {
         continue;
@@ -889,23 +875,23 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
     if (isZboson) return ZBoson;
   }
   if (numOfParents == 2 ) {
-  int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-  int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-  //--Sherpa Z->tautau
-  if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfTau == 2  && (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return ZBoson;
+    const int pdg1 = partOriVert->incomingParticle(0)->pdgId();
+    const int pdg2 = partOriVert->incomingParticle(1)->pdgId();
+    //--Sherpa Z->tautau
+    if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfTau == 2  && (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return ZBoson;
 
-  //--Sherpa W->taunu  new
-  if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfTau == 1 && NumOfTauNeut == 1) return WBoson;
+    //--Sherpa W->taunu  new
+    if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfTau == 1 && NumOfTauNeut == 1) return WBoson;
 
-  //--Sherpa ZZ,ZW
-  if ((numOfDaug - NumOfquark - NumOfgluon) == 4 &&
-      (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
-      (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
+    //--Sherpa ZZ,ZW
+    if ((numOfDaug - NumOfquark - NumOfgluon) == 4 &&
+        (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
+        (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
 
-  //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
-  if ((numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 &&
-      (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
-      (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
+    //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
+    if ((numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 &&
+        (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
+        (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
   }
   // New Sherpa Z->tautau
   if (partOriVert == mothOriVert) {
@@ -918,7 +904,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
         if (!pin) continue;
         if (!HepMC::is_same_particle(pout,pin)) continue;
         if (MC::isTau(pout)) NumOfTauLoop++;
-        if (std::abs(pout->pdgId()) == MC::NU_TAU) NumOfTauNeuLoop++;
+        if (std::abs(pout->pdgId()) == MC::NU_TAU) NumOfTauNeuLoop++; // FIXME pin vs pout difference in behaviour compared to MCTruthClassifier::defOrigOfElectron
         if (MC::isSMLepton(pout)) NumOfLepLoop++;
       }
     }
@@ -929,58 +915,53 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
   }
 
   if (MC::isHiggs(motherPDG)) return Higgs;
-  if (abs(motherPDG) == 35 || abs(motherPDG) == 36 || abs(motherPDG) == 37) return HiggsMSSM;
-  if (abs(motherPDG) == 32 || abs(motherPDG) == 33 || abs(motherPDG) == 34) return HeavyBoson;
-  if (abs(motherPDG) == 9900024) return WBosonLRSM;
-  if (abs(motherPDG) == 9900016) return NuRTau;
+  if (MC::isMSSMHiggs(motherPDG)) return HiggsMSSM; // MSSM Higgs bosons
+  if (MC::isHeavyBoson(motherPDG)) return HeavyBoson; // Heavy bosons( Z', Z'', W'+)
+  if (abs(motherPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
   if (MC::isSUSY(motherPDG)) return SUSY;
   if (MC::isBSM(motherPDG)) return OtherBSM;
   if (abs(motherPDG) == MC::JPSI) return JPsi;
 
-  ParticleType pType = defTypeOfHadron(motherPDG);
+  const ParticleType pType = defTypeOfHadron(motherPDG);
   return convHadronTypeToOrig(pType, motherPDG);
 }
 
-ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTES,
-                                   const xAOD::TruthParticle* thePart,
-                                   bool& isPrompt,
-                                   MCTruthPartClassifier::Info* infoin) const
+ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer& xTruthParticleContainer,
+                                                  const xAOD::TruthParticle* thePart,
+                                                  bool& isPrompt,
+                                                  MCTruthPartClassifier::Info& info) const
 {
-  if (!thePart) return NonDefined;
-  if (!mcTruthTES) return NonDefined;
-  MCTruthPartClassifier::Info* info = infoin;
+  if (!thePart) return NonDefined; // FIXME Why is this extra protection needed for this function and not the others?
   ATH_MSG_DEBUG("Executing DefOrigOfPhoton ");
 
-  MCTruthPartClassifier::Info tmpinfo;
-  if (!info) { info = &tmpinfo; }
-  if (info) {
-    info->resetMotherProperties();
-    info->photonMother = nullptr;
-  }
+  info.resetMotherProperties();
+  info.photonMother = nullptr;
 
-  const xAOD::TruthParticle* thePriPart = MC::findMatching(mcTruthTES, thePart);
+  // Find the first copy of this particle stored in the xAOD::TruthParticleContainer (i.e. the particle prior to any interactions)
+  const xAOD::TruthParticle* thePriPart = MC::findMatching(xTruthParticleContainer, thePart);
   if (!thePriPart) return NonDefined;
   if (!MC::isPhoton(thePriPart)) return NonDefined;
 
   const xAOD::TruthVertex* partOriVert = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
 
   //-- to define photon outcome status
-  if (info) info->particleOutCome = defOutComeOfPhoton(thePriPart);
+  info.particleOutCome = defOutComeOfPhoton(thePriPart);
   if (!partOriVert) return NonDefined;
 
   int numOfParents = partOriVert->nIncomingParticles();
-  if (partOriVert->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfPhoton:: photon  has more than one mother ");
+  if (partOriVert->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfPhoton:: photon has more than one mother ");
 
 
   const xAOD::TruthParticle* mother = MC::findMother(thePriPart);
-  if (info) info->setMotherProperties(mother);
-  if (!mother) return NonDefined;
+  info.setMotherProperties(mother);
+  if (!mother) { return NonDefined; } // mother is not a nullptr beyond this point
+
   int motherPDG = mother->pdgId();
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
-  if (info) info->setMotherProperties(mother);
-  partOriVert = mother->decayVtx();
+  partOriVert = mother->decayVtx(); // FIXME how often does this line actually change the pointer???
   numOfParents = partOriVert->nIncomingParticles();
-  int numOfDaug = partOriVert->nOutgoingParticles();
+  const int numOfDaug = partOriVert->nOutgoingParticles();
   int NumOfNucFr(0);
   int NumOfEl(0);
   int NumOfPos(0);
@@ -989,43 +970,49 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   int NumOfPht(0);
   int NumOfLQ(0);
   int DaugType(0);
-  long NumOfLep(0);
-  long NumOfNeut(0);
-  long NumOfPartons(0);
-  const xAOD::TruthParticle* Daug = nullptr;
+  long NumOfLep(0); // FIXME does this really need to be a long???
+  long NumOfNeut(0); // FIXME does this really need to be a long???
+  long NumOfPartons(0); // FIXME does this really need to be a long???
+  const xAOD::TruthParticle* Daug{};
   for (const auto& pout: partOriVert->particles_out()) {
     if (!pout) continue;
     DaugType = pout->pdg_id();
     if (numOfParents == 1 && (MC::isPhoton(motherPDG) || MC::isElectron(motherPDG) || abs(motherPDG) == MC::PIPLUS) &&
-        (DaugType > 1000000000 || DaugType == 0 || DaugType == MC::PROTON || DaugType == MC::NEUTRON))
+        (MC::isNucleus(DaugType) || DaugType == 0 || DaugType == MC::PROTON || DaugType == MC::NEUTRON))
       NumOfNucFr++;
     if (DaugType == MC::PHOTON) NumOfPht++;
-    if (DaugType == MC::ELECTRON) NumOfEl++;
-    if (DaugType == MC::POSITRON) NumOfPos++;
-    if (MC::isMuon(DaugType)) NumOfMu++;
-    if (MC::isTau(DaugType)) NumOfTau++;
-    if (MC::isLeptoQuark(DaugType)) NumOfLQ++;
-    if (MC::isElectron(DaugType) || MC::isMuon(DaugType) || MC::isTau(DaugType)) NumOfLep++;
-    if (abs(DaugType) == MC::NU_E || abs(DaugType) == MC::NU_MU || abs(DaugType) == MC::NU_TAU) NumOfNeut++;
-    if (abs(DaugType) < MC::ELECTRON || (abs(DaugType) > MC::NU_TAU && abs(DaugType) < 43 && !MC::isPhoton(DaugType))) NumOfPartons++;
+    else if (DaugType == MC::ELECTRON) NumOfEl++;
+    else if (DaugType == MC::POSITRON) NumOfPos++;
+    else if (MC::isMuon(DaugType)) NumOfMu++;
+    else if (MC::isTau(DaugType)) NumOfTau++;
+    else if (MC::isLeptoQuark(DaugType)) NumOfLQ++;
+    else if (MC::isElectron(DaugType) || MC::isMuon(DaugType) || MC::isTau(DaugType)) NumOfLep++;
+    else if (abs(DaugType) == MC::NU_E || abs(DaugType) == MC::NU_MU || abs(DaugType) == MC::NU_TAU) NumOfNeut++;
+    if (abs(DaugType) < MC::ELECTRON || (abs(DaugType) > MC::NU_TAU && abs(DaugType) < 43 && !MC::isPhoton(DaugType))) {
+      // FIXME Too loose? This definition picks up 4th generation quarks and leptons as well as all gauge bosons and leptoquarks.
+      // Suggest MC::isSMQuark(DaugType) || (MC::isBoson(DaugType) && !MC::isPhoton(DaugType))
+      // or maybe even MC::isSMQuark(DaugType) || MC::isGluon(DaugType)
+      // AKA const long NumOfPartons = DP.apd({MC::DQUARK,MC::UQUARK,MC::SQUARK,MC::CQUARK,MC::BQUARK,MC::TQUARK,MC::GLUON});
+      NumOfPartons++;
+    }
     if (DaugType == motherPDG) {
       Daug = pout;
-     }
+    }
   }
 
   bool foundISR = false;
   bool foundFSR = false;
-  if (numOfParents == 1 && numOfDaug == 2 &&  Daug && info && info->Mother() && HepMC::is_same_generator_particle(Daug, info->Mother())) return BremPhot;
+  if (numOfParents == 1 && numOfDaug == 2 &&  Daug && HepMC::is_same_generator_particle(Daug, mother)) return BremPhot;
   if (numOfParents == 1 && numOfDaug == 2 && MC::isElectron(motherPDG) && NumOfPht == 2) return ElMagProc;
 
   // decay of W,Z and Higgs to lepton with FSR generated by Pythia
   if (numOfParents == 1 && numOfDaug == 2 && (MC::isElectron(motherPDG) || MC::isMuon(motherPDG) || MC::isTau(motherPDG)) &&
-      !(Daug && info && info->Mother() && HepMC::is_same_generator_particle(Daug, info->Mother())) && mothOriVert != nullptr &&
+      !(Daug && HepMC::is_same_generator_particle(Daug, mother)) && mothOriVert &&
       mothOriVert->nIncomingParticles() == 1) {
     int itr = 0;
     int PartPDG = 0;
     const xAOD::TruthVertex* prodVert = mothOriVert;
-    const xAOD::TruthVertex* Vert = nullptr;
+    const xAOD::TruthVertex* Vert{};
     do {
       Vert = prodVert;
       for (const auto & pin: Vert->particles_in()) {
@@ -1039,7 +1026,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
         ATH_MSG_WARNING("DefOrigOfPhoton:: infinite while");
         break;
       }
-    } while (prodVert != nullptr && abs(motherPDG) == PartPDG);
+    } while (prodVert && abs(motherPDG) == PartPDG);
 
     if (foundFSR) return FSRPhot;
   }
@@ -1052,13 +1039,13 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   if ((numOfParents == 1 && (MC::isPhoton(motherPDG) || MC::isElectron(motherPDG)) && numOfDaug > 2 && NumOfNucFr != 0) ||
       (numOfParents == 1 && abs(motherPDG) == MC::PIPLUS && numOfDaug > 10 && NumOfNucFr != 0) ||
       (numOfParents == 1 && MC::isPhoton(motherPDG) && numOfDaug > 10 && MC::isStable(mother)) ||
-      (numOfParents == 1 && motherPDG > 1000000000))
+      (numOfParents == 1 && MC::isNucleus(motherPDG) && std::abs(motherPDG) != MC::PROTON)) // FIXME vetoing protons here to preserve previous behaviour
     return NucReact;
 
   if (MC::isMuon(motherPDG) && NumOfMu == 0) return Mu;
   if (MC::isTau(motherPDG) && NumOfTau == 0) return TauLep;
 
-  if (numOfParents == 1 && mother && mother->status() == 3) return (foundISR)? ISRPhot:UndrPhot;
+  if (numOfParents == 1 && mother->status() == 3) return (foundISR)? ISRPhot:UndrPhot; // FIXME foundISR is always false at this point
 
   //-- to find initial and final state raiation and underline photons
   //-- SUSY
@@ -1071,7 +1058,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
       if (!Vrtx) continue;
       if (Vrtx->nOutgoingParticles() != 1 && Vrtx->nIncomingParticles() == 1) continue;
       if (!Vrtx->outgoingParticle(0)) continue;
-      if (Vrtx->outgoingParticle(0)->pdgId() == 91) foundISR = true;
+      if (Vrtx->outgoingParticle(0)->pdgId() == 91) foundISR = true; // Herwig "cluster"
     }
     return (foundISR)?ISRPhot:UndrPhot;
   }
@@ -1089,13 +1076,13 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
 
   //-- Exotics - CompHep
   if (MC::isElectron(motherPDG) && numOfParents == 1 && numOfDaug == 2 && (NumOfEl == 1 || NumOfPos == 1) && NumOfPht == 1 &&
-      !( Daug && info && info->Mother() && HepMC::is_same_generator_particle(Daug, info->Mother())) && !HepMC::is_simulation_particle(Daug) && !HepMC::is_simulation_particle(info->Mother()))
+      !( Daug && HepMC::is_same_generator_particle(Daug, mother)) && !HepMC::is_simulation_particle(Daug) && !HepMC::is_simulation_particle(mother))
     return FSRPhot;
 
   // FSR  from Photos
   if (MC::isZ(motherPDG) && ((NumOfEl + NumOfPos == 2 || NumOfEl + NumOfPos == 4) || (NumOfMu == 2 || NumOfMu == 4) || (NumOfTau == 2 || NumOfTau == 4)) && NumOfPht > 0) return FSRPhot;
 
-  if (NumOfPht > 0 && (abs(motherPDG) == 9900024 || abs(motherPDG) == 9900012 || abs(motherPDG) == 9900014 || abs(motherPDG) == 9900016)) return FSRPhot;
+  if (NumOfPht > 0 && (abs(motherPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(motherPDG))) return FSRPhot; // Left-right symmetric model WBoson || Right-handed neutrinos (Pythia-specific)
 
   if (numOfParents == 2 && NumOfLQ == 1) return FSRPhot;
 
@@ -1106,20 +1093,20 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
 
     if (NumOfLep == 1 && NumOfNeut == 1 && numOfDaug == NumOfLep + NumOfNeut + NumOfPht) return FSRPhot;
 
-    if (mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
+    if (mothOriVert && mothOriVert->nIncomingParticles() != 0) {
       const xAOD::TruthVertex* prodVert = mothOriVert;
       const xAOD::TruthParticle* itrP;
       do {
-        itrP = prodVert->incomingParticle(0);
+        itrP = prodVert->incomingParticle(0); // FIXME just taking the first one
         prodVert = itrP->hasProdVtx() ? itrP->prodVtx() : nullptr;
-      } while (MC::isW(itrP) && prodVert != nullptr);
+      } while (MC::isW(itrP) && prodVert);
 
       if (prodVert && prodVert->nIncomingParticles() == 1 ) {
         if ( MC::isTau(itrP)) return TauLep;
         if ( MC::isMuon(itrP)) return Mu;
-        if ( abs(itrP->pdgId()) == 9900012) return NuREle;
-        if ( abs(itrP->pdgId()) == 9900014) return NuRMu;
-        if ( abs(itrP->pdgId()) == 9900016) return NuRTau;
+        if ( abs(itrP->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+        if ( abs(itrP->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+        if ( abs(itrP->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
       }
     } else
       return WBoson;
@@ -1137,10 +1124,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
       }
       const xAOD::TruthParticle* theDaug = partOriVert->outgoingParticle(ipOut);
       if (!theDaug) continue;
-      const xAOD::TruthParticle* theNextDaug = nullptr;
+      const xAOD::TruthParticle* theNextDaug{};
       for (unsigned int ipOut1 = ipOut + 1; ipOut1 < partOriVert->nOutgoingParticles(); ipOut1++) {
         theNextDaug = partOriVert->outgoingParticle(ipOut1);
-        if (theNextDaug != nullptr) break;
+        if (theNextDaug) break;
       }
       if (!theNextDaug) continue;
       if (MC::isTau(theDaug) && MC::isTau(theNextDaug)) {
@@ -1166,12 +1153,12 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   //--Sherpa ZZ,ZW+FSR
   if (numOfParents == 4 && (numOfDaug - NumOfPht) == 4 && (NumOfLep + NumOfNeut == 4)) {
     if (MC::isSMLepton(partOriVert->incomingParticle(0))&&MC::isSMLepton(partOriVert->incomingParticle(1))
-     && MC::isSMLepton(partOriVert->incomingParticle(2))&&MC::isSMLepton(partOriVert->incomingParticle(3)))
+        && MC::isSMLepton(partOriVert->incomingParticle(2))&&MC::isSMLepton(partOriVert->incomingParticle(3)))
       return FSRPhot;
   }
 
   //--New Sherpa single photon
-  if (partOriVert == mothOriVert && partOriVert != nullptr) {
+  if (partOriVert == mothOriVert && partOriVert) {
     int NumOfPhtLoop = 0;
     for (const auto *const pout: partOriVert->particles_out()) {
       if (!pout) continue;
@@ -1185,8 +1172,8 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
 
   if (MC::isHiggs(motherPDG)) return Higgs;
   if (abs(motherPDG) == MC::PI0) return PiZero;
-  if (abs(motherPDG) == 35 || abs(motherPDG) == 36 || abs(motherPDG) == 37) return HiggsMSSM;
-  if (abs(motherPDG) == 32 || abs(motherPDG) == 33 || abs(motherPDG) == 34 || abs(motherPDG) == 5100039 ) return HeavyBoson;
+  if (MC::isMSSMHiggs(motherPDG)) return HiggsMSSM; // MSSM Higgs bosons
+  if (MC::isHeavyBoson(motherPDG) || std::abs(motherPDG) == 5100039 ) return HeavyBoson; // Heavy Bosons (Z' Z'' W'+) + KK excited graviton
 
   if (MC::isSUSY(motherPDG)) return SUSY;
   if (MC::isBSM(motherPDG)) return OtherBSM;
@@ -1194,41 +1181,39 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   // Pythia8 gamma+jet samples
   if (MC::Pythia8::isConditionA(mother) && MC::isStable(thePriPart) && NumOfPht == 1 && numOfDaug == (NumOfPht + NumOfPartons))  return PromptPhot;
 
-  ParticleType pType = defTypeOfHadron(motherPDG);
-  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatteringVertex(mothOriVert)) isPrompt = true;
+  const ParticleType pType = defTypeOfHadron(motherPDG);
+  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert && MC::isHardScatteringVertex(mothOriVert)) isPrompt = true;
   return convHadronTypeToOrig(pType, motherPDG);
 }
 
 ParticleOrigin
-MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruthTES,
+MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                      const xAOD::TruthParticle* thePart,
                                      bool& isPrompt,
-                                     MCTruthPartClassifier::Info* infoin) const
+                                     MCTruthPartClassifier::Info& info) const
 {
-  MCTruthPartClassifier::Info* info = infoin;
   ATH_MSG_DEBUG("Executing DefOrigOfNeutrino ");
 
-  int nuFlav = abs(thePart->pdgId());
-  const xAOD::TruthParticle* thePriPart = MC::findMatching(mcTruthTES, thePart);
+  const int nuFlav = abs(thePart->pdgId());
+  // Find the first copy of this particle stored in the xAOD::TruthParticleContainer (i.e. the particle prior to any interactions)
+  const xAOD::TruthParticle* thePriPart = MC::findMatching(xTruthParticleContainer, thePart);
   if (!thePriPart) return NonDefined;
   if (abs(thePriPart->pdgId()) != nuFlav) return NonDefined;
 
   const xAOD::TruthVertex* partOriVert = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
 
   //-- to define neutrino outcome status
-  if (info) info->particleOutCome = NonInteract;
+  info.particleOutCome = NonInteract;
 
-  MCTruthPartClassifier::Info tmpinfo;
-  if (!info) { info = &tmpinfo; }
   if (!partOriVert) return NonDefined;
 
-  int numOfParents = -1;
-  numOfParents = partOriVert->nIncomingParticles();
-  if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfNeutrino:: neutrino  has more than one mother ");
+  int numOfParents = partOriVert->nIncomingParticles();
+  if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfNeutrino:: neutrino has more than one mother ");
 
   const xAOD::TruthParticle* mother = MC::findMother(thePriPart);
-  if (info) info->mother = mother;
-  if (!mother) return NonDefined;
+  info.setMotherProperties(mother);
+  if (!mother) { return NonDefined; } // mother is not a nullptr beyond this point
+
   int motherPDG = mother->pdgId();
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
 
@@ -1236,22 +1221,22 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   bool samePart = false;
   if (mothOriVert && HepMC::is_same_vertex(mothOriVert,partOriVert)) samePart = true;
   //
-  if ((abs(motherPDG) == nuFlav || MC::isTau(motherPDG) || MC::isW(motherPDG)) && mothOriVert != nullptr &&
+  if ((abs(motherPDG) == nuFlav || MC::isTau(motherPDG) || MC::isW(motherPDG)) && mothOriVert &&
       !samePart) {
     int pPDG(0);
-    const xAOD::TruthParticle* MotherParent(nullptr);
+    const xAOD::TruthParticle* MotherParent{};
     do {
       pPDG = 0;
       MotherParent = MC::findMother(mother);
       // to prevent Sherpa loop
-      const xAOD::TruthVertex* mother_prdVtx(nullptr);
-      const xAOD::TruthVertex* mother_endVtx(nullptr);
+      const xAOD::TruthVertex* mother_prdVtx{};
+      const xAOD::TruthVertex* mother_endVtx{};
       if (mother) {
         mother_prdVtx = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
         mother_endVtx = mother->decayVtx();
       }
-      const xAOD::TruthVertex* parent_prdVtx(nullptr);
-      const xAOD::TruthVertex* parent_endVtx(nullptr);
+      const xAOD::TruthVertex* parent_prdVtx{};
+      const xAOD::TruthVertex* parent_endVtx{};
       if (MotherParent) {
         parent_prdVtx = MotherParent->hasProdVtx() ? MotherParent->prodVtx() : nullptr;
         parent_endVtx = MotherParent->decayVtx();
@@ -1270,29 +1255,29 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
       }
       if (abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) ) {
         mother = MotherParent;
-        if (info) info->setMotherProperties(mother);
+        info.setMotherProperties(mother);
       }
 
     } while ((std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG)));
 
     if (std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
-        std::abs(pPDG) == 35 || std::abs(pPDG) == 36 || std::abs(pPDG) == 37 || std::abs(pPDG) == 32 || std::abs(pPDG) == 33 ||
-        std::abs(pPDG) == 34 || MC::isTop(pPDG) || std::abs(pPDG) == 9900024 || std::abs(pPDG) == 9900012 || std::abs(pPDG) == 9900014 ||
-        std::abs(pPDG) == 9900016 || (std::abs(pPDG) < 2000040 && std::abs(pPDG) > 1000001)) {
+        MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) ||  // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
+        std::abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) || // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
+        MC::isSUSY(pPDG)) {
       mother = MotherParent;
-      if (info) info->setMotherProperties(mother);
+      info.setMotherProperties(mother);
     }
   }
   //if mother is still nullptr, we have a problem
-  if (!mother) return NonDefined;
+  if (!mother) return NonDefined; // FIXME it should not be possible for mother to be nullptr at this point???
 
   motherPDG = mother->pdgId();
   partOriVert = mother->decayVtx();
   mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   numOfParents = partOriVert->nIncomingParticles();
-  int numOfDaug = partOriVert->nOutgoingParticles();
+  const int numOfDaug = partOriVert->nOutgoingParticles();
 
-  if (info) info->setMotherProperties(mother);
+  info.setMotherProperties(mother);
 
   int NumOfPhot(0);
   int NumOfquark(0);
@@ -1310,34 +1295,34 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
     if (!theDaug) continue;
     int DaugType = theDaug->pdgId();
     if (MC::isSMQuark(DaugType)) NumOfquark++;
-    if (MC::isGluon(DaugType)) NumOfgluon++;
-    if (abs(DaugType) == MC::NU_E) NumOfElNeut++;
-    if (std::abs(DaugType) == MC::NU_MU) NumOfMuNeut++;
-    if (std::abs(DaugType) == MC::NU_TAU) NumOfTauNeut++;
-    if (MC::isPhoton(DaugType)) NumOfPhot++;
-    if (MC::isElectron(DaugType)) NumOfEl++;
-    if (MC::isMuon(DaugType)) NumOfMu++;
-    if (MC::isTau(DaugType)) NumOfTau++;
-    if (MC::isLeptoQuark(DaugType)) NumOfLQ++;
-    if (std::abs(DaugType) == std::abs(motherPDG) && theDaug && info && info->Mother() && HepMC::is_same_generator_particle(theDaug,info->Mother())) samePart = true;
+    else if (MC::isGluon(DaugType)) NumOfgluon++;
+    else if (abs(DaugType) == MC::NU_E) NumOfElNeut++;
+    else if (std::abs(DaugType) == MC::NU_MU) NumOfMuNeut++;
+    else if (std::abs(DaugType) == MC::NU_TAU) NumOfTauNeut++;
+    else if (MC::isPhoton(DaugType)) NumOfPhot++;
+    else if (MC::isElectron(DaugType)) NumOfEl++;
+    else if (MC::isMuon(DaugType)) NumOfMu++;
+    else if (MC::isTau(DaugType)) NumOfTau++;
+    else if (MC::isLeptoQuark(DaugType)) NumOfLQ++;
+    if (std::abs(DaugType) == std::abs(motherPDG) && theDaug && HepMC::is_same_generator_particle(theDaug,mother)) samePart = true;
   }
 
   // Quark weak decay
   if (MC::isQuark(motherPDG) && numOfParents == 1 && numOfDaug == 3 && NumOfquark == 1 && (NumOfEl == 1 || NumOfMu == 1 || NumOfTau == 1)) return QuarkWeakDec;
   if (MC::isTop(motherPDG)) return top;
 
-  if (MC::isW(motherPDG) && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
+  if (MC::isW(motherPDG) && mothOriVert && mothOriVert->nIncomingParticles() != 0) {
     const xAOD::TruthVertex* prodVert = mothOriVert;
     const xAOD::TruthParticle* ptrPart;
     do {
-      ptrPart = prodVert->incomingParticle(0);
+      ptrPart = prodVert->incomingParticle(0); // FIXME just taking the first one
       prodVert = ptrPart->hasProdVtx() ? ptrPart->prodVtx() : nullptr;
-    } while (MC::isW(ptrPart) && prodVert != nullptr);
+    } while (MC::isW(ptrPart) && prodVert);
 
     if (prodVert && prodVert->nIncomingParticles() == 1) {
-      if (abs(ptrPart->pdgId()) == 9900012) return NuREle;
-      if (abs(ptrPart->pdgId()) == 9900014) return NuRMu;
-      if (abs(ptrPart->pdgId()) == 9900016) return NuRTau;
+      if (abs(ptrPart->pdgId()) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+      if (abs(ptrPart->pdgId()) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+      if (abs(ptrPart->pdgId()) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
     }
     return WBoson;
   }
@@ -1350,7 +1335,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   if (numOfParents == 1 && numOfDaug > 4 && (MC::isSMQuark(motherPDG) || MC::isGluon(motherPDG))) {
 
     const xAOD::TruthParticle* thePartToCheck = thePriPart;
-    const xAOD::TruthParticle* theMother = thePriPart->hasProdVtx() ? thePriPart->prodVtx()->incomingParticle(0) : nullptr;
+    const xAOD::TruthParticle* theMother = thePriPart->hasProdVtx() ? thePriPart->prodVtx()->incomingParticle(0) : nullptr; // FIXME just taking the first one
 
     if (MC::isElectron(theMother) && MC::isDecayed(theMother)) thePartToCheck = theMother;
     bool isZboson = false;
@@ -1360,10 +1345,10 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
     for (unsigned int ipOut = 0; ipOut + 1 < partOriVert->nOutgoingParticles(); ++ipOut) {
       const xAOD::TruthParticle* theDaug = partOriVert->outgoingParticle(ipOut);
       if (!theDaug) continue;
-      const xAOD::TruthParticle* theNextDaug = nullptr;
+      const xAOD::TruthParticle* theNextDaug{};
       for (unsigned int ipOut1 = ipOut + 1; ipOut1 < partOriVert->nOutgoingParticles(); ipOut1++) {
         theNextDaug = partOriVert->outgoingParticle(ipOut1);
-        if (theNextDaug != nullptr) break;
+        if (theNextDaug) break;
       }
       if (!theNextDaug) continue;
 
@@ -1372,8 +1357,8 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
         continue;
       }
 
-      int apdgID1 = abs(theDaug->pdgId());
-      int apdgID2 = abs(theNextDaug->pdgId());
+      const int apdgID1 = abs(theDaug->pdgId());
+      const int apdgID2 = abs(theNextDaug->pdgId());
       if (apdgID1 == apdgID2 && MC::isSMNeutrino(apdgID1)) {
         // Zboson
         if (thePartToCheck == theDaug || thePartToCheck == theNextDaug) {
@@ -1401,25 +1386,25 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   }
 
   if (numOfParents == 2) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-  //--Sherpa Z->nunu
+    const int pdg1 = partOriVert->incomingParticle(0)->pdgId();
+    const int pdg2 = partOriVert->incomingParticle(1)->pdgId();
+    //--Sherpa Z->nunu
     if ( (numOfDaug - NumOfquark - NumOfgluon) == 2 && (NumOfElNeut == 2 || NumOfMuNeut == 2 || NumOfTauNeut == 2)) return ZBoson;
 
-  //--Sherpa W->enu ??
-  if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && ((NumOfEl == 1 && NumOfElNeut == 1) || (NumOfMu == 1 && NumOfMuNeut == 1) || (NumOfTau == 1 && NumOfTauNeut == 1))) return WBoson;
+    //--Sherpa W->enu ??
+    if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && ((NumOfEl == 1 && NumOfElNeut == 1) || (NumOfMu == 1 && NumOfMuNeut == 1) || (NumOfTau == 1 && NumOfTauNeut == 1))) return WBoson;
 
-  //--Sherpa ZZ,ZW
-  if ( (numOfDaug - NumOfquark - NumOfgluon) == 4 && (NumOfEl + NumOfMu + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
-       (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
+    //--Sherpa ZZ,ZW
+    if ( (numOfDaug - NumOfquark - NumOfgluon) == 4 && (NumOfEl + NumOfMu + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
+         (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
 
-  //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
-  if ((numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 && (NumOfEl + NumOfMu + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
-     (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
+    //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
+    if ((numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 && (NumOfEl + NumOfMu + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
+        (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
   }
 
   // New Sherpa Z->nunu
-  if (partOriVert == mothOriVert && partOriVert != nullptr) {
+  if (partOriVert == mothOriVert && partOriVert) {
     int NumOfLepLoop = 0;
     int NumOfNeuLoop = 0;
     for (const auto *const pout: partOriVert->particles_out()) {
@@ -1427,7 +1412,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
       for (const auto *const pin: partOriVert->particles_in()) {
         if (!pin) continue;
         if (HepMC::is_same_particle(pin,pout)) continue;
-        int apdgid = abs(pout->pdgId());
+        const int apdgid = abs(pout->pdgId());
         if (MC::isSMLepton(apdgid)) {
           if (MC::isSMNeutrino(apdgid)) { NumOfNeuLoop++; }
           else { NumOfLepLoop++; }
@@ -1442,25 +1427,25 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   //-- McAtNLo
 
   if (MC::isHiggs(motherPDG)) return Higgs;
-  if (abs(motherPDG) == 35 || abs(motherPDG) == 36 || abs(motherPDG) == 37) return HiggsMSSM;
-  if (abs(motherPDG) == 32 || abs(motherPDG) == 33 || abs(motherPDG) == 34) return HeavyBoson;
+  if (MC::isMSSMHiggs(motherPDG)) return HiggsMSSM; // MSSM Higgs bosons
+  if (MC::isHeavyBoson(motherPDG)) return HeavyBoson; // Heavy bosons( Z', Z'', W'+)
 
   if (MC::isTau(motherPDG)) {
-    ParticleOrigin tauOrig = defOrigOfTau(mcTruthTES, mother, motherPDG, info);
-    ParticleType tautype = defTypeOfTau(tauOrig);
+    const ParticleOrigin tauOrig = defOrigOfTau(xTruthParticleContainer, mother, motherPDG, info);
+    const ParticleType tautype = defTypeOfTau(tauOrig);
     return (tautype == IsoTau)?tauOrig:TauLep;
   }
 
-  if (abs(motherPDG) == 9900024) return WBosonLRSM;
-  if (abs(motherPDG) == 9900012) return NuREle;
-  if (abs(motherPDG) == 9900014) return NuRMu;
-  if (abs(motherPDG) == 9900016) return NuRTau;
+  if (abs(motherPDG) == MC::WBOSON_LRSM) return WBosonLRSM; // Left-right symmetric model WBoson (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_E) return NuREle; // Right-handed NU_E (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_MU) return NuRMu; // Right-handed NU_MU (Pythia-specific)
+  if (abs(motherPDG) == MC::RH_NU_TAU) return NuRTau; // Right-handed NU_TAU (Pythia-specific)
   if (MC::isLeptoQuark(motherPDG) || NumOfLQ != 0) return LQ;
   if (MC::isSUSY(motherPDG)) return SUSY;
   if (MC::isBSM(motherPDG)) return OtherBSM;
 
-  ParticleType pType = defTypeOfHadron(motherPDG);
-  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatteringVertex(mothOriVert)) isPrompt = true;
+  const ParticleType pType = defTypeOfHadron(motherPDG);
+  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert && MC::isHardScatteringVertex(mothOriVert)) isPrompt = true;
 
   return convHadronTypeToOrig(pType, motherPDG);
 }

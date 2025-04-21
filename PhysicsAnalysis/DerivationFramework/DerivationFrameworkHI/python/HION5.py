@@ -81,10 +81,57 @@ def HION5KernelCfg(flags, name="HION5Kernel", **kwargs):
     for HION5"""
     acc = ComponentAccumulator()
 
-    # Common augmentations which include DFCommon
-    from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
+    # Schedule extra jets collections
+    from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track
+    from JetRecConfig.JetRecConfig import JetRecCfg
 
-    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper=kwargs["TriggerListsHelper"]))
+    jetList = [AntiKt4PV0Track]
+    for jd in jetList:
+        acc.merge(JetRecCfg(flags, jd))
+
+    # Common augmentations
+    # cannot use PhysCommon sequence because
+    # - no triggers
+    # - no TauJets
+    # so we have to use a modified version here
+    from DerivationFrameworkMuons.MuonsCommonConfig import MuonsCommonCfg
+    from DerivationFrameworkEGamma.EGammaCommonConfig import EGammaCommonCfg
+
+    acc.merge(MuonsCommonCfg(flags))
+    acc.merge(EGammaCommonCfg(flags))
+
+    # jet cleaning
+    # standard way in PhysCommon is
+    # - calculate tau ID (needed for default jet OR)
+    # - decorate jets with overlap removal
+    # - do event cleaning
+    # but taus are missing in HI derivations so need to do differently
+
+    # NO JVT criteria in HI data (see pp config for details)
+
+    # Decorate if jet passes OR and save decoration DFCommonJets_passOR
+    # Use modified OR that does not check overlaps with taus
+    from AssociationUtils.AssociationUtilsConfig import OverlapRemovalToolCfg
+
+    outputLabel = "DFCommonJets_passOR"
+    bJetLabel = ""  # default
+    tauLabel = ""  # workaround for missing taus
+    tauKey = ""  # workaround for missing taus
+    orTool = acc.popToolsAndMerge(
+        OverlapRemovalToolCfg(
+            flags, outputLabel=outputLabel, bJetLabel=bJetLabel, doTaus=False
+        )
+    )
+    algOR = CompFactory.OverlapRemovalGenUseAlg(
+        "OverlapRemovalGenUseAlg",
+        OverlapLabel=outputLabel,
+        OverlapRemovalTool=orTool,
+        JetKey = 'AntiKt4HIJets',
+        TauKey=tauKey,
+        TauLabel=tauLabel,
+        BJetLabel=bJetLabel,
+    )
+    acc.addEventAlgo(algOR)
 
     # skimming
     skimmingTool = acc.getPrimaryAndMerge(HION5SkimmingToolCfg(flags))
@@ -106,6 +153,9 @@ def HION5KernelCfg(flags, name="HION5Kernel", **kwargs):
 def HION5Cfg(flags):
     acc = ComponentAccumulator()
 
+    from DerivationFrameworkEGamma.PhotonsCPDetailedContent import PhotonsCPDetailedContent
+    from DerivationFrameworkEGamma.ElectronsCPDetailedContent import ExtraElectronShowerShapes,ExtraElectronGSFVar
+    
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     HION5TriggerListsHelper = TriggerListsHelper(flags)
         
@@ -119,9 +169,21 @@ def HION5Cfg(flags):
     
     HION5SlimmingHelper = SlimmingHelper("HION5SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     
+    AllVariables  = []    
+    AllVariables += ListSlimming.HION5AllVariables()
+    AllVariables += ListSlimming.HION5ExtraContainersTrigger()
+
     HION5SlimmingHelper.SmartCollections = ListSlimming.HION5SmartCollections()
-    HION5SlimmingHelper.AllVariables     = ListSlimming.HION5AllVariables()
     HION5SlimmingHelper.ExtraVariables   = ListSlimming.HION5Extravariables()
+    HION5SlimmingHelper.ExtraVariables   += PhotonsCPDetailedContent
+    HION5SlimmingHelper.ExtraVariables   += ExtraElectronShowerShapes
+    HION5SlimmingHelper.ExtraVariables   += ExtraElectronGSFVar
+    HION5SlimmingHelper.AllVariables     = AllVariables
+
+    # Add egamma trigger objects
+    HION5SlimmingHelper.IncludeEGammaTriggerContent = True
+    # Add muon trigger objects
+    HION5SlimmingHelper.IncludeMuonTriggerContent = True
     
     HION5ItemList = HION5SlimmingHelper.GetItemList()
 

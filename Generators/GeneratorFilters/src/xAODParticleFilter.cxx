@@ -1,21 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Allows the user to search for particles with specified kinematics.
 // It will pass if there is an particle with pT and eta or E in the specified
 // range
 #include "GeneratorFilters/xAODParticleFilter.h"
-
-#include "xAODTruth/TruthEvent.h"
-#include "xAODTruth/TruthEventContainer.h"
-
-xAODParticleFilter::xAODParticleFilter(const std::string &name,
-                                       ISvcLocator *pSvcLocator)
-    : GenFilter(name, pSvcLocator) {}
+#include "xAODTruth/TruthVertex.h"
 
 StatusCode xAODParticleFilter::filterInitialize()
 {
+  CHECK(m_truthPartContKey.initialize());
   ATH_MSG_INFO("Ptcut=" << m_Ptmin);
   ATH_MSG_INFO("Etacut=" << m_EtaRange);
   ATH_MSG_INFO("Energycut=" << m_EnergyRange);
@@ -29,19 +24,13 @@ StatusCode xAODParticleFilter::filterEvent()
 {
   int nParts = 0;
 
-// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
-// duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+// Retrieve TruthGen container from xAOD Gen slimmer, contains all
+// particles witout barcode_zero and duplicated barcode ones
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
   // Loop over all particles in the event and build up the grid
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-      const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
-
+  for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
       if (std::abs(pitr->pdgId()) != m_PDGID)
         continue;
       if (pitr->pt() >= m_Ptmin && std::abs(pitr->eta()) <= m_EtaRange &&

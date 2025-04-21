@@ -18,7 +18,7 @@
 
 namespace DerivationFramework {
 
-  class TruthIsolationTool : public AthAlgTool, public IAugmentationTool {
+  class TruthIsolationTool : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       TruthIsolationTool(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthIsolationTool();

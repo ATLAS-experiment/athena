@@ -35,14 +35,11 @@ namespace DerivationFramework {
 
 namespace DerivationFramework {
 
-  static const InterfaceID IID_JpsiXPlus2V0("JpsiXPlus2V0", 1, 0);
-
-  class JpsiXPlus2V0 : virtual public AthAlgTool, public IAugmentationTool
+  class JpsiXPlus2V0 : public extends<AthAlgTool, IAugmentationTool>
   {
   enum V0Enum{ UNKNOWN=0, LAMBDA=1, LAMBDABAR=2, KS=3 };
 
   public:
-    static const InterfaceID& interfaceID() { return IID_JpsiXPlus2V0; }
     JpsiXPlus2V0(const std::string& type, const std::string& name, const IInterface* parent);
     virtual ~JpsiXPlus2V0() = default;
     virtual StatusCode initialize() override;

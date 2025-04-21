@@ -45,7 +45,7 @@ class get_MaterialResolutionEffect : public asg::AsgMessaging {
   */
   double getDelta(int particle_type, double energy, double eta,
                   int response_type, int isyst) const;
-  double interpolateTH1(TH1* hist, double x, bool abs_bins) const;
+  static double interpolateTH1(TH1* hist, double x, bool abs_bins) ;
   void store_IBL_PP0_YProjections();
   void setInterpolate(bool interpolate) {
     m_interpolate = interpolate;

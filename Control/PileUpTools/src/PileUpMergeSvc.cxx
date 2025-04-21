@@ -254,32 +254,6 @@ const xAOD::EventInfo* PileUpMergeSvc::getPileUpEvent( StoreGateSvc* sg, const s
 }
 
 
-const InterfaceID& 
-PileUpMergeSvc::interfaceID() {
-  static const InterfaceID IID_IPileUpMergeSvc(9991, 1, 0); //FIXME
-  return IID_IPileUpMergeSvc; 
-} 
-
-  // Query the interfaces.
-  //   Input: riid, Requested interface ID
-  //          ppvInterface, Pointer to requested interface
-  //   Return: StatusCode indicating SUCCESS or FAILURE.
-  // N.B. Don't forget to release the interface after use!!!
-StatusCode 
-PileUpMergeSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-{
-  //FIXME
-  if ( interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (PileUpMergeSvc*)this;
-  }
-  else  {
-    // Interface is not directly available: try out a base class
-    return AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
-
 bool
 PileUpMergeSvc::isLive(CLID id, const string& dataKey, int iXing) {
   return m_ranges[make_pair(id, dataKey)].contains(iXing);

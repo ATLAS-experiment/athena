@@ -4,6 +4,8 @@
 
 // class header
 #include "GauginosPhysicsTool.h"
+
+#include <memory>
 // package headers
 #include "GMSBNeutralino.hh"
 #include "GMSBGravitino.hh"
@@ -33,22 +35,37 @@ GauginosPhysicsTool::GauginosPhysicsTool( const std::string& type,
 {
   m_physicsOptionType = G4AtlasPhysicsOption::Type::BSMPhysics;
 
-  declareProperty("GravitinoMass",m_GravitinoMass=0.108E-04*CLHEP::GeV,"Gravitino Mass");
-  declareProperty("GravitinoWidth",m_GravitinoWidth=0.*CLHEP::GeV,"Gravitino Width");
-  declareProperty("GravitinoCharge",m_GravitinoCharge=0,"Gravitino charge");
-  declareProperty("GravitinoPDGCode",m_GravitinoPDGCode=1000039,"Gravitino PDG CODE");
-  declareProperty("GravitinoLifetime",m_GravitinoLifetime=-1 ,"Gravitino Lifetime");
-  declareProperty("GravitinoStable",m_GravitinoStable=true ,"Gravitino Stable");
-  declareProperty("GravitinoShortlived",m_GravitinoShortlived=false ,"Gravitino Shortlived");
+  declareProperty("GravitinoMass",
+                  m_GravitinoParams.mass = 0.108E-04 * CLHEP::GeV,
+                  "Gravitino Mass");
+  declareProperty("GravitinoWidth", m_GravitinoParams.width = 0. * CLHEP::GeV,
+                  "Gravitino Width");
+  declareProperty("GravitinoCharge", m_GravitinoParams.charge = 0,
+                  "Gravitino charge");
+  declareProperty("GravitinoPDGCode", m_GravitinoParams.pdgCode = 1000039,
+                  "Gravitino PDG CODE");
+  declareProperty("GravitinoLifetime", m_GravitinoParams.lifetime = -1,
+                  "Gravitino Lifetime");
+  declareProperty("GravitinoStable", m_GravitinoParams.stable = true,
+                  "Gravitino Stable");
+  declareProperty("GravitinoShortlived", m_GravitinoParams.shortlived = false,
+                  "Gravitino Shortlived");
 
-  declareProperty("NeutralinoMass",m_NeutralinoMass=118.848*CLHEP::GeV,"Neutralino Mass");
-  declareProperty("NeutralinoWidth",m_NeutralinoWidth=0.*CLHEP::GeV,"Neutralino Width");
-  declareProperty("NeutralinoCharge",m_NeutralinoCharge=0,"Neutralino charge");
-  declareProperty("NeutralinoPDGCode",m_NeutralinoPDGCode=1000022,"Neutralino PDG CODE");
-  declareProperty("NeutralinoStable",m_NeutralinoStable=true,"Neutralino Stable");
-  declareProperty("NeutralinoLifetime",m_NeutralinoLifetime=-1,"Neutralino Lifetime");
-  declareProperty("NeutralinoShortlived",m_NeutralinoShortlived=false,"Neutralino Shortlived");
-
+  declareProperty("NeutralinoMass",
+                  m_NeutralinoParams.mass = 118.848 * CLHEP::GeV,
+                  "Neutralino Mass");
+  declareProperty("NeutralinoWidth", m_NeutralinoParams.width = 0. * CLHEP::GeV,
+                  "Neutralino Width");
+  declareProperty("NeutralinoCharge", m_NeutralinoParams.charge = 0,
+                  "Neutralino charge");
+  declareProperty("NeutralinoPDGCode", m_NeutralinoParams.pdgCode = 1000022,
+                  "Neutralino PDG CODE");
+  declareProperty("NeutralinoStable", m_NeutralinoParams.stable = true,
+                  "Neutralino Stable");
+  declareProperty("NeutralinoLifetime", m_NeutralinoParams.lifetime = -1,
+                  "Neutralino Lifetime");
+  declareProperty("NeutralinoShortlived", m_NeutralinoParams.shortlived = false,
+                  "Neutralino Shortlived");
 }
 
 //=============================================================================
@@ -66,27 +83,27 @@ StatusCode GauginosPhysicsTool::initialize( )
 {
   ATH_MSG_DEBUG("GauginosPhysicsTool initialize(  )");
 
-  this->SetPhysicsName(name());
   return StatusCode::SUCCESS;
 }
 
-
-GauginosPhysicsTool* GauginosPhysicsTool::GetPhysicsOption()
-{
-  return this;
+auto GauginosPhysicsTool::GetPhysicsOption() -> UPPhysicsConstructor {
+  return std::make_unique<GauginosPhysicsTool::PhysicsConstructor>(
+      name(), msgLevel(), *this);
 }
 
-void GauginosPhysicsTool::ConstructParticle()
-{
+void GauginosPhysicsTool::PhysicsConstructor::ConstructParticle() {
   ATH_MSG_DEBUG("Create particle of Gauginos" );
-
-  GMSBNeutralino::Definition(m_NeutralinoMass, m_NeutralinoWidth, m_NeutralinoCharge, m_NeutralinoPDGCode, m_NeutralinoStable, m_NeutralinoLifetime, m_NeutralinoShortlived );
-
-  GMSBGravitino::Definition(m_GravitinoMass, m_GravitinoWidth, m_GravitinoCharge, m_GravitinoPDGCode, m_GravitinoStable, m_GravitinoLifetime, m_NeutralinoShortlived);
-
+  GMSBNeutralino::Definition(
+      m_NeutralinoParams.mass, m_NeutralinoParams.width,
+      m_NeutralinoParams.charge, m_NeutralinoParams.pdgCode,
+      m_NeutralinoParams.stable, m_NeutralinoParams.lifetime,
+      m_NeutralinoParams.shortlived);
+  GMSBGravitino::Definition(
+      m_GravitinoParams.mass, m_GravitinoParams.width, m_GravitinoParams.charge,
+      m_GravitinoParams.pdgCode, m_GravitinoParams.stable,
+      m_GravitinoParams.lifetime, m_GravitinoParams.shortlived);
 }
 
-void GauginosPhysicsTool::ConstructProcess()
-{
+void GauginosPhysicsTool::PhysicsConstructor::ConstructProcess() {
   ATH_MSG_DEBUG(" Construct Process for the Gauginos being run");
 }

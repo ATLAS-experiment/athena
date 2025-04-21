@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <mutex>
@@ -137,7 +137,7 @@ int SiHitIdHelper::buildHitIdFromStringITk(int part, const std::string& physVolN
     int side = 0;
     //Extract the indices from the name, and write them in to the matching int
     std::map<std::string, int&> fields{{"barrel_endcap",brlEcap},{"layer_wheel",layerDisk},{"phi_module",phiMod},{"eta_module",etaMod},{"side",side}};
-    for(auto field:fields){
+    for(const auto & field:fields){
         size_t pos1 = (physVolName).find(field.first+"_");
         size_t pos2 = (physVolName).find("_",pos1+field.first.size()+1);//start looking only after end of first delimiter (plus 1 for the "_" appended) ends
         std::string strNew = (physVolName).substr(pos1+field.first.size()+1,pos2-(pos1+field.first.size()+1));
@@ -153,7 +153,7 @@ int SiHitIdHelper::buildHitIdFromStringHGTD(int part, const std::string& physVol
     int moduleInLayer = 0;
     //Extract the indices from the name, and write them in to the matching int
     std::map<std::string, int&> fields{{"endcap",endcap},{"layer",layer},{"moduleInLayer",moduleInLayer}};
-    for(auto field:fields){
+    for(const auto & field:fields){
         size_t pos1 = (physVolName).find(field.first+"_");
         size_t pos2 = (physVolName).find("_",pos1+field.first.size()+1);//start looking only after end of first delimiter (plus 1 for the "_" appended) ends
         std::string strNew = (physVolName).substr(pos1+field.first.size()+1,pos2-(pos1+field.first.size()+1));

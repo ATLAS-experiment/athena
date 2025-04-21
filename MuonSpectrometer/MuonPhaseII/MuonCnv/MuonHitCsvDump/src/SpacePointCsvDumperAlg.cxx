@@ -11,17 +11,20 @@
 #include <TString.h>
 
 namespace {
-    union SectorId{
-        int8_t fields[4];
-        int hash;
-    };
+    constexpr int encodeId(const int8_t stName, const int8_t stEta,
+                 const int8_t sector, const int8_t tech) {
+        return ( tech <<24 | sector <<16 |stEta << 8| stName);
+    }
+    constexpr double precCutOff(const double value, const double cutOff = 1.e-15) {
+        return std::abs(value) > cutOff ? value : 0.;
+    }
 }
 
 
 namespace MuonR4{
 
 StatusCode SpacePointCsvDumperAlg::initialize() {
-   ATH_CHECK(m_readKey.initialize());
+   ATH_CHECK(m_readKeys.initialize());
    ATH_CHECK(m_idHelperSvc.retrieve());
    return StatusCode::SUCCESS;
  }
@@ -59,19 +62,17 @@ StatusCode SpacePointCsvDumperAlg::execute(){
     /// Properties of the space point Identifier
     file<<"gasGap"<<delim;
     file<<"primaryCh"<<delim;
-    file<<"secondaryCh"<<delim;
+    file<<"measuresEta"<<delim;
+    file<<"measuresPhi"<<delim;
     file<<std::endl;
-
-
-   SG::ReadHandle readHandle{m_readKey, ctx};
-   ATH_CHECK(readHandle.isPresent());
 
    auto dumpToFile = [&](const unsigned bucketId,
                          const SpacePoint& spacePoint,
                          const unsigned gasGap) {
         
-        const Identifier measId = spacePoint.identify();
-        int primaryCh{0}, secondCh{-1};
+        const Identifier& measId = spacePoint.identify();
+        ATH_MSG_VERBOSE("Dump space point "<<m_idHelperSvc->toString(measId)<<", gasGap: "<<gasGap);
+        int primaryCh{0};
         using TechIndex = Muon::MuonStationIndex::TechnologyIndex; 
         const TechIndex techIdx = m_idHelperSvc->technologyIndex(measId);
         switch (techIdx) {
@@ -83,81 +84,69 @@ StatusCode SpacePointCsvDumperAlg::execute(){
             case TechIndex::RPC: {
                 const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
                 primaryCh = idHelper.channel(measId);
-                if (spacePoint.secondaryMeasurement()){
-                    secondCh = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
-                }
                 break;
             }
             case TechIndex::TGC: {
                 const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
                 primaryCh = idHelper.channel(measId);
-                if (spacePoint.secondaryMeasurement()){
-                    secondCh = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
-                }
                 break;
             }
             case TechIndex::STGC: {
                 const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
                 primaryCh = idHelper.channel(measId);
-                if (spacePoint.secondaryMeasurement()){
-                    secondCh = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
-                }
                 break;
             }
             case TechIndex::MM: {
                 const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
                 primaryCh = idHelper.channel(measId);
-                if (spacePoint.secondaryMeasurement()){
-                    secondCh = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
-                }
                 break;
             }
             default:
                 ATH_MSG_WARNING("Dude you can't have CSCs in R4 "<<m_idHelperSvc->toString(measId));
         };
-                            
-        SectorId secId{};
-        secId.fields[0] = static_cast<int>(spacePoint.msSector()->chamberIndex());
-        secId.fields[1] = spacePoint.msSector()->side();
-        secId.fields[2] = spacePoint.msSector()->sector();
-        secId.fields[3] = static_cast<int>(techIdx);
-        file<<secId.hash<<delim;
+
+        const int secId = encodeId(static_cast<int8_t>(spacePoint.msSector()->chamberIndex()),
+                                   spacePoint.msSector()->side(),
+                                   spacePoint.msSector()->sector(),
+                                   static_cast<int8_t>(techIdx));
+
+        file<<secId<<delim;
         file<<bucketId<<delim;
-        file<<spacePoint.positionInChamber().x()<<delim;
-        file<<spacePoint.positionInChamber().y()<<delim;
-        file<<spacePoint.positionInChamber().z()<<delim;
+        file<<precCutOff(spacePoint.positionInChamber().x())<<delim;
+        file<<precCutOff(spacePoint.positionInChamber().y())<<delim;
+        file<<precCutOff(spacePoint.positionInChamber().z())<<delim;
         //
-        file<<spacePoint.directionInChamber().x()<<delim;
-        file<<spacePoint.directionInChamber().y()<<delim;
-        file<<spacePoint.directionInChamber().z()<<delim;
+        file<<precCutOff(spacePoint.directionInChamber().x())<<delim;
+        file<<precCutOff(spacePoint.directionInChamber().y())<<delim;
+        file<<precCutOff(spacePoint.directionInChamber().z())<<delim;
         //
-        file<<spacePoint.planeNormal().x()<<delim;
-        file<<spacePoint.planeNormal().y()<<delim;
-        file<<spacePoint.planeNormal().z()<<delim;
+        file<<precCutOff(spacePoint.planeNormal().x())<<delim;
+        file<<precCutOff(spacePoint.planeNormal().y())<<delim;
+        file<<precCutOff(spacePoint.planeNormal().z())<<delim;
         //
-        file<<spacePoint.covariance()(Amg::x, Amg::x)<<delim;
-        file<<spacePoint.covariance()(Amg::x, Amg::y)<<delim;
-        file<<spacePoint.covariance()(Amg::y, Amg::x)<<delim;
-        file<<spacePoint.covariance()(Amg::y, Amg::y)<<delim;
-        file<<spacePoint.driftRadius()<<delim;
+        file<<precCutOff(spacePoint.covariance()(Amg::x, Amg::x))<<delim;
+        file<<precCutOff(spacePoint.covariance()(Amg::x, Amg::y))<<delim;
+        file<<precCutOff(spacePoint.covariance()(Amg::y, Amg::x))<<delim;
+        file<<precCutOff(spacePoint.covariance()(Amg::y, Amg::y))<<delim;
+        file<<precCutOff(spacePoint.driftRadius())<<delim;
         file<<gasGap<<delim;
         file<<primaryCh<<delim;
-        file<<secondCh<<delim;
+        file<<spacePoint.measuresEta()<<delim;
+        file<<spacePoint.measuresPhi()<<delim;
         file<<std::endl;
    };
 
-   for(const SpacePointBucket* bucket : *readHandle) {
-       const SpacePointPerLayerSorter sorter{*bucket};
-       unsigned int gasGap{0};
-       for (const SpacePointPerLayerSorter::HitVec& mdtLayer : sorter.mdtHits()) {
-            ++gasGap;
-            for (const SpacePoint* spacePoint : mdtLayer) {
-                dumpToFile(bucket->bucketId(), *spacePoint, gasGap);
-            }
-       }
-       for (const SpacePointPerLayerSorter::HitVec& mdtLayer : sorter.stripHits()) {
-            ++gasGap;
-            for (const SpacePoint* spacePoint : mdtLayer) {
+   for (const SG::ReadHandleKey<SpacePointContainer>& key : m_readKeys) {
+        const SpacePointContainer* spContainer{nullptr};
+        ATH_CHECK(SG::get(spContainer, key, ctx));
+
+        const SpacePointPerLayerSorter layerSorter{m_idHelperSvc.get()};
+        for(const SpacePointBucket* bucket : *spContainer) {
+         std::unordered_map<Identifier, unsigned> gasNumbers{};
+         for (const SpacePointBucket::value_type& spacePoint:  *bucket) {
+                unsigned int gasGap{gasNumbers.insert(
+                                    std::make_pair(layerSorter.detectorLayerId(spacePoint->identify()), 
+                                                   gasNumbers.size())).first->second};
                 dumpToFile(bucket->bucketId(), *spacePoint, gasGap);
             }
         }

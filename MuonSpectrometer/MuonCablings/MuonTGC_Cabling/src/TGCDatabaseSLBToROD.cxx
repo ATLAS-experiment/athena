@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCDatabaseSLBToROD.h"
@@ -7,8 +7,7 @@
 #include <fstream>
 #include <sstream>
 
-namespace MuonTGC_Cabling 
-{
+namespace MuonTGC_Cabling {
 
 TGCDatabaseSLBToROD::TGCDatabaseSLBToROD(const std::string& filename,
                                          const std::string& blockname) 
@@ -16,11 +15,6 @@ TGCDatabaseSLBToROD::TGCDatabaseSLBToROD(const std::string& filename,
 {
   // read out ascii file and fill database
   TGCDatabaseSLBToROD::readDB();
-}
-
-TGCDatabaseSLBToROD::TGCDatabaseSLBToROD(const TGCDatabaseSLBToROD& right)
-  : TGCDatabase(right)
-{
 }
 
 void TGCDatabaseSLBToROD::readDB(void) {

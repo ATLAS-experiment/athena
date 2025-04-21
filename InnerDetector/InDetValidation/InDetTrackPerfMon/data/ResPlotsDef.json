@@ -194,47 +194,92 @@
 },
 "sigma_$TRKTAG_d0" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma(d_{0}) [mm]", "nBins" : "100", "low" : "0.0", "high" : "$D0RESMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #sigma(d_{0}) [mm]", "nBins" : "100", "low" : "0.0", "high" : "$D0RESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "sigma_$TRKTAG_z0" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma(z_{0}) [mm]", "nBins" : "100", "low" : "0.0", "high" : "$Z0RESMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #sigma(z_{0}) [mm]", "nBins" : "100", "low" : "0.0", "high" : "$Z0RESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "sigma_$TRKTAG_qoverp" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma(q/p) [GeV^{-1}]", "nBins" : "100", "low" : "0.0", "high" : "$QOPRESMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #sigma(q/p) [GeV^{-1}]", "nBins" : "100", "low" : "0.0", "high" : "$QOPRESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "sigma_$TRKTAG_ptqopt" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma(q/pT)", "nBins" : "100", "low" : "0.0", "high" : "$PTQOPTRESMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #sigma(q/p_{T})", "nBins" : "100", "low" : "0.0", "high" : "$PTQOPTRESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "sigma_$TRKTAG_theta" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma(#theta)", "nBins" : "100", "low" : "0.0", "high" : "$THETARESMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #sigma(#theta)", "nBins" : "100", "low" : "0.0", "high" : "$THETARESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "sigma_$TRKTAG_phi" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma(#phi)", "nBins" : "100", "low" : "0.0", "high" : "$PHIRESMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #sigma(#phi)", "nBins" : "100", "low" : "0.0", "high" : "$PHIRESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "sigma_$TRKTAG_pt" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma((p_{T}) [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+    "xAxis" : { "title" : "#$TRKTYPE sigma(p_{T}) [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
     "yAxis" : { "title" : "Entries" }
 },
 "sigma_$TRKTAG_z0sin" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma(z_{0}sin#theta) [mm]", "nBins" : "100", "low" : "0.0", "high" : "$Z0SINRESMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #sigma(z_{0}sin#theta) [mm]", "nBins" : "100", "low" : "0.0", "high" : "$Z0SINRESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "sigma_$TRKTAG_eta" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma(#eta)", "nBins" : "100", "low" : "0.0", "high" : "2.0" },
+    "xAxis" : { "title" : "$TRKTYPE #sigma(#eta)", "nBins" : "100", "low" : "0.0", "high" : "2.0" },
+    "yAxis" : { "title" : "Entries" }
+},
+"significance_$TRKTAG_d0" : {
+    "type" : "TH1F",
+    "xAxis" : { "title" : "$TRKTYPE d_{0} significance", "nBins" : "100", "low" : "-50.0", "high" : "50.0" },
+    "yAxis" : { "title" : "Entries" }
+},
+"significance_$TRKTAG_z0" : {
+    "type" : "TH1F",
+    "xAxis" : { "title" : "$TRKTYPE z_{0} significance", "nBins" : "100", "low" : "-50.0", "high" : "50.0" },
+    "yAxis" : { "title" : "Entries" }
+},
+"significance_$TRKTAG_qoverp" : {
+    "type" : "TH1F",
+    "xAxis" : { "title" : "$TRKTYPE q/p significance", "nBins" : "100", "low" : "-50.0", "high" : "50.0" },
+    "yAxis" : { "title" : "Entries" }
+},
+"significance_$TRKTAG_ptqopt" : {
+    "type" : "TH1F",
+    "xAxis" : { "title" : "$TRKTYPE q/p_{T} significance", "nBins" : "100", "low" : "-50.0", "high" : "50.0" },
+    "yAxis" : { "title" : "Entries" }
+},
+"significance_$TRKTAG_theta" : {
+    "type" : "TH1F",
+    "xAxis" : { "title" : "$TRKTYPE #theta significance", "nBins" : "100", "low" : "-50.0", "high" : "50.0" },
+    "yAxis" : { "title" : "Entries" }
+},
+"significance_$TRKTAG_phi" : {
+    "type" : "TH1F",
+    "xAxis" : { "title" : "$TRKTYPE #phi significance", "nBins" : "100", "low" : "-50.0", "high" : "50.0" },
+    "yAxis" : { "title" : "Entries" }
+},
+"significance_$TRKTAG_pt" : {
+    "type" : "TH1F",
+    "xAxis" : { "title" : "$TRKTYPE p_{T} significance", "nBins" : "100", "low" : "-50.0", "high" : "50.0" },
+    "yAxis" : { "title" : "Entries" }
+},
+"significance_$TRKTAG_z0sin" : {
+    "type" : "TH1F",
+    "xAxis" : { "title" : "$TRKTYPE z_{0}sin#theta significance", "nBins" : "100", "low" : "-50.0", "high" : "50.0" },
+    "yAxis" : { "title" : "Entries" }
+},
+"significance_$TRKTAG_eta" : {
+    "type" : "TH1F",
+    "xAxis" : { "title" : "$TRKTYPE #eta significance", "nBins" : "100", "low" : "-50.0", "high" : "50.0" },
     "yAxis" : { "title" : "Entries" }
 },
 "pull_d0" : {

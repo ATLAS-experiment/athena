@@ -34,7 +34,7 @@ class PixeldEdxAlg : public AthAlgorithm {
 
   private:
 
-    const PixelID* m_pixelID;
+    const PixelID* m_pixelID{};
 
     Gaudi::Property<std::string> m_filename
     {this, "CalibrationFile", "mcpar_signed_234.txt","Read dEdx from this file"}; 

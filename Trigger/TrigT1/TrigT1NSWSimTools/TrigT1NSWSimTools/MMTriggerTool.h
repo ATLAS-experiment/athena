@@ -23,10 +23,6 @@
 #include "GeneratorObjects/McEventCollection.h"
 #include "TrackRecord/TrackRecordCollection.h"
 
-namespace MuonGM {
-  class MuonDetectorManager;
-}
-
 
 // namespace for the NSW LVL1 related classes
 namespace NSWL1 {
@@ -43,15 +39,16 @@ namespace NSWL1 {
     StatusCode runTrigger(const EventContext& ctx, Muon::NSW_TrigRawDataContainer* rdo, const bool do_MMDiamonds) const override;
 
   private:
-    // read data handle
     SG::ReadHandleKey<McEventCollection> m_keyMcEventCollection{this,"McEventCollection","TruthEvent","Location of TruthEvent"};
     SG::ReadHandleKey<TrackRecordCollection> m_keyMuonEntryLayer{this,"MuonEntryLayer","MuonEntryLayer","Location of MuonEntryLayer"};
     SG::ReadHandleKey<MmDigitContainer> m_keyMmDigitContainer{this,"MmDigitContainer","MM_DIGITS","Location of MmDigitContainer"};
+    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detectorManagerKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of MuonDetectorManager condition data"};
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+
     Gaudi::Property<bool>  m_isMC            {this, "IsMC",         true, "This is MC"};
     Gaudi::Property<bool>  m_doTruth         {this, "DoTruth",     false, "Process truth information. Disabled by default"};
 
     // Parameters for Diamond Road algorithms
-    Gaudi::Property<bool>  m_trapShape            {this, "TrapezoidalShape",         true, "Consider the quadruplet as a trapezoid"};
     Gaudi::Property<int>   m_diamRoadSize         {this, "DiamondRoadSize",          8,    "Number of strips to create a road"};
     Gaudi::Property<bool>  m_uv                   {this, "DiamondUV",                true, "Include Stereo planes for tracking"};
     Gaudi::Property<int>   m_diamXthreshold       {this, "DiamondEtaThreshold",      3,    "Number of Eta planes for coincidences"};
@@ -74,18 +71,12 @@ namespace NSWL1 {
     Gaudi::Property<float>        m_dThetaMax       {this, "DThetaMax",  0.015,          "Maximum dTheta [rad]"};
     Gaudi::Property<int>          m_dThetaBits      {this, "DThetaBits", 5,              "Number of dTheta bits"};
 
-    mutable std::shared_ptr<MMT_Parameters> m_par_large ATLAS_THREAD_SAFE{nullptr};
-    mutable std::shared_ptr<MMT_Parameters> m_par_small ATLAS_THREAD_SAFE{nullptr};
-    mutable std::atomic<bool> m_isInitialized ATLAS_THREAD_SAFE{false};
-    mutable std::mutex m_mutex ATLAS_THREAD_SAFE{};
-    void fillPointers(const MuonGM::MuonDetectorManager* detManager) const;
-    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detManagerKey{this, "MuonManagerKey", "MuonDetectorManager"};
-    const MmIdHelper* m_MmIdHelper;        //!< MM offline Id helper
+    std::unique_ptr<MMT_Diamond> m_diamond;
 
     std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_ntrig ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_bc ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<char> > m_trigger_diamond_sector ATLAS_THREAD_SAFE {};
-    std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_stationPhi ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_sectorPhi ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_totalCount ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_realCount ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_iX ATLAS_THREAD_SAFE {};

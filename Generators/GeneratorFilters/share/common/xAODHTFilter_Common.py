@@ -11,6 +11,7 @@ from GeneratorFilters.GeneratorFiltersConf import xAODHTFilter
 if "xAODHTFilter" not in filtSeq:
     filtSeq += xAODHTFilter()
 
+from AthenaCommon.SystemOfUnits import GeV
 #filtSeq.xAODHTFilter.MinJetPt = 20.*GeV # Min pT to consider jet in HT
 #filtSeq.xAODHTFilter.MaxJetEta = 999. # Max eta to consider jet in HT
 #filtSeq.xAODHTFilter.MinHT = 200.*GeV # Min HT to keep event

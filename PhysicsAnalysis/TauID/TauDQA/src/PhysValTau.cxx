@@ -26,17 +26,8 @@
 PhysValTau::PhysValTau(const std::string& type, 
 		       const std::string& name, 
                        const IInterface* parent) : 
-  ManagedMonitorToolBase(type, name, parent),
-  m_truthTool("TauAnalysisTools::TauTruthMatchingTool/TauTruthMatchingTool", this),
-  m_primTauSel("TauAnalysisTools::TauSelectionTool/PrimitiveTauSelectionTool", this),
-  m_nomiTauSel("TauAnalysisTools::TauSelectionTool/NominalTauSelectionTool", this)
+  ManagedMonitorToolBase(type, name, parent)
 {
-  declareProperty("TauContainerName", m_TauJetContainerName = "TauJets");
-  declareProperty("TruthParticleContainerName", m_TruthParticleContainerName = "TruthParticles");
-  declareProperty("isMC", m_isMC = false);
-  declareProperty("TauTruthMatchingTool", m_truthTool);
-  declareProperty("PrimitiveTauSelectionTool", m_primTauSel);
-  declareProperty("NominalTauSelectionTool", m_nomiTauSel);
 }
 
 
@@ -74,7 +65,7 @@ StatusCode PhysValTau::bookHistograms()
 
 StatusCode PhysValTau::fillHistograms()
 {
-  ATH_MSG_INFO ("Filling hists " << name() << "...");
+  ATH_MSG_DEBUG ("Filling hists " << name() << "...");
 
   // Retrieve tau container
   const xAOD::TauJetContainer* taus = nullptr;
@@ -145,29 +136,35 @@ StatusCode PhysValTau::fillHistograms()
 	  ATH_MSG_DEBUG("Tau is hadronic tau");
 	  m_oTauValidationPlots->m_oGeneralTauAllProngsPlots.fill(*tau, weight);
 	  m_oTauValidationPlots->m_oNewCoreMatchedPlots.fill(*tau, weight);
+	  m_oTauValidationPlots->m_oMatchedResolutionPlots.fill(*tau, *trueTau, weight);
 	  // Substructure/PFO histograms 
 	  m_oTauValidationPlots->m_oMatchedTauAllProngsPlots.fill(*tau, weight);
 	  m_oTauValidationPlots->m_oMatchedTauEffPlots.fill(*tau, weight);
 	  if ( nominal ) {
 	    m_oTauValidationPlots->m_oMatchedGeneralNom.fill(*tau, weight);
+	    m_oTauValidationPlots->m_oMatchedResolutionPlotsNom.fill(*tau, *trueTau, weight);
 	    m_oTauValidationPlots->m_oMatchedTauEffPlotsNom.fill(*tau, weight);
 	    m_oTauValidationPlots->m_oMatchedTauRecoTauPlotsNom.fill(*tau, weight);
 	    m_oTauValidationPlots->m_oNewCoreMatchedPlotsNom.fill(*tau, weight);
 	  }
 	  if ( recProng == 1 ) {
 	    m_oTauValidationPlots->m_oHad1ProngPlots.fill(*tau, weight);
-	    m_oTauValidationPlots->m_oMatchedTauEff1PPlots.fill(*tau, weight);  
+	    m_oTauValidationPlots->m_oMatchedTauEff1PPlots.fill(*tau, weight);
+	     m_oTauValidationPlots->m_oMatchedResolution1PPlots.fill(*tau, *trueTau, weight);
 	    if ( nominal ) {
 	      m_oTauValidationPlots->m_oMatchedHad1ProngNom.fill(*tau, weight);
 	      m_oTauValidationPlots->m_oMatchedTauEff1PPlotsNom.fill(*tau, weight);
+	      m_oTauValidationPlots->m_oMatchedResolution1PPlotsNom.fill(*tau, *trueTau, weight);
 	    }
 	  }
 	  else if ( recProng == 3 ) {
 	    m_oTauValidationPlots->m_oHad3ProngPlots.fill(*tau, weight);
-	    m_oTauValidationPlots->m_oMatchedTauEff3PPlots.fill(*tau, weight);  
+	    m_oTauValidationPlots->m_oMatchedTauEff3PPlots.fill(*tau, weight);
+	    m_oTauValidationPlots->m_oMatchedResolution3PPlots.fill(*tau, *trueTau, weight);
 	    if ( nominal ) {
 	      m_oTauValidationPlots->m_oMatchedHad3ProngNom.fill(*tau, weight);
 	      m_oTauValidationPlots->m_oMatchedTauEff3PPlotsNom.fill(*tau, weight);
+	      m_oTauValidationPlots->m_oMatchedResolution3PPlotsNom.fill(*tau, *trueTau, weight);
 	    }
 	  }
 

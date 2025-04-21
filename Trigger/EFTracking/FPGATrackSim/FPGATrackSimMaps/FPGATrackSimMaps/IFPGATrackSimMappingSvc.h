@@ -28,6 +28,8 @@ class IFPGATrackSimMappingSvc: virtual public IService
         virtual const FPGATrackSimRegionMap* SubRegionMap_2nd() const = 0;
         virtual std::string getFakeNNMapString() const = 0;
         virtual std::string getParamNNMapString() const = 0;
+        virtual std::string getFakeNNMap2ndString() const = 0;
+        virtual std::string getParamNNMap2ndString() const = 0;
         virtual std::string getExtensionNNHitMapString() const = 0;
         virtual std::string getExtensionNNVolMapString() const = 0;
 

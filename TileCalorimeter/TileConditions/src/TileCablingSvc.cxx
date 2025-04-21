@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi includes
@@ -26,13 +26,6 @@
 
 
 //
-//____________________________________________________________________
-static const InterfaceID IID_TileCablingSvc("TileCablingSvc", 1, 0);
-const InterfaceID& TileCablingSvc::interfaceID() {
-  return IID_TileCablingSvc;
-}
-
-//
 //_____________________________________________________________________________
 TileCablingSvc::TileCablingSvc(const std::string& name, ISvcLocator* pSvcLocator)
     : AthService(name, pSvcLocator)
@@ -42,18 +35,6 @@ TileCablingSvc::TileCablingSvc(const std::string& name, ISvcLocator* pSvcLocator
   declareProperty("ConnectedDrawers", m_connectedDrawers, "List of connected drawer ranges: starts,end1,start2,end2,...");
   declareProperty("CablingType", m_cablingType = -9, "Cabling type: -1 - testbeam, 0 - old simulation, 1 - without MBTS, 2 - with MBTS instead of crack scin, 3 - MBTS in spare channels, 4 - RUN2 cabling, 5 - RUN2a cabling");
   declareProperty("UseCache", m_useCache = true, "Use cache for channel_id to cell_id conversion");
-}
-
-//
-//_____________________________________________________________________________
-StatusCode TileCablingSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-  if (TileCablingSvc::interfaceID().versionMatch(riid)) {
-    *ppvInterface = dynamic_cast<TileCablingSvc*>(this);
-  } else {
-    return AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 //
@@ -630,12 +611,5 @@ StatusCode TileCablingSvc::initialize ATLAS_NOT_THREAD_SAFE () {
 
   if (m_useCache) cablingService->fillH2SIdCache();
 
-  return StatusCode::SUCCESS;
-}
-
-//
-//_____________________________________________________________________________
-StatusCode TileCablingSvc::finalize() {
-  ATH_MSG_DEBUG( "finalized" );
   return StatusCode::SUCCESS;
 }

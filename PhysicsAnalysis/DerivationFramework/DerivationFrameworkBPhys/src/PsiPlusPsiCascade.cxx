@@ -255,7 +255,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  PsiPlusPsiCascade::PsiPlusPsiCascade(const std::string& type, const std::string& name, const IInterface* parent) : AthAlgTool(type,name,parent),
+  PsiPlusPsiCascade::PsiPlusPsiCascade(const std::string& type, const std::string& name, const IInterface* parent) : base_class(type,name,parent),
     m_vertexPsi1ContainerKey(""),
     m_vertexPsi2ContainerKey(""),
     m_cascadeOutputsKeys({"PsiPlusPsiCascadeVtx1", "PsiPlusPsiCascadeVtx2", "PsiPlusPsiCascadeVtx3"}),

@@ -8,7 +8,7 @@ atlas_add_component (L0MuonS1RPC
         src/*.cxx src/components/*.cxx
         INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
 	LINK_LIBRARIES AnaAlgorithmLib AthenaKernel xAODMuonRDO MuonDigitContainer xAODTrigger AthenaMonitoringKernelLib
-	MuonCablingData xAODTrigger
+	MuonCablingData xAODTrigger L0MuonInterface
         PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} )
 
 

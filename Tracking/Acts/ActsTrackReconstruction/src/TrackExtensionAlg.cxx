@@ -23,7 +23,6 @@
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "Acts/MagneticField/MagneticFieldProvider.hpp"
 #include "Acts/Surfaces/Surface.hpp"
-#include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
@@ -88,10 +87,6 @@ namespace ActsTrk{
     // Using the CKF propagator as extrapolator
     detail::Extrapolator extrapolator = propagator;
 
-    // most trivial measurement selector
-    Acts::MeasurementSelectorCuts measurementSelectorCuts({-4.0, 4.0});
-    Acts::MeasurementSelector measurementSelector(measurementSelectorCuts);
-
 
     // update once shared code for configuring this is available
     Acts::TrackSelector::EtaBinnedConfig trackSelectorCfg(std::vector<double>({0, 4}));
@@ -105,10 +100,9 @@ namespace ActsTrk{
 
     detail::CKF_config ckfConfig{
         std::move(extrapolator),
-        {std::move(propagator), m_logger->cloneWithSuffix("CKF")},
-        measurementSelector,
+        detail::CKF{std::move(propagator), m_logger->cloneWithSuffix("CKF")},
         {},
-        trackSelectorCfg};
+        Acts::TrackSelector{trackSelectorCfg}};
 
     m_ckfConfig = std::make_unique<detail::CKF_config>(std::move(ckfConfig));
     return StatusCode::SUCCESS;

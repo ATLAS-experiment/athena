@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TruthParticle_v1.cxx 690336 2015-08-20 10:54:57Z abuckley $
@@ -313,7 +313,9 @@ namespace xAOD {
 
 // Forget about this macro:
 #undef MC_PID_HELPER
-   bool TruthParticle_v1::isGenStable() const { return MC::isGenStable(this);};
+   bool TruthParticle_v1::isGenStable() const { return MC::isGenStable(this); };
+   bool TruthParticle_v1::isStable() const { return MC::isStable(this); };
+   bool TruthParticle_v1::isSimulationParticle() const { return HepMC::is_simulation_particle(this); };
 
 
 

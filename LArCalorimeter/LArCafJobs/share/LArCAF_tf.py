@@ -33,6 +33,10 @@ if __name__ == '__main__':
                             type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='output'),
                             help='Output HECNoise file', group='Ntuple Files')
 
+    trf.parser.add_argument('--doSC', type=trfArgClasses.argFactory(trfArgClasses.argBool),
+                            help='Fill also SC info (default: True)', group='LArCAF_tf',
+                            default=trfArgClasses.argBool(True))
+
     trf.parseCmdLineArgs(sys.argv[1:])
     trf.execute()
     trf.generateReport()

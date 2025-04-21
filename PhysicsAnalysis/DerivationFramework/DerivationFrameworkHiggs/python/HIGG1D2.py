@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_HIGG1D2.py
@@ -107,7 +107,7 @@ def HIGG1D2KernelCfg(flags, name='HIGG1D2Kernel', **kwargs):
         truth_cond_2 = "((abs(TruthParticles.pdgId) >= 11) && (abs(TruthParticles.pdgId) <= 16))" # Leptons
         truth_cond_3 = "((abs(TruthParticles.pdgId) ==  6))"                                     # Top quark
         truth_cond_4 = "((abs(TruthParticles.pdgId) == 22) && (TruthParticles.pt > 1*GeV))"       # Photon
-        truth_cond_finalState = '(TruthParticles.status == 1 && TruthParticles.barcode < 200000)' # stable particles
+        truth_cond_finalState = '(TruthParticles.isGenStable)' # stable particles
         truth_expression = '('+truth_cond_1+' || '+truth_cond_2 +' || '+truth_cond_3 +' || '+truth_cond_4+') || ('+truth_cond_finalState+')'
     
         HIGG1D2GenericTruthThinningTool   = acc.getPrimaryAndMerge(GenericTruthThinningCfg(
@@ -255,9 +255,8 @@ def HIGG1D2Cfg(flags):
                                             "EventInfo.hardScatterVertexLink.timeStampNSOffset"]
     
     # Add Btagging information
-    from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent, BTaggingXbbContent
+    from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
     HIGG1D2SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowJets", flags)
-    HIGG1D2SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowJets", flags)
     
     # Truth containers
     if flags.Input.isMC:

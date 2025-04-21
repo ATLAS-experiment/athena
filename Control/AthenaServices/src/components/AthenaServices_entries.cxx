@@ -25,8 +25,6 @@
 #include "../AthenaHiveEventLoopMgr.h"
 #include "../AthenaMtesEventLoopMgr.h"
 #include "../AthIncFirerAlg.h"
-#include "../ToyNextPassFilterAlg.h"
-#include "../ToyNextPassFilterTool.h"
 #include "../ConditionsCleanerSvc.h"
 #include "../DelayedConditionsCleanerSvc.h"
 #include "../DecisionAlg.h"
@@ -59,8 +57,6 @@ DECLARE_COMPONENT( OutputStreamSequencerSvc )
 DECLARE_COMPONENT( AthenaOutputStreamTool )
 DECLARE_COMPONENT( Athena::ThinningCacheTool )
 DECLARE_COMPONENT( AthIncFirerAlg )
-DECLARE_COMPONENT( ToyNextPassFilterAlg )
-DECLARE_COMPONENT( ToyNextPassFilterTool )
 DECLARE_COMPONENT( Athena::ConditionsCleanerSvc )
 DECLARE_COMPONENT( Athena::DelayedConditionsCleanerSvc )
 DECLARE_COMPONENT( DecisionAlg )

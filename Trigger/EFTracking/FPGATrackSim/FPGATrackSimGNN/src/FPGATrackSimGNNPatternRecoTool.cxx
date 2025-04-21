@@ -2,14 +2,6 @@
 
 #include "FPGATrackSimGNNPatternRecoTool.h"
 
-///////////////////////////////////////////////////////////////////////////////
-// AthAlgTool
-
-FPGATrackSimGNNPatternRecoTool::FPGATrackSimGNNPatternRecoTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
-  base_class(algname, name, ifc)
-{
-  declareInterface<IFPGATrackSimRoadFinderTool>(this);
-}
 
 StatusCode FPGATrackSimGNNPatternRecoTool::initialize()
 {

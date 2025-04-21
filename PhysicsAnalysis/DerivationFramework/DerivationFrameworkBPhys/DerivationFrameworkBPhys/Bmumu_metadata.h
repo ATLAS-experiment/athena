@@ -31,7 +31,7 @@ namespace DerivationFramework {
   /// Store JO metadata specific to the Bmumu analysis in the output file.
   /// This class inherits from BPhysMetadataBase.
   ///
-  class Bmumu_metadata : virtual public BPhysMetadataBase {
+  class Bmumu_metadata : public BPhysMetadataBase {
     public: 
     /// @brief Main constructor
     Bmumu_metadata(const std::string& t, const std::string& n,

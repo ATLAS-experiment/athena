@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv_p3.cxx
@@ -22,12 +22,7 @@ void DataHeaderElementCnv_p3::persToTrans(const DataHeaderElement_p3* pers,
 	DataHeaderElement* trans,
 	const std::vector<std::string>& map) {
    trans->m_pClid = *pers->m_clids.begin();
-   trans->m_clids.clear();
-   std::set<CLID>::iterator lastClid = trans->m_clids.begin();
-   for (std::vector<unsigned int>::const_iterator iter = pers->m_clids.begin() + 1,
-		   last = pers->m_clids.end(); iter != last; ++iter) {
-      lastClid = trans->m_clids.insert(lastClid, *iter);
-   }
+   trans->m_clids.assign (pers->m_clids.begin()+1, pers->m_clids.end());
    trans->m_key = *pers->m_alias.begin();
    trans->m_alias.clear();
    std::set<std::string>::iterator lastAlias = trans->m_alias.begin();
@@ -78,9 +73,7 @@ void DataHeaderElementCnv_p3::persToTrans(const DataHeaderElement_p3* pers,
       snprintf(text, length, "][TECH=%08X][OID=%08X-%08X]", pers->m_technology, pers->m_oid1, pers->m_oid2);
       tokenStr.append(text);
    }
-   Token* token = new Token;
-   token->fromString(tokenStr);
-   delete trans->m_token; trans->m_token = token;
+   trans->m_token.fromString(tokenStr);
 }
 //______________________________________________________________________________
 void DataHeaderElementCnv_p3::transToPers(const DataHeaderElement* /*trans*/,

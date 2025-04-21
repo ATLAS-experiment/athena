@@ -2,9 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETPATTRECOTOOLS_SEEDINGTOOLBASE_IPP
-#define TRIGINDETPATTRECOTOOLS_SEEDINGTOOLBASE_IPP
-
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetIdentifier/PixelID.h" 
 
@@ -57,8 +54,9 @@ StatusCode SeedingToolBase::initialize() {
 
   ATH_MSG_DEBUG("Property useML "<< m_useML);
   ATH_MSG_DEBUG("Property DoPhiFiltering "<<m_filter_phi);
-  ATH_MSG_DEBUG("Property pTmin"<<m_minPt);
-
+  ATH_MSG_DEBUG("Property pTmin "<<m_minPt);
+  ATH_MSG_DEBUG("Property LRTmode "<<m_LRTmode);
+ 
   return StatusCode::SUCCESS;
 }
 
@@ -207,34 +205,35 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	      continue;
 	    }
 	  }
-	
-	  //match edge candidate against edges incoming to n2
 
 	  float exp_eta = std::sqrt(1+tau*tau)-tau;
+	  
+	  if (m_matchBeforeCreate) {//match edge candidate against edges incoming to n2
 
-	  bool isGood = v2In.size() <= 2;//we must have enough incoming edges to decide
+	    bool isGood = v2In.size() <= 2;//we must have enough incoming edges to decide
 
-	  if(!isGood) {
+	    if(!isGood) {
 
-	    float uat_1 = 1.0f/exp_eta;
+	      float uat_1 = 1.0f/exp_eta;
 		    
-	    for(const auto& n2_in_idx : v2In) {
+	      for(const auto& n2_in_idx : v2In) {
 		    
-	      float tau2 = edgeStorage.at(n2_in_idx).m_p[0]; 
-	      float tau_ratio = tau2*uat_1 - 1.0f;
-	      
-	      if(std::fabs(tau_ratio) > cut_tau_ratio_max){//bad match
-		continue;
+		float tau2 = edgeStorage.at(n2_in_idx).m_p[0]; 
+		float tau_ratio = tau2*uat_1 - 1.0f;
+		
+		if(std::fabs(tau_ratio) > cut_tau_ratio_max){//bad match
+		  continue;
+		}
+		isGood = true;//good match found
+		break;
 	      }
-	      isGood = true;//good match found
-	      break;
+	    }
+	    
+	    if(!isGood) {//no match found, skip creating [n1 <- n2] edge
+	      continue;
 	    }
 	  }
-	
-	  if(!isGood) {//no match found, skip creating [n1 <- n2] edge
-	    continue;
-	  }
-
+	  
 	  float dPhi2 = curv*r2;
 	  float dPhi1 = curv*r1;
 	
@@ -359,5 +358,3 @@ int SeedingToolBase::runCCA(int nEdges, std::vector<TrigFTF_GNN_Edge>& edgeStora
   return maxLevel;  
 }
 
-
-#endif

@@ -30,8 +30,6 @@
 #include "StoreGate/ReadHandle.h"
 #include "AthContainers/ConstAccessor.h"
 
-#include <iostream>
-
 #include "TruthUtils/HepMCHelpers.h"
 
 using CLHEP::GeV;
@@ -546,7 +544,7 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::Truth
                             m_oPhotonValidationPlots.res_eta_cut->Fill(thePart->eta(),EtLin,weight);
                         }
                     }else {
-                        cout<<"Truth particle associated not in egamma truth collection"<<endl;
+  		        ATH_MSG_INFO("Truth particle associated not in egamma truth collection");
                     }
                 }
                 

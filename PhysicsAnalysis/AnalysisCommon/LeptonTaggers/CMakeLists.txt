@@ -21,7 +21,7 @@ atlas_add_library( LeptonTaggersLib
    FourMomUtils
    GaudiKernel
    PathResolver
-   FlavorTagDiscriminants
+   FlavorTagInference
    TrkVertexFitterInterfaces
    xAODBase xAODBTagging xAODEgamma
    xAODEventInfo xAODJet xAODMuon xAODTracking )

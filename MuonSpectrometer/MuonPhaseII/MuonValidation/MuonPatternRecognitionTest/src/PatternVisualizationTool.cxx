@@ -253,7 +253,10 @@ namespace MuonValR4 {
             return;
         }
         auto truthHits = getMatchingSimHits(truthSeg);
-        SG::ReadHandle geoCtx{m_geoCtxKey, ctx};
+        const ActsGeometryContext* geoCtx{nullptr};
+        if (!SG::get(geoCtx, m_geoCtxKey, ctx).isSuccess()) {
+            return;
+        }
         for (const xAOD::MuonSimHit* simHit :  truthHits) {
             const MuonGMR4::MuonReadoutElement* re = m_detMgr->getReadoutElement(simHit->identify());
             const IdentifierHash hash = re->detectorType() == ActsTrk::DetectorType::Mdt ?
@@ -444,7 +447,10 @@ namespace MuonValR4 {
         }
         Parameters segPars{};
         {
-            SG::ReadHandle geoCtx{m_geoCtxKey, ctx};
+            const ActsGeometryContext* geoCtx{nullptr};
+            if (!SG::get(geoCtx, m_geoCtxKey, ctx).isSuccess()) {
+                return;
+            }
             const Amg::Transform3D trf{segment.msSector()->globalToLocalTrans(*geoCtx)};
             const Amg::Vector3D locPos = trf * segment.position();
             const Amg::Vector3D locDir = trf.linear() * segment.direction();
@@ -644,8 +650,10 @@ namespace MuonValR4 {
         for (const SpacePointType& hit : hits) { 
             const SpacePoint* underlyingSp{nullptr};
             double chi2{0.};
-            if constexpr( std::is_same_v<SpacePointType, Segment::MeasType>) {
+            bool displayChi2{true};
+            if constexpr(std::is_same_v<SpacePointType, Segment::MeasType>) {
                 underlyingSp = hit->spacePoint();
+                displayChi2 = (hit->fitState() == CalibratedSpacePoint::State::Valid );
                 chi2 = SegmentFitHelpers::chiSqTerm(locPos, locDir, pars[toInt(AxisDefs::t0)], 
                                                     std::nullopt, *hit, msgStream());
             } else {
@@ -688,11 +696,17 @@ namespace MuonValR4 {
                                                idHelper.multilayer(hitId), idHelper.gasGap(hitId),
                                                hit->measuresEta() ? "si" : "nay", hit->measuresPhi() ? "si" : "nay");
                     break;
-                } 
+                }  case xAOD::UncalibMeasType::Other: {
+                    legendstream = "Ext. constaint";
+                }
                 default:
                     break;
             }
-            legendstream+=std::format(", #chi^{{2}}: {:.2f}", chi2);
+            if (displayChi2) {
+                legendstream+=std::format(", #chi^{{2}}: {:.2f}", chi2);
+            } else {
+                legendstream+=", #chi^{2}: ---";
+            }
             primitives.push_back(drawLabel(legendstream, legX, startLegY, 14));
             startLegY -= 0.05;
             if (startLegY<= endLegY) {

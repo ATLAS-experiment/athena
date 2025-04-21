@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetTrackScoringTools package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -164,6 +164,7 @@ def InDetCosmicsScoringToolCfg(flags, name='InDetCosmicsScoringTool', **kwargs):
     kwargs.setdefault("nWeightedClustersMin",
                       flags.Tracking.ActiveConfig.nWeightedClustersMin)
     kwargs.setdefault("minTRTHits", 0)
+    kwargs.setdefault("maxZImp", flags.Tracking.ActiveConfig.maxZImpact)
 
     acc.setPrivateTools(CompFactory.InDet.InDetCosmicScoringTool(
         name+flags.Tracking.ActiveConfig.extension, **kwargs))
@@ -340,6 +341,7 @@ def ITkCosmicsScoringToolCfg(flags, name='ITkCosmicsScoringTool', **kwargs):
     kwargs.setdefault("nWeightedClustersMin",
                       flags.Tracking.ActiveConfig.nWeightedClustersMin)
     kwargs.setdefault("minTRTHits", 0)
+    kwargs.setdefault("maxZImp", flags.Tracking.ActiveConfig.maxZImpact)
 
     acc.setPrivateTools(CompFactory.InDet.InDetCosmicScoringTool(
         name+flags.ITk.Tracking.ActiveConfig.extension, **kwargs))

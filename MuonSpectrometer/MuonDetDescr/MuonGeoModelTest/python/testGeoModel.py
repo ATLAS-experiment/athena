@@ -4,6 +4,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def SetupArgParser():
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
+
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
@@ -13,13 +15,13 @@ def SetupArgParser():
                         "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"
                         ], 
                         help="Input file to run on ", nargs="+")
-    parser.add_argument("--geoTag", default="ATLAS-R3S-2021-03-02-00", help="Geometry tag to use", choices=["ATLAS-R2-2016-01-02-01",
-                                                                                     "ATLAS-R3S-2021-03-02-00"])
-    parser.add_argument("--condTag", default="OFLCOND-MC23-SDR-RUN3-09", help="Conditions tag to use",
-                                                                         choices=["OFLCOND-MC16-SDR-RUN2-11",
-                                                                                  "OFLCOND-MC23-SDR-RUN3-09",
-                                                                                  "CONDBR2-BLKPA-2024-03",
-                                                                                  "CONDBR2-BLKPA-RUN2-11"])
+    parser.add_argument("--geoTag", default=defaultGeometryTags.RUN3, help="Geometry tag to use", choices=[defaultGeometryTags.RUN2_BEST_KNOWLEDGE ,
+                                                                                                           defaultGeometryTags.RUN3])
+    parser.add_argument("--condTag", default=defaultConditionsTags.RUN3_MC, help="Conditions tag to use",
+                                                                            choices=[defaultConditionsTags.RUN3_MC,
+                                                                                     defaultConditionsTags.RUN3_DATA,
+                                                                                     defaultConditionsTags.RUN2_DATA,
+                                                                                     defaultConditionsTags.RUN2_MC])
     parser.add_argument("--chambers", default=["all"
     ], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
     parser.add_argument("--excludedChambers", default=[], nargs="+", help="Chambers to exclude. If string contains 'none', all chambers will be checked. Note: adding a chamber to --excludedChambers will overwrite it being in --chambers.")

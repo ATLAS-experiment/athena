@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAOUTPUTSTREAMTOOL_H
@@ -15,6 +15,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include <string>
+#include <map>
+#include <regex>
 
 class IClassIDSvc;
 class IDecisionSvc;
@@ -34,39 +36,36 @@ public:
    AthenaOutputStreamTool(const std::string& type,
 	   const std::string& name,
 	   const IInterface* parent);
-   /// Destructor
-   virtual ~AthenaOutputStreamTool();
 
    /// AthAlgTool Interface method implementations:
-   StatusCode initialize();
-   StatusCode finalize();
+   virtual StatusCode initialize() override;
 
    /// Specify which data store and conversion service to use
    /// and whether to extend provenance
    ///   Only use if one wants to override jobOptions
    StatusCode connectServices(const std::string& dataStore,
 	   const std::string& cnvSvc,
-	   bool extendProvenenceRecord);
+	   bool extendProvenenceRecord) override;
 
    /// Connect to the output stream
    ///   Must connectOutput BEFORE streaming
    ///   Only specify "outputName" if one wants to override jobOptions
-   StatusCode connectOutput(const std::string& outputName = "");
+   StatusCode connectOutput(const std::string& outputName = "") override;
 
    /// Commit the output stream after having streamed out objects
    ///   Must commitOutput AFTER streaming
-   StatusCode commitOutput(bool doCommit = false);
+   StatusCode commitOutput(bool doCommit = false) override;
 
    /// Finalize the output stream after the last commit, e.g. in
    /// finalize
-   StatusCode finalizeOutput();
+   StatusCode finalizeOutput() override;
 
    /// Stream out objects. Provide vector of typeName/key pairs.
    ///   If key is empty, assumes only one object and this
    ///   will fail if there is more than one
    typedef std::pair<std::string, std::string> TypeKeyPair;
    typedef std::vector<TypeKeyPair>            TypeKeyPairs;
-   virtual StatusCode streamObjects(const TypeKeyPairs& typeKeys, const std::string& outputName = "");
+   virtual StatusCode streamObjects(const TypeKeyPairs& typeKeys, const std::string& outputName = "") override;
 
    /// Stream out a vector of objects
    ///   Must convert to DataObject, e.g.
@@ -74,13 +73,15 @@ public:
    ///     T* obj = xxx;
    ///     DataObject* dataObject = SG::asStorable(obj);
    typedef std::vector<DataObject*> DataObjectVec;
-   virtual StatusCode streamObjects(const DataObjectVec& dataObjects, const std::string& outputName = "");
+   virtual StatusCode streamObjects(const DataObjectVec& dataObjects, const std::string& outputName = "") override;
 
-   virtual StatusCode getInputItemList(SG::IFolder* m_p2BWrittenFromTool);
+   virtual StatusCode getInputItemList(SG::IFolder* m_p2BWrittenFromTool) override;
 
 private:
    /// Do the real connection to services
-   virtual StatusCode connectServices();
+   StatusCode connectServices();
+   /// copy provenance records when creating new DataHeaders
+   void propagateProvenance( const DataHeader& src_dh );
 
 private:
    StringProperty  m_outputName{ this, "OutputFile", "", "name of the output db name"};
@@ -92,8 +93,10 @@ private:
    StringProperty  m_metaDataOutputCollection{ this, "MetaDataOutputCollection", "", "custom container name prefix for MetaDataHeader: default = "" (will result in \"MetaDataHdr\")"};
    StringProperty  m_metaDataContainerPrefix{ this, "MetaDataPoolContainerPrefix", "", "prefix for top level MetaData container: default = "" (will result in \"MetaData\")"};
    StringProperty  m_branchNameHint{ this, "SubLevelBranchName", "0", "naming hint policy for POOL branching: default = \"0\"" };
-   std::string  m_outputAttributes{""};
-   std::string  m_metaDataOutputAttributes{""};
+   BooleanProperty m_extend{ this, "SaveDecisions", false, "Set to true to add streaming decisions to an attributeList"};
+
+   std::string  m_outputAttributes;
+   std::string  m_metaDataOutputAttributes;
    SG::ReadHandleKey<AthenaAttributeList>  m_attrListKey{this, "AttributeListKey", "", "optional key for AttributeList to be written as part of the DataHeader: default = \"\""};
    //SG::WriteHandleKey<AthenaAttributeList>  m_attrListWrite{this, "AttributeListWrite", "", "optional key for AttributeList to be written as part of the DataHeader: default = <AttributeListKey>+\"Decisions\""};
    std::string  m_attrListWrite{""};
@@ -106,14 +109,19 @@ private:
    /// Ref to DecisionSvc
    ServiceHandle<IDecisionSvc>   m_decSvc;
    /// Current DataHeader for streamed objects
-   DataHeader*     m_dataHeader;
+   DataHeader*          m_dataHeader{nullptr};
    /// Flag to tell whether connectOutput has been called
-   bool            m_connectionOpen;
+   bool                 m_connectionOpen{false};
+
    /// Flag as to whether to extend provenance via the DataHeader
-   bool            m_extendProvenanceRecord;
-   /// Flag to extend attribute list with stream flags from DecisionSvc
-   bool m_extend;
-   
+   bool                 m_extendProvenanceRecord{false};
+   /// RegEx string to match provenance tags to keep in the output DataHeader. Retrieved from an OutputStream property
+   std::string          m_keepProvenancesStr;
+   /// RegEx pattern created from m_keepProvenancesStr
+   std::regex           m_keepProvenancesRE;
+   /// Cache provenance RegEx matching result in a map
+   std::map<std::string, bool>  m_keepProvenanceMatch;
+
    /// set of skipped item keys, because of missing CLID
    std::set<std::string> m_skippedItems;
 };

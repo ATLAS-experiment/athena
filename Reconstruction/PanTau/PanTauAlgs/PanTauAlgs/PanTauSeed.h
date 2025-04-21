@@ -172,7 +172,7 @@ namespace PanTau {
 
     std::vector<int>                                    m_TechnicalQuality;
 
-    //place to store which input alg created this pantauseed: eflowRec, CellBased, ClusterBased..                                                                                                                                              
+    //place to store which input alg created this pantauseed: CellBased, ClusterBased..                                                                                                                                              
     std::string                                         m_NameInputAlgorithm;
 
     //pointer to the TauJet this PanTauSeed was build from (pointer not owned by PanTauSeed)                                                                                                                                                   

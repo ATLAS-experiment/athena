@@ -14,6 +14,8 @@
 #include <G4Geantino.hh>
 #include <G4ChargedGeantino.hh>
 
+#include "MCTruth/TrackInformation.h"
+
 using namespace ActsTrk;
 
 namespace {
@@ -130,9 +132,12 @@ namespace MuonG4R4 {
         hit->setKineticEnergy(currentTrack->GetKineticEnergy());
         hit->setGenParticleLink(trHelper.GenerateParticleLink());
         hit->setStepLength(aStep->GetStepLength());
-
+        
         ATH_MSG_VERBOSE("Save new hit "<<m_detMgr->idHelperSvc()->toString(hitId)
-                        <<", "<<hit->genParticleLink()<<", trackId: "<<currentTrack->GetTrackID()<<", "
+                        <<", pdgId: "<<hit->pdgId()
+                        <<", "<<hit->genParticleLink()
+                        <<", trackId: "<<currentTrack->GetTrackID()<<", "
+                        <<", "<<hit->genParticleLink().cptr()<<std::endl
                         <<"pos: "<<Amg::toString(hitPos)<<", dir: "<<Amg::toString(hitDir)<<", time: "<<globTime
                         <<", energy: "<<hit->kineticEnergy()<<", stepLength: "<<hit->stepLength()<<", "
                         <<", deposit energy: "<<hit->energyDeposit());

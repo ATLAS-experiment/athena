@@ -6,13 +6,19 @@ input_hits=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/HITS
 n_events=1000
 
 checkCollectionOnFile() {
+    local file=$1
+    shift 1
     local collections=("$@")
-    checkxAOD.py RDO.pool.root >& storedCollections.txt
+    echo "Checking file: "${file}
+    echo "Collections: "${collections}
+    checkxAOD.py ${file} >& storedCollections.txt
     for var in "${collections[@]}"; do
-	echo "   - checking collection: "${var//\"/}
-	grep -e " ${var//\"/} " storedCollections.txt >& tmp.log
+	variable=${var//\"/}
+	echo "   - checking collection: "${variable}
+	grep -e " ${variable} " storedCollections.txt >& tmp.log
 	res=$?
 	if [ $res != 0 ]; then
+	    echo "returning "${res}
 	    return ${res}
 	fi
     done
@@ -41,7 +47,7 @@ if [ $rc != 0 ]; then
 fi
     
 # Check SiHit collections are in the RDO file
-checkCollectionOnFile "ITkStripHits" "ITkPixelHits" "ITkStripSDO_Map" "ITkPixelSDO_Map"
+checkCollectionOnFile RDO.pool.root "ITkStripHits" "ITkPixelHits" "ITkStripSDO_Map" "ITkPixelSDO_Map"
 
 rc=$?
 if [ $rc != 0 ]; then
@@ -61,6 +67,14 @@ Reco_tf.py \
 
 rc=$?
 if [ $rc != 0 ]; then
+    exit 1
+fi
+
+checkCollectionOnFile AOD.pool.root "ITkPixelMSOSs" "ITkStripMSOSs" "ITkPixelMeasurements" "ITkStripMeasurements" "InDetTrackParticles" "TruthParticles"
+
+rc=$?
+if [ $rc != 0 ]; then
+    checkxAOD.py AOD.pool.root
     exit 1
 fi
 

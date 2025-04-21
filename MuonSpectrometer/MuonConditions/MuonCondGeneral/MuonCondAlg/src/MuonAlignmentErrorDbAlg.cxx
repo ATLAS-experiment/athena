@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondAlg/MuonAlignmentErrorDbAlg.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include <GaudiKernel/EventIDRange.h>
+#include <format>
 #include <fstream>
 #include <iterator>
 

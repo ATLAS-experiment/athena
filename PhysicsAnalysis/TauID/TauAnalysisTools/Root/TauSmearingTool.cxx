@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -43,7 +43,26 @@ StatusCode TauSmearingTool::initialize()
 
   if (m_sInputFilePath.empty()) {
     std::string sDirectory = "TauAnalysisTools/" + std::string(sSharedFilesVersion) + "/Smearing/";
-    if (m_sRecommendationTag == "2022-prerec") {
+
+    if(m_sRecommendationTag == "2025-prerec") {
+      ATH_MSG_WARNING("2025-prerec is under development and not complete yet.");
+
+      if (m_sCampaign!="mc23" && m_sCampaign!="mc20"){
+        ATH_MSG_ERROR("unknown campaign (mc20|mc23):" << m_sCampaign);
+        return StatusCode::FAILURE;
+      }
+
+      if(m_useFastSim) {
+        ATH_MSG_WARNING("No fast-sim recommendation for tau smearing is available, using full sim");
+      }
+
+      if (m_sCampaign=="mc23") {
+        m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc23_v0.root";
+      } else {
+        m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc20_v0.root";
+      }
+
+    } else if (m_sRecommendationTag == "2022-prerec") {
 
       if (m_sCampaign!="mc21" && m_sCampaign!="mc20"){
         ATH_MSG_ERROR("unknown campaign (mc20|mc21):" << m_sCampaign);

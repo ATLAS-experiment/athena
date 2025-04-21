@@ -98,6 +98,7 @@ namespace MuonR4{
             fitResult.nPhiMeas+= hit->measuresPhi();
             fitResult.nDoF+= hit->measuresPhi();
             fitResult.nDoF+= hit->measuresEta();
+            fitResult.nPrecMeas+= (hit->type() == xAOD::UncalibMeasType::MdtDriftCircleType);
             /// Mdts are already counted in the measures eta category. Don't count them twice
             fitResult.nDoF += (m_cfg.doTimeFit && hit->type() != xAOD::UncalibMeasType::MdtDriftCircleType && hit->measuresTime());
             fitResult.nTimeMeas+=hit->measuresTime();              

@@ -20,8 +20,6 @@
 
 namespace DerivationFramework{
 
-static const InterfaceID IID_TTbarPlusHeavyFlavorFilterTool("TTbarPlusHeavyFlavorFilterTool", 1, 0);
-
 class TTbarPlusHeavyFlavorFilterTool: public AthAlgTool {
 public:
   TTbarPlusHeavyFlavorFilterTool(const std::string& t, const std::string& n, const IInterface* p);
@@ -30,8 +28,6 @@ public:
   virtual StatusCode initialize();
   virtual StatusCode finalize();
   int filterFlag() const;
-
-  static const InterfaceID& interfaceID() { return IID_TTbarPlusHeavyFlavorFilterTool; }
 
 
 private:

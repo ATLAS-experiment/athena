@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
-#include "GaudiKernel/Bootstrap.h"
 #include "CSCcabling/CSCcablingSvc.h"
 #include "MuonRDO/CscRawDataCollectionIdHash.h" 
 #include "MuonRDO/CscRawDataCollection.h" 
@@ -12,8 +11,8 @@
 CscRawDataCollectionIdHash::CscRawDataCollectionIdHash()
 {
   // initialize RPC cabling service
-  SmartIF<CSCcablingSvc> cabling{Gaudi::svcLocator()->service("CSCcablingSvc")};
-  if (!cabling) {
+  ServiceHandle<CSCcablingSvc> cabling{"CSCcablingSvc", "CscRawDataCollectionIdHash"};
+  if (cabling.retrieve().isFailure()) {
     REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "CscRawDataCollectionIdHash")
       << "Cannot get CSC cabling Service " << endmsg;
   }

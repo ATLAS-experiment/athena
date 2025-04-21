@@ -3,7 +3,7 @@
 
 # art-description: Trigger RDO->RDO_TRIG athena test of lowMu menu
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 # art-output: *.txt
@@ -19,19 +19,15 @@
 # art-output: *perfmon*
 # art-output: *.check*
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TriggerTest.MCExecStep import MCGridStep
+from TrigValTools.TrigValSteering import Test, CheckSteps
+from TrigValTools.TrigMCCommonParams import mcDefaults
 
-from AthenaConfiguration.TestDefaults import defaultConditionsTags
-conditions = defaultConditionsTags.RUN3_MC
-
-ex = ExecStep.ExecStep()
-ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT.py'
+ex = MCGridStep(
+    menu='PhysicsP1_pp_lowMu_run3_v1',
+    mc_campaign=mcDefaults.mc_campaign+'LowMu',
+)
 ex.input = 'minbias'
-ex.threads = 8
-ex.concurrent_events = 8
-ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_lowMu_run3_v1"',
-            'IOVDb.GlobalTag="' + conditions + '"']
 
 test = Test.Test()
 test.art_type = 'grid'

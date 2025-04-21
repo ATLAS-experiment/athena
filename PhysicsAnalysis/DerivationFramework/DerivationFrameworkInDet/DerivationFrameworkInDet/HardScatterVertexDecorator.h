@@ -26,9 +26,7 @@
 
 namespace DerivationFramework {
 
-  class HardScatterVertexDecorator :
-    public AthAlgTool,
-    public IAugmentationTool
+  class HardScatterVertexDecorator : public extends<AthAlgTool, IAugmentationTool>
   {
     ///////////////////////////////////////////////////////////////////
     // Public methods:

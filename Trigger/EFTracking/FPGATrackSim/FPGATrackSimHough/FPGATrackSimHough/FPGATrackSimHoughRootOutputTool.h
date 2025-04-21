@@ -30,6 +30,8 @@
 
 #include "TTree.h"
 
+#include "GaudiKernel/ToolHandle.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 
 class IFPGATrackSimMappingSvc;
 class IFPGATrackSimEventSelectionSvc;
@@ -67,6 +69,7 @@ class FPGATrackSimHoughRootOutputTool : public AthAlgTool
         const FPGATrackSimRegionMap* m_SUBREGIONMAP = m_FPGATrackSimMapping->SubRegionMap();
         TrackCorrType m_IdealCoordFitType = TrackCorrType::None;
 
+        ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
 
         TTree *m_tree = nullptr; // output tree
         std::vector<float> m_x; // x position of hit in road

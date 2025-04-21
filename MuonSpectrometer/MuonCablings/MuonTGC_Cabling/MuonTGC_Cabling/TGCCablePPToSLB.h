@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCABLEPPTOSLB_HH
@@ -8,20 +8,18 @@
 #include "MuonTGC_Cabling/TGCCable.h"
 
 #include <string>
+#include <memory>
+#include <array>
 
-
-namespace MuonTGC_Cabling
-{
+namespace MuonTGC_Cabling {
 
 class TGCDatabase;
   
 class TGCCablePPToSLB : public TGCCable
 {
 public:
-  // Constructor & Destructor
   TGCCablePPToSLB(const std::string& filename);
-
-  virtual ~TGCCablePPToSLB(void);
+  virtual ~TGCCablePPToSLB() = default;
   
   virtual TGCChannelId* getChannel(const TGCChannelId* channelId,
 				   bool orChannel=false) const;
@@ -35,9 +33,10 @@ private:
 				      bool orChannel=false) const;
   virtual TGCModuleMap* getModuleIn(const TGCModuleId* slb) const;
   virtual TGCModuleMap* getModuleOut(const TGCModuleId* pp) const;
-  TGCDatabase* m_database[TGCId::MaxRegionType][TGCId::MaxModuleType]{};
+
+  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>, TGCId::MaxRegionType> m_database{{{nullptr}}};
 };
   
-} // end of namespace
+}  // end of namespace
  
 #endif

@@ -57,6 +57,7 @@ def createActsConfigFlags():
     # 'None'    : no material map is provided
     actscf.addFlag('Acts.TrackingGeometry.MaterialSource', 'Default')
     actscf.addFlag('Acts.TrackingGeometry.MaterialCalibrationFolder', 'ACTS/MaterialMaps/ITk')
+    actscf.addFlag('Acts.TrackingGeometry.MaterialFileExtension', '')
 
     ## Enable Tracking geometry with additional passive layers
     actscf.addFlag('Acts.TrackingGeometry.InsertITkPassiveMaterialLayers', False)
@@ -73,6 +74,7 @@ def createActsConfigFlags():
     # Monitoring
     actscf.addFlag('Acts.doMonitoring', False)
     actscf.addFlag('Acts.doAnalysis', False)
+    actscf.addFlag('Acts.doAnalysisNtuples', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.Clusters.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.SpacePoints.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.Seeds.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
@@ -91,10 +93,9 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.doRotCorrection', True)
     actscf.addFlag('Acts.doPrintTrackStates', False)
     actscf.addFlag('Acts.skipDuplicateSeeds', True)
-    actscf.addFlag('Acts.trackFindingTrackSelectorConfig', 1) # 0=no selection, 1=default track selection (chi2<25,25), 2=Athena chi2 cut (chi2<9,25), 3=no looser cuts in branch stopper, 4=no pix hit/pix hole/str hole cuts
     actscf.addFlag('Acts.doTwoWayCKF', True) # run CKF twice, first with forward propagation with smoothing, then with backward propagation
     actscf.addFlag('Acts.useStripSeedsFirst', False) # switch order of seed collections
-    actscf.addFlag('Acts.reverseTrackFindingForStrips', False) # track finding starts going inward for strip seeds
+    actscf.addFlag('Acts.autoReverseSearchCKF', False) # track finding starts going inward first if we are outside the defined RZ boundary
     actscf.addFlag('Acts.useHGTDClusterInTrackFinding', False) # use HGTD cluster in track finding
 
     actscf.addFlag('Acts.doAmbiguityResolution', True)
@@ -114,9 +115,7 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.GsfMaxComponents", 12)
     actscf.addFlag("Acts.GsfComponentMergeMethod", 'MaxWeight')
     actscf.addFlag("Acts.GsfDirectNavigation", False)
-    actscf.addFlag("Acts.GsfOutlierChi2Cut", 20.0)
-
-    actscf.addFlag('Acts.useDefaultActsMeasurementSelector', False) # if True, uses no outlier chi2 cut as before (chi2<25,inf)
+    actscf.addFlag("Acts.GsfOutlierChi2Cut", 1e4) # Effectively no cut. Compatible with legacy
 
     # Decorations
     actscf.addFlag('Acts.decoratePRD.sdoSiHit', lambda pcf: pcf.Tracking.doTIDE_AmbiTrackMonitoring)

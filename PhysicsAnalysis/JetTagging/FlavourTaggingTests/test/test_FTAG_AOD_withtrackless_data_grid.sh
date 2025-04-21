@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: RDO to AOD step with trackless b-tagging on data 2023
 # art-type: grid
@@ -8,7 +8,7 @@
 # art-output: *.pool.root
 # art-output: *.log
 # art-output: *log.
-# art-athena-mt: 4
+# art-athena-mt: 8
 
 ATHENA_CORE_NUMBER=4 Reco_tf.py \
 --multithreaded \

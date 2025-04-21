@@ -22,11 +22,10 @@ DerivationFramework::DESDM_EXOTHIP_SkimmingTool::DESDM_EXOTHIP_SkimmingTool(cons
 									    const std::string& skimtool,
 									    const IInterface* interface ) :
   
-  AthAlgTool(CPP_exothip, skimtool, interface),
+  base_class(CPP_exothip, skimtool, interface),
   m_trigDec("Trig::TrigDecisionTool/TrigDecisionTool")
 
 {
-  declareInterface<DerivationFramework::ISkimmingTool>(this);
   declareProperty("HTTRTHitsCounter", m_trnnoutContName);
   declareProperty("MinHTRatioWedge", m_minHTratioWedge);
 }

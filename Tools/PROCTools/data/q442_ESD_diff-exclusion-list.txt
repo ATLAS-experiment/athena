@@ -2,8 +2,7 @@ index_ref
 (.*)_mems(.*)
 (.*)_timings(.*)
 
-# Ignore most b-tagging outside the recommended taggers: DL1dv01 and GN2v01
-xAOD::BTagging(?!.*PFlow.*DL1dv01_p.*)
+# Ignore most b-tagging outside the recommended taggers: GN2v01
 xAOD::BTagging(?!.*PFlow.*GN2v01_p.*)
 
 # Also ignore some b-tagging on tracking

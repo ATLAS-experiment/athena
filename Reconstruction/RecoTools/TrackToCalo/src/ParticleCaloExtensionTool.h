@@ -52,8 +52,6 @@ public:
   virtual ~ParticleCaloExtensionTool();
 
   virtual StatusCode initialize() override final;
-  virtual StatusCode finalize() override final;
-
   /*
    * Implement the IParticleCaloExtension methods
    * see IParticleCaloExtension.h for
@@ -132,7 +130,7 @@ private:
     "",
     "Tool to build calorimeter layer surfaces"
   };
- 
+
   Gaudi::Property<std::string> m_particleTypeName{
       this, "ParticleType", "muon",
       "The particle type used during extrapolation when not passed via the "

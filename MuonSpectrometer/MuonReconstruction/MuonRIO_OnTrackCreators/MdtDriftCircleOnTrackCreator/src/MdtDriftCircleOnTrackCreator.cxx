@@ -113,7 +113,7 @@ StatusCode MdtDriftCircleOnTrackCreator::initialize() {
         msg(MSG::INFO) << ss.str() << endmsg;
     }
     if (m_isMC)
-        ATH_MSG_INFO("Using MC error tuning");
+        ATH_MSG_DEBUG("Using MC error tuning");
     ATH_MSG_VERBOSE("A correction is made if set to true: do_MDT = " << m_doMdt);
 
     if (m_timeCorrectionType == COSMICS_TOF) {

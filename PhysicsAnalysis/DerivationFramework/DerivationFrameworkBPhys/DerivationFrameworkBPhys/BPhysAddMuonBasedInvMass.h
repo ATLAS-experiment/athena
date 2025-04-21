@@ -102,8 +102,7 @@ namespace DerivationFramework {
   ///
   ///  For a usage example see BPHY8.py .
   /// 
-  class BPhysAddMuonBasedInvMass : virtual public AthAlgTool,
-    public IAugmentationTool {
+  class BPhysAddMuonBasedInvMass : public extends<AthAlgTool, IAugmentationTool> {
 
   public:
       ///

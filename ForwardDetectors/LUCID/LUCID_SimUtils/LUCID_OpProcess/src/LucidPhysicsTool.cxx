@@ -5,17 +5,17 @@
 // local
 #include "LucidPhysicsTool.h"
 
-#include "G4ProcessManager.hh"
-#include "G4ParticleTable.hh"
-#include "G4VProcess.hh"
-#include "G4Version.hh"
-
+#include <memory>
 
 #include "G4Cerenkov.hh"
-#include "G4Scintillation.hh"
 #include "G4OpAbsorption.hh"
-#include "G4OpRayleigh.hh"
 #include "G4OpBoundaryProcess.hh"
+#include "G4OpRayleigh.hh"
+#include "G4ParticleTable.hh"
+#include "G4ProcessManager.hh"
+#include "G4Scintillation.hh"
+#include "G4VProcess.hh"
+#include "G4Version.hh"
 
 #if G4VERSION_NUMBER > 1029
 #define PARTICLEITERATOR (this->GetParticleIterator())
@@ -37,11 +37,11 @@
 // Standard constructor, initializes variables
 //=============================================================================
 LucidPhysicsTool::LucidPhysicsTool( const std::string& type,
-                                    const std::string& nam,const IInterface* parent )
-  : G4VPhysicsConstructor(nam), AthAlgTool ( type, nam , parent )
+                                    const std::string& name,const IInterface* parent )
+  : AthAlgTool ( type, name , parent )
 {
   m_physicsOptionType = G4AtlasPhysicsOption::Type::GlobalProcesses;
-  ATH_MSG_INFO("LucidPhysicsTool "<<type<<" "<<nam);
+  ATH_MSG_INFO("LucidPhysicsTool "<<type<<" "<<name);
   declareInterface< IPhysicsOptionTool >( this ) ;
 }
 
@@ -59,22 +59,16 @@ LucidPhysicsTool::~LucidPhysicsTool()
 StatusCode LucidPhysicsTool::initialize( )
 {
   ATH_MSG_INFO("LucidPhysicsTool initialize( )");
-  this->SetPhysicsName(name());
   return StatusCode::SUCCESS;
 }
 
-G4VPhysicsConstructor* LucidPhysicsTool::GetPhysicsOption()
-{
-  return this;
+auto LucidPhysicsTool::GetPhysicsOption() -> UPPhysicsConstructor {
+  return std::make_unique<LucidPhysicsTool::PhysicsConstructor>(
+      name(), this->msgLevel());
 }
 
-
-void LucidPhysicsTool::ConstructParticle()
-{
-
-}
-void LucidPhysicsTool::ConstructProcess()
-{
+void LucidPhysicsTool::PhysicsConstructor::ConstructParticle() {}
+void LucidPhysicsTool::PhysicsConstructor::ConstructProcess() {
   G4Cerenkov*          theCerenkovProcess      = new G4Cerenkov         ("Cerenkov");
   G4Scintillation*     theScintillationProcess = new G4Scintillation    ("Scintillation");
   G4OpAbsorption*      theOpAbsorptionProcess  = new G4OpAbsorption     ();
@@ -127,6 +121,5 @@ void LucidPhysicsTool::ConstructProcess()
         pmanager->AddDiscreteProcess(theOpRayleighProcess);
         pmanager->AddDiscreteProcess(theOpBoundaryProcess);
       }
-    }
-
+  }
 }

@@ -21,6 +21,7 @@ namespace xAOD {
  
     class eFexTower_v1 : public SG::AuxElement{
     public:
+        static const int c_missingCountCode = 1025; // code used to in bs decoder to indicate a missing supercell count
 
       /// Inherit all of the base class's constructors 
       using SG::AuxElement::AuxElement;
@@ -63,6 +64,17 @@ namespace xAOD {
       /// or can be pathalogically connected but not used by the module's algorithms at all (they are out of range)
       /// These are also flagged as disconnected
       bool disconnectedCount(size_t idx) const;
+
+      /// Obtain the index in the count vector of a given supercell
+      /// returns et_count().size() if cell is invalid
+      size_t cellIdx(uint32_t layer, uint32_t cell=0) const;
+
+      /// supercell Et in MeV
+      /// layer: 0-4 (ps,l1,l2,l3,had)
+      /// cell: 0-3 for l1,l2, 0 otherwise
+      /// will return 0 if the cell is disconnected or invalid
+      int cellEt(uint32_t layer, uint32_t cell=0) const;
+
 
       /// get em status bit
       uint32_t em_status() const; /// getter for the electromagnetic status bit

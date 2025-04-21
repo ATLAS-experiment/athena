@@ -6,23 +6,21 @@
 #define GLOBALSIM_INVARIANTMASSDELTAPHIINCLUSIVE2_H
 
 /**
- * Algtool to run the Global InvariantMassDeltaPhiInclusive2
+ * AlgTool to run the Global InvariantMassDeltaPhiInclusive2
  */
 
-#include "GepAlgoHypothesisPortsIn.h"
-#include "InvariantMassDeltaPhiInclusive2ContainerPortsIn.h"
-#include "InvariantMassDeltaPhiInclusive2ContainerPortsOut.h"
-
+#include "GenericTob.h"
+#include "InvariantMassResult.h"
 #include "../../../IGlobalSimAlgTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+
+#include <bitset>
 
 namespace GlobalSim {
   class InvariantMassDeltaPhiInclusive2AlgTool: public extends<AthAlgTool,
 							   IGlobalSimAlgTool> {
     
   public:
-    using PortsOut = InvariantMassDeltaPhiInclusive2ContainerPortsOut;
-    using GenTobPtr = PortsOut::GenTobPtr;
     
     InvariantMassDeltaPhiInclusive2AlgTool(const std::string& type,
 					   const std::string& name,
@@ -35,6 +33,9 @@ namespace GlobalSim {
     virtual StatusCode run(const EventContext& ctx) const override;
     
     virtual std::string toString() const override;
+
+    using TobContainer = std::vector<std::string>;
+    using TobContainerPtr = std::unique_ptr<TobContainer>;
     
   private:
  
@@ -43,26 +44,153 @@ namespace GlobalSim {
 	"enableDump",
 	  {false},
 	"flag to enable dumps"};
+    
+    Gaudi::Property<std::vector<int>> m_minEt1Cuts
+      {this,
+       "minEt1Cuts",
+       {},
+       "Min Et for Tobs 1"
+      };
+    
+    Gaudi::Property<std::vector<int>> m_minEt2Cuts
+      {this,
+       "minEt2Cuts",
+       {},
+       "Min Et for Tobs 2"
+      };
 
+    Gaudi::Property<bool> m_applyEtaCuts
+      {this,
+       "applyEtaCuts",
+       {true},
+       "Apply eta cuts if set true"
+      };
+        
+    Gaudi::Property<std::vector<int>> m_minEta1Cuts
+      {this,
+       "minEta1Cuts",
+       {},
+       "Min Eta for Tobs 1"
+      };
+           
+    Gaudi::Property<std::vector<int>> m_maxEta1Cuts
+      {this,
+       "maxEta1Cuts",
+       {},
+       "Max Eta for Tobs 1"
+      };
+   
+    Gaudi::Property<std::vector<int>> m_minEta2Cuts
+      {this,
+       "minEta2Cuts",
+       {},
+       "Min Eta for Tobs 2"
+      };
+           
+    Gaudi::Property<std::vector<int>> m_maxEta2Cuts
+      {this,
+       "maxEta2Cuts",
+       {},
+       "Max Eta for Tobs 2"
+      };
 
-    SG::ReadHandleKey<InvariantMassDeltaPhiInclusive2ContainerPortsIn>
-    m_portsInReadKey {
-      this,
-      "HypoFIFOReadKey",
-      "hypoFIFO",
-      "key to read input port data for the hypo block"};
+    Gaudi::Property<std::vector<int>> m_minInvMassSqrCuts
+      {this,
+       "minInvMassSqrCuts",
+       {},
+       "minimum invariant mass squared"
+      };
 
     
+    Gaudi::Property<std::vector<int>> m_maxInvMassSqrCuts
+      {this,
+       "maxInvMassSqrCuts",
+       {},
+       "maximum invariant mass squared"
+      };
+        
+    Gaudi::Property<std::vector<int>> m_minDeltaPhiCuts
+      {this,
+       "minDeltaPhiCuts",
+       {},
+       "minimum DeltaPhi"
+      };
+ 
+    Gaudi::Property<std::vector<int>> m_maxDeltaPhiCuts
+      {this,
+       "maxDeltaPhiCuts",
+       {},
+       "maximum DeltaPhi"
+      };
 
-    SG::WriteHandleKey<InvariantMassDeltaPhiInclusive2ContainerPortsOut>
-    m_portsOutWriteKey {
+    
+    Gaudi::Property<int> m_maxTob1
+      {this,
+       "maxTob1",
+       {6},
+       "maximum number of Tobs from 1st list to consider"
+      };
+
+     
+    Gaudi::Property<int> m_maxTob2
+      {this,
+       "maxTob2",
+       {6},
+       "maximum number of Tobs from 2nd list to consider"
+      };
+  
+    SG::ReadHandleKey<GenericTobContainer>
+    m_tobsInReadKey1 {
       this,
-      "PortsOutKey",
-      "eEmSortSelectCount",
-      "key to write output ports data"};
+      "GenericTobContainerReadKey1",
+      "genericTobContainer1",
+      "key to read a container of Generic TOBS"};
 
+    SG::ReadHandleKey<GenericTobContainer>
+    m_tobsInReadKey2 {
+      this,
+      "GenericTobContainerReadKey2",
+      "genericTobContainer2",
+      "key to read a container of Generic TOBS"};
 
+    
+    SG::WriteHandleKey<InvariantMassResult>
+    m_resultsWriteKey {
+      this,
+      "ResultsKey",
+      "yesultsKey",
+      "key to write a bitset of results"};
+    
+
+    using AcceptFlags =  std::vector<std::vector<bool>>;
+    
+    StatusCode
+    selectTobs1(const GenericTobContainer&,
+		AcceptFlags&) const;
+
+    StatusCode
+    selectTobs2(const GenericTobContainer&,
+		AcceptFlags&) const;
+    
+    StatusCode
+    setAcceptFlags(const GenericTobContainer&,
+		   std::vector<bool>&,
+		   int minEt,
+		   int minEta,
+		   int maxEta) const;
+
+    
+    StatusCode
+    setAcceptFlags(const GenericTobContainer&,
+		   std::vector<bool>&,
+		   int minEt) const;
+    
+
+    constexpr static std::size_t s_inputWidth1{6};
+    constexpr static std::size_t s_inputWidth2{6};
   };
+
+  
 }
     
 #endif

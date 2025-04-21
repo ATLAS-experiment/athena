@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_XAODTRUTHPARTICLESLIMMERELECTRON_H
@@ -7,9 +7,11 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthEvent.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "xAODTruth/TruthMetaDataContainer.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 /// @brief Algorithm to skim the xAOD truth particle container for xAOD electron filter
 ///
@@ -29,14 +31,15 @@ public:
     virtual StatusCode execute();
 
 private:
-    /// The key for the output xAOD truth containers
-    std::string m_xaodTruthParticleContainerNameElectron;
-    std::string m_xaodTruthParticleContainerName;
-    std::string m_xaodTruthEventContainerName;
+  SG::ReadHandleKey<xAOD::TruthEventContainer> m_xaodTruthEventContainerName
+    {this, "xAODTruthEventContainerName", "TruthEvents"};
+  /// The key for the output xAOD truth containers
+  SG::WriteHandleKey<xAOD::TruthParticleContainer> m_xaodTruthParticleContainerNameElectron
+    {this, "xAODTruthParticleContainerNameElectron","TruthElectrons","Name of Truth Electrons contatiner from the slimmer"};
 
-    /// Selection values for keeping taus and leptons
-    double m_el_pt_selection; //in GeV
-    double m_abseta_selection;
+  /// Selection values for keeping taus and leptons
+  DoubleProperty m_el_pt_selection{this, "el_pt_selection", 1. * Gaudi::Units::GeV}; //in GeV
+  DoubleProperty m_abseta_selection{this, "abseta_selection", 5.};
 
 }; // class xAODTruthParticleSlimmerElectron
 

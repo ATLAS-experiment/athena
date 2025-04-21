@@ -42,9 +42,9 @@ namespace MuonR4 {
         DigiCache digitCache{};
         /// Fetch the conditions for efficiency calculations
         const Muon::DigitEffiData* efficiencyMap{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_effiDataKey, efficiencyMap));
+        ATH_CHECK(SG::get(efficiencyMap, m_effiDataKey, ctx));
         const NswErrorCalibData* nswUncertDB{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_uncertCalibKey, nswUncertDB));
+        ATH_CHECK(SG::get(nswUncertDB, m_uncertCalibKey, ctx));
         
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
         xAOD::ChamberViewer viewer{hitsToDigit, m_idHelperSvc.get()};

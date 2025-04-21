@@ -51,3 +51,22 @@ would do something like this to set up your runtime environment from scratch:
 
     asetup ...
     source build/x86_64-slc6-gcc49-opt/setup.sh
+
+Using the included Visual Studio Code Workspace
+-----------------------------------------------
+
+The project includes `WorkDir.code-workspace`, which can be used to simplify
+working with this project in [VSCode](https://code.visualstudio.com/). To use
+it natively on a machine using the operating system that an ATLAS nightly would
+have been built against
+([EL9](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9)
+at the time of writing), you could do:
+
+    asetup ...
+    echo "+ Control/AthenaExamples/AthExHelloWorld \n- .*" > package_filters.txt
+    code athena/Projects/WorkDir/WorkDir.code-workspace
+
+With the
+[C\+\+ Extension Pack](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools-extension-pack)
+installed, you can now build the project using your freshly made
+`package_filters.txt` file, with the click of a button.

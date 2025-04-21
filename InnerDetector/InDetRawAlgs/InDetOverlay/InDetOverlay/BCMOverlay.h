@@ -17,8 +17,8 @@
 
 struct BCM_Pulse {
   BCM_Pulse(unsigned int p_, unsigned int w_) {p = p_; w = w_;};
-  unsigned int p;
-  unsigned int w;
+  unsigned int p{};
+  unsigned int w{};
 };
 
 class BCMOverlay : public AthReentrantAlgorithm

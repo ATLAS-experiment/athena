@@ -3,21 +3,20 @@
 */
 
 #include "TrigT1NSWSimTools/MMLoadVariables.h"
+#include "GeneratorObjects/McEventCollection.h"
+#include "FourMomUtils/xAODP4Helpers.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "AthenaKernel/getMessageSvc.h"
+#include "Math/Vector4D.h"
+#include <cmath>
+#include <vector>
 
-MMLoadVariables::MMLoadVariables(const MuonGM::MuonDetectorManager* detManager, const MmIdHelper* idhelper):
-   AthMessaging(Athena::getMessageSvc(), "MMLoadVariables") {
-      m_detManager = detManager;
-      m_MmIdHelper = idhelper;
-}
+MMLoadVariables::MMLoadVariables() : AthMessaging(Athena::getMessageSvc(), "MMLoadVariables") {}
 
-StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
-                                            const McEventCollection *truthContainer,
-                                            const TrackRecordCollection* trackRecordCollection,
-                                            const MmDigitContainer *nsw_MmDigitContainer,
-                                            std::map<std::pair<int,unsigned int>,std::vector<digitWrapper> >& entries,
-                                            std::map<std::pair<int,unsigned int>,std::vector<hitData_entry> >& Hits_Data_Set_Time,
-                                            std::map<std::pair<int,unsigned int>,evInf_entry>& Event_Info) const {
+StatusCode MMLoadVariables::getTruthInfo(const EventContext& ctx,
+                                         const McEventCollection *truthContainer,
+                                         const TrackRecordCollection* trackRecordCollection,
+                                         std::map<std::pair<uint64_t,unsigned int>,evInf_entry>& Event_Info) const {
       //*******Following MuonPRD code to access all the variables**********
       std::vector<ROOT::Math::PtEtaPhiEVector> truthParticles, truthParticles_ent, truthParticles_pos;
       std::vector<int> pdg;
@@ -33,8 +32,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
       auto MuEntry_Particle_n = (trackRecordCollection!=nullptr)?trackRecordCollection->size():0;
       int j=0; // iteration of particle entries
       if( truthContainer != nullptr ){
-      for(const auto it : *truthContainer) {
-        const HepMC::GenEvent *subEvent = it;
+      for(const auto subEvent : *truthContainer) {
         for(const auto& particle : *subEvent){
           const HepMC::FourVector momentum = particle->momentum();
           if( HepMC::generations(particle) < 1 && std::abs(particle->pdg_id())==13){
@@ -90,178 +88,21 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
       } //end truth container loop (should be only 1 container per event)
       } // if truth container is not null
 
-      int event = ctx.eventID().event_number();
-      int TruthParticle_n = j;
-      unsigned int digit_particles = 0;
-      for(auto digitCollectionIter : *nsw_MmDigitContainer) {
-        // a digit collection is instanciated for each container, i.e. holds all digits of a multilayer
-        const MmDigitCollection* digitCollection = digitCollectionIter;
-        // loop on all digits inside a collection, i.e. multilayer
-        std::vector<digitWrapper> entries_tmp;
-
-        for (const auto item:*digitCollection) {
-            // get specific digit and identify it
-            const MmDigit* digit = item;
-            Identifier id = digit->identify();
-            if (!m_MmIdHelper->is_mm(id)) continue;
-
-            std::string stName   = m_MmIdHelper->stationNameString(m_MmIdHelper->stationName(id));
-            int stationName      = m_MmIdHelper->stationName(id);
-            int stationEta       = m_MmIdHelper->stationEta(id);
-            int stationPhi       = m_MmIdHelper->stationPhi(id);
-            int multiplet        = m_MmIdHelper->multilayer(id);
-            int gas_gap          = m_MmIdHelper->gasGap(id);
-            int channel          = m_MmIdHelper->channel(id);
-
-            const MuonGM::MMReadoutElement* rdoEl = m_detManager->getMMReadoutElement(id);
-
-            std::vector<float>  time{digit->stripResponseTime()};
-            std::vector<float>  charge{digit->stripResponseCharge()};
-            std::vector<int>    stripPosition{channel};
-            std::vector<int>    MMFE_VMM{channel};
-            std::vector<int>    VMM{channel};
-
-            bool isValid = false;
-            std::vector<double> localPosX;
-            std::vector<double> localPosY;
-            std::vector<double> globalPosX;
-            std::vector<double> globalPosY;
-            std::vector<double> globalPosZ;
-
-            int nstrip = 0; //counter of the number of firing strips
-            for (const auto &i: stripPosition) {
-
-	      isValid = false; //reset
-              // take strip index form chip information
-              int cr_strip = i;
-              localPosX.push_back (0.);
-              localPosY.push_back (0.);
-              globalPosX.push_back(0.);
-              globalPosY.push_back(0.);
-              globalPosZ.push_back(0.);
-              ++nstrip;
-
-              Identifier cr_id = m_MmIdHelper->channelID(stationName, stationEta, stationPhi, multiplet, gas_gap, cr_strip, isValid);
-              if (!isValid) {
-                ATH_MSG_WARNING("MicroMegas digitization: failed to create a valid ID for (chip response) strip n. " << cr_strip
-                               << "; associated positions will be set to 0.0.");
-              } else {
-                  // asking the detector element to get local position of strip
-                  Amg::Vector2D cr_strip_pos(0., 0.);
-                  if ( !rdoEl->stripPosition(cr_id,cr_strip_pos) ) {
-                    ATH_MSG_WARNING("MicroMegas digitization: failed to associate a valid local position for (chip response) strip n. " << cr_strip
-                                   << "; associated positions will be set to 0.0.");
-                  } else {
-                    localPosX[nstrip-1] = cr_strip_pos.x();
-                    localPosY[nstrip-1] = cr_strip_pos.y();
-                  }
-
-                  // asking the detector element to transform this local to the global position
-                  Amg::Vector3D cr_strip_gpos(0., 0., 0.);
-                  rdoEl->surface(cr_id).localToGlobal(cr_strip_pos, Amg::Vector3D(0., 0., 0.), cr_strip_gpos);
-                  globalPosX[nstrip-1] = cr_strip_gpos[0];
-                  globalPosY[nstrip-1] = cr_strip_gpos[1];
-                  globalPosZ[nstrip-1] = cr_strip_gpos[2];
-              }
-            }//end of strip position loop
-            if(globalPosY.empty()) continue;
-
-            if (!time.empty()) entries_tmp.push_back(
-              digitWrapper(digit, stName, -1.,
-                           ROOT::Math::XYZVector(-999, -999, -999),
-                           ROOT::Math::XYZVector(localPosX[0], localPosY[0], -999),
-                           ROOT::Math::XYZVector(globalPosX[0], globalPosY[0], globalPosZ[0] )
-                          ) );
-        } //end iterator digit loop
-
-        if (!entries_tmp.empty()) {
-          std::vector<std::string> stNames;
-          for(const auto &dW : entries_tmp) stNames.push_back(dW.stName);
-          if(std::all_of(stNames.begin(), stNames.end(), [&] (const std::string & name) { return name == stNames[0]; })) {
-            entries[std::make_pair(event,digit_particles)]=entries_tmp;
-            digit_particles++;
-          } else {
-            ATH_MSG_WARNING("Digits belonging to different stations, skipping items");
-          }
-          stNames.clear();
-        }
-      } // end digit container loop
-
+      uint64_t event = ctx.eventID().event_number();
       for(unsigned int i=0; i<truthParticles.size(); i++) {
         evInf_entry particle_info(event, pdg[i],
                     truthParticles[i].E(), truthParticles[i].Pt(),
                     truthParticles[i].Eta(), truthParticles_pos[i].Eta(), truthParticles_ent[i].Eta(),
                     truthParticles[i].Phi(), truthParticles_pos[i].Phi(), truthParticles_ent[i].Phi(),
                     truthParticles[i].Theta(), truthParticles_pos[i].Theta(), truthParticles_ent[i].Theta(), truthParticles_ent[i].Theta()-truthParticles_pos[i].Theta(),
-                    TruthParticle_n,MuEntry_Particle_n,vertex[i]);
-        Event_Info[std::make_pair(event,i)] = particle_info;
+                    j,MuEntry_Particle_n,vertex[i]);
+        Event_Info[{event,i}] = std::move(particle_info);
       }
 
-      //Loop over entries, which has digitization info for each event
-      unsigned int ient=0;
-      for (auto it=entries.begin(); it!=entries.end(); it++){
-
-        /* Identifying the wedge from digits:
-         * now the digit is associated with the corresponding station, so lambda function can be exploited to check if they are all the same
-         */
-        double tru_phi = -999, tru_theta = -999;
-        std::pair<int, unsigned int> pair (event,ient);
-        auto tru_it = Event_Info.find(pair);
-        if (tru_it != Event_Info.end()) {
-          tru_phi = tru_it->second.phi_pos;
-          tru_theta = tru_it->second.theta_pos;
-        }
-
-        std::string station = it->second[0].stName;
-        std::vector<hitData_entry> hit_info;
-        hit_info.reserve(it->second.size());
-
-        //Now we need to loop on digits
-        for (const auto &dW : it->second) {
-          Identifier tmpID      = dW.id();
-          int thisMultiplet     = m_MmIdHelper->multilayer( tmpID );
-          int thisGasGap        = m_MmIdHelper->gasGap( tmpID );
-          int thisTime          = dW.digit->stripResponseTime();
-          int thisCharge        = 2; //dW.digit->stripChargeForTrigger().at(0);
-          int thisStripPosition = m_MmIdHelper->channel(tmpID);
-          double thisLocalPosX  = dW.strip_lpos.X();
-          int thisVMM           = m_MmIdHelper->channel( tmpID);
-          int thisMMFE_VMM      = thisVMM;
-          int thisStationEta    = m_MmIdHelper->stationEta( tmpID );
-          int thisStationPhi    = m_MmIdHelper->stationPhi( tmpID );
-          int thisPlane = (thisMultiplet-1)*4+thisGasGap-1;
-          int BC_id = std::ceil( thisTime / 25. );
-          ROOT::Math::XYZVector mazin_check(
-            dW.strip_gpos.X(),
-            dW.strip_gpos.Y(),
-            dW.strip_gpos.Z()
-            );
-
-          hitData_entry hit_entry(event,
-                               thisTime,
-                               thisCharge,
-                               thisVMM,
-                               thisMMFE_VMM,
-                               thisPlane,
-                               thisStripPosition,
-                               thisStationEta,
-                               thisStationPhi,
-                               thisMultiplet,
-                               thisGasGap,
-                               thisLocalPosX,
-                               tru_theta,
-                               tru_phi,
-                               true,
-                               BC_id,
-                               mazin_check,
-                               mazin_check);
-
-          hit_info.push_back(hit_entry);
-          ATH_MSG_DEBUG("Done filling hit_info structure");
-        }//end digit wrapper loop
-
-        Hits_Data_Set_Time[std::make_pair(event,ient)] = hit_info;
-        ient++;
-      }
     return StatusCode::SUCCESS;
 }
+
+evInf_entry::evInf_entry(uint64_t event,int pdg,double e,double p,double ieta,double peta,double eeta,double iphi,double pphi,double ephi,double ithe,double pthe,double ethe,double dth,
+                         int trn,int mun,const ROOT::Math::XYZVector& tex):
+  athena_event(event),pdg_id(pdg),E(e),pt(p),eta_ip(ieta),eta_pos(peta),eta_ent(eeta),phi_ip(iphi),phi_pos(pphi),phi_ent(ephi),theta_ip(ithe),theta_pos(pthe),theta_ent(ethe),
+  dtheta(dth),truth_n(trn),mu_n(mun),vertex(tex) {}

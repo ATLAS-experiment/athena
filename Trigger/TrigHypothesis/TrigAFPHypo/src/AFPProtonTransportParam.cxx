@@ -1,17 +1,14 @@
-/*                                                                                                    
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration                             
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFPProtonTransportParam.h"
 
-AFPProtonTransportParam::AFPProtonTransportParam(double beam_energy, AFPProtonTransportPolynomial* poly_array[8]) {
-  m_energy = beam_energy;
-  for (int i = 0; i < 8; i++) m_polynomial[i] = poly_array[i];
-}
+#include <utility>
 
-AFPProtonTransportParam::~AFPProtonTransportParam () {
-  for (int i = 0; i < 8; i++)
-    delete m_polynomial[i];
+AFPProtonTransportParam::AFPProtonTransportParam(double beam_energy, std::unique_ptr<AFPProtonTransportPolynomial> poly_array[8]) {
+  m_energy = beam_energy;
+  for (int i = 0; i < 8; i++) m_polynomial[i] = std::move(poly_array[i]);
 }
 
 double AFPProtonTransportParam::evaluate(double x0, double y0, double z0, double sx0, double sy0, double E) const {

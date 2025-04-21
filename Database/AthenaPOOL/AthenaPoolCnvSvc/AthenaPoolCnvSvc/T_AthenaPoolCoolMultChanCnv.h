@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_T_ATHENAPOOLCOOLMULTCHANCNV_H
@@ -15,6 +15,7 @@
  **/
 
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustCnv.h"
+#include "PersistentDataModel/Token.h"
 
 #include <string>
 
@@ -62,7 +63,7 @@ protected:
     StatusCode objectToAttrListColl ATLAS_NOT_THREAD_SAFE
                                    (COLL_T* obj, IOpaqueAddress*& pAddr,
 				    CondAttrListCollection*& attrListColl,
-				    Token*& token);
+				    std::unique_ptr<Token>& token);
 
     /// Read in objects from POOL for the tokens stored
     /// CondAttrListCollection and save the objects in the output

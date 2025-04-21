@@ -11,6 +11,7 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODMuonRDO/NRPCRDOContainer.h"
 #include "xAODTrigger/MuonRoIContainer.h"
+#include "L0MuonInterface/BarrelCandDataContainer.h"
 #include "MuonDigitContainer/RpcDigitContainer.h"
 #include "MuonCablingData/RpcCablingMap.h"
 
@@ -30,6 +31,10 @@ class RPCSimulation: public ::AthReentrantAlgorithm {
   /// Output RoIs
   SG::WriteHandleKey<xAOD::MuonRoIContainer> m_outputMuonRoIKey{this, "L0MuonBarrelKey", "L0MuonBarrelRoI",
     "key for LVL0 Muon RoIs in the barrel" };
+  
+  /// Output RoIs
+  SG::WriteHandleKey<L0Muon::BarrelCandDataContainer> m_outputCandKey{this, "L0MuonBarrelCandKey", "L0MuonBarrelCand",
+    "LVL0 trigger candidates in the Muon Barrel" };
   
 
   /// NRPC cabling map

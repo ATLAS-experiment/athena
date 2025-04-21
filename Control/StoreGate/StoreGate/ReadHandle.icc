@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ReadHandle.icc 797637 2017-02-17 02:32:11Z ssnyder $
@@ -41,7 +41,7 @@ ReadHandle<T>::ReadHandle()
 
 
 /**
- * @brief Constructor with full arguments.
+ * @brief Constructor specifying the key as a string.
  * @param sgkey StoreGate key of the referenced object.
  * @param storename Name of the referenced event store.
  */
@@ -50,7 +50,38 @@ inline
 ReadHandle<T>::ReadHandle(const std::string& sgkey, 
                           const std::string& storename /*= "StoreGateSvc"*/)
   : VarHandleBase( ClassID_traits<T>::ID(),
-                   sgkey, Gaudi::DataHandle::Reader, storename )
+                   sgkey, Gaudi::DataHandle::Reader, storename, nullptr )
+{
+}
+
+
+/**
+ * @brief Constructor specifying the key as a string, with context.
+ * @param sgkey StoreGate key of the referenced object.
+ * @param ctx The event context.
+ */
+template <class T>
+inline
+ReadHandle<T>::ReadHandle(const std::string& sgkey,
+                          const EventContext& ctx)
+  : ReadHandle(sgkey, StoreID::storeName(StoreID::EVENT_STORE), ctx)
+{
+}
+
+
+/**
+ * @brief Constructor specifying the key as a string, with context.
+ * @param sgkey StoreGate key of the referenced object.
+ * @param storename Name of the referenced event store.
+ * @param ctx The event context.
+ */
+template <class T>
+inline
+ReadHandle<T>::ReadHandle(const std::string& sgkey,
+                          const std::string& storename,
+                          const EventContext& ctx)
+  : VarHandleBase( ClassID_traits<T>::ID(),
+                   sgkey, Gaudi::DataHandle::Reader, storename, &ctx )
 {
 }
 
@@ -366,6 +397,24 @@ const T* get (const ReadHandleKey<T>& key,
   return h.get();
 }
 
+
+/**
+ * @brief Convenience function to retrieve an object given a @c ReadHandleKey.
+ * @param ptr Pointer to the retrieved object.
+ * @param key The key to retrieve.
+ *
+ * In case of error, sets @c ptr to nullptr and returns FAILURE. In case of an
+ * empty key, sets @c ptr to nullptr and returns SUCCESS.
+ */
+template <class T>
+inline
+StatusCode get (const T*& ptr,
+                const ReadHandleKey<T>& key,
+                const EventContext& ctx)
+{
+  ptr = get(key, ctx);
+  return (ptr || key.empty()) ? StatusCode::SUCCESS : StatusCode::FAILURE;
+}
 
 } /* namespace SG */
 

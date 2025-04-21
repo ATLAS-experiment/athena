@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StripGmxInterface.h"
@@ -749,7 +749,7 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
             std::map<std::string,std::string> stripBoxMap;
             for(const std::string& paramName:stripBoxParamNames){
                 std::string paramValue = (*stripBox)[iR]->getString(paramName);
-                stripBoxMap[paramName] = paramValue;
+                stripBoxMap[paramName] = std::move(paramValue);
             }
         std::string stripBoxName = (*stripBox)[iR]->getString("SensorType");
         makeSiStripBox(stripBoxName,stripBoxMap);

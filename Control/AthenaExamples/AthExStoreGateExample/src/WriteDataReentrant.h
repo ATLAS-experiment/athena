@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -29,24 +29,22 @@ class WriteDataReentrant
   : public AthReentrantAlgorithm
 {
 public:
-  WriteDataReentrant (const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
   virtual StatusCode initialize() override final;
-  virtual StatusCode finalize() override final;
   virtual StatusCode execute (const EventContext& ctx) const override final;
 
 private:
-  SG::WriteHandleKey<MyDataObj> m_dobjKey;
-  SG::WriteHandleKey<MyDataObj> m_dobjKey2;
-  SG::WriteHandleKey<MyDataObj> m_dobjKey3;
-  //SG::WriteHandleKey<MyDataObj> m_dobjKey4;
-  SG::WriteHandleKey<DataVector<MyContObj> > m_cobjKey;
-  SG::WriteHandleKey<std::vector<float> > m_vFloatKey;
-  SG::WriteHandleKey<MapStringFloat> m_mKey;
-  SG::WriteHandleKey<std::list<ElementLink<std::vector<float> > > > m_pLinkListKey;
-  SG::WriteHandleKey<std::vector<ElementLink<MapStringFloat> > > m_linkVectorKey;
-  SG::WriteHandleKey<TestDataObject> m_testObjectKey;
+  SG::WriteHandleKey<MyDataObj> m_dobjKey{this, "DObjKey", "dobj"};
+  SG::WriteHandleKey<MyDataObj> m_dobjKey2{this, "DObjKey2", "dobj2"};
+  SG::WriteHandleKey<MyDataObj> m_dobjKey3{this, "DObjKey3", ""};
+  SG::WriteHandleKey<DataVector<MyContObj> > m_cobjKey{this, "CObjKey", "cobj"};
+  SG::WriteHandleKey<std::vector<float> > m_vFloatKey{this, "VFloatKey", "vFloat"};
+  SG::WriteHandleKey<MapStringFloat> m_mKey{this, "MKey", "mkey"};
+  SG::WriteHandleKey<std::list<ElementLink<std::vector<float>>>> m_pLinkListKey{this,"PLinkListKey", ""};
+  SG::WriteHandleKey<std::vector<ElementLink<MapStringFloat>>> m_linkVectorKey{this, "LinkVectorKey", "linkvec"};
+  SG::WriteHandleKey<TestDataObject> m_testObjectKey{this, "TestObjectKey", "testobj"};
 
-  SG::WriteHandleKeyArray<MyDataObj> m_dobjKeyArray;
+  SG::WriteHandleKeyArray<MyDataObj> m_dobjKeyArray{this, "DObjKeyArray", {"dobj_a1", "dobj_a2"}};
 
   SG::DataObjectSharedPtr<TestDataObject> m_testObject;
   StatusCode onError() const;

@@ -10,6 +10,8 @@
 
 #include <ColumnarCore/ContainerId.h>
 #include <xAODBase/IParticleContainer.h>
+#include <xAODMissingET/MissingETContainer.h>
+#include <xAODMissingET/MissingETAssociationMap.h>
 
 namespace columnar
 {

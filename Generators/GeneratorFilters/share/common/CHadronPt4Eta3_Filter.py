@@ -7,6 +7,7 @@ if not hasattr(filtSeq, "HeavyFlavorCHadronPt4Eta3_Filter"):
     HeavyFlavorCHadronPt4Eta3_Filter = HeavyFlavorHadronFilter(name="HeavyFlavorCHadronPt4Eta3_Filter")
 
 ## Default cut params
+from AthenaCommon.SystemOfUnits import GeV
 HeavyFlavorCHadronPt4Eta3_Filter.RequestBottom=False
 HeavyFlavorCHadronPt4Eta3_Filter.RequestCharm=True
 HeavyFlavorCHadronPt4Eta3_Filter.Request_cQuark=False

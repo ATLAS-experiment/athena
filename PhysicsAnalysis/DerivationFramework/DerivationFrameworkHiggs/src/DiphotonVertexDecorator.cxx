@@ -29,10 +29,9 @@ typedef ElementLink<xAOD::PhotonContainer> phlink_t;
 DerivationFramework::DiphotonVertexDecorator::DiphotonVertexDecorator(const std::string& t,
 							    const std::string& n,
 							    const IInterface* p) : 
-  AthAlgTool(t, n, p)
+  base_class(t, n, p)
 {
 
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
  
   declareProperty("RemoveCrack",           m_removeCrack    = true);
   declareProperty("MaxEta",                m_maxEta         = 2.37);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/Tool_ModeDiscriminator.h"
@@ -15,16 +15,8 @@
 
 PanTau::Tool_ModeDiscriminator::Tool_ModeDiscriminator(const std::string& name) :
   asg::AsgTool(name),
-  m_Name_InputAlg("InvalidInputAlg"),
-  m_Name_ModeCase("InvalidModeCase"),
-  m_Tool_InformationStore("PanTau::Tool_InformationStore/Tool_InformationStore"),
   m_MVABDT_List()
 {
-  declareProperty("calibFolder",              m_calib_path,               "Location of calib files in cvmfs");//sync'd with tauRecFlags.tauRecToolsCVMFSPath()
-  declareProperty("Name_InputAlg",            m_Name_InputAlg,            "Name of the input algorithm for this instance");
-  declareProperty("Name_ModeCase",            m_Name_ModeCase,            "Name of the two modes to be distinguished for this instance");
-  declareProperty("Tool_InformationStore",    m_Tool_InformationStore,    "Handle to the information store tool");
-  declareProperty("Tool_InformationStoreName",m_Tool_InformationStoreName,"Handle to the information store tool");
 }
 
 
@@ -42,7 +34,6 @@ StatusCode PanTau::Tool_ModeDiscriminator::initialize() {
     
   // get the required information from the informationstore tool
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("ModeDiscriminator_BinEdges_Pt", m_BinEdges_Pt));
-  ATH_CHECK( m_Tool_InformationStore->getInfo_String("ModeDiscriminator_ReaderOption", m_ReaderOption) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("ModeDiscriminator_TMVAMethod", m_MethodName) );
     
   // build the name of the variable that contains the variable list for this discri tool
@@ -68,7 +59,7 @@ StatusCode PanTau::Tool_ModeDiscriminator::initialize() {
     std::string curPtBin        = "ET_" + bin_lowerStr + "_" + bin_upperStr;
     
     // weight files
-    std::string curWeightFile = m_calib_path + (m_calib_path.length() ? "/" : "");
+    std::string curWeightFile = m_calib_path + (!m_calib_path.empty() ? "/" : "");
     curWeightFile += "TrainModes_";
     curWeightFile += m_Name_InputAlg + "_";
     curWeightFile += curPtBin + "_";

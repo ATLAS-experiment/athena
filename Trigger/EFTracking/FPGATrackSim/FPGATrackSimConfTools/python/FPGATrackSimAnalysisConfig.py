@@ -96,7 +96,10 @@ def FPGATrackSimRoadUnionToolCfg(flags):
     yMin -= yBuffer
     yMax += yBuffer
     tools = []
-    
+    houghType = flags.Trigger.FPGATrackSim.ActiveConfig.houghType
+    roadMerge = flags.Trigger.FPGATrackSim.ActiveConfig.roadMerge
+
+
     FPGATrackSimMapping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     for number in range(getNSubregions(FPGATrackSimMapping.subrmap)): 
         HoughTransform = CompFactory.FPGATrackSimHoughTransformTool("HoughTransform_0_" + str(number))
@@ -124,12 +127,29 @@ def FPGATrackSimRoadUnionToolCfg(flags):
         HoughTransform.traceHits = True
         HoughTransform.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
         HoughTransform.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
+        HoughTransform.houghType = houghType
+        HoughTransform.roadMerge = roadMerge
+        if houghType=='LowResource': ##consider only case of LowResource version
+            HoughTransform.requirements = flags.Trigger.FPGATrackSim.ActiveConfig.requirements
+        if houghType=='Flexible': ##consider only case of Flexible version
+            HoughTransform.r_max=flags.Trigger.FPGATrackSim.ActiveConfig.r_max
+            HoughTransform.phi_coord_max=flags.Trigger.FPGATrackSim.ActiveConfig.phi_coord_max
+            HoughTransform.phi_range=flags.Trigger.FPGATrackSim.ActiveConfig.phi_range
+            HoughTransform.r_max_mm=flags.Trigger.FPGATrackSim.ActiveConfig.r_max_mm
+            HoughTransform.bitwise_qApt_conv=flags.Trigger.FPGATrackSim.ActiveConfig.bitwise_qApt_conv
+            HoughTransform.bitwise_phi0_conv=flags.Trigger.FPGATrackSim.ActiveConfig.bitwise_phi0_conv
+            HoughTransform.phi0_sectors=flags.Trigger.FPGATrackSim.ActiveConfig.phi0_sectors
+            HoughTransform.qApt_sectors=flags.Trigger.FPGATrackSim.ActiveConfig.qApt_sectors
+            HoughTransform.pipes_qApt=flags.Trigger.FPGATrackSim.ActiveConfig.pipes_qApt
+            HoughTransform.pipes_phi0=flags.Trigger.FPGATrackSim.ActiveConfig.pipes_phi0
 
         tools.append(HoughTransform)
 
     RF.tools = tools
     result.addPublicTool(RF, primary=True)
     return result
+
+
 
 def FPGATrackSimRoadUnionTool1DCfg(flags):
     result=ComponentAccumulator()
@@ -184,8 +204,24 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
     result=ComponentAccumulator()
 
     # read the cuts from a seperate python file specified by FPGATrackSim.GenScan.genScanCuts
-    cutset = importlib.import_module(flags.Trigger.FPGATrackSim.GenScan.genScanCuts).cuts[flags.Trigger.FPGATrackSim.region]
-    
+    cutset=None
+    if flags.Trigger.FPGATrackSim.oldRegionDefs:
+        toload=flags.Trigger.FPGATrackSim.GenScan.genScanCuts
+        if toload == 'FPGATrackSimGenScanCuts': # its on the newRegion default so it hasn't been set
+            toload = 'FPGATrackSimHough.FPGATrackSimGenScanCuts_incr'
+        cutset = importlib.import_module(toload).cuts[flags.Trigger.FPGATrackSim.region]
+    else:
+        cutFileName = f"{PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir)}{flags.Trigger.FPGATrackSim.GenScan.genScanCuts}.py"
+        print(f"Cut File = {cutFileName}")
+        # this allows the cut file defined in python to be loaded from the map directory
+        spec=importlib.util.spec_from_file_location(flags.Trigger.FPGATrackSim.GenScan.genScanCuts ,cutFileName)
+        print ("Spec = ", spec)
+        if spec is None:
+            print("Failed to find Cut File")
+        cutmodule = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cutmodule)
+        cutset=cutmodule.cuts[flags.Trigger.FPGATrackSim.region]
+
     # make the binning class
     Binning = None
     if (cutset["parSet"]=="PhiSlicedKeyLyrPars") :
@@ -214,8 +250,8 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
     # configure which filers and thresholds to apply
     tool.binFilter=flags.Trigger.FPGATrackSim.GenScan.binFilter
     tool.reversePairDir=flags.Trigger.FPGATrackSim.GenScan.reverse
-    tool.applyPairFilter=True
-    tool.applyPairSetFilter=True
+    tool.applyPairFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
+    tool.applyPairSetFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
     tool.threshold = 4
 
     # configure the padding around the nominal region
@@ -230,7 +266,12 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags):
         setattr(tool,cut,val)
 
     # set layer map
-    tool.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
+    if not flags.Trigger.FPGATrackSim.GenScan.layerStudy:
+        if flags.Trigger.FPGATrackSim.oldRegionDefs:
+            tool.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
+        else:
+            # now assumed to be in the map directory with name = basename for region + _lyrmap.json
+            tool.layerMapFile = f"{PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir)}{FPGATrackSimDataPrepConfig.getBaseName(flags)}_lyrmap.json"
 
     # even though we are not actually doing a Union, we need the 
     # RoadUnionTool because mapping is now there
@@ -268,10 +309,22 @@ def FPGATrackSimGNNGraphConstructionToolCfg(flags):
 
     GNNGraphConstructionTool = CompFactory.FPGATrackSimGNNGraphConstructionTool()
     GNNGraphConstructionTool.graphTool = flags.Trigger.FPGATrackSim.GNN.graphTool.value
+
+    # Module Map Configuration
     GNNGraphConstructionTool.moduleMapType=flags.Trigger.FPGATrackSim.GNN.moduleMapType.value
     GNNGraphConstructionTool.moduleMapFunc=flags.Trigger.FPGATrackSim.GNN.moduleMapFunc.value
     GNNGraphConstructionTool.moduleMapTol=flags.Trigger.FPGATrackSim.GNN.moduleMapTol
     GNNGraphConstructionTool.moduleMapPath=PathResolver.FindCalibFile(flags.Trigger.FPGATrackSim.GNN.moduleMapPath)
+
+    # Metric Learning Configuration
+    GNNGraphConstructionTool.metricLearningR=flags.Trigger.FPGATrackSim.GNN.metricLearningR
+    GNNGraphConstructionTool.metricLearningMaxN=flags.Trigger.FPGATrackSim.GNN.metricLearningMaxN
+
+    from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
+    from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
+
+    GNNGraphConstructionTool.MLInferenceTool = result.popToolsAndMerge(OnnxRuntimeInferenceToolCfg(
+        flags, flags.Trigger.FPGATrackSim.GNN.MLModelPath, OnnxRuntimeType.CPU))
 
     result.setPrivateTools(GNNGraphConstructionTool)
 
@@ -351,11 +404,12 @@ def NNTrackToolCfg(flags):
     NNTrackTool.THistSvc = CompFactory.THistSvc()
     NNTrackTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     NNTrackTool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
-    NNTrackTool.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
-    NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan
+    NNTrackTool.IdealGeoRoads = False
+    NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan and not flags.Trigger.FPGATrackSim.ActiveConfig.GNN
     NNTrackTool.SPRoadFilterTool = getSPRoadFilterTool(flags)
     NNTrackTool.MinNumberOfRealHitsInATrack = 5 if flags.Trigger.FPGATrackSim.ActiveConfig.genScan else 9
-    
+    NNTrackTool.useSectors = False
+    NNTrackTool.doGNNTracking = flags.Trigger.FPGATrackSim.GNN.doGNNTracking
     result.setPrivateTools(NNTrackTool)
     return result
 
@@ -391,6 +445,9 @@ def FPGATrackSimOverlapRemovalToolCfg(flags):
         OR_1st.nBins_y = flags.Trigger.FPGATrackSim.ActiveConfig.yBins + 2 * flags.Trigger.FPGATrackSim.ActiveConfig.yBufferBins
         OR_1st.localMaxWindowSize = flags.Trigger.FPGATrackSim.ActiveConfig.localMaxWindowSize
         OR_1st.roadSliceOR = flags.Trigger.FPGATrackSim.ActiveConfig.roadSliceOR
+
+    from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimOverlapRemovalToolMonitoringCfg
+    OR_1st.MonTool = result.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolMonitoringCfg(flags))
     
     result.addPublicTool(OR_1st, primary=True)
     return result
@@ -431,15 +488,15 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHitsProcessAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
     theFPGATrackSimLogicalHitsProcessAlg.DoHoughRootOutput1st = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput1st
     theFPGATrackSimLogicalHitsProcessAlg.NumOfHitPerGrouping = flags.Trigger.FPGATrackSim.ActiveConfig.NumOfHitPerGrouping
-    theFPGATrackSimLogicalHitsProcessAlg.DoNNTrack = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis
+    theFPGATrackSimLogicalHitsProcessAlg.DoNNTrack_1st = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis
     theFPGATrackSimLogicalHitsProcessAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionCfg(flags))
     theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut
     theFPGATrackSimLogicalHitsProcessAlg.passLowestChi2TrackOnly = flags.Trigger.FPGATrackSim.ActiveConfig.passLowestChi2TrackOnly
     FPGATrackSimMaping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     theFPGATrackSimLogicalHitsProcessAlg.FPGATrackSimMapping = FPGATrackSimMaping
 
-    # If tracking is set to False, don't configure the bank service
-    if flags.Trigger.FPGATrackSim.tracking:
+    # If tracking is set to False or if we do the NN analysis, don't configure the bank service
+    if flags.Trigger.FPGATrackSim.tracking and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis:
         result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
 
     if (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
@@ -504,7 +561,26 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
 
     return result
 
+def getChi2Cut(region):
+    #list of chi2 cuts for time being
+    chi2cut_l = [12, 16, 16, 16, 16, 18, 14, 16, 16, 16, 19, 15, 18, 12, 15, 15, 14, 14, 12, 15]
+    binSize = 0.2
+    side = (region >> 5) & 0x1
+    etaBin = (region >> 6) & 0x1F
+    etaRange = [round(binSize * etaBin, 1), round(binSize * (etaBin + 1), 1)] if side else [round(-binSize * (etaBin + 1), 1), round(-binSize * etaBin, 1)]
+    abs_etaRange = tuple(abs(val) for val in etaRange)
 
+    eta_to_chi2 = {
+        (0.0, 0.2): chi2cut_l[0], (0.2, 0.4): chi2cut_l[1], (0.4, 0.6): chi2cut_l[2],
+        (0.6, 0.8): chi2cut_l[3], (0.8, 1.0): chi2cut_l[4], (1.0, 1.2): chi2cut_l[5],
+        (1.2, 1.4): chi2cut_l[6], (1.4, 1.6): chi2cut_l[7], (1.6, 1.8): chi2cut_l[8],
+        (1.8, 2.0): chi2cut_l[9], (2.0, 2.2): chi2cut_l[10], (2.2, 2.4): chi2cut_l[11],
+        (2.4, 2.6): chi2cut_l[12], (2.6, 2.8): chi2cut_l[13], (2.8, 3.0): chi2cut_l[14],
+        (3.0, 3.2): chi2cut_l[15], (3.2, 3.4): chi2cut_l[16], (3.4, 3.6): chi2cut_l[17], 
+        (3.6, 3.8): chi2cut_l[18], (3.8, 4.0): chi2cut_l[19]
+    }
+
+    return eta_to_chi2.get(abs_etaRange, 9) #Set default chi2 if the region is not found
 
 
 if __name__ == "__main__":
@@ -535,6 +611,9 @@ if __name__ == "__main__":
 
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
+    
+    if flags.Trigger.FPGATrackSim.Hough.useVaryingChi2Cut: 
+        flags.Trigger.FPGATrackSim.Hough.chi2cut = getChi2Cut(flags.Trigger.FPGATrackSim.region)
 
     assert not flags.Trigger.FPGATrackSim.pipeline.startswith('F-5'),"ERROR You are trying to run an F-5* pipeline! This is not yet supported!"
 
@@ -556,7 +635,7 @@ if __name__ == "__main__":
     elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-4')):
         print("You are trying to run an F-4* pipeline! I am auto-configuring the GNN pattern recognition for you. Whether you wanted to or not")
         flags.Trigger.FPGATrackSim.Hough.GNN = True
-        flags.Trigger.FPGATrackSim.Hough.chi2cut = 25 # All of the track candidates have chi2 values around 20 for some reason. Needs further investigation. For now move the default cut value to 25
+        flags.Trigger.FPGATrackSim.Hough.chi2cut = 40 # All of the track candidates have chi2 values around 20 for some reason. Needs further investigation. For now move the default cut value to 40
     elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-6')):
         print("You are trying to run an F-6* pipeline! I am auto-configuring the Inside-Out for you. Whether you wanted to or not")
         flags.Trigger.FPGATrackSim.Hough.genScan=True
@@ -595,7 +674,7 @@ if __name__ == "__main__":
         if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
             acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
 
-            if (flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis):
+            if (flags.Trigger.FPGATrackSim.doNNPathFinder):
                 acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUTNNPATHFINDER DATAFILE='NNPathfinder.root', OPT='RECREATE'"]))
 
             if (flags.Trigger.FPGATrackSim.Hough.houghRootoutput1st | flags.Trigger.FPGATrackSim.Hough.houghRootoutput2nd):

@@ -12,7 +12,6 @@ from .Physics_pp_run3_v1 import (
     SingleJetGroup,
     SingleBjetGroup,
     SingleMuonGroup,
-    SingleTauGroup,
     MultiMuonGroup,
     EgammaMuonGroup,
     PrimaryLegGroup,
@@ -58,10 +57,6 @@ def getCosmicSignatures():
         # phase-I
         ChainProp(name='HLT_g3_etcut_LArPEB_L1eEM5', stream=['LArCells'], groups=['RATE:SinglePhoton', 'BW:Egamma']),
         ChainProp(name='HLT_e5_etcut_L1eEM5',stream=['Main'], groups=['RATE:SingleElectron', 'BW:Egamma']),
-    ]
-
-    chains['Tau'] = [
-        ChainProp(name='HLT_tau0_ptonly_L1eTAU12', l1SeedThresholds=['eTAU12'], stream=['Main'], groups=PrimaryPhIGroup+SingleTauGroup),
     ]
 
     chains['Jet'] = [

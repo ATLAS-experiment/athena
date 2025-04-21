@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DBREPLICASVC_IDBREPLICASVC_H
@@ -12,14 +12,9 @@
 #include "RelationalAccess/IReplicaSortingAlgorithm.h"
 
 class IDBReplicaSvc : virtual public IInterface, 
-  virtual public coral::IReplicaSortingAlgorithm {
+                      virtual public coral::IReplicaSortingAlgorithm {
  public:
-  static const InterfaceID& interfaceID();
+  DeclareInterfaceID(IDBReplicaSvc, 1, 0);
 };
-
-inline const InterfaceID& IDBReplicaSvc::interfaceID() {
-  static const InterfaceID IID_IDBReplicaSvc("IDBReplicaSvc",1,0);
-  return IID_IDBReplicaSvc;
-}
 
 #endif // DBREPLICASVC_IDBREPLICASVC_H

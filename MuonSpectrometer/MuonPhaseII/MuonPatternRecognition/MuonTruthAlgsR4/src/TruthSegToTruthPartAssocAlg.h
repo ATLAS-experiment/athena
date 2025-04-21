@@ -16,6 +16,11 @@
 
 
 namespace MuonR4{
+    /** @brief The TruthSegToTruthPartAssocAlg associates the TruthSegments with the primary TruthParticle
+     *         from the IP. At the same time, the truth particles are linked to all the associated segment candidates.
+     *         
+     *         To perform the matching, the SDO identifiers decorated to the TruthParticle are compared with the SDO
+     *         identifiers of the truth hits making up the truth segment.  */
     class TruthSegToTruthPartAssocAlg: public AthReentrantAlgorithm {
         public:
             using AthReentrantAlgorithm::AthReentrantAlgorithm;
@@ -32,7 +37,7 @@ namespace MuonR4{
             /** @brief Declaration of the dependency on the simHit decorations */
             SG::ReadDecorHandleKeyArray<xAOD::TruthParticleContainer> m_simHitKeys{this, "TruthSimHitIdKeys", {}};
             /** @brief Declaration of the segmentLink to the truth particle */
-            SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_segLinkKey{this, "SegmentToPartKey", m_truthKey, "truthSegLinks"};
+            SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_segLinkKey{this, "SegmentToPartKey", m_truthKey, "truthSegmentLinks"};
             /** @brief Key to the truth segment container to associate */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentKey", "TruthSegmentsR4"};
             /** @brief Key of the truthParticleLink decorated onto the segment */
@@ -40,6 +45,4 @@ namespace MuonR4{
 
     };
 }
-
-
 #endif

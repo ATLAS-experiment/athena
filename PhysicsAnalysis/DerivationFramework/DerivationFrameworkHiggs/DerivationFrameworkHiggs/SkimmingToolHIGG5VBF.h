@@ -31,7 +31,7 @@ namespace DerivationFramework {
   /** @class SkimmingToolHIGG5VBF
       @author Yasuyuki.Okumura@cern.ch
      */
-  class SkimmingToolHIGG5VBF : public AthAlgTool, public ISkimmingTool {
+  class SkimmingToolHIGG5VBF : public extends<AthAlgTool, ISkimmingTool> {
     
   public:
     /** Constructor with parameters */

@@ -11,6 +11,7 @@
 #include "AthenaKernel/IEvtSelectorSeek.h"
 #include "AthenaKernel/IEventShare.h"
 #include "AthenaKernel/IDataShare.h"
+#include "CxxUtils/xmalloc.h"
 #include "GaudiKernel/IEvtSelector.h"
 #include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/IFileMgr.h"
@@ -34,35 +35,9 @@ SharedEvtQueueConsumer::SharedEvtQueueConsumer(const std::string& type
 					       , const std::string& name
 					       , const IInterface* parent)
   : AthenaMPToolBase(type,name,parent)
-  , m_useSharedReader(false)
-  , m_useSharedWriter(false)
-  , m_isRoundRobin(false)
-  , m_nEventsBeforeFork(0)
-  , m_nSkipEvents(0)
-  , m_debug(false)
-  , m_rankId(-1)
   , m_chronoStatSvc("ChronoStatSvc", name)
-  , m_evtSeek(nullptr)
-  , m_evtSelSeek(nullptr)
-  , m_evtContext(nullptr)
-  , m_evtShare(nullptr)
-  , m_dataShare(nullptr)
-  , m_sharedEventQueue(nullptr)
-  , m_sharedRankQueue(nullptr)
-  , m_readEventOrders(false)
-  , m_eventOrdersFile("athenamp_eventorders.txt")
   , m_masterPid(getpid())
 {
-  declareInterface<IAthenaMPTool>(this);
-
-  declareProperty("UseSharedReader",m_useSharedReader);
-  declareProperty("UseSharedWriter",m_useSharedWriter);
-  declareProperty("IsRoundRobin",m_isRoundRobin);
-  declareProperty("EventsBeforeFork",m_nEventsBeforeFork);
-  declareProperty("Debug", m_debug);
-  declareProperty("ReadEventOrders",m_readEventOrders);
-  declareProperty("EventOrdersFile",m_eventOrdersFile);
-
   m_subprocDirPrefix = "worker_";
 }
 
@@ -126,7 +101,7 @@ StatusCode SharedEvtQueueConsumer::finalize()
 
     // 1. Check if master run directory already contains a file with saved orders
     // If so, then rename it with random suffix
-    std::filesystem::path ordersFile(m_eventOrdersFile);
+    std::filesystem::path ordersFile(m_eventOrdersFile.value());
     if(std::filesystem::exists(ordersFile)) {
       srand((unsigned)time(0));
       std::ostringstream randname;
@@ -140,7 +115,7 @@ StatusCode SharedEvtQueueConsumer::finalize()
     }
 
     // 2. Merge workers event orders into the master file
-    std::fstream fs(m_eventOrdersFile.c_str(),std::fstream::out);
+    std::fstream fs(m_eventOrdersFile,std::fstream::out);
     for(int i=0; i<m_nprocs; ++i) {
       std::ostringstream workerIndex;
       workerIndex << i;
@@ -164,7 +139,6 @@ StatusCode SharedEvtQueueConsumer::finalize()
     m_evtContext = nullptr;
   }
 
-  delete m_sharedRankQueue;
   return StatusCode::SUCCESS;
 }
 
@@ -187,15 +161,10 @@ int SharedEvtQueueConsumer::makePool(int, int nprocs, const std::string& topdir)
 
   // Get the shared event queue
   ATH_MSG_DEBUG("Event queue name AthenaMPEventQueue_" << m_randStr);
-  StatusCode sc = detStore()->retrieve(m_sharedEventQueue,"AthenaMPEventQueue_"+m_randStr);
-  if(sc.isFailure()) {
-    ATH_MSG_ERROR("Unable to retrieve the pointer to Shared Event Queue");
-    return -1;
-  }
-
+  ATH_CHECK( detStore()->retrieve(m_sharedEventQueue,"AthenaMPEventQueue_"+m_randStr), -1);
 
   // Create rank queue and fill it
-  m_sharedRankQueue = new AthenaInterprocess::SharedQueue("SharedEvtQueueConsumer_RankQueue_"+m_randStr,m_nprocs,sizeof(int));
+  m_sharedRankQueue = std::make_unique<AthenaInterprocess::SharedQueue>("SharedEvtQueueConsumer_RankQueue_"+m_randStr,m_nprocs,sizeof(int));
   for(int i=0; i<m_nprocs; ++i)
     if(!m_sharedRankQueue->send_basic<int>(i)) {
       ATH_MSG_ERROR("Unable to send int to the ranks queue!");
@@ -287,7 +256,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::boots
   if(m_debug) waitForSignal();
 
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = 1; // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
 
@@ -386,13 +355,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::boots
   
   // ________________________ Make Shared Reader/Writer Client ________________________
   if(m_useSharedReader && m_evtShare) {
-    if(!m_evtShare->makeClient(m_rankId).isSuccess()) {
-      ATH_MSG_ERROR("Failed to make the event selector a share client");
-      return outwork;
-    } 
-    else {
-      ATH_MSG_DEBUG("Successfully made the event selector a share client");
-    }
+    ATH_CHECK( m_evtShare->makeClient(m_rankId), outwork);
   }
 
   if(m_useSharedWriter && m_dataShare) {
@@ -407,46 +370,25 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::boots
   }
 
   // ________________________ I/O reinit ________________________
-  if(!m_ioMgr->io_reinitialize().isSuccess()) {
-    ATH_MSG_ERROR("Failed to reinitialize I/O");
-    return outwork;
-  } 
-  else {
-    ATH_MSG_DEBUG("Successfully reinitialized I/O");
-  }
+  ATH_CHECK( m_ioMgr->io_reinitialize(), outwork );
 
   // _______________ Get the value of SkipEvent ________________________
   if(m_evtSelector) {
     SmartIF<IProperty> propertyServer(m_evtSelector);
-    if(!propertyServer) {
-      ATH_MSG_ERROR("Unable to cast event selector to IProperty");
-      return outwork;
+    ATH_CHECK( propertyServer.isValid(), outwork);
+
+    IntegerProperty skipEventsProp("SkipEvents", m_nSkipEvents);
+    if(propertyServer->getProperty(&skipEventsProp).isFailure()) {
+      ATH_MSG_INFO("Event Selector does not have SkipEvents property");
     }
     else {
-      std::string propertyName("SkipEvents");
-      IntegerProperty skipEventsProp(propertyName,m_nSkipEvents);
-      if(propertyServer->getProperty(&skipEventsProp).isFailure()) {
-	ATH_MSG_INFO("Event Selector does not have SkipEvents property");
-      }
-      else {
-	m_nSkipEvents = skipEventsProp.value();
-      }
+      m_nSkipEvents = skipEventsProp.value();
     }
-
 
     // ________________________ Event selector restart ________________________
     SmartIF<IService> evtSelSvc(m_evtSelector);
-    if(!evtSelSvc) {
-      ATH_MSG_ERROR("Failed to dyncast event selector to IService");
-      return outwork;
-    }
-    if(!evtSelSvc->start().isSuccess()) {
-      ATH_MSG_ERROR("Failed to restart the event selector");
-      return outwork;
-    } 
-    else {
-      ATH_MSG_DEBUG("Successfully restarted the event selector");
-    }
+    ATH_CHECK( evtSelSvc.isValid(), outwork);
+    ATH_CHECK( evtSelSvc->start(), outwork);
   } 
   // For PileUp jobs >>>>
   // Main event selector: advance it if we either forked after N events, or skipEvents!=0
@@ -486,7 +428,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::boots
 
   // _______________________ Event orders for debugging ________________________________
   if(m_readEventOrders) {
-    std::fstream fs(m_eventOrdersFile.c_str(),std::fstream::in);
+    std::fstream fs(m_eventOrdersFile,std::fstream::in);
     if(fs.good()) {
       ATH_MSG_INFO("Reading predefined event orders from " << m_eventOrdersFile);
       while(fs.good()){
@@ -550,7 +492,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::exec_
   auto predefinedEvt = m_eventOrders.cbegin();
 
   // If the event orders file already exists in worker's run directory, then it's an unexpected error!
-  std::filesystem::path ordersFile(m_eventOrdersFile);
+  std::filesystem::path ordersFile(m_eventOrdersFile.value());
   if(std::filesystem::exists(ordersFile)) {
     ATH_MSG_ERROR(m_eventOrdersFile << " already exists in the worker's run directory!");
     all_ok = false;
@@ -558,7 +500,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::exec_
 
   System::ProcessTime time_start = System::getProcessTime();
   if(all_ok) {
-    std::fstream fs(m_eventOrdersFile.c_str(),std::fstream::out);
+    std::fstream fs(m_eventOrdersFile,std::fstream::out);
     fs << m_rankId;
     bool firstOrder(true);
     while(true) {
@@ -682,7 +624,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::exec_
 
   // Return value: "ERRCODE|Func_Flag|NEvt|EvtLoopTime"
   int outsize = 2*sizeof(int)+sizeof(AthenaMPToolBase::Func_Flag)+sizeof(elapsedTime);
-  void* outdata = malloc(outsize);
+  void* outdata = CxxUtils::xmalloc(outsize);
   *(int*)(outdata) = (all_ok?0:1); // Error code: for now use 0 success, 1 failure
   AthenaMPToolBase::Func_Flag func = AthenaMPToolBase::FUNC_EXEC;
   memcpy((char*)outdata+sizeof(int),&func,sizeof(func));
@@ -718,7 +660,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::fin_f
 
   // Return value: "ERRCODE|Func_Flag|NEvt|EvtLoopTime"  (Here NEvt=-1 and EvtLoopTime=-1)
   int outsize = 2*sizeof(int)+sizeof(AthenaMPToolBase::Func_Flag)+sizeof(TimeValType);
-  void* outdata = malloc(outsize);
+  void* outdata = CxxUtils::xmalloc(outsize);
   *(int*)(outdata) = (all_ok?0:1); // Error code: for now use 0 success, 1 failure
   AthenaMPToolBase::Func_Flag func = AthenaMPToolBase::FUNC_FIN;
   memcpy((char*)outdata+sizeof(int),&func,sizeof(func));

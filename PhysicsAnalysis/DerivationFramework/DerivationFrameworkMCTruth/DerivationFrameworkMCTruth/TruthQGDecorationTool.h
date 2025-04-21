@@ -21,7 +21,7 @@
 
 namespace DerivationFramework {
 
-  class TruthQGDecorationTool : public AthAlgTool, public IAugmentationTool {
+  class TruthQGDecorationTool : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       TruthQGDecorationTool(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthQGDecorationTool();

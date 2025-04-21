@@ -2,8 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETPATTRECOTOOLS_GNN_DATA_STORAGE_IPP
-#define TRIGINDETPATTRECOTOOLS_GNN_DATA_STORAGE_IPP
 
 #include "TrigInDetPattRecoEvent/TrigInDetSiLayer.h"
 #include "GNN_Geometry.h"
@@ -53,7 +51,8 @@ void TrigFTF_GNN_EtaBin::sortByPhi() {
 
 
 void TrigFTF_GNN_EtaBin::initializeNodes() {
-  if(m_vn.size() ==0) return;
+  
+  if(m_vn.empty()) return;
   
   m_params.resize(m_vn.size());
   
@@ -228,4 +227,3 @@ void TrigFTF_GNN_DataStorage::generatePhiIndexing(float dphi) {
   for(auto& b : m_etaBins) b.generatePhiIndexing(dphi);
 }
 
-#endif

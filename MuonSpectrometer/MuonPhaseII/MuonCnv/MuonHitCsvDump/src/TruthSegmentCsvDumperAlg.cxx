@@ -19,12 +19,15 @@
 
 
 namespace {
-  union SectorId{
-      int8_t fields[4];
-      int hash;
-  };
-}
+  constexpr int encodeId(const int8_t stName, const int8_t stEta,
+               const int8_t sector) {
+      return (sector <<16 |stEta << 8| stName);
+  }
+  constexpr double precCutOff(const double value, const double cutOff = 1.e-15) {
+    return std::abs(value) > cutOff ? value : 0.;
+  }
 
+}
 
 namespace MuonR4{
 
@@ -54,7 +57,6 @@ StatusCode TruthSegmentCsvDumperAlg::execute(){
   const EventContext & ctx = Gaudi::Hive::currentContext();
   std::ofstream file{std::string(Form("event%09zu-",++m_event))+"MuonTruthSegment.csv"};
   constexpr std::string_view delim = ",";
- 
   file<<"sectorId"<<delim;
   file<<"globalPositionX"<<delim;
   file<<"globalPositionY"<<delim;
@@ -81,11 +83,12 @@ StatusCode TruthSegmentCsvDumperAlg::execute(){
   file<<"phiLayers"<<delim;
   file<<"trigEtaLayers"<<delim;
   file<<std::endl;
-  SG::ReadHandle readTruthSegment{m_inSegmentKey, ctx};
-  ATH_CHECK(readTruthSegment.isPresent());
 
-  SG::ReadHandle gctxHandle{m_geoCtxKey, ctx};
-  ATH_CHECK(gctxHandle.isPresent());
+  const xAOD::MuonSegmentContainer* readTruthSegment{nullptr};
+  ATH_CHECK(SG::get(readTruthSegment, m_inSegmentKey, ctx));
+
+  const ActsGeometryContext* gctxHandle{nullptr};
+  ATH_CHECK(SG::get(gctxHandle, m_geoCtxKey, ctx));
 
   for (const xAOD::MuonSegment* segment : *readTruthSegment) {
     const MuonGMR4::SpectrometerSector* sector = msSector(*segment);
@@ -100,11 +103,9 @@ StatusCode TruthSegmentCsvDumperAlg::execute(){
     const Amg::Vector3D locPos = globToLoc * globPos;
     const Amg::Vector3D locDir = globToLoc.linear() * globDir;
 
-    SectorId secId{};
-    secId.fields[0] = static_cast<int>(segment->chamberIndex());
-    secId.fields[1] = sign(segment->etaIndex());
-    secId.fields[2] = segment->sector();
-
+    const int secId = encodeId(static_cast<int8_t>(sector->chamberIndex()),
+                               sector->side(),
+                               sector->sector());
     // time information
     float seg_t0      = segment->t0();
     float seg_t0error = segment->t0error();
@@ -129,32 +130,32 @@ StatusCode TruthSegmentCsvDumperAlg::execute(){
     ATH_MSG_VERBOSE("nPrecisionHits: "<<seg_PrecisionHits<<" nPhiLayers: "<<seg_PhiLayers<<" nTrigEtaLayers: "<<seg_TrigEtaLayers);
 
     // save the segment information to the csv file 
-    file<<secId.hash<<delim;
-    file<<globPos.x()<<delim;
-    file<<globPos.y()<<delim;
-    file<<globPos.z()<<delim;
-    file<<globDir.x()<<delim;
-    file<<globDir.y()<<delim;
-    file<<globDir.z()<<delim;
+    file<<secId<<delim;
+    file<<precCutOff(globPos.x())<<delim;
+    file<<precCutOff(globPos.y())<<delim;
+    file<<precCutOff(globPos.z())<<delim;
+    file<<precCutOff(globDir.x())<<delim;
+    file<<precCutOff(globDir.y())<<delim;
+    file<<precCutOff(globDir.z())<<delim;
 
-    file<<locPos.x()<<delim;
-    file<<locPos.y()<<delim;
-    file<<locPos.z()<<delim;
-    file<<locDir.x()<<delim;
-    file<<locDir.y()<<delim;
-    file<<locDir.z()<<delim;
+    file<<precCutOff(locPos.x())<<delim;
+    file<<precCutOff(locPos.y())<<delim;
+    file<<precCutOff(locPos.z())<<delim;
+    file<<precCutOff(locDir.x())<<delim;
+    file<<precCutOff(locDir.y())<<delim;
+    file<<precCutOff(locDir.z())<<delim;
 
 
-    file<<seg_t0<<delim;
-    file<<seg_t0error<<delim;
-    file<<seg_chiSquared<<delim;
+    file<<precCutOff(seg_t0)<<delim;
+    file<<precCutOff(seg_t0error)<<delim;
+    file<<precCutOff(seg_chiSquared)<<delim;
     file<<seg_numberDoF<<delim;
     file<<seg_PrecisionHits<<delim;
     file<<seg_PhiLayers<<delim;
     file<<seg_TrigEtaLayers<<delim;
     file<<std::endl;
-    }
-    return StatusCode::SUCCESS;
+  }
+  return StatusCode::SUCCESS;
 }
 
 }

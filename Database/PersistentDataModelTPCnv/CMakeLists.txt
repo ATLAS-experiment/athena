@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PersistentDataModelTPCnv )
@@ -11,8 +11,8 @@ atlas_add_library( PersistentDataModelTPCnv
                    src/*.cxx
                    PUBLIC_HEADERS PersistentDataModelTPCnv
                    PRIVATE_INCLUDE_DIRS ${UUID_INCLUDE_DIRS}
-                   LINK_LIBRARIES PersistentDataModel
-                   PRIVATE_LINK_LIBRARIES ${UUID_LIBRARIES} CxxUtils )
+                   LINK_LIBRARIES PersistentDataModel AthenaKernel CxxUtils
+                   PRIVATE_LINK_LIBRARIES ${UUID_LIBRARIES} )
 
 atlas_add_dictionary( PersistentDataModelTPCnvDict
                       PersistentDataModelTPCnv/PersistentDataModelTPCnvDict.h

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /* Second stage alg needs to:
  *  retrieve Tracks_1st and Hits_2nd from storegate
@@ -58,7 +58,7 @@ StatusCode FPGATrackSimSecondStageAlg::initialize()
     }
 
     ATH_CHECK(m_houghRootOutputTool.retrieve(EnableTool{m_doHoughRootOutput2nd}));
-    ATH_CHECK(m_NNTrackTool.retrieve(EnableTool{m_doNNTrack}));
+    ATH_CHECK(m_NNTrackTool.retrieve(EnableTool{m_doNNTrack_2nd}));
     if (m_doSpacepoints) ATH_CHECK(m_spRoadFilterTool.retrieve(EnableTool{m_spRoadFilterTool}));
 
     ATH_CHECK(m_trackFitterTool.retrieve(EnableTool{m_doTracking}));
@@ -179,7 +179,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
 
     // Get second stage roads from tracks.
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> prefilter_roads;
-    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads = prefilter_roads;
+    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads = std::move(prefilter_roads);
 
     if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: TrackExtension");
     // Use the track extension tool to actually produce a new set of roads.
@@ -229,9 +229,9 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: Road Filtering");
     // Spacepoint road filter tool. Needed when fitting to spacepoints.
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> post_spfilter_roads;
-    if (m_doSpacepoints) {
+    if (m_doSpacepoints && !m_doNNPathFinder) {
         ATH_CHECK(m_spRoadFilterTool->filterRoads(roads, post_spfilter_roads));
-        roads = post_spfilter_roads;
+        roads = std::move(post_spfilter_roads);
     }
     if constexpr (enableBenchmark) m_chrono->chronoStop("2nd Stage: Road Filtering");
     auto mon_nroads_postfilter = Monitored::Scalar<unsigned>("nroads_2nd_postfilter", roads.size());
@@ -242,9 +242,9 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: Track Extraction");
     std::vector<FPGATrackSimTrack> tracks;
     if (m_doTracking) {
-        if (m_doNNTrack) {
+        if (m_doNNTrack_2nd) {
             ATH_MSG_DEBUG("Performing NN tracking");
-            ATH_CHECK(m_NNTrackTool->getTracks(roads, tracks));
+            ATH_CHECK(m_NNTrackTool->getTracks_2nd(roads, tracks));
         } else {
             ATH_MSG_DEBUG("Performing Linear tracking");
 
@@ -354,7 +354,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         auto truthz0= Monitored::Scalar<float>("z0",truthtracks.front().getZ0());
         if (roads.size() > 0) m_nRoadsFound++;
 	if (roads.size() > m_maxNRoadsFound) m_maxNRoadsFound = roads.size();
-		
+
 	unsigned npasschi2(0);
 	unsigned npasschi2OLR(0);
 

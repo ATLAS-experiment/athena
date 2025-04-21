@@ -7,6 +7,7 @@ from GeneratorFilters.GeneratorFiltersConf import HTFilter
 if "HTFilter" not in filtSeq:
     filtSeq += HTFilter()
 
+from AthenaCommon.SystemOfUnits import GeV
 filtSeq.HTFilter.MinJetPt = 20.*GeV # Min pT to consider jet in HT
 filtSeq.HTFilter.MaxJetEta = 999. # Max eta to consider jet in HT
 filtSeq.HTFilter.MinHT = 200.*GeV # Min HT to keep event

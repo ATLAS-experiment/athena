@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -518,8 +518,7 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
  
   /// this uses move semantics so doesn't do a deep copy, so ...
   std::unique_ptr<TrigRoiDescriptor> tmpRoi = std::make_unique<TrigRoiDescriptor>(roi);
-  /// need to disable managment of the constituents
-  tmpRoi->manageConstituents(false);
+
   auto vertices = std::make_unique<TrigVertexCollection>();
   std::vector<float> vZv;
 
@@ -674,6 +673,8 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
       spVec = {osp1, osp2, osp3};//create a 3-SP seed
     }
 
+    vec_seedSize.push_back(spVec.size());//monitoring seed length for GBTS seeding
+ 
     if(m_checkSeedRedundancy) {
       //check if clusters do not belong to any track
       std::vector<Identifier> clusterIds;

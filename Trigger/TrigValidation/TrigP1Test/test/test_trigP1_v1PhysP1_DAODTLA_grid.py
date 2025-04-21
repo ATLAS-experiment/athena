@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Test of P1+Tier0 workflow, runs athenaHLT with PhysicsP1_pp_run3_v1 menu followed by offline reco and monitoring (incl. EDM)
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
@@ -22,6 +22,7 @@
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Common import find_file
 from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 # Specify trigger menu once here:
 triggermenu = 'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale'
@@ -33,7 +34,7 @@ hlt.job_options = 'TriggerJobOpts.runHLT'
 hlt.forks = 1
 hlt.threads = 8
 hlt.concurrent_events = 8
-hlt.input = 'data_Main'
+hlt.input = 'data'
 hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
              'Trigger.doLVL1=True']
 hlt.args = '-o output'
@@ -56,7 +57,7 @@ tlareco.input = ''
 tlareco.explicit_input = True
 tlareco.args = '--inputBSFile=' + find_file('*.physics_TLA*._athenaHLT*.data')  # output of the previous step
 tlareco.args += ' --outputDAOD_TLAFile=DAOD_TLA.pool.root'
-tlareco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2024-03\' --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
+tlareco.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA}" --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
 tlareco.args += ' --preExec="{:s}"'.format(tlarecoPreExec)
 
 # The full test
@@ -64,11 +65,8 @@ test = Test.Test()
 test.art_type = 'grid'
 test.exec_steps = [hlt, filter_bs, tlareco]
 test.check_steps = CheckSteps.default_check_steps(test)
-add_analysis_steps(test)
-
-# Overwrite default histogram file name for checks
-for step in [test.get_step(name) for name in ['RootComp']]:
-    step.input_file = 'ExampleMonitorOutput.root'
+add_analysis_steps(test, input_file='DAOD_TLA.pool.root')
+test.exec_steps = [t for t in test.exec_steps if not t.name == "TrigEDMChecker"] # TrigEDMChecker fails on TLA DAOD output due to missing HLT containers
 
 import sys
 sys.exit(test.run())

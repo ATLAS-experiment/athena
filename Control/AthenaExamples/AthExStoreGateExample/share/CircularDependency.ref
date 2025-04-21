@@ -1,0 +1,1 @@
+testalg2    WARNING Implicit circular data dependency detected for id  ( 'MyDataObj' , 'StoreGateSvc+obj' ) 

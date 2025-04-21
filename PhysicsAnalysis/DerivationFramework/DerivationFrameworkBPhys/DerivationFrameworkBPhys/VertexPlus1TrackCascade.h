@@ -28,8 +28,6 @@ namespace Trk {
 
 namespace DerivationFramework {
 
-    static const InterfaceID IID_VertexPlus1TrackCascade("VertexPlus1TrackCascade", 1, 0);
-
     class VertexPlus1TrackCascade : virtual public AthAlgTool
     {
         
@@ -57,7 +55,6 @@ namespace DerivationFramework {
         ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
 
     public:
-        static const InterfaceID& interfaceID() { return IID_VertexPlus1TrackCascade;}
         VertexPlus1TrackCascade(const std::string& t, const std::string& n, const IInterface*  p);
         ~VertexPlus1TrackCascade();
         StatusCode initialize() override;

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -10,6 +10,7 @@ atlas_add_library( FTagAnalysisAlgorithmsLib
    FTagAnalysisAlgorithms/*.h FTagAnalysisAlgorithms/*.icc Root/*.cxx
    PUBLIC_HEADERS FTagAnalysisAlgorithms
    LINK_LIBRARIES xAODJet xAODBTagging SelectionHelpersLib SystematicsHandlesLib
+   TrigCompositeUtilsLib TrigDecisionToolLib
    AnaAlgorithmLib FTagAnalysisInterfacesLib )
 
 atlas_add_dictionary( FTagAnalysisAlgorithmsDict

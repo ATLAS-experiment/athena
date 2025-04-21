@@ -20,10 +20,13 @@ VectorBranch<T>::VectorBranch(MuonTesterTree& tree, const std::string& name, con
 
 template <class T> bool VectorBranch<T>::fill(const EventContext&) {
     if (!initialized()) {
-        ATH_MSG_ERROR("init()  -- The branch " << name() << " is not initialized yet.");
+        ATH_MSG_ERROR("fill()  -- The branch " << name() << " is not initialized yet.");
         return false;
     }
-    if (!m_updated) m_variable.clear();
+    if (!m_updated) {
+        m_variable.clear();
+    }
+    ATH_MSG_VERBOSE("Fill "<<name()<< " with "<<m_variable<<", "<<m_variable.size()<<"  elements. ");
     m_updated = false;
     return true;
 }

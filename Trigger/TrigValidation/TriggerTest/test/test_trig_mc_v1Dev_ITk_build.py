@@ -1,30 +1,30 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger test for Run4 with single muon
 # art-type: build
 # art-include: main/Athena
-# art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
-
-# Generate configuration run file
-run = ExecStep.ExecStep()
-run.type = 'athena'
-run.threads = 1
-run.input = 'Single_mu_Run4'
-run.job_options = 'TriggerJobOpts/runHLT.py'
-
+from TriggerTest.MCExecStep import MCBuildStep
+from TrigValTools.TrigValSteering import Test, CheckSteps
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
-run.flags = ['Trigger.triggerMenuSetup="MC_pp_run4_v1"',
-             'Trigger.doRuntimeNaviVal=True',
-             'ITk.doTruth=False',
-             'Tracking.doTruth=False',
-             'Trigger.enableL1CaloPhase1=False',
-            f'IOVDb.GlobalTag={defaultConditionsTags.RUN4_MC}'
-             ]
+
+# Phase II No-Pileup MC settings consistent with input file
+run = MCBuildStep(
+    menu='MC_pp_run4_v1',
+    global_tag=defaultConditionsTags.RUN4_MC,
+    mc_campaign='Campaigns.PhaseIINoPileUp'
+)
+run.input = 'Single_mu_Run4'
+
+run.flags += [
+    'Trigger.doRuntimeNaviVal=True',
+    'ITk.doTruth=False',
+    'Tracking.doTruth=False',
+    'Trigger.enableL1CaloPhase1=False',
+]
 
 # The full test configuration
 test = Test.Test()

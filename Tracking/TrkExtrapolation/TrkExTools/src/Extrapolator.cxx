@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 ///////////////////////////////////////////////////////////////////
@@ -3424,12 +3424,12 @@ Trk::Extrapolator::insideVolumeStaticLayers(const EventContext& ctx,
   } else if (!toBoundary) {
     nextParameters =
       cache.manage(prop.propagate(ctx,
-                                                  *nextParameters,
-                                                  *cache.m_destinationSurface,
-                                                  dir,
-                                                  bcheck,
-                                                  m_fieldProperties,
-                                                  particle));
+                                  *nextParameters,
+                                  *cache.m_destinationSurface,
+                                  dir,
+                                  bcheck,
+                                  m_fieldProperties,
+                                  particle));
     // job done: cleanup and go home
     // reset the recallInformation
     cache.resetRecallInformation();
@@ -4459,7 +4459,6 @@ Trk::Extrapolator::collectIntersections(
   const Trk::TrackParameters& parm,
   Trk::PropDirection dir,
   Trk::ParticleHypothesis particle,
-  std::vector<const Trk::TrackStateOnSurface*>*& material,
   int destination) const
 {
 
@@ -4473,8 +4472,6 @@ Trk::Extrapolator::collectIntersections(
   cache.m_path = 0.;
   // initialize parameters vector
   cache.m_identifiedParameters = std::make_unique<identifiedParameters_t>();
-  // initialize material collection
-  cache.m_matstates = material;
   // dummy input
   cache.m_currentStatic = nullptr;
   const Trk::TrackingVolume* boundaryVol = nullptr;
@@ -4968,8 +4965,8 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
       pathLim -= path;
     }
     ATH_MSG_DEBUG("  [+] Number of intersection solutions: " << solutions.size());
-    // collect material
-    if (cache.m_currentDense->zOverAtimesRho() != 0. && !cache.m_matstates &&
+    // Material effects
+    if (cache.m_currentDense->zOverAtimesRho() != 0.&&
         cache.m_extrapolationCache) {
       double dInX0 = std::abs(path) / cache.m_currentDense->x0();
       double currentqoverp = nextPar->parameters()[Trk::qOverP];
@@ -4986,45 +4983,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
         ATH_MSG_DEBUG(cache.to_string(" After"));
       }
     }
-    if (cache.m_currentDense->zOverAtimesRho() != 0. && cache.m_matstates) {
-      double dInX0 = std::abs(path) / cache.m_currentDense->x0();
-      MaterialProperties materialProperties(*cache.m_currentDense, std::abs(path));
-      double scatsigma = std::sqrt(m_msupdater->sigmaSquare(
-        materialProperties, 1. / std::abs(nextPar->parameters()[qOverP]), 1., particle));
-      auto newsa = Trk::ScatteringAngles(
-        0, 0, scatsigma / std::sin(nextPar->parameters()[Trk::theta]), scatsigma);
-      // energy loss
-      double currentqoverp = nextPar->parameters()[Trk::qOverP];
-      EnergyLoss eloss = m_elossupdater->energyLoss(
-        materialProperties, std::abs(1. / currentqoverp), 1., dir, particle);
-      // compare energy loss
-      ATH_MSG_DEBUG(" [M] Energy loss: STEP , EnergyLossUpdator:"
-                    << nextPar->momentum().mag() - currPar->momentum().mag() << ","
-                    << eloss.deltaE());
 
-     if (cache.m_extrapolationCache) {
-        if (m_dumpCache) {
-          ATH_MSG_DEBUG(cache.to_string(" extrapolateToVolumeWithPathLimit"));
-        }
-        cache.m_extrapolationCache->updateX0(dInX0);
-        cache.m_extrapolationCache->updateEloss(
-          eloss.meanIoni(), eloss.sigmaIoni(), eloss.meanRad(), eloss.sigmaRad());
-        if (m_dumpCache) {
-          ATH_MSG_DEBUG(cache.to_string( " After"));
-        }
-      }
-      auto mefot = std::make_unique<Trk::MaterialEffectsOnTrack>(
-          dInX0, newsa, std::make_unique<Trk::EnergyLoss>(std::move(eloss)),
-          *((nextPar->associatedSurface()).baseSurface()));
-
-      cache.m_matstates->push_back(
-        new TrackStateOnSurface(nullptr, ManagedTrackParmPtr(nextPar).to_unique(), std::move(mefot)));
-
-      ATH_MSG_DEBUG("  [M] Collecting material from dense volume '"
-                    << cache.m_currentDense->volumeName() << "', t/X0 = " << dInX0);
-    }
-
-    // int iDest = 0;
     unsigned int iSol = 0;
     while (iSol < solutions.size()) {
       if (solutions[iSol] < iDest) {
@@ -5050,22 +5009,11 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
               cache.m_parametersAtBoundary.resetBoundaryInformation();
               return {};
             } // the MEOT will be saved at the end
-              ATH_MSG_VERBOSE(" Update energy loss:" << nextPar->momentum().mag() - pIn
-                                                     << "at position:" << nextPar->position());
-              if (cache.m_matstates) {
-                addMaterialEffectsOnTrack(ctx,
-                                          cache,
-                                          *m_stepPropagator,
-                                          nextPar.index(),
-                                          *mb,
-                                          *cache.m_currentStatic,
-                                          dir,
-                                          particle);
-              }
+            ATH_MSG_VERBOSE(" Updated energy loss:" << nextPar->momentum().mag() - pIn
+                            << "at position:" << nextPar->position());
 
           }
         }
-
         // static volume boundary; return to the main loop
         unsigned int index = solutions[iSol] - iDest;
         // use global coordinates to retrieve attached volume (just for static!)
@@ -5212,16 +5160,6 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
               ATH_MSG_VERBOSE(" Update energy loss:" << nextPar->momentum().mag() - pIn
                                                      << "at position:" << nextPar->position());
 
-          }
-          if (cache.m_matstates) {
-            addMaterialEffectsOnTrack(ctx,
-                                      cache,
-                                      *m_stepPropagator,
-                                      nextPar.index(),
-                                      *nextLayer,
-                                      *cache.m_currentStatic,
-                                      dir,
-                                      particle);
           }
           if (m_cacheLastMatLayer) {
             cache.m_lastMaterialLayer = nextLayer;

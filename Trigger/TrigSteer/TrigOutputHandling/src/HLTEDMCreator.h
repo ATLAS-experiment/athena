@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGOUTPUTHANDLING_HLTEDMCREATOR_H
 #define TRIGOUTPUTHANDLING_HLTEDMCREATOR_H 1
@@ -223,7 +223,7 @@ class HLTEDMCreator: public extends<AthAlgTool, IHLTOutputTool>  {
     const SG::ReadHandleKeyArray< ViewContainer >& views;
   };
 
-  StatusCode fixLinks() const;
+  StatusCode fixLinks( EventContext const& context ) const;
 
   template<typename T, typename STORE, typename G, typename M >
     StatusCode createIfMissing( const EventContext& context, const ConstHandlesGroup<T>& handles, 

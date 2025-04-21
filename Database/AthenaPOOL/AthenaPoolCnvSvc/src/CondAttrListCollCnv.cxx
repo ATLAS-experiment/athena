@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file CondAttrListCollCnv.cxx
@@ -82,12 +82,14 @@ StatusCode CondAttrListCollCnv::createRep(DataObject* pObj, IOpaqueAddress*& pAd
 
     CondAttrListCollection* list = 0; //dynamic_cast<CondAttrListCollection*>(pObj);
     SG::fromStorable(pObj, list);
+    if ( pAddr != nullptr ) pAddr->release();
     CondAttrListCollAddress* addr = new CondAttrListCollAddress(POOL_StorageType,
 		    classID(),
 		    "POOLContainer_CondAttrListCollection][CLID=x");
     addr->setAttrListColl(list);
     pAddr = addr;
-
+    pAddr->addRef();
+    
     log << MSG::DEBUG << "Created CondAttrListCollAddress with list ptr: " << list << endmsg;
     return(StatusCode::SUCCESS);
 }

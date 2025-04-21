@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/GNNAuxTaskDecoratorAlg.h"
@@ -23,17 +23,17 @@ namespace FlavorTagDiscriminants {
     ATH_CHECK(m_jetContainerKey.initialize());
     ATH_CHECK(m_trackContainerKey.initialize());
 
-    m_trackLinksKey = m_jetContainerKey.key() + "." + m_trackLinksKey.key();
     ATH_CHECK(m_trackLinksKey.initialize());
 
     m_trackAuxTasksDecorKeys.reserve(m_trackAuxTasks.size());
     m_readDecorKeys.reserve(m_trackAuxTasks.size());
-    for (std::pair<std::string,std::string> auxTask : m_trackAuxTasks) {
-      SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>& trackAuxTaskDecorKey = m_trackAuxTasksDecorKeys.emplace_back(this, name()+auxTask.second, m_trackContainerKey.key()+"."+auxTask.second, "");
-      SG::ReadDecorHandleKey<xAOD::BTaggingContainer>& readDecorKey = m_readDecorKeys.emplace_back(this, name()+auxTask.first, m_jetContainerKey.key()+"."+auxTask.first, "");
-      ATH_CHECK(trackAuxTaskDecorKey.initialize());
-      ATH_CHECK(readDecorKey.initialize());
+    for (const auto& [jetDecor, trackDecor] : m_trackAuxTasks) {      
+      m_trackAuxTasksDecorKeys.emplace_back(m_trackContainerKey, trackDecor);
+      m_readDecorKeys.emplace_back(m_jetContainerKey, jetDecor);
     }
+    ATH_CHECK(m_trackAuxTasksDecorKeys.initialize());
+    ATH_CHECK(m_readDecorKeys.initialize());
+
 
     return StatusCode::SUCCESS;
   }
@@ -46,7 +46,7 @@ namespace FlavorTagDiscriminants {
     }
 
     // define the required ReadDecorHandle objects
-    std::vector<SG::ReadDecorHandle<xAOD::BTaggingContainer, std::vector<char>>> jet_rdhs;
+    std::vector<SG::ReadDecorHandle<xAOD::JetContainer, std::vector<char>>> jet_rdhs;
     for (const auto& rdhk: m_readDecorKeys) {
       jet_rdhs.emplace_back(rdhk, ctx);
     }
@@ -63,7 +63,7 @@ namespace FlavorTagDiscriminants {
     }
 
     // adding actual aux task results to a subset of tracks
-    SG::ReadHandle<xAOD::BTaggingContainer> jets(m_jetContainerKey, ctx);
+    SG::ReadHandle<xAOD::JetContainer> jets(m_jetContainerKey, ctx);
     ATH_CHECK(jets.isValid());
     SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<ElementLink<xAOD::TrackParticleContainer>>> trackLinks_rdh(m_trackLinksKey, ctx);
     for (const auto jet: *jets) {

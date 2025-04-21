@@ -299,20 +299,21 @@ def DecoratePLITCfg(
     # path on calib area (found by path resolver
     # /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/
 
-    # Note: Run3 config is not available yet, so we use the Run2 config for now
-
-    kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2025-02-24/")
     if lepton_name == 'Electrons':
         if isRun3:
-            kwargs.setdefault("ConfigFileVersion", 'network_electrons_barrel_run2.onnx')
-            kwargs.setdefault("ConfigFileVersion_endcap", 'network_electrons_endcap_run2.onnx')
+            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2025-03-24/")
+            kwargs.setdefault("ConfigFileVersion", 'network_electrons_barrel_run3.onnx')
+            kwargs.setdefault("ConfigFileVersion_endcap", 'network_electrons_endcap_run3.onnx')
         else:
+            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2025-02-24/")
             kwargs.setdefault("ConfigFileVersion", 'network_electrons_barrel_run2.onnx')
             kwargs.setdefault("ConfigFileVersion_endcap", 'network_electrons_endcap_run2.onnx')
     elif lepton_name == 'Muons':
         if isRun3:
-            kwargs.setdefault("ConfigFileVersion", 'network_muons_run2.onnx')
+            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2025-03-24/")
+            kwargs.setdefault("ConfigFileVersion", 'network_muons_run3.onnx')
         else:
+            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2025-02-24/")
             kwargs.setdefault("ConfigFileVersion", 'network_muons_run2.onnx')
     else:
         raise ValueError(f'Decorate{Tagger_name} - unknown lepton type: "{lepton_name}"')
@@ -331,6 +332,7 @@ def DecoratePLITCfg(
 
 def DecoratePromptLeptonImprovedCfg(
     flags, BDT_name="", lepton_name="", track_jet_name="AntiKtVR30Rmax4Rmin02PV0TrackJets",
+    veto_BDT_name=None,
     **kwargs
 ) -> ComponentAccumulator:
     """
@@ -378,6 +380,12 @@ def DecoratePromptLeptonImprovedCfg(
     kwargs.setdefault("extraDecoratorShortVars", ['CandVertex_NPassVtx'])
     kwargs.setdefault("vetoDecoratorFloatVars", ['PromptLeptonRNN_prompt'])
     kwargs.setdefault("vetoDecoratorShortVars", [])
+
+    if veto_BDT_name:
+        kwargs['vetoDecoratorFloatVars'] += ['RawPt']
+        kwargs['vetoDecoratorFloatVars'] += getStringFloatVars(veto_BDT_name)
+        kwargs['vetoDecoratorShortVars'] += ['CandVertex_NPassVtx']
+        kwargs['vetoDecoratorShortVars'] += getStringIntVars(veto_BDT_name)
 
     kwargs.setdefault("leptonPtBinsVector", [10.0e3, 15.0e3, 20.0e3, 25.0e3, 32.0e3, 43.0e3, 100.0e3])
 
@@ -428,6 +436,7 @@ def DecorateImprovedPromptLeptonAlgsCfg(
         ))
         acc.merge(DecoratePromptLeptonImprovedCfg(
             ConfigFlags, BDT_name="PromptLeptonImprovedVetoECAP",
+            veto_BDT_name='PromptLeptonImprovedVetoBARR',
             lepton_name="Electrons", track_jet_name="AntiKtVR30Rmax4Rmin02PV0TrackJets"
         ))
 

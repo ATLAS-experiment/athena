@@ -1,9 +1,10 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonTesterTree/IParticleFourMomBranch.h>
 #include <xAODTracking/TrackParticle.h>
+#include <xAODTruth/TruthParticle.h>
 namespace {
     constexpr size_t dummyIdx = -1;
     constexpr float MeVtoGeV = 1.e-3;
@@ -53,6 +54,8 @@ namespace MuonVal{
             q = acc_charge(*p);
         } else if (p->type() == xAOD::Type::ObjectType::TrackParticle){
             q = static_cast<const xAOD::TrackParticle*>(p)->charge();
+        } else if (p->type() == xAOD::Type::ObjectType::TruthParticle) {
+            q = static_cast<const xAOD::TruthParticle*>(p)->charge();
         }
         ATH_MSG_VERBOSE("New particle ("<<p<<") "<<p->pt()<<", "<<p->eta()<<", "<<p->phi()<<", q: "<<q<<". Size: "<<size());
 

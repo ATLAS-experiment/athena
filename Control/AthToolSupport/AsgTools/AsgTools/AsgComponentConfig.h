@@ -11,6 +11,7 @@
 
 // Athena include(s).
 #include "AsgMessaging/StatusCode.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // System include(s).
 #include <map>
@@ -118,6 +119,8 @@ namespace asg
   public:
     template<typename T> StatusCode
     setProperty (const std::string& name, const T& value);
+    template<typename T> StatusCode
+    setProperty (const std::string& name, const Gaudi::Property<T>& value);
 
 
     /// \brief set a given property from a string value

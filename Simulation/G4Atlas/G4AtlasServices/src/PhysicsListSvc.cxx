@@ -121,13 +121,13 @@ void PhysicsListSvc::CreatePhysicsList()
   for (auto& physOptTool: sortedPhysicsOptions)
     {
       ATH_MSG_DEBUG("Registering " << physOptTool->name());
-      m_physicsList->RegisterPhysics(physOptTool->GetPhysicsOption());
+      m_physicsList->RegisterPhysics(physOptTool->GetPhysicsOption().release());
     }
   //Register decays to the G4VModularPhysicsList
   for (auto& physDecayTool: m_phys_decay)
     {
       ATH_MSG_DEBUG("Registering " << physDecayTool->name());
-      m_physicsList->RegisterPhysics(physDecayTool->GetPhysicsOption());
+      m_physicsList->RegisterPhysics(physDecayTool->GetPhysicsOption().release());
     }
 
   //ConstructProcess();

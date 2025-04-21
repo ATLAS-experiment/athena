@@ -11,11 +11,10 @@ namespace DerivationFramework {
 
 
 TopHeavyFlavorFilterAugmentation::TopHeavyFlavorFilterAugmentation(const std::string& t, const std::string& n, const IInterface* p):
-  AthAlgTool(t,n,p),
+  base_class(t,n,p),
   m_filterTool("")
 {
 
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
 
     declareProperty("EventInfoName",m_eventInfoName="EventInfo");
     declareProperty("FilterTool",m_filterTool);

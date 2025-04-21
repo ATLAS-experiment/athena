@@ -81,12 +81,13 @@ StatusCode AthenaAttributeListCnv::createRep(DataObject* pObj, IOpaqueAddress*& 
 
     AthenaAttributeList* list = 0; //dynamic_cast<AthenaAttributeList*>(pObj);
     SG::fromStorable(pObj, list);
+    if ( pAddr != nullptr ) pAddr->release();
     AthenaAttrListAddress* addr = new AthenaAttrListAddress(POOL_StorageType,
 		    classID(),
 		    "POOLContainer_AthenaAttributeList][CLID=x");
     addr->setAttrList(list);
     pAddr = addr;
-
+    pAddr->addRef();
     log << MSG::DEBUG << "Created AthenaAttrListAddress with list ptr: " << list << endmsg;
     return(StatusCode::SUCCESS);
 }

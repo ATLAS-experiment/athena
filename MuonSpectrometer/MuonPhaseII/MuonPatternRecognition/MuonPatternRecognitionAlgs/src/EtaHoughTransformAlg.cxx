@@ -1,21 +1,34 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EtaHoughTransformAlg.h"
 
 #include <MuonReadoutGeometryR4/SpectrometerSector.h>
-#include <StoreGate/ReadCondHandle.h>
 
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
 #include "MuonPatternEvent/SegmentSeed.h"
 #include "MuonSpacePoint/UtilFunctions.h"
+#include "MuonSpacePoint/SpacePointPerLayerSorter.h"
+#include "xAODMuonPrepData/UtilFunctions.h"
 #include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
 
+#include <format>
+
 namespace MuonR4{
-EtaHoughTransformAlg::EtaHoughTransformAlg(const std::string& name,
-                                                   ISvcLocator* pSvcLocator)
-    : AthReentrantAlgorithm(name, pSvcLocator) {}
+    // helper to check if our trajectory traverses a chamber
+    inline bool passesThrough(const SpacePointBucket::chamberLocation & loc, double y0, double tanTheta){
+        double yCross = (y0 + 0.5 * (loc.zBottom+loc.zTop) * tanTheta);  
+        return (loc.yLeft < yCross && yCross < loc.yRight); 
+    } 
+    // determines the local residual when traversing a chamber 
+    inline double  proximity(const SpacePoint* dc, double y0, double tanTheta) {
+        if (dc->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
+            return std::min(std::abs(HoughHelpers::Eta::houghParamMdtLeft(tanTheta, dc) - y0), 
+                            std::abs(HoughHelpers::Eta::houghParamMdtRight(tanTheta, dc) - y0));
+        }
+        return std::abs(HoughHelpers::Eta::houghParamStrip(tanTheta, dc) - y0);
+    }
 
 StatusCode EtaHoughTransformAlg::initialize() {
     ATH_CHECK(m_geoCtxKey.initialize());
@@ -25,35 +38,18 @@ StatusCode EtaHoughTransformAlg::initialize() {
     ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));
     return StatusCode::SUCCESS;
 }
-
-template <class ContainerType>
-StatusCode EtaHoughTransformAlg::retrieveContainer(const EventContext& ctx, 
-                                                  const SG::ReadHandleKey<ContainerType>& key,
-                                                  const ContainerType*& contToPush) const {
-    contToPush = nullptr;
-    if (key.empty()) {
-        ATH_MSG_VERBOSE("No key has been parsed for object "
-                        << typeid(ContainerType).name());
-        return StatusCode::SUCCESS;
-    }
-    SG::ReadHandle readHandle{key, ctx};
-    ATH_CHECK(readHandle.isPresent());
-    contToPush = readHandle.cptr();
-    return StatusCode::SUCCESS;
-}
-
 StatusCode EtaHoughTransformAlg::execute(const EventContext& ctx) const {
 
     /// read the PRDs
     const SpacePointContainer* spacePoints{nullptr};
-    ATH_CHECK(retrieveContainer(ctx, m_spacePointKey, spacePoints));
+    ATH_CHECK(SG::get(spacePoints, m_spacePointKey, ctx));
 
     // book the output container
     SG::WriteHandle<EtaHoughMaxContainer> writeMaxima(m_maxima, ctx);
     ATH_CHECK(writeMaxima.record(std::make_unique<EtaHoughMaxContainer>()));
 
     const ActsGeometryContext* gctx{nullptr};
-    ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
+    ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
     HoughEventData data{};
 
@@ -156,30 +152,21 @@ void EtaHoughTransformAlg::prepareHoughPlane(HoughEventData& data) const {
 
 bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBucket, const MuonR4::ActsPeakFinderForMuon::Maximum & maximum) const{
 
-    // helper to check if a space-point is inside a chamber 
-    auto isInside = [](const SpacePointBucket::chamberLocation & loc, const Amg::Vector3D & SP){
-        return (loc.yLeft < SP.y() &&  SP.y() < loc.yRight && loc.zBottom < SP.z() && SP.z() < loc.zTop);  
-    };
-
-    // helper to check if our trajectory traverses a chamber
-    auto passesThrough = [](const SpacePointBucket::chamberLocation & loc, double y0, double tanTheta){
-        double yCross = (y0 + 0.5 * (loc.zBottom+loc.zTop) * tanTheta);  
-        return (loc.yLeft < yCross && yCross < loc.yRight); 
-    };
-
-    // determines the local residual when traversing a chamber 
-    auto proximity = []( HoughHitType dc, double y0, double tanTheta){
-        return std::min(std::abs(HoughHelpers::Eta::houghParamMdtLeft(tanTheta,dc) - y0), std::abs(HoughHelpers::Eta::houghParamMdtRight(tanTheta,dc) - y0)); 
-    };
-
     // now we propagate along the seed trajectory and collect crossed volumes 
-    int expectedPrecisionChambers = 0; 
-    int seenPrecisionChambers = 0; 
+    int expectedPrecisionChambers{0}, seenPrecisionChambers{0}; 
     bool hasTrig = false; 
+    const double distCutOff = 2.*m_targetResoIntercept;
     // loop over all chambers in the bucket    
-    for (auto & muonChamber : currentBucket.bucket->chamberLocations()){      
+    for (const auto & muonChamber : currentBucket.bucket->chamberLocations()){      
         // skip any we don't touch 
-        if (!passesThrough(muonChamber, maximum.y, maximum.x)) continue; 
+        if (!passesThrough(muonChamber, maximum.y, maximum.x)) {
+            ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" maximum does not cross "
+                          << m_idHelperSvc->toStringDetEl(muonChamber.reEle->identify()));
+            continue; 
+        }
+        ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" maximum crosses "
+            << m_idHelperSvc->toStringDetEl(muonChamber.reEle->identify()));
+
         // for MDT multilayers, we increase our expected number of crossed chambers / tubes
         const ActsTrk::DetectorType type = muonChamber.reEle->detectorType();
         if (type == ActsTrk::DetectorType::Mdt || type == ActsTrk::DetectorType::Mm ||
@@ -187,13 +174,22 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
             ++expectedPrecisionChambers; 
         }
         // now we check if we have a compatible measurement on our seed
-        bool hasHit = false; 
-        for (auto & SP : maximum.hitIdentifiers){
+        bool hasHit = false;
+        for (const SpacePoint* SP : maximum.hitIdentifiers){
             // the hit should be inside the current volume and the local residual should be 
             // compatible with the desired resolution            
-            if (isInside(muonChamber, SP->positionInChamber()) && proximity(SP,maximum.y,maximum.x) < 2. * m_targetResoIntercept){
+            if (readoutElement(SP->primaryMeasurement()) != muonChamber.reEle){
+                continue;
+            } 
+            const double dist = proximity(SP, maximum.y, maximum.x);
+            if (dist < distCutOff){
+                ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" Maximum has associated in "
+                        << m_idHelperSvc->toStringDetEl(muonChamber.reEle->identify()));
                 hasHit=true;
                 break;
+            } else {
+                ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" Hit "<<m_idHelperSvc->toString(SP->identify())
+                    <<" is too far away: "<<dist<<" >= "<<distCutOff);
             }
         }
         // if we find an MDT hit, we increment the counter for seen chambers
@@ -206,17 +202,17 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
     }
     // now count the total number of MDT tube layers we collected on our seed 
     std::set<std::pair<int,int>> seenLayers; 
-    for (auto & SP : maximum.hitIdentifiers){       
-            // apply a compatibility window - enforce hits are at least reasonably close 
-            if (proximity(SP,maximum.y,maximum.x) < 2. * m_targetResoIntercept){
-                if (SP->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
-                    const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(SP->primaryMeasurement());
-                    seenLayers.emplace(dc->readoutElement()->multilayer(), dc->tubeLayer()); 
-                } else if(SP->type() == xAOD::UncalibMeasType::MMClusterType){
-                    const xAOD::MMCluster* mmclust = static_cast<const xAOD::MMCluster*>(SP->primaryMeasurement());
-                    seenLayers.emplace(mmclust->readoutElement()->multilayer(), mmclust->gasGap()); 
-                }
+    for (const SpacePoint*  SP : maximum.hitIdentifiers){       
+        // apply a compatibility window - enforce hits are at least reasonably close 
+        if (proximity(SP,maximum.y, maximum.x) < distCutOff) {
+            if (SP->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
+                const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(SP->primaryMeasurement());
+                seenLayers.emplace(dc->readoutElement()->multilayer(), dc->tubeLayer()); 
+            } else if(SP->type() == xAOD::UncalibMeasType::MMClusterType){
+                const auto* mmclust = static_cast<const xAOD::MMCluster*>(SP->primaryMeasurement());
+                seenLayers.emplace(mmclust->readoutElement()->multilayer(), mmclust->gasGap()); 
             }
+        }
     }
     // compute the minimum number of requested precision layers
     // the integer division will round down (resulting cut: 2 for single-ML, 4 for dual-ML)  
@@ -228,7 +224,9 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
         minLayers -= 1;
         minSeenPrecisionChambers = 1;
     }
-    
+    ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": "<<currentBucket.bucket->msSector()->identString()<< 
+                  ", seen prec: "<<seenPrecisionChambers<<", required: "<<minSeenPrecisionChambers
+            <<" -- layers: "<<seenLayers.size()<<", required: "<<minLayers);
     return seenPrecisionChambers >= minSeenPrecisionChambers && (int)seenLayers.size() >= minLayers; 
 }
 
@@ -319,17 +317,13 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
         }      
 
         // convert the set of hit identifiers from ACTS to the vector we need later 
-        std::vector<HoughHitType> hitList;
-        hitList.reserve(max.hitIdentifiers.size());
-        for (auto & hit : max.hitIdentifiers){
-            hitList.push_back(hit);
-        }
+        std::vector<HoughHitType> hitList{max.hitIdentifiers.begin(), max.hitIdentifiers.end()};
 
         // apply a seed quality cut. 
         if (!passSeedQuality(bucket, max)) {
             // if seed visualisation is enabled, draw the rejected seed 
             if (m_visionTool.isEnabled()) {
-                const HoughMaximum& houghMax{max.x, max.y, (double)hitList.size(), std::move(hitList), bucket.bucket};
+                const HoughMaximum& houghMax{max.x, max.y, 1. *hitList.size(), std::move(hitList), bucket.bucket};
                 const SegmentSeed seed{houghMax};
                 MuonValR4::IPatternVisualizationTool::PrimitiveVec primitives{};  
                 MuonValR4::IPatternVisualizationTool::PrimitiveVec primitivesForAcc{};  
@@ -363,7 +357,8 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
         // add phi measurements - will be filtered for compatibility in separate algorithm
         extendWithPhiHits(hitList, bucket);
         // sort hits by layer 
-        sortByLayer(hitList);
+        SpacePointPerLayerSorter sorter{m_idHelperSvc.get()};
+        std::ranges::stable_sort(hitList, sorter);
         // create hough maximum instance and add it to the event data for later writing! 
         const HoughMaximum& houghMax{data.maxima.emplace_back(max.x, max.y, nHits, std::move(hitList), bucket.bucket)};
 

@@ -111,6 +111,10 @@ def MuonClusterOnTrackCreatorCfg(flags, name="MuonClusterOnTrackCreator", **kwar
             from MuonConfig.MuonRecToolsConfig import SimpleMMClusterBuilderToolCfg
             kwargs.setdefault("MMClusterBuilder", result.popToolsAndMerge(SimpleMMClusterBuilderToolCfg(flags))) 
         elif flags.Muon.MMClusterCalibRecoTool == MMClusterBuilderEnum.ClusterTimeProjection:
+            #Turn on the calibrated drift velocities only for data (by default 2022 is also switched to centroid!)
+            if not flags.Input.isMC:
+                kwargs["NSWCalibTool"].calibrateDriftVelocityFromData = True
+
             from MuonConfig.MuonRecToolsConfig import  ClusterTimeProjectionMMClusterBuilderToolCfg
             kwargs.setdefault("MMClusterBuilder", result.popToolsAndMerge(ClusterTimeProjectionMMClusterBuilderToolCfg(flags))) 
             

@@ -54,16 +54,6 @@ std::ostream& operator<<(std::ostream &os, const FPGATrackSimGenScanTool::Stored
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-// AthAlgTool
-
-FPGATrackSimGenScanTool::FPGATrackSimGenScanTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
-  base_class(algname, name, ifc)
-{
-  declareInterface<IFPGATrackSimRoadFinderTool>(this);
-}
-
-
 StatusCode FPGATrackSimGenScanTool::initialize()
 {
   // Dump the configuration to make sure it propagated through right
@@ -320,9 +310,12 @@ StatusCode FPGATrackSimGenScanTool::fillImage(const std::vector<std::shared_ptr<
 
           // replace the hit layer with the layer map and only add if its in the map
           if (m_mod_to_lyr_map.size() != 0) {
-            if (m_mod_to_lyr_map[idx].contains(hit->getIdentifierHash())) {
+            if (m_mod_to_lyr_map[idx].contains(hit->getIdentifierHash())) {              
               s_hit.layer = m_mod_to_lyr_map[idx][hit->getIdentifierHash()];
               m_image[idx].addHit(s_hit);
+            } else {
+              if (m_monitoring->isTruthBin(idx))
+                  ATH_MSG_DEBUG("Hit missed layer map bin=" << idx << " hash=" << hit->getIdentifierHash());
             }
           } else {
             // add hit to the BinEntry for the bin

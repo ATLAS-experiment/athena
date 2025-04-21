@@ -138,7 +138,6 @@ def LArNoisyROMonConfigCore(helper,algoinstance,flags,
        ft_n = int(ft_up - ft_low)
 
        darray = helper.addArray([lArDQGlobals.Partitions[2*subdet:2*subdet+2]],larNoisyROMonAlg,lArDQGlobals.SubDet[subdet],topPath='/')
-
        # Known bad FEBS
        darray.defineHistogram('slotBad,FTBad;KnownBadFEB', title='Known Bad FEBs {0} ; Slot ; FT', 
                               type='TH2I', path=hist_path,
@@ -244,7 +243,7 @@ def LArNoisyROMonConfigCore(helper,algoinstance,flags,
                                  xbins=l1siz+1,xmin=0.5,xmax=l1siz+1.5,
                                  xlabels=larNoisyROMonAlg.L1NoiseBurstTriggers.append("NONE"))
     for subdet in range(0,4): 
-       darray1 = helper.addArray([lArDQGlobals.Partitions[2*subdet:2*subdet+2]],larNoisyROMonAlg,lArDQGlobals.SubDet[subdet],topPath='/')
+       darray1 = helper.addArray([["HV"+ sd for sd in lArDQGlobals.Partitions[2*subdet:2*subdet+2]]],larNoisyROMonAlg,lArDQGlobals.SubDet[subdet],topPath='/')
 
        darray1.defineHistogram('LBHV;HVlineNoisyEvent',type='TH1I', path=hist_path,
                                  title='Yield of events flagged by HVlines flag - {0} ; Luminosity Block; Number of events', 

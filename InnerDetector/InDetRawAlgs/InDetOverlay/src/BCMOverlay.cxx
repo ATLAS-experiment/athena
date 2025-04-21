@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetOverlay/BCMOverlay.h"
@@ -183,7 +183,7 @@ std::unique_ptr<BCM_RawData> BCMOverlay::mergeChannel(const BCM_RawData *bkgRDO,
   std::sort(merged_pulses.begin(), merged_pulses.end(), compare);
 
   // Check whether some of the pulses merged
-  for (size_t i = 0; i < merged_pulses.size()-1; i++) {
+  for (int i{}; i < std::ssize(merged_pulses)-1; i++) {
 
     BCM_Pulse *early = merged_pulses.at(i).get();
     BCM_Pulse *later = merged_pulses.at(i+1).get();

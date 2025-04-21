@@ -43,9 +43,9 @@ namespace CP {
         };
 
         using caloDecorNames = std::array<std::string, 4>;
-        /// Returns an array with the calo cluster decoration ames [0]-> eta, [1]->phi, [2]->energy. [3]->isDecorated
-        static caloDecorNames caloDecors();
-        static caloDecorNames pflowDecors();
+        /// Returns an array with the calo cluster decoration names [0]-> eta, [1]->phi, [2]->energy. [3]->isDecorated
+        static const caloDecorNames& caloDecors();
+        static const caloDecorNames& pflowDecors();
 
         using IsoHelperMap = std::map<IsoType, std::unique_ptr<IsoVariableHelper>>;
 
@@ -220,7 +220,9 @@ namespace CP {
             this, "BackupPrefix", "", "Prefix in front of the isolation variables, if the original cone values need  to  be backuped"};
 
         Gaudi::Property<std::string> m_isoDecSuffix{
-            this, "IsoDecSuffix", "", "Suffix added to output isolation variable nanes for close by corrections"};
+            this, "IsoDecSuffix", "", "Suffix added to output isolation variable names for close by corrections"};
+        Gaudi::Property<std::string> m_caloDecSuffix{
+            this, "CaloDecSuffix", "", "Suffix added to output cluster variable names for close by corrections"};
 
         /// EXPERT PROPERTIES
         Gaudi::Property<int> m_caloModel{this, "CaloCorrectionModel", TopoConeCorrectionModel::SubtractObjectsDirectly};

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "DerivationFrameworkMuons/MuonTPExtrapolationAlg.h"
+#include "MuonTPExtrapolationAlg.h"
 #include "DerivationFrameworkMuons/Utils.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "TrkSurfaces/CylinderSurface.h"

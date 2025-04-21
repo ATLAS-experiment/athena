@@ -3,7 +3,6 @@
 */
 #include "TruthSegToTruthPartAssocAlg.h"
 
-#include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "AthLinks/ElementLink.h"
@@ -37,9 +36,9 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     StatusCode TruthSegToTruthPartAssocAlg::execute(const EventContext& ctx) const {
-        SG::ReadHandle truthParticles{m_truthKey, ctx};
-        ATH_CHECK(truthParticles.isPresent());
 
+        const xAOD::TruthParticleContainer* truthParticles{nullptr};
+        ATH_CHECK(SG::get(truthParticles, m_truthKey, ctx));
 
         using IdDecorHandle_t = SG::ReadDecorHandle<xAOD::TruthParticleContainer, std::vector<unsigned long long>>;
         using TruthSegLink_t = std::vector<ElementLink<xAOD::MuonSegmentContainer>>;
@@ -71,8 +70,8 @@ namespace MuonR4{
             truthPartWithIds.emplace_back(std::make_tuple(truthMuon, std::move(assocIds)));
         }
         /// Fetch the segment container
-        SG::ReadHandle segments{m_segmentKey, ctx};
-        ATH_CHECK(segments.isPresent());
+        const xAOD::MuonSegmentContainer* segments{nullptr};
+        ATH_CHECK(SG::get(segments, m_segmentKey, ctx));
         
         /// Setup the write decorators
         using TruthPartLink_t = ElementLink<xAOD::TruthParticleContainer>;
@@ -128,12 +127,10 @@ namespace MuonR4{
                 continue;
             }
             const xAOD::TruthParticle* truthPart{std::get<0>(*best_itr)};
-            segLinkDecor(*truthPart).emplace_back(segments.cptr(), segment->index());
-            truthLinkDecor(*segment) = TruthPartLink_t{truthParticles.cptr(), truthPart->index()};
+            segLinkDecor(*truthPart).emplace_back(segments, segment->index());
+            truthLinkDecor(*segment) = TruthPartLink_t{truthParticles, truthPart->index()};
         }
 
         return StatusCode::SUCCESS;
     }
 }
-
-

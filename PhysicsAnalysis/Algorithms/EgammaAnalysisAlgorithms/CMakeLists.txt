@@ -28,13 +28,13 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_data( data/* )
 
 atlas_add_test( TestCPRunElectrons
-   SCRIPT CPRun.py --work-dir cmake_test_electronsDir --text-config EgammaAnalysisAlgorithms/test_configuration_Run2_Electrons.yaml -e 30 --input-file $ASG_TEST_FILE_MC
+   SCRIPT CPRun.py --text-config EgammaAnalysisAlgorithms/test_configuration_Run2_Electrons.yaml -e 30 --input-list $ASG_TEST_FILE_MC
    POST_EXEC_SCRIPT nopost.sh
    PROPERTIES TIMEOUT 400 
 )
 
 atlas_add_test( TestCPRunPhotons
-   SCRIPT CPRun.py --work-dir cmake_test_photonsDir --text-config EgammaAnalysisAlgorithms/test_configuration_Run2_Photons.yaml -e 30 --input-file $ASG_TEST_FILE_MC
+   SCRIPT CPRun.py --text-config EgammaAnalysisAlgorithms/test_configuration_Run2_Photons.yaml -e 30 --input-list $ASG_TEST_FILE_MC
    POST_EXEC_SCRIPT nopost.sh
    PROPERTIES TIMEOUT 400 
 )

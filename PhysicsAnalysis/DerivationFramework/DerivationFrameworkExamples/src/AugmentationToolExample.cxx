@@ -1,33 +1,25 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
-// AugmentationToolExample.cxx, (c) ATLAS Detector software
+// AugmentationToolExample.cxx
 ///////////////////////////////////////////////////////////////////
 // Author: Thomas Gillam (thomas.gillam@cern.ch)
 //
 // This is a trivial example of tool that creates extra information
-// and places it in the StoreGate
+// and places it in the StoreGate.
 // The example shows how to do it with (a) simple vectors and (b) dressing
-// of objects (tracks in this case)
-// The same information is written into both
+// of objects (tracks in this case).
+// The same information is written into both.
 
-#include "DerivationFrameworkExamples/AugmentationToolExample.h"
+#include "AugmentationToolExample.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
 #include <vector>
 #include <string>
 
 namespace DerivationFramework {
-
-  AugmentationToolExample::AugmentationToolExample(const std::string& t,
-      const std::string& n,
-      const IInterface* p) : 
-    AthAlgTool(t,n,p)
-  {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
-  }
 
   StatusCode AugmentationToolExample::addBranches() const
   {
@@ -47,7 +39,7 @@ namespace DerivationFramework {
         return StatusCode::FAILURE;
       }
 
-      const xAOD::Vertex* pv(0);
+      const xAOD::Vertex* pv{nullptr};
       for (const xAOD::Vertex* vx : *vertices) {
         if (vx->vertexType() == xAOD::VxType::PriVtx) {
           pv = vx;
@@ -80,7 +72,7 @@ namespace DerivationFramework {
           ATH_MSG_ERROR("Tool is attempting to write StoreGate keys which already exists. Please use a different key");
           return StatusCode::FAILURE;
       } else {
-        CHECK(evtStore()->record(std::move(track_z0_PV), "DFAugmentationExample"));       
+        ATH_CHECK(evtStore()->record(std::move(track_z0_PV), "DFAugmentationExample"));
       }
 
       return StatusCode::SUCCESS;

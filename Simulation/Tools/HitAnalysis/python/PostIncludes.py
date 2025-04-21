@@ -16,6 +16,9 @@ def ITkHitAnalysis(flags):
     if flags.Detector.EnablePLR:
         result.merge(PLR_HitAnalysisCfg(flags))
 
+    result.getService("THistSvc").Output = [
+        "SiHitAnalysis DATAFILE='SiHitValid.root' OPT='RECREATE'"]
+
     return result
 
 def HGTDHitAnalysis(flags):
@@ -26,6 +29,9 @@ def HGTDHitAnalysis(flags):
 
     if flags.Detector.EnableHGTD:
         result.merge(HGTD_HitAnalysisCfg(flags))
+
+    result.getService("THistSvc").Output = [
+        "HGTDHitAnalysis DATAFILE='HGTDHitValid.root' OPT='RECREATE'"]
 
     return result
 

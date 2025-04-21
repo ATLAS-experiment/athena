@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // GeneratorFilters/DecaysFinalStateFilter
@@ -36,26 +36,9 @@
 #include <cmath>
 
 
-xAODDecaysFinalStateFilter::xAODDecaysFinalStateFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name,pSvcLocator) 
-{
-  declareProperty("PDGAllowedParents", m_PDGAllowedParents);
-
-  declareProperty("NQuarks", m_NQuarks = -1);
-  declareProperty("NElectrons", m_NElectrons = -1);
-  declareProperty("NMuons", m_NMuons = -1);
-  declareProperty("NTaus", m_NTaus = -1);
-  declareProperty("NChargedLeptons", m_NChargedLeptons = -1);
-  declareProperty("NNeutrinos", m_NNeutrinos = -1);
-  declareProperty("NPhotons", m_NPhotons = -1);
-
-  declareProperty("MinNQuarks", m_MinNQuarks = 0);
-  declareProperty("MinNElectrons", m_MinNElectrons = 0);
-  declareProperty("MinNMuons", m_MinNMuons = 0);
-  declareProperty("MinNTaus", m_MinNTaus = 0);
-  declareProperty("MinNChargedLeptons", m_MinNChargedLeptons = 0);
-  declareProperty("MinNNeutrinos", m_MinNNeutrinos = 0);
-  declareProperty("MinNPhotons", m_MinNPhotons = 0);
+StatusCode xAODDecaysFinalStateFilter::filterInitialize() {
+    CHECK(m_truthPartContKey.initialize());
+    return StatusCode::SUCCESS;
 }
 
 
@@ -68,20 +51,14 @@ StatusCode xAODDecaysFinalStateFilter::filterEvent() {
     int nNeutrinos = 0;
     int nPhotons = 0;
 
-// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
-// duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+    // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+    // duplicated barcode ones
+    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+    CHECK(xTruthParticleContainer.isValid());
 
 
-  // Loop over all particles in the event and build up the grid
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-      const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
-
+    // Loop over all particles in the event and build up the grid
+    for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
             // look only at the allowed parents (e.g. W, Z)
             bool allowedParent = false;
             for (size_t i=0; i<m_PDGAllowedParents.size(); ++i) {

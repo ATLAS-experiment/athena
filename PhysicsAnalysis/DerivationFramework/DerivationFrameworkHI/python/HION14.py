@@ -123,7 +123,7 @@ def HION14KernelCfg(flags, name='HION14Kernel', **kwargs):
 
     # Truth thinning
     if flags.Input.isMC:
-        truth_thinning_expression = "(TruthParticles.status == 1) && ( (TruthParticles.pdgId != 2112 && TruthParticles.pdgId != 2212) || TruthParticles.pt > 0.1 )"
+        truth_thinning_expression = "(TruthParticles.isStable) && ( (TruthParticles.pdgId != 2112 && TruthParticles.pdgId != 2212) || TruthParticles.pt > 0.1 )"
         
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import GenericTruthThinningCfg
 

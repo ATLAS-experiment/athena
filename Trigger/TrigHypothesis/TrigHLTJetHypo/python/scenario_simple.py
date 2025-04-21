@@ -144,10 +144,10 @@ def get_condition_args_from_chainpart(cp):
                 #This dictionary maps the bdips efficiency into the WP cut to be applied to the DIPS output
                 gn2x_WPs = {
                     '':   float('-inf'),
-                    '60': 3.1077,
-                    '70': 2.2998,
-                    '80': 1.2486,
-                    '90': -0.4298,
+                    '79': 3.1077,
+                    '86': 2.2998,
+                    '91': 1.2486,
+                    '96': -0.4298,
                 }
 
                 assert (values[0] in gn2x_WPs.keys()),f"The efficiency of the specified gn2x cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the dips WP dictionary."

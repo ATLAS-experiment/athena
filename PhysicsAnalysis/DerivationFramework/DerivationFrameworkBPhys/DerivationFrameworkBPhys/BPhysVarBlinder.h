@@ -38,7 +38,7 @@ namespace DerivationFramework {
   ///
   /// For an example configuration using this tool see BPHY8.py.
   ///
-  class BPhysVarBlinder : public CfAthAlgTool, public IAugmentationTool {
+  class BPhysVarBlinder : public extends<CfAthAlgTool, IAugmentationTool> {
 
   public: 
     ///

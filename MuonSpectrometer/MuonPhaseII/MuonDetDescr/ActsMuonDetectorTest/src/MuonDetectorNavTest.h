@@ -56,7 +56,7 @@ namespace ActsTrk {
 
         SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleKey{this, "TruthKey", "MuonTruthParticles"};
 
-        SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthSegLinkKey{this, "TruthKeyToSeg", m_truthParticleKey, "truthSegLinks", "TruthParticle to TruthSegment link"};
+        SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthSegLinkKey{this, "TruthKeyToSeg", m_truthParticleKey, "truthSegmentLinks", "TruthParticle to TruthSegment link"};
 
         const MuonGMR4::MuonDetectorManager* m_r4DetMgr{nullptr};
 
@@ -86,16 +86,22 @@ namespace ActsTrk {
         MuonVal::MuonIdentifierBranch m_detId{m_tree, "detId"};
         MuonVal::VectorBranch<unsigned short>& m_techIdx{m_tree.newVector<unsigned short>("detId_techIdx")};
         MuonVal::VectorBranch<unsigned short>& m_gasGapId{m_tree.newVector<unsigned short>("detId_gasGap")};
-        MuonVal::VectorBranch<double>& m_actsPropMomentum{m_tree.newVector<double>("actsPropMomentum")};
-        MuonVal::VectorBranch<double>& m_atlasPropMomentum{m_tree.newVector<double>("atlasPropMomentum")};
+        MuonVal::VectorBranch<float>& m_actsPropMomentum{m_tree.newVector<float>("actsPropMomentum")};
+        MuonVal::VectorBranch<float>& m_atlasPropMomentum{m_tree.newVector<float>("atlasPropMomentum")};
+        MuonVal::ThreeVectorBranch m_startGlob{m_tree, "startGlob"};
         MuonVal::ThreeVectorBranch m_truthLoc{m_tree, "truthHitLoc"};
         MuonVal::ThreeVectorBranch m_truthDir{m_tree, "truthHitDir"};
+        MuonVal::ThreeVectorBranch m_truthGlob{m_tree, "truthHitGlob"};
         MuonVal::ThreeVectorBranch m_actsPropLoc{m_tree, "actsPropLoc"};
         MuonVal::ThreeVectorBranch m_atlasPropLoc{m_tree, "atlasPropLoc"};
+        MuonVal::ThreeVectorBranch m_actsPropGlob{m_tree, "actsPropGlob"};
+        MuonVal::ThreeVectorBranch m_atlasPropGlob{m_tree, "atlasPropGlob"};
         MuonVal::ThreeVectorBranch m_actsPropDir{m_tree, "actsPropDir"};
         MuonVal::ThreeVectorBranch m_atlasPropDir{m_tree, "atlasPropDir"};
         MuonVal::VectorBranch<unsigned short>& m_isPropagated{m_tree.newVector<unsigned short>("isPropagated")};
         MuonVal::ScalarBranch<unsigned int>& m_propSteps{m_tree.newScalar<unsigned int>("propSteps")};
+        MuonVal::ScalarBranch<float>& m_propLength{m_tree.newScalar<float>("propLength")};
+        MuonVal::VectorBranch<float>& m_actsStepSize{m_tree.newVector<float>("stepSize")};
         MuonVal::ScalarBranch<float>& m_matchedTruthFraction{m_tree.newScalar<float>("matchedTruthFraction")};
         MuonVal::ScalarBranch<float>& m_matchedPropFraction{m_tree.newScalar<float>("matchedPropFraction")};
         MuonVal::ScalarBranch<float>& m_truthPt{m_tree.newScalar<float>("truthPt")};

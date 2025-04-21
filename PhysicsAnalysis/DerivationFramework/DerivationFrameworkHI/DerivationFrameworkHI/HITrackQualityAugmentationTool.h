@@ -20,7 +20,7 @@
 
 namespace DerivationFramework {
  
-  class HITrackQualityAugmentationTool : public AthAlgTool, public IAugmentationTool {
+  class HITrackQualityAugmentationTool : public extends<AthAlgTool, IAugmentationTool> {
     public:
    enum{
       PP_MIN_BIAS=1<<1, //2

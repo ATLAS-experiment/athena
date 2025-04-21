@@ -21,7 +21,7 @@ if __name__=="__main__":
 
    # make logging more verbose
    from AthenaCommon.Logging import log
-   from AthenaCommon.Constants import DEBUG, INFO
+   from AthenaCommon.Constants import DEBUG
    log.setLevel(DEBUG)
    
    # --- set flags

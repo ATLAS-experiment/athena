@@ -14,38 +14,9 @@ TauGNNEvaluator::TauGNNEvaluator(const std::string &name):
   TauRecToolBase(name),
   m_net_inclusive(nullptr),
   m_net_0p(nullptr), m_net_1p(nullptr), m_net_2p(nullptr), m_net_3p(nullptr) {
-    
-  declareProperty("NetworkFileInclusive", m_weightfile_inclusive = "");
-  declareProperty("NetworkFile0P", m_weightfile_0p = "");
-  declareProperty("NetworkFile1P", m_weightfile_1p = "");
-  declareProperty("NetworkFile2P", m_weightfile_2p = "");
-  declareProperty("NetworkFile3P", m_weightfile_3p = "");
 
-  declareProperty("OutputVarname", m_output_varname = "GNTauScore");
-  declareProperty("OutputPTau", m_output_ptau = "GNTauProbTau");
-  declareProperty("OutputPJet", m_output_pjet = "GNTauProbJet");
-  declareProperty("OutputDiscriminant", m_output_discriminant = Discriminant::NegLogPJet, 
-    "Discriminant used to calculate the output score: 0 -> -log(PJet), 1 -> PTau");
-
-  declareProperty("MaxTracks", m_max_tracks = 30);
-  declareProperty("MaxClusters", m_max_clusters = 20);
-  declareProperty("MaxClusterDR", m_max_cluster_dr = 1.0f);
-
-  declareProperty("VertexCorrection", m_doVertexCorrection = true);
-  declareProperty("DecorateTracks", m_decorateTracks = false);
-  declareProperty("TrackClassification", m_doTrackClassification = true);
-  declareProperty("MinTauPt", m_minTauPt = 0.);
-
-  // Prongness selection minimum track pT
-  declareProperty("MinProngTrackPt", m_min_prong_track_pt = 0);
-
-  // Naming conventions for the network weight files:
-  declareProperty("InputLayerScalar", m_input_layer_scalar = "tau_vars");
-  declareProperty("InputLayerTracks", m_input_layer_tracks = "track_vars");
-  declareProperty("InputLayerClusters", m_input_layer_clusters = "cluster_vars");
-  declareProperty("NodeNameTau", m_outnode_tau = "GN2TauNoAux_pb");
-  declareProperty("NodeNameJet", m_outnode_jet = "GN2TauNoAux_pu");
-  }
+  declareProperty("MaxTracks", m_max_tracks = 30);  
+}
 
 TauGNNEvaluator::~TauGNNEvaluator() {}
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -22,24 +22,6 @@
 #include <algorithm>
 #include <string>
 
-
-/////////////////////////////////////////////////////////////////////
-// CONSTRUCTOR:
-/////////////////////////////////////////////////////////////////////
-
-CaloCellFastCopyTool::CaloCellFastCopyTool(const std::string& type,
-    const std::string& name, const IInterface* parent)
-    : base_class(type, name, parent)
-  , m_srcCellContainerKey("AllCalo")
-  , m_avoidDuplicates(false)
-  , m_isFindCellFast(false)
-  , m_caloID(nullptr)
-{
-  declareProperty("InputName", m_srcCellContainerKey);
-  declareProperty("IncludeSamplings", m_acceptedSampleNames);
-  declareProperty("AvoidDuplicates", m_avoidDuplicates);
-  declareProperty("IsFindCellFast", m_isFindCellFast);
-}
 
 /////////////////////////////////////////////////////////////////////
 // INITIALIZE:

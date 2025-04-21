@@ -3,6 +3,7 @@
 */
 
 #include "DerivationFrameworkLLP/RecoverZeroPixelHitMuons.h"
+#include <TVector3.h>
 
 RecoverZeroPixelHitMuons::RecoverZeroPixelHitMuons(const std::string& name, ISvcLocator* pSvcLocator) :
   AthReentrantAlgorithm(name, pSvcLocator)
@@ -43,8 +44,6 @@ StatusCode RecoverZeroPixelHitMuons::execute(const EventContext& context) const
   double track_eta=0.0;
   double track_phi=0.0;
   double track_charge=0.0;
-  double mu_eta=0.0;
-  double mu_phi=0.0;
   double mu_charge=0.0;
   std::vector<const xAOD::Muon*> matchedMuons;
   int n_tracks=0;
@@ -54,6 +53,10 @@ StatusCode RecoverZeroPixelHitMuons::execute(const EventContext& context) const
     uint8_t nPixHits = 0;
     t->summaryValue(nPixHits,xAOD::numberOfPixelHits);
     if (nPixHits > 0) continue;
+
+    // Define ID track vector and charge
+    TVector3 track_vector;
+    track_vector.SetPtEtaPhi(t->pt(), t->eta(), t->phi());
     track_eta=t->eta();
     track_phi=t->phi();
     track_charge=t->charge();
@@ -67,11 +70,14 @@ StatusCode RecoverZeroPixelHitMuons::execute(const EventContext& context) const
       const xAOD::Muon &m = *(*muItr);
       if (m.muonType() != xAOD::Muon::MuonStandAlone) continue;
       if (std::find(matchedMuons.begin(), matchedMuons.end(), *muItr) != matchedMuons.end()) continue;
-          
-      mu_eta=m.eta();
-      mu_phi=m.phi();
+
+      // Define SA muon vector
+      TVector3 mu_vector;
+      mu_vector.SetPtEtaPhi(m.pt(), m.eta(), m.phi());
       mu_charge=m.charge();
-      float mu_dR=std::sqrt(std::pow(mu_eta-track_eta,2)+std::pow(mu_phi-track_phi,2));  
+      float mu_dR=mu_vector.DeltaR(track_vector);
+
+      // Update matching between ID track and SA muon
       if (mu_dR < min_dR){
         min_dR=mu_dR;
         min_mu_charge=mu_charge;

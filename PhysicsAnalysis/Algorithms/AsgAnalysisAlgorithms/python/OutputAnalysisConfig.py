@@ -130,10 +130,10 @@ class OutputAnalysisConfig (ConfigBlock):
             outputDict = config.getOutputVars (containerName)
             for outputName in outputDict :
                 outputConfig = copy.deepcopy (outputDict[outputName])
-                if containerName != outputConfig.origContainerName :
+                if containerName != outputConfig.origContainerName or config.checkOutputContainer(containerName):
                     outputConfig.outputContainerName = containerName + '_%SYS%'
-                else :
-                    outputConfig.outputContainerName = config.readName (containerName)
+                else:
+                    outputConfig.outputContainerName = config.readName(containerName)
                 outputConfigs[prefix + outputName] = outputConfig
 
         # check for DSID-specific commands

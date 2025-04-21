@@ -103,7 +103,6 @@ namespace DerivationFramework {
 					   const IInterface*  p)
     : BPhysVertexTrackBase(t,n,p) {
     
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     
     declareProperty("IsolationConeSizes"    , m_isoConeSizes);
     declareProperty("IsoTrkImpLogChi2Max"   , m_isoTrkImpLogChi2Max);

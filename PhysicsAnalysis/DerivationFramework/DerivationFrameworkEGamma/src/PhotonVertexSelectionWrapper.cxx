@@ -11,10 +11,9 @@ namespace DerivationFramework {
 PhotonVertexSelectionWrapper::PhotonVertexSelectionWrapper(const std::string& t,
                                                            const std::string& n,
                                                            const IInterface* p)
-  : AthAlgTool(t, n, p)
+  : base_class(t, n, p)
   , m_decPrefix("")
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
   declareProperty(
     "DecorationPrefix", m_decPrefix, "Prefix for the decoration name");
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_READCONDHANDLE_H
@@ -53,6 +53,10 @@ namespace SG {
     ReadCondHandle(const SG::ReadCondHandleKey<T>& key);
     ReadCondHandle(const SG::ReadCondHandleKey<T>& key, 
                    const EventContext& ctx);
+
+    ReadCondHandle(SG::ReadCondHandleKey<T>&& key) = delete; // Not allowed from a temporary.
+    ReadCondHandle(SG::ReadCondHandleKey<T>&& key, 
+                   const EventContext& ctx) = delete; // Not allowed from a temporary.
     
     ~ReadCondHandle() {};
     
@@ -270,6 +274,45 @@ namespace SG {
   SG::ReadCondHandle<T> makeHandle(const SG::ReadCondHandleKey<T> &key,
                                    const EventContext& ctx = Gaudi::Hive::currentContext()) {
      return SG::ReadCondHandle<T>(key, ctx);
+  }
+
+  /**
+   * @brief Convenience function to retrieve an object given a @c ReadCondHandleKey.
+   * @param key The key to retrieve.
+   * @param ctx The event context.
+   *
+   * Returns the object.  Returns nullptr if the key is null or if there's an error.
+   */
+  template <class T>
+  const T* get (const ReadCondHandleKey<T>& key,
+                const EventContext& ctx)
+  {
+    if (key.key().empty()) return nullptr;
+    try {
+      ReadCondHandle<T> h (key, ctx);
+      return h.cptr();
+    }
+    catch (SG::ExcNoCondCont&) {
+      return nullptr;
+    }
+  }
+
+
+  /**
+   * @brief Convenience function to retrieve an object given a @c ReadCondHandleKey.
+   * @param ptr Pointer to the retrieved object.
+   * @param key The key to retrieve.
+   *
+   * In case of error, sets @c ptr to nullptr and returns FAILURE. In case of an
+   * empty key, sets @c ptr to nullptr and returns SUCCESS.
+   */
+  template <class T>
+  StatusCode get (const T*& ptr,
+                  const ReadCondHandleKey<T>& key,
+                  const EventContext& ctx)
+  {
+    ptr = get(key, ctx);
+    return (ptr || key.empty()) ? StatusCode::SUCCESS : StatusCode::FAILURE;
   }
 
 }

@@ -151,6 +151,9 @@ namespace ActsTrk
      ATH_CHECK( m_vertexHandle.initialize(m_expression_strategy == expressionStrategy::Vertex) );
      ATH_CHECK( m_fieldCacheCondObjInputKey.initialize() );
 
+     m_decorator_actsTracks = m_trackParticlesOutKey.key() + "." + m_decorator_actsTracks.key();
+     ATH_CHECK(m_decorator_actsTracks.initialize());
+     
      ATH_CHECK( m_extrapolationTool.retrieve() ); // for extrapolation to beamline
 
      // propagator for conversion to curvilnear parameters
@@ -200,6 +203,8 @@ namespace ActsTrk
        ATH_MSG_ERROR("Failed to record track particle container with key " << m_trackParticlesOutKey.key() );
        return StatusCode::FAILURE;
     }
+
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, ElementLink<ActsTrk::TrackContainer>> trackLink(m_decorator_actsTracks, ctx);
 
     xAOD::TrackParticleContainer *track_particles = wh_track_particles.ptr();
 
@@ -281,8 +286,6 @@ namespace ActsTrk
 
     unsigned int converted_track_states=0;
 
-    static const SG::AuxElement::Decorator<ElementLink<ActsTrk::TrackContainer> > trackLink("actsTrack");
-    
     using namespace Acts::UnitLiterals;
     for (const ActsTrk::TrackContainer *tracksContainer : trackContainers) {
       for (const typename ActsTrk::TrackContainer::ConstTrackProxy track : *tracksContainer) {
@@ -396,6 +399,16 @@ namespace ActsTrk
 	setSummaryValue(*track_particle,
 			specialHitCounts[ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::PixelClusterType)][ActsTrk::detail::HitCategory::Hole],
 			xAOD::numberOfPixelHoles);
+	setSummaryValue(*track_particle,
+			hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 0),
+			xAOD::numberOfInnermostPixelLayerSharedEndcapHits);
+	setSummaryValue(*track_particle,
+			hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 1)
+			+hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 2),
+			xAOD::numberOfNextToInnermostPixelLayerSharedEndcapHits);
+	setSummaryValue(*track_particle,
+			hitInfo.contributingSharedHits(ActsTrk::detail::HitSummaryData::pixelTotal),
+			xAOD::numberOfPixelSharedHits);
 	// do not expect pixel hits if there are not contributing pixel hits in the flat barrel and expectIfPixelContributes is true
 	std::array<unsigned int,4> expect_layer_pattern = ((   !m_expectIfPixelContributes.value()
 							       || hitInfo.contributingLayers(ActsTrk::detail::HitSummaryData::pixelTotal))
@@ -424,6 +437,12 @@ namespace ActsTrk
 	setSummaryValue(*track_particle,
 			static_cast<unsigned int >(hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat,1)),
 			xAOD::numberOfNextToInnermostPixelLayerOutliers);
+	setSummaryValue(*track_particle,
+			static_cast<unsigned int >(hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat,0)),
+			xAOD::numberOfInnermostPixelLayerSharedHits);
+	setSummaryValue(*track_particle,
+			static_cast<unsigned int >(hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat,1)),
+			xAOD::numberOfNextToInnermostPixelLayerSharedHits);
 	
 	// Strip summaries
 	setSummaryValue(*track_particle,
@@ -432,6 +451,9 @@ namespace ActsTrk
 	setSummaryValue(*track_particle,
 			hitInfo.contributingOutlierHits( ActsTrk::detail::HitSummaryData::stripTotal ),
 			xAOD::numberOfSCTOutliers);
+	setSummaryValue(*track_particle,
+			hitInfo.contributingSharedHits( ActsTrk::detail::HitSummaryData::stripTotal ),
+			xAOD::numberOfSCTSharedHits);
 	setSummaryValue(*track_particle,
 			specialHitCounts[ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::StripClusterType)][ActsTrk::detail::HitCategory::Hole],
 			xAOD::numberOfSCTHoles);

@@ -162,7 +162,7 @@ StatusCode eFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                 towerMap[std::make_tuple(t.getCrate(),t.getModule(),t.getFpgaNumber(),t.getRegion().getEtaIndex(),t.getRegion().getPhiIndex())] = eTowers->size();
                 eTowers->push_back( std::make_unique<xAOD::eFexTower>() );
                 // in bytestream cell orders are L2,PS,L1,L3 so reorder to usual PS,L1,L2,L3 order
-                std::vector<uint16_t> counts(11,0); // defaults hadronic to 1025, which we will use to indicate absent
+                std::vector<uint16_t> counts(11,xAOD::eFexTower::c_missingCountCode);
                 counts[0] = t.getSupercells().at(4);
                 for(size_t idx = 0;idx<4;idx++) {
                     counts[idx+1] = t.getSupercells().at(idx+5); // L1
@@ -187,7 +187,7 @@ StatusCode eFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                     towerMap[std::make_tuple(t.getCrate(),t.getModule(),t.getFpgaNumber(),t.getRegion().getEtaIndex(),t.getRegion().getPhiIndex())] = eTowers->size();
                     eTowers->push_back( std::make_unique<xAOD::eFexTower>() );
                     eTowers->back()->initialize(t.getRegion().getEtaIndex()*0.1 + 0.05,2.*ROOT::Math::Pi()*(0.5 + t.getRegion().getPhiIndex() - 64*(t.getRegion().getPhiIndex()>=32))/64,
-                                                std::vector<uint16_t>(11,1025), // use 1025 count to indicate missing
+                                                std::vector<uint16_t>(11,xAOD::eFexTower::c_missingCountCode),
                                                 t.getModule() + t.getCrate()*12,t.getFpgaNumber(),0,t.getFlag());
                 }
                 auto tower = eTowers->at(idx);

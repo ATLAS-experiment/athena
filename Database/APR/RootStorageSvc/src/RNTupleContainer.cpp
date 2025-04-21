@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -10,12 +10,11 @@
 
 // Framework include files
 #include "POOLCore/DbPrint.h"
-#include "RootAuxDynIO/RootAuxDynIO.h"
+#include "RootAuxDynIO/IRootAuxDynIO.h"
 #include "StorageSvc/DbArray.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbOption.h"
-#include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/Transaction.h"
@@ -26,14 +25,13 @@
 #include "RootDatabase.h"
 #include "RNTupleWriterHelper.h"
 
+#include "Gaudi/PluginService.h"
+
 // Root include files
 #include "ROOT/RNTuple.hxx"
 #include "ROOT/RNTupleReader.hxx"
-
 #include "TFile.h"
 #include "TError.h"
-// for version checks
-#include "TROOT.h"
 
 #include <algorithm>
 
@@ -131,6 +129,11 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
    std::replace(ntupleName.begin(), ntupleName.end(), '/', '_');
    std::string fieldName;
 
+   m_auxDynTool = Gaudi::PluginService::Factory< RootAuxDynIO::IFactoryTool*() >::create("RootAuxDynIO::FactoryTool");
+   if( !m_auxDynTool ) {
+      log << DbPrintLvl::Warning << "Could NOT load RootAuxDynIO::FactoryTool. Dynamic attributes support disabled"
+          << DbPrint::endmsg;
+   }
    try {
       const DbTypeInfo::Columns& cols = info->columns();
       log << DbPrintLvl::Debug << "   attributes# = " << cols.size()
@@ -184,14 +187,6 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
             log << DbPrintLvl::Debug << "Adding new RNTuple Field: name=" << dsc.fieldname 
                 << "  typename=" << dsc.typeName() << DbPrint::endmsg;
             m_ntupleWriter->addField( dsc.fieldname, dsc.typeName() );
-            if( dsc.hasAuxStore() ) {
-               dsc.auxdyn_writer = RootAuxDynIO::getNTupleAuxDynWriter();
-               if( !dsc.auxdyn_writer ) {
-                  log << DbPrintLvl::Error << "Cannot get AuxDyn writer for " << dsc.fieldname
-                      << DbPrint::endmsg;
-                  return Error;
-               }
-            }
          }
       }
       else if( mode & (pool::READ | pool::UPDATE) ) {
@@ -209,10 +204,10 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
          }
          for( auto& dsc : m_fieldDescs ) {
             dsc.view = m_ntupleReader->GetView<void>(dsc.fieldname, nullptr);
-            if( dsc.hasAuxStore() ) {
+            if( dsc.auxdyn_writer ) {
                // Attach RNTuple Reader (owned by the DB)
                const std::string type_name = dsc.view->GetField().GetTypeName();
-               dsc.auxdyn_reader = RootAuxDynIO::getNTupleAuxDynReader( dsc.fieldname, type_name, m_ntupleReader );
+               dsc.auxdyn_reader = m_auxDynTool->getNTupleAuxDynReader( dsc.fieldname, type_name, m_ntupleReader );
                // If we set up a reader, then disable aging
                // for this file.  That will prevent POOL from
                // deleting the file while we still have
@@ -270,15 +265,16 @@ DbStatus RNTupleContainer::initObjectFieldDesc( FieldDesc& dsc )
    if( dsc.clazz )  {
       if( dsc.clazz->GetStreamerInfo() and dsc.clazz->HasDictionary() )  {
          // AUX STORE specifics
-         if( RootAuxDynIO::hasAuxStore(dsc.sgkey, dsc.clazz) ) {
-            TClass *storeTClass = dsc.clazz->GetBaseClass("SG::IAuxStoreIO");
-            if( storeTClass ) {
-               // This is a class implementing SG::IAuxStoreIO
-               // Provide writers for its dynamic attributes
-               dsc.aux_iostore_IFoffset = dsc.clazz->GetBaseClassOffset( storeTClass );
-               // get rid of the AUX_POSTFIX dot at the end (converter to _ earlier)
-               auto last = dsc.fieldname.end() - 1;
-               if( *last == '_' )  *last = ':';
+         if( m_auxDynTool and m_auxDynTool->hasAuxStoreIO(dsc.clazz) ) {
+            // get rid of the AUX_POSTFIX dot at the end (converted to _ earlier)
+            auto last = dsc.fieldname.end() - 1;
+            if( *last == '_' )  *last = ':';
+            dsc.auxdyn_writer = m_auxDynTool->getNTupleAuxDynWriter(*dsc.clazz);
+            if( !dsc.auxdyn_writer ) {
+               DbPrint log(m_name);
+               log << DbPrintLvl::Error << "Cannot get AuxDyn writer for " << dsc.fieldname
+                   << DbPrint::endmsg;
+               return Error;
             }
          }
          return Success;
@@ -336,7 +332,7 @@ DbStatus RNTupleContainer::writeObject( ActionList::value_type& action )
           dsc.object            = p.ptr;
           try {
              if( dsc.auxdyn_writer ) {
-                auto attrList = dsc.auxdyn_writer->collectAuxAttributes( dsc.fieldname, dsc.getIOStorePtr() );
+                auto attrList = dsc.auxdyn_writer->collectAuxAttributes( dsc.fieldname, dsc.object );
                 for(const auto& itr : attrList) {
                    m_ntupleWriter->addAttribute( itr );
                 }

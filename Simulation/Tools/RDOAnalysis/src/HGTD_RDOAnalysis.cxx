@@ -45,6 +45,7 @@ StatusCode HGTD_RDOAnalysis::initialize() {
     m_tree->Branch("m_rdo_module_x", &m_rdo_module_x);
     m_tree->Branch("m_rdo_module_y", &m_rdo_module_y);
     m_tree->Branch("m_rdo_module_z", &m_rdo_module_z);
+    m_tree->Branch("m_rdo_module_ID", &m_rdo_module_ID);
     m_tree->Branch("m_rdo_hit_x", &m_rdo_hit_x);
     m_tree->Branch("m_rdo_hit_y", &m_rdo_hit_y);
     m_tree->Branch("m_rdo_hit_z", &m_rdo_hit_z);
@@ -72,6 +73,7 @@ StatusCode HGTD_RDOAnalysis::execute() {
   m_rdo_module_x.clear();
   m_rdo_module_y.clear();
   m_rdo_module_z.clear();
+  m_rdo_module_ID.clear();
   m_rdo_hit_x.clear();
   m_rdo_hit_y.clear();
   m_rdo_hit_z.clear();
@@ -105,11 +107,6 @@ StatusCode HGTD_RDOAnalysis::execute() {
       InDetDD::SiLocalPosition localPosColl = elementColl->rawLocalPositionOfCell(rdoIDColl);
       Amg::Vector3D globalPosColl = elementColl->globalPosition(localPosColl);
 
-      m_rdo_module_x.push_back(globalPosColl[Amg::x]);
-      m_rdo_module_y.push_back(globalPosColl[Amg::y]);
-      m_rdo_module_z.push_back(globalPosColl[Amg::z]);
-
-      m_rdo_module_layer.push_back(m_HGTD_ID->layer(rdoIDColl));
 
       for ( HGTD_RDO_Collection::const_iterator rdo_itr= p_RDO_coll->begin(); rdo_itr != p_RDO_coll->end(); ++rdo_itr ) {
 
@@ -120,8 +117,16 @@ StatusCode HGTD_RDOAnalysis::execute() {
         Amg::Vector3D globalPos_hit = rdo_element->globalPosition(localPos_hit);
 
         m_rdo_hit_x.push_back(globalPos_hit[Amg::x]);
-		    m_rdo_hit_y.push_back(globalPos_hit[Amg::y]);
+	m_rdo_hit_y.push_back(globalPos_hit[Amg::y]);
         m_rdo_hit_z.push_back(globalPos_hit[Amg::z]);
+
+   	// Move global position storage for RDO module from outer to inner loop
+	m_rdo_module_x.push_back(globalPosColl[Amg::x]);
+      	m_rdo_module_y.push_back(globalPosColl[Amg::y]);
+      	m_rdo_module_z.push_back(globalPosColl[Amg::z]);
+	
+	m_rdo_module_layer.push_back(m_HGTD_ID->layer(rdoIDColl));
+	m_rdo_module_ID.push_back(rdoIDColl.get_compact());
 
         // Get the Time of Arrival which include the tof and the digitisation smearing of 25 ps
         float rdo_toa = (*rdo_itr)->getTOA(); 

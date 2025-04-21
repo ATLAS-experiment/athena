@@ -15,6 +15,11 @@
 #include <MuonEfficiencyCorrections/KinematicSystHandler.h>
 #include <PATInterfaces/ISystematicsTool.h>
 
+#include <ColumnarCore/ColumnAccessor.h>
+#include <ColumnarCore/ColumnarTool.h>
+#include <ColumnarMuon/MuonDef.h>
+#include <ColumnarCore/ObjectColumn.h>
+
 // further ROOT includes
 #include <TFile.h>
 #include <TDirectory.h>
@@ -32,7 +37,7 @@ namespace CP {
     
     class SystematicSet;
     class MuonEfficiencyScaleFactors;
-    class EfficiencyScaleFactor {
+    class EfficiencyScaleFactor : public columnar::ColumnarTool<> {
 
             /// @class EfficiencyScaleFactor
             /// @brief Utility class to manage scale factor histograms
@@ -96,6 +101,7 @@ namespace CP {
 
             /// scale factors...
             CorrectionCode ScaleFactor(const xAOD::Muon& mu, float & SF) const;
+            CorrectionCode ScaleFactor(columnar::MuonId mu, float & SF) const;
             CorrectionCode ScaleFactorReplicas(const xAOD::Muon& mu, std::vector<float> & SF);
             
             /// or you can just decorate the scale-factor to the muon
@@ -142,18 +148,19 @@ namespace CP {
            
             /// Read SF histrograms from a given input file.
             bool ReadFromFile(const std::string &file, const std::string& time_unit);
-            std::unique_ptr<HistHandler> ReadHistFromFile(const std::string& name, TFile* f, const std::string& time_unit);
+            std::unique_ptr<HistHandler> ReadHistFromFile(columnar::ColumnarTool<>* parent, const std::string& name, TFile* f, const std::string& time_unit);
             
             // use some maps for easy histo loading / arithmetics by name
             
             /// read the content of the correct bin in one of my histos. MCefficiencies actually do  not need a pt-dependet systematic
             CorrectionCode GetContentFromHist(const HistHandler* Hist, const xAOD::Muon& mu, float & SF, bool add_kine_syst) const;
+            CorrectionCode GetContentFromHist(const HistHandler* Hist, columnar::MuonId mu, float & SF, bool add_kine_syst) const;
             /// read a vector of replica contents in the correct bin in one of my histos
             CorrectionCode GetContentReplicasFromHist(EfficiencyScaleFactor::SFReplicaVec &replicas, const xAOD::Muon& mu, std::vector<float> & SF, bool add_kine_syst);
 
             
             // package a TH1 in a HistHandler
-            std::unique_ptr<HistHandler> package_histo(TH1* h);
+            std::unique_ptr<HistHandler> package_histo(columnar::ColumnarTool<>* parent, TH1* h);
 
             
             // replica generation
@@ -217,6 +224,14 @@ namespace CP {
             
             unsigned int m_firstRun;
             unsigned int m_lastRun;
+
+        public:
+
+            columnar::MuonAccessor<columnar::ObjectColumn> m_muons {*this, "Muons"};
+            columnar::MuonAccessor<columnar::RetypeColumn<double,float>> ptAcc {*this, "pt"};
+            columnar::MuonAccessor<columnar::RetypeColumn<double,float>> etaAcc {*this, "eta"};
+            columnar::MuonAccessor<columnar::RetypeColumn<double,float>> phiAcc {*this, "phi"};
+            columnar::MuonAccessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>> muonTypeAcc {*this, "muonType"};
     };
 } /* namespace CP */
 

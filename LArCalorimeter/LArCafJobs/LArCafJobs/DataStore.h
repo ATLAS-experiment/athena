@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -40,19 +40,24 @@ namespace LArSamples {
     virtual ~DataStore();
     
     const HistoryContainer* historyContainer(unsigned int i) const { return m_cellHistories[i]; }
+    const HistoryContainer* historyContainerSC(unsigned int i) const { return m_cellHistoriesSC[i]; }
     const EventData* eventData(unsigned int i) const { return m_events[i]; }
     const RunData* runData(unsigned int i) const { return m_runs[i]; }
 
     /** @brief append data (takes ownership of everything) */
     HistoryContainer* makeNewHistory(const IdentifierHash& hash, CellInfo* info);
+    HistoryContainer* makeNewHistorySC(const IdentifierHash& hash, CellInfo* info);
     bool addData(const IdentifierHash& hash, DataContainer* data);
+    bool addDataSC(const IdentifierHash& hash, DataContainer* data);
     
     unsigned int addEvent(EventData* eventData);
     unsigned int addRun(RunData* eventData);
 
     unsigned int nChannels() const { return Definitions::nChannels; }
+    unsigned int nChannelsSC() const { return Definitions::nChannelsSC; }
     unsigned int size() const;
     unsigned int nFilledChannels() const;
+    unsigned int nFilledChannelsSC() const;
     unsigned int nEvents() const { return m_events.size(); }
     unsigned int nRuns() const { return m_runs.size(); }
 
@@ -65,12 +70,15 @@ namespace LArSamples {
    private:
       
     HistoryContainer*& hist_cont(unsigned int i) { return m_cellHistories[i]; }
+    HistoryContainer*& hist_cont_sc(unsigned int i) { return m_cellHistoriesSC[i]; }
     EventData*& eventData(unsigned int i) { return m_events[i]; }
     RunData*& runData(unsigned int i) { return m_runs[i]; }
 
     std::vector<HistoryContainer*> m_cellHistories;
+    std::vector<HistoryContainer*> m_cellHistoriesSC;
     std::vector<EventData*> m_events;
     std::vector<RunData*> m_runs;
+
   };
 }
 

@@ -28,9 +28,6 @@ namespace MuonR4{
     double contract(const CalibratedSpacePoint::Covariance_t& mat, const Amg::Vector2D& a);
     /** @brief Returns the matrix in string */
     std::string toString(const CalibratedSpacePoint::Covariance_t& mat);
-    /** @brief Sorts the space points in a vector by z
-     *  @param spacePoints: List of hits to be sorted */
-    void sortByLayer(std::vector<const SpacePoint*>& spacePoints);
 }
 
 #endif

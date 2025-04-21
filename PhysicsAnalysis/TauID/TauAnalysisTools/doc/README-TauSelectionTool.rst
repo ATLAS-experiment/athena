@@ -154,19 +154,19 @@ setup:
      - ``EleRNNRegion``
      - ``std::vector<double>``
      - accepting taus within electron RNN score regions, each `odd` in the vector is a lower bound, each `even` is an upper bound
-     - 
+     - This cut is applied only on 1 prong tau
 
    * -
      - ``EleRNNMin``
      - ``double``
      - accepting taus with a electron RNN score above a lower bound
-     - if ``EleRNNMin`` is configured, ``EleRNNRegion`` configuration wont be considered
+     - if ``EleRNNMin`` is configured, ``EleRNNRegion`` configuration wont be considered. This cut is applied only on 1 prong tau
 
    * -
      - ``EleRNNMax``
      - ``double``
      - accepting taus with a electron RNN score below an upper bound
-     - if ``EleRNNMax`` is configured, ``EleRNNRegion`` configuration wont be considered
+     - if ``EleRNNMax`` is configured, ``EleRNNRegion`` configuration wont be considered. This cut is applied only on 1 prong tau
 
    * - 
      - ``EleIDVersion``
@@ -221,6 +221,8 @@ and for ``CutEleIDWP``:
      
    * - ELEIDRNNTIGHT
      - passing electron RNN tight working point. Electron ID efficiency 85% (90%) for 1-prong (3-prong)
+
+Note: even though the eRNN was trained also for 3 prong taus, current recommendation is to apply it only for 1 prong tau. In case an analysis suffers from large contamination of electrons mis-reconstructed as tau for 3 prong, please contact the TauCP conveners    
 
 If one wants to use a different setup one has three options:
 

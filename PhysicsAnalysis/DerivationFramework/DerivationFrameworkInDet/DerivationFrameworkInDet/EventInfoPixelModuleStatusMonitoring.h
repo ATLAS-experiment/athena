@@ -35,7 +35,7 @@
 
 namespace DerivationFramework {
 
-  class EventInfoPixelModuleStatusMonitoring : public AthAlgTool, public IAugmentationTool {
+  class EventInfoPixelModuleStatusMonitoring : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       EventInfoPixelModuleStatusMonitoring(const std::string& type, const std::string& name, const IInterface* parent);
 

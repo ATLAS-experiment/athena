@@ -12,7 +12,6 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GeoPrimitives/GeoPrimitives.h"
-#include "MuonClusterization/RpcHitClustering.h"
 #include "MuonClusterization/TgcHitClustering.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"

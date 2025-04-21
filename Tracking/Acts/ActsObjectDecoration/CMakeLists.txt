@@ -19,4 +19,5 @@ atlas_add_component( ActsObjectDecoration
    TrkTruthData
    InDetSimData
    InDetSimEvent
+   PixelReadoutGeometryLib
 )

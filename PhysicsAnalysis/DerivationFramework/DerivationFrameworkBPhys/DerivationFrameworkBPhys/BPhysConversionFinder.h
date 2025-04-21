@@ -30,7 +30,7 @@ namespace Trk
 
 namespace DerivationFramework {
 
-class BPhysConversionFinder : public AthAlgTool, public IAugmentationTool {
+class BPhysConversionFinder : public extends<AthAlgTool, IAugmentationTool> {
 
     public:
 

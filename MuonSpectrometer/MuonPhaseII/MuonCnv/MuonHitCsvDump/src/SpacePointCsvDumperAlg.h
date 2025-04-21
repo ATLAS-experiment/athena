@@ -1,12 +1,12 @@
-#ifndef MUONCSVDUMP_MuonStripCsvDumperAlg_H
-#define MUONCSVDUMP_MuonStripCsvDumperAlg_H
 /*
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+#ifndef MUONCSVDUMP_MuonStripCsvDumperAlg_H
+#define MUONCSVDUMP_MuonStripCsvDumperAlg_H
 
 #include <AthenaBaseComps/AthAlgorithm.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
-#include <StoreGate/ReadHandleKey.h>
+#include <StoreGate/ReadHandleKeyArray.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <MuonSpacePoint/SpacePointContainer.h>
 
@@ -28,7 +28,7 @@ class SpacePointCsvDumperAlg: public AthAlgorithm {
    private:
 
     
-    SG::ReadHandleKey<SpacePointContainer> m_readKey{this, "ReadKey", "MuonSpacePoints", "Key to the space point container"};
+    SG::ReadHandleKeyArray<SpacePointContainer> m_readKeys{this, "SpacePointKeys", {"MuonSpacePoints"}, "Key to the space point container"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 

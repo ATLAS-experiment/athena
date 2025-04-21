@@ -1,130 +1,68 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/MMT_Diamond.h"
 
-MMT_Diamond::MMT_Diamond(const MuonGM::MuonDetectorManager* detManager): AthMessaging(Athena::getMessageSvc(), "MMT_Diamond") {
-  m_detManager = detManager;
+MMT_Diamond::MMT_Diamond(const int diamXthreshold, const bool uv, const int diamUVthreshold, const int roadSize,
+    const int olapEtaUp, const int olapEtaDown, const int olapStereoUp, const int olapStereoDown): AthMessaging(Athena::getMessageSvc(), "MMT_Diamond") {
+    m_xthr = diamXthreshold;
+    m_uvthr = diamUVthreshold;
+    m_uvflag = uv;
+    m_roadSize = roadSize;
+    m_roadSizeUpX = olapEtaUp;
+    m_roadSizeDownX = olapEtaDown;
+    m_roadSizeUpUV =  olapStereoUp;
+    m_roadSizeDownUV = olapStereoDown;
 }
 
-void MMT_Diamond::clearEvent() {
-  if (!m_diamonds.empty()) {
-    for (auto &diam : m_diamonds) {
-      if (!diam.ev_roads.empty()) diam.ev_roads.clear();
-      if (!diam.ev_hits.empty()) diam.ev_hits.clear();
-      diam.slopes.clear();
-    }
-    m_diamonds.clear();
-  }
-}
-
-void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<hitData_entry> &hitDatas, const MuonGM::MuonDetectorManager* detManager, std::shared_ptr<MMT_Parameters> par, const int phi) {
-  ATH_MSG_DEBUG("createRoads_fillHits: Feeding hitDatas Start");
-
-  diamond_t entry;
-  entry.wedgeCounter = iterator;
-  entry.sector = par->getSector();
-  entry.stationPhi = (par->getSector() == 'S') ? phi*2-1 : phi*2-2;
-
-  std::string sector = (par->getSector() == 'L') ? "MML" : "MMS";
-
+void MMT_Diamond::createRoads(std::vector<std::shared_ptr<MMT_Road> >& roads, const bool isLarge) const {
+  const char sec = (isLarge) ? 'L' : 'S';
   /*
-   * The following for-loop merges all plane global coordinates in one single shot:
-   * X & Y are constant in all layers, for a given phi (Not used at the moment)
-   * Z (layer coordinates) changes only for Small and Large sectors --> USED and working!
+   * This computation is done as follows: 1024 X roads
+   * MML: for i in [0,8] -> i*6 UV roads. Then: (1024-9)*6*9 UV roads
+   * MMS: for i in [0,6] -> i*6 UV roads. Then: (1024-7)*6*7 UV roads
    */
-  std::vector<ROOT::Math::XYZVector> planeCoordinates{};
-  planeCoordinates.reserve(8);
-  for (unsigned int iphi = 0; iphi < 8; iphi++) {
-    Amg::Vector3D globalPos(0.0, 0.0, 0.0);
-    int multilayer = (iphi < 4) ? 1 : 2;
-    int gasgap = ((iphi+1)%4 == 0) ? 4 : (iphi+1)%4;
-    /*
-     * Strip 100 (or 200) chosen as good compromise, considering offline strips.
-     * channelMin() function (https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/MuonSpectrometer/MuonIdHelpers/MuonIdHelpers/MmIdHelper.h?v=21.3#0123)
-     * could be used, instead of hardcoding the strip id, but it returns (always?) as initialized in level ranges
-     */
-    int strip = (iphi > 1 && iphi < 6) ? par->getMissedBottomStereoStrips()+1 : par->getMissedBottomEtaStrips()+1;
-    Identifier strip_id = detManager->mmIdHelper()->channelID(sector, 1, iphi+1, multilayer, gasgap, strip);
-    const MuonGM::MMReadoutElement* readout = detManager->getMMReadoutElement(strip_id);
-
-    ROOT::Math::XYZVector coord(0.,0.,0.);
-    if (readout->stripGlobalPosition(strip_id, globalPos)) coord.SetXYZ(globalPos.x(), globalPos.y(), globalPos.z());
-    else ATH_MSG_WARNING("Wedge " << sector << " phi: " << iphi << " mult. " << multilayer << " gas " << gasgap <<  " | Unable to retrieve global positions");
-    planeCoordinates.push_back(coord);
-  }
-
+  const unsigned int vecRoads = (isLarge) ? 56050 : 43864;
+  roads.reserve(vecRoads);
   int nroad = 8192/this->getRoadSize();
-  static const double B = (1./std::tan(1.5/180.*M_PI));
-  int uvfactor = std::round( par->getlWidth() / (B * 0.4 * 2.)/this->getRoadSize() ); // full wedge has to be considered, i.e. S(L/M)2
-  this->setUVfactor(uvfactor);
+  for (int i = 0; i < nroad; ++i) {
+    roads.emplace_back(std::make_shared<MMT_Road>(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i));
 
-  for (const auto &hit_entry : hitDatas) {
-    auto myhit = std::make_shared<MMT_Hit>(hit_entry, detManager, par, planeCoordinates);
-    if (myhit->verifyHit()) {
-      m_hitslopes.push_back(myhit->getRZSlope());
-      entry.ev_hits.push_back(myhit);
+    /*
+     * The computation of "nuv" is:
+     * B = (1./std::tan(1.5/180.*M_PI));
+     * nuv = std::round( par->getlWidth() / (B * 0.4 * 2.)/this->getRoadSize() );
+     * As getlWidth() has to deal with the full wedge, only two (fixed by construction) integer values are allowed, according to small (7) or large (9) wedge
+     */
+    if(m_uvflag) {
+      const int nuv = (isLarge) ? 9 : 7;
+      for (int uv = 1; uv <= nuv; uv++) {
+        if (i-uv < 0) continue;
+
+        roads.emplace_back(std::make_shared<MMT_Road>(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i+uv, i-uv));
+        roads.emplace_back(std::make_shared<MMT_Road>(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i-uv, i+uv));
+        roads.emplace_back(std::make_shared<MMT_Road>(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i+uv-1, i-uv));
+        roads.emplace_back(std::make_shared<MMT_Road>(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i-uv, i+uv-1));
+        roads.emplace_back(std::make_shared<MMT_Road>(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i-uv+1, i+uv));
+        roads.emplace_back(std::make_shared<MMT_Road>(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i+uv, i-uv+1));
+      }
     }
   }
-  entry.side = (std::all_of(entry.ev_hits.begin(), entry.ev_hits.end(), [] (const auto &hit) { return hit->getStationEta() < 0; })) ? 'C' : 'A';
-
-  for (int i = 0; i < nroad; i++) {
-    auto myroad = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
-                                             m_xthr, m_uvthr, i);
-    entry.ev_roads.push_back(myroad);
-
-    int nuv = (this->getUV()) ? this->getUVfactor() : 0;
-    for (int uv = 1; uv <= nuv; uv++) {
-      if (i-uv < 0) continue;
-
-      auto myroad_0 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
-                                                 m_xthr, m_uvthr, i, i+uv, i-uv);
-      entry.ev_roads.push_back(myroad_0);
-
-      auto myroad_1 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
-                                                 m_xthr, m_uvthr, i, i-uv, i+uv);
-      entry.ev_roads.push_back(myroad_1);
-
-      auto myroad_2 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
-                                                 m_xthr, m_uvthr, i, i+uv-1, i-uv);
-      entry.ev_roads.push_back(myroad_2);
-
-      auto myroad_3 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
-                                                 m_xthr, m_uvthr, i, i-uv, i+uv-1);
-      entry.ev_roads.push_back(myroad_3);
-
-      auto myroad_4 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
-                                                 m_xthr, m_uvthr, i, i-uv+1, i+uv);
-      entry.ev_roads.push_back(myroad_4);
-
-      auto myroad_5 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
-                                                 m_xthr, m_uvthr, i, i+uv, i-uv+1);
-      entry.ev_roads.push_back(myroad_5);
-    }
-  }
-  m_diamonds.push_back(entry);
-  ATH_MSG_DEBUG("CreateRoadsAndFillHits: Feeding hitDatas Ended");
 }
 
-void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
-  if (m_diamonds[iterator].ev_hits.empty()) return;
+void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std::vector<std::shared_ptr<MMT_Road> >& roads, std::vector<slope_t>& diamondSlopes, const int sectorPhi) const {
 
-  auto t0 = std::chrono::high_resolution_clock::now();
   int bc_start = 999999;
   int bc_end = -1;
   int bc_wind = 4; // fixed time window (in bunch crossings) during which the algorithm collects ART hits
   unsigned int ibc = 0;
 
-  m_diamonds[iterator].slopes.clear();
-
   // Comparison with lambda function (easier to implement)
-  std::sort(m_diamonds[iterator].ev_hits.begin(), m_diamonds[iterator].ev_hits.end(), [](const auto &h1, const auto &h2){ return h1->getBC() < h2->getBC(); });
-  bc_start = m_diamonds[iterator].ev_hits.front()->getBC();
-  bc_end = m_diamonds[iterator].ev_hits.front()->getBC() + 16;
+  std::sort(hits.begin(), hits.end(), [](const auto &h1, const auto &h2){ return h1->getBC() < h2->getBC(); });
+  bc_start = hits.front()->getBC();
+  bc_end = hits.front()->getBC() + 16;
   ATH_MSG_DEBUG("Window Start: " << bc_start << " - Window End: " << bc_end);
-
-  for (const auto &road : m_diamonds[iterator].ev_roads) road->reset();
 
   std::vector<std::shared_ptr<MMT_Hit> > hits_now = {};
   std::vector< std::pair<int, float> > vmm_same = {};
@@ -134,13 +72,13 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
   int n_vmm  = 128;
 
   // each road makes independent triggers, evaluated on each BC
-  for (int bc = m_diamonds[iterator].ev_hits.front()->getBC(); bc < bc_end; bc++) {
+  for (int bc = hits.front()->getBC(); bc < bc_end; bc++) {
     // Cleaning stuff
     hits_now.clear();
 
-    for (unsigned int j = ibc; j < m_diamonds[iterator].ev_hits.size(); j++) {
-      if (m_diamonds[iterator].ev_hits[j]->getBC() == bc) hits_now.push_back(m_diamonds[iterator].ev_hits[j]);
-      else if (m_diamonds[iterator].ev_hits[j]->getBC() > bc) {
+    for (unsigned int j = ibc; j < hits.size(); j++) {
+      if (hits[j]->getBC() == bc) hits_now.push_back(hits[j]);
+      else if (hits[j]->getBC() > bc) {
         ibc = j;
         break;
       }
@@ -152,7 +90,7 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
       for (int j = 0; j < n_vmm; j++) {
         vmm_same.clear();
         unsigned int k = 0;
-        for (auto hit_pointer: hits_now) {
+        for (const auto &hit_pointer: hits_now) {
           if (static_cast<unsigned int>(hit_pointer->getPlane()) != ib) continue;
           if (hit_pointer->getVMM() == j){
             vmm_same.push_back( std::make_pair(k, hit_pointer->getTime()) );
@@ -196,7 +134,7 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
       }
     } // loop on plane for VMM and ART ASIC filter
 
-    for (auto &road : m_diamonds[iterator].ev_roads) {
+    for (auto &road : roads) {
       road->incrementAge(bc_wind);
       if (!hits_now.empty()) road->addHits(hits_now);
 
@@ -230,7 +168,6 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
         }
 
         slope_t slope;
-        slope.event = event;
         slope.BC = bcidMode;
         slope.totalCount = road->countHits();
         slope.realCount = road->countRealHits();
@@ -246,7 +183,7 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
         slope.my = road->avgSofX(); // defined as my in ATL-COM-UPGRADE-2015-033
         slope.uavg = road->avgSofUV(2,4);
         slope.vavg = road->avgSofUV(3,5);
-	static const double tan_stereo_angle = std::tan(0.02618); // The stereo angle is fixed and can be hardcoded
+        static const double tan_stereo_angle = std::tan(0.02618); // The stereo angle is fixed and can be hardcoded
         slope.mx = (slope.uavg-slope.vavg)/(2.*tan_stereo_angle);
         double theta = std::atan(std::sqrt(std::pow(slope.mx,2) + std::pow(slope.my,2)));
         slope.theta = (slope.my > 0.) ? theta : M_PI - theta;
@@ -254,17 +191,15 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
         slope.dtheta = (slope.mxl - slope.my)/(1. + slope.mxl*slope.my);
         slope.side = (slope.my > 0.) ? 'A' : 'C';
         double phi = std::atan(slope.mx/slope.my);
-        double phiShifted = this->phiShift(this->getDiamond(iterator).stationPhi, phi, slope.side);
+        double phiShifted = phiShift(sectorPhi, phi, slope.side);
         slope.phi = phi;
         slope.phiShf = phiShifted;
         slope.lowRes = road->evaluateLowRes();
 
-        m_diamonds[iterator].slopes.push_back(slope);
+        diamondSlopes.push_back(slope);
       }
     }
   }
-  auto t1 = std::chrono::high_resolution_clock::now();
-  ATH_MSG_DEBUG("Processing roads took " << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count() << " ms");
 }
 
 double MMT_Diamond::phiShift(const int n, const double phi, const char side) const {
@@ -275,11 +210,7 @@ double MMT_Diamond::phiShift(const int n, const double phi, const char side) con
   else             return (Phi - shift);
 }
 
-void MMT_Diamond::resetSlopes() {
-  if (!m_hitslopes.empty()) m_hitslopes.clear();
-}
-
-slope_t::slope_t(int ev, int bc, unsigned int tC, unsigned int rC, int iX, int iU, int iV, unsigned int uvb, unsigned int xb, unsigned int uvm, unsigned int xm,
+slope_t::slope_t(uint64_t ev, int bc, unsigned int tC, unsigned int rC, int iX, int iU, int iV, unsigned int uvb, unsigned int xb, unsigned int uvm, unsigned int xm,
                  int age, double mxl, double my, double uavg, double vavg, double mx, double th, double eta, double dth, char side, double phi, double phiS,
                  bool lowRes) :
   event(ev), BC(bc), totalCount(tC), realCount(rC), iRoad(iX), iRoadu(iU), iRoadv(iV), uvbkg(uvb), xbkg(xb), uvmuon(uvm), xmuon(xm),

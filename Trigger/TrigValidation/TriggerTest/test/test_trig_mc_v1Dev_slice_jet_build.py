@@ -3,24 +3,16 @@
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the jet slice in Dev_pp_run3_v1 menu
 # art-type: build
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TriggerTest.MCExecStep import MCBuildStep
+from TrigValTools.TrigValSteering import Test, CheckSteps
 
-from AthenaConfiguration.TestDefaults import defaultConditionsTags
-conditions = defaultConditionsTags.RUN3_MC
-
-ex = ExecStep.ExecStep()
-ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT.py'
+ex = MCBuildStep(menu='Dev_pp_run3_v1',signatures=['Jet'])
 ex.input = 'ttbar'
-ex.threads = 1
-ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
-            'IOVDb.GlobalTag="' + conditions + '"',
-            'Trigger.enabledSignatures=[\\\"Jet\\\"]']
 
 test = Test.Test()
 test.art_type = 'build'

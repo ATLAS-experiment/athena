@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EvtRangeScatterer.h"
@@ -7,6 +7,7 @@
 #include "AthenaInterprocess/SharedQueue.h"
 
 #include "AthenaKernel/IEventShare.h"
+#include "CxxUtils/xmalloc.h"
 #include "GaudiKernel/IEvtSelector.h"
 #include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/IFileMgr.h"
@@ -114,7 +115,7 @@ AthenaMP::AllWorkerOutputs_ptr EvtRangeScatterer::generateOutputReport()
 std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::bootstrap_func()
 {
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = 1; // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
 
@@ -236,7 +237,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::exec_func(
     }    
 
     // Signal the Pilot that AthenaMP is ready for event processing
-    void* ready_message = malloc(strReady.size());
+    void* ready_message = CxxUtils::xmalloc(strReady.size());
     memcpy(ready_message,strReady.data(),strReady.size());
     socket2Pilot->send(ready_message,strReady.size());
     void* eventRangeMessage;
@@ -292,7 +293,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::exec_func(
       std::string errorStr("ERR_ATHENAMP_PARSE \"" + eventRange + "\": Wrong format");
       ATH_MSG_ERROR(errorStr);
       ATH_MSG_INFO("Ignoring this event range ");
-      void* errorMessage = malloc(errorStr.size());
+      void* errorMessage = CxxUtils::xmalloc(errorStr.size());
       memcpy(errorMessage,errorStr.data(),errorStr.size());
       socket2Pilot->send(errorMessage,errorStr.size());
       continue;
@@ -316,7 +317,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::exec_func(
       std::string errorStr("ERR_ATHENAMP_PARSE \"" + eventRange + "\": Wrong values of range fields");
       ATH_MSG_ERROR(errorStr);
       ATH_MSG_INFO("Ignoring this event range ");
-      void* errorMessage = malloc(errorStr.size());
+      void* errorMessage = CxxUtils::xmalloc(errorStr.size());
       memcpy(errorMessage,errorStr.data(),errorStr.size());
       socket2Pilot->send(errorMessage,errorStr.size());
       continue;
@@ -353,7 +354,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::exec_func(
     }
     
     // Send to the Processor: RangeID,evtToken[,evtToken] 
-    message2Processor = (char*)malloc(message2ProcessorStr.size());
+    message2Processor = (char*)CxxUtils::xmalloc(message2ProcessorStr.size());
     memcpy(message2Processor,message2ProcessorStr.data(),message2ProcessorStr.size());
     socket2Processor->send(message2Processor,message2ProcessorStr.size());
     procReportPending++;
@@ -372,7 +373,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::exec_func(
     void* emptyMess4Processor(0);
     if(!processorWaitRequest.empty()) {
       // We already have one processor waiting for the answer
-      emptyMess4Processor = malloc(1);
+      emptyMess4Processor = CxxUtils::xmalloc(1);
       socket2Processor->send(emptyMess4Processor,1);
       ATH_MSG_INFO("Set worker PID=" << workerPid << " free");
       processorWaitRequest.clear();
@@ -395,7 +396,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::exec_func(
       if(it!=m_pid2RangeID.end()) {
 	m_pid2RangeID.erase(it);
       }
-      emptyMess4Processor = malloc(1);
+      emptyMess4Processor = CxxUtils::xmalloc(1);
       socket2Processor->send(emptyMess4Processor,1);
       ATH_MSG_INFO("Set worker PID=" << workerPid << " free");
       ATH_MSG_INFO("Still " << procReportPending << " pending reports");
@@ -415,7 +416,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::exec_func(
   }
   
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = (all_ok?0:1); // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
 
@@ -434,7 +435,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::fin_func()
 {
   // Dummy
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = 0; // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
   return outwork;
@@ -506,7 +507,7 @@ std::string EvtRangeScatterer::getNewRangeRequest(yampl::ISocket* socket2Process
     default:
       break;
     }
-    void* errorMessage = malloc(errorStr.size());
+    void* errorMessage = CxxUtils::xmalloc(errorStr.size());
     memcpy(errorMessage,errorStr.data(),errorStr.size());
     socket2Pilot->send(errorMessage,errorStr.size());
     procReportPending--;
@@ -517,7 +518,7 @@ std::string EvtRangeScatterer::getNewRangeRequest(yampl::ISocket* socket2Process
   ATH_MSG_INFO("Received request from a processor: " << strProcessorRequest);
   // Decode the request. If it contains output file name then pass it over to the pilot and return empty string
   if(strProcessorRequest.starts_with( "/")) {
-    void* outpFileNameMessage = malloc(strProcessorRequest.size());
+    void* outpFileNameMessage = CxxUtils::xmalloc(strProcessorRequest.size());
     memcpy(outpFileNameMessage,strProcessorRequest.data(),strProcessorRequest.size());
     socket2Pilot->send(outpFileNameMessage,strProcessorRequest.size());
     procReportPending--;
@@ -540,7 +541,7 @@ pid_t EvtRangeScatterer::pollFailedPidQueue(AthenaInterprocess::SharedQueue* sha
       ATH_MSG_WARNING("The failed RangeID = " << m_pid2RangeID[pid] << " will be reported to Pilot");
 
       std::string errorStr("ERR_ATHENAMP_PROCESS " + m_pid2RangeID[pid] + ": Failed to process event range");
-      void* errorMessage = malloc(errorStr.size());
+      void* errorMessage = CxxUtils::xmalloc(errorStr.size());
       memcpy(errorMessage,errorStr.data(),errorStr.size());
       socket2Pilot->send(errorMessage,errorStr.size());
       --procReportPending;

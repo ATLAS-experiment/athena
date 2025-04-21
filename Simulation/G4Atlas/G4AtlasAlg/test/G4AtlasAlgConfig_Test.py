@@ -48,9 +48,10 @@ if __name__ == '__main__':
     enableFrozenShowersFCalOnly(flags)
 
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.GeoModel.Align.Dynamic = False
-    flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-14"
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_MC
 
     # To respect --athenaopts
     flags.fillFromArgs()

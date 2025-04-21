@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_XAODTRUTHPARTICLESLIMMERMUON_H
@@ -29,10 +29,11 @@ public:
     virtual StatusCode execute();
 
 private:
-    /// The key for the output xAOD truth containers
-    std::string m_xaodTruthParticleContainerNameMuon;
-    std::string m_xaodTruthParticleContainerName;
-    std::string m_xaodTruthEventContainerName;
+    SG::ReadHandleKey<xAOD::TruthEventContainer> m_xaodTruthEventContainerName
+    {this,"xAODTruthEventContainerName","TruthEvents","Name of Truth Events container"};
+     /// The key for the output xAOD truth containers
+    SG::WriteHandleKey<xAOD::TruthParticleContainer> m_xaodTruthParticleContainerNameMuon
+    {this, "xAODTruthParticleContainerNameMuon","TruthMuons","Name of Truth Muons contatiner from the slimmer"};
 
     /// Selection values for keeping muons
 

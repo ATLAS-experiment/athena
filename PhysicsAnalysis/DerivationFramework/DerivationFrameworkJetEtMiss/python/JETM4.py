@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_JETM4.py
 #====================================================================
@@ -14,14 +14,9 @@ def JETM4SkimmingToolCfg(flags):
 
     from DerivationFrameworkJetEtMiss import TriggerLists
     triggerlist = TriggerLists.single_photon_Trig(flags)
-    addRun3PhotonTriggers = ["HLT_g140_loose_L1EM22VHI","HLT_g300_etcut_L1EM22VHI"]
-    triggerlist = triggerlist+addRun3PhotonTriggers
 
-    triggers = '||'.join(triggerlist)
-
-    JETM4SkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "JETM4SkimmingTool",
-                                                                               expression = triggers)
-    acc.addPublicTool(JETM4SkimmingTool, primary = True)
+    JETM4SkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "JETM4SkimmingTool", TriggerListOR = triggerlist)
+    acc.addPublicTool(JETM4SkimmingTool, primary=True)
 
     return(acc)
 
@@ -95,10 +90,10 @@ def JETM4KernelCfg(flags, name='JETM4Kernel', **kwargs):
 
     if flags.Input.isMC:
         truth_cond_WZH    = "((abs(TruthParticles.pdgId) >= 23) && (abs(TruthParticles.pdgId) <= 25))"                                      # W, Z and Higgs
-        truth_cond_Lepton = "((abs(TruthParticles.pdgId) >= 11) && (abs(TruthParticles.pdgId) <= 16) && (TruthParticles.barcode < 200000))" # Leptons
+        truth_cond_Lepton = "((abs(TruthParticles.pdgId) >= 11) && (abs(TruthParticles.pdgId) <= 16) && !(TruthParticle.isSimulationParticle))" # Leptons
         truth_cond_Quark  = "((abs(TruthParticles.pdgId) <=  5 && (TruthParticles.pt > 10000.)) || (abs(TruthParticles.pdgId) == 6))"       # Quarks
         truth_cond_Gluon  = "((abs(TruthParticles.pdgId) == 21) && (TruthParticles.pt > 10000.))"                                           # Gluons
-        truth_cond_Photon = "((abs(TruthParticles.pdgId) == 22) && (TruthParticles.pt > 10000.) && (TruthParticles.barcode < 200000))"      # Photon
+        truth_cond_Photon = "((abs(TruthParticles.pdgId) == 22) && (TruthParticles.pt > 10000.) && !(TruthParticle.isSimulationParticle))"      # Photon
 
         truth_expression = '('+truth_cond_WZH+' || '+truth_cond_Lepton +' || '+truth_cond_Quark+'||'+truth_cond_Gluon+' || '+truth_cond_Photon+')'
 

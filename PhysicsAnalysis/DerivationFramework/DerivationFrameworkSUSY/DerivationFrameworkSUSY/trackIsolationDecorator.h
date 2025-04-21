@@ -21,7 +21,7 @@ namespace DerivationFramework {
   /** @class trackIsolationDecorator
       @author christopher.young@cern.ch
      */
-  class trackIsolationDecorator : public AthAlgTool, public IAugmentationTool {
+  class trackIsolationDecorator : public extends<AthAlgTool, IAugmentationTool> {
     
   public: 
     /** Constructor with parameters */

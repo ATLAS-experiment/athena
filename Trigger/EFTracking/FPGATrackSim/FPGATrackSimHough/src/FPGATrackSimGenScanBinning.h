@@ -314,12 +314,9 @@ public:
 class FPGATrackSimGenScanStdTrkBinning : public extends<AthAlgTool, FPGATrackSimGenScanBinningBase> 
 {
 public:
-  FPGATrackSimGenScanStdTrkBinning(const std::string& algname, const std::string &name, const IInterface *ifc) :
-  base_class(algname, name, ifc), m_parNames({"z0", "eta", "qOverPt", "d0", "phi"})
-  {
-    declareInterface<FPGATrackSimGenScanBinningBase>(this);
-  }
-  
+  /// Constructor
+  using base_class::base_class;
+
   virtual StatusCode initialize() override { return StatusCode::SUCCESS; }
 
   virtual const std::string &parNames(unsigned i) const override { return m_parNames[i]; }
@@ -370,7 +367,7 @@ public:
   }
 
 private:
-  const std::vector<std::string> m_parNames;
+  const std::vector<std::string> m_parNames{"z0", "eta", "qOverPt", "d0", "phi"};
 };
 
 //-------------------------------------------------------------------------------------------------------
@@ -465,7 +462,6 @@ public:
   FPGATrackSimGenScanKeyLyrBinning(const std::string& algname, const std::string &name, const IInterface *ifc) :
   base_class(algname, name, ifc), m_keylyrtool(m_rin,m_rout), m_parNames({"zR1", "zR2", "phiR1", "phiR2", "xm"})
   {
-    declareInterface<FPGATrackSimGenScanBinningBase>(this);
   }
 
   virtual StatusCode initialize() override {
@@ -538,11 +534,8 @@ private:
 class FPGATrackSimGenScanPhiSlicedKeyLyrBinning : public extends<AthAlgTool, FPGATrackSimGenScanBinningBase>
 {
 public:
-  FPGATrackSimGenScanPhiSlicedKeyLyrBinning(const std::string& algname, const std::string &name, const IInterface *ifc) :
-  base_class(algname, name, ifc), m_parNames({"zR1", "zR2", "phiR1", "phiR2", "xm"})
-  {
-    declareInterface<FPGATrackSimGenScanBinningBase>(this);
-  }
+  /// Constructor
+  using base_class::base_class;
 
   virtual StatusCode initialize() override {
     m_keylyrtool.setR1(m_rin);
@@ -749,7 +742,7 @@ public:
 
 private:
     FPGATrackSimGenScanKeyLyrHelper m_keylyrtool;
-    const std::vector<std::string> m_parNames;
+    const std::vector<std::string> m_parNames{"zR1", "zR2", "phiR1", "phiR2", "xm"};
 
  }; 
 

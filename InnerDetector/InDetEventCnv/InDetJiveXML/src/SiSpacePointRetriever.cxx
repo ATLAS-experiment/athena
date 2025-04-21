@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiSpacePointRetriever.h"
@@ -235,12 +235,13 @@ namespace JiveXML
 
     //Now put together the DataMap
     DataMap dataMap;
-    dataMap["x"] = x;
-    dataMap["y"] = y;
-    dataMap["z"] = z;
-    dataMap["clusters multiple=\"2\""] = clusters;
-    dataMap["phiModule"] = phiModule;
-    dataMap["etaModule"] = etaModule;
+    const auto sz = x.size();
+    dataMap["x"] = std::move(x);
+    dataMap["y"] = std::move(y);
+    dataMap["z"] = std::move(z);
+    dataMap["clusters multiple=\"2\""] = std::move(clusters);
+    dataMap["phiModule"] = std::move(phiModule);
+    dataMap["etaModule"] = std::move(etaModule);
 
     //Only store truth associations if we retrieved them
     if ( numBarcodes.size() > 0 ){
@@ -248,10 +249,10 @@ namespace JiveXML
       dataMap["numBarcodes"] = numBarcodes;
       // Compute the "multiple" and put the barcodes vector in the map.
       std::string bctag = "barcodes multiple=\""+DataType(barcodes.size()/double(numBarcodes.size())).toString()+"\"";
-      dataMap[bctag] = barcodes;
+      dataMap[bctag] = std::move(barcodes);
     }
 
-    ATH_MSG_DEBUG( dataTypeName() << ": "<< x.size() );
+    ATH_MSG_DEBUG( dataTypeName() << ": "<< sz );
 
      //forward data to formating tool and return
     return FormatTool->AddToEvent(dataTypeName(), "", &dataMap);

@@ -60,6 +60,7 @@
 #include "JetMomentTools/JetVertexNNTagger.h"
 #include "JetAnalysisInterfaces/IJvtEfficiencyTool.h"
 #include "PATCore/IAsgSelectionTool.h"
+#include "JetCPInterfaces/ICPJetCorrectionTool.h"
 
 #include "MuonAnalysisInterfaces/IMuonTriggerScaleFactors.h"
 #include "EgammaAnalysisInterfaces/IAsgElectronEfficiencyCorrectionTool.h"
@@ -486,6 +487,8 @@ namespace ST {
 
     const std::vector<std::string> split(const std::string& s, const std::string& delim) const;
 
+    std::string getDefaultJetUncConfig();
+
     void getTauConfig(const std::string& tauConfigPath, std::vector<float>& pT_window, std::vector<float>& eta_window, bool &eleOLR, bool &muVeto, bool &muOLR) const;
 
     void configFromFile(bool& property, const std::string& propname, TEnv& rEnv,
@@ -536,6 +539,7 @@ namespace ST {
     std::string m_badJetCut;
 
     std::string m_fatJetUncConfig;
+    bool m_fatJetUncertaintiesPDsmearing;
     std::string m_fatJetUncVars;
 
     TEnv m_WconfigReader;
@@ -807,6 +811,7 @@ namespace ST {
 
     CP::SystematicSet m_defaultSyst = CP::SystematicSet();
     CP::SystematicSet m_currentSyst;
+    std::vector<CP::SystematicSet> m_fatjetFFSmearingSyst; // as we need to keep track of the systematics of the FFJetSmearingTool
 
     std::string m_EG_corrModel;
     std::string m_EG_corrFNList;
@@ -822,6 +827,8 @@ namespace ST {
     asg::AnaToolHandle<ICPJetUncertaintiesTool> m_jetUncertaintiesTool;
     asg::AnaToolHandle<ICPJetUncertaintiesTool> m_jetUncertaintiesPDSmearTool;
     asg::AnaToolHandle<ICPJetUncertaintiesTool> m_fatjetUncertaintiesTool;
+    asg::AnaToolHandle<ICPJetUncertaintiesTool> m_fatjetUncertaintiesPDSmearTool;
+    asg::AnaToolHandle<ICPJetCorrectionTool> m_fatjetFFSmearingTool;
     asg::AnaToolHandle<IJetSelector> m_jetCleaningTool;
 
     asg::AnaToolHandle<JetPileupLabelingTool>  m_jetPileupLabelingTool;

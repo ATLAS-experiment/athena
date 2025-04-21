@@ -219,7 +219,7 @@ namespace ActsTrk {
 
     SG::ReadCondHandle< InDetDD::SiDetectorElementCollection > detEleHandle( m_detEleCollKey, ctx );
     ATH_CHECK( detEleHandle.isValid() );
-    const InDetDD::SiDetectorElementCollection* detEle = detEleHandle.retrieve();
+    const InDetDD::SiDetectorElementCollection& detElements = *detEleHandle.retrieve();
 
     // Read the b-field information
     SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle { m_fieldCondObjInputKey, ctx };
@@ -235,13 +235,13 @@ namespace ActsTrk {
     // utilities
     // Used for param estimation
     auto retrieveSurfaceFunction = 
-      [this, &detEle] (const ActsTrk::Seed& seed) -> const Acts::Surface& 
+      [this, &detElements] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& 
       { 
-	const auto& els = seed.sp().front()->measurements();
-	const auto* cluster = els[0];
-	const InDetDD::SiDetectorElement* Element = detEle->getDetectorElement(cluster->identifierHash());	
-	const Trk::Surface& atlas_surface = Element->surface();
-	return this->m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
+          const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
+          const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(
+                useTopSp ? sp->elementIdList().back() : sp->elementIdList().front());
+          const Trk::Surface& atlas_surface = element->surface();
+          return this->m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
       };
 
 
@@ -256,12 +256,12 @@ namespace ActsTrk {
 
     for (const auto* seed : seed_container) {
       std::optional<Acts::BoundTrackParameters> optTrackParams =
-        m_paramEstimationTool->estimateTrackParameters(ctx,
+        m_paramEstimationTool->estimateTrackParameters(
 						       *seed,
+						       m_useTopSp,
 						       geo_context.context(),
 						       magFieldContext,
-						       retrieveSurfaceFunction,
-						       m_useTopSp);
+						       retrieveSurfaceFunction);
 
       if ( not optTrackParams.has_value() ) continue;
 
@@ -474,6 +474,7 @@ namespace ActsTrk {
     float S2 = 1. + A * A;
     float B = Vb - A * Ub;
     float B2 = B * B;
+    if (B2 == 0) B2 = 1e-8;
 
     // dzdr
     float dzdr_b = (zM - zB) / (rM - rB);

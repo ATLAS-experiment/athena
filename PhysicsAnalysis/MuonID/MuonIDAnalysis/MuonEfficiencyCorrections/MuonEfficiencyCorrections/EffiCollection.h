@@ -16,6 +16,11 @@
 #include <string>
 #include <iostream>
 
+#include <ColumnarCore/ColumnAccessor.h>
+#include <ColumnarCore/ColumnarTool.h>
+#include <ColumnarCore/ObjectColumn.h>
+#include <ColumnarMuon/MuonDef.h>
+
 namespace CP {
     class MuonEfficiencyScaleFactors;
     class EfficiencyScaleFactor;
@@ -26,14 +31,15 @@ namespace CP {
     /// whether it's a calo-tag muon, belongs to the high-eta region or has low-pt. 
     /// There exists one instance of the EffiCollection foreach systematic variation and nominal. Scale-factor maps which are not affected by 
     /// a systematic, especially in the case of common vs. low-pt, are taken from the Nominal maps.
-    class EffiCollection final {
+    class EffiCollection final : public columnar::ColumnarTool<> {
         public:
-            explicit EffiCollection(const MuonEfficiencyScaleFactors& ref_tool);
+            explicit EffiCollection(MuonEfficiencyScaleFactors& ref_tool);
             ///Constructor with nominal as fallback..
-            EffiCollection(const EffiCollection* Nominal, const MuonEfficiencyScaleFactors& ref_tool, const std::string& syst, int syst_bit_map, bool is_up);
+            EffiCollection(const EffiCollection* Nominal, MuonEfficiencyScaleFactors& ref_tool, const std::string& syst, int syst_bit_map, bool is_up);
           
             /// return the correct SF type to provide, depending on eta and the author
             EfficiencyScaleFactor* retrieveSF(const xAOD::Muon & mu, unsigned int RunNumber) const;
+            EfficiencyScaleFactor* retrieveSF(columnar::MuonId mu, unsigned int RunNumber) const;
             enum CollectionType {
                 /// The five different scale-factor maps
                 Central = 1, 
@@ -100,8 +106,8 @@ namespace CP {
 
         private:
             CollectionContainer* FindContainer(unsigned int bin) const;
-            CollectionContainer* FindContainer(const xAOD::Muon& mu) const;
-            CollectionContainer* FindLRTContainer(const xAOD::Muon& mu) const;
+            CollectionContainer* FindContainer(columnar::MuonId mu) const;
+            CollectionContainer* FindLRTContainer(columnar::MuonId mu) const;
             
             const MuonEfficiencyScaleFactors& m_ref_tool;
             
@@ -119,6 +125,14 @@ namespace CP {
             /// The systematic set is returned back to the MuonEfficiencyScaleFactors instance to register
             /// The known systematics to the global service
             std::unique_ptr<SystematicSet> m_syst_set;        
+
+        public:
+
+            columnar::MuonAccessor<columnar::ObjectColumn> m_muons {*this, "Muons"};
+            columnar::MuonAccessor<columnar::RetypeColumn<double,float>> ptAcc {*this, "pt"};
+            columnar::MuonAccessor<columnar::RetypeColumn<double,float>> etaAcc {*this, "eta"};
+            columnar::MuonAccessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>> muonTypeAcc {*this, "muonType"};
+            columnar::MuonAccessor<char> isLRTmuon {*this, "isLRT", {.isOptional = true}};
     };
     
     /// The collection container manages the time binning of a particular scale-factor map. For a given runNumber,
@@ -185,6 +199,9 @@ namespace CP {
             /// Offset to translate between the bin-numbers in the bin numbers
             /// of each file against the global bin-number
             unsigned int m_binOffSet;
+
+        public:
+            void addSubtoolsTo (columnar::ColumnarTool<>& parentTool);
         
     };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTTracksMonAlg.h"
@@ -247,7 +247,7 @@ ATH_MSG_DEBUG("SCTTracksMonAlg::fillHistograms()");
 // ====================================================================================================
 float
 SCTTracksMonAlg::calculatePull(const float residual, const float trkErr, const float hitErr) const {
-  float ErrorSum{sqrt(trkErr * trkErr + hitErr * hitErr)};
+  float ErrorSum{std::sqrt(trkErr * trkErr + hitErr * hitErr)};
 
   if (ErrorSum > 1.0e-20) { // as floats are rarely exactly zero
     return residual / ErrorSum;

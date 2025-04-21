@@ -21,7 +21,7 @@
 namespace DerivationFramework {
 
  enum  EInvariantMassToolParser { kInvariantMassToolParser1, kInvariantMassToolParser2, kInvariantMassToolParserNum };
- class InvariantMassTool : public ExpressionParserUser<AthAlgTool,kInvariantMassToolParserNum>, public IAugmentationTool {
+ class InvariantMassTool : public extends<ExpressionParserUser<AthAlgTool,kInvariantMassToolParserNum>, IAugmentationTool> {
     public: 
       InvariantMassTool(const std::string& t, const std::string& n, const IInterface* p);
 

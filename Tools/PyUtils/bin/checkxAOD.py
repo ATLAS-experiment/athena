@@ -233,14 +233,14 @@ if __name__ == "__main__":
             pass
 
             print(f"{d.memSize:12.3f} {sizeUnits:3} {d.diskSize:12.3f} {sizeUnits:3}"
-                  f" {d.diskSize / poolFile.dataHeader.nEntries:12.3f} {sizeUnits:3}"
+                  f" {d.diskSize / max(poolFile.dataHeader.nEntries,1):12.3f} {sizeUnits:3}"
                   f" {d.memSize / d.diskSize:12.3f} {d.nEntries:8d}  {nameType:s}")
             memSize = memSize + d.memSize
             diskSize = diskSize + d.diskSize
             pass
         print( "-" * 106 )
         print(f"{memSize:12.3f} {sizeUnits:3} {diskSize:12.3f} {sizeUnits:3}"
-              f" {diskSize / poolFile.dataHeader.nEntries:12.3f} {sizeUnits:3}"
+              f" {diskSize / max(poolFile.dataHeader.nEntries,1):12.3f} {sizeUnits:3}"
               f" {memSize / diskSize:12.3f} {poolFile.dataHeader.nEntries:8d}  Total")
         print( "" )
 
@@ -261,7 +261,7 @@ if __name__ == "__main__":
         dsFrac = []
         dsName = []
         for d in categorizedData:
-            dsPerEvt     = d.diskSize / poolFile.dataHeader.nEntries
+            dsPerEvt     = d.diskSize / max(poolFile.dataHeader.nEntries,1)
             dsPerCatFrac = d.diskSize / diskSize
             totDiskSize += dsPerEvt
             frac        += dsPerCatFrac

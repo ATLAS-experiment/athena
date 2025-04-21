@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -58,7 +58,7 @@ StatusCode test1()
 
   TTree tree ("t", "t");
   xAOD::TAuxStore s1( "fooAux." );
-  RETURN_CHECK( APP_NAME, s1.readFrom (&tree) );
+  RETURN_CHECK( APP_NAME, s1.readFrom (tree) );
   s1.resize(5);
 
   int* i1 = reinterpret_cast<int*> (s1.getData(ityp1, 5, 20));

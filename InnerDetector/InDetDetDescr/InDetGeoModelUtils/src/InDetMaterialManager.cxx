@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "InDetGeoModelUtils/InDetMaterialManager.h"
@@ -305,7 +305,7 @@ InDetMaterialManager::addMaterial(GeoMaterial* material) {
     //std::cout << m_store[name] << std::endl;
   } else {
     material->lock();
-    m_store[name] = matPtr;
+    m_store[name] = std::move(matPtr);
 
     ATH_MSG_DEBUG("Created new material: " << name << ", " << material->getDensity() /
                   (Gaudi::Units::g / Gaudi::Units::cm3) << " g/cm3");

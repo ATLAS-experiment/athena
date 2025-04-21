@@ -161,8 +161,8 @@ std::unique_ptr<Trk::TrackingVolumeArray>
         } else {
             xh = get_x_size(cv);
         }
-        if (!xVol.size() || xpos > xVol.back().first)
-            xVol.push_back(std::make_pair(xpos, xh));
+        if (xVol.empty() || xpos > xVol.back().first)
+            xVol.emplace_back(xpos, xh);
         else {
             std::vector<std::pair<double, double>>::iterator it = xVol.begin();
             while (it != xVol.end() && xpos > (*it).first) {
@@ -203,7 +203,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
             volBounds = std::make_unique<Trk::CuboidVolumeBounds>(std::max(halfX1, halfX2), std::max(halfY1, halfY2), halfZ);
         } else if (clv->getShape()->type() == "Box") {
             const GeoBox* box = dynamic_cast<const GeoBox*>(clv->getShape());
-            volBounds = m_geoShapeConverter.convert(box);
+            volBounds = Trk::GeoShapeConverter::convert(box);
         } else {
             double xSize = get_x_size(cv);
             ATH_MSG_VERBOSE("subvolume not box nor trapezoid, estimated x size:" << xSize);
@@ -283,7 +283,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
             if (Xcurr >= currX + rpclowXsize + rpcuppXsize) {
                 auto rpcBounds = std::make_unique<Trk::CuboidVolumeBounds>(0.5 * (Xcurr - currX), envY, envZ);
                 Amg::Transform3D rpcTrf{Amg::getTranslateX3D(currX + rpcBounds->halflengthX())};
-                auto rpcVol = std::make_unique<Trk::Volume>(makeTransform(std::move(rpcTrf)), 
+                auto rpcVol = std::make_unique<Trk::Volume>(makeTransform(rpcTrf), 
                                                             rpcBounds.release());
                 std::unique_ptr<Trk::TrackingVolume> rpcTrkVol = processRpc(*rpcVol, geoRpc, transfRpc, cache);
                 trkVols.push_back(std::move(rpcTrkVol));
@@ -301,7 +301,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
             if (Xcurr - currX - (spacerlowXsize + spaceruppXsize) >= -tolerance) {
                 auto spacerBounds = std::make_unique<Trk::CuboidVolumeBounds>(0.5 * (Xcurr - currX), envY, envZ);
                 Amg::Transform3D spacerTrf{Amg::getTranslateX3D(currX + spacerBounds->halflengthX())};
-                Trk::Volume spacerVol(makeTransform(std::move(spacerTrf)), spacerBounds.release());
+                Trk::Volume spacerVol(makeTransform(spacerTrf), spacerBounds.release());
                 std::unique_ptr<Trk::TrackingVolume> spacerTrkVol{processSpacer(spacerVol, geoSpacer, transfSpacer)};
                 trkVols.emplace_back(std::move(spacerTrkVol));
                 volSteps.push_back(Xcurr);
@@ -423,7 +423,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
         if (maxX >= currX + spacerlowXsize + spaceruppXsize) {
             auto spacerBounds = std::make_unique<Trk::CuboidVolumeBounds>(0.5 * (maxX - currX), envY, envZ);
             Amg::Transform3D spacerTrf{Amg::getTranslateX3D(currX + spacerBounds->halflengthX())};
-            Trk::Volume spacerVol(makeTransform(std::move(spacerTrf)),
+            Trk::Volume spacerVol(makeTransform(spacerTrf),
                                   spacerBounds.release());
             std::unique_ptr<Trk::TrackingVolume> spacerTrkVol{processSpacer(spacerVol, geoSpacer, transfSpacer)};
             trkVols.emplace_back(std::move(spacerTrkVol));
@@ -437,7 +437,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
         if (maxX >= currX + rpclowXsize + rpcuppXsize) {
             auto rpcBounds = std::make_unique<Trk::CuboidVolumeBounds>(0.5 * (maxX - currX), envY, envZ);
             Amg::Transform3D rpcTrf{Amg::getTranslateX3D(currX + rpcBounds->halflengthX())};
-            auto rpcVol = std::make_unique<Trk::Volume>(makeTransform(std::move(rpcTrf)), 
+            auto rpcVol = std::make_unique<Trk::Volume>(makeTransform(rpcTrf), 
                                                         rpcBounds.release());
             std::unique_ptr<Trk::TrackingVolume> rpcTrkVol{processRpc(*rpcVol, geoRpc, transfRpc, cache)};
             trkVols.push_back(std::move(rpcTrkVol));
@@ -519,7 +519,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
                                                                   envelope.maxHalflengthX(),
                                                                   envelope.halflengthY(), xSize);
         }
-        auto vol = std::make_unique<Trk::Volume>(makeTransform(std::move(boxTrf)), 
+        auto vol = std::make_unique<Trk::Volume>(makeTransform(boxTrf), 
                                                  bounds.release());       
         std::string cname = clv->getName();
         std::string vname = mv->getLogVol()->getName();
@@ -594,7 +594,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
                                                                                  0.5 * (Xcurr - currX));
                 Amg::Transform3D tr = Amg::getTranslateX3D(currX + spacerBounds->halflengthZ()) *
                                       Amg::getRotateY3D(M_PI_2) * Amg::getRotateZ3D(M_PI_2);
-                Trk::Volume spacerVol(makeTransform(std::move(tr)), spacerBounds.release());
+                Trk::Volume spacerVol(makeTransform(tr), spacerBounds.release());
                 std::unique_ptr<Trk::TrackingVolume> spacerTrkVol{processSpacer(spacerVol, geoSpacer, transfSpacer)};
                 trkVols.push_back(std::move(spacerTrkVol));
                 currX = Xcurr;
@@ -1208,7 +1208,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
     // translate into layers
     for (unsigned int ic = 0; ic < gv.size(); ++ic) {
         const GeoLogVol* clv = gv[ic]->getLogVol();
-        Trk::Material cmat = m_materialConverter.convert(clv->getMaterial());
+        Trk::Material cmat = Trk::GeoMaterialConverter::convert(clv->getMaterial());
         ATH_MSG_VERBOSE(" spacer material all X0 "
                         << cmat.X0 << " L0 " << cmat.L0 << " A " << cmat.A
                         << " Z " << cmat.Z << " rho " << cmat.rho);
@@ -1313,12 +1313,12 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
                     const GeoBox* sb1 = dynamic_cast<const GeoBox*>(subVs[0].first);
                     if (sb1) {
                         v1 = std::make_unique<Trk::Volume>(makeTransform(subVs[0].second),
-                                                            m_geoShapeConverter.convert(sb1).release());
+                                                            Trk::GeoShapeConverter::convert(sb1).release());
                     }
                     const GeoBox* sb2 = dynamic_cast<const GeoBox*>(subVs[1].first);
                     if (sb2) {
                         v2 = std::make_unique<Trk::Volume>(makeTransform(subVs[1].second),
-                                                            m_geoShapeConverter.convert(sb2).release());
+                                                            Trk::GeoShapeConverter::convert(sb2).release());
                     }
                     const GeoBox* boxB = dynamic_cast<const GeoBox*>(subVs[2].first);
                     if (boxB && v1 && v2) {
@@ -1511,7 +1511,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processCscSta
         // xy -> yz  rotation
         // the center of Volume is shifted by y1-y2 in y
         Amg::Transform3D cTr = Amg::getRotateY3D(M_PI_2) *  Amg::getRotateZ3D(M_PI_2) * Amg::getTranslateZ3D(xShift);
-        envelope = std::make_unique<Trk::Volume>(makeTransform(std::move(cTr)), cscBounds.release());
+        envelope = std::make_unique<Trk::Volume>(makeTransform(cTr), cscBounds.release());
         // components
         double xCurr = -xTotal;
         for (unsigned int ic = 0; ic < xSizes.size(); ic++) {
@@ -1612,7 +1612,7 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
     std::string vName = gv->getLogVol()->getName();
     ATH_MSG_DEBUG("processing sTGC prototype of " << vName);
 
-    Amg::Transform3D tr_env(transf);
+    const Amg::Transform3D& tr_env(transf);
     std::unique_ptr<Trk::Volume> envelope = m_geoShapeConverter.translateGeoShape(gv->getLogVol()->getShape(), tr_env);
     if (!envelope) {
         ATH_MSG_WARNING("sTGC prototype for " << vName << " not built ");
@@ -1680,7 +1680,7 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
 
     ATH_MSG_DEBUG("processing MM:" << vName << ":"<< gv->getLogVol()->getShape()->type());
 
-    Amg::Transform3D tr_env(transf);
+    const Amg::Transform3D& tr_env(transf);
     std::unique_ptr<const Trk::Volume> envelope{m_geoShapeConverter.translateGeoShape(gv->getLogVol()->getShape(), tr_env)};
     if (!envelope) {
         ATH_MSG_WARNING("MM prototype for " << vName << " not built ");
@@ -2474,7 +2474,7 @@ void Muon::MuonStationTypeBuilder::printVolumeBounds(const std::string & comment
     }
 }
 
-double Muon::MuonStationTypeBuilder::envelopeThickness(const Trk::VolumeBounds& volBounds) const {
+double Muon::MuonStationTypeBuilder::envelopeThickness(const Trk::VolumeBounds& volBounds) {
 
     const Trk::CuboidVolumeBounds* box = dynamic_cast<const Trk::CuboidVolumeBounds*>(&volBounds);
     if (box)
@@ -2496,7 +2496,7 @@ double Muon::MuonStationTypeBuilder::envelopeThickness(const Trk::VolumeBounds& 
 }
 
 std::unique_ptr<Trk::SurfaceBounds> 
-    Muon::MuonStationTypeBuilder::getLayerBoundsFromEnvelope(const Trk::Volume& envelope) const {
+    Muon::MuonStationTypeBuilder::getLayerBoundsFromEnvelope(const Trk::Volume& envelope) {
 
     const Trk::CuboidVolumeBounds* box =
         dynamic_cast<const Trk::CuboidVolumeBounds*>(&(envelope.volumeBounds()));
@@ -2517,7 +2517,7 @@ std::unique_ptr<Trk::SurfaceBounds>
     return nullptr;
 }
 
-double Muon::MuonStationTypeBuilder::area(const Trk::SurfaceBounds& sb) const {
+double Muon::MuonStationTypeBuilder::area(const Trk::SurfaceBounds& sb) {
 
     const Trk::RectangleBounds* box = dynamic_cast<const Trk::RectangleBounds*>(&sb);
     if (box) {

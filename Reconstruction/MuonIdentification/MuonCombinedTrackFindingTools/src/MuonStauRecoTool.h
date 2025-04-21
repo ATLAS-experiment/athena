@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONSTAURECOTOOL_H
@@ -11,11 +11,8 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/PhysicalConstants.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "MdtCalibData/MdtCalibDataContainer.h"
 #include "MuidInterfaces/ICombinedMuonTrackBuilder.h"
-#include "MuonClusterization/RpcHitClustering.h"
 #include "MuonCombinedEvent/MuGirlLowBetaTag.h"
 #include "MuonCombinedToolInterfaces/IMuonCombinedInDetExtensionTool.h"
 #include "MuonCombinedToolInterfaces/IMuonLayerSegmentMatchingTool.h"
@@ -42,6 +39,7 @@
 
 namespace Muon {
     class RpcClusterOnTrack;
+    struct RpcClusterObj;
 }
 
 namespace MuonCombined {
@@ -165,7 +163,8 @@ namespace MuonCombined {
         void findSegments(const Muon::MuonSystemExtension::Intersection& intersection, MaximumData& maximumData,
                           std::vector<std::shared_ptr<const Muon::MuonSegment>>& t0fittedSegments,
                           const ToolHandle<Muon::IMuonPRDSelectionTool>& muonPRDSelectionTool,
-                          const ToolHandle<Muon::IMuonSegmentMaker>& segmentMaker) const;
+                          const ToolHandle<Muon::IMuonSegmentMaker>& segmentMaker,
+                          float beta = 1.) const;
 
         /** associate Hough maxima and associate time measurements */
         bool extractTimeMeasurements(const EventContext& ctx, const Muon::MuonSystemExtension& muonSystemExtension,

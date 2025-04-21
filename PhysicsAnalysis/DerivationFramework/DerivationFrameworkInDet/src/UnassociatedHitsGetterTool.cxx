@@ -20,9 +20,8 @@ namespace DerivationFramework {
 UnassociatedHitsGetterTool::UnassociatedHitsGetterTool(const std::string& type,
 						       const std::string& name,
 						       const IInterface* parent) : 
-  AthAlgTool(type, name, parent)
+  base_class(type, name, parent)
 {
-  declareInterface<IUnassociatedHitsGetterTool>(this);
 }
 
 UnassociatedHitsGetterTool::~UnassociatedHitsGetterTool()= default;

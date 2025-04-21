@@ -249,7 +249,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  JpsiPlusPsiCascade::JpsiPlusPsiCascade(const std::string& type, const std::string& name, const IInterface* parent) : AthAlgTool(type,name,parent),
+  JpsiPlusPsiCascade::JpsiPlusPsiCascade(const std::string& type, const std::string& name, const IInterface* parent) : base_class(type,name,parent),
     m_vertexContainerKey(""),
     m_vertexPsiContainerKey(""),
     m_cascadeOutputsKeys({"JpsiPlusPsiCascadeVtx1", "JpsiPlusPsiCascadeVtx2", "JpsiPlusPsiCascadeVtx3"}),

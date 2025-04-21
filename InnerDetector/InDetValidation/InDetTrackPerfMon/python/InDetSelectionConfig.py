@@ -117,6 +117,19 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
     from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionToolCfg
     offlineSelectionTool = acc.popToolsAndMerge( InDetTrackSelectionToolCfg( flags, **kwargs_InDetTrackSelectionTool) )
 
+    minHitsVector = flags.PhysVal.IDTPM.currentTrkAna.offlMinHitsVector
+    minPtVector = flags.PhysVal.IDTPM.currentTrkAna.offlMinPtVector
+    maxD0Vector = flags.PhysVal.IDTPM.currentTrkAna.offlMaxD0Vector
+    maxZ0Vector = flags.PhysVal.IDTPM.currentTrkAna.offlMaxZ0Vector
+    etaBins = flags.PhysVal.IDTPM.currentTrkAna.offlEtaBins
+
+    if flags.PhysVal.IDTPM.currentTrkAna.CustomOfflSel == "EFTracking": # Default selection for EFTracking studies
+        etaBins = [-1., 2., 2.6, 9999.]
+        minHitsVector = [9, 8, 7]
+        minPtVector = [1000., 400., 400.]
+        maxD0Vector = [20., 20., 100.]
+        maxZ0Vector = [150., 150., 150.]
+
     kwargs.setdefault( "offlineTool", offlineSelectionTool )
     kwargs.setdefault( "maxPt", flags.PhysVal.IDTPM.currentTrkAna.offlMaxPt )
     kwargs.setdefault( "minEta", flags.PhysVal.IDTPM.currentTrkAna.offlMinEta )
@@ -135,6 +148,11 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
     kwargs.setdefault( "maxAbsZ0", flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsZ0 )
     kwargs.setdefault( "minAbsQoPT", flags.PhysVal.IDTPM.currentTrkAna.offlMinAbsQoPT )
     kwargs.setdefault( "maxAbsQoPT", flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsQoPT )
+    kwargs.setdefault( "etaBins", etaBins ) 
+    kwargs.setdefault( "minHitsVec", minHitsVector )
+    kwargs.setdefault( "minPtVec", minPtVector )
+    kwargs.setdefault( "maxD0Vec", maxD0Vector )
+    kwargs.setdefault( "maxZ0Vec", maxZ0Vector )
 
     acc.setPrivateTools( CompFactory.IDTPM.OfflineTrackQualitySelectionTool( name, **kwargs ) )
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // local include(s)
@@ -8,9 +8,6 @@
 
 TauAODSelector::TauAODSelector(const std::string& name) 
   : TauRecToolBase(name) {
-  declareProperty("Min0pTauPt", m_min0pTauPt = 0.);
-  declareProperty("MinTauPt", m_minTauPt = 0.);
-  declareProperty("doEarlyStopping", m_doEarlyStopping = true);
 }
 
 

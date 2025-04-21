@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaPoolCnvSvc/test/T_AthenaPoolViewVectorCnv_test.cxx
@@ -139,9 +139,9 @@ void test1 (ISvcLocator* svcloc,
   assert (pers->size() == 0);
 
   testsvc.m_pers = pers;
-  Token* token = new Token;
+  auto token = std::make_unique<Token>();
   token->setClassID (Guid (YCont_v2_guid));
-  TokenAddress taddr (0, 0, "", "", 0, token);
+  TokenAddress taddr (0, 0, "", "", 0, std::move(token));
 
   DataObject* pObj;
   assert (cnv.createObj (&taddr, pObj).isSuccess());
@@ -164,7 +164,9 @@ void test1 (ISvcLocator* svcloc,
   pers1.setClearOnPersistent();
   pers1.toPersistent();
   testsvc.m_pers = &pers1;
+  token = std::make_unique<Token>();
   token->setClassID (Guid (YCont_v1_guid));
+  taddr.setToken (std::move (token));
   assert (cnv.createObj (&taddr, pObj).isSuccess());
   auto* trans2 = SG::Storable_cast<ViewVector<DataVector<Y_v2> > > (pObj);
   assert (trans2->size() == 10);
@@ -176,7 +178,9 @@ void test1 (ISvcLocator* svcloc,
   ViewVectorBaseTest::checkPersEmpty (*trans2);
   delete trans2;
 
+  token = std::make_unique<Token>();
   token->setClassID (Guid ("79E2478D-C17F-45E9-848D-278240C2FED3"));
+  taddr.setToken (std::move (token));
   assert (cnv.createObj (&taddr, pObj).isFailure());
 }
 
@@ -198,9 +202,9 @@ void test2 (ISvcLocator* svcloc, TestCnvSvc& testsvc, DataVector<Y_v2>& vec)
 
   testsvc.m_pers = nullptr;
   testsvc.m_pers_old = &pers2;
-  Token* token = new Token;
+  auto token = std::make_unique<Token>();
   token->setClassID (Guid (YCont_v2_guid2));
-  TokenAddress taddr (0, 0, "", "", 0, token);
+  TokenAddress taddr (0, 0, "", "", 0, std::move(token));
 
   DataObject* pObj;
   assert (cnv.createObj (&taddr, pObj).isSuccess());
@@ -219,7 +223,9 @@ void test2 (ISvcLocator* svcloc, TestCnvSvc& testsvc, DataVector<Y_v2>& vec)
   for (size_t i = 0; i < sz; i++)
     pers1.emplace_back ("vec", i);
   testsvc.m_pers_old = &pers1;
+  token = std::make_unique<Token>();
   token->setClassID (Guid (YCont_v1_guid2));
+  taddr.setToken (std::move (token));
   assert (cnv.createObj (&taddr, pObj).isSuccess());
   auto* trans1 = SG::Storable_cast<ViewVector<DataVector<Y_v2> > > (pObj);
   assert (trans1->size() == 10);

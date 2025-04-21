@@ -1,3 +1,4 @@
+<!-- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
 
   <!-- Vector -->
@@ -18,7 +19,6 @@
   <class name="CLHEP::HepRep3x3"/>
   <class name="CLHEP::HepLorentzVector"/>
   <class name="CLHEP::HepLorentzRotation"/>
-  <class name="CLHEP::Hep3Vector"/>
   <class name="CLHEP::HepAxisAngle"/>
   <class name="CLHEP::HepEulerAngles"/>
   <class name="CLHEP::HepRotation"/>

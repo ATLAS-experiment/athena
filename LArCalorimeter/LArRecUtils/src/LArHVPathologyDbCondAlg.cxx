@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHVPathologyDbCondAlg.h" 
@@ -7,9 +7,6 @@
 #include "LArRecConditions/LArHVPathology.h"
 #include "LArHV/EMBPresamplerHVModule.h"
 #include "LArHV/EMECPresamplerHVModule.h"
-
-#include "GaudiKernel/IToolSvc.h"
-#include "GaudiKernel/MsgStream.h"
 
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "CoralBase/AttributeListException.h"
@@ -73,40 +70,6 @@ StatusCode LArHVPathologyDbCondAlg::finalize()
   return StatusCode::SUCCESS;
 }
 
-/*
-AthenaAttributeList* LArHVPathologyDbCondAlg::hvPathology2AttrList(const LArHVPathologiesDb& pathologyContainer)
-{
-  coral::AttributeListSpecification* spec = new coral::AttributeListSpecification();
-
-  spec->extend("blobVersion","unsigned int");   //Should allow schema evolution if needed
-  spec->extend("Constants","blob");             //Holds the container
- 
-  AthenaAttributeList* attrList = new AthenaAttributeList(*spec);
-     
-  (*attrList)["blobVersion"].data<unsigned int>()=(unsigned int)0;
-  coral::Blob& blob=(*attrList)["Constants"].data<coral::Blob>();
-     
-  TClass* klass = TClass::GetClass("LArHVPathologiesDb");
-  if (klass==NULL) {
-    ATH_MSG_ERROR ( "Can't find TClass LArHVPathologiesDb" );
-    return 0;
-  }
-  else
-    ATH_MSG_DEBUG ( "Got TClass LArHVPathologiesDb" );
- 
-  TBufferFile buf(TBuffer::kWrite);
- 
-  if(buf.WriteObjectAny(&pathologyContainer, klass)!=1) {
-    ATH_MSG_ERROR ( "Failed to stream LArHVPathologiesDb" );
-    return 0;
-  }
-  
-  blob.resize(buf.Length());
-  void* adr = blob.startingAddress();
-  memcpy(adr,buf.Buffer(),buf.Length());
-  return attrList;
-}
-*/
 
 StatusCode LArHVPathologyDbCondAlg::execute(const EventContext& ctx) const {
 

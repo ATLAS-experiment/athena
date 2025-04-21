@@ -3,24 +3,19 @@
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the Dev_pp_run3_v1 menu with 2 slots and 2 threads
 # art-type: build
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TriggerTest.MCExecStep import MCBuildStep
+from TrigValTools.TrigValSteering import Test, CheckSteps
 
-from AthenaConfiguration.TestDefaults import defaultConditionsTags
-conditions = defaultConditionsTags.RUN3_MC
-
-ex = ExecStep.ExecStep()
-ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT.py'
+ex = MCBuildStep(menu='Dev_pp_run3_v1_TriggerValidation_prescale')
 ex.input = 'ttbar'
+
 ex.threads = 2
 ex.concurrent_events = 2
-ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
-            'IOVDb.GlobalTag="' + conditions + '"']
 
 test = Test.Test()
 test.art_type = 'build'

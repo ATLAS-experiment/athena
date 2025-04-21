@@ -24,6 +24,7 @@
 
 #include "ReadoutGeometryBase/SiCellId.h"
 #include "ReadoutGeometryBase/SiReadoutCellId.h"
+#include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 
 #include "TrkParameters/TrackParameters.h"
 
@@ -333,6 +334,7 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
     if (SCT_Collection == nullptr) { continue; }
 
     std::map<int, bool> firedStrips;
+    std::map<int, const SCT_RDORawData*> firedStripsToRDO;
     // Preprocess the SCT collection hits to get information for encoding strip in ITK format
     // All strips fired read into a map to an overview of full module that should be used to encode
     // the data into the ITk formatl
@@ -342,13 +344,15 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
       const int baseLineStrip{m_sctId->strip(rdoId)};
       for(int i = 0; i < sctRawData->getGroupSize(); i++) {
         firedStrips[baseLineStrip+ i] = true;
+        firedStripsToRDO[baseLineStrip + i] = sctRawData;
       }
     }
 
     // Loop over the fired hits and encode them in the ITk strips hit map
     // It find unique hits in the list that can be encoded and don't overlap
     std::map<int, int> stripEncodingForITK;
-    for(auto& [stripID, fired]: firedStrips)
+    std::map<int, const SCT_RDORawData* > stripEncodingForITKToRDO;
+    for(const auto& [stripID, fired]: firedStrips)
     {
       // Don't use the strip that has been set false. 
       // This will be the case where neighbouring strip will "used up in the cluster"
@@ -385,16 +389,20 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
 
       // Encode the hit map into a int
       stripEncodingForITK[stripID] = (int)(hitMap.to_ulong());
-
+      stripEncodingForITKToRDO[stripID] = firedStripsToRDO[stripID];
     }
 
     // Actual creation of the FPGAHit objects
-    for (const SCT_RDORawData* sctRawData : *SCT_Collection) 
+    for(const auto& [stripID, fired]: firedStrips)
     {
+      const SCT_RDORawData* sctRawData = firedStripsToRDO[stripID];
       const Identifier rdoId = sctRawData->identify();
       // get the det element from the det element collection
       const InDetDD::SiDetectorElement* sielement = m_SCT_mgr->getDetectorElement(rdoId);
-      Amg::Vector2D localPos = sielement->rawLocalPositionOfCell(rdoId);
+      const InDetDD::SiDetectorDesign& design = dynamic_cast<const InDetDD::SiDetectorDesign&>(sielement->design());
+
+      InDetDD::SiCellId frontId(stripID);
+      Amg::Vector2D localPos = design.localPositionOfCell(frontId);
       std::pair<Amg::Vector3D, Amg::Vector3D> endsOfStrip = sielement->endsOfStrip(localPos);
 
       hitIndexMap[rdoId] = hitIndex;
@@ -428,13 +436,13 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
       tmpSGhit.setLayerDisk(m_sctId->layer_disk(rdoId));
       tmpSGhit.setPhiModule(m_sctId->phi_module(rdoId));
       tmpSGhit.setEtaModule(m_sctId->eta_module(rdoId));
-      tmpSGhit.setPhiIndex(m_sctId->strip(rdoId));
+      tmpSGhit.setPhiIndex(stripID);
       tmpSGhit.setEtaIndex(m_sctId->row(rdoId));
       tmpSGhit.setPhiCoord(localPos[0]);
       tmpSGhit.setEtaCoord(localPos[1]);
       tmpSGhit.setSide(m_sctId->side(rdoId));
-      tmpSGhit.setEtaWidth(sctRawData->getGroupSize());
-      tmpSGhit.setPhiWidth(0);
+      tmpSGhit.setEtaWidth(0);
+      tmpSGhit.setPhiWidth(1);
       if (bestParent) {
         tmpSGhit.setEventIndex(bestTruthLink->eventIndex());
         tmpSGhit.setBarcode(bestTruthLink->barcode()); // FIXME barcode-based
@@ -447,7 +455,6 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
       }
 
       // If the strip has been identified by the previous for loop as a valid hit that can be encoded into ITk Strip format
-      int stripID   = m_sctId->strip(rdoId);
       if(stripEncodingForITK.find(stripID) != stripEncodingForITK.end())
       { 
         // Each ITK ABC chip reads 128 channels in one row, so we just need to divide the current strip with 128 to get the chip index

@@ -22,7 +22,7 @@ namespace DerivationFramework {
   typedef ElementLink<xAOD::TrackParticleContainer> TrackParticleLink;
   typedef std::vector<TrackParticleLink> TrackParticleLinkVector;
 
-  PsiPlusPsiSingleVertex::PsiPlusPsiSingleVertex(const std::string& type, const std::string& name, const IInterface* parent) : AthAlgTool(type,name,parent),
+  PsiPlusPsiSingleVertex::PsiPlusPsiSingleVertex(const std::string& type, const std::string& name, const IInterface* parent) : base_class(type,name,parent),
     m_vertexPsi1ContainerKey(""),
     m_vertexPsi2ContainerKey(""),
     m_outputsKeys({"Psi1Vtx", "Psi2Vtx", "MainVtx"}),

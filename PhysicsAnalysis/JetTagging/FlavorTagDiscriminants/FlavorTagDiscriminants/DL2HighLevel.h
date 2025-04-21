@@ -5,9 +5,9 @@
 #ifndef DL2_HIGH_LEVEL_HH
 #define DL2_HIGH_LEVEL_HH
 
-#include "FlavorTagDiscriminants/FlipTagEnums.h"
-#include "FlavorTagDiscriminants/AssociationEnums.h"
-#include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
+#include "FlavorTagInference/FlipTagEnums.h"
+#include "FlavorTagInference/AssociationEnums.h"
+#include "FlavorTagInference/FTagDataDependencyNames.h"
 
 // EDM includes
 #include "xAODBTagging/BTaggingFwd.h"
@@ -20,6 +20,10 @@
 #include <cmath>
 
 namespace FlavorTagDiscriminants {
+
+  using FlavorTagInference::FlipTagConfig;
+  using FlavorTagInference::TrackLinkType;
+  using FlavorTagInference::FTagDataDependencyNames;
 
   class DL2;
 

@@ -15,7 +15,6 @@
 #include <TTree.h>
 #include <TFile.h>
 namespace CP {
-    static const SG::AuxElement::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
 
     MuonEfficiencyScaleFactors::MuonEfficiencyScaleFactors(const std::string& name) :
                 asg::AsgTool(name),
@@ -212,6 +211,9 @@ namespace CP {
         }
         ATH_MSG_INFO("Successfully initialized! ");
 
+        for (auto& sf_set : m_sf_sets)
+            addSubtool (*sf_set);
+        ATH_CHECK (initializeColumns());
         return StatusCode::SUCCESS;
     }
     unsigned int MuonEfficiencyScaleFactors::getRandomRunNumber(const xAOD::EventInfo* info) const {
@@ -223,20 +225,38 @@ namespace CP {
                 return 999999;
             }
         }
-        if (!info->eventType(xAOD::EventInfo::IS_SIMULATION)) {
+        return getRandomRunNumber (columnar::EventInfoId (*info));
+    }
+    unsigned int MuonEfficiencyScaleFactors::getRandomRunNumber(columnar::EventInfoId info) const {
+        if (!eventTypeAcc(info,xAOD::EventInfo::IS_SIMULATION)) {
             ATH_MSG_DEBUG("The current event is a data event. Return runNumber instead.");
-            return info->runNumber();
+            return runNumberAcc (info);
         }
-        if (!acc_rnd.isAvailable(*info)) {
+        if (!acc_rnd.isAvailable(info)) {
             ATH_MSG_WARNING("Failed to find the RandomRunNumber decoration. Please call the apply() method from the PileupReweightingTool before hand in order to get period dependent SFs. You'll receive SFs from the most recent period.");
             return 999999;
-        } else if (acc_rnd(*info) == 0) {
+        } else if (acc_rnd(info) == 0) {
             ATH_MSG_DEBUG("Pile up tool has given runNumber 0. Return SF from latest period.");
             return 999999;
         }
-        return acc_rnd(*info);
+        return acc_rnd(info);
     }
     CorrectionCode MuonEfficiencyScaleFactors::getEfficiencyScaleFactor(const xAOD::Muon& mu, float& sf, const xAOD::EventInfo* info) const {
+        if (!m_init) {
+            ATH_MSG_ERROR("The tool has not been initialized yet.");
+            return CorrectionCode::Error;
+        }
+        if (!info) {
+            SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfo);
+            info = evtInfo.operator->();
+            if (!info) {
+                ATH_MSG_ERROR("Could not retrieve the xAOD::EventInfo. Return 999999");
+                return CorrectionCode::Error;
+            }
+        }
+        return getEfficiencyScaleFactor (columnar::MuonId (mu), sf, columnar::EventInfoId(*info));
+    }
+    CorrectionCode MuonEfficiencyScaleFactors::getEfficiencyScaleFactor(columnar::MuonId mu, float& sf, columnar::EventInfoId info) const {
         if (!m_init) {
             ATH_MSG_ERROR("The tool has not been initialized yet.");
             return CorrectionCode::Error;
@@ -457,6 +477,8 @@ namespace CP {
                 return StatusCode::FAILURE;
             }
         }
+        for (auto& sf_set : m_sf_sets)
+            addSubtool (*sf_set);
         return StatusCode::SUCCESS;
     }
     std::map<std::string, unsigned int> MuonEfficiencyScaleFactors::lookUpSystematics(){
@@ -641,6 +663,35 @@ namespace CP {
       }
       ATH_MSG_ERROR("The given systematic " << systConfig.name() << " is not an unfolded one. Return  unknown bin ");
       return "unknown bin";
+    }
+
+    void MuonEfficiencyScaleFactors::callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId event) const
+    {
+        for (columnar::MuonId muon : muons)
+        {
+            float sf = 0;
+            switch (getEfficiencyScaleFactor(muon, sf, event).code())
+            {
+            case CP::CorrectionCode::Ok:
+                sfDec(muon) = sf;
+                validDec(muon) = true;
+                break;
+            case CP::CorrectionCode::OutOfValidityRange:
+                sfDec(muon) = sf;
+                validDec(muon) = false;
+                break;
+            default:
+                throw std::runtime_error("Error in getEfficiencyScaleFactor");
+            }
+        }
+    }
+
+    void MuonEfficiencyScaleFactors::callEvents (columnar::EventContextRange events) const {
+        for (columnar::EventContextId event : events)
+        {
+            auto eventInfo = m_eventInfoCol(event);
+            callSingleEvent (m_muons(event), eventInfo);
+        }
     }
 
 } /* namespace CP */

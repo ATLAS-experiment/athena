@@ -128,8 +128,10 @@ class MuonCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
 
         if self.writeTrackD0Z0:
+            config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0', noSys=True)
             config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig', noSys=True)
             config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta', noSys=True)
+            config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig', noSys=True)
 
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
@@ -173,8 +175,8 @@ class MuonWorkingPointConfig (ConfigBlock) :
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only muons satisfying the working point "
             "requirements. The default is True.")
-        self.addOption ('closeByCorrection', False, type=bool,
-            info="whether to use close-by-corrected isolation working points.")
+        self.addOption ('isoDecSuffix', '', type=str,
+            info="isoDecSuffix if using close-by-corrected isolation working points.")
         self.addOption ('systematicBreakdown', False, type=bool,
             info="enables the full breakdown of efficiency SF systematics "
             "(1 NP per uncertainty source, instead of 1 NP in total). "
@@ -264,8 +266,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
                                    'MuonIsolationAlg' + postfix )
             config.addPrivateTool( 'isolationTool', 'CP::IsolationSelectionTool' )
             alg.isolationTool.MuonWP = self.isolation
-            if self.closeByCorrection:
-              alg.isolationTool.IsoDecSuffix = "CloseByCorr"
+            alg.isolationTool.IsoDecSuffix = self.isoDecSuffix
             alg.isolationDecoration = 'isolated_muon' + postfix + ',as_char'
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)

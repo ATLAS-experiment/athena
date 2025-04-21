@@ -6,6 +6,7 @@
 #define DITAUREC_VERTEXFINDER_H
 
 #include "DiTauToolBase.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "JetEDM/TrackVertexAssociation.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/TrackParticle.h"
@@ -41,9 +42,11 @@ class VertexFinder : public DiTauToolBase {
  private:
   SG::ReadHandleKey<xAOD::VertexContainer> m_primVtxContainerName
     { this, "PrimVtxContainerName", "PrimaryVertices", "" };
-  std::string m_assocTracksName;
   SG::ReadHandleKey<jet::TrackVertexAssociation> m_trackVertexAssocName
     { this, "TrackVertexAssociation", "JetTrackVtxAssoc_forDiTaus", "" };
+
+  Gaudi::Property<std::string> m_assocTracksName{this, "AssociatedTracks", "GhostTrack"};
+
 };
 
 #endif  // DITAUREC_VERTEXFINDER_H

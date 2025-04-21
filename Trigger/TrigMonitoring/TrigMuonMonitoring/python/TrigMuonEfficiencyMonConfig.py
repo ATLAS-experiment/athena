@@ -4,6 +4,7 @@ import re
 import math
 
 from AthenaCommon.Logging import logging
+from AthenaConfiguration.Enums import LHCPeriod
 log = logging.getLogger('TrigMuonEfficiencyMonConfig.py')
 
 def regex(pat):
@@ -83,7 +84,7 @@ def TrigMuonEfficiencyMonTTbarConfig(helper):
         histGroup = helper.addGroup(monAlg, GroupName, 'HLT/MuonMon/Efficiency/ttbar/'+chain)
 
         PlotConfig(monAlg, chain)
-        defineEfficiencyHistograms(monAlg, histGroup, GroupName, chain)
+        defineEfficiencyHistograms(monAlg, histGroup, GroupName, chain, helper.flags)
 
     return
 
@@ -126,7 +127,7 @@ def TrigMuonEfficiencyMonZTPConfig(helper):
         histGroup = helper.addGroup(monAlg, GroupName, 'HLT/MuonMon/Efficiency/ZTP/'+chain)
 
         PlotConfig(monAlg, chain)
-        defineEfficiencyHistograms(monAlg, histGroup, GroupName, chain)
+        defineEfficiencyHistograms(monAlg, histGroup, GroupName, chain, helper.flags)
 
     return
 
@@ -156,7 +157,7 @@ def PlotConfig(monAlg, chain):
          monAlg.doEFCBFS = False
 
 
-def defineEfficiencyHistograms(monAlg, histGroup, GroupName, chain):
+def defineEfficiencyHistograms(monAlg, histGroup, GroupName, chain, flags):
 
     def defineEachStepHistograms(xvariable, xlabel, xbins, xmin, xmax):
         histGroup.defineHistogram(GroupName+'_'+xvariable+';'+xvariable,
@@ -262,7 +263,10 @@ def defineEfficiencyHistograms(monAlg, histGroup, GroupName, chain):
     defineEachStepHistograms('muPt', 'p_{T} [GeV]', 50, 0.0, 100.)
     defineEachStepHistograms('muEta', '#eta', 30, -3.0, 3.0)
     defineEachStepHistograms('muPhi', '#phi', 30, -math.pi, math.pi)
-    defineEachStepHistograms('averageMu', 'average pileup', 4, 0., 80.)
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        defineEachStepHistograms('averageMu', 'average pileup', 4, 100., 220.)
+    else:
+        defineEachStepHistograms('averageMu', 'average pileup', 4, 0., 80.)
 
 
     histGroup.defineHistogram(GroupName+'_invmass;invmass',

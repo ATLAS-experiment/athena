@@ -12,6 +12,8 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/CondHandleKeyArray.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
@@ -86,6 +88,9 @@ namespace ActsTrk
     SG::WriteHandleKey<xAOD::TrackParticleContainer> m_trackParticlesOutKey
        {this, "TrackParticlesOutKey","", "Name of the produced track particle collection" };
 
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_decorator_actsTracks
+      {this, "ActsTrackLink", "actsTrack"};
+    
     Gaudi::Property<double>  m_paramExtrapolationParLimit
        {this, "ExtrapolationPathLimit",std::numeric_limits<double>::max(), "PathLimit for extrapolating track parameters." }; // @TODO (unit?mm?)
     Gaudi::Property<bool>  m_firstAndLastParamOnly

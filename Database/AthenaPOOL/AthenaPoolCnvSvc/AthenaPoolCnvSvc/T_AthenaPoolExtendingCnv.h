@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_T_ATHENAPOOLEXTENDCNV_H
@@ -38,7 +38,7 @@ protected:
   // ##########################################################
   
   /// Return the top level TP converter (which is always used for writing)
-  virtual TopLevelTPCnvBase*	getTopLevelTPCnv() = 0;
+  virtual TopLevelTPCnvBase*	getTopLevelTPCnv() override = 0;
   
   /// Read the persistent object from POOL
   /// @param token [IN] token of the object to read
@@ -46,11 +46,11 @@ protected:
   
 protected:
   // redirect to the old API readObjectFromPool()
-  virtual void 		readObject( const std::string& token ) { this->readObjectFromPool(token); }
+  virtual void 		readObject( const std::string& token ) override { this->readObjectFromPool(token); }
   
   /// Write the persistent object to POOL
   /// @param key [IN] StoreGate key (string) - placement hint to generate POOL container name
-  virtual const Token*	writeObject(const std::string& key, const std::string& output);
+  virtual std::unique_ptr<const Token> writeObject(const std::string& key, const std::string& output) override;
 
   /// return the original AthenaPool converter this one was cloned from
   /// if not cloned this returns self
@@ -58,14 +58,14 @@ protected:
   virtual BaseType*	baseAthenaPoolCnv() { return m_originalExtendingCnv; }
 
   /// remember the original converter this one was cloned from
-  virtual void 		wasClonedFrom( AthenaConverterTLPExtension *orig_converter );
+  virtual void 		wasClonedFrom( AthenaConverterTLPExtension *orig_converter ) override;
 
   /// tells if this converter needs to be cloned
   /// (true after the converter has been registered once already)
-  virtual bool		needsCloning() const { return m_originalExtendingCnv != 0; }
+  virtual bool		needsCloning() const override { return m_originalExtendingCnv != 0; }
 
   /// @copydoc T_AthenaPoolCustomCnv::setToken()
-  virtual void		setToken(const std::string& token);
+  virtual void		setToken(const std::string& token)override;
 
   /// @copydoc T_AthenaPoolCustomCnv::poolReadObject()
   /// deprecated - use poolReadObject(TLPCnv)
@@ -83,13 +83,13 @@ protected:
   
   /// Get the name of this converter (anything that identifies it). Used for logging
   /// @return Name of this converter 
-  virtual const std::string   name() const;
+  virtual const std::string   name() const override;
 
   
   // hidden away, as they don't make sense for this converter
   /// no-op
-  virtual PERS 	*createPersistent( TRANS *) { return 0; }
-  virtual TRANS	*createTransient() { return 0; }
+  virtual PERS 	*createPersistent( TRANS *) override { return 0; }
+  virtual TRANS	*createTransient() override { return 0; }
 
   /// pointer to the original Gaudi converter - only this one is registered in the framework and has to be used for all I/O operations
   BaseType*	m_originalExtendingCnv;

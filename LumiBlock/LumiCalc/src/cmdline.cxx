@@ -309,10 +309,12 @@ struct generic_list
  */
 static void add_node(struct generic_list **list) {
   struct generic_list *new_node = (struct generic_list *) malloc (sizeof (struct generic_list));
-  new_node->next = *list;
-  *list = new_node;
-  new_node->arg.string_arg = 0;
-  new_node->orig = 0;
+  if (new_node){
+    new_node->next = *list;
+    *list = new_node;
+    new_node->arg.string_arg = 0;
+    new_node->orig = 0;
+  }
 }
 
 /**
@@ -551,21 +553,22 @@ get_multiple_arg_token(const char *arg)
   len -= num_of_escape;
 
   ret = (char *) malloc (len);
-
-  i = 0;
-  j = 0;
-  while (arg[i] && (j < len-1))
-    {
-      if (arg[i] == '\\' && 
-	  arg[ i + 1 ] && 
-	  arg[ i + 1 ] == ',')
-        ++i;
-
-      ret[j++] = arg[i++];
-    }
-
-  ret[len-1] = '\0';
-
+  if (ret){
+  
+    i = 0;
+    j = 0;
+    while (arg[i] && (j < len-1))
+      {
+        if (arg[i] == '\\' && 
+      arg[ i + 1 ] && 
+      arg[ i + 1 ] == ',')
+          ++i;
+  
+        ret[j++] = arg[i++];
+      }
+  
+    ret[len-1] = '\0';
+  }
   return ret;
 }
 
@@ -980,27 +983,39 @@ void update_multiple_arg(void *field, char ***orig_field,
       switch(arg_type) {
       case ARG_INT:
         if (! *((int **)field)) {
-          *((int **)field) = (int *)malloc (sizeof (int));
-          (*((int **)field))[0] = default_value->int_arg; 
+          int* pi = (int *)malloc (sizeof (int));
+          if (pi){
+            *((int **)field) = pi;
+            (*((int **)field))[0] = default_value->int_arg;
+          }
         }
         break;
       case ARG_DOUBLE:
         if (! *((double **)field)) {
-          *((double **)field) = (double *)malloc (sizeof (double));
-          (*((double **)field))[0] = default_value->double_arg;
+          double * pd = (double *)malloc (sizeof (double));
+          if (pd){
+            *((double **)field) = pd;
+            (*((double **)field))[0] = default_value->double_arg;
+          }
         }
         break;
       case ARG_STRING:
         if (! *((char ***)field)) {
-          *((char ***)field) = (char **)malloc (sizeof (char *));
-          (*((char ***)field))[0] = gengetopt_strdup(default_value->string_arg);
+          char ** pc = (char **)malloc (sizeof (char *));
+          if (pc){
+            *((char ***)field) = pc;
+            (*((char ***)field))[0] = gengetopt_strdup(default_value->string_arg);
+          }
         }
         break;
       default: break;
       }
       if (!(*orig_field)) {
-        *orig_field = (char **) malloc (sizeof (char *));
-        (*orig_field)[0] = 0;
+        char ** pc = (char **)malloc (sizeof (char *));
+        if (pc){
+          *orig_field = pc;
+          (*orig_field)[0] = 0;
+        }
       }
     }
   }

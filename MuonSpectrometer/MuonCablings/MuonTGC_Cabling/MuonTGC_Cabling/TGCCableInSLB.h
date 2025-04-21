@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCABLEINSLB_HH
@@ -7,17 +7,15 @@
  
 #include "MuonTGC_Cabling/TGCCable.h"
 
-namespace MuonTGC_Cabling
-{
+namespace MuonTGC_Cabling {
   
 class TGCCableInSLB : public TGCCable
 {
 public:
-  // Constructor & Destructor
   TGCCableInSLB(void)
     : TGCCable(TGCCable::InSLB) {}
 
-  virtual ~TGCCableInSLB(void) {}
+  virtual ~TGCCableInSLB() = default;
 
    
   virtual TGCChannelId* getChannel(const TGCChannelId* channelId, 

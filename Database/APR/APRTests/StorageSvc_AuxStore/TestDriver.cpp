@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -33,8 +33,7 @@ using namespace std;
 
 static const bool test_nodict = false;
 
-static const std::string file = "AUX.pool_test.root";
-static const std::string container = "CollectionTree(container_Aux.)";
+static const std::string container = "DataContainer(container_Aux.)";
 static const int nObjects = 10;
 
 class TestClassNoDict {
@@ -46,10 +45,13 @@ public:
 using APRTest::AClassWithDict;
 
 
-TestDriver::TestDriver()
+TestDriver::TestDriver(const std::string& filename, pool::DbType storage_type)
+   : m_fileName(filename),
+     m_storageType(storage_type)
 {
    pool::DbPrintLvl::setLevel( pool::DbPrintLvl::Info );
 }
+
 
 TestDriver::~TestDriver()
 {
@@ -72,12 +74,12 @@ std::string TestDriver::testWriting()
    storSvc->addRef();
    cout << "startSession" << endl;
    pool::Session* sessionHandle = 0;
-   if ( ! ( storSvc->startSession( pool::CREATE, pool::ROOT_StorageType.type(), sessionHandle ).isSuccess() ) ) {
+   if ( ! ( storSvc->startSession( pool::CREATE, m_storageType.type(), sessionHandle ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a session." );
    }
 
    cout << "Session connect" << endl;
-   pool::FileDescriptor fd( file, file );
+   pool::FileDescriptor fd( m_fileName, m_fileName );
    if ( ! ( storSvc->connect( sessionHandle, pool::RECREATE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
    }
@@ -95,8 +97,8 @@ std::string TestDriver::testWriting()
 
    SG::auxid_t ityp1 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
    SG::auxid_t ityp2 = SG::AuxTypeRegistry::instance().getAuxID<int> ("int2");
-   SG::auxid_t dict_type = SG::AuxTypeRegistry::instance().getAuxID<AClassWithDict*>("withdict");
-   SG::auxid_t nodict_type = SG::AuxTypeRegistry::instance().getAuxID<TestClassNoDict*>("nodict");
+   SG::auxid_t dict_type = SG::AuxTypeRegistry::instance().getAuxID<AClassWithDict>("withdict");
+   SG::auxid_t nodict_type = SG::AuxTypeRegistry::instance().getAuxID<TestClassNoDict>("nodict");
 
    cout << "Creating objects" << endl;
    vector<APRTest::AuxStore*>  objs;   
@@ -106,17 +108,17 @@ std::string TestDriver::testWriting()
       const int intN = 10;
       int* i1 = reinterpret_cast<int*>( object->getData(ityp1, intN, 20) );
       int* i2 = reinterpret_cast<int*>( object->getData(ityp2, intN, 20) );
-      AClassWithDict** wd_vect = reinterpret_cast<AClassWithDict**>( object->getData(dict_type, intN, 20) );
-      TestClassNoDict** nodict = 0;
+      AClassWithDict* wd_vect = reinterpret_cast<AClassWithDict*>( object->getData(dict_type, intN, 20) );
+      TestClassNoDict* nodict = 0;
       if( test_nodict )
-         nodict = reinterpret_cast<TestClassNoDict**>( object->getData(nodict_type, intN, 20) );
+         nodict = reinterpret_cast<TestClassNoDict*>( object->getData(nodict_type, intN, 20) );
       assert (object->size() == intN);
       for( int i=0; i<intN; i++ ) {
          i1[i] = getVal1(objn, i);
          i2[i] = getVal2(objn, i);
-         wd_vect[i] = new AClassWithDict(objn);
+         wd_vect[i] = AClassWithDict(objn);
          if( test_nodict )
-            nodict[i] = new TestClassNoDict(objn);
+            nodict[i] = TestClassNoDict(objn);
       } 
       objs.push_back( object );
    }
@@ -144,8 +146,7 @@ std::string TestDriver::testWriting()
    cout << "Writing objects" << endl;
    for( int objn=0; objn <nObjects; objn++ ) {
       Token* token;
-      if( ! ( storSvc->allocate( fd,
-                                 container, pool::ROOTTREE_StorageType.type(),
+      if( ! ( storSvc->allocate( fd, container, m_storageType.type(),
                                  objs[objn], shape, token ).isSuccess() ) ) {
          throw std::runtime_error( "Could not write an object" );
       }
@@ -200,15 +201,15 @@ TestDriver::testReading(const string& testTypeID)
 
   SG::auxid_t ityp1 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
   SG::auxid_t ityp2 = SG::AuxTypeRegistry::instance().getAuxID<int> ("int2");
-  SG::auxid_t dict_type = SG::AuxTypeRegistry::instance().getAuxID<AClassWithDict*>("withdict");
-  SG::auxid_t nodict_type = SG::AuxTypeRegistry::instance().getAuxID<TestClassNoDict*>("nodict");
+  SG::auxid_t dict_type = SG::AuxTypeRegistry::instance().getAuxID<AClassWithDict>("withdict");
+  SG::auxid_t nodict_type = SG::AuxTypeRegistry::instance().getAuxID<TestClassNoDict>("nodict");
 
   pool::Session* sessionHandle = 0;
   if ( ! ( storSvc->startSession( pool::READ, pool::ROOT_StorageType.type(), sessionHandle ).isSuccess() ) ) {
     throw std::runtime_error( "Could not start a session." );
   }
 
-  pool::FileDescriptor* fd = new pool::FileDescriptor( file, file );
+  pool::FileDescriptor* fd = new pool::FileDescriptor( m_fileName, m_fileName );
   sc = storSvc->connect( sessionHandle, pool::READ, *fd );
   if ( sc != pool::DbStatus::Success ) {
     throw std::runtime_error( "Could not start a connection." );
@@ -260,16 +261,16 @@ TestDriver::testReading(const string& testTypeID)
       const int intN = 10;
       const int* i1 = reinterpret_cast<const int*>( object->getData(ityp1) );
       const int* i2 = reinterpret_cast<const int*>( object->getData(ityp2) );
-      TestClassNoDict* const* nodict = 0;
+      TestClassNoDict const* nodict = 0;
       if( test_nodict )
-         nodict = reinterpret_cast<TestClassNoDict* const*>( object->getData(nodict_type) );
-      auto wd_vect = reinterpret_cast<AClassWithDict* const*>( object->getData(dict_type) );
+         nodict = reinterpret_cast<TestClassNoDict const*>( object->getData(nodict_type) );
+      auto wd_vect = reinterpret_cast<AClassWithDict const*>( object->getData(dict_type) );
       assert (object->size() == intN);
       for( int i=0; i<intN; i++ ) {
          cout << i << ": " << i1[i] << "   : " << i2[i]
-              << "  : withdict["<<i<<"]= " << wd_vect[i] << " v=" << wd_vect[i]->_val;
+              << "  : withdict["<<i<<"]:  val=" << wd_vect[i]._val;
          if( test_nodict )
-            cout << "  : nodict[]= " << nodict[i] ;
+            cout << "  : nodict[]:  val=" << nodict[i]._val ;
          cout << endl;
          if( i1[i] != getVal1(iObject, i) || i2[i] != getVal2(iObject,i) )
             throw std::runtime_error( "Objects AUX data read different from objects written" );

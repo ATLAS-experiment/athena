@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOPIXELCHIP_H
@@ -16,7 +16,7 @@ class GeoPixelChip : public GeoVPixelFactory {
                std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
                bool isModule3D)
-    : GeoVPixelFactory (ddmgr, mgr, sqliteReader, mapFPV, mapAX),
+    : GeoVPixelFactory (ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX)),
       m_isModule3D(isModule3D)
   {};
   virtual GeoVPhysVol* Build() override;

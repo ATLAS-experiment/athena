@@ -1,27 +1,24 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef GENERATORFILTERSXAODPARENTCHILDFILTER_H
 #define GENERATORFILTERSXAODPARENTCHILDFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
-#include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
-#include "xAODTruth/TruthParticleAuxContainer.h"
-#include "xAODTruth/TruthEvent.h"
-#include "xAODTruth/TruthEventContainer.h"
 
 /// Allows the user to search for any given decay  Parent -> Child + X
 /// @author B K Gjelsten, March 2006
 class xAODParentChildFilter : public GenFilter {
 public:
+  using GenFilter::GenFilter;
 
-  xAODParentChildFilter(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode filterInitialize();
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterInitialize() override final;
+  virtual StatusCode filterEvent() override final;
 
 private:
 
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthPartContKey{this, "TruthParticleContainerKey", "TruthGen"};
   Gaudi::Property<double> m_PtMinParent{this,"PtMinParent",0.,"Min parent Pt"};
   Gaudi::Property<double> m_PtMaxParent{this,"PtMaxParent",1e9,"Max parent Pt"};
   Gaudi::Property<double> m_MassMinParent{this,"MassMinParent",-1e9,"Min parent mass"};

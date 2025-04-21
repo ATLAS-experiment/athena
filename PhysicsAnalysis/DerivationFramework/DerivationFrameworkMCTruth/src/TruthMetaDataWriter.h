@@ -27,7 +27,7 @@ class IHepMCWeightSvc;
 
 namespace DerivationFramework {
 
-  class ATLAS_NOT_THREAD_SAFE TruthMetaDataWriter : public AthAlgTool, public IAugmentationTool {
+  class ATLAS_NOT_THREAD_SAFE TruthMetaDataWriter : public extends<AthAlgTool, IAugmentationTool> {
     //  ^ meta-data handling in addBranches
     public: 
       TruthMetaDataWriter(const std::string& t, const std::string& n, const IInterface* p);

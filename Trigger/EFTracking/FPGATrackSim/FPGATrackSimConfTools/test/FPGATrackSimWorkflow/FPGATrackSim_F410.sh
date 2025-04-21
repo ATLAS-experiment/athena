@@ -18,27 +18,39 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
 source FPGATrackSim_CommonEnv.sh "${FWRD_ARGS[@]}"
+
+# Use the old 9L NN for the NN Track Tool, awaiting new training
+ONNX_INPUT_FAKE="${BANKS_9L}ClassificationHT_v5.onnx"
+ONNX_INPUT_PARAM="${BANKS_9L}ParamEstimationHT_v5.onnx"
+ONNX_INPUT_HIT="${BANKS_9L}Ath_Extrap_v51_6_superBig_0_outsideIN.onnx"
+ONNX_INPUT_VOL="${BANKS_9L}HT_detector_v6_3.onnx"
 
 echo "... Running ${TEST_LABEL} analysis"
 run_F410(){
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     --evtMax=$RDO_EVT_ANALYSIS \
     --filesInput=$RDO_ANALYSIS \
+    --skipEvents=$SKIP_EVENTS \
     Output.AODFileName=$xAODOutput \
     Trigger.FPGATrackSim.doEDMConversion=True \
     Trigger.FPGATrackSim.runCKF=$RUN_CKF \
     Trigger.FPGATrackSim.pipeline='F-410' \
+    Trigger.FPGATrackSim.GNN.graphTool=graphTool.MetricLearning \
     Trigger.FPGATrackSim.GNN.moduleMapPath=$GNN_MODULE_MAP \
+    Trigger.FPGATrackSim.GNN.MLModelPath=$GNN_METRIC_LEARNING \
     Trigger.FPGATrackSim.GNN.GNNModelPath=$GNN_ONNX_MODEL \
     Trigger.FPGATrackSim.GNN.doGNNRootOutput=True \
+    Trigger.FPGATrackSim.GNN.doGNNTracking=True \
     Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
     Trigger.FPGATrackSim.mapsDir=$MAPS_9L_GNN \
     Trigger.FPGATrackSim.region=0 \
+    Trigger.FPGATrackSim.oldRegionDefs=True \
     Trigger.FPGATrackSim.writeToAOD=True \
     Trigger.FPGATrackSim.bankDir=$BANKS_9L \
-    Trigger.FPGATrackSim.FakeNNonnxFile=$ONNX_INPUT_FAKE \
-    Trigger.FPGATrackSim.ParamNNonnxFile=$ONNX_INPUT_PARAM \
+    Trigger.FPGATrackSim.FakeNNonnxFile1st=$ONNX_INPUT_FAKE \
+    Trigger.FPGATrackSim.ParamNNonnxFile1st=$ONNX_INPUT_PARAM \
     Trigger.FPGATrackSim.outputMonitorFile="monitoring${TEST_LABEL}.root"
 }
 run_F410

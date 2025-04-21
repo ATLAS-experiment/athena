@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -408,7 +408,8 @@ void samfr_etaX (
       cout << " ===  Written only:  " << TVar[IVar];
       cout << " as a function of Pseudorapidity to "<< datfil <<" === " << endl;
 //      
-      fout = fopen (datfil,"w");  
+      fout = fopen (datfil,"w");
+      if (!fout) std::abort();
 //
       fprintf (fout, "%5d \n", Nscan);
       fprintf (fout, "%10.3f%10.3f%10.3f \n", Scan1,Scan2,DScan); 

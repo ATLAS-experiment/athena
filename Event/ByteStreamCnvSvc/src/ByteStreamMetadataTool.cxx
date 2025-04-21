@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
    */
 
 /** @file ByteStreamMetadataTool.cxx
@@ -18,11 +18,10 @@ ByteStreamMetadataTool::ByteStreamMetadataTool(
     const std::string& type,
     const std::string& name,
     const IInterface* parent)
-  : AthAlgTool(type, name, parent)
+  : base_class(type, name, parent)
   , m_metadataStore("StoreGateSvc/MetaDataStore", name)
   , m_inputStore   ("StoreGateSvc/InputMetaDataStore", name)
 {
-  declareInterface<IMetaDataTool>(this);
 }
 
 
@@ -37,7 +36,6 @@ ByteStreamMetadataTool::initialize()
 {
   ATH_MSG_INFO("Initializing");
 
-  ATH_CHECK(::AthAlgTool::initialize());
   ATH_CHECK(m_metadataStore.retrieve());
   ATH_CHECK(m_inputStore.retrieve());
 
@@ -47,24 +45,7 @@ ByteStreamMetadataTool::initialize()
 
 /******************************************************************************/
 StatusCode
-ByteStreamMetadataTool::finalize()
-{
-  ATH_MSG_INFO("in finalize()");
-  return(::AthAlgTool::finalize());
-}
-
-
-/******************************************************************************/
-StatusCode
 ByteStreamMetadataTool::beginInputFile(const SG::SourceID&)
-{
-  return this->beginInputFile();
-}
-
-
-/******************************************************************************/
-StatusCode
-ByteStreamMetadataTool::beginInputFile()
 {
   std::set<std::string> keys = keysFromInput();
 
@@ -153,20 +134,6 @@ ByteStreamMetadataTool::keysFromInput() const
 /******************************************************************************/
 StatusCode
 ByteStreamMetadataTool::endInputFile(const SG::SourceID&)
-{
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode
-ByteStreamMetadataTool::endInputFile()
-{
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode
-ByteStreamMetadataTool::metaDataStop(const SG::SourceID&)
 {
   return StatusCode::SUCCESS;
 }

@@ -1,17 +1,14 @@
 
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "sTgcMeasViewAlg.h"
 
-#include <StoreGate/ReadHandle.h>
 #include <StoreGate/WriteHandle.h>
 #include <AthContainers/ConstDataVector.h>
 namespace MuonR4{
-    sTgcMeasViewAlg::sTgcMeasViewAlg(const std::string& name, ISvcLocator* pSvcLocator):
-        AthReentrantAlgorithm{name, pSvcLocator} {}
     
     StatusCode sTgcMeasViewAlg::initialize() {        
         ATH_CHECK(m_readKeyStrip.initialize());
@@ -20,29 +17,14 @@ namespace MuonR4{
         ATH_CHECK(m_writeKey.initialize());
         return StatusCode::SUCCESS;
     }
-    template <class ContainerType>
-        StatusCode sTgcMeasViewAlg::retrieveContainer(const EventContext& ctx, 
-                                                      const SG::ReadHandleKey<ContainerType>& key,
-                                                      const ContainerType*& contToPush) const {
-        contToPush = nullptr;
-        if (key.empty()) {
-            ATH_MSG_VERBOSE("No key has been parsed for object " << typeid(ContainerType).name());
-            return StatusCode::SUCCESS;
-        }
-        SG::ReadHandle<ContainerType> readHandle{key, ctx};
-        ATH_CHECK(readHandle.isPresent());
-        contToPush = readHandle.cptr();
-        return StatusCode::SUCCESS;
-    }
-
-
+    
     StatusCode sTgcMeasViewAlg::execute(const EventContext& ctx) const {
         const xAOD::sTgcStripContainer* strips{nullptr};
         const xAOD::sTgcWireContainer* wires{nullptr};
         const xAOD::sTgcPadContainer* pads{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_readKeyStrip, strips));
-        ATH_CHECK(retrieveContainer(ctx, m_readKeyWire, wires));
-        ATH_CHECK(retrieveContainer(ctx, m_readKeyPad, pads));
+        ATH_CHECK(SG::get(strips, m_readKeyStrip, ctx));
+        ATH_CHECK(SG::get(wires, m_readKeyWire, ctx));
+        ATH_CHECK(SG::get(pads, m_readKeyPad, ctx));
 
         ConstDataVector<xAOD::sTgcMeasContainer> outContainer{SG::VIEW_ELEMENTS};
         if (strips) {

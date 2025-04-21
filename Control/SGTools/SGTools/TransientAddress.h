@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SGTOOLS_TRANSIENTADDRESS_H
@@ -49,6 +49,12 @@ namespace SG {
     ///< Construct from clid, key and IOpaqueAddress
     TransientAddress(CLID id, const std::string& key, 
 		     IOpaqueAddress* addr, bool clearAddress = true);
+
+    ///< Constructor giving full list of symlinked IDs --- used
+    ///  from DataHeaderElement::getAddress().
+    TransientAddress(CLID id, const std::string& key, 
+		     IOpaqueAddress* addr,
+                     const std::vector<CLID>& clids);
 
     TransientAddress (const TransientAddress&);
     TransientAddress (TransientAddress&&);

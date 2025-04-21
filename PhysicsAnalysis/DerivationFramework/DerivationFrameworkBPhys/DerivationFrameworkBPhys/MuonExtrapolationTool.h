@@ -17,7 +17,7 @@
 
 
 namespace DerivationFramework {
-  class MuonExtrapolationTool : public AthAlgTool, public IAugmentationTool {
+  class MuonExtrapolationTool : public extends<AthAlgTool, IAugmentationTool> {
     
   public:  
     MuonExtrapolationTool(const std::string& t, const std::string& n, const IInterface *p);

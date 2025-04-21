@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -78,6 +78,8 @@ def ActsTrackingGeometrySvcCfg(flags,
         extension += "-HGTD"
       if flags.Acts.TrackingGeometry.InsertITkPassiveMaterialLayers:
         extension += "-passiveLayers"
+      if flags.Acts.TrackingGeometry.MaterialFileExtension:
+        extension += "-"+flags.Acts.TrackingGeometry.MaterialFileExtension
       actsTrackingGeometrySvc.UseMaterialMap = True
       actsTrackingGeometrySvc.MaterialMapCalibFolder = flags.Acts.TrackingGeometry.MaterialCalibrationFolder
       actsTrackingGeometrySvc.MaterialMapInputFile = \
@@ -278,4 +280,27 @@ def ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags,
     kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
 
     acc.addCondAlgo(CompFactory.ActsTrk.DetectorElementToActsGeometryIdMappingAlg(name, **kwargs))
+    return acc
+
+def ActsVolumeIdToDetectorCollectionMappingAlgCfg(flags,
+                           name: str = "ActsVolumeIdToDetectorCollectionMappingAlgCfg",
+                           **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    if 'TrackingGeometryTool' not in kwargs :
+      kwargs.setdefault('TrackingGeometryTool',
+                        acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault('ActsVolumeIdToDetectorElementCollectionMap', 'VolumeIdToDetectorElementCollectionMap')
+
+    def filterCollections(flags, pixel_det_el, strip_det_el) :
+      ret=[]
+      if flags.Detector.GeometryITkPixel:
+        ret += [ pixel_det_el ]
+      if flags.Detector.GeometryITkStrip:
+        ret += [ strip_det_el ]
+      return ret
+    kwargs.setdefault('DetectorElementsKeys', filterCollections( flags,
+                                                                 'ITkPixelDetectorElementCollection',
+                                                                 'ITkStripDetectorElementCollection'))
+
+    acc.addCondAlgo(CompFactory.ActsTrk.ActsVolumeIdToDetectorElementCollectionMappingAlg(name, **kwargs))
     return acc

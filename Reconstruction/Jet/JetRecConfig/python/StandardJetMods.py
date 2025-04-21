@@ -237,6 +237,22 @@ stdJetModifiers.update(
                                             "ghost:TausFinal"]
                                    ),
 
+    
+    JetDeltaRInitialLabel =   JetModifier("ParticleJetDeltaRLabelTool","jetdrlabelerinitial_jetptmin",
+                                          createfn=ParticleJetToolsConfig.getJetDeltaRInitialLabelTool,
+                                          prereqs=["ghost:BHadronsInitial",
+                                                   "ghost:CHadronsInitial",
+                                                   "ghost:TausFinal"]
+                                   ),
+
+    
+    JetGhostInitialLabel =    JetModifier("ParticleJetGhostLabelTool","jetghostinitiallabeler",
+                                          createfn=ParticleJetToolsConfig.getJetGhostInitialLabelTool,
+                                          prereqs=["ghost:BHadronsInitial",
+                                                   "ghost:CHadronsInitial",
+                                                   "ghost:TausFinal"]
+                                   ),
+
 
     JetTaggingTruthLabel = JetModifier("JetTaggingTruthLabel", "truthlabeler_{mods}",
                                        filterfn=isMC,

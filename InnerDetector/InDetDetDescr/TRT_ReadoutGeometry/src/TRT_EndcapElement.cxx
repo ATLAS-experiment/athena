@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_ReadoutGeometry/TRT_EndcapElement.h"
@@ -97,7 +97,7 @@ TRT_EndcapElement::setPreviousInZ(const TRT_EndcapElement* element)
 }
 
 HepGeom::Transform3D
-TRT_EndcapElement::calculateStrawTransform(int straw) const
+TRT_EndcapElement::calculateStrawTransform(int straw, GeoAlignmentStore* alignStore) const
 {
   // NB The tranformation to a straw is reconstructed here precisely as
   // it was ... hopefully... in the factory.  One could eliminate this
@@ -112,7 +112,7 @@ TRT_EndcapElement::calculateStrawTransform(int straw) const
     size_t offsetInto = m_descriptor->getStrawTransformOffset();
 
     return Amg::EigenTransformToCLHEP(
-             getMaterialGeom()->getAbsoluteTransform() *
+             getMaterialGeom()->getAbsoluteTransform(alignStore) *
              ((*f)(istraw + offsetInto))) *
            calculateLocalStrawTransform(straw);
     ////return conditions()->solenoidFrame()
@@ -128,7 +128,7 @@ TRT_EndcapElement::calculateStrawTransform(int straw) const
     CLHEP::Hep3Vector pos(
       r * cos(phi),
       r * sin(phi),
-      (Amg::EigenTransformToCLHEP(getMaterialGeom()->getAbsoluteTransform()) *
+      (Amg::EigenTransformToCLHEP(getMaterialGeom()->getAbsoluteTransform(alignStore)) *
        HepGeom::Point3D<double>())
         .z());
     CLHEP::HepRotation rot;
@@ -196,10 +196,10 @@ TRT_EndcapElement::elementSurface() const
 }
 
 void
-TRT_EndcapElement::createSurfaceCache() const
+TRT_EndcapElement::createSurfaceCache(GeoAlignmentStore* alignStore) const
 {
  if (!m_surfaceCache.isValid()) {
-    m_surfaceCache.set(createSurfaceCacheHelper());
+    m_surfaceCache.set(createSurfaceCacheHelper(alignStore));
   }
   // create the surface if needed
   if (!m_surface) {
@@ -208,7 +208,7 @@ TRT_EndcapElement::createSurfaceCache() const
 }
 
 SurfaceCache
-TRT_EndcapElement::createSurfaceCacheHelper() const
+TRT_EndcapElement::createSurfaceCacheHelper(GeoAlignmentStore* alignStore) const
 {
   // Calculate the surface
   double phiCenter = m_descriptor->startPhi() +
@@ -235,9 +235,9 @@ TRT_EndcapElement::createSurfaceCacheHelper() const
   // to get the z axis pointing in the correct direction.
   auto transform =
     m_code.isPosZ()
-      ? Amg::Transform3D((getMaterialGeom()->getAbsoluteTransform() *
+      ? Amg::Transform3D((getMaterialGeom()->getAbsoluteTransform(alignStore) *
                           GeoTrf::RotateZ3D(phiCenter)))
-      : Amg::Transform3D((getMaterialGeom()->getAbsoluteTransform() *
+      : Amg::Transform3D((getMaterialGeom()->getAbsoluteTransform(alignStore) *
                           GeoTrf::RotateY3D(180 * CLHEP::deg) *
                           GeoTrf::RotateZ3D(phiCenter)));
 

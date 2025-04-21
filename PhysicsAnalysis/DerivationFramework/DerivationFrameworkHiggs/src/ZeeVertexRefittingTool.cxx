@@ -31,11 +31,10 @@ namespace DerivationFramework {
   ZeeVertexRefittingTool::ZeeVertexRefittingTool(const std::string& t,
 					   const std::string& n,
 					   const IInterface* p) : 
-    ExpressionParserUser<AthAlgTool>(t, n, p),
+    base_class(t, n, p),
     m_expression("true"),
     m_massCut(0.0)
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("ObjectRequirements", m_expression);  
     declareProperty("LowMassCut", m_massCut);
     declareProperty("MCSamples",m_MCSamples);

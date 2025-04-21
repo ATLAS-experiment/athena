@@ -25,12 +25,15 @@ echo "... analysis on RDO"
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     --evtMax=$RDO_EVT_ANALYSIS \
     --filesInput=$RDO_ANALYSIS \
+    --skipEvents=${SKIP_EVENTS} \
     Output.AODFileName=$xAODOutput \
     Trigger.FPGATrackSim.doEDMConversion=True \
     Trigger.FPGATrackSim.pipeline='F-100' \
     Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
     Trigger.FPGATrackSim.mapsDir=$MAPS_9L \
     Trigger.FPGATrackSim.writeToAOD=True \
+    Trigger.FPGATrackSim.oldRegionDefs=True \
+    Trigger.FPGATrackSim.region=0 \
     Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
     Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root"
 

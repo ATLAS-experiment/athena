@@ -113,6 +113,10 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "CHSGNeutralParticleFlowObjects",
             "TruthParticles",
             "TruthVertices",
+            "JetAssociatedPixelClusters",
+            "JetAssociatedSCTClusters",
+            "PixelClusters",
+            "SCT_Clusters",
     ]
     
     if flags.GeoModel.Run >= LHCPeriod.Run4:
@@ -133,11 +137,6 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     if flags.BTagging.Pseudotrack:
         FTAG1SlimmingHelper.AllVariables += [ "InDetPseudoTrackParticles" ]
 
-    if flags.BTagging.Trackless:
-        FTAG1SlimmingHelper.AllVariables += [
-                "JetAssociatedPixelClusters",
-                "JetAssociatedSCTClusters",
-                ]
 
     # Add additional e/gamma variables
     FTAG1SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent

@@ -81,7 +81,6 @@ class TGCId {
   bool isInner() const;
   bool isForward() const;
   bool isEndcap() const;
-  bool isBackward() const;
 
  public:
   void setSideType(SideType side);

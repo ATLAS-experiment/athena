@@ -22,12 +22,11 @@
 DerivationFramework::SkimmingToolHIGG1::SkimmingToolHIGG1(const std::string& t,
 							    const std::string& n,
 							    const IInterface* p) : 
-  AthAlgTool(t, n, p),
+  base_class(t, n, p),
   m_trigDecisionTool("Trig::TrigDecisionTool/TrigDecisionTool"),
   m_mergedCutTools("")
 {
 
-  declareInterface<DerivationFramework::ISkimmingTool>(this);
 
   declareProperty("RequireGRL",            m_reqGRL           = true);
   declareProperty("ReqireLArError",        m_reqLArError      = true);

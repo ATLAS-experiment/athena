@@ -94,11 +94,15 @@ namespace ActsTrk::detail {
                 const xAOD::UncalibratedMeasurement &uncalibMeas = getUncalibratedMeasurement(sl);
                 if (measurement_to_summary_type.at(to_underlying(uncalibMeas.type())) <  xAOD::numberOfTrackSummaryTypes ) {
                    if (static_cast<unsigned int>(to_underlying(uncalibMeas.type())) < siDetEleColl.size()) {
-                      hit_info_out.addHit(siDetEleColl[to_underlying(uncalibMeas.type())],
-                                          uncalibMeas.identifierHash(),
-                                          (flag.test(Acts::TrackStateFlag::OutlierFlag)
-                                           ? HitSummaryData::Outlier
-                                           : HitSummaryData::Hit));
+                     HitSummaryData::EHitSelection hit_selection = (flag.test(Acts::TrackStateFlag::OutlierFlag)
+                                                                        ? HitSummaryData::Outlier
+                                                                        : HitSummaryData::Hit);
+                     if (flag.test(Acts::TrackStateFlag::SharedHitFlag)) {
+                        hit_selection = HitSummaryData::EHitSelection(hit_selection | HitSummaryData::SharedHit);
+                     }
+                     hit_info_out.addHit(siDetEleColl[to_underlying(uncalibMeas.type())],
+                                         uncalibMeas.identifierHash(),
+                                         hit_selection);
                    }
                 }
                 if (state.calibratedSize()>0 && !flag.test(Acts::TrackStateFlag::OutlierFlag)) {

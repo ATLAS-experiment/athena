@@ -13,7 +13,7 @@
 #include "xAODMetaData/FileMetaData.h"
 
 // Framework includes
-#include "egammaUtils/ShowerDepthTool.h"
+#include "egammaUtils/ShowerDepthUtil.h"
 #include "egammaUtils/egPhotonWrtPoint.h"
 #include "PathResolver/PathResolver.h"
 
@@ -203,8 +203,8 @@ StatusCode PhotonPointingTool::updatePointingAuxdata(const xAOD::EgammaContainer
     float cl_theta = 2.0*atan(exp(-1.0*cluster->eta()));
 
     // Shower depths
-    std::pair<float, float> RZ1 = CP::ShowerDepthTool::getRZ(etas1, 1);
-    std::pair<float, float> RZ2 = CP::ShowerDepthTool::getRZ(etas2, 2);
+    std::pair<float, float> RZ1 = CP::ShowerDepthUtil::getRZ(etas1, 1);
+    std::pair<float, float> RZ2 = CP::ShowerDepthUtil::getRZ(etas2, 2);
 
     // Calo cluster pointing calculation
     double r0_with_beamSpot = d_beamSpot*cos(phis2 - phi_beamSpot);
@@ -261,7 +261,7 @@ StatusCode PhotonPointingTool::updatePointingAuxdata(const xAOD::EgammaContainer
     float conv_z = conv->z();
 
     // Shower depths
-    std::pair<float, float> RZ1 = CP::ShowerDepthTool::getRZ(etas1, 1);
+    std::pair<float, float> RZ1 = CP::ShowerDepthUtil::getRZ(etas1, 1);
 
     // Photon conversion
     double conv_r = hypot(conv_x, conv_y);

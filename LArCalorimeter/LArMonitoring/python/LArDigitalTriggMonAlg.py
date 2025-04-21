@@ -367,6 +367,14 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                            ybins=500, ymin=-5, ymax=5,
                                            pattern=[(part)])
 
+            partGroup_digi.defineHistogram('Digi_part_lb, Digi_part_adc;ADC_vs_LB_'+thisSel,
+                                           title='ADC value vs LB '+selStrPart[thisSel]+'; LB; ADC Value',
+                                           type='TProfile',
+                                           cutmask='Digi_part_'+thisSel,
+                                           path=thisTopPath,
+                                           xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max,
+                                           ybins=500, ymin=0, ymax=5000,
+                                           pattern=[(part)])
 
         #### Plots from SC ET loop 
 

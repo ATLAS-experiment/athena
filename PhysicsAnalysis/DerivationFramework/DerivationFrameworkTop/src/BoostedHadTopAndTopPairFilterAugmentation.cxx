@@ -11,12 +11,11 @@ namespace DerivationFramework {
 
 
 BoostedHadTopAndTopPairFilterAugmentation::BoostedHadTopAndTopPairFilterAugmentation(const std::string& t, const std::string& n, const IInterface* p):
-  AthAlgTool(t,n,p),
+  base_class(t,n,p),
   m_filterTool_High(""),
   m_filterTool_Low("")
 {
 
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
 
     declareProperty("EventInfoName",m_eventInfoName="EventInfo");
     declareProperty("FilterTool_High", m_filterTool_High);

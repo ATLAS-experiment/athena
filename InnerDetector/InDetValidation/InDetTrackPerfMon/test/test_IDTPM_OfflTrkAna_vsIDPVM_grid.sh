@@ -28,9 +28,15 @@ run () {
     name="${1}"
     cmd="${@:2}"
     echo "Running ${name}..."
+    echo -e "\n---> ${name}" >> "${cwd}/commands.log"
+    echo "${cmd}" >> "${cwd}/commands.log"
     time ${cmd}
     rc=$?
     echo "art-result: $rc ${name}"
+    ## if _skipRC is in name skip exit condition
+    if [[ "${name}" =~ "_skipRC" ]]; then
+      return 0
+    fi
     if [ $rc != 0 ]; then
         exit $rc
     fi
@@ -59,7 +65,7 @@ lastref_dir=last_results
 art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
 ls -la "$lastref_dir"
 
-run "dcube-last" \
+run "dcube-last_skipRC" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_last \
     --plotopts=ratio \
@@ -83,11 +89,11 @@ if [ -z "$dcubeXml_IDTPMcmp_absPath" ]; then
     exit 1
 fi
 
-#run "dcube-IDTPMvsIDPVM" \
-$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+run "dcube-IDTPMvsIDPVM_skipRC" \
+  $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_cmp \
     --plotopts=ratio \
     -c ${dcubeXml_IDTPMcmp_absPath} \
     -r idpvm.IDTPMcnv.root \
-    -R 'ref = IDPVM' -M 'mon = IDTPM' \
+    -R 'ref=IDPVM' -M 'mon=IDTPM' \
     IDTPM.HIST.root

@@ -23,7 +23,6 @@ def ITkPixelRDORemappingCfg(flags) :
 def DefectsHistSvcCfg(flags, HistogramGroup: str="PixelDefects", FileName: str='pixel_defects.root') -> ComponentAccumulator:
     acc = ComponentAccumulator()
     if HistogramGroup is not None and len(HistogramGroup) > 0 and FileName is not None and len(FileName) > 0 :
-        print("DEBUG DefectsHistSvcCfg",HistogramGroup,FileName,[f"{HistogramGroup} DATAFILE='{FileName}', OPT='RECREATE'"])
         histSvc = CompFactory.THistSvc(Output = [f"{HistogramGroup} DATAFILE='{FileName}', OPT='RECREATE'"] )
         acc.addService(histSvc)
     return acc

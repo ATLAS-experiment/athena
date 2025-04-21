@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardTransportModel.h"
@@ -207,7 +207,7 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
     abort(); // to keep Coverity happy
   }
   fastStep.ProposePrimaryTrackFinalPosition(postTransportPosition, false); // position in global coordinates
-  fastStep.SetPrimaryTrackFinalMomentum(postTransportMomentum, false);
+  fastStep.ProposePrimaryTrackFinalMomentumDirection(postTransportMomentum, false); // FIXME This only sets the normalised direction of the momentum - possible use ProposePrimaryTrackFinalKineticEnergyAndDirection instead?
   fastStep.KillPrimaryTrack();
 }
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SGTools )
@@ -10,8 +10,7 @@ find_package( Boost COMPONENTS timer)
 atlas_add_library( SGTools
                    src/*.cxx
                    PUBLIC_HEADERS SGTools
-                   LINK_LIBRARIES AthenaKernel CxxUtils GaudiKernel
-                   PRIVATE_LINK_LIBRARIES SGAudCore )
+                   LINK_LIBRARIES AthenaKernel CxxUtils GaudiKernel )
 
 atlas_add_dictionary( SGToolsDict
                       SGTools/SGToolsDict.h

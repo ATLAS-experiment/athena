@@ -17,6 +17,7 @@
 #include "Acts/Utilities/Logger.hpp"
 
 #include "ActsInterop/Logger.h"
+#include "ActsInterop/TableUtils.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 
 #include "src/detail/MeasurementIndex.h"
@@ -65,6 +66,16 @@ namespace ActsTrk
      return StatusCode::SUCCESS;
   }
 
+  StatusCode AmbiguityResolutionAlg::finalize() {
+    ATH_MSG_INFO("Ambiguity Resolution statistics" << std::endl
+                 << makeTable(m_stat,
+                              std::array<std::string, kNStat>{
+                                  "Input tracks",
+                                  "Resolved tracks",
+                                  "Total shared hits"}).columnWidth(10));
+    return StatusCode::SUCCESS;
+ }
+
   StatusCode AmbiguityResolutionAlg::execute(const EventContext &ctx) const
   {
     auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
@@ -72,6 +83,7 @@ namespace ActsTrk
 
     SG::ReadHandle<ActsTrk::TrackContainer> trackHandle = SG::makeHandle(m_tracksKey, ctx);
     ATH_CHECK(trackHandle.isValid());
+    m_stat[kNInputTracks] += trackHandle->size();
 
     Acts::GreedyAmbiguityResolution::State state;
     m_ambi->computeInitialState(*trackHandle, state, &sourceLinkHash,
@@ -81,6 +93,7 @@ namespace ActsTrk
 
     ATH_MSG_DEBUG("Resolved to " << state.selectedTracks.size() << " tracks from "
                   << trackHandle->size());
+    m_stat[kNResolvedTracks] += state.selectedTracks.size();
 
     ActsTrk::MutableTrackContainer solvedTracks;
     solvedTracks.ensureDynamicColumns(*trackHandle);
@@ -99,8 +112,10 @@ namespace ActsTrk
         totalShared += nShared;
       }
     }
-    if (m_countSharedHits)
+    if (m_countSharedHits) {
       ATH_MSG_DEBUG("total number of shared hits = " << totalShared);
+      m_stat[kNSharedHits] += totalShared;
+    }
 
     std::unique_ptr<ActsTrk::TrackContainer> outputTracks = m_resolvedTracksBackendHandles.moveToConst(std::move(solvedTracks), 
        m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);

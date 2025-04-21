@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+
+"""Dump useful ftag metadata
+
+At the moment this is sum of event weights, but other stuff could be added
+"""
+
+_inputs_help = "with no inputs use ASG_TEST_FILE_MC"
+
+import sys
+import os
+from argparse import ArgumentParser
+from pathlib import Path
+
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+from JetTagDerivationUtils.MetadataAlgConfig import MetadataAlgCfg
+
+
+def get_args():
+    parser = ArgumentParser(description=__doc__)
+    parser.add_argument('input_files', nargs='*', help=_inputs_help)
+    parser.add_argument('-o', '--h5-output', type=Path)
+    parser.add_argument('-j', '--json-output', type=Path)
+    parser.add_argument('-m', '--max-events', type=int)
+    parser.add_argument(
+        "-i", "--event-print-interval",
+        type=int, default=500,
+        help="set output frequency")
+    return parser.parse_args()
+
+
+def run():
+
+    args = get_args()
+
+    flags = initConfigFlags()
+    flags.Input.Files = args.input_files or [os.environ['ASG_TEST_FILE_MC']]
+    flags.Exec.EventPrintoutInterval = args.event_print_interval
+    if n := args.max_events:
+        flags.Exec.MaxEvents = args.max_events
+
+    ca = MainServicesCfg(flags)
+    ca.merge(PoolReadCfg(flags))
+
+    outputs = {}
+    if o := args.h5_output:
+        output = CompFactory.H5FileSvc(path=str(o))
+        ca.addService(output)
+        outputs |= dict(h5_output=output)
+    if j := args.json_output:
+        outputs |= dict(json_output=j)
+    ca.merge(MetadataAlgCfg(flags, **outputs))
+
+    return ca.run()
+
+if __name__ == '__main__':
+    rc = run()
+    sys.exit(0 if rc.isSuccess() else 1)

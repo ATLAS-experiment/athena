@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 // This is a general-purpose multi-c-jet filter with the removal of the 
 // c-hadrons orriginating from b-hadrons decay.
@@ -18,25 +18,9 @@
 
 // Other classes used by this class:-
 #include "GaudiKernel/SystemOfUnits.h"
-#include "xAODJet/JetContainer.h"
 #include "CxxUtils/BasicTypes.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "TLorentzVector.h"
-
-
-
-xAODMultiCjetFilter::xAODMultiCjetFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name,pSvcLocator){
-
-  // Local Member Data:-
-
-  m_NPass = 0;
-  m_Nevt = 0;
-  m_SumOfWeights_Pass = 0;
-  m_SumOfWeights_Evt = 0;
-}
-
-xAODMultiCjetFilter::~xAODMultiCjetFilter(){}
 
 StatusCode xAODMultiCjetFilter::filterInitialize() {
 
@@ -45,6 +29,8 @@ StatusCode xAODMultiCjetFilter::filterInitialize() {
   m_SumOfWeights_Pass = 0;
   m_SumOfWeights_Evt = 0;
 
+  CHECK(m_TruthJetContainerName.initialize());
+  CHECK(m_truthPartContKey.initialize());
   ATH_MSG_INFO("Initialized");
   return StatusCode::SUCCESS;
 }
@@ -63,11 +49,9 @@ StatusCode xAODMultiCjetFilter::filterEvent() {
   m_Nevt++;
 
   // Retrieve truth jets
-  const xAOD::JetContainer* truthjetTES = 0;
-  StatusCode sc = evtStore()->retrieve(truthjetTES, m_TruthJetContainerName);
-  if(sc.isFailure() || !truthjetTES) {
-    ATH_MSG_INFO("No xAOD::JetContainer found in TDS " << m_TruthJetContainerName \
-      << sc.isFailure() << " "<<   !truthjetTES );
+  SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName};
+  if (!truthjetTES.isValid()) {
+    ATH_MSG_WARNING("No xAOD::JetContainer with name " << m_TruthJetContainerName.key() << " found in StoreGate!");
     return StatusCode::SUCCESS;
   }
 
@@ -96,20 +80,12 @@ StatusCode xAODMultiCjetFilter::filterEvent() {
 
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
 // duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
-    
   // Make a vector containing all the event's b-hadrons
   std::vector< const xAOD::TruthParticle* > bHadrons;
-
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-      const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
-
+  for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
       if( !MC::isWeaklyDecayingBHadron(part) ) continue;
       if( part->pt() < m_bottomPtMin ) continue;
       if( std::abs( part->abseta() ) > m_bottomEtaMax) continue;
@@ -118,10 +94,7 @@ StatusCode xAODMultiCjetFilter::filterEvent() {
   }
   // Make a vector containing all the event's c-hadrons
   std::vector< const xAOD::TruthParticle* > cHadrons;
-
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-      const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
-
+  for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
       if( !MC::isWeaklyDecayingCHadron(part) ) continue;
       if( part->pt() < m_bottomPtMin ) continue;
       if( std::abs( part->abseta() ) > m_bottomEtaMax) continue;

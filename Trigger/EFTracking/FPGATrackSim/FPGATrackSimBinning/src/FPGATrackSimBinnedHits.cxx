@@ -73,8 +73,8 @@ StatusCode FPGATrackSimBinnedHits::fill(
     const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits) {
   ATH_MSG_DEBUG("In fill");
 
+  int stepnum = 0;
   for (const auto &step : m_bintool->steps()) {
-    int stepnum = 0;
 
     ATH_MSG_DEBUG("fill binning: step num " << stepnum << " " << step->stepName());
     for (auto &bin : step->validBinsFull()) {
@@ -111,8 +111,11 @@ StatusCode FPGATrackSimBinnedHits::fill(
                   m_binnedHitsStep[stepnum][bin.idx()].addHit(storedhit);
                 } 
               } else {
-                storedhit.layer = hit.hitptr->getLayer();
-                m_binnedHitsStep[stepnum][bin.idx()].addHit(storedhit);
+                // TODO is it right to ignore hits that were unmapped?
+                if (hit.hitptr->isMapped()) {
+                  storedhit.layer = hit.hitptr->getLayer();
+                  m_binnedHitsStep[stepnum][bin.idx()].addHit(storedhit);
+                }
               }
             }            
           }

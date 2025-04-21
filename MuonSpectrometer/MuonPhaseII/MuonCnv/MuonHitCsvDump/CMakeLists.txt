@@ -15,7 +15,7 @@ atlas_add_component( MuonHitCsvDump
 atlas_install_python_modules( python/*.py)
 
 atlas_add_test( testCsvDumper
-                SCRIPT python -m MuonHitCsvDump.csvHitDump --nEvents 1 --noSTGC --noMM
+                SCRIPT python -m MuonHitCsvDump.csvHitDump --nEvents 1 --noSTGC 
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)

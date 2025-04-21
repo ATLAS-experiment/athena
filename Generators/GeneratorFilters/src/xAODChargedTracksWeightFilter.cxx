@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
    */
 
 #include "GeneratorFilters/xAODChargedTracksWeightFilter.h"
@@ -10,19 +10,9 @@
 
 using Point = xAODChargedTracksWeightFilter::Spline::Point;
 
-xAODChargedTracksWeightFilter::xAODChargedTracksWeightFilter(const std::string& name, ISvcLocator* pSvcLocator)
-    : GenFilter(name, pSvcLocator)
-{
-    declareProperty("Ptcut", m_Ptmin = 50.0);
-    declareProperty("Etacut", m_EtaRange = 2.5);
-    declareProperty("NchMin", m_nchmin = 0);
-    declareProperty("NchMax", m_nchmax = 20);
-    declareProperty("SplineX", m_weight_fun_x);
-    declareProperty("SplineY", m_weight_fun_y);
-}
-
 StatusCode xAODChargedTracksWeightFilter::filterInitialize() {
 
+    CHECK(m_truthPartContKey.initialize());
     CHECK(m_rndmSvc.retrieve());
 
     if(m_nchmin < 0) m_nchmin = 0;
@@ -32,7 +22,7 @@ StatusCode xAODChargedTracksWeightFilter::filterInitialize() {
         return StatusCode::FAILURE;
     }
 
-    CHECK(m_spline.initialize(m_weight_fun_x, m_weight_fun_y));
+    CHECK(m_spline.initialize(m_weight_fun_x.value(), m_weight_fun_y.value()));
 
     m_min_weight = m_spline.get_minimum(m_nchmin, m_nchmax);
 
@@ -72,13 +62,10 @@ CLHEP::HepRandomEngine* xAODChargedTracksWeightFilter::getRandomEngine(const std
 
 StatusCode xAODChargedTracksWeightFilter::filterEvent() {
 
-  // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
-// duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;   
-  }
+    // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+    // duplicated barcode ones
+    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+    CHECK(xTruthParticleContainer.isValid());
 
     const EventContext& ctx = Gaudi::Hive::currentContext();
     CLHEP::HepRandomEngine* rndmGen = this->getRandomEngine(name(), ctx);
@@ -89,10 +76,8 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent() {
     }
 
     int nChargedTracks = 0;
-    unsigned int nPart = xTruthParticleContainer->size();
-    for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-            const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
-
+    // Loop over all particles in the event
+    for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
             // We only care about stable particles
             if (!part->isGenStable()) continue;
 

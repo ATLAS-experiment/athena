@@ -12,7 +12,7 @@
 #include <MuonPatternHelpers/MdtSegmentFitter.h>
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
 #include "xAODMuonPrepData/RpcStripContainer.h"
-#include <MuonSpacePoint/SpacePointPerLayerSorter.h>
+#include <MuonSpacePoint/SpacePointPerLayerSplitter.h>
 #include <MuonSpacePoint/UtilFunctions.h>
 
 #include <xAODMuonPrepData/RpcMeasurement.h>
@@ -24,6 +24,8 @@
 #include <Math/Minimizer.h>
 
 #include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
+
+#include <format>
 
 namespace MuonR4 {
     using namespace SegmentFit;
@@ -70,9 +72,9 @@ namespace MuonR4 {
     }
     StatusCode SegmentFittingAlg::execute(const EventContext& ctx) const {
         const ActsGeometryContext* gctx{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
+        ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         const SegmentSeedContainer* segmentSeeds=nullptr; 
-        ATH_CHECK(retrieveContainer(ctx, m_seedKey, segmentSeeds));
+        ATH_CHECK(SG::get(segmentSeeds, m_seedKey, ctx));
     
         SG::WriteHandle writeSegments{m_outSegments, ctx};
         ATH_CHECK(writeSegments.record(std::make_unique<SegmentContainer>()));
@@ -128,21 +130,6 @@ namespace MuonR4 {
         ATH_MSG_VERBOSE("Found in total "<<writeSegments->size()<<" segments. ");
         return StatusCode::SUCCESS; 
     }
-
-    template <class ContainerType>
-        StatusCode SegmentFittingAlg::retrieveContainer(const EventContext& ctx, 
-                                                        const SG::ReadHandleKey<ContainerType>& key,
-                                                        const ContainerType*& contToPush) const {
-            contToPush = nullptr;
-            if (key.empty()) {
-                ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
-                return StatusCode::SUCCESS;
-            }
-            SG::ReadHandle readHandle{key, ctx};
-            ATH_CHECK(readHandle.isPresent());
-            contToPush = readHandle.cptr();
-            return StatusCode::SUCCESS;
-        }
 
     SegmentFitResult SegmentFittingAlg::fitSegmentHits(const EventContext& ctx,
                                                        const ActsGeometryContext& gctx,
@@ -216,7 +203,6 @@ namespace MuonR4 {
             }
             seedLines.push_back(drawLabel(std::format("possible seeds: {:d}",  drawMe.numGenerated()), 0.2, 0.85, 14));
             m_visionTool->visualizeSeed(ctx, *patternSeed, "pattern", std::move(seedLines));
-
         }
 
         MdtSegmentSeedGenerator seedGen{name(), patternSeed, std::move(genCfg)};
@@ -274,7 +260,7 @@ namespace MuonR4 {
                                            SegmentFitResult& data) const {
         
         /** If no degree of freedom is in the segment fit then try to plug the holes  */
-        if (data.nDoF<=0 || data.calibMeasurements.empty()) {
+        if (data.nDoF<=0 || data.calibMeasurements.empty() || data.nPrecMeas < m_precHitCut) {
             ATH_MSG_VERBOSE("No degree of freedom available. What shall be removed?!. nDoF: "
                             <<data.nDoF<<", n-meas: "<<data.calibMeasurements);
             return false;
@@ -297,7 +283,7 @@ namespace MuonR4 {
         }
 
         /** Next sort the measurements by chi2 */
-        std::sort(data.calibMeasurements.begin(), data.calibMeasurements.end(),
+        std::ranges::sort(data.calibMeasurements,
                   [&, this](const HitVec::value_type& a, const HitVec::value_type& b){
                     return SegmentFitHelpers::chiSqTerm(segPos, segDir, data.segmentPars[toInt(ParamDefs::time)], std::nullopt, *a, msgStream()) <
                            SegmentFitHelpers::chiSqTerm(segPos, segDir, data.segmentPars[toInt(ParamDefs::time)], std::nullopt, *b, msgStream());
@@ -345,7 +331,7 @@ namespace MuonR4 {
         }
 
         HitVec candidateHits{};
-        SpacePointPerLayerSorter hitLayers{*seed.parentBucket()};
+        SpacePointPerLayerSplitter hitLayers{*seed.parentBucket()};
         bool hasCandidate{false};
         const auto [locPos, locDir] = beforeRecov.makeLine();
         for (const std::vector<HoughHitType>& mdtLayer : hitLayers.mdtHits()) {

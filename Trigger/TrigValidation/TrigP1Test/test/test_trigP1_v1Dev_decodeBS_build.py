@@ -3,7 +3,7 @@
 
 # art-description: Runs athenaHLT writing BS output and then runs BS decoding
 # art-type: build
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps

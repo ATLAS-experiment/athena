@@ -1,15 +1,16 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # can be added as a post include to a Reco_tf
-#   --postInclude "PixelDefectsEmulatorPostInclude.emulateITkPixelDefectsPoisson"
-# or
-#  --postExec "from InDetDefectsEmulation.PixelDefectsEmulatorPostInclude import emulateITkPixelDefects;
-#              emulateITkPixelDefectsPoisson(flags,cfg,HistogramFileName="itk_pixel_defects.root",FrontEndCCDefectProb=1e-1,PixelDefectProb=1e-2,ModuleDefectProb=1e-2,NoiseProb=1e-5,PropagateDefectsToStatus=True);"
+#   --postInclude "PixelDefectsEmulatorPostInclude.emulateITkPixelDefectsDefault"
+# or (with noise 1e-5)
+#  --postExec "from InDetDefectsEmulation.PixelDefectsEmulatorPostInclude import emulateITkPixelDefectsDefault;
+#              emulateITkPixelDefectsDefault(flags,cfg,HistogramFileName='itk_pixel_defects.root',FrontEndCCDefectProb=1e-1,PixelDefectProb=1e-2,ModuleDefectProb=1e-2,CornerDefectProb=15e-2,NoiseProb=1e-5,PropagateDefectsToStatus=True);"
 #   disable histogramming:  HistogramFileName=None
 
 import math
 from InDetDefectsEmulation.StripDefectsEmulatorConfig import (moduleDefect,
-                                                              combineModuleDefects
+                                                              combineModuleDefects,
+                                                              makeCornerDefectParam
                                                               )
 
 def emulateITkPixelDefects(flags,
@@ -19,6 +20,8 @@ def emulateITkPixelDefects(flags,
                            NDefectFractionsPerPattern=[[1.,-1, 1.]],
                            NoiseProbability=[],
                            NoiseShape=[],
+                           CornerDefectParamsPerPattern=[],
+                           NCornerDefectFractionsPerPattern=[],
                            FillHistogramsPerPattern=False,
                            FillEtaPhiHistogramsPerPattern=False,
                            MaxRandomPositionAttempts: int=10,
@@ -37,6 +40,14 @@ def emulateITkPixelDefects(flags,
                                 n-tuple must contain for each group defect probability a non empty set of fractions of exactly 1, ... n defects.
                                 Fractions for different group defects are separated by -1. There should be two sequences of
                                 positive fractions separated by -1.
+    NoiseProbability: Empty or probabilities of a pixel to produce a spurious hit.
+    NoiseShape: binned PDF (i.e. list of fractions) to create tot values for spurious hits.
+    CornerDefectParamsPerPattern: parameters for corner defects per pattern can be created with e.g. makeCornerDefectParam
+    NCornerDefectFractionsPerPattern: fractions of 1,..4 corner defects
+    FillHistogramsPerPattern: if True histograms are filled per module pattern
+    FillEtaPhiHistogramsPerPattern: if True also fill xy, and rz histograms of defects per module.
+    HistogramGroupName: None (disables histogramming) or the histogram group name must be unique
+    HistogramFileName: None (disables histogramming) or a file name for writing the histograms.
     """
 
     from InDetDefectsEmulation.PixelDefectsEmulatorConfig import (
@@ -60,6 +71,8 @@ def emulateITkPixelDefects(flags,
                                                  DefectProbabilities = DefectProbabilities,
                                                  NDefectFractionsPerPattern = NDefectFractionsPerPattern,
                                                  MaxRandomPositionAttempts=MaxRandomPositionAttempts,
+                                                 CornerDefectParamsPerPattern=CornerDefectParamsPerPattern,
+                                                 NCornerDefectFractionsPerPattern=NCornerDefectFractionsPerPattern,
                                                  FillHistogramsPerPattern=FillHistogramsPerPattern,
                                                  FillEtaPhiHistogramsPerPattern=FillEtaPhiHistogramsPerPattern,
                                                  CheckerBoardDefects=False,
@@ -113,7 +126,7 @@ def emulatePixelDefects(flags,
         cfg.merge( DefectsHistSvcCfg(flags, HistogramGroup=HistogramGroupName, FileName=HistogramFileName))
 
     if ModulePatterns is None and DefectProbabilities is None and NDefectFractionsPerPattern is None:
-        a_module_pattern_list, a_prob_list,fractions = combineModuleDefects([
+        a_module_pattern_list, a_prob_list,fractions,ignore_NoiseProbability,ignore_NoiseShape, cornerDefectParam, cornerDefectFractions = combineModuleDefects([
                                          moduleDefect(bec=[-2,-2],layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all modules
                                                       columns_or_strips=[0,9999], # sensors with all kind of numbers of columns
                                                       side_range=[0,0],     # there is only a single side
@@ -133,6 +146,8 @@ def emulatePixelDefects(flags,
                                               ModulePatterns = ModulePatterns,
                                               DefectProbabilities = DefectProbabilities,
                                               NDefectFractionsPerPattern = NDefectFractionsPerPattern,
+                                              CornerDefectParamsPerPattern=cornerDefectParam,
+                                              NCornerDefectFractionsPerPattern=cornerDefectFractions,
                                               FillHistogramsPerPattern=FillHistogramsPerPattern,
                                               FillEtaPhiHistogramsPerPattern=FillEtaPhiHistogramsPerPattern,
                                               # to enable histogramming:
@@ -150,9 +165,9 @@ def emulatePixelDefects(flags,
                                              OutputLevel=INFO))
 
 
-def poissonFractions(cc_defect_prob=1e-1) :
+def poissonFractions(cc_defect_prob=1e-1, max_n=5) :
     """
-    Create fractions for exactly 1..6 defects, under the condition that
+    Create fractions for exactly 1..max_n defects, under the condition that
     the probability for at least one such defects is cc_defect_prob, and
     assuming that the fractions are Poisson distributed.
     """
@@ -163,7 +178,7 @@ def poissonFractions(cc_defect_prob=1e-1) :
             Norm = 1./sum (fractions)
             return [Norm*elm for elm in fractions ]
         expectation=-math.log(1-cc_defect_prob)
-        return norm([ PoissonProb(expectation,i) for i in range(1,6) ])
+        return norm([ PoissonProb(expectation,i) for i in range(1,max_n+1) ])
     else :
         return [1.]
 
@@ -182,12 +197,31 @@ def fractionsForExactlyNCoreColumnDefects(ExactlyNCoreColumnDefects=1) :
     """
     return [ 0. if idx != ExactlyNCoreColumnDefects else 1. for idx in range(1,ExactlyNCoreColumnDefects+1) ]
 
-def makeITkDefectsParams( quad_cc_defect_prob, quad_fractions, circuit_cc_defect_prob, circuit_fractions, pixel_defect_prob=1e-2,module_defect_prob=0.,
-                          noiseProbability=None, noiseShape=[]) :
+def makeITkDefectsParams( quad_cc_defect_prob,
+                          quad_fractions,
+                          circuit_cc_defect_prob,
+                          circuit_fractions,
+                          pixel_defect_prob=1e-2,
+                          module_defect_prob=0.,
+                          cornerDefectProb=0.,
+                          noiseProbability=None,
+                          noiseShape=[]) :
     """
     Create different defects for quads and single chip modules, where the corresponding modules are selected by
     the number of offline columns
     """
+    # corner defects:
+    # - 50% of ~30% of the 3D modules have disconnected corners area 2-4mm x 2-2.5mm,
+    # - roughly circular shape with a sagitta (defined by circle crossing sensor edges) of ~0-2mm,
+    # - impact on all 3D sensors which are all single chip modules i.e. modules with 384 or 400 columns
+    corner_defects=makeCornerDefectParam(probability=cornerDefectProb,
+                                         min_rx=2.,max_rx=8.4,
+                                         min_ry=2.,max_ry=4.5,
+                                         min_sagitta=0.,max_sagitta=2.2)
+    # assume each corner has equal probability to suffer corner defects
+    # Assume number of corners with defects Poisson distributed
+    corner_defect_n_defect_corners=poissonFractions(cc_defect_prob=15e-2, max_n=4)
+
     return combineModuleDefects([
             moduleDefect(bec=[-2,2],layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all modules
                          columns_or_strips=[800,800], # but only quads
@@ -200,7 +234,10 @@ def makeITkDefectsParams( quad_cc_defect_prob, quad_fractions, circuit_cc_defect
                                       ],
                          fractionsOfNDefects=[quad_fractions,[1.]], # dummy fractions for circuit defects
                          noiseProbability=noiseProbability,
-                         noiseShape=noiseShape),
+                         noiseShape=noiseShape,
+                         cornerDefectParam=[], # need empty lists here
+                         cornerDefectNCornerFractions=[] # and here, otherwise resulting property will be non-conform,
+                         ),
             moduleDefect(bec=[-2,2],layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all modules
                          columns_or_strips=[384,384], # but only ring triplet modules
                          side_range=[0,0],     # there is only a single side
@@ -212,7 +249,10 @@ def makeITkDefectsParams( quad_cc_defect_prob, quad_fractions, circuit_cc_defect
                                       ],
                          fractionsOfNDefects=[circuit_fractions,[1.]], # dummy fractions for circuit defects
                          noiseProbability=noiseProbability,
-                         noiseShape=noiseShape),
+                         noiseShape=noiseShape,
+                         cornerDefectParam=corner_defects,
+                         cornerDefectNCornerFractions=corner_defect_n_defect_corners,
+                         ),
             moduleDefect(bec=[-2,2],layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all modules
                          columns_or_strips=[200,200], # but only barrel triplet modules
                          side_range=[0,0],     # there is only a single side
@@ -224,7 +264,10 @@ def makeITkDefectsParams( quad_cc_defect_prob, quad_fractions, circuit_cc_defect
                                     ],
                          fractionsOfNDefects=[circuit_fractions,[1.]], # dummy fractions for circuit defects
                          noiseProbability=noiseProbability,
-                         noiseShape=noiseShape)
+                         noiseShape=noiseShape,
+                         cornerDefectParam=corner_defects,
+                         cornerDefectNCornerFractions=corner_defect_n_defect_corners,
+                         )
         ])
 
 def makeITkPixelNoise(noiseProb=0.) :
@@ -253,8 +296,9 @@ def emulateITkPixelDefectsOneCC(flags,
                                 cfg,
                                 FrontEndCCDefectProb=0.1,
                                 PixelDefectProb=1e-2,
-                                NumberOfCCDefcts=1,
+                                NumberOfCCDefects=1,
                                 ModuleDefectProb=0.,
+                                CornerDefectProb=0.,
                                 NoiseProb=0.,
                                 PropagateDefectsToStatus=True,
                                 HistogramFileName=None) :
@@ -263,16 +307,17 @@ def emulateITkPixelDefectsOneCC(flags,
     by module_prob, and create single pixel defects according to pixel_defect_prob
     """
     noiseProbabilitySingle,noiseShapeSingle = makeITkPixelNoise(NoiseProb)
-    fractions=fractionsForExactlyNCoreColumnDefects(NumberOfCCDefcts)
-    ModulePatterns, DefectProbabilities, NDefectFractionsPerPattern, NoiseProbability, NoiseShape = makeITkDefectsParams(
-        quadProb(FrontEndCCDefectProb),
-        fractions,    # same fractions for quads and other modules
-        FrontEndCCDefectProb,
-        fractions,
-        PixelDefectProb,
-        ModuleDefectProb,
-        noiseProbabilitySingle,
-        noiseShapeSingle)
+    fractions=fractionsForExactlyNCoreColumnDefects(NumberOfCCDefects)
+    ModulePatterns, DefectProbabilities, NDefectFractionsPerPattern, NoiseProbability, NoiseShape,cornerDefectParam,cornerDefectFractions = makeITkDefectsParams(
+        quad_cc_defect_prob=quadProb(FrontEndCCDefectProb),
+        quad_fractions=fractions,    # same fractions for quads and other modules
+        circuit_cc_defect_prob=FrontEndCCDefectProb,
+        circuit_fractions=fractions,
+        pixel_defect_prob=PixelDefectProb,
+        module_defect_prob=ModuleDefectProb,
+        cornerDefectProb=CornerDefectProb,
+        noiseProbability=noiseProbabilitySingle,
+        noiseShape=noiseShapeSingle)
 
     return emulateITkPixelDefects(flags,
                                   cfg,
@@ -281,6 +326,8 @@ def emulateITkPixelDefectsOneCC(flags,
                                   NDefectFractionsPerPattern=NDefectFractionsPerPattern,
                                   NoiseProbability=NoiseProbability,
                                   NoiseShape=NoiseShape,
+                                  CornerDefectParamsPerPattern=cornerDefectParam,
+                                  NCornerDefectFractionsPerPattern=cornerDefectFractions,
                                   FillHistogramsPerPattern=True,
                                   FillEtaPhiHistogramsPerPattern=True,
                                   PropagateDefectsToStatus=PropagateDefectsToStatus,
@@ -292,6 +339,7 @@ def emulateITkPixelDefectsPoisson(flags,
                                   FrontEndCCDefectProb=0.1,
                                   PixelDefectProb=1e-2,
                                   ModuleDefectProb=0.,
+                                  CornerDefectProb=0.,
                                   NoiseProb=0.,
                                   PropagateDefectsToStatus=True,
                                   HistogramFileName=None) :
@@ -302,15 +350,16 @@ def emulateITkPixelDefectsPoisson(flags,
     """
     noiseProbabilitySingle,noiseShapeSingle = makeITkPixelNoise(NoiseProb)
     quad_prob=quadProb(FrontEndCCDefectProb)
-    ModulePatterns, DefectProbabilities, NDefectFractionsPerPattern, NoiseProbability, NoiseShape = makeITkDefectsParams(
-        quad_prob,
-        poissonFractions(quad_prob),
-        FrontEndCCDefectProb,
-        poissonFractions(FrontEndCCDefectProb),
-        PixelDefectProb,
-        ModuleDefectProb,
-        noiseProbabilitySingle,
-        noiseShapeSingle)
+    ModulePatterns, DefectProbabilities, NDefectFractionsPerPattern, NoiseProbability, NoiseShape,cornerDefectParam,cornerDefectFractions = makeITkDefectsParams(
+        quad_cc_defect_prob=quad_prob,
+        quad_fractions=poissonFractions(quad_prob),
+        circuit_cc_defect_prob=FrontEndCCDefectProb,
+        circuit_fractions=poissonFractions(FrontEndCCDefectProb),
+        pixel_defect_prob=PixelDefectProb,
+        module_defect_prob=ModuleDefectProb,
+        cornerDefectProb=CornerDefectProb,
+        noiseProbability=noiseProbabilitySingle,
+        noiseShape=noiseShapeSingle)
 
     return emulateITkPixelDefects(flags,
                                   cfg,
@@ -319,7 +368,30 @@ def emulateITkPixelDefectsPoisson(flags,
                                   NDefectFractionsPerPattern=NDefectFractionsPerPattern,
                                   NoiseProbability=NoiseProbability,
                                   NoiseShape=NoiseShape,
+                                  CornerDefectParamsPerPattern=cornerDefectParam,
+                                  NCornerDefectFractionsPerPattern=cornerDefectFractions,
                                   FillHistogramsPerPattern=True,
                                   FillEtaPhiHistogramsPerPattern=True,
                                   PropagateDefectsToStatus=PropagateDefectsToStatus,
                                   HistogramFileName=HistogramFileName)
+
+def emulateITkPixelDefectsDefault(flags,
+                                  cfg,
+                                  FrontEndCCDefectProb=0.1,
+                                  PixelDefectProb=1e-2,
+                                  ModuleDefectProb=1e-2,
+                                  CornerDefectProb=15e-2,
+                                  NoiseProb=0.,
+                                  PropagateDefectsToStatus=True,
+                                  HistogramFileName=None) :
+    """
+    Enables all defects according to the current expectation.
+    """
+    emulateITkPixelDefectsPoisson(flags,cfg,
+                                  FrontEndCCDefectProb,
+                                  PixelDefectProb,
+                                  ModuleDefectProb,
+                                  CornerDefectProb,
+                                  NoiseProb,
+                                  PropagateDefectsToStatus,
+                                  HistogramFileName)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file GeneratorFilters/TTbarWithJpsimumuFilter.h
@@ -13,31 +13,26 @@
 #define GeneratorFilters_XAODTTbarWithJpsimumuFilter_H
 
 #include "GeneratorModules/GenFilter.h"
-
-#include "xAODTruth/TruthEvent.h"
-#include "xAODTruth/TruthEventContainer.h"
-#include "xAODTruth/TruthParticle.h"
-
+#include "xAODTruth/TruthParticleContainer.h"
 
 class xAODTTbarWithJpsimumuFilter: public GenFilter {
  public:
-  xAODTTbarWithJpsimumuFilter(const std::string& fname, ISvcLocator* pSvcLocator);
-  virtual ~xAODTTbarWithJpsimumuFilter();
-  virtual StatusCode filterInitialize();
-  virtual StatusCode filterFinalize();
-  virtual StatusCode filterEvent();
+  using GenFilter::GenFilter;
+
+  virtual StatusCode filterInitialize() override final;
+  virtual StatusCode filterFinalize() override final;
+  virtual StatusCode filterEvent() override final;
 
  private:
 
   /// properties
-  bool m_selectJpsi;
-  //bool m_useMuonDecay;
-  //bool m_useElectronDecay;
-  double m_JpsiPtMinCut;
-  double m_JpsiEtaMaxCut;
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthPartContKey{this, "TruthParticleContainerKey", "TruthGen"};
+  Gaudi::Property<bool> m_selectJpsi{this, "SelectJpsi", true};
+  Gaudi::Property<double> m_JpsiPtMinCut{this, "JpsipTMinCut", 0.}; /// MeV
+  Gaudi::Property<double> m_JpsiEtaMaxCut{this, "JpsietaMaxCut", 5.};
 
   // method to check if Jpsi decays into pair of leptons
-  bool isLeptonDecay(const xAOD::TruthParticle* part, int type) const;  
+  bool isLeptonDecay(const xAOD::TruthParticle* part, int type) const;
 
   // method to check if Jpsi pass some selection criteria
   bool passJpsiSelection(const xAOD::TruthParticle* part) const;

@@ -87,9 +87,11 @@
 + PhysicsAnalysis/JetTagging/JetTagPerformanceCalibration/CalibrationDataInterface
 + PhysicsAnalysis/JetTagging/JetTagPerformanceCalibration/xAODBTaggingEfficiency
 + PhysicsAnalysis/JetTagging/FlavorTagDiscriminants
++ PhysicsAnalysis/JetTagging/FlavorTagInference
 + PhysicsAnalysis/JetTagging/JetTagConfig
 + PhysicsAnalysis/JetTagging/FlavourTaggingTests
 + PhysicsAnalysis/JetTagging/JetH5Writer
++ PhysicsAnalysis/JetTagging/JetTagDerivationUtils
 + PhysicsAnalysis/MCTruthClassifier
 + PhysicsAnalysis/MuonID/MuonIDAnalysis/.*
 + PhysicsAnalysis/MuonID/MuonSelectorTools
@@ -167,7 +169,6 @@
 + Control/SGComps
 + Control/SGTools
 + Control/StoreGateBindings
-+ Control/SGMon/SGAudCore
 + Control/AthenaBaseComps
 + Control/AthAnalysisBaseComps
 + Control/AthenaCommon

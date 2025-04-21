@@ -35,12 +35,11 @@ namespace DerivationFramework {
 EGTransverseMassTool::EGTransverseMassTool(const std::string& t,
                                            const std::string& n,
                                            const IInterface* p)
-  : ExpressionParserUser<AthAlgTool>(t, n, p)
+  : base_class(t, n, p)
   , m_expression1("true")
   , m_METmin(-999.)
   , m_mass1Hypothesis(0.0)
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
   declareProperty("ObjectRequirements", m_expression1);
   declareProperty("METmin", m_METmin);
   declareProperty("ObjectMassHypothesis", m_mass1Hypothesis);

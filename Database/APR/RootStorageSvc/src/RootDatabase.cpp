@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -17,12 +17,11 @@
 #include "StorageSvc/DbDomain.h"
 #include "POOLCore/DbPrint.h"
 #include "RootUtils/APRDefaults.h"
-#include "RootAuxDynIO/RootAuxDynIO.h"
+#include "RootAuxDynIO/IRootAuxDynIO.h"
 #include "RNTupleWriterHelper.h"
 #include "RootUtils/APRDefaults.h"
 
 #include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ConcurrencyFlags.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IFileMgr.h"
 
@@ -1097,7 +1096,7 @@ DbStatus RootDatabase::fillBranchContainerTrees()
 }
 
 
-RNTupleReader*
+ROOT::RNTupleReader*
 RootDatabase::getNTupleReader(const std::string& ntuple_name)
 {
    // If we already know the reader simply return it
@@ -1108,7 +1107,7 @@ RootDatabase::getNTupleReader(const std::string& ntuple_name)
 
    // If this is the first time, set up the reader
    // If something goes wrong we return a null pointer
-   auto native_reader = m_file ? RNTupleReader::Open(ntuple_name, m_file->GetName()) : nullptr;
+   auto native_reader = m_file ? ROOT::RNTupleReader::Open(ntuple_name, m_file->GetName()) : nullptr;
    if ( native_reader ) {
       if( m_rntReaderMetricsEnabled ) {
          native_reader->EnableMetrics();
@@ -1135,7 +1134,7 @@ RootDatabase::getNTupleWriter(const std::string& ntuple_name, bool create)
 }
 
 
-uint64_t RootDatabase::indexLookup([[maybe_unused]] RNTupleReader* reader, uint64_t idx_val) {
+uint64_t RootDatabase::indexLookup([[maybe_unused]]ROOT::RNTupleReader* reader, uint64_t idx_val) {
    DbPrint log( m_file->GetName() );
    if( m_ntupleIndexMap.find(reader) == m_ntupleIndexMap.end() ) {
       // First access the RNTuple, read and store the index

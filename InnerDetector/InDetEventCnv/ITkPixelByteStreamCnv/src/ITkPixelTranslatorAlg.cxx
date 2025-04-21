@@ -28,7 +28,8 @@ StatusCode ITkPixelTranslatorAlg::execute(const EventContext& ctx) const {
             std::unique_ptr<ITkPixel1RawData> itkrdo = std::make_unique<ITkPixel1RawData>(rdo->identify(), rdo->getWord());
             itkColl->push_back(itkrdo.release());
         }
-        ATH_CHECK(itkpixelrdocontainer->addCollection(itkColl.release(), itkColl->identifyHash()));
+        IdentifierHash hash = itkColl->identifyHash();
+        ATH_CHECK(itkpixelrdocontainer->addCollection(itkColl.release(), hash));
     }
     SG::WriteHandle<ITkPixelRDO_Container> itkRDOContainerHandle(m_itkPixelRDOKey, ctx);
     ATH_CHECK(itkRDOContainerHandle.record(std::move(itkpixelrdocontainer)));

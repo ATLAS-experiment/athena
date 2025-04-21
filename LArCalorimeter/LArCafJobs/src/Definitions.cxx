@@ -9,5 +9,6 @@ using namespace LArSamples;
 
 
 const unsigned int Definitions::nChannels = 195072;
+const unsigned int Definitions::nChannelsSC = 34048;
 const unsigned int Definitions::samplingInterval = 25;
 const double Definitions::none = -DBL_MAX;

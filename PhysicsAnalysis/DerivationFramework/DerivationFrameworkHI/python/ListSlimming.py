@@ -88,6 +88,7 @@ def HION4AllVariablesGeneral():
     variables += ["InDetPixelTrackParticles"]
     variables += ["Photons"]
     variables += ["Electrons"]
+    variables += ["ForwardElectrons"]
     variables += ["AntiKt4HIJets"]
     
     return variables
@@ -239,121 +240,81 @@ def HION4ExtraVariablesEventShape():
 
 def HION5Extravariables():
     variables  = []
-    variables += ["InDetTrackParticles.truthMatchProbability.x.y.z.vx.vy.vz"]
-    variables += ["InDetTrackParticles.numberOfInnermostPixelLayerSplitHits"]
-    variables += ["InDetTrackParticles.numberOfNextToInnermostPixelLayerSplitHits"]
-    variables += ["InDetTrackParticles.numberOfNextToInnermostPixelLayerSharedHits"]
-    variables += ["InDetTrackParticles.numberOfPixelSplitHits"]
-    variables += ["InDetTrackParticles.numberOfInnermostPixelLayerSharedHits"]
-    variables += ["InDetTrackParticles.numberOfContribPixelLayers"]
-    variables += ["InDetTrackParticles.hitPattern.radiusOfFirstHit"]
-    variables += ["InDetTrackParticles.is_selected"]
-    variables += ["InDetTrackParticles.is_associated"]
-    variables += ["InDetTrackParticles.is_svtrk_final"]
-    variables += ["InDetTrackParticles.pt_wrtSV"]
-    variables += ["InDetTrackParticles.eta_wrtSV"]
-    variables += ["InDetTrackParticles.phi_wrtSV"]
-    variables += ["InDetTrackParticles.d0_wrtSV"]
-    variables += ["InDetTrackParticles.z0_wrtSV"]
-    variables += ["InDetTrackParticles.errP_wrtSV"]
-    variables += ["InDetTrackParticles.errd0_wrtSV"]
-    variables += ["InDetTrackParticles.errz0_wrtSV"]
-    variables += ["InDetTrackParticles.chi2_toSV"]
+    variables += [
+        ".".join(["InDetTrackParticles", field]) for field in [
+            "truthMatchProbability.x.y.z.vx.vy.vz",
+            "numberOfInnermostPixelLayerSplitHits",
+            "numberOfNextToInnermostPixelLayerSplitHits",
+            "numberOfNextToInnermostPixelLayerSharedHits",
+            "numberOfPixelSplitHits",
+            "numberOfInnermostPixelLayerSharedHits",
+            "numberOfContribPixelLayers",
+            "hitPattern.radiusOfFirstHit",
+            "is_selected", "is_associated", "is_svtrk_final",
+            "pt_wrtSV", "eta_wrtSV", "phi_wrtSV", "d0_wrtSV", "z0_wrtSV",
+            "errP_wrtSV", "errd0_wrtSV", "errz0_wrtSV",
+            "chi2_toSV",
+            "eProbabilityHT", "eProbabilityComb", "deltaPoverP"
+        ]
+    ] 
 
-    variables += ["PrimaryVertices.neutralWeights"]
-    variables += ["PrimaryVertices.numberDoF"]
-    variables += ["PrimaryVertices.sumPt2"]
-    variables += ["PrimaryVertices.chiSquared"]
-    variables += ["PrimaryVertices.covariance"]
-    variables += ["PrimaryVertices.trackWeights"]
-    variables += ["PrimaryVertices.x.y.trackParticleLinks.vertexType.neutralParticleLinks"]
+    variables += [
+        ".".join(["PrimaryVertices", field]) for field in [
+            "neutralWeights", "numberDoF", "sumPt2", "chiSquared",
+            "covariance", "trackWeights",
+            "x.y.trackParticleLinks.vertexType.neutralParticleLinks"
+        ]
+    ]
 
     variables += ["ExtrapolatedMuonTrackParticles.vx.vy.vz"]
     variables += ["MuonSpectrometerTrackParticles.vx.vy.vz"]
     variables += ["CombinedMuonTrackParticles.vx.vy.vz"]
 
-    variables += ["Electrons.DFCommonElectronsHILHLoose"]
-    variables += ["Electrons.DFCommonElectronsHILHMedium"]
-    variables += ["Electrons.ptcone20"]
-    variables += ["Electrons.ptcone30"]
-    variables += ["Electrons.ptcone40"]
-    variables += ["Electrons.ptvarcone20"]
-    variables += ["Electrons.ptvarcone30"]
-    variables += ["Electrons.ptvarcone40"]
-    variables += ["Electrons.etcone20"]
-    variables += ["Electrons.etcone30"]
-    variables += ["Electrons.etcone40"]
-    variables += ["Electrons.topoetcone20"]
-    variables += ["Electrons.topoetcone30"]
-    variables += ["Electrons.topoetcone40"]
-    variables += ["Electrons.ptvarcone20_TightTTVA_pt500"]
-    variables += ["Electrons.ptvarcone30_TightTTVA_pt500"]
-    variables += ["Electrons.ptvarcone40_TightTTVA_pt500"]
-    variables += ["Electrons.ptvarcone20_TightTTVA_pt1000"]
-    variables += ["Electrons.ptvarcone30_TightTTVA_pt1000"]
-    variables += ["Electrons.ptvarcone40_TightTTVA_pt1000"]
-    variables += ["Electrons.ptvarcone20_TightTTVALooseCone_pt500"]
-    variables += ["Electrons.ptvarcone30_TightTTVALooseCone_pt500"]
-    variables += ["Electrons.ptvarcone40_TightTTVALooseCone_pt500"]
-    variables += ["Electrons.ptvarcone20_TightTTVALooseCone_pt1000"]
-    variables += ["Electrons.ptvarcone30_TightTTVALooseCone_pt1000"]
-    variables += ["Electrons.ptvarcone40_TightTTVALooseCone_pt1000"]
-    variables += ["Electrons.ptcone20_TightTTVA_pt500"]
-    variables += ["Electrons.ptcone30_TightTTVA_pt500"]
-    variables += ["Electrons.ptcone40_TightTTVA_pt500"]
-    variables += ["Electrons.ptcone20_TightTTVA_pt1000"]
-    variables += ["Electrons.ptcone30_TightTTVA_pt1000"]
-    variables += ["Electrons.ptcone40_TightTTVA_pt1000"]
-    variables += ["Electrons.ptcone20_TightTTVALooseCone_pt500"]
-    variables += ["Electrons.ptcone30_TightTTVALooseCone_pt500"]
-    variables += ["Electrons.ptcone40_TightTTVALooseCone_pt500"]
-    variables += ["Electrons.ptcone20_TightTTVALooseCone_pt1000"]
-    variables += ["Electrons.ptcone30_TightTTVALooseCone_pt1000"]
-    variables += ["Electrons.ptcone40_TightTTVALooseCone_pt1000"]
-    variables += ["Electrons.topoetcone20ptCorrection"]
-    variables += ["Electrons.topoetcone30ptCorrection"]
-    variables += ["Electrons.topoetcone40ptCorrection"]
+    variables += [
+        ".".join(["Electrons", field]) for field in [
+            "DFCommonElectronsHILHLoose", "DFCommonElectronsHILHMedium",
+            "ptcone20", "ptcone30", "ptcone40",
+            "ptvarcone20", "ptvarcone30", "ptvarcone40",
+            "etcone20", "etcone30", "etcone40",
+            "topoetcone20", "topoetcone30", "topoetcone40",
+            "ptvarcone20_TightTTVA_pt500", "ptvarcone30_TightTTVA_pt500", "ptvarcone40_TightTTVA_pt500",
+            "ptvarcone20_TightTTVA_pt1000", "ptvarcone30_TightTTVA_pt1000", "ptvarcone40_TightTTVA_pt1000",
+            "ptvarcone20_TightTTVALooseCone_pt500", "ptvarcone30_TightTTVALooseCone_pt500", "ptvarcone40_TightTTVALooseCone_pt500",
+            "ptvarcone20_TightTTVALooseCone_pt1000", "ptvarcone30_TightTTVALooseCone_pt1000", "ptvarcone40_TightTTVALooseCone_pt1000",
+            "ptcone20_TightTTVA_pt500", "ptcone30_TightTTVA_pt500", "ptcone40_TightTTVA_pt500",
+            "ptcone20_TightTTVA_pt1000", "ptcone30_TightTTVA_pt1000", "ptcone40_TightTTVA_pt1000",
+            "ptcone20_TightTTVALooseCone_pt500", "ptcone30_TightTTVALooseCone_pt500", "ptcone40_TightTTVALooseCone_pt500",
+            "ptcone20_TightTTVALooseCone_pt1000", "ptcone30_TightTTVALooseCone_pt1000", "ptcone40_TightTTVALooseCone_pt1000",
+            "topoetcone20ptCorrection", "topoetcone30ptCorrection", "topoetcone40ptCorrection",
+            "deltaPoverP"
+        ]
+    ]
 
-    variables += ["Muons.EnergyLoss.energyLossType"]
-    variables += ["Muons.ptcone20"]
-    variables += ["Muons.ptcone30"]
-    variables += ["Muons.ptcone40"]
-    variables += ["Muons.ptvarcone20"]
-    variables += ["Muons.ptvarcone30"]
-    variables += ["Muons.ptvarcone40"]
-    variables += ["Muons.etcone20"]
-    variables += ["Muons.etcone30"]
-    variables += ["Muons.etcone40"]
-    variables += ["Muons.topoetcone20"]
-    variables += ["Muons.topoetcone30"]
-    variables += ["Muons.topoetcone40"]
-    variables += ["Muons.ptcone20_TightTTVA_pt500"]
-    variables += ["Muons.ptcone30_TightTTVA_pt500"]
-    variables += ["Muons.ptcone40_TightTTVA_pt500"]
-    variables += ["Muons.ptcone20_TightTTVA_pt1000"]
-    variables += ["Muons.ptcone30_TightTTVA_pt1000"]
-    variables += ["Muons.ptcone40_TightTTVA_pt1000"]
-    variables += ["Muons.ptvarcone20_TightTTVA_pt500"]
-    variables += ["Muons.ptvarcone30_TightTTVA_pt500"]
-    variables += ["Muons.ptvarcone40_TightTTVA_pt500"]
-    variables += ["Muons.ptvarcone20_TightTTVA_pt1000"]
-    variables += ["Muons.ptvarcone30_TightTTVA_pt1000"]
-    variables += ["Muons.ptvarcone40_TightTTVA_pt1000"]
-    variables += ["Muons.ptcone20_TightTTVALooseCone_pt500"]
-    variables += ["Muons.ptcone30_TightTTVALooseCone_pt500"]
-    variables += ["Muons.ptcone40_TightTTVALooseCone_pt500"]
-    variables += ["Muons.ptcone20_TightTTVALooseCone_pt1000"]
-    variables += ["Muons.ptcone30_TightTTVALooseCone_pt1000"]
-    variables += ["Muons.ptcone40_TightTTVALooseCone_pt1000"]
-    variables += ["Muons.ptvarcone20_TightTTVALooseCone_pt500"]
-    variables += ["Muons.ptvarcone30_TightTTVALooseCone_pt500"]
-    variables += ["Muons.ptvarcone40_TightTTVALooseCone_pt500"]
-    variables += ["Muons.ptvarcone20_TightTTVALooseCone_pt1000"]
-    variables += ["Muons.ptvarcone30_TightTTVALooseCone_pt1000"]
-    variables += ["Muons.ptvarcone40_TightTTVALooseCone_pt1000"]
+    variables += [
+        ".".join(["Muons", field]) for field in [
+            "EnergyLoss.energyLossType",
+            "ptcone20", "ptcone30", "ptcone40",
+            "ptvarcone20", "ptvarcone30", "ptvarcone40",
+            "etcone20", "etcone30", "etcone40",
+            "topoetcone20", "topoetcone30", "topoetcone40",
+            "ptcone20_TightTTVA_pt500", "ptcone30_TightTTVA_pt500", "ptcone40_TightTTVA_pt500",
+            "ptcone20_TightTTVA_pt1000", "ptcone30_TightTTVA_pt1000", "ptcone40_TightTTVA_pt1000",
+            "ptvarcone20_TightTTVA_pt500", "ptvarcone30_TightTTVA_pt500", "ptvarcone40_TightTTVA_pt500",
+            "ptvarcone20_TightTTVA_pt1000", "ptvarcone30_TightTTVA_pt1000", "ptvarcone40_TightTTVA_pt1000",
+            "ptcone20_TightTTVALooseCone_pt500", "ptcone30_TightTTVALooseCone_pt500", "ptcone40_TightTTVALooseCone_pt500",
+            "ptcone20_TightTTVALooseCone_pt1000", "ptcone30_TightTTVALooseCone_pt1000", "ptcone40_TightTTVALooseCone_pt1000",
+            "ptvarcone20_TightTTVALooseCone_pt500", "ptvarcone30_TightTTVALooseCone_pt500", "ptvarcone40_TightTTVALooseCone_pt500",
+            "ptvarcone20_TightTTVALooseCone_pt1000", "ptvarcone30_TightTTVALooseCone_pt1000", "ptvarcone40_TightTTVALooseCone_pt1000"
+        ]
+    ]
 
-    variables += ["Photons.etcone20.etcone30.etcone40.Loose"]
+    variables += [
+        ".".join(["Photons", field]) for field in [
+            "etcone20.etcone30.etcone40.Loose"
+        ]
+    ]
     
+
     return variables
 
 def HION5AllVariables():
@@ -363,6 +324,8 @@ def HION5AllVariables():
     variables += ["HIEventShape"]
     variables += ["ForwardElectrons"]
     variables += ["ForwardElectronClusters"]
+    variables += ["EventInfo"]
+    variables += ["CaloSums"]
     
     return variables
 
@@ -377,7 +340,13 @@ def HION5SmartCollections():
     variables += ["AntiKt4EMTopoJets"]
     
     return variables
-    
+
+def HION5ExtraContainersTrigger():    
+    variables  = ["HLT_MuonsCB_RoI",
+                  "HLT_MuonsCB_RoIAux.",
+                  "HLT_egamma_Electrons",
+                  "HLT_egamma_ElectronsAux."]
+    return variables    
 
 #################################################################################
 #HION12
@@ -648,7 +617,7 @@ def HION14TruthVariablesGeneral():
 def HION14ContentTruthParticles():
     variables = []
     variables += ["TruthParticles.pdgId"]
-    variables += ["TruthParticles.barcode"]
+    variables += ["TruthParticles.barcode"] # FIXME barcode-based
     variables += ["TruthParticles.m"]
     variables += ["TruthParticles.e"]
     variables += ["TruthParticles.py"]

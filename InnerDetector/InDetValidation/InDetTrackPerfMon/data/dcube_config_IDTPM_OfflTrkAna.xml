@@ -62,10 +62,6 @@
         <hist1D name="offl_chi2OverNdof" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="offl_author" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="offl_time" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="offl_eta_vs_pt" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="offl_eta_vs_phi" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="offl_z0_vs_d0" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="offl_z0sin_vs_d0" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="truth_phi" type="TH1D" plotopts="" tests="KSnorm"/>
@@ -77,11 +73,6 @@
         <hist1D name="truth_prodR" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="truth_prodZ" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="truth_nSiHits" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="truth_nSiHits_vs_eta" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="truth_eta_vs_pt" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="truth_eta_vs_phi" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="truth_z0_vs_d0" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="truth_z0sin_vs_d0" type="TH2F" plotopts="" tests="KSnorm"/>
         <graph name="offl_hasValidTime_eff_vs_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="Multiplicities">
@@ -96,158 +87,104 @@
         <hist1D name="pull_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_pt_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_pt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_pt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_pt_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_pt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_pt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_pt_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_pt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_pt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_pt_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_pt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_pt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_eta_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_eta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_eta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_eta_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_eta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_eta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_eta_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_eta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_eta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_eta_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_eta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_eta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_d0" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_d0" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_d0" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_d0" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_d0_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_d0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_d0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_d0_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_d0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_d0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_d0_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_d0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_d0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_d0_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_d0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_d0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_z0" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_z0" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_z0" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_z0" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_z0_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_z0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_z0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_z0_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_z0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_z0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_z0_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_z0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_z0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_z0_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_z0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_z0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_qoverp" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_qoverp" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_qoverp" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_qoverp" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_qoverp_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_qoverp_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_qoverp_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_qoverp_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_qoverp_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_qoverp_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_qoverp_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_qoverp_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_qoverp_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_qoverp_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_qoverp_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_qoverp_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_ptqopt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_ptqopt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_ptqopt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_ptqopt" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_ptqopt_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_ptqopt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_ptqopt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_ptqopt_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_ptqopt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_ptqopt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_ptqopt_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_ptqopt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_ptqopt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_ptqopt_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_ptqopt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_ptqopt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_theta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_theta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_theta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_theta" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_theta_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_theta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_theta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_theta_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_theta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_theta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_theta_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_theta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_theta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_theta_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_theta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_theta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_phi" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_phi" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_phi" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_phi" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_phi_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_phi_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_phi_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_phi_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_phi_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_phi_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_phi_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_phi_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_phi_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_phi_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_phi_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_phi_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_z0sin" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_z0sin" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_z0sin" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_z0sin" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_z0sin_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_z0sin_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_z0sin_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_z0sin_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_z0sin_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_z0sin_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_z0sin_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_z0sin_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_z0sin_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_z0sin_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_z0sin_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_z0sin_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="Efficiencies">
-        <graph name="eff_vs_offl_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_z0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_eta_vs_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_eta_vs_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_z0_vs_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_z0sin_vs_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_truth_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_truth_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_truth_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
@@ -297,10 +234,6 @@
         <hist1D name="offl_chi2OverNdof" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="offl_author" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="offl_time" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="offl_eta_vs_pt" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="offl_eta_vs_phi" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="offl_z0_vs_d0" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="offl_z0sin_vs_d0" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="truth_phi" type="TH1D" plotopts="" tests="KSnorm"/>
@@ -312,11 +245,6 @@
         <hist1D name="truth_prodR" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="truth_prodZ" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="truth_nSiHits" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="truth_nSiHits_vs_eta" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="truth_eta_vs_pt" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="truth_eta_vs_phi" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="truth_z0_vs_d0" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="truth_z0sin_vs_d0" type="TH2F" plotopts="" tests="KSnorm"/>
         <graph name="offl_hasValidTime_eff_vs_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="Multiplicities">
@@ -331,158 +259,104 @@
         <hist1D name="pull_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_pt_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_pt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_pt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_pt_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_pt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_pt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_pt_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_pt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_pt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_pt_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_pt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_pt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_eta_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_eta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_eta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_eta_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_eta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_eta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_eta_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_eta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_eta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_eta_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_eta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_eta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_d0" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_d0" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_d0" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_d0" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_d0_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_d0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_d0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_d0_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_d0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_d0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_d0_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_d0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_d0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_d0_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_d0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_d0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_z0" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_z0" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_z0" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_z0" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_z0_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_z0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_z0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_z0_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_z0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_z0_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_z0_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_z0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_z0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_z0_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_z0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_z0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_qoverp" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_qoverp" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_qoverp" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_qoverp" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_qoverp_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_qoverp_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_qoverp_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_qoverp_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_qoverp_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_qoverp_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_qoverp_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_qoverp_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_qoverp_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_qoverp_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_qoverp_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_qoverp_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_ptqopt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_ptqopt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_ptqopt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_ptqopt" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_ptqopt_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_ptqopt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_ptqopt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_ptqopt_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_ptqopt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_ptqopt_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_ptqopt_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_ptqopt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_ptqopt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_ptqopt_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_ptqopt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_ptqopt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_theta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_theta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_theta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_theta" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_theta_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_theta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_theta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_theta_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_theta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_theta_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_theta_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_theta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_theta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_theta_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_theta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_theta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_phi" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_phi" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_phi" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_phi" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_phi_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_phi_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_phi_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_phi_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_phi_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_phi_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_phi_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_phi_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_phi_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_phi_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_phi_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_phi_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pull_z0sin" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="res_z0sin" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="sigma_offl_z0sin" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="corr_offl_vs_truth_z0sin" type="TH2F" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_z0sin_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_z0sin_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_z0sin_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_z0sin_vs_truth_pt" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_z0sin_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_z0sin_vs_truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="resHelper_z0sin_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="resolution_z0sin_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="resmean_z0sin_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
-        <hist2D name="pullHelper_z0sin_vs_truth_eta" type="TH2F" plotopts="" tests="KSnorm"/>
         <hist1D name="pullwidth_z0sin_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
         <hist1D name="pullmean_z0sin_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="Efficiencies">
-        <graph name="eff_vs_offl_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_z0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_eta_vs_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_eta_vs_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_z0_vs_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <graph name="eff_vs_offl_z0sin_vs_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_truth_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_truth_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="eff_vs_truth_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>

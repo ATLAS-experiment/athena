@@ -24,9 +24,7 @@
 #include <string>
 namespace DerivationFramework {
 
-class EGPhotonCleaningWrapper
-  : public AthAlgTool
-  , public IAugmentationTool
+class EGPhotonCleaningWrapper : public extends<AthAlgTool, IAugmentationTool>
 {
 public:
   EGPhotonCleaningWrapper(const std::string& t,

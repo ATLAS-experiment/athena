@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -18,27 +18,6 @@ PURPOSE:  Apply cell correction to CaloCellContainer
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloEvent/CaloCell.h"
 #include "CaloIdentifier/CaloCell_ID.h"
-
-
-/////////////////////////////////////////////////////////////////////
-// CONSTRUCTOR:
-/////////////////////////////////////////////////////////////////////
-
-CaloCellContainerCorrectorTool::CaloCellContainerCorrectorTool(
-			     const std::string& type, 
-			     const std::string& name, 
-			     const IInterface* parent)
-  :base_class(type, name, parent),
-   m_cellCorrectionTools(this),
-   m_caloSelection(false) {
-  declareProperty("CaloNums",m_caloNums);
-  declareProperty("CellCorrectionToolNames",m_cellCorrectionTools);
-  m_caloNums.clear();
-  //default: process all calo
-  m_caloNums.push_back( static_cast<int>(CaloCell_ID::NSUBCALO) );
-}
-
-
 
 
 /////////////////////////////////////////////////////////////////////

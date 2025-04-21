@@ -81,6 +81,7 @@ class L1CaloRampMaker : public AthAlgorithm
   
     unsigned int m_nEvent;
     bool m_firstEvent;
+    unsigned int m_nTTs;
   
     const CaloLVL1_ID *m_lvl1Helper;
 
@@ -90,7 +91,8 @@ class L1CaloRampMaker : public AthAlgorithm
     double getTriggerTowerEnergy(const xAOD::TriggerTower* tt, SG::ReadCondHandle<L1CaloPprChanCalibContainer> pprCond);
     double getCaloEnergy(const xAOD::TriggerTower* tt);
     void checkProvenance(const xAOD::TriggerTower* tt);
-  
+
+    bool validTower(const bool& isTile );
 
   // stores coolid vs. number of failed ofc iterations       
   std::map<unsigned int, std::pair<unsigned int, double> > m_mapBadOFCIteration;   

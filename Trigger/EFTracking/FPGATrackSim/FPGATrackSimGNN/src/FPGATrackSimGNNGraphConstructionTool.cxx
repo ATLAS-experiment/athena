@@ -23,6 +23,11 @@ StatusCode FPGATrackSimGNNGraphConstructionTool::initialize()
             loadDoubletModuleMap(); // Load the doublet module map and store entry branches in vectors
         }
     }
+    else if(m_graphTool == "MetricLearning") {
+        ATH_CHECK( m_MLInferenceTool.retrieve() );
+        m_MLInferenceTool->printModelInfo();
+        assert(m_MLFeatureNamesVec.size() == m_MLFeatureScalesVec.size());
+    }
 
     return StatusCode::SUCCESS;
 }
@@ -34,6 +39,9 @@ StatusCode FPGATrackSimGNNGraphConstructionTool::getEdges(const std::vector<std:
 {
     if(m_graphTool == "ModuleMap") {
         doModuleMap(hits, edges);
+    }
+    else if(m_graphTool == "MetricLearning") {
+        doMetricLearning(hits, edges);
     }
 
     return StatusCode::SUCCESS;
@@ -152,12 +160,7 @@ void FPGATrackSimGNNGraphConstructionTool::applyDoubletCuts(const std::shared_pt
     std::shared_ptr<FPGATrackSimGNNEdge> edge = std::make_shared<FPGATrackSimGNNEdge>();
     edge->setEdgeIndex1(hit1_index);
     edge->setEdgeIndex2(hit2_index);
-    edge->setEdgeDR(dr);
-    edge->setEdgeDPhi(dphi);
-    edge->setEdgeDZ(dz);
-    edge->setEdgeDEta(deta);
-    edge->setEdgePhiSlope(phislope);
-    edge->setEdgeRPhiSlope(0.5 * (hit2->getR() + hit1->getR()) * phislope);
+    computeEdgeFeatures(edge, hit1, hit2);
     edges.emplace_back(edge);
 }
 
@@ -188,4 +191,118 @@ float FPGATrackSimGNNGraphConstructionTool::featureSign(float feature)
     if(feature < 0.0) { return -1.0; }
     else if(feature > 0.0) { return 1.0; }
     else { return 0.0; }
+}
+
+void FPGATrackSimGNNGraphConstructionTool::doMetricLearning(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits, std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges)
+{
+    // Use Metric Learning for edge construction 
+    // Clustering properties can be set in the input scripta as Gaudi::Property variables
+    std::vector<float> gNodeFeatures = getNodeFeatures(hits);
+    std::vector<float> gEmbedded = embed(hits);
+    doClustering(hits, edges, gEmbedded);
+}
+
+std::vector<float> FPGATrackSimGNNGraphConstructionTool::getNodeFeatures(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits)
+{
+    std::vector<float> gNodeFeatures;
+    
+    for(auto hit : hits) {
+        std::map<std::string, float> features;
+        features["r"] = hit->getR();
+        features["phi"] = hit->getPhi();
+        features["z"] = hit->getZ();
+
+        for(size_t i = 0; i < m_MLFeatureNamesVec.size(); i++){
+            gNodeFeatures.push_back(
+            features[m_MLFeatureNamesVec[i]] / m_MLFeatureScalesVec[i]);
+        }
+    }
+    return gNodeFeatures;
+}
+
+std::vector<float> FPGATrackSimGNNGraphConstructionTool::embed(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits)
+{
+    // Use the ML network to embed the hits in a 12-dim latent space
+    std::vector<float> gNodeFeatures = getNodeFeatures(hits);
+    std::vector<float> gEmbedded;
+
+    std::vector<Ort::Value> gInputTensor;
+    StatusCode s = m_MLInferenceTool->addInput(gInputTensor, gNodeFeatures, 0, hits.size());
+    std::vector<Ort::Value> gOutputTensor;
+    s = m_MLInferenceTool->addOutput(gOutputTensor, gEmbedded, 0, hits.size());
+    s = m_MLInferenceTool->inference(gInputTensor, gOutputTensor);
+
+    return gEmbedded;
+}
+
+void FPGATrackSimGNNGraphConstructionTool::doClustering(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits, std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges, 
+                                                        std::vector<float> & gEmbedded)
+{
+    // Create graph edges based on the hits distance in the latent space
+    // Creates a directed graph
+    int n_dim = 12;
+    int size = hits.size();
+    float r_squared = m_metricLearningR*m_metricLearningR; 
+    int index1 = 0;
+    int index2 = 0;
+    int count = 0;
+    float distance = 0.;
+    std::vector<float> start(n_dim); 
+
+    // Loop over all hits
+    for(int k = 0; k < size; ++k){
+        count = 0;
+        // Setup current hit
+        for(int j = 0; j < n_dim; ++j){
+            start[j] = gEmbedded[k*n_dim + j];
+        }
+        // Loop over the hits not yet checked 
+        for (int i = k + 1; i < size; ++i){
+            distance = 0.;
+            for(int d = 0; d < n_dim; ++d){
+                distance += (start[d] - gEmbedded[i*n_dim + d]) * (start[d] - gEmbedded[i*n_dim + d]);
+            }
+            // Store edge if the distance between the hits meets is below the limit
+            if(distance < r_squared){
+                std::shared_ptr<FPGATrackSimGNNEdge> edge = std::make_shared<FPGATrackSimGNNEdge>();
+                // Set order of edge indices to make a directed graph
+                float d_i_sq = (hits[i]->getR() * hits[i]->getR()) + (hits[i]->getZ() * hits[i]->getZ());
+                float d_k_sq = (hits[k]->getR() * hits[k]->getR()) + (hits[k]->getZ() * hits[k]->getZ());
+                if (d_i_sq < d_k_sq){ 
+                    index1 = i;
+                    index2 = k;
+                } else {
+                    index1 = k;
+                    index2 = i;
+                }
+                
+                edge->setEdgeIndex1(index1);
+                edge->setEdgeIndex2(index2);
+                computeEdgeFeatures(edge, hits[index1], hits[index2]);
+                edges.emplace_back(edge);
+                ++count;
+            }
+            // Upper limit for connections of the same hit
+            if(count > m_metricLearningMaxN){
+                break;
+            }
+        }
+
+    }
+}
+
+void FPGATrackSimGNNGraphConstructionTool::computeEdgeFeatures(std::shared_ptr<FPGATrackSimGNNEdge>& edge, const std::shared_ptr<FPGATrackSimGNNHit> & hit1, const std::shared_ptr<FPGATrackSimGNNHit> & hit2)
+{
+    float deta = hit1->getEta() - hit2->getEta();
+    float dz = hit2->getZ() - hit1->getZ();
+    float dr = hit2->getR() - hit1->getR();
+    float dphi = P4Helpers::deltaPhi(hit2->getPhi(),hit1->getPhi());
+    float phislope = dr==0. ? 0. : dphi / dr;
+    
+    edge->setEdgeDR(dr);
+    edge->setEdgeDPhi(dphi);
+    edge->setEdgeDZ(dz);
+    edge->setEdgeDEta(deta);
+    edge->setEdgePhiSlope(phislope);
+    edge->setEdgeRPhiSlope(0.5 * (hit2->getR() + hit1->getR()) * phislope);
 }

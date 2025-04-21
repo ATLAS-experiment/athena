@@ -17,12 +17,11 @@ namespace DerivationFramework {
   AugOriginalCounts::AugOriginalCounts(const std::string& t,
                                        const std::string& n,
                                        const IInterface* p) :
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_TrackContainername("InDetTrackParticles"),
     m_TrackContainerLRTname("InDetLargeD0TrackParticles"),
     m_PVContainername("PrimaryVertices")
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
 
     declareProperty("TrackContainer", m_TrackContainername);
     declareProperty("TrackLRTContainer", m_TrackContainerLRTname);

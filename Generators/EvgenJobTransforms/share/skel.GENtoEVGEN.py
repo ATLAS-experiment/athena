@@ -88,7 +88,7 @@ if not hasattr(runArgs, "outputEVNTFile") and not hasattr(runArgs, "outputEVNT_P
 if not hasattr(runArgs, "ecmEnergy"):
     raise RuntimeError("No center of mass energy provided.")
 else:
-    evgenLog.info(' ecmEnergy = ' + str(runArgs.ecmEnergy) )
+    evgenLog.info('ecmEnergy = ' + str(runArgs.ecmEnergy) )
 if not hasattr(runArgs, "randomSeed"):
     raise RuntimeError("No random seed provided.")
     # TODO: or guess it from the JO name??
@@ -513,8 +513,8 @@ else:
 # Propagate DSID and seed to the generators
    include("EvgenJobTransforms/Generate_dsid_ranseed.py")
 
-## Purge unstable particle w/o end vertex occasionally produced by Hijing
-if 'Hijing' in evgenConfig.generators:
+## Purge unstable particle w/o end vertex occasionally produced by Hijing or Herwig
+if 'Hijing' in evgenConfig.generators or 'Herwig7' in evgenConfig.generators:
     fixSeq.FixHepMC.PurgeUnstableWithoutEndVtx = True
 
 ## Propagate debug output level requirement to generators
@@ -859,6 +859,13 @@ excludedNames = ['AthSequencer', 'PyAthena::Alg', 'TestHepMC']
 filterNames = list(set(filterNames) - set(excludedNames))
 print ("MetaData: %s = %s" % ("genFilterNames", ", ".join(filterNames)))
 
+if (hasattr( runArgs, "allowOldFilter") and runArgs.allowOldFilter):
+  for alg in acas.iter_algseq(filtSeq):
+     filtName = alg.getType()
+     exceptName =['xAOD','Jet']
+     if filtName not in excludedNames:
+        if not any(ex in filtName for ex in exceptName):  
+           alg.AllowOldFilter=True
 
 ##==============================================================
 ## Dump evgenConfig so it can be recycled in post-run actions

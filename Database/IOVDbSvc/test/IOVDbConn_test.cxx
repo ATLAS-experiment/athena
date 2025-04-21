@@ -40,7 +40,7 @@ struct IOVDbConnFixture{
   IOVDbConnFixture():msgSvc("msgSvc","test"),
    connectionString("sqlite://;schema=IOVDbConnTest.db;dbname=OFLP200"),
    log(msgSvc.get(), "IOVDbConn_Boost_test"),
-   connection(connectionString, true, log)
+   connection(connectionString, false, log)
   {
     (void)unlink ("IOVDbConnTest.db");
   }
@@ -57,7 +57,7 @@ BOOST_FIXTURE_TEST_SUITE(IOVDbConnTest , GaudiKernelFixture)
       BOOST_TEST(!connection.isActive());//no db active at this point
       cool::IDatabasePtr db=connection.getCoolDb();//db connection or creation
       BOOST_TEST(connection.isActive());
-      BOOST_TEST(connection.isReadOnly());
+      BOOST_TEST(!connection.isReadOnly());
       BOOST_TEST(!connection.aborted());
       BOOST_TEST(connection.nFolders() == 0);
       connection.incUsage();

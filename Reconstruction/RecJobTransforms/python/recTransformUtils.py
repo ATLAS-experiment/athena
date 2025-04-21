@@ -68,6 +68,9 @@ def addStandardRecoFiles(parser):
     parser.add_argument('--outputAOD_SKIMFile', 
                         type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='output'),
                         help='Output skimmed AOD file', group='Reco Files')
+    parser.add_argument("--outputHEPMCFile",
+                        type=trfArgClasses.argFactory(trfArgClasses.argHepEvtAsciiFile, type='hepmc', io='output', runarg=True),
+                        help="Name of HepMC output file", group='Reco Files')
     parser.add_argument('--outputHISTFile', 
                         type=trfArgClasses.argFactory(trfArgClasses.argHISTFile, io='output'), 
                         help='Output DQ monitoring file', group='Reco Files')

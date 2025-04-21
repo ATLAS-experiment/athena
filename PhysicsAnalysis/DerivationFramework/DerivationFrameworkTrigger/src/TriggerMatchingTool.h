@@ -35,8 +35,7 @@ namespace DerivationFramework
    *
    * @author Jon Burr
    */
-  class TriggerMatchingTool final : public AthAlgTool,
-                                    virtual public IAugmentationTool
+  class TriggerMatchingTool final : public extends<AthAlgTool, IAugmentationTool>
   {
   public:
     /// Helper typedefs

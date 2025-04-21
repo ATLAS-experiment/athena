@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "NSWGeoPlottingAlg.h"
 
@@ -21,10 +21,6 @@ using chType = sTgcIdHelper::sTgcChannelTypes;
 
 
 namespace MuonGMR4 {
-NswGeoPlottingAlg::NswGeoPlottingAlg(const std::string& name,
-                                     ISvcLocator* pSvcLocator)
-    : AthHistogramAlgorithm(name, pSvcLocator) {}
-
 
 StatusCode NswGeoPlottingAlg::initialize() {
   ATH_CHECK(m_geoCtxKey.initialize());
@@ -37,9 +33,9 @@ StatusCode NswGeoPlottingAlg::initialize() {
 }
 StatusCode NswGeoPlottingAlg::execute() {
   const EventContext& ctx = Gaudi::Hive::currentContext();
-  SG::ReadHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, ctx};
-  ATH_CHECK(gctxHandle.isPresent());
-  
+  const ActsGeometryContext* gctx{nullptr};
+  ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
+
   std::vector<const MmReadoutElement*> micromegas = m_detMgr->getAllMmReadoutElements();
   for (const MmReadoutElement* mm : micromegas) {
       for (int gasGap = 1; gasGap <= 4; ++ gasGap) {
@@ -59,7 +55,7 @@ StatusCode NswGeoPlottingAlg::execute() {
                      continue;                     
                   }
                   
-                  const Amg::Vector3D globPos = plane.transform(gctxHandle->context()) * locPos;
+                  const Amg::Vector3D globPos = plane.transform(gctx->context()) * locPos;
                   histo->Fill(globPos.x(), globPos.y());
               }
           }
@@ -89,7 +85,7 @@ StatusCode NswGeoPlottingAlg::execute() {
                          continue;                     
                       }
                   
-                      const Amg::Vector3D globPos = plane.transform(gctxHandle->context()) * locPos;
+                      const Amg::Vector3D globPos = plane.transform(gctx->context()) * locPos;
                       histo->Fill(globPos.x(), globPos.y());
                   }
               }

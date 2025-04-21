@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -23,19 +23,11 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-WriteData::WriteData(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator)
-{
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-
 StatusCode WriteData::initialize(){
   ATH_MSG_INFO ("in initialize()");
   //locate the StoreGateSvc and initialize our local ptr
-  StatusCode sc = evtStore().retrieve();
-  if (!sc.isSuccess()) ATH_MSG_ERROR ("Could not find StoreGateSvc");
-  return sc;
+  ATH_CHECK (evtStore().retrieve());
+  return StatusCode::SUCCESS;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
@@ -328,13 +320,6 @@ StatusCode WriteData::execute() {
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-
-StatusCode WriteData::finalize() {
-
-  ATH_MSG_INFO ("in finalize()");
-  return StatusCode::SUCCESS;
-}
-
 
 StatusCode WriteData::onError() {
 

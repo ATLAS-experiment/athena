@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //====================================================================
 //    Root Database Container RNTuple implementation
@@ -10,31 +10,36 @@
 #define POOL_RNTUPLECONTAINER_H 1
 
 // Framework include files
-
-
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbContainerImp.h"
 #include "StorageSvc/DbDatabase.h"
-#include <vector>
+
+#include "RootAuxDynIO/IRootAuxDynIO.h"
+
+#include "ROOT/RNTupleView.hxx"
+
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 // Forward declarations
 class TClass;
-namespace SG { class IAuxStoreIO; }
 namespace RootAuxDynIO { class IRootAuxDynReader; class IRNTupleAuxDynWriter; }
 namespace RootStorageSvc { class RNTupleWriterHelper; }
-namespace ROOT::Experimental { class RNTupleReader; }
 
-#include "ROOT/RNTupleView.hxx"
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
+namespace ROOT { using ROOT::Experimental::RNTupleView; }
+namespace ROOT::Experimental { class RNTupleReader; }
+namespace ROOT { using ROOT::Experimental::RNTupleReader; }
+#else
+namespace ROOT { class RNTupleReader; }
+#endif
+
 /*
  * POOL namespace declaration
  */
 namespace pool {
-
-using ROOT::Experimental::RNTupleReader;
-using ROOT::Experimental::RNTupleView;
 
 // Forward declaration
 class DbColumn;
@@ -54,7 +59,7 @@ class RNTupleContainer : public DbContainerImp
   struct FieldDesc : public DbColumn
   {
     std::string fieldname;
-    std::optional< RNTupleView<void> > view;
+    std::optional< ROOT::RNTupleView<void> > view;
     std::string sgkey;
     TClass*     clazz = nullptr;
     void*       object = nullptr;
@@ -66,13 +71,10 @@ class RNTupleContainer : public DbContainerImp
     // number of rows written to this branch so far
     size_t rows_written = 0;
 
-    /// IOStore interface offset for object type in this branch (for casting)
-    int aux_iostore_IFoffset = -1;
-
     // AuxDyn RNTuple reader (managed by the Database)
     std::unique_ptr<RootAuxDynIO::IRootAuxDynReader> auxdyn_reader;
 
-    // AuxDyn RNTuple writer (managed by the Database)
+    // AuxDyn RNTuple writer
     std::unique_ptr<RootAuxDynIO::IRNTupleAuxDynWriter> auxdyn_writer;
 
     FieldDesc(const DbColumn& c);
@@ -84,13 +86,6 @@ class RNTupleContainer : public DbContainerImp
     FieldDesc& operator=(FieldDesc&& other) = default;
 
     const std::string typeName();
-    bool hasAuxStore() { return aux_iostore_IFoffset >= 0; }
-    SG::IAuxStoreIO* getIOStorePtr() {
-      return (aux_iostore_IFoffset >= 0
-                  ? reinterpret_cast<SG::IAuxStoreIO*>((char*)object +
-                                                       aux_iostore_IFoffset)
-                  : nullptr);
-    }
   };
 
  protected:
@@ -116,7 +111,10 @@ class RNTupleContainer : public DbContainerImp
    RootStorageSvc::RNTupleWriterHelper*     m_ntupleWriter = nullptr;
 
    /// Internal cache of the native RNTupleReader
-   RNTupleReader*       m_ntupleReader{};
+   ROOT::RNTupleReader*       m_ntupleReader{};
+
+   /// Factory object from AuxDynIO plugin that creates AuxDyn readers and writers
+   std::unique_ptr<RootAuxDynIO::IFactoryTool>       m_auxDynTool;
 
  public:
    /// Standard constructor

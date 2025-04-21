@@ -15,7 +15,7 @@ namespace DerivationFramework {
   Bmumu_metadata::Bmumu_metadata(const std::string& t,
 				 const std::string& n,
 				 const IInterface*  p) : 
-    AthAlgTool(t,n,p), BPhysMetadataBase(t,n,p) {
+    BPhysMetadataBase(t,n,p) {
 
     // configuration defaults etc.
     recordPropertyI("verbose", 0);

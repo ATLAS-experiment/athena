@@ -56,12 +56,25 @@ def LArShapeDumperCfg(flags):
         result.merge(TrigDecisionToolCfg(flags))
 
     
-    result.merge(addFolders(flags,'/LAR/ElecCalibOfl/AutoCorrs/AutoCorr<tag>LARElecCalibOflAutoCorrsAutoCorr-RUN2-UPD3-00</tag>','LAR_OFL'))
+    result.merge(addFolders(flags,'/LAR/ElecCalibOfl/AutoCorrs/AutoCorr<tag>LARElecCalibOflAutoCorrsAutoCorr-RUN2-UPD3-00</tag>','LAR_OFL',className='LArAutoCorrComplete'))
     result.getService("IOVDbSvc").overrideTags+=['<prefix>/LAR/ElecCalibOfl/Shape/RTM/5samples1phase</prefix><tag>LARElecCalibOflShapeRTM5samples1phase-RUN2-UPD1-04</tag>']
     # for splashes: FIXME later
     result.getService("IOVDbSvc").overrideTags+=['<prefix>/LAR/ElecCalibOfl/OFC/PhysWave/RTM/4samples3bins17phases</prefix><tag>LARElecCalibOflOFCPhysWaveRTM4samples3bins17phases-RUN2-UPD3-00</tag>']
     result.getService("IOVDbSvc").overrideTags+=['<prefix>/LAR/ElecCalibOfl/Shape/RTM/4samples3bins17phases</prefix><tag>LARElecCalibOflShapeRTM4samples3bins17phases-RUN2-UPD3-00</tag>']
 
+    if(flags.LArShapeDump.digitsKeySC != ""):
+       #Setup cabling
+       from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
+       result.merge(LArOnOffIdMappingSCCfg(flags))
+       from LArBadChannelTool.LArBadChannelConfig import  LArBadChannelCfg
+       result.merge(LArBadChannelCfg(flags,isSC=True))
+       from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
+       result.merge(LArElecCalibDBSCCfg(flags,["Pedestal"]))
+       from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
+       result.merge(LArRawSCDataReadingCfg(flags))
+               
+
+       
     
     print("Dumping flags: ")
     flags.dump()
@@ -78,12 +91,16 @@ def LArShapeDumperCfg(flags):
     dumperAlg.ProblemsToMask=['deadReadout', 'deadPhys','almostDead', 'short',
                               'highNoiseHG','highNoiseMG','highNoiseLG']
     dumperAlg.LArShapeDumperTool=CompFactory.LArShapeDumperTool(DoShape=True)
+    dumperAlg.LArShapeDumperTool=CompFactory.LArShapeDumperTool("LArShapeDumperToolSC",DoShape=False,IsSC=True)
     dumperAlg.FileName=flags.LArShapeDump.outputNtup
     dumperAlg.TriggerNames = flags.LArShapeDump.triggerNames
     dumperAlg.TrigDecisionTool = result.getPublicTool('TrigDecisionTool')
     from LArConfiguration.LArConfigFlags import RawChannelSource 
     if flags.LAr.RawChannelSource == RawChannelSource.Calculated:
        dumperAlg.ChannelsKey = "LArRawChannels_FromDigits"
+
+    dumperAlg.EnergyCutSC = flags.LArShapeDump.energySCCut   
+    dumperAlg.MinADCMaxSC = flags.LArShapeDump.adcSCCut
 
     result.addEventAlgo(dumperAlg)
 

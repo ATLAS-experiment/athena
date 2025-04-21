@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MOOSEGMENTFINDERS_MUOSEGMENTFINDERALGS_H
@@ -21,7 +21,7 @@
 
 class MuonSegmentFinderAlg : public AthReentrantAlgorithm {
 public:
-    MuonSegmentFinderAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual ~MuonSegmentFinderAlg() = default;
 
@@ -135,12 +135,7 @@ private:
     Gaudi::Property<bool> m_removeUsedNswHits{this, "removeUsedNSW", true};
     /// Apply a preselection on the segments
     Gaudi::Property<int> m_segQuality{this, "SegmentQuality", -1};
-    
-    /// load the container from storegate given a ReadHandleKey. If the key is empty
-    /// a nullptr will be returned
-    template <class ContType> StatusCode loadFromStoreGate(const EventContext& ctx,
-                                                           const SG::ReadHandleKey<ContType>& key,
-                                                           const ContType* & cont_ptr) const;
+   
 };
 
 #endif

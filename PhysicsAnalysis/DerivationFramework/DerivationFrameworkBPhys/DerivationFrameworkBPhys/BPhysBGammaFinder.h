@@ -40,7 +40,7 @@ namespace InDet
 
 namespace DerivationFramework {
 	
-class BPhysBGammaFinder : public AthAlgTool, public IAugmentationTool {
+class BPhysBGammaFinder : public extends<AthAlgTool, IAugmentationTool> {
 
     public:
 

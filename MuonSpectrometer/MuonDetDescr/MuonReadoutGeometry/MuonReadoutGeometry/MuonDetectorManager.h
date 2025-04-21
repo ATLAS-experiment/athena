@@ -17,7 +17,7 @@
 #include "GeoModelKernel/GeoVDetectorManager.h"
 #include "MuonAlignmentData/CorrContainer.h"
 #include "MuonAlignmentData/NswAsBuiltDbData.h"
-#include "MuonAlignmentData/sTGCAsBuiltData2.h"
+#include "MuonAlignmentData/sTGCAsBuiltData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 
@@ -146,13 +146,10 @@ namespace MuonGM {
         StatusCode updateCSCInternalAlignmentMap(const ALineContainer& cscIntAline);
 
         void setNswAsBuilt(const NswAsBuiltDbData* nswAsBuiltData);
-        void setsTGCAsBuilt2(const sTGCAsBuiltData2* stgcAsBuilt2);
+        void setsTGCAsBuilt(const sTGCAsBuiltData* stgcAsBuilt);
 #ifndef SIMULATIONBASE
         const NswAsBuilt::StripCalculator* getMMAsBuiltCalculator() const { 
             return  m_nswAsBuilt ? m_nswAsBuilt->microMegaData.get() : nullptr; 
-        }
-        const NswAsBuilt::StgcStripCalculator* getStgcAsBuiltCalculator() const { 
-            return m_nswAsBuilt ? m_nswAsBuilt->sTgcData.get() : nullptr; ; 
         }
 #endif
         /**
@@ -162,8 +159,8 @@ namespace MuonGM {
         static constexpr int NTgcStatTypeOff = -41;
         static constexpr int NTgcStEtaOffset = 5;
 
-        const sTGCAsBuiltData2* getsTGCAsBuilt2() const {
-            return m_stgcAsBuildData2;
+        const sTGCAsBuiltData* getsTGCAsBuilt() const {
+            return m_stgcAsBuildData;
         }
 
         // map the RPC station indices (0-NRpcStatType) back to the RpcIdHelper stationNames
@@ -217,7 +214,7 @@ namespace MuonGM {
 
         
         const NswAsBuiltDbData* m_nswAsBuilt{nullptr};
-        const sTGCAsBuiltData2* m_stgcAsBuildData2 {nullptr};
+        const sTGCAsBuiltData* m_stgcAsBuildData {nullptr};
     
         /// RPC name caches
         std::map<int, int> m_rpcStatToIdx;

@@ -1,14 +1,13 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file PileUpMergeSvc.h
   @brief the preferred mechanism to access information from the different event
   stores in a pileup job.
   @author Paolo Calafiura
-  $Id: PileUpMergeSvc.h,v 1.17 2008-04-19 00:31:09 calaf Exp $
 */
 #ifndef PILEUPTOOLS_PILEUPMERGESVC_H
 #define PILEUPTOOLS_PILEUPMERGESVC_H
@@ -52,7 +51,6 @@ class IToolSvc;
   collections) to be merged attaching sub-evt time offsets 
 
   @author Paolo Calafiura
-  $Id: PileUpMergeSvc.h,v 1.17 2008-04-19 00:31:09 calaf Exp $
 */
 
 class PileUpMergeSvc : public AthService {
@@ -63,7 +61,7 @@ public:
         
   virtual ~PileUpMergeSvc() {}
 
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
 
   ///generate the types of the timed data objects
   template <typename DATA>
@@ -111,10 +109,6 @@ public:
   ///clear bkg event caches from unneeded data objects (as configured using 
   /// PileUpXingFolder CacheRefreshFrequency property)
   StatusCode clearDataCaches();
-
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID();
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface );
 
   /// get EventInfo from SG, by default using p_overStore
   const xAOD::EventInfo* getPileUpEvent( StoreGateSvc* sg,

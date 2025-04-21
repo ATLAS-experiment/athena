@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <stdexcept>
@@ -33,7 +33,7 @@ StripAnnulusDesign::StripAnnulusDesign(const SiDetectorDesign::Axis &stripDirect
 
     double width = m_nStrips * m_pitch;
     double length = m_stripEndRadius - m_stripStartRadius;
-    std::unique_ptr<Trk::SurfaceBounds> m_bounds = std::make_unique<Trk::RectangleBounds>(width / 2.0, length / 2.0); // Awaiting new boundclass for Annulus shape
+    m_bounds = std::make_unique<Trk::RectangleBounds>(width / 2.0, length / 2.0); // Awaiting new boundclass for Annulus shape
 }
 
 Amg::Vector3D StripAnnulusDesign::sensorCenter() const {

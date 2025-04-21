@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_HIGG1D1.py
 # This defines DAOD_HIGG1D1, an unskimmed DAOD format for Run 3.
@@ -59,7 +59,7 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
                             "((abs(TruthParticles.pdgId) ==  6))",                                       # Top quark
                             "((abs(TruthParticles.pdgId) == 22) && (TruthParticles.pt > 1*GeV))",        # Photon
                             "(abs(TruthParticles.pdgId) >=  1000000)",                                   # BSM
-                            "(TruthParticles.status == 1 && TruthParticles.barcode < 200000)"]           # stable particles
+                            "(TruthParticles.isGenStable)"]           # stable particles
         truth_expression = f'({" || ".join(truth_conditions)})'
 
         HIGG1D1GenericTruthThinningTool   = acc.getPrimaryAndMerge(GenericTruthThinningCfg(
@@ -418,11 +418,9 @@ def HIGG1D1Cfg(flags):
                                            "AFPVertexContainer",
                                            "AFPToFTrackContainer"]
     # Add Btagging information
-    from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent,BTaggingXbbContent
+    from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
     HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowCustomVtxJets", flags)
     HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowJets", flags)
-    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowCustomVtxJets", flags)
-    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowJets", flags)
 
     # is this really needed given Photons are in the AllVariables list ?
     from DerivationFrameworkEGamma.PhotonsCPDetailedContent import PhotonsCPDetailedContent

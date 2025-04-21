@@ -12,6 +12,7 @@ xAODForwardProtonFilter = xAODForwardProtonFilter("xAODForwardProtonFilter")
 filtSeq += xAODForwardProtonFilter
 
 # to modiify cuts put into JOs e.g.:
+from AthenaCommon.SystemOfUnits import GeV
 #filtSeq.xAODForwardProtonFilter.xi_min = 0.00
 #filtSeq.xAODForwardProtonFilter.xi_max = 0.20
 #filtSeq.xAODForwardProtonFilter.beam_energy = 6500.*GeV

@@ -153,7 +153,7 @@ class ThresholdDef:
                                               thr=eEMVarThreshold( 'eEM%iVM' % thrV, 'eEM').setIsolation( reta = "Medium", wstot = "Medium", rhad = "Medium" ) )
 
         # jEM
-        jEM_cuts = [25]
+        jEM_cuts = [25, 35]
         for thrV in jEM_cuts:
             jEMThreshold('jEM%i' % thrV, 'jEM').addThrValue(get_threshold_cut('jEM',thrV))
 
@@ -224,7 +224,7 @@ class ThresholdDef:
             ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ%i' % thrV, 'jJ'), pt=max(get_threshold_cut('jJ', thrV),ptMin), shift_set=0, rangemin=0, rangemax=32 )
 
         # jJET central
-        jJ_cuts = [(30,25), (40,25), (50,25), (55,23), (70,23), (80,25), (85,21)]
+        jJ_cuts = [(30,25), (40,25), (50,25), (56,49), (55,23), (70,23), (80,25), (85,21)]
         for thrV, etamax in jJ_cuts:
             ThresholdDef.addJetVaryingThrValues( jJetThreshold( 'jJ%ip0ETA%i'  % (thrV, etamax), 'jJ'), pt=get_threshold_cut('CjJ', thrV), shift_set=0, rangemin=0, rangemax=etamax )
 
@@ -262,7 +262,7 @@ class ThresholdDef:
 
 
         # gLJET (default range)
-        for thrV in [80, 100, 140, 160]:
+        for thrV in [80, 90, 100, 140, 160]:
             ThresholdDef.addJetVaryingThrValues( gLJetThreshold('gLJ%ip0ETA25' % thrV, 'gLJ'), pt=get_threshold_cut('gLJ', thrV), shift_set=0, rangemin=0, rangemax=25)  
 
         # gLJET SPARES

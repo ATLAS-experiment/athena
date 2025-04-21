@@ -30,6 +30,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h" //member
 #include "FPGATrackSimObjects/FPGATrackSimVectors.h" //vector2D
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
+#include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 
 #include "TMatrixDfwd.h"
 #include <string>
@@ -94,6 +95,7 @@ class FPGATrackSimConstGenAlgo : public AthAlgorithm
         // Handles
 
         ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping{this, "FPGATrackSimMappingSvc","FPGATrackSimMappingSvc"};
+        ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel{this,"FPGATrackSimEventSelectionSvc","FPGATrackSimEventSelectionSvc"};
         ServiceHandle<ITHistSvc> m_tHistSvc{this, "THistSvc","THistSvc"};
 
         const FPGATrackSimPlaneMap* m_pmap = nullptr;

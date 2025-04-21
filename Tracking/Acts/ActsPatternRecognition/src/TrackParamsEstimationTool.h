@@ -10,6 +10,10 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ActsInterop/Logger.h"
 
+// ACTS
+#include "Acts/Propagator/Propagator.hpp"
+#include "Acts/Propagator/SympyStepper.hpp"
+
 namespace ActsTrk {
   
   class TrackParamsEstimationTool :
@@ -24,21 +28,22 @@ namespace ActsTrk {
 
     virtual
       std::optional<Acts::BoundTrackParameters>
-      estimateTrackParameters(const EventContext& ctx,
+      estimateTrackParameters(
 			      const ActsTrk::Seed& seed,
+			      bool useTopSp,
 			      const Acts::GeometryContext& geoContext,
 			      const Acts::MagneticFieldContext& magFieldContext,
-			      std::function<const Acts::Surface&(const ActsTrk::Seed&)> retrieveSurface,
-			      bool useTopSp) const override;
+			      std::function<const Acts::Surface&(const ActsTrk::Seed& seed, bool useTopSp)> retrieveSurface) const override;
 
     virtual
       std::optional<Acts::BoundTrackParameters>
-      estimateTrackParameters(const EventContext& ctx,
+      estimateTrackParameters(
 			      const ActsTrk::Seed& seed,
+			      bool useTopSp,
 			      const Acts::GeometryContext& geoContext,
+			      const Acts::MagneticFieldContext& magFieldContext,
 			      const Acts::Surface& surface,
-			      const Acts::Vector3& bField,
-			      bool useTopSp) const override;
+			      const Acts::Vector3& bField) const override;
 
     // *********************************************************************
 
@@ -60,6 +65,21 @@ namespace ActsTrk {
         "Initial relative pT resolution"};
     Gaudi::Property< std::vector<double> > m_initialVarInflation {this, "initialVarInflation", {1., 1., 1., 1., 1., 1.},
         "Inflate tracks"};
+
+    using Stepper = Acts::SympyStepper;
+    using Navigator = Acts::VoidNavigator;
+    using Extrapolator = Acts::Propagator<Stepper>;
+
+    std::optional<Extrapolator> m_extrapolator;
+
+    /// Private access to the logger
+    const Acts::Logger &logger() const
+    {
+      return *m_logger;
+    }
+
+    /// logging instance
+    std::unique_ptr<const Acts::Logger> m_logger;
   };
   
 } // namespace

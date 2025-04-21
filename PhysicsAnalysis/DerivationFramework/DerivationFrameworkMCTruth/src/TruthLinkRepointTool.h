@@ -20,7 +20,7 @@
 
 namespace DerivationFramework {
 
-  class TruthLinkRepointTool : public AthAlgTool, public IAugmentationTool {
+  class TruthLinkRepointTool : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       TruthLinkRepointTool(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthLinkRepointTool();

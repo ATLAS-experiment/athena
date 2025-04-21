@@ -92,7 +92,8 @@ The tool can be used to retrieve scale factors for a specific
    * - ``RecommendationTag``
      - ``std::string``
      - ``"2022-prerec"``
-     
+     - ``"2025-prerec"``
+
 For the default ``RecommendationTag`` "2022-prerec" the following properties
 are available for tool steering:
 
@@ -129,6 +130,39 @@ are available for tool steering:
      - ``std::string``
      - ``"combined"``
      - ``"Ztautau"``, ``"ttbar"``, 
+
+For the ``RecommendationTag`` "2025-prerec" the following properties
+are available for tool steering:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 10 45 35
+
+   * - property name
+     - type
+     - default value
+     - other sensible values
+
+   * - ``Campaign``
+     - ``std::string``
+     - ``""``
+     - ``mc20 (for Run2), mc23 (for Run3)``  
+
+   * - ``EfficiencyCorrectionTypes``
+     - ``std::vector<int>``
+     - ``{SFRecoHadTau, SFJetIDHadTau}``
+     - ``std::vector<int>({SFEleIDHadTau, SFEleIDElectron, SFTriggerHadTau, SFDecayModeHadTau})``
+
+   * - ``JetIDLevel``
+     - ``int``
+     - ``JETIDNONE``
+     - ``JETIDRNNLOOSE``, ``JETIDRNNMEDIUM``, ``JETIDRNNTIGHT``
+
+   * - ``EleIDLevel``
+     - ``int``
+     - ``ELEIDNONE``
+     - ``ELEIDRNNLOOSE``, ``ELEIDRNNMEDIUM``
+     
 
 In addition the following properties are available for further configurations:
      

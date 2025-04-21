@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## Configuration Access to OFFLINE DB (COMP200)
 
@@ -312,7 +312,7 @@ def NswCalibDbAlgCfg(flags, **kwargs):
                        "/MDT/MM/TIME/SIDEC", "/MDT/MM/CHARGE/SIDEC"]
             result.merge( addFolders(flags, folders, detDb=scheme, className='CondAttrListCollection') ) 
             if(kwargs['ReadKey_MM_T0']):
-                result.merge(addFolders(flags, [kwargs['ReadKey_MM_T0']], detDb=scheme, className='CondAttrListCollection' , tag="MmT0SideAc-Nov2023"))
+                result.merge(addFolders(flags, [kwargs['ReadKey_MM_T0']], detDb=scheme, className='CondAttrListCollection' , tag="MmT0SideAC-Feb2025-withTDOCalib-v1"))
             
        
         ## sTGC folders
@@ -328,6 +328,9 @@ def NswCalibDbAlgCfg(flags, **kwargs):
             folders = ["/TGC/NSW/TIME/SIDEA", "/TGC/NSW/CHARGE/SIDEA", \
                        "/TGC/NSW/TIME/SIDEC", "/TGC/NSW/CHARGE/SIDEC"]
             result.merge( addFolders(flags, folders , detDb=scheme, className='CondAttrListCollection') )
+
+            if kwargs["ReadKey_STGC_T0"]:
+                result.merge(addFolders(flags, [kwargs["ReadKey_STGC_T0"]], detDb=scheme, className='CondAttrListCollection'))
     
     result.addCondAlgo(CompFactory.NswCalibDbAlg(**kwargs))
     return result
@@ -391,7 +394,7 @@ def MmDigitEffiCondAlgCfg(flags, **kwargs):
         kwargs["ReadKey"] = ""
     else:
         kwargs.setdefault("ReadKey","/MDT/MM/EFFMAP")
-        acc.merge(addFolders(flags, kwargs["ReadKey"]),"MDT_OFL", className="CondAttrListCollection", tag="MMEffMap_2024DataTillEndOfJuly")
+        acc.merge(addFolders(flags, kwargs["ReadKey"],"MDT_OFL", className="CondAttrListCollection", tag="MMEffMap_2024DataTillEndOfJuly"))
 
     alg = CompFactory.MmDigitEffiCondAlg("MmDigitEffiCondAlg", **kwargs)
     acc.addCondAlgo(alg)
@@ -405,7 +408,7 @@ def sTgcDigitEffiCondAlgCfg(flags, **kwargs):
         kwargs["ReadKey"] = ""
     else:
         kwargs.setdefault("ReadKey","/TGC/NSW/EFFMAP")
-        acc.merge(addFolders(flags, kwargs["ReadKey"]),"TGC_OFL", className="CondAttrListCollection",tag="sTGCEffMap_2024DataTillEndOfJuly")
+        acc.merge(addFolders(flags, kwargs["ReadKey"],"TGC_OFL", className="CondAttrListCollection",tag="sTGCEffMap_2024DataTillEndOfJuly"))
 
     alg = CompFactory.sTgcDigitEffiCondAlg("sTgcDigitEffiCondAlg", **kwargs)
     acc.addCondAlgo(alg)

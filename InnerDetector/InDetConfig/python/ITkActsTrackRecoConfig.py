@@ -105,10 +105,6 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
         
     # Post-Processing
     print('Starting Post-Processing')
-    for currentFlags in scheduledTrackingPasses:
-        # Particle persistification for tracking pass
-        from InDetConfig.ITkActsParticleCreationConfig import ITkActsTrackParticlePersistificationCfg
-        acc.merge(ITkActsTrackParticlePersistificationCfg(currentFlags))
 
     ## ACTS Specific write PRDInfo
     if flags.Tracking.writeExtendedSi_PRDInfo:
@@ -119,6 +115,47 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
         from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
         acc.merge(ITkActsPrepDataToxAODCfg(flags))
 
+        # Create MSOS on final InDetTrackParticles collection
+        from ActsConfig.ActsObjectDecorationConfig import ActsTrackStateOnSurfaceDecoratorAlgCfg
+        acc.merge(ActsTrackStateOnSurfaceDecoratorAlgCfg(flags,
+                                                         name=f"Acts{trackParticleContainerName}StateOnSurfaceDecoratorAlg",
+                                                         TrackParticles=trackParticleContainerName))
+
+    # Run on the specific tracking passes
+    for currentFlags in scheduledTrackingPasses:
+        # Particle persistification for tracking pass
+        from InDetConfig.ITkActsParticleCreationConfig import ITkActsTrackParticlePersistificationCfg
+        acc.merge(ITkActsTrackParticlePersistificationCfg(currentFlags))
+
+        # Create MSOS for the intermediate track particle collections
+        # this may be the CKF and/or the ambi tracks and can only happen if
+        # - storeSiSPSeededTracks for this tracking pass is requested
+        # - storeSeparateContainer for this tracking pass is requested
+        if flags.Tracking.writeExtendedSi_PRDInfo:
+            from ActsConfig.ActsObjectDecorationConfig import ActsTrackStateOnSurfaceDecoratorAlgCfg
+            # CKF tracks are called: SiSPSeededTracks{currentFlags.Tracking.ActiveConfig.extension}TrackParticles
+            if currentFlags.Tracking.ActiveConfig.storeSiSPSeededTracks:
+                TrackParticleCollectionForMsos = f'SiSPSeededTracks{currentFlags.Tracking.ActiveConfig.extension}TrackParticles'
+                acc.merge(ActsTrackStateOnSurfaceDecoratorAlgCfg(flags,
+                                                                 name=f"{TrackParticleCollectionForMsos}StateOnSurfaceDecoratorAlg",
+                                                                 TrackParticles=TrackParticleCollectionForMsos,
+                                                                 PixelMSOSs=f"SiSPSeededITk{currentFlags.Tracking.ActiveConfig.extension}PixelMSOSs",
+                                                                 StripMSOSs=f"SiSPSeededITk{currentFlags.Tracking.ActiveConfig.extension}StripMSOSs"))
+                
+            if currentFlags.Tracking.ActiveConfig.storeSeparateContainer:
+                # track collection can be the CKF or the ambi depending
+                # on the presence of the ambiguity resolution algorithm
+                # but the track particle collection remains the same
+                # name: InDet{currentFlags.Tracking.ActiveConfig.extension}TrackParticles
+                TrackParticleCollectionForMsos = f'InDet{currentFlags.Tracking.ActiveConfig.extension}TrackParticles'
+                acc.merge(ActsTrackStateOnSurfaceDecoratorAlgCfg(flags,
+                                                                 name=f"{TrackParticleCollectionForMsos}StateOnSurfaceDecoratorAlg",
+                                                                 TrackParticles=TrackParticleCollectionForMsos,
+                                                                 PixelMSOSs=f"ITk{currentFlags.Tracking.ActiveConfig.extension}PixelMSOSs",
+                                                                 StripMSOSs=f"ITk{currentFlags.Tracking.ActiveConfig.extension}StripMSOSs"))
+                
+            
+        
     acc.printConfig(withDetails = False, summariseProps = False)
     return acc
 

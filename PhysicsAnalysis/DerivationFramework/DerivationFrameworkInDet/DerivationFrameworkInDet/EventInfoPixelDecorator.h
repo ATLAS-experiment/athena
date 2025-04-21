@@ -23,7 +23,7 @@
 
 namespace DerivationFramework {
 
-  class EventInfoPixelDecorator : public ExpressionParserUser<AthAlgTool>, public IAugmentationTool {
+  class EventInfoPixelDecorator : public extends<ExpressionParserUser<AthAlgTool>, IAugmentationTool> {
     public: 
       EventInfoPixelDecorator(const std::string& type, const std::string& name, const IInterface* parent);
 

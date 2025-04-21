@@ -17,27 +17,37 @@
 #include "Gaudi/PluginService.h"
 
 #include <string>
-#include <vector>
+
+#include "RVersion.h"
 
 class TFile;
 class IFileMgr;
 
 // Import classes from experimental namespace for the time being
-namespace ROOT::Experimental {
-   class RNTupleReader;
-   class RNTupleWriter;
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
+namespace ROOT {
    class RNTupleModel;
+   class RNTupleWriter;
+   class RNTupleReader;
 }
+#else
+namespace ROOT::Experimental {
+   class RNTupleModel;
+   class RNTupleWriter;
+   class RNTupleReader;
+}
+namespace ROOT {
+   using RNTupleModel = ROOT::Experimental::RNTupleModel;
+   using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
+   using RNTupleReader = ROOT::Experimental::RNTupleReader;
+}
+#endif
 
 namespace pool {
 
    class ISession; 
 
    namespace RootCollection {
-
-      using RNTupleReader = ROOT::Experimental::RNTupleReader;
-      using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
-      using RNTupleModel  = ROOT::Experimental::RNTupleModel;
       class Attribute;
       class AttributeSpecification;
 
@@ -117,8 +127,8 @@ namespace pool {
         RNTCollection & operator = (const RNTCollection &) = delete;
     
         void delayedFileOpen(const std::string& method);
-        std::unique_ptr< RNTupleReader > getCollectionRNTuple();
-        void addField(RNTupleModel* model, const std::string& field_name, const std::string& field_type);
+        std::unique_ptr<ROOT::RNTupleReader> getCollectionRNTuple();
+        void addField(ROOT::RNTupleModel* model, const std::string& field_name, const std::string& field_type);
 
         bool fileCatalogRequired() const;
         std::string retrievePFN() const;
@@ -130,9 +140,9 @@ namespace pool {
         void cleanup();
 
         CollectionDescription                m_description;
-        std::unique_ptr< RNTupleReader >     m_reader;
-        std::unique_ptr< RNTupleWriter >     m_rntupleWriter;
-        
+        std::unique_ptr<ROOT::RNTupleReader> m_reader;
+        std::unique_ptr<ROOT::RNTupleWriter> m_rntupleWriter;
+
         std::string                          m_name;
         std::string                          m_fileName;
         ICollection::OpenMode                m_mode;

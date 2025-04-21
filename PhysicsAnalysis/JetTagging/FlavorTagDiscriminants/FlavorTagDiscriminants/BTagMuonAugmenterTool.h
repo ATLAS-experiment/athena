@@ -7,7 +7,7 @@
 #define BTAG_MUON_AUGMENTER_TOOL_H
 
 #include "AsgTools/AsgTool.h"
-#include "FlavorTagDiscriminants/IBTagDecorator.h"
+#include "FlavorTagInference/IBTagDecorator.h"
 
 namespace FlavorTagDiscriminants {
 

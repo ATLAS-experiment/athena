@@ -14,7 +14,7 @@ def jFexEmulatedTowersCfg(flags, name="jFexEmulatedTowerMaker",writeKey="L1_jFex
     
     emulator = CompFactory.LVL1.jFexEmulatedTowers(name)
     emulator.SCell = flags.Trigger.L1.L1CaloSuperCellContainerName 
-    emulator.jTowersWriteKey = writeKey 
+    emulator.jTowersWriteKey = writeKey
     emulator.isDATA = not flags.Input.isMC 
     acc.addEventAlgo(emulator)
 

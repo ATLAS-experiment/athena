@@ -814,9 +814,9 @@ def LLP1Cfg(flags):
     contNames = [ "LRTElectrons", "MuonsLRT" ] 
     acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1", isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1', hasLRT = True))
     contNames = [ MergedMuonContainer, MergedElectronContainer, "Photons" ] 
-    acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1_LRTMerged", isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1', isoDecSuffix = "CloseByCorr_LRT", hasLRT = True))
+    acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1_LRTMerged", isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1', isoDecSuffix = "CloseByCorr_LRT", caloDecSuffix = '_LRT', hasLRT = True))
     contNames = [ "ZeroPixelHitMuons" ]
-    acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1_ZeroPixelHitsMuons", isPhysLite = False, containerNames = contNames, stream_name = 'StreamDAOD_LLP1'))
+    acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1_ZeroPixelHitsMuons", isPhysLite = False, containerNames = contNames, stream_name = 'StreamDAOD_LLP1', isoDecSuffix = "CloseByCorr_ZPH"))
 
     # ============================
     # Define contents of the format
@@ -988,8 +988,9 @@ def LLP1Cfg(flags):
         if flags.Derivation.LLP.saveFullTruth:
             LLP1SlimmingHelper.ExtraVariables += ['TruthParticles', 'TruthVertices']
         StaticContent += ["xAOD::JetContainer#AntiKt10TruthRCJets","xAOD::JetAuxContainer#AntiKt10TruthRCJetsAux.-PseudoJet"]
-
-        StaticContent += ["xAOD::MuonContainer#ZeroPixelHitMuons", "xAOD::MuonAuxContainer#ZeroPixelHitMuonsAux."]
+    
+    # ZeroPixelHitMuons container
+    StaticContent += ["xAOD::MuonContainer#ZeroPixelHitMuons", "xAOD::MuonAuxContainer#ZeroPixelHitMuonsAux."]
 
     from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
         PhotonsCPDetailedContent,

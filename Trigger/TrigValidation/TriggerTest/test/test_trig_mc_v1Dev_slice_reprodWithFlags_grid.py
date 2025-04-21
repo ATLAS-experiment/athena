@@ -3,7 +3,7 @@
 
 # art-description: Compares results of a slice chains when running in full menu and when running alone with other slices disabled by doXYZFlag=False
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-output: *.txt
 # art-output: *.log
@@ -27,20 +27,13 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 def generate_exec_steps(slice_name = None):
     name = slice_name or 'FullMenu'
 
-    from AthenaConfiguration.TestDefaults import defaultConditionsTags
-    conditions = defaultConditionsTags.RUN3_MC
+    from TriggerTest.MCExecStep import MCExecStep
     
     # athena
-    ex = ExecStep.ExecStep(name)
-    ex.type = 'athena'
-    ex.job_options = 'TriggerJobOpts/runHLT.py'
+    ex = MCExecStep(name,menu='Dev_pp_run3_v1',signatures=slice_name)
     ex.input = 'ttbar'
     ex.threads = 1
     ex.max_events = 100
-    ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
-                'IOVDb.GlobalTag="' + conditions + '"']
-    if slice_name:
-        ex.flags += [f'Trigger.enabledSignatures=[\\\"{slice_name}\\\"]']
     # rename histogram file
     hist_file_name = 'expert-monitoring_{:s}.root'.format(name)
     mv = ExecStep.ExecStep('RenameHist' + name)

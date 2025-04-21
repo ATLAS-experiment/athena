@@ -42,7 +42,7 @@ ParticleCaloCellAssociationTool::initialize()
   if (!m_cellContainerName.key().empty()) {
     ATH_CHECK(m_cellContainerName.initialize());
   }
-  
+
   ATH_CHECK(m_caloMgrKey.initialize());
   return StatusCode::SUCCESS;
 }
@@ -107,10 +107,10 @@ ParticleCaloCellAssociationTool::particleCellAssociation(
     // option
     caloExtensionUPtr = std::make_unique<Trk::CaloExtension>(
       caloExtension->caloEntryLayerIntersection()
-        ? caloExtension->caloEntryLayerIntersection()->clone()
+        ? caloExtension->caloEntryLayerIntersection()->uniqueClone()
         : nullptr,
       caloExtension->muonEntryLayerIntersection()
-        ? caloExtension->muonEntryLayerIntersection()->clone()
+        ? caloExtension->muonEntryLayerIntersection()->uniqueClone()
         : nullptr,
       std::vector<Trk::CurvilinearParameters>(
         caloExtension->caloLayerIntersections()));

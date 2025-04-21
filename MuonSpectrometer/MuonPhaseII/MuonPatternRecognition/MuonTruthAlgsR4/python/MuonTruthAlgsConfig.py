@@ -119,6 +119,13 @@ def SdoMultiTruthMakerCfg(flags):
 
     return result
 
+def RecoSegmentTruthAssocCfg(flags, **kwargs):
+    result = ComponentAccumulator()
+    ### Ensure that this configuration is always set externally
+    kwargs.setdefault("SegmentKey", "")
+    the_alg = CompFactory.MuonR4.RecoSegToTruthAssocAlg(**kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
 
 def TruthSegmentToTruthPartAssocCfg(flags, name="MuonTruthSegmentToTruthAssocAlg", **kwargs):
     result = ComponentAccumulator()
@@ -158,9 +165,8 @@ def MuonTruthAlgsCfg(flags):
                      "StoreGateSvc+{cont_name}.simHitLink".format(cont_name = cont_name)) for cont_name in PrimaryMeasContNamesCfg(flags) ]
     result.merge(TruthSegmentMakerCfg(flags, ExtraInputs = PrdLinkInputs))
     result.merge(PrdMultiTruthMakerCfg(flags))
-    from MuonConfig.MuonTruthAlgsConfig import MuonTruthClassificationAlgCfg, MuonTruthHitCountsAlgCfg
-
-    result.merge(MuonTruthClassificationAlgCfg(flags))
+    from MuonConfig.MuonTruthAlgsConfig import TruthMuonMakerAlgCfg, MuonTruthHitCountsAlgCfg
+    result.merge(TruthMuonMakerAlgCfg(flags))
     result.merge(MuonTruthHitCountsAlgCfg(flags))
     #### Disable for the moment because tracking geometry explodes for R4
     ### from MuonConfig.MuonTruthAlgsConfig import MuonTruthAddTrackRecordsAlgCfg

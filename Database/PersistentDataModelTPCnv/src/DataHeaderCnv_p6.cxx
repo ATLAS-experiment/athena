@@ -16,15 +16,13 @@ using FullElement  = DataHeader_p6::FullElement;
 
 //______________________________________________________________________________
 bool DataHeaderCnv_p6::persToElem( const DataHeader_p6* pers, unsigned p_idx,
-                                    DataHeaderElement* trans, const DataHeaderForm_p6& form ) const
+                                    DataHeaderElement* trans, const DataHeaderForm_p6& form,
+                                   bool sameForm ) const
 {
-   delete trans->m_token;  trans->m_token = nullptr;
    int obj_idx = pers->m_shortElements[p_idx];
    if( obj_idx == INT32_MIN ) return true;
 
-   Token* token = new Token;
-   trans->m_token = token;
-   trans->m_ownToken = true;
+   Token& token = trans->m_token;
    unsigned db_idx = 0;
    unsigned long long oid2 = 0;
    if( obj_idx >= 0 ) {
@@ -39,20 +37,25 @@ bool DataHeaderCnv_p6::persToElem( const DataHeader_p6* pers, unsigned p_idx,
 
    if( form.sizeDb() > db_idx ) {
       // Append DbGuid
-      token->setDb(         form.getDbGuid( db_idx ) );
-      token->setTechnology( form.getDbTech( db_idx ) );
+      token.setDb(         form.getDbGuid( db_idx ) );
+      token.setTechnology( form.getDbTech( db_idx ) );
    }
    if( form.sizeObj() > (size_t)obj_idx ) {
-      token->setCont(       form.getObjContainer( obj_idx ) );
-      // Append ClassId
-      token->setClassID(    form.getObjClassId(obj_idx) );
-      token->setOid( Token::OID_t( form.getObjOid1(obj_idx), oid2) );
-      // StoreGate
-      trans->m_key = form.getObjKey( obj_idx );
-      trans->m_alias = form.getObjAlias( obj_idx );
-      trans->m_pClid = form.getObjType( obj_idx );
-      trans->m_clids = form.getObjSymLinks( obj_idx );
-      trans->m_hashes = form.getObjHashes( obj_idx );
+      token.setOid( Token::OID_t( form.getObjOid1(obj_idx), oid2) );
+
+      if (!sameForm) {
+         // If the form hasn't changed, these should all be the same ---
+         // so don't need to copy them again.
+         token.setCont(       form.getObjContainer( obj_idx ) );
+         // Append ClassId
+         token.setClassID(    form.getObjClassId(obj_idx) );
+         // StoreGate
+         trans->m_key = form.getObjKey( obj_idx );
+         trans->m_alias = form.getObjAlias( obj_idx );
+         trans->m_pClid = form.getObjType( obj_idx );
+         trans->m_clids = form.getObjSymLinks( obj_idx );
+         trans->m_hashes = form.getObjHashes( obj_idx );
+      }
    }
    return form.sizeDb() > db_idx and form.sizeObj() > (size_t)obj_idx;
 }
@@ -62,29 +65,40 @@ DataHeader* DataHeaderCnv_p6::createTransient( const DataHeader_p6* pers,
                                                const DataHeaderForm_p6& form,
                                                const Token* dhToken ) const
 {
-   DataHeader* trans = new DataHeader();
+   DataHeader* trans = m_dhQueue.get();
    const unsigned int provSize = pers->m_provenanceSize;
-   trans->m_inputDataHeader.resize(provSize);
    // DataHeaders with a self Reference at the end have the list longer by 1 element
    int selfRefSizeCorrection = (form.version() ==  DataHeaderForm_p6::DHverFormRef? 1 : 0);
    size_t nelts = pers->m_shortElements.size() - provSize;
-   trans->m_dataHeader.resize( nelts );
+   bool sameForm = false;
+   if (!pers->dhFormToken().empty() &&
+       pers->dhFormToken() == trans->dhFormToken() &&
+       trans->m_inputDataHeader.size() == provSize &&
+       trans->m_dataHeader.size() == nelts)
+   {
+     sameForm = true;
+   }
+   else {
+     trans->setDhFormToken (pers->dhFormToken());
+     trans->m_inputDataHeader.resize(provSize);
+     trans->m_dataHeader.resize( nelts );
+   }
 
    // convert all elements - transient vectors need to have the right sizes
    unsigned i = 0;
    for( auto& elem : trans->m_dataHeader ) {
-      persToElem( pers, i++, &elem, form );
+      persToElem( pers, i++, &elem, form, sameForm );
       // Last entry is the self-reference, which is handled below.
       if (i == nelts - selfRefSizeCorrection) break;
    }
    for( auto& elem : trans->m_inputDataHeader ) {
-      persToElem( pers, i++, &elem, form );
+      persToElem( pers, i++, &elem, form, sameForm );
    }
    // Add the self reference
    if (selfRefSizeCorrection > 0) {
      auto& elem = trans->m_dataHeader.back();
      // convert the self ref that was stored at the end of the element list
-     persToElem( pers, i++, &elem, form );
+     persToElem( pers, i++, &elem, form, sameForm );
 
      if( elem.getToken()->contID().find("DataHeader") == std::string::npos ) {
        // discard wrong element
@@ -159,8 +173,8 @@ void DataHeaderCnv_p6::insertDHRef( DataHeader_p6* pers,
                                     const std::string& key, const std::string& tokstr,
                                     DataHeaderForm_p6& form ) const
 {
-   Token* token = new Token();
-   token->fromString( tokstr );
-   DataHeaderElement tEle(ClassID_traits<DataHeader>::ID(), key, token);
+   Token token;
+   token.fromString( tokstr );
+   DataHeaderElement tEle(ClassID_traits<DataHeader>::ID(), key, std::move(token));
    elemToPers( &tEle, pers, form );
 }

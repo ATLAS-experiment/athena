@@ -68,31 +68,17 @@ namespace IDTPM {
         track, "truthParticleLink" );
   }
 
-  /// isFake
-  bool isFakeTruth( const xAOD::TrackParticle& track,
-                    const float truthProbCut,
-                    const bool unlinkedAsFakes )
-  {
-    /// if fakes include unlinked, return true if isUnlinked is true
-    if( unlinkedAsFakes and isUnlinkedTruth( track ) ) return true;
-    float prob = getTruthMatchProb( track );
-    /// returns true if truthMatchProbability deco isn't available or
-    /// if the truth matching probability is below theshold
-    return ( prob < truthProbCut );
-  }
-
-  /// isReconstructable
-  bool isReconstructable( const xAOD::TruthParticle& truth,
-                          const std::vector<unsigned int>& minSilHits,
-                          const std::vector<float>& etaBins)
-  {
-    // Get eta bin
-    float absEta = std::abs(truth.eta());
+  template < typename PARTICLE >
+  unsigned int getEtaBin (const PARTICLE& p, const std::vector<float>& etaBins)  {
+    float absEta = std::abs(p.eta());
     absEta = std::clamp(absEta, etaBins.front(), etaBins.back());
     const auto pVal =  std::lower_bound(etaBins.begin(), etaBins.end(), absEta);
     const unsigned int bin = std::distance(etaBins.begin(), pVal) - 1;
-    return ( nSiHits(truth) >= minSilHits.at( bin ) );
+    return bin;
   }
+  template unsigned int getEtaBin < xAOD::TruthParticle >(const xAOD::TruthParticle& truth, const std::vector<float>& etaBins);
+  template unsigned int getEtaBin < xAOD::TrackParticle >(const xAOD::TrackParticle& track, const std::vector<float>& etaBins);
+
 
   /// getVertexTracksAndWeights
   bool getVertexTracksAndWeights( const xAOD::Vertex& vtx,

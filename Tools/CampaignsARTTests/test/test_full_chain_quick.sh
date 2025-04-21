@@ -5,7 +5,7 @@
 # art-type: grid
 # art-include: main/Athena
 # art-output: *.root
-# art-athena-mt: 4
+# art-athena-mt: 8
 
 file=test_full_chain_mu0.sh
 script="`basename \"$0\"`"

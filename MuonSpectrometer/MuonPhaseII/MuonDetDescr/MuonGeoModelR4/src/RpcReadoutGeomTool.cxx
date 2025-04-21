@@ -24,10 +24,6 @@
 #   include "Acts/Surfaces/TrapezoidBounds.hpp"
 #endif
 
-namespace {
-    constexpr double tolerance = 0.001 * Gaudi::Units::mm;
-}
-
 using namespace CxxUtils;
 using namespace ActsTrk;
 

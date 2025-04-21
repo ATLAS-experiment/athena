@@ -253,7 +253,7 @@ Surface::owner() const
 }
 
 inline void
-Surface::setMaterialLayer(std::shared_ptr<Layer> mlay)
+Surface::setMaterialLayer(const std::shared_ptr<Layer>& mlay)
 {
   m_materialLayer = mlay;
 }

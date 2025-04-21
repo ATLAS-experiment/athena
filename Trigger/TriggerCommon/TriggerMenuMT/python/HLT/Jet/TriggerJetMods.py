@@ -14,9 +14,9 @@ def getTrkAugNNJvtTool(jetdef, modspec):
         VertexContainer = jetdef._cflags.Jet.Context[modspec or jetdef.context]["Vertices"],
         SuppressInputDependence = True,
         UseTrkAugNN = True,
-        NNConfigDir = "JetPileupTag/NNJvt/HLT-2025-02-05",
-        NNParamFile = "TrkAugNNJVT.Network.graph.HLT.json",
-        NNCutFile = "TrkAugNNJVT.Cuts.HLT.json",
+        TrkAugNNConfigDir = "JetPileupTag/NNJvt/HLT-2025-02-05",
+        TrkAugNNParamFile = "TrkAugNNJVT.Network.graph.HLT.json",
+        TrkAugNNCutFile = "TrkAugNNJVT.Cuts.HLT.json",
     )
     return nnjvt_trkaug
 

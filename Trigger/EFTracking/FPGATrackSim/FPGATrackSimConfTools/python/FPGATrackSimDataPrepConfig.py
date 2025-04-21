@@ -61,7 +61,7 @@ def getBaseName(flags):
     else:
         if (flags.Trigger.FPGATrackSim.region >= 1280 or flags.Trigger.FPGATrackSim.region < 0): return 'default'
         else:
-            return str(flags.Trigger.FPGATrackSim.region)
+            return "region"+str(flags.Trigger.FPGATrackSim.region)
 
 def getPhiRange(flags):
     if (flags.Trigger.FPGATrackSim.oldRegionDefs):
@@ -276,8 +276,10 @@ def FPGATrackSimMappingCfg(flags):
     mappingSvc.pmap = flags.Trigger.FPGATrackSim.mapsDir+"/"+getBaseName(flags)+".pmap"
     mappingSvc.modulemap = flags.Trigger.FPGATrackSim.mapsDir+"/moduleidmap"
     mappingSvc.radiiFile = flags.Trigger.FPGATrackSim.mapsDir + "/"+getBaseName(flags)+"_radii.txt"
-    mappingSvc.FakeNNonnx = flags.Trigger.FPGATrackSim.FakeNNonnxFile
-    mappingSvc.ParamNNonnx = flags.Trigger.FPGATrackSim.ParamNNonnxFile
+    mappingSvc.FakeNNonnx1st = flags.Trigger.FPGATrackSim.FakeNNonnxFile1st
+    mappingSvc.FakeNNonnx2nd = flags.Trigger.FPGATrackSim.FakeNNonnxFile2nd
+    mappingSvc.ParamNNonnx1st = flags.Trigger.FPGATrackSim.ParamNNonnxFile1st
+    mappingSvc.ParamNNonnx2nd = flags.Trigger.FPGATrackSim.ParamNNonnxFile2nd
     mappingSvc.ExtensionNNVolonnx = flags.Trigger.FPGATrackSim.ExtensionNNVolonnxFile
     mappingSvc.ExtensionNNHitonnx = flags.Trigger.FPGATrackSim.ExtensionNNHitonnxFile
     mappingSvc.layerOverride = []
@@ -483,15 +485,18 @@ def runDataPrepChain():
     from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
     OnlyTrackingPreInclude(flags)
     
-    ############################################
-
-    # ensure that the offline xAOD/ACTS SP and cluster containers are available for DataPrep and FastTrack
-    flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
-    flags.Tracking.ITkMainPass.doAthenaSpacePoint=True
+    ############################################    
+    # ensure that the xAOD SP and cluster containers are available
     flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
+    flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
+    from TrkConfig.TrkConfigFlags import TrackingComponent
+    flags.Tracking.recoChain = [TrackingComponent.ActsChain] # another viable option is TrackingComponent.AthenaChain
+    flags.Acts.doRotCorrection = False
     
     ############################################
     flags.Concurrency.NumThreads=1
+    flags.Concurrency.NumConcurrentEvents=1
+    flags.Concurrency.NumProcs=0
     flags.Scheduler.ShowDataDeps=False
     flags.Scheduler.CheckDependencies=True
     flags.Debug.DumpEvtStore=False # Set to Truth to enable Event Store printouts
@@ -532,23 +537,30 @@ def runDataPrepChain():
             acc.merge(InDetTrackRecoCfg(flags))
             from InDetConfig.InDetPrepRawDataToxAODConfig import TruthParticleIndexDecoratorAlgCfg
             acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
+            from InDetConfig.InDetPrepRawDataFormationConfig import ITkXAODToInDetClusterConversionCfg
+            acc.merge(ITkXAODToInDetClusterConversionCfg(flags))
    
 
     # Use the imported configuration function for the data prep algorithm.
     acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
 
     if flags.Trigger.FPGATrackSim.doEDMConversion:
-        acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg', stage = '_1st', doActsTrk=False, doSP = True))
+        acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg', stage = '_1st', doActsTrk=False, doSP = False))
+        
+        # convert Pixel Clusters to SPs
+        from ActsConfig.ActsSpacePointFormationConfig import ActsPixelSpacePointFormationAlgCfg
+        acc.merge(ActsPixelSpacePointFormationAlgCfg(flags,name="FPGAActsPixelSpacePointFormationAlg",
+                                                     **{'PixelClusters':"xAODPixelClusters_1stFromFPGACluster",
+                                                        'PixelSpacePoints':"xAODPixelSpacePoints_1stFromFPGA"}))         
         
         if flags.Trigger.FPGATrackSim.connectToToITkTracking:     
-            
             # Run ACTS Fast Tracking on offline objects (starting from seeding)
             acc.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks="ActsFast"))    
                
             # Run ACTS Fast Tracking for FPGA clusters (starting from seeding)
             acc.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks=FinalDataPrepTrackChainxAODTracksKeyPrefix,
                             **{'PixelSeedingAlg.InputSpacePoints' : ['xAODPixelSpacePoints_1stFromFPGA'],
-                                'StripSeedingAlg.InputSpacePoints' : ['xAODStripSpacePoints_1stFromFPGA'],
+                                'StripSeedingAlg.InputSpacePoints' : [''],
                                 'TrackFindingAlg.UncalibratedMeasurementContainerKeys' : ["xAODPixelClusters_1stFromFPGACluster","xAODStripClusters_1stFromFPGACluster"],
                                 'PixelClusterToTruthAssociationAlg.Measurements' : 'xAODPixelClusters_1stFromFPGACluster',
                                 'StripClusterToTruthAssociationAlg.Measurements' : 'xAODStripClusters_1stFromFPGACluster'}))
@@ -561,10 +573,18 @@ def runDataPrepChain():
             
         # Printout for various FPGA-related objects
         from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
-        acc.merge(FPGATrackSimReportingCfg(flags,
+        acc.merge(FPGATrackSimReportingCfg(flags,stage="_1st",
                                            perEventReports = (flags.Trigger.FPGATrackSim.sampleType != 'skipTruth'),
                                            isDataPrep=True))
-    
+        
+        # cluster monitoring
+        if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
+            from EFTrackingFPGAOutputValidation.FPGAOutputValidationConfig import FPGAOutputValidationCfg
+            acc.merge(FPGAOutputValidationCfg(flags, **{'pixelKeys' : ["xAODPixelClusters_1stFromFPGACluster","ITkPixelClusters"],
+                                                        'stripKeys':["xAODStripClusters_1stFromFPGACluster","ITkStripClusters"],
+                                                        'doDiffHistograms':True,
+                                                        'matchByID' : True}))
+            
     acc.store(open('AnalysisConfig.pkl','wb'))
 
     statusCode = acc.run(flags.Exec.MaxEvents)

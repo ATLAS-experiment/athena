@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_XAODTRUTHPARTICLESLIMMERTAU_H
@@ -8,10 +8,10 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
-#include "xAODTruth/TruthEvent.h"
+#include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthMetaDataContainer.h"
 #include "CLHEP/Vector/LorentzVector.h"
-
+#include "GaudiKernel/SystemOfUnits.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 
@@ -39,19 +39,20 @@ public:
   CLHEP::HepLorentzVector sumDaughterNeutrinos( const xAOD::TruthParticle* tau );
 
 private:
-
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_xaodTruthParticleContainerName
+  {this,"xAODTruthParticleContainerName","TruthParticles","Name of Truth Particle container"};
   /// The key for the output xAOD truth containers
-  std::string m_xaodTruthTauParticleContainerName;
-  std::string m_xaodTruthParticleContainerName;
+  SG::WriteHandleKey<xAOD::TruthParticleContainer> m_xaodTruthTauParticleContainerName
+    {this, "xAODTruthTauParticleContainerName","TruthTaus","Name of Truth Taus contatiner from the slimmer"};
 
   /// Selection values for keeping taus and leptons
-  double m_tau_pt_selection; //in GeV
-  double m_abseta_selection;
+  DoubleProperty m_tau_pt_selection{this, "tau_pt_selection", 0.001 * Gaudi::Units::GeV}; //in GeV
+  DoubleProperty m_abseta_selection{this, "abseta_selection", 10.};
 
   /// a flag to force rerunning (useful for rerunning on ESDs)
-  bool m_forceRerun;
+  BooleanProperty m_forceRerun{this, "ForceRerun", false};
 
-  ToolHandle<IMCTruthClassifier> m_classifier;
+  PublicToolHandle<IMCTruthClassifier> m_classifier{this, "MCTruthClassifier", "MCTruthClassifier/MCTruthClassifier"};
 
 }; // class xAODTruthParticleSlimmerTau
 

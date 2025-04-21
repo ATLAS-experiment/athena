@@ -14,7 +14,7 @@
 #include <memory>
 
 namespace DerivationFramework {
-  class TVAAugmentationTool : public AthAlgTool, virtual public IAugmentationTool
+  class TVAAugmentationTool : public extends<AthAlgTool, IAugmentationTool>
   {
     public:
       TVAAugmentationTool(const std::string& t, const std::string& n, const IInterface* p);

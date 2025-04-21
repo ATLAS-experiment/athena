@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRT_HIT_ANALYSIS_H
-#define TRT_HIT_ANALYSIS_H
+#ifndef HITANALYSIS_TRTHITANALYSIS_H
+#define HITANALYSIS_TRTHITANALYSIS_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 
@@ -20,16 +20,19 @@ class TH1;
 class TH2;
 class TTree;
 
+namespace InDetDD {
+  class TRT_DetectorManager;
+}
 
 class TRTHitAnalysis : public AthAlgorithm {
 
  public:
 
    TRTHitAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
-   ~TRTHitAnalysis(){}
+   ~TRTHitAnalysis() = default;
 
-   virtual StatusCode initialize();
-   virtual StatusCode execute();
+   virtual StatusCode initialize() override;
+   virtual StatusCode execute() override;
 
  private:
 
@@ -64,7 +67,7 @@ class TRTHitAnalysis : public AthAlgorithm {
    std::string m_path;
    std::string m_ntupleFileName; 
    ServiceHandle<ITHistSvc> m_thistSvc;
-
+   const InDetDD::TRT_DetectorManager* m_detMgr{nullptr};
 };
 
 #endif // TRT_HIT_ANALYSIS_H

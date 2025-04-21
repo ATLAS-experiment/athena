@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/BTagJetAugmenter.h"
@@ -10,13 +10,14 @@
 
 #include "xAODJet/Jet.h"
 #include "xAODBTagging/BTaggingUtilities.h"
+#include "CxxUtils/trapping_fp.h"
 
 #include "TVector3.h"
 
 namespace {
+  using FlipTagConfig = FlavorTagInference::FlipTagConfig;
   // grab names based on configuration
-  std::string negString(FlavorTagDiscriminants::FlipTagConfig f) {
-    using namespace FlavorTagDiscriminants;
+  std::string negString(FlipTagConfig f) {
     switch(f) {
     case FlipTagConfig::STANDARD: return "";
     case FlipTagConfig::FLIP_SIGN: // intentional fall-through
@@ -24,8 +25,7 @@ namespace {
     default: throw std::logic_error("undefined flip config");
     }
   }
-  std::string flipString(FlavorTagDiscriminants::FlipTagConfig f) {
-    using namespace FlavorTagDiscriminants;
+  std::string flipString(FlipTagConfig f) {
     switch(f) {
     case FlipTagConfig::STANDARD: return "";
     case FlipTagConfig::FLIP_SIGN: // intentional fall-through
@@ -35,22 +35,22 @@ namespace {
   }
 
   // the taggers
-  std::string ip2(FlavorTagDiscriminants::FlipTagConfig f) {
+  std::string ip2(FlipTagConfig f) {
     return "IP2D" + negString(f);
   }
-  std::string ip3(FlavorTagDiscriminants::FlipTagConfig f) {
+  std::string ip3(FlipTagConfig f) {
     return "IP3D" + negString(f);
   }
-  std::string jf(FlavorTagDiscriminants::FlipTagConfig f) {
+  std::string jf(FlipTagConfig f) {
     return "JetFitter" + flipString(f);
   }
-  std::string sv(FlavorTagDiscriminants::FlipTagConfig f) {
+  std::string sv(FlipTagConfig f) {
     return "SV1" + flipString(f);
   }
-  std::string jfSvNew(FlavorTagDiscriminants::FlipTagConfig f) {
+  std::string jfSvNew(FlipTagConfig f) {
     return "JetFitterSecondaryVertex" + flipString(f);
   }
-  std::string jfDMeson(FlavorTagDiscriminants::FlipTagConfig f){
+  std::string jfDMeson(FlipTagConfig f){
     return "JetFitterDMeson" + flipString(f);
   }
 
@@ -58,7 +58,7 @@ namespace {
 
 
 BTagJetAugmenter::BTagJetAugmenter(const std::string& associator,
-                                   FlavorTagDiscriminants::FlipTagConfig f,
+                                   FlipTagConfig f,
                                    bool useIpxd):
   m_jetLink("jetLink"),
   m_pt_uncalib("pt_btagJes" + flipString(f)),
@@ -337,6 +337,9 @@ void BTagJetAugmenter::augment(const xAOD::BTagging &btag) const {
 
   // Loop over tracks in the jet
   for (const auto &jet_track_link : m_jet_track_links(btag)) {
+    // Tell clang to optimize assuming that FP operations may trap.
+    CXXUTILS_TRAPPING_FP;
+
     const xAOD::TrackParticle &track_particle = **jet_track_link;
 
     uint8_t n_pixel_hits;

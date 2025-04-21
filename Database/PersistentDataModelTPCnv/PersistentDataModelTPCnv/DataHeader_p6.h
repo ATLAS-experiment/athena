@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENTDATAMODELTPCNV_DATAHEADER_P6_H
@@ -64,7 +64,7 @@ public: // Constructor and Destructor
 
    unsigned int insertObj(const ObjRecord& rec,
            const std::set<std::string>& alias = std::set<std::string>(),  bool doAliasFiletering = true,
-           const std::set<unsigned int>& symLinks = std::set<unsigned int>(),
+           const std::vector<unsigned int>& symLinks = std::vector<unsigned int>(),
            const std::vector<sgkey_t>& hashes = std::vector<sgkey_t>());
    std::size_t sizeObj() const;
    std::string getObjContainer(unsigned int index) const;
@@ -73,7 +73,7 @@ public: // Constructor and Destructor
    Guid getObjClassId(unsigned int index) const;
    long long getObjOid1(unsigned int index) const { return m_objRecords[index].oid1; }
    std::set<std::string>        getObjAlias(unsigned int index) const;
-   std::set<unsigned int>       getObjSymLinks(unsigned int index) const;
+   const std::vector<unsigned int>&    getObjSymLinks(unsigned int index) const;
    std::vector<sgkey_t>         getObjHashes(unsigned int index) const;
    bool                 isModified() const;
    void                 clearModified();

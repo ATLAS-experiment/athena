@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauPi0Selector.h"
@@ -8,9 +8,6 @@
 
 TauPi0Selector::TauPi0Selector(const std::string& name) : 
     TauRecToolBase(name) {
-  declareProperty("ClusterEtCut", m_clusterEtCut);
-  declareProperty("ClusterBDTCut_1prong", m_clusterBDTCut_1prong);
-  declareProperty("ClusterBDTCut_mprong", m_clusterBDTCut_mprong);
 }
 
 
@@ -46,12 +43,12 @@ StatusCode TauPi0Selector::executePi0nPFO(xAOD::TauJet& pTau, xAOD::PFOContainer
     int etaBin = getEtaBin( neutralPFO->cluster(0)->eta() );
     
     // Apply Et cut
-    if (neutralPFO->p4().Et() < m_clusterEtCut.at(etaBin)) continue;
+    if (neutralPFO->p4().Et() < m_clusterEtCut[etaBin]) continue;
     
     // Apply BDT score cut
     double BDTScore = neutralPFO->bdtPi0Score();
-    if ((pTau.nTracks() == 1 && BDTScore < m_clusterBDTCut_1prong.at(etaBin)) || 
-        (pTau.nTracks() > 1 && BDTScore < m_clusterBDTCut_mprong.at(etaBin))) continue;
+    if ((pTau.nTracks() == 1 && BDTScore < m_clusterBDTCut_1prong[etaBin]) || 
+        (pTau.nTracks() > 1 && BDTScore < m_clusterBDTCut_mprong[etaBin])) continue;
 
     int nHitsInEM1 = 0;
     if (!neutralPFO->attribute(xAOD::PFODetails::cellBased_NHitsInEM1, nHitsInEM1)) { 

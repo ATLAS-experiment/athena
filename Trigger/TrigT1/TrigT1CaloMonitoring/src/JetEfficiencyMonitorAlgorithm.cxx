@@ -34,14 +34,22 @@ static const std::map<std::string, int> gFEX_trigger_thresholds = {};
 int JetEfficiencyMonitorAlgorithm::extractgFEXThresholdValue(const std::string& key) const {
   std::regex pattern(R"(L1_g(?:LJ|J)(\d+)(?:p0ETA25)?)");
   std::smatch match;
-  
   if (std::regex_search(key, match, pattern)) {
-      return std::stoi(match[1]) * GeV;
+      int threshold = std::stoi(match[1]) * GeV;
+      if (key.find("gLJ") != std::string::npos) { //the gLJ threshold is actually 30 GeV less than the threshold in the name
+          threshold -= 30 * GeV;
+      }
+      if (threshold < 0) {
+        ATH_MSG_WARNING("Extracted threshold for " << key << " is negative!");
+      }
+      ATH_MSG_DEBUG("Trigger " << key << ": extracted threshold " << threshold );
+      return threshold;
   } else {
-      std::cerr << "Could not extract threshold from key: " << key << std::endl;
+      ATH_MSG_WARNING("Trigger " << key << " threshold not extracted!");
       return -1; // Error indicator
   }
 }
+
 
 
 JetEfficiencyMonitorAlgorithm::JetEfficiencyMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
@@ -289,12 +297,12 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
         auto gFEX_threshold_it = gFEX_trigger_thresholds.find(trigger_name);
         if (gFEX_threshold_it != gFEX_trigger_thresholds.end()) {
             gFEX_threshold = gFEX_threshold_it->second;
-            ATH_MSG_WARNING("gfex threshold in map! "<< gFEX_threshold);
+            ATH_MSG_DEBUG("gfex threshold in map! "<< gFEX_threshold);
         } else {
             // If not found in the map, extract the threshold dynamically
             gFEX_threshold = extractgFEXThresholdValue(trigger_name);
         }
-        ATH_MSG_WARNING("gfex threshold used: "<< gFEX_threshold);
+        ATH_MSG_DEBUG("gfex threshold used: "<< gFEX_threshold);
         // Proceed only if a valid threshold was obtained
         if (gFEX_threshold != -1) {
             if (jet_pt["leadingGfex_SmallRadiusTOB"] >= gFEX_threshold) {

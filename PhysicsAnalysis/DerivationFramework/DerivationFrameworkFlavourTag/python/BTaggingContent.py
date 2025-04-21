@@ -40,6 +40,13 @@ def _getVars(name, extra_flavours=None, flip_modes=None):
     variants = [""] + flip_modes
     return [f'{name}{v}_p{f}' for v in variants for f in flavors]
 
+def _getVarsXbb(name, extra_flavours=None):
+    """Convenience function for getting output variable names, here for Xbb tagging (typically GN2X)"""
+    if extra_flavours is None:
+        extra_flavours = []
+    flavors = ["hbb", "hcc", "top", "qcd"] + extra_flavours
+    return [f'{name}_p{f}' for f in flavors]
+
 def _getTruthVars():
     vals = ['ID', 'Pt', 'Lxy', 'DR', 'PdgId', 'Barcode']
     algs = ['HadronConeExcl', 'HadronGhost']
@@ -74,10 +81,23 @@ JetExtendedAux = [
     "PartonTruthLabelEnergy",
 ]
 
+# standard largeR jets truth outputs 
+LargeRJetStandardAux = [
+    "R10TruthLabel_R22v1",
+    "R10TruthLabel_R22v1_TruthJetMass",
+    "R10TruthLabel_R22v1_TruthJetPt"
+]
+
 # standard outputs for Run 3
 BTaggingRun3Aux = ["SV1_NGTinSvx", "SV1_masssvx",]
 BTaggingRun3Aux += _getVars("DL1dv01", flip_modes=['Flip']) # 202 r22 pre-rec tagger
 BTaggingRun3Aux += _getVars("GN2v01", extra_flavours=['tau'], flip_modes=['SimpleFlip']) # planned GN2 tagger for 2024 recommendations
+
+# Xbb taggers outputs 
+BTaggingLargeRAux = []
+BTaggingLargeRAux += _getVarsXbb("GN2Xv01")
+BTaggingLargeRAux += _getVarsXbb("GN2Xv02")
+BTaggingLargeRAux += _getVarsXbb("GN2XTauV00", extra_flavours=['htautauhad'])
 
 # standard outputs for Run 4
 BTaggingRun4Aux = [
@@ -162,7 +182,6 @@ def BTaggingExpertContent(jetcol, ConfigFlags = None):
 
 def BTaggingStandardContent(jetcol, ConfigFlags = None):
     btagging = _getBtagging(jetcol)
-
     # jet variables
     jetcontent = _getVariableList(jetcol, JetStandardAux)
 
@@ -171,22 +190,15 @@ def BTaggingStandardContent(jetcol, ConfigFlags = None):
     aux = BTaggingRun4Aux if isRun4 else BTaggingRun3Aux
     btagcontent = _getVariableList(btagging, aux)
 
+
     return jetcontent + btagcontent
 
 
-def BTaggingXbbContent(jetcol, ConfigFlags = None):
-    btagging = _getBtagging(jetcol)
-
-    # jet variables
-    jetAllAux = JetStandardAux + JetExtendedAux
-    jetcontent = _getVariableList(jetcol, jetAllAux)
-
+def BTaggingLargeRContent(jetcol, ConfigFlags = None):
+    jetcontent = _getVariableList(jetcol, LargeRJetStandardAux)
     # b-tagging variables
-    isRun4 = _isRun4(ConfigFlags)
-    aux = BTaggingRun4Aux if isRun4 else BTaggingRun3Aux
-    aux += BTaggingHighLevelAux
-    btagcontent = _getVariableList(btagging, aux)
-
+    aux = BTaggingLargeRAux
+    btagcontent = _getVariableList(jetcol, aux)
     return jetcontent + btagcontent
 
 def BTagginglessContent(jetcol, ConfigFlags=None):

@@ -5,6 +5,8 @@
 
 #include "InvMassDPhiInc2TestBenchAlg.h"
 
+#include <algorithm>
+
 namespace GlobalSim {
 
     
@@ -40,8 +42,14 @@ namespace GlobalSim {
     }
     
     
-    if (m_testTobs1.size() ==  m_testTobs2.size()) {
-      ATH_MSG_INFO("no events with testTobs2 != no of events with testTobs2");
+    if (m_testTobs1.size() !=  m_testTobs2.size()) {
+      auto ss = std::stringstream();
+      ss << "number events with testTobs2 ["
+	 << m_testTobs1.size()
+	 << "] != number events with testTobs2 ["
+	 << m_testTobs2.size()
+	 << ']';	
+      ATH_MSG_INFO(ss.str());
       return StatusCode::FAILURE;
     }
 
@@ -96,13 +104,78 @@ namespace GlobalSim {
     }
 
     // apply the repeat value
-    for(int i = 0; i != m_testRepeat; ++i) {
-      m_testTobs1.push_back(m_testTobs1_in);
-      m_testTobs2.push_back(m_testTobs2_in);
+    {
+      auto container = GenericTobContainer();
+      container.reserve(m_testRepeat*(m_testTobs1_in.size()));
+
+      for (std::size_t i = 0; i != m_testRepeat; ++i) {
+	std::transform(std::cbegin(m_testTobs1_in),
+		       std::cend(m_testTobs1_in),
+		       std::back_inserter(container),
+		       [](const auto& bs){
+			 return std::make_shared<GenericTob>(bs);});
+	
+      }
+      m_testTobs1.push_back(container);
+    }
+
+    {
+      auto container = GenericTobContainer();
+      container.reserve(m_testRepeat*(m_testTobs2_in.size()));
+      
+      for (std::size_t i = 0; i != m_testRepeat; ++i) {
+	std::transform(std::cbegin(m_testTobs2_in),
+		       std::cend(m_testTobs2_in),
+		       std::back_inserter(container),
+		       [](const auto& bs){
+			 return std::make_shared<GenericTob>(bs);});
+	
+      }
+      m_testTobs2.push_back(container);
     }
 
     m_expectedResults.push_back(m_expResults_in);
 
+
+    
+    {
+      auto ss = std::stringstream();
+      
+      ss << "bitstrings tobs1 [" << m_testTobs1_in.size()<< "]\n";
+      for (const auto& bs : m_testTobs1_in) {
+	ss << bs << '\n';
+      }
+      ATH_MSG_DEBUG(ss.str());
+    }
+    
+    {
+      auto ss = std::stringstream();
+      std::size_t i_ev{0};
+      
+      ss << "nevents tobs1 " << m_testTobs1.size()<< '\n';
+      for (const auto& ev : m_testTobs1) {
+	ss << "ev " << i_ev++ << '\n';
+	for (const auto& gt : ev) {
+	  ss << *gt << '\n';
+	}
+	ATH_MSG_DEBUG(ss.str());
+      }
+    }
+
+    {
+      auto ss = std::stringstream();
+      std::size_t i_ev{0};
+      
+      ss << "nevents tobs2 " << m_testTobs2.size() << '\n';
+      for (const auto& ev : m_testTobs2) {
+	ss << "ev " << i_ev++ << '\n';
+	for (const auto& gt : ev) {
+	  ss << *gt << '\n';
+	}
+	ATH_MSG_DEBUG(ss.str());
+      }
+    }
+    
     return StatusCode::SUCCESS;
   }
 
@@ -121,18 +194,18 @@ namespace GlobalSim {
 
     {
       auto h_write =
-	SG::WriteHandle<TobContainer>(m_tobs1_WriteKey);
+	SG::WriteHandle<GenericTobContainer>(m_tobs1_WriteKey);
       auto tobs =
-	std::make_unique<TobContainer>(m_testTobs1[m_dataIndex]);
+	std::make_unique<GenericTobContainer>(m_testTobs1[m_dataIndex]);
       CHECK(h_write.record(std::move(tobs)));
     }
 
     
     {
       auto h_write =
-	SG::WriteHandle<TobContainer>(m_tobs2_WriteKey);
+	SG::WriteHandle<GenericTobContainer>(m_tobs2_WriteKey);
     auto tobs =
-	std::make_unique<TobContainer>(m_testTobs2[m_dataIndex]);
+	std::make_unique<GenericTobContainer>(m_testTobs2[m_dataIndex]);
     CHECK(h_write.record(std::move(tobs)));
     }
 

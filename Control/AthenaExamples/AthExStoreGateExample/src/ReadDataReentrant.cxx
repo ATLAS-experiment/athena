@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id$
 /**
  * @file ReadDataReentrant.h
  * @author scott snyder <snyder@bnl.gov>
@@ -14,40 +13,19 @@
 #undef NDEBUG
 #include "ReadDataReentrant.h"
 
-#include <list>
-#include <map>
-#include <vector>
 #include "AthExStoreGateExample/MyDataObj.h"
-#include "MyContObj.h"
-#include "MapStringFloat.h"
-#include "StoreGateExample_ClassDEF.h" /*the CLIDs for the containers*/
-
-#include "GaudiKernel/ISvcLocator.h"
 #include "AthContainers/DataVector.h"
-
-#include "StoreGate/SGIterator.h"
-#include "StoreGate/UpdateHandle.h"
-#include "StoreGate/ReadHandle.h"
-#include "AthLinks/ElementLink.h"
-
 #include "AthenaKernel/DefaultKey.h"
 #include "AthenaKernel/errorcheck.h"
+#include "AthLinks/ElementLink.h"
+#include "StoreGate/SGIterator.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGateExample_ClassDEF.h" /*the CLIDs for the containers*/
+
+#include <vector>
+
 
 /////////////////////////////////////////////////////////////////////////////
-
-ReadDataReentrant::ReadDataReentrant(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator)
-{
-  
-  declareProperty ("CObjKey", m_cobjKey = std::string("cobj"));
-  declareProperty ("VFloatKey", m_vFloatKey = std::string("vFloat"));
-  declareProperty ("PLinkListKey", m_pLinkListKey = std::string("WriteDataReentrant"));
-  declareProperty ("LinkVectorKey", m_linkVectorKey = std::string("linkvec"));
-  declareProperty ("TestObjectKey", m_testObjectKey = "testobj");
-  declareProperty ("DObjKeyArray", m_dobjKeyArray = {"dobj_a1", "dobj_a2"});
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
 StatusCode ReadDataReentrant::initialize()
 {
@@ -62,6 +40,7 @@ StatusCode ReadDataReentrant::initialize()
   ATH_CHECK( m_testObjectKey.initialize() );
   ATH_CHECK( m_eventInfo.initialize() );
   ATH_CHECK( m_dobjKeyArray.initialize() );
+  ATH_CHECK( m_nonexistingKey.initialize() );
 
   return StatusCode::SUCCESS;
 }
@@ -71,43 +50,11 @@ StatusCode ReadDataReentrant::initialize()
 StatusCode ReadDataReentrant::execute (const EventContext& ctx) const
 {
 
-  // An algorithm, like this one, retrieving an object from the StoreGate(SG)
-  // can either ask for:
-  //    i) the most recent (default) object of a given type 
-  //   ii) a specific object of a given type
-  //  iii) all objects of a given type
-  //This example will show how to perform these three tasks
-
-
   ATH_MSG_INFO ("in execute()");
 
   /////////////////////////////////////////////////////////////////////
   // Part 1: retrieving individual objects from SG
   //
-  //   i)Get the most recent (default) object of type MyDataObj
-  // we start by creating a *const* pointer: we won't be able
-  // to modify the MyDataObj we retrieve.
-  //unless you know what you are doing, *always* use const pointers 
-   //FIXME const MyDataObj* dobj;
-
-  //We pass the pointer to the StoreGate that will set it to point to
-  //the default MyDataObj. More precisely the handle will now contain
-  //all infos necessary to access (or create) the default MyDataObj when 
-  //we will use it 
-  //FIXME new (tag StoreGate-02-12-08) keyless record scheme does not allow it!
-  //FIXME  if (StatusCode::SUCCESS != p_SGevent->retrieve(dobj) ) {
-  //FIXME    log << MSG::ERROR 
-  //FIXME	<< "Could not find default MyDataObj" 
-  //FIXME	<< endmsg;
-  //FIXME    return( StatusCode::FAILURE);
-  //FIXME  }
-  //FIXME  log << MSG::INFO 
-  //FIXME      << "default MyDataObj Val: " << dobj->val() 
-  //FIXME      << endmsg;
-
-  /////////////////////////////////////////////////////////////////////
-  //   ii) Get a specific MyDataObj by providing its key 
-  //       (in this case the name of the algo which recorded it)
 
   SG::ReadHandle<TestDataObject> testobj (m_testObjectKey, ctx);
   if (testobj->val() != 10) std::abort();
@@ -117,32 +64,10 @@ StatusCode ReadDataReentrant::execute (const EventContext& ctx) const
   for (size_t i = 0; i < vh.size(); i++) {
     assert (vh[i]->val() == static_cast<int> (100+i));
   }
-  
-#if 0
-  /////////////////////////////////////////////////////////////////////
-  // iii) Get all recorded instances of MyDataObj, print out their contents
-
-  // (a SG::ConstIterator is an iterator class that we also use to defer
-  //  and control the access to the persistent object)
-  SG::ConstIterator<MyDataObj> iMyD;
-  SG::ConstIterator<MyDataObj> eMyD;
-
-  if (StatusCode::SUCCESS != evtStore()->retrieve(iMyD, eMyD) ) {
-    ATH_MSG_ERROR ("Could not find MyDataObj list");
-    return( StatusCode::FAILURE);
-  }
-
-  // while(iMyD != eMyD) {
-  //   ATH_MSG_INFO ((*iMyD).val());
-  //   ++iMyD;
-  // }
-  ATH_MSG_WARNING ("FIXME loop of ConstIterator bombs");
-#endif
 
 
-
-////////////////////////////////////////////////////////////////////
-// Get the default listof MyContObj, print out its contents
+  ////////////////////////////////////////////////////////////////////
+  // Get the default listof MyContObj, print out its contents
 
   //the CLID of list<MyContObj> must be defined using the CLASSDEF
   //macros. See StoreGateExample_ClassDEF.h for a few examples
@@ -160,8 +85,7 @@ StatusCode ReadDataReentrant::execute (const EventContext& ctx) const
   }
 
   /////////////////////////////////////////////////////////////////////
-
-// Get the std::vector, print out its contents
+  // Get the std::vector, print out its contents
 
   SG::ReadHandle<std::vector<float> > pVec (m_vFloatKey, ctx);
   for (unsigned int it=0; it<pVec->size(); it++) {
@@ -169,32 +93,15 @@ StatusCode ReadDataReentrant::execute (const EventContext& ctx) const
   }
 
   /////////////////////////////////////////////////////////////////////
-  // test if an object is in the store
-  //FIXME if (p_SGevent->contains<MyDataObj>(SG::DEFAULTKEY)) {
-  //FIXME     log << MSG::INFO
-  //FIXME 	<<"event store contains default MyDataObj"
-  //FIXME 	<<endmsg;
-  //FIXME   } else {
-  //FIXME     log << MSG::ERROR
-  //FIXME 	<<"event store claims it does not contain default MyDataObj"
-  //FIXME      	<<endmsg;
-  //FIXME     return( StatusCode::FAILURE);
-  //FIXME   }	
-
-#if 0
   // test if an object is not in the store
-  const SG::ReadHandle<MyDataObj> nonexisting (m_nonexistingKey, ctx);
+  SG::ReadHandle<MyDataObj> nonexisting (m_nonexistingKey, ctx);
   if (nonexisting.isValid()) {
-    ATH_MSG_ERROR 
-      ("event store claims it contains MyDataObj with FunnyNonExistingKey");
-    return( StatusCode::FAILURE);
+    ATH_MSG_ERROR ("event store claims it contains MyDataObj with " << m_nonexistingKey);
+    return StatusCode::FAILURE;
   } else {
-    ATH_MSG_INFO
-      ("event store does not contain MyDataObj with FunnyNonExistingKey");
+    ATH_MSG_INFO ("event store does not contain MyDataObj with " << m_nonexistingKey);
   }	
-#endif
-  
-  
+
   /////////////////////////////////////////////////////////////////////
   // Part 2: retrieving DataLinks
 
@@ -216,69 +123,5 @@ StatusCode ReadDataReentrant::execute (const EventContext& ctx) const
        << " - stored as " << l);
   }
 
-  //try to "read back" a link
-  //    istrstream istr("due 0");
-  //    MapElemLink toBeRead;
-  //    istr >> toBeRead;
-  //    if (!toBeRead.isValid()) {
-  //      log << MSG::ERROR 
-  //  	<< "Could not read back MapElement" 
-  //  	<< endmsg;
-  //      return( StatusCode::FAILURE);
-  //    } else {
-  //      log << MSG::INFO <<  "MapElement read back: key " << toBeRead->first
-  //  	<< "  value " << toBeRead->second <<endmsg;
-  //    }
-
-  /////////////////////////////////////////////////////////////////////
-  // Part 3: symbolic links and derived types
-  // Get all objects as its base class 
-
-#if 0
-  SG::ConstIterator<BaseClass> it2;
-  SG::ConstIterator<BaseClass> iEnd2;
-
-  if (StatusCode::SUCCESS != evtStore()->retrieve(it2, iEnd2) ) {
-
-    ATH_MSG_ERROR ("Could not find base class list");
-    return( StatusCode::FAILURE);
-  }
-
-  // not much we can do with an empty base class,
-  // so print the path of its persistable companion (the DataBucket)
-  ATH_MSG_INFO (" retrieve as BaseClass, print its address: ");
-  while(it2 != iEnd2) {
-    ATH_MSG_INFO (&*it2);
-    ++it2;
-  }
-#endif
-  
-  /////////////////////////////////////////////////////////////////////
-  // Part 4: Get the event header, print out event and run number
-
-#if 0
-  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo,ctx);
-  if(eventInfo.isValid()) {
-    int event = eventInfo->eventNumber();
-    int run = eventInfo->runNumber();
-    ATH_MSG_INFO (" EventInfo : " 
-		  << " event: " << event 
-		  << " run: " << run);
-  }
-  else
-  {
-    ATH_MSG_ERROR (" Unable to retrieve EventInfo from StoreGate ");
-    return StatusCode::SUCCESS;
-  }
-#endif
-
-  return StatusCode::SUCCESS;
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-
-StatusCode ReadDataReentrant::finalize() {
-
-  ATH_MSG_INFO ("in finalize()");
   return StatusCode::SUCCESS;
 }

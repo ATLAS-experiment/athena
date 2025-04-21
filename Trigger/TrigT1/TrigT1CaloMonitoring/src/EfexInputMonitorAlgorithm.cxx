@@ -25,7 +25,7 @@ StatusCode EfexInputMonitorAlgorithm::initialize() {
     ATH_CHECK( m_bcContKey.initialize() );
 
 
-  // load the scid map
+    // load the scid map
     if (auto fileName = PathResolverFindCalibFile( "L1CaloFEXByteStream/2023-02-13/scToEfexTowers.root" ); !fileName.empty()) {
         std::unique_ptr<TFile> f( TFile::Open(fileName.c_str()) );
         if (f) {
@@ -184,6 +184,21 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
               continue;
           }
           bool isLAr = !(i==10 && std::abs(Towereta)<=1.5);
+          if(counts[i]==1025) {
+              // 1025 is the code used by bytestream decoder if there is no input for that slot
+              if(isLAr) {
+                  if (auto itr = m_scMap.find(std::make_pair(coord, i)); itr != m_scMap.end()) {
+                      SlotSCID = itr->second.second;
+                  }
+                  Decision = "MissingLAr";
+                  fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+              } else {
+                  Decision = "MissingTile";
+                  SlotSCID="";
+                  fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+              }
+              continue;
+          }
           TowerSlot = i;
           TowerCount = counts[i];
           TowerRefCount = -1;

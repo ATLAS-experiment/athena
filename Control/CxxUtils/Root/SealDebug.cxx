@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -341,6 +341,8 @@ void DebugAids::stacktraceLine ATLAS_NOT_THREAD_SAFE (IOFD fd,
 
   char dembuf[ LINE_MAX ];
   char line[ LINE_MAX ];
+  const int     relbuf_size = 7 + BitTraits<unsigned long>::HexDigits;
+  char	  relbuf [relbuf_size];
 
   if (dladdr ((void*)addr, &info) && info.dli_fname && info.dli_fname[0])
   {
@@ -352,9 +354,6 @@ void DebugAids::stacktraceLine ATLAS_NOT_THREAD_SAFE (IOFD fd,
 
     // RS start
     int length = 0;
-    
-    const int     relbuf_size = 7 + BitTraits<unsigned long>::HexDigits;
-    char	  relbuf [relbuf_size];
     
     // difference of two pointers
     unsigned long libaddr = (unsigned long) info.dli_fbase;

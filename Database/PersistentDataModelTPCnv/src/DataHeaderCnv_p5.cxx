@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv_p5.cxx
@@ -21,8 +21,7 @@ void DataHeaderElementCnv_p5::persToTrans(const DataHeaderElement_p5& pers,
 	const DataHeaderForm_p5& form,
         unsigned int entry) const
 {
-   delete trans.m_token; trans.m_token = new Token; trans.m_ownToken = true;
-   Token* token = const_cast<Token*>(trans.m_token);
+   Token& token = trans.m_token;
    std::vector<unsigned int>::const_iterator intIter = form.params(entry).begin();
    unsigned int keyIdx = 0U, aliasNum = 0U, clidNum = 0U;
 // Translate PoolToken
@@ -31,7 +30,7 @@ void DataHeaderElementCnv_p5::persToTrans(const DataHeaderElement_p5& pers,
       keyIdx = *intIter; ++intIter;
       aliasNum = *intIter; ++intIter;
       clidNum = *intIter; ++intIter;
-      token->fromString(pers.m_token);
+      token.fromString(pers.m_token);
    } else {
       const unsigned int keyPos = (unsigned short)(*intIter>>16),
 	      version = (unsigned short)(*intIter&0x0000FFFF); ++intIter;
@@ -54,7 +53,7 @@ void DataHeaderElementCnv_p5::persToTrans(const DataHeaderElement_p5& pers,
       }
 // Append DbGuid
       Guid guid(form.map()[guidIdx]);
-      token->setDb(guid);
+      token.setDb(guid);
 // Container name, may be optimized
       std::string cntName;
       if (prefixIdx > 0) {
@@ -69,14 +68,14 @@ void DataHeaderElementCnv_p5::persToTrans(const DataHeaderElement_p5& pers,
       } else {
          cntName += pers.m_token;
       }
-      //token->setCont(cntName);
+      //token.setCont(cntName);
 // Append ClassId
       Guid clid(form.map()[classIdx]);
-      token->setClassID(clid);
-      token->setTechnology(tech);
-      token->setOid(Token::OID_t(oid1, pers.m_oid2));
+      token.setClassID(clid);
+      token.setTechnology(tech);
+      token.setOid(Token::OID_t(oid1, pers.m_oid2));
    }
-   unsigned int aliasCur = 0U, clidCur = 0U;
+   unsigned int aliasCur = 0U;
    trans.m_key = form.map()[keyIdx];
    trans.m_alias.clear();
    for (std::set<std::string>::const_iterator lastAlias = trans.m_alias.begin();
@@ -84,12 +83,12 @@ void DataHeaderElementCnv_p5::persToTrans(const DataHeaderElement_p5& pers,
       lastAlias = trans.m_alias.insert(lastAlias, form.map()[keyIdx + aliasCur + 1]);
    }
    trans.m_pClid = *intIter; ++intIter;
-   trans.m_clids.clear();
    const std::vector<unsigned int>::const_iterator intLast = form.params(entry).end();
-   for (std::set<CLID>::const_iterator lastClid = trans.m_clids.begin();
-		   intIter != intLast && clidCur < clidNum; ++intIter, ++clidCur) {
-      lastClid = trans.m_clids.insert(lastClid, *intIter);
+   if (intIter+clidNum > intLast) {
+     clidNum = intLast - intIter;
    }
+   trans.m_clids.assign (intIter, intIter+clidNum);
+   intIter += clidNum;
    trans.m_hashes.clear();
    for (; intIter != intLast; ++intIter) {
       trans.m_hashes.push_back(*intIter);
@@ -199,9 +198,8 @@ void DataHeaderElementCnv_p5::transToPers(const DataHeaderElement& trans,
       form.insertMap(*iter);
    }
    form.insertParam(trans.m_pClid, entry);
-   for (std::set<CLID>::const_iterator iter = trans.m_clids.begin(),
-		   last = trans.m_clids.end(); iter != last; ++iter) {
-      form.insertParam(*iter, entry);
+   for (CLID clid : trans.m_clids) {
+      form.insertParam(clid, entry);
    }
    for (std::vector<SG::sgkey_t>::const_iterator iter = trans.m_hashes.begin(),
 		   last = trans.m_hashes.end(); iter != last; ++iter) {
@@ -219,6 +217,7 @@ void DataHeaderCnv_p5::persToTrans(const DataHeader_p5& pers,
 {
   unsigned int entry = 1;
   const unsigned int provSize = dhForm.params(entry)[0];
+  trans.setDhFormToken (pers.dhFormToken());
   trans.m_inputDataHeader.resize(provSize);
   std::vector<DataHeaderElement>::iterator it = trans.m_inputDataHeader.begin();
   std::vector<DataHeaderElement_p5>::const_iterator pit = pers.m_dataHeader.begin();
@@ -263,9 +262,9 @@ void DataHeaderCnv_p5::insertDHRef(DataHeader_p5& pers,
                                    const std::string& key,
                                    const std::string& strToken) const
 {
-  Token* token = new Token;
-  token->fromString(strToken);
-  DataHeaderElement tEle(ClassID_traits<DataHeader>::ID(), key, token);
+  Token token;
+  token.fromString(strToken);
+  DataHeaderElement tEle(ClassID_traits<DataHeader>::ID(), key, std::move(token));
   DataHeaderElement_p5 pEle;
   unsigned int entry = dhForm.size() + 1;
   m_elemCnv.transToPers(tEle, pEle, dhForm, entry);

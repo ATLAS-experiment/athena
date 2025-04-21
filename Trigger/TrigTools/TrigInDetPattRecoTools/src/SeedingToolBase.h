@@ -54,9 +54,10 @@ class SeedingToolBase: public AthAlgTool {
   UnsignedIntegerProperty m_nMaxPhiSlice{this, "nMaxPhiSlice", 53};
   BooleanProperty m_doubletFilterRZ{this, "Doublet_FilterRZ", true};
   BooleanProperty m_useEtaBinning{this, "UseEtaBinning", true};
+  BooleanProperty m_matchBeforeCreate{this, "MatchBeforeCreate", false};
   FloatProperty m_minPt{this, "pTmin", 1000.0};
   IntegerProperty m_nMaxEdges{this, "MaxGraphEdges", 2000000};
-  StringProperty  m_connectionFile{this, "ConnectionFileName", "binTables_ITK_RUN4.txt"};
+  StringProperty  m_connectionFile{this, "ConnectionFileName", "binTables_ITK_RUN4_UPD_10_APR_2025.txt"};
 
   float m_phiSliceWidth = 0.;
 

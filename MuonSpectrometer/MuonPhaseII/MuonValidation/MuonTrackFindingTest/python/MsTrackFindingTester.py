@@ -1,0 +1,53 @@
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+def MsTrackTesterCfg(flags, name = "MsTrackTester", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("isMC", flags.Input.isMC)
+    the_alg = CompFactory.MuonValR4.MsTrackTester(name= name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+
+if __name__=="__main__":
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, setupHistSvcCfg
+    parser = SetupArgParser()
+    parser.add_argument("--noMonitorPlots", help="If set to true, there're no monitoring plots", default = False,
+                                            action='store_true')
+    parser.add_argument("--writeSpacePoints", help="If set to true, the spacepoints in the bucket are saved to disk",
+                                              default=False, action='store_true')
+    parser.set_defaults(nEvents = -1)
+    parser.set_defaults(noSTGC=True)
+    parser.set_defaults(noMM=True)
+ 
+    parser.set_defaults(outRootFile="MsTrkTester.root")
+    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"])
+   
+    args = parser.parse_args()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.PerfMon.doFullMonMT = True
+    flags.Muon.doFastMMDigitization = True
+    flags, cfg = setupGeoR4TestCfg(args,flags)
+
+    cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
+                                    outStream="MuonTrackTester"))
+
+
+    from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
+    cfg.merge(xAODUncalibMeasPrepCfg(flags))
+    
+    from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
+    cfg.merge(MuonSpacePointFormationCfg(flags))
+
+    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg
+    cfg.merge(MuonPatternRecognitionCfg(flags))
+
+    from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
+    cfg.merge(MSTrackFinderAlgCfg(flags))
+
+    cfg.merge(MsTrackTesterCfg(flags))
+   
+    executeTest(cfg)

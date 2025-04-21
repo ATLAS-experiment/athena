@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeneratorFilters/xAODTauFilter.h"
 #include "AthenaKernel/RNGWrapper.h"
@@ -13,45 +13,13 @@
 
 xAODTauFilter::xAODTauFilter( const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter( name,pSvcLocator ),
-    m_events(), m_events_sel(),
-    m_eventse(0), m_eventsmu(0), m_eventshad(0), 
-    m_eventseacc(0), m_eventsmuacc(0), m_eventshadacc(0)
+    m_events(), m_events_sel()
 {
-  declareProperty( "Ntaus", m_Ntau = 1 );
-  declareProperty( "MaxNtaus", m_maxNtau = 100 );
-  declareProperty( "EtaMaxe", m_etaMaxe = 2.5 );
-  declareProperty( "EtaMaxmu", m_etaMaxmu = 2.5 );
-  declareProperty( "EtaMaxhad", m_etaMaxhad = 2.5 );
-
-  declareProperty( "Ptcute", m_pTmine = 12000.0 );
-  declareProperty( "Ptcutmu", m_pTminmu = 12000.0 );
-  declareProperty( "Ptcuthad", m_pTminhad = 12000.0 );
-
-  // new options:
-  declareProperty( "UseNewOptions", m_NewOpt = false );
-  declareProperty( "UseMaxNTaus", m_useMaxNTaus = false );
-  declareProperty( "Nhadtaus", m_Nhadtau = 0 );
-  declareProperty( "MaxNhadtaus", m_maxNhadtau = 100 );
-  declareProperty( "Nleptaus", m_Nleptau = 0 );
-  declareProperty( "MaxNleptaus", m_maxNleptau = 100 );
-  declareProperty( "EtaMaxlep", m_etaMaxlep = 2.6 );
-  declareProperty( "Ptcutlep", m_pTminlep = 7000.0 );
-  declareProperty( "Ptcutlep_lead", m_pTminlep_lead = 7000.0);
-  declareProperty( "Ptcuthad_lead", m_pTminhad_lead = 12000.0 );
-  declareProperty( "ReverseFilter", m_ReverseFilter = false);
-  
-  declareProperty( "HasTightRegion", m_HasTightRegion = false);
-  declareProperty( "LooseRejectionFactor", m_LooseRejectionFactor = 1);
-  declareProperty( "Ptcutlep_tight", m_pTminlep_tight = 7000.0 );
-  declareProperty( "Ptcutlep_tight_lead", m_pTminlep_tight_lead = 7000.0 );
-  declareProperty( "Ptcuthad_tight", m_pTminhad_tight = 12000.0 );
-  declareProperty( "Ptcuthad_tight_lead", m_pTminhad_tight_lead = 12000.0 );
-
-  declareProperty( "filterEventNumber", m_filterEventNumber = 0 );
 }
 
 
 StatusCode xAODTauFilter::filterInitialize() {
+  CHECK(m_truthPartContKey.initialize());
   m_eventse = 0;
   m_eventsmu = 0;
   m_eventshad = 0;
@@ -114,8 +82,8 @@ StatusCode xAODTauFilter::filterEvent() {
   double weight = 1;
 
 
-  const xAOD::TruthParticleContainer* vtruth = nullptr;
-  ATH_CHECK( evtStore()->retrieve( vtruth, "TruthTaus" ) );
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
   //get the weight of the event from McEventCollection
   setFilterPassed(false);
@@ -135,7 +103,7 @@ StatusCode xAODTauFilter::filterEvent() {
   }
 
   
-  for (const auto * truthtau : *vtruth) {
+  for (const auto * truthtau : *xTruthParticleContainer) {
    // Look for the first physical tau
     if (MC::isTau(truthtau) && MC::isPhysical(truthtau)) {
         const xAOD::TruthParticle* tau = truthtau;
@@ -292,7 +260,7 @@ StatusCode xAODTauFilter::filterEvent() {
   if(m_NewOpt && m_HasTightRegion) {
     // Get MC event collection for setting weight
     const McEventCollection* mecc = 0;
-    if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){
+    if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){ // FIXME keyless retrieve
       setFilterPassed(false);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - weight might not work");
       return StatusCode::SUCCESS;

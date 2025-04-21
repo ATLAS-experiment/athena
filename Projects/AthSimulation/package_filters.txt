@@ -55,8 +55,6 @@
 + Control/RngComps
 + Control/RootUtils
 + Control/SGComps
-+ Control/SGMon/SGAudCore
-+ Control/SGMon/SGAudSvc
 + Control/SGTools
 + Control/StoreGate
 + Control/StoreGateBindings
@@ -251,7 +249,6 @@
 + LArCalorimeter/LArGeoModel/LArReadoutGeometry
 + LArCalorimeter/LArIdentifier
 + LArCalorimeter/LArSimEvent
-+ MagneticField/BFieldData
 + MagneticField/MagFieldConfig
 + MagneticField/MagFieldServices
 + MagneticField/MagFieldUtils

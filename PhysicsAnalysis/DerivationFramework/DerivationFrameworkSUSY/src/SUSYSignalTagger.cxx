@@ -21,8 +21,7 @@ namespace DerivationFramework {
   static const SG::AuxElement::Decorator<int> dec_pdgId2("SUSY_pid2");
     
   SUSYSignalTagger::SUSYSignalTagger(const std::string& t, const std::string& n, const IInterface* p):
-    AthAlgTool(t,n,p){
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
+    base_class(t,n,p){
   }  
   
   StatusCode SUSYSignalTagger::addBranches() const{

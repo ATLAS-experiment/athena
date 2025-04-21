@@ -131,29 +131,6 @@ namespace IOVDbNamespace{
     return jsonReply;
   }
 
-
-  std::map<std::string, std::string>
-  CrestFunctions::getGlobalTagMap(const std::string& globaltag){
-    std::map<std::string, std::string> tagmap;
-    try{
-      GlobalTagMapSetDto dto = m_crestCl->findGlobalTagMap(globaltag,"Trace");
-      nlohmann::json globaltag_map_data = dto.toJson();
-      nlohmann::json j = getResources(globaltag_map_data);
-      int n = j.size();
-      for (int i = 0; i < n; i++ ){
-	nlohmann::json j_item = j[i];
-        if (j_item.contains("label") && j_item.contains("tagName") ){
-          tagmap[j_item["label"]] = j_item["tagName"];
-        }
-      }
-    } catch (std::exception & e){
-      std::cerr<<__FILE__<<":"<<__LINE__<< ": " << e.what() << " Cannot get a global tag map for " << globaltag << std::endl;
-    }
-
-    return tagmap;
-  }
-
-
   nlohmann::json CrestFunctions::getTagInfo(const std::string & tag){
     try{
       TagMetaDto dto = m_crestCl->findTagMeta(tag);

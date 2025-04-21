@@ -8,7 +8,7 @@
 
 # TODO update following ATLASRECTS-8054
 export ATHENA_CORE_NUMBER=8
-INPUTFILE=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.HITS_RUN3[0])")
+INPUTFILE=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.HITS_RUN3_HI[0])")
 CONDTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
 
 Reco_tf.py --CA "all:True" --multithreaded --maxEvents=20 --autoConfiguration 'everything' \

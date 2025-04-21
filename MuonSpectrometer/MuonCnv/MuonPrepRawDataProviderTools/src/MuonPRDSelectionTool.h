@@ -55,7 +55,7 @@ namespace Muon {
     }
     
     /** IMuonPRDSelectionTool interface: calibrate and select single MDT */
-    const MdtDriftCircleOnTrack* calibrateAndSelect( const MuonSystemExtension::Intersection& intersection, const MdtPrepData& mdt ) const;
+    const MdtDriftCircleOnTrack* calibrateAndSelect( const MuonSystemExtension::Intersection& intersection, const MdtPrepData& mdt, double beta = 1.) const;
 
     /** IMuonPRDSelectionTool interface: calibrate and select single cluster */
     const MuonClusterOnTrack* calibrateAndSelect( const Trk::TrackParameters& pars, const MuonCluster& clus ) const;

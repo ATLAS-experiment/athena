@@ -34,7 +34,6 @@ FPGATrackSimPhiRoadFilterTool::FPGATrackSimPhiRoadFilterTool(const std::string& 
     base_class(algname, name, ifc),
     m_name(instance_name(name))
 {
-    declareInterface<IFPGATrackSimRoadFilterTool>(this);
 }
 
 

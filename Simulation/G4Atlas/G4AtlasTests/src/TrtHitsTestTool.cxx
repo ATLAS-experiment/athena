@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrtHitsTestTool.h"
 
 #include "GeoAdaptors/GeoTRTUncompressedHit.h"
 #include "InDetSimEvent/TRTUncompressedHitCollection.h"
+#include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 #include <TH1D.h>
 #include <TH2D.h>
 
@@ -56,6 +57,8 @@ StatusCode TrtHitsTestTool::initialize()
   _TH1D(m_hits_log_barcode,"trt_log_barcode",50,0.,16.);
   _SET_TITLE(m_hits_log_barcode, "log(barcode)","log(barcode)","dN/dlog(barcode)");
 
+  ATH_CHECK(detStore()->retrieve(m_detMgr,"TRT"));
+
   return StatusCode::SUCCESS;
 }
 
@@ -66,7 +69,7 @@ StatusCode TrtHitsTestTool::processEvent() {
   if (evtStore()->retrieve(p_collection,m_collection).isSuccess()) {
     for (const TRTUncompressedHit& hit : *p_collection) {
       GeoTRTUncompressedHit ghit(hit);
-      HepGeom::Point3D<double> u = ghit.getGlobalPosition();
+      HepGeom::Point3D<double> u = ghit.getGlobalPosition(m_detMgr);
       m_indetBarrel->Fill(u.x(),u.y());
       m_indetLongView->Fill(u.z(),u.perp());
       m_hits_xy->Fill(u.x(),u.y());

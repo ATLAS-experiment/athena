@@ -53,7 +53,7 @@
 #include "AthAllocators/maybeUnprotect.h"
 #include "AthContainers/DataVector.h"
 #include "AthContainers/DataVectorWithAllocFwd.h"
-
+#include <boost/type_traits.hpp>
 
 /**
  * @brief @c DataVector using a custom allocator for the elements.

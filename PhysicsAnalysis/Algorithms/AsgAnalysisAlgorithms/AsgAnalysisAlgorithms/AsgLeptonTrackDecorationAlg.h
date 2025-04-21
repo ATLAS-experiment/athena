@@ -46,11 +46,17 @@ namespace CP
     SysReadHandle<xAOD::IParticleContainer> m_particlesHandle {
       this, "particles", "", "the asg collection to run on"};
 
+    SysWriteDecorHandle<float> m_d0Handle {
+      this, "d0", "d0_%SYS%", "decoration name for d0" };
+    
     SysWriteDecorHandle<float> m_d0sigHandle {
       this, "d0sig", "d0sig_%SYS%", "decoration name for d0 significance" };
 
     SysWriteDecorHandle<float> m_z0sinthetaHandle {
       this, "z0sintheta", "z0sintheta_%SYS%", "decoration name for z0*sin(theta)" };
+
+    SysWriteDecorHandle<float> m_z0sinthetasigHandle {
+        this, "z0sinthetasig", "z0sinthetasig_%SYS%", "decoration name for z0*sin(theta) significance" };
 
   };
 

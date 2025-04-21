@@ -27,9 +27,7 @@
 
 namespace DerivationFramework {
 
-class MaxCellDecorator
-  : public AthAlgTool
-  , public IAugmentationTool
+class MaxCellDecorator : public extends<AthAlgTool, IAugmentationTool>
 {
 public:
   MaxCellDecorator(const std::string& t,

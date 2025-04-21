@@ -34,7 +34,7 @@ namespace DerivationFramework {
       @author Leo Cerda
       @author magdac@cern.ch
      */
-  class DiphotonVertexDecorator : public AthAlgTool, public IAugmentationTool {
+  class DiphotonVertexDecorator : public extends<AthAlgTool, IAugmentationTool> {
 
     public: 
       /** Constructor with parameters */

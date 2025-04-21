@@ -59,70 +59,62 @@ namespace Trk {
   class Surface;
 }
 
-namespace InDetDD {   
+namespace InDetDD {
      class SiDetectorElement;
 }
 
 namespace InDet {
-    
+
   /** @class DiscOverlapDescriptor
-         
+
       Class to describe overlaps in the custom detector,
       it extends the Trk::OverlapDescriptor base class.
-        
+
       There are two interface methods, one provides the most probably overlapcell,
       the second provides a list of overlap cells, based on an restricted area
-        
+
       @author Noemi.Calace@cern.ch
-        
+
   */
   class DiscOverlapDescriptor : public Trk::OverlapDescriptor {
   public:
-    
+    DiscOverlapDescriptor() = default;
     /** Constructor */
-    DiscOverlapDescriptor(const Trk::BinnedArray<Trk::Surface>* bin_array = 0,
-                          std::vector<Trk::BinUtility*>* singleBinUtils = 0,
+    DiscOverlapDescriptor(const Trk::BinnedArray<Trk::Surface>* bin_array,
+                          const std::vector<Trk::BinUtility>& singleBinUtils,
                           bool isPixel = false);
-    
     /** Destructor */
-    virtual ~DiscOverlapDescriptor() {
-      if (m_singleBinUtils) {
-        std::vector<Trk::BinUtility*>::iterator binIter = m_singleBinUtils->begin();
-        for ( ; binIter != m_singleBinUtils->end(); ++binIter) delete *binIter;
-      }
-      delete m_singleBinUtils;
-    }
-    
+    virtual ~DiscOverlapDescriptor()  = default;
+
     ///Delete copy
     DiscOverlapDescriptor(const DiscOverlapDescriptor &) = delete;
-    
+
     ///Delete assignment
     DiscOverlapDescriptor & operator=(const DiscOverlapDescriptor &) = delete;
-    
+
     /**Pseudo-Constructor*/
     virtual DiscOverlapDescriptor* clone() const override;
-    
-    /** get the compatible surfaces 
+
+    /** get the compatible surfaces
         - return vector : surfaces
         - primary bin surface : sf
         - position & direction : pos, dir
     */
-    bool reachableSurfaces(std::vector<Trk::SurfaceIntersection>& surfaces, 
+    bool reachableSurfaces(std::vector<Trk::SurfaceIntersection>& surfaces,
                            const Trk::Surface& sf,
                            const Amg::Vector3D& pos,
                            const Amg::Vector3D& dir) const override;
-    
+
   private:
     bool dumpSurfaces(std::vector<Trk::SurfaceIntersection>& surfaces) const;
-    
-    const Trk::BinnedArray<Trk::Surface>*           m_bin_array;
-    std::vector<Trk::BinUtility*>*                  m_singleBinUtils;
-    bool                                            m_pixelCase;
+
+    const Trk::BinnedArray<Trk::Surface>*           m_bin_array {nullptr};
+    std::vector<Trk::BinUtility>                    m_singleBinUtils{};
+    bool                                            m_pixelCase{false};
   };
-  
-  
-  inline DiscOverlapDescriptor* DiscOverlapDescriptor::clone() const { return new DiscOverlapDescriptor(); }     
-  
+
+  inline DiscOverlapDescriptor* DiscOverlapDescriptor::clone() const { return new DiscOverlapDescriptor(); }
+
 }
 
 #endif // INDETTRACKINGGEOMETRY_DISCOVERLAPDESCRIPTOR_H

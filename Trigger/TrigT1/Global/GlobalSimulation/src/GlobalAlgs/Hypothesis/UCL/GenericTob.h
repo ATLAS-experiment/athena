@@ -8,8 +8,10 @@
 #include "AlgoConstants.h"
 #include "AlgoDataTypes.h"  //bitSetToInt
 #include "eEmTob.h"
+#include "eTauTob.h"
 
 #include <bitset>
+#include <vector>
 #include <ostream>
 
 namespace GlobalSim {
@@ -27,13 +29,18 @@ namespace GlobalSim {
     
     constexpr static std::size_t GenericPhiBitWidth{7};
     constexpr static std::size_t GenericMuonFlagBitWidth{2};
+    constexpr static std::size_t GenericOverflowWidth{1};
 
     constexpr static std::size_t GenericTobWidth =
       GenericEtBitWidth + GenericEtaBitWidth +
-      GenericPhiBitWidth + GenericMuonFlagBitWidth;
+      GenericPhiBitWidth + GenericMuonFlagBitWidth +
+      GenericOverflowWidth;
     
     GenericTob(){};
+    GenericTob(const eEmTob& in_tob);
     GenericTob(const eEmTobPtr& in_tob);
+    GenericTob(const eTauTob& in_tob);
+    GenericTob(const eTauTobPtr& in_tob);
     GenericTob(const std::string&);
 
     
@@ -44,7 +51,7 @@ namespace GlobalSim {
     const std::bitset<1>& overflow_bits() const {return m_Overflow_bits;}
     std::bitset<32> as_bits() const;
  
-    ulong Et () const {return m_Et_bits.to_ulong();}
+    int Et () const {return bitSetToInt(m_Et_bits);}
     int Eta () const {return bitSetToInt(m_Eta_bits);}
     int Phi () const {return bitSetToInt(m_Phi_bits);}
     int Charge () const{return bitSetToInt(m_Charge_bits);}
@@ -62,7 +69,11 @@ namespace GlobalSim {
     
   };
 
+  using GenericTobContainer = std::vector<std::shared_ptr<GenericTob>>;
+
 }
+
+CLASS_DEF( GlobalSim::GenericTobContainer , 1078282199 , 1 )
 
 std::ostream& operator << (std::ostream&, const GlobalSim::GenericTob&);
 

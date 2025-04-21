@@ -33,7 +33,6 @@ DiTauTruthMatchingTool::DiTauTruthMatchingTool( const std::string& name )
   , m_accPhiVis("phi_vis")
   , m_accMVis("m_vis")
 {
-  declareProperty( "MaxDeltaR", m_dMaxDeltaR = 0.2);
 }
 
 //______________________________________________________________________________

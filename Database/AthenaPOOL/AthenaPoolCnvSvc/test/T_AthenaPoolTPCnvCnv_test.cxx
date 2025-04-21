@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaPoolCnvSvc/test/T_AthenaPoolTPCnvCnv_test.cxx
@@ -147,9 +147,9 @@ void test2 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
     pers2.m_v.push_back (X_p2 (i*50));
 
   testsvc.m_pers2 = &pers2;
-  Token* token = new Token;
+  auto token = std::make_unique<Token>();
   token->setClassID (Guid (XCont_p2_guid));
-  TokenAddress taddr (0, 0, "", "", 0, token);
+  TokenAddress taddr (0, 0, "", "", 0, std::move(token));
 
   {
     DataObject* pObj = nullptr;
@@ -167,7 +167,9 @@ void test2 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
     pers1.m_v.push_back (X_p1 (i*80));
 
   testsvc.m_pers1 = &pers1;
+  token = std::make_unique<Token>();
   token->setClassID (Guid (XCont_p1_guid));
+  taddr.setToken (std::move (token));
   {
     DataObject* pObj = nullptr;
     assert (cnv.createObj (&taddr, pObj).isSuccess());
@@ -184,7 +186,9 @@ void test2 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
     pers0.push_back (new X (i*11));
 
   testsvc.m_pers0 = &pers0;
+  token = std::make_unique<Token>();
   token->setClassID (Guid (XCont_guid));
+  taddr.setToken (std::move (token));
   {
     DataObject* pObj = nullptr;
     assert (cnv.createObj (&taddr, pObj).isSuccess());
@@ -195,7 +199,9 @@ void test2 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
     delete pObj;
   }
 
+  token = std::make_unique<Token>();
   token->setClassID (Guid ("8ACD1C53-D3C7-4FE5-9BC0-E388701DB8FA"));
+  taddr.setToken (std::move (token));
   DataObject* pObj = nullptr;
   assert (cnv.createObj (&taddr, pObj).isFailure());
 

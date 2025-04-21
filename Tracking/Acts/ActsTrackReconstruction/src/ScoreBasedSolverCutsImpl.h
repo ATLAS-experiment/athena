@@ -15,11 +15,10 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "InDetRecToolInterfaces/IInDetEtaDependentCutsSvc.h"
 
-
 // Gaudi includes
 #include "Gaudi/Property.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "GaudiKernel/ToolHandle.h"
 
 namespace ActsTrk {
 namespace ScoreBasedSolverCutsImpl {
@@ -29,22 +28,20 @@ using trackProxy_t = ActsTrk::MutableTrackContainer::ConstTrackProxy;
 ActsTrk::MutableTrackContainer addSummaryInformation(
     ActsTrk::TrackContainer trackContainer);
 
-/** Filter for tracks based on double holes */    
-bool doubleHolesFilter(const trackProxy_t &track);
+/** Filter for tracks based on double holes */
+void doubleHolesScore(const trackProxy_t &track, double &score);
 
 /** Score modifier for tracks based on innermost pixel layer hits */
 void innermostPixelLayerHitsScore(const trackProxy_t &track, double &score);
 
-/** Score modifier for tracks based on contributing pixel layers */
+/** Score modifier for tracks based on number of contributing pixel layers */
 void ContribPixelLayersScore(const trackProxy_t &track, double &score);
 
-/** Filter for tracks based on eta dependent cuts */
-bool etaDependentCuts(const trackProxy_t &track, ServiceHandle<InDet::IInDetEtaDependentCutsSvc> etaDependentCutsSvc);
+/** Score modifier for tracks based on number of SCT and pixel hits */
+void nSCTPixelHitsScore(const trackProxy_t &track, double &score);
 
-/** Hit selection for tracks based on pattern track hits */
-void patternTrackHitSelection(
-    const trackProxy_t &track, const trackProxy_t::ConstTrackStateProxy &ts,
-    Acts::ScoreBasedAmbiguityResolution::TrackStateTypes &trackStateType);
+/** Filter for tracks based on eta dependent cuts */
+bool etaDependentCuts(const trackProxy_t &track);
 
 }  // namespace ScoreBasedSolverCutsImpl
 }  // namespace ActsTrk

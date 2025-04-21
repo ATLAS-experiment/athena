@@ -4,7 +4,7 @@
 
 #include "CombinatorialNSWSeedFinderAlg.h"
 
-#include <MuonSpacePoint/SpacePointPerLayerSorter.h>
+#include <MuonSpacePoint/SpacePointPerLayerSplitter.h>
 #include <MuonTruthHelpers/MuonSimHitHelpers.h>
 #include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
 
@@ -21,6 +21,7 @@
 #include <vector>
 #include <unordered_set>
 #include <nlohmann/json.hpp>
+#include <format>
 #include <fstream> 
 
 
@@ -42,21 +43,6 @@ StatusCode CombinatorialNSWSeedFinderAlg::initialize() {
         return StatusCode::FAILURE;
     }
    
-    return StatusCode::SUCCESS;
-}
-
-template <class ContainerType>
-StatusCode CombinatorialNSWSeedFinderAlg::retrieveContainer(const EventContext &ctx, 
-                                                            const SG::ReadHandleKey<ContainerType> &key,
-                                                            const ContainerType* &contToPush) const {
-    contToPush = nullptr;
-    if (key.empty()) {
-        ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
-        return StatusCode::SUCCESS;
-    }
-    SG::ReadHandle readHandle{key, ctx};
-    ATH_CHECK(readHandle.isPresent());
-    contToPush = readHandle.cptr();
     return StatusCode::SUCCESS;
 }
 
@@ -258,7 +244,7 @@ CombinatorialNSWSeedFinderAlg::buildSegmentSeed(HitVec& hits,
 std::vector<std::unique_ptr<SegmentSeed>>
 CombinatorialNSWSeedFinderAlg::findSeedsFromMaximum(const HoughMaximum &max, const ActsGeometryContext &gctx) const {
     // first sort the hits per layer from the maximum
-    SpacePointPerLayerSorter hitLayers{max.getHitsInMax()};
+    SpacePointPerLayerSplitter hitLayers{max.getHitsInMax()};
 
     HitLayVec stripHitsLayers{hitLayers.stripHits()};
 
@@ -350,10 +336,10 @@ CombinatorialNSWSeedFinderAlg::findSeedsFromMaximum(const HoughMaximum &max, con
 StatusCode CombinatorialNSWSeedFinderAlg::execute(const EventContext &ctx) const {
     // read the inputs
     const EtaHoughMaxContainer *maxima{nullptr};
-    ATH_CHECK(retrieveContainer(ctx, m_etaKey, maxima));
+    ATH_CHECK(SG::get( maxima, m_etaKey, ctx));
 
     const ActsGeometryContext *gctx{nullptr};
-    ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
+    ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
     // prepare our output collection
     SG::WriteHandle writeMaxima{m_writeKey, ctx};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -47,7 +47,7 @@ StatusCode test_linked()
                                           auxid1);
   TTree tree ("t", "t");
   xAOD::TAuxStore s( "fooAux." );
-  RETURN_CHECK( APP_NAME, s.readFrom (&tree) );
+  RETURN_CHECK( APP_NAME, s.readFrom (tree) );
   int* vp1 = reinterpret_cast<int*> (s.getData (auxid1, 10, 10));
   float* vp2 = reinterpret_cast<float*> (s.getData (auxid2, 3, 3));
 
@@ -102,7 +102,7 @@ StatusCode test_linked()
 
   TTree tree2 ("t2", "t2");
   xAOD::TAuxStore s2( "fooAux." );
-  RETURN_CHECK( APP_NAME, s2.readFrom (&tree2) );
+  RETURN_CHECK( APP_NAME, s2.readFrom (tree2) );
   (void)s2.getData (auxid2, 6, 6);
   (void)s2.getData (auxid1, 4, 4);
   auto v3 = reinterpret_cast<const std::vector<int>*> (s2.getIOData (auxid1));
@@ -152,6 +152,7 @@ int main() {
                "tree" );
       return 1;
    }
+   itree->LoadTree( 0 );
    itree->Print();
    ::Info( APP_NAME, "Created transient input TTree for the test" );
 
@@ -160,7 +161,7 @@ int main() {
    store.lock();
 
    // Connect it to this transient input tree:
-   ANA_CHECK( store.readFrom( itree.get() ) );
+   ANA_CHECK( store.readFrom( *itree ) );
 
    // Check that it found the two variables that it needed to:
    ::Info( APP_NAME, "Auxiliary variables found on the input:" );
@@ -217,7 +218,7 @@ int main() {
    otree->SetDirectory( 0 );
 
    // Connect the store object to the tree:
-   ANA_CHECK( store.writeTo( otree.get() ) );
+   ANA_CHECK( store.writeTo( *otree ) );
 
    // Create the decoration again:
    SIMPLE_ASSERT( store.getDecoration( decId, 5, 5 ) != 0 );

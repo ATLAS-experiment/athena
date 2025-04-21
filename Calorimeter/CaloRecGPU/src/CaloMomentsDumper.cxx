@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -12,17 +12,6 @@
 
 using namespace CaloRecGPU;
 
-CaloMomentsDumper::CaloMomentsDumper(const std::string & type, const std::string & name, const IInterface * parent):
-  AthAlgTool(type, name, parent)
-{
-  declareInterface<CaloClusterCollectionProcessor> (this);
-}
-
-
-StatusCode CaloMomentsDumper::initialize()
-{
-  return StatusCode::SUCCESS;
-}
 
 StatusCode CaloMomentsDumper::execute (const EventContext & ctx, xAOD::CaloClusterContainer * cluster_collection) const
 {

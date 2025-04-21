@@ -21,11 +21,6 @@
 #include <cmath>
 #include <algorithm>
 
-FPGATrackSimWindowExtensionTool::FPGATrackSimWindowExtensionTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
-    base_class(algname, name, ifc) {
-        declareInterface<IFPGATrackSimTrackExtensionTool>(this);
-    }
-
 
 StatusCode FPGATrackSimWindowExtensionTool::initialize() {
 

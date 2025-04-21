@@ -3,7 +3,6 @@
 # art-type: grid
 # art-include: main/Athena
 # art-memory: 8192
-# art-input-nfiles: 2
 # art-output: *.txt
 # art-output: *.root
 set -e
@@ -32,20 +31,21 @@ python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
     OutFileName="MyMaps_" \
     doInsideOut=True \
     nSlices=1 \
-    Trigger.FPGATrackSim.region=0 \
+    Trigger.FPGATrackSim.region=34 \
     Trigger.FPGATrackSim.spacePoints=False \
-    Trigger.FPGATrackSim.oldRegionDefs=True \
     Trigger.FPGATrackSim.Hough.secondStage=False \
     GeoModel.AtlasVersion="${GEO_TAG}"
 ls -l
 echo "... Maps Making, this part is done ..."
 
 mkdir -p maps
-mv MyMaps_region0.rmap maps/eta0103phi0305.rmap
-mv MyMaps_region0.subrmap maps/eta0103phi0305.subrmap
-mv MyMaps_region0.pmap maps/eta0103phi0305.pmap
-mv MyMaps_region0.patt maps/eta0103phi0305.patt
-mv *_radii.txt maps/eta0103phi0305_radii.txt
+mv MyMaps_region*.rmap maps/region34.rmap
+mv MyMaps_region*.subrmap maps/region34.subrmap
+mv MyMaps_region*.pmap maps/region34.pmap
+mv MyMaps_region*.patt maps/region34.patt
+mv *radii.txt maps/region34_radii.txt
+cp /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/${MAPS_5L}/region34_lyrmap.json maps/region34_lyrmap.json
+cp /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/${MAPS_5L}/*.py maps/
 touch maps/moduleidmap
 
 echo "... Banks generation"
@@ -53,7 +53,9 @@ python -m FPGATrackSimBankGen.FPGATrackSimBankGenConfig \
     --filesInput="${RDO_SINGLE_MUON}" \
     --evtMax=-1 \
     Trigger.FPGATrackSim.Hough.genScan=True \
-    Trigger.FPGATrackSim.mapsDir=maps
+    Trigger.FPGATrackSim.GenScan.noCuts=False \
+    Trigger.FPGATrackSim.Hough.secondStage=False \
+    Trigger.FPGATrackSim.mapsDir="maps/"
 ls -l
 echo "... Banks generation, this part is done ..."
 
@@ -61,23 +63,23 @@ echo "... const generation on combined matrix file"
 python -m FPGATrackSimBankGen.FPGATrackSimBankConstGenConfig \
     Trigger.FPGATrackSim.FPGATrackSimMatrixFileRegEx="${COMBINED_MATRIX}" \
     Trigger.FPGATrackSim.Hough.genScan=True \
-    Trigger.FPGATrackSim.mapsDir=maps \
+    Trigger.FPGATrackSim.Hough.secondStage=False \
+    Trigger.FPGATrackSim.mapsDir="maps/" \
     --evtMax=1
 ls -l
 echo "... const generation on combined matrix file, this part is done ..."
 
 mkdir -p banks 
-mv sectors* slices* corr* const.root banks
-cp "${COMBINED_MATRIX}" banks
+mv sectors* corr* banks
 
 echo "... analysis on wrapper"
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.wrapperFileName="wrapper.root" \
-    Trigger.FPGATrackSim.mapsDir=./maps \
+    Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
     Trigger.FPGATrackSim.pipeline='F-600' \
     Trigger.FPGATrackSim.tracking=True \
     Trigger.FPGATrackSim.Hough.secondStage=False \
-    Trigger.FPGATrackSim.bankDir=./banks/
+    Trigger.FPGATrackSim.bankDir=${BANKS_5L}
 ls -l
 echo "... analysis on wrapper, this part is done ..."
 
@@ -104,11 +106,11 @@ echo "... analysis on RDO"
 python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
         --evtMax=${RDO_EVT} \
         --filesInput=${RDO_SINGLE_MUON} \
-        Trigger.FPGATrackSim.mapsDir=./maps \
-        Trigger.FPGATrackSim.bankDir=./banks/ \
+        Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
+        Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
         Trigger.FPGATrackSim.pipeline='F-600' \
         Trigger.FPGATrackSim.tracking=True \
-        Trigger.FPGATrackSim.sampleType="${SAMPLE_TYPE}" \
+        Trigger.FPGATrackSim.sampleType=${SAMPLE_TYPE} \
         Trigger.FPGATrackSim.doEDMConversion=True \
         Trigger.FPGATrackSim.doOverlapRemoval=True \
         Trigger.FPGATrackSim.Hough.secondStage=False \

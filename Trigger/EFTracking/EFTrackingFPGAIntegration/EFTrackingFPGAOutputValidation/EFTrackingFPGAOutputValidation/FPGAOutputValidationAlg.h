@@ -1,0 +1,52 @@
+/*
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ */
+
+#ifndef EFTRACKING_ATHENA_VS_FPGA_CLUSTER_HIST_MAKER_H
+#define EFTRACKING_ATHENA_VS_FPGA_CLUSTER_HIST_MAKER_H
+
+#include "GaudiKernel/LockedHandle.h"
+
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaMonitoringKernel/Monitored.h"
+#include "StoreGate/ReadHandleKeyArray.h"
+#include "xAODMeasurementBase/MeasurementDefs.h"
+#include "xAODInDetMeasurement/PixelClusterContainer.h"
+#include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/PixelCluster.h"
+#include "xAODInDetMeasurement/StripCluster.h"
+
+class FPGAOutputValidationAlg : public AthReentrantAlgorithm
+{
+  Gaudi::Property<std::string> m_outputRootFilePath{
+    this,
+    "outputRootFilePath", 
+    "fpgaOutputValidation.root", 
+    "Path to output root file containing histograms."
+  };
+
+  Gaudi::Property<bool> m_doDiffHistograms{
+    this,
+    "doDiffHistograms",
+    false,
+    "Create extra histograms for cluster parameter diffs between matched clusters."
+  };
+  Gaudi::Property<bool> m_matchByID{this, "matchByID", false, "Use hash to match clusters. If false, use only the rdo list."};
+  Gaudi::Property<size_t> m_allowedRdoMisses {this, "allowedRdoMisses", 0, "Use hash to match clusters. If false, use only the rdo list."};
+
+  SG::ReadHandleKeyArray<xAOD::PixelClusterContainer> m_pixelKeys{this, "pixelKeys", {}};
+  SG::ReadHandleKeyArray<xAOD::StripClusterContainer> m_stripKeys{this, "stripKeys", {}};
+
+  ToolHandle<GenericMonitoringTool> m_monitoringTool{this, "monitoringTool", "", "Monitoring tool"};
+
+  // chrono service
+  ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
+
+ public:
+  FPGAOutputValidationAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  virtual StatusCode initialize() override final;
+  virtual StatusCode execute(const EventContext& ctx) const override final;
+};
+
+#endif
+

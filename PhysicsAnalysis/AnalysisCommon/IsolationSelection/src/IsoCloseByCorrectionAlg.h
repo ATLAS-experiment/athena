@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IsoCloseByCorrectionAlg_H
@@ -34,11 +34,17 @@ namespace CP {
         StatusCode initialize() override;
 
     private:
-        StatusCode applySelection(const EventContext& ctx, const xAOD::Electron* elec) const;
-        StatusCode applySelection(const EventContext& ctx, const xAOD::Photon* phot) const;
-        StatusCode applySelection(const EventContext& ctx, const xAOD::Muon* muon) const;
+        StatusCode applySelection(const EventContext& ctx,
+                                  const xAOD::Electron* elec,
+                                  const SG::Decorator<char>& isOK) const;
+        StatusCode applySelection(const EventContext& ctx,
+                                  const xAOD::Photon* phot,
+                                  const SG::Decorator<char>& isOK) const;
+        StatusCode applySelection(const EventContext& ctx,
+                                  const xAOD::Muon* muon,
+                                  const SG::Decorator<char>& isOK) const;
         template <class CONT_TYPE>
-        StatusCode selectLeptonsAndPhotons(const EventContext& ctx, CONT_TYPE particles) const;
+        StatusCode selectLeptonsAndPhotons(const EventContext& ctx, CONT_TYPE particles, const SG::Decorator<char>& isOK) const;
 
         /// Input containers to retrieve from the storegate
         SG::ReadHandleKeyArray<xAOD::IParticleContainer>     m_contKeys{this, "ParticleContainerKeys", {} };
@@ -68,6 +74,10 @@ namespace CP {
         Gaudi::Property<float> m_minPhotPt{this, "MinPhotPt", 0,
                                            "Minimum pt cut that the photon needs to pass in order to be selected"};
 
+        // Name of the isolation selection decoration
+        Gaudi::Property<std::string> m_quality_name{
+            this, "SelectionDecorator", "isoSelIsOK",
+            "Name of the char auxdata defining whether the particle shall be considered for iso correction"};
     };
 }  // namespace CP
 #endif

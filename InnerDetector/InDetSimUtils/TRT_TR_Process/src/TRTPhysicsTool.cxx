@@ -13,6 +13,7 @@
 
 #include "globals.hh"
 #include <iostream>
+#include <memory>
 
 //-----------------------------------------------------------------------------
 // Implementation file for class : TRTPhysicsTool
@@ -32,10 +33,9 @@
 //=============================================================================
 // Standard constructor, initializes variables
 //=============================================================================
-TRTPhysicsTool::TRTPhysicsTool( const std::string& type,
-                                const std::string& nam,const IInterface* parent )
-  : G4VPhysicsConstructor(nam), base_class ( type, nam , parent )
-{
+TRTPhysicsTool::TRTPhysicsTool(const std::string& type, const std::string& name,
+                               const IInterface* parent)
+    : base_class(type, name, parent) {
   m_physicsOptionType = G4AtlasPhysicsOption::Type::GlobalProcesses;
 
   declareProperty("XMLFile", m_xmlFile="TRgeomodelgeometry.xml");
@@ -47,31 +47,25 @@ TRTPhysicsTool::TRTPhysicsTool( const std::string& type,
 StatusCode TRTPhysicsTool::initialize( )
 {
   ATH_MSG_DEBUG("TRTPhysicsTool initialize()");
-  this->SetPhysicsName(name());
   return StatusCode::SUCCESS;
 }
 
 //=============================================================================
 // Return the physics constructor
 //=============================================================================
-G4VPhysicsConstructor* TRTPhysicsTool::GetPhysicsOption()
-{
-  // I am the physics constructor, so return self.
-  return this;
+auto TRTPhysicsTool::GetPhysicsOption() -> UPPhysicsConstructor {
+  return std::make_unique<TRTPhysicsTool::PhysicsConstructor>(name(), this->msgLevel(), m_xmlFile);
 }
 
 //=============================================================================
 // Particle construction; not implemented
 //=============================================================================
-void TRTPhysicsTool::ConstructParticle()
-{
-}
+void TRTPhysicsTool::PhysicsConstructor::ConstructParticle() {}
 
 //=============================================================================
 // Physics process construction
 //=============================================================================
-void TRTPhysicsTool::ConstructProcess()
-{
+void TRTPhysicsTool::PhysicsConstructor::ConstructProcess() {
   ATH_MSG_DEBUG("TRTPhysicsTool::ConstructProcess() - start");
 
   // Use the Geant4 garbage collection mechanism to clean this up.

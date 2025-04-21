@@ -137,6 +137,8 @@ class EventSelectionConfig(ConfigBlock):
             self.add_NLJETGHOST_selector(text, cfg)
         elif "LJET_N" in text.split():
             self.add_NLJET_selector(text, cfg)
+        elif "OBJ_N" in text.split():
+            self.add_NOBJ_selector(text, cfg)
         elif "MET" in text.split():
             self.add_MET_selector(text, cfg)
         elif "MWT" in text.split():
@@ -650,6 +652,22 @@ class EventSelectionConfig(ConfigBlock):
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+
+    def add_NOBJ_selector(self, text, config):
+        items = text.split()
+        if items[0] != "OBJ_N":
+            self.raise_misconfig(text, "OBJ_N")
+        if len(items) != 5:
+            self.raise_misconfig(text, "number of arguments")
+        thisalg = f'{self.name}_NOBJ_{self.step}'
+        alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
+        alg.particles, alg.objectSelection = config.readNameAndSelection(self.check_string(items[1]))
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
+        alg.minPt = self.check_float(items[2])
+        alg.sign  = self.check_sign(items[3])
+        alg.count = self.check_int(items[4])
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 

@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include <DerivationFrameworkMuons/CaloIsolationDecorAlg.h>
-#include <DerivationFrameworkMuons/Utils.h>
+#include "CaloIsolationDecorAlg.h"
+#include "DerivationFrameworkMuons/Utils.h"
 #include <StoreGate/ReadHandle.h>
 #include <StoreGate/WriteDecorHandle.h>
 

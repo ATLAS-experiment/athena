@@ -14,6 +14,7 @@ xAODVBFMjjIntervalFilter = xAODVBFMjjIntervalFilter("xAODVBFMjjIntervalFilter")
 filtSeq += xAODVBFMjjIntervalFilter
 
 # to modify cuts put into JOs e.g.:
+from AthenaCommon.SystemOfUnits import GeV
 filtSeq.xAODVBFMjjIntervalFilter.RapidityAcceptance = 5.0
 filtSeq.xAODVBFMjjIntervalFilter.MinSecondJetPT = 15.*GeV
 filtSeq.xAODVBFMjjIntervalFilter.MinOverlapPT = 15.*GeV

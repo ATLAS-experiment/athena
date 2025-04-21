@@ -6,6 +6,7 @@
         "OfflineTrkKey" : "_TRKCOLLNAME_",
         "MatchingType"  : "TruthMatch",
         "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
         "plotDuplicateRates"  : true
     }
 }

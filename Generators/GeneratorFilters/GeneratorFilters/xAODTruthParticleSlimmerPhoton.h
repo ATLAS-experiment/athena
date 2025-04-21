@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_XAODTRUTHPARTICLESLIMMERPHOTON_H
@@ -7,6 +7,7 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthEvent.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "xAODTruth/TruthMetaDataContainer.h"
@@ -29,10 +30,11 @@ public:
     virtual StatusCode execute();
 
 private:
-    /// The key for the output xAOD truth containers
-    std::string m_xaodTruthParticleContainerNamePhoton;
-    std::string m_xaodTruthParticleContainerName;
-    std::string m_xaodTruthEventContainerName;
+  SG::ReadHandleKey<xAOD::TruthEventContainer> m_xaodTruthEventContainerName
+  {this, "xAODTruthEventContainerName", "TruthEvents"};
+  /// The key for the output xAOD truth containers
+  SG::WriteHandleKey<xAOD::TruthParticleContainer> m_xaodTruthParticleContainerNamePhoton
+    {this, "xAODTruthParticleContainerNamePhoton","TruthPhotons","Name of Truth Photons contatiner from the slimmer"};
 }; // class xAODTruthParticleSlimmerPhoton
 
 #endif //GENERATORFILTERS_XAODTRUTHPARTICLESLIMMERPHOTON_H

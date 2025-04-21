@@ -5,7 +5,7 @@
 
 # art-description: art job for tau_ztautau_lowpt_pu46_CA
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-input: valid1.601191.PhPy8EG_AZNLO_Ztautau.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42134185_00
 # art-input-nfiles: 3

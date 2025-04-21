@@ -8,12 +8,10 @@ if __name__=="__main__":
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
     parser.set_defaults(outRootFile="RecoChainTester.root")
-    # parser.set_defaults(condTag="CONDBR2-BLKPA-2024-03")
     parser.set_defaults(inputFile=[
                                    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"
                                     # "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
                                     ])
-    parser.set_defaults(eventPrintoutLevel = 500)
     parser.add_argument("--monitorPlots", action='store_true', default=False, 
                         help="Setup monitoring plots of the pattern recognition")
     parser.add_argument("--runVtune", 

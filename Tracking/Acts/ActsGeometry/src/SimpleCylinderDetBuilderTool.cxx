@@ -33,7 +33,7 @@ namespace ActsTrk {
         auto cylinderDetectorVolume = Acts::Experimental::DetectorVolumeFactory::construct(
                     Acts::Experimental::defaultPortalGenerator(), gctx->context(), "EnvelopeSimple", 
                     Acts::Transform3::Identity(), std::move(cylinderBounds), Acts::Experimental::tryAllPortalsAndSurfaces());
-        cylinderDetectorVolume->assignGeometryId(Acts::GeometryIdentifier{}.setVolume(1));
+        cylinderDetectorVolume->assignGeometryId(Acts::GeometryIdentifier{}.withVolume(1));
 
         if(msgLvl(MSG::VERBOSE)){
             Acts::ObjVisualization3D helper;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VertexDecoratorAlg.h"
@@ -211,8 +211,7 @@ namespace InDetGNNHardScatterSelection
 
       dec_ntrk(*vertex) = number_tracks;
 
-      static const SG::AuxElement::Decorator<float> acc_sumPt("sumPt");
-      if(not acc_sumPt.isAvailable(*vertex)){
+      if(!dec_sumPt.isAvailable()){
         dec_sumPt(*vertex) = sumPt;
       }
       dec_chi2Over_ndf(*vertex) = vertex->chiSquared() / vertex->numberDoF();

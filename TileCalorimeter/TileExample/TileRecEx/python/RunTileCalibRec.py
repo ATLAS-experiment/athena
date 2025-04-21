@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 '''@file RunTileCalibRec.py
 @brief Script to run Tile Reconstrcution/Monitoring for calibration runs
@@ -62,11 +62,15 @@ def getArgumentParser(flags):
     parser.add_argument('--pool', default=False, help='Create output POOL file', action=argparse.BooleanOptionalAction)
     parser.add_argument('--jivexml', default=False, help='Create output Jive XML files for Atlantis', action=argparse.BooleanOptionalAction)
     parser.add_argument('--d3pd', default=False, help='Create output D3PD file', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--special-demo-shape', dest='special_demo_shape', type=int, default=None, help='Use special pulse shape for the Demonstrator')
 
     # Set up Tile h2000 ntuple
     ntuple = parser.add_argument_group('Tile h2000 ntuple')
     ntuple.add_argument('--ntuple', default=True, help='Create Tile h2000 ntuple', action=argparse.BooleanOptionalAction)
     ntuple.add_argument('--reduced-ntuple', dest='reduced_ntuple', action='store_true', help='No Tile raw cahnnel container (including DSP) in h2000 ntuple')
+    ntuple.add_argument('--use-dsp-units', dest='use_dsp_units', action='store_true', help='Use DSP units in h2000 ntuple')
+    ntuple.add_argument('--calibrate', default=None, help='Calibrate energy in h2000 ntuple', action=argparse.BooleanOptionalAction)
+    ntuple.add_argument('--offline-units', dest='offline_units', type=int, default=None, help='Units in h2000 ntuple (see TileRawChannelUnit)')
 
     # Set up Tile monitoring
     mon = parser.add_argument_group('Tile monitoring')
@@ -88,6 +92,7 @@ def getArgumentParser(flags):
     run_type.add_argument('--cis', action='store_true', help='Tile CIS run type')
     run_type.add_argument('--mono-cis', action='store_true', dest='mono_cis', help='Tile mono CIS run type')
     run_type.add_argument('--gap-cis', action='store_true', dest='gap_cis', help='Tile gap CIS run type')
+    run_type.add_argument('--l1calo', action='store_true', help='Tile LVL1 Calo (CIS) run type')
     run_type.add_argument('--laser', action='store_true', help='Tile laser run type')
     run_type.add_argument('--gap-laser', action='store_true', dest='gap_laser', help='Tile gap laser run type')
     run_type.add_argument('--pedestals', action='store_true', help='Tile pedestals run type')
@@ -168,6 +173,8 @@ if __name__=='__main__':
             flags.Tile.RunType = TileRunType.MONOCIS
         elif args.gap_cis:
             flags.Tile.RunType = TileRunType.GAPCIS
+        elif args.l1calo:
+            flags.Tile.RunType = TileRunType.L1CALO
         elif args.laser:
             flags.Tile.RunType = TileRunType.LAS
         elif args.gap_laser:
@@ -180,10 +187,12 @@ if __name__=='__main__':
             log.error('The Tile Run Type must be provided! For example: --laser or --cis, ..., or Tile.RunType=TileRunType.PED')
             sys.exit(-1)
 
-    if flags.Tile.RunType not in [TileRunType.PHY, TileRunType.CIS]:
+    if flags.Tile.RunType in [TileRunType.PED, TileRunType.LAS, TileRunType.BILAS, TileRunType.MONOCIS]:
         flags.Exec.SkipEvents = 1
     elif flags.Tile.RunType is TileRunType.CIS:
         flags.Exec.SkipEvents = 192 # skip all events when just one channel is fired (4*48)
+    elif flags.Tile.RunType is TileRunType.L1CALO:
+        flags.Exec.SkipEvents = 3
 
     # Set up Tile reconstuction method
     flags.Tile.doOpt2 = args.opt2
@@ -212,7 +221,7 @@ if __name__=='__main__':
     # Set up the DB global conditions tag
     if flags.Input.Format is Format.BS:
         if args.run3:
-            condDbTag = 'CONDBR2-BLKPA-2023-01' if args.upd4 else 'CONDBR2-ES1PA-2023-01'
+            condDbTag = 'CONDBR2-BLKPA-2024-04' if args.upd4 else 'CONDBR2-ES1PA-2024-05'
             detDescrVersion = 'ATLAS-R3S-2021-03-01-00'
         elif args.run2:
             condDbTag = 'CONDBR2-BLKPA-2018-16' if args.upd4 else 'CONDBR2-ES1PA-2018-05'
@@ -308,12 +317,18 @@ if __name__=='__main__':
 
     # =======>>> Set up the Tile cell maker
     if args.cells:
+        rawChannelContainer = flags.Tile.RawChannelContainer
+        if flags.Tile.doOptATLAS and any([flags.Tile.doFit, flags.Tile.doOpt2]):
+            rawChannelContainer = 'TileRawChannelOpt2' if flags.Tile.doOpt2 else 'TileRawChannelFit'
         from TileRecUtils.TileCellMakerConfig import TileCellMakerCfg
         if biGainRun:
             cfg.merge( TileCellMakerCfg(flags, SkipGain=0, mergeChannels=False) )
             cfg.merge( TileCellMakerCfg(flags, SkipGain=1, mergeChannels=False) )
+            cfg.getEventAlgo("TileCellMakerHG").CaloCellMakerToolNames["TileCellBuilder"].TileRawChannelContainer = rawChannelContainer
+            cfg.getEventAlgo("TileCellMakerLG").CaloCellMakerToolNames["TileCellBuilder"].TileRawChannelContainer = rawChannelContainer
         else:
             cfg.merge( TileCellMakerCfg(flags, mergeChannels=False) )
+            cfg.getEventAlgo("TileCellMaker").CaloCellMakerToolNames["TileCellBuilder"].TileRawChannelContainer = rawChannelContainer
 
     # =======>>> Set up the Tile clusters maker
     if args.clusters:
@@ -339,7 +354,7 @@ if __name__=='__main__':
     if args.ntuple:
         ntupleFile = f'{args.outputDirectory}/tile_{runNumber}_{args.outputVersion}.aan.root'
         from TileRec.TileAANtupleConfig import TileAANtupleCfg
-        cfg.merge( TileAANtupleCfg(flags, outputFile=ntupleFile) )
+        cfg.merge( TileAANtupleCfg(flags, outputFile=ntupleFile, UseDspUnits=args.use_dsp_units) )
         tileNtuple = cfg.getEventAlgo('TileNtuple')
         # CompressionSettings: algorithm * 100 + level
         tileNtuple.CompressionSettings = 204
@@ -349,8 +364,11 @@ if __name__=='__main__':
         if args.reduced_ntuple:
             tileNtuple.Reduced = True
             tileNtuple.TileRawChannelContainer = ""
-        if flags.Tile.RunType is TileRunType.LAS:
-            tileNtuple.OfflineUnits = 1 # use pCb units for ntuple
+        if args.offline_units:
+            tileNtuple.OfflineUnits = args.offline_units
+            tileNtuple.CalibrateEnergy = True
+        elif args.calibrate is not None:
+            tileNtuple.CalibrateEnergy = args.calibrate
         if flags.Tile.RunType in [TileRunType.GAPLAS, TileRunType.GAPCIS]:
             tileNtuple.TileDigitsContainerFlt = "TileDigitsCnt"
             tileNtuple.TileDigitsContainer = "" # do not save various error bits
@@ -412,7 +430,7 @@ if __name__=='__main__':
             cfg.merge(TileDigiNoiseMonitoringConfig(flags, TriggerTypes=triggerTypes))
             setOnlineEnvironment(cfg.getEventAlgo('TileDigiNoiseMonAlg'))
 
-        if any([args.tmdb_digits_mon, args.tmdb_mon]) and args.postprocessing:
+        if any([args.tmdb_digits_mon, args.tmdb_mon, args.channel_mon, args.digits_mon]) and args.postprocessing:
             from AthenaCommon.Utils.unixtools import find_datafile
             configurations = []
             dataPath = find_datafile('TileMonitoring')
@@ -455,6 +473,14 @@ if __name__=='__main__':
             from TileCalibAlgs.TileLaserCalibAlgConfig import TileLaserCalibAlgCfg
             cfg.merge( TileLaserCalibAlgCfg(flags, FileName=laserCalibFile) )
 
+        elif flags.Tile.RunType is TileRunType.L1CALO:
+            from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
+            cfg.merge( LVL1CaloRun2ReadBSCfg(flags))
+
+            l1caloCalibFile = f'tileCalibL1Calo_{runNumber}_{args.outputVersion}.root'
+            from TileCalibAlgs.TileTriggerCalibAlgConfig import TileTriggerCalibAlgCfg
+            cfg.merge( TileTriggerCalibAlgCfg(flags, FileName=l1caloCalibFile) )
+
         elif flags.Tile.RunType is TileRunType.CIS:
             cisCalibFile = f'tileCalibCIS_{runNumber}_{args.outputVersion}.root'
             from TileCalibAlgs.TileCisCalibAlgConfig import TileCisCalibAlgCfg
@@ -487,7 +513,7 @@ if __name__=='__main__':
                 cfg.merge( TileDigiNoiseCalibAlgCfg(flags) )
                 digiNoiseCalibAlg = cfg.getEventAlgo('TileDigiNoiseCalibAlg')
                 digiNoiseCalibAlg.DoAvgCorr = False # False=> Full AutoCorr matrix calculation
-                rawChanNoiseCalibAlg.FileNamePrefix = f'{args.outputDirectory}/Digi_NoiseCalib{fileVersion}'
+                digiNoiseCalibAlg.FileNamePrefix = f'{args.outputDirectory}/Digi_NoiseCalib{fileVersion}'
 
 
     # =======>>> Set up the Tile output Jive XML files
@@ -527,12 +553,55 @@ if __name__=='__main__':
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         cfg.merge( OutputStreamCfg(flags, streamName='ESD', ItemList=outputItemList) )
 
+    if args.run3:
+        if args.special_demo_shape and args.special_demo_shape > 0 and args.special_demo_shape <= 10:
+            tileInfoLoader = cfg.getService('TileInfoLoader')
+            if flags.RunType.getCommonType() is TileRunType.LAS:
+                # Disable special treatment for demo in laser runs for the moment
+                args.special_demo_shape = -1
+            elif flags.RunType.getCommonType() is TileRunType.CIS:
+                # Put CIS pulse shape for Demo in laser and physics structures
+                args.special_demo_shape = 3
+                tileInfoLoader.filename_lo_las = "pulselo_cis_demo_100.dat"
+                tileInfoLoader.filename_hi_las = "pulsehi_cis_demo_100.dat"
+                tileInfoLoader.filename_lo_las_der = "dpulselo_cis_demo_100.dat"
+                tileInfoLoader.filename_hi_las_der = "dpulsehi_cis_demo_100.dat"
+                tileInfoLoader.filename_lo_phys = "pulselo_cis_demo_5p2.dat"
+                tileInfoLoader.filename_hi_phys = "pulsehi_cis_demo_5p2.dat"
+                tileInfoLoader.filename_lo_phys_der = "dpulselo_cis_demo_5p2.dat"
+                tileInfoLoader.filename_hi_phys_der = "dpulsehi_cis_demo_5p2.dat"
+            else:
+                # Put physics pulse shape for Demo in laser structures
+                args.special_demo_shape = 2
+                tileInfoLoader.filename_lo_las = "pulselo_phys_demo.dat"
+                tileInfoLoader.filename_hi_las = "pulsehi_phys_demo.dat"
+                tileInfoLoader.filename_lo_las_der = "dpulselo_phys_demo.dat"
+                tileInfoLoader.filename_hi_las_der = "dpulsehi_phys_demo.dat"
+        else:
+            # Disable only leakage pulse in CIS/MonoCIS, but use the same pulse shape
+            if not args.special_demo_shape:
+                args.special_demo_shape = 9
+
+        if args.special_demo_shape:
+            if flags.Tile.doFit:
+                fitFilter = cfg.getEventAlgo('TileRChMaker').TileRawChannelBuilder['TileRawChannelBuilderFitFilter']
+                fitFilter.SpecialDemoShape = args.special_demo_shape
+
+    if flags.Input.Format is Format.BS:
+        cfg.getCondAlgo("TileHid2RESrcIDCondAlg").RODStatusProxy = None
+
     # =======>>> Any last things to do?
     if args.postExec:
         log.info('Executing postExec: %s', args.postExec)
         exec(args.postExec)
 
-    cfg.printConfig(withDetails=args.printDetailedConfig)
+    cfg.printConfig(withDetails=args.printDetailedConfig,
+                    summariseProps=args.printDetailedConfig,
+                    printDefaults=args.printDetailedConfig)
 
-    sc = cfg.run()
-    sys.exit(0 if sc.isSuccess() else 1)
+    if args.config_only:
+        cfg.store(open('RunTileCalibRec.pkl', 'wb'))
+    else:
+        sc = cfg.run()
+        # Success should be 0
+        sys.exit(0 if sc.isSuccess() else 1)

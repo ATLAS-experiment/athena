@@ -10,6 +10,7 @@ if not hasattr(filtSeq, "HeavyFlavorCHadronPt4Eta4_JetFilter"):
 # Anti-kt truth jets with pt>7 GeV and R=0.4
 include("GeneratorFilters/AntiKt4TruthJets.py")
 #
+from AthenaCommon.SystemOfUnits import GeV
 HeavyFlavorCHadronPt4Eta4_JetFilter.RequestBottom=False
 HeavyFlavorCHadronPt4Eta4_JetFilter.RequestCharm=True
 HeavyFlavorCHadronPt4Eta4_JetFilter.Request_cQuark=False

@@ -12,6 +12,7 @@
 
 #include <AsgTools/AsgComponentFactories.h>
 #include <AsgTools/MessageCheckAsgTools.h>
+#include <mutex>
 
 #include <AsgAnalysisAlgorithms/AsgClassificationDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgCutBookkeeperAlg.h>
@@ -93,6 +94,7 @@
 #include <EventSelectionAlgorithms/TransverseMassSelectorAlg.h>
 #include <FakeBkgTools/AsymptMatrixTool.h>
 #include <FTagAnalysisAlgorithms/BTaggingEfficiencyAlg.h>
+#include <FTagAnalysisAlgorithms/BTaggingTriggerEfficiencyAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingInformationDecoratorAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingScoresAlg.h>
 #include <FTagAnalysisAlgorithms/XbbEfficiencyAlg.h>
@@ -203,7 +205,10 @@
 
 namespace CP
 {
-  bool preloadComponentFactories ()
+  // this function gets called once by the function below.  calling it
+  // once avoids any errors if setup happens multiple times, e.g. in
+  // test fixtures
+  static bool doPreloadComponentFactories ()
   {
     using namespace asg::msgComponentConfig;
     ANA_CHECK_SET_TYPE (bool);
@@ -230,6 +235,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgxAODNTupleMakerAlg>("CP::AsgxAODNTupleMakerAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::BJetCalibrationAlg >("CP::BJetCalibrationAlg "));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::BTaggingEfficiencyAlg>("CP::BTaggingEfficiencyAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::BTaggingTriggerEfficiencyAlg>("CP::BTaggingTriggerEfficiencyAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::BTaggingInformationDecoratorAlg>("CP::BTaggingInformationDecoratorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::BTaggingScoresAlg>("CP::BTaggingScoresAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::BootstrapGeneratorAlg>("CP::BootstrapGeneratorAlg"));
@@ -397,5 +403,13 @@ namespace CP
     ANA_CHECK (asg::registerServiceFactory<CP::SelectionNameSvc> ("CP::SelectionNameSvc"));
 
     return true;
+  }
+
+  bool preloadComponentFactories ()
+  {
+    static bool result = false;
+    static std::once_flag flag;
+    std::call_once (flag, [&] () { result = doPreloadComponentFactories (); });
+    return result;
   }
 }

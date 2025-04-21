@@ -12,7 +12,7 @@
 //***When this is resolved it can be deleted
 
 namespace DerivationFramework {
-  class AnyVertexSkimmingTool : public AthAlgTool, public ISkimmingTool{
+  class AnyVertexSkimmingTool : public extends<AthAlgTool, ISkimmingTool>{
     public:
       AnyVertexSkimmingTool(const std::string&, const std::string&, const IInterface*);
       StatusCode initialize() override;

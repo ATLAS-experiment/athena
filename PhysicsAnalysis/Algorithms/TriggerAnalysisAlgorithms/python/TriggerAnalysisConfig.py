@@ -206,7 +206,7 @@ class TriggerAnalysisBlock (ConfigBlock):
         if self.triggerChainsPerYear and not self.triggerChainsForSelection:
             triggers = set()
             for trigger_chains in self.multiTriggerChainsPerYear.values():
-                for chain_list in self.triggerChainsPerYear.values():
+                for chain_list in trigger_chains.values():
                     for chain in chain_list:
                         if '||' in chain:
                             chains = chain.split('||')

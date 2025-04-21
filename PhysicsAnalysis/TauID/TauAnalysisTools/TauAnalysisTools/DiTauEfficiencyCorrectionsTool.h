@@ -1,12 +1,11 @@
 /**
  *
- * @copyright Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *
  * @file DiTauEfficiencyCorrectionsTool.h
  * @author Guillermo Hamity (ghamity@cern.ch)
  * @author David Kirchmeier
  * @brief Efficiency scale factors and uncertainties for ditau jets
- * @date 2021-02-18
  *
  */
 
@@ -17,6 +16,7 @@
 // Framework include(s):
 #include "AsgTools/AsgMetadataTool.h"
 #include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // Local include(s):
 #include "TauAnalysisTools/IDiTauEfficiencyCorrectionsTool.h"
@@ -111,14 +111,16 @@ private:
 private:
 
   std::vector<int> m_vEfficiencyCorrectionTypes;
+
+  Gaudi::Property<std::string> m_sInputFilePathJetIDHadTau{this, "InputFilePathJetIDHadTau", ""};
+  Gaudi::Property<std::string> m_sVarNameJetIDHadTau{this, "VarNameJetIDHadTau", ""};
+  Gaudi::Property<std::string> m_sRecommendationTag{this, "RecommendationTag", "2017-moriond"};
+  Gaudi::Property<int> m_iJetIDLevel{this, "JetIDLevel", static_cast<int>(JETIDBDTTIGHT)};
+  Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};   
+
   std::vector< asg::AnaToolHandle<IDiTauEfficiencyCorrectionsTool>* > m_vCommonEfficiencyTools;
-  std::string m_sInputFilePathJetIDHadTau;
-  std::string m_sVarNameJetIDHadTau;
-  std::string m_sRecommendationTag;
-  bool m_bSkipTruthMatchCheck;
   bool m_bIsData;
   bool m_bIsConfigured;
-  int m_iJetIDLevel;
 
 }; // class DiTauEfficiencyCorrectionsTool
 

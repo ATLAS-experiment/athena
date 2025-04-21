@@ -27,7 +27,7 @@ using namespace DerivationFramework;
 ReVertex::ReVertex(const std::string& t,
                    const std::string& n,
                    const IInterface* p) :
-    AthAlgTool(t,n,p), m_vertexEstimator("InDet::VertexPointEstimator"), m_iVertexFitter("Trk::TrkVKalVrtFitter"),
+    base_class(t,n,p), m_vertexEstimator("InDet::VertexPointEstimator"), m_iVertexFitter("Trk::TrkVKalVrtFitter"),
     m_massConst(0.),
     m_totalMassConst(0.),
     m_v0Tools("Trk::V0Tools"),
@@ -39,7 +39,6 @@ ReVertex::ReVertex(const std::string& t,
     m_useAdditionalTrack(false)
 {
 
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("TrackIndices", m_TrackIndices);
     declareProperty("TrkVertexFitterTool", m_iVertexFitter);
     declareProperty("VertexPointEstimator",m_vertexEstimator);

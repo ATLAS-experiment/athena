@@ -38,14 +38,6 @@ Update : June 2004 David Rousseau
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
-// CONSTRUCTOR:
-
-CaloCellCorrection::CaloCellCorrection(const std::string& type, 
-				     const std::string& name, 
-				     const IInterface* parent) 
-  : AthAlgTool(type, name, parent)
-{ }
-
 // DESTRUCTOR:
 
 CaloCellCorrection::~CaloCellCorrection()

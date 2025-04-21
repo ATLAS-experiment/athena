@@ -31,7 +31,7 @@ namespace xAOD {
  */
 namespace DerivationFramework {
 
-  class Reco_4mu : public AthAlgTool, public IAugmentationTool {
+  class Reco_4mu : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       Reco_4mu(const std::string& t, const std::string& n, const IInterface* p);
 

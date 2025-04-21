@@ -1,13 +1,14 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Test of cosmic P1+Tier0 workflow, runs athenaHLT with Cosmic_run3_v1 menu followed by offline reco and monitoring
 # art-type: build
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Common import find_file
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 # Specify trigger menu once here:
 triggermenu = 'Cosmic_run3_v1'
@@ -69,7 +70,7 @@ tzreco.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  
 tzreco.args += ' --outputAODFile=AOD.pool.root'
 tzreco.args += ' --outputHISTFile=ExampleMonitorOutput.root'
 tzreco.args += ' --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
-tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2023-05\''
+tzreco.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA23}"'
 tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
 
 # The full test

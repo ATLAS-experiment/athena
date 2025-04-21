@@ -11,6 +11,7 @@ should be added there, not here.
 from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
     ParentDecoratorCfg
 )
+from JetTagDerivationUtils.JetMatchingConfig import JetMatchingCfg
 
 ## Common items used in PHYSVAL, FTAG1 and FTAG2
 PHYSVAL_FTAG1_FTAG2_SmartCollections = [
@@ -157,8 +158,34 @@ def add_baseline_slimming_allvariables(SlimmingHelper):
     SlimmingHelper.AllVariables += PHYSVAL_FTAG1_FTAG2_AllVariables
 
 
+def _int_labels():
+    algs = ['HadronConeExcl', 'HadronGhost']
+    types = ['Extended', '']
+    return [f'{a}{e}TruthLabelID' for a in algs for e in types]
+
+
+def _match_vars(source):
+    labels = _int_labels()
+    allvars = [f'{l}From{source}' for l in labels]
+    allvars += [f'delta{v}To{source}' for v in ['R', 'Pt']]
+    return allvars
+
+
 def addCommonAugmentation(flags, cfg, helper):
     """add content common to all ftag derivations"""
+
+    target = "AntiKt4EMPFlowJets"
+
+    cfg.merge(
+        JetMatchingCfg(
+            flags,
+            target=target,
+            ints_to_copy=_int_labels(),
+        )
+    )
+    helper.ExtraVariables +=  [
+        '.'.join(['AntiKt4EMPFlowJets'] + _match_vars(target))
+    ]
 
     if not flags.Input.isMC:
         return
@@ -167,7 +194,7 @@ def addCommonAugmentation(flags, cfg, helper):
     cfg.merge(
         ParentDecoratorCfg(
             flags,
-            targetContainer="AntiKt4EMPFlowJets",
+            targetContainer=target,
             prefix="PFlow",
             matchDeltaR=0.3
         )
@@ -179,3 +206,4 @@ def addCommonAugmentation(flags, cfg, helper):
     ]
 
     helper.ExtraVariables += ['.'.join(['AntiKt4EMPFlowJets'] + truth_labels)]
+

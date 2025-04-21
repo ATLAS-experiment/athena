@@ -7,8 +7,6 @@
 
 #include "ActsToolInterfaces/ISeedingTool.h"
 #include "StoreGate/ReadCondHandleKey.h"
-#include "InDetReadoutGeometry/SiDetectorElement.h"
-#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
 
 #include "SeedingToolBase.h"
@@ -32,9 +30,13 @@ class Gbts2ActsSeedingTool: public SeedingToolBase, public ActsTrk::ISeedingTool
                   ActsTrk::SeedContainer& seedContainer ) const override;
 
     protected:
-    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetectorElements", "ITkPixelDetectorElementCollection", "Key of input SiDetectorElementCollection for Pixel"};
-    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey{this, "StripDetectorElements", "ITkStripDetectorElementCollection", "Key of input SiDetectorElementCollection for Strip"};
+
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
+
+  const std::vector<short>* m_sct_h2l{nullptr};
+  const std::vector<short>* m_pix_h2l{nullptr};
+  std::vector<bool> m_are_pixels;
+  
 };
 
 #endif

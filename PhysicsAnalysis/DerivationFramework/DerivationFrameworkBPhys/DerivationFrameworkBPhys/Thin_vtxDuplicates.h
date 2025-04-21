@@ -15,7 +15,7 @@ class IThinningSvc;
 
 namespace DerivationFramework {
 
-  class Thin_vtxDuplicates : public AthAlgTool, public IThinningTool {
+  class Thin_vtxDuplicates : public extends<AthAlgTool, IThinningTool> {
     public: 
       Thin_vtxDuplicates(const std::string& t, const std::string& n, const IInterface* p);
       ~Thin_vtxDuplicates();

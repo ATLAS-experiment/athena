@@ -484,6 +484,56 @@ def HION5SkimmingTriggers():
     triggers += ["HLT_g25_loose"]
     triggers += ["HLT_g30_loose"]
     triggers += ["HLT_g35_loose"]
+
+
+    #2023 HI
+    triggers += ["HLT_e15_lhloose_nogsf_ion_L1EM12"]
+    triggers += ["HLT_e15_loose_nogsf_ion_L1EM12"]
+    triggers += ["HLT_e15_lhmedium_nogsf_ion_L1EM12"]
+    triggers += ["HLT_e15_medium_nogsf_ion_L1EM12"]
+    triggers += ["HLT_e18_lhloose_nogsf_ion_L1EM15"]
+    triggers += ["HLT_e18_loose_nogsf_ion_L1EM15"]
+    triggers += ["HLT_e18_lhmedium_nogsf_ion_L1EM15"]
+    triggers += ["HLT_e18_medium_nogsf_ion_L1EM15"]
+    triggers += ["HLT_e20_lhloose_nogsf_ion_L1EM15"]
+    triggers += ["HLT_e20_lhmedium_nogsf_ion_L1EM15"]
+    triggers += ["HLT_e20_loose_nogsf_ion_L1EM15"]
+    triggers += ["HLT_e20_medium_nogsf_ion_L1EM15"]
+    triggers += ["HLT_mu10_L1MU8F"] #also 2024
+    triggers += ["HLT_mu10_L1MU5VF"] #also 2024
+
+    #2024 HI
+
+    triggers += ["HLT_e15_lhloose_nogsf_ion_L1eEM15"]
+    triggers += ["HLT_e15_loose_nogsf_ion_L1eEM15"]
+    triggers += ["HLT_e15_lhmedium_nogsf_ion_L1eEM15"]
+    triggers += ["HLT_e15_medium_nogsf_ion_L1eEM15"]
+    triggers += ["HLT_e20_lhloose_nogsf_ion_L1eEM18"]
+    triggers += ["HLT_e20_lhmedium_nogsf_ion_L1eEM18"]
+    triggers += ["HLT_e20_loose_nogsf_ion_L1eEM18"]
+    triggers += ["HLT_e20_loose_nogsf_ion_L1eEM18L"]
+    triggers += ["HLT_e20_medium_nogsf_ion_L1eEM18"]
+
+    #2024 pp ref
+    triggers += ["HLT_e14_lhvloose_L1eEM12L"]
+    triggers += ["HLT_e15_lhloose_L1eEM15"]
+    triggers += ["HLT_e15_loose_L1eEM15"]
+    triggers += ["HLT_e15_lhmedium_L1eEM15"]
+    triggers += ["HLT_e15_medium_L1eEM15"]
+    triggers += ["HLT_e20_lhloose_L1eEM18"]
+    triggers += ["HLT_e20_lhmedium_L1eEM18"]
+    triggers += ["HLT_e20_loose_L1eEM18"]
+    triggers += ["HLT_e20_loose_L1eEM18L"]
+    triggers += ["HLT_e20_medium_L1eEM18"]
+    triggers += ["HLT_e30_lhloose_L1eEM18"]
+    triggers += ["HLT_e30_lhmedium_L1eEM18"]
+    triggers += ["HLT_e30_loose_L1eEM18"]
+    triggers += ["HLT_e30_medium_L1eEM18"]
+    triggers += ["HLT_mu12_L1MU8F"]
+    triggers += ["HLT_mu15_L1MU8F"]
+    triggers += ["HLT_mu15_L1MU14FCH"]
+    triggers += ["HLT_mu4noL1_L1MBTS_1"]
+
     
     return triggers
 

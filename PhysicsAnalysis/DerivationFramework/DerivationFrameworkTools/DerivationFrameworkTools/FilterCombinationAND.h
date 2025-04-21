@@ -27,7 +27,7 @@ namespace DerivationFramework {
 
       @author James Catmore -at- cern.ch
      */
-  class FilterCombinationAND : public AthAlgTool, public ISkimmingTool {
+  class FilterCombinationAND : public extends<AthAlgTool, ISkimmingTool> {
    
   public: 
     /** Constructor with parameters */

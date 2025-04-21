@@ -52,4 +52,12 @@ def MuonPatternRecognitionCfg(flags):
         result.merge(MuonEtaHoughTransformAlgCfg(flags))
         result.merge(MuonPhiHoughTransformAlgCfg(flags))
         result.merge(MuonSegmentFittingAlgCfg(flags))
+        from MuonSegmentCnv.MuonSegmentCnvConfig import xAODSegmentCnvAlgCfg
+        result.merge(xAODSegmentCnvAlgCfg(flags))
+        if flags.Input.isMC:
+           from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg
+           result.merge(RecoSegmentTruthAssocCfg(flags,
+                                                 name="MuonSegmentsFromR4TruthMatching",
+                                                 SegmentKey="MuonSegmentsFromR4"))
+
     return result

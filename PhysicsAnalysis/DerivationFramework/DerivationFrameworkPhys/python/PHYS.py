@@ -80,6 +80,10 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
     acc.merge(IsoCloseByAlgsCfg(flags, isPhysLite = False, stream_name = StreamName))
 
+    ## IFF augmentation - Adding Lepton Taggers
+    from LeptonTaggers.LeptonTaggersConfig import DecoratePLITAlgsCfg
+    acc.merge(DecoratePLITAlgsCfg(flags))
+
     #===================================================
     # HEAVY FLAVOR CLASSIFICATION FOR ttbar+jets EVENTS
     #===================================================
@@ -140,13 +144,10 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     if flags.Tau.TauEleRM_isAvailable:
         PHYSSlimmingHelper.ExtraVariables += ["TauJets_EleRM.dRmax.etOverPtLeadTrk"]
 
-    # FTAG Xbb extra content
-    extraList = []
-    for tagger in ["GN2Xv01", "GN2Xv02"]:
-        for score in ["phbb", "phcc", "ptop", "pqcd"]:
-            extraList.append(f"{tagger}_{score}")
-    PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraList)]
- 
+    # IFF extra content
+    from LeptonTaggers.LeptonTaggersConfig import GetExtraPLITVariablesForDxAOD
+    PHYSSlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
+
     # Truth extra content
     if flags.Input.isMC:
 

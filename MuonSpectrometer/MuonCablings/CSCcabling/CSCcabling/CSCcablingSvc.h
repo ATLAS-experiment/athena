@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CSCCABLING_CSCCABLINGSVC_H
@@ -11,25 +11,15 @@
  *---------------------------------------------------*/
 
 #include "AthenaBaseComps/AthService.h"
-#include "GaudiKernel/IInterface.h"
 
 #include <inttypes.h>
-#include <atomic>
 
-class MsgStream;
 
-const InterfaceID IID_ICSCcablingSvc("CSCcablingSvc", 1, 0);
-
-class CSCcablingSvc : public AthService, virtual public IInterface {
+class CSCcablingSvc : public AthService {
 public:
-   
-  CSCcablingSvc(const std::string& name,ISvcLocator* sl);
-  virtual ~CSCcablingSvc()=default;
+  using AthService::AthService;
 
-  static const InterfaceID& interfaceID() { return IID_ICSCcablingSvc; }
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvIF);
-
-  virtual StatusCode initialize(void);
+  virtual StatusCode initialize() override;
 
   /** map offline ROD identifier to online ID */
   bool onlineId(const uint16_t subdetectorID, const uint16_t offlineID, uint32_t& rodId) const;
@@ -68,10 +58,11 @@ public:
 
  private:
 
-  unsigned int m_side;
-  unsigned int m_rod;
-  unsigned int m_max;
-  bool m_run1;
+  unsigned int m_side{2};
+  unsigned int m_rod{16};
+  unsigned int m_max{32};
+
+  Gaudi::Property<bool> m_run1{this, "Run1Cabling", false};
 };
 
 #endif

@@ -10,6 +10,8 @@ atlas_install_joboptions( share/*.py )
 atlas_install_runtime( share/*.conf )
 atlas_install_data( share/*.ref )
 
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
 # Unit tests:
 atlas_add_test( TrigValSteeringUT
                 SCRIPT trigvalsteering-unit-tester.py ${CMAKE_CURRENT_SOURCE_DIR}/test

@@ -2,6 +2,7 @@
 # art-description: Nightly test to compare G-200 vs C-000 (Full-scan) for EFTrack studies using ttbar pu200 sample
 # art-type: grid
 # art-include: main/Athena
+# art-architecture: '#&nvidia'
 # art-output: IDTPM.*.root
 # art-output: *.json
 # art-output: *.xml

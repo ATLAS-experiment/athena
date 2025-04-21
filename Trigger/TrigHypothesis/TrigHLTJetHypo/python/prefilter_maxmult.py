@@ -18,6 +18,7 @@ etaRangeAbbrev = {
     "j":"0eta320", # default
     "a":"0eta490", 
     "c":"0eta240", 
+    "C":"0eta210", 
     "f":"320eta490"
 }
 

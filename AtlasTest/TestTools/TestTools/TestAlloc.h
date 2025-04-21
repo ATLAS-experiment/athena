@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TestTools/TestAlloc.h
@@ -45,6 +45,7 @@ public:
   pointer allocate (size_type n, const void*  = 0)
   {
     void* p = malloc (sizeof(Head) + n*sizeof(T));
+    if (!p) std::abort();
     Head* h = (Head*)p;
     h->i[0] = n;
     h->i[1] = MAGIC;

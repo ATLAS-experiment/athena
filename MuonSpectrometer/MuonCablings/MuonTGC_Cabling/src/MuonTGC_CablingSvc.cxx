@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -21,8 +21,7 @@
 
 ///////////////////////////////////////////////////////////////
 MuonTGC_CablingSvc::MuonTGC_CablingSvc(const std::string& name, ISvcLocator* svc)
-  : AthService(name, svc),
-    m_cabling(nullptr) {
+  : AthService(name, svc) {
   declareProperty("AsideId", m_AsideId=103);
   declareProperty("CsideId", m_CsideId=104);
   declareProperty("rodId", m_rodId);  //obsolete
@@ -32,19 +31,6 @@ MuonTGC_CablingSvc::MuonTGC_CablingSvc(const std::string& name, ISvcLocator* svc
   declareProperty("databaseSLBToROD", m_databaseSLBToROD="MuonTGC_Cabling_SLB2ROD.db");
 }
 
-///////////////////////////////////////////////////////////////
-StatusCode  MuonTGC_CablingSvc::queryInterface(const InterfaceID& riid, void** ppvIF)
-{
-  if(MuonTGC_CablingSvc::interfaceID().versionMatch(riid)) {
-    *ppvIF = dynamic_cast<MuonTGC_CablingSvc*>(this);
-  } else {
-    return Service::queryInterface(riid, ppvIF);
-  }
-  
-  addRef();
-  return StatusCode::SUCCESS;
-}
-  
 ///////////////////////////////////////////////////////////////
 void MuonTGC_CablingSvc::getReadoutIDRanges(int& maxRodId,
                                             int& maxSRodId,
@@ -137,10 +123,10 @@ StatusCode MuonTGC_CablingSvc::initialize(void)
 
 
   // instantiate TGC cabling manager
-  m_cabling = new MuonTGC_Cabling::TGCCabling(dbASDToPP,
-					      dbInPP,
-					      dbPPToSL,
-					      dbSLBToROD);
+  m_cabling = std::make_unique<MuonTGC_Cabling::TGCCabling>(dbASDToPP,
+                                                            dbInPP,
+                                                            dbPPToSL,
+                                                            dbSLBToROD);
   
   ATH_CHECK(m_condDataTool.retrieve());
   std::string folderName = m_condDataTool->getFolderName();
@@ -160,14 +146,6 @@ StatusCode MuonTGC_CablingSvc::initialize(void)
   return StatusCode::SUCCESS;
 }  
   
-///////////////////////////////////////////////////////////////
-StatusCode MuonTGC_CablingSvc::finalize(void)
-{
-  delete m_cabling;
-  m_cabling = nullptr;
-  return StatusCode::SUCCESS;
-}
-
 ///////////////////////////////////////////////////////////////
 // give phi-range which a ROD covers  
 bool MuonTGC_CablingSvc::getCoveragefromRodID(const int rodID,

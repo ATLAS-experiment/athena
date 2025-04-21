@@ -9,6 +9,7 @@
 # art-athena-mt: 8
 # art-runon: Saturday
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_DATA)")
 timeout 64800 Reco_tf.py \
   --inputBSFile=${ArtInFile} \
   --outputAODFile=myAOD.pool.root \
@@ -19,7 +20,7 @@ timeout 64800 Reco_tf.py \
   --multithreaded='True' \
   --preExec 'all:flags.DQ.Steering.doHLTMon=False; flags.Exec.FPE=10;' \
   --autoConfiguration='everything' \
-  --conditionsTag 'all:CONDBR2-BLKPA-RUN2-11' --geometryVersion='default:ATLAS-R2-2016-01-00-01' \
+  --conditionsTag "${conditions}" --geometryVersion='default:ATLAS-R2-2016-01-00-01' \
   --runNumber='357750' --maxEvents='-1'
 
 rc1=$?

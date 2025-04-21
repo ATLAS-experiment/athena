@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
@@ -21,15 +21,10 @@ def AODFixCfg(flags):
         _doneAODFixes.add(doneFix)
 
     result=ComponentAccumulator()
-    
 
-    #Add list of known AOD Fixes here: 
-    listOfFixes=[]
-
-    #Example:
-    #from RecJobTransforms.AODFixDemoConfig import AODFixDemoCfg
-    #listOfFixes=[AODFixDemoCfg,]
-  
+    # #Add list of known AOD Fixes here:
+    from RecJobTransforms.AODFixEGAmbiguityLinksConfig import AODFixEGAmbiguityLinksCfg
+    listOfFixes=[AODFixEGAmbiguityLinksCfg,]
 
     for aodFix in listOfFixes:
         aodFixName=aodFix.__name__ 

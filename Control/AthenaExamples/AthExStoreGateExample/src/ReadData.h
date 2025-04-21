@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHEXSTOREGATEEXAMPLE_READDATA_H
@@ -13,20 +13,23 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
-class StoreGateSvc;
 
-/////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Example of a legacy Algorithm in single-threaded athena.
+ *
+ * IMPORTANT: This is no longer recommended. See ReadDataReentrant instead.
+ */
 class ReadData:public AthAlgorithm {
 public:
-  ReadData (const std::string& name, ISvcLocator* pSvcLocator);
-  StatusCode initialize();
-  StatusCode execute();
-  StatusCode finalize();
-  
+  using AthAlgorithm::AthAlgorithm;
+
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
+
 private:
   //Properties
-  std::string m_DataProducer;
+  Gaudi::Property<std::string> m_DataProducer{this, "DataProducer", ""};
   SG::ReadHandle<MyDataObj> m_dobj3;
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EvtInfo", "EventInfo", "EventInfo name"};
 };

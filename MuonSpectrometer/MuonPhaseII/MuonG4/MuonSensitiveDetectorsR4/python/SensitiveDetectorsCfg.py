@@ -156,6 +156,6 @@ def OutputSimContainersCfg(flags):
         containerNames+=["xStgcSimHits"]    
     
     outContainers +=[ f"xAOD::MuonSimHitContainer#{cont}" for cont in containerNames]
-    outContainers +=[ f"xAOD::MuonSimHitAuxContainer#{cont}Aux." for cont in containerNames]
+    outContainers +=[ f"xAOD::MuonSimHitAuxContainer#{cont}Aux.-MuonSim_G4TrkId" for cont in containerNames]
 
     return outContainers

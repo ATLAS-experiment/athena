@@ -10,12 +10,8 @@ if __name__=="__main__":
                                               default=False, action='store_true')
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(noSTGC=True)
-    parser.set_defaults(noMM=True)
-
-
-   
+ 
     parser.set_defaults(outRootFile="HoughTransformTester.root")
-    #parser.set_defaults(condTag="CONDBR2-BLKPA-2024-03")
     parser.set_defaults(inputFile=[
                                     #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
                                     "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"
@@ -53,14 +49,14 @@ if __name__=="__main__":
         cfg.merge(addOverride(flags, "/MDT/TWINMAPPING", "MDTTwinMapping_compactFormat_Run123"))
 
     
-    cfg.merge(MuonHoughTransformTesterCfg(flags,
-                                          VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
+        cfg.merge(MuonHoughTransformTesterCfg(flags,
+                                              VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
 
     if not args.noMonitorPlots and (flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC):
         cfg.getEventAlgo("MuonEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="EtaHoughPlotValid",
                                                                                                 AllCanvasName="AllEtaHoughiDiPuffPlots", doPhiBucketViews = False,
-                                                                                                displayTruthOnly = True, saveSinglePDFs = False, saveSummaryPDF= False))
+                                                                                                displayTruthOnly = True, saveSinglePDFs = True, saveSummaryPDF= False))
         cfg.getEventAlgo("MuonPhiHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="PhiHoughPlotValid",
                                                                                                 AllCanvasName="AllPhiHoughiDiPuffPlots",doEtaBucketViews = False,

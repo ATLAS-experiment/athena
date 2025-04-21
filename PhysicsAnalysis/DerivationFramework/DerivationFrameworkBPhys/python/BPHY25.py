@@ -543,6 +543,7 @@ def BPHY25Cfg(flags):
         list_3bodyA_obj[i].MassUpperCut             = list_3bodyA_massHi[i]
         list_3bodyA_obj[i].CascadeVertexCollections = ["BPHY25_"+list_3bodyA_hypo[i]+"_CascadeVtx1","BPHY25_"+list_3bodyA_hypo[i]+"_CascadeMainVtx"]
         list_3bodyA_obj[i].HasJXSubVertex           = False
+        list_3bodyA_obj[i].HasJXV0SubVertex         = False
         list_3bodyA_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
         list_3bodyA_obj[i].V0Hypothesis             = "Lambda"
         list_3bodyA_obj[i].MassCutGamma             = 10.
@@ -579,6 +580,76 @@ def BPHY25Cfg(flags):
         list_3bodyA_obj[i].V0TrackSelectorTool      = v0trackselect
         list_3bodyA_obj[i].TrackSelectorTool        = trackselect
         list_3bodyA_obj[i].Extrapolator             = extrapolator
+
+    ###########################
+    ## Xi_b- -> Lambdab0 pi- ##
+    ###########################
+
+    list_RefA_hypo = ["XibpmRef"]
+    list_RefA_extraTrkMass = [Pimass]
+    list_RefA_extraTrkPt = [760.0]
+    list_RefA_massLo = [Xib_lo]
+    list_RefA_massHi = [Xib_hi]
+
+    list_RefA_obj = []
+    for hypo in list_RefA_hypo:
+        list_RefA_obj.append( CompFactory.DerivationFramework.JpsiXPlusDisplaced("BPHY25_"+hypo) )
+
+    for i in range(len(list_RefA_obj)):
+        list_RefA_obj[i].JXVertices               = "BPHY25OniaCandidates"
+        list_RefA_obj[i].JXVtxHypoNames           = ["Jpsi"]
+        list_RefA_obj[i].TrackParticleCollection  = mainIDInput
+        list_RefA_obj[i].RelinkTracks             = TrkToRelink
+        list_RefA_obj[i].V0Vertices               = "V0Collection"
+        list_RefA_obj[i].UseImprovedMass          = True
+        list_RefA_obj[i].LambdaMassLowerCut       = Ld_lo
+        list_RefA_obj[i].LambdaMassUpperCut       = Ld_hi
+        list_RefA_obj[i].KsMassLowerCut           = Ks_lo
+        list_RefA_obj[i].KsMassUpperCut           = Ks_hi
+        list_RefA_obj[i].JpsiMassLowerCut         = Jpsi_lo
+        list_RefA_obj[i].JpsiMassUpperCut         = Jpsi_hi
+        list_RefA_obj[i].MassLowerCut             = list_RefA_massLo[i]
+        list_RefA_obj[i].MassUpperCut             = list_RefA_massHi[i]
+        list_RefA_obj[i].CascadeVertexCollections = ["BPHY25_"+list_RefA_hypo[i]+"_CascadeVtx1","BPHY25_"+list_RefA_hypo[i]+"_CascadeVtx2","BPHY25_"+list_RefA_hypo[i]+"_CascadeMainVtx"]
+        list_RefA_obj[i].HasJXSubVertex           = False
+        list_RefA_obj[i].HasJXV0SubVertex         = True
+        list_RefA_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
+        list_RefA_obj[i].V0Hypothesis             = "Lambda"
+        list_RefA_obj[i].MassCutGamma             = 10.
+        list_RefA_obj[i].Chi2CutGamma             = 3.
+        list_RefA_obj[i].LxyV0Cut                 = 5.
+        list_RefA_obj[i].HypothesisName           = list_RefA_hypo[i]
+        list_RefA_obj[i].NumberOfJXDaughters      = 2
+        list_RefA_obj[i].JXDaug1MassHypo          = Mumass
+        list_RefA_obj[i].JXDaug2MassHypo          = Mumass
+        list_RefA_obj[i].NumberOfDisVDaughters    = 2
+        list_RefA_obj[i].ExtraTrack1MassHypo      = list_RefA_extraTrkMass[i]
+        list_RefA_obj[i].ExtraTrack1MinPt         = list_RefA_extraTrkPt[i]
+        list_RefA_obj[i].JpsiMass                 = Jpsimass
+        list_RefA_obj[i].LambdaMass               = Lambdamass
+        list_RefA_obj[i].KsMass                   = Ksmass
+        list_RefA_obj[i].ApplyJpsiMassConstraint  = True
+        list_RefA_obj[i].ApplyV0MassConstraint    = True
+        list_RefA_obj[i].ApplyJXV0MassConstraint  = False
+        list_RefA_obj[i].ApplyMainVMassConstraint = False
+        list_RefA_obj[i].Chi2CutV0                = 4.
+        list_RefA_obj[i].Chi2Cut                  = 4.
+        list_RefA_obj[i].Trackd0Cut               = 3.0
+        list_RefA_obj[i].MaxJXCandidates          = 10
+        list_RefA_obj[i].MaxV0Candidates          = 20
+        list_RefA_obj[i].MaxMainVCandidates       = 30
+        list_RefA_obj[i].RefitPV                  = True
+        list_RefA_obj[i].MaxnPV                   = 50
+        list_RefA_obj[i].RefPVContainerName       = "BPHY25_"+list_RefA_hypo[i]+"_RefPrimaryVertices"
+        list_RefA_obj[i].TrkVertexFitterTool      = vkalvrt
+        list_RefA_obj[i].V0VertexFitterTool       = v0fitter
+        list_RefA_obj[i].GammaFitterTool          = gammafitter
+        list_RefA_obj[i].PVRefitter               = pvrefitter
+        list_RefA_obj[i].V0Tools                  = V0Tools
+        list_RefA_obj[i].TrackToVertexTool        = tracktovtxtool
+        list_RefA_obj[i].V0TrackSelectorTool      = v0trackselect
+        list_RefA_obj[i].TrackSelectorTool        = trackselect
+        list_RefA_obj[i].Extrapolator             = extrapolator
 
     ####################################################
     ## Xib^0 -> J/psi Xi^- pi+, Xi^- -> Lambda pi-    ##
@@ -682,7 +753,7 @@ def BPHY25Cfg(flags):
         list_2V0A_obj[i].JpsiMassLowerCut         = Jpsi_lo
         list_2V0A_obj[i].JpsiMassUpperCut         = Jpsi_hi
         list_2V0A_obj[i].MassLowerCut             = 0.
-        list_2V0A_obj[i].MassUpperCut             = 9400.
+        list_2V0A_obj[i].MassUpperCut             = 100000.
         list_2V0A_obj[i].CascadeVertexCollections = ["BPHY25_"+list_2V0A_hypo[i]+"_CascadeVtx1","BPHY25_"+list_2V0A_hypo[i]+"_CascadeVtx2","BPHY25_"+list_2V0A_hypo[i]+"_CascadeMainVtx"]
         list_2V0A_obj[i].HasJXSubVertex           = False
         list_2V0A_obj[i].HasJXV02SubVertex        = False
@@ -936,6 +1007,21 @@ def BPHY25Cfg(flags):
         PVContainerName            = "BPHY25_Xibpm3body_RefPrimaryVertices",
         OutputVtxContainerName     = "BPHY25_Xibpm3body_JpsiPiVtx")
 
+    BPHY25Rev_XibpmRef = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY25Rev_XibpmRef",
+        InputVtxContainerName      = "BPHY25_XibpmRef_CascadeVtx2",
+        TrackIndices               = [ 0, 1 ],
+        UseMassConstraint          = True,
+        VertexMass                 = Jpsimass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 25.,
+        TrkVertexFitterTool	   = vkalvrt,
+        PVRefitter                 = pvrefitter,
+        V0Tools                    = V0Tools,
+        RefitPV                    = False,
+        PVContainerName            = "BPHY25_XibpmRef_RefPrimaryVertices",
+        OutputVtxContainerName     = "BPHY25_XibpmRef_JpsiVtx")
+
     BPHY25Rev_Xib03body = CompFactory.DerivationFramework.ReVertex(
         name                       = "BPHY25Rev_Xib03body",
         InputVtxContainerName      = "BPHY25_Xib03body_CascadeMainVtx",
@@ -1016,8 +1102,8 @@ def BPHY25Cfg(flags):
     RefPVAuxContainers = [ ]
     passedCandidates   = [ ]
 
-    list_obj = list_disV_obj + list_BpmLd_obj + list_B0Ld_obj + list_B0Ks_obj + list_3bodyA_obj + list_3bodyB_obj + list_2V0A_obj + list_2V0B_obj
-    list_rev = [BPHY25Rev_JpsiXi, BPHY25Rev_JpsiOmg, BPHY25Rev_BpmLd, BPHY25Rev_B0KpiLd, BPHY25Rev_B0piKLd, BPHY25Rev_B0KpiKs, BPHY25Rev_B0piKKs, BPHY25Rev_Bpm3body, BPHY25Rev_Xibpm3body, BPHY25Rev_Xib03body, BPHY25Rev_Lambdab03body, BPHY25Rev_Jpsi2V0A, BPHY25Rev_Jpsi2V0B1, BPHY25Rev_Jpsi2V0B2]
+    list_obj = list_disV_obj + list_BpmLd_obj + list_B0Ld_obj + list_B0Ks_obj + list_3bodyA_obj + list_RefA_obj + list_3bodyB_obj + list_2V0A_obj + list_2V0B_obj
+    list_rev = [BPHY25Rev_JpsiXi, BPHY25Rev_JpsiOmg, BPHY25Rev_BpmLd, BPHY25Rev_B0KpiLd, BPHY25Rev_B0piKLd, BPHY25Rev_B0KpiKs, BPHY25Rev_B0piKKs, BPHY25Rev_Bpm3body, BPHY25Rev_Xibpm3body, BPHY25Rev_XibpmRef, BPHY25Rev_Xib03body, BPHY25Rev_Lambdab03body, BPHY25Rev_Jpsi2V0A, BPHY25Rev_Jpsi2V0B1, BPHY25Rev_Jpsi2V0B2]
 
     for obj in list_obj:
         Collections += obj.CascadeVertexCollections

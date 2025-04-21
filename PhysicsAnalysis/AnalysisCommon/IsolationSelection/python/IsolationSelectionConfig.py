@@ -52,7 +52,7 @@ def IsoCloseByCorrSkimmingAlgCfg(flags, suff = "", name="IsoCloseByCorrSkimmingA
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], useSelTools = False, isoDecSuffix = "CloseByCorr", hasLRT = False, **kwargs):
+def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], useSelTools = False, isoDecSuffix = "CloseByCorr", caloDecSuffix = "", hasLRT = False, **kwargs):
 
     result = ComponentAccumulator()
 
@@ -66,12 +66,13 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite 
                                                                     MuonWPVec     = muIsoWPs,
                                                                     PhotonWPVec   = phIsoWPs))
     # Set suffix for writing corrected isolation values
-    selectionDecorator = "isoSelIsOK"
+    selectionDecorator = "isoSelIsOK" + suff
     kwargs.setdefault("IsoCloseByCorrectionTool", 
                        result.popToolsAndMerge(IsoCloseByCorrectionToolCfg(flags, 
                                                                            IsolationSelectionTool = isoTool,
                                                                            SelectionDecorator     = selectionDecorator,
                                                                            IsoDecSuffix           = isoDecSuffix,
+                                                                           CaloDecSuffix = caloDecSuffix,
                                                                            EleContainers = [ x for x in containerNames if x.find("Ele") != -1],
                                                                            MuoContainers = [ x for x in containerNames if x.find("Muo") != -1],
                                                                            PhoContainers = [ x for x in containerNames if x.find("Pho") != -1])))  
@@ -101,7 +102,9 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite 
     kwargs.setdefault("MinPhotPt", 0.)
 
       
-    the_alg = CompFactory.CP.IsoCloseByCorrectionAlg(name + suff, **kwargs)
+    the_alg = CompFactory.CP.IsoCloseByCorrectionAlg(name + suff,
+                                                     SelectionDecorator     = selectionDecorator,
+                                                     **kwargs)
     result.addEventAlgo(the_alg)
     return result
 
@@ -140,7 +143,7 @@ def TestIsoCloseByCorrectionCfg(flags, name="TestIsoCloseByAlg", suff = "", **kw
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], stream_name="", ttva_wp = "Nonprompt_All_MaxWeight", useSelTools = False, isoDecSuffix = "CloseByCorr", hasLRT = False):
+def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], stream_name="", ttva_wp = "Nonprompt_All_MaxWeight", useSelTools = False, isoDecSuffix = "CloseByCorr", caloDecSuffix = "", hasLRT = False):
 
     # Add in two ways to do IsoCloseBy correction:
     #   - use IsoCloseByCorrAlg to modify the <iso_value>s for close by lepton/photon. 
@@ -167,9 +170,7 @@ def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "
 
     # Setup the isolation close-by correction algorithm sequence to correct the isolation of near-by el, mu, ph
     from IsolationSelection.IsolationSelectionConfig import IsoCloseByCorrAlgCfg
-    acc.merge(IsoCloseByCorrAlgCfg(flags, suff = suff, isPhysLite = isPhysLite, containerNames = containerNames, useSelTools = useSelTools, isoDecSuffix = isoDecSuffix, hasLRT = hasLRT))
-
-
+    acc.merge(IsoCloseByCorrAlgCfg(flags, suff = suff, isPhysLite = isPhysLite, containerNames = containerNames, useSelTools = useSelTools, isoDecSuffix = isoDecSuffix, caloDecSuffix = caloDecSuffix, hasLRT = hasLRT))
     return acc
 
 def setupIsoCloseBySlimmingVariables(slimmingHelper, isLLP1 = False):

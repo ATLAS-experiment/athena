@@ -12,6 +12,7 @@
 
 #include "GepAlgoHypothesisPortsIn.h"
 #include "eEmSortSelectCountContainerPortsOut.h"
+#include "eEmTob.h"
 
 #include "../../../IGlobalSimAlgTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -76,7 +77,7 @@ namespace GlobalSim {
     // s_NumCnt: one entry per set of count cuts. The inner vector
     // will be initialised to have length 3, one cut for eacn of the
     // three eta regions.
-    std::vector<std::vector<unsigned int>> m_count_EtMin;
+    std::vector<std::vector<int>> m_count_EtMin;
     std::vector<std::vector<int>> m_count_EtaMin;
     std::vector<std::vector<int>> m_count_EtaMax;
 

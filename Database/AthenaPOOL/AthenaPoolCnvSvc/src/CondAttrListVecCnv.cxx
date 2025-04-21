@@ -80,11 +80,13 @@ StatusCode CondAttrListVecCnv::createRep(DataObject* pObj, IOpaqueAddress*& pAdd
 
     CondAttrListVec* list = 0; //dynamic_cast<AthenaAttributeList*>(pObj);
     SG::fromStorable(pObj, list);
+    if ( pAddr != nullptr ) pAddr->release();
     CondAttrListVecAddress* addr = new CondAttrListVecAddress(POOL_StorageType,
 		    classID(),
 		    "POOLContainer_CondAttrListVec][CLID=x");
     addr->setAttrListVec(list);
     pAddr = addr;
+    pAddr->addRef();
     log << MSG::DEBUG << "Created CondAttrListVec with list ptr: " << list << endmsg;
     return(StatusCode::SUCCESS);
 }

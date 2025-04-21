@@ -93,6 +93,16 @@ namespace xAOD {
     ///will be biased. 
     double z0significance(const xAOD::TrackParticle *tp, const xAOD::Vertex *vx=NULL);
 
+    ///@brief Get the impact parameter significance of a track particle in the z direction, including the sin(theta) projection.
+    ///@param tp a pointer to a track particle.
+    ///@param vx a pointer to a primary vertex with respect to which z0 is expressed or NULL. 
+    ///@return the z0*sin(theta) IP significance of the track particle.
+    ///@throw this method may throw an exception in case the uncertainty is zero or the covariance matrix does not exist.
+    ///The impact parameter and uncertainty are those stored in the track particle. Will perform input (tp, cov) validity checks.
+    ///If the given vertex results from a fit which includes the track particle tp, then this z0*(sintheta) impact parameter significance
+    ///will be biased. 
+    double z0sinthetasignificance(const xAOD::TrackParticle *tp, const xAOD::Vertex *vx=NULL);
+
     ///@brief Unsafe version of @ref z0significance
     ///@return the impact parameter significance of the track particle or an undefined value
     ///In case the covariance matrix does not exist or the uncertainty is zero or smaller, this method will return an undefined value.

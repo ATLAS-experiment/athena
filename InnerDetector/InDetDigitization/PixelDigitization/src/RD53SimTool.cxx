@@ -1,10 +1,10 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "RD53SimTool.h"
 #include "PixelDigitizationUtilities.h"
-
+#include "PixelNoiseFunctions.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
 #include "SiDigitization/SiChargedDiodeCollection.h"
@@ -14,7 +14,6 @@
 #include "ReadoutGeometryBase/SiReadoutCellId.h"
 #include "InDetRawData/Pixel1RawData.h"
 #include "CLHEP/Random/RandFlat.h"
-#include "CLHEP/Random/RandGaussZiggurat.h"
 #include "PixelNoiseFunctions.h"
 #include <cmath>
 
@@ -64,7 +63,7 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
   SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey, ctx);
   const PixelChargeCalibCondData *calibData = *calibDataHandle;
 
-  int overflowToT = calibData->getFEI4OverflowToT();
+  int overflowToT = 14; //for RD53 (aka ITkPixV2) chip, not FEI4
 
   std::vector<Pixel1RawData*> p_rdo_small_fei4;
   std::vector<int> row, col;
@@ -125,14 +124,7 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     // charge to ToT conversion
     double tot = calibData->getToT(type, moduleHash, FE, charge);
     double totsig = calibData->getTotRes(moduleHash, FE, tot);
-    int nToT = static_cast<int>(CLHEP::RandGaussZiggurat::shoot(rndmEngine, tot, totsig));
-    if (nToT < 1) {
-      nToT = 1;
-    }
-    // RD53 HitDiscConfig
-    if (nToT >= overflowToT) {
-      nToT = overflowToT;
-    }
+    int nToT = generateToT(rndmEngine, tot,totsig, std::make_pair(1,overflowToT));
 
     if (nToT <= moduleData->getToTThreshold(barrel_ec, layerIndex)) {
       SiHelper::belowThreshold(mapDiode, true, true);

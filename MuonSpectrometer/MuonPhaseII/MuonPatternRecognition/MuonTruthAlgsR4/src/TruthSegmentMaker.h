@@ -32,14 +32,6 @@ namespace MuonR4{
           StatusCode execute(const EventContext& ctx) const override;
       
       private:
-          /** @brief Helper method to retrieve any kind of container from a ReadHandleKey. If the 
-           *         key is empty, it's assumed that it shall be the case and the parsed point is to nullptr
-           * @param ctx: EventContext to access the data in the event
-           * @param key: Refrence to the initialized ReadHandleKey from which the object shall be retrieved
-           * @param contToPush: Reference to a pointer to which eventually points to the retrieved container */
-          template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
-                                                                      const SG::ReadHandleKey<ContainerType>& key,
-                                                                      const ContainerType* & contToPush) const;
           /** @brief Returns the transform from the local simHit frame -> chamber frame
            *  @param gctx: Geometry context to align the chambers within ATLAS
            *  @param chanId: Identifier of the channel for which the transform shall be fetched */

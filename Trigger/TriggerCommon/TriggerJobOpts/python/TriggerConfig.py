@@ -674,6 +674,12 @@ def triggerRunCfg( flags, menu=None ):
         acc.merge( triggerIDCCacheCreatorsCfg( flags, seqName="AthAlgSeq" ), sequenceName="HLTBeginSeq" )
         from HLTSeeding.HLTSeedingConfig import HLTSeedingCfg
         hltSeedingAcc = HLTSeedingCfg( flags )
+        
+        from AthenaConfiguration.Enums import LHCPeriod
+        if flags.GeoModel.Run > LHCPeriod.Run3:
+            from InDetConfig.TrackRecoConfig import SiDetectorElementStatusCfg
+            acc.merge(SiDetectorElementStatusCfg( flags), sequenceName="HLTBeginSeq")
+
     # TODO, once moved to newJO the algorithm can be added to hltSeedingAcc and merging will be sufficient here
     acc.merge( hltSeedingAcc,  sequenceName="HLTBeginSeq" )
 
@@ -776,6 +782,7 @@ def triggerIDCCacheCreatorsCfg(flags, seqName = None):
         from TrigInDetConfig.TrigInDetConfig import InDetIDCCacheCreatorCfg
         acc.merge( InDetIDCCacheCreatorCfg(flags), sequenceName = seqName )
 
+    if flags.Trigger.useActsTracking:
         from TrigInDetConfig.TrigInDetConfig import ActsIDCCacheCreatorCfg
         acc.merge( ActsIDCCacheCreatorCfg(flags), sequenceName = seqName )
         

@@ -19,7 +19,7 @@ namespace TauAnalysisTools{
 
 namespace DerivationFramework {
 
-  class TruthCollectionMakerTau : public AthAlgTool, public IAugmentationTool {
+  class TruthCollectionMakerTau : public extends<AthAlgTool, IAugmentationTool> {
   public: 
     TruthCollectionMakerTau(const std::string& t, const std::string& n, const IInterface* p);
     ~TruthCollectionMakerTau();

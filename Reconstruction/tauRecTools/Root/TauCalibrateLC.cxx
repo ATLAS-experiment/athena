@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauCalibrateLC.h"
@@ -17,8 +17,6 @@
 /********************************************************************/
 TauCalibrateLC::TauCalibrateLC(const std::string& name) :
   TauRecToolBase(name) {
-  declareProperty("calibrationFile", m_calibrationFile = "");
-  declareProperty("VertexCorrection", m_doVertexCorrection = true);
 }
 
 /********************************************************************/
