@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTLorentzMonAlg.h"
@@ -252,7 +252,7 @@ SCTLorentzMonAlg::findAnglesToWaferSurface(const float (&vec)[3], // 3 is for x,
     return iflag;
   }
 
-  float cosAlpha{sqrt(1.0f - sinAlpha * sinAlpha)};
+  float cosAlpha{std::sqrt(1.0f - sinAlpha * sinAlpha)};
   double phix{ cosAlpha * element->phiAxis().x() + sinAlpha * element->phiAxis().y()};
   double phiy{-sinAlpha * element->phiAxis().x() + cosAlpha * element->phiAxis().y()};
 
@@ -267,8 +267,8 @@ SCTLorentzMonAlg::findAnglesToWaferSurface(const float (&vec)[3], // 3 is for x,
     theta = -90.;
   }
   if (pNormal != 0.) {
-    phi = atan(pPhi / pNormal) / CLHEP::deg;
-    theta = atan(pEta / pNormal) / CLHEP::deg;
+    phi = std::atan(pPhi / pNormal) / CLHEP::deg;
+    theta = std::atan(pEta / pNormal) / CLHEP::deg;
   }
   iflag = 1;
   return iflag;
