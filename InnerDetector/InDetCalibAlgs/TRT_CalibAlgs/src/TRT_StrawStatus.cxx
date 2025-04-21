@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -40,7 +40,6 @@ InDet::TRT_StrawStatus::TRT_StrawStatus(const std::string& name, ISvcLocator* pS
 :
 AthAlgorithm(name,pSvcLocator),
 m_nEvents(0), m_runNumber(0),
-m_accumulateHits(nullptr),
 m_TRTHelper(nullptr)
 {}
 
@@ -55,7 +54,7 @@ InDet::TRT_StrawStatus::~TRT_StrawStatus()
 StatusCode InDet::TRT_StrawStatus::initialize()
 {
 
-  m_accumulateHits = new ACCHITS_t;
+  m_accumulateHits = std::make_unique<ACCHITS_t>();
   assert( (*m_accumulateHits)[0][0].size() == nAllStraws );
   clear();
 
@@ -78,10 +77,10 @@ StatusCode InDet::TRT_StrawStatus::initialize()
 //================ Finalisation =================================================
 
 StatusCode InDet::TRT_StrawStatus::finalize(){
-    reportResults();
+    ATH_CHECK( reportResults() );
     if (m_printDetailedInformation) printDetailedInformation();
     // Code entered here will be executed once at the end of the program run.
-    delete m_accumulateHits;
+    m_accumulateHits.reset();
     return StatusCode::SUCCESS;
 }
 
@@ -97,7 +96,7 @@ StatusCode InDet::TRT_StrawStatus::execute(){
     }
     int runNumber = (int) eventInfo->runNumber();
     if (runNumber != m_runNumber) {
-      if (m_nEvents) { reportResults(); clear(); }
+      if (m_nEvents) { ATH_CHECK( reportResults() ); clear(); }
       m_runNumber = runNumber;
     }
     int lumiBlock0 =eventInfo->lumiBlock();
@@ -272,7 +271,7 @@ StatusCode InDet::TRT_StrawStatus::execute(){
 
     m_nEvents++;
     last_lumiBlock0 = lumiBlock0;
-    if (m_nEvents%1000==0 && msgLvl(MSG::DEBUG)) reportResults();
+    if (m_nEvents%1000==0 && msgLvl(MSG::DEBUG)) ATH_CHECK( reportResults() );
     return sc;
 }
 
@@ -284,11 +283,15 @@ void InDet::TRT_StrawStatus::clear() {
     return;
 }
 
-void InDet::TRT_StrawStatus::reportResults() {
+StatusCode InDet::TRT_StrawStatus::reportResults() {
     ATH_MSG_INFO( "InDet::TRT_StrawStatus::reportResults() for " << m_nEvents << " events." );
     char fileName[300];
     snprintf(fileName, 299,"%s.%07d_newFormat.txt", m_fileName.value().c_str(), m_runNumber);
     FILE *f = fopen(fileName, "w");
+    if (!f) {
+      ATH_MSG_ERROR( "InDet::TRT_StrawStatus::reportResults: Cannot open " << fileName << " for write" );
+      return StatusCode::FAILURE;
+    }
     fprintf(f, "%d %d %d %d %d %d %d %d %d \n", 0, 0, 0, 0, 0, 0, 0, 0, m_nEvents);
     for (size_t i=0; i<2; i++) for (size_t j=0; j<32; j++) for (size_t k=0; k<nAllStraws; k++) {
         int side = (i>0)?-1:1;
@@ -298,7 +301,7 @@ void InDet::TRT_StrawStatus::reportResults() {
         fprintf(f, "\n");
     }
     fclose(f);
-    return;
+    return StatusCode::SUCCESS;
 }
 
 void InDet::TRT_StrawStatus::printDetailedInformation() {
