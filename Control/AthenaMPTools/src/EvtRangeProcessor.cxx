@@ -7,6 +7,7 @@
 #include "AthenaInterprocess/ProcessGroup.h"
 
 #include "AthenaKernel/IEvtSelectorSeek.h"
+#include "CxxUtils/xmalloc.h"
 #include "GaudiKernel/IEvtSelector.h"
 #include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/IFileMgr.h"
@@ -359,7 +360,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeProcessor::bootstrap_
   if(m_debug) waitForSignal();
 
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = 1; // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
   // ...
@@ -491,7 +492,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeProcessor::exec_func(
   std::string ping = pidstr.str() + std::string(" ready for event processing");
 
   while(true) {
-    void* message2scatterer = malloc(ping.size());   
+    void* message2scatterer = CxxUtils::xmalloc(ping.size());
     memcpy(message2scatterer,ping.data(),ping.size());   
     socket2Scatterer->send(message2scatterer,ping.size());
     ATH_MSG_INFO("Sent a welcome message to the Scatterer");
@@ -642,7 +643,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeProcessor::exec_func(
       std::string outputFileReport = outputReportStream.str();
       
       // Report the output
-      message2scatterer = malloc(outputFileReport.size());
+      message2scatterer = CxxUtils::xmalloc(outputFileReport.size());
       memcpy(message2scatterer,outputFileReport.data(),outputFileReport.size());
       socket2Scatterer->send(message2scatterer,outputFileReport.size());
       ATH_MSG_INFO("Reported the output " << outputFileReport);
@@ -662,7 +663,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeProcessor::exec_func(
 
   // Return value: "ERRCODE|Func_Flag|NEvt"
   int outsize = 2*sizeof(int)+sizeof(AthenaMPToolBase::Func_Flag);
-  void* outdata = malloc(outsize);
+  void* outdata = CxxUtils::xmalloc(outsize);
   *(int*)(outdata) = 0; // Error code: for now use 0 success, 1 failure
   AthenaMPToolBase::Func_Flag func = AthenaMPToolBase::FUNC_EXEC;
   memcpy((char*)outdata+sizeof(int),&func,sizeof(func));
@@ -698,7 +699,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeProcessor::fin_func()
 
   // Return value: "ERRCODE|Func_Flag|NEvt"  (Here NEvt=-1)
   int outsize = 2*sizeof(int)+sizeof(AthenaMPToolBase::Func_Flag);
-  void* outdata = malloc(outsize);
+  void* outdata = CxxUtils::xmalloc(outsize);
   *(int*)(outdata) = 0; // Error code: for now use 0 success, 1 failure
   AthenaMPToolBase::Func_Flag func = AthenaMPToolBase::FUNC_FIN;
   memcpy((char*)outdata+sizeof(int),&func,sizeof(func));
@@ -774,7 +775,7 @@ void EvtRangeProcessor::reportError(yampl::ISocket* socket, AthenaMPToolBase::ES
 {
   pid_t pid = getpid();
   size_t messageSize = sizeof(pid_t)+sizeof(AthenaMPToolBase::ESRange_Status);
-  void* message2scatterer = malloc(messageSize);
+  void* message2scatterer = CxxUtils::xmalloc(messageSize);
   memcpy(message2scatterer,&pid,sizeof(pid_t));
   memcpy((pid_t*)message2scatterer+1,&status,sizeof(AthenaMPToolBase::ESRange_Status));
   socket->send(message2scatterer,messageSize);

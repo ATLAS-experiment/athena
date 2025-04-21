@@ -11,6 +11,7 @@
 #include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "AthenaKernel/IEventShare.h"
+#include "CxxUtils/xmalloc.h"
 
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/mapped_region.hpp>
@@ -109,7 +110,7 @@ AthenaMP::AllWorkerOutputs_ptr SharedEvtQueueProvider::generateOutputReport()
 std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueProvider::bootstrap_func()
 {
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = 1; // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
 
@@ -312,7 +313,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueProvider::exec_
 
 
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = (all_ok?0:1); // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
 
@@ -327,7 +328,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueProvider::fin_f
 {
   // Dummy
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = 0; // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
   return outwork;

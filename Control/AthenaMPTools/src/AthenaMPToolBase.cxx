@@ -5,6 +5,7 @@
 #include "AthenaMPToolBase.h"
 #include "copy_file_icc_hack.h"
 #include "AthenaInterprocess/ProcessGroup.h"
+#include "CxxUtils/xmalloc.h"
 
 #include "GaudiKernel/IEvtSelector.h"
 #include "GaudiKernel/IIoComponentMgr.h"
@@ -242,7 +243,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> AthenaMPToolBase::operator()(
 
   if(!all_ok) {
     outwork = std::unique_ptr<AthenaInterprocess::ScheduledWork>(new AthenaInterprocess::ScheduledWork);
-    outwork->data = malloc(sizeof(int));
+    outwork->data = CxxUtils::xmalloc(sizeof(int));
     *(int*)(outwork->data) = 1; // Error code: for now use 0 success, 1 failure
     outwork->size = sizeof(int);
   }
