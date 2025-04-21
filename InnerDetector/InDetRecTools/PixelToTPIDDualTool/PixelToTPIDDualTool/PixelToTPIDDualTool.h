@@ -22,8 +22,8 @@
 #ifndef XAOD_STANDALONE
 #pragma message("NOT compiling in XAOD_STANDALONE mode")
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
-#include "PixelConditionsData/PixeldEdxData.h"
-#include "StoreGate/ReadCondHandleKey.h"
+//#include "PixelConditionsData/PixeldEdxData.h"
+//#include "StoreGate/ReadCondHandleKey.h"
 #include "PixelGeoModel/IIBLParameterSvc.h"
 //
 #include "TrkTrack/Track.h"
@@ -51,14 +51,14 @@
 #include <memory>
 #include <mutex>
 
-
+/* IAN
 #ifndef XAOD_STANDALONE
-class AtlasDetectorID;
-class Identifier;
-class PixelID;
-class IIBLParameterSvc;
+class AtlasDetectorID; //needed?
+class Identifier; //needed?
+class PixelID; //needed?
+class IIBLParameterSvc; //needed?
 #endif
-
+*/ 
 namespace {
   struct PrintHeaderInclude {
     PrintHeaderInclude() { 
@@ -99,14 +99,16 @@ namespace CP {
                        int& nUsedHits,
                        int& nUsedIBLOverflowHits) const override;
 #endif
+
     /// Athena & AnalysisBase with xAOD EDM
     virtual float dEdx(const xAOD::TrackParticle& track,
                        int& nUsedHits,
                        int& nUsedIBLOverflowHits) const override;
 
   private:
-    StatusCode initSFsFromTrees();
     
+    Gaudi::Property<bool> m_equalizeClusterMeasurements
+    { this, "EqualizeClusterMeasurements", false, ""};
 
 #ifndef XAOD_STANDALONE
     ServiceHandle<IIBLParameterSvc> m_IBLParameterSvc {this, "IBLParameterSvc", "IBLParameterSvc"};
@@ -115,13 +117,9 @@ namespace CP {
     {this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "ChargeCalibration data, for ToT overflow setting"};
 #endif
 
-    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"}; // needed?
 
-    Gaudi::Property<bool> m_equalizeClusterMeasurements
-    { this, "EqualizeClusterMeasurements", false, ""};
-
-    Gaudi::Property<std::string> m_msosLink
-    { this, "MSOSLink", "Reco_msosLink"};
+#ifdef XAOD_STANDALONE
+    StatusCode initSFsFromTrees();
 
     Gaudi::Property<std::string> m_sfDir { this, "SFDir", "share/"};
     Gaudi::Property<std::string> m_sfFileName { this, "SFFileName", "nTuple_data_lowMu_flat.root"};
@@ -142,9 +140,9 @@ namespace CP {
     /// Decorators for xAOD EDM
     /// Raw track-level truncated mean dE/dx:
     ///    Returned by dEdx() if m_equalizeClusterMeasurements == false.
-    ///    Already AOD, calculated during reconstruction via this same tool using ESD EDM, stored by TrackParticleCreator.
+    ///    Already in AOD, calculated during reconstruction via this same tool using ESD EDM, stored by TrackParticleCreator.
     ///    NB: dE/dx calculated from xAOD and ESD EDMs can differ, likely due to migrations of cluster local (x,y).
-    ///        Place cuts on cluster location when calculating dE/dx to avoid sensor edges.
+    ///        We place cuts on cluster location when calculating dE/dx to avoid sensor edges.
     ///        As a result, hits used for one EDM can be excluded in calculation for the other EDM.
     /// Equalized track-level truncated mean dE/dx:
     ///    Returned by dEdx() if m_equalizeClusterMeasurements == true.
@@ -153,6 +151,12 @@ namespace CP {
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxKey{this, "clusterdEdxKey", "PixelClusters.dEdx", "SG key for the raw pixel cluster dE/dx attribute"};
     /// Equalized cluster dE/dx:
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxEqKey{this, "clusterdEdxEqKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
+#endif
+
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"}; // needed?
+
+    Gaudi::Property<std::string> m_msosLink
+    { this, "MSOSLink", "Reco_msosLink"};
 
     /// For charge -> dE/dx calc.
     double m_conversionfactor;

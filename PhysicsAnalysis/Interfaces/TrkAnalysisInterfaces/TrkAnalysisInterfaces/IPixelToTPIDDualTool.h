@@ -6,7 +6,7 @@
 // Framework include(s):
 #include "AsgTools/IAsgTool.h"
 
-#ifndef XAOD_ANALYSIS
+#ifndef XAOD_STANDALONE
 #include "TrkTrack/Track.h"
 #endif
 #include "xAODTracking/TrackParticle.h"
@@ -21,14 +21,15 @@ namespace CP {
     ASG_TOOL_INTERFACE(CP::IPixelToTPIDDualTool)
     
   public:
-    
-#ifndef XAOD_ANALYSIS
+
+#ifndef XAOD_STANDALONE
     // Athena
     virtual float dEdx(const EventContext& ctx,
                        const Trk::Track& track,
                        int& nUsedHits,
                        int& nUsedIBLOverflowHits) const = 0;
 #endif
+
     // AnalysisBase
     virtual float dEdx(const xAOD::TrackParticle& track,
                        int& nUsedHits,

@@ -45,9 +45,11 @@ changes : 11.02.04 added docu
 #include "TrkTrackSummary/TrackSummary.h"
 
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
-#include "TrkToolInterfaces/IPixelToTPIDTool.h" //template parameter to tool handle
+//#include "TrkToolInterfaces/IPixelToTPIDTool.h" //template parameter to tool handle
 #include "TrkToolInterfaces/ITrackParticleCreatorTool.h"
 #include "TrkToolInterfaces/ITRT_ElectronPidTool.h" //template parameter to tool handle
+
+#include "TrkAnalysisInterfaces/IPixelToTPIDDualTool.h"
 
 #include "MuonRecToolInterfaces/IMuonHitSummaryTool.h"
 
@@ -267,7 +269,8 @@ private:
                                                        "",
                                                        "" };
   /**tool to calculate dE/dx using pixel clusters*/
-  ToolHandle<IPixelToTPIDTool> m_dedxtool{ this, "PixelToTPIDTool", "", "" };
+  //ToolHandle<IPixelToTPIDTool> m_dedxtool{ this, "PixelToTPIDTool", "", "" };
+  ToolHandle<CP::IPixelToTPIDDualTool> m_dedxdualtool{ this, "PixelToTPIDDualTool", "", "" };
 
   /**tool to calculate expected hit information in innermost layers*/
   ToolHandle<InDet::IInDetTestPixelLayerTool> m_testPixelLayerTool{ this,

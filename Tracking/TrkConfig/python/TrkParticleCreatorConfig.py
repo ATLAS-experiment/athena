@@ -40,11 +40,22 @@ def TrackParticleCreatorToolCfg(flags,
             TRT_ElectronPidToolCfg)
         kwargs.setdefault("TRT_ElectronPidTool", result.popToolsAndMerge(
             TRT_ElectronPidToolCfg(flags, name="InDetTRT_ElectronPidTool")))
-
+    '''
     if 'PixelToTPIDTool' not in kwargs and flags.Detector.EnablePixel:
         from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
-        kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
-            PixelToTPIDToolCfg(flags)))
+        print("Ian: PixelToTPIDTool:")
+        tool = PixelToTPIDToolCfg(flags)
+        tool.printConfig(withDetails=True)
+        kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(tool))
+        #kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
+        #    PixelToTPIDToolCfg(flags)))
+    '''
+    if 'PixelToTPIDDualTool' not in kwargs and flags.Detector.EnablePixel:
+        from PixelToTPIDDualTool.PixelToTPIDDualToolConfig import PixelToTPIDDualToolCfg
+        print("Ian: PixelToTPIDDualTool:")
+        tool = PixelToTPIDDualToolCfg(flags)
+        tool.printConfig(withDetails=True)
+        kwargs.setdefault("PixelToTPIDDualTool", result.popToolsAndMerge(tool))
 
     if 'TestPixelLayerTool' not in kwargs and flags.Detector.EnablePixel:
         from InDetConfig.InDetTestPixelLayerConfig import (
@@ -81,7 +92,8 @@ def TrackParticleCreatorToolPIDCheckCfg(flags,
     if not flags.Tracking.ActiveConfig.RunTRTPID:
         kwargs.setdefault("TRT_ElectronPidTool", None)
     if not flags.Tracking.ActiveConfig.RunPixelPID:
-        kwargs.setdefault("PixelToTPIDTool", None)
+        #kwargs.setdefault("PixelToTPIDTool", None)
+        kwargs.setdefault("PixelToTPIDDualTool", None)
         kwargs.setdefault("TestPixelLayerTool", None)
 
     # have to create special public instance depending on PID tool configuration
@@ -102,7 +114,8 @@ def TrackParticleCreatorToolNoPIDCfg(flags,
                                      name="InDetxAODParticleCreatorToolNoPID",
                                      **kwargs):
     kwargs.setdefault("TRT_ElectronPidTool", None)
-    kwargs.setdefault("PixelToTPIDTool", None)
+    #kwargs.setdefault("PixelToTPIDTool", None)
+    kwargs.setdefault("PixelToTPIDDualTool", None)
     kwargs.setdefault("TestPixelLayerTool", None)
     return TrackParticleCreatorToolCfg(flags, name, **kwargs)
 
@@ -120,7 +133,8 @@ def InDetTrigParticleCreatorToolTRTPidCfg(flags,
     
     result = ComponentAccumulator()
 
-    kwargs.setdefault("PixelToTPIDTool", None)
+    #kwargs.setdefault("PixelToTPIDTool", None)
+    kwargs.setdefault("PixelToTPIDDualTool", None)
 
     if "TRT_ElectronPidTool" not in kwargs and flags.Detector.EnableTRT:
         from InDetConfig.TRT_ElectronPidToolsConfig import (
@@ -251,11 +265,16 @@ def GSFBuildInDetParticleCreatorToolCfg(flags,
             GSFTrackSummaryToolCfg(flags))
         result.addPublicTool(TrackSummaryTool)
         kwargs.setdefault("TrackSummaryTool", TrackSummaryTool)
-
+    '''
     if flags.GeoModel.Run < LHCPeriod.Run4 and "PixelToTPIDTool" not in kwargs:
         from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
         kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
             PixelToTPIDToolCfg(flags)))
+    '''
+    if flags.GeoModel.Run < LHCPeriod.Run4 and "PixelToTPIDDualTool" not in kwargs:
+        from PixelToTPIDDualTool.PixelToTPIDDualToolConfig import PixelToTPIDDualToolCfg
+        kwargs.setdefault("PixelToTPIDDualTool", result.popToolsAndMerge(
+            PixelToTPIDDualToolCfg(flags)))
 
     if flags.Detector.EnableTRT and "TRT_ElectronPidTool" not in kwargs:
         from InDetConfig.TRT_ElectronPidToolsConfig import (
@@ -340,11 +359,16 @@ def MuonCombinedParticleCreatorCfg(flags,
             MuonHitSummaryToolCfg(flags)))
 
     if not flags.Muon.MuonTrigger:
-
+        '''
         if 'PixelToTPIDTool' not in kwargs and flags.Detector.EnablePixel:
             from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
             kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
                 PixelToTPIDToolCfg(flags)))
+        '''
+        if 'PixelToTPIDDualTool' not in kwargs and flags.Detector.EnablePixel:
+            from PixelToTPIDDualTool.PixelToTPIDDualToolConfig import PixelToTPIDDualToolCfg
+            kwargs.setdefault("PixelToTPIDDualTool", result.popToolsAndMerge(
+                PixelToTPIDDualToolCfg(flags)))
 
         if ('TestPixelLayerTool' not in kwargs and
                 (flags.Detector.EnablePixel or flags.Detector.EnableITkPixel)):

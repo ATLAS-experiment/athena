@@ -11,6 +11,7 @@ namespace {
 namespace CP {
   
   PixelToTPIDDualTool::PixelToTPIDDualTool(const std::string& tool_name) : asg::AsgTool(tool_name) {    
+
     float energyPair = 3.68e-6; // Energy in MeV to create an electron-hole pair in silicon
     float sidensity = 2.329; // silicon density in g cm^-3
     m_conversionfactor=energyPair/sidensity;
@@ -18,6 +19,8 @@ namespace CP {
     m_Pixel_sensorthickness=.025; // 250 microns Pixel Planars
     m_IBL_3D_sensorthickness=.023; // 230 microns IBL 3D
     m_IBL_PLANAR_sensorthickness=.020; // 200 microns IBL Planars
+
+    m_pixelid = nullptr;
   }
 
   PixelToTPIDDualTool::~PixelToTPIDDualTool() = default;
@@ -25,26 +28,32 @@ namespace CP {
   StatusCode PixelToTPIDDualTool::initialize() {
     ATH_MSG_INFO("Initializing PixelToTPIDDualTool");
 
+    ATH_CHECK(m_eventInfo.initialize());
+
     if (m_equalizeClusterMeasurements) {
       ATH_MSG_INFO("Will equalize cluster dE/dx measurements before calculating truncated mean.");
 
+#ifdef XAOD_STANDALONE
       if (m_sfDirLocal != "")
         ATH_MSG_WARNING("!! SETTING UP WITH USER SPECIFIED INPUT LOCATION \"" << m_sfDirLocal << "\"!! FOR DEVELOPMENT USE ONLY !! ");
 
       ATH_CHECK(initSFsFromTrees()); // Eventually want to be able to choose between trees and the conditions database.
+#endif
     }
     else{
       ATH_MSG_INFO("Will NOT equalize cluster dE/dx measurements before calculating truncated mean.");
     }
 
+#ifdef XAOD_STANDALONE
     ANA_CHECK ( m_clusterdEdxKey.initialize() );
     ATH_MSG_INFO("Will decorate PixelCluster container with variable " << m_clusterdEdxKey);
     ANA_CHECK ( m_clusterdEdxEqKey.initialize() );
     ATH_MSG_INFO("Will decorate PixelCluster container with variable " << m_clusterdEdxEqKey << " (if equalization is enabled).");
+#endif
+
 
 #ifndef XAOD_STANDALONE
-    ATH_CHECK(m_eventInfo.initialize());
-    m_pixelid = nullptr;
+    ATH_CHECK(detStore()->retrieve(m_pixelid,"PixelID"));
     
     if (!m_IBLParameterSvc.empty()) {
       if (m_IBLParameterSvc.retrieve().isFailure()) {
@@ -52,6 +61,9 @@ namespace CP {
         return StatusCode::FAILURE; 
       } else
         ATH_MSG_INFO("Retrieved service " << m_IBLParameterSvc); 
+
+      ATH_CHECK(m_moduleDataKey.initialize());
+
     }
 #endif
 
@@ -61,7 +73,7 @@ namespace CP {
   //////////////////
   //////////////////
   //////////////////
-
+#ifdef XAOD_STANDALONE
   StatusCode PixelToTPIDDualTool::initSFsFromTrees()  {
     
     ATH_MSG_INFO("Initializing dE/dx equalization scale factor trees");
@@ -98,6 +110,7 @@ namespace CP {
 
     return StatusCode::SUCCESS;
   }
+#endif
 
   //////////////////
   //////////////////
@@ -229,9 +242,9 @@ namespace CP {
 
       return averagedEdxEq;
     }
-    else {
-      return averagedEdx;
-    }
+
+    return averagedEdx;
+
   }
 #endif
 
@@ -286,6 +299,7 @@ namespace CP {
       runNumber =  eventInfo->runNumber();
     }
     
+#ifdef XAOD_STANDALONE
     /// If using SFs from trees, get the closest run.
     /// Ideally, would filter the dataframe in initialize, only keeping the rows from the closest runNumber.
     /// But we don't know the runNumber until execute...
@@ -327,6 +341,7 @@ namespace CP {
     /// Declare decorators here
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > dEdxHandle(m_clusterdEdxKey); // no ctx?
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > dEdxEqHandle(m_clusterdEdxEqKey); // no ctx?
+#endif    
 
     /// Check for track states:
     static const SG::AuxElement::ConstAccessor< StatesOnTrack > trackStateAcc(m_msosLink);
@@ -450,7 +465,8 @@ namespace CP {
       
       /// Store
       cluster.dEdx = clusterdEdx;
-    
+
+#ifdef XAOD_STANDALONE    
       /// Decorate pixel cluster on track with raw dE/dx.
       ATH_MSG_DEBUG("Will decorate  variable " << m_clusterdEdxKey << " with value " << cluster.dEdx);
       dEdxHandle(**pixclus) = cluster.dEdx;
@@ -486,14 +502,15 @@ namespace CP {
         ATH_MSG_DEBUG("Will decorate  variable " << m_clusterdEdxEqKey << " with value " << cluster.dEdxEq);
         dEdxEqHandle(**pixclus) = cluster.dEdxEq;
       }
-     
+#endif
+      
       /// Add cluster to vector for truncated mean calculation
       clusters.push_back(cluster);
     } // MSOS iterator
-  
+    
     /// Always calculate raw truncated mean.
     float averagedEdx = getTruncatedMean(clusters, nUsedHits, goodPixelhits);
-
+    
     /// Sanity check that the recalculated raw dE/dx matches what was calculated during reco and stored as a track summary variable.    
     float stored_dEdx { 0 };
     unsigned char stored_numberOfUsedHitsdEdx = 99;
@@ -522,6 +539,7 @@ namespace CP {
       }
     }
 
+#ifdef XAOD_STANDALONE
     /// Calculate equalized truncated mean.
     if(m_equalizeClusterMeasurements) {
       int nUsedHitsEq=0; // need separate counter or will double count if calculating both raw and equalized dE/dx
@@ -531,13 +549,13 @@ namespace CP {
       if (nUsedHitsEq != nUsedHits) {
         ATH_MSG_ERROR("The numberOfUsedHitsdEdx calculated for the raw ("<< nUsedHits <<") and equalized ("<< nUsedHitsEq <<") dE/dx differ!  Should not happen!");
       }
-
+      
       return(averagedEdxEq);
     }
-    else {
-      return averagedEdx;
-    }
-  } 
+#endif    
+
+    return averagedEdx;
+  }
 
   //////////////////
   //////////////////
@@ -647,5 +665,5 @@ namespace CP {
     }
     return -1;
   }
-  
+
 } // namespace CP

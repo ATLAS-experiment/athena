@@ -12,7 +12,10 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def PixelToTPIDDualToolCfg(flags, name="PixelToTPIDDualTool", **kwargs):
    """Configure the pixel ToT PID tool"""
    acc = ComponentAccumulator()
-   # kwargs.setdefault("<property>", <value> )
-   the_tool = CompFactory.CP.PixelToTPIDDualTool(name, **kwargs)   
-   acc.setPrivateTools(the_tool)
+
+   from PixelConditionsAlgorithms.PixelConditionsConfig import PixelChargeCalibCondCfg
+   acc.merge(PixelChargeCalibCondCfg(flags))
+
+   acc.setPrivateTools(CompFactory.CP.PixelToTPIDDualTool(name, **kwargs))
+
    return acc   
