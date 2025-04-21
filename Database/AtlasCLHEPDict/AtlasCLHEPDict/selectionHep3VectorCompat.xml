@@ -1,0 +1,16 @@
+<!-- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration -->
+<lcgdict>
+
+   <class name="CLHEP::Hep3Vector"/>
+   <read sourceClass="CLHEP::Hep3Vector"
+         source="double dx; double dy; double dz;"
+         checksum="[3040806103]"
+         targetClass="CLHEP::Hep3Vector"
+         target="data">
+  <![CDATA[
+    (void)data;
+    newObj->set(onfile.dx, onfile.dy, onfile.dz);
+  ]]>
+  </read>
+
+</lcgdict>
