@@ -209,6 +209,7 @@ class DerivationTest(WorkflowTest):
             extra_args += f" --maxEvents {events}"
             format_flush = ", ".join([f"\"DAOD_{format}\": {flush}" for format in formats])
             extra_args += f" --preExec 'flags.Output.TreeAutoFlush={{{format_flush}}}'"
+
         if "inputAODFile" not in extra_args:
             extra_args += f" --inputAODFile {input_AOD[run][data_type]}"
 
