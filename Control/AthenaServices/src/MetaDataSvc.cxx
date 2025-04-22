@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file MetaDataSvc.cxx
@@ -34,67 +34,60 @@
 
 
 namespace {
-  bool
-  leftString(std::string & s, char sc){
-    bool truncated{false};
-    auto n = s.find(sc);
-    if (n!=std::string::npos){
-      s.resize(n);
-      truncated=true;
+  /**
+   * Truncates a string at the first occurrence of a specified character.
+   * 
+   * @param s The string to truncate (modified in-place)
+   * @param sc The character to truncate at
+   * @return true if the string was truncated, false otherwise
+   */
+  bool leftString(std::string& s, char sc) {
+    if (const auto pos = s.find(sc); pos != std::string::npos) {
+      s.resize(pos);
+      return true;
     }
-    return truncated;
+    return false;
   }
-
 }
 
 
 //________________________________________________________________________________
-MetaDataSvc::MetaDataSvc(const std::string& name, ISvcLocator* pSvcLocator) : base_class(name, pSvcLocator),
-	m_inputDataStore("StoreGateSvc/InputMetaDataStore", name),
-	m_outputDataStore("StoreGateSvc/MetaDataStore", name),
-	m_addrCrtr("AthenaPoolCnvSvc", name),
-	m_fileMgr("FileMgr", name),
-	m_incSvc("IncidentSvc", name),
-        m_outSeqSvc("OutputStreamSequencerSvc", name),
-	m_storageType(0L),
-	m_clearedInputDataStore(true),
-	m_clearedOutputDataStore(false),
-	m_allowMetaDataStop(false),
-        m_outputPrepared(false),
-	m_persToClid() {
-   // declare properties
-   declareProperty("MetaDataContainer", m_metaDataCont = "");
-   declareProperty("MetaDataTools", m_metaDataTools);
-   declareProperty("CnvSvc", m_addrCrtr = ServiceHandle<IAddressCreator>("AthenaPoolCnvSvc", name));
-   // persistent class name to transient CLID map
-   m_persToClid.insert(std::pair<std::string, CLID>("DataHeader_p5", 222376821));
-   m_persToClid.insert(std::pair<std::string, CLID>("EventStreamInfo_p3", 167728019));
-   m_persToClid.insert(std::pair<std::string, CLID>("ByteStreamMetadataContainer_p1", 1076128893));
-   m_persToClid.insert(std::pair<std::string, CLID>("IOVMetaDataContainer_p1", 1316383046));
-   m_persToClid.insert(std::pair<std::string, CLID>("xAOD::EventFormat_v1", 243004407));
-   m_persToClid.insert(std::pair<std::string, CLID>("xAOD::CutBookkeeperContainer_v1", 1234982351));
-   m_persToClid.insert(std::pair<std::string, CLID>("xAOD::CutBookkeeperAuxContainer_v1", 1147935274));
-   m_persToClid.insert(std::pair<std::string, CLID>("xAOD::TriggerMenuContainer_v1", 1107011239));
-   m_persToClid.insert(std::pair<std::string, CLID>("DataVector<xAOD::TriggerMenu_v1>", 1107011239));
-   m_persToClid.insert(std::pair<std::string, CLID>("xAOD::TriggerMenuAuxContainer_v1", 1212409402));
-   m_persToClid.insert(std::pair<std::string, CLID>("xAOD::TriggerMenuJsonContainer_v1", 1221262614));
-   m_persToClid.insert(std::pair<std::string, CLID>("DataVector<xAOD::TriggerMenuJson_v1>", 1221262614));
-   m_persToClid.insert(std::pair<std::string, CLID>("xAOD::TriggerMenuJsonAuxContainer_v1", 373045213));
-   m_persToClid.insert(std::pair<std::string, CLID>("xAOD::LumiBlockRangeContainer_v1", 1115934851));
-   m_persToClid.insert(std::pair<std::string, CLID>("DataVector<xAOD::LumiBlockRange_v1>", 1115934851));
-   m_persToClid.insert(std::pair<std::string, CLID>("xAOD::LumiBlockRangeAuxContainer_v1", 1251061086));
-   m_persToClid.insert(std::pair<std::string, CLID>("xAOD::FileMetaData_v1", 178309087));
-   m_persToClid.insert(std::pair<std::string, CLID>("xAOD::FileMetaDataAuxInfo_v1", 73252552));
-   m_persToClid.insert(std::pair<std::string, CLID>("xAOD::RingSetConfContainer_v1", 1157997427));
-   m_persToClid.insert(std::pair<std::string, CLID>("DataVector<xAOD::RingSetConf_v1>", 1157997427));
-   m_persToClid.insert(std::pair<std::string, CLID>("xAOD::RingSetConfAuxContainer_v1", 1307745126));
-   m_persToClid.insert(std::pair<std::string, CLID>("xAOD::TruthMetaDataContainer_v1", 1188015687));
-   m_persToClid.insert(std::pair<std::string, CLID>("DataVector<xAOD::TruthMetaData_v1>", 1188015687));
-   m_persToClid.insert(std::pair<std::string, CLID>("xAOD::TruthMetaDataAuxContainer_v1", 1094306618));
-}
-//__________________________________________________________________________
-MetaDataSvc::~MetaDataSvc() {
-}
+MetaDataSvc::MetaDataSvc( const std::string& name, ISvcLocator* pSvcLocator )
+    : base_class( name, pSvcLocator )
+    , m_inputDataStore( "StoreGateSvc/InputMetaDataStore", name )
+    , m_outputDataStore( "StoreGateSvc/MetaDataStore", name )
+    , m_addrCrtr( "AthenaPoolCnvSvc", name )
+    , m_fileMgr( "FileMgr", name )
+    , m_incSvc( "IncidentSvc", name )
+    , m_outSeqSvc( "OutputStreamSequencerSvc", name )
+    , m_persToClid{ { "DataHeader_p5", 222376821 },
+                    { "EventStreamInfo_p3", 167728019 },
+                    { "ByteStreamMetadataContainer_p1", 1076128893 },
+                    { "IOVMetaDataContainer_p1", 1316383046 },
+                    { "xAOD::EventFormat_v1", 243004407 },
+                    { "xAOD::CutBookkeeperContainer_v1", 1234982351 },
+                    { "xAOD::CutBookkeeperAuxContainer_v1", 1147935274 },
+                    { "xAOD::TriggerMenuContainer_v1", 1107011239 },
+                    { "DataVector<xAOD::TriggerMenu_v1>", 1107011239 },
+                    { "xAOD::TriggerMenuAuxContainer_v1", 1212409402 },
+                    { "xAOD::TriggerMenuJsonContainer_v1", 1221262614 },
+                    { "DataVector<xAOD::TriggerMenuJson_v1>", 1221262614 },
+                    { "xAOD::TriggerMenuJsonAuxContainer_v1", 373045213 },
+                    { "xAOD::LumiBlockRangeContainer_v1", 1115934851 },
+                    { "DataVector<xAOD::LumiBlockRange_v1>", 1115934851 },
+                    { "xAOD::LumiBlockRangeAuxContainer_v1", 1251061086 },
+                    { "xAOD::FileMetaData_v1", 178309087 },
+                    { "xAOD::FileMetaDataAuxInfo_v1", 73252552 },
+                    { "xAOD::RingSetConfContainer_v1", 1157997427 },
+                    { "DataVector<xAOD::RingSetConf_v1>", 1157997427 },
+                    { "xAOD::RingSetConfAuxContainer_v1", 1307745126 },
+                    { "xAOD::TruthMetaDataContainer_v1", 1188015687 },
+                    { "DataVector<xAOD::TruthMetaData_v1>", 1188015687 },
+                    { "xAOD::TruthMetaDataAuxContainer_v1", 1094306618 } } {}
+
+//________________________________________________________________________________
+MetaDataSvc::~MetaDataSvc() = default;
+
 //__________________________________________________________________________
 StatusCode MetaDataSvc::initialize() {
    ATH_MSG_INFO("Initializing " << name());
@@ -205,7 +198,9 @@ StatusCode MetaDataSvc::loadAddresses(StoreID::type storeID, IAddressProvider::t
             if (clid != ClassID_traits<DataHeader>::ID()) {
                SG::VersionedKey myVersObjKey(dhe.getKey(), verNumber);
                std::string key = dhe.getKey();
-               if (verNumber != 0) key = myVersObjKey;
+               if (verNumber != 0) {
+                  key = myVersObjKey;
+               }
                tads.push_back(dhe.getAddress(key));
             }
          }
@@ -216,7 +211,7 @@ StatusCode MetaDataSvc::loadAddresses(StoreID::type storeID, IAddressProvider::t
 //________________________________________________________________________________
 StatusCode MetaDataSvc::newMetadataSource(const Incident& inc)
 {
-   const FileIncident* fileInc  = dynamic_cast<const FileIncident*>(&inc);
+   const FileIncident* fileInc = dynamic_cast<const FileIncident*>(&inc);
    if (fileInc == nullptr) {
       ATH_MSG_ERROR("Unable to get FileName from EndInputFile incident");
       return StatusCode::FAILURE;
@@ -232,16 +227,13 @@ StatusCode MetaDataSvc::newMetadataSource(const Incident& inc)
          }
          m_clearedInputDataStore = true;
       }
-      if (!initInputMetaDataStore(fileName).isSuccess()) {
-         ATH_MSG_ERROR("Unable to initialize InputMetaDataStore");
-         return StatusCode::FAILURE;
-      }
+      ATH_CHECK(initInputMetaDataStore(fileName));
    }
-   StatusCode rc(StatusCode::SUCCESS);
-   for (auto it = m_metaDataTools.begin(); it != m_metaDataTools.end(); ++it) {
-      ATH_MSG_DEBUG(" calling beginInputFile on " << (*it)->name() << " for GUID \"" << guid << "\"");
-      if ( (*it)->beginInputFile(guid).isFailure() ) {
-         ATH_MSG_ERROR("Unable to call beginInputFile for " << (*it)->name());
+   StatusCode rc{StatusCode::SUCCESS};
+   for (auto& tool : m_metaDataTools) {
+      ATH_MSG_DEBUG(" calling beginInputFile on " << tool->name() << " for GUID \"" << guid << "\"");
+      if (tool->beginInputFile(guid).isFailure()) {
+         ATH_MSG_ERROR("Unable to call beginInputFile for " << tool->name());
          rc = StatusCode::FAILURE;
       }
    }
@@ -257,12 +249,9 @@ StatusCode MetaDataSvc::retireMetadataSource(const Incident& inc)
    }
    const std::string guid = fileInc->fileGuid();
    ATH_MSG_DEBUG("retireMetadataSource: " << fileInc->fileName());
-   for (auto it = m_metaDataTools.begin(); it != m_metaDataTools.end(); ++it) {
-      ATH_MSG_DEBUG(" calling endInputFile on " << (*it)->name() << " for GUID \"" << guid << "\"");
-      if ( (*it)->endInputFile(guid).isFailure() ) {
-         ATH_MSG_ERROR("Unable to call endInputFile for " << (*it)->name());
-         return StatusCode::FAILURE;
-      }
+   for (auto& tool : m_metaDataTools) {
+      ATH_MSG_DEBUG(" calling endInputFile on " << tool->name() << " for GUID \"" << guid << "\"");
+      ATH_CHECK(tool->endInputFile(guid));
    }
    m_allowMetaDataStop = true;
    return StatusCode::SUCCESS;
@@ -270,21 +259,23 @@ StatusCode MetaDataSvc::retireMetadataSource(const Incident& inc)
 
 StatusCode MetaDataSvc::prepareOutput()
 {
-   StatusCode rc(StatusCode::SUCCESS);
-   // Check if already called
-   if (!m_outputPrepared) {
-      for (auto it = m_metaDataTools.begin(); it != m_metaDataTools.end(); ++it) {
-         ATH_MSG_DEBUG(" calling metaDataStop for " << (*it)->name());
-         if ( (*it)->metaDataStop().isFailure() ) {
-            ATH_MSG_ERROR("Unable to call metaDataStop for " << (*it)->name());
-            rc = StatusCode::FAILURE;
-         }
-      }
-      if (!m_metaDataTools.release().isSuccess()) {
-         ATH_MSG_WARNING("Cannot release " << m_metaDataTools);
+   if (m_outputPrepared) {
+      return StatusCode::SUCCESS;
+   }
+
+   StatusCode rc{StatusCode::SUCCESS};
+   for (auto& tool : m_metaDataTools) {
+      ATH_MSG_DEBUG(" calling metaDataStop for " << tool->name());
+      if (tool->metaDataStop().isFailure()) {
+         ATH_MSG_ERROR("Unable to call metaDataStop for " << tool->name());
+         rc = StatusCode::FAILURE;
       }
    }
-   m_outputPrepared=true;
+   if (!m_metaDataTools.release().isSuccess()) {
+      ATH_MSG_WARNING("Cannot release " << m_metaDataTools);
+   }
+
+   m_outputPrepared = true;
    return rc;
 }
 
@@ -292,15 +283,17 @@ StatusCode MetaDataSvc::prepareOutput()
 StatusCode MetaDataSvc::prepareOutput(const std::string& outputName)
 {
    // default to the serial implementation if no output name given
-   if( outputName.empty() ) return prepareOutput();
+   if( outputName.empty() ) {
+       return prepareOutput();
+   }
    ATH_MSG_DEBUG( "prepareOutput('" << outputName << "')" );
 
-   StatusCode rc = StatusCode::SUCCESS;
-   for (auto it = m_metaDataTools.begin(); it != m_metaDataTools.end(); ++it) {
-      ATH_MSG_DEBUG("  calling metaDataStop for " << (*it)->name());
+   StatusCode rc{StatusCode::SUCCESS};
+   for (auto& tool : m_metaDataTools) {
+      ATH_MSG_DEBUG("  calling metaDataStop for " << tool->name());
       // planning to replace the call below with  (*it)->prepareOutput(outputName)
-      if ( (*it)->metaDataStop().isFailure() ) {
-         ATH_MSG_ERROR("Unable to call metaDataStop for " << (*it)->name());
+      if (tool->metaDataStop().isFailure()) {
+         ATH_MSG_ERROR("Unable to call metaDataStop for " << tool->name());
          rc = StatusCode::FAILURE;
       }
    }
@@ -312,23 +305,14 @@ StatusCode MetaDataSvc::prepareOutput(const std::string& outputName)
 StatusCode MetaDataSvc::shmProxy(const std::string& filename)
 {
    if (!m_clearedInputDataStore) {
-      if (!m_inputDataStore->clearStore(true).isSuccess()) {
-         ATH_MSG_ERROR("Unable to clear input MetaData Proxies");
-	 return StatusCode::FAILURE;
-      }
+      ATH_CHECK(m_inputDataStore->clearStore(true));
       m_clearedInputDataStore = true;
    }
    if (!m_clearedOutputDataStore) {
-      if (!m_outputDataStore->clearStore(true).isSuccess()) {
-         ATH_MSG_ERROR("Unable to clear output MetaData Proxies");
-	 return StatusCode::FAILURE;
-      }
+      ATH_CHECK(m_outputDataStore->clearStore(true));
       m_clearedOutputDataStore = true;
    }
-   if (!addProxyToInputMetaDataStore(filename).isSuccess()) {
-      ATH_MSG_ERROR("Unable to add proxy to InputMetaDataStore");
-      return StatusCode::FAILURE;
-   }
+   ATH_CHECK(addProxyToInputMetaDataStore(filename));
    return StatusCode::SUCCESS;
 }
 
@@ -396,9 +380,8 @@ StatusCode MetaDataSvc::io_reinit() {
    ATH_MSG_INFO("I/O reinitialization...");
    ATH_MSG_DEBUG("Dumping InputMetaDataStore: " << m_inputDataStore->dump());
    ATH_MSG_DEBUG("Dumping OutputMetaDataStore: " << m_outputDataStore->dump());
-   for (auto iter = m_metaDataTools.begin(),
- 	     last = m_metaDataTools.end(); iter != last; iter++) {
-      ATH_MSG_INFO("Attached MetaDataTool: " << (*iter)->name());
+   for (const auto& tool : m_metaDataTools) {
+      ATH_MSG_INFO("Attached MetaDataTool: " << tool->name());
    }
    m_outputPrepared = false;
    return(StatusCode::SUCCESS);
@@ -420,14 +403,15 @@ std::string MetaDataSvc::removeStreamFromKey(std::string& key) {
    key = key.substr(0, pos) + key.substr(epos+1);
    return stream;
 }
+
 //__________________________________________________________________________
-std::set<std::string> MetaDataSvc::getPerStreamKeysFor(const std::string& key ) const {
-   auto iter = m_streamKeys.find( key );
-   if( iter == m_streamKeys.end() ) {
-      return std::set<std::string>( {key} );
-   }
-   return iter->second;
+[[nodiscard]] std::set<std::string> MetaDataSvc::getPerStreamKeysFor(const std::string& key) const {
+    if (!m_streamKeys.contains(key)) {
+        return {key};
+    }
+    return m_streamKeys.at(key);
 }
+
 //__________________________________________________________________________
 StatusCode MetaDataSvc::addProxyToInputMetaDataStore(const std::string& tokenStr) {
    std::string fileName = tokenStr.substr(tokenStr.find("[FILE=") + 6);
@@ -447,10 +431,9 @@ StatusCode MetaDataSvc::addProxyToInputMetaDataStore(const std::string& tokenStr
    iss >> num;
    CLID clid = m_persToClid[className];
    if (clid == 167728019) { // EventStreamInfo, will change tool to combine input metadata, clearing things before...
-      bool foundTool = false;
-      for (auto iter = m_metaDataTools.begin(), iterEnd = m_metaDataTools.end(); iter != iterEnd; iter++) {
-         if ((*iter)->name() == "ToolSvc.CopyEventStreamInfo") foundTool = true;
-      }
+      bool foundTool = std::ranges::any_of( m_metaDataTools, []( const auto& tool ) {
+        return tool->name() == "ToolSvc.CopyEventStreamInfo";
+      } );
       if (!foundTool) {
          if (serviceLocator()->existsService("CutFlowSvc")) {
             ServiceHandle<IIncidentListener> cfSvc("CutFlowSvc", this->name()); // Disable CutFlowSvc by stopping its incidents.
@@ -476,14 +459,17 @@ StatusCode MetaDataSvc::addProxyToInputMetaDataStore(const std::string& tokenStr
    // make stream-unique keys for infile metadata objects
    // AthenaOutputStream will use this to distribute objects to the right stream (and restore the original key)
    if( clid == 178309087 ) {  // FileMetaData
-      std::string newName = keyName + m_streamInKeyMark + fileName + "]";
+      std::string newName = std::format("{}{}{}{}", keyName, m_streamInKeyMark, fileName, "]");
       ATH_MSG_DEBUG("Recording " << keyName << " as " << newName);
       m_streamKeys[keyName].insert(newName);
       keyName = std::move(newName);
    }
    if( clid == 73252552 ) {  // FileMetaDataAuxInfo
-      std::string newName = keyName.substr(0, keyName.find(RootAuxDynIO::AUX_POSTFIX)) + m_streamInKeyMark
-                          + fileName +  + "]" + RootAuxDynIO::AUX_POSTFIX;
+      std::string newName = std::format("{}{}{}]{}",
+                                       keyName.substr(0, keyName.find(RootAuxDynIO::AUX_POSTFIX)),
+                                       m_streamInKeyMark,
+                                       fileName,
+                                       RootAuxDynIO::AUX_POSTFIX);
       ATH_MSG_DEBUG("Recording " << keyName << " as " << newName);
       m_streamKeys[keyName].insert(newName);
       keyName = std::move(newName);
@@ -529,8 +515,14 @@ StatusCode MetaDataSvc::initInputMetaDataStore(const std::string& fileName) {
    } else if (fileName.compare(0, 3, "SHM")==0) {
       ATH_MSG_DEBUG("MetaDataSvc called for shared memory.");
    } else {
-      const std::string par[2] = { fileName,  m_metaDataCont.value() + "(DataHeader)" };
-      const std::string parOld[2] = { fileName,  m_metaDataCont.value() + "DataHeader" };
+      const std::string par[2] = {
+         fileName,
+         std::format("{}(DataHeader)", m_metaDataCont.value())
+      };
+      const std::string parOld[2] = {
+         fileName,
+         std::format("{}{}", m_metaDataCont.value(), "DataHeader")
+      };
       for (int verNumber = 0; verNumber < 100; verNumber++) {
          SG::VersionedKey myVersKey(name(), verNumber);
          if (m_inputDataStore->contains<DataHeader>(myVersKey)) {
@@ -550,10 +542,7 @@ StatusCode MetaDataSvc::initInputMetaDataStore(const std::string& fileName) {
          }
       }
       std::list<SG::TransientAddress*> tList;
-      if (!loadAddresses(StoreID::METADATA_STORE, tList).isSuccess()) {
-         ATH_MSG_ERROR("Unable to load MetaData Proxies");
-         return StatusCode::FAILURE;
-      }
+      ATH_CHECK(loadAddresses(StoreID::METADATA_STORE, tList));
       for (SG::TransientAddress* tad : tList) {
          CLID clid = tad->clID();
           ATH_MSG_VERBOSE("initInputMetaDataStore: add proxy for clid = " << clid << ", key = " << tad->name());
@@ -591,8 +580,7 @@ const std::string MetaDataSvc::currentRangeID() const
 
 CLID MetaDataSvc::remapMetaContCLID( const CLID& itemID ) const
 {
-   auto it =  m_handledClasses.find(itemID);
-   if (it == m_handledClasses.end()) {
+   if (!m_handledClasses.contains(itemID)) {
       ATH_MSG_DEBUG("Not translating metadata item ID #" << itemID);
       return itemID;
    }
@@ -600,7 +588,7 @@ CLID MetaDataSvc::remapMetaContCLID( const CLID& itemID ) const
    std::string itemName;
    CLID contID = 0;
    if (m_classIDSvc->getTypeNameOfID(itemID, itemName).isSuccess()) {
-     const std::string contName = "MetaCont<" + itemName + ">";
+     const std::string contName = std::format("MetaCont<{}>", itemName);
      ATH_MSG_DEBUG("Transforming " << contName << " to " << itemName
                    << " for output");
      if (m_classIDSvc->getIDOfTypeName(contName, contID).isSuccess())
@@ -616,7 +604,7 @@ void MetaDataSvc::recordHook(const std::type_info& typeInfo) {
 
   CLID itemID = 0;
   if (m_classIDSvc->getIDOfTypeInfoName(typeName, itemID).isSuccess()) {
-    auto result =  m_handledClasses.insert(itemID);
+    auto result = m_handledClasses.insert(itemID);
     if (result.second)
       ATH_MSG_DEBUG("MetaDataSvc will handle " << typeName
                     << " ClassID: " << itemID);
@@ -635,24 +623,18 @@ void MetaDataSvc::removeHook(const std::type_info& typeInfo) {
   }
 }
 
-
-void MetaDataSvc::lockTools() const
-{
+void MetaDataSvc::lockTools() const {
    ATH_MSG_DEBUG("Locking metadata tools");
-   for(auto tool : m_metaDataTools ) {
-      ILockableTool *lockable = dynamic_cast<ILockableTool*>( tool.get() );
+   for(auto& tool : m_metaDataTools ) {
+      const ILockableTool *lockable = dynamic_cast<const ILockableTool*>( tool.get() );
       if( lockable ) lockable->lock_shared();
    }
 }
 
-
-void MetaDataSvc::unlockTools() const
-{
+void MetaDataSvc::unlockTools() const {
    ATH_MSG_DEBUG("Unlocking metadata tools");
-   for(auto tool : m_metaDataTools ) {
-      ILockableTool *lockable = dynamic_cast<ILockableTool*>( tool.get() );
+   for(auto& tool : m_metaDataTools ) {
+      const ILockableTool *lockable = dynamic_cast<const ILockableTool*>( tool.get() );
       if( lockable ) lockable->unlock_shared();
    }
 }
-
-
