@@ -6,7 +6,6 @@
 #define TRACKINGANALYSISALGORITHMS_PIXELDEDXEQUALIZATIONALG_H
 
 #include <AnaAlgorithm/AnaReentrantAlgorithm.h>
-//#include <AnaAlgorithm/AnaAlgorithm.h>
 #include <xAODTracking/TrackParticleContainer.h>
 #include <xAODTracking/TrackParticleAuxContainer.h>
 
@@ -41,7 +40,6 @@ namespace CP {
   /// These scale factors equalize the dE/dx measurments throughout time (lumi).
   ///
   /// @author Ian Dyckes
-  /// @author Simone Pagan Griso
   ///
   class PixelDEdxEqualizationAlg final : public EL::AnaReentrantAlgorithm {
 
@@ -53,20 +51,14 @@ namespace CP {
     StatusCode initialize() override;
 
     /// Function executing the algorithm
+    /// Only support use in AnalysisBase.
+#ifdef XAOD_STANDALONE
     StatusCode execute(const EventContext& ctx) const override;
-
-  /*
-  class PixelDEdxEqualizationAlg final : public EL::AnaAlgorithm {
-    using EL::AnaAlgorithm::AnaAlgorithm;
-    StatusCode initialize () override;
-    StatusCode execute () override;
-  */
-
-
+#endif
+    
   private:
 
     ToolHandle<CP::IPixelToTPIDDualTool> m_pixelToTPIDDualTool{this, "PixelToTPIDDualTool", "", "tool for pixel dE/dx"};
-    //ToolHandle<CP::IPixelToTPIDDualTool> m_pixelToTPIDDualTool{this, "PixelToTPIDDualTool", "CP::PixelToTPIDDualTool/PixelToTPIDDualTool", "tool for pixel dE/dx"}; // ?
 
     /// @name Algorithm properties
     /// @{
@@ -77,13 +69,16 @@ namespace CP {
     this, "TrackContainerName", "InDetTrackParticles", "Input track collection to decorate with corrected dE/dx measurements."};
 
     /// Decorators
-    /// Equalized dE/dx.  Provide the variable name without the container.  Container will be set dynamically in initialize.  Form will be <container>.<m_dEdxEqKey>.
+    /// Equalized dE/dx.
+    /// Provide the variable name without the container.  
+    /// Container will be set dynamically in initialize.  
+    /// Form will be <container>.<m_dEdxEqKey>.
     Gaudi::Property<std::string>  m_dEdxEqVarName
     { this, "dEdxEqVarName", "dEdxEq", "Variabel name for the equalized pixel dE/dx attribute" };
-    /// Declaire WriteDectorHandleKey but set dynamically in initialize once track container is known...
-    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dEdxEqKey; 
-    // SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dEdxEqKey{this, "dEdxEqName", "dEdxEq", "SG key for the equalized pixel dE/dx attribute"}; //set container  dynamically in initialize.
 
+    /// Declare WriteDectorHandleKey but set dynamically in initialize once track container is known...
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dEdxEqKey; 
+ 
     /// Counters.  Maybe drop?
     mutable std::atomic<unsigned long> m_nEventsProcessed{};
     mutable std::atomic<unsigned long> m_nTracksProcessed{};

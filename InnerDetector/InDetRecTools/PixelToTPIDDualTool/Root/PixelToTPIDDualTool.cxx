@@ -16,11 +16,14 @@ namespace CP {
     float sidensity = 2.329; // silicon density in g cm^-3
     m_conversionfactor=energyPair/sidensity;
 
+    /// Sensor thicknesses (in cm).
     m_Pixel_sensorthickness=.025; // 250 microns Pixel Planars
     m_IBL_3D_sensorthickness=.023; // 230 microns IBL 3D
     m_IBL_PLANAR_sensorthickness=.020; // 200 microns IBL Planars
 
-    m_pixelid = nullptr;
+#ifndef XAOD_STANDALONE
+    m_pixelid = nullptr; // not used in XAOD_STANDALONE.
+#endif
   }
 
   PixelToTPIDDualTool::~PixelToTPIDDualTool() = default;
@@ -28,31 +31,43 @@ namespace CP {
   StatusCode PixelToTPIDDualTool::initialize() {
     ATH_MSG_INFO("Initializing PixelToTPIDDualTool");
 
-    ATH_CHECK(m_eventInfo.initialize());
-
+    /// Common to both EDMs ///
     if (m_equalizeClusterMeasurements) {
       ATH_MSG_INFO("Will equalize cluster dE/dx measurements before calculating truncated mean.");
-
-#ifdef XAOD_STANDALONE
-      if (m_sfDirLocal != "")
-        ATH_MSG_WARNING("!! SETTING UP WITH USER SPECIFIED INPUT LOCATION \"" << m_sfDirLocal << "\"!! FOR DEVELOPMENT USE ONLY !! ");
-
-      ATH_CHECK(initSFsFromTrees()); // Eventually want to be able to choose between trees and the conditions database.
-#endif
     }
     else{
       ATH_MSG_INFO("Will NOT equalize cluster dE/dx measurements before calculating truncated mean.");
     }
 
+
+    /// xAOD EDM ///
 #ifdef XAOD_STANDALONE
+
+    /// For determining data vs MC, as well as run number.
+    ATH_CHECK(m_eventInfo.initialize());
+
+    /// Set up scale factors. In XAOD_STANDALONE, read SFs from trees stored on CVMFS
+    if(m_equalizeClusterMeasurements) {
+      if (m_sfDirLocal != "") {
+        ATH_MSG_WARNING("!! SETTING UP WITH USER SPECIFIED INPUT LOCATION \"" << m_sfDirLocal << "\"!! FOR DEVELOPMENT USE ONLY !! ");
+      }
+      ATH_CHECK(initSFsFromTrees());
+    }
+
+    /// Initialize decorator keys
     ANA_CHECK ( m_clusterdEdxKey.initialize() );
     ATH_MSG_INFO("Will decorate PixelCluster container with variable " << m_clusterdEdxKey);
-    ANA_CHECK ( m_clusterdEdxEqKey.initialize() );
+    ANA_CHECK ( m_clusterdEdxEqKey.initialize() ); // only use if m_equalizeClusterMeasurements == true.
     ATH_MSG_INFO("Will decorate PixelCluster container with variable " << m_clusterdEdxEqKey << " (if equalization is enabled).");
 #endif
 
 
+    /// ESD EDM ///
 #ifndef XAOD_STANDALONE
+    
+    /// When NOT in XAOD_STANDALONE, will read SFs from conditions database instead.
+    /// See QT from Rebecca Hicks (ATLIDTRKCP-579).
+
     ATH_CHECK(detStore()->retrieve(m_pixelid,"PixelID"));
     
     if (!m_IBLParameterSvc.empty()) {
@@ -73,6 +88,9 @@ namespace CP {
   //////////////////
   //////////////////
   //////////////////
+
+  /// When in XAOD_STANDALONE, initialize SFs from ROOT TTrees on CVMFS.
+  /// Read into an RDataFrame.  Will filter to get SFs from closest run  in dEdx().
 #ifdef XAOD_STANDALONE
   StatusCode PixelToTPIDDualTool::initSFsFromTrees()  {
     
@@ -117,7 +135,7 @@ namespace CP {
   //////////////////
 
 #ifndef XAOD_STANDALONE
-
+  /// This is the version ran during reconstruction on the ESD EDM.
   /// Will return the dE/dx, and will update nUsedHits (the divisor in the truncated mean) and nUsedIBLOverflowHits.
   /// Whether this is the raw or equalized dE/dx will be determined by the tool properties.
   float PixelToTPIDDualTool::dEdx(const EventContext& ctx,
@@ -125,12 +143,14 @@ namespace CP {
                                   int& nUsedHits,
                                   int& nUsedIBLOverflowHits) const
   {
-    
-    int goodPixelhits = 0;
+
+    /// Total number of good pixel hits considered in truncated mean calc.    
+    /// Clusters will be subjected to various cuts.
+    int goodPixelhits = 0; 
 
     /// passed by ref, so will update here.  
-    nUsedHits=0;
-    nUsedIBLOverflowHits=0;
+    nUsedHits=0; // divisor in the truncated mean calculation.
+    nUsedIBLOverflowHits=0; // number of IBL hits in overflow.
     
     /// Get pixel clusters in this simple struct to abstract away the two EDMs.
     std::vector<PixelCluster> clusters;
@@ -173,7 +193,8 @@ namespace CP {
             
             float dotProd = (*tsosIter)->trackParameters()->momentum().dot( (*tsosIter)->trackParameters()->associatedSurface().normal() );
             cluster.cosalpha = fabs(dotProd / (*tsosIter)->trackParameters()->momentum().mag());
-            cluster.charge = pixclus->prepRawData()->totalCharge()*cluster.cosalpha; // NB: multiplying by cosalpha!
+            //cluster.charge = pixclus->prepRawData()->totalCharge()*cluster.cosalpha; // NB: multiplying by cosalpha!
+            cluster.charge = pixclus->prepRawData()->totalCharge();
 
             /// keep track if this is an ibl cluster with overflow
             int iblOverflow=0;
@@ -252,6 +273,8 @@ namespace CP {
   //////////////////
   //////////////////
 
+#ifdef XAOD_STANDALONE
+  /// This is the version ran via a CP alg on the xAOD EDM.
   /// Will return the dE/dx, and will update nUsedHits (the divisor in the truncated mean) and nUsedIBLOverflowHits.
   /// Whether this is the raw or equalized dE/dx will be determined by the tool properties.
   float PixelToTPIDDualTool::dEdx(const xAOD::TrackParticle& track,
@@ -261,20 +284,24 @@ namespace CP {
 
     using StatesOnTrack = std::vector<ElementLink<xAOD::TrackStateValidationContainer>>;
 
+    /// Total number of good pixel hits considered in truncated mean calc.    
+    /// Clusters will be subjected to various cuts.
     int goodPixelhits = 0;
+
+    /// All pixel hits linked to the track.
     int allPixelHits = 0;
 
     /// Passed by ref, so will update here.  
-    nUsedHits=0;
-    nUsedIBLOverflowHits=0;
+    nUsedHits=0; // divisor in truncated mean.
+    nUsedIBLOverflowHits=0; // number of IBL hits in overflow.
 
     /// Get pixel clusters in this simple struct to abstract away the two EDMs.
     std::vector<PixelCluster> clusters;
 
-    /// second value keeps track if the cluster is in IBL and has at least an overflow hit
+    /// Second value keeps track if the cluster is in IBL and has at least an overflow hit
     std::multimap<float,int> dEdxMap;
 
-    /// Determine if data or MC.  Ideally this would be done in initialize...
+    /// Determine if data or MC.
     /// If data, get the run number for scale factor determination.  
     /// If MC, do not allow m_equalizeClusterMeasurements to be true.
     ///    Not supporting dE/dx equalization for  MC at this time.
@@ -282,13 +309,14 @@ namespace CP {
     ///    Eventually, can apply scale factors to "undo" MC23 rad damage modeling.
     ///    For now, only allow m_equalizeClusterMeasurements == false.
     ////   Still useful to decorate the clusters with their raw dE/dx measurements.
-    int runNumber = 0;
+    int runNumber = 0; // won't be used if not in XAOD_STANDALONE, since not applying SFs from trees.
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);        
     if (eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) { //MC
       ATH_MSG_DEBUG("The current event is simulation.");
       if( m_equalizeClusterMeasurements ) {
         ATH_MSG_ERROR("Requested to equalize the dE/dx, but this is not yet supported for MC.");
         ATH_MSG_ERROR("Eventually, can apply scale factors to \"undo\" the radiation modeling in MC23.");
+        ATH_MSG_ERROR("Or equalize the MC to the data reference run.");
         
         /// Throw runtime error since not returning a status code.
         throw std::runtime_error("Cannot set EqualizeClusterMeasurements to true for MC (for now).");
@@ -299,7 +327,6 @@ namespace CP {
       runNumber =  eventInfo->runNumber();
     }
     
-#ifdef XAOD_STANDALONE
     /// If using SFs from trees, get the closest run.
     /// Ideally, would filter the dataframe in initialize, only keeping the rows from the closest runNumber.
     /// But we don't know the runNumber until execute...
@@ -309,7 +336,7 @@ namespace CP {
 
     if( m_equalizeClusterMeasurements ) {
       
-      // First, try to find it (lock the map while accessing)
+      /// First, try to find it (lock the map while accessing)
       {
         std::lock_guard<std::mutex> lock(m_mapMutex);
 
@@ -329,7 +356,7 @@ namespace CP {
                                                return std::abs(a - runNumber) < std::abs(b - runNumber); });
         ATH_MSG_INFO("Closest run number:" << closestRunNumber);
         auto filtered = std::make_shared<ROOT::RDF::RNode>(df->Filter([closestRunNumber](int run) { return run == closestRunNumber; }, {"runNumber"}));
-        // Store it in the map (lock again)
+        /// Store it in the map (lock again)
         {
           std::lock_guard<std::mutex> lock(m_mapMutex);
           m_filteredRDFMap[runNumber] = filtered;
@@ -339,9 +366,9 @@ namespace CP {
     }
 
     /// Declare decorators here
+    /// Will cause issues with TrackParticleCreator during reco if included outside of XAOD_STANDALONE.
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > dEdxHandle(m_clusterdEdxKey); // no ctx?
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > dEdxEqHandle(m_clusterdEdxEqKey); // no ctx?
-#endif    
 
     /// Check for track states:
     static const SG::AuxElement::ConstAccessor< StatesOnTrack > trackStateAcc(m_msosLink);
@@ -424,7 +451,8 @@ namespace CP {
 
       static const SG::AuxElement::ConstAccessor< float > chargeAcc("charge");
       if (chargeAcc.isAvailable(**pixclus)) {
-        cluster.charge = chargeAcc(**pixclus) * cluster.cosalpha; // NB: multiplying by cosalpha!
+        //cluster.charge = chargeAcc(**pixclus) * cluster.cosalpha; // NB: multiplying by cosalpha!
+        cluster.charge = chargeAcc(**pixclus);
       } else {
         ATH_MSG_WARNING("charge auxdata is missing!");
         continue;
@@ -466,7 +494,6 @@ namespace CP {
       /// Store
       cluster.dEdx = clusterdEdx;
 
-#ifdef XAOD_STANDALONE    
       /// Decorate pixel cluster on track with raw dE/dx.
       ATH_MSG_DEBUG("Will decorate  variable " << m_clusterdEdxKey << " with value " << cluster.dEdx);
       dEdxHandle(**pixclus) = cluster.dEdx;
@@ -502,7 +529,6 @@ namespace CP {
         ATH_MSG_DEBUG("Will decorate  variable " << m_clusterdEdxEqKey << " with value " << cluster.dEdxEq);
         dEdxEqHandle(**pixclus) = cluster.dEdxEq;
       }
-#endif
       
       /// Add cluster to vector for truncated mean calculation
       clusters.push_back(cluster);
@@ -539,7 +565,6 @@ namespace CP {
       }
     }
 
-#ifdef XAOD_STANDALONE
     /// Calculate equalized truncated mean.
     if(m_equalizeClusterMeasurements) {
       int nUsedHitsEq=0; // need separate counter or will double count if calculating both raw and equalized dE/dx
@@ -552,15 +577,22 @@ namespace CP {
       
       return(averagedEdxEq);
     }
-#endif    
 
     return averagedEdx;
   }
+#endif    
 
   //////////////////
   //////////////////
   //////////////////
+  
+  /// All functions below are shared between the two dEdx() functions.
+  /// They take PixelClusters as input, a simple struct defined to abstract away the two EDMs.
+  /// This prevents the duplication of the truncated mean logic, as well as the cluster (x,y) cuts.
+  /// The number of good pixel hits (hits considered for truncated mean calc) is passed by ref & incremented.
+  /// As is the number of IBL hits in overflow (again, only if they are considered for the trunc mean calc).
 
+  /// Returns the cluster dE/dx.
   float PixelToTPIDDualTool::getClusterdEdx(const PixelCluster& cluster,
                                             int& pixelhits,
                                             int& nUsedIBLOverflowHits) const{    
@@ -572,7 +604,8 @@ namespace CP {
           (fabs(cluster.locy) < 10. &&
            (cluster.locx > -8.33 &&
             cluster.locx < 8.3))) { // check if IBL 3D and good cluster selection
-        dEdxValue = cluster.charge * m_conversionfactor / m_IBL_3D_sensorthickness;
+        //dEdxValue = cluster.charge  *  m_conversionfactor / m_IBL_3D_sensorthickness;
+        dEdxValue = cluster.charge * cluster.cosalpha *  m_conversionfactor / m_IBL_3D_sensorthickness;
         pixelhits++;
         if (cluster.iblOverflow == 1) {
           nUsedIBLOverflowHits++;
@@ -582,7 +615,8 @@ namespace CP {
                   (cluster.locx > -8.33 &&
                    cluster.locx < 8.3))) { // check if IBL planar and good cluster
         // selection
-        dEdxValue = cluster.charge * m_conversionfactor / m_IBL_PLANAR_sensorthickness;
+        //dEdxValue = cluster.charge * m_conversionfactor / m_IBL_PLANAR_sensorthickness;
+        dEdxValue = cluster.charge * cluster.cosalpha * m_conversionfactor / m_IBL_PLANAR_sensorthickness;
         pixelhits++;
         if (cluster.iblOverflow == 1) {
           nUsedIBLOverflowHits++;
@@ -593,11 +627,13 @@ namespace CP {
     }
     //PIXEL layer and ENDCAP
     else if(cluster.bec==0 && fabs(cluster.locy)<30. &&  ((cluster.locx>-8.20 && cluster.locx<-0.60) || (cluster.locx>0.50 && cluster.locx<8.10))) {
-      dEdxValue = cluster.charge * m_conversionfactor / m_Pixel_sensorthickness;
+      //dEdxValue = cluster.charge * m_conversionfactor / m_Pixel_sensorthickness;
+      dEdxValue = cluster.charge * cluster.cosalpha * m_conversionfactor / m_Pixel_sensorthickness;
       pixelhits++;
     }
     else if (std::abs(cluster.bec)==2 && fabs(cluster.locy)<30. && ((cluster.locx>-8.15 && cluster.locx<-0.55) || (cluster.locx>0.55 && cluster.locx<8.15))) {
-      dEdxValue = cluster.charge * m_conversionfactor / m_Pixel_sensorthickness;
+      //dEdxValue = cluster.charge * m_conversionfactor / m_Pixel_sensorthickness;
+      dEdxValue = cluster.charge * cluster.cosalpha * m_conversionfactor / m_Pixel_sensorthickness;
       pixelhits++;
     }
     else{
@@ -612,13 +648,17 @@ namespace CP {
   //////////////////
   //////////////////
 
+  /// Returns the truncated mean over the track. 
+  /// If equalize == true, it will use the equalized cluster dE/dx measurement in the calculation.
+  /// NB:  nUsedHits is passed by reference and updated.  Do not call this function multiple times with the same counter.
   float PixelToTPIDDualTool::getTruncatedMean(const std::vector<PixelCluster>& clusters,
                                               int& nUsedHits, 
                                               int pixelhits,
                                               bool equalize) const {
 
-    /// Get the dEdxMap.  First in pair is the dE/dx (raw or equalized).  Second indicates if it's a IBL cluster in with ToT in overflow.
-    /// The nice thing about multimaps is that it will automatically sort based on the first element in the pair.  Useful for truncated mean alg.
+    /// Get the dEdxMap.
+    /// First in pair is the dE/dx (raw or equalized).  Second indicates if it's a IBL cluster in with ToT in overflow.
+    /// Multimaps  will automatically sort based on the first element in the pair.  Useful for truncated mean alg.
     std::multimap<float,int> dEdxMap;
     for (const auto& cluster : clusters) {
       if(equalize) {

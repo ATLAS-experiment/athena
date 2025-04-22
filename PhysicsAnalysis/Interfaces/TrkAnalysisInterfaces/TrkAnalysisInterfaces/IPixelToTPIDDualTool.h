@@ -22,18 +22,20 @@ namespace CP {
     
   public:
 
+    /// Athena
 #ifndef XAOD_STANDALONE
-    // Athena
     virtual float dEdx(const EventContext& ctx,
                        const Trk::Track& track,
                        int& nUsedHits,
                        int& nUsedIBLOverflowHits) const = 0;
 #endif
 
-    // AnalysisBase
+    /// AnalysisBase
+#ifdef XAOD_STANDALONE
     virtual float dEdx(const xAOD::TrackParticle& track,
                        int& nUsedHits,
                        int& nUsedIBLOverflowHits) const = 0;
+#endif
 
   }; //class IPixelToTPIDDualTool
 
