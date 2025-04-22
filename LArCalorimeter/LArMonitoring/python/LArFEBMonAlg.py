@@ -188,6 +188,7 @@ def LArFEBMonConfigCore(helper,algoinstance,flags, cellDebug=False, dspDebug=Fal
                                 title='% of events rejected in current LB (online only)',
                                 type='TProfile',
                                 path=summary_hist_path,
+                                opt='kLBNHistoryDepth=10,kAlwaysCreate',
                                 xbins=1, xmin=0, xmax=1, xlabels=['% of events'])
        Group.defineHistogram('LB,streamBin,LArEvSizePart;eventSizeStreamVsLB',
                                 title='LAr event size per stream per LB (w/o ROS headers)',
@@ -367,7 +368,8 @@ def LArFEBMonConfigCore(helper,algoinstance,flags, cellDebug=False, dspDebug=Fal
                                 title='% of events rejected in current LB (online only)',
                                 type='TProfile',
                                 path=hist_path,
-                                opt='kAlwaysCreate',
+                                #opt='kAlwaysCreate',
+                                opt='kLBNHistoryDepth=10,kAlwaysCreate',
                                 xbins=1, xmin=0, xmax=1, xlabels=['% of events'])
           darray.defineHistogram('LB,streamBin,LArEvSizePart;eventSizeStreamVsLB',
                                 title='LAr event size per stream per LB (w/o ROS headers)',
