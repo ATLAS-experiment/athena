@@ -3,7 +3,7 @@
 #
 # art-description: Test of transform RDO->RDO_TRIG->AOD with threads=1 and Acts tracking
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
