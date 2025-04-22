@@ -83,12 +83,6 @@ StatusCode LAr::LArVolumeBuilder::initialize()
 StatusCode LAr::LArVolumeBuilder::finalize()
 {
   ATH_MSG_DEBUG( "finalize() successful" );
-
-  // empty the material garbage
-  for ( const auto *mat : m_materialGarbage ) {
-    delete mat;
-  }
-
   return StatusCode::SUCCESS;
 }
 
@@ -101,21 +95,6 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   //Trk::GeoMaterialConverter geoMaterialToMaterialProperties;
 
   Trk::Material dummyMaterial;
-
-  /** Helper to collect local garbage and transfer it into global garbage bin on return */
-  struct GarbageCollector {
-    explicit GarbageCollector(MaterialGarbage& globalGarbage) : globalBin(globalGarbage) {}
-    ~GarbageCollector() {
-      static std::mutex mutex;
-      std::scoped_lock lock(mutex);
-      globalBin.merge(bin);
-    }
-    MaterialGarbage bin;        ///!< our local trash
-    MaterialGarbage& globalBin; ///!< global trash
-  };
-
-  // Local garbage collector
-  GarbageCollector gc(m_materialGarbage);
 
   // get LAr Detector Description Manager
   const LArDetectorManager* lArMgr=nullptr;
@@ -158,11 +137,8 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
   // default material definition
   Trk::Material solenoidMaterial = Trk::Material( 69.9, 811.5,  28.9, 13.8, 0.003);
-  const Trk::Material* lArBarrelPresamplerMaterial = new Trk::Material(130.,  634.4,  33.7, 15.4, 0.0017);
-  const Trk::Material* lArBarrelMaterial           = new Trk::Material( 26.2, 436.3,  65.4, 27.8, 0.0035);
-
-  gc.bin.insert(lArBarrelPresamplerMaterial);
-  gc.bin.insert(lArBarrelMaterial);
+  auto lArBarrelPresamplerMaterial = std::make_shared<Trk::Material>(130.,  634.4,  33.7, 15.4, 0.0017);
+  auto lArBarrelMaterial = std::make_shared<Trk::Material>( 26.2, 436.3,  65.4, 27.8, 0.0035);
 
   // load layer surfaces
   std::vector<std::pair<const Trk::Surface*, const Trk::Surface*>> entrySurf =
@@ -268,19 +244,12 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     matID.emplace_back(lArBarrelMaterial,baseID+3);
     // scaling factors refer to avZ(avA) change
     matID.emplace_back(lArBarrelMaterial->scale(1.3),baseID+1);
-    gc.bin.insert(matID.back().first);
     matID.emplace_back(lArBarrelMaterial->scale(1.3),baseID+2);
-    gc.bin.insert(matID.back().first);
     matID.emplace_back(lArBarrelMaterial->scale(0.6),baseID+3);
-    gc.bin.insert(matID.back().first);
     matID.emplace_back(lArBarrelMaterial->scale(0.7),baseID+3);
-    gc.bin.insert(matID.back().first);
     matID.emplace_back(lArBarrelMaterial->scale(0.8),baseID+3);
-    gc.bin.insert(matID.back().first);
     matID.emplace_back(lArBarrelMaterial->scale(0.9),baseID+3);
-    gc.bin.insert(matID.back().first);
     matID.emplace_back(lArBarrelMaterial->scale(1.1),baseID+3);
-    gc.bin.insert(matID.back().first);
 
     //
     auto bubn = Trk::BinUtility(30,-1.5,0.,Trk::open,Trk::binEta);
@@ -334,8 +303,8 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
       indexP[bubp.bins()-1-i] = std::vector<size_t>(indx);
     }
 
-    const Trk::BinnedMaterial* lArBarrelMaterialBinPos = new Trk::BinnedMaterial(lArBarrelMaterial,bubp,layBUP,indexP,matID);
-    const Trk::BinnedMaterial* lArBarrelMaterialBinNeg = new Trk::BinnedMaterial(lArBarrelMaterial,bubn,layBUN,indexN,matID);
+    const Trk::BinnedMaterial* lArBarrelMaterialBinPos = new Trk::BinnedMaterial(*lArBarrelMaterial,bubp,layBUP,indexP,matID);
+    const Trk::BinnedMaterial* lArBarrelMaterialBinNeg = new Trk::BinnedMaterial(*lArBarrelMaterial,bubn,layBUN,indexN,matID);
 
     Amg::Transform3D* align=nullptr;
 
@@ -496,8 +465,8 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     int baseID = Trk::GeometrySignature(Trk::Calo)*1000;
     matBP.emplace_back(lArBarrelPresamplerMaterial,baseID);
 
-    const Trk::BinnedMaterial* lArBarrelPresamplerMaterialBinPos = new Trk::BinnedMaterial(lArBarrelPresamplerMaterial,rBU,dummylay,matBP);
-    const Trk::BinnedMaterial* lArBarrelPresamplerMaterialBinNeg = new Trk::BinnedMaterial(lArBarrelPresamplerMaterial,rBUc,dummylay,matBP);
+    const Trk::BinnedMaterial* lArBarrelPresamplerMaterialBinPos = new Trk::BinnedMaterial(*lArBarrelPresamplerMaterial,rBU,dummylay,matBP);
+    const Trk::BinnedMaterial* lArBarrelPresamplerMaterialBinNeg = new Trk::BinnedMaterial(*lArBarrelPresamplerMaterial,rBUc,dummylay,matBP);
 
     Trk::AlignableTrackingVolume* lArBarrelPresamplerPos = new Trk::AlignableTrackingVolume(lArPBPosTransform, align,
 											    lArBarrelPresamplerPosBounds,
@@ -677,9 +646,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
 
     // create the material
-    //Trk::MaterialProperties lArEndcapMaterial = Trk::MaterialProperties(1., 22.2/0.99, 0.0027*pow(0.99,3), 39.);
-    const Trk::Material* lArEndcapMaterial=new Trk::Material(22.21, 402.2, 72.6, 30.5, 0.0039);
-    gc.bin.insert(lArEndcapMaterial);
+    auto lArEndcapMaterial= std::make_shared<Trk::Material>(22.21, 402.2, 72.6, 30.5, 0.0039);
 
     lArEndcapHalfZ = lArPositiveEndcapBounds->halflengthZ();
     lArEndcapZmin = lArEndcapZpos - lArPositiveEndcapBounds->halflengthZ();
@@ -707,59 +674,32 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     matEID.emplace_back(lArEndcapMaterial,baseID+3);
     // scaled
     matEID.emplace_back(lArEndcapMaterial->scale(1.05),baseID+1);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.1),baseID+1);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.15),baseID+1);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.2),baseID+1);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.25),baseID+1);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.3),baseID+1);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.35),baseID+1);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.4),baseID+1);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.05),baseID+2);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.1),baseID+2);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.15),baseID+2);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.2),baseID+2);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.25),baseID+2);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.3),baseID+2);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.35),baseID+2);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.4),baseID+2);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.45),baseID+2);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(0.7),baseID+3);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(0.75),baseID+3);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(0.8),baseID+3);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(0.85),baseID+3);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(0.9),baseID+3);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(0.95),baseID+3);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.05),baseID+3);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.1),baseID+3);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.15),baseID+3);
-    gc.bin.insert(matEID.back().first);
     matEID.emplace_back(lArEndcapMaterial->scale(1.2),baseID+3);
-    gc.bin.insert(matEID.back().first);
 
     // binned material for LAr : layer depth per eta bin
     std::vector< Trk::BinUtility> layEUP(bup.bins());
@@ -872,8 +812,8 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
       layEUN[i] = zBU;
     }
 
-    const Trk::BinnedMaterial* lArEndcapMaterialBinnedPos = new Trk::BinnedMaterial(lArEndcapMaterial,bup,layEUP,indexEP,matEID);
-    const Trk::BinnedMaterial* lArEndcapMaterialBinnedNeg = new Trk::BinnedMaterial(lArEndcapMaterial,bun,layEUN,indexEN,matEID);
+    const Trk::BinnedMaterial* lArEndcapMaterialBinnedPos = new Trk::BinnedMaterial(*lArEndcapMaterial,bup,layEUP,indexEP,matEID);
+    const Trk::BinnedMaterial* lArEndcapMaterialBinnedNeg = new Trk::BinnedMaterial(*lArEndcapMaterial,bun,layEUN,indexEN,matEID);
 
     lArPositiveEndcap = new Trk::AlignableTrackingVolume(lArPositiveEndcapTransform,align,
 							 lArPositiveEndcapBounds.release(),
@@ -910,10 +850,8 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
   // binned material for EC Presampler : layers only
    std::vector<Trk::IdentifiedMaterial> matECP;
-   const Trk::Material* mAr = new Trk::Material(140., 1170./1.4, 40., 18., 0.0014);
-   const Trk::Material* mAl = new Trk::Material(88.93, 388.8, 27., 13., 0.0027);
-   gc.bin.insert(mAr);
-   gc.bin.insert(mAl);
+   auto mAr = std::make_shared<Trk::Material>(140., 1170./1.4, 40., 18., 0.0014);
+   auto mAl = std::make_shared<Trk::Material>(88.93, 388.8, 27., 13., 0.0027);
 
    // layer material can be adjusted here
    int baseID = Trk::GeometrySignature(Trk::Calo)*1000 + 4;
@@ -952,7 +890,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     std::vector<size_t> iep{0,1};
 
     // binned material
-    const Trk::BinnedMaterial* lArECPresamplerMaterialBinPos = new Trk::BinnedMaterial( lArBarrelPresamplerMaterial,hecp,iep,matECP);
+    const Trk::BinnedMaterial* lArECPresamplerMaterialBinPos = new Trk::BinnedMaterial( *lArBarrelPresamplerMaterial,hecp,iep,matECP);
 
     Amg::Transform3D* align=nullptr;
 
@@ -973,7 +911,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     std::vector<size_t> ien{1,0};
 
     // binned material
-    const Trk::BinnedMaterial* lArECPresamplerMaterialBinNeg = new Trk::BinnedMaterial( lArBarrelPresamplerMaterial,hecpn,ien,matECP);
+    const Trk::BinnedMaterial* lArECPresamplerMaterialBinNeg = new Trk::BinnedMaterial( *lArBarrelPresamplerMaterial,hecpn,ien,matECP);
 
     lArNegECPresampler = new Trk::AlignableTrackingVolume(lArNegECPresamplerTransform, align,
 							  lArECPresamplerBounds->clone(),
@@ -1374,25 +1312,16 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
    // binned material for HEC : layers only
    std::vector<Trk::IdentifiedMaterial> matHEC;
-   //Trk::MaterialProperties lArHecFcalCoverMaterial = geoMaterialToMaterialProperties.convert(lArPositiveHec1Material);
-   //Trk::MaterialProperties lArHecFcalCoverMaterial = Trk::MaterialProperties(1., 18.6, 0.00345, 27.);
-   const Trk::Material* lArHecFcalCoverMaterial=new Trk::Material(18.4, 201.9, 57.2, 26.1, 0.0071);
-   const Trk::Material* lArHecMaterial = new Trk::Material(19., 224.4, 56.7, 25.8, 0.007);
-   gc.bin.insert(lArHecFcalCoverMaterial);
-   gc.bin.insert(lArHecMaterial);
+   auto lArHecFcalCoverMaterial= std::make_shared<Trk::Material>(18.4, 201.9, 57.2, 26.1, 0.0071);
+   auto lArHecMaterial = std::make_shared<Trk::Material>(19., 224.4, 56.7, 25.8, 0.007);
 
    // layer material can be adjusted here
    baseID = Trk::GeometrySignature(Trk::Calo)*1000 + 8;
    matHEC.emplace_back(lArHecFcalCoverMaterial->scale(0.13*m_scale_HECmaterial),0);
-   gc.bin.insert(matHEC.back().first);
    matHEC.emplace_back(lArHecMaterial->scale(m_scale_HECmaterial),baseID);
-   gc.bin.insert(matHEC.back().first);
    matHEC.emplace_back(lArHecFcalCoverMaterial->scale(0.93*m_scale_HECmaterial),baseID+1);
-   gc.bin.insert(matHEC.back().first);
    matHEC.emplace_back(lArHecFcalCoverMaterial->scale(1.09*m_scale_HECmaterial),baseID+2);
-   gc.bin.insert(matHEC.back().first);
    matHEC.emplace_back(lArHecFcalCoverMaterial->scale(1.12*m_scale_HECmaterial),baseID+3);
-   gc.bin.insert(matHEC.back().first);
 
    // divide the HEC into two parts per EC :
    // -  fit one around the FCAL - and adopt to LAr Endcap outer radius
@@ -1435,7 +1364,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        std::vector<size_t> hfc{0,2,3,4};
 
        // binned material
-       const Trk::BinnedMaterial* lArHecFcalCoverMaterialBinPos = new Trk::BinnedMaterial( lArHecFcalCoverMaterial,hfp,hfc,matHEC);
+       const Trk::BinnedMaterial* lArHecFcalCoverMaterialBinPos = new Trk::BinnedMaterial( *lArHecFcalCoverMaterial,hfp,hfc,matHEC);
 
        lArPositiveHecFcalCover = new Trk::AlignableTrackingVolume(lArPositiveHecFcalCoverTransform, align,
 								  lArPositiveHecFcalCoverBounds,
@@ -1456,7 +1385,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        std::vector<size_t> hfcn{4,3,2,0};
 
        // binned material
-       const Trk::BinnedMaterial* lArHecFcalCoverMaterialBinNeg = new Trk::BinnedMaterial( lArHecFcalCoverMaterial,hfn,hfcn,matHEC);
+       const Trk::BinnedMaterial* lArHecFcalCoverMaterialBinNeg = new Trk::BinnedMaterial( *lArHecFcalCoverMaterial,hfn,hfcn,matHEC);
 
        lArNegativeHecFcalCover = new Trk::AlignableTrackingVolume(lArNegativeHecFcalCoverTransform, align,
 								  lArNegativeHecFcalCoverBounds,
@@ -1502,7 +1431,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        std::vector<size_t> hf{0,1};
 
        // binned material
-       const Trk::BinnedMaterial* lArHecMaterialBinPos = new Trk::BinnedMaterial( lArHecMaterial,hp,hf,matHEC);
+       const Trk::BinnedMaterial* lArHecMaterialBinPos = new Trk::BinnedMaterial( *lArHecMaterial,hp,hf,matHEC);
 
        lArPositiveHec = new Trk::AlignableTrackingVolume(lArPositiveHecTransform,align,
 							 lArPositiveHecBounds,
@@ -1522,7 +1451,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        std::vector<size_t> hfn{1,0};
 
        // binned material
-       const Trk::BinnedMaterial* lArHecMaterialBinNeg = new Trk::BinnedMaterial( lArHecMaterial,hn,hfn,matHEC);
+       const Trk::BinnedMaterial* lArHecMaterialBinNeg = new Trk::BinnedMaterial( *lArHecMaterial,hn,hfn,matHEC);
 
        lArNegativeHec = new Trk::AlignableTrackingVolume(lArNegativeHecTransform,align,
 							 lArNegativeHecBounds,
@@ -1536,20 +1465,15 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
    // binned material for FCAL : layers only
    std::vector<Trk::IdentifiedMaterial> matFCAL;
    // convert the Material
-   const Trk::Material* lArFcalMaterial =new Trk::Material(8.4, 175.5, 100.8, 42.1, 0.0097);
-   const Trk::Material* lArFcalMaterial0 =new Trk::Material(96., 560., 30.3, 14.3, 0.0025);
-   gc.bin.insert(lArFcalMaterial);
-   gc.bin.insert(lArFcalMaterial0);
+   auto lArFcalMaterial = std::make_shared<Trk::Material>(8.4, 175.5, 100.8, 42.1, 0.0097);
+   auto  lArFcalMaterial0 = std::make_shared<Trk::Material>(96., 560., 30.3, 14.3, 0.0025);
 
    // layer material can be adjusted here
    baseID = Trk::GeometrySignature(Trk::Calo)*1000 + 20;
    matFCAL.emplace_back(lArFcalMaterial0,0);
    matFCAL.emplace_back(lArFcalMaterial->scale(0.5),baseID+1);
-   gc.bin.insert(matFCAL.back().first);
    matFCAL.emplace_back(lArFcalMaterial->scale(1.5),baseID+2);
-   gc.bin.insert(matFCAL.back().first);
    matFCAL.emplace_back(lArFcalMaterial->scale(1.4),baseID+3);
-   gc.bin.insert(matFCAL.back().first);
 
    // smooth the FCal to Tube form
    if (lArPositiveFcal1Bounds && lArPositiveFcal2Bounds && lArPositiveFcal3Bounds &&
@@ -1591,7 +1515,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        std::vector<size_t> hf{0,1,2,3};
 
        // binned material
-       const Trk::BinnedMaterial* lArFcalMaterialBinPos = new Trk::BinnedMaterial( lArFcalMaterial,fcp,hf,matFCAL);
+       const Trk::BinnedMaterial* lArFcalMaterialBinPos = new Trk::BinnedMaterial( *lArFcalMaterial,fcp,hf,matFCAL);
 
        // layer binning in Z
        std::vector<float> snfc;
@@ -1606,7 +1530,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
        std::vector<size_t> hfn{3,2,1,0};
 
        // binned material
-       const Trk::BinnedMaterial* lArFcalMaterialBinNeg = new Trk::BinnedMaterial( lArFcalMaterial,fcn,hfn,matFCAL);
+       const Trk::BinnedMaterial* lArFcalMaterialBinNeg = new Trk::BinnedMaterial( *lArFcalMaterial,fcn,hfn,matFCAL);
 
        // the new HepTransforms
        Amg::Vector3D lArPositiveFcalPos(0.,0.,lArFcalZposition);
@@ -1884,8 +1808,9 @@ void LAr::LArVolumeBuilder::printChildren(const PVConstLink& pv,int gen, int ige
   }
 }
 
-GeoPVConstLink LAr::LArVolumeBuilder::getChild(const GeoPVConstLink& mother, const std::string& name, Amg::Transform3D& trIn) const
-{
+GeoPVConstLink LAr::LArVolumeBuilder::getChild(const GeoPVConstLink& mother,
+                                               const std::string& name,
+                                               Amg::Transform3D& trIn) const {
   // subcomponents
   for (const GeoVolumeVec_t::value_type& p : geoGetVolumes (&*mother))
   {

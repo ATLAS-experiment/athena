@@ -1034,9 +1034,9 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolum
   std::vector<Trk::IdentifiedMaterial> matCrack;
   // layer material can be adjusted here
   int baseID = Trk::GeometrySignature(Trk::Calo) * 1000 + 17;
-  matCrack.emplace_back(&m_Scint, baseID);
-  matCrack.emplace_back(&m_caloMaterial, -1);
-  matCrack.emplace_back(&m_Al, -1);
+  matCrack.emplace_back(std::make_shared<Trk::Material>(m_Scint), baseID);
+  matCrack.emplace_back(std::make_shared<Trk::Material>(m_caloMaterial), -1);
+  matCrack.emplace_back(std::make_shared<Trk::Material>(m_Al), -1);
   //
   double etadist;
   // if TileGap3 goes above 1.6 in eta - it's RUN3 geometry
@@ -1069,7 +1069,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolum
   }
 
   const Trk::BinnedMaterial* crackBinPos =
-      new Trk::BinnedMaterial(&m_crackMaterial, bup, layUP, indexP, matCrack);
+      new Trk::BinnedMaterial(m_crackMaterial, bup, layUP, indexP, matCrack);
 
   Amg::Transform3D* align = nullptr;
 
@@ -1099,7 +1099,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(Trk::TrackingVolum
   }
 
   Trk::BinnedMaterial* crackBinNeg =
-      new Trk::BinnedMaterial(&m_crackMaterial, bun, layDN, indexN, matCrack);
+      new Trk::BinnedMaterial(m_crackMaterial, bun, layDN, indexN, matCrack);
 
   align = nullptr;
 

@@ -180,8 +180,8 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     m_surfBuilder->exitSurfaces(&caloDDM);
 
   // averaged material properties
-  auto barrelProperties = std::make_unique<Trk::Material>(22.7, 212., 45.8, 21.4, 0.0062);
-  auto extendedBarrelProperties = std::make_unique<Trk::Material>(22.7, 210., 45.8, 21.4, 0.0062);
+  auto barrelProperties = std::make_shared<Trk::Material>(22.7, 212., 45.8, 21.4, 0.0062);
+  auto extendedBarrelProperties = std::make_shared<Trk::Material>(22.7, 210., 45.8, 21.4, 0.0062);
   // material properties with layer encoding - to be defined later
   const Trk::BinnedMaterial* barrelMaterialBinned = nullptr;
   const Trk::BinnedMaterial* extendedMaterialBinned = nullptr;
@@ -196,10 +196,10 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   // layer material can be adjusted here
   std::vector<Trk::IdentifiedMaterial> matTB;
   int baseID = Trk::GeometrySignature(Trk::Calo)*1000 + 12;
-  matTB.emplace_back(barrelProperties.get(),0);
-  matTB.emplace_back(barrelProperties.get(),baseID);
-  matTB.emplace_back(barrelProperties.get(),baseID+1);
-  matTB.emplace_back(barrelProperties.get(),baseID+2);
+  matTB.emplace_back(barrelProperties,0);
+  matTB.emplace_back(barrelProperties,baseID);
+  matTB.emplace_back(barrelProperties,baseID+1);
+  matTB.emplace_back(barrelProperties,baseID+2);
 
   // material index
   std::vector<size_t> ltb{0,1,2,3};
@@ -207,10 +207,10 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   // layer material can be adjusted here
   std::vector<Trk::IdentifiedMaterial> matETB;
   baseID = Trk::GeometrySignature(Trk::Calo)*1000 + 18;
-  matETB.emplace_back(extendedBarrelProperties.get(),0);
-  matETB.emplace_back(extendedBarrelProperties.get(),baseID);
-  matETB.emplace_back(extendedBarrelProperties.get(),baseID+1);
-  matETB.emplace_back(extendedBarrelProperties.get(),baseID+2);
+  matETB.emplace_back(extendedBarrelProperties,0);
+  matETB.emplace_back(extendedBarrelProperties,baseID);
+  matETB.emplace_back(extendedBarrelProperties,baseID+1);
+  matETB.emplace_back(extendedBarrelProperties,baseID+2);
 
   // layer material can be adjusted here
   //Trk::MaterialProperties barrelFingerGapProperties = Trk::MaterialProperties(1., 130./0.35, 0.003*pow(0.35,3),30.);
@@ -287,7 +287,7 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 	    steps.push_back(depth);
 	    auto rBU = Trk::BinUtility(steps, Trk::open, Trk::binR);
 
-	    barrelMaterialBinned = new Trk::BinnedMaterial(barrelProperties.get(),rBU,ltb,matTB);
+	    barrelMaterialBinned = new Trk::BinnedMaterial(*barrelProperties,rBU,ltb,matTB);
 
 	    tileBarrel = new Trk::AlignableTrackingVolume(nullptr,align,
 							  tileBarrelBounds,
@@ -351,7 +351,7 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 	    steps.push_back(tileExtendedBounds->outerRadius());
 	    auto eBU = Trk::BinUtility(steps, Trk::open, Trk::binR);
 
-	    extendedMaterialBinned = new Trk::BinnedMaterial(extendedBarrelProperties.get(),eBU,ltb,matETB);
+	    extendedMaterialBinned = new Trk::BinnedMaterial(*extendedBarrelProperties,eBU,ltb,matETB);
 
 	    tileExtendedTrackingVolume = new Trk::AlignableTrackingVolume(new Amg::Transform3D(Amg::Translation3D(childPosition)),
 									  align,
@@ -376,7 +376,7 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 	      steps.push_back(tileExtendedBounds->outerRadius());
 	      auto eBU = Trk::BinUtility(steps, Trk::open, Trk::binR);
 
-	      extendedMaterialBinned = new Trk::BinnedMaterial(extendedBarrelProperties.get(),eBU,ltb,matETB);
+	      extendedMaterialBinned = new Trk::BinnedMaterial(*extendedBarrelProperties.get(),eBU,ltb,matETB);
 
 	      tileExtendedTrackingVolume = new Trk::AlignableTrackingVolume(new Amg::Transform3D(Amg::Translation3D(childPosition)),
 									    align,
@@ -436,9 +436,9 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   std::vector<Trk::IdentifiedMaterial> matITC;
   // layer material can be adjusted here
   baseID = Trk::GeometrySignature(Trk::Calo)*1000;
-  matITC.emplace_back(barrelProperties.get(),baseID+15);
-  matITC.emplace_back(barrelProperties.get(),baseID+16);
-  matITC.emplace_back(barrelProperties.get(),baseID+17);
+  matITC.emplace_back(barrelProperties,baseID+15);
+  matITC.emplace_back(barrelProperties,baseID+16);
+  matITC.emplace_back(barrelProperties,baseID+17);
 
   // ITCPlug1
   double p1Z = 0.5*(plug1Z-plug1hZ+tileExtZ);
@@ -457,8 +457,8 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   std::vector<float> bpsteps{float(plug1R), float(tileBarrelBounds->outerRadius())};
   auto rBU = Trk::BinUtility(bpsteps, Trk::open, Trk::binR);
   const Trk::BinUtility& rBUc(rBU);
-  const Trk::BinnedMaterial* plug1MatPos = new Trk::BinnedMaterial(barrelProperties.get(),rBU,dummylay,matITC);
-  const Trk::BinnedMaterial* plug1MatNeg = new Trk::BinnedMaterial(barrelProperties.get(),rBUc,dummylay,matITC);
+  const Trk::BinnedMaterial* plug1MatPos = new Trk::BinnedMaterial(*barrelProperties,rBU,dummylay,matITC);
+  const Trk::BinnedMaterial* plug1MatNeg = new Trk::BinnedMaterial(*barrelProperties,rBUc,dummylay,matITC);
 
   Amg::Transform3D* align=nullptr;
 
@@ -492,8 +492,8 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   std::vector<float> p2steps{float(plug2R), float(plug1R)};
   auto  p2BU = Trk::BinUtility(p2steps, Trk::open, Trk::binR);
   const Trk::BinUtility&  p2BUc(p2BU);
-  const Trk::BinnedMaterial* plug2MatPos = new Trk::BinnedMaterial(barrelProperties.get(),p2BU,p2lay,matITC);
-  const Trk::BinnedMaterial* plug2MatNeg = new Trk::BinnedMaterial(barrelProperties.get(),p2BUc,p2lay,matITC);
+  const Trk::BinnedMaterial* plug2MatPos = new Trk::BinnedMaterial(*barrelProperties,p2BU,p2lay,matITC);
+  const Trk::BinnedMaterial* plug2MatNeg = new Trk::BinnedMaterial(*barrelProperties,p2BUc,p2lay,matITC);
 
   Trk::AlignableTrackingVolume* itcPlug2Pos = new Trk::AlignableTrackingVolume(itcP2PosTransform, align,
 									       itcPlug2Bounds,
@@ -525,7 +525,7 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
   std::vector<size_t> glay(1,2);
   std::vector<float> gsteps{float(gapi-gapBounds->halflengthZ()), float(gapi+gapBounds->halflengthZ())};
   auto gp = Trk::BinUtility(gsteps, Trk::open, Trk::binZ);
-  const Trk::BinnedMaterial* gpMat = new Trk::BinnedMaterial(barrelProperties.get(),gp,glay,matITC);
+  const Trk::BinnedMaterial* gpMat = new Trk::BinnedMaterial(*barrelProperties,gp,glay,matITC);
 
   Trk::AlignableTrackingVolume* gapPos = new Trk::AlignableTrackingVolume(gapPosTransform, align,
 									  gapBounds,
@@ -535,7 +535,7 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
 
   std::vector<float> nsteps{float(-gapi-gapBounds->halflengthZ()), float(-gapi+gapBounds->halflengthZ())};
   auto gn = Trk::BinUtility(nsteps, Trk::open, Trk::binZ);
-  const Trk::BinnedMaterial* gnMat = new Trk::BinnedMaterial(barrelProperties.get(),gn,glay,matITC);
+  const Trk::BinnedMaterial* gnMat = new Trk::BinnedMaterial(*barrelProperties,gn,glay,matITC);
 
   Trk::AlignableTrackingVolume* gapNeg = new Trk::AlignableTrackingVolume(gapNegTransform, align,
 									  gapBounds->clone(),
@@ -790,9 +790,6 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM
     printCheckResult(msg(MSG::DEBUG), tileGirder);
   } // end of detailed output
 
-  throwIntoGarbage (std::move (barrelProperties));
-  throwIntoGarbage (std::move (extendedBarrelProperties));
-
   return tileTrackingVolumes;
 }
 
@@ -868,10 +865,4 @@ void Tile::TileVolumeBuilder::printChildren(
       cname = clv->getName();
     }
   }
-}
-
-void Tile::TileVolumeBuilder::throwIntoGarbage (std::unique_ptr<Trk::Material> mat) const
-{
-  std::scoped_lock lock (m_garbageMutex);
-  m_garbage.push_back (std::move (mat));
 }

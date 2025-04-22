@@ -113,10 +113,6 @@ private:
   //!< tool required for DetDescr-based layering
   ToolHandle<ICaloSurfaceBuilder> m_calosurf{this, "CaloSurfaceBuilder", "CaloSurfaceBuilder"};
 
-  //internal garbage collector (protected by lock)
-  typedef std::set<const Trk::Material*> MaterialGarbage;
-  mutable MaterialGarbage m_materialGarbage ATLAS_THREAD_SAFE;
-
   // material scaling ( temporary ? )
   FloatProperty m_scale_HECmaterial{this, "ScaleFactor_HECmaterial", 1.1};
 };

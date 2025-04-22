@@ -1837,7 +1837,8 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
   // 1/ order valid intersections ( already in trSurfs )
 
   std::vector<unsigned int> sols;
-  for (unsigned int i = 0; i < cache.m_trSurfs.size(); i++) {
+  sols.reserve(cache.m_trSurfs.size());
+  for (unsigned int i = 0; i < cache.m_trSurfs.size(); ++i) {
     sols.push_back(i);
   }
 
@@ -2104,7 +2105,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
       if (dIter != cache.m_denseVols.end()) {
         currVol = (*dIter).first;
 
-        if (m_navigator->trackingGeometry(ctx)->atVolumeBoundary(nextPos, nextPar->momentum(), currVol, assocVol, dir,
+        if (Trk::TrackingGeometry::atVolumeBoundary(nextPos, nextPar->momentum(), currVol, assocVol, dir,
                                                               m_tolerance)) {
           if (assocVol && assocVol->zOverAtimesRho() != 0.) {
             cache.m_currentDense = assocVol;
@@ -2133,7 +2134,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
     throwIntoGarbageBin(cache,nextPar);
   }
 
- 
+
 
   if (nextPar) {
    ATH_MSG_DEBUG(
@@ -2229,7 +2230,7 @@ Trk::TimedExtrapolator::transportInAlignableTV(Trk::TimedExtrapolator::Cache &ca
         if (d2n.second > 0.001) {    // retrieve material and save bin entry
           pot = pos + 0.5 * d2n.second * dir * umo;
           binIDMat = binMat->material(pot);
-          iis.emplace_back(distTot, binIDMat->second, binIDMat->first);
+          iis.emplace_back(distTot, binIDMat->second, binIDMat->first.get());
           // std::cout <<"saving next bin entry:"<< distTot<<","<<binIDMat->second<<std::endl;
         }
       }
@@ -2429,7 +2430,7 @@ Trk::TimedExtrapolator::transportInAlignableTV(Trk::TimedExtrapolator::Cache &ca
 
   throwIntoGarbageBin(cache,nextPar);
 
- 
+
 
   ATH_MSG_DEBUG("  [+] StaticVol boundary reached of '" << cache.m_currentStatic->volumeName() << "'.");
 
@@ -2482,7 +2483,7 @@ Trk::TimedExtrapolator::extrapolateInAlignableTV(Trk::TimedExtrapolator::Cache &
   emptyGarbageBin(cache,&parm);
 
   // verify current position
-  Amg::Vector3D gp = parm.position();
+  const Amg::Vector3D& gp = parm.position();
   if (vol && vol->inside(gp, m_tolerance)) {
     staticVol = vol;
   } else {
