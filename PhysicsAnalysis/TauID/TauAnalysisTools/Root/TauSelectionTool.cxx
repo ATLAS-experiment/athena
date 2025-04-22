@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -222,18 +222,27 @@ StatusCode TauSelectionTool::initialize()
         iSelectionCuts = iSelectionCuts | CutGNTauScoreSigTrans;
         if (m_vGNTauSigTransRegion.empty())
           TauAnalysisTools::split(rEnv,"GNTauSigTransRegion", ';', m_vGNTauSigTransRegion);
+
+	// check if using GNTau for control histograms
+        m_useGNTau = true; 
       }
       else if (sCut == "GNTauSigTransMin")
       {
         iSelectionCuts = iSelectionCuts | CutGNTauScoreSigTrans;
         if (m_dGNTauSigTransMin != m_dGNTauSigTransMin)
           m_dGNTauSigTransMin = rEnv.GetValue("GNTauSigTransMin",NAN);
+
+	// check if using GNTau for control histograms
+	m_useGNTau = true;
       }
       else if (sCut == "GNTauSigTransMax")
       {
         iSelectionCuts = iSelectionCuts | CutGNTauScoreSigTrans;
         if (m_dGNTauSigTransMax != m_dGNTauSigTransMax)
           m_dGNTauSigTransMax = rEnv.GetValue("GNTauSigTransMax",NAN);
+
+	// check if using GNTau for control histograms
+	m_useGNTau = true;
       }
       else if (sCut == "EleRNNRegion")
       {
@@ -289,6 +298,10 @@ StatusCode TauSelectionTool::initialize()
 
   m_sJetIDWP = convertJetIDWPToStr(m_iJetIDWP);
   m_sEleIDWP = convertEleIDWPToStr(m_iEleIDWP);
+
+  // check if using GNTau for control histograms 
+  if(m_sJetIDWP.find("GNTAU") != std::string::npos)
+     m_useGNTau = true;	  
 
   // initialise the ReadHandleKey of the muon container when the muon veto is applied
   ATH_CHECK( m_muonContainerKey.initialize( m_iSelectionCuts & CutMuonOLR ) );

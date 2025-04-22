@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_TAUSELECTIONTOOL_H
@@ -130,6 +130,7 @@ private:
   // JetID working point
   std::string m_sJetIDWP;
   int m_iJetIDWP;
+  bool m_useGNTau=false;
   // vector of EleRNN cut regions
   std::vector<float> m_vEleRNNRegion;
   // EleID working point

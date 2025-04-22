@@ -367,11 +367,21 @@ TauSelectionCutJetIDWP::TauSelectionCutJetIDWP(TauSelectionTool* tTST)
 //______________________________________________________________________________
 void TauSelectionCutJetIDWP::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
 {
-  // FIXME: should this be extended to gntau ID?
-  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigVeryLoose)); 
-  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigLoose)+2);
-  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigMedium)+4);
-  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigTight)+6);
+  if(m_tTST->m_useGNTau){ 
+     static const SG::ConstAccessor<char> acc_gnTauVeryLoose("GNTauVL_v0prune");
+     static const SG::ConstAccessor<char> acc_gnTauLoose("GNTauL_v0prune");
+     static const SG::ConstAccessor<char> acc_gnTauMedium("GNTauM_v0prune");
+     static const SG::ConstAccessor<char> acc_gnTauTight("GNTauT_v0prune");
+     hHist.Fill(acc_gnTauVeryLoose(xTau));
+     hHist.Fill(acc_gnTauLoose(xTau)+2);
+     hHist.Fill(acc_gnTauMedium(xTau)+4);
+     hHist.Fill(acc_gnTauTight(xTau)+6);
+  } else {
+     hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigVeryLoose)); 
+     hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigLoose)+2);
+     hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigMedium)+4);
+     hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigTight)+6);
+  }
 }
 
 //______________________________________________________________________________
