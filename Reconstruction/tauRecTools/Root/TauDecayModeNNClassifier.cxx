@@ -376,18 +376,6 @@ namespace tauRecTools
     return val;
   }
 
-  float TauDecayModeNNVariable::ptSubRatio(const PFOPtr pfo)
-  {
-    float clus0pt = pfo->cluster(0)->pt();
-    return clus0pt > 0.0f ? (clus0pt - pfo->pt()) / clus0pt : 0.0f;
-  }
-
-  float TauDecayModeNNVariable::energyFracEM2(const PFOPtr pfo, float energy_em2)
-  {
-    float clus0e = pfo->cluster(0)->e();
-    return clus0e > 0.0f ? energy_em2 / clus0e : 0.0f;
-  }
-
   float TauDecayModeNNHelper::Log10Robust(const float val, const float min_val)
   {
     return TMath::Log10(std::max(val, min_val));

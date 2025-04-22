@@ -108,8 +108,6 @@ bool pt_tau_log(const xAOD::TauJet &tau, double &out);
 
 bool ptDetectorAxis(const xAOD::TauJet &tau, double &out);
 
-bool ptIntermediateAxis(const xAOD::TauJet &tau, double &out);
-
 //functions to calculate input variables needed for the eVeto RNN
 bool ptJetSeed_log             (const xAOD::TauJet &tau, double &out);
 bool absleadTrackEta           (const xAOD::TauJet &tau, double &out);
@@ -185,25 +183,7 @@ bool nPixelHitsPlusDeadSensors (
 bool nSCTHitsPlusDeadSensors (
     const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
 
-bool eProbabilityHT(
-    const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
-
-bool eProbabilityNN(
-    const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
-
 bool eProbabilityNNorHT(
-    const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
-
-bool chargedScoreRNN(
-    const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
-
-bool isolationScoreRNN(
-    const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
-
-bool conversionScoreRNN(
-    const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
-
-bool fakeScoreRNN(
     const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
 
 } // namespace Track
