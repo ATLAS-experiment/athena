@@ -76,13 +76,13 @@ private:
 };
 
 /** Tool to implement Pythi8 main70 functionality */
-class UserPhotonFlux: public AthAlgTool, virtual public IPythia8Custom {
+class UserPhotonFlux: public extends<AthAlgTool, IPythia8Custom> {
   
   public:
   
   /** AlgTool style constructor */
-  UserPhotonFlux(const std::string&,const std::string&,const IInterface*);
-  
+  using base_class::base_class;
+
   /** Destructor */
   virtual ~UserPhotonFlux(){};
   
@@ -104,10 +104,10 @@ class UserPhotonFlux: public AthAlgTool, virtual public IPythia8Custom {
 
  private:
 
-  int m_process;
-  double m_flux_Z;
-  double m_flux_min_b;
-  double m_flux_min_x;
+  Gaudi::Property<int> m_process{this, "Process", 1};
+  Gaudi::Property<double> m_flux_Z{this, "NuclearCharge", 82.};
+  Gaudi::Property<double> m_flux_min_b{this, "MinimumB", 13.24};
+  Gaudi::Property<double> m_flux_min_x{this, "MinimumX", -1};//default applies no cut since sampled x's always >0.
 };
 
 #ifdef PYTHIA_VERSION_INTEGER

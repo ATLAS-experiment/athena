@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IPYTHIA8CUSTOM_H
@@ -7,19 +7,16 @@
 
 #include "GaudiKernel/IAlgTool.h"
 
-
-static const InterfaceID IID_IPythia8Custom("IPythia8Custom", 1, 0);
-
 namespace Pythia8{
   class Pythia;
 }
 
 
-class IPythia8Custom: virtual public IAlgTool {
+class IPythia8Custom: virtual public extend_interfaces<IAlgTool> {
   public:
     /** Algtool infrastructure */
-    static const InterfaceID& interfaceID(){ return IID_IPythia8Custom; };
-  
+    DeclareInterfaceID(IPythia8Custom, 1, 0);
+
     /** Virtual destructor */
     virtual ~IPythia8Custom(){};
   
