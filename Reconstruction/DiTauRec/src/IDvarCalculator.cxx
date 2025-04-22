@@ -51,7 +51,7 @@ StatusCode IDVarCalculator::execute(DiTauCandidateData * data,
   }
 
   // cells if available 
-  bool useCells = m_useCells;;
+  bool useCells = true;
   std::vector<const CaloCell*> vSubjetCells = data->subjetCells;
   if (vSubjetCells.empty()) {
     ATH_MSG_DEBUG("No cell information available.");
