@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -234,22 +234,30 @@ Accept( Visitor& visitor, boost::shared_ptr<dqm_core::Region> dqParent ) const
   else {
     dqr = dqParent;
   }
-
   // Accept the same visitor on all containing m_groups and m_assessors
 
-  TIter nextAssess( &m_assessors );
-  HanConfigAssessor* hca;
-  while( (hca = dynamic_cast<HanConfigAssessor*>( nextAssess() )) != 0 ) {
-    hca->Accept( visitor, dqr );
+  try {
+    TIter nextAssess(&m_assessors);
+    HanConfigAssessor* hca;
+    while ((hca = dynamic_cast<HanConfigAssessor*>(nextAssess())) != 0) {
+      hca->Accept(visitor, dqr);
+    }
+  } catch (std::exception& s) {
+    std::cout << "Assess: Caught exception " << s.what() << std::endl;
+    throw;
   }
-  
-  TIter nextGroup( &m_groups );
-  HanConfigGroup* hcg;
-  while( (hcg = dynamic_cast<HanConfigGroup*>( nextGroup() )) != 0 ) {
-    hcg->Accept( visitor, dqr );
+
+  try {
+    TIter nextGroup(&m_groups);
+    HanConfigGroup* hcg;
+    while ((hcg = dynamic_cast<HanConfigGroup*>(nextGroup())) != 0) {
+      hcg->Accept(visitor, dqr);
+    }
+  } catch (std::exception& s) {
+    std::cout << "Group: Caught exception " << s.what() << std::endl;
+    throw;
   }
 }
-
 
 void
 HanConfigGroup::
