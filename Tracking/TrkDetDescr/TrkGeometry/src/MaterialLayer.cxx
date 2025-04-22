@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,20 +10,20 @@
 
 #include "TrkGeometry/LayerMaterialProperties.h"
 #include "TrkSurfaces/Surface.h"
+#include "TrkDetDescrUtils/SharedDoNoDelete.h"
 
 // constructor with arguments
 Trk::MaterialLayer::MaterialLayer(Surface& surfaceRepresentation,
                                   const LayerMaterialProperties& mlprop)
     : Trk::Layer(),
-      // m_surfaceRepresentation(SharedObject<const
+      // m_surfaceRepresentation(std::shared_ptr<const
       // Surface>(&surfaceRepresentation,true))
-
       /*
        * The above line was setting the not delete ndel to true
        * do the same with no-op deleter for shared_ptr
        * Probably ownership might need some clean up here
        */
-      m_surfaceRepresentation(SharedObject<Surface>(
+      m_surfaceRepresentation(std::shared_ptr<Surface>(
           &surfaceRepresentation, do_not_delete<Surface>)) {
   m_layerMaterialProperties.reset(mlprop.clone());
   m_layerThickness = 1.;
@@ -31,7 +31,7 @@ Trk::MaterialLayer::MaterialLayer(Surface& surfaceRepresentation,
 
 // constructor with arguments
 Trk::MaterialLayer::MaterialLayer(
-    const SharedObject<Surface>& surfaceRepresentation,
+    const std::shared_ptr<Surface>& surfaceRepresentation,
     const LayerMaterialProperties& mlprop)
     : Trk::Layer(), m_surfaceRepresentation(surfaceRepresentation) {
   m_layerMaterialProperties.reset(mlprop.clone());

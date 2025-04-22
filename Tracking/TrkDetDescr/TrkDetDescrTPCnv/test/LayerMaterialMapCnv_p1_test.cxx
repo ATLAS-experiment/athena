@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TrkDetDescrTPCnv/test/LayerMaterialMapCnv_p1_test.cxx
@@ -183,7 +183,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   e->addElement (Trk::Material (21.5, 22.5, 23.5, 30, 24.5), "thirty");
 
 
-  Trk::SharedObject<const Trk::ElementTable> eShared(e);
+  std::shared_ptr<const Trk::ElementTable> eShared(e);
   Trk::LayerMaterialMap lmm(eShared);
 
   {
@@ -197,11 +197,11 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
     mm[0].push_back (new Trk::MaterialProperties (mat2, 2));
     mm[1].push_back (new Trk::MaterialProperties (mat3, 3));
     mm[1].push_back (new Trk::MaterialProperties (mat4, 4));
-    
+
     Trk::BinUtility binning (2, 0, 10);
     Trk::BinUtility binning2 (2, 0, 20);
     binning += binning2;
-  
+
     lmm[Trk::LayerIndex(1)] = new Trk::BinnedLayerMaterial (binning, mm, 1.5);
   }
 
@@ -221,7 +221,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
     binning += binning2;
 
     std::vector<unsigned short> indices {0, 1, 2, 3};
-  
+
     lmm[Trk::LayerIndex(1)] = new Trk::CompressedLayerMaterial (binning, mm, indices, 1.5);
   }
 

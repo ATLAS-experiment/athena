@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -14,7 +14,7 @@
 
 // Trk
 #include "CxxUtils/CachedValue.h"
-#include "TrkDetDescrUtils/SharedObject.h"
+#include <memory>
 #include "TrkParametersBase/ParametersT.h"
 #include "TrkSurfaces/CylinderBounds.h"
 #include "TrkSurfaces/NoBounds.h"
@@ -286,7 +286,7 @@ protected: //!< data members
   //!< cache of the line direction (speeds up)
   CxxUtils::CachedValue<Amg::Vector3D> m_lineDirection;
   //!< bounds (shared)
-  SharedObject<const CylinderBounds> m_bounds;
+  std::shared_ptr<const CylinderBounds> m_bounds;
   //!< NoBounds as return object when no bounds are declared
   static const NoBounds s_boundless;
 };

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -61,8 +61,8 @@ class BoundarySubtractedCylinderSurface final
         SubtractedCylinderSurface(csf) {}
 
   /** Constructor for a Boundary with two VolumeArrays attached to it*/
-  BoundarySubtractedCylinderSurface(SharedObject<VolumeArray> insideArray,
-                                    SharedObject<VolumeArray> outsideArray,
+  BoundarySubtractedCylinderSurface(std::shared_ptr<VolumeArray> insideArray,
+                                    std::shared_ptr<VolumeArray> outsideArray,
                                     const SubtractedCylinderSurface& csf)
       : BoundarySurface<Tvol>(insideArray, outsideArray),
         SubtractedCylinderSurface(csf) {}

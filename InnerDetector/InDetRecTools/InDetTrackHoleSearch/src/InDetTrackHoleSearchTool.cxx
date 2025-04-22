@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,7 +17,6 @@
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkEventUtils/TrackStateOnSurfaceComparisonFunction.h"
 #include "TrkGeometry/TrackingGeometry.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkGeometry/TrackingVolume.h"
 #include "Identifier/Identifier.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
@@ -26,6 +25,8 @@
 #include "TrkVolumes/Volume.h"
 #include "TrkVolumes/CylinderVolumeBounds.h"
 #include "GeoModelInterfaces/IGeoModelSvc.h"
+
+#include <memory>
 #include <set>
 
 //================ Constructor =================================================

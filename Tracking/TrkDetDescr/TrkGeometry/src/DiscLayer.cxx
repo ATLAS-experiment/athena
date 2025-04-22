@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -158,7 +158,7 @@ void Trk::DiscLayer::resizeLayer(const VolumeBounds& bounds, double envelope) {
     Trk::DiscBounds* rDiscBounds =
         new Trk::DiscBounds(rInner + envelope, rOuter - envelope);
     Trk::DiscSurface::m_bounds =
-        Trk::SharedObject<const Trk::SurfaceBounds>(rDiscBounds);
+        std::shared_ptr<const Trk::SurfaceBounds>(rDiscBounds);
     // (1) resize the material properties by updating the BinUtility, assuming
     // r/phi binning
     if (Trk::Layer::m_layerMaterialProperties) {

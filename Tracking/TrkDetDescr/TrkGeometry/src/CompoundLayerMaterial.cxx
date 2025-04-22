@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ Trk::CompoundLayerMaterial::CompoundLayerMaterial(
       m_rhoBins(rhoBins),
       m_composition(composition),
       m_fullComposition(fComposition),
-      m_elementTable(Trk::SharedObject<const Trk::ElementTable>(nullptr))
+      m_elementTable(std::shared_ptr<const Trk::ElementTable>(nullptr))
 {
   resizeMaterialProperties();
 }
@@ -129,7 +129,7 @@ const Trk::MaterialProperties* Trk::CompoundLayerMaterial::material(
       z = m_zBins.value(bin0, bin1);
       rho = m_rhoBins.value(bin0, bin1);
     }
-    
+
     // check for 0 material
     if (x0 == 0.) {
       return nullptr;

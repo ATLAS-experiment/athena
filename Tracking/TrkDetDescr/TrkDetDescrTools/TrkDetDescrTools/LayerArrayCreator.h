@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,7 +19,6 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 // Trk
 #include "TrkDetDescrInterfaces/ILayerArrayCreator.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkGeometry/PlaneLayer.h"
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/DiscLayer.h"
@@ -27,6 +26,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 // STL
 #include <algorithm>
+#include <memory>
 
 namespace Trk {
 
@@ -34,7 +34,7 @@ namespace Trk {
     class PlaneLayer;
 
     /**@typedef LayerOrderPosition */
-    typedef std::pair< SharedObject<const Layer>, Amg::Vector3D> LayerOrderPosition;
+    typedef std::pair< std::shared_ptr<const Layer>, Amg::Vector3D> LayerOrderPosition;
 
 
     /** @class LayerArrayCreator
@@ -45,7 +45,7 @@ namespace Trk {
       It fills the gaps automatically with Trk::NavigationLayer to be processed easily in the
       Navigation of the Extrapolation process.
 
-      @author Andreas.Salzburger@cern.ch   
+      @author Andreas.Salzburger@cern.ch
      */
 
     class LayerArrayCreator : public AthAlgTool, virtual public ILayerArrayCreator {
@@ -53,7 +53,7 @@ namespace Trk {
       public:
         /** Constructor */
         LayerArrayCreator(const std::string&,const std::string&,const IInterface*);
-        
+
         /** Destructor */
         virtual ~LayerArrayCreator();
 

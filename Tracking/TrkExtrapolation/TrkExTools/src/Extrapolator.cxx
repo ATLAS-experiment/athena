@@ -16,7 +16,6 @@
 #include "TrkTrack/Track.h"
 //
 #include "TrkDetDescrUtils/GeometrySignature.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 //
 #include "TrkEventUtils/TrkParametersComparisonFunction.h"
 //
@@ -50,9 +49,9 @@
 #include "EventPrimitives/EventPrimitives.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 //
-#include <memory>
 #include <utility>
 #include <cstdint>
+#include <memory>
 
 
 

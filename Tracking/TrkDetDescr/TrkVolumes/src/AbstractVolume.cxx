@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -62,14 +62,14 @@ Trk::AbstractVolume::operator=(const Trk::AbstractVolume& vol)
     Volume::operator=(vol);
     delete m_boundarySurfaces;
     m_boundarySurfaces = new std::vector<
-      Trk::SharedObject<const Trk::BoundarySurface<Trk::AbstractVolume>>>(
+      std::shared_ptr<const Trk::BoundarySurface<Trk::AbstractVolume>>>(
       *vol.m_boundarySurfaces);
   }
   return *this;
 }
 
 const std::vector<
-  Trk::SharedObject<const Trk::BoundarySurface<Trk::AbstractVolume>>>&
+  std::shared_ptr<const Trk::BoundarySurface<Trk::AbstractVolume>>>&
 Trk::AbstractVolume::boundarySurfaces() const
 {
   return (*m_boundarySurfaces);
@@ -79,7 +79,7 @@ void Trk::AbstractVolume::createBoundarySurfaces()
 {
   // prepare the BoundarySurfaces
   m_boundarySurfaces = new std::vector<
-    Trk::SharedObject<const Trk::BoundarySurface<Trk::AbstractVolume>>>;
+    std::shared_ptr<const Trk::BoundarySurface<Trk::AbstractVolume>>>;
   // transform Surfaces To BoundarySurfaces
   const std::vector<const Trk::Surface*>* surfaces =
     Trk::Volume::volumeBounds().decomposeToSurfaces(this->transform());
@@ -95,7 +95,7 @@ void Trk::AbstractVolume::createBoundarySurfaces()
       dynamic_cast<const Trk::PlaneSurface*>(*surfIter);
     if (psf) {
       m_boundarySurfaces->push_back(
-        Trk::SharedObject<const Trk::BoundarySurface<Trk::AbstractVolume>>(
+        std::shared_ptr<const Trk::BoundarySurface<Trk::AbstractVolume>>(
           new Trk::BoundaryPlaneSurface<Trk::AbstractVolume>(
             this, nullptr, *psf)));
       delete psf;
@@ -105,7 +105,7 @@ void Trk::AbstractVolume::createBoundarySurfaces()
       dynamic_cast<const Trk::DiscSurface*>(*surfIter);
     if (dsf) {
       m_boundarySurfaces->push_back(
-        Trk::SharedObject<const Trk::BoundarySurface<Trk::AbstractVolume>>(
+        std::shared_ptr<const Trk::BoundarySurface<Trk::AbstractVolume>>(
           new Trk::BoundaryDiscSurface<Trk::AbstractVolume>(
             this, nullptr, *dsf)));
       delete dsf;
@@ -118,7 +118,7 @@ void Trk::AbstractVolume::createBoundarySurfaces()
         (sfCounter == 3 && sfNumber > 3) ? nullptr : this;
       Trk::AbstractVolume* outer = (inner) ? nullptr : this;
       m_boundarySurfaces->push_back(
-        Trk::SharedObject<const Trk::BoundarySurface<Trk::AbstractVolume>>(
+        std::shared_ptr<const Trk::BoundarySurface<Trk::AbstractVolume>>(
           new Trk::BoundaryCylinderSurface<Trk::AbstractVolume>(
             inner, outer, *csf)));
       delete csf;

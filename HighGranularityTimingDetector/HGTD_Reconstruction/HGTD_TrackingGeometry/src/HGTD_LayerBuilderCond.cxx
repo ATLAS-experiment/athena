@@ -179,7 +179,7 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
      // register the chosen side in the object array
      // This line is problematic for MT  .
      // Something like
-     // Trk::SharedObject<Trk::Surface>  = std::make_shared<Trk::Surface>((*hgtdDetIter)) could be fine
+     // std::shared_ptr<Trk::Surface>  = std::make_shared<Trk::Surface>((*hgtdDetIter)) could be fine
      //
      // As things are now
      // 1) Notice that basically we couple the DetElement owned surface to the Tracking Geometry
@@ -187,7 +187,7 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
      // 2)
      // The const_cast here make the code non MT safe. For now we handle this
      // by being careful on lifetimes and non-re-entrant TG construction.
-     Trk::SharedObject<Trk::Surface> sharedSurface(
+     std::shared_ptr<Trk::Surface> sharedSurface(
        const_cast<Trk::Surface*>(&((*hgtdDetIter)->surface())),
        [](Trk::Surface*) {});
      Trk::SurfaceOrderPosition surfaceOrder(sharedSurface, orderPosition);

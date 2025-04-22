@@ -17,10 +17,10 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 // Trk
 #include "TrkDetDescrInterfaces/ILayerBuilderCond.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkGeometry/TrackingGeometry.h"
 // STL
+#include <memory>
 #include <vector>
 
 class HGTD_ID;
@@ -32,13 +32,13 @@ namespace Trk {
   class DiscLayer;
   class PlaneLayer;
   class BinnedLayerMaterial;
-  typedef std::pair< SharedObject<Surface>, Amg::Vector3D > SurfaceOrderPosition;
+  typedef std::pair< std::shared_ptr<Surface>, Amg::Vector3D > SurfaceOrderPosition;
 }
 
 /** @class HGTD_LayerBuilderCond
 
    The HGTD_LayerBuilderCond parses the senstive detector elments and orders them onto a
-   Disc surface; no cylindrical layers are expected. 
+   Disc surface; no cylindrical layers are expected.
    This implementation is based on what done in the SiLayerBuilderCond, adapted to the HGTD use case.
 
    */
@@ -76,7 +76,7 @@ class HGTD_LayerBuilderCond : public extends<AthAlgTool, Trk::ILayerBuilderCond>
 
   private:
     SG::ReadCondHandle<InDetDD::HGTD_DetectorElementCollection> retrieveHGTDdetElements(const EventContext& ctx) const;
-    //!< helper method to construct HGTD materia 
+    //!< helper method to construct HGTD materia
     const Trk::BinnedLayerMaterial discLayerMaterial(double rMin, double rMax) const;
 
     //!< layer association
@@ -89,17 +89,17 @@ class HGTD_LayerBuilderCond : public extends<AthAlgTool, Trk::ILayerBuilderCond>
 
     const HGTD_DetectorManager*           m_hgtdMgr;                        //!< the HGTD Detector Manager
     const HGTD_ID*                        m_hgtdHelper;                     //!< HGTD Id Helper
-                                          
+
     bool                                  m_setLayerAssociation;            //!< Set Layer Association
-                                          
-    std::string                           m_identification;                 //!< string identification        
-    
+
+    std::string                           m_identification;                 //!< string identification
+
     int                                   m_rBins;                          //!< set the number of bins
     int                                   m_phiBins;                        //!< set the number of bins
-    
+
     float                                 m_discEnvelopeR;                  //!< set disc envelope
     float                                 m_discThickness;                  //!< set disc thickness
-    
+
     bool                                  m_runGeometryValidation;          //!< run geometry validation
 
     SG::ReadCondHandleKey<InDetDD::HGTD_DetectorElementCollection>

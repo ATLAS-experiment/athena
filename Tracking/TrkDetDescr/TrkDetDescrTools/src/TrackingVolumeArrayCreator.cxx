@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,6 +17,7 @@
 #include "TrkDetDescrUtils/BinnedArray2D.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
 #include "TrkDetDescrUtils/NavBinnedArray1D.h"
+#include "TrkDetDescrUtils/SharedDoNoDelete.h"
 #include "TrkVolumes/BevelledCylinderVolumeBounds.h"
 #include "TrkVolumes/CuboidVolumeBounds.h"
 #include "TrkVolumes/CylinderVolumeBounds.h"

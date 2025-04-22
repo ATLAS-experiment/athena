@@ -34,7 +34,6 @@
 #include "TrkParticleBase/TrackParticleBase.h"
 #include "TrkEventUtils/TrkParametersComparisonFunction.h"
 #include "TrkDetDescrInterfaces/IDynamicLayerCreator.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkDetDescrUtils/GeometrySignature.h"
 #include "TrkMaterialOnTrack/EnergyLoss.h"
 #include "TrkMaterialOnTrack/ScatteringAngles.h"
@@ -2133,7 +2132,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
     throwIntoGarbageBin(cache,nextPar);
   }
 
- 
+
 
   if (nextPar) {
    ATH_MSG_DEBUG(
@@ -2429,7 +2428,7 @@ Trk::TimedExtrapolator::transportInAlignableTV(Trk::TimedExtrapolator::Cache &ca
 
   throwIntoGarbageBin(cache,nextPar);
 
- 
+
 
   ATH_MSG_DEBUG("  [+] StaticVol boundary reached of '" << cache.m_currentStatic->volumeName() << "'.");
 

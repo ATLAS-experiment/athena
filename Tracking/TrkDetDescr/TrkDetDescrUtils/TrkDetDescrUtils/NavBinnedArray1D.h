@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,10 +10,10 @@
 #define TRKDETDESCRUTILS_NAVBINNEDARRAY1D_H
 
 #include "TrkDetDescrUtils/BinUtility.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 
 // STL
 #include <vector>
+#include <memory>
 
 class MsgStream;
 
@@ -49,24 +49,24 @@ public:
   delete objects at the end, if this deletion should be turned off, the boolean
   deletion should be switched to false the global position is given by pointer
   and then deleted! */
-  NavBinnedArray1D(const std::vector<SharedObject<T>>& tclassvector,
+  NavBinnedArray1D(const std::vector<std::shared_ptr<T>>& tclassvector,
                    BinUtility* bingen,
                    Amg::Transform3D* transform)
     : BinnedArray<T>()
     , m_array{}
     , m_arrayObjects(nullptr)
-    , m_binUtility(SharedObject<BinUtility>(bingen))
+    , m_binUtility(std::shared_ptr<BinUtility>(bingen))
     , m_transf(transform)
   {
     // prepare the binned Array // simplify as the array is ordered when defined
     if (bingen) {
-      m_array = std::vector<SharedObject<T>>(tclassvector);
+      m_array = std::vector<std::shared_ptr<T>>(tclassvector);
     }
   }
 
   /**Copy Constructor with shift */
   NavBinnedArray1D(const NavBinnedArray1D& barr,
-                   std::vector<SharedObject<T>>&& vec,
+                   std::vector<std::shared_ptr<T>>&& vec,
                    Amg::Transform3D& shift)
     : BinnedArray<T>()
     , m_array(std::move(vec))
@@ -84,7 +84,7 @@ public:
     , m_transf(nullptr)
   {
     if (m_binUtility.get()) {
-      m_array = std::vector<SharedObject<T>>(m_binUtility.get()->bins(0));
+      m_array = std::vector<std::shared_ptr<T>>(m_binUtility.get()->bins(0));
       for (size_t ient = 0; ient < m_binUtility.get()->bins(0); ++ient) {
         m_array[ient] = (barr.m_array)[ient];
       }
@@ -103,7 +103,7 @@ public:
       m_binUtility = barr.m_binUtility;
       // --------------------------------------------------------------------------
       if (m_binUtility.get()) {
-        m_array = std::vector<SharedObject<T>>(m_binUtility.get()->bins(0));
+        m_array = std::vector<std::shared_ptr<T>>(m_binUtility.get()->bins(0));
         for (size_t ient = 0; ient < m_binUtility.get()->bins(0); ++ient) {
           m_array[ient] = (barr.m_array)[ient];
         }
@@ -219,11 +219,11 @@ private:
   }
 
   //!< vector of pointers to the class T
-  std::vector<SharedObject<T>> m_array;
+  std::vector<std::shared_ptr<T>> m_array;
   //!< forced 1D vector of pointers to class T
   CxxUtils::CachedUniquePtr<std::vector<T*>> m_arrayObjects;
   //!< binUtility for retrieving and filling the Array
-  SharedObject<BinUtility> m_binUtility;
+  std::shared_ptr<BinUtility> m_binUtility;
   // !< transform into local navigation coordinates
   Amg::Transform3D* m_transf;
 };

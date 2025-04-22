@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -54,9 +54,9 @@ Trk::MaterialMapping::MaterialMapping(const std::string& name, ISvcLocator* pSvc
   m_unmapped(0),
   m_skippedOutside(0),
   m_layerMaterialScreenOutput(0)
-#ifdef TRKDETDESCR_MEMUSAGE      
+#ifdef TRKDETDESCR_MEMUSAGE
   ,m_memoryLogger()
-#endif 
+#endif
 {
     // the name of the volume to map
     declareProperty("MappingVolumeName"           , m_mappingVolumeName);
@@ -78,7 +78,7 @@ Trk::MaterialMapping::MaterialMapping(const std::string& name, ISvcLocator* pSvc
     declareProperty("InputElementTable"           , m_inputEventElementTable);
     // Output screen stuff
     declareProperty("MaterialScreenOutputLevel"   , m_layerMaterialScreenOutput);
-    
+
 }
 
 Trk::MaterialMapping::~MaterialMapping()
@@ -96,10 +96,10 @@ StatusCode Trk::MaterialMapping::initialize()
 
     if ( !m_materialMapper.empty() )
       ATH_CHECK( m_materialMapper.retrieve() );
-    
-    if ( !m_layerMaterialRecordAnalyser.empty() ) 
+
+    if ( !m_layerMaterialRecordAnalyser.empty() )
       ATH_CHECK( m_layerMaterialRecordAnalyser.retrieve() );
-        
+
     if ( !m_layerMaterialCreators.empty() )
       ATH_CHECK( m_layerMaterialCreators.retrieve() );
 
@@ -108,7 +108,7 @@ StatusCode Trk::MaterialMapping::initialize()
 
     ATH_CHECK( m_inputMaterialStepCollection.initialize() );
     ATH_CHECK(  m_inputEventElementTable.initialize() );
-        
+
     return StatusCode::SUCCESS;
 }
 
@@ -124,21 +124,21 @@ StatusCode Trk::MaterialMapping::execute()
             ATH_MSG_INFO("Could not retrieve mapping volume from tracking geometry. Exiting.");
             return retrieveCode;
         }
-    } 
+    }
     if (m_mappingVolume)
-      ATH_MSG_VERBOSE("Mapping volume correctly retrieved from tracking geometry");  
-    
-    
+      ATH_MSG_VERBOSE("Mapping volume correctly retrieved from tracking geometry");
+
+
     SG::ReadHandle<MaterialStepCollection> materialStepCollection(m_inputMaterialStepCollection);
-    
+
         // --------- prepare the element table ---------------------------------------------------
 
     if (m_mapComposition) {
       SG::ReadHandle<Trk::ElementTable> eTableEvent(m_inputEventElementTable);
-      (*m_elementTable) += (*eTableEvent);  // accummulate the table 
+      (*m_elementTable) += (*eTableEvent);  // accummulate the table
     }
-    
-    
+
+
     // event parameters - associated asteps, and layers hit per event
     int associatedSteps      = 0;
     m_accumulatedMaterialXX0 = 0.;
@@ -146,24 +146,24 @@ StatusCode Trk::MaterialMapping::execute()
     m_layersRecordedPerEvent.clear();
     // clearing the recorded layers per event
     if (materialStepCollection.isValid() && !materialStepCollection->empty()){
-    
-       // get the number of material steps 
+
+       // get the number of material steps
        size_t materialSteps = materialStepCollection->size();
        ATH_MSG_DEBUG("[+] Successfully read  "<<  materialSteps << " geantino steps");
-       
+
        // create a direction out of the last material step
        double dirx = (*materialStepCollection)[materialSteps-1]->hitX();
        double diry = (*materialStepCollection)[materialSteps-1]->hitY();
        double dirz = (*materialStepCollection)[materialSteps-1]->hitZ();
        Amg::Vector3D direction = Amg::Vector3D(dirx,diry,dirz).unit();
-       
+
        double eta = direction.eta();
        // skip the event if the eta cut is not met
        if ( fabs(eta) > m_etaCutOff || (m_etaSide && m_etaSide*eta < 0.)  ) {
            ATH_MSG_VERBOSE("[-] Event is outside eta acceptance of " << m_etaCutOff << ". Skipping it.");
            return StatusCode::SUCCESS;
        }
-       
+
        // now propagate through the full detector and collect the layers
        Trk::NeutralCurvilinearParameters ncP(Amg::Vector3D(0.,0.,0.), direction, 0.);
        // create a neutral extrapolation cell
@@ -172,7 +172,7 @@ StatusCode Trk::MaterialMapping::execute()
        ecc.addConfigurationMode(Trk::ExtrapolationMode::StopAtBoundary);
        ecc.addConfigurationMode(Trk::ExtrapolationMode::CollectPassive);
        ecc.addConfigurationMode(Trk::ExtrapolationMode::CollectBoundary);
-       
+
        // let's extrapolate through the detector and remember which layers (with material) should have been hit
        std::vector< std::pair<const Trk::Layer*, Amg::Vector3D> > layersAndHits;
        // call the extrapolation engine
@@ -187,7 +187,7 @@ StatusCode Trk::MaterialMapping::execute()
            // for screen output
            size_t ilayer = 0;
            // find all the intersected material - remember the last parameters
-           const Trk::NeutralParameters* parameters = nullptr; 
+           const Trk::NeutralParameters* parameters = nullptr;
            // loop over the collected information
            for (auto& es : ecc.extrapolationSteps){
                // continue if we have parameters
@@ -196,9 +196,9 @@ StatusCode Trk::MaterialMapping::execute()
                   const Trk::Surface& pSurface = parameters->associatedSurface();
                   // get the surface with associated layer (that has material)
                   ATH_MSG_VERBOSE("[L] Testing layer with associatedLayer() " << pSurface.associatedLayer() << " and materialLayer() " << pSurface.materialLayer() );
-                  // 
+                  //
                   if ( ( pSurface.associatedLayer() && pSurface.associatedLayer()->layerMaterialProperties() )  || pSurface.materialLayer() ){
-                      // material layer 
+                      // material layer
                       const Trk::Layer* mLayer = pSurface.materialLayer() ? pSurface.materialLayer() : pSurface.associatedLayer();
                       // record that one
                       std::pair<const Trk::Layer*, Amg::Vector3D> layerHitPair(mLayer, parameters->position());
@@ -210,25 +210,25 @@ StatusCode Trk::MaterialMapping::execute()
             }
             // cleanup of the final hits
             if (ecc.endParameters != parameters) delete ecc.endParameters;
-            
+
             // we have no layers and Hits
             if (layersAndHits.empty()){
                 ATH_MSG_VERBOSE("[!] No Layer was intersected - skipping.");
                 return StatusCode::SUCCESS;
             }
-            
+
             // layers are ordered, hence you can move the starting point along
             size_t currentLayer = 0;
-            // loop through hits and find the closest layer, the start point moves outwards as we go 
+            // loop through hits and find the closest layer, the start point moves outwards as we go
             for ( const Trk::MaterialStep* step : *materialStepCollection ) {
-               // verbose output    
+               // verbose output
                ATH_MSG_VERBOSE("[L] starting from layer " << currentLayer << " from layer collection for this step.");
                // step length and position
                double t     = step->steplength();
                Amg::Vector3D pos(step->hitX(), step->hitY(), step->hitZ());
-               // skip if : 
+               // skip if :
                // -- 0) no mapping volume exists
-               // -- 1) outside the mapping volume 
+               // -- 1) outside the mapping volume
                // -- 2) outside the eta acceptance
                if (!m_mappingVolume || !(m_mappingVolume->inside(pos)) || fabs(pos.eta()) > m_etaCutOff ){
                   ++m_skippedOutside;
@@ -247,30 +247,30 @@ StatusCode Trk::MaterialMapping::execute()
                        ATH_MSG_VERBOSE("- test    distance is " << testDistance << " from " << Amg::toString(pos) << " and " << Amg::toString(layersAndHits[testLayer].second) );
                        if ( testDistance < currentDistance ){
                            // screen output
-                           ATH_MSG_VERBOSE("[L] Skipping over to current layer " << testLayer << " because " << testDistance << " < " << currentDistance); 
+                           ATH_MSG_VERBOSE("[L] Skipping over to current layer " << testLayer << " because " << testDistance << " < " << currentDistance);
                            // the test distance did shrink - update currentLayer
-                           currentLayer      = testLayer; 
+                           currentLayer      = testLayer;
                            currentDistance   = testDistance;
                        } else {
-                           // stick to the layer you have 
+                           // stick to the layer you have
                            break;
                        }
                    }
                }
-               // the currentLayer *should* be correct now 
+               // the currentLayer *should* be correct now
                const Trk::Layer* assignedLayer =  layersAndHits[currentLayer].first;
                Amg::Vector3D assignedPosition  = layersAndHits[currentLayer].second;
-               // associate the hit 
-               // (1) count it 
+               // associate the hit
+               // (1) count it
                ++associatedSteps;
                // (2) associate it
                associateHit(*assignedLayer, pos, assignedPosition, t, step->fullMaterial());
           } // loop over material Steps
-        
+
           // check for the empty hits - they need to be taken into account
           ATH_MSG_VERBOSE("Found " << layersAndHits.size() << " intersected layers - while having " << m_layersRecordedPerEvent.size() << " recorded ones.");
-        
-          // now - cross-chek if you have additional layers 
+
+          // now - cross-chek if you have additional layers
           for ( auto& lhp : layersAndHits){
               // check if you find the layer int he already done record-map : not found - we need to do an empty hit scaling
               if (m_layersRecordedPerEvent.find(lhp.first) == m_layersRecordedPerEvent.end()){
@@ -283,7 +283,7 @@ StatusCode Trk::MaterialMapping::execute()
                       ATH_MSG_WARNING("- no Layer found in the associated map! Should not happen.");
               }
            }
-           
+
            // check whether the event was good for at least one hit
            if (associatedSteps) {
                ATH_MSG_VERBOSE("There are associated steps, need to call finalizeEvent() & record to the MaterialMapper.");
@@ -291,44 +291,44 @@ StatusCode Trk::MaterialMapping::execute()
                for (auto& lRecord : m_layerRecords ) {
                    // associated material
                    Trk::AssociatedMaterial* assMatHit = lRecord.second.finalizeEvent((*lRecord.first));
-                   // record the full layer hit 
+                   // record the full layer hit
                    if (assMatHit && !m_materialMapper.empty()) m_materialMapper->recordLayerHit(*assMatHit, true);
                    delete assMatHit;
                    // call the material mapper finalize method
                    ATH_MSG_VERBOSE("Calling finalizeEvent on the MaterialMapper ...");
-               } 
+               }
            } // the event had at least one associated hit
 
-        } // end of eCode.success : needed for new mapping schema  
-     
+        } // end of eCode.success : needed for new mapping schema
+
      } // material steps existed
-         
+
 
     return StatusCode::SUCCESS;
 }
 
 
-bool Trk::MaterialMapping::associateHit( const Trk::Layer& associatedLayer, 
+bool Trk::MaterialMapping::associateHit( const Trk::Layer& associatedLayer,
                                          const Amg::Vector3D& pos,
                                          const Amg::Vector3D& positionOnLayer,
                                          double stepl,
                                          const Trk::Material& mat)
-{   
+{
     // get the intersection with the layer
     ++m_mapped;
     // get the layer
     const Trk::Layer* layer = &associatedLayer;
-    
+
     // get the associated volume
     const Trk::TrackingVolume* associatedVolume = trackingGeometry().lowestTrackingVolume(pos);
-    
+
     // try to find the layer material record
-    auto clIter = m_layerRecords.find(layer);              
+    auto clIter = m_layerRecords.find(layer);
     if (clIter != m_layerRecords.end() ){
         // remember that you actually hit this layer
         m_layersRecordedPerEvent[layer] = true;
         // LayerMaterialRecord found, add the hit
-        (*clIter).second.associateGeantinoHit(positionOnLayer, stepl, mat);           
+        (*clIter).second.associateGeantinoHit(positionOnLayer, stepl, mat);
         ATH_MSG_VERBOSE("- associate Geantino Information at intersection [r/z] = " << positionOnLayer.perp() << "/"<< positionOnLayer.z() );
         ATH_MSG_VERBOSE("                                      mapping distance = " << (pos-positionOnLayer).mag() );
         ATH_MSG_VERBOSE("- associate Geantino Information ( s, s/x0 , x0 , l0, a, z, rho ) = "
@@ -344,11 +344,11 @@ bool Trk::MaterialMapping::associateHit( const Trk::Layer& associatedLayer,
                 m_materialMapper->recordMaterialHit(am, positionOnLayer);
                 ATH_MSG_VERBOSE(" - associated material produced as : " << am);
             }
-        
+
     } else if (layer) {
         ATH_MSG_WARNING("- associate hit - the layer with index " << layer->layerIndex().value() << " was not found - should not happen!");
     }
-    // return 
+    // return
     return true;
 }
 
@@ -408,22 +408,22 @@ StatusCode Trk::MaterialMapping::finalize()
 
     ATH_MSG_INFO("========================================================================================= ");
     ATH_MSG_INFO("finalize() starts ...");
-    
-#ifdef TRKDETDESCR_MEMUSAGE       
+
+#ifdef TRKDETDESCR_MEMUSAGE
     m_memoryLogger.refresh(getpid());
-    ATH_MSG_INFO("[ memory usage ] Start building of material maps: " );    
-    ATH_MSG_INFO( m_memoryLogger );                     
-#endif  
-        
+    ATH_MSG_INFO("[ memory usage ] Start building of material maps: " );
+    ATH_MSG_INFO( m_memoryLogger );
+#endif
+
     // create a dedicated LayerMaterialMap by layerMaterialCreator;
     std::map< std::string, Trk::LayerMaterialMap* > layerMaterialMaps;
     for (  auto& lmcIter : m_layerMaterialCreators  ){
         ATH_MSG_INFO("-> Creating material map '"<< lmcIter->layerMaterialName() << "' from creator "<<  lmcIter.typeAndName() );
-        layerMaterialMaps[lmcIter->layerMaterialName()] = new Trk::LayerMaterialMap(); 
+        layerMaterialMaps[lmcIter->layerMaterialName()] = new Trk::LayerMaterialMap();
     }
-    
+
     ATH_MSG_INFO( m_layerRecords.size() << " LayerMaterialRecords to be finalized for this material mapping run.");
-    
+
     // loop over the layers and output the stuff --- fill the associatedLayerMaterialProperties
     for ( auto& lIter :  m_layerRecords ) {
         // Get the key map, the layer & the volume name
@@ -445,17 +445,17 @@ StatusCode Trk::MaterialMapping::finalize()
         size_t ilmc = 0;
         for ( auto& lmcIter : m_layerMaterialCreators ){
             // call the creator and register in the according map
-#ifdef TRKDETDESCR_MEMUSAGE       
+#ifdef TRKDETDESCR_MEMUSAGE
             m_memoryLogger.refresh(getpid());
-            ATH_MSG_INFO("[ memory usage ] Before building the map for Layer "<< layerKey.value()  );    
-            ATH_MSG_INFO( m_memoryLogger );                     
-#endif  
+            ATH_MSG_INFO("[ memory usage ] Before building the map for Layer "<< layerKey.value()  );
+            ATH_MSG_INFO( m_memoryLogger );
+#endif
             const Trk::LayerMaterialProperties* lMaterial = lmcIter->createLayerMaterial(lIter.second);
-#ifdef TRKDETDESCR_MEMUSAGE       
+#ifdef TRKDETDESCR_MEMUSAGE
             m_memoryLogger.refresh(getpid());
-            ATH_MSG_INFO("[ memory usage ] After building the map for Layer "<< layerKey.value()  );    
-            ATH_MSG_INFO( m_memoryLogger );                     
-#endif  
+            ATH_MSG_INFO("[ memory usage ] After building the map for Layer "<< layerKey.value()  );
+            ATH_MSG_INFO( m_memoryLogger );
+#endif
             if (lMaterial)
                 ATH_MSG_VERBOSE("LayerMaterial map created as "<< *lMaterial );
             // insert the created map for the given layer
@@ -468,18 +468,18 @@ StatusCode Trk::MaterialMapping::finalize()
     }
 
     ATH_MSG_INFO("Finalize map synchronization and write the maps to the DetectorStore.");
-   
+
     for (auto& ilmIter : layerMaterialMaps ){
       // elementTable handling - if existent
       if (m_mapComposition){
-          Trk::SharedObject<const Trk::ElementTable> tElementTable(new Trk::ElementTable(*m_elementTable));
+          auto tElementTable = std::make_shared<Trk::ElementTable>(*m_elementTable);
           ilmIter.second->updateElementTable(tElementTable);
           if (ilmIter.second->elementTable()){
               ATH_MSG_INFO("ElementTable for LayerMaterialMap '" << ilmIter.first << "' found and syncrhonized." );
               ATH_MSG_INFO( *(ilmIter.second->elementTable()) );
           }
       }
-      // detector store writing        
+      // detector store writing
       if ( (detStore()->record(ilmIter.second, ilmIter.first, false)).isFailure()){
           ATH_MSG_ERROR( "Writing of LayerMaterialMap with name '" << ilmIter.first << "' was not successful." );
           delete ilmIter.second;
@@ -487,11 +487,11 @@ StatusCode Trk::MaterialMapping::finalize()
     }
     delete m_elementTable;
 
-#ifdef TRKDETDESCR_MEMUSAGE       
+#ifdef TRKDETDESCR_MEMUSAGE
     m_memoryLogger.refresh(getpid());
-    ATH_MSG_INFO( "[ memory usage ] At the end of the material map creation.");    
-    ATH_MSG_INFO( m_memoryLogger );                     
-#endif  
+    ATH_MSG_INFO( "[ memory usage ] At the end of the material map creation.");
+    ATH_MSG_INFO( m_memoryLogger );
+#endif
 
     ATH_MSG_INFO( "========================================================================================= " );
     ATH_MSG_INFO( "    ->  Total mapped hits                  : "  << m_mapped         );
@@ -508,16 +508,16 @@ StatusCode Trk::MaterialMapping::handleTrackingGeometry()
 {
     // either get a string volume or the highest one
     const Trk::TrackingVolume* trackingVolume = trackingGeometry().highestTrackingVolume();
-    
+
     // prepare the mapping volume
     m_mappingVolume = trackingGeometry().trackingVolume(m_mappingVolumeName);
-    
+
     // register the confined layers from the TrackingVolume
     registerVolume(*trackingVolume, 0);
-    
+
     ATH_MSG_INFO("Add "<< m_layerRecords.size() << " confined volume layers to mapping setup.");
     ATH_MSG_INFO("Add "<< trackingGeometry().numBoundaryLayers() << " boundary layers to mapping setup.");
-    
+
     // register the layers from boundary surfaces
     for (const auto bLayerIter : trackingGeometry().boundaryLayers())
         insertLayerMaterialRecord(*(bLayerIter.first));
@@ -539,7 +539,7 @@ void Trk::MaterialMapping::registerVolume(const Trk::TrackingVolume& tvol, int l
 
     // all those to be processed
     std::vector<const Trk::Layer*> volumeLayers;
-  
+
     // collect all material layers that have layerMaterial
     const Trk::BinnedArray< Trk::Layer >* confinedLayers = tvol.confinedLayers();
     if (confinedLayers) {
@@ -553,17 +553,17 @@ void Trk::MaterialMapping::registerVolume(const Trk::TrackingVolume& tvol, int l
          auto clIterE = layers.end();
          for ( ; clIter != clIterE; ++clIter ) {
             // only take layers with MaterialProperties defined and which are within the mapping volume
-            const Amg::Vector3D& sReferencePoint = (*clIter)->surfaceRepresentation().globalReferencePoint(); 
+            const Amg::Vector3D& sReferencePoint = (*clIter)->surfaceRepresentation().globalReferencePoint();
             bool insideMappingVolume = m_mappingVolume ? m_mappingVolume->inside(sReferencePoint) : true;
             if ((*clIter)->layerMaterialProperties() && insideMappingVolume)
                 volumeLayers.push_back((*clIter));
         }
-    }        
-    
+    }
+
    // now create LayerMaterialRecords for all
    for ( auto& lIter : volumeLayers )
            insertLayerMaterialRecord(*lIter);
-   
+
     // step dopwn the navigation tree to reach the confined volumes
     const Trk::BinnedArray<Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
     if (confinedVolumes) {
@@ -599,7 +599,7 @@ void Trk::MaterialMapping::insertLayerMaterialRecord(const Trk::Layer& lay){
                                    layerMaterialBinUtility,
                                    (Trk::MaterialAssociationType)m_associationType);
      // and fill it into the map
-     m_layerRecords[&lay] = lmr;                        
+     m_layerRecords[&lay] = lmr;
  }
 }
 

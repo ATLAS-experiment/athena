@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -23,7 +23,6 @@
 #include "TrkDetDescrUtils/BinnedArray1D1D1D.h"
 #include "TrkDetDescrUtils/BinnedArray2D.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkGeometry/GlueVolumesDescriptor.h"
 #include "TrkGeometry/Material.h"
 #include "TrkGeometry/TrackingGeometry.h"
@@ -46,6 +45,7 @@
 #include <cmath>
 #include <fstream>
 #include <map>
+#include <memory>
 
 namespace Muon {
 

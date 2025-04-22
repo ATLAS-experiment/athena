@@ -21,7 +21,7 @@
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/DiscLayer.h"
 #include "TrkSurfaces/DiscBounds.h"
-
+#include "TrkDetDescrUtils/SharedDoNoDelete.h"
 
 // constructor
 InDet::SiLayerBuilderImpl::SiLayerBuilderImpl(const std::string& t, const std::string& n, const IInterface* p) :
@@ -168,7 +168,7 @@ InDet::SiLayerBuilderImpl::createRingLayersImpl(const InDetDD::SiDetectorElement
         const Amg::Vector3D& orderPosition = detElement->center();
         // register the chosen side in the object array
         // Something like
-        // Trk::SharedObject<Trk::Surface>  =
+        // std::shared_ptr<Trk::Surface>  =
         // std::make_shared<Trk::Surface>(detElement)) could be fine
         //
         // As things are now
@@ -179,7 +179,7 @@ InDet::SiLayerBuilderImpl::createRingLayersImpl(const InDetDD::SiDetectorElement
         // 2) The const_cast here make the
         // code non MT safe. For now we handle this by being careful
         // on lifetimes and non-re-entrant TG construction.
-        Trk::SharedObject<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(&(detElement->surface())),
+        std::shared_ptr<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(&(detElement->surface())),
                                                       Trk::do_not_delete<Trk::Surface>);
         Trk::SurfaceOrderPosition surfaceOrder(sharedSurface, orderPosition);
         discSurfaces[currentlayer].push_back(surfaceOrder);
@@ -554,7 +554,7 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
         const Amg::Vector3D& orderPosition = chosenSide->center();
         // register the chosen side in the object array
         // Something like
-        // Trk::SharedObject<Trk::Surface>  =
+        // std::shared_ptr<Trk::Surface>  =
         // std::make_shared<Trk::Surface>(detElement)) could be fine
         //
         // As things are now
@@ -566,7 +566,7 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
         // code non MT safe. For now we handle this by being careful
         // on lifetimes and non-re-entrant TG construction.
 
-        Trk::SharedObject<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(&(chosenSide->surface())),
+        std::shared_ptr<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(&(chosenSide->surface())),
                                                       [](Trk::Surface*){});
         Trk::SurfaceOrderPosition surfaceOrder(sharedSurface, orderPosition);
         if (takeIt) (discSurfaces[currentlayer]).push_back(surfaceOrder);
@@ -988,7 +988,7 @@ InDet::SiLayerBuilderImpl::cylindricalLayersImpl(const InDetDD::SiDetectorElemen
        const Trk::Surface* moduleSurface = takeIt ? (&((*sidetIter)->surface())) : (&(otherSide->surface()));
 
        // register the module surface
-       // Trk::SharedObject<Trk::Surface>  =
+       // std::shared_ptr<Trk::Surface>  =
        // std::make_shared<Trk::Surface>(.... some det element)) could be fine
        //
        // As things are now
@@ -999,7 +999,7 @@ InDet::SiLayerBuilderImpl::cylindricalLayersImpl(const InDetDD::SiDetectorElemen
        // 2) The const_cast here make the
        // code non MT safe. For now we handle this by being careful
        // on lifetimes and non-re-entrant TG construction.
-       Trk::SharedObject<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(moduleSurface),
+       std::shared_ptr<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(moduleSurface),
                                                      Trk::do_not_delete<Trk::Surface>);
 
        Trk::SurfaceOrderPosition surfaceOrder(sharedSurface, orderPosition);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -22,9 +22,7 @@ Trk::SubtractedDiscSurface::SubtractedDiscSurface()
 {}
 
 // copy constructor
-Trk::SubtractedDiscSurface::SubtractedDiscSurface(const SubtractedDiscSurface& psf)
-   
-= default;
+Trk::SubtractedDiscSurface::SubtractedDiscSurface(const SubtractedDiscSurface& psf) = default;
 
 // copy constructor with shift
 Trk::SubtractedDiscSurface::SubtractedDiscSurface(const SubtractedDiscSurface& psf, const Amg::Transform3D& shift)
@@ -36,7 +34,7 @@ Trk::SubtractedDiscSurface::SubtractedDiscSurface(const SubtractedDiscSurface& p
 // constructor
 Trk::SubtractedDiscSurface::SubtractedDiscSurface(const Trk::DiscSurface& ps, AreaExcluder* vol, bool shared)
   : Trk::DiscSurface(ps)
-  , m_subtrVol(Trk::SharedObject<AreaExcluder>(vol))
+  , m_subtrVol(std::shared_ptr<AreaExcluder>(vol))
   , m_shared(shared)
 {}
 

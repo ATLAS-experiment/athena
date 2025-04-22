@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // InDet
@@ -18,6 +18,7 @@
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/DiscLayer.h"
 #include "TrkSurfaces/DiscBounds.h"
+#include "TrkDetDescrUtils/SharedDoNoDelete.h"
 //Athena
 #include "CxxUtils/checker_macros.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
@@ -853,10 +854,10 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilderImpl::mergeDiscLayers (std::vect
   }
   rsteps.push_back(rbounds.back().second);
 
-  std::vector< std::pair< Trk::SharedObject<Trk::Surface>, Amg::Vector3D >  > surfaces;
+  std::vector< std::pair< std::shared_ptr<Trk::Surface>, Amg::Vector3D >  > surfaces;
   for ( auto *  sf : surfs ) {
-    Trk::SharedObject<Trk::Surface> sharedSurface(sf,Trk::do_not_delete<Trk::Surface>);
-    std::pair< Trk::SharedObject<Trk::Surface>, Amg::Vector3D >  surfaceOrder(sharedSurface, sf->center());
+    std::shared_ptr<Trk::Surface> sharedSurface(sf,Trk::do_not_delete<Trk::Surface>);
+    std::pair< std::shared_ptr<Trk::Surface>, Amg::Vector3D >  surfaceOrder(sharedSurface, sf->center());
     surfaces.push_back(surfaceOrder);
   }
 
