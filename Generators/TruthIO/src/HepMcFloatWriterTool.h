@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // HepMcFloatWriterTool.h 
@@ -23,7 +23,7 @@
 // Forward declaration
 #include "AtlasHepMC/GenEvent_fwd.h"
 
-class HepMcFloatWriterTool : virtual public IIOHepMcTool, public AthAlgTool
+class HepMcFloatWriterTool : public extends<AthAlgTool, IIOHepMcTool>
 { 
 
   /////////////////////////////////////////////////////////////////// 
@@ -31,9 +31,7 @@ class HepMcFloatWriterTool : virtual public IIOHepMcTool, public AthAlgTool
   /////////////////////////////////////////////////////////////////// 
  public: 
 
-  // Copy constructor: 
-
-  /// Constructor with parameters: 
+  /// Constructor with parameters:
   HepMcFloatWriterTool( const std::string& type, const std::string& name,  const IInterface* parent );
 
   /// Destructor: 
