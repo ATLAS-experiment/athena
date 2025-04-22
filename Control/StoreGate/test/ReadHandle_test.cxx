@@ -302,7 +302,7 @@ void test5()
   SG::WriteHandleKey<MyObj> h2 ("foo3", "FooSvc");
   assert (h1.alias (h2).isSuccess());
   assert (testStore.proxy (MyCLID, "foo3") == prox1);
-  assert (prox1->alias().count ("foo3") == 1);
+  assert (prox1->hasAlias("foo3"));
   #if 0
 
   // Making symlink.

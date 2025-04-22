@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file DataStore_test.cxx
@@ -120,19 +120,19 @@ void test_addAlias ATLAS_NOT_THREAD_SAFE ()
   assert (store.proxy (123, "dp1a") == dp1);
   assert (store.proxy_exact (pool.stringToKey ("dp1a", 123)) == dp1);
 
-  assert (dp1->alias().count ("dp1a") == 1);
+  assert (dp1->hasAlias("dp1a"));
 
   SG::DataProxy* dp2 = make_proxy (123, "dp2");
   assert (store.addToStore (123, dp2).isSuccess());
   assert (store.addAlias ("dpx", dp2).isSuccess());
   assert (dp2->refCount() == 2);
-  assert (dp2->alias().count ("dpx") == 1);
+  assert (dp2->hasAlias("dpx"));
 
   assert (store.addAlias ("dpx", dp1).isSuccess());
   assert (dp1->refCount() == 4);
   assert (dp2->refCount() == 1);
-  assert (dp2->alias().count ("dpx") == 0);
-  assert (dp1->alias().count ("dpx") == 1);
+  assert (!dp2->hasAlias("dpx"));
+  assert (dp1->hasAlias("dpx"));
   assert (store.addAlias ("dpx", dp1).isSuccess());
   assert (dp1->refCount() == 4);
   assert (dp2->refCount() == 1);

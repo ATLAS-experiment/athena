@@ -63,7 +63,7 @@ unsigned int DataHeaderForm_p6::getDbTech(unsigned int index) const {
 }
 
 unsigned int DataHeaderForm_p6::insertObj(const ObjRecord& rec,
-        const std::set<std::string>& aliases, bool doAliasFiltering,
+        const std::vector<std::string>& aliases, bool doAliasFiltering,
 	const std::vector<unsigned int>& symLinks,
 	const std::vector<sgkey_t>& hashes)
 {
@@ -72,7 +72,6 @@ unsigned int DataHeaderForm_p6::insertObj(const ObjRecord& rec,
            iter != last; ++iter, ++index) {
       if (*iter == rec) break;
    }
-   std::vector<std::string>     alias( aliases.cbegin(), aliases.cend() );
    if (index != m_objRecords.size()) {
       // found matching object record, check if all the info is the same
       if( m_objSymLinks[index] != symLinks ) {
@@ -83,15 +82,15 @@ unsigned int DataHeaderForm_p6::insertObj(const ObjRecord& rec,
          m_objHashes[index] = hashes;
          m_modified = true;
       }
-      if( (!doAliasFiltering or m_modified) and m_objAlias[index] != alias ) {
-         m_objAlias[index] = std::move(alias);
+      if( (!doAliasFiltering or m_modified) and m_objAlias[index] != aliases ) {
+         m_objAlias[index] = aliases;
          m_modified = true;
       }
       return index;
    }
    // enter a new record
    m_objRecords.push_back( rec );
-   m_objAlias.push_back( std::move(alias) );
+   m_objAlias.push_back( aliases );
    m_objSymLinks.push_back( symLinks );
    m_objHashes.push_back( hashes );
    m_modified = true;
@@ -102,11 +101,11 @@ std::size_t DataHeaderForm_p6::sizeObj() const {
    return(m_objRecords.size());
 }
 
-std::string DataHeaderForm_p6::getObjContainer(unsigned int index) const {
+const std::string& DataHeaderForm_p6::getObjContainer(unsigned int index) const {
    return m_objRecords[index].cont;
 }
 
-std::string DataHeaderForm_p6::getObjKey(unsigned int index) const {
+const std::string& DataHeaderForm_p6::getObjKey(unsigned int index) const {
    return m_objRecords[index].key;
 }
 
@@ -114,12 +113,12 @@ unsigned int DataHeaderForm_p6::getObjType(unsigned int index) const {
    return m_objRecords[index].clid;
 }
 
-Guid DataHeaderForm_p6::getObjClassId(unsigned int index) const {
+const Guid& DataHeaderForm_p6::getObjClassId(unsigned int index) const {
    return m_objRecords[index].guid;
 }
 
-std::set<std::string> DataHeaderForm_p6::getObjAlias(unsigned int index) const {
-   return(std::set<std::string>(m_objAlias[index].begin(), m_objAlias[index].end()));
+const std::vector<std::string>& DataHeaderForm_p6::getObjAlias(unsigned int index) const {
+  return m_objAlias[index];
 }
 
 const std::vector<unsigned int>&
@@ -127,7 +126,7 @@ DataHeaderForm_p6::getObjSymLinks(unsigned int index) const {
   return m_objSymLinks[index];
 }
 
-std::vector<DataHeaderForm_p6::sgkey_t>
+const std::vector<DataHeaderForm_p6::sgkey_t>&
 DataHeaderForm_p6::getObjHashes(unsigned int index) const {
    return(m_objHashes[index]);
 }

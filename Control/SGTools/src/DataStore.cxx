@@ -279,7 +279,6 @@ DataStore::removeProxyImpl (DataProxy* proxy, int index)
     ProxyMap& pmap = storeIter->second;
 
     // first remove the alias key:
-    SG::DataProxy::AliasCont_t alias_set = proxy->alias();
     for (const std::string& alias : alias_set) {
       if (1 == pmap.erase(alias)) proxy->release();
     }
