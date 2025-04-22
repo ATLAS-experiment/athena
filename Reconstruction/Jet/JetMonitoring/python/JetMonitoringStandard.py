@@ -38,6 +38,7 @@ commonHistoSpecs = [
     "JVF[0]",
     "JVF[1]",
     "Jvt",
+    "Timing",
     "nconstit",
     "N90Constituents",
     "leadingJetsRel",
@@ -58,7 +59,7 @@ commonHistoSpecs = [
     "m;pt",
     "eta;pt",
     "eta;phi",
-
+    "eta;Timing",
 
     # TProfile2D : just use 3 variables. For now the sytem will automatically
     #  interpret it as a TProfile2D (the 3rd variable being profiled)

@@ -152,7 +152,7 @@ def NswAsBuiltCondAlgCfg(flags, name = "NswAsBuiltCondAlg", **kwargs):
     ##TODO: remove hard-coded tag once the global tag is ready
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     if(not (kwargs["MicroMegaJSON"] or not kwargs["ReadMmAsBuiltParamsKey"]) ) : # no need to add the folder if we are reading a json file anyhow
-        result.merge(addFolders( flags, kwargs["ReadMmAsBuiltParamsKey"]  , 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MuonAlignAsBuiltParamsMm-RUN3-01-00'))
+        result.merge(addFolders( flags, kwargs["ReadMmAsBuiltParamsKey"]  , 'MUONALIGN_OFL', className='CondAttrListCollection'))
     the_alg = CompFactory.NswAsBuiltCondAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)     
     return result

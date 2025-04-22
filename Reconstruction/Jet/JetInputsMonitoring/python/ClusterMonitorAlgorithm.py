@@ -99,6 +99,12 @@ def ClusterMonitoringConfig(inputFlags):
         topPath='CaloTopoClusters/AllEMClusters/Expert/'
     )
 
+    clustersNCBGroup = helper.addGroup(
+        alg=clusterMonAlg,
+        name='ClusterMonitorNCBPlots',
+        topPath='CaloTopoClusters/AllClusters/NCB/'
+    )
+
     clustersCalECAGroup = helper.addGroup(
         alg=clusterMonAlg,
         name='ClusterMonitorCalECA',
@@ -178,6 +184,13 @@ def ClusterMonitoringConfig(inputFlags):
     clustersExpertGroup.defineHistogram('clusterEta,clusterPhi;vHotRatOcc',type='TH2F', title='Occupancy of Clusters with Highest Cell E_{frac}>0.9;eta;phi',
                             xbins=98,xmin=-4.9,xmax=4.9,ybins=64,ymin=-3.15,ymax=3.15, cutmask='HighHotRat')
 
+    # Histograms for NCB checks
+    clustersNCBGroup.defineHistogram('clusterEta,clusterTime',type='TH2F',title='Cluster Time vs eta; eta; time',
+                                     xbins=98,xmin=-4.9,xmax=4.9,ybins=200,ymin=-100.0,ymax=100.0)
+    clustersNCBGroup.defineHistogram('clusterEta,clusterTime;PhiRegion1',type='TH2F',title='Cluster Time vs eta - |phi| < 0.3 || |phi| > 2.7;eta; time',
+                                     xbins=98,xmin=-4.9,xmax=4.9,ybins=200,ymin=-100.0,ymax=100.0, cutmask='PhiRegion1')
+    clustersNCBGroup.defineHistogram('clusterEta,clusterTime;PhiRegion2',type='TH2F',title='Cluster Time vs eta - 0.3 < |phi| < 2.7 ;eta; time',
+                                     xbins=98,xmin=-4.9,xmax=4.9,ybins=200,ymin=-100.0,ymax=100.0, cutmask='PhiRegion2')
 
     # Configure histograms - Occupancies and energies by region
     #ECA:

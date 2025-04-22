@@ -108,7 +108,7 @@ atlas_add_citest( ZdcRec_ZDCInjCalib
   )
 
 atlas_add_citest( RecoRun3Data_Cosmics 
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q450 -e '--maxEvents 25  --preExec="all:flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-17'  --no-output-checks)
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q450 -e '--maxEvents 25  --preExec="all:flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-17' --no-output-checks)
 
 atlas_add_citest( RecoRun3Data_Calib
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q451 -e '--maxEvents 25  --preExec="all:flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-17' --no-output-checks)
@@ -153,15 +153,15 @@ atlas_add_citest( DerivationRun2MCAF3_PHYSLITE
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3Data_PHYS
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS --threads 4
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS --threads 4 -e '--preExec="flags.IOVDb.GlobalTag = \\\"CONDBR2-BLKPA-2022-17\\\";"'
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3Data_PHYSLITE
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4 -e '--preExec="flags.IOVDb.GlobalTag = \\\"CONDBR2-BLKPA-2022-17\\\";"'
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3Data_Train
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks -e '--preExec="flags.IOVDb.GlobalTag = \\\"CONDBR2-BLKPA-2022-17\\\";"'
    PROPERTIES PROCESSORS 4 )
 
 # Explicitly set maxEvents so that the preExec doesn't get overwritten
@@ -262,7 +262,7 @@ atlas_add_citest( DataQuality_Run3Data_Postprocessing
    DEPENDS_SUCCESS RecoRun3Data )
 
 atlas_add_citest( DataQuality_Run3Data_AODtoHIST
-   SCRIPT Reco_tf.py --AMI=q449 --inputAODFile="../RecoRun3Data/run_q449/myAOD.pool.root" --outputHISTFile=DataQuality_Run3Data_AODtoHIST.root   --preExec="all:flags.Exec.FPE=500;" --athenaopts='--threads=1'
+   SCRIPT Reco_tf.py --AMI=q449 --inputAODFile="../RecoRun3Data/run_q449/myAOD.pool.root" --outputHISTFile=DataQuality_Run3Data_AODtoHIST.root   --preExec="all:flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2024-05 --geometryVersion ATLAS-R3S-2021-03-02-00 --athenaopts='--threads=1'
    DEPENDS_SUCCESS RecoRun3Data )
 
 #################################################################################
