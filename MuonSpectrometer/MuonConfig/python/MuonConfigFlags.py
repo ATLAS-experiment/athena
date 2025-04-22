@@ -134,7 +134,7 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.Align.UseBLines", lambda prevFlags: 'all' if _muonAlignMode(prevFlags) else 'none') # Can be ['none','all','barrel','endcaps']
     mcf.addFlag("Muon.Align.UseILines", lambda prevFlags: (_muonAlignMode(prevFlags)))
     mcf.addFlag("Muon.Align.UseAsBuilt", lambda prevFlags: (_muonAlignMode(prevFlags)))
-    mcf.addFlag("Muon.Align.UsesTGCAsBuild",False)
+    mcf.addFlag("Muon.Align.UsesTGCAsBuild", lambda prevFlags: (_muonAlignMode(prevFlags)) and not prevFlags.Common.isOnline and prevFlags.GeoModel.Run == LHCPeriod.Run3)
 
     # Muon Trigger Flags
     mcf.addFlag("Muon.MuonTrigger", False) 
