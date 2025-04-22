@@ -223,8 +223,6 @@ class FeatureHandler:
         Types = []
         Types += ["ProtoMomentumCore"]
         Types += ["ProtoMomentumWide"]
-        #Types += ["ValMomCore2GeV"]
-        
         
         for iVar in Variables:
             for iType in Types:
@@ -242,7 +240,6 @@ class FeatureHandler:
     def addTypeSpecificFeatures_PID(self):
         Variables = []
         Variables += ["BDTValues"]
-        Variables += ["BDTValuesSum"]
         
         Sorts = []
         Sorts += ["BDTSort"]
@@ -268,10 +265,7 @@ class FeatureHandler:
         Variables += ["SumShots_Eta"]
         Variables += ["SumShots_Phi"]
         Variables += ["SumShots_M"]
-        Variables += ["ConstDeltaRToSumShots"]
         Variables += ["EtSumShotsOverConstEt"]
-        Variables += ["TauDeltaRToSumShots"]
-        Variables += ["EtSumShotsOverTauEt"]
         
         Sorts = []
         Sorts += ["BDTSort"]
@@ -391,9 +385,6 @@ class FeatureHandler:
     def addTypeSpecificFeatures_JetMoment(self):
         Variables = []
         Variables += ["EtDR"]
-        Variables += ["EtDRprime"]
-        Variables += ["EtDR2"]
-        Variables += ["EtAngle"]
         Variables += ["EtDRxTotalEt"]
         for iVar in Variables:
             self.addToFeatures_AllTypes(iVar, self.m_VarTypeName_JetMoment, "F")

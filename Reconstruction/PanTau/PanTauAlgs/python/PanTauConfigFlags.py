@@ -7,7 +7,6 @@ import AthenaCommon.SystemOfUnits as Units
 def createPanTauConfigFlags():
     flags = AthConfigFlags()
 
-    flags.addFlag("UseDefaultCellBasedConfig", True)
     flags.addFlag("TauConstituents_UsePionMass", True)
     flags.addFlag("FeatureExtractor_UseEmptySeeds", False)
 

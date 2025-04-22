@@ -391,7 +391,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   prefixVARType = m_varTypeName_PID;
     
   // Sorted by highest BDT score
-  double value_sumBDT_BDTSort = 0;
   for(unsigned int iTypeConst=0; iTypeConst<n_Constituents_Type; iTypeConst++) {
         
     double value_BDT = list_TypeConstituents_SortBDT[iTypeConst]->getBDTValue();
@@ -409,10 +408,9 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
       value_BDT = value_BDT - mvaCorrection;
     }
         
-    value_sumBDT_BDTSort += value_BDT;
     std::string iConst = m_HelperFunctions.convertNumberToString((double)(iTypeConst+1));
     tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_BDTValues_BDTSort_" + iConst, value_BDT);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_BDTValuesSum_BDTSort_" + iConst, value_sumBDT_BDTSort);
+
   }
     
   //! Shot information ///////////////////////////////////////////
@@ -465,15 +463,13 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
       double deltaRSumShotToConst = tlv_CurConst.DeltaR(tlv_SumShots);
       if(deltaRSumShotToConst > maxDeltaRSumShotToConst) maxDeltaRSumShotToConst = deltaRSumShotToConst;
       if(deltaRSumShotToConst < minDeltaRSumShotToConst) minDeltaRSumShotToConst = deltaRSumShotToConst;
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_ConstDeltaRToSumShots_BDTSort_" + iConstStr, deltaRSumShotToConst);
+
       if(tlv_CurConst.Et() > 0.) tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtSumShotsOverConstEt_BDTSort_" + iConstStr, tlv_SumShots.Et() / tlv_CurConst.Et());
             
       //energy ratio, deltaR of shots and tauSeed
       double deltaRSumShotToTau = tlv_Reference.DeltaR(tlv_SumShots);
       if(deltaRSumShotToTau > maxDeltaRSumShotToTau) maxDeltaRSumShotToTau = deltaRSumShotToTau;
       if(deltaRSumShotToTau < minDeltaRSumShotToTau) minDeltaRSumShotToTau = deltaRSumShotToTau;
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_TauDeltaRToSumShots_BDTSort_" + iConstStr, deltaRSumShotToTau);
-      if(tlv_Reference.Et() > 0.) tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtSumShotsOverTauEt_BDTSort_" + iConstStr, tlv_SumShots.Et() / tlv_Reference.Et());
             
     }//end loop over constituents in tau
     
@@ -546,9 +542,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   if(sum_Et > 0.) {
     //Using transverse energy
     tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtDR",            sum_EtxDR / sum_Et);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtDRprime",       sum_EtxDRprime / sum_Et);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtDR2",           sum_EtxDR2 / sum_Et);
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtAngle",         sum_EtxAngle / sum_Et);
     tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_EtDRxTotalEt",    (sum_EtxDR / sum_Et) * variants_SeedEt.at("EtAllConsts"));
   }
 
