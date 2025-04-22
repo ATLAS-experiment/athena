@@ -506,7 +506,7 @@ long getCoarseID(const FPGATrackSimHit & hit)
   // returns large negative value if no layer
 
   long volumeID = getVolumeID(hit);
-  unsigned layerID = hit.getLayerDisk();
+  unsigned layerID = hit.getLayerDisk(true);
 
   long offset = -10000;
 
