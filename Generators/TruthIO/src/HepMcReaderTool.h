@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // HepMcReaderTool.h 
@@ -27,7 +27,7 @@
 #include "HepMC3/ReaderAsciiHepMC2.h"
 #endif 
 
-class HepMcReaderTool : virtual public IIOHepMcTool, public AthAlgTool
+class HepMcReaderTool : public extends<AthAlgTool, IIOHepMcTool>
 { 
 
   /////////////////////////////////////////////////////////////////// 
