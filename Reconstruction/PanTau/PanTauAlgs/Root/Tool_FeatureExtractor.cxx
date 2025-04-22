@@ -313,9 +313,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   double                      sum_Et2                     = 0;
   // ===> Sum of Et (and E) times DeltaR, DeltaR', Angle 
   double                      sum_EtxDR                   = 0;
-  double                      sum_EtxDR2                  = 0;
-  double                      sum_EtxDRprime              = 0;
-  double                      sum_EtxAngle                = 0;
   // ===> Isolation rings
   double                      sum_EtInRing00To01          = 0;
   double                      sum_EtInRing01To02          = 0;
@@ -348,18 +345,12 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
     double hlp_Et               = tlv_curConst.Et();
     double hlp_Et2              = hlp_Et * hlp_Et;
     double hlp_DeltaR           = tlv_Reference.DeltaR(tlv_curConst);
-    double hlp_DeltaR2          = hlp_DeltaR * hlp_DeltaR;
-    double hlp_DeltaRprime      = m_HelperFunctions.deltaRprime(tlv_Reference.Vect(), tlv_curConst.Vect());
-    double hlp_Angle            = tlv_Reference.Angle(tlv_curConst.Vect());
 
     // update Sum of Et, Et^2, E and E^2
     sum_Et                      += hlp_Et;
     sum_Et2                     += hlp_Et2;
     // update Sum of Et (and E) times DeltaR, DeltaR', Angle 
     sum_EtxDR                   += hlp_Et * hlp_DeltaR;
-    sum_EtxDR2                  += hlp_Et * hlp_DeltaR2;
-    sum_EtxDRprime              += hlp_Et * hlp_DeltaRprime;
-    sum_EtxAngle                += hlp_Et * hlp_Angle;
     // update Isolation rings
     if(hlp_DeltaR >= 0.0 && hlp_DeltaR < 0.1) sum_EtInRing00To01 += hlp_Et;
     if(hlp_DeltaR >= 0.1 && hlp_DeltaR < 0.2) sum_EtInRing01To02 += hlp_Et;
