@@ -305,7 +305,7 @@ void test5()
   assert (dp1.transientID().size() == 2);
   assert (dp1.transientID (123));
   assert (dp1.transientID (124));
-  assert (dp1.alias() == std::set<std::string> {"key2"});
+  assert (dp1.alias() == std::vector<std::string> {"key2"});
 
   assert (tad1.address() == nullptr);
   assert (tad1.transientID().empty());

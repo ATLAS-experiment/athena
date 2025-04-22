@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AddressRemappingSvc.cxx
@@ -76,15 +76,13 @@ StatusCode AddressRemappingSvc::initialize() {
          symClids.insert(getClid(clidStr.substr(p_clidSep + 1)));
       }
       std::string keyStr = entry.first.substr(p_oldSep + 1);
-      std::set<std::string> aliases;
-      for (std::string::size_type p_keySep = keyStr.rfind(','); p_keySep != std::string::npos; keyStr.resize(p_keySep), p_keySep = keyStr.rfind(',')) {
-         aliases.insert(keyStr.substr(p_keySep + 1));
-      }
       SG::TransientAddress oldTad(getClid(clidStr), keyStr);
+      for (std::string::size_type p_keySep = keyStr.rfind(','); p_keySep != std::string::npos; keyStr.resize(p_keySep), p_keySep = keyStr.rfind(',')) {
+         oldTad.setAlias(keyStr.substr(p_keySep + 1));
+      }
       for (CLID clid : symClids) {
          oldTad.setTransientID(clid);
       }
-      oldTad.setAlias(aliases);
 
       const std::string::size_type p_newSep = entry.second.find('#');
       if (p_newSep == std::string::npos) {
@@ -336,8 +334,9 @@ StatusCode AddressRemappingSvc::updateAddressConst(StoreID::type /*storeID*/,
    for (std::vector<SG::TransientAddress>::const_iterator oldIter = oldTads->begin(),
 		   newIter = newTads->begin(), oldIterEnd = oldTads->end();
 		   oldIter != oldIterEnd; ++oldIter, ++newIter) {
-      if (oldIter->transientID(tad->clID())
-	      && (oldIter->name() == tad->name() || oldIter->alias().find(tad->name()) != oldIter->alias().end())) {
+      if (oldIter->transientID(tad->clID()) &&
+          (oldIter->name() == tad->name() || oldIter->hasAlias (tad->name())))
+      {
          ATH_MSG_DEBUG("Overwrite for: " << tad->clID() << "#" << tad->name() << " -> " << newIter->clID() << "#" << newIter->name());
          SG::DataProxy* dataProxy(m_proxyDict->proxy(newIter->clID(), newIter->name()));
          if (dataProxy == 0) {
@@ -406,7 +405,6 @@ StatusCode AddressRemappingSvc::renameTads (IAddressProvider::tadList& tads) con
       }
 
       size_t namelen = tad->name().size();
-      SG::TransientAddress::TransientAliasSet newAliases;
       for (const std::string& a : tad->alias()) {
         std::string a_renamed = a;
 
@@ -422,9 +420,8 @@ StatusCode AddressRemappingSvc::renameTads (IAddressProvider::tadList& tads) con
             a_renamed = name_renamed + a_renamed.substr (namelen, std::string::npos);
         }
           
-        newAliases.insert (a_renamed);
+        tad_new->setAlias (a_renamed);
       }
-      tad_new->setAlias (newAliases);
       tad_new->setProvider (tad->provider(), tad->storeID());
 
       // Replace the old TAD in the list with the new one.

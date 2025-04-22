@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef DEBUG_SGIMPL
@@ -889,8 +889,7 @@ SG::DataProxy* SGImplSvc::recordObject (SG::DataObjectSharedPtr<DataObject> obj,
         }
       }
 
-      else if (key == proxy->name() ||
-               proxy->alias().count (key) > 0)
+      else if (key == proxy->name() || proxy->hasAlias(key) > 0)
       {
         // key matches.  Make a symlink.
         if (addSymLink (obj->clID(), proxy).isFailure()) {

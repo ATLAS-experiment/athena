@@ -52,7 +52,7 @@ class DataStore;
     typedef std::string name_type;
     typedef std::string id_type;
     typedef TransientAddress::TransientClidSet CLIDCont_t;
-    typedef TransientAddress::TransientAliasSet AliasCont_t;
+    typedef std::vector<std::string> AliasCont_t;
     typedef IStringPool::sgkey_t sgkey_t;
 
     // Constructors
@@ -338,12 +338,6 @@ class DataStore;
     typedef std::lock_guard<mutex_t> lock_t;
     mutable mutex_t m_mutex;
 
-    // For m_dObject.
-    typedef std::recursive_mutex objMutex_t;
-    typedef std::lock_guard<objMutex_t> objLock_t;
-    mutable objMutex_t m_objMutex; // For m_dObject, m_errno
-
-    
     Athena::IMessageSvcHolder m_ims;
     
     /// The store of which we are a part.
@@ -351,6 +345,12 @@ class DataStore;
 
     /// errno-style error code for accessData
     enum ErrNo m_errno;  // protected by m_objMutex
+
+
+    // For m_dObject.
+    typedef std::recursive_mutex objMutex_t;
+    typedef std::lock_guard<objMutex_t> objLock_t;
+    mutable objMutex_t m_objMutex; // For m_dObject, m_errno
 
     
     /**
@@ -417,19 +417,19 @@ class DataStore;
 //  +18:  IAddressProvider* m_pAddressProvider
 //  +20:  SG::CachedValue<std::string> m_name <== 2nd cache line starts at +20
 //  +48:  vector m_transientID 
-//  +60:  set m_transientAlias       <== 3rd cache line starts at +60
-//  +90.. 
+//  +60:  vector m_transientAlias       <== 3rd cache line starts at +60
+//  +7c..
 
-// DP+b0: IConverter* m_dataLoader
-// DP+b8: T2PMap* m_t2p
-// DP+c0: vector m_handles           <== 4th cache line starts at +c0
-// DP+d8: m_mutex
+// DP+9c: IConverter* m_dataLoader
+// DP+a0: T2PMap* m_t2p
+// DP+a8: vector m_handles
+// DP+c0: m_mutex                    <== 4th cache line starts at +c0
+// DP+e8: IMessageSvc* m_ims
+// DP+f0: std::atomic<IProxyDict*> m_store
+// DP+f8: ErrNo m_errno
+// DP+fc: padding
 // DP+100: m_objMutex                <== 5th cache line starts at +100
-// DP+128: IMessageSvc* m_ims
-// DP+130: std::atomic<IProxyDict*> m_store
-// DP+138: ErrNo m_errno
-// DP+13c: padding
-// DP+140: end
+// DP+128: end
 
 
 #include "SGTools/DataProxy.icc"

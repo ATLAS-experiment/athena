@@ -13,6 +13,7 @@
 #include "SGTools/TransientAddress.h"
 #include "SGTools/DataProxy.h"
 #include "AthenaKernel/IStringPool.h"
+#include "CxxUtils/ranges.h"
 
 //______________________________________________________________________________
 DataHeaderElement::DataHeaderElement() : m_pClid(0), m_clids(), m_key(), m_alias(), m_hashes() {
@@ -31,7 +32,7 @@ DataHeaderElement::DataHeaderElement(const SG::TransientAddress* sgAddress, IOpa
   : DataHeaderElement (sgAddress->clID(),
                        sgAddress->name(),
                        sgAddress->transientID(),
-                       SG::DataProxy::AliasCont_t (sgAddress->alias()),
+                       std::vector<std::string>(sgAddress->alias()),
                        sgAddress->address(),
                        tokAddress, pTag)
 {
@@ -51,7 +52,7 @@ DataHeaderElement::DataHeaderElement(const SG::DataProxy* proxy, IOpaqueAddress*
 DataHeaderElement::DataHeaderElement(CLID clid,
                                      const std::string& name,
                                      const std::vector<CLID>& tClids,
-                                     std::set<std::string>&& alias,
+                                     std::vector<std::string>&& alias,
                                      IOpaqueAddress* tadAddress,
                                      IOpaqueAddress* tokAddress,
                                      const std::string& pTag)
@@ -117,7 +118,7 @@ const std::string& DataHeaderElement::getKey() const {
    return(m_key);
 }
 //______________________________________________________________________________
-const std::set<std::string>& DataHeaderElement::getAlias() const {
+const std::vector<std::string>& DataHeaderElement::getAlias() const {
    return(m_alias);
 }
 //_____________________________________________________________________________
@@ -169,7 +170,7 @@ void DataHeaderElement::dump(std::ostream& ostr) const
    ostr << std::endl;
    if( getAlias().size() > 0 ) {
       ostr << "Alias: ";
-      for( auto& a : getAlias() ) ostr << " " << a;
+      for( const std::string& a : getAlias() ) ostr << " " << a;
       ostr << endl;
    }
    ostr << "Token: " << m_token.toString() << endl;

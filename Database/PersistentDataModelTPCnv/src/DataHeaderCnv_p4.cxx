@@ -13,6 +13,7 @@
 
 #include <cstdio>
 #include <sstream>
+#include <algorithm>
 
 DataHeaderElementCnv_p4::DataHeaderElementCnv_p4() {}
 DataHeaderElementCnv_p4::~DataHeaderElementCnv_p4() {}
@@ -26,12 +27,13 @@ void DataHeaderElementCnv_p4::persToTrans(const DataHeaderElement_p4* pers,
    trans->m_pClid = *intIter; ++intIter;
    trans->m_clids.assign (intIter, intLast);
    std::vector<std::string>::const_iterator strIter = pers->m_alias.begin();
-   const std::vector<std::string>::const_iterator strLast = pers->m_alias.end();
    trans->m_key = *strIter; ++strIter;
-   trans->m_alias.clear();
-   for (std::set<std::string>::const_iterator lastAlias = trans->m_alias.begin();
-		   strIter != strLast; ++strIter) {
-      lastAlias = trans->m_alias.insert(lastAlias, *strIter);
+   trans->m_alias.assign (strIter, pers->m_alias.end());
+   if (!std::ranges::is_sorted (trans->m_alias)) {
+     // Should really be sorted, but just in case...
+     std::ranges::sort (trans->m_alias);
+     auto ret = std::ranges::unique (trans->m_alias);
+     trans->m_alias.erase (ret.begin(), ret.end());
    }
    trans->m_hashes.clear();
    trans->m_hashes.reserve(pers->m_hashes.size());
