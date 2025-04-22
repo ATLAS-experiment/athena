@@ -206,6 +206,6 @@ class ttj_MiNNLO(PowhegV2):
 
         # Calculate appropriate decay mode numbers
         self.parameters_by_keyword("topdecaymode")[0].value = _decay_mode_lookup[self.decay_mode]
-        if self.decay_mode == "semileptonic":
+        if self.decay_mode == "t t~ > semileptonic":
             # Parameter semileptonic must be set to 1 to actually get semileptonic decays, because the topdecaymode=11111 also allows fully hadronic decays (with one up and one charm quark)
             self.parameters_by_keyword("semileptonic")[0].value = 1
