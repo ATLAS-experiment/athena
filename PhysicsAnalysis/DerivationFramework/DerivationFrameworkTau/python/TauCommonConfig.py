@@ -150,8 +150,8 @@ def AddDiTauLowPtCfg(flags, **kwargs):
     from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo
     acc.merge(JetRecCfg(flags,AntiKt10LCTopo))
 
-    from DiTauRec.DiTauBuilderConfig import DiTauBuilderLowPtCfg
-    acc.merge(DiTauBuilderLowPtCfg(flags, name="DiTauLowPtBuilder"))
+    from DiTauRec.DiTauBuilderConfig import DiTauBuilderCfg
+    acc.merge(DiTauBuilderCfg(flags, name="DiTauLowPtBuilder", doLowPt=True))
 
     return acc
 
