@@ -2215,7 +2215,7 @@ bool Trk::STEP_Propagator::propagateWithJacobian(Cache& cache, bool errorPropaga
         h = dist2next.second * propDir;
       }
       if (binIDMat)
-        cache.m_material = binIDMat->first;
+        cache.m_material = binIDMat->first.get();
     }
   }
 
@@ -2373,7 +2373,7 @@ bool Trk::STEP_Propagator::propagateWithJacobian(Cache& cache, bool errorPropaga
             if (cache.m_material) {
               updateMaterialEffects(cache, mom, sin(direction.theta()), sumPath + path - stepOver);
             }
-            cache.m_material = binIDMat->first;
+            cache.m_material = binIDMat->first.get();
           }
           // recalculate distance to next bin
           if (distanceToNextBin < h) {
@@ -2423,7 +2423,7 @@ bool Trk::STEP_Propagator::propagateWithJacobian(Cache& cache, bool errorPropaga
             if (binIDMat) {
               assert(cache.m_material);
               updateMaterialEffects(cache, mom, sin(direction.theta()), sumPath + path);
-              cache.m_material = binIDMat->first;
+              cache.m_material = binIDMat->first.get();
             }
           }
           // recalculate distance to next bin

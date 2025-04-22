@@ -96,8 +96,6 @@ private:
 
   bool m_forceSymmetry; //!< forces volume symmetry between negative/positive part
 
-  mutable std::mutex m_garbageMutex;
-  mutable std::vector<std::unique_ptr<Trk::Material>> m_garbage ATLAS_THREAD_SAFE;
 };
 
 } // end of namespace
