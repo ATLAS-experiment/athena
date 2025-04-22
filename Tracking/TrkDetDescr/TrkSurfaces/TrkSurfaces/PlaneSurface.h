@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@
 #define TRKSURFACES_PLANESURFACE_H
 
 // Trk
-#include "TrkDetDescrUtils/SharedObject.h"
+#include <memory>
 #include "TrkParametersBase/ParametersT.h"
 #include "TrkSurfaces/NoBounds.h"
 #include "TrkSurfaces/Surface.h"
@@ -127,7 +127,7 @@ public:
 
   /** Constructor for Planes with shared object*/
   PlaneSurface(const Amg::Transform3D& htrans,
-               const Trk::SharedObject<const Trk::SurfaceBounds>& sbounds);
+               const std::shared_ptr<const Trk::SurfaceBounds>& sbounds);
 
   /**Equality operator*/
   virtual bool operator==(const Surface& sf) const override;
@@ -284,7 +284,7 @@ protected: //!< data members
   template<class SURFACE, class BOUNDS_CNV>
   friend class ::BoundSurfaceCnv_p2;
 
-  SharedObject<const SurfaceBounds> m_bounds; //!< bounds (shared)
+  std::shared_ptr<const SurfaceBounds> m_bounds; //!< bounds (shared)
   //!< NoBounds as return object when no bounds are declared
   static const NoBounds s_boundless;
 };

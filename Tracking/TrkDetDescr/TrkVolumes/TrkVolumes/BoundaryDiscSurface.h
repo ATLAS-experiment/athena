@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@
 #define TRKVOLUMES_BOUNDARYDISCSURFACE_H
 
 // Trk
-#include "TrkDetDescrUtils/SharedObject.h"
+#include <memory>
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkSurfaces/DiscSurface.h"
@@ -60,8 +60,8 @@ class BoundaryDiscSurface final : virtual public BoundarySurface<Tvol>,
       : BoundarySurface<Tvol>(inside, outside), DiscSurface(dsf) {}
 
   /** Constructor for a Boundary with two VolumeArrays attached to it*/
-  BoundaryDiscSurface(SharedObject<VolumeArray> insideArray,
-                      SharedObject<VolumeArray> outsideArray,
+  BoundaryDiscSurface(std::shared_ptr<VolumeArray> insideArray,
+                      std::shared_ptr<VolumeArray> outsideArray,
                       const DiscSurface& dsf)
       : BoundarySurface<Tvol>(insideArray, outsideArray), DiscSurface(dsf) {}
 

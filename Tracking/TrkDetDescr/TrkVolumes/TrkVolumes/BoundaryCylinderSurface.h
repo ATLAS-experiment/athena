@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -54,8 +54,8 @@ class BoundaryCylinderSurface final : virtual public BoundarySurface<Tvol>,
       : BoundarySurface<Tvol>(inside, outside), CylinderSurface(csf) {}
 
   /** Constructor for a Boundary with two VolumeArrays attached to it*/
-  BoundaryCylinderSurface(SharedObject<VolumeArray> insideArray,
-                          SharedObject<VolumeArray> outsideArray,
+  BoundaryCylinderSurface(std::shared_ptr<VolumeArray> insideArray,
+                          std::shared_ptr<VolumeArray> outsideArray,
                           const CylinderSurface& csf)
       : BoundarySurface<Tvol>(insideArray, outsideArray),
         CylinderSurface(csf) {}

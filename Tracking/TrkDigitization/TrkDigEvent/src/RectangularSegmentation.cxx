@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -12,7 +12,6 @@
 
 
 #include "TrkDigEvent/RectangularSegmentation.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkSurfaces/PlaneSurface.h"
 #include "TrkSurfaces/RectangleBounds.h"
 // Amg includes
@@ -27,19 +26,19 @@ Trk::RectangularSegmentation::RectangularSegmentation(std::shared_ptr<const Trk:
 {
     // first the x dimension if needed
     if (numCellsX > 1)
-         m_binUtility = new Trk::BinUtility(numCellsX, -m_activeBounds->halflengthX(), m_activeBounds->halflengthX(), Trk::open, Trk::binX); 
+         m_binUtility = new Trk::BinUtility(numCellsX, -m_activeBounds->halflengthX(), m_activeBounds->halflengthX(), Trk::open, Trk::binX);
     // use y dimension if needed
     if (numCellsY > 1){
         Trk::BinUtility yBinUtility(numCellsY, -m_activeBounds->halflengthY(), m_activeBounds->halflengthY(), Trk::open, Trk::binY);
         if (m_binUtility)
             (*m_binUtility) += yBinUtility;
-        else 
+        else
             m_binUtility = new Trk::BinUtility(yBinUtility);
-    }           
-}        
+    }
+}
 
  /** Constructor for ATLAS module type pixels */
-Trk::RectangularSegmentation::RectangularSegmentation(std::shared_ptr<const Trk::RectangleBounds> mBounds, size_t numCellsX, double longY, size_t numCellsY, double numberOfChip): 
+Trk::RectangularSegmentation::RectangularSegmentation(std::shared_ptr<const Trk::RectangleBounds> mBounds, size_t numCellsX, double longY, size_t numCellsY, double numberOfChip):
    m_activeBounds(std::move(mBounds)),
    m_binUtility(nullptr),
    m_binsX(numCellsX),
@@ -47,43 +46,43 @@ Trk::RectangularSegmentation::RectangularSegmentation(std::shared_ptr<const Trk:
 {
     // first the x dimension if needed
     if (numCellsX > 1)
-         m_binUtility = new Trk::BinUtility(numCellsX, -m_activeBounds->halflengthX(), m_activeBounds->halflengthX(), Trk::open, Trk::binX); 
+         m_binUtility = new Trk::BinUtility(numCellsX, -m_activeBounds->halflengthX(), m_activeBounds->halflengthX(), Trk::open, Trk::binX);
     // use y dimension if needed
     if (numCellsY > 1){
- 
+
       int numCellsYinChip = numCellsY/numberOfChip;
       double begin = -m_activeBounds->halflengthY();
       double end = (2. * m_activeBounds->halflengthY() / numberOfChip) - m_activeBounds->halflengthY();
       std::vector<float> boundaries;
-      
+
       boundaries.push_back(begin);
-      
+
       for (int i = 0; i< numberOfChip; i++){
 	Trk::BinUtility SmallBinUtility((size_t) numCellsYinChip-2, begin+longY, end-longY, Trk::open, Trk::binY);
-	
-	
+
+
 	boundaries.insert(boundaries.end(), SmallBinUtility.binningData().at(0).boundaries.begin(), SmallBinUtility.binningData().at(0).boundaries.end());
 	boundaries.push_back(end);
-	
+
 	begin=end;
 	end+=(2 * m_activeBounds->halflengthY() / numberOfChip);
-	
+
       }
-     
-      
+
+
       if (boundaries.size() != numCellsY+1) {
         throw std::runtime_error("RectangularSegmentation: invalid numCellsY");
       }
-      
+
       Trk::BinUtility yBinUtility(boundaries, Trk::open, Trk::binY);
       if (m_binUtility)
 	(*m_binUtility) += yBinUtility;
-      else 
+      else
 	m_binUtility = new Trk::BinUtility(yBinUtility);
-      
+
        boundaries.clear();
-    }           
-}        
+    }
+}
 
 
 Trk::RectangularSegmentation::~RectangularSegmentation()
@@ -95,24 +94,24 @@ void Trk::RectangularSegmentation::createSegmenationSurfaces(std::vector< std::s
                                                              std::vector< std::shared_ptr< const Trk::Surface> >& segmentationSurfacesX,
                                                              std::vector< std::shared_ptr< const Trk::Surface> >& segmentationSurfacesY,
                                                              double halfThickness,
-                                                             int readoutDirection, 
+                                                             int readoutDirection,
                                                              double lorentzAngle) const
 {
     // may be needed throughout
     double lorentzAngleTan    =  std::tan(lorentzAngle);
     double lorentzPlaneShiftX = halfThickness*lorentzAngleTan;
-    
+
     // (A) --- top/bottom surfaces -----------------------------------------------------------
     // let's create the top/botten surfaces first - we call them readout / counter readout
-    // there are some things to consider 
+    // there are some things to consider
     // - they share the RectangleBounds only if the lorentzAngle is 0, otherwise only the readout surface has full length bounds like the module
-    Trk::SharedObject<const Trk::SurfaceBounds> moduleBounds = std::make_shared<Trk::RectangleBounds>(m_activeBounds->halflengthX(),m_activeBounds->halflengthY());
+    std::shared_ptr<const Trk::SurfaceBounds> moduleBounds = std::make_shared<Trk::RectangleBounds>(m_activeBounds->halflengthX(),m_activeBounds->halflengthY());
     // - they are separated by half a thickness in z
     Amg::Transform3D readoutPlaneTransform(Amg::Transform3D::Identity());
     Amg::Transform3D counterPlaneTransform(Amg::Transform3D::Identity());
     // readout and counter readout bounds, the bounds of the readout plane are like the active ones
-    Trk::SharedObject<const Trk::SurfaceBounds> readoutPlaneBounds = moduleBounds;
-    Trk::SharedObject<const Trk::SurfaceBounds> counterPlaneBounds(nullptr);
+    std::shared_ptr<const Trk::SurfaceBounds> readoutPlaneBounds = moduleBounds;
+    std::shared_ptr<const Trk::SurfaceBounds> counterPlaneBounds(nullptr);
     // the transform of the readout plane is always centric
     readoutPlaneTransform.translation()     = Amg::Vector3D(0.,0.,readoutDirection*halfThickness);
     // no lorentz angle and everything is straight-forward
@@ -120,29 +119,29 @@ void Trk::RectangularSegmentation::createSegmenationSurfaces(std::vector< std::s
         counterPlaneBounds = moduleBounds;
         counterPlaneTransform.translation()     = Amg::Vector3D(0.,0.,-readoutDirection*halfThickness);
     } else {
-        // lorentz reduced Bounds 
+        // lorentz reduced Bounds
         double lorentzReducedHalfX = m_activeBounds->halflengthX() - std::abs(lorentzPlaneShiftX);
-        Trk::SharedObject<const Trk::SurfaceBounds> lorentzReducedBounds(std::make_shared<Trk::RectangleBounds>(lorentzReducedHalfX,m_activeBounds->halflengthY()));
+        std::shared_ptr<const Trk::SurfaceBounds> lorentzReducedBounds(std::make_shared<Trk::RectangleBounds>(lorentzReducedHalfX,m_activeBounds->halflengthY()));
         counterPlaneBounds  = lorentzReducedBounds;
         // now we shift the counter plane in position - this depends on lorentz angle
         double counterPlaneShift = -readoutDirection*lorentzPlaneShiftX;
-        counterPlaneTransform.translation() = Amg::Vector3D(counterPlaneShift,0.,-readoutDirection*halfThickness); 
+        counterPlaneTransform.translation() = Amg::Vector3D(counterPlaneShift,0.,-readoutDirection*halfThickness);
     }
     // - build the readout & counter readout surfaces
     boundarySurfaces.push_back(std::make_shared<Trk::PlaneSurface>(readoutPlaneTransform,readoutPlaneBounds));
     boundarySurfaces.push_back(std::make_shared<Trk::PlaneSurface>(counterPlaneTransform,counterPlaneBounds));
-    
+
     // (B) - bin X and lorentz surfaces -----------------------------------------------------------
-    // easy stuff first, constant pitch size and 
+    // easy stuff first, constant pitch size and
     double pitchX             =  2.*m_activeBounds->halflengthX()/m_binsX;
 
     // now, let's create the SharedBounds of all surfaces marking x bins - choice fixes orientation of the matrix
-    Trk::SharedObject<const Trk::SurfaceBounds> xBinBounds(std::make_shared<Trk::RectangleBounds>(m_activeBounds->halflengthY(),halfThickness));
+    std::shared_ptr<const Trk::SurfaceBounds> xBinBounds(std::make_shared<Trk::RectangleBounds>(m_activeBounds->halflengthY(),halfThickness));
     // now, let's create the SharedBounds of all surfaces marking lorentz planes
     double lorentzPlaneHalfX  = std::abs(halfThickness/std::cos(lorentzAngle));
     // the bounds of the lorentz plane
-    Trk::SharedObject<const Trk::SurfaceBounds> lorentzPlaneBounds = (lorentzAngle==0.) ? xBinBounds :
-        Trk::SharedObject<const Trk::SurfaceBounds>(std::make_shared<Trk::RectangleBounds>(m_activeBounds->halflengthY(),lorentzPlaneHalfX));
+    std::shared_ptr<const Trk::SurfaceBounds> lorentzPlaneBounds = (lorentzAngle==0.) ? xBinBounds :
+        std::shared_ptr<const Trk::SurfaceBounds>(std::make_shared<Trk::RectangleBounds>(m_activeBounds->halflengthY(),lorentzPlaneHalfX));
 
     // now the rotation matrix for the xBins
     Amg::RotationMatrix3D xBinRotationMatrix;
@@ -150,8 +149,8 @@ void Trk::RectangularSegmentation::createSegmenationSurfaces(std::vector< std::s
     xBinRotationMatrix.col(1) = Amg::Vector3D::UnitZ();
     xBinRotationMatrix.col(2) = Amg::Vector3D::UnitX();
     // now the lorentz plane rotation should be the xBin rotation, rotated by the lorentz angle around y
-    Amg::RotationMatrix3D lorentzPlaneRotationMatrix =  (lorentzAngle !=0.) ? 
-        xBinRotationMatrix * Amg::AngleAxis3D(lorentzAngle, Amg::Vector3D::UnitX()) : xBinRotationMatrix; 
+    Amg::RotationMatrix3D lorentzPlaneRotationMatrix =  (lorentzAngle !=0.) ?
+        xBinRotationMatrix * Amg::AngleAxis3D(lorentzAngle, Amg::Vector3D::UnitX()) : xBinRotationMatrix;
 
     // reserve, it's always (number of bins-1) as the boundaries are within the boundarySurfaces
     segmentationSurfacesX.reserve(m_binsX);
@@ -162,34 +161,34 @@ void Trk::RectangularSegmentation::createSegmenationSurfaces(std::vector< std::s
            if (!ibinx || ibinx == m_binsX){
                // check if it a straight boundary or not: always straight for no lorentz angle, and either the first boundary or the last dependening on lorentz & readout
                bool boundaryStraight = (lorentzAngle == 0. || (!ibinx && readoutDirection*lorentzAngle > 0.) || (ibinx==m_binsX && readoutDirection*lorentzAngle < 0));
-               // set the low boundary parameters : position & rotation 
+               // set the low boundary parameters : position & rotation
                Amg::Vector3D boundaryXPosition = boundaryStraight  ? Amg::Vector3D(cPosX, 0.,0.) : Amg::Vector3D(cPosX-readoutDirection*lorentzPlaneShiftX, 0., 0.);
                const Amg::RotationMatrix3D& boundaryXRotation = boundaryStraight ? xBinRotationMatrix : lorentzPlaneRotationMatrix;
                // build the rotation from it
                Amg::Transform3D boundaryXTransform(Amg::getTransformFromRotTransl(boundaryXRotation, boundaryXPosition));
                // the correct bounds for this
-               Trk::SharedObject<const Trk::SurfaceBounds> boundaryXBounds = boundaryStraight ? xBinBounds : lorentzPlaneBounds;
-               // boundary surfaces 
-               boundarySurfaces.push_back(std::shared_ptr<const Trk::PlaneSurface>(new Trk::PlaneSurface(boundaryXTransform,boundaryXBounds)));
-           // (ii) this is the in between bins  --- ( 1 <= ibin < m_mbnsX ) 
+               std::shared_ptr<const Trk::SurfaceBounds> boundaryXBounds = boundaryStraight ? xBinBounds : lorentzPlaneBounds;
+               // boundary surfaces
+               boundarySurfaces.push_back(std::make_shared<const Trk::PlaneSurface>(boundaryXTransform,boundaryXBounds));
+           // (ii) this is the in between bins  --- ( 1 <= ibin < m_mbnsX )
            } else {
-               // shift by the lorentz angle 
+               // shift by the lorentz angle
                Amg::Vector3D lorentzPlanePosition(cPosX-readoutDirection*lorentzPlaneShiftX, 0., 0.);
                Amg::Transform3D lorentzPlaneTransform(Amg::getTransformFromRotTransl(lorentzPlaneRotationMatrix,lorentzPlanePosition));
-               // lorentz plane surfaces 
+               // lorentz plane surfaces
                segmentationSurfacesX.push_back(std::make_shared<Trk::PlaneSurface>(lorentzPlaneTransform,lorentzPlaneBounds));
            }
     }
-    
+
     // (C) - bin Y surfaces - everything is defined -----------------------------------------------------------
     // now the rotation matrix for the yBins - anticyclic
     Amg::RotationMatrix3D yBinRotationMatrix;
     yBinRotationMatrix.col(0) = Amg::Vector3D::UnitX();
     yBinRotationMatrix.col(1) = Amg::Vector3D::UnitZ();
     yBinRotationMatrix.col(2) = Amg::Vector3D(0.,-1.,0.);
-    // easy stuff first, constant pitch in Y 
+    // easy stuff first, constant pitch in Y
     // let's create the SharedBounds of all surfaces marking y bins
-    Trk::SharedObject<const Trk::SurfaceBounds> yBinBounds(std::make_shared<Trk::RectangleBounds>(m_activeBounds->halflengthX(),halfThickness));
+    std::shared_ptr<const Trk::SurfaceBounds> yBinBounds(std::make_shared<Trk::RectangleBounds>(m_activeBounds->halflengthX(),halfThickness));
     // reserve, it's always (number of bins-1) as the boundaries are within the boundarySurfaces
     segmentationSurfacesY.reserve(m_binsY);
     for (size_t ibiny = 0; ibiny <= m_binsY; ++ibiny){
@@ -203,11 +202,11 @@ void Trk::RectangularSegmentation::createSegmenationSurfaces(std::vector< std::s
             boundarySurfaces.push_back(std::make_shared<Trk::PlaneSurface>(binTransform,yBinBounds));
         else // these are the bin boundaries
             segmentationSurfacesY.push_back(std::make_shared<Trk::PlaneSurface>(binTransform,yBinBounds));
-    }  
+    }
 }
 
 
-const Amg::Vector2D Trk::RectangularSegmentation::cellPosition(const DigitizationCell& dCell) const 
+const Amg::Vector2D Trk::RectangularSegmentation::cellPosition(const DigitizationCell& dCell) const
 {
 
     // use the bin utility for this job
@@ -221,27 +220,27 @@ const Amg::Vector2D Trk::RectangularSegmentation::cellPosition(const Digitizatio
 const Trk::DigitizationStep Trk::RectangularSegmentation::digitizationStep(const Amg::Vector3D& startStep,
                                                                            const Amg::Vector3D& endStep,
                                                                            double halfThickness,
-                                                                           int readoutDirection, 
+                                                                           int readoutDirection,
                                                                            double lorentzAngle) const
-{   
+{
     Amg::Vector3D stepCenter = 0.5*(startStep+endStep);
-    // take the full drift length 
+    // take the full drift length
     // this is the absolute drift in z
     double driftInZ     = halfThickness-readoutDirection*stepCenter.z();
     // this is the absolute drift length
-    double driftLength  = driftInZ/cos(lorentzAngle); 
+    double driftLength  = driftInZ/cos(lorentzAngle);
     // project to parameter the readout surface
     double lorentzDeltaX = readoutDirection*driftInZ*tan(lorentzAngle);
-    // the projected center, it has the lorentz shift applied 
+    // the projected center, it has the lorentz shift applied
     Amg::Vector2D stepCenterProjected(stepCenter.x()+lorentzDeltaX,stepCenter.y());
     // the cell & its center
     Trk::DigitizationCell dCell = cell(stepCenterProjected);
     Amg::Vector2D cellCenter    = cellPosition(dCell);
     // we are ready to return what we have
-    return Trk::DigitizationStep((endStep-startStep).mag(),driftLength,dCell,startStep,endStep,stepCenterProjected,cellCenter);   
+    return Trk::DigitizationStep((endStep-startStep).mag(),driftLength,dCell,startStep,endStep,stepCenterProjected,cellCenter);
 }
 
 
 
-                                                    
+
 

@@ -11,10 +11,10 @@
 
 #include "TrkDetDescrUtils/BinUtility.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 
 // STL
 #include <vector>
+#include <memory>
 
 #include "CxxUtils/CachedUniquePtr.h"
 
@@ -42,7 +42,7 @@ public:
  ~BinnedArray1D() = default;
  /** ctors with arguments*/
  BinnedArray1D(
-     const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
+     const std::vector<std::pair<std::shared_ptr<T>, Amg::Vector3D>>& tclassvector,
      const BinUtility& bingen)
      : BinnedArray<T>(),
        m_array{},
@@ -51,7 +51,7 @@ public:
    initialize(tclassvector);
   }
   BinnedArray1D(
-    const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
+    const std::vector<std::pair<std::shared_ptr<T>, Amg::Vector3D>>& tclassvector,
     BinUtility&& bingen)
     : BinnedArray<T>()
     , m_array{}
@@ -154,10 +154,10 @@ private:
     }
   }
 
-  void initialize(const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector) {
+  void initialize(const std::vector<std::pair<std::shared_ptr<T>, Amg::Vector3D>>& tclassvector) {
     // prepare the binned Array
     size_t vecsize = tclassvector.size();
-    m_array = std::vector<SharedObject<T>>(vecsize);
+    m_array = std::vector<std::shared_ptr<T>>(vecsize);
     for (size_t ivec = 0; ivec < vecsize; ++ivec) {
       const Amg::Vector3D currentGlobal(((tclassvector[ivec]).second));
       if (m_binUtility.inside(currentGlobal)) {
@@ -169,7 +169,7 @@ private:
     }
   }
   //!< vector of pointers to the class T
-  std::vector<SharedObject<T>> m_array{};
+  std::vector<std::shared_ptr<T>> m_array{};
   //!< 1D vector of cached not owning pointers to class T
   CxxUtils::CachedUniquePtr<std::vector<T*>> m_arrayObjects{nullptr};
   //!< binUtility for retrieving and filling the Array

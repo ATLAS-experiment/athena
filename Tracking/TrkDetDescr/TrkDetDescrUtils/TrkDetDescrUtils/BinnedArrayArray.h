@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,13 +11,13 @@
 
 #include "TrkDetDescrUtils/BinUtility.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 // GaudiKernel
 #include "GaudiKernel/GaudiException.h"
 // Eigen
 #include "GeoPrimitives/GeoPrimitives.h"
 // STL
 #include <vector>
+#include <memory>
 
 class MsgStream;
 

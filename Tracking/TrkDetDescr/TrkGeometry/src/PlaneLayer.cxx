@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ Trk::PlaneLayer::PlaneLayer(Trk::PlaneSurface* plane,
 
 Trk::PlaneLayer::PlaneLayer(
     const Amg::Transform3D & transform,
-    const Trk::SharedObject<const Trk::SurfaceBounds>& tbounds,
+    const std::shared_ptr<const Trk::SurfaceBounds>& tbounds,
     const Trk::LayerMaterialProperties& laymatprop, double thickness,
     std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : PlaneSurface(transform, tbounds),

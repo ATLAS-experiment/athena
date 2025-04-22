@@ -11,7 +11,6 @@
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkDetDescrUtils/BinnedArray1D1D.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 //
 #include "TrkGeometry/AlignableTrackingVolume.h"
 #include "TrkGeometry/BinnedMaterial.h"

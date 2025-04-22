@@ -110,7 +110,6 @@
 //-----------------------------------------------------------------------------
 // TrkCompetingRioOnTrack
 //-----------------------------------------------------------------------------
-#include "TrkEventTPCnv/TrkCompetingRIOsOnTrack/CompetingRIOsOnTrack_p1.h"
 
 
 //-----------------------------------------------------------------------------
@@ -152,22 +151,22 @@ DECLARE_TPCNV_FACTORY(MVFVxContainerCnv_tlp1,
                       MVFVxContainer,
                       Trk::MVFVxContainer_tlp1,
                       Athena::TPCnvVers::Current)
-                      
+
 DECLARE_TPCNV_FACTORY(V0ContainerCnv_tlp1,
                       V0Container,
                       Trk::V0Container_tlp1,
                       Athena::TPCnvVers::Old)
-                      
+
 DECLARE_TPCNV_FACTORY(V0ContainerCnv_tlp2,
                       V0Container,
                       Trk::V0Container_tlp2,
                       Athena::TPCnvVers::Current)
-		      
+
 DECLARE_TPCNV_FACTORY(VxContainerCnv_tlp1,
                       VxContainer,
                       Trk::VxContainer_tlp1,
                           Athena::TPCnvVers::Old)
-                     
+
 DECLARE_TPCNV_FACTORY(VxContainerCnv_tlp2,
                       VxContainer,
                       Trk::VxContainer_tlp2,

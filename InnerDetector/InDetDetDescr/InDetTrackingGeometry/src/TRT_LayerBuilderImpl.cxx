@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackingGeometry/TRT_LayerBuilderImpl.h"
@@ -13,6 +13,7 @@
 #include "TrkDetDescrUtils/BinnedArrayArray.h"
 #include "TrkDetDescrUtils/BinnedArray1D.h"
 #include "TrkDetDescrUtils/BinnedArray2D.h"
+#include "TrkDetDescrUtils/SharedDoNoDelete.h"
 // GeoPrimitives
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 // InDetDD
@@ -217,7 +218,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
         Amg::Vector3D layerSectorPosition(0.,0.,0.);
 
         // the sector approaching surfaces
-        std::vector< std::pair< Trk::SharedObject<const Trk::ApproachSurfaces>, Amg::Vector3D > > layerApproachSurfaces;
+        std::vector< std::pair< std::shared_ptr<const Trk::ApproachSurfaces>, Amg::Vector3D > > layerApproachSurfaces;
 
         // layer sector arrays
         for (int phisec=0; phisec < nBarrelPhiSectors; phisec++){
@@ -262,7 +263,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
             aSurfaces->push_back(new Trk::PlaneSurface(Amg::Transform3D(Amg::getTransformFromRotTransl(elementRotation, outerCenter))));
 
             // now register it to for building the array
-            layerApproachSurfaces.emplace_back( Trk::SharedObject<const Trk::ApproachSurfaces>(aSurfaces),elementCenter);
+            layerApproachSurfaces.emplace_back( std::shared_ptr<const Trk::ApproachSurfaces>(aSurfaces),elementCenter);
             // screen output
             ATH_MSG_VERBOSE("---> Sector " << phisec << " - posneg - " << posneg << " - with central phi = " << elementSurface->center().phi() );
             // sector phi centers
@@ -289,7 +290,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
                  * now that SharedObject is a shared_ptr typedef do the same with empty deleter
                  */
                 // Something like
-                // Trk::SharedObject<Trk::Surface>  =
+                // std::shared_ptr<Trk::Surface>  =
                 // std::make_shared<Trk::Surface>(.....)) could be fine
                 //
                 // As things are now
@@ -300,7 +301,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
                 // 2) The const_cast here make the
                 // code non MT safe. For now we handle this by being careful
                 // on lifetimes and non-re-entrant TG construction.
-                Trk::SharedObject<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(currentStraw),
+                std::shared_ptr<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(currentStraw),
                                                               Trk::do_not_delete<Trk::Surface>);
                 strawsPerPhiSecLayer.emplace_back(sharedSurface, strawOrderPos);
                 // and record
@@ -600,7 +601,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
                   takeSmaller(zMin,zPos);
                   takeBigger(zMax,zPos);
                   // Something like
-                  // Trk::SharedObject<Trk::Surface>  =
+                  // std::shared_ptr<Trk::Surface>  =
                   // std::make_shared<Trk::Surface>(currentElement)) could be fine
                   //
                   // As things are now
@@ -611,7 +612,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
                   // 2) The const_cast here make the
                   // code non MT safe. For now we handle this by being careful
                   // on lifetimes and non-re-entrant TG construction.
-                  Trk::SharedObject<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(currentStraw),
+                  std::shared_ptr<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(currentStraw),
                                                                 [](Trk::Surface*) {});
                   strawPerEndcapLayer.emplace_back(sharedSurface, strawOrderPos);
                   ++numberOfStraws;

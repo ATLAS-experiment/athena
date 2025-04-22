@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -21,7 +21,7 @@ Trk::SubtractedCylinderSurface::SubtractedCylinderSurface()
 
 // copy constructor
 Trk::SubtractedCylinderSurface::SubtractedCylinderSurface(const SubtractedCylinderSurface& psf)
-   
+
 = default;
 
 // copy constructor with shift
@@ -37,7 +37,7 @@ Trk::SubtractedCylinderSurface::SubtractedCylinderSurface(const Trk::CylinderSur
                                                           AreaExcluder* vol,
                                                           bool shared)
   : Trk::CylinderSurface(ps)
-  , m_subtrVol(Trk::SharedObject<Trk::AreaExcluder>(vol))
+  , m_subtrVol(std::shared_ptr<Trk::AreaExcluder>(vol))
   , m_shared(shared)
 {}
 

@@ -95,7 +95,7 @@ class TestElement
   : public Trk::TrkDetElementBase
 {
 public:
-  TestElement (unsigned int val);
+  explicit TestElement (unsigned int val);
   virtual Identifier identify() const override final;
 
   virtual IdentifierHash identifyHash() const override final

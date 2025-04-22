@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@
 #define TRKSURFACES_CYLINDERSURFACE_H
 
 // Trk
-#include "TrkDetDescrUtils/SharedObject.h"
+#include <memory>
 #include "TrkEventPrimitives/LocalParameters.h"
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "TrkParametersBase/ParametersT.h"
@@ -287,7 +287,7 @@ protected: //!< data members
   friend class ::BoundSurfaceCnv_p2;
 
   //!< bounds (shared)
-  SharedObject<const CylinderBounds> m_bounds;
+  std::shared_ptr<const CylinderBounds> m_bounds;
   //!< The global reference point (== a point on the  surface)
   CxxUtils::CachedUniquePtr<Amg::Vector3D> m_referencePoint;
   //!< The rotational symmetry axis

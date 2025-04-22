@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,7 +10,6 @@
 #define TRKDETDESCRUTILS_BINNEDARRAY_H
 
 #include "TrkDetDescrUtils/BinUtility.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 // GaudiKernel
 #include "GaudiKernel/GaudiException.h"
 // Eigen
@@ -19,6 +18,7 @@
 // STL
 #include <span>
 #include <vector>
+#include <memory>
 
 class MsgStream;
 

@@ -34,7 +34,6 @@
 #include "TrkParticleBase/TrackParticleBase.h"
 #include "TrkEventUtils/TrkParametersComparisonFunction.h"
 #include "TrkDetDescrInterfaces/IDynamicLayerCreator.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkDetDescrUtils/GeometrySignature.h"
 #include "TrkMaterialOnTrack/EnergyLoss.h"
 #include "TrkMaterialOnTrack/ScatteringAngles.h"

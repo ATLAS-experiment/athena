@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,7 +11,7 @@
 
 //Trk
 #include "TrkDetDescrUtils/GeometryStatics.h"
-#include "TrkDetDescrUtils/SharedObject.h"
+#include <memory>
 #include "TrkDetDescrUtils/ObjectAccessor.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "AthenaKernel/CLASS_DEF.h"
@@ -75,7 +75,7 @@ namespace Trk {
       protected:
         std::unique_ptr<Amg::Transform3D>             m_transform;         //!< HepGeom::Transform3D
         CxxUtils::CachedUniquePtr<Amg::Vector3D>      m_center;            //!< center position of the surface
-        SharedObject<VolumeBounds>                    m_volumeBounds;      //!< the volumeBounds
+        std::shared_ptr<VolumeBounds>                    m_volumeBounds;      //!< the volumeBounds
     };
 
     inline const Amg::Transform3D& Volume::transform() const

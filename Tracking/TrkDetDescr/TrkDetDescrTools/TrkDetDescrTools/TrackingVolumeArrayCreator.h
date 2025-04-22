@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,10 +15,10 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 // Trk
 #include "TrkDetDescrInterfaces/ITrackingVolumeArrayCreator.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkGeometry/TrackingVolume.h"
 // STL
 #include <algorithm>
+#include <memory>
 
 namespace Trk {
 
@@ -28,10 +28,10 @@ namespace Trk {
     /** @class TrackingVolumeArrayCreator
 
       The TrackingVolumeArrayCreator is a simple Tool that helps to construct
-      binned arrays of TrackingVolumes for both, confinement in another volume 
+      binned arrays of TrackingVolumes for both, confinement in another volume
       and navigation issues.
 
-      @author Andreas.Salzburger@cern.ch   
+      @author Andreas.Salzburger@cern.ch
      */
 
     class TrackingVolumeArrayCreator : public AthAlgTool,
@@ -99,7 +99,7 @@ namespace Trk {
                                                       bool navigationtype=false) const override;
         std::unique_ptr<TrackingVolumeArray> trapezoidVolumesArrayNav(const std::vector<VolumePtr>& vols,
                                                                      Trk::BinUtility* binUtil) const override;
-                                                      
+
         /** TrackingVolumeArrayCreator interface method -
             create a doubleTrapezoid volume array - linked to detached tracking volumes */
         TrackingVolumeArray* doubleTrapezoidVolumesArrayNav(const std::vector< TrackingVolume* >& vols,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@
 #define TRKSURFACES_DISCSURFACE_H
 
 // Trk
-#include "TrkDetDescrUtils/SharedObject.h"
+#include <memory>
 #include "TrkEventPrimitives/LocalParameters.h"
 #include "TrkParametersBase/ParametersT.h"
 #include "TrkSurfaces/NoBounds.h"
@@ -282,7 +282,7 @@ protected: //!< data members
   template<class SURFACE, class BOUNDS_CNV>
   friend class ::BoundSurfaceCnv_p2;
   //!< bounds (shared)
-  SharedObject<const SurfaceBounds> m_bounds;
+  std::shared_ptr<const SurfaceBounds> m_bounds;
   //!< reference Point on the Surface
   CxxUtils::CachedUniquePtr<Amg::Vector3D> m_referencePoint;
   //!< static member for boundless approach

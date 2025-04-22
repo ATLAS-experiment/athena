@@ -130,7 +130,7 @@ Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, const Trk::Surf
 // construct module with shared boundaries
 Trk::PlaneSurface::PlaneSurface(
     const Amg::Transform3D & htrans,
-    const Trk::SharedObject<const Trk::SurfaceBounds>& tbounds)
+    const std::shared_ptr<const Trk::SurfaceBounds>& tbounds)
     : Trk::Surface(htrans), m_bounds(tbounds) {}
 
 bool

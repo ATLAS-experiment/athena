@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKINGGEOMETRY_SILAYERBUILDER_H
@@ -9,9 +9,9 @@
 #include "InDetTrackingGeometry/SiLayerBuilderImpl.h"
 // Trk
 #include "TrkDetDescrInterfaces/ILayerBuilder.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
 // STL
+#include <memory>
 #include <vector>
 
 namespace Trk {

@@ -11,13 +11,13 @@
 //
 #include "TrkDetDescrUtils/BinUtility.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "CxxUtils/CachedUniquePtr.h"
 //
 // STL
 #include <cassert>
 #include <vector>
 #include <utility>
+#include <memory>
 //
 class MsgStream;
 //
@@ -44,7 +44,7 @@ public:
 
  /**ctors */
  BinnedArray1D1D1D(
-     const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
+     const std::vector<std::pair<std::shared_ptr<T>, Amg::Vector3D>>& tclassvector,
      const BinUtility& binUtil1, const BinUtility& binUtil2,
      const std::vector<std::vector<BinUtility>>& binUtilVec)
      : BinnedArray<T>(),
@@ -56,7 +56,7 @@ public:
    initialize(tclassvector);
  }
  BinnedArray1D1D1D(
-     const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
+     const std::vector<std::pair<std::shared_ptr<T>, Amg::Vector3D>>& tclassvector,
      BinUtility&& binUtil1,
      BinUtility&& binUtil2,
      std::vector<std::vector<BinUtility>>&& binUtilVec)
@@ -183,14 +183,14 @@ private:
    }
  }
 
-  void initialize(const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector) {
+  void initialize(const std::vector<std::pair<std::shared_ptr<T>, Amg::Vector3D>>& tclassvector) {
     int v1Size = m_binUtil1.bins();
     int v2Size = m_binUtil2.bins();
-    m_array = std::vector<std::vector<std::vector<SharedObject<T>>>>(v1Size);
+    m_array = std::vector<std::vector<std::vector<std::shared_ptr<T>>>>(v1Size);
     for (int i = 0; i < v1Size; ++i) {
-      m_array[i] = std::vector<std::vector<SharedObject<T>>>(v2Size);
+      m_array[i] = std::vector<std::vector<std::shared_ptr<T>>>(v2Size);
       for (int j = 0; j < v2Size; ++j) {
-        m_array[i][j] = std::vector<SharedObject<T>>(m_binUtilArray[i][j].bins());
+        m_array[i][j] = std::vector<std::shared_ptr<T>>(m_binUtilArray[i][j].bins());
       }
     }
     // fill the Volume vector into the array
@@ -201,8 +201,8 @@ private:
         int bin1 = m_binUtil1.bin(currentGlobal);
         int bin2 = m_binUtil2.bin(currentGlobal);
         int bin3 = m_binUtilArray[bin1][bin2].bin(currentGlobal);
-        std::vector<std::vector<SharedObject<T>>>& currArr = m_array[bin1];
-        std::vector<SharedObject<T>>& curVec = currArr[bin2];
+        std::vector<std::vector<std::shared_ptr<T>>>& currArr = m_array[bin1];
+        std::vector<std::shared_ptr<T>>& curVec = currArr[bin2];
         curVec[bin3] = (tclassvector[ivec]).first;
       } else
         throw GaudiException("BinnedArray1D1D1D", "Object outside bounds",
@@ -211,7 +211,7 @@ private:
   }
 
   //!< vector of pointers to the class T
-  std::vector<std::vector<std::vector<SharedObject<T>>>> m_array{};
+  std::vector<std::vector<std::vector<std::shared_ptr<T>>>> m_array{};
   //!<  1D cache of non owning pointers to class T
   CxxUtils::CachedUniquePtr<std::vector<T*>> m_arrayObjects{nullptr};
   BinUtility m_binUtil1{}; //!< binUtility for retrieving and filling the Array

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -134,18 +134,18 @@ public:
       --- Necessary as friendship cannot be inherited: your father's friend
      isn't necessary yours ---
    */
-  Trk::TrackingVolume* glueTrackingVolumeArrays(TrackingVolume& firstVol, 
-                                                BoundarySurfaceFace firstFace, 
-                                                TrackingVolume& secondVol, 
-                                                BoundarySurfaceFace secondFace, 
+  Trk::TrackingVolume* glueTrackingVolumeArrays(TrackingVolume& firstVol,
+                                                BoundarySurfaceFace firstFace,
+                                                TrackingVolume& secondVol,
+                                                BoundarySurfaceFace secondFace,
                                                 std::string name) const override;
 
-  std::unique_ptr<Trk::TrackingVolume> glueTrackingVolumeArrays(std::shared_ptr<TrackingVolume> firstVol, 
-                                                                BoundarySurfaceFace firstFace, 
-                                                                std::shared_ptr<TrackingVolume> secondVol, 
-                                                                BoundarySurfaceFace secondFace, 
+  std::unique_ptr<Trk::TrackingVolume> glueTrackingVolumeArrays(std::shared_ptr<TrackingVolume> firstVol,
+                                                                BoundarySurfaceFace firstFace,
+                                                                std::shared_ptr<TrackingVolume> secondVol,
+                                                                BoundarySurfaceFace secondFace,
                                                                 const std::string& name) const override;
-  
+
   /** protected method to set inside Volume of a BoundarySurface:
       input:
       - the volume that holds the BoundarySurface
@@ -176,7 +176,7 @@ public:
   void setInsideTrackingVolumeArray(
     TrackingVolume& tvol,
     BoundarySurfaceFace face,
-    SharedObject<BinnedArray<TrackingVolume>> insidevolarray) const override;
+    std::shared_ptr<BinnedArray<TrackingVolume>> insidevolarray) const override;
 
   /** protected method to set outside Volume of a BoundarySurface:
       input:
@@ -204,12 +204,12 @@ public:
   void setOutsideTrackingVolumeArray(
     TrackingVolume& tvol,
     BoundarySurfaceFace face,
-    SharedObject<BinnedArray<TrackingVolume>> outsidevolarray) const override;
+    std::shared_ptr<BinnedArray<TrackingVolume>> outsidevolarray) const override;
 
 private:
    //!< helper method to construct barrel material
    std::unique_ptr<Trk::LayerMaterialProperties> layerMaterialProperties(const Trk::Surface& sf) const;
-  
+
   /** Private method - it takes the full vector of given volumes to create the
      supervolume,
                      - it compares the volumes with the ones scheduled to build

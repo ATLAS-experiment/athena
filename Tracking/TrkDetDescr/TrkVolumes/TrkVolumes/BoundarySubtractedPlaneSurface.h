@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -60,8 +60,8 @@ class BoundarySubtractedPlaneSurface final
       : BoundarySurface<Tvol>(inside, outside), SubtractedPlaneSurface(psf) {}
 
   /** Constructor for a Boundary with two VolumeArrays attached to it*/
-  BoundarySubtractedPlaneSurface(SharedObject<VolumeArray> insideArray,
-                                 SharedObject<VolumeArray> outsideArray,
+  BoundarySubtractedPlaneSurface(std::shared_ptr<VolumeArray> insideArray,
+                                 std::shared_ptr<VolumeArray> outsideArray,
                                  const SubtractedPlaneSurface& psf)
       : BoundarySurface<Tvol>(insideArray, outsideArray),
         SubtractedPlaneSurface(psf) {}

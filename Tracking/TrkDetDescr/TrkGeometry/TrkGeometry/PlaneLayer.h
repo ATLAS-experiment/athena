@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -57,7 +57,7 @@ public:
      components and MaterialProperties
      - shared bounds */
   PlaneLayer(const Amg::Transform3D & transform,
-             const Trk::SharedObject<const Trk::SurfaceBounds>& tbounds,
+             const std::shared_ptr<const Trk::SurfaceBounds>& tbounds,
              const Trk::LayerMaterialProperties& laymatprop,
              double thickness = 0., std::unique_ptr<Trk::OverlapDescriptor> olap = nullptr,
              int laytyp = int(Trk::active));

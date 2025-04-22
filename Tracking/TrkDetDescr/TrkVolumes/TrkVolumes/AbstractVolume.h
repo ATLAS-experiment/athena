@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@
 #define TRKVOLUMES_ABSTRACTVOLUME_H
 
 // Trk
-#include "TrkDetDescrUtils/SharedObject.h"
+#include <memory>
 #include "TrkVolumes/BoundarySurface.h"
 #include "TrkVolumes/Volume.h"
 // STD
@@ -70,14 +70,14 @@ class AbstractVolume : public Volume {
   AbstractVolume* clone() const;
 
   /** Method to return the BoundarySurfaces */
-  const std::vector<SharedObject<const BoundarySurface<AbstractVolume> > >&
+  const std::vector<std::shared_ptr<const BoundarySurface<AbstractVolume> > >&
   boundarySurfaces() const;
 
  private:
   /**Private method to create BoundarySurfaces */
   void createBoundarySurfaces();
 
-  std::vector<SharedObject<const BoundarySurface<AbstractVolume> > >*
+  std::vector<std::shared_ptr<const BoundarySurface<AbstractVolume> > >*
       m_boundarySurfaces;  //!< boundary Surfaces
 };
 
