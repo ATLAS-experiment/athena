@@ -86,8 +86,9 @@ StatusCode PanTau::Tool_TauConstituentSelector::SelectTauConstituents(const std:
 
     // check if constituent is charged:
     if (curConstituent->isOfType(PanTau::TauConstituent::t_Charged)) {
-      passesSelection = passesSelection_ChargedConstituent(curConstituent);
-            
+      // we want to use all tracks
+      passesSelection = true;
+
       // check if constituent is neutral, assign correctly pi0neut and neut flags:
     } else if (curConstituent->isOfType(PanTau::TauConstituent::t_Neutral)) {
       passesSelection = passesSelection_NeutralConstituent(curConstituent);
@@ -99,7 +100,8 @@ StatusCode PanTau::Tool_TauConstituentSelector::SelectTauConstituents(const std:
       }            
       // apply further selection to constituent in isolation cone:
     } else if (curConstituent->isOfType(PanTau::TauConstituent::t_OutChrg)) {
-      passesSelection = passesSelection_OutChrgConstituent(curConstituent);
+      // we want to use all tracks
+      passesSelection = true;
             
     } else if (curConstituent->isOfType(PanTau::TauConstituent::t_OutNeut)) {
       passesSelection = passesSelection_OutNeutConstituent(curConstituent);
@@ -143,23 +145,10 @@ bool PanTau::Tool_TauConstituentSelector::passesSelection_Pi0NeutConstituent(Pan
   return true;
 }
 
-
-bool PanTau::Tool_TauConstituentSelector::passesSelection_ChargedConstituent(PanTau::TauConstituent* /*tauConstituent*/) const {
-  // we want to use all tracks
-  return true;
-}
-
-
 bool PanTau::Tool_TauConstituentSelector::passesSelection_OutNeutConstituent(TauConstituent* TauConstituent) const {
   TLorentzVector tlv_Constituent = TauConstituent->p4();
    
   return tlv_Constituent.Et() >= getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_OutNeut);
 
-}
-
-
-bool PanTau::Tool_TauConstituentSelector::passesSelection_OutChrgConstituent(TauConstituent* /*TauConstituent*/) const {
-  // we want to use all tracks
-  return true;
 }
 

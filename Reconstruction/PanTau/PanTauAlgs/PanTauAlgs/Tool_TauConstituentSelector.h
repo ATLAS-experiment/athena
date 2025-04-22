@@ -39,9 +39,7 @@ namespace PanTau {
         
     virtual bool    passesSelection_NeutralConstituent(TauConstituent* tauConstituent) const;
     virtual bool    passesSelection_Pi0NeutConstituent(TauConstituent* tauConstituent) const;
-    virtual bool    passesSelection_ChargedConstituent(TauConstituent* tauConstituent) const;
     virtual bool    passesSelection_OutNeutConstituent(TauConstituent* TauConstituent) const;
-    virtual bool    passesSelection_OutChrgConstituent(TauConstituent* TauConstituent) const;
         
     virtual double  getEtCut(double eta, PanTau::TauConstituent::Type constituentType) const;
         
