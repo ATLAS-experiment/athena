@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PYTHIA8_CHECK_FOR_FINAL_PARTONS_H
@@ -10,20 +10,19 @@
 
 #include "Pythia8/Pythia.h"
 
-class CheckForFinalPartons: public AthAlgTool, virtual public IPythia8Custom{
+class CheckForFinalPartons: public extends<AthAlgTool, IPythia8Custom> {
   
   public:
-  
-  CheckForFinalPartons(const std::string &type, const std::string &name, const IInterface *parent);
-  
+  using base_class::base_class;
+
   StatusCode ModifyPythiaEvent(Pythia8::Pythia &pythia) const override;
   
   private:
   
   bool acceptEvent(Pythia8::Event &event) const;
   
-  int m_maxFailures;
-  mutable int m_nFailures;
+  Gaudi::Property<int> m_maxFailures{this, "MaxFailures", 5};
+  mutable int m_nFailures{0};
   
 };
 
