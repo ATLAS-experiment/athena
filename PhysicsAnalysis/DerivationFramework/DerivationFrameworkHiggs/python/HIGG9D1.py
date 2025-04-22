@@ -216,7 +216,7 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     HIGG9D1_tauTrks = '(TauJets.nTracks + TauJets.nTracksIsolation >= 1 && TauJets.nTracks + TauJets.nTracksIsolation <= 8)'
     HIGG9D1_tauLead = '(TauJets.pt > 23.0*GeV || TauJets.ptFinalCalib > 23.0*GeV)'
     HIGG9D1_tauSubl = '(TauJets.pt > 18.0*GeV || TauJets.ptFinalCalib > 18.0*GeV)'
-    HIGG9D1_tauId   = 'TauJets.DFTauLoose'
+    HIGG9D1_tauId   = 'TauJets.DFTauRNNLoose'
     HIGG9D1_tauReq0 = 'count( '+HIGG9D1_tauSubl+' && '+HIGG9D1_tauTrks+' ) >= 2'
     HIGG9D1_tauReq1 = 'count( '+HIGG9D1_tauSubl+' && '+HIGG9D1_tauTrks+' && '+HIGG9D1_tauId+' ) >= 1'
     HIGG9D1_tauReq2 = 'count( '+HIGG9D1_tauLead+' && '+HIGG9D1_tauTrks+' ) >= 1'
