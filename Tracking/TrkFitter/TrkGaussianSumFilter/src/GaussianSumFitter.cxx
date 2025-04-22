@@ -1,5 +1,5 @@
 /*§
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -76,11 +76,9 @@ GSFTsos smootherHelper(
 
 {
   if (combineToSingle) {
-    auto combinedLastState = Trk::MultiComponentStateCombiner::combineToSingle(
-        updatedState, useMode);
+    auto combinedLastState = Trk::MultiComponentStateCombiner::combineToSingle(updatedState, useMode);
     if (combinedLastState) {
-      return {fitQuality, std::move(measurement), std::move(combinedLastState),
-              std::move(updatedState)};
+      return {fitQuality, std::move(measurement), std::move(combinedLastState),std::move(updatedState)};
     }
   }
   return {fitQuality, std::move(measurement), nullptr, std::move(updatedState)};
@@ -949,9 +947,9 @@ Trk::GaussianSumFitter::smootherFit(
       return {};
     }
     // Handle the case where Original measurement was flagged as an outlier
+    // and not used
     if (!trackStateOnSurface.typeFlags.test(TrackStateOnSurface::Measurement)) {
-      std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> type(
-        0);
+      std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> type(0);
       type.set(TrackStateOnSurface::Outlier);
       smoothedTrajectory.emplace_back(
           FitQualityOnSurface(1, 1),
@@ -963,11 +961,9 @@ Trk::GaussianSumFitter::smootherFit(
       continue;
     }
     // Update with the measurement
-    updatedState = Trk::GsfMeasurementUpdator::update(
-      std::move(extrapolatedState), *measurement, fitQuality);
+    updatedState = Trk::GsfMeasurementUpdator::update(std::move(extrapolatedState), *measurement, fitQuality);
     if (updatedState.empty()) {
-      ATH_MSG_WARNING(
-        "Could not update the multi-component state... rejecting track!");
+      ATH_MSG_WARNING("Could not update the multi-component state");
       return {};
     }
     // last in reverse (first in normal order) is special as we collapse to single track Parameters
@@ -976,41 +972,33 @@ Trk::GaussianSumFitter::smootherFit(
       // Optional combine smoother state with fitter state
       // e.g combine the current tsos (from the forward) with
       // the updated from the smoother
-      const Trk::MultiComponentState& forwardsMultiState =
-          trackStateOnSurface.multiComponentState;
-      Trk::MultiComponentState combinedfitterState =
-          Trk::MultiComponentStateCombiner::combineWithSmoother(
-              forwardsMultiState, updatedState, m_maximumNumberOfComponents);
+      const Trk::MultiComponentState& forwardsMultiState = trackStateOnSurface.multiComponentState;
+      Trk::MultiComponentState combinedfitterState = Trk::MultiComponentStateCombiner::combineWithSmoother(
+        forwardsMultiState, updatedState, m_maximumNumberOfComponents);
       //
       if (combinedfitterState.empty()) {
         ATH_MSG_WARNING("Could not combine state from forward fit with "
                         "smoother state");
         return {};
       }
-      auto combinedFitQuality = Trk::GsfMeasurementUpdator::fitQuality(
-        combinedfitterState, *measurement);
-      smoothedTrajectory.emplace_back(
-          smootherHelper(std::move(combinedfitterState), std::move(measurement),
-                         combinedFitQuality, islast, m_useMode));
+      auto combinedFitQuality = Trk::GsfMeasurementUpdator::fitQuality(combinedfitterState, *measurement);
+      smoothedTrajectory.emplace_back(smootherHelper(std::move(combinedfitterState), std::move(measurement),
+                                                     combinedFitQuality, islast, m_useMode));
     } else {
       // If combination with forwards state is not done
-      smoothedTrajectory.emplace_back(
-          smootherHelper(std::move(updatedState), std::move(measurement),
-                         fitQuality, islast, m_useMode));
+      smoothedTrajectory.emplace_back(smootherHelper(std::move(updatedState), std::move(measurement),
+                                                     fitQuality, islast, m_useMode));
     }
-    //
-    // For the next iteration start from last added
-    loopUpdatedState = &(smoothedTrajectory.back().multiComponentState);
     // Handle adding measurement from calo if it is present
     if (ccot && trackStateOnSurfaceItr == secondLastTrackStateOnSurface) {
-      Trk::MultiComponentState ccotState =
-        addCCOT(ctx, ccot, smoothedTrajectory);
-      if (!ccotState.empty()) {
-        (*loopUpdatedState) = std::move(ccotState);
+      if (!addCCOT(ctx, ccot, smoothedTrajectory)) {
+        ATH_MSG_WARNING("Could not add Calo Cluster On Track Measurement");
+        return {};
       }
     }
+    // For the next iteration start from last added
+    loopUpdatedState = &(smoothedTrajectory.back().multiComponentState);
   } // End for loop over all components
-
   return smoothedTrajectory;
 }
 
@@ -1018,7 +1006,7 @@ Trk::GaussianSumFitter::smootherFit(
  * Account for additional measurement from
  * the calorimeter
  */
-Trk::MultiComponentState
+bool
 Trk::GaussianSumFitter::addCCOT(
   const EventContext& ctx,
   const Trk::CaloCluster_OnTrack* ccot,
@@ -1026,82 +1014,70 @@ Trk::GaussianSumFitter::addCCOT(
 {
   const GSFTsos& currentMultiStateOS = smoothedTrajectory.back();
   if (!ccot) {
-    return {};
+    return false;
   }
   const auto& currentMultiComponentState = currentMultiStateOS.multiComponentState;
   const Trk::MeasurementBase* measurement = currentMultiStateOS.measurementOnTrack.get();
-  const Trk::Surface* currentSurface(nullptr);
-  if (measurement) {
-    currentSurface = &(measurement->associatedSurface());
+  if (!measurement) {
+     return false;
   }
-  Trk::MultiComponentState extrapolatedState{};
+  const Trk::Surface& currentSurface = measurement->associatedSurface();
+
+  //Create a ccot that we will own. So we use it to build our own TSOS
+  auto ownCCOT = ccot->uniqueClone();
   // Extrapolate to the Calo to get prediction
-  if (currentSurface) {
-    extrapolatedState =
-      m_extrapolator->extrapolateDirectly(ctx,
-                                          currentMultiComponentState,
-                                          ccot->associatedSurface(),
-                                          Trk::alongMomentum,
-                                          false,
-                                          Trk::nonInteracting);
-  }
-  if (extrapolatedState.empty()) {
-    return {};
+  Trk::MultiComponentState extrapolatedToCaloState = m_extrapolator->extrapolateDirectly(
+    ctx, currentMultiComponentState, ownCCOT->associatedSurface(),
+    Trk::alongMomentum, false, Trk::nonInteracting);
+
+  if (extrapolatedToCaloState.empty()) {
+    return false;
   }
   // Update newly extrapolated state with measurement
   Trk::FitQualityOnSurface fitQuality;
-  Trk::MultiComponentState updatedState = Trk::GsfMeasurementUpdator::update(
-    std::move(extrapolatedState), *ccot, fitQuality);
-  if (updatedState.empty()) {
-    return {};
+  Trk::MultiComponentState updatedStateAtCalo =
+      Trk::GsfMeasurementUpdator::update(std::move(extrapolatedToCaloState),
+                                         *ownCCOT, fitQuality);
+  if (updatedStateAtCalo.empty()) {
+    return false;
   }
 
-  // Extrapolate back to the surface nearest the origin
-  extrapolatedState = m_extrapolator->extrapolateDirectly(ctx,
-                                                          updatedState,
-                                                          *currentSurface,
-                                                          Trk::oppositeMomentum,
-                                                          false,
-                                                          Trk::nonInteracting);
-  if (extrapolatedState.empty()) {
-    return {};
+  // Extrapolate back to the surface near the origin
+  auto improvedState = m_extrapolator->extrapolateDirectly(
+      ctx, updatedStateAtCalo, currentSurface, Trk::oppositeMomentum,
+      false, Trk::nonInteracting);
+
+  if (improvedState.empty()) {
+    return false;
   }
+ // Combine the improved state after extrapolating back from the calo
+ // and find the mode of the distribution
+  std::unique_ptr<Trk::TrackParameters> combinedState =
+    MultiComponentStateCombiner::combineToSingle(improvedState, m_useMode);
+  auto combinedFitQuality = Trk::GsfMeasurementUpdator::fitQuality(improvedState, *ownCCOT);
 
-  // Build TSOS with CCOT at the surface of calo
-  // updated state not used after this point
-  smoothedTrajectory.emplace_back(
-      fitQuality,
-      std::unique_ptr<Trk::CaloCluster_OnTrack>(ccot->clone()),
-      nullptr,
-      std::move(updatedState));
-
-  // Now build a dummy measurement ....  we dont want to a double count the
-  // measurement but we need to extrapolate back to origin to allow for the
-  // perigee parameters to be estimated.
-  // Note this only important if the track is
-  // refit otherwise it has no influence.
+  // Now build a dummy measurement for the improved estimation
   AmgSymMatrix(5) covMatrix;
   covMatrix.setZero();
   covMatrix(0, 0) = 1e6;
-
   Trk::DefinedParameter locX(0, Trk::locX);
   Trk::LocalParameters locpars(locX);
-
   auto pseudoMeasurement = std::make_unique<Trk::PseudoMeasurementOnTrack>(
-    std::move(locpars), std::move(covMatrix), *currentSurface);
+    std::move(locpars), std::move(covMatrix), currentSurface);
 
-  //  Combine the state  and find the mode of the distribution
-  std::unique_ptr<Trk::TrackParameters> combinedState =
-    MultiComponentStateCombiner::combineToSingle(extrapolatedState, m_useMode);
-  auto combinedFitQuality =
-    Trk::GsfMeasurementUpdator::fitQuality(extrapolatedState, *ccot);
+  // Build TSOS at the surface of calo
+  smoothedTrajectory.emplace_back(
+      fitQuality,
+      std::move(ownCCOT),
+      nullptr,
+      std::move(updatedStateAtCalo));
 
-  // Build a TSOS using the dummy measurement and combined state
+  // Build a TSOS using the dummy measurement and and the final combined state
   smoothedTrajectory.emplace_back(
       combinedFitQuality,
       std::move(pseudoMeasurement),
       std::move(combinedState),
-      MultiComponentStateHelpers::clone(extrapolatedState));
+      std::move(improvedState));
 
-  return extrapolatedState;
+  return true;
 }

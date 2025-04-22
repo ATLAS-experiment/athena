@@ -159,9 +159,9 @@ private:
      const CaloCluster_OnTrack* ccot = nullptr) const;
 
  /** Methof to add the CaloCluster onto the track */
- MultiComponentState addCCOT(const EventContext& ctx,
-           const Trk::CaloCluster_OnTrack* ccot,
-           GSFTrajectory& smoothedTrajectory) const;
+ bool  addCCOT(const EventContext& ctx,
+               const Trk::CaloCluster_OnTrack* ccot,
+               GSFTrajectory& smoothedTrajectory) const;
 
 private:
  ToolHandle<IMultiStateExtrapolator> m_extrapolator{
