@@ -43,6 +43,7 @@ atlas_add_component(EFTrackingFPGAPipeline
                                    InDetReadoutGeometry
                                    LibXRT 
                                    LibXOCL
+                                   FPGATrackSimObjectsLib
                                    EFTrackingFPGAUtilityLib)
 
 atlas_add_dictionary(
