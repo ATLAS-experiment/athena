@@ -283,6 +283,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
         if (inputTensorValues.size() != planeMap->getNLogiLayers()*3) {
           inputTensorValues.resize(planeMap->getNLogiLayers()*3);
         }
+        inputTensorValues.resize(15); // Retain only the first 15 values for consistency
       }
 
       std::vector<float> NNoutput = m_fakeNN_1st.runONNXInference(inputTensorValues);
@@ -478,6 +479,15 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
 
       if (inputTensorValues.size() != planeMap->getNLogiLayers()*3) {
         inputTensorValues.resize(planeMap->getNLogiLayers()*3);
+      }
+
+      if (!m_doGNNTracking) {
+        if (inputTensorValues.size() < 27) {
+          inputTensorValues.resize(27, 0.0f); // Resize to 27 and fill with 0.0f
+        }
+        else if (inputTensorValues.size() > 27) {
+          inputTensorValues.resize(27); // Resize to 27 and keep the first 27 elements
+        }
       }
 
       std::vector<float> NNoutput = m_fakeNN_2nd.runONNXInference(inputTensorValues);
