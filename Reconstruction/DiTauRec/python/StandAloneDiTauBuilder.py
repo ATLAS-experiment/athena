@@ -1,8 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
-
 
 def DiTauOutputCfg(flags):
 
@@ -56,12 +54,6 @@ if __name__=="__main__":
 
     cfg=MainServicesCfg(flags)
     cfg.merge(PoolReadCfg(flags))
-
-    # this delcares to the scheduler that EventInfo object comes from the input
-    loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
-                  ( 'AthenaAttributeList' , 'StoreGateSvc+Input' ),
-                  ( 'CaloCellContainer' , 'StoreGateSvc+AllCalo' )]
-    cfg.addEventAlgo(CompFactory.SGInputLoader(Load=loadFromSG), sequenceName="AthAlgSeq")
 
     cfg.merge(DiTauReconstructionCfg(flags))
 
