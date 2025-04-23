@@ -142,9 +142,8 @@ StatusCode LArHVCorrToSCHVCorr::stop()
     }
     if(wsum>0.) hvcorr /= wsum;
     nFilledIds += 1;
-    // Hack for excessive corr. in EMBC
-    if(hvcorr >=1.6 && calosccellID->is_em_barrel(scId) && calosccellID->pos_neg(scId)==-1) {
-    //if(hvcorr >=2.0 ) {
+    // Hack for excessive corr. in EM
+    if(hvcorr >=1.6) {
        ATH_MSG_INFO("Set manually HVCorr to 1. for SC "<< scId.get_identifier32().get_compact()<<" "<<calosccellID->cell_name(scId));
        ATH_MSG_INFO( calosccellID->is_em_barrel(scId) << " " << calosccellID->pos_neg(scId));
        hvcorr=1.;

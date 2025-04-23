@@ -28,6 +28,11 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
     LArPhysOFCAlg.UseDelta = flags.LArCalib.OFC.useDelta
     LArPhysOFCAlg.KeyOFC   = "LArOFC_"+postfix
     LArPhysOFCAlg.KeyShape = "LArShape_"+postfix
+    LArPhysOFCAlg.ComputeOFCPed  = flags.LArCalib.OFC.usePed
+    #FIXME: we have to undertstand why this is needed:
+    if flags.LArCalib.isSC and flags.LArCalib.OFC.usePed:
+       LArPhysOFCAlg.ErrAmplitude = 0.1 
+       LArPhysOFCAlg.ErrTime = 1.5
     
     if flags.LArCalib.OFC.Nsamples==4 and not flags.LArCalib.isSC:
         LArPhysOFCAlg.ReadDSPConfig   = True

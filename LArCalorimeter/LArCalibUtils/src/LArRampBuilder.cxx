@@ -630,7 +630,7 @@ StatusCode LArRampBuilder::stop()
 	ramppoint.ADC        = adcpeak;
 	ramppoint.DAC        = dac_it->first; 
 
-        if(m_ishec && m_onlineHelper->isHECchannel(chid)) {
+        if( !m_isSC && m_ishec && m_onlineHelper->isHECchannel(chid)) {
            if(rinj) {
               const float rinjval = rinj->Rinj(chid);
               if(rinjval < 4) ramppoint.DAC /= 2;
