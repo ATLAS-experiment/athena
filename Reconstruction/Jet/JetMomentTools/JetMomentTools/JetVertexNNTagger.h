@@ -104,13 +104,13 @@ namespace JetPileupTag {
 
 
           ClassicHandleHolder(
-              const SG::ReadDecorHandleKey<xAOD::JetContainer>& m_jvfCorrKey,
-              const SG::ReadDecorHandleKey<xAOD::JetContainer>& m_sumPtTrkKey,
-              const SG::WriteDecorHandleKey<xAOD::JetContainer>& m_rptKey
+              const SG::ReadDecorHandleKey<xAOD::JetContainer>& jvfCorrKey,
+              const SG::ReadDecorHandleKey<xAOD::JetContainer>& sumPtTrkKey,
+              const SG::WriteDecorHandleKey<xAOD::JetContainer>& rptKey
           ) :
-              jvfCorrHandle(m_jvfCorrKey),
-              sumPtTrkHandle(m_sumPtTrkKey),
-              rptHandle(m_rptKey)
+              jvfCorrHandle(jvfCorrKey),
+              sumPtTrkHandle(sumPtTrkKey),
+              rptHandle(rptKey)
           {}
           
           void decorate(const xAOD::Jet& jet, float rpt) {
@@ -134,25 +134,25 @@ namespace JetPileupTag {
 
           // Constructor should take ReadDecorHandleKey and WriteDecorHandleKey
           TrkAugHandleHolder(
-              const SG::ReadDecorHandleKey<xAOD::JetContainer>& m_trkWidthKey,
-              const SG::ReadDecorHandleKey<xAOD::JetContainer>& m_sumPtTrkKey,
-              const SG::ReadDecorHandleKey<xAOD::JetContainer>& m_numTrkKey,
-              const SG::WriteDecorHandleKey<xAOD::JetContainer>& m_DtrkWidthKey,
-              const SG::WriteDecorHandleKey<xAOD::JetContainer>& m_DnumTrkKey,
-              const SG::WriteDecorHandleKey<xAOD::JetContainer>& m_DrptPerVertexKey,
-              const SG::WriteDecorHandleKey<xAOD::JetContainer>& m_rptPerVertexKey,
-              const SG::WriteDecorHandleKey<xAOD::JetContainer>& m_TrkWidthSortedKey,
-              const SG::WriteDecorHandleKey<xAOD::JetContainer>& m_NumTrkSortedKey
+              const SG::ReadDecorHandleKey<xAOD::JetContainer>& trkWidthKey,
+              const SG::ReadDecorHandleKey<xAOD::JetContainer>& sumPtTrkKey,
+              const SG::ReadDecorHandleKey<xAOD::JetContainer>& numTrkKey,
+              const SG::WriteDecorHandleKey<xAOD::JetContainer>& DtrkWidthKey,
+              const SG::WriteDecorHandleKey<xAOD::JetContainer>& DnumTrkKey,
+              const SG::WriteDecorHandleKey<xAOD::JetContainer>& DrptPerVertexKey,
+              const SG::WriteDecorHandleKey<xAOD::JetContainer>& rptPerVertexKey,
+              const SG::WriteDecorHandleKey<xAOD::JetContainer>& TrkWidthSortedKey,
+              const SG::WriteDecorHandleKey<xAOD::JetContainer>& NumTrkSortedKey
           ) :
-              sumPtTrkHandle(m_sumPtTrkKey),  
-              trkWidthHandle(m_trkWidthKey),  
-              numTrkHandle(m_numTrkKey),       
-              DtrkWidthHandle(m_DtrkWidthKey), 
-              DnumTrkHandle(m_DnumTrkKey),     
-              DrptPerVertexHandle(m_DrptPerVertexKey),  
-              rptPerVertexHandle(m_rptPerVertexKey),    
-              trkWidthSortedHandle(m_TrkWidthSortedKey), 
-              numTrkSortedHandle(m_NumTrkSortedKey)      
+              sumPtTrkHandle(sumPtTrkKey),
+              trkWidthHandle(trkWidthKey),
+              numTrkHandle(numTrkKey),
+              DtrkWidthHandle(DtrkWidthKey),
+              DnumTrkHandle(DnumTrkKey),
+              DrptPerVertexHandle(DrptPerVertexKey),
+              rptPerVertexHandle(rptPerVertexKey),
+              trkWidthSortedHandle(TrkWidthSortedKey),
+              numTrkSortedHandle(NumTrkSortedKey)
           {}
 
             TrackMomentStruct getTrackMoments(const xAOD::Jet& jet) {
