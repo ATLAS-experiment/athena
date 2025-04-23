@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TextFileDBReader.h"
@@ -53,10 +53,8 @@ TextFileDBReader::readFile(const std::string & readFile)
     if (key.empty()) continue;
     
     if (key == "Table") {
-      std::string value;
-      istr >> value;
+      istr >> currentTable;
       tableMode = true;
-      currentTable = value;
       currentIndex = -1;
       currentFields.clear();
     } else if (key == "TableEnd") { 
@@ -141,7 +139,7 @@ TextFileDBReader::formatKey(const std::string & key) const
       // Already have rowNumber from before
       std::cout << "ERROR in format:" << key << std::endl;
     } else {
-      rowNumber = tmpRowNumber;
+      rowNumber = std::move(tmpRowNumber);
     }
   }
   
@@ -151,7 +149,7 @@ TextFileDBReader::formatKey(const std::string & key) const
   } else {
     if (rowNumber.empty()) rowNumber = "0";
     if (tableName.empty()) {
-      newKey = fieldName;
+      newKey = std::move(fieldName);
     }else if (tableName == "TableSize") {
       newKey = "TableSize:"+fieldName;
     } else {
