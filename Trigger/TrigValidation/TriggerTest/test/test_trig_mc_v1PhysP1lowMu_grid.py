@@ -21,13 +21,15 @@
 
 from TriggerTest.MCExecStep import MCGridStep
 from TrigValTools.TrigValSteering import Test, CheckSteps
-from TrigValTools.TrigMCCommonParams import mcDefaults
 
 ex = MCGridStep(
     menu='PhysicsP1_pp_lowMu_run3_v1',
-    mc_campaign=mcDefaults.mc_campaign+'LowMu',
+    mc_campaign='Campaigns.MC23LowMu',
 )
 ex.input = 'minbias'
+# the MC23LowMu campaign is based on MC23a, MC23eLowMu doesn't exist, need to override relevant settings
+ex.flags.extend(['Input.MCCampaign=Campaign.MC23e',
+                 'Input.ConditionsRunNumber=470000'])
 
 test = Test.Test()
 test.art_type = 'grid'
