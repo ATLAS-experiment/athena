@@ -2,7 +2,7 @@
 # art-description: Compare F100 to C100 on Zee pu200 events (full detector)
 # art-type: grid
 # art-include: main/Athena
-# art-memory: 16384
+# art-memory: 8192
 # art-input: mc21_14TeV:mc21_14TeV.601189.PhPy8EG_AZNLO_Zee.recon.RDO.e8557_s4422_r16130
 # art-input-nfiles: 51
 # art-output: *.txt

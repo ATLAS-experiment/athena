@@ -2,8 +2,7 @@
 # art-description: Compare F100 to C100 on ttbar pu200 events (whole detector)
 # art-type: grid
 # art-include: main/Athena
-# art-memory: 16384
-# art-input-nfiles: 2
+# art-memory: 8192
 # art-output: *.txt
 # art-output: *.root
 # art-output: *.xml
