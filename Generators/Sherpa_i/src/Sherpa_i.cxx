@@ -280,7 +280,6 @@ StatusCode Sherpa_i::genFinalize() {
   std::cout << *p_sherpa->GetInitHandler()->GetVariations() << std::endl;
 
   p_sherpa->SummarizeRun();
-  delete p_sherpa;
 
   if (m_cleanup) {
     ATH_MSG_INFO("Deleting left-over files from working directory.");
