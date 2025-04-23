@@ -395,7 +395,6 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
         // This track has been extrapolated, copy the completed tracks to the full list with full road objects
         for (const auto &miniroad : completedRoads) {
             FPGATrackSimRoad road;
-            road.setNLayers(miniroad.getNLayers());
             road.setWCLayers(miniroad.getWCLayers());
             road.setHitLayers(miniroad.getHitLayers());
             m_missingHitsOnRoad.push_back(miniroad.getNWCLayers());
@@ -406,9 +405,34 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             road.setXBin(track->getHoughXBin());
             road.setYBin(track->getHoughYBin());
             road.setSubRegion(track->getSubRegion());
-            road.setHits(miniroad.getVecHits());
+
+            // just force the right number of layers now, in case we find fewer than expected (needed downstream)
+            std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> roadhits = miniroad.getVecHits();
+            unsigned nexpected = m_nLayers_1stStage+m_nLayers_2ndStage;
+            if (roadhits.size() > nexpected) { // cut off the last ones
+                roadhits.resize(nexpected);
+            }
+            else if (roadhits.size() < nexpected) { // fill with missing hits
+                for (unsigned layer = roadhits.size(); layer < nexpected; layer++) {
+                    std::shared_ptr<FPGATrackSimHit> emptyHitPtr = std::make_shared<FPGATrackSimHit>();
+                    emptyHitPtr->setX(0);
+                    emptyHitPtr->setY(0);
+                    emptyHitPtr->setZ(0);
+                    emptyHitPtr->setLayer(layer);
+                    emptyHitPtr->setHitType(HitType::wildcard);
+                    std::vector<std::shared_ptr<const FPGATrackSimHit>> hitVec;
+                    hitVec.push_back(emptyHitPtr);
+                    roadhits.push_back(hitVec);
+                    layer_bitmask_t wclayers = road.getWCLayers();
+                    wclayers |= (1 << layer);
+                    road.setWCLayers(wclayers);
+                }
+            }
+            road.setHits(std::move(roadhits));
+
             m_roads.push_back(road);
         }
+
         currentRoadHitFineIDs.clear();
         tmp_predictedHitsFineID.clear();
         currentRoadHitITkLayer.clear();
