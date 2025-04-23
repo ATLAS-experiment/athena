@@ -107,44 +107,58 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::anglesOfIncidence(const InDetD
 template <typename calib_data_t, typename traj_t>
 std::pair<float, float>
 AnalogueClusteringToolImpl<calib_data_t, traj_t>::getCentroid(
-    const std::vector<Identifier>& rdos,
+    const xAOD::PixelCluster& cluster,
     const InDetDD::SiDetectorElement& element) const
 {
+  // Different behaviours if pixel uncalibrated cluster use digital or
+  // charge-weighted local position
+  if (not m_useWeightedPos) {
+    // We return the cluster local position here
+    // This is actually the digital position, which only minimally
+    // differs from the centroid
+    // Eventually we will have a NN for the on-track calibration instead this instead
+    const auto& localPos = cluster.template localPosition<2>();
+    return std::make_pair(localPos(0, 0),
+			  localPos(1, 0));
+  }
 
-    int rowmin = std::numeric_limits<int>::max();
-    int rowmax = std::numeric_limits<int>::min();
-    int colmin = std::numeric_limits<int>::max();
-    int colmax = std::numeric_limits<int>::min();
-    for (const Identifier& rid : rdos) {
-        int row = m_pixelid->phi_index(rid);
-        rowmin = std::min(row, rowmin);
-        rowmax = std::max(row, rowmax);
-
-        int col = m_pixelid->eta_index(rid);
-        colmin = std::min(col, colmin);
-        colmax = std::max(col, colmax);
-    }
-
-    const InDetDD::PixelModuleDesign& design =
-	dynamic_cast<const InDetDD::PixelModuleDesign&>(element.design());
-
-    InDetDD::SiLocalPosition pos1 =
-	design.positionFromColumnRow(colmin, rowmin);
-
-    InDetDD::SiLocalPosition pos2 =
-	design.positionFromColumnRow(colmax, rowmin);
-
-    InDetDD::SiLocalPosition pos3 =
-	design.positionFromColumnRow(colmin, rowmax);
-
-    InDetDD::SiLocalPosition pos4 =
-	design.positionFromColumnRow(colmax, rowmax);
-
-    InDetDD::SiLocalPosition centroid = 0.25 * (pos1 + pos2 + pos3 + pos4);
-
-    double shift = m_lorentzAngleTool->getLorentzShift(element.identifyHash(), Gaudi::Hive::currentContext());
-
-    return std::make_pair(centroid.xPhi() + shift, centroid.xEta());
+  // if weighted position, we need to compute the centroid
+  const std::vector<Identifier>& rdos = cluster.rdoList();
+    
+  int rowmin = std::numeric_limits<int>::max();
+  int rowmax = std::numeric_limits<int>::min();
+  int colmin = std::numeric_limits<int>::max();
+  int colmax = std::numeric_limits<int>::min();
+  for (const Identifier& rid : rdos) {
+    int row = m_pixelid->phi_index(rid);
+    rowmin = std::min(row, rowmin);
+    rowmax = std::max(row, rowmax);
+    
+    int col = m_pixelid->eta_index(rid);
+    colmin = std::min(col, colmin);
+    colmax = std::max(col, colmax);
+  }
+  
+  const InDetDD::PixelModuleDesign& design =
+    dynamic_cast<const InDetDD::PixelModuleDesign&>(element.design());
+  
+  InDetDD::SiLocalPosition pos1 =
+    design.positionFromColumnRow(colmin, rowmin);
+  
+  InDetDD::SiLocalPosition pos2 =
+    design.positionFromColumnRow(colmax, rowmin);
+  
+  InDetDD::SiLocalPosition pos3 =
+    design.positionFromColumnRow(colmin, rowmax);
+  
+  InDetDD::SiLocalPosition pos4 =
+    design.positionFromColumnRow(colmax, rowmax);
+  
+  InDetDD::SiLocalPosition centroid = 0.25 * (pos1 + pos2 + pos3 + pos4);
+  
+  double shift = m_lorentzAngleTool->getLorentzShift(element.identifyHash(), Gaudi::Hive::currentContext());
+  
+  return std::make_pair(centroid.xPhi() + shift, centroid.xEta());
 }
 
 template <typename calib_data_t, typename traj_t>
@@ -172,13 +186,11 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getErrorData() const
 template <typename calib_data_t, typename traj_t>
 std::pair<std::optional<float>, std::optional<float>>
 AnalogueClusteringToolImpl<calib_data_t, traj_t>::getCorrectedPosition(
-    const std::vector<Identifier>& rdos,
+    const xAOD::PixelCluster& cluster,
     const error_data_t& errorData,
     const InDetDD::SiDetectorElement& element,
-    const std::pair<float, float>& angles,
-    const xAOD::PixelCluster& cluster) const
+    const std::pair<float, float>& angles) const
 {
-    // TODO validate these angles
     auto& [anglePhi, angleEta] = angles;
 
     std::optional<float> posX;
@@ -191,7 +203,7 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getCorrectedPosition(
 
     if (omX > -0.5 && omY > -0.5 && (nrows > 1 || ncols > 1)) {
 
-	std::pair<float, float> centroid = getCentroid(rdos, element);
+	std::pair<float, float> centroid = getCentroid(cluster, element);
 
         IdentifierHash idHash = element.identifyHash();
         
@@ -308,7 +320,7 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate(
     }
 
 
-    auto [posX, posY] = getCorrectedPosition(cluster.rdoList(), *errorData, detElement, angles, cluster);
+    auto [posX, posY] = getCorrectedPosition(cluster, *errorData, detElement, angles);
     if (posX.has_value())
 	pos[Acts::eBoundLoc0] = *posX;
     if (posY.has_value())

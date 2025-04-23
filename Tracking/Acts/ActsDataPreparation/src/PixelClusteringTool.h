@@ -70,7 +70,7 @@ private:
     "Pixel charge calibration data"};
   
   Gaudi::Property<bool> m_addCorners {this, "AddCorners", true};
-  Gaudi::Property<bool> m_useWeightedPos {this, "UseWeightedPosition", true};
+  Gaudi::Property<bool> m_useWeightedPos {this, "UseWeightedPosition", false};
   Gaudi::Property<bool> m_broadErrors {this, "UseBroadErrors", false};
 };
   
