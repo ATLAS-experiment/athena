@@ -32,7 +32,7 @@ default config file
 Tool configuration
 ------------------
 
-The default config file looks like this::
+A possible config file looks like this::
 
   SelectionCuts: PtMin AbsEtaRegion AbsCharge NTracks JetIDWP EleIDWP
 
@@ -130,19 +130,38 @@ setup:
      - ``JetRNNSigTransRegion``
      - ``std::vector<double>``
      - accepting taus within jet RNN score regions, each `odd` in the vector is a lower bound, each `even` is an upper bound
-     - ``JetRNNSigTrans`` is a transformed RNN score and provides flat ID efficiencies with respect to pT and pile-up. 
+     - ``JetRNNScoreSigTrans`` is a transformed RNN score and provides flat ID efficiencies with respect to pT and pile-up. 
 
    * -
      - ``JetRNNSigTransMin``
      - ``double``
      - accepting taus with a jet RNN score above a lower bound
-     - if ``JetRNNMin`` is configured, ``JetRNNRegion`` configuration wont be considered. ``JetRNNSigTrans`` is a transformed RNN score and provides flat ID efficiencies with respect to pT and pile-up. 
+     - if ``JetRNNSigTransMin`` is configured, ``JetRNNSigTransRegion`` configuration wont be considered. ``JetRNNScoreSigTrans`` is a transformed RNN score and provides flat ID efficiencies with respect to pT and pile-up. 
 
    * - 
      - ``JetRNNSigTransMax``
      - ``double``
      - accepting taus with a jet RNN score below an upper bound
-     - if ``JetRNNMax`` is configured, ``JetRNNRegion`` configuration wont be considered. ``JetRNNSigTrans`` is a transformed RNN score and provides flat ID efficiencies with respect to pT and pile-up. 
+     - if ``JetRNNSigTransMax`` is configured, ``JetRNNRegion`` configuration wont be considered. ``JetRNNScoreSigTrans`` is a transformed RNN score and provides flat ID efficiencies with respect to pT and pile-up. 
+
+   * - ``CutGNTauScoreSigTrans``
+     - ``GNTauSigTransRegion``
+     - ``std::vector<double>``
+     - accepting taus within jet GNTau score regions, each `odd` in the vector is a lower bound, each `even` is an upper bound
+     - ``GNTauScoreSigTrans_v0prune`` is a transformed GNTau score and provides flat ID efficiencies with respect to pT and pile-up. 
+
+   * -
+     - ``GNTauSigTransMin``
+     - ``double``
+     - accepting taus with a jet GNTau score above a lower bound
+     - if ``GNTauSigTransMin`` is configured, ``GNTauSigTransRegion`` configuration wont be considered. ``GNTauScoreSigTrans_v0prune`` is a transformed RNN score and provides flat ID efficiencies with respect to pT and pile-up. 
+
+   * - 
+     - ``GNTauSigTransMax``
+     - ``double``
+     - accepting taus with a jet GNTau score below an upper bound
+     - if ``GNTauSigTransMax`` is configured, ``GNTauSigTransRegion`` configuration wont be considered. ``GNTauScoreSigTrans_v0prune`` is a transformed RNN score and provides flat ID efficiencies with respect to pT and pile-up. 
+   
 
    * - ``CutJetIDWP``
      - ``JetIDWP``
@@ -203,6 +222,17 @@ Currently implemented working points for ``CutJetIDWP`` are:
    * - JETIDRNNTIGHT
      - passing RNN tight working point, ID efficiency 60% (45%) for 1-prong (3-prong)
      
+   * - JETIDGNTAUVERYLOOSE
+     - passing GNTau very loose working point, ID efficiency 95%
+
+   * - JETIDGNTAULOOSE
+     - passing GNTau loose working point, ID efficiency 85% (75%) for 1-prong (3-prong)
+     
+   * - JETIDGNTAUMEDIUM
+     - passing GNTau medium working point, ID efficiency 75% (60%) for 1-prong (3-prong)
+     
+   * - JETIDGNTAUTIGHT
+     - passing GNTau tight working point, ID efficiency 60% (45%) for 1-prong (3-prong)
 
 and for ``CutEleIDWP``:
 
