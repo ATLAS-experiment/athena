@@ -12,6 +12,7 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
+ex.threads = 1
 ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'data_cos'
 ex.flags = ['Trigger.triggerMenuSetup="Cosmic_run3_v1"',

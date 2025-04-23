@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, LHCPeriod, ProductionStep, Project, FlagEnum
@@ -136,7 +136,7 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.Align.UseAsBuilt", lambda prevFlags: (_muonAlignMode(prevFlags)) and not \
                                                            (prevFlags.IOVDb.DatabaseInstance == 'COMP200' or \
                                                             'HLT' in prevFlags.IOVDb.GlobalTag or prevFlags.Common.isOnline) )
-    mcf.addFlag("Muon.Align.UsesTGCAsBuild",False)
+    mcf.addFlag("Muon.Align.UsesTGCAsBuild", lambda prevFlags: (_muonAlignMode(prevFlags)) and not prevFlags.Common.isOnline and prevFlags.GeoModel.Run == LHCPeriod.Run3)
 
     # Muon Trigger Flags
     mcf.addFlag("Muon.MuonTrigger", False) 
