@@ -186,7 +186,7 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     } else {
         ATH_MSG_DEBUG("No Event Selection applied");
     }
-
+    
     // Event passes cuts, count it
     m_evt++;
     if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: EventSelection");
@@ -214,19 +214,15 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     auto mon_regionID = Monitored::Scalar<unsigned>("regionID", regionID);
     Monitored::Group(m_monTool, mon_regionID);
 
+    if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: record hits");
     // If and when we set up code to run over more than one region/tower at a time this will need to be updated
     std::vector<FPGATrackSimHit> const & hits = m_logicEventHeader->towers().at(0).hits();
-    
-    std::vector<std::shared_ptr<const FPGATrackSimHit>> phits;
-    phits.reserve(hits.size());
-    for (FPGATrackSimHit const& h : hits) {
-        if (h.isReal()) phits.emplace_back(std::make_shared<const FPGATrackSimHit>(h));
+    FPGAHits->reserve(hits.size());
+    for (const auto & hit : hits) {
+        if (hit.isReal()) FPGAHits->push_back(hit);
     }
+    if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: record hits");
 
-    // this part is needed for tracking
-    for (const auto & hit : phits)
-        FPGAHits->push_back(*hit);
- 
     auto mon_nhits = Monitored::Scalar<unsigned>("nHits", hits.size());
     auto mon_nhits_unmapped = Monitored::Scalar<unsigned>("nHits_unmapped", m_hits_miss.size());
     Monitored::Group(m_monTool, mon_nhits, mon_nhits_unmapped);
@@ -295,7 +291,7 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
                                                             SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClustersFiltered,
                                                             SG::WriteHandle<FPGATrackSimClusterCollection> &FPGASpacePoints)
 {
-    m_clusters.clear();
+    m_clusters->clear();
     m_spacepoints.clear();
     m_hits_miss.clear();
 
@@ -309,7 +305,6 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
     for (const FPGATrackSimHit& hit : m_hits_miss) FPGAHitUnmapped->push_back(hit);
 
 
-
     ATH_MSG_DEBUG("Hits conversion done, #unmapped hists = " << m_hits_miss.size());
     // Random removal of hits
     if (m_doHitFiltering) {
@@ -318,31 +313,32 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
     }
 
     // At this stage, copy the logicEventHeader.
-    *m_logicEventHeader_precluster = *m_logicEventHeader;
+    if(m_writeOutputData) *m_logicEventHeader_precluster = *m_logicEventHeader;
 
     // Clustering
     for (int ic = 0; ic < m_clustering; ic++) {
-      ATH_MSG_DEBUG("Running clustering");
-      ATH_CHECK(m_clusteringTool->DoClustering(*m_logicEventHeader, m_clusters));
-      m_clusters_original = m_clusters;
-      
-      // I think I also want to pass m_clusters to random removal (but won't work currently)
-      if (m_doHitFiltering) ATH_CHECK(m_hitFilteringTool->DoRandomRemoval(*m_logicEventHeader, false));
-      unsigned npix(0), nstrip(0);
-      for (const FPGATrackSimCluster& cluster : m_clusters_original) {
-	FPGAClusters->push_back(cluster);
-	if (cluster.getClusterEquiv().isPixel()) npix++;
-	else nstrip++;
-      }
-      m_nPixClusters += npix;
-      m_nStripClusters += nstrip;
-      if (npix > m_nMaxPixClusters) m_nMaxPixClusters = npix;
-      if (nstrip > m_nMaxStripClusters) m_nMaxStripClusters = nstrip;
-      if (m_clusters_original.size() > m_nMaxClusters) m_nMaxClusters = m_clusters_original.size();
+        ATH_MSG_DEBUG("Running clustering");
+        ATH_CHECK(m_clusteringTool->DoClustering(*m_logicEventHeader, *m_clusters));
+        // I think I also want to pass m_clusters to random removal (but won't work currently)
+        if (m_doHitFiltering) ATH_CHECK(m_hitFilteringTool->DoRandomRemoval(*m_logicEventHeader, false));
+        unsigned npix(0), nstrip(0);
+        for (const FPGATrackSimCluster& cluster : *m_clusters) {
+            if (cluster.getClusterEquiv().isPixel()) npix++;
+            else nstrip++;
+        }
+        m_nPixClusters += npix;
+        m_nStripClusters += nstrip;
+        if (npix > m_nMaxPixClusters) m_nMaxPixClusters = npix;
+        if (nstrip > m_nMaxStripClusters) m_nMaxStripClusters = nstrip;
+        if (m_clusters->size() > m_nMaxClusters) m_nMaxClusters = m_clusters->size();
     }
-
+    FPGAClusters->insert(
+        FPGAClusters->end(),
+        std::make_move_iterator(m_clusters->begin()),
+        std::make_move_iterator(m_clusters->end()));
+    
     // At this stage, copy the logicEventHeader.
-    *m_logicEventHeader_cluster = *m_logicEventHeader;
+    if(m_writeOutputData) *m_logicEventHeader_cluster = *m_logicEventHeader;
     
     // Filter hits/clusters (untested for hits, ie with m_clustering = false)
     if (m_doHitFiltering)
@@ -355,12 +351,13 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
         //Currntly the maps generated that can use diffrent logical layers for the same phys layers only use the pixles
         //This code will be updated in the future when maps are made with strips that can use the diffrent logical layers 
         ATH_CHECK(m_hitFilteringTool->GetPairedStripPhysLayers(planeMap, filter_strip_physLayers));
-        m_clusters.clear();
-        ATH_CHECK(m_hitFilteringTool->DoHitFiltering(*m_logicEventHeader, filter_pixel_physLayers, filter_strip_physLayers, m_clusters));
-        for (const FPGATrackSimCluster &cluster : m_clusters) FPGAClustersFiltered->push_back(cluster);
- 
+        ATH_CHECK(m_hitFilteringTool->DoHitFiltering(*m_logicEventHeader, filter_pixel_physLayers, filter_strip_physLayers, *m_clusters));
+        FPGAClustersFiltered->insert(
+            FPGAClustersFiltered->end(),
+            std::make_move_iterator(m_clusters->begin()),
+            std::make_move_iterator(m_clusters->end()));
     }
-
+    
     // Space points
     if (m_doSpacepoints) {
         ATH_CHECK(m_spacepointsTool->DoSpacePoints(*m_logicEventHeader, m_spacepoints));

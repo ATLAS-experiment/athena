@@ -105,9 +105,9 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         FPGATrackSimLogicalEventInputHeader*  m_logicEventHeader = nullptr;
 
         // Event storage
-        std::vector<FPGATrackSimCluster> m_clusters, m_clusters_original;
-        std::vector<FPGATrackSimCluster> m_spacepoints;
-        std::vector<FPGATrackSimHit>     m_hits_miss;
+        std::unique_ptr<FPGATrackSimClusterCollection> m_clusters = std::make_unique<FPGATrackSimClusterCollection>();
+        std::vector<FPGATrackSimCluster> m_spacepoints{};
+        std::vector<FPGATrackSimHit>     m_hits_miss{};
 
         // internal counters
         double m_evt = 0; // number of events passing event selection, independent of truth
