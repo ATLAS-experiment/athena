@@ -1556,7 +1556,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_JvtPtMax, "Jet.JvtPtMax", rEnv, 60.0e3);
   configFromFile(m_JvtConfigRun2, "Jet.JvtConfigRun2", rEnv, "JetJvtEfficiency/May2024/NNJvtSFFile_Run2_EMPFlow.root", true); // empty string means dummy SF
   configFromFile(m_JvtConfigRun3, "Jet.JvtConfigRun3", rEnv, "JetJvtEfficiency/May2024/NNJvtSFFile_Run3_EMPFlow.root", true); // empty string means dummy SF
-  configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, getDefaultJetUncConfig().c_str() ); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel22/
+  configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, getDefaultJetUncConfig() ); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel22/
   configFromFile(m_jetUncertaintiesAnalysisFile, "Jet.AnalysisFile", rEnv, "default"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
   configFromFile(m_jetUncertaintiesCalibArea, "Jet.UncertCalibArea", rEnv, "default"); // Defaults to default area set by tool
   configFromFile(m_jetUncertaintiesMCType, "Jet.UncertMCType", rEnv, "", true); // empty string means the MCType is guessed
