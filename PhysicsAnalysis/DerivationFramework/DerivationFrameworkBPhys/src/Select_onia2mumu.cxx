@@ -10,7 +10,7 @@
 //
 // Basic Jpsi->mu mu derivation example
 
-#include "DerivationFrameworkBPhys/Select_onia2mumu.h"
+#include "Select_onia2mumu.h"
 
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "xAODBPhys/BPhysHypoHelper.h"

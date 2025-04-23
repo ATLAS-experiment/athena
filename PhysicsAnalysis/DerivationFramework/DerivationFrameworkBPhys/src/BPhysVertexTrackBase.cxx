@@ -155,7 +155,7 @@
 //                           
 //============================================================================
 //
-#include "DerivationFrameworkBPhys/BPhysVertexTrackBase.h"
+#include "BPhysVertexTrackBase.h"
 #include "xAODTracking/TrackParticlexAODHelpers.h"
 #include "xAODBPhys/BPhysHelper.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"

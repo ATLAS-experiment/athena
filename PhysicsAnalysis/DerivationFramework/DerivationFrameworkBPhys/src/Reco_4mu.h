@@ -13,7 +13,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
-#include "DerivationFrameworkBPhys/FourMuonTool.h"
+#include "FourMuonTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "xAODBPhys/BPhysHelper.h"
 

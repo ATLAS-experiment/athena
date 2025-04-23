@@ -10,11 +10,11 @@
 //
 // Basic Jpsi->mu mu derivation example
 
-#include "DerivationFrameworkBPhys/Reco_mumu.h"
+#include "Reco_mumu.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
+#include "BPhysPVTools.h"
 
 
 namespace DerivationFramework {

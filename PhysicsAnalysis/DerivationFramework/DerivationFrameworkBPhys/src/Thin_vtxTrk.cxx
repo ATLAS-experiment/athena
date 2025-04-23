@@ -9,7 +9,7 @@
 // This is a trivial example of an implementation of a thinning tool
 // which removes all ID tracks which do not pass a user-defined cut
 
-#include "DerivationFrameworkBPhys/Thin_vtxTrk.h"
+#include "Thin_vtxTrk.h"
 
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "StoreGate/ThinningHandle.h"

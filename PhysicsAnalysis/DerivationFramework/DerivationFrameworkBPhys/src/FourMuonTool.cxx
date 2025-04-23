@@ -10,8 +10,8 @@
 // ----------------------------------------------------------------------------
 // ****************************************************************************
 
-#include "DerivationFrameworkBPhys/FourMuonTool.h"
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
+#include "FourMuonTool.h"
+#include "BPhysPVTools.h"
 #include "xAODBPhys/BPhysHelper.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkV0Fitter/TrkV0VertexFitter.h"

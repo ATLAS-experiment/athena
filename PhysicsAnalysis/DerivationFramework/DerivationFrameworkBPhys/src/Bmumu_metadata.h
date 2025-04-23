@@ -16,7 +16,7 @@
 #include <map>
 #include <vector>
 
-#include "DerivationFrameworkBPhys/BPhysMetadataBase.h"
+#include "BPhysMetadataBase.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "GaudiKernel/ToolHandle.h"

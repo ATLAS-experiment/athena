@@ -7,11 +7,11 @@
 ///////////////////////////////////////////////////////////////////
 // Author: James Catmore <james.catmore@cern.ch>
 
-#include "DerivationFrameworkBPhys/Reco_4mu.h"
+#include "Reco_4mu.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
+#include "BPhysPVTools.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "AthContainers/ConstAccessor.h"
 

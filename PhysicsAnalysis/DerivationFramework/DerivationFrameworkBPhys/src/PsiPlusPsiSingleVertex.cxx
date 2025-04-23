@@ -4,12 +4,12 @@
 /////////////////////////////////////////////////////////////////
 // PsiPlusPsiSingleVertex.cxx, (c) ATLAS Detector software
 /////////////////////////////////////////////////////////////////
-#include "DerivationFrameworkBPhys/PsiPlusPsiSingleVertex.h"
+#include "PsiPlusPsiSingleVertex.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
+#include "BPhysPVCascadeTools.h"
+#include "BPhysPVTools.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "HepPDT/ParticleDataTable.hh"

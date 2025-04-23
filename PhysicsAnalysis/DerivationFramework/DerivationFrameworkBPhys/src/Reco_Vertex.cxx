@@ -10,8 +10,8 @@
 //
 // Basic Jpsi->mu mu derivation example
 
-#include "DerivationFrameworkBPhys/Reco_Vertex.h"
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
+#include "Reco_Vertex.h"
+#include "BPhysPVTools.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "JpsiUpsilonTools/JpsiUpsilonCommon.h"

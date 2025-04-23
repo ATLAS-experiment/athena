@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef DERIVATIONFRAMEWORKBPHYS_CASCADETOOLS_H
 #define DERIVATIONFRAMEWORKBPHYS_CASCADETOOLS_H
@@ -10,7 +10,6 @@
 // Adam Barton <abarton@cern.ch>
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "CLHEP/Vector/LorentzVector.h"
 #include "xAODTracking/Vertex.h"
 
 
@@ -29,13 +28,6 @@ namespace DerivationFramework {
  * Virtual destructor
  */
     ~CascadeTools();
-
-/**
- * Standard AlgTool methods
- */
-    //Nothing done not needed
-    //StatusCode initialize() override;
-    //StatusCode finalize() override;
 
     Amg::Vector3D momentum(const std::vector<TLorentzVector> &particleMom) const;
     Amg::Vector3D pca(const std::vector<TLorentzVector> &particleMom, const xAOD::Vertex* SV, const xAOD::Vertex* PV) const;
@@ -65,8 +57,6 @@ namespace DerivationFramework {
 
     Amg::MatrixX * convertCovMatrix(const xAOD::Vertex * vxCandidate) const;
     Amg::MatrixX SetFullMatrix(int NTrk, const std::vector<float> & Matrix) const;
-
-  //private:
 
   }; //end of class definitions
 

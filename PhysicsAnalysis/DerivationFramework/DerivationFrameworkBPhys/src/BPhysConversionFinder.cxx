@@ -5,7 +5,7 @@
 // BPhysConversionFinder.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 // Author: A. Chisholm <andrew.chisholm@cern.ch>
-#include "DerivationFrameworkBPhys/BPhysConversionFinder.h"
+#include "BPhysConversionFinder.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
