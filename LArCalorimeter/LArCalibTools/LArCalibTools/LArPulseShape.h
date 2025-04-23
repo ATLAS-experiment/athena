@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARPULSESHAPE_H
@@ -66,7 +66,6 @@ class LArPulseShape : public AthAlgorithm {
    NTuple::Item<short> m_useLgIntercept;
    int m_OffId = 0;  
    int m_OffId_conv = 0;     
-   const char * m_id_char = nullptr;  
    int m_isample = 0;
    int m_mindist = 0;
    int m_closestBC = 0;
