@@ -22,6 +22,8 @@
 // STL
 #include <memory>
 #include <vector>
+//
+#include "CxxUtils/checker_macros.h"
 
 class HGTD_ID;
 class HGTD_DetectorManager;
@@ -43,7 +45,10 @@ namespace Trk {
 
    */
 
-class HGTD_LayerBuilderCond : public extends<AthAlgTool, Trk::ILayerBuilderCond> {
+//This class in not thread safe although the checker does nor readily see this.
+//The issue is that the input is still modifiable. For details see discussion in
+//https://gitlab.cern.ch/atlas/athena/-/merge_requests/79401#note_9399034
+class ATLAS_NOT_THREAD_SAFE  HGTD_LayerBuilderCond : public extends<AthAlgTool, Trk::ILayerBuilderCond> {
 
   public:
 

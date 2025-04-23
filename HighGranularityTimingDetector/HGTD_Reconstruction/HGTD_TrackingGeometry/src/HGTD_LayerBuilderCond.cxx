@@ -176,20 +176,17 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
      // get the center position
      const Amg::Vector3D& orderPosition = (*hgtdDetIter)->center();
 
-     // register the chosen side in the object array
-     // This line is problematic for MT  .
-     // Something like
-     // std::shared_ptr<Trk::Surface>  = std::make_shared<Trk::Surface>((*hgtdDetIter)) could be fine
+
+     // Register the chosen side in the object array
+     // Passing a no-op deleter (no delete happens)
+     // This line can be problematic for MT  .
+     // Basically we couple the DetElement owned surface to the Tracking Geometry.
+     // The lifetime is not controlled by the geometry.
+     // For now we need to be careful on how we schedule these as we do not
+     // want to end up with dangling ptr.
+     // Also the payload is modifiable at this point
+     std::shared_ptr<Trk::Surface> sharedSurface(&((*hgtdDetIter)->surface()),[](Trk::Surface*) {});
      //
-     // As things are now
-     // 1) Notice that basically we couple the DetElement owned surface to the Tracking Geometry
-     // passing a no-op deleter (no delete happens) to the shared_ptr(SharedObject is typedef of shared_ptr)
-     // 2)
-     // The const_cast here make the code non MT safe. For now we handle this
-     // by being careful on lifetimes and non-re-entrant TG construction.
-     std::shared_ptr<Trk::Surface> sharedSurface(
-       const_cast<Trk::Surface*>(&((*hgtdDetIter)->surface())),
-       [](Trk::Surface*) {});
      Trk::SurfaceOrderPosition surfaceOrder(sharedSurface, orderPosition);
 
      discSurfaces[currentlayer].push_back(surfaceOrder);
