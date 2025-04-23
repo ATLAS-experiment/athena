@@ -131,8 +131,7 @@ normal way to open CoraCool database connections.
 - the CoraCoolDatabaseSvcFactory class provides a singleton to load all
 the necessary SEAL, CORAL and COOL libraries and provide access to a
 CoraCoolDatabaseSvc and a cool::IDatabaseSvc. It is intended for writing
-standalone applications, such as the CoraCoolExample program in 
-AtlasTest/DatabaseTest/CoraCoolTest.
+standalone applications.
 
 - the CoraCoolFolder class provides an interface to interact with a 
 CoraCool folder (COOL database folder plus corresponding CORAL payload table),
