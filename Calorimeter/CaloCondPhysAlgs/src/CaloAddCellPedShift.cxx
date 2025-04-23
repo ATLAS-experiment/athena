@@ -120,6 +120,10 @@ StatusCode CaloAddCellPedShift::stop()
   const CaloDetDescrManager* calodetdescrmgr = *caloMgrHandle;
 
   FILE* fp = fopen("calopedestal.txt","w");
+  if (!fp) {
+    ATH_MSG_ERROR("Cannot open file calopedestal.txt for writing");
+    return StatusCode::FAILURE;
+  }
   ATH_MSG_INFO ( " start loop over Calo cells " << ncell );
   for (int i=0;i<ncell;i++) {
        IdentifierHash idHash=i;
