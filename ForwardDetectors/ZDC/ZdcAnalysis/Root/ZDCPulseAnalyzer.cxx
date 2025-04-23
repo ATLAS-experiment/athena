@@ -1277,8 +1277,8 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
 					 static_cast<unsigned int>(m_peak2ndDerivMinSample + m_peak2ndDerivMinTolerance + 1));
 
     
-    for (int isample = postStartIdx; isample < (int) m_samplesDeriv2nd.size() - 1; isample++) {
-      if (!useSample[isample]) continue;
+    for (int isample = postStartIdx; isample < (int) nSamples - 1; isample++) {
+      if (!useSample.at(isample)) continue;
       
       // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
       // BAC 12-01-2024
@@ -1308,11 +1308,11 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
       // add small 1e-3 in division to avoid floating overflow
       //
 
-      float deriv = m_samplesSub[isample + 1] - m_samplesSub[isample];
+      float deriv = m_samplesSub.at(isample + 1) - m_samplesSub.at(isample);
       float derivSig = deriv/(std::sqrt(2)*noiseSig);
-      float deriv2ndSig = -m_samplesDeriv2nd[isample] / (std::sqrt(6)*noiseSig);
+      float deriv2ndSig = -m_samplesDeriv2nd.at(isample) / (std::sqrt(6)*noiseSig);
 
-      float deriv2ndTest = m_samplesDeriv2nd[isample] / (-m_minDeriv2nd + 1.0e-3);
+      float deriv2ndTest = m_samplesDeriv2nd.at(isample) / (-m_minDeriv2nd + 1.0e-3);
 
       if (derivSig > 5) {
 	//
@@ -2134,7 +2134,7 @@ std::vector<float> ZDCPulseAnalyzer::Calculate2ndDerivative(const std::vector <f
   unsigned int nSamples = inputData.size();
 
   // We start with two zero entries for which we can't calculate the double-step derivative
-  //   and woud pad with two zero entries at the end. Start by initializing 
+  //   and would pad with two zero entries at the end. Start by initializing 
   //
   unsigned int vecSize = 2*step + nSamples - step - 1;
   std::vector<float> results(vecSize, 0);
