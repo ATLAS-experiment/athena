@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelConditionsData/PixelDCSHVData.h
@@ -18,11 +18,20 @@
 
 class PixelDCSHVData {
   public:
-    void setBiasVoltage(const int chanNum, const float value);
+    void defaultVoltage(float v);
+    void useDefault(bool b);
+    void setChannelToDefault(int chanNum);
+    void setBiasVoltage(int chanNum, float value);
+    //
     float getBiasVoltage(const int chanNum) const;
+    bool  useDefault() const {return m_alwaysUseDefault;}
+    float defaultVoltage() const {return m_defaultVoltage;}
 
   private:
     typedef std::unordered_map<int, float> FloatConditions;
+    static constexpr std::pair<float, float> m_valueLimits{-1000.f, 1000.f};
+    float m_defaultVoltage{150.f};
+    bool m_alwaysUseDefault{};
     FloatConditions  m_biasVoltage;
 };
 
