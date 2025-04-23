@@ -720,8 +720,8 @@ StatusCode LArCompleteToFlat::stop() {
       }   
     } else {
       const int nGain = m_isSC ? 1 : 3;
-      const bool wfcal = m_isSC ? true : false;
-      singleFloatFlat("MphysOverMcal", MphysOverMcalComplete, flatName+"/MphysOverMcal",nGain,wfcal); //No MphysOverMCal for FCAL
+      //const bool wfcal = m_isSC ? true : false;
+      singleFloatFlat("MphysOverMcal", MphysOverMcalComplete, flatName+"/MphysOverMcal",nGain,false); //No MphysOverMCal for FCAL
     }
   }//end if have m_MphysOverMcalInput
 

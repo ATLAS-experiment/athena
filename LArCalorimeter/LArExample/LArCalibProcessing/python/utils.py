@@ -30,7 +30,7 @@ class FolderTagResolver:
 
         try:
           folder=self._db.getFolder(foldername)
-        except cool.FolderNotFound:
+        except Exception:
           self._msg.warning("\tCould not find folder %s in database %s",foldername,self._db.databaseId())
           self._msg.warning("\tFalling back to default tag %s",foldertag)
           return foldertag
@@ -47,11 +47,11 @@ class FolderTagResolver:
               foldertag=folder.resolveTag(globalTag)
               self._msg.info("\tResolved tag %s",foldertag)
               return foldertag
-            except cool.TagNotFound:
+            except Exception:
                 self._msg.warning("\tCould not resolve global tag %s",globalTag)
                 self._msg.warning("\tFalling back to default tag %s",foldertag)
                 pass
-            except cool.TagRelationNotFound:
+            except Exception:
                 self._msg.warning("\tCould not find tag relation to %s",globalTag)
                 self._msg.warning("\tFalling back to default tag %s",foldertag)
                 pass

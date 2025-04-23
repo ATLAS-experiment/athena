@@ -153,17 +153,19 @@ if __name__=="__main__":
     flags.lock()
    
     try:
-       import importlib
        from pathlib import Path
        to_import = args.infold
        if "/" not in args.infold:
            mypath=os.getcwd()
            path=Path(mypath)
+           sys.path.append(str(path))
        else:
            path=Path(args.infold)
            to_import = path.name
-       sys.path.append(str(path.parent))
-       module = importlib.import_module(to_import)#, package=str(path.name))
+           sys.path.append(str(path.parent))
+       import importlib
+       module = importlib.import_module(to_import)
+
     except Exception as e:
        print(e)
        sys.exit(-1)
