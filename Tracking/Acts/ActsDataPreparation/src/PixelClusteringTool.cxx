@@ -81,31 +81,38 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   float qRowMax = 0.f;
   float qColMin = 0.f;
   float qColMax = 0.f;
-  
-  bool hasGanged = false;
 
+  // We temporary comment this since it is not used
+  // bool hasGanged = false;
+  
   Identifier moduleID = element->identify();
   IdentifierHash moduleHash = element->identifyHash();
 
   // This could be moved outside the cluster loop
-  bool multiChip = design.numberOfCircuits() > 1 ? true : false;
+  bool multiChip = design.numberOfCircuits() > 1;
     
   for (size_t i = 0; i < cluster.ids.size(); i++) {
-    
+
     //Construct the identifier class
     Identifier id = Identifier(cluster.ids[i]);
 
-    //Single chip modules do not have ganged pixels in ITk
-    if (multiChip)  {
-      hasGanged = hasGanged ||
-	m_pixelRDOTool->isGanged(id, element).has_value();
-    }
-        
+    // We temporary comment this since it is not used
+    // TODO: Check how the ganged info is used in legacy
+    // if (multiChip)  {
+    //   hasGanged = hasGanged ||
+    // 	m_pixelRDOTool->isGanged(id, element).has_value();
+    // }
+
     int tot = cluster.tots.at(i);
     float charge = tot;
         
     if (calibData) {
 
+      if (design.getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53) {
+	ATH_MSG_ERROR("Chip type is not recognized!");
+	return StatusCode::FAILURE;
+      }
+      
       // The calibration strategy is updated for each element 
       // Retrieving the calibration only depends on FE and not per cell (can be further optimized)
       // Single FE modules could have an optimized getCharge function where the calib constants are cached
@@ -115,11 +122,6 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
 				    moduleHash,
 				    feValue,
 				    tot);
-
-      // These numbers are taken from the Cluster Maker Tool
-      if (design.getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53 && (moduleHash < 12 or moduleHash > 2035)) {
-	charge = tot/8.0*(8000.0-1200.0)+1200.0;
-      }
       chargeList.push_back(charge);
     }
     
@@ -156,13 +158,19 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
     InDetDD::SiCellId si_cell = element->cellIdFromIdentifier(id);
     InDetDD::SiLocalPosition pos = design.localPositionOfCell(si_cell);
 
+    // We compute the digital position as a sum of all RDO positions
+    // all with the same weight of 1
+    // We do not compute a charge-weighted center of gravity here (by default) since
+    // we observe it to be worse than the digital position
+    // ToT-weighted center of gravity must not be used
     if (m_useWeightedPos) {
-	pos_acc += tot * pos;
-	tot_acc += tot;
+      pos_acc += charge * pos;
+      tot_acc += charge;
     } else {
-	pos_acc += pos;
-	tot_acc += 1;
+      pos_acc += pos;
+      tot_acc += 1;
     }
+    
   }
   
   if (tot_acc > 0)
@@ -202,7 +210,7 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
       width0 = siWidth.phiR();
       width1 = siWidth.z();
   } else {
-      // Use pixel width
+      // Use average pixel width
       width0 = siWidth.phiR() / siWidth.colRow().x();
       width1 = siWidth.z() / siWidth.colRow().y();
   }

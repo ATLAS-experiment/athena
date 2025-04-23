@@ -82,6 +82,9 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.Particles.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.storeTrackStateInfo', False)
 
+    # Cluster
+    actscf.addFlag("Acts.Clusters.UseWeightedPosition", False)
+    
     # SpacePoint
     actscf.addFlag("Acts.SpacePointStrategy", SpacePointStrategy.ActsTrk, type=SpacePointStrategy)  # Define SpacePoint Strategy
 
