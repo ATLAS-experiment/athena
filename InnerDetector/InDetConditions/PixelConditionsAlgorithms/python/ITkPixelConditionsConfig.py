@@ -85,10 +85,8 @@ def ITkPixelChargeCalibCondAlgCfg(flags, name="ITkPixelChargeCalibCondAlg", **kw
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))
     kwargs.setdefault("PixelDetEleCollKey", "ITkPixelDetectorElementCollection")
-    kwargs.setdefault("PixelModuleData", "ITkPixelModuleData")
-    kwargs.setdefault("ReadKey", folderName)
     kwargs.setdefault("WriteKey", "ITkPixelChargeCalibCondData")
-    acc.addCondAlgo(CompFactory.PixelChargeLUTCalibCondAlg(name, **kwargs))
+    acc.addCondAlgo(CompFactory.ITkPixChargeCalibAlg(name, **kwargs))
     return acc
 
 def ITkPixelDCSCondHVAlgCfg(flags, name="ITkPixelDCSCondHVAlg", **kwargs):
