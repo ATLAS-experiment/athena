@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // STL include(s)
@@ -26,7 +26,7 @@ namespace Ringer {
 xAODRingSetConfWriter::xAODRingSetConfWriter( const std::string& name,
                                ::ISvcLocator* svcLoc ) : 
   ::AthAlgorithm( name, svcLoc ),
-  m_metaStore( "MetaDataStore", name ),
+  m_metaStore( "StoreGateSvc/MetaDataStore", name ),
   m_inputMetaStore( "StoreGateSvc/InputMetaDataStore", name )
 {
 
