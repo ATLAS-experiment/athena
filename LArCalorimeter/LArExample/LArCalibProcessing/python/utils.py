@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from PyCool import cool
 from AthenaCommon.Logging import logging
@@ -47,10 +47,6 @@ class FolderTagResolver:
               foldertag=folder.resolveTag(globalTag)
               self._msg.info("\tResolved tag %s",foldertag)
               return foldertag
-            except Exception:
-                self._msg.warning("\tCould not resolve global tag %s",globalTag)
-                self._msg.warning("\tFalling back to default tag %s",foldertag)
-                pass
             except Exception:
                 self._msg.warning("\tCould not find tag relation to %s",globalTag)
                 self._msg.warning("\tFalling back to default tag %s",foldertag)
