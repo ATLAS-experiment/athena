@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 # ====================================================================
 # IDTIDE.py
@@ -464,6 +464,8 @@ def IDTIDECfg(flags):
         IDTIDESlimmingHelper.AppendToDictionary.update({
             "AntiKt4TruthJets": "xAOD::JetContainer",
             "AntiKt4TruthJetsAux": "xAOD::JetAuxContainer",
+            "InTimeAntiKt4TruthJets": "xAOD::JetContainer",
+            "InTimeAntiKt4TruthJetsAux": "xAOD::JetAuxContainer",
             "JetInputTruthParticles": "xAOD::TruthParticleContainer",
             "JetInputTruthParticlesNoWZ": "xAOD::TruthParticleContainer",
             "TruthEvents": "xAOD::TruthEventContainer",
@@ -480,6 +482,7 @@ def IDTIDECfg(flags):
             "TruthVerticesAux": "xAOD::TruthVertexAuxContainer"})
 
         AllVariables += ["AntiKt4TruthJets",
+                         "InTimeAntiKt4TruthJets",
                          "JetInputTruthParticles",
                          "JetInputTruthParticlesNoWZ",
                          "TruthEvents",
