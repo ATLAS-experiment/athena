@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSCATTERINGANGLESIGNIFICANCETOOL_H
@@ -45,7 +45,7 @@ namespace Rec {
         // tools and services
         ToolHandle<Trk::ITrackFitter> m_fitter{this, "TrackFitter", "",
                                                "tool for unslimming via track fit"};  //!< tool for unslimming via track fit
-        ServiceHandle<Trk::ITrackingVolumesSvc> m_trackingVolumesSvc{this, "TrackingVolumesSvc", "TrackingVolumesSvc",
+        ServiceHandle<Trk::ITrackingVolumesSvc> m_trackingVolumesSvc{this, "TrackingVolumesSvc", "Trk::TrackingVolumesSvc/TrackingVolumesSvc",
                                                                      "geometry for analysing track lengths"};
 
         // constants
