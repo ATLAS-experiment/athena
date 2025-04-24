@@ -1,5 +1,5 @@
 """
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 FtagBaseContent.py
 This module contains common configuration used by PHYSVAL, FTAG1 and FTAG2.
@@ -158,14 +158,16 @@ def add_baseline_slimming_allvariables(SlimmingHelper):
     SlimmingHelper.AllVariables += PHYSVAL_FTAG1_FTAG2_AllVariables
 
 
-def _int_labels():
+def _int_labels(flags):
+    if not flags.Input.isMC:
+        return []
     algs = ['HadronConeExcl', 'HadronGhost']
     types = ['Extended', '']
     return [f'{a}{e}TruthLabelID' for a in algs for e in types]
 
 
-def _match_vars(source):
-    labels = _int_labels()
+def _match_vars(flags, source):
+    labels = _int_labels(flags)
     allvars = [f'{l}From{source}' for l in labels]
     allvars += [f'delta{v}To{source}' for v in ['R', 'Pt']]
     return allvars
@@ -180,11 +182,11 @@ def addCommonAugmentation(flags, cfg, helper):
         JetMatchingCfg(
             flags,
             target=target,
-            ints_to_copy=_int_labels(),
+            ints_to_copy=_int_labels(flags),
         )
     )
     helper.ExtraVariables +=  [
-        '.'.join(['AntiKt4EMPFlowJets'] + _match_vars(target))
+        '.'.join(['AntiKt4EMPFlowJets'] + _match_vars(flags, target))
     ]
 
     if not flags.Input.isMC:
