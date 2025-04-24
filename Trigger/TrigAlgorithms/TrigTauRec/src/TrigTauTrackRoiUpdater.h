@@ -10,7 +10,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
-#include "TrkTrack/TrackCollection.h"
+#include "xAODTracking/TrackParticleContainer.h"
 
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 
@@ -49,7 +49,7 @@ private:
     Gaudi::Property<int> m_nSiHoles {this, "nSiHoles", 2, "Maximum number of Si holes on the lead track"};
 
     SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roIInputKey {this, "RoIInputKey", "", "Input RoI key"};
-    SG::ReadHandleKey<TrackCollection> m_tracksKey {this, "TracksKey", "", "FTF tracks" };
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tracksKey {this, "TracksKey", "", "FTF tracks" };
     SG::WriteHandleKey<TrigRoiDescriptorCollection> m_roIOutputKey {this, "RoIOutputKey", "", "Output RoI key"};
 };
 

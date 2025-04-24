@@ -76,7 +76,7 @@ StatusCode TrigTauFastTrackHypoAlg::execute(const EventContext& context) const
         }
 
         // Get FTF tracks
-        SG::ReadHandle<TrackCollection> tracksHandle = ViewHelper::makeHandle(*viewEL, m_tracksKey, context);
+        SG::ReadHandle<xAOD::TrackParticleContainer> tracksHandle = ViewHelper::makeHandle(*viewEL, m_tracksKey, context);
         ATH_CHECK(tracksHandle.isValid());
         ATH_MSG_DEBUG("Tracks handle size: " << tracksHandle->size());
 
@@ -86,7 +86,7 @@ StatusCode TrigTauFastTrackHypoAlg::execute(const EventContext& context) const
         TrigCompositeUtils::linkToPrevious(newDecision, decisionInput().key(), counter);
         if(tracksHandle->size()) {
             // If we have tracks in the RoI, link them as the new decision's feature
-            ElementLink<TrackCollection> newTracksEL = ViewHelper::makeLink(*viewEL, tracksHandle, 0);
+            ElementLink<xAOD::TrackParticleContainer> newTracksEL = ViewHelper::makeLink(*viewEL, tracksHandle, 0);
             ATH_CHECK(newTracksEL.isValid());
             newDecision->setObjectLink(featureString(), newTracksEL);
         } else {
