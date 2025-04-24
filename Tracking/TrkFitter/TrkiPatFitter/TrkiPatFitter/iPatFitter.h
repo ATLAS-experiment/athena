@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKIPATFITTER_IPATFITTER_H
@@ -202,7 +202,7 @@ class iPatFitter : public AthAlgTool, virtual public ITrackFitter {
       this, "StraightLineIntersector",
       "Trk::StraightLineIntersector/StraightLineIntersector"};
   ServiceHandle<ITrackingVolumesSvc> m_trackingVolumesSvc{
-      this, "TrackingVolumesSvc", "TrackingVolumesSvc/TrackingVolumesSvc"};
+      this, "TrackingVolumesSvc", "Trk::TrackingVolumesSvc/TrackingVolumesSvc"};
   ToolHandle<Trk::IExtendedTrackSummaryTool> m_trackSummaryTool{
       this, "TrackSummaryTool", "MuonTrackSummaryTool"};
 
