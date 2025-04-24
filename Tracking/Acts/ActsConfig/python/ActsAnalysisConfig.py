@@ -34,6 +34,8 @@ def ActsTrackAnalysisAlgCfg(flags,
                                     xbins=128, xmin=0, xmax=math.pi)
     monitoringGroup.defineHistogram('eta', title='Track eta;#eta;Entries', type='TH1F', path=kwargs['MonGroupName'],
                                     xbins=128, xmin=-4, xmax=4)
+    monitoringGroup.defineHistogram('pt', title='Track pR;p_{T};Entries', type='TH1F', path=kwargs['MonGroupName'],
+                                    xbins=200, xmin=0, xmax=200)
     monitoringGroup.defineHistogram('phi', title='Track azimuthal angle;#phi;Entries', type='TH1F', path=kwargs['MonGroupName'],
                                     xbins=128, xmin=-math.pi, xmax=math.pi)
     monitoringGroup.defineHistogram('qoverp', title='track inverse momentum;q/p [1/GeV];Entries', type='TH1F', path=kwargs['MonGroupName'],
@@ -71,6 +73,8 @@ def ActsTrackAnalysisAlgCfg(flags,
     monitoringGroup.defineHistogram('eta,nHoles', title='Track eta;#eta;Entries', type='TH2F', path=kwargs['MonGroupName'],
                                     xbins=128, xmin=-4, xmax=4,
                                     ybins=35, ymin=0, ymax=35)
+    monitoringGroup.defineHistogram('eta,pt', title='Track pT vs eta;#eta;p_{T}', type='TProfile', path=kwargs['MonGroupName'],
+                                    xbins=128, xmin=-4, xmax=4)
 
     acc.merge(helper.result())
     return acc
