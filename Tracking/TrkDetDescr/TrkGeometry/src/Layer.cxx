@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -249,6 +249,6 @@ size_t Trk::Layer::compatibleSurfaces(
                                ice);
 }
 
-inline bool Trk::Layer::hasSubStructure(bool resolveSensitive) const {
+bool Trk::Layer::hasSubStructure(bool resolveSensitive) const {
   return resolveSensitive && m_surfaceArray;
 }
