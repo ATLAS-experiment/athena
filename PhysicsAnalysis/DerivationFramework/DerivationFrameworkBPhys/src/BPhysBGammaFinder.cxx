@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "DerivationFrameworkBPhys/BPhysBGammaFinder.h"
+#include "BPhysBGammaFinder.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"

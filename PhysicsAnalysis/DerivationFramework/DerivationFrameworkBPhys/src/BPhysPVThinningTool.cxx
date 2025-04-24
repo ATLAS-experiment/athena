@@ -9,7 +9,7 @@
 // This is a trivial example of an implementation of a thinning tool
 // which removes all ID tracks which do not pass a user-defined cut
 
-#include "DerivationFrameworkBPhys/BPhysPVThinningTool.h"
+#include "BPhysPVThinningTool.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "StoreGate/ThinningHandle.h"

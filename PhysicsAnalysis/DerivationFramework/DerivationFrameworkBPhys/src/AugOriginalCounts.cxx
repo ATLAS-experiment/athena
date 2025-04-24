@@ -7,7 +7,7 @@
  *
  */
 
-#include "DerivationFrameworkBPhys/AugOriginalCounts.h"
+#include "AugOriginalCounts.h"
 #include <StoreGate/WriteDecorHandle.h>
 #include "GaudiKernel/EventContext.h"
 

@@ -9,14 +9,14 @@
 //
 // ----------------------------------------------------------------------------
 // ****************************************************************************
-#include "DerivationFrameworkBPhys/ReVertex.h"
+#include "ReVertex.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "JpsiUpsilonTools/JpsiUpsilonCommon.h"
 
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
+#include "BPhysPVTools.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"

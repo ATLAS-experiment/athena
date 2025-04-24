@@ -10,7 +10,7 @@
 
 
 
-#include "DerivationFrameworkBPhys/Thin_vtxDuplicates.h"
+#include "Thin_vtxDuplicates.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include <vector>

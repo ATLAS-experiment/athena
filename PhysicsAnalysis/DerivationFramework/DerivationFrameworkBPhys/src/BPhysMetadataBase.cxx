@@ -34,7 +34,7 @@
 //============================================================================
 //
 
-#include "DerivationFrameworkBPhys/BPhysMetadataBase.h"
+#include "BPhysMetadataBase.h"
 #include "xAODMetaData/FileMetaData.h"
 #include "xAODMetaData/FileMetaDataAuxInfo.h"
 #include "AthContainers/Accessor.h"

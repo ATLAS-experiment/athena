@@ -2,14 +2,14 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
   Contact: Xin Chen <xin.chen@cern.ch>
 */
-#include "DerivationFrameworkBPhys/JpsiXPlusDisplaced.h"
+#include "JpsiXPlusDisplaced.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
-#include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
+#include "BPhysPVCascadeTools.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
