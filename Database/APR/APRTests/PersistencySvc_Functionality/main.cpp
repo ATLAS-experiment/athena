@@ -45,8 +45,8 @@ int main( int, char** )
       std::cout << std::endl;
       runTestForStorageType(pool::ROOTTREEINDEX_StorageType, driver);
       std::cout << std::endl;
-      // MN: Enable this test when RNTuple is in production
-      // runTestForStorageType(pool::ROOTRNTUPLE_StorageType, driver);
+      // Enable this test once we decide how to handle commit and hold for RNTuple
+      //runTestForStorageType(pool::ROOTRNTUPLE_StorageType, driver);
    } catch ( std::exception& e ) {
       std::cerr << e.what() << std::endl;
       return 1;

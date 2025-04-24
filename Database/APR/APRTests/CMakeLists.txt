@@ -39,7 +39,7 @@ function( _add_test name )
       ${ROOT_LIBRARIES}
       ENVIRONMENT "ROOT_INCLUDE_PATH=$ENV{ROOT_INCLUDE_PATH}:${CMAKE_CURRENT_SOURCE_DIR}/TestDictionary"
       PROPERTIES TIMEOUT 300
-      LOG_IGNORE_PATTERN "POOL_CATALOG is not defined|using default|New file created|FID|0x[0-9a-f]{4,}|APRFileCatalog.*DEBUG"
+      LOG_IGNORE_PATTERN "POOL_CATALOG is not defined|using default|New file created|FID|0x[0-9a-f]{4,}|APRFileCatalog.*DEBUG|RNTuple.*(DEBUG|VERBOSE)"
       DEPENDS ${ARG_DEPENDS} )
 endfunction( _add_test )
 
