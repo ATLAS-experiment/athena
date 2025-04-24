@@ -316,8 +316,9 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                             const MuonReadoutElement* refEle = args.detEles.front();
                             const Identifier refId = refEle->identify();
                             const Identifier testId = readOutEle->identify();
-                            /// Check that the two readout elements are on the same side
-                            if (sign(refEle->stationEta()) != sign(readOutEle->stationEta())) {
+                            /// Check that the two readout elements are on the same side.
+                            /// Exception BOG eta 0 -> attributes to positive sectors
+                            if (sign(refEle->stationEta()) * sign(readOutEle->stationEta()) <0) {
                                  return false;
                             }
                             /// The two readout elements shall be located in the same sector
@@ -331,7 +332,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                             }
                             /// Summarize all readout element in the same sector & layer
                             /// into a single chamber
-                            if (readOutEle->stationName() == refEle->stationName()) {
+                            if (readOutEle->chamberIndex() == refEle->chamberIndex()) {
                                  return true;
                             }
                             /// sTgcs && Micromegas should belong to the same chamber
@@ -346,7 +347,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                                 stIndicesEIL.count(refEle->stationName())) {
                                  return true;    
                             }
-                            return false;// readOutEle->chamberIndex() == refEle->chamberIndex();
+                            return false;
                          });
       /// If no chamber has been found, then create a new one
       if (exist == envelopeCandidates.end()) {
@@ -398,7 +399,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                }
             }
          } else {
-               const MuonReadoutElement* refEle = candidate.detEles.front();
+            const MuonReadoutElement* refEle = candidate.detEles.front();
             const Amg::Transform3D toChambCentre = axisRotation(refEle->detectorType()) * refEle->globalToLocalTrans(gctx);
             ATH_MSG_VERBOSE("New chambre candidate "<<m_idHelperSvc->toStringChamber(refEle->identify()));
             const auto[chamberBox, chamberCentre] = boundingBox(gctx, candidate.detEles, toChambCentre, boundSet, 0.1*Gaudi::Units::cm);
@@ -416,49 +417,17 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                                                    const SpectrometerSector::ChamberPtr& b) {
                                                       return (*a) < (*b);
                                                    });
-         auto globalToSector = sectorArgs.locToGlobTrf.inverse(); 
+         const Amg::Transform3D globalToSector = sectorArgs.locToGlobTrf.inverse(); 
 
          /// now, build simplified 2D representations of the sorted chambers we collected. 
          for (auto & chamber : sectorArgs.chambers){
             // split by readout elements - MDT multilayers and trigger chambers 
             for (auto & RE : chamber->readoutEles()){
                // get the center of the element in the sector frame 
-               auto chamberToGlobal = RE->localToGlobalTrans(gctx); 
-               Amg::Vector3D origin {0, 0,  0}; 
-               origin = globalToSector * chamberToGlobal * origin;
+               const Amg::Transform3D& chamberToGlobal{RE->localToGlobalTrans(gctx)}; 
+               const Amg::Vector3D origin = (globalToSector * chamberToGlobal).translation();
                // and then add the bounds of the element - this is technology dependent 
-               if (RE->detectorType()==ActsTrk::DetectorType::Mdt){
-                     const MuonGMR4::MdtReadoutElement* MDT = dynamic_cast<const MuonGMR4::MdtReadoutElement*>(RE); 
-                     sectorArgs.detectorLocs.emplace_back(origin.y() - MDT->getParameters().halfY, 
-                                                         origin.y() + MDT->getParameters().halfY, 
-                                                         origin.z() - MDT->getParameters().halfHeight, 
-                                                         origin.z() + MDT->getParameters().halfHeight, 
-                                                         RE); 
-               }
-               else if (RE->detectorType()==ActsTrk::DetectorType::Rpc){
-                     const MuonGMR4::RpcReadoutElement* RPC = dynamic_cast<const MuonGMR4::RpcReadoutElement*>(RE);
-                     sectorArgs.detectorLocs.emplace_back(origin.y() - RPC->getParameters().halfLength, 
-                                                         origin.y() + RPC->getParameters().halfLength, 
-                                                         origin.z() - RPC->getParameters().halfThickness, 
-                                                         origin.z() + RPC->getParameters().halfThickness, 
-                                                         RE); 
-               }
-               else if (RE->detectorType()==ActsTrk::DetectorType::Tgc){
-                     const MuonGMR4::TgcReadoutElement* TGC = dynamic_cast<const MuonGMR4::TgcReadoutElement*>(RE);
-                     sectorArgs.detectorLocs.emplace_back(origin.y() - TGC->getParameters().halfHeight, 
-                                                         origin.y() + TGC->getParameters().halfHeight, 
-                                                         origin.z() - TGC->getParameters().halfThickness, 
-                                                         origin.z() + TGC->getParameters().halfThickness, 
-                                                         RE); 
-               }
-               else if (RE->detectorType() == ActsTrk::DetectorType::Mm){
-                   const MuonGMR4::MmReadoutElement* MM = dynamic_cast<const MuonGMR4::MmReadoutElement*>(RE);
-                   sectorArgs.detectorLocs.emplace_back(origin.y() - MM->getParameters().halfHeight,
-                                                       origin.y() + MM->getParameters().halfHeight,
-                                                       origin.z() - MM->getParameters().halfThickness,
-                                                       origin.z() + MM->getParameters().halfThickness,
-                                                       RE);
-               }
+               sectorArgs.detectorLocs.emplace_back(origin, RE, boundingBox(RE, boundSet));
             }
          }
          auto newSector = std::make_unique<SpectrometerSector>(std::move(sectorArgs));

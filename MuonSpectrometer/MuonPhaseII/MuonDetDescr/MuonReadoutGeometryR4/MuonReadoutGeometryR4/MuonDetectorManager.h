@@ -42,7 +42,7 @@
     const ELE_TYPE* GETTER(const IdentifierHash& hash) const; \
     const ELE_TYPE* GETTER(const Identifier& hash) const;     \
                                                               \
-    StatusCode SETTER(ElementPtr<ELE_TYPE> element);
+    StatusCode SETTER(ElementPtr_t<ELE_TYPE> element);
 
 #define DECLARE_ELEMENT(ELE_TYPE) \
     DECLARE_GETTERSETTER(ELE_TYPE, get##ELE_TYPE, add##ELE_TYPE)   \
@@ -65,24 +65,26 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     MuonDetectorManager();
     ~MuonDetectorManager();
 
-    template <class MuonDetectorType>
-    using ElementPtr = std::unique_ptr<MuonDetectorType>;
-    template <class MuonDetectorType>
-    using ElementStorage = std::vector<ElementPtr<MuonDetectorType>>;
+    using ChIndex = Muon::MuonStationIndex::ChIndex;
+    /** @brief: Abrivation of the smart pointer holding the readout element */
+    template <class MuonDetectorType> using ElementPtr_t = std::unique_ptr<MuonDetectorType>;
+    /** @brief: Abbrivation of the container holding all readout elements of a technology.
+     *          The index of the vector entry corresponds to the IdentifierHash of the readout element. */
+    template <class MuonDetectorType> using ElementStorage_t = std::vector<ElementPtr_t<MuonDetectorType>>;
     
-    /// Access specifically the individual readout element technologies
+    /** @brief Declaration of the readout element getters & setter function as 
+     *         described above. */
     DECLARE_ELEMENT(MdtReadoutElement)
     DECLARE_ELEMENT(TgcReadoutElement)    
     DECLARE_ELEMENT(RpcReadoutElement)
     DECLARE_ELEMENT(sTgcReadoutElement)
     DECLARE_ELEMENT(MmReadoutElement)
-
-    /// Returns the number of primary nodes in the GeoModel tree
-    /// that are building the full MuonSystem (MuonBarrel, MuonEndCap, NSW etc)
+    
+    /** @brief Returns the number of tree top nodes describing the muon system */
     unsigned int getNumTreeTops() const override final;
-    /// Returns the i-th top node of the MuonSystem trees 
+    /** @brief Returns the i-the tree top GeoModel volume */ 
     PVConstLink getTreeTop(unsigned int i) const override final;
-    /// Adds a new GeoModelTree node indicating the entrance to a muon system description
+    /** @brief Adds a new GeoModelVolume with its children as a new top node of the muon system */
     void addTreeTop(PVConstLink pv);
     /// Returns a pointer to the central MuonIdHelperSvc
     const Muon::IMuonIdHelperSvc* idHelperSvc() const;
@@ -97,10 +99,18 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
 #ifndef SIMULATIONBASE
     /** @brief Add a spectrometer enevelope object to the manager
      *  @param chSector: Unique_ptr to the sector */
-    void addSpectrometerSector(ElementPtr<SpectrometerSector>&& chSector);
+    void addSpectrometerSector(ElementPtr_t<SpectrometerSector>&& chSector);
     /** @brief Retrieves the spectrometer envelope enclosing the channel's readout element
-     *  @param channelId: Identifier of a muon channel of interest*/
+     *  @param channelId: Identifier of a muon channel of interest */
     const SpectrometerSector* getSectorEnvelope(const Identifier& channelId) const;
+    /** @brief Retrieves the spectrometer envelope from a generic identifier as it's 
+     *         used by e.g., the xAOD::MuonSegment.
+     *  @param chIdx: Chamber index indicating where the envelope is residing (BIL, BIS, etc.)
+     *  @param sector: Global sector of the envelope (1-16)
+     *  @param side: Integer indicating whether, the envelope is in the positive or negative hemisphere */
+    const SpectrometerSector* getSectorEnvelope(const Muon::MuonStationIndex::ChIndex chIdx,
+                                                const unsigned sector,
+                                                const int side) const;
     /** @brief Retrieves the chamber enclosing the channel's readout element
       *  @param channelId: Identifier of a muon channel of interest*/
     const Chamber* getChamber(const Identifier& channelId) const;
@@ -120,30 +130,34 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     /// Returns a list of all detector types
     std::vector<ActsTrk::DetectorType> getDetectorTypes() const;
    private:
-    /** @brief Method that connect the same elements from the station with the parsed readout Element and
+    /** @brief Method that connects the same elements from the station with the parsed readout Element and
      *         vice versa. The way how they are inter-linked depends on the detector technology
      *         For the moment, only link Mdts from the same multilayer against each other.
-     */
-    template <class MuonDetectorType> void linkElements(ElementStorage<MuonDetectorType>& allStore,
+     *  @param allStore: Storage of all detector element that are cached up to this point
+     *  @param readOutEle: Particular readout element to link against the existing elements */
+    template <class MuonDetectorType> void linkElements(ElementStorage_t<MuonDetectorType>& allStore,
                                                         MuonDetectorType* readOutEle);
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{"Muon::MuonIdHelperSvc/MuonIdHelperSvc", 
                                                         "MuonDetectorManager"};
 #ifndef SIMULATIONBASE
-    ElementStorage<SpectrometerSector> m_secEnvelopes{};
+    ElementStorage_t<SpectrometerSector> m_secEnvelopes{};
+    /** @brief Abbrivation to find the sector envelopes sorted by the generic MS identifier */
+    using EnvelopeMap_t = std::unordered_map<unsigned, const SpectrometerSector*>;
+    EnvelopeMap_t m_envelopesById{};
 #endif
-    ElementStorage<MdtReadoutElement> m_mdtEles{};
-    ElementStorage<TgcReadoutElement> m_tgcEles{};    
-    ElementStorage<RpcReadoutElement> m_rpcEles{};
-    ElementStorage<sTgcReadoutElement> m_sTgcEles{};
-    ElementStorage<MmReadoutElement> m_mmEles{};
+    ElementStorage_t<MdtReadoutElement> m_mdtEles{};
+    ElementStorage_t<TgcReadoutElement> m_tgcEles{};    
+    ElementStorage_t<RpcReadoutElement> m_rpcEles{};
+    ElementStorage_t<sTgcReadoutElement> m_sTgcEles{};
+    ElementStorage_t<MmReadoutElement> m_mmEles{};
 
     std::vector<PVConstLink> m_treeTopVector{};
 
 
 };
 
-template <> void MuonDetectorManager::linkElements(ElementStorage<MdtReadoutElement>& detStore, MdtReadoutElement* refEle);
+template <> void MuonDetectorManager::linkElements(ElementStorage_t<MdtReadoutElement>& detStore, MdtReadoutElement* refEle);
 
 }  // namespace MuonGMR4
 
