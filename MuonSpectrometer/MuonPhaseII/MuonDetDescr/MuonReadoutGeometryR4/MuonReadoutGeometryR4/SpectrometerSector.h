@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_SPECTROMETERSECTOR_H
 #define MUONREADOUTGEOMETRYR4_SPECTROMETERSECTOR_H
@@ -9,11 +9,12 @@
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
 #include <MuonReadoutGeometryR4/Chamber.h>
 #include <ActsGeometryInterfaces/GeometryDefs.h>
+#include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
+
 
 #include <set>
 
 namespace Acts {
-    class TrapezoidVolumeBounds;
     class Volume;
 }
 namespace MuonGMR4{
@@ -46,11 +47,61 @@ namespace MuonGMR4 {
             /// Maps regions instrumented by chambers in the y-z frame. 
             /// Used in pattern recognition. 
             struct chamberLocation{
-                double yLeft{0.};     // left edge 
-                double yRight{0.};     // right edge 
-                double zBottom{0.};     // bottom edge 
-                double zTop{0.};     // top edge 
-                const MuonGMR4::MuonReadoutElement* reEle{nullptr};
+                public:
+                    using enum Acts::TrapezoidVolumeBounds::BoundValues;
+                    using BoundPtr_t = std::shared_ptr<const Acts::TrapezoidVolumeBounds>;
+                    /** @brief Standard constructor taking the position of the readout element inside the 
+                     *         sector frame, the pointer to the readout element itself and the volume
+                     *          bounds enclosing the element volume.
+                     *  @param origin: Position of the readout element centre expressed in the chamber frame
+                     *  @param reEle: Pointer to the readout element of interest
+                     *  @param bounds: Pointer to the bounds of interest. */
+                    chamberLocation(const Amg::Vector3D& origin,
+                                    const MuonReadoutElement* reEle,
+                                    BoundPtr_t bounds):
+                        m_origin{origin}, m_reEle{reEle}, m_bounds{std::move(bounds)}{}
+                    /** @brief Copy constructor */
+                    chamberLocation(const chamberLocation& other) = default;
+                    /** @brief Move constructor */
+                    chamberLocation(chamberLocation&& other) = default;
+                    /** @brief Copy assignment */
+                    chamberLocation& operator=(const chamberLocation& other) = default;
+                    /** @brief Move assignment */
+                    chamberLocation& operator=(chamberLocation&& other) = default;
+                    /** @brief Returns whether the external position is inside the boundaries 
+                     *         in the y-z plane.
+                     *  @param pos: Position to check */
+                    bool insideYZ(const Amg::Vector3D& pos) const {
+                      return minY() <= pos.y() &&  maxY() >= pos.y() &&
+                             minZ() <= pos.z() &&  maxZ() >= pos.z();
+                    }
+                     /** @brief Returns the minimum y covered by the chamber location */
+                     double minY() const { return m_origin.y() - m_bounds->get(eHalfLengthY); }
+                     /** @brief Returns the maximum u covered by the chamber location */
+                     double maxY() const { return m_origin.y() + m_bounds->get(eHalfLengthY); }
+                     /** @brief Returns the minimum y covered by the chamber location */
+                     double minZ() const { return m_origin.z() - m_bounds->get(eHalfLengthZ); }
+                     /** @brief Returns the maximum u covered by the chamber location */
+                     double maxZ() const { return m_origin.z() + m_bounds->get(eHalfLengthZ); }
+                     /** @brief Calculate the strip / tube length at a given position in the y-z plane */
+                     double width(const double y0) const {
+                        const double tanPhiHalf = 0.5*(m_bounds->get(eHalfLengthXposY) - m_bounds->get(eHalfLengthXnegY)) 
+                                                / m_bounds->get(eHalfLengthY); 
+                        return m_bounds->get(eHalfLengthXnegY) + tanPhiHalf * (y0 - minY());
+                     }
+                     /** @brief Returns the poter to the associate readout element  */
+                     const MuonReadoutElement* readoutEle() const { return m_reEle; }
+                     /** @brief Returns the pointer to the associate bounds */
+                    const BoundPtr_t& bounds() const { return m_bounds; }
+                    /** @brief Returns the location */
+                    const Amg::Vector3D& location() const { return m_origin; }
+                private:
+                    /** @brief Origin vector of the readout element inside the spectrometer frame */
+                    Amg::Vector3D m_origin{Amg::Vector3D::Zero()};
+                    /** @brief Associated readout element */
+                    const MuonReadoutElement* m_reEle{nullptr};
+                    /** @brief Pointer to the associated bounds */
+                    BoundPtr_t m_bounds{};
             };
 
             struct defineArgs{
