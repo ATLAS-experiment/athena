@@ -20,7 +20,7 @@ if __name__=='__main__':
    parser.add_argument('-r','--run', dest='run', default='00408913', help='Run number string as in input filename', type=str)
    parser.add_argument('-g','--gain', dest='gain', default="MEDIUM", help='Gain string', type=str)
    parser.add_argument('-p','--partition', dest='partition', default="All", help='Partition string', type=str)
-   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data24_calib", help='File prefix string', type=str)
+   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data25_calib", help='File prefix string', type=str)
    parser.add_argument('-i','--indirprefix', dest='dprefix', default="/eos/atlas/atlastier0/rucio/", help='Input directory prefix string', type=str)
    parser.add_argument('-d','--indir', dest='indir', default="", help='Full input dir string', type=str)
    parser.add_argument('-t','--trigger', dest='trig', default='calibration_', help='Trigger string in filename', type=str)
@@ -36,6 +36,7 @@ if __name__=='__main__':
    parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Input sqlite file with bad chans.', type=str)
    parser.add_argument('--FW6', dest='fw6', default=False, help='Is it for fw v. 6', action='store_true')
    parser.add_argument('--EMF', dest='emf', default=False, help='Is it for EMF', action='store_true')
+   parser.add_argument('--nsamples', dest='nsamp', default="32", help='number of samples taken (default 32', type=str)
 
    args = parser.parse_args()
    if help in args and args.help is not None and args.help:
@@ -62,8 +63,7 @@ if __name__=='__main__':
          partstr = args.partition+"-DT"
       if args.rawdata:
             partstr += "-RawData"
-      # here - add optional nsamples
-      InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Pedestal-32s-"+gain+"-"+partstr+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Pedestal-32s-"+gain+"-"+partstr+".daq.RAW/"
+      InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Pedestal-"+args.nsamp+"s-"+gain+"-"+partstr+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Pedestal-"+args.nsamp+"s-"+gain+"-"+partstr+".daq.RAW/"
 
    #Import the configution-method we want to use (here: Pedestal and AutoCorr)
    from LArCalibProcessing.LArCalib_PedestalAutoCorrConfig import LArPedestalAutoCorrCfg
@@ -207,17 +207,31 @@ if __name__=='__main__':
 
    cfg.merge(LArPedestalAutoCorrCfg(flags))
 
-   if args.fw6:
-      from IOVDbSvc.IOVDbSvcConfig import addOverride
-      cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))   
-
-   cfg.getService("IOVDbSvc").DBInstance=""
+   if flags.LArCalib.isSC:
+      fwversion=5
+      # autoconfig
+      from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+      try:
+         runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
+         log.info("Got DT run info !")
+      except Exception:
+         log.warning("Could not get DT run info, using defaults !")
+      else:   
+         fwversion=runinfo.FWversion()   
+      if args.fw6 or fwversion==6:
+         #FIXME: for some reason addOverride is not working, CA merger is then complaining
+         #from IOVDbSvc.IOVDbSvcConfig import addOverride
+         #cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))
+         fldrs=cfg.getService("IOVDbSvc").Folders   
+         for i in range(0, len(fldrs)):
+             if 'LatomeMapping' in fldrs[i]: fldrs[i] += '<tag>LARIdentifierLatomeMapping-fw6</tag>'   
 
    if args.emf:   
       fldrs=cfg.getService("IOVDbSvc").Folders   
       for i in range(0, len(fldrs)):
           if 'Align' in fldrs[i]: fldrs[i] += '<forceRunNumber>9999999</forceRunNumber>'
           if 'LatomeMapping' in fldrs[i]: fldrs[i] += '<tag>LARIdentifierLatomeMapping-EMF</tag>'   
+
 
    #run the application
    cfg.run() 

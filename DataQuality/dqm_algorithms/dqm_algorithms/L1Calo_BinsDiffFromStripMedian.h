@@ -31,8 +31,6 @@ namespace dqm_algorithms
 
         class bin{
           public:
-            double m_eta{};
-            double m_phi{};
             int    m_ix{};
             int    m_iy{};
             double m_value{};

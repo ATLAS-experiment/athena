@@ -12,7 +12,7 @@ def LArMissingFeb2AsciiCfg(flags,OutputFile,dbname="LAR_OFL",folder=None,tag=Non
 
     
     if folder is None:
-        if dbname in ("LAR","LAR_ONL"):
+        if dbname in ("LAR","LAR_ONL") or flags.Input.isMC:
             folder="/LAR/BadChannels/MissingFEBs"
         else: 
             folder="/LAR/BadChannelsOfl/MissingFEBs"
@@ -59,6 +59,7 @@ if __name__=="__main__":
     parser.add_argument("-f","--folder",default=None, help="database folder to read")
     parser.add_argument("-t","--tag",default=None, help="folder-level tag to read")
     parser.add_argument("-s","--summary",default="", help="Executive summary file")
+    parser.add_argument("--MC", action='store_true', default=False, help="Work on MC DB")
 
     (args,leftover)=parser.parse_known_args(sys.argv[1:])
 
@@ -71,11 +72,14 @@ if __name__=="__main__":
     flags=initConfigFlags()
     addLArCalibFlags(flags)
 
-    flags.Input.isMC = False
-    flags.IOVDb.DatabaseInstance="CONDBR2"
+    flags.Input.isMC = args.MC
+    flags.IOVDb.DatabaseInstance="OFLP200" if args.MC else "CONDBR2"
     flags.LAr.doAlign=False
     flags.Input.RunNumbers=[args.runnumber]
-    flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2022-06"
+    flags.IOVDb.GlobalTag="OFLCOND-MC21-SDR-RUN3-11" if args.MC else "CONDBR2-ES1PA-2023-02"
+    if args.MC:
+       from Campaigns.Utils import Campaign
+       flags.Input.MCCampaign = Campaign.MC21a
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     

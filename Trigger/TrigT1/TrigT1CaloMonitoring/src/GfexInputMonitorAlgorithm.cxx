@@ -18,6 +18,7 @@ StatusCode GfexInputMonitorAlgorithm::initialize() {
 
 	// we initialise all the containers that we need
 	ATH_CHECK( m_gFexTowerContainerKey.initialize() );
+    ATH_CHECK( m_gFexEmulatedTowerKey.initialize(SG::AllowEmpty) );
 
 	return AthMonitorAlgorithm::initialize();
 }
@@ -39,22 +40,70 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 	auto Towerphi = Monitored::Scalar<float>("TowerPhi",0.0);
 	auto Towersaturationflag = Monitored::Scalar<char>("TowerSaturationflag",0.0);
 	auto Toweret = Monitored::Scalar<int>("TowerEt",0);
+    auto TowerId = Monitored::Scalar<uint32_t>("TowerId",0);
 	auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
     auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(GetEventInfo(ctx)->lumiBlock()));
     auto lbn = Monitored::Scalar<int>("LBN",GetEventInfo(ctx)->lumiBlock());
 	auto binNumber = Monitored::Scalar<int>("binNumber",0);
-	
 
+    std::map<uint32_t, const xAOD::gFexTower*> emulatedTowers;
+    if(!m_gFexEmulatedTowerKey.empty()) {
+        SG::ReadHandle<xAOD::gFexTowerContainer> gFexEmulatedTowerContainer{m_gFexEmulatedTowerKey, ctx};
+        if(!gFexEmulatedTowerContainer.isValid()){
+            ATH_MSG_ERROR("No gFex Emulated Tower container found in storegate  "<< m_gFexEmulatedTowerKey);
+            return StatusCode::FAILURE;
+        }
+
+        for(const xAOD::gFexTower* tower : *gFexEmulatedTowerContainer){
+            if(emulatedTowers.find(tower->gFEXtowerID())!=emulatedTowers.end()) {
+                ATH_MSG_WARNING("Duplicate towers with ID = " << tower->gFEXtowerID());
+            }
+            emulatedTowers[tower->gFEXtowerID()] = tower;
+        }
+    }
+
+    auto Decision = Monitored::Scalar<std::string>("Error", "");
+    auto refTowerET = Monitored::Scalar<int>("RefTowerEt",0);
+    auto refTowerSat = Monitored::Scalar<char>("RefTowerSat",0.0);
 
 	unsigned int nTowers = 0;
 	for(const xAOD::gFexTower* gfexTowerRoI : *gFexTowerContainer){
 
-		Toweret=gfexTowerRoI->towerEt();
-		Towersaturationflag=gfexTowerRoI->isSaturated();
-		fill("gTowers",Toweret,Towersaturationflag);
+        Toweret=gfexTowerRoI->towerEt();
+        Towersaturationflag=gfexTowerRoI->isSaturated();
+        float eta = gfexTowerRoI->eta();
+        float phi = gfexTowerRoI->phi();
 
-		float eta = gfexTowerRoI->eta();
-		float phi = gfexTowerRoI->phi();
+        if(!emulatedTowers.empty()) {
+            Towereta = eta; Towerphi = phi;
+            TowerId=gfexTowerRoI->gFEXtowerID();
+            // compare to emulated towers
+            auto eTowerItr = emulatedTowers.find(gfexTowerRoI->gFEXtowerID());
+            if(eTowerItr == emulatedTowers.end()) {
+                // missing emulated tower?
+                Decision = "MissingTower";
+                fill("errors",Decision,lbnString,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+                continue;
+            }
+
+            const auto eTower = eTowerItr->second;
+            refTowerET = eTower->towerEt();
+            refTowerSat = eTower->isSaturated();
+
+            if(refTowerET != Toweret) {
+                Decision = "ETMismatch";
+                fill("errors",Decision,lbnString,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+            }
+            if(refTowerSat != Towersaturationflag) {
+                Decision = "SatMismatch";
+                fill("errors",Decision,lbnString,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+            }
+
+        }
+
+
+
+		fill("gTowers",Toweret,Towersaturationflag);
 
 		if (eta < -3.17 && eta > -3.25){ eta = -3.225;}
 		if (eta < 3.3 && eta > 3.17){ eta = 3.275;}

@@ -139,6 +139,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
     if(missingLAr) {
         Decision = "MissingSCells";
         fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+        ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
     }
 
 
@@ -161,11 +162,13 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
         Decision="BadEMStatus";
         ErrorAndLocation = std::string("#splitline{") + Decision + "}{" + std::to_string(TowerId) + "}";
         fill("errors",Decision,ErrorAndLocation,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
+        ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
     }
       if(eTower->had_status()) {
           Decision="BadHadStatus";
           ErrorAndLocation = std::string("#splitline{") + Decision + "}{" + std::to_string(TowerId) + "}";
           fill("errors",Decision,ErrorAndLocation,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
+          ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
       }
       std::vector<uint16_t> counts=eTower->et_count();
       std::vector<uint16_t> refcounts;
@@ -192,10 +195,12 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                   }
                   Decision = "MissingLAr";
                   fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+                  ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
               } else {
                   Decision = "MissingTile";
                   SlotSCID="";
                   fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+                  ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
               }
               continue;
           }
@@ -234,6 +239,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                   }
                   ErrorAndLocation = std::string("#splitline{") + Decision + "}{" + std::to_string(TowerId) + "}";
                   fill("errors",Decision,ErrorAndLocation,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+                  ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
               }
           }
           // since lar invalid codes will be treated as a 0 energy, don't fill into plot
@@ -245,7 +251,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                   if(etaIdx>0) etaIdx--; // so goes from -25 to 24
                   int phiIdx = std::abs(TowerId % 100000)/1000;
                   if(phiIdx>31) phiIdx -= 64; // so goes from -32 to 31
-                  binNumber = (phiIdx+32)*50 + 26 + etaIdx; // = 50*(y-1)+x as displayed in standard histogram
+                  binNumber = (25 + etaIdx)*64 + phiIdx+33; // = 64*(x-1)+y as displayed in standard histogram
                   fill((i<10) ? "ecal" : "hcal",lbn,Towereta,Towerphi,TowerCount,AboveCut,BelowCut,binNumber);
               }
           }

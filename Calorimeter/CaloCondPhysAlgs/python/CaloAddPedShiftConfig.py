@@ -41,13 +41,16 @@ if __name__=="__main__":
     parser= argparse.ArgumentParser(description="CaloCell Pedestal shift")
     parser.add_argument('-t', '--globaltag', type=str, help="Global conditions tag ")
     parser.add_argument('-i','--input', type=str, default="",  help="Input text file")
-    parser.add_argument('-o', '--output',type=str,default="cellped_data.root",help="name for root output files")
+    parser.add_argument('-o', '--output',type=str,default="pedestalshift_data.root",help="name for root output files")
+    parser.add_argument('-r', '--run', type=int, default=0xFFFFFFE, help="Run number to use to query Conddb")
+    parser.add_argument('-l', '--lb', type=int, default=0, help="LB to use to query Conddb")
     args = parser.parse_args()
     print(args)
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Input.RunNumbers=[0xFFFFFFE,]
+    flags.Input.RunNumbers=[args.run,]
+    flags.Input.LumiBlockNumbers=[args.lb,]
     flags.Input.Files=[]
     flags.IOVDb.DatabaseInstance="CONDBR2"
     from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags

@@ -2,7 +2,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCALIBUTILS_LAROFCALGORITHM_H
@@ -102,6 +102,10 @@ private:
 			      std::vector<float>& vecOFCa, std::vector<float>& vecOFCb // Output variables;
 			      ) ; 
 
+  static void           optFiltPed(const std::vector<float> &gWave_in, const std::vector<float>  &gDerivWave_in, const Eigen::MatrixXd& autoCorrInv, //input variables
+			 std::vector<float>& OFCa, std::vector<float>& OFCb // Output variables;
+			 ) ; 
+
   void process(perChannelData_t&, const LArOnOffIdMapping* cabling) const;
 
 
@@ -114,23 +118,23 @@ private:
   StatusCode     initPhysWaveContainer(const LArOnOffIdMapping* cabling);
   StatusCode     initCaliWaveContainer();
 
+  unsigned int  m_nPoints;
     
-  std::string              m_dumpOFCfile ;
-  std::vector<std::string> m_keylist;
-  bool                     m_verify; 
-  bool                     m_normalize;
-  bool                     m_timeShift;
-  int                      m_timeShiftByIndex ;
+  StringProperty           m_dumpOFCfile{this, "DumpOFCfile", ""};
+  StringArrayProperty      m_keylist{this, "KeyList", {}, "List of keys to process"};
+  BooleanProperty          m_verify{this, "Verify", true, "Verufy OFCs after computation"}; 
+  BooleanProperty          m_normalize{this, "Normalize", false, "Normalize input wave"};
+  BooleanProperty          m_timeShift{this, "TimeShift", false, "Shifting input wave"};
+  IntegerProperty          m_timeShiftByIndex{this, "TimeShiftByIndex", -1, "shifting by n bins input wave"} ;
 
 
   LArCaliWaveContainer*    m_waveCnt_nc=nullptr;
 
-  unsigned int             m_nSamples;
-  unsigned int             m_nPhases;
-  unsigned int             m_dPhases; // number of samples between two neighboring phases (OFC sets)
-  unsigned int             m_nDelays ;
-  unsigned int             m_nPoints;
-  float                    m_addOffset;
+  UnsignedIntegerProperty  m_nSamples{this, "Nsample", 5, "How many sample to compute"};
+  UnsignedIntegerProperty  m_nPhases{this, "Nphase", 50, "How many sphases to compute"};
+  UnsignedIntegerProperty  m_dPhases{this, "Dphase", 1, "Number of samples between two neighboring phases (OFC sets)"};
+  UnsignedIntegerProperty  m_nDelays{this, "Ndelay", 24, "Number of delays in one clock"};
+  FloatProperty            m_addOffset{this, "AddTimeOffset", 0., "Time offset to add"} ;
 
   ToolHandle<ILArAutoCorrDecoderTool> m_AutoCorrDecoder{this,"DecoderTool",{} };
   ToolHandle<ILArAutoCorrDecoderTool> m_AutoCorrDecoderV2{this,"DecoderToolV2", {} };
@@ -139,31 +143,33 @@ private:
   const LArOnlineID_Base*  m_onlineID; 
   const LArOFCBinComplete* m_larPhysWaveBin;
 
-  double m_errAmpl;
-  double m_errTime;
+  DoubleProperty m_errAmpl{this, "ErrAmplitude", 0.01, "Allowed amplitude difference in check"};
+  DoubleProperty m_errTime{this, "ErrTime",      0.01, "Allowed time difference in check"};
 
-  bool                     m_readCaliWave ;
-  bool                     m_fillShape ;
-  std::string              m_ofcKey; 
-  std::string              m_ofcKeyV2; 
-  std::string              m_shapeKey; 
-  bool                     m_storeMaxPhase;
-  std::string              m_ofcBinKey;
+  BooleanProperty          m_readCaliWave{this, "ReadCaliWave",  true,       "If false PhysWave is input"};
+  BooleanProperty          m_fillShape{this,    "FillShape",     false,      "Fill also shape object"};
+  StringProperty           m_ofcKey{this,       "KeyOFC",        "LArOFC",   "Output key non-pileup OFCs"}; 
+  StringProperty           m_ofcKeyV2{this,     "KeyOFCV2",      "LArOFCV2", "Output key pileup OFCs"}; 
+  StringProperty           m_shapeKey{this,     "KeyShape",      "LArShape", "Output key Shape object"}; 
+  BooleanProperty          m_storeMaxPhase{this,"StoreMaxPhase", false,      "Store phase of input wave max.?"};
+  StringProperty           m_ofcBinKey{this,    "LArOFCBinKey",  "LArOFCPhase","Key for storing OFCBin object for MAx phase"};
 
-  // Grouping type
-  std::string              m_groupingType;
-  std::string              m_larPhysWaveBinKey;
+  StringProperty           m_groupingType{this,  "GroupingType",  "SubDetector","Which grouping type to use"};
+  StringProperty           m_larPhysWaveBinKey{this,"LArPhysWaveBinKey", "",  "Key for object to choose bin"};
 
-  int                      m_useDelta;
-  int                      m_useDeltaV2;
-  bool                     m_computeV2;
-  int                      m_nThreads;
+  IntegerProperty          m_useDelta{this,      "UseDelta",      0,          "0= not use Delta, 1=only EMECIW/HEC/FCAL, 2=all , 3 = only EMECIW/HEC/FCAL1+high eta FCAL2-3"};
+  IntegerProperty          m_useDeltaV2{this,    "UseDeltaV2",    0,          "Same af before for Delta"};
+  BooleanProperty          m_computeV2{this,     "ComputeOFCV2",  false,      "Compute pileup OFCs?"};
+  BooleanProperty          m_computePed{this,    "ComputeOFCPed", false,      "Compute OFCs with additional constraint to pedestal?"};
+  IntegerProperty          m_nThreads{this,      "nThreads",      -1,         "-1: No TBB, 0: Let TBB decide, >0 number of threads"};
 
-  bool                     m_readDSPConfig;
-  std::string              m_DSPConfigFolder;
+  BooleanProperty          m_readDSPConfig{this, "ReadDSPConfig", false,      "Read DSPConfig object ?"};
+  StringProperty           m_DSPConfigFolder{this,"DSPConfigFolder","/LAR/Configuration/DSPConfiguration", "Folder for DSPConfig object"};
   std::unique_ptr<LArDSPConfig>  m_DSPConfig;
 
-  bool                     m_forceShift;
+  BooleanProperty          m_forceShift{this,     "ForceShift",   false,       "Forcing shift of input wave ?"};
+
+  BooleanProperty m_isSC{this, "isSC", false, "Running on cells or supercells?"};
 
   Eigen::VectorXd getDelta(std::vector<float>& samples, const HWIdentifier chid, unsigned nSamples) const;
  
@@ -191,9 +197,6 @@ private:
     const LArOnOffIdMapping* m_cabling;
     const LArOFCAlg* m_ofcAlg;
   };
-  
-  // Running on cells or supercells?
-  bool m_isSC;
 };
 
 

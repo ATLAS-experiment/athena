@@ -27,6 +27,10 @@ if __name__ == "__main__":
     flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
     flags.Output.ESDFileName = args.output
     flags.Input.Files = args.inputFile
+
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA23
+
     flags.lock()
    
     cfg = setupServicesCfg(flags)
