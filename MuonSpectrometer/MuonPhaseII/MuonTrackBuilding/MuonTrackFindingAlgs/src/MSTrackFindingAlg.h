@@ -69,11 +69,9 @@ namespace MuonR4{
             /** @brief Iterates over the search tree and combines close-by segments to a track seed.
              *         Seeds with the same segments as other seeds are deduplicated
              *  @brief ctx: The event's context to access StoreGate & Conditions
-             *  @param segSearchTree: Presorted collection of segments
-             *  @param trackSeeds: Output track seed container. */
-            void findTrackSeeds(const EventContext& ctx,
-                                const SortTree_t& segSearchTree, 
-                                MsTrackSeedContainer& trackSeeds) const;
+             *  @param segSearchTree: Presorted collection of segments */
+            std::unique_ptr<MsTrackSeedContainer> findTrackSeeds(const EventContext& ctx,
+                                                                 const SortTree_t& segSearchTree) const;
             
             StatusCode drawEvent(const EventContext& ctx,
                                  const SortTree_t& segSearchTree,

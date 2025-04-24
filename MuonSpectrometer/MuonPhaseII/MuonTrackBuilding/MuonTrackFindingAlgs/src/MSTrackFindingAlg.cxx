@@ -64,9 +64,7 @@ namespace MuonR4{
  
         const SortTree_t segSearchTree = constructTree(ctx);
 
-        auto seedContainer = std::make_unique<MsTrackSeedContainer>();
-
-        findTrackSeeds(ctx,segSearchTree, *seedContainer);
+        auto seedContainer =  findTrackSeeds(ctx,segSearchTree);
 
         ATH_CHECK(drawEvent(ctx, segSearchTree, *seedContainer));
 
@@ -147,9 +145,11 @@ namespace MuonR4{
         return SortTree_t{std::move(treeData)};
     }
 
-    void MSTrackFindingAlg::findTrackSeeds(const EventContext& ctx,
-                                           const SortTree_t& segSearchTree, 
-                                           MsTrackSeedContainer& trackSeeds) const {
+    std::unique_ptr<MsTrackSeedContainer> 
+            MSTrackFindingAlg::findTrackSeeds(const EventContext& ctx,
+                                              const SortTree_t& segSearchTree) const {
+
+        MsTrackSeedContainer trackSeeds{};
 
         for (const auto& [coords, seedCandidate] : segSearchTree) {
             /** Bad segment not suitable for track seeding or the segment coordinates are
@@ -186,40 +186,33 @@ namespace MuonR4{
                 continue;
             }
             newSeed.addSegment(seedCandidate);
-            /** @brief calculate the seed's position */
+            /** Calculate the seed's position */
             const double r = newSeed.location() == Location::Barrel ? m_refBarrelR : coords[1];
             const double z = newSeed.location() == Location::Barrel ? coords[1] : coords[0]* m_refEndcapDiscZ;
             Amg::Vector3D pos = r * Amg::dirFromAngles(seedCandidate->position().phi(), 90. * Gaudi::Units::deg)
                               + z * Amg::Vector3D::UnitZ();
             
             newSeed.setPosition(std::move(pos));
-            
-            /** Search in all existing seeds whether the segments are already part of it  */
-            MsTrackSeedContainer::iterator exist_itr = 
-                std::ranges::find_if(trackSeeds, [&newSeed](const MsTrackSeed& exist) {
-                    const int sector = newSeed.msSector()->sector();
-                    const int side = newSeed.msSector()->side();
-                    const int exSector = exist.msSector()->sector();
-                    const int exSide =  exist.msSector()->side();
-                    if (side != exSide || std::abs(sector - exSector) > 1){
-                        return false;
-                    }
-                    const unsigned overlap = std::ranges::count_if(newSeed.segments(), 
-                        [&exist](const xAOD::MuonSegment* seg){
-                        return std::ranges::find(exist.segments(), seg)!= exist.segments().end();
-                    });
-                    return overlap == newSeed.segments().size();
-                });
-            if (exist_itr != trackSeeds.end()) {
-                if (exist_itr->segments().size() >= newSeed.segments().size()) {
-                    continue;
-                }
-                /** This seed is better replace the worse one with this one*/
-                std::swap(*exist_itr, newSeed);
-                continue;
-            }
             trackSeeds.emplace_back(std::move(newSeed));
         }
+        /** Resort the seeds starting from the ones with the most segments to the lowest  */
+        std::ranges::sort(trackSeeds, [](const MsTrackSeed& a, const MsTrackSeed&b) {
+           return a.segments().size() > b.segments().size();
+        });
+        auto outputSeeds = std::make_unique<MsTrackSeedContainer>();
+        outputSeeds->reserve(trackSeeds.size());
+        std::ranges::copy_if(trackSeeds, std::back_inserter(*outputSeeds),
+                             [&ctx, this, &outputSeeds](const MsTrackSeed& testMe) {
+                                /** Only seeds which are not subsets of others are kept*/
+                                const bool add =  std::ranges::find_if(*outputSeeds, [&testMe](const MsTrackSeed& goodSeed){
+                                    return testMe < goodSeed;
+                                }) == outputSeeds->end();
+                                if (add) {
+                                    ATH_MSG_VERBOSE("Add new seed "<<ctx.eventID().event_number()<<std::endl<<testMe);
+                                }
+                                return add;
+                             });
+        return outputSeeds;
     }
     StatusCode MSTrackFindingAlg::drawEvent(const EventContext& ctx,
                                             const SortTree_t& segSearchTree,
@@ -235,6 +228,7 @@ namespace MuonR4{
         if (!m_summaryCan) {
             return StatusCode::SUCCESS;
         }
+        constexpr double inM = 1./ Gaudi::Units::m;
 
         std::vector<std::unique_ptr<TObject>> primitives{}, primitivesRPhi{}, legendPrim{};
 
@@ -249,7 +243,7 @@ namespace MuonR4{
             std::unordered_set<const xAOD::TruthParticle*> truth{nullptr};
             double legY{0.9};
             for (const xAOD::MuonSegment* seg : *truthSegs){
-                const Amg::Vector3D pos{seg->position()};
+                const Amg::Vector3D pos{seg->position()* inM};
                 const Amg::Vector3D dir{seg->direction()};
 
                 const Amg::Vector2D projPos{pos.perp(), pos.z()};
@@ -258,7 +252,7 @@ namespace MuonR4{
                 CxxUtils::sincos phi{pos.phi()};
 
                 double lambda = Amg::intersect<2>(projPos, projDir, Amg::Vector2D::UnitX(), 
-                                                  m_refBarrelR).value_or(0.);
+                                                  m_refBarrelR * inM).value_or(0.);
            
                 const Amg::Vector2D barrel2D{projPos + lambda * projDir};
 
@@ -283,7 +277,7 @@ namespace MuonR4{
                 auto marker = std::make_unique<TMarker>(barrel2D.x(),barrel2D.y(), markerStyle);
                 marker->SetMarkerColor(kOrange + 2);
                 marker->SetMarkerSize(3);
-                if (std::abs(barrel2D.y()) < m_refEndcapDiscZ) {
+                if (std::abs(barrel2D.y()) < m_refEndcapDiscZ * inM) {
                     primitives.emplace_back(std::move(marker));
                     marker = std::make_unique<TMarker>(barrel2D.x() * phi.cs,
                                                        barrel2D.x() * phi.sn, markerStyle);
@@ -293,14 +287,14 @@ namespace MuonR4{
                 }
 
                 lambda = Amg::intersect<2>(projPos, projDir, Amg::Vector2D::UnitY(), 
-                                           sign(pos.z())* m_refEndcapDiscZ).value_or(0.);
+                                           sign(pos.z())* m_refEndcapDiscZ * inM).value_or(0.);
             
                 const Amg::Vector2D endcap2D{projPos + lambda * projDir};
 
-                marker = std::make_unique<TMarker>(endcap2D.x(),endcap2D.y(), markerStyle);
+                marker = std::make_unique<TMarker>(endcap2D.x(), endcap2D.y(), markerStyle);
                 marker->SetMarkerColor(kOrange + 2);
                 marker->SetMarkerSize(3);
-                if (endcap2D.x() < m_refEndcapDiscR) {
+                if (endcap2D.x() < m_refEndcapDiscR * inM) {
                     primitives.emplace_back(std::move(marker));
                     marker = std::make_unique<TMarker>(endcap2D.x() * phi.cs,
                                                        endcap2D.x() * phi.sn, markerStyle);
@@ -334,8 +328,8 @@ namespace MuonR4{
             if (coords[2] == 0 || coords[2] == 17){
                 continue;
             }
-            const double r = (coords[0] == static_cast<int>(Location::Barrel) ? m_refBarrelR : coords[1]);
-            const double z = (coords[0] == static_cast<int>(Location::Barrel) ? coords[1] : m_refEndcapDiscZ *  coords[0]);
+            const double r = (coords[0] == static_cast<int>(Location::Barrel) ? m_refBarrelR : coords[1]) * inM;
+            const double z = (coords[0] == static_cast<int>(Location::Barrel) ? coords[1] : m_refEndcapDiscZ *  coords[0]) * inM;
             const Segment* seg = detailedSegment(*aodSeg);
             const MuonGMR4::SpectrometerSector* sector = seg->msSector();
             sstr<<" **** "<<sector->identString()<<" "<<Amg::toString(seg->position())<<" + "<<Amg::toString(seg->direction())
@@ -369,8 +363,8 @@ namespace MuonR4{
                     break;
             }
 
-            bounding[0].expand(r-50.*Gaudi::Units::cm, r+ 50.*Gaudi::Units::cm);
-            bounding[1].expand(z-50.*Gaudi::Units::cm, z+ 50.*Gaudi::Units::cm);
+            bounding[0].expand(r-50.*Gaudi::Units::cm * inM, r+ 50.*Gaudi::Units::cm * inM);
+            bounding[1].expand(z-50.*Gaudi::Units::cm * inM, z+ 50.*Gaudi::Units::cm * inM);
             auto marker = std::make_unique<TMarker>(r,z, markerStyle);
             marker->SetMarkerColor(markerColor);
             marker->SetMarkerSize(2);
@@ -388,11 +382,11 @@ namespace MuonR4{
         for (const MsTrackSeed& seed : trackSeeds) {
             Acts::RangeXD<2, double> seedBounds{std::array{1.e9,1.e9}, std::array{-1.e9,-1.e9}};
             
-            const Amg::Vector3D& pos{seed.position()};
-            const double r = seed.position().perp();
-            const double z = seed.position().z();
+            const Amg::Vector3D pos{seed.position() * inM};
+            const double r = pos.perp();
+            const double z = pos.z();
             
-            auto marker = std::make_unique<TMarker>(pos.x(),pos.y(), kFullDiamond);
+            auto marker = std::make_unique<TMarker>(pos.x(), pos.y(), kFullDiamond);
             marker->SetMarkerColor(kBlack);
             marker->SetMarkerSize(2);
             primitivesRPhi.push_back(std::move(marker));
@@ -424,19 +418,37 @@ namespace MuonR4{
             primitivesRPhi.insert(primitivesRPhi.begin(), std::move(theLine));
         }
         /** Draw the legend */
-        auto legend = std::make_unique<TLegend>(0.1,0.01,0.5,0.2);
+        auto legend = std::make_unique<TLegend>(0.005,0.01,0.6,0.1);
+        legend->SetNColumns(4);
         {
             auto triangle = std::make_unique<TMarker>(0.,0, kOpenTriangleUp);            
-            legend->AddEntry(triangle.get(), "Inner");
+            legend->AddEntry(triangle.get(), "Inner", "P");
             legendPrim.emplace_back(std::move(triangle));
             auto openCross = std::make_unique<TMarker>(0,0, kOpenCrossX);
-            legend->AddEntry(openCross.get(), "Middle");
+            legend->AddEntry(openCross.get(), "Middle", "P");
             legendPrim.emplace_back(std::move(openCross));
             triangle = std::make_unique<TMarker>(0,0, kOpenFourTrianglesX);
-            legend->AddEntry(triangle.get(), "Outer");
+            legend->AddEntry(triangle.get(), "Outer", "P");
             legendPrim.emplace_back(std::move(triangle));
+            auto diamond = std::make_unique<TMarker>(0,0, kFullDiamond);
+            legend->AddEntry(diamond.get(), "Seed", "P");
+            legendPrim.emplace_back(std::move(diamond));
 
+            auto box = MuonValR4::drawBox(0.,0,1,1, kOrange +2, MuonValR4::fullFilling);
+            legend->AddEntry(box.get(), "Truth", "F");
+            legendPrim.emplace_back(std::move(box));
 
+            box = MuonValR4::drawBox(0.,0,1,1, kRed, MuonValR4::fullFilling);
+            legend->AddEntry(box.get(), "Barrel", "F");
+            legendPrim.emplace_back(std::move(box));
+
+            box = MuonValR4::drawBox(0.,0,1,1, kBlue, MuonValR4::fullFilling);
+            legend->AddEntry(box.get(), "Endcap (A)", "F");
+            legendPrim.emplace_back(std::move(box));
+
+            box = MuonValR4::drawBox(0.,0,1,1, kGreen, MuonValR4::fullFilling);
+            legend->AddEntry(box.get(), "Endcap (C)", "F");
+            legendPrim.emplace_back(std::move(box));
         }
 
         ATH_MSG_VERBOSE(std::endl<<sstr.str());
@@ -444,9 +456,9 @@ namespace MuonR4{
         auto canvas = std::make_unique<TCanvas>("can", "can", 800, 600);
         canvas->cd();
   
-        auto h1 = std::make_unique<TH2I>("frame", "frame;r[mm];z[mm]", 
+        auto h1 = std::make_unique<TH2I>("frame", "frame;r[m];z[m]", 
                                          1, bounding[0].min(), bounding[0].max(), 
-                                         1, bounding[1].min(), bounding[1].max());
+                                         1, bounding[1].min()-1, bounding[1].max()+1);
         h1->Draw("AXIS");
         for (auto& prim : primitives) {
             prim->Draw();
@@ -456,9 +468,9 @@ namespace MuonR4{
         canvas->SaveAs("AllMSTrksSeed.pdf");
         primitives.clear();
 
-        h1 = std::make_unique<TH2I>("frame1","frame;x[mm];y[mm]",
-                                    1,-bounding[0].max(),bounding[0].max(),
-                                    1,-bounding[0].max(),bounding[0].max());
+        h1 = std::make_unique<TH2I>("frame1","frame;x[m];y[m]",
+                                    1,-bounding[0].max()-0.5,bounding[0].max()+0.5,
+                                    1,-bounding[0].max()-0.5,bounding[0].max()+0.5);
         h1->Draw("AXIS");
         for (auto& prim : primitivesRPhi) {
             prim->Draw();

@@ -64,10 +64,11 @@ namespace MuonValR4{
         MuonVal::ThreeVectorBranch m_seedPos{m_tree, "MsTrkSeed_position"};
         /** @brief Is the seed in the encap or in the barrel chambers */
         MuonVal::VectorBranch<char>& m_seedType{m_tree.newVector<char>("MstTrkSeed_type")};
-        /** @brief */
-        // MuonVal::MatrixBranch<float>& m_seedSegProjections{m_tree.newMatrix<float>("MsTrkSeed_segmentPlaneProject")};
-        
+        /** @brief Maximum separation between the segments on the reference plane */
         MuonVal::VectorBranch<float>& m_seedLength{m_tree.newVector<float>("MsTrkSeed_length")};
+        /** @brief Maximum angular difference between the segments part of the seed */
+        MuonVal::VectorBranch<float>& m_seedThetaCone{m_tree.newVector<float>("MsTrkSeed_thetaCone")};
+
         /** @brief Link of the track seed to the building segment  */
         MuonVal::MatrixBranch<unsigned short>& m_seedRecoSegMatch{m_tree.newMatrix<unsigned short>("MsTrkSeed_segmentLinks")};
         /** @brief Link of the truth segments to the matchin reco segments */
