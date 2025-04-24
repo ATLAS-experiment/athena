@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODTruthCnvAlg.h"
 
@@ -51,7 +51,7 @@ namespace xAODMaker {
     
     xAODTruthCnvAlg::xAODTruthCnvAlg( const string& name, ISvcLocator* svcLoc )
       : AthReentrantAlgorithm( name, svcLoc )
-      , m_metaStore( "MetaDataStore", name )
+      , m_metaStore( "StoreGateSvc/MetaDataStore", name )
       , m_firstBeginRun(true)
     {
       // leaving metadata alone for now--to be updated

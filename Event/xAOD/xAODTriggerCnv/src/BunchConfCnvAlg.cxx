@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: BunchConfCnvAlg.cxx 583381 2014-02-14 15:58:20Z krasznaa $
 
 // Gaudi/Athena include(s):
 #include "AthenaKernel/errorcheck.h"
@@ -21,7 +19,7 @@ namespace xAODMaker {
                                      ISvcLocator* svcLoc )
       : AthAlgorithm( name, svcLoc ),
         m_bcConf( "Trig::TrigConfBunchCrossingTool/BunchCrossingTool" ),
-        m_metaStore( "MetaDataStore", name ),
+        m_metaStore( "StoreGateSvc/MetaDataStore", name ),
         m_bcc( nullptr ) {
 
       declareProperty( "EventName", m_eventName = "BunchConfKey" );
