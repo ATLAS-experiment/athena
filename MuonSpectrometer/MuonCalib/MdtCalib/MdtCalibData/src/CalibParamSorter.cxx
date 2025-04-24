@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MdtCalibData/CalibParamSorter.h>
 
 namespace MuonCalib{
 
-    CalibParamSorter::CalibParamSorter(double _tol) :
-        m_tolerance{_tol}{}
+    CalibParamSorter::CalibParamSorter(double tol) :
+        m_tolerance{tol}{}
                 
     int CalibParamSorter::compare(const std::vector<double>& a , const std::vector<double>& b) const {
         if (a.size() != b.size()) return a.size() < b.size() ? -1 : 1;
