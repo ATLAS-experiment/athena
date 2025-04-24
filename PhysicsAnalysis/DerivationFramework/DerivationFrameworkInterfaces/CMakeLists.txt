@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DerivationFrameworkInterfaces )
@@ -8,7 +8,7 @@ atlas_add_library( DerivationFrameworkInterfaces
    DerivationFrameworkInterfaces/*.h
    INTERFACE
    PUBLIC_HEADERS DerivationFrameworkInterfaces
-   LINK_LIBRARIES ExpressionEvaluationLib GaudiKernel StoreGateLib xAODBase )
+   LINK_LIBRARIES GaudiKernel )
 
 atlas_add_dictionary( DerivationFrameworkInterfacesDict
    DerivationFrameworkInterfaces/DerivationFrameworkInterfacesDict.h
