@@ -121,6 +121,8 @@ public:
   virtual SG::DataProxy* proxy_exact(const CLID& /*id*/,
                                      const std::string& /*key*/) const override
   { return nullptr; }
+  virtual SG::DataProxy* proxy_exact(SG::sgkey_t) const override
+  { return nullptr; }
 
   std::vector<SG::DataProxy*> proxies;
 };
