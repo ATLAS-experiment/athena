@@ -13,7 +13,7 @@
 # art-output: dcube*
 # art-html: dcube_shifter_last
 
-relname="r24.0.71"
+relname="r24.0.87"
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_mu100GeV_reco.root
