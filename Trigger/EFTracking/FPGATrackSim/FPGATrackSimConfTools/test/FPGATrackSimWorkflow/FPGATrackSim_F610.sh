@@ -27,15 +27,20 @@ run_F610(){
         Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
         Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
         Trigger.FPGATrackSim.runCKF=$RUN_CKF \
-        Trigger.FPGATrackSim.region=0 \
+        Trigger.FPGATrackSim.region=34 \
         Trigger.FPGATrackSim.pipeline='F-610' \
         Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
         Trigger.FPGATrackSim.doEDMConversion=True \
         Trigger.FPGATrackSim.doOverlapRemoval=False \
+        Trigger.FPGATrackSim.Hough.secondStage=False \
         Trigger.FPGATrackSim.writeToAOD=True \
         Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
         Trigger.FPGATrackSim.FakeNNonnxFile1st=$ONNX_INPUT_FAKE \
         Trigger.FPGATrackSim.ParamNNonnxFile1st=$ONNX_INPUT_PARAM \
+        Trigger.FPGATrackSim.FakeNNonnxFile2nd=$ONNX_INPUT_FAKE_2ND \
+        Trigger.FPGATrackSim.ParamNNonnxFile2nd=$ONNX_INPUT_PARAM_2ND \
+        Trigger.FPGATrackSim.ExtensionNNVolonnxFile=$ONNX_INPUT_VOL \
+        Trigger.FPGATrackSim.ExtensionNNHitonnxFile=$ONNX_INPUT_HIT \
         Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
         Output.AODFileName=$xAODOutput
 }
