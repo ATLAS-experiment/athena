@@ -413,11 +413,13 @@ namespace CP {
         loadAssociatedObjects(ctx, cache);
         std::vector<float>::iterator Cone = corrections.begin();
         for (const IsolationType& iso_type : types) {
-            std::lock_guard<std::mutex> guard{m_isoHelpersMutex};
-            IsoHelperMap::const_iterator Itr = m_isohelpers.find(iso_type);
-            if (Itr->second->backupIsolation(&par) == CP::CorrectionCode::Error) {
-                ATH_MSG_ERROR("Failed to backup isolation");
-                return CorrectionCode::Error;
+            {
+                std::lock_guard<std::mutex> guard{m_isoHelpersMutex};
+                IsoHelperMap::const_iterator Itr = m_isohelpers.find(iso_type);
+                if (Itr->second->backupIsolation(&par) == CP::CorrectionCode::Error) {
+                    ATH_MSG_ERROR("Failed to backup isolation");
+                    return CorrectionCode::Error;
+                }
             }
             if (isTrackIso(iso_type)) {
                 if (getCloseByCorrectionTrackIso(&par, iso_type, cache, (*Cone)) == CorrectionCode::Error) {
@@ -572,13 +574,15 @@ namespace CP {
             ATH_MSG_ERROR("Invalid isolation type " << toString(type));
             return CorrectionCode::Error;
         }
-        std::lock_guard<std::mutex> guard{m_isoHelpersMutex};
-        IsoHelperMap::const_iterator Itr = m_isohelpers.find(type);
-        if (Itr == m_isohelpers.end() || Itr->second->getOriginalIsolation(par, isoValue) == CorrectionCode::Error) {
-            ATH_MSG_WARNING("Could not retrieve the isolation variable " << toString(type));
-            return CorrectionCode::Error;
-        } else if (cache.tracks.empty())
-            return CorrectionCode::Ok;
+        {
+            std::lock_guard<std::mutex> guard{m_isoHelpersMutex};
+            IsoHelperMap::const_iterator Itr = m_isohelpers.find(type);
+            if (Itr == m_isohelpers.end() || Itr->second->getOriginalIsolation(par, isoValue) == CorrectionCode::Error) {
+                ATH_MSG_WARNING("Could not retrieve the isolation variable " << toString(type));
+                return CorrectionCode::Error;
+            } else if (cache.tracks.empty())
+                return CorrectionCode::Ok;
+        }
 
         float MaxDR = coneSize(par, type);
         const TrackSet ToExclude = getAssociatedTracks(par);
@@ -687,10 +691,12 @@ namespace CP {
             ATH_MSG_ERROR("getCloseByCorrectionTopoIso() -- The isolation type is not an et cone variable " << toString(type));
             return CorrectionCode::Error;
         }
-        std::lock_guard<std::mutex> guard{m_isoHelpersMutex};
-        if (m_isohelpers.at(type)->getOriginalIsolation(primary, isoValue) == CorrectionCode::Error) {
-            ATH_MSG_WARNING("Could not retrieve the isolation variable.");
-            return CorrectionCode::Error;
+        {
+            std::lock_guard<std::mutex> guard{m_isoHelpersMutex};
+            if (m_isohelpers.at(type)->getOriginalIsolation(primary, isoValue) == CorrectionCode::Error) {
+                ATH_MSG_WARNING("Could not retrieve the isolation variable.");
+                return CorrectionCode::Error;
+            }
         }
         /// Disable the correction of already isolated objects
         if (isoValue <= 0.) {
