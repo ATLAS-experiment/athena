@@ -78,7 +78,7 @@ namespace MuonR4{
     }
 
     void MSTrackFindingAlg::fillInSegment(const xAOD::MuonSegment* seg, 
-                                          const PlaneProjection project, 
+                                          const Location project, 
                                           TreeDataVec_t& dataVec) const {
         const Segment* recoSeg = detailedSegment(*seg);
         const MuonGMR4::SpectrometerSector* msSec = recoSeg->msSector();
@@ -89,7 +89,7 @@ namespace MuonR4{
         const Amg::Vector2D projDir{dir.perp(), dir.z()};
 
         double lambda{0.};
-        if (PlaneProjection::Barrel == project) {
+        if (Location::Barrel == project) {
             lambda = Amg::intersect<2>(projPos, projDir, Amg::Vector2D::UnitX(), 
                                         m_refBarrelR).value_or(0.);
         } else {
@@ -114,7 +114,7 @@ namespace MuonR4{
 
         SortTree_t::coordinate_t point;
         point[2] = seg->sector();
-        point[1] = (project == PlaneProjection::Barrel ? refPoint.y() :  refPoint.x());
+        point[1] = (project == Location::Barrel ? refPoint.y() :  refPoint.x());
         point[0] = static_cast<int>(project)*msSec->side();
         /// To properly catch the sector overlap at -pi append the segment another time if it's in sector 1 or 16
         if (point[2] == 1 || point[2] == 16) {
@@ -140,8 +140,8 @@ namespace MuonR4{
             treeData.reserve(2*inCont->size() + treeData.capacity());
                 
             for (const xAOD::MuonSegment* seg : *inCont) {
-                fillInSegment(seg, PlaneProjection::Barrel, treeData);
-                fillInSegment(seg, PlaneProjection::Endcap, treeData);
+                fillInSegment(seg, Location::Barrel, treeData);
+                fillInSegment(seg, Location::Endcap, treeData);
             }
         }
         return SortTree_t{std::move(treeData)};
@@ -159,18 +159,17 @@ namespace MuonR4{
                 !m_segSelector->passSeedingQuality(ctx, *recoCandidate)){
                 continue;
             }
-            const MuonGMR4::SpectrometerSector* msSeg = recoCandidate->msSector();
-            
             /** Define the search range. */    
             SortTree_t::range_t selectRange{};
-            /** Ensure that only endcap / barrel seeds are considered */
+            /** Ensure that only endcap / barrel seeds are considered. 
+             *  The values are integers -> add tiny margin */
             selectRange[0].shrink(coords[0] - 0.1, coords[0] + 0.1);
             /** Move 25 cm along the projected plane */
-            selectRange[1].shrink(coords[1] - 25.*Gaudi::Units::cm, coords[1] + 25.*Gaudi::Units::cm);
+            selectRange[1].shrink(coords[1] - m_seedHalfLength, coords[1] + m_seedHalfLength);
             /** Include the neighbouring sectors */
             selectRange[2].shrink(coords[2]-1.25, coords[2] + 1.25);
             
-            MsTrackSeed newSeed{};
+            MsTrackSeed newSeed{static_cast<Location>(std::abs(coords[0]))};
             /** Using the cube above, let the tree search for all compatible segments */
             
             segSearchTree.rangeSearchMapDiscard(selectRange, [this, &ctx, &newSeed, &recoCandidate](
@@ -188,8 +187,8 @@ namespace MuonR4{
             }
             newSeed.addSegment(seedCandidate);
             /** @brief calculate the seed's position */
-            const double r = coords[0] == static_cast<int>(PlaneProjection::Barrel) ? m_refBarrelR : coords[1];
-            const double z = coords[0] == static_cast<int>(PlaneProjection::Barrel) ? coords[1] : msSeg->side()* m_refEndcapDiscZ;
+            const double r = newSeed.location() == Location::Barrel ? m_refBarrelR : coords[1];
+            const double z = newSeed.location() == Location::Barrel ? coords[1] : coords[0]* m_refEndcapDiscZ;
             Amg::Vector3D pos = r * Amg::dirFromAngles(seedCandidate->position().phi(), 90. * Gaudi::Units::deg)
                               + z * Amg::Vector3D::UnitZ();
             
@@ -335,8 +334,8 @@ namespace MuonR4{
             if (coords[2] == 0 || coords[2] == 17){
                 continue;
             }
-            const double r = (coords[0] == static_cast<int>(PlaneProjection::Barrel) ? m_refBarrelR : coords[1]);
-            const double z = (coords[0] == static_cast<int>(PlaneProjection::Barrel) ? coords[1] : m_refEndcapDiscZ *  coords[0]);
+            const double r = (coords[0] == static_cast<int>(Location::Barrel) ? m_refBarrelR : coords[1]);
+            const double z = (coords[0] == static_cast<int>(Location::Barrel) ? coords[1] : m_refEndcapDiscZ *  coords[0]);
             const Segment* seg = detailedSegment(*aodSeg);
             const MuonGMR4::SpectrometerSector* sector = seg->msSector();
             sstr<<" **** "<<sector->identString()<<" "<<Amg::toString(seg->position())<<" + "<<Amg::toString(seg->direction())

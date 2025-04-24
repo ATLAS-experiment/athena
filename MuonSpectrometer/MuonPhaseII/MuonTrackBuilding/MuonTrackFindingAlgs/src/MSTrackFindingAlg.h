@@ -54,7 +54,7 @@ namespace MuonR4{
             SortTree_t constructTree(const EventContext& ctx) const;
 
             /** @brief Enum defining the projection plane. Either barrel cylinder or endcap disc */
-            enum class PlaneProjection { Barrel, Endcap };
+            using Location = MsTrackSeed::Location;
             /** @brief Fill a segment into the KDTree data vector by projecting it either onto the fictive 
              *         barrel cylinder or onto one of the two endcap discs. If the projection is within the
              *         cylinder / disc boundaries the segment is added. Further, segments at the discontinuous sectors
@@ -63,10 +63,14 @@ namespace MuonR4{
              *  @param project: Projection plane of choice (Barrel / Endcap)
              *  @param target: Output KDTree data vector to which the successful candidate is appended. */
             void fillInSegment(const xAOD::MuonSegment* seg, 
-                               PlaneProjection project, 
+                               Location project, 
                                TreeDataVec_t& target) const;
 
-            /** @brief  */
+            /** @brief Iterates over the search tree and combines close-by segments to a track seed.
+             *         Seeds with the same segments as other seeds are deduplicated
+             *  @brief ctx: The event's context to access StoreGate & Conditions
+             *  @param segSearchTree: Presorted collection of segments
+             *  @param trackSeeds: Output track seed container. */
             void findTrackSeeds(const EventContext& ctx,
                                 const SortTree_t& segSearchTree, 
                                 MsTrackSeedContainer& trackSeeds) const;
@@ -97,12 +101,12 @@ namespace MuonR4{
             /** @brief Track extrapolation tool */
             ToolHandle<IActsExtrapolationTool> m_extrapolator{this, "Extrapolator" ,"" };
                 
-            /** @brief Radius of the barrel reference cylinder onto which all segments are projected
-             *         Size is set in initialize as the radius of the BMS sector */
+            Gaudi::Property<double> m_seedHalfLength{this, "SeedHalfLength", 50.*Gaudi::Units::cm};
+            /** @brief Radius of the barrel reference cylinder onto which all segments are projected */
             double m_refBarrelR{7.*Gaudi::Units::m};
-            /** @brief  */
+            /** @brief Position along the beam axis of the referece disc onto which all endcap segments are projected */
             double m_refEndcapDiscZ{15.*Gaudi::Units::m};
-            /** @brief  */
+            /** @brief Radius of the reference disc. */
             double m_refEndcapDiscR{12.*Gaudi::Units::m};
 
             const Muon::MuonSectorMapping m_sectorMap{};

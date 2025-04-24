@@ -82,17 +82,23 @@ namespace MuonValR4 {
         for (const MuonR4::MsTrackSeed& seed : *trkSeeds) {
             unsigned int seedIdx = m_seedPos.size();
             m_seedPos += seed.position();
+            m_seedType+= static_cast<char>(seed.location());
+            double minL{Gaudi::Units::km},maxL{-Gaudi::Units::km};
             for (const xAOD::MuonSegment* seg : seed.segments()) {
                 m_seedRecoSegMatch[seedIdx].push_back(m_recoSegs->push_back(*seg));
                 const xAOD::MuonSegment* truthSeg = MuonR4::getMatchedTruthSegment(*seg);
                 if (!truthSeg) {
                     continue;
                 }
+                const double projected = expressAtRefPlane(*seg, seed.location());
+                minL = std::min(minL, projected);
+                maxL = std::max(maxL, projected);
 
                 std::vector<unsigned>& matchCounter = truthToSeedMatchCounter[MuonR4::getTruthMatchedParticle(*truthSeg)];
                 if (seedIdx >= matchCounter.size()) matchCounter.resize(seedIdx +1);
                 ++matchCounter[seedIdx];
             }
+            m_seedLength+=(maxL - minL);
         }
         /** Then dump the reconstructed segments */
         const xAOD::MuonSegmentContainer* recoSegments{nullptr};
@@ -141,6 +147,27 @@ namespace MuonValR4 {
         ATH_CHECK(m_tree.fill(ctx));
         return StatusCode::SUCCESS;
     }
+    double MsTrackTester::expressAtRefPlane(const xAOD::MuonSegment& segment,
+                                            const Location plane) const {
+
+        const Amg::Vector3D pos{segment.position()};
+        const Amg::Vector3D dir{segment.direction()};
+
+        const Amg::Vector2D projPos{pos.perp(), pos.z()};
+        const Amg::Vector2D projDir{dir.perp(), dir.z()};
+
+        double lambda{0.};
+        if (Location::Barrel == plane) {
+            lambda = Amg::intersect<2>(projPos, projDir, Amg::Vector2D::UnitX(), 
+                                       m_refBarrelR).value_or(0.);
+        } else {
+            lambda = Amg::intersect<2>(projPos, projDir, Amg::Vector2D::UnitY(), 
+                                    (projPos[1] > 0 ? 1. : .1)* m_refEndcapDiscZ).value_or(0.);
+        }
+        const Amg::Vector2D refPoint{ (projPos + lambda * projDir)};
+        return plane == Location::Barrel ? refPoint.y() :  refPoint.x();
+    }
+
     StatusCode MsTrackTester::finalize() {
         ATH_CHECK(m_tree.write());
         return StatusCode::SUCCESS;

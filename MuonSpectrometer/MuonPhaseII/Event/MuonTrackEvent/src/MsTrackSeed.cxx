@@ -5,6 +5,8 @@
 #include "MuonTrackEvent/MsTrackSeed.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
 namespace MuonR4 {
+    MsTrackSeed::MsTrackSeed(const Location loc): m_loc{loc}{}
+    MsTrackSeed::Location MsTrackSeed::location() const { return m_loc; }
     const std::unordered_set<const SpacePointBucket*>& MsTrackSeed::buckets() const { return m_buckets; }
     const std::vector<const xAOD::MuonSegment*>& MsTrackSeed::segments() const { return m_segments; }
     const std::vector<const Segment*>& MsTrackSeed::detailedSegments() const { return m_detSegments; }
