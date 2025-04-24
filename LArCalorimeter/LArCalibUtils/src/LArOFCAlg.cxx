@@ -38,11 +38,8 @@
 
 
 LArOFCAlg::LArOFCAlg(const std::string& name, ISvcLocator* pSvcLocator) 
-	: AthAlgorithm(name, pSvcLocator),
-	  m_calo_dd_man(nullptr),
-          m_onlineID(nullptr),
-	  m_larPhysWaveBin(nullptr)
-{; }
+	: AthAlgorithm(name, pSvcLocator)
+{}
 
 
 

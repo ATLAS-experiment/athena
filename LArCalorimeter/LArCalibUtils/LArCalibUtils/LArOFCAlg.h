@@ -118,7 +118,7 @@ private:
   StatusCode     initPhysWaveContainer(const LArOnOffIdMapping* cabling);
   StatusCode     initCaliWaveContainer();
 
-  unsigned int  m_nPoints;
+  unsigned int  m_nPoints{0};
     
   StringProperty           m_dumpOFCfile{this, "DumpOFCfile", ""};
   StringArrayProperty      m_keylist{this, "KeyList", {}, "List of keys to process"};
@@ -139,9 +139,9 @@ private:
   ToolHandle<ILArAutoCorrDecoderTool> m_AutoCorrDecoder{this,"DecoderTool",{} };
   ToolHandle<ILArAutoCorrDecoderTool> m_AutoCorrDecoderV2{this,"DecoderToolV2", {} };
 
-  const CaloDetDescrManager_Base* m_calo_dd_man;
-  const LArOnlineID_Base*  m_onlineID; 
-  const LArOFCBinComplete* m_larPhysWaveBin;
+  const CaloDetDescrManager_Base* m_calo_dd_man{};
+  const LArOnlineID_Base*  m_onlineID{};
+  const LArOFCBinComplete* m_larPhysWaveBin{};
 
   DoubleProperty m_errAmpl{this, "ErrAmplitude", 0.01, "Allowed amplitude difference in check"};
   DoubleProperty m_errTime{this, "ErrTime",      0.01, "Allowed time difference in check"};
