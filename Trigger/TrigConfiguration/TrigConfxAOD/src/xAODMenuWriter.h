@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFXAOD_XAODMENUWRITER_H
@@ -103,7 +103,7 @@ namespace TrigConf {
       Gaudi::Property< std::string > m_metaNameJSON_bg {this, "JSONMetaObjectNameBunchgroup", "TriggerMenuJson_BG",
         "StoreGate key for the xAOD::TriggerMenuJson BunchGroup configuration object"};
 
-      ServiceHandle< StoreGateSvc > m_metaStore {this, "MetaDataStore", "MetaDataStore",
+      ServiceHandle< StoreGateSvc > m_metaStore {this, "MetaDataStore", "StoreGateSvc/MetaDataStore",
         "The MetaDataStore"};
 
       ToolHandle<IKeyWriterTool> m_keyWriterTool{this, "KeyWriterTool", "KeyWriterTool/OfflineKeyWriterTool", 
