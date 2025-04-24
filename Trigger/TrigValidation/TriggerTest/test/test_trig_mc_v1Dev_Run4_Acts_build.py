@@ -14,11 +14,11 @@ run = ExecStep.ExecStep()
 run.type = 'athena'
 run.threads = 1
 #run.input = 'ttbar_pu200_Run4'
-run.input = 'Single_mu_Run4'                                              #need simpler dataset until tau completely sorted out
+run.input = 'Single_mu_Run4'                                     #need simpler dataset until egamma run-time completely sorted out
 run.job_options = 'TriggerJobOpts/runHLT.py'
 
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
-run.flags = ['Trigger.enabledSignatures=["Muon","Egamma","Jet","Bjet"]',  #need to skip Tau temporarily and disabled does not work
+run.flags = ['Trigger.enabledSignatures=["Muon","Egamma","Jet","Bjet","Tau"]',  #list signatures temporarily 
              'Trigger.useActsTracking=True',
              'Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
