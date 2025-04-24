@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file CopyEventStreamInfo.cxx
  *  @brief This file contains the implementation for the CopyEventStreamInfo class.
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
- *  $Id: CopyEventStreamInfo.cxx,v 1.7 2009-02-09 22:48:31 gemmeren Exp $
  **/
 
 #include "CopyEventStreamInfo.h"
@@ -15,12 +14,11 @@
 
 //___________________________________________________________________________
 CopyEventStreamInfo::CopyEventStreamInfo(const std::string& type,
-	const std::string& name,
-	const IInterface* parent) : ::AthAlgTool(type, name, parent),
-                m_metaDataSvc("MetaDataSvc", name),
-		m_inputMetaDataStore("StoreGateSvc/InputMetaDataStore", name) {
-   // Declare IMetaDataTool interface
-   declareInterface<IMetaDataTool>(this);
+                                         const std::string& name,
+                                         const IInterface* parent) :
+  base_class(type, name, parent),
+  m_metaDataSvc("MetaDataSvc", name),
+  m_inputMetaDataStore("StoreGateSvc/InputMetaDataStore", name) {
 }
 //___________________________________________________________________________
 CopyEventStreamInfo::~CopyEventStreamInfo() {
@@ -29,26 +27,9 @@ CopyEventStreamInfo::~CopyEventStreamInfo() {
 StatusCode CopyEventStreamInfo::initialize() {
    ATH_MSG_INFO("Initializing " << name());
    // Locate the MetaDataSvc and InputMetaDataStore
-   if (!m_metaDataSvc.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Could not find MetaDataSvc");
-      return(StatusCode::FAILURE);
-   }
-   if (!m_inputMetaDataStore.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Could not find InputMetaDataStore");
-      return(StatusCode::FAILURE);
-   }
-   return(StatusCode::SUCCESS);
-}
-//___________________________________________________________________________
-StatusCode CopyEventStreamInfo::finalize() {
-   ATH_MSG_DEBUG("in finalize()");
-   // release the MetaDataSvc and InputMetaDataStore
-   if (!m_metaDataSvc.release().isSuccess()) {
-      ATH_MSG_WARNING("Could not release MetaDataSvc");
-   }
-   if (!m_inputMetaDataStore.release().isSuccess()) {
-      ATH_MSG_WARNING("Could not release InputMetaDataStore");
-   }
+   ATH_CHECK( m_metaDataSvc.retrieve() );
+   ATH_CHECK( m_inputMetaDataStore.retrieve() );
+
    return(StatusCode::SUCCESS);
 }
 
@@ -80,20 +61,15 @@ StatusCode CopyEventStreamInfo::beginInputFile(const SG::SourceID&)
          continue;
       }
       std::list<SG::ObjectWithVersion<EventStreamInfo> > allVersions;
-      if (!m_inputMetaDataStore->retrieveAllVersions(allVersions, key).isSuccess()) {
-         ATH_MSG_ERROR("Could not retrieve all versions for EventStreamInfo");
-         return StatusCode::FAILURE;
-      }
+      ATH_CHECK( m_inputMetaDataStore->retrieveAllVersions(allVersions, key) );
+
       EventStreamInfo* evtStrInfo_out = 0;
       for (SG::ObjectWithVersion<EventStreamInfo>& obj : allVersions) {
          const EventStreamInfo* evtStrInfo_in = obj.dataObject.cptr();
          evtStrInfo_out = m_metaDataSvc->tryRetrieve<EventStreamInfo>(key);
          if( !evtStrInfo_out ) {
             auto esinfo_up = std::make_unique<EventStreamInfo>(*evtStrInfo_in);
-            if( m_metaDataSvc->record( std::move(esinfo_up), key ).isFailure()) {
-               ATH_MSG_ERROR("Could not record DataObject: " << key);
-               return StatusCode::FAILURE;
-            }
+            ATH_CHECK( m_metaDataSvc->record( std::move(esinfo_up), key ) );
          } else {
             evtStrInfo_out->addEvent(evtStrInfo_in->getNumberOfEvents());
             for (auto elem = evtStrInfo_in->getRunNumbers().begin(),
