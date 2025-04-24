@@ -51,10 +51,13 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
     LArOFPhasePick = CompFactory.LArOFPhasePicker("LArOFPhasePicker"+keySuffix)
     if flags.LArCalib.isSC:
         LArOFPhasePick.KeyPhase = "LArSCOFCPhase"
-        # FIXME: this should be taken from the COOL
-        print("InputSCOFCPhaseDb: ",InputSCOFCPhaseDb)
-        result.merge(addFolders(flags,"/LAR/ElecCalibOflSC/OFCBin/PhysShift",detDb=InputSCOFCPhaseDb,tag=SCOFCPhaseTag,
+
+        if InputSCOFCPhaseDb != "" and SCOFCPhaseTag != "": #set up reading of phases from sqlite
+           result.merge(addFolders(flags,"/LAR/ElecCalibOflSC/OFCBin/PhysShift",detDb=InputSCOFCPhaseDb,tag=SCOFCPhaseTag,
                                  modifiers="<key>LArSCOFCPhase</key>"))
+        else:
+           result.merge(addFolders(flags,"/LAR/ElecCalibOflSC/OFCBin/PhysShift", detDb="LAR_OFL",modifiers="<key>LArSCOFCPhase</key>"))
+
         if InputSCOFCWeightDb != "" and SCOFCWeightTag != "": # set up the weights for OFCPicker
            result.merge(addFolders(flags,"/LAR/ElecCalibOflSC/OFCFactor",detDb=InputSCOFCWeightDb,tag=SCOFCWeightTag,className="CondAttrListCollection"))
            LArOFCWeightCondAlg=CompFactory.getComp("LArFlatConditionsAlg<LArOFCweightSC>")
@@ -132,20 +135,20 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
     
     return result
 
-def LArOFPhasePickerCfg(flags,loadInputs=True,InputSCOFCPhaseDb = "/afs/cern.ch/user/p/pavol/w0/public/DB_update_22/fillDB/SCOFCPhase.db",SCOFCPhaseTag="LARElecCalibOflSCOFCBinPhysShift-07",InputSCOFCWeightDb="",SCOFCWeightTag=""):
+def LArOFPhasePickerCfg(flags,loadInputs=True,InputSCOFCPhaseDb = "",SCOFCPhaseTag="",InputSCOFCWeightDb="",SCOFCWeightTag=""):
 
     #Get basic services and cond-algos
     from LArCalibProcessing.LArCalibBaseConfig import LArCalibBaseCfg
     result=LArCalibBaseCfg(flags)
 
     if flags.LArCalib.isSC:
-       result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples",outputSuffix="4samples1phase",keySuffix="_1ns", nColl=0, loadInputs=loadInputs,InputSCOFCPhaseDb=InputSCOFCPhaseDb,SCOFCPhaseTag=SCOFCPhaseTag,InputSCOFCWeightDb=InputSCOFCWeightDb,SCOFCWeightTag=SCOFCWeightTag))
+       result.merge(_OFPhasePickerCfg(flags, inputSuffix=str(flags.LArCalib.OFC.Nsamples)+"samples",outputSuffix=str(flags.LArCalib.OFC.Nsamples)+"samples1phase",keySuffix="_1ns", nColl=0, loadInputs=loadInputs,InputSCOFCPhaseDb=InputSCOFCPhaseDb,SCOFCPhaseTag=SCOFCPhaseTag,InputSCOFCWeightDb=InputSCOFCWeightDb,SCOFCWeightTag=SCOFCWeightTag))
        if flags.LArCalib.OFC.Ncoll > 0:
-          result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples",outputSuffix="4samples1phase",keySuffix="_1ns_mu", nColl=flags.LArCalib.OFC.Ncoll, loadInputs=loadInputs, storeShape=False,InputSCOFCPhaseDb=InputSCOFCPhaseDb,SCOFCPhaseTag=SCOFCPhaseTag,InputSCOFCWeightDb=InputSCOFCWeightDb,SCOFCWeightTag=SCOFCWeightTag))
+          result.merge(_OFPhasePickerCfg(flags, inputSuffix=str(flags.LArCalib.OFC.Nsamples)+"samples",outputSuffix=str(flags.LArCalib.OFC.Nsamples)+"samples1phase",keySuffix="_1ns_mu", nColl=flags.LArCalib.OFC.Ncoll, loadInputs=loadInputs, storeShape=False,InputSCOFCPhaseDb=InputSCOFCPhaseDb,SCOFCPhaseTag=SCOFCPhaseTag,InputSCOFCWeightDb=InputSCOFCWeightDb,SCOFCWeightTag=SCOFCWeightTag))
     else:
-       result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="_3ns", nColl=0, loadInputs=loadInputs))
+       result.merge(_OFPhasePickerCfg(flags, inputSuffix=str(flags.LArCalib.OFC.Nsamples)+"samples3bins17phases",outputSuffix=str(flags.LArCalib.OFC.Nsamples)+"samples1phase",keySuffix="_3ns", nColl=0, loadInputs=loadInputs))
        if flags.LArCalib.OFC.Ncoll > 0:
-          result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="_3ns_mu", nColl=flags.LArCalib.OFC.Ncoll, loadInputs=loadInputs, storeShape=False))
+          result.merge(_OFPhasePickerCfg(flags, inputSuffix=str(flags.LArCalib.OFC.Nsamples)+"samples3bins17phases",outputSuffix=str(flags.LArCalib.OFC.Nsamples)+"samples1phase",keySuffix="_3ns_mu", nColl=flags.LArCalib.OFC.Ncoll, loadInputs=loadInputs, storeShape=False))
 
     #RegistrationSvc    
     result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = False))

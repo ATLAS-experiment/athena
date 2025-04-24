@@ -178,7 +178,7 @@ def mergeDBCfg(flags, InputKeys=[], InputSQLiteFiles=[]):
                                                        Run1 = flags.LArCalib.IOVStart, Run2= flags.LArCalib.IOVEnd, WriteIOV=True))
     pass
 
-    result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = True))
+    result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = False))
 
     #MC Event selector since we have no input data file
     from McEventSelector.McEventSelectorConfig import McEventSelectorCfg

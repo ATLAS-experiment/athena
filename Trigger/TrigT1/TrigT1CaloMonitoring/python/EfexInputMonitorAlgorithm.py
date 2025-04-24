@@ -38,22 +38,32 @@ def EfexInputMonitoringConfig(flags):
     # note: string DQ algo parameters must have leading/trailing ' char, to distinguish from other parts of algo config
     # these initial values were determined from run 486894 in 2024
     # these should be reviewed at an L1Calo meeting in 2025, prior to data taking
+    # commenting out for start of 2025 - will remove this comment once new set of known anomalies established
+    # knownAnomalies_hotHcal = {
+    #     "KnownDead":"\"1,29;12,57;15,57;18,24;18,41;18,50;19,41;2,29;20,41;21,41;22,41;23,29;23,41;24,41;25,36;25,41;26,18;26,38;27,18;28,18;29,18;32,18;33,18;41,21;41,54;42,21;42,43;47,6;7,62;8,54;9,41;9,51;9,52;9,53;9,54;9,56\"",
+    #     "KnownWarm":"\"26,3;27,3;28,3;29,3;30,3;31,3;32,3;33,3;34,3\"", # noisy tile drawer
+    #     "KnownHot":"\"15,49\"" # one hotspot in LAr HCal?
+    # }
+    # knownAnomalies_coldHcal = {
+    #     "KnownDead":"\"1,29;2,29;41,21;41,54;42,21;42,43;47,6;7,62;8,54;9,41;9,51;9,52;9,53;9,54;9,56\"",
+    #     "KnownWarm":"\"5,33\"" # one slightly-frequent coldspot
+    # }
+    # knownAnomalies_hotEcal = {
+    #     "KnownCold":"\"19,18;48,8;8,33;9,19;9,20;9,33;9,34\"",
+    #     "KnownWarm":"\"2,15;2,47;2,55;2,56;47,35;47,36;47,47;47,48;48,47;50,44\""
+    # }
+    # knownAnomalies_coldEcal = {
+    #     "KnownHot":"\"1,15;2,15;47,47;48,36\"",
+    #     "KnownWarm":"\"1,47;1,48;1,49;1,55;1,56;2,16;2,47;2,48;2,55;2,56;22,14;23,14;47,35;47,36;47,48;48,35;48,47;48,48;49,51;50,43;50,44\""
+    # }
+
     knownAnomalies_hotHcal = {
-        "KnownDead":"\"1,29;12,57;15,57;18,24;18,41;18,50;19,41;2,29;20,41;21,41;22,41;23,29;23,41;24,41;25,36;25,41;26,18;26,38;27,18;28,18;29,18;32,18;33,18;41,21;41,54;42,21;42,43;47,6;7,62;8,54;9,41;9,51;9,52;9,53;9,54;9,56\"",
-        "KnownWarm":"\"26,3;27,3;28,3;29,3;30,3;31,3;32,3;33,3;34,3\"", # noisy tile drawer
-        "KnownHot":"\"15,49\"" # one hotspot in LAr HCal?
     }
     knownAnomalies_coldHcal = {
-        "KnownDead":"\"1,29;2,29;41,21;41,54;42,21;42,43;47,6;7,62;8,54;9,41;9,51;9,52;9,53;9,54;9,56\"",
-        "KnownWarm":"\"5,33\"" # one slightly-frequent coldspot
     }
     knownAnomalies_hotEcal = {
-        "KnownCold":"\"19,18;48,8;8,33;9,19;9,20;9,33;9,34\"",
-        "KnownWarm":"\"2,15;2,47;2,55;2,56;47,35;47,36;47,47;47,48;48,47;50,44\""
     }
     knownAnomalies_coldEcal = {
-        "KnownHot":"\"1,15;2,15;47,47;48,36\"",
-        "KnownWarm":"\"1,47;1,48;1,49;1,55;1,56;2,16;2,47;2,48;2,55;2,56;22,14;23,14;47,35;47,36;47,48;48,35;48,47;48,48;49,51;50,43;50,44\""
     }
 
     commonAlgConfig = {"libname":"libdqm_summaries.so",
@@ -82,6 +92,16 @@ def EfexInputMonitoringConfig(flags):
                              thresholdConfig=commonThresholdConfig
                              )
 
+    helper.defineDQAlgorithm("Efex_ecal_hot_etaPhiLBMapOutliers",
+                             hanConfig=commonAlgConfig|hotCuts|knownAnomalies_hotEcal|{"NBinsY":64,"LiveMode":1},
+                             thresholdConfig=commonThresholdConfig
+                             )
+
+    helper.defineDQAlgorithm("Efex_hcal_hot_etaPhiLBMapOutliers",
+                             hanConfig=commonAlgConfig|hotCuts|knownAnomalies_hotHcal|{"NBinsY":64,"LiveMode":1},
+                             thresholdConfig=commonThresholdConfig
+                             )
+
     helper.defineDQAlgorithm("Efex_ecal_cold_etaPhiMapOutliers",
                              hanConfig=commonAlgConfig|coldCuts|knownAnomalies_coldEcal,
                              thresholdConfig=commonThresholdConfig
@@ -102,10 +122,10 @@ def EfexInputMonitoringConfig(flags):
                                xbins=50,xmin=-2.5,xmax=2.5,
                                ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])
 
-        helper.defineHistogram(f'LBN,binNumber;h_dataTowers_{layer}_hot_posVsLBN',title=f'{layer.upper()} SuperCells >= 500MeV;LB;50(y-1)+x',
-                           path="Expert/Inputs/eFEX/detail",
+        helper.defineHistogram(f'LBN,binNumber;h_dataTowers_{layer}_hot_posVsLBN',title=f'{layer.upper()} SuperCells >= 500MeV;LB;64(x-1)+y',
+                           paths=["Expert/Inputs/eFEX/detail","Shifter/Inputs/eFEX"],
                            cutmask="AboveCut",
-                           hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='../h_dataTowers_{layer}_hot_EtaPhiMap'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
+                           hanConfig={"algorithm":f"Efex_{layer}_hot_etaPhiLBMapOutliers","description":f"x and y correspond to axis bin numbers on <a href='../h_dataTowers_{layer}_hot_EtaPhiMap'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
                            fillGroup=layer,
                            type='TH2I',
                            xbins=1,xmin=0,xmax=10,
@@ -120,7 +140,7 @@ def EfexInputMonitoringConfig(flags):
                                xbins=50,xmin=-2.5,xmax=2.5,
                                ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])
 
-        helper.defineHistogram(f'LBN,binNumber;h_dataTowers_{layer}_cold_posVsLBN',title=f'{layer.upper()} SuperCells <= -500MeV;LB;50(y-1)+x',
+        helper.defineHistogram(f'LBN,binNumber;h_dataTowers_{layer}_cold_posVsLBN',title=f'{layer.upper()} SuperCells <= -500MeV;LB;64(x-1)+y',
                                path="Expert/Inputs/eFEX/detail",
                                cutmask="BelowCut",
                                hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='../h_dataTowers_{layer}_cold_EtaPhiMap'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},

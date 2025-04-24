@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Compares results of a slice chains when running in full menu and when running alone with other slices disabled by prescaling
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
+# art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*
@@ -106,9 +107,9 @@ def remove_disabled_counts(counts_file, ps_file_pattern):
 
 def generate_config_steps():
     # athena
-    from TriggerTest.MCExecStep import MCExecStep
-    
-    ex = MCExecStep('ConfigOnly',menu='Dev_pp_run3_v1')
+    from TriggerTest.MCExecStep import MCGridStep
+
+    ex = MCGridStep('ConfigOnly',menu='Dev_pp_run3_v1')
     ex.config_only = True
     ex.input = 'ttbar'
     ex.max_events = 100

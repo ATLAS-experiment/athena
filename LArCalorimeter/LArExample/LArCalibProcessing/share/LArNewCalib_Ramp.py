@@ -7,6 +7,8 @@ if __name__=='__main__':
 
    import os,sys
    import argparse
+   from AthenaCommon import Logging
+   log = Logging.logging.getLogger( 'LArRamp' )
 
    # now process the CL options and assign defaults
    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -14,7 +16,7 @@ if __name__=='__main__':
    parser.add_argument('-r','--run', dest='run', default='00408920', help='Run number string as in input filename', type=str)
    parser.add_argument('-g','--gain', dest='gain', default="MEDIUM", help='Gain string', type=str)
    parser.add_argument('-p','--partition', dest='partition', default="Em", help='Data taking partition string', type=str)
-   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data24_calib", help='File prefix string', type=str)
+   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data25_calib", help='File prefix string', type=str)
    parser.add_argument('-i','--indirprefix', dest='dprefix', default="/eos/atlas/atlastier0/rucio/", help='Input directory prefix string', type=str)
    parser.add_argument('-d','--indir', dest='indir', default="", help='Full input dir string', type=str)
    parser.add_argument('-t','--trigger', dest='trig', default='calibration_', help='Trigger string in filename', type=str)
@@ -44,7 +46,7 @@ if __name__=='__main__':
 
    for _, value in args._get_kwargs():
     if value is not None:
-        print(value)
+        print(_,":",value)
 
    if len(args.run) < 8:
       args.run = args.run.zfill(8)
@@ -135,6 +137,8 @@ if __name__=='__main__':
          flags.LArCalib.Preselection.FT = [3,10,16,22]
       elif args.subdet == 'HECFCAL':
          flags.LArCalib.Preselection.FT = [3,6,10,16,22]
+   else:
+      flags.LArCalib.Input.SubDet=args.subdet
    
    #Configure the Bad-Channel database we are reading 
    #(the AP typically uses a snapshot in an sqlite file
@@ -190,8 +194,6 @@ if __name__=='__main__':
    
    from AthenaCommon.Constants import INFO 
    flags.Exec.OutputLevel = INFO
-   from AthenaCommon.Constants import DEBUG
-   #flags.Exec.OutputLevel = DEBUG
 
    from AthenaConfiguration.Enums import LHCPeriod
    flags.GeoModel.Run = LHCPeriod.Run3
@@ -200,6 +202,10 @@ if __name__=='__main__':
       # additions for EMF
       flags.IOVDb.SqliteInput="/afs/cern.ch/user/p/pavol/public/EMF_otherCond.db"
       flags.IOVDb.SqliteFolders = ("/LAR/BadChannelsOfl/BadChannelsSC","/LAR/BadChannels/BadChannelsSC","/LAR/Identifier/OnOffIdMap",)
+      fldrs=cfg.getService("IOVDbSvc").Folders
+      for i in range(0, len(fldrs)):
+          if 'LatomeMapping' in fldrs[i]: fldrs[i] += '<tag>LARIdentifierLatomeMapping-EMF</tag>'
+
 
    flags.lock()
    
@@ -207,9 +213,6 @@ if __name__=='__main__':
    
    cfg.merge(LArRampCfg(flags))
 
-   # all debug messages
-   cfg.getService("MessageSvc").debugLimit = 9999999
-   cfg.printConfig()
    # in case debug is needed
    #if flags.LArCalib.doValidation:
    #   from AthenaCommon.Constants import DEBUG
@@ -225,10 +228,25 @@ if __name__=='__main__':
    #   # block standard patching for this CB
    #   cfg.getEventAlgo("LArRampPatcher").DoNotPatchCBs=[0x3fc70000]
 
-   if args.fw6:
-      from IOVDbSvc.IOVDbSvcConfig import addOverride
-      cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))
- 
+   if flags.LArCalib.isSC:
+      fwversion=5
+      # autoconfig
+      from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+      try:
+         runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
+         log.info("Got DT run info !")
+      except Exception:
+         log.warning("Could not get DT run info, using defaults !")
+      else:   
+         fwversion=runinfo.FWversion()   
+      if args.fw6 or fwversion==6:
+         #FIXME: for some reason addOverride is not working, CA merger is then complaining
+         #from IOVDbSvc.IOVDbSvcConfig import addOverride
+         #cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))   
+         fldrs=cfg.getService("IOVDbSvc").Folders
+         for i in range(0, len(fldrs)):
+             if 'LatomeMapping' in fldrs[i]: fldrs[i] += '<tag>LARIdentifierLatomeMapping-fw6</tag>'
+
 
    # ignore some channels ?
    if args.ignoreB:
@@ -243,9 +261,6 @@ if __name__=='__main__':
          cfg.getEventAlgo("LArRawSCCalibDataReadingAlg").LATOMEDecoder.IgnoreEndcapChannels=args.ignoreE
 
    cfg.getService("IOVDbSvc").DBInstance=""
-
-   # all messages
-   cfg.getService("MessageSvc").debugLimit = 99999999
 
    #run the application
    cfg.run() 

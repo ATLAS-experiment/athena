@@ -79,13 +79,12 @@ fi
 
 echo "tags" ${tags}
 
-
-
 for t in $tags
 do
-  echo "use tag $t"
-  echo "Running athena to add pedestal shift values to existing UPD1 tag"
-  athena.py -c "FileName=\"${inputfilename}\";RunNumber=${run1};LumiBlock=${lb1}"  CaloCondPhysAlgs/CaloAddPedShift_jobOptions.py > pedestal.log 2>&1
+  echo $t
+  echo "use tag" $t
+  echo "Running athena to add pedestal shift values to existing ${t} tag"
+  python -m CaloCondPhysAlgs.CaloAddPedShiftConfig  --input ${inputfilename}  --run ${run1} --lb ${lb1}  > pedestal.log 2>&1
   if [ $? -ne 0 ];  then
         echo "Athena reported an error ! Please check pedestal.log!"
         exit
@@ -100,7 +99,7 @@ do
   nLines=`wc -l calopedestal.txt | cut -f 1 -d " "`
   echo " Ncells*Ngains for which pedestal is computed  " ${nLines}
   if [ $nLines -ne 547404 ]; then
-       echo "Number of lines in pedstal ascii file is not correct, check log file to investigate possible problem (or disk space)"
+       echo "Number of lines in pedstal ascii file is not correct, check log file to investigate possible problem \(or disk space\)"
        exit
   fi
 

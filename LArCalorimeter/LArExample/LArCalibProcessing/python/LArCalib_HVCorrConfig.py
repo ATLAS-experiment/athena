@@ -5,6 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
 
 def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0):
+
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     result=LArGMCfg(flags)
     
@@ -19,7 +20,7 @@ def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0):
     result.merge(LArOnOffIdMappingSCCfg(flags))
     result.addEventAlgo(CompFactory.LArHVCorrToSCHVCorr(ContainerKey="NewLArHVScaleCorr",OutputKey="NewSCLArHVScaleCorr",
                                                         OutputFolder="/LAR/ElecCalibFlatSC/HVScaleCorrNew",
-                                                        PhysicsWeights="HVcorrPhysicsWeights.txt"))
+                                                        PhysicsWeights="TrigT1CaloCalibUtils/HVcorrPhysicsWeights.txt"))
 
     #The LArHVCorrMaker creates a flat blob in a CondAttrListCollection
     #Input: The HV Scale Correction computed by the LArHVCondAlg based on the DCS HV values

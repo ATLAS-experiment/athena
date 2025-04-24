@@ -82,14 +82,49 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
                                    xbins=1,xmin=0,xmax=1,ybins=20,ymin=-0.5,ymax=19.5, opt=['kAddBinsDynamically'])
 
 
+    commonAlgConfig = {"libname":"libdqm_summaries.so",
+                       "name":"L1Calo_BinsDiffFromStripMedian",
+                       "PublishDetail":32}
+    hotCuts = {"ColdCut":-3.5,"WarmCut":9,"HotCut":20} # when looking at frequency of hot deposits, use these cuts
+
+    commonThresholdConfig = {
+        "NWrongKnown":[0,100], # warn of any corrections that are needed for the known anomalies lists
+        "NDead":[0,2], # warn on any new dead spots, error if more than a couple
+        "NHot":[0,2],  # warn on any new hot spots, error if more than a couple
+        "NCold":[0,2],  # warn on any new cold spots, error if more than a couple
+        "NWarm":[0,5],  # warn on any new warm spots, error if more than 5
+        "NDeadStrip":[0,0], # no dead strips - exception to this will be in cold hcal, where tile cannot be negative
+        "NConsecUnlikelyStrip":[2,5], # warn if more than 2 consecutive strips deemed unlikely
+    }
+
+    knownAnomalies_eEM = {
+        "KnownCold":"\"\"",
+        "KnownWarm":"\"\""
+    }
+    knownAnomalies_eTAU = {
+        "KnownCold":"\"\"",
+        "KnownWarm":"\"\""
+    }
+
     helper.defineDQAlgorithm("Efex_eEM_etaThiMapFilled",
-                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0."},
-                             thresholdConfig={"NBins":[1,64*50]}, # currently there is 1 known deadspot in eEM, so that is allowed, anything else is a warning. Error if fully empty
+                             hanConfig=commonAlgConfig|hotCuts|knownAnomalies_eEM,
+                             thresholdConfig=commonThresholdConfig
                              )
     helper.defineDQAlgorithm("Efex_eTAU_etaThiMapFilled",
-                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0."},
-                             thresholdConfig={"NBins":[0,64*50]}, # everywhere should be filled, otherwise a warning (error if entirely empty)
+                             hanConfig=commonAlgConfig|hotCuts|knownAnomalies_eTAU,
+                             thresholdConfig=commonThresholdConfig
                              )
+
+    helper.defineDQAlgorithm("Efex_eEM_etaPhiLBMapOutliers",
+                             hanConfig=commonAlgConfig|hotCuts|knownAnomalies_eEM|{"NBinsY":64,"LiveMode":1},
+                             thresholdConfig=commonThresholdConfig
+                             )
+
+    helper.defineDQAlgorithm("Efex_eTAU_etaPhiLBMapOutliers",
+                         hanConfig=commonAlgConfig|hotCuts|knownAnomalies_eTAU|{"NBinsY":64,"LiveMode":1},
+                         thresholdConfig=commonThresholdConfig
+                         )
+
 
     # Now define the histograms with low/hi Pt cut
     for cut_name, cut_val in zip(cut_names, cut_vals):
@@ -124,11 +159,11 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
                                     xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])
 
             if "Sim" not in containerKey and "x" not in containerKey:
-                helper.defineHistogram(f"LBN,binNumber;h_{containerKey}_{cut_name}_posVsLBN", title=tobStr+' Count'+cut_title_addition+';LB;50(y-1)+x',
+                helper.defineHistogram(f"LBN,binNumber;h_{containerKey}_{cut_name}_posVsLBN", title=tobStr+' Count'+cut_title_addition+';LB;64(x-1)+y',
                                    fillGroup=fillGroup,
-                                   hanConfig={"description":f"Timeseries of TOB counts at each location ... y-axis relates to x and y bin numbers from <a href='../h_{containerKey}_{cut_name}_EtaPhiMap'>eta-phi map</a>. Use Projection X1 for 1D plot"},
+                                   hanConfig={"algorithm":f"Efex_{pathFromKey(containerKey,'')}_etaPhiLBMapOutliers","description":f"Timeseries of TOB counts at each location ... y-axis relates to x and y bin numbers from <a href='../h_{containerKey}_{cut_name}_EtaPhiMap'>eta-phi map</a>. Use Projection X1 for 1D plot"},
                                    type='TH2I',
-                                   path="Expert/Outputs/"+pathFromKey(containerKey,"")+"/detail",
+                                   paths=["Expert/Outputs/"+pathFromKey(containerKey,"")+"/detail","Shifter/Outputs/"+pathFromKey(containerKey,"")],
                                    xbins=1,xmin=0,xmax=10,
                                    ybins=64*50,ymin=0.5,ymax=64*50+0.5,opt=['kAddBinsDynamically'])
 
@@ -203,11 +238,11 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
                                    xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])
 
             if "Sim" not in containerKey and "x" not in containerKey:
-                helper.defineHistogram(f"LBN,binNumber;h_{containerKey}_{cut_name}_posVsLBN", title='eTAU '+tobStr+' Count'+cut_title_addition+';LB;50(y-1)+x',
+                helper.defineHistogram(f"LBN,binNumber;h_{containerKey}_{cut_name}_posVsLBN", title='eTAU '+tobStr+' Count'+cut_title_addition+';LB;64(x-1)+y',
                                fillGroup=fillGroup,
-                               hanConfig={"description":f"Timeseries of TOB counts at each location ... y-axis relates to x and y bin numbers from <a href='../h_{containerKey}_{cut_name}_EtaPhiMap'>eta-phi map</a>. Use Projection X1 for 1D plot"},
+                               hanConfig={"algorithm":f"Efex_{pathFromKey(containerKey,'')}_etaPhiLBMapOutliers","description":f"Timeseries of TOB counts at each location ... y-axis relates to x and y bin numbers from <a href='../h_{containerKey}_{cut_name}_EtaPhiMap'>eta-phi map</a>. Use Projection X1 for 1D plot"},
                                type='TH2I',
-                               path="Expert/Outputs/"+pathFromKey(containerKey,"")+"/detail",
+                               paths=["Expert/Outputs/"+pathFromKey(containerKey,"")+"/detail","Shifter/Outputs/"+pathFromKey(containerKey,"")],
                                xbins=1,xmin=0,xmax=10,
                                ybins=64*50,ymin=0.5,ymax=64*50+0.5,opt=['kAddBinsDynamically'])
 
