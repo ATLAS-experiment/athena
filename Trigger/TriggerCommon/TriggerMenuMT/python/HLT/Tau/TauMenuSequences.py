@@ -159,7 +159,8 @@ def _ftfCoreSeq(flags, name, is_probe_leg=False):
     recoAcc.mergeReco(trigInDetFastTrackingCfg(flags, roisKey=RoIs, signatureName=f'tau{name}'))
 
     # Create new RoIs for the next tracking steps (FTFIso and PrecTrack), based on the found tracks
-    TrackCollection = flags.Tracking.ActiveConfig.trkTracks_FTF
+    TrackCollection = flags.Tracking.ActiveConfig.tracks_FTF
+    
     if name == 'Core':
         from TrigTauRec.TrigTauRoIToolsConfig import tauTrackRoiUpdaterCfg
         recoAcc.mergeReco(tauTrackRoiUpdaterCfg(flags, inputRoIs=RoIs, tracks=TrackCollection))
@@ -286,7 +287,7 @@ def _ftfTauIsoSeq(flags, name, is_probe_leg=False):
     # The hypothesis algorithm/tool does not perform any action (debug logging of number of tracks only)
     selAcc.addHypoAlgo(CompFactory.TrigTauFastTrackHypoAlg(
         f'TauFastTrackHypoAlg_PassBy{name}',
-        FastTracksKey=flags.Tracking.ActiveConfig.trkTracks_FTF,
+        FastTracksKey=flags.Tracking.ActiveConfig.tracks_FTF,
     ))
 
 

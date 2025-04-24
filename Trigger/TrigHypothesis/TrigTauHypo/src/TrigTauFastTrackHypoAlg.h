@@ -7,7 +7,7 @@
 #define TrigTauHypo_TrigTauFastTrackHypoAlg_H
 
 #include "DecisionHandling/HypoBase.h"
-#include "TrkTrack/TrackCollection.h"
+#include "xAODTracking/TrackParticleContainer.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 #include "ITrigTauFastTrackHypoTool.h"
@@ -27,7 +27,7 @@ public:
 private: 
     ToolHandleArray<ITrigTauFastTrackHypoTool> m_hypoTools {this, "HypoTools", {}, "Hypo tools"};
 
-    SG::ReadHandleKey<TrackCollection> m_tracksKey {this, "FastTracksKey", "", "Fast Tracks (from FTF steps) in view"};
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tracksKey {this, "FastTracksKey", "", "Fast Tracks (from FTF steps) in view"};
   
     SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiForID2ReadKey {this, "RoIForIDReadHandleKey", "", "Updated RoI produced in view"};
 
