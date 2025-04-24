@@ -121,7 +121,7 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
  run Reco_tf.py --CA \
     --inputRDOFile $rdo \
     --outputAODFile $aod \
-    --steering doRAWtoALL \
+    --steering doRAWtoALL
  rec_tf_exit_code=$?
  echo "art-result: $rec_tf_exit_code reco"
 
