@@ -636,5 +636,5 @@ def HIGG9D1Cfg(flags):
     HIGG9D1ItemList = HIGG9D1SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_HIGG9D1", ItemList=HIGG9D1ItemList, AcceptAlgs=["HIGG9D1Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_HIGG9D1", AcceptAlgs=["HIGG9D1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
-    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
+    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True)
     return acc
