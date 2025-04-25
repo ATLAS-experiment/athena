@@ -28,18 +28,22 @@ StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInpu
     {
         // Retreive the hits from the tower
         FPGATrackSimTowerInputHeader& tower = *header.getTower(i);
-        std::vector<FPGATrackSimHit> hits = tower.hits();
-
-        std::vector<std::vector<FPGATrackSimHit>> hitsPerModule;
+        HitPtrCollection hits;
+        hits.reserve(tower.hits().size());
+        for (auto& hit : tower.hits()) {
+            hits.push_back(std::make_unique<FPGATrackSimHit>(hit));
+        }
+        
+        HitPtrContainer hitsPerModule;
         std::vector<FPGATrackSimCluster> towerClusters;
 
         if (m_reduceCoordPrecision) {
             for (auto &hit : hits)
-                reduceGlobalCoordPrecision(hit);
+                reduceGlobalCoordPrecision(*hit);
         }
 
-        splitAndSortHits(hits, hitsPerModule);
-        SortedClustering(hitsPerModule, towerClusters);
+        splitAndSortHits(std::move(hits), hitsPerModule);
+        SortedClustering(std::move(hitsPerModule), towerClusters);
         normaliseClusters(towerClusters);
 
         //remove the old hits from the tower...
@@ -83,12 +87,12 @@ StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInpu
 }
 
 //Attempt to implement clustering using FPGATrackSim objects.
-void FPGATrackSimClusteringTool::SortedClustering(const std::vector<std::vector<FPGATrackSimHit> >& sorted_hits, std::vector<FPGATrackSimCluster> &clusters) const {
+void FPGATrackSimClusteringTool::SortedClustering(HitPtrContainer&& sorted_hits, std::vector<FPGATrackSimCluster> &clusters) const {
     std::vector<FPGATrackSimCluster> moduleClusters;
     //Loop over the sorted modules that we have
-    for( auto& moduleHits:sorted_hits){
+    for( HitPtrCollection & moduleHits: sorted_hits){
         //Make the clusters for this module
-        Clustering(moduleHits, moduleClusters);
+        Clustering(std::move(moduleHits), moduleClusters);
         //Put these clusters into the output list
         clusters.insert(clusters.end(), moduleClusters.begin(), moduleClusters.end());
         //Clear the vector or this will get messy
@@ -96,7 +100,8 @@ void FPGATrackSimClusteringTool::SortedClustering(const std::vector<std::vector<
     }
 }
 
-void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleHits, std::vector<FPGATrackSimCluster> &moduleClusters) const {
+
+void FPGATrackSimClusteringTool::Clustering(HitPtrCollection &&moduleHits, std::vector<FPGATrackSimCluster> &moduleClusters) const {
     std::vector<FPGATrackSimCluster> tempClusters;
     FPGATrackSimHit clusterEquiv;
     bool newCluster, newHit;
@@ -108,12 +113,12 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
 
         //Loop over the clusters we have already made, check if this hit should be added to them?
         for( auto& cluster: tempClusters){
-            if(hit.isPixel()){
-                if (FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, false, m_digitalClustering))
+            if(hit->isPixel()){
+                if (FPGATrackSimCLUSTERING::updatePixelCluster(cluster, *hit, false, m_digitalClustering))
                     is_clustered_hit = true;
             }
-            if(hit.isStrip()){
-                if (FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, false, m_digitalClustering))
+            if(hit->isStrip()){
+                if (FPGATrackSimCLUSTERING::updateStripCluster(cluster, *hit, false, m_digitalClustering))
                     is_clustered_hit = true;
             }
         }
@@ -121,17 +126,18 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
         //If it is the first hit or a not clustered hit, then start a new cluster and add it to the output vector
         if((is_clustered_hit==0) or (tempClusters.size()==0)){
             FPGATrackSimCluster cluster;
-            if(hit.isPixel()){
+            if(hit->isPixel()){
                 // No need to check the return code here
-                FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, true, m_digitalClustering);
-            } else if(hit.isStrip()){
-                FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, true, m_digitalClustering);
+                FPGATrackSimCLUSTERING::updatePixelCluster(cluster, *hit, true, m_digitalClustering);
+            } else if(hit->isStrip()){
+                FPGATrackSimCLUSTERING::updateStripCluster(cluster, *hit, true, m_digitalClustering);
             }
             //Put this cluster into the output hits. Will update it in place.
             tempClusters.push_back(cluster);
         }
     }
-
+    moduleHits.clear();
+    
     // Merge overlapping clusters
     for (auto& cluster : tempClusters) {
         newCluster = true;
@@ -267,80 +273,80 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
     }
 }
 
-void FPGATrackSimClusteringTool::splitAndSortHits(std::vector<FPGATrackSimHit> &hits, std::vector<std::vector<FPGATrackSimHit> > &hitsPerModule, int &eta_phi) const {
-    splitHitsToModules(hits, hitsPerModule);
+void FPGATrackSimClusteringTool::splitAndSortHits(HitPtrCollection &&hits, HitPtrContainer &hitsPerModule, int &eta_phi) const {
+    splitHitsToModules(std::move(hits), hitsPerModule);
     sortHitsOnModules(hitsPerModule, eta_phi);
 }
 
-void FPGATrackSimClusteringTool::splitAndSortHits(std::vector<FPGATrackSimHit> &hits, std::vector<std::vector<FPGATrackSimHit> > &hitsPerModule) const{
-    splitHitsToModules(hits, hitsPerModule);
+
+void FPGATrackSimClusteringTool::splitAndSortHits(HitPtrCollection &&hits, HitPtrContainer &hitsPerModule) const{
+    splitHitsToModules(std::move(hits), hitsPerModule);
     sortHitsOnModules(hitsPerModule);
 }
 
 /*Temporarilly sort the hits into module by module packets
 */
-void FPGATrackSimClusteringTool::splitHitsToModules(std::vector<FPGATrackSimHit> &hits, std::vector<std::vector<FPGATrackSimHit> > &hitsPerModule) const{
+void FPGATrackSimClusteringTool::splitHitsToModules(HitPtrCollection &&hits, HitPtrContainer &hitsPerModule) const{
     //To hold the current module
-    std::vector<FPGATrackSimHit> currentModule;
+    HitPtrCollection currentModule;
     uint hashing = 0;
     //Split the incoming hits into hits by module
     for ( auto& hit:hits){
         if(hashing == 0){
-            currentModule.push_back(hit);
-            hashing = hit.getIdentifierHash();
-        } else if (hit.getIdentifierHash() == hashing) {
-            currentModule.push_back(hit);
+            hashing = hit->getIdentifierHash();
+            currentModule.push_back(std::move(hit));
+        } else if (hit->getIdentifierHash() == hashing) {
+            currentModule.push_back(std::move(hit));
         } else {
-            hitsPerModule.push_back(currentModule);
-            currentModule.clear();
-            hashing = hit.getIdentifierHash();
-            currentModule.push_back(hit);
+            hitsPerModule.push_back(std::exchange(currentModule, HitPtrCollection{}));
+            hashing = hit->getIdentifierHash();
+            currentModule.push_back(std::move(hit));
         }
     }
 
     // Now push that last one
-    if (currentModule.size() > 0) hitsPerModule.push_back(currentModule);
+    if (currentModule.size() > 0) hitsPerModule.push_back(std::move(currentModule));
 }
 
-void FPGATrackSimClusteringTool::sortHitsOnModules(std::vector<std::vector<FPGATrackSimHit> > &hitsPerModule, int &eta_phi) const{
+void FPGATrackSimClusteringTool::sortHitsOnModules(HitPtrContainer &hitsPerModule, int &eta_phi) const{
     //Loop over the module separated hits
     for ( auto& module:hitsPerModule){
         //Work out if columns are ETA (1) || PHI (0)
-        if(etaOrPhi(module.at(0)) == true){
+        if(etaOrPhi(*module.at(0)) == true){
             //Sort by ETA first
             eta_phi = ETA;
             if (module.size() > 1) {
-                if (module.at(0).isStrip())
+                if (module.at(0)->isStrip())
                     std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputEta);
             }
             if (module.size() > 1) {
-                if (module.at(0).isStrip())
+                if (module.at(0)->isStrip())
                     std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputPhi);
             }
         } else {
             //Sort by PHI first
             eta_phi = PHI;
             if (module.size() > 1) {
-                if (module.at(0).isStrip())
+                if (module.at(0)->isStrip())
                     std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputPhi);
             }
             if (module.size() > 1) {
-                if (module.at(0).isStrip())
+                if (module.at(0)->isStrip())
                     std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputEta);
             }
         }
     }
 }
 
-void FPGATrackSimClusteringTool::sortHitsOnModules(std::vector<std::vector<FPGATrackSimHit> > &hitsPerModule) const{
+void FPGATrackSimClusteringTool::sortHitsOnModules(HitPtrContainer &hitsPerModule) const{
     //Loop over the module separated hits
     for ( auto& module:hitsPerModule){
         if (module.size() > 1) {
-            if (module.at(0).isStrip())
+            if (module.at(0)->isStrip())
                 std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputEta);
         }
         if (module.size() > 1) {
-            if (module.at(0).isStrip())
+            if (module.at(0)->isStrip())
                 std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputPhi);
         }
     }
@@ -691,20 +697,20 @@ bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentC
 
 /* Sort for the ordering of ITk modules: Sort by ETA.
 */
-bool FPGATrackSimCLUSTERING::sortITkInputEta(const FPGATrackSimHit& hitA, const FPGATrackSimHit& hitB)
+bool FPGATrackSimCLUSTERING::sortITkInputEta(const std::unique_ptr<FPGATrackSimHit>& hitA, const std::unique_ptr<FPGATrackSimHit>& hitB)
 {
-    if (hitA.getIdentifierHash() != hitB.getIdentifierHash())
-        return hitA.getIdentifierHash() < hitB.getIdentifierHash();
-    return hitA.getEtaIndex() < hitB.getEtaIndex();
+    if (hitA->getIdentifierHash() != hitB->getIdentifierHash())
+        return hitA->getIdentifierHash() < hitB->getIdentifierHash();
+    return hitA->getEtaIndex() < hitB->getEtaIndex();
 }
 
 /* Sort for the ordering of ITk modules: Sort by PHI.
 */
-bool FPGATrackSimCLUSTERING::sortITkInputPhi(const FPGATrackSimHit& hitA, const FPGATrackSimHit& hitB)
+bool FPGATrackSimCLUSTERING::sortITkInputPhi(const std::unique_ptr<FPGATrackSimHit>& hitA, const std::unique_ptr<FPGATrackSimHit>& hitB)
 {
-    if (hitA.getIdentifierHash() != hitB.getIdentifierHash())
-        return hitA.getIdentifierHash() < hitB.getIdentifierHash();
-    return hitA.getPhiIndex() < hitB.getPhiIndex();
+    if (hitA->getIdentifierHash() != hitB->getIdentifierHash())
+        return hitA->getIdentifierHash() < hitB->getIdentifierHash();
+    return hitA->getPhiIndex() < hitB->getPhiIndex();
 }
 
 /* Cap precision of the global coordinates in r, phi, z */

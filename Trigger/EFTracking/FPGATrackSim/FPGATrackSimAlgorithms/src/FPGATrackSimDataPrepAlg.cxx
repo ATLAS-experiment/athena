@@ -214,14 +214,16 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     auto mon_regionID = Monitored::Scalar<unsigned>("regionID", regionID);
     Monitored::Group(m_monTool, mon_regionID);
 
-    if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: record hits");
-    // If and when we set up code to run over more than one region/tower at a time this will need to be updated
-    std::vector<FPGATrackSimHit> const & hits = m_logicEventHeader->towers().at(0).hits();
-    FPGAHits->reserve(hits.size());
-    for (const auto & hit : hits) {
-        if (hit.isReal()) FPGAHits->push_back(hit);
+    std::vector<FPGATrackSimHit> const& hits = m_logicEventHeader->towers().at(0).hits();
+    if (m_recordHits) {
+        if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: record hits");
+        // If and when we set up code to run over more than one region/tower at a time this will need to be updated
+        FPGAHits->reserve(hits.size());
+        for (const auto& hit : hits) {
+            if (hit.isReal()) FPGAHits->push_back(hit);
+        }
+        if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: record hits");
     }
-    if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: record hits");
 
     auto mon_nhits = Monitored::Scalar<unsigned>("nHits", hits.size());
     auto mon_nhits_unmapped = Monitored::Scalar<unsigned>("nHits_unmapped", m_hits_miss.size());
