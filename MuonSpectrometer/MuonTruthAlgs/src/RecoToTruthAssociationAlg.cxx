@@ -38,7 +38,7 @@ namespace {
     static const SG::ConstAccessor<std::vector<unsigned long long>> truthCscHitsAcc("truthCscHits");
     static const SG::ConstAccessor<std::vector<unsigned long long>> truthRpcHitsAcc("truthRpcHits");
     static const SG::ConstAccessor<std::vector<unsigned long long>> truthTgcHitsAcc("truthTgcHits");
-    
+
 }  // namespace
 
 namespace Muon {
@@ -47,14 +47,15 @@ StatusCode RecoToTruthAssociationAlg::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_truthMuKey.initialize());
     ATH_CHECK(m_recoMuKey.initialize());
-    
+
     if (m_recoLink.empty()){
         m_muonTruthRecoLink = "" ;
     } else {
         m_muonTruthRecoLink = m_recoLink;
     }
-     
+
     ATH_CHECK(m_muonTruthRecoLink.initialize(!m_recoLink.empty()));
+    ATH_CHECK(m_recoInDetTrackParticles.initialize());
     ATH_CHECK(m_muonTruthParticleLink.initialize());
     ATH_CHECK(m_muonTruthParticleOrigin.initialize());
     ATH_CHECK(m_muonTruthParticleType.initialize());
@@ -81,7 +82,7 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
     if (!m_muonTruthRecoLink.empty()) {
         muonTruthParticleRecoLink = std::make_unique<SG::WriteDecorHandle<xAOD::TruthParticleContainer, ElementLink<xAOD::MuonContainer>>>(m_muonTruthRecoLink, ctx);
     }
-   
+
     SG::WriteDecorHandle<xAOD::MuonContainer, ElementLink<xAOD::TruthParticleContainer> > muonTruthParticleLink(m_muonTruthParticleLink,
                                                                                                                 ctx);
     if (!muonTruthParticleLink.isValid()) {
@@ -122,14 +123,14 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
                 muonTruthParticleType(*muon) = acc_type(*tp);
                 setOrigin = true;
             }
-            
-            ElementLink<xAOD::TruthParticleContainer> truthLink;  
+
+            ElementLink<xAOD::TruthParticleContainer> truthLink;
             if (acc_link.isAvailable(*tp)) {
                 truthLink = acc_link(*tp);
             } else {
-                ATH_MSG_DEBUG("Could not find any truth link associated with track having pt:"<<tp->pt()<<" MeV, eta: "<<tp->eta()<<", phi: "<<tp->phi()<<", charge: "<<tp->charge()<<". d0:"<<tp->d0()<<", z0: "<<tp->z0());               
+                ATH_MSG_DEBUG("Could not find any truth link associated with track having pt:"<<tp->pt()<<" MeV, eta: "<<tp->eta()<<", phi: "<<tp->phi()<<", charge: "<<tp->charge()<<". d0:"<<tp->d0()<<", z0: "<<tp->z0());
             }
-           
+
             if (truthLink.isValid()) {
                 ATH_MSG_VERBOSE(" Got valid truth link for muon author " << muon->author() << " uniqueID " << HepMC::uniqueID(*truthLink));
                 // loop over truth particles
@@ -137,15 +138,15 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
                     if (!MC::isStable(truthParticle)) continue;
                     ATH_MSG_DEBUG("Got truth muon with uniqueID " << HepMC::uniqueID(truthParticle) << " pt " << truthParticle->pt());
                     if ( !HepMC::is_sim_descendant(*truthLink, truthParticle)) {
-                        ATH_MSG_VERBOSE("UniqueID truth link: " << HepMC::uniqueID(*truthLink) 
+                        ATH_MSG_VERBOSE("UniqueID truth link: " << HepMC::uniqueID(*truthLink)
                                                                << " is not decendant of " << HepMC::uniqueID(truthParticle));
                         continue;
                     }
                     ATH_MSG_VERBOSE("Truth muon uniqueID matches -> creating link with truth particle " << HepMC::uniqueID(*truthLink));
                     foundTruth = true;
                     /// Link the truth particle to the muon
-                    ElementLink<xAOD::TruthParticleContainer> muonTruthLink{*muonTruthContainer, 
-                                                                            truthParticle->index(), 
+                    ElementLink<xAOD::TruthParticleContainer> muonTruthLink{*muonTruthContainer,
+                                                                            truthParticle->index(),
                                                                             ctx};
                     muonTruthLink.toPersistent();
                     muonTruthParticleLink(*muon) = muonTruthLink;
@@ -161,7 +162,7 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
                                         <<" eta: "<<decor_muon->eta()<<" phi: "<<decor_muon->phi()<<" charge: "<<
                                         decor_muon->charge()<<" author: "<<decor_muon->author()<<" all authors: "<<
                                         decor_muon->allAuthors());
-                             
+
                         // Check first if the exiting muon has a better author
                         if (MuonCombined::authorRank(decor_muon->author()) <  MuonCombined::authorRank(muon->author())){
                             ATH_MSG_DEBUG("Author of the decorated muon is better than the one of the new candidate");
@@ -174,12 +175,12 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
                             continue;
                         }
                         /// The last judge is a simple dR cut but this will hopefully never trigger
-                        if (deltaR2(muon,truthParticle) >= deltaR2(muon, decor_muon)) continue; 
+                        if (deltaR2(muon,truthParticle) >= deltaR2(muon, decor_muon)) continue;
                     }
 
- 
+
                     ElementLink<xAOD::MuonContainer> muonLink{muon, *muonTruthParticleLink, ctx};
-                    
+
 
                     /// Zero supression do not want to store meaningless zeros
                     std::vector<unsigned int> nprecHitsPerChamberLayer(Muon::MuonStationIndex::ChIndexMax, dummy_unsigned);
@@ -196,7 +197,7 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
                     muonTruthParticleNPhiMatched(*muon) = nphiHitsPerChamberLayer;
                     muonTruthParticleNTrigEtaMatched(*muon) = ntrigEtaHitsPerChamberLayer;
 
-                    if (muonTruthParticleRecoLink) (*muonTruthParticleRecoLink)(*truthParticle) = muonLink;  
+                    if (muonTruthParticleRecoLink) (*muonTruthParticleRecoLink)(*truthParticle) = muonLink;
                     break;
                 }
             } else {
@@ -219,7 +220,7 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
             muonTruthParticleNPhiMatched(*muon) = std::vector<unsigned int>{};
             muonTruthParticleNTrigEtaMatched(*muon) = std::vector<unsigned int>{};
         }
-        /// Patch for STACO muons: Copy the truth information from the muon back to the combined 
+        /// Patch for STACO muons: Copy the truth information from the muon back to the combined
         /// track to avoid file corruptions reported in ATLASRECTS-6454
         if (muon->author() == xAOD::Muon::STACO) {
             const xAOD::TrackParticle* cmb_trk = muon->trackParticle(xAOD::Muon::CombinedTrackParticle);
@@ -243,10 +244,10 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
     if (muonTruthParticleRecoLink && !muonTruthParticleRecoLink->isAvailable()) {
         for (const xAOD::TruthParticle* truthParticle : **muonTruthParticleRecoLink) {
             ATH_MSG_DEBUG("no reco muon link set, add an empty one");
-            (*muonTruthParticleRecoLink)(*truthParticle) = ElementLink<xAOD::MuonContainer>();        
+            (*muonTruthParticleRecoLink)(*truthParticle) = ElementLink<xAOD::MuonContainer>();
          }
     }
-    
+
     return StatusCode::SUCCESS;
 }
 
@@ -363,7 +364,7 @@ void RecoToTruthAssociationAlg::clear_dummys(const std::vector<unsigned long lon
                 if (m_idHelperSvc->phiIndex(id) == phiIdx) {
                     vec[i] = 0;
                     break;
-                } 
+                }
             } else {
                 const auto chIdx = static_cast<Muon::MuonStationIndex::ChIndex>(i);
                 if (m_idHelperSvc->chamberIndex(id) == chIdx) {

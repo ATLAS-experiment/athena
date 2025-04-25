@@ -28,11 +28,15 @@ private:
     /** @brief Key to the filtered muon truth particles  */
    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthMuKey{
         this, "MuonTruthParticleContainerName", "MuonTruthParticles"};
-   
+
     SG::ReadHandleKey<xAOD::MuonContainer> m_recoMuKey{
         this, "MuonContainerName", "Muons",
         "container name for muon truth particles; the full handle name, including the reco muon link auxdata, is set in initialize()"};
-   
+
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_recoInDetTrackParticles{
+        this, "InDetTrackParticleName", "InDetTrackParticles",
+        "container name for input InDetTrackParticles. truthLink guaranteed to be there by their constuction in MC"};
+
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_muonTruthRecoLink{
         this, "MuonTruthParticleRecoLink", m_truthMuKey, "",
         "container name for muon truth particles; the full handle name, including the reco muon link auxdata, is set in initialize()"};
@@ -55,15 +59,14 @@ private:
     SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonTruthParticleNTrigEtaMatched{
         this, "MuonTruthParticleNTrigEtaMatched", m_recoMuKey, "ntrigEtaMatchedHitsPerChamberLayer",
         "muon vector of number of phi matched hits per chamber layer auxdata name; name will be reset in initialize() based on m_muonName"};
-    
-   
+
+
     SG::ReadDecorHandleKeyArray<xAOD::IParticleContainer> m_inputDecorKey{
         this, "TrkTruthLinkKeys", {},
         "Declare the decoration dependencies of this algorithm. Steer via TrackContainers property"};
     Gaudi::Property<std::vector<std::string>> m_assocTrkContainers{this, "TrackContainers", {"CombinedMuonTrackParticles",
                                                                                             "ExtrapolatedMuonTrackParticles",
-                                                                                            "InDetTrackParticles",
-                                                                                            "MSOnlyExtrapolatedMuonTrackParticles"}, 
+                                                                                            "MSOnlyExtrapolatedMuonTrackParticles"},
                         "Collection of track containers to be decorated before this alg can be scheduled. truthLink decoration exploited "};
     Gaudi::Property<std::string> m_recoLink{this, "RecoLinkName", "recoMuonLink" , "Decoration to the truth particle pointing to the muon"};
     Gaudi::Property<bool> m_associateWithInDetTP{this, "AssociateWithInDetTP", false, "force use of ID track particles for association"};
@@ -74,7 +77,7 @@ private:
                               std::vector<unsigned int>& nprecHitsPerChamberLayer, std::vector<unsigned int>& nphiHitsPerChamberLayer,
                               std::vector<unsigned int>& ntrigEtaHitsPerChamberLayer) const;
     void clear_dummys(const std::vector<unsigned long long>& identifiers, std::vector<unsigned int>& vec) const;
-  
+
 };
 }
 #endif  // TRUTHPARTICLEALGS_MUONTRUTHDECORATIONALG_H
