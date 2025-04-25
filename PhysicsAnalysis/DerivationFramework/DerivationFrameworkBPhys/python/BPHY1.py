@@ -196,5 +196,5 @@ def BPHY1Cfg(flags):
 
     acc.merge(OutputStreamCfg(flags, "DAOD_BPHY1", ItemList=BPHY1ItemList, AcceptAlgs=["BPHY1Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY1", AcceptAlgs=["BPHY1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
-    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
+    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True)
     return acc
