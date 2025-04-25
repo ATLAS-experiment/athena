@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTAUMONITORING_TRIGTAUMONITORL1ALGORITHM_H
@@ -16,6 +16,7 @@ public:
 private:
     // Require at least 1 offline Tau per event (will bias the variable distributions for background events)
     Gaudi::Property<bool> m_requireOfflineTaus{this, "RequireOfflineTaus", true, "Require at leat 1 offline tau per event"};
+    Gaudi::Property<unsigned int> m_offline_tau_id{this, "OfflineTauID", TauID::RNN, "Offline TauID (1: RNN, 2: GNTau)"};
 
     // We need access to the xTOB-based RoI container to retrieve the BDT score
     SG::ReadHandleKey<xAOD::eFexTauRoIContainer> m_phase1l1eTauxRoIKey{this, "Phase1L1eTauxRoIKey", "L1_eTauxRoI", "eTau Phase1 L1 xRoI key"};

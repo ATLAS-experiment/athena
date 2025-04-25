@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigTauMonitorSingleAlgorithm.h"
@@ -57,7 +57,6 @@ StatusCode TrigTauMonitorSingleAlgorithm::processEvent(const EventContext& ctx) 
 
     // Offline taus
     auto offline_taus_all = getOfflineTausAll(ctx, 0.0);
-
     if(m_requireOfflineTaus && offline_taus_all.empty()) return StatusCode::SUCCESS;
 
     for(const std::string& trigger : m_triggers) {
@@ -73,9 +72,10 @@ StatusCode TrigTauMonitorSingleAlgorithm::processEvent(const EventContext& ctx) 
         const bool hlt_not_prescaled_flag = (passBits & TrigDefs::EF_prescaled) == 0;
 
         // Filter offline taus
-        auto offline_taus = classifyOfflineTaus(offline_taus_all, info.getHLTTauThreshold() - threshold_offset);
+        auto offline_taus = classifyOfflineTaus(offline_taus_all, info.getHLTTauThreshold() - threshold_offset, static_cast<TauID>(m_offline_tau_id.value()));
         std::vector<const xAOD::TauJet*> offline_taus_1p = offline_taus.first;
         std::vector<const xAOD::TauJet*> offline_taus_3p = offline_taus.second;
+        if(m_requireOfflineTaus && offline_taus_1p.empty() && offline_taus_3p.empty()) continue;
 
         // Online taus
         std::vector<const xAOD::TauJet*> hlt_taus_all = getOnlineTausAll(trigger, true);

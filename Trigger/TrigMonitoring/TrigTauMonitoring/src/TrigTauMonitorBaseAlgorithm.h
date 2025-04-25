@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTAUMONITORING_TRIGTAUMONITORBASEALGORITHM_H
@@ -27,6 +27,12 @@ public:
     virtual StatusCode initialize() override;
     virtual StatusCode fillHistograms(const EventContext& ctx) const override;
 
+    enum TauID {
+        None = 0,
+        RNN = 1,
+        GNTau = 2,
+    };
+
 protected:
     // List of triggers from menu (before duplicate filtering)
     Gaudi::Property<std::vector<std::string>> m_triggers{this, "TriggerList", {}};
@@ -50,7 +56,7 @@ protected:
 
     // Get offline 1P and 3P TauJet objects that pass the quality selection cuts
     std::vector<const xAOD::TauJet*> getOfflineTausAll(const EventContext& ctx, const float threshold = 20.0) const;
-    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> getOfflineTaus(const EventContext& ctx, const float threshold = 20.0) const;
+    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> getOfflineTaus(const EventContext& ctx, const float threshold = 20.0, const TauID tau_id = TauID::RNN) const;
 
     // Get L1 RoIs
     std::vector<const xAOD::eFexTauRoI*> getL1eTAUs(const EventContext& ctx, const std::string& l1_item) const;
@@ -102,13 +108,13 @@ protected:
       true_tau_p4.SetPtEtaPhiM(acc_ptvis(*true_tau), acc_etavis(*true_tau), acc_phivis(*true_tau), acc_mvis(*true_tau));
 
       for(auto tau : tau_vec) {
-	if(true_tau_p4.DeltaR(tau->p4()) < threshold) return true;
+	    if(true_tau_p4.DeltaR(tau->p4()) < threshold) return true;
       }
       return false;
     }
 
-    std::vector<const xAOD::TauJet*> classifyTausAll(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
-    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOfflineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
+    std::vector<const xAOD::TauJet*> classifyTausAll(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::RNN) const;
+    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOfflineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::RNN) const;
     std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOnlineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
 
 private:
