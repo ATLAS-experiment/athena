@@ -31,6 +31,7 @@
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
 #include <vector>
+#include <cmath>
 
 
 namespace Analysis {
@@ -55,12 +56,340 @@ namespace Analysis {
   JetFitterVariablesFactory::~JetFitterVariablesFactory() {}
 
 StatusCode JetFitterVariablesFactory::initialize() {
-  ATH_MSG_INFO(" Initialization of JetFitterVariablesFactory succesfull");
+  ATH_MSG_INFO(" Initialization of JetFitterVariablesFactory successful");
   return StatusCode::SUCCESS;
 }
 
 StatusCode JetFitterVariablesFactory::finalize() {
-  ATH_MSG_INFO(" Finalization of JetFitterVariablesFactory succesfull");
+  ATH_MSG_INFO(" Finalization of JetFitterVariablesFactory successful");
+  return StatusCode::SUCCESS;
+}
+
+//this is a nasty hack but doesn't disrupt BTagging workflow with fillJetFitterVariables
+StatusCode JetFitterVariablesFactory::computeJetFitterVariables(const xAOD::Jet &myJet,
+  const Trk::VxJetFitterVertexInfo* myJetFitterInfo,
+  const std::string& basename,
+  JetFitterVariables &vars) const {
+
+  bool nastyVsRevertPosToNeg = (basename.find("Flip") != std::string::npos);
+  int nVTX = 0, ndof = 0, nTracksAtVtx = 0, nSingleTracks = 0;
+  float energyFraction = NAN, mass = NAN, mass_uncorr = NAN, significance3d = NAN, deltaphi = NAN, deltaeta = NAN, chi2 = 0., deltaRFlightDir = NAN;
+
+  std::vector<Trk::VxJetCandidate*> myVertices;
+  Trk::VxJetCandidate* myVxJetCandidate = nullptr;
+  if (myJetFitterInfo) myVertices = myJetFitterInfo->verticesJF();
+  if(myVertices.size() == 0){
+    ATH_MSG_DEBUG("#BTAG# Trk::VxJetCandidate not found for jet fitter ");
+    vars.massUncorr        = mass_uncorr;
+    vars.chi2              = chi2;
+    vars.ndof              = ndof;
+    vars.dRFlightDir       = deltaRFlightDir;
+    vars.nVTX              = nVTX;
+    vars.nSingleTracks     = nSingleTracks;
+    vars.nTracksAtVtx      = nTracksAtVtx;
+    vars.mass              = mass;
+    vars.energyFraction    = energyFraction;
+    vars.significance3d    = significance3d;
+    vars.deltaeta          = deltaeta;
+    vars.deltaphi          = deltaphi;
+    return StatusCode::SUCCESS;
+  }
+  if(myVertices.size() > 0) myVxJetCandidate=dynamic_cast<Trk::VxJetCandidate*>(myVertices[0]);
+  if (myVxJetCandidate==0) {
+    ATH_MSG_WARNING("#BTAG# No correct VxJetCandidate could be retrieved." );
+    vars.massUncorr        = mass_uncorr;
+    vars.chi2              = chi2;
+    vars.ndof              = ndof;
+    vars.dRFlightDir       = deltaRFlightDir;
+    vars.nVTX              = nVTX;
+    vars.nSingleTracks     = nSingleTracks;
+    vars.nTracksAtVtx      = nTracksAtVtx;
+    vars.mass              = mass;
+    vars.energyFraction    = energyFraction;
+    vars.significance3d    = significance3d;
+    vars.deltaeta          = deltaeta;
+    vars.deltaphi          = deltaphi;
+    return StatusCode::SUCCESS;
+  }
+
+  const Trk::VxJetCandidate& myJetCandidate =*myVxJetCandidate;
+
+  const Trk::SelectedTracksInJet* mySelectedTracksInJet = myJetFitterInfo->getSelectedTracksInJet();
+  
+      
+  //put all needed information inside :-)
+  
+  //const double s_massks=497.648;
+  const double s_pion=139.57018;//hard coded pion mass ;-)
+  
+  double energyFromPrimary=0.;
+  double energyFromSecondary=0.;
+
+  // get fit quality variables for the PV of jetfitter
+  const Trk::VxVertexOnJetAxis* pvtxjet = myVxJetCandidate->getPrimaryVertex();
+  const Trk::FitQuality& fitquality = pvtxjet->fitQuality();
+  chi2 = fitquality.chiSquared();
+  ndof = fitquality.numberDoF();
+
+  if (mySelectedTracksInJet!=0) 
+  {
+    ATH_MSG_DEBUG(" Adding the tracks from primary vertex information ");
+    const std::vector<const Trk::ITrackLink*> & myPrimaryLinks=mySelectedTracksInJet->getPrimaryTrackLinks();
+    
+    std::vector<const Trk::ITrackLink*>::const_iterator myPrimaryLinksBegin=myPrimaryLinks.begin();
+    std::vector<const Trk::ITrackLink*>::const_iterator myPrimaryLinksEnd=myPrimaryLinks.end();
+
+    for(std::vector<const Trk::ITrackLink*>::const_iterator myPrimaryLinksIter=myPrimaryLinksBegin;
+        myPrimaryLinksIter!=myPrimaryLinksEnd;
+        ++myPrimaryLinksIter)
+    {
+      const Trk::TrackParameters* myParameters=(*myPrimaryLinksIter)->parameters();
+      if (myParameters)
+      {
+        energyFromPrimary+=std::sqrt(s_pion*s_pion+myParameters->momentum().mag2());
+      }
+      else
+      {
+        ATH_MSG_WARNING(" no perigee in track for energy computation. Skipping primary track...");
+      }
+    }
+  } else
+  {
+    ATH_MSG_DEBUG(" No information about further primary tracks available. Normal in JetFitter vs. 1");
+  }
+  
+  
+  const Trk::RecVertexPositions & recVertexPositions=myJetCandidate.getRecVertexPositions();
+  const Amg::VectorX & vertexPosition=recVertexPositions.position();
+  const Amg::MatrixX & vertexCovMatrix = recVertexPositions.covariancePosition();
+  
+  Amg::Vector3D primaryPos(vertexPosition[Trk::jet_xv],
+      vertexPosition[Trk::jet_yv],
+      vertexPosition[Trk::jet_zv]);
+
+  Amg::Vector3D flightAxis(1,1,1);//has to be different from 0
+  Amg::setPhi(flightAxis, vertexPosition[Trk::jet_phi]);
+  Amg::setTheta(flightAxis, vertexPosition[Trk::jet_theta]);
+
+  xAOD::IParticle::FourMom_t JetVector = myJet.p4();
+  
+  //loop over primary vertex
+  const std::vector<Trk::VxTrackAtVertex*> & TracksAtPrimary=myJetCandidate.getPrimaryVertex()->getTracksAtVertex();
+  const std::vector<Trk::VxTrackAtVertex*>::const_iterator TracksAtPrimaryBegin=TracksAtPrimary.begin();
+  const std::vector<Trk::VxTrackAtVertex*>::const_iterator TracksAtPrimaryEnd=TracksAtPrimary.end();
+  
+  for (std::vector<Trk::VxTrackAtVertex*>::const_iterator TracksAtPrimaryIter=TracksAtPrimaryBegin;
+ TracksAtPrimaryIter!=TracksAtPrimaryEnd;
+ ++TracksAtPrimaryIter) {
+
+      //FIXME: dynamic cast necessary? neutral perigee commented out, fix when vertex supports neutral
+    if (dynamic_cast<const Trk::Perigee*>((*TracksAtPrimaryIter)->perigeeAtVertex())!=0)
+    {
+      
+      energyFromPrimary+=
+  std::sqrt(s_pion*s_pion+
+   (*TracksAtPrimaryIter)->perigeeAtVertex()->momentum().mag2());
+    }
+    else
+    {
+      ATH_MSG_ERROR(" FIXME: VERTEX DOESN'T SUPPORT NEUTRAL PERIGEE, commented out in line 163");
+      ATH_MSG_ERROR(" Track is not a normal track neither a KS. This is an ERROR (ask developer to fix it). Skipping track... ");
+    }
+  }
+  
+
+  
+  
+  Amg::Vector3D sumPAllVertices(0.,0.,0.);
+  CLHEP::HepLorentzVector massVector(0,0,0,0);
+  double sumPtAdd(0.);
+
+  double dist(0.);
+  double inverrordist(0.);
+  
+  //now access the vertices on the jet axis info...
+  std::vector<Trk::VxVertexOnJetAxis*> vectorOfVertices=myJetCandidate.getVerticesOnJetAxis();
+  
+  //then you have to order them...
+  std::vector<Trk::VxVertexOnJetAxis*>::iterator vectorOfClustersOfTrackBegin=vectorOfVertices.begin();
+  std::vector<Trk::VxVertexOnJetAxis*>::iterator vectorOfClustersOfTrackEnd=vectorOfVertices.end();
+
+  for (std::vector<Trk::VxVertexOnJetAxis*>::const_iterator vectorOfClustersOfTrackIter=vectorOfClustersOfTrackBegin;
+ vectorOfClustersOfTrackIter!=vectorOfClustersOfTrackEnd;
+ ++vectorOfClustersOfTrackIter) {
+    
+    const std::vector<Trk::VxTrackAtVertex*> & tracksOfVertex=(*vectorOfClustersOfTrackIter)->getTracksAtVertex();
+    
+    int vertexSize=tracksOfVertex.size();
+    int ntrack=(*vectorOfClustersOfTrackIter)->getNumVertex()+5;//gets the right component (should add EDM method which does 
+    if (!nastyVsRevertPosToNeg)
+    {
+      if (vertexPosition[ntrack]>0) {     
+        if (vertexSize>1) {
+          nVTX+=1;
+          nTracksAtVtx+=vertexSize;
+        } else {
+          nSingleTracks+=1;
+        }
+      }
+    }
+    else
+    {
+      if (vertexPosition[ntrack]<=0) {     
+        if (vertexSize>1) {
+          nVTX+=1;
+          nTracksAtVtx+=vertexSize;
+        } else {
+          nSingleTracks+=1;
+        }
+      }
+    }        
+  }
+  
+  for (std::vector<Trk::VxVertexOnJetAxis*>::const_iterator vectorOfClustersOfTrackIter=vectorOfClustersOfTrackBegin;
+ vectorOfClustersOfTrackIter!=vectorOfClustersOfTrackEnd;
+ ++vectorOfClustersOfTrackIter) {
+
+    const std::vector<Trk::VxTrackAtVertex*> & tracksOfVertex=(*vectorOfClustersOfTrackIter)->getTracksAtVertex();
+    std::vector<Trk::VxTrackAtVertex*>::const_iterator clustersOfTrackBegin=tracksOfVertex.begin();
+    std::vector<Trk::VxTrackAtVertex*>::const_iterator clustersOfTrackEnd=tracksOfVertex.end();
+    
+    int vertexSize=tracksOfVertex.size();
+    
+    int ntrack=(*vectorOfClustersOfTrackIter)->getNumVertex()+5;//gets the right component (should add EDM method which does 
+    // this nasty little addition of 5...)
+
+
+    if ((vertexPosition[ntrack]<0 && (!nastyVsRevertPosToNeg))||(vertexPosition[ntrack]>=0 && nastyVsRevertPosToNeg)) {      
+      if (m_addNegativeTracksToPrimaryVertex) 
+      {
+        for (std::vector<Trk::VxTrackAtVertex*>::const_iterator clustersOfTrackIter=clustersOfTrackBegin;
+             clustersOfTrackIter!=clustersOfTrackEnd;++clustersOfTrackIter) {
+          
+          energyFromPrimary+=
+      std::hypot(s_pion, (*clustersOfTrackIter)->perigeeAtVertex()->momentum().mag());
+        }
+      }
+    } else {
+
+if ( (nVTX>0 && vertexSize>1) || nVTX==0 ) {
+  dist+=std::abs(vertexPosition[ntrack])/vertexCovMatrix(ntrack,ntrack);
+        if (vertexCovMatrix(ntrack,ntrack)>0)
+        {
+          inverrordist+=1./vertexCovMatrix(ntrack,ntrack);
+        }
+        else
+        {
+          ATH_MSG_WARNING("The diagonal element of the vertex cov matrix ("<<ntrack<<","<<ntrack<<") is "<<vertexCovMatrix(ntrack,ntrack)<<". It should be positive... Ignoring vertex when computing L/sigma(L)");
+        }
+}
+
+Amg::Vector3D sumP(0.,0.,0.);
+CLHEP::HepLorentzVector massThisCluster(0.,0.,0.,0.);
+
+//in case it's a real seconday vertex track...
+
+for (std::vector<Trk::VxTrackAtVertex*>::const_iterator clustersOfTrackIter=clustersOfTrackBegin;
+     clustersOfTrackIter!=clustersOfTrackEnd;
+     ++clustersOfTrackIter) {
+  
+//	  const Trk::MeasuredPerigee* aMeasPer=static_cast<const Trk::MeasuredPerigee*>((*clustersOfTrackIter)->perigeeAtVertex());
+        const Trk::TrackParameters* aMeasPer=(*clustersOfTrackIter)->perigeeAtVertex();
+//	  CLHEP::HepVector perigeeParms = aMeasPer->parameters();
+        
+  Amg::Vector3D mytrack(aMeasPer->momentum());
+  sumP+=mytrack;
+        if (dynamic_cast<const Trk::Perigee*>((*clustersOfTrackIter)->perigeeAtVertex())!=0)
+        {
+          massThisCluster+=CLHEP::HepLorentzVector(mytrack.x(), mytrack.y(), mytrack.z(), std::hypot(s_pion, mytrack.mag()));
+        }
+        else
+        {
+          ATH_MSG_ERROR("Neutral parameter has been taken out until Vertex has been rewritten to support neutral perigee again. ");
+          ATH_MSG_ERROR(" Track is not a normal track neither a KS. This is an ERROR (ask developer to fix it). Skipping track... ");
+        }
+}
+
+
+sumPAllVertices+=sumP;
+double ptadd=sumP.perp(flightAxis.unit());
+double masswithneutrals=std::sqrt(massThisCluster.mag2()+ptadd*ptadd)+ptadd;
+
+      if (m_useSingleTracksAlsoForMass)
+      {
+          massVector+=massThisCluster;
+      }
+      else
+      {
+        if ( (nVTX>0 && vertexSize>1) || nVTX==0 ) {
+          massVector+=massThisCluster;
+          sumPtAdd+=ptadd;
+        }
+      }
+      
+
+      if (m_usePtCorrectedEnergy)
+      {
+        energyFromSecondary+=std::sqrt(masswithneutrals*masswithneutrals+sumP.mag2());
+      }
+      else
+      {
+        energyFromSecondary+=std::sqrt(massThisCluster.mag2()+sumP.mag2());
+      }
+      
+
+
+
+    }//end if dist<0
+  }//end vectorOfVerteces
+  
+  if (energyFromSecondary+energyFromPrimary>0) {
+    energyFraction=energyFromSecondary/(energyFromSecondary+energyFromPrimary);
+  }
+  
+  if (massVector.mag()>0) {
+    mass=std::sqrt(massVector.mag2()+sumPtAdd*sumPtAdd)+sumPtAdd;
+    mass_uncorr=massVector.mag();
+    //port range of mass to maximum 10000.
+    if (mass>5000.) {
+mass = 
+  5000.+(5000./M_PI)*2.*std::atan((M_PI/2./5000.)*(mass-5000.));
+    }
+    if (mass_uncorr>5000.) {
+mass_uncorr = 
+  5000.+(5000./M_PI)*2.*std::atan((M_PI/2./5000.)*(mass_uncorr-5000.));
+    }
+  }
+  
+  if (inverrordist!=0) {
+    significance3d=dist/std::sqrt(inverrordist);
+    //port range of significance 3d to maximum 100.
+    significance3d=100./(M_PI/2.)*std::atan((M_PI/2./100.)*significance3d);
+  }
+  
+  if (std::abs(sumPAllVertices.mag())>1e-7) {
+    deltaphi=sumPAllVertices.eta()-JetVector.Eta();
+    deltaeta=sumPAllVertices.deltaPhi(Amg::Vector3D(JetVector.Px(), JetVector.Py(), JetVector.Pz()));
+    deltaRFlightDir = std::hypot(sumPAllVertices.deltaPhi(flightAxis), sumPAllVertices.eta()-flightAxis.eta());
+  } else {
+    deltaphi=-10.;
+    deltaeta=-10.;
+    deltaRFlightDir = -10;
+  }
+
+  // At the end, instead of writing to BTag, assign to the struct:
+  vars.massUncorr        = mass_uncorr;
+  vars.chi2              = chi2;
+  vars.ndof              = ndof;
+  vars.dRFlightDir       = deltaRFlightDir;
+  vars.nVTX              = nVTX;
+  vars.nSingleTracks     = nSingleTracks;
+  vars.nTracksAtVtx      = nTracksAtVtx;
+  vars.mass              = mass;
+  vars.energyFraction    = energyFraction;
+  vars.significance3d    = significance3d;
+  vars.deltaeta          = deltaeta;
+  vars.deltaphi          = deltaphi;
   return StatusCode::SUCCESS;
 }
 

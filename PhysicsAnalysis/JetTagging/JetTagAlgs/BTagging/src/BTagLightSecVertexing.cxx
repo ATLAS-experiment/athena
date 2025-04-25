@@ -119,7 +119,7 @@ namespace Analysis {
         energyfrc = myVertexInfoVKal->energyFraction();
         n2trk = myVertexInfoVKal->n2trackvertices();
         energyTrk =  myVertexInfoVKal->energyTrkInJet();
-	dsttomatlayer= myVertexInfoVKal->dstToMatLay();
+	      dsttomatlayer= myVertexInfoVKal->dstToMatLay();
       }
 
       newBTag->setVariable<float>(basename, "energyTrkInJet", energyTrk);
