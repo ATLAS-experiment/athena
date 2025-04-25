@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTAUMONITORING_TRIGTAUMONITORTANDPALGORITHM_H
@@ -15,6 +15,7 @@ public:
 private:
     // Require at least 1 offline Tau per event (will bias the variable distributions for background events)
     Gaudi::Property<bool> m_requireOfflineTaus{this, "RequireOfflineTaus", true, "Require at leat 1 offline tau per event"};
+    Gaudi::Property<unsigned int> m_offline_tau_id{this, "OfflineTauID", TauID::RNN, "Offline TauID (1: RNN, 2: GNTau)"};
 
     // Get offline electrons that pass the quality selection cuts
     std::vector<const xAOD::Electron*> getOfflineElectrons(const EventContext& ctx, const float threshold = 0.0) const;

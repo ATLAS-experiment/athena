@@ -289,7 +289,7 @@ if __name__=='__main__':
     flags = initConfigFlags()
     flags.Input.Files = TestDefaults.defaultTestFiles.RAW_RUN3
     flags.GeoModel.AtlasVersion = TestDefaults.defaultGeometryTags.RUN3
-    flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2023-02'
+    flags.IOVDb.GlobalTag = TestDefaults.defaultConditionsTags.RUN3_DATA23
     flags.Exec.MaxEvents = 1
     flags.Concurrency.NumThreads = 1
 

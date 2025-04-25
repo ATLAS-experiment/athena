@@ -175,7 +175,6 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                          gPos::AMSK,
                          Asatur  );
 
-        gtCalib(Atwr,200, 0,gPos::CAL_OFF);
 
 
         b_gtrx_map(Bfiber, BMapped);
@@ -197,8 +196,7 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                           gPos::BMSK,
                           Bsatur  );
 
-        gtCalib(Btwr,200, 0,gPos::CAL_OFF);
-
+    
         c_gtrx_map(Cfiber, CMapped);
 
         int fpgaC = 2; 
@@ -218,7 +216,6 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                           gPos::CMSK, 
                           Csatur );
 
-        gtCalib(Ctwr,200, 0,gPos::CAL_OFF);
 
         // Fill the gTower EDM with the corresponding towers
         int iEta = 0;
@@ -1282,7 +1279,7 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     // limit input to 12 bits to avoid accidental sign extension
     int din = (0x00000FFF &  datumPtr );
     // map all special cases to zero for now
-    if( din > 0x0FDE ) din = 0x4EE;
+    if( din > 0x0FDD ) din = 0x4EE;
     // limit negative values
     if( (din > 0) && ( din < 962 )  ) din =  962;
     //zeroZero
@@ -1295,6 +1292,7 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     int FPGA_CONVLIN_TH3 = 1773;
     int FPGA_CONVLIN_TH4 = 2541;
     int FPGA_CONVLIN_TH5 = 4029;
+    int FPGA_CONVLIN_TH6 = 4061;
 
     int FPGA_CONVLIN_OF0 = -5072;
     int FPGA_CONVLIN_OF1 = -2012;
@@ -1309,6 +1307,7 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     int oth3 = 0;
     int oth4 = 0;
     int oth5 = 0;
+    int oth6 = 0;
   
     int r1shv = 0;
     int r2shv = 0;
@@ -1373,28 +1372,35 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     else{
         oth5 = 0; 
     }
+    if ( din > FPGA_CONVLIN_TH6 ){
+        oth6 = 1;
+   }
+   else{
+        oth6 = 0; 
+   }
+
 
     // divide by 2 to 50 MeV LSB
 
-    if( (! oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 )  ) {
+    if( (! oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 )   ) {
         dout = 0;
     } 
-    else if( ( oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 )  ) {
+    else if( ( oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
         dout =  r1conv >>1;
     } 
-    else if( ( oth0) & (  oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 )  ) {
+    else if( ( oth0) & (  oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
         dout = r2conv >>1;
     } 
-    else if( ( oth0) & (  oth1 ) & ( oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 )  ) {
+    else if( ( oth0) & (  oth1 ) & ( oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
         dout = r3conv >>1;
     }  
-    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (! oth4 ) & (! oth5 )  ) {
+    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
         dout = r4conv >>1;
     }  
-    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (! oth5 )  ) {
+    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (! oth5 ) & (! oth6 ) ) {
         dout = r5conv >>1;
     }  
-    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (  oth5 )  ) {
+    else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (  oth5 ) & (! oth6 )  ) {
         dout = r6conv >>1;
     } 
     else {

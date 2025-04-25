@@ -302,6 +302,7 @@ namespace LVL1
          calTower = -2048;
       if (calTower > 2047)
          calTower = 2047;
+      if (address == 2047)  calTower = 2047;
 
       *tower = calTower;
    }
