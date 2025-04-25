@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // vim: ts=8 sw=2
@@ -39,8 +39,8 @@ using ROOT::Math::VectorUtil::Phi_mpi_pi;
 
 //______________________________constructor________________________________
 MissingMassCalculator::MissingMassCalculator(
-    MMCCalibrationSet::e aset, std::string m_paramFilePath)
-    : m_randomGen(), Prob(new MissingMassProb(aset, m_paramFilePath)) {
+    MMCCalibrationSet::e aset, std::string paramFilePath)
+    : m_randomGen(), Prob(new MissingMassProb(aset, paramFilePath)) {
   m_mmcCalibrationSet = aset;
   preparedInput.m_fUseVerbose = 0;
   preparedInput.m_beamEnergy = 6500.0; // for now LHC default is sqrt(S)=7 TeV
