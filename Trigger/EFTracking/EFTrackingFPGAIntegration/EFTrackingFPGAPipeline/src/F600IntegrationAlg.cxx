@@ -37,7 +37,8 @@ StatusCode F600IntegrationAlg::execute(const EventContext &ctx) const
 {
     ATH_MSG_DEBUG("Executing F600IntegrationAlg");
 
-    [[maybe_unused]] SG::ReadHandleKey<FPGATrackSimTrackCollection> FPGATrackHandle = SG::makeHandle(m_FPGATrackKey, ctx);
+   [[maybe_unused]] auto FPGATrackHandle = SG::makeHandle(m_FPGATrackKey, ctx);
 
     return StatusCode::SUCCESS;
+}
 }
