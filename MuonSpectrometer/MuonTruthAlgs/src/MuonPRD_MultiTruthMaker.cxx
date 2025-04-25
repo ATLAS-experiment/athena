@@ -1,170 +1,102 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Algorithm producing truth info for PrepRawData, keeping all MC particles contributed to a PRD.
-// A. Gaponenko, 2006
 
 #include "MuonTruthAlgs/MuonPRD_MultiTruthMaker.h"
 
-#include <iterator>
-#include <typeinfo>
-
-//================================================================
-MuonPRD_MultiTruthMaker::MuonPRD_MultiTruthMaker(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator) {
-    // Input
-    declareProperty("MDT_PrepRawDataContainer", m_MDT_ContainerName = "MDT_DriftCircles");
-    declareProperty("CSC_PrepRawDataContainer", m_CSC_ContainerName = "CSC_Clusters");
-    declareProperty("RPC_PrepRawDataContainer", m_RPC_ContainerName = "RPC_Measurements");
-    declareProperty("TGC_PrepRawDataContainer", m_TGC_ContainerName = "TGC_Measurements");
-    declareProperty("STGC_PrepRawDataContainer", m_STGC_ContainerName = "STGC_Measurements");
-    declareProperty("MM_PrepRawDataContainer", m_MM_ContainerName = "MM_Measurements");
-
-    declareProperty("MDT_SDO_Container", m_MDT_SimDataMapName = "MDT_SDO");
-    declareProperty("CSC_SDO_Container", m_CSC_SimDataMapName = "CSC_SDO");
-    declareProperty("RPC_SDO_Container", m_RPC_SimDataMapName = "RPC_SDO");
-    declareProperty("TGC_SDO_Container", m_TGC_SimDataMapName = "TGC_SDO");
-    declareProperty("STGC_SDO_Container", m_STGC_SimDataMapName = "sTGC_SDO");
-    declareProperty("MM_SDO_Container", m_MM_SimDataMapName = "MM_SDO");
-
-    // Output
-    declareProperty("MDT_PRD_TruthContainer", m_MDT_PRD_TruthName = "MDT_TruthMap");
-    declareProperty("CSC_PRD_TruthContainer", m_CSC_PRD_TruthName = "CSC_TruthMap");
-    declareProperty("RPC_PRD_TruthContainer", m_RPC_PRD_TruthName = "RPC_TruthMap");
-    declareProperty("TGC_PRD_TruthContainer", m_TGC_PRD_TruthName = "TGC_TruthMap");
-    declareProperty("STGC_PRD_TruthContainer", m_STGC_PRD_TruthName = "STGC_TruthMap");
-    declareProperty("MM_PRD_TruthContainer", m_MM_PRD_TruthName = "MM_TruthMap");
-}
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteHandle.h"
 
 //================================================================
 StatusCode MuonPRD_MultiTruthMaker::initialize() {
     ATH_MSG_DEBUG("MuonPRD_MultiTruthMaker::initialize()");
     ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(m_MDT_ContainerName.initialize());
-    ATH_CHECK(m_CSC_ContainerName.initialize(m_idHelperSvc->hasCSC()));
-    ATH_CHECK(m_RPC_ContainerName.initialize());
-    ATH_CHECK(m_TGC_ContainerName.initialize());
-    ATH_CHECK(m_STGC_ContainerName.initialize(m_idHelperSvc->hasSTGC()));
-    ATH_CHECK(m_MM_ContainerName.initialize(m_idHelperSvc->hasMM()));
-    ATH_CHECK(m_MDT_SimDataMapName.initialize());
-    ATH_CHECK(m_CSC_SimDataMapName.initialize(m_idHelperSvc->hasCSC()));
-    ATH_CHECK(m_RPC_SimDataMapName.initialize());
-    ATH_CHECK(m_TGC_SimDataMapName.initialize());
-    ATH_CHECK(m_STGC_SimDataMapName.initialize(m_idHelperSvc->hasSTGC()));
-    ATH_CHECK(m_MM_SimDataMapName.initialize(m_idHelperSvc->hasMM()));
-    ATH_CHECK(m_MDT_PRD_TruthName.initialize());
-    ATH_CHECK(m_CSC_PRD_TruthName.initialize(m_idHelperSvc->hasCSC()));
-    ATH_CHECK(m_RPC_PRD_TruthName.initialize());
-    ATH_CHECK(m_TGC_PRD_TruthName.initialize());
-    ATH_CHECK(m_STGC_PRD_TruthName.initialize(m_idHelperSvc->hasSTGC()));
-    ATH_CHECK(m_MM_PRD_TruthName.initialize(m_idHelperSvc->hasMM()));
+    ATH_CHECK(m_MdtPrdKey.initialize(!m_MdtPrdKey.empty()));
+    ATH_CHECK(m_CscPrdKey.initialize(!m_CscPrdKey.empty()));
+    ATH_CHECK(m_RpcPrdKey.initialize(!m_RpcPrdKey.empty()));
+    ATH_CHECK(m_TgcPrdKey.initialize(!m_TgcPrdKey.empty()));
+    ATH_CHECK(m_sTgcPrdKey.initialize(!m_sTgcPrdKey.empty()));
+    ATH_CHECK(m_MmPrdKey.initialize(!m_MmPrdKey.empty()));
+
+    ATH_CHECK(m_MdtSDOKey.initialize(!m_MdtPrdKey.empty()));
+    ATH_CHECK(m_CscSDOKey.initialize(!m_CscPrdKey.empty()));
+    ATH_CHECK(m_RpcSDOKey.initialize(!m_RpcPrdKey.empty()));
+    ATH_CHECK(m_TgcSDOKey.initialize(!m_TgcPrdKey.empty()));
+    ATH_CHECK(m_sTgcSDOKey.initialize(!m_sTgcPrdKey.empty()));
+    ATH_CHECK(m_MmSDOKey.initialize(!m_MmPrdKey.empty()));
+
+    ATH_CHECK(m_MdtTruthMapKey.initialize(!m_MdtPrdKey.empty()));
+    ATH_CHECK(m_CscTruthMapKey.initialize(!m_CscPrdKey.empty()));
+    ATH_CHECK(m_RpcTruthMapKey.initialize(!m_RpcPrdKey.empty()));
+    ATH_CHECK(m_TgcTruthMapKey.initialize(!m_TgcPrdKey.empty()));
+    ATH_CHECK(m_sTgcTruthMapKey.initialize(!m_sTgcPrdKey.empty()));
+    ATH_CHECK(m_MmTruthMapKey.initialize(!m_MmPrdKey.empty()));
     return StatusCode::SUCCESS;
 }
 
 //================================================================
-StatusCode MuonPRD_MultiTruthMaker::execute() {
+StatusCode MuonPRD_MultiTruthMaker::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("MuonPRD_MultiTruthMaker::execute()");
-
-    std::vector<StatusCode> retvals;
-    retvals.push_back(
-        buildPRD_Truth<Muon::MdtPrepDataContainer, MuonSimDataCollection>(m_MDT_ContainerName, m_MDT_SimDataMapName, m_MDT_PRD_TruthName));
-    if (m_idHelperSvc->hasCSC())
-        retvals.push_back(buildPRD_Truth<Muon::CscPrepDataContainer, CscSimDataCollection>(m_CSC_ContainerName, m_CSC_SimDataMapName,
-                                                                                           m_CSC_PRD_TruthName));
-    retvals.push_back(
-        buildPRD_Truth<Muon::RpcPrepDataContainer, MuonSimDataCollection>(m_RPC_ContainerName, m_RPC_SimDataMapName, m_RPC_PRD_TruthName));
-    retvals.push_back(
-        buildPRD_Truth<Muon::TgcPrepDataContainer, MuonSimDataCollection>(m_TGC_ContainerName, m_TGC_SimDataMapName, m_TGC_PRD_TruthName));
-    if (m_idHelperSvc->hasSTGC())
-        retvals.push_back(buildPRD_Truth<Muon::sTgcPrepDataContainer, MuonSimDataCollection>(m_STGC_ContainerName, m_STGC_SimDataMapName,
-                                                                                             m_STGC_PRD_TruthName));
-    if (m_idHelperSvc->hasMM())
-        retvals.push_back(
-            buildPRD_Truth<Muon::MMPrepDataContainer, MuonSimDataCollection>(m_MM_ContainerName, m_MM_SimDataMapName, m_MM_PRD_TruthName));
-
-    bool ok = true;
-    for (std::vector<StatusCode>::const_iterator i = retvals.begin(); i != retvals.end(); ++i) {
-        if (i->isFailure()) ok = false;
-    }
-    if (ok) return StatusCode::SUCCESS;
-    return StatusCode::FAILURE;
+    ATH_CHECK(buildPRD_Truth(ctx, m_MdtPrdKey, m_MdtSDOKey, m_MdtTruthMapKey));
+    ATH_CHECK(buildPRD_Truth(ctx, m_CscPrdKey, m_CscSDOKey, m_CscTruthMapKey));
+    ATH_CHECK(buildPRD_Truth(ctx, m_RpcPrdKey, m_RpcSDOKey, m_RpcTruthMapKey));
+    ATH_CHECK(buildPRD_Truth(ctx, m_TgcPrdKey, m_TgcSDOKey, m_TgcTruthMapKey));
+    ATH_CHECK(buildPRD_Truth(ctx, m_sTgcPrdKey, m_sTgcSDOKey, m_sTgcTruthMapKey));
+    ATH_CHECK(buildPRD_Truth(ctx, m_MmPrdKey, m_MmSDOKey, m_MmTruthMapKey));
+    return StatusCode::SUCCESS;
 }
 
 //================================================================
-template <class PrepDataContainer, class SIMDATACOLLECTION>
-StatusCode MuonPRD_MultiTruthMaker::buildPRD_Truth(SG::ReadHandleKey<PrepDataContainer> prepDataKey,
-                                                   SG::ReadHandleKey<SIMDATACOLLECTION> sdoKey,
-                                                   const SG::WriteHandleKey<PRD_MultiTruthCollection>& outputKey) {
-    SG::ReadHandle<SIMDATACOLLECTION> simDataMap(sdoKey);
-    if (!simDataMap.isPresent()) {
-        ATH_MSG_DEBUG("SimDataCollection for key=" << sdoKey.key() << " not in storegate, not adding it ");
+template <class PrdType, class SimCollection>
+StatusCode MuonPRD_MultiTruthMaker::buildPRD_Truth(const EventContext& ctx,
+                                                   const SG::ReadHandleKey<Muon::MuonPrepDataContainerT<PrdType>>& prdKey, 
+                                                   const SG::ReadHandleKey<SimCollection>& sdoKey,
+                                                   const SG::WriteHandleKey<PRD_MultiTruthCollection>& outputKey) const{
+    
+    if (prdKey.empty()) {
+        ATH_MSG_DEBUG("No key has been defined for "<<typeid(PrdType).name()<<". Bail out silently");
         return StatusCode::SUCCESS;
     }
-
-    if (!simDataMap.isValid()) {
-        ATH_MSG_ERROR("Could not read " << sdoKey.key());
+    SG::ReadHandle prdContainer{prdKey, ctx};
+    if (!prdContainer.isPresent()) {
+        ATH_MSG_ERROR("Could not read " << prdKey.key());
         return StatusCode::FAILURE;
     }
 
-    SG::ReadHandle<PrepDataContainer> prdContainer(prepDataKey);
-    if (!prdContainer.isValid()) {
-        ATH_MSG_ERROR("Could not read " << prepDataKey.key());
+    SG::ReadHandle simDataMap{sdoKey, ctx};
+    if (!simDataMap.isPresent()) {
+        ATH_MSG_ERROR("SimDataCollection for key=" << sdoKey.key() << " not in storegate.");
         return StatusCode::FAILURE;
     }
-
     // Create and fill the PRD truth structure
     ATH_MSG_DEBUG("make PRD truth for " << outputKey.key());
-    SG::WriteHandle<PRD_MultiTruthCollection> output(outputKey);
-    ATH_CHECK(output.record(std::make_unique<PRD_MultiTruthCollection>()));
-    addPRDCollections(output, prdContainer->begin(), prdContainer->end(), simDataMap);
+    SG::WriteHandle prdTruth{outputKey, ctx};
+    ATH_CHECK(prdTruth.record(std::make_unique<PRD_MultiTruthCollection>()));
 
-    return StatusCode::SUCCESS;
-}
+    for (const Muon::MuonPrepDataCollection<PrdType>* coll : *prdContainer) {
+        for (const PrdType* prd : *coll) {
+            ATH_MSG_VERBOSE("addPrepRawDatum(): new PRD " << prd << ", id=" << prd->identify() << ", number of RDOs: " << prd->rdoList().size());
+            bool gotSDO{false}, gotValidParticle{false};
 
-//================================================================
-template <class PRD_Container_Iterator, class SIMDATACOLLECTION>
-void MuonPRD_MultiTruthMaker::addPRDCollections(SG::WriteHandle<PRD_MultiTruthCollection>& prdTruth,
-                                                PRD_Container_Iterator collections_begin, PRD_Container_Iterator collections_end,
-                                                SG::ReadHandle<SIMDATACOLLECTION> simDataMap) {
-    for (PRD_Container_Iterator colNext = collections_begin; colNext != collections_end; ++colNext) {
-        addPRDRange(prdTruth, (*colNext)->begin(), (*colNext)->end(), simDataMap);
-    }
-}
-
-//================================================================
-// Adds PRDs in the range to prdTruth.
-template <class PRD_Collection_Iterator, class SIMDATACOLLECTION>
-void MuonPRD_MultiTruthMaker::addPRDRange(SG::WriteHandle<PRD_MultiTruthCollection>& prdTruth, PRD_Collection_Iterator range_begin,
-                                          PRD_Collection_Iterator range_end, SG::ReadHandle<SIMDATACOLLECTION> simDataMap) {
-    for (PRD_Collection_Iterator nextDatum = range_begin; nextDatum != range_end; nextDatum++) {
-        addPrepRawDatum(prdTruth, *nextDatum, simDataMap);
-    }
-}
-
-//================================================================
-template <class SIMDATACOLLECTION>
-void MuonPRD_MultiTruthMaker::addPrepRawDatum(SG::WriteHandle<PRD_MultiTruthCollection>& prdTruth, const Trk::PrepRawData* prd,
-                                              SG::ReadHandle<SIMDATACOLLECTION> simDataMap) {
-    ATH_MSG_VERBOSE("addPrepRawDatum(): new PRD " << prd << ", id=" << prd->identify() << ", number of RDOs: " << prd->rdoList().size());
-
-    bool gotSDO = false;
-    bool gotValidParticle = false;
-
-    // loop over RDOs
-    for (const auto& nextRDO : prd->rdoList()) {
-        typename SIMDATACOLLECTION::const_iterator iter(simDataMap->find(nextRDO));
-
-        if (iter != simDataMap->end()) {
-            gotSDO = true;
-            // Got an SDO.  Try to associate the PRD to MC particles we have info about.
-            typedef typename SIMDATACOLLECTION::mapped_type SIMDATA;
-            const SIMDATA& sdo = iter->second;
-            const std::vector<typename SIMDATA::Deposit>& deposits = sdo.getdeposits();
-            if (deposits.empty()) { continue; }
-            for (const auto& [particleLink, mcData] : deposits) {
-                ATH_MSG_VERBOSE("addPrepRawDatum(): particleLink.isValid() " << particleLink.isValid());
-                ATH_MSG_VERBOSE("addPrepRawDatum(): Barcode " << particleLink.barcode() << " evt " << particleLink.eventIndex());
-                if (particleLink.isValid()) {
+            for (const auto& nextRDO : prd->rdoList()) {
+                typename SimCollection::const_iterator iter(simDataMap->find(nextRDO));
+                if (iter == simDataMap->end()) {
+                    continue;
+                }
+                gotSDO = true;
+                // Got an SDO.  Try to associate the PRD to MC particles we have info about.
+                typedef typename SimCollection::mapped_type SIMDATA;
+                const SIMDATA& sdo = iter->second;
+                const std::vector<typename SIMDATA::Deposit>& deposits = sdo.getdeposits();
+                if (deposits.empty()) { continue; }
+                for (const auto& [particleLink, mcData] : deposits) {
+                    ATH_MSG_VERBOSE("addPrepRawDatum(): particleLink.isValid() " << particleLink.isValid());
+                    ATH_MSG_VERBOSE("addPrepRawDatum(): Barcode " << particleLink.barcode() << " evt " << particleLink.eventIndex());
+                    if (!particleLink.isValid()) {
+                        continue;
+                    }               
                     gotValidParticle = true;
                     // Associate the particle to the PRD. But don't add duplicates.
                     // Note: it may be more efficient to filter out duplicates among particles for the current PRD, then check-and-add the
@@ -179,15 +111,13 @@ void MuonPRD_MultiTruthMaker::addPrepRawDatum(SG::WriteHandle<PRD_MultiTruthColl
                     }
                 }
             }
+            if (gotSDO && !gotValidParticle) {
+                // Looked at all the deposits from all the SDOs, but did not find any valid particle link.
+                // prdTruth->insert(std::make_pair(prd, particleLinkUnknown));
+                ATH_MSG_DEBUG("addPrepRawDatum(): got SDO but no particles");
+            }
         }
     }
-
-    if (gotSDO && !gotValidParticle) {
-        // Looked at all the deposits from all the SDOs, but did not find any valid particle link.
-        // prdTruth->insert(std::make_pair(prd, particleLinkUnknown));
-        ATH_MSG_DEBUG("addPrepRawDatum(): got SDO but no particles");
-    }
+    return StatusCode::SUCCESS;
 }
 
-//================================================================
-// EOF
