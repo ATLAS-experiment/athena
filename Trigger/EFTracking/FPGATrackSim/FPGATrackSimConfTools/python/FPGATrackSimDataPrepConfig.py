@@ -330,6 +330,7 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
     theFPGATrackSimDataPrepAlg.Clustering = flags.Trigger.FPGATrackSim.clustering
     theFPGATrackSimDataPrepAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
     theFPGATrackSimDataPrepAlg.useInternalTruthTracks = flags.Trigger.FPGATrackSim.useFPGATruthTrackMatching
+    theFPGATrackSimDataPrepAlg.recordHits = not flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')
     
     FPGATrackSimMaping = result.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
     theFPGATrackSimDataPrepAlg.FPGATrackSimMapping = FPGATrackSimMaping
@@ -382,7 +383,6 @@ def FPGATrackSimDataPrepConnectToFastTracking(flagsIn,FinalTracks="F100-",**kwar
     flags.Tracking.ActiveConfig.extension=FinalTracks 
     flags.Tracking.writeExtendedSi_PRDInfo=True
     flags.lock()
-    flags.dump()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass") # TODO: Check if it's really necessary 
     prefix=flags.Tracking.ActiveConfig.extension # prefix for the name of final tracks (this is what IDTPM reads)
     
@@ -553,9 +553,10 @@ def runDataPrepChain():
                                                      **{'PixelClusters':"xAODPixelClusters_1stFromFPGACluster",
                                                         'PixelSpacePoints':"xAODPixelSpacePoints_1stFromFPGA"}))         
         
-        if flags.Trigger.FPGATrackSim.connectToToITkTracking:     
-            # Run ACTS Fast Tracking on offline objects (starting from seeding)
-            acc.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks="ActsFast"))    
+        if flags.Trigger.FPGATrackSim.connectToToITkTracking:
+            if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:     
+                # Run ACTS Fast Tracking on offline objects (starting from seeding)
+                acc.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks="ActsFast"))    
                
             # Run ACTS Fast Tracking for FPGA clusters (starting from seeding)
             acc.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks=FinalDataPrepTrackChainxAODTracksKeyPrefix,
