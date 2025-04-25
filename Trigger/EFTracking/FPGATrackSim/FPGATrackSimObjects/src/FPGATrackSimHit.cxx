@@ -84,10 +84,9 @@ unsigned FPGATrackSimHit::getPhysLayer(bool old) const
 }
 
 
-unsigned FPGATrackSimHit::getLayer() const
+int FPGATrackSimHit::getLayer() const
 {
-    if (isMapped() || (m_hitType == HitType::guessed)) return m_layer;
-    throw std::domain_error("FPGATrackSimHit::getLayer() called on a hit with invalid type: " + to_string(m_hitType));
+    return m_layer;
 }
 
 unsigned FPGATrackSimHit::getSection() const

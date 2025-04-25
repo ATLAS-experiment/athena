@@ -175,7 +175,7 @@ StatusCode FPGATrackSimHoughTransform_d0phi0_Tool::getRoads(const std::vector<st
 }
 
 
-FPGATrackSimHoughTransform_d0phi0_Tool::Image FPGATrackSimHoughTransform_d0phi0_Tool::createLayerImage(std::vector<unsigned> const & combine_layers, const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits, unsigned const scale) const
+FPGATrackSimHoughTransform_d0phi0_Tool::Image FPGATrackSimHoughTransform_d0phi0_Tool::createLayerImage(std::vector<int> const & combine_layers, const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits, unsigned const scale) const
 {
 
   Image image(m_imageSize_y, m_imageSize_x);
@@ -474,7 +474,7 @@ void FPGATrackSimHoughTransform_d0phi0_Tool::addRoad(const std::vector<std::shar
     // get bin scaling for the hit
     unsigned bin_scale = 0;
     for (unsigned i = 0; i < m_nCombineLayers; i++) {
-      for (unsigned const layer : m_combineLayer2D[i]) {
+      for (int const layer : m_combineLayer2D[i]) {
 	if (hit->getLayer() == layer) {
 	  bin_scale = m_binScale[layer];
 	}
