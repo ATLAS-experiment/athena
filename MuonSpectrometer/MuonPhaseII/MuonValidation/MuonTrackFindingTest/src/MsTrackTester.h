@@ -28,9 +28,17 @@ namespace MuonValR4{
           StatusCode execute() override final;
           StatusCode finalize() override final;
       private:
+        
+
+        using Location = MuonR4::MsTrackSeed::Location;
+
+        double expressAtRefPlane(const xAOD::MuonSegment& segment,
+                                 const Location plane) const;       
         MuonVal::MuonTesterTree m_tree{"MsTrackValidTest", "MuonTrackTester"};
 
         Gaudi::Property<bool> m_isMC{this, "isMC", false};
+
+
         using TruthHitCol = std::unordered_set<const xAOD::MuonSimHit*>;
 
         using SegmentKey_t = SG::ReadHandleKey<xAOD::MuonSegmentContainer>;
@@ -54,6 +62,13 @@ namespace MuonValR4{
 
         /** @brief Simple seed information */
         MuonVal::ThreeVectorBranch m_seedPos{m_tree, "MsTrkSeed_position"};
+        /** @brief Is the seed in the encap or in the barrel chambers */
+        MuonVal::VectorBranch<char>& m_seedType{m_tree.newVector<char>("MstTrkSeed_type")};
+        /** @brief Maximum separation between the segments on the reference plane */
+        MuonVal::VectorBranch<float>& m_seedLength{m_tree.newVector<float>("MsTrkSeed_length")};
+        /** @brief Maximum angular difference between the segments part of the seed */
+        MuonVal::VectorBranch<float>& m_seedThetaCone{m_tree.newVector<float>("MsTrkSeed_thetaCone")};
+
         /** @brief Link of the track seed to the building segment  */
         MuonVal::MatrixBranch<unsigned short>& m_seedRecoSegMatch{m_tree.newMatrix<unsigned short>("MsTrkSeed_segmentLinks")};
         /** @brief Link of the truth segments to the matchin reco segments */
@@ -67,6 +82,13 @@ namespace MuonValR4{
         /** @brief Links from the truth muon to the segments  */
         MuonVal::MatrixBranch<unsigned short>& m_truthMuRecoSegLinks{m_tree.newMatrix<unsigned short>("TruthMuons_recoSegLinks")};
 
+
+        /** @brief Radius of the barrel reference cylinder onto which all segments are projected */
+        double m_refBarrelR{7.*Gaudi::Units::m};
+        /** @brief Position along the beam axis of the referece disc onto which all endcap segments are projected */
+        double m_refEndcapDiscZ{15.*Gaudi::Units::m};
+        /** @brief Radius of the reference disc. */
+        double m_refEndcapDiscR{12.*Gaudi::Units::m};
 
     };
 }

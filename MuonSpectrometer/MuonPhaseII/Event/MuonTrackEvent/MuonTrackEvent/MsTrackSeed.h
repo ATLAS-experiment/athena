@@ -15,8 +15,14 @@
 namespace MuonR4{
     class MsTrackSeed {
         public:
-            MsTrackSeed() = default;
-
+            /** @brief Enum defining whether the seed is made in the endcap / barrel */
+            enum class Location: int8_t{
+                Undefined =-1,
+                Barrel,
+                Endcap
+            };
+            /** @brief Constructor with location defintion */
+            MsTrackSeed(const Location loc);
             /** @brief Returns the vector of associated segments */
             const std::vector<const xAOD::MuonSegment*>& segments() const;
             /** @brief Returns the list of detailed segments */
@@ -31,13 +37,28 @@ namespace MuonR4{
             void setPosition(Amg::Vector3D&& pos);
             /** @brief Returns the associated MS sector */
             const MuonGMR4::SpectrometerSector* msSector() const;
+            /** @brief Returns the location of the seed */
+            Location location() const;
+            /** @brief Equality operator */
+            bool operator==(const MsTrackSeed& other) const;
+            /** @brief Returns if all segments of this seed are also in the seed as well */
+            bool operator<(const MsTrackSeed& other) const;
         private:
+            /** @brief Returns whether two spectrometer sectors may be compatbile 
+             *  @param secA: First sector to compare
+             *  @param secB: Second sector to compare */
+            static bool compatibleSectors(const MuonGMR4::SpectrometerSector* secA,
+                                          const MuonGMR4::SpectrometerSector* secB);
+
+            Location m_loc{Location::Undefined};
             Amg::Vector3D m_pos{Amg::Vector3D::Zero()};
             std::vector<const xAOD::MuonSegment*> m_segments{};
             std::vector<const Segment*> m_detSegments{};
             std::unordered_set<const SpacePointBucket*> m_buckets{};
     };
     using MsTrackSeedContainer = std::vector<MsTrackSeed>;
+    std::ostream& operator<<(std::ostream& ostr, const MuonR4::MsTrackSeed& seed);
+
 }
 CLASS_DEF( MuonR4::MsTrackSeedContainer , 1290595104 , 1 )
 #endif
