@@ -62,7 +62,7 @@ StatusCode IDTPM::EFTrackMatchingTool::match(
       trkAnaColls.refTrackVec( TrackAnalysisCollections::InRoI ),
       trkAnaColls.matches() ) );
 
-  ATH_MSG_INFO( trkAnaColls.printMatchInfo() );
+  ATH_MSG_DEBUG( trkAnaColls.printMatchInfo() );
   
 
   return StatusCode::SUCCESS;

@@ -33,7 +33,7 @@ IDTPM::TrackAnalysisInfoWriteTool::TrackAnalysisInfoWriteTool(
 ///--------------------------
 StatusCode IDTPM::TrackAnalysisInfoWriteTool::initialize()
 {
-  ATH_MSG_INFO( "Initializing " << name() );
+  ATH_MSG_DEBUG( "Initializing " << name() );
 
   ATH_CHECK( asg::AsgTool::initialize() );
 

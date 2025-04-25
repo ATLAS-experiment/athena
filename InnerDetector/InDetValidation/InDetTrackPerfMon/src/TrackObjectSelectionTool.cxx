@@ -33,7 +33,7 @@ StatusCode IDTPM::TrackObjectSelectionTool::initialize() {
 
   ATH_CHECK( asg::AsgTool::initialize() );
 
-  ATH_MSG_INFO( "Initializing " << name() << "..." );
+  ATH_MSG_DEBUG( "Initializing " << name() << "..." );
 
   return StatusCode::SUCCESS;
 }

@@ -159,68 +159,87 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
     return acc    
 
 
+def TruthSelectionBaseToolCfg( flags, name="TruthSelectionBaseTool", **kwargs ) :
+    '''
+    Copy of InDetPhysValMonitoring.InDetPhysValMonitoringConfig InDetRttTruthSelectionToolCfg
+    to handle flags internally in IDTPM, i.e. not relying on IDPVM's (default) flags
+    '''
+    acc = ComponentAccumulator()
+
+    ## Baseline requirements to be applied to all analyses
+    kwargs.setdefault( "requireStable", True )
+    kwargs.setdefault( "requireCharged", True )
+    kwargs.setdefault( "selectedCharge", 0 )
+    kwargs.setdefault( "maxEta", 4.0 if flags.Detector.GeometryITk else 2.5 )
+
+    kwargs.setdefault( "requireOnlyPrimary", True )
+    kwargs.setdefault( "maxProdVertRadius", 300. )
+
+    kwargs.setdefault( "minPt", 1000 if flags.Detector.GeometryITk else 500 )
+    kwargs.setdefault( "ancestorList", [] )
+    kwargs.setdefault( "requireSiHit", 0 )
+    kwargs.setdefault( "Extrapolator", None )
+
+    acc.setPrivateTools( CompFactory.AthTruthSelectionTool( name, **kwargs ) )
+    return acc
+
+
 def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwargs ) :
     acc = ComponentAccumulator()
 
     # Default configurations 
     # ----------------------
-    truthMinPt = flags.PhysVal.IDTPM.currentTrkAna.truthMinPt
-    truthMaxPt = flags.PhysVal.IDTPM.currentTrkAna.truthMaxPt
-    truthPdgId = flags.PhysVal.IDTPM.currentTrkAna.truthPdgId
-    truthIsHadron = flags.PhysVal.IDTPM.currentTrkAna.truthIsHadron
-    truthIsPion = flags.PhysVal.IDTPM.currentTrkAna.truthIsPion
+    truthMinPt      = flags.PhysVal.IDTPM.currentTrkAna.truthMinPt
+    truthMaxPt      = flags.PhysVal.IDTPM.currentTrkAna.truthMaxPt
+    truthMaxAbsEta  = flags.PhysVal.IDTPM.currentTrkAna.truthMaxAbsEta
+    truthPdgId      = flags.PhysVal.IDTPM.currentTrkAna.truthPdgId
 
-    if "Muon" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject:
+    ## SelectTruthObject: customised Pt range selection
+    if "HighPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+        truthMinPt = 10000  # 10 GeV
+        truthMaxPt = -9999. # +inf
+    if "LowPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+        truthMinPt = 1000   # 1 GeV
+        truthMaxPt = 10000  # 10 GeV
+
+    ## SelectTruthObjec: cutomised selections
+    if "Muon" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
         truthPdgId = 13 
-        if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "highPTMuon": 
-            truthMinPt = 10000 
-            truthMaxPt = -9999. 
-        if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "lowPTMuon": 
-            truthMinPt = 1000 
-            truthMaxPt = 10000 
+    if "Electron" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+        truthPdgId = 11
+        ## adjusting pT ranges for low/highPt electrons
+        if "HighPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+            truthMinPt = 20000  # 20 GeV
+            truthMaxPt = -9999. # +inf
+        if "LowPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+            truthMinPt = 10000  # 10 GeV
+            truthMaxPt = 20000  # 20 GeV
+    truthIsHadron   = ( "Hadron" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject )
+    truthIsPion     = ( "Pion" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject )
 
-    elif "Hadron" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject:
-        truthIsHadron = True
-        if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "highPTHadron": 
-            truthMinPt = 10000 
-            truthMaxPt = -9999. 
-        if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "lowPTHadron": 
-            truthMinPt = 1000 
-            truthMaxPt = 10000 
+    ## SelectTruthObjec: cutomised truth origin selections
+    truthIsFromB = ( "FromB" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject )
+    truthIsFromC = ( "FromC" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject )
+    truthIsFromHeavyFlav = ( "FromHeavyFlav" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject )
+    truthIsFromLightFlav = ( "FromLightFlav" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject )
 
-    elif "Pion" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject:
-        truthIsPion = True
-        if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "highPTPion": 
-            truthMinPt = 10000 
-            truthMaxPt = -9999. 
-        if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "lowPTHadron": 
-            truthMinPt = 1000 
-            truthMaxPt = 10000 
-        
-    elif "Electron" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject:
-        truthPdgId = 11  
-        if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "highPTElectron": 
-            truthMinPt = 20000 
-            truthMaxPt = -9999. 
-        if flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject == "lowPTElectron": 
-            truthMinPt = 10000 
-            truthMaxPt = 20000
+    # TruthSelectionBaseTool properties
+    # ---------------------------------
+    kwargs_base = {}
+    if truthMinPt!=-9999.       : kwargs_base.setdefault( "minPt",  truthMinPt )
+    if truthMaxPt!=-9999.       : kwargs_base.setdefault( "maxPt",  truthMaxPt )
+    if truthMaxAbsEta!=-9999.   : kwargs_base.setdefault( "maxEta", truthMaxAbsEta )
+    if truthPdgId!=-9999.       : kwargs_base.setdefault( "pdgId",  truthPdgId )
+    ## remove only primary requirements for Heavy Flavour truth selection - removed for now
+    #doHF = truthIsFromB or truthIsFromC or truthIsFromHeavyFlav
+    #if doHF                         : kwargs_base.setdefault( "requireOnlyPrimary", False )
+    #if doHF or truthIsFromLightFlav : kwargs_base.setdefault( "maxProdVertRadius", -1. )
 
-
-    # InDetRttTruthSelectionTool properties
-    # -------------------------------------
-    kwargs_InDetRttTruthSelectionTool = {}
-    if truthMinPt!=-9999.: kwargs_InDetRttTruthSelectionTool.setdefault( "minPt", truthMinPt )
-    if truthMaxPt!=-9999.: kwargs_InDetRttTruthSelectionTool.setdefault( "maxPt", truthMaxPt )
-    if flags.PhysVal.IDTPM.currentTrkAna.truthMaxAbsEta!=-9999.: kwargs_InDetRttTruthSelectionTool.setdefault( "maxEta", flags.PhysVal.IDTPM.currentTrkAna.truthMaxAbsEta )
-    if truthPdgId!=-9999.: kwargs_InDetRttTruthSelectionTool.setdefault( "pdgId", truthPdgId )
-
-    from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetRttTruthSelectionToolCfg
-    truthSelectionTool = acc.popToolsAndMerge(InDetRttTruthSelectionToolCfg(flags, **kwargs_InDetRttTruthSelectionTool))
+    kwargs.setdefault( "truthTool" ,
+        acc.popToolsAndMerge( TruthSelectionBaseToolCfg( flags, **kwargs_base ) ) )
 
     # Additional properties
     # ---------------------
-    kwargs.setdefault( "truthTool" , truthSelectionTool)
     kwargs.setdefault( "maxEta", flags.PhysVal.IDTPM.currentTrkAna.truthMaxEta )
     kwargs.setdefault( "minEta", flags.PhysVal.IDTPM.currentTrkAna.truthMinEta )
     kwargs.setdefault( "minPhi", flags.PhysVal.IDTPM.currentTrkAna.truthMinPhi )
@@ -231,8 +250,6 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
     kwargs.setdefault( "maxZ0", flags.PhysVal.IDTPM.currentTrkAna.truthMaxZ0 )
     kwargs.setdefault( "minQoPT", flags.PhysVal.IDTPM.currentTrkAna.truthMinQoPT )
     kwargs.setdefault( "maxQoPT", flags.PhysVal.IDTPM.currentTrkAna.truthMaxQoPT )
-    kwargs.setdefault( "isHadron", truthIsHadron )
-    kwargs.setdefault( "isPion", truthIsPion )
     kwargs.setdefault( "minAbsEta", flags.PhysVal.IDTPM.currentTrkAna.truthMinAbsEta )
     kwargs.setdefault( "minAbsPhi", flags.PhysVal.IDTPM.currentTrkAna.truthMinAbsPhi )
     kwargs.setdefault( "maxAbsPhi", flags.PhysVal.IDTPM.currentTrkAna.truthMaxAbsPhi )
@@ -242,6 +259,12 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
     kwargs.setdefault( "maxAbsZ0", flags.PhysVal.IDTPM.currentTrkAna.truthMaxAbsZ0 )
     kwargs.setdefault( "minAbsQoPT", flags.PhysVal.IDTPM.currentTrkAna.truthMinAbsQoPT )
     kwargs.setdefault( "maxAbsQoPT", flags.PhysVal.IDTPM.currentTrkAna.truthMaxAbsQoPT )
+    kwargs.setdefault( "isHadron", truthIsHadron )
+    kwargs.setdefault( "isPion", truthIsPion )
+    kwargs.setdefault( "isFromB", truthIsFromB )
+    kwargs.setdefault( "isFromC", truthIsFromC )
+    kwargs.setdefault( "isFromHeavyFlav", truthIsFromHeavyFlav )
+    kwargs.setdefault( "isFromLightFlav", truthIsFromLightFlav )
 
     acc.setPrivateTools( CompFactory.IDTPM.TruthQualitySelectionTool( name, **kwargs ) )
 

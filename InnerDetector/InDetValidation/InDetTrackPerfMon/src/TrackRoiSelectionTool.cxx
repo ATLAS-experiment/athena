@@ -39,7 +39,7 @@ StatusCode IDTPM::TrackRoiSelectionTool::initialize() {
 
   ATH_CHECK( asg::AsgTool::initialize() );
 
-  ATH_MSG_INFO( "Initializing " << name() );
+  ATH_MSG_DEBUG( "Initializing " << name() );
 
   ATH_CHECK( m_triggerTrkParticleName.initialize( 
       not m_triggerTrkParticleName.key().empty() ) );
