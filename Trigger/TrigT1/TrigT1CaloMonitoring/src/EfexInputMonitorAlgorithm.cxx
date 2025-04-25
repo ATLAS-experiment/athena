@@ -215,7 +215,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                   TowerRefCount = refcounts.at(i);
                   if(isLAr) {
                       if(TowerCount==1022) {
-                          Decision = "LArInvalidCode";
+                          //Decision = "LArInvalidCode"; - not an error, or at least not one we (L1Calo) should be tracking for now
                           if(TowerRefCount!=1022) {
                               Decision = "LArInvalidCodeMismatched";
                           }
