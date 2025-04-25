@@ -38,7 +38,8 @@ namespace Analysis {
     virtual StatusCode finalize();
     
     virtual StatusCode fillJetFitterVariables(const xAOD::Jet &, xAOD::BTagging* BTag, const Trk::VxJetFitterVertexInfo* myJetFitterInfo, std::string basename) const;
-   
+    virtual StatusCode computeJetFitterVariables(const xAOD::Jet &myJet, const Trk::VxJetFitterVertexInfo* myJetFitterInfo, const std::string& basename, JetFitterVariables &vars) const;
+
   private:
 
     bool m_addNegativeTracksToPrimaryVertex;

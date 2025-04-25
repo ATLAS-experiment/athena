@@ -4,6 +4,7 @@
 #include "BTagging/JetSecVertexingAlg.h"
 #include "BTagging/JetSecVtxFindingAlg.h"
 #include "BTagging/BTagTrackAugmenterAlg.h"
+#include "BTagging/JetTagVertexDecoratorAlg.h"
 
 using namespace Analysis ;
 
@@ -13,5 +14,7 @@ DECLARE_COMPONENT( JetSecVtxFindingAlg )
 DECLARE_COMPONENT( BTagTool )
 DECLARE_COMPONENT( JetBTaggingAlg )
 DECLARE_COMPONENT( BTagTrackAugmenterAlg )
+DECLARE_COMPONENT( JetTagVertexDecoratorAlg )
+
 /** factory entries need to have the name of the package */
 

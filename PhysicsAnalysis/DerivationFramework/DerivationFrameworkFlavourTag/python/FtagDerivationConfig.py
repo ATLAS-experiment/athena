@@ -160,15 +160,16 @@ def tagSingleJetCollection(cfgFlags, jet_col, pv_col,
     ))
 
     # schedule tagging algorithms for this jet collection
-    acc.merge(BTagAlgsCfg(
-        inputFlags=cfgFlags,
-        JetCollection=jet_col_name_without_Jets,
-        nnList=GetTaggerTrainingMap(cfgFlags, jet_col_name_without_Jets),
-        trackCollection=track_collection,
-        primaryVertices=pv_col,
-        muons=input_muons,
-        AddedJetSuffix='Jets',
-    ))
+    if cfgFlags.BTagging.EnableLegacyBTagging:
+        acc.merge(BTagAlgsCfg(
+            inputFlags=cfgFlags,
+            JetCollection=jet_col_name_without_Jets,
+            nnList=GetTaggerTrainingMap(cfgFlags, jet_col_name_without_Jets),
+            trackCollection=track_collection,
+            primaryVertices=pv_col,
+            muons=input_muons,
+            AddedJetSuffix='Jets',
+        ))
 
     return acc
 
