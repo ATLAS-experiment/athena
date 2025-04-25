@@ -137,8 +137,7 @@ class FeatureHandler:
         self.m_ConstituentTypes += [self.m_ConstituentTypeName_Neutral]
         self.m_ConstituentTypes += [self.m_ConstituentTypeName_Pi0Neut]
         
-        self.m_EnergyVariantsList = []
-        self.m_EnergyVariantsList += ["EtAllConsts"]
+        self.m_EnergyVariantsList = ["EtAllConsts"]
         # ==============================================
         
         
@@ -238,21 +237,15 @@ class FeatureHandler:
     #end def addFourMomentum
     
     def addTypeSpecificFeatures_PID(self):
-        Variables = []
-        Variables += ["BDTValues"]
-        
-        Sorts = []
-        Sorts += ["BDTSort"]
+        Variables = ["BDTValues"]
         
         MaxNum = 4
         
         for iVar in Variables:
-            for iSort in Sorts:
-                for iNum in range(1, MaxNum):
-                    featName = iVar + "_" + iSort + "_" + str(iNum)
-                    self.addToFeatures_AllTypes(featName, self.m_VarTypeName_PID, "F")
-                #end loop over num
-            #end loop over sort
+            for iNum in range(1, MaxNum):
+                featName = iVar + "_BDTSort_" + str(iNum)
+                self.addToFeatures_AllTypes(featName, self.m_VarTypeName_PID, "F")
+            #end loop over num
         #end loop over variables
     #end addTypeSpecificFeatures
     
@@ -260,38 +253,21 @@ class FeatureHandler:
     def addTypeSpecificFeatures_Shots(self):
         Variables = []
         Variables += ["nPhotons"]
-        Variables += ["nShots"]
-        Variables += ["SumShots_Et"]
-        Variables += ["SumShots_Eta"]
-        Variables += ["SumShots_Phi"]
-        Variables += ["SumShots_M"]
         Variables += ["EtSumShotsOverConstEt"]
-        
-        Sorts = []
-        Sorts += ["BDTSort"]
         
         MaxNum = 4
         
         for iVar in Variables:
-            for iSort in Sorts:
-                for iNum in range(1, MaxNum):
-                    featName = iVar + "_" + iSort + "_" + str(iNum)
-                    curDefVal = self.m_DefaultValues[self.m_VarTypeName_Shots]
-                    if iVar == "Et":
-                        curDefVal = -1000
-                    if iVar == "Eta" or iVar == "Phi":
-                        curDefVal = -8
-                    if iVar == "M":
-                        curDefVal = -200
+            for iNum in range(1, MaxNum):
+                featName = iVar + "_BDTSort_" + str(iNum)
+                curDefVal = self.m_DefaultValues[self.m_VarTypeName_Shots]
                     
-                    self.addToFeatures_FullName(self.m_ConstituentTypeName_Neutral + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)
-                    self.addToFeatures_FullName(self.m_ConstituentTypeName_Pi0Neut + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)
+                self.addToFeatures_FullName(self.m_ConstituentTypeName_Neutral + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)
+                self.addToFeatures_FullName(self.m_ConstituentTypeName_Pi0Neut + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)
                 #end loop over iNum
-            #end loop over sorts
         #end loop over variables
         
         Variables = []
-        Variables += ["NShotsInSeed"]
         Variables += ["NPhotonsInSeed"]
         for iVar in Variables:
             featName = iVar
@@ -359,25 +335,21 @@ class FeatureHandler:
         VariablesVec += ["Constituents_phi"]
         VariablesVec += ["Constituents_m"]
         
-        VariablesVecSort = []
-        VariablesVecSort += ["BDTSort"]
-        
-        for iSort in VariablesVecSort:
-            for iVecVar in VariablesVec:
-                featName = iSort + "_" + iVecVar
-                curDefVal   = -4000.
-                if iVecVar == "Constituents_eta" or iVecVar == "Constituents_phi":
-                    curDefVal = -9.
-                if iVecVar == "Constituents_m":
-                    curDefVal = -200.
-                self.addToFeatures_AllTypes(featName, self.m_VarTypeName_HLV, "V", curDefVal)
+        for iVecVar in VariablesVec:
+            featName = "BDTSort_" + iVecVar
+            curDefVal   = -4000.
+            if iVecVar == "Constituents_eta" or iVecVar == "Constituents_phi":
+                curDefVal = -9.
+            if iVecVar == "Constituents_m":
+                curDefVal = -200.
+            self.addToFeatures_AllTypes(featName, self.m_VarTypeName_HLV, "V", curDefVal)
                 
-                # also add the OutChrg and OutNeut
-                featName = self.m_ConstituentTypeName_OutChrg + "_" + self.m_VarTypeName_HLV + "_" + iSort + "_" + iVecVar
-                self.addToFeatures_FullName(featName, self.m_VarTypeName_HLV, "V", curDefVal)
+            # also add the OutChrg and OutNeut
+            featName = self.m_ConstituentTypeName_OutChrg + "_" + self.m_VarTypeName_HLV + "_BDTSort_" + iVecVar
+            self.addToFeatures_FullName(featName, self.m_VarTypeName_HLV, "V", curDefVal)
                 
-                featName = self.m_ConstituentTypeName_OutNeut + "_" + self.m_VarTypeName_HLV + "_" + iSort + "_" + iVecVar
-                self.addToFeatures_FullName(featName, self.m_VarTypeName_HLV, "V", curDefVal)
+            featName = self.m_ConstituentTypeName_OutNeut + "_" + self.m_VarTypeName_HLV + "_BDTSort_" + iVecVar
+            self.addToFeatures_FullName(featName, self.m_VarTypeName_HLV, "V", curDefVal)
                 
         #end loop over variables
     #end addTypeSpecificFeatures_HLV

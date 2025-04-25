@@ -46,11 +46,3 @@ double PanTau::HelperFunctions::stddev(double sumOfSquares, double sumOfValues, 
   return std::sqrt(stdDev);
 }
 
-
-double PanTau::HelperFunctions::deltaRprime(const TVector3& vec1, const TVector3& vec2) const {
-  const double a = vec1.DeltaPhi(vec2);
-  const double b = vec1.Theta() - vec2.Theta();
-  double dRprime = std::sqrt(a*a + b*b);
-  return dRprime;
-}
-

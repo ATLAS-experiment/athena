@@ -411,7 +411,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
         
     TLorentzVector          totalTLV_SumShots       = TLorentzVector(0., 0., 0., 0.);
     unsigned int            totalPhotonsInSeed      = 0;
-    unsigned int            totalShotsInSeed        = 0;
     double                  maxDeltaRSumShotToConst = -999;
     double                  minDeltaRSumShotToConst = 999;
     double                  maxDeltaRSumShotToTau   = -999;
@@ -435,20 +434,12 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
 	tlv_SumShots += curShot->p4();
 	allShotTLVs.push_back(curShot->p4());
       }//end loop over shots
-      totalShotsInSeed    += nShots;
       totalTLV_SumShots   += tlv_SumShots;
       totalPhotonsInSeed  += totalPhotonsInNeutral;
             
       std::string iConstStr = m_HelperFunctions.convertNumberToString((double)(iConst+1));
                        
       tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_nPhotons_BDTSort_" + iConstStr, totalPhotonsInNeutral);
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_nShots_BDTSort_" + iConstStr, nShots);
-            
-      //the et/eta/phi/m of the hlv of all shots combined for this neutral-type constituent
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_SumShots_Et_BDTSort_" + iConstStr, tlv_SumShots.Et());
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_SumShots_Eta_BDTSort_" + iConstStr, tlv_SumShots.Eta());
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_SumShots_Phi_BDTSort_" + iConstStr, tlv_SumShots.Phi());
-      tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_SumShots_M_BDTSort_" + iConstStr, tlv_SumShots.M());
             
       //energy ratio, deltaR of sumShots and constituent
       double deltaRSumShotToConst = tlv_CurConst.DeltaR(tlv_SumShots);
@@ -465,7 +456,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
     }//end loop over constituents in tau
     
     //number of shots in seed
-    tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_NShotsInSeed", totalShotsInSeed);
     tauFeatureMap->addFeature(inputAlgName + "_" + curTypeName + "_" + prefixVARType + "_NPhotonsInSeed", totalPhotonsInSeed);
  
   }//end if check for shot info dumping
