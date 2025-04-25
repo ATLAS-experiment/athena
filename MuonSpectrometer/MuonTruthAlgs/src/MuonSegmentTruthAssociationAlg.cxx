@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSegmentTruthAssociationAlg.h"
@@ -12,6 +12,7 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "TruthUtils/MagicNumbers.h"
 #include "xAODTruth/TruthVertex.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace Muon {
 
@@ -200,12 +201,14 @@ namespace Muon {
                     continue;
                 }
                 ATH_MSG_DEBUG("truthSegLink " << truthSegLink);
-                if (!truthSegment->isAvailable<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink")) {
+                static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer> >
+                  truthParticleLinkAcc("truthParticleLink");
+                if (!truthParticleLinkAcc.isAvailable(*truthSegment)) {
                     ATH_MSG_WARNING("truthSegment without truthParticleLink ");
                     continue;
                 }
                 ElementLink<xAOD::TruthParticleContainer> truthLink =
-                    truthSegment->auxdata<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink");
+                  truthParticleLinkAcc(*truthSegment);
                 const xAOD::TruthParticle* truthParticle = *truthLink;
                 if (!truthParticle) {
                     ATH_MSG_WARNING("Invalid truth link " << truthLink);

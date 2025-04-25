@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONTRACKTRUTHTOOL_H
@@ -12,8 +12,8 @@
 #include <vector>
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
+
+
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
 #include "MuonRecToolInterfaces/IMuonTrackTruthTool.h"
@@ -24,10 +24,6 @@
 #include "TrkTrack/TrackCollection.h"
 
 class TruthTrajectory;
-
-namespace MuonGM {
-    class MuonDetectorManager;
-}
 
 namespace Muon {
     class MuonSegment;
@@ -44,7 +40,7 @@ namespace Muon {
        @brief Tool to calculate track truth
 
     */
-    class MuonTrackTruthTool : virtual public IMuonTrackTruthTool, public AthAlgTool {
+    class MuonTrackTruthTool :  public extends<AthAlgTool, IMuonTrackTruthTool> {
     public:
         struct SortResultByMatchedHits {
             bool operator()(const MatchResult& r1, const MatchResult& r2) const;
@@ -54,8 +50,7 @@ namespace Muon {
 
     public:
         /** @brief constructor */
-        MuonTrackTruthTool(const std::string&, const std::string&, const IInterface*);
-
+        using base_class::base_class;
         /** @brief destructor */
         ~MuonTrackTruthTool() = default;
 
@@ -136,11 +131,9 @@ namespace Muon {
         /// The number of such scatters is returned in the .second.
         const std::pair<HepMC::ConstGenParticlePtr, unsigned int> getInitialPair(const TruthTrajectory& traj, const int barcodeIn) const;
 
-        const MuonGM::MuonDetectorManager* m_detMgr;
-
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-        ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
+        PublicToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
         ToolHandle<Trk::ITruthTrajectoryBuilder> m_truthTrajectoryBuilder{
             this, "TruthTrajectoryBuilder", "Muon::MuonDecayTruthTrajectoryBuilder/MuonDecayTruthTrajectoryBuilder"};
 
