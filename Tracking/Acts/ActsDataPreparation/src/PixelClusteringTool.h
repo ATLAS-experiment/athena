@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_DATAPREPARATION_PIXEL_CLUSTERING_TOOL_H
@@ -60,7 +60,7 @@ private:
 			 xAOD::PixelCluster& container) const;
 
 private:  
-  ServiceHandle< InDetDD::IPixelReadoutManager > m_pixelReadout {this, "PixelReadoutManager", "ITkPixelReadoutManager",
+  ServiceHandle< InDetDD::IPixelReadoutManager > m_pixelReadout {this, "PixelReadoutManager", "InDetDD::ITk::PixelReadoutManager",
       "Pixel readout manager" };
   
   ToolHandle< InDet::PixelRDOTool > m_pixelRDOTool {this, "PixelRDOTool", "", "The Pixel RDO tool"};

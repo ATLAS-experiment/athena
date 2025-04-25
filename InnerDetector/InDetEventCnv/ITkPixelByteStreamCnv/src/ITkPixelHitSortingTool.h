@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -38,7 +38,7 @@ class ITkPixelHitSortingTool: public AthAlgTool {
 
     private:
 
-    ServiceHandle< InDetDD::IPixelReadoutManager > m_pixelReadout {this, "PixelReadoutManager", "ITkPixelReadoutManager", "Pixel readout manager" };
+    ServiceHandle< InDetDD::IPixelReadoutManager > m_pixelReadout {this, "PixelReadoutManager", "InDetDD::ITk::PixelReadoutManager", "Pixel readout manager" };
     const PixelID* m_pixIdHelper{};
     const InDetDD::PixelDetectorManager* m_detManager{};
 
