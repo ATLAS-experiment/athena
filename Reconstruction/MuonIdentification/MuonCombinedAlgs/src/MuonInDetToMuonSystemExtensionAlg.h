@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDALGS_MUONINDETSYSTEMEXTENSIONALG_H
@@ -71,7 +71,7 @@ private:
     struct MuidCoCache {
         const MuonCombined::InDetCandidate* id_trk{nullptr};
         const MuonCombined::CombinedFitTag* cmb_trk{nullptr};
-        MuidCoCache(const MuonCombined::InDetCandidate* _id, const MuonCombined::CombinedFitTag* _cb) : id_trk{_id}, cmb_trk{_cb} {}
+        MuidCoCache(const MuonCombined::InDetCandidate* id, const MuonCombined::CombinedFitTag* cb) : id_trk{id}, cmb_trk{cb} {}
     };
     using MuidCoVector = std::vector<MuidCoCache>;
 
