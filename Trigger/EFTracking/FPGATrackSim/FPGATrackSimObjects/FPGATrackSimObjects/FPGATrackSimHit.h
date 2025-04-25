@@ -91,7 +91,7 @@ public:
     // NB: isMapped() should return true to access these members
     void setLayer(unsigned v) { m_layer = v; } // This is the logical layer
     void setSection(unsigned v) { m_section = v; }
-    unsigned getLayer() const;
+    int getLayer() const;
     unsigned getSection() const;
     void setRoadID(int roadID) { m_roadID = roadID; }
 
