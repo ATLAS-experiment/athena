@@ -733,7 +733,7 @@ int FPGATrackSimMatrixGenAlgo::getRegion(std::vector<FPGATrackSimHit> const & hi
   std::vector<bool> region_mask(m_nRegions, true);
 
   for (FPGATrackSimHit const & hit : hits) {
-    if (hit.getHitType() !=  HitType::wildcard){ // don't worry about hits that are WCs
+    if (hit.isReal()) { // don't worry about hits that are WCs
       for (int region = 0; region < m_nRegions; region++) {
 	if (m_doHoughConstants && is1ststage) {
 	  if (!m_FPGATrackSimMapping->RegionMap_1st()->isInRegion(region, hit))
@@ -894,8 +894,8 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
   std::vector<float> coords;
 
   for (int i = 0; i < nLayers; ++i) {
-    if (sector_hits[i].getHitType() != HitType::wildcard) {
 
+    if (sector_hits[i].isReal()) {
       double target_r = (m_doSecondStage ? m_FPGATrackSimMapping->RegionMap_2nd()->getAvgRadius(0, i) : m_FPGATrackSimMapping->RegionMap_1st()->getAvgRadius(0, i));
       // If this is a spacepoint the target R should be the average of the two layers.
       // TODO, get this to be loaded in from a mean radii file into the mapping infrastructure.
