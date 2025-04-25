@@ -58,7 +58,7 @@ StatusCode IDTPM::TruthDecoratorAlg::execute( const EventContext& ctx ) const {
 
   /// check if ALL required decorations exist already. If so return SUCCESS
   if( IDTPM::decorationsAllExist( *ptruths, m_decor_truth ) ) {
-    ATH_MSG_INFO( "All decorations already exist. Exiting gracefully" );
+    ATH_MSG_DEBUG( "All decorations already exist. Exiting gracefully" );
     return StatusCode::SUCCESS;
   }
 
