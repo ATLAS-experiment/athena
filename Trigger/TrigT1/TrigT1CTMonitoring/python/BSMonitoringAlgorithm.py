@@ -585,7 +585,7 @@ def BSMonitoringConfig(inputFlags):
         myGroup.defineHistogram('candPtBAX;candPtBA', title='BA cand pT;pT index;candidates', path=monPath,xbins=6, xmin=0.5, xmax=6.5, opt='kAlwaysCreate')
         myGroup.defineHistogram('candPtECX;candPtEC', title='EC cand pT;pT index;candidates', path=monPath,xbins=15,xmin=0.5,xmax=15.5,opt='kAlwaysCreate')
         myGroup.defineHistogram('candPtFWX;candPtFW', title='FW cand pT;pT index;candidates', path=monPath,xbins=15,xmin=0.5,xmax=15.5,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candCount',title='Candidates distrib. per event (central slice);candidates',type='TH1I',path=monPath,xbins=candidateWordsPerTimeslice,duration='' if inputFlags.Common.isOnline else 'lb',opt='kAlwaysCreate')
+        myGroup.defineHistogram('candCount',title='Candidates distrib. per event (central slice);candidates',type='TH1I',path=monPath,xbins=candidateWordsPerTimeslice,opt='kAlwaysCreate')
         myGroup.defineHistogram('candCountVsLBX,candCountVsLBY;candCountVsLB',title='Candidates distrib. per event (central slice) vs LB;LB;candidates',type='TH2I',path=monPath,xmin=0.5,xmax=2000.5,xbins=2000,ybins=candidateWordsPerTimeslice,opt='kAlwaysCreate')
 
         monPath="/MUCTPI/Cand/Expert"
