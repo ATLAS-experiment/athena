@@ -34,46 +34,30 @@ def __exit():
     ComponentAccumulator._checkUnmerged = False
 atexit.register(__exit)
 
-def printProperties(msg, c, nestLevel = 0, printDefaults=False, onlyComponentsOnly=False):
-    # Iterate in sorted order.
-    propnames= sorted(c._descriptors.keys())
-    for propname in propnames:
 
-        if not printDefaults and not c.is_property_set(propname):
-            continue
+def printProperties(msg, c, nestLevel = 0, printDefaults=False):
 
-        propval=getattr(c,propname)
-        # Ignore empty lists
+    # Dictionary of (default and) explicitly set values with latter taking precedence
+    props = {**c.getDefaultProperties(), **c._properties} if printDefaults else c._properties
 
-        if isinstance(propval,(GaudiConfig2.semantics._ListHelper,
-                               GaudiConfig2.semantics._DictHelper,
-                               GaudiConfig2.semantics._SetHelper)) and propval.data is None:
-            continue
-        # Printing EvtStore could be relevant for Views?
-        if not c.is_property_set(propname) and propname in ["DetStore","EvtStore", "AuditFinalize", "AuditInitialize", "AuditReinitialize", "AuditRestart", "AuditStart", "AuditStop", "AuditTools", "ExtraInputs", "ExtraOutputs"]:
-            continue
+    for propname, propval in sorted(props.items()):
 
+        # Recursively expand these types:
         if isinstance(propval, GaudiConfig2.Configurable):
-            msg.info("%s    * %s: %s/%s", " "*nestLevel, propname, propval.__cpp_type__, propval.getName())
-            printProperties(msg, propval, nestLevel+3)
-            continue
+            msg.info("%s    * %s: %s", " "*nestLevel, propname, propval.getFullJobOptName())
+            printProperties(msg, propval, nestLevel+3, printDefaults)
 
-        propstr = ""
-        if isinstance(propval, GaudiHandles.PublicToolHandleArray):
-            ths = [th.getName() for th in propval]
-            propstr = "PublicToolHandleArray([ {0} ])".format(', '.join(ths))
         elif isinstance(propval, GaudiHandles.PrivateToolHandleArray):
             msg.info( "%s    * %s: PrivateToolHandleArray of size %s", " "*nestLevel, propname, len(propval))
             for el in propval:
                 msg.info( "%s    * %s/%s", " "*(nestLevel+3), el.__cpp_type__, el.getName())
-                printProperties(msg, el, nestLevel+6)
-        elif isinstance(propval, GaudiHandles.GaudiHandle): # Any other handle
-            propstr = "Handle( {0} )".format(propval.typeAndName)
-        elif not onlyComponentsOnly:
-            propstr = str(propval)
-        if propstr:
-            msg.info("%s    * %s: %s", " "*nestLevel, propname, propstr)
-    return
+                printProperties(msg, el, nestLevel+6, printDefaults)
+
+        # Only print handle keys:
+        elif isinstance(propval, DataHandle):
+            propval = propval.Path
+
+        msg.info("%s    * %s: %r", " "*nestLevel, propname, propval)
 
 
 def filterComponents (comps, onlyComponents = []):
@@ -212,12 +196,12 @@ class ComponentAccumulator(AccumulatorCachable):
         self._msg=logging.getLogger('ComponentAccumulator')
 
 
-    def printCondAlgs(self, summariseProps=False, onlyComponents=[], printDefaults=False, printComponentsOnly=False):
+    def printCondAlgs(self, summariseProps=False, onlyComponents=[], printDefaults=False):
         self._msg.info( "Condition Algorithms" )
         for (c, flag) in filterComponents (self._conditionsAlgs, onlyComponents):
             self._msg.info( " \\__ %s (cond alg)%s", c.name, self._componentsContext.get(c.name,""))
             if summariseProps and flag:
-                printProperties(self._msg, c, 1, printDefaults, printComponentsOnly)
+                printProperties(self._msg, c, 1, printDefaults)
         return
 
 
@@ -226,7 +210,7 @@ class ComponentAccumulator(AccumulatorCachable):
     # in the list with a trailing `-', then only the name of the component
     # will be printed, not its properties.
     def printConfig(self, withDetails=False, summariseProps=False,
-                    onlyComponents = [], printDefaults=False, printComponentsOnly=False, printSequenceTreeOnly=False, prefix=None):
+                    onlyComponents = [], printDefaults=False, printSequenceTreeOnly=False, prefix=None):
         msg = logging.getLogger(prefix) if prefix else self._msg
 
         msg.info( "Event Algorithm Sequences" )
@@ -254,7 +238,7 @@ class ComponentAccumulator(AccumulatorCachable):
                     else:
                         msg.info( "%s\\__ %s", " "*nestLevel, c.name )
                     if summariseProps and flag:
-                        printProperties(msg, c, nestLevel, printDefaults, printComponentsOnly)
+                        printProperties(msg, c, nestLevel, printDefaults)
 
 
         for n,s in enumerate(self._allSequences):
@@ -275,7 +259,7 @@ class ComponentAccumulator(AccumulatorCachable):
             msg.info( "  %s,", t.getFullJobOptName() + self._componentsContext.get(t.name,""))
             # Not nested, for now
             if summariseProps and flag:
-                printProperties(msg, t, printDefaults, printComponentsOnly)
+                printProperties(msg, t, printDefaults)
         msg.info( "]" )
         msg.info( "Private Tools")
         msg.info( "[" )
@@ -283,7 +267,7 @@ class ComponentAccumulator(AccumulatorCachable):
             for tool in self._privateTools if isinstance(self._privateTools, Sequence) else [self._privateTools]:
                 msg.info( "  %s,", tool.getFullJobOptName() + self._componentsContext.get(tool.name,""))
                 if summariseProps:
-                    printProperties(msg, tool, printDefaults, printComponentsOnly)
+                    printProperties(msg, tool, printDefaults)
         msg.info( "]" )
         if self._auditors:
             msg.info( "Auditors" )
