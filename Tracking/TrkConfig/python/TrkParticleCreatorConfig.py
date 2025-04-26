@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of TrkParticleCreator package
 # Creating xAOD::TrackParticles starting from
 # input Trk::Tracks
@@ -367,7 +367,6 @@ def MuonCombinedParticleCreatorCfg(flags,
     kwargs.setdefault("IBLParameterSvc",
                       "IBLParameterSvc" if flags.Detector.GeometryID else "")
 
-    kwargs.setdefault("TrackingVolumesSvc", "TrackingVolumesSvc")
     result.setPrivateTools(
         CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
     return result
@@ -397,8 +396,6 @@ def MuonCaloParticleCreatorCfg(flags, name="MuonCaloParticleCreator", **kwargs):
     kwargs.setdefault("PerigeeExpression", "Origin")
     kwargs.setdefault("IBLParameterSvc",
                       "IBLParameterSvc" if flags.Detector.GeometryID else "")
-
-    kwargs.setdefault("TrackingVolumesSvc", "TrackingVolumesSvc")
 
     result.setPrivateTools(
         CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))

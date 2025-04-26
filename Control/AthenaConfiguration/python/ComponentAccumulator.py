@@ -1187,11 +1187,18 @@ class ComponentAccumulator(AccumulatorCachable):
                 self._msg.error("Failure running application")
                 return sc
 
-        app.stop().ignore()
+        scStop=app.stop()
+        if not scStop.isSuccess():
+            self._msg.error("Failed to stop AppMgr")
+            return scStop
 
         if (self._debugStage.value == "fini"):
             hookDebugger()
-        app.finalize().ignore()
+            
+        scFin=app.finalize()
+        if not scFin.isSuccess():
+            self._msg.error("Failed to finalize AppMgr")
+            return scFin
 
         sc1 = app.terminate()
         return sc1

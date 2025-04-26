@@ -193,7 +193,7 @@ namespace Trk{
     PublicToolHandle<Trk::IEnergyLossUpdator>           m_elossupdator
        {this,"EnergyLossUpdator","Trk::EnergyLossUpdator/AtlasEnergyLossUpdator",""};
     ServiceHandle<Trk::ITrackingVolumesSvc> m_trackingVolumesSvc
-      {this, "TrackingVolumeSvc", "TrackingVolumesSvc/TrackingVolumesSvc"};
+      {this, "TrackingVolumeSvc", "Trk::TrackingVolumesSvc/TrackingVolumesSvc"};
     ServiceHandle<ITrackingGeometrySvc> m_trackingGeometrySvc {this, "TrackingGeometrySvc", "", ""};
 
     SG::ReadCondHandleKey<TrackingGeometry>   m_trackingGeometryReadKey

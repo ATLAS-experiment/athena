@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUREC_TAUAODRUNNERALG_H
@@ -33,22 +33,26 @@
  *  related containers, and make deep copies. The tools scheduled for this algorithm were 
  *  divided into two categories, modification tools and standard tools after the 
  *  modification. The algorithm does not proceed to the standard tools if the tau object was 
- *  not modified by the modification tools. The example python scheduling scripts can be 
- *  found in the DerivationFramework package.
+ *  not modified by the modification tools, unless no modification tool has been provided.
+ *  The example python scheduling scripts can be found in the DerivationFramework package.
+ *
+ *  Caution! The tool can be configured to only deep-copy the TauJet container (by setting
+ *  the other input/output keys to "", but this will restrict the tools you can run, to
+ *  only those that decorate/modify the TauJets, and none of the linked objects (e.g.
+ *  vertices, tracks, PFOs, etc). Otherwise, errors and/or crashes will happen.
  */
-
 class TauAODRunnerAlg: public AthReentrantAlgorithm {
     public:
         TauAODRunnerAlg(const std::string &name, ISvcLocator *);
-        ~TauAODRunnerAlg(){};
         virtual StatusCode initialize() override;
-	virtual StatusCode execute(const EventContext& ctx) const override;
+        virtual StatusCode execute(const EventContext& ctx) const override;
 
     private:
-        //Tool handle array
+        // Tool handle arrays
         ToolHandleArray<ITauToolBase>  m_modificationTools{this, "modificationTools", {}, "Tools for modifying the taus"};
         ToolHandleArray<ITauToolBase>  m_officialTools    {this, "officialTools",     {}, "Official Reconstruction tools for taus after the modifications"};
-        //Read and write keys
+
+        // Read and write keys
         SG::ReadHandleKey<xAOD::TauJetContainer>        m_tauContainer              {this, "Key_tauContainer",                  "TauJets",                      "input tau key"};
         SG::ReadHandleKey<xAOD::CaloClusterContainer>   m_pi0ClusterInputContainer  {this, "Key_pi0ClusterInputContainer",      "TauPi0Clusters",               "input pi0 cluster"};
         SG::WriteHandleKey<xAOD::TauJetContainer>       m_tauOutContainer           {this, "Key_tauOutputContainer",            "TauJets_AODReco",              "output tau key"};
@@ -59,7 +63,7 @@ class TauAODRunnerAlg: public AthReentrantAlgorithm {
         SG::WriteHandleKey<xAOD::TauTrackContainer>     m_tauTrackOutputContainer   {this, "Key_tauTrackOutputContainer",       "TauTracks_AODReco",            "output tau track key"};
         SG::WriteHandleKey<xAOD::VertexContainer>       m_vertexOutputContainer     {this, "Key_vertexOutputContainer",         "TauSecondaryVertices_AODReco", "output vertex container key"};
 
-        //helper
+        // Helper
         static bool isTauModified(const xAOD::TauJet* newtau) ;
 };
 

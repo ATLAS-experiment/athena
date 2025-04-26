@@ -3,7 +3,6 @@
 # art-description: Express processing at Tier0
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 
@@ -13,7 +12,7 @@ Reco_tf.py  \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
 --outputHISTFile="HIST.root" \
---conditionsTag="CONDBR2-ES1PA-2024-05" \
+--conditionsTag="CONDBR2-ES1PA-2025-01" \
 --imf False
 
 rc1=$?
