@@ -405,6 +405,11 @@ if any([s.name=="AvalancheSchedulerSvc" for s in cfg.getServices()]):
 # need to override a folder tag for LAr while testing v6 firmware...
 if not flags.Input.isMC:
   from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+  if partition.isValid() and len(flags.Input.Files)==0:
+    # wait here for 2 minutes, to give LAr time to put fw info in the database
+    import time
+    log.info("Waiting 2 minutes for LATOME to get their databases in order")
+    time.sleep(120)
   runinfo = getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
   if runinfo.FWversion()==6:
     # need a dbOverride ... add it
@@ -509,6 +514,10 @@ if flags.Output.AODFileName != "":
 
 # ensure reloading OTF masking every event if running online monitoring
 if "MaskedSCCondAlg" in cfg.getCondAlgos(): cfg.getCondAlgo("MaskedSCCondAlg").ReloadEveryEvent=flags.Common.isOnline
+
+if flags.Trigger.L1.doeFex and (args.evtNumber is not None):
+  # when debugging individual events, add the eFex event dumper to the job
+  cfg.addEventAlgo(CompFactory.LVL1.eFexEventDumper(TowersKey="L1_eFexDataTowers",EMRoIKey="L1_eEMRoI",TauRoIKey="L1_eTauRoI"))
 
 # example of adding user algorithm
 # cfg.addEventAlgo(CompFactory.AnotherPackageAlg(),sequenceName="AthAlgSeq")
