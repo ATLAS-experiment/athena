@@ -99,8 +99,11 @@ namespace Rec {
            if( btsv_cont.isValid() ){
              for ( const auto *btsv : *btsv_cont ) mindRSVPV=std::min(Amg::deltaR(btsv->position()-pv->position(),iv->position()-pv->position()),mindRSVPV);
            }
-           if (m_removeNonLepVerts && vertexHasNoLep(ctx, iv)) continue;
-           bVertexContainer->push_back(iv);
+           if (m_removeNonLepVerts && vertexHasNoLep(ctx, iv)) {
+             delete iv;
+             continue;
+           }
+   	   bVertexContainer->push_back(iv);
            std::vector< Trk::VxTrackAtVertex > & vtrk = iv->vxTrackAtVertex();
            TLorentzVector VSUM(0.,0.,0.,0.);
            TLorentzVector tmp;
