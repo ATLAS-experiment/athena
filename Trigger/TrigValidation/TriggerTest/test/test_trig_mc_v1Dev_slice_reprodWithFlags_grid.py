@@ -6,6 +6,7 @@
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-output: *.txt
+# art-athena-mt: 8
 # art-output: *.log
 # art-output: log.*
 # art-output: *.out
@@ -30,9 +31,9 @@ def generate_exec_steps(slice_name = None):
     from TriggerTest.MCExecStep import MCExecStep
     
     # athena
-    ex = MCExecStep(name,menu='Dev_pp_run3_v1',signatures=slice_name)
+    ex = MCExecStep(name,menu='Dev_pp_run3_v1',signatures=[slice_name])
     ex.input = 'ttbar'
-    ex.threads = 1
+    ex.threads = 8
     ex.max_events = 100
     # rename histogram file
     hist_file_name = 'expert-monitoring_{:s}.root'.format(name)
