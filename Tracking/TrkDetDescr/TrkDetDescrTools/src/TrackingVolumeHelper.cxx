@@ -68,10 +68,10 @@ StatusCode TrackingVolumeHelper::initialize() {
 
 /** Simply forward to base class method to enhance friendship relation */
 void TrackingVolumeHelper::glueTrackingVolumes(TrackingVolume& firstVol,
-                                                    BoundarySurfaceFace firstFace,
-                                                    TrackingVolume& secondVol,
-                                                    BoundarySurfaceFace secondFace,
-                                                    bool buildBoundaryLayer) const
+                                               BoundarySurfaceFace firstFace,
+                                               TrackingVolume& secondVol,
+                                               BoundarySurfaceFace secondFace,
+                                               bool buildBoundaryLayer) const
 {
     TrackingVolumeManipulator::glueVolumes( firstVol, firstFace, secondVol, secondFace );
 
@@ -100,11 +100,11 @@ void TrackingVolumeHelper::glueTrackingVolumes(TrackingVolume& firstVol,
 
 /** Simply forward to base class method to enhance friendship relation */
 void TrackingVolumeHelper::glueTrackingVolumes(TrackingVolume& firstVol,
-                                                    BoundarySurfaceFace firstFace,
-                                                    const std::vector<TrackingVolume*>& secondVolumes,
-                                                    BoundarySurfaceFace secondFace,
-                                                    bool buildBoundaryLayer,
-                                                    bool boundaryFaceExchange) const
+                                               BoundarySurfaceFace firstFace,
+                                               const std::vector<TrackingVolume*>& secondVolumes,
+                                               BoundarySurfaceFace secondFace,
+                                               bool buildBoundaryLayer,
+                                               bool boundaryFaceExchange) const
 {
 
     if (msgLvl(MSG::VERBOSE)) {
@@ -404,152 +404,6 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
         }
     }
     // coverity will report a bug here for mLayer running out of scope, but the memory management is done later in the TrackingVolume
-}
-
-TrackingVolume* TrackingVolumeHelper::glueTrackingVolumeArrays(
-                                                    TrackingVolume& firstVol,
-                                                    BoundarySurfaceFace firstFace,
-                                                    TrackingVolume& secondVol,
-                                                    BoundarySurfaceFace secondFace, std::string name) const
-{
-    TrackingVolume* enclosingVolume = nullptr;
-
-    const auto *cyl1 = dynamic_cast<const CylinderVolumeBounds*> (&(firstVol.volumeBounds()));
-    const auto *cyl2 = dynamic_cast<const CylinderVolumeBounds*> (&(secondVol.volumeBounds()));
-
-    if (!cyl1 || !cyl2) {
-        ATH_MSG_ERROR( "TrackingVolumeHelper::glueTrackingVolumeArrays: input volumes not cylinders, return 0" );
-        return enclosingVolume;
-    }
-    if (cyl1->halfPhiSector()!= M_PI || cyl2->halfPhiSector()!= M_PI ) {
-        ATH_MSG_ERROR( "TrackingVolumeHelper::glueTrackingVolumeArrays: not coded for cylinder Phi sectors yet, return 0" );
-        return enclosingVolume;
-    }
-
-    // if the swap is required
-    BoundarySurfaceFace firstFaceCorr = firstFace;
-    BoundarySurfaceFace secondFaceCorr = secondFace;
-
-
-    // build volume envelope
-    std::vector<TrackingVolume*> vols;
-    CylinderVolumeBounds* envBounds =  nullptr;
-    Amg::Transform3D* envTransf = nullptr;
-    BinnedArray<TrackingVolume>*  subVols = nullptr;
-    vols.push_back(&firstVol);
-    vols.push_back(&secondVol);
-    std::vector<TrackingVolume*> envGlueNegXY;
-    std::vector<TrackingVolume*> envGluePosXY;
-    std::vector<TrackingVolume*> envGlueOuter;
-    std::vector<TrackingVolume*> envGlueInner;
-
-    if (firstFace==positiveFaceXY) {
-        envBounds =  new CylinderVolumeBounds(cyl1->innerRadius(),
-                                                   cyl1->outerRadius(),
-                                                   cyl1->halflengthZ()+cyl2->halflengthZ());
-        envTransf   = new Amg::Transform3D;
-        (*envTransf) = Amg::Translation3D(firstVol.center().x(),
-                                          firstVol.center().y(),
-                                          firstVol.center().z()+cyl2->halflengthZ());
-        subVols = m_trackingVolumeArrayCreator->cylinderVolumesArrayInZ(vols,false);
-        envGlueNegXY.push_back(&firstVol);
-        envGluePosXY.push_back(&secondVol);
-        envGlueOuter = vols;
-        envGlueInner = vols;
-    } else if (firstFace==negativeFaceXY) {
-        envBounds =  new CylinderVolumeBounds(cyl1->innerRadius(),
-                                                   cyl1->outerRadius(),
-                                                   cyl1->halflengthZ()+cyl2->halflengthZ());
-        envTransf = new Amg::Transform3D;
-        (*envTransf) = Amg::Translation3D(firstVol.center().x(),
-                                          firstVol.center().y(),
-                                          firstVol.center().z()-cyl2->halflengthZ());
-        envGlueNegXY.push_back(&secondVol);
-        envGluePosXY.push_back(&firstVol);
-        // revert vols
-        vols.clear();
-        vols.push_back(&secondVol);
-        vols.push_back(&firstVol);
-        // --- account for the swapping
-        firstFaceCorr = secondFace;
-        secondFaceCorr = firstFace;
-        //
-        subVols = m_trackingVolumeArrayCreator->cylinderVolumesArrayInZ(vols,false);
-        envGlueOuter = vols;
-        envGlueInner = vols;
-    } else if (firstFace==tubeInnerCover) {
-        if (secondFace==tubeOuterCover){
-            envBounds =  new CylinderVolumeBounds(cyl2->innerRadius(),
-                                                       cyl1->outerRadius(),
-                                                       cyl1->halflengthZ());
-        } else {
-            envBounds =  new CylinderVolumeBounds(cyl1->outerRadius(),
-                                                       cyl1->halflengthZ());
-        }
-        envTransf = firstVol.transform().isApprox(Amg::Transform3D::Identity()) ? nullptr : new Amg::Transform3D;
-        if (envTransf)
-           (*envTransf) = Amg::Translation3D(firstVol.center());
-        // revert vols
-        vols.clear();
-        vols.push_back(&secondVol);
-        vols.push_back(&firstVol);
-        // account for the swapping
-        firstFaceCorr = secondFace;
-        secondFaceCorr = firstFace;
-        //
-        subVols = m_trackingVolumeArrayCreator->cylinderVolumesArrayInR(vols,false);
-        envGlueNegXY = vols;
-        envGluePosXY = vols;
-        envGlueOuter.push_back(&firstVol);
-        envGlueInner.push_back(&secondVol);
-    } else {
-        envBounds =  new CylinderVolumeBounds(cyl1->innerRadius(),
-                                                   cyl2->outerRadius(),
-                                                   cyl1->halflengthZ());
-        envTransf = firstVol.transform().isApprox(Amg::Transform3D::Identity()) ? nullptr : new Amg::Transform3D;
-        if (envTransf)
-           (*envTransf) = Amg::Translation3D(firstVol.center());
-        subVols = m_trackingVolumeArrayCreator->cylinderVolumesArrayInR(vols,false);
-        envGlueNegXY = vols;
-        envGluePosXY = vols;
-        envGlueOuter.push_back(&secondVol);
-        envGlueInner.push_back(&firstVol);
-        // account for the swapping
-        firstFaceCorr = secondFace;
-        secondFaceCorr = firstFace;
-    }
-
-    // create the enveloping volume
-    enclosingVolume  =  new TrackingVolume(envTransf,
-                                                envBounds,
-                                                firstVol,
-                                                nullptr,subVols,
-                                                name);
-
-    // ENVELOPE GLUE DESCRIPTION -----------------------------------------------------------------
-    // glue descriptors ---- they jump to the first one
-    GlueVolumesDescriptor& glueDescr  = enclosingVolume->glueVolumesDescriptor();
-
-    // for the outside volumes, could be done in a loop as well, but will only save 4 lines
-    std::vector<TrackingVolume*> glueNegXY;
-    std::vector<TrackingVolume*> gluePosXY;
-    std::vector<TrackingVolume*> glueInner;
-    std::vector<TrackingVolume*> glueOuter;
-    fillGlueVolumes(vols,envGlueNegXY,negativeFaceXY,glueNegXY);
-    fillGlueVolumes(vols,envGluePosXY,positiveFaceXY,gluePosXY);
-    fillGlueVolumes(vols,envGlueInner,tubeInnerCover,glueInner);
-    fillGlueVolumes(vols,envGlueOuter,tubeOuterCover,glueOuter);
-    // set them to the envelopGlueDescriptor
-    glueDescr.registerGlueVolumes(negativeFaceXY, glueNegXY);
-    glueDescr.registerGlueVolumes(positiveFaceXY, gluePosXY);
-    glueDescr.registerGlueVolumes(tubeInnerCover, glueInner);
-    glueDescr.registerGlueVolumes(tubeOuterCover, glueOuter);
-    glueDescr.registerGlueVolumes(cylinderCover,  glueOuter);
-
-    // INTERNAL GLUEING ---------------------------------------------------------------------------
-    glueTrackingVolumes(vols,firstFaceCorr,secondFaceCorr);
-
-    return enclosingVolume;
 }
 
 std::unique_ptr<TrackingVolume> TrackingVolumeHelper::glueTrackingVolumeArrays(std::shared_ptr<TrackingVolume> firstVol,
