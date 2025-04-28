@@ -110,7 +110,7 @@ namespace LVL1CTP {
       // Needed services and tools
       ServiceHandle<ITHistSvc> m_histSvc { this, "THistSvc", "THistSvc/THistSvc", "Histogramming svc" };
 
-      ToolHandle<LVL1CTP::ResultBuilder> m_resultBuilder { this, "ResultBuilder", "LVL1CTP__ResultBuilder/ResultBuilder", "Builds the CTP result" };
+      ToolHandle<LVL1CTP::ResultBuilder> m_resultBuilder { this, "ResultBuilder", "LVL1CTP::ResultBuilder/ResultBuilder", "Builds the CTP result" };
 
       // random engine for calculating prescales
       ATHRNG::RNGWrapper m_RNGEngines;

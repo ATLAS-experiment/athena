@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootNtupleOutputMetadataTool.cxx 
@@ -40,8 +40,8 @@ RootNtupleOutputMetadataTool::RootNtupleOutputMetadataTool(const std::string& ty
                                            const std::string& name,
                                            const IInterface* parent) : 
   base_class(type, name, parent),
-  m_imetaStore("InputMetaDataStore", name),
-  m_ometaStore("MetaDataStore", name),
+  m_imetaStore("StoreGateSvc/InputMetaDataStore", name),
+  m_ometaStore("StoreGateSvc/MetaDataStore", name),
   m_clidSvc("ClassIDSvc", name), 
   m_metaWritten(false)
 {
