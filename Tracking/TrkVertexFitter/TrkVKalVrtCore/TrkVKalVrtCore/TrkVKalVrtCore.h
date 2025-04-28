@@ -90,6 +90,7 @@ namespace Trk {
      public:
        ForCFT vk_forcft;
        bool m_frozenVersionForBTagging = false;
+       bool m_allowUltraDisplaced = false;
   };
 
 } // end of namespace bracket

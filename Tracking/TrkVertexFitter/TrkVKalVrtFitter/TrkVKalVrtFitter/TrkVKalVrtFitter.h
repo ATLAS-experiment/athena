@@ -325,6 +325,8 @@ namespace Trk{
         SimpleProperty<double> m_IterationPrecision;
         SimpleProperty<double> m_IDsizeR;
         SimpleProperty<double> m_IDsizeZ;
+        SimpleProperty<double> m_MSsizeR;
+        SimpleProperty<double> m_MSsizeZ;
         std::vector<double> m_c_VertexForConstraint;
         std::vector<double> m_c_CovVrtForConstraint;
         std::vector<double> m_c_MassInputParticles;
@@ -351,6 +353,7 @@ namespace Trk{
         bool m_usePassNear;
         bool m_usePassWithTrkErr;
 	bool m_frozenVersionForBTagging;
+        bool m_allowUltraDisplaced;
         void initCnstList();
 
         //  Track material effects control
@@ -427,6 +430,7 @@ namespace Trk{
         bool m_usePassNear = false;
         bool m_usePassWithTrkErr = false;
         bool m_frozenVersionForBTagging = false;
+        bool m_allowUltraDisplaced = false;
 
         std::vector<double> m_VertexForConstraint;
         std::vector<double> m_CovVrtForConstraint;

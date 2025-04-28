@@ -317,6 +317,9 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     # VrtSecInclusive
     from VrtSecInclusive.VrtSecInclusiveConfig import VrtSecInclusiveCfg
 
+    # MuSAVtxFitter
+    from MuSAVtxFitter.MuSAVtxFitterConfig import MuSAVtxFitterConfig
+
     acc.merge(VrtSecInclusiveCfg(flags,
                                  name = "VrtSecInclusive",
                                  AugmentingVersionString  = "",
@@ -418,6 +421,10 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                  TwoTrVrtMinDistFromPVCut    = 0.5,
                                  associatePtCut              = 500.))
     LLP1VrtSecInclusiveSuffixes.append(BoostedMuonsSuffix)
+
+    # MuSA Vertices
+    acc.merge(MuSAVtxFitterConfig(flags, 
+                                  MuonContainerName=MergedMuonContainer))
 
     # NewVSI: LepTrack variation
     from NewVrtSecInclusiveTool.NewVrtSecInclusiveAlgConfig import NewVrtSecInclusiveAlgLLPCfg
@@ -910,6 +917,11 @@ def LLP1Cfg(flags):
         StaticContent += ["xAOD::VertexContainer#NewVrtSecInclusive_SecondaryVertices" + wp]
         StaticContent += ["xAOD::VertexAuxContainer#NewVrtSecInclusive_SecondaryVertices" + wp + "Aux." + excludedVertexAuxData]
 
+    StaticContent += ["xAOD::VertexContainer#MuSAVertices"]
+    StaticContent += ["xAOD::VertexAuxContainer#MuSAVerticesAux."]
+    StaticContent += ["xAOD::TrackParticleContainer#MuSAExtrapolatedTrackParticles"]
+    StaticContent += ["xAOD::TrackParticleAuxContainer#MuSAExtrapolatedTrackParticlesAux."]
+
     LLP1SlimmingHelper.ExtraVariables += ["AntiKt10TruthTrimmedPtFrac5SmallR20Jets.Tau1_wta.Tau2_wta.Tau3_wta.D2.GhostBHadronsFinalCount",
                                           "Electrons.LHValue.DFCommonElectronsLHVeryLooseNoPixResult.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
                                           "LRTElectrons.LHValue.DFCommonElectronsLHVeryLooseNoPixResult.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
@@ -1050,4 +1062,3 @@ def LLP1Cfg(flags):
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_LLP1", AcceptAlgs=["LLP1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
-

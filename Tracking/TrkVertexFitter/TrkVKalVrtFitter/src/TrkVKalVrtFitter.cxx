@@ -39,6 +39,8 @@ TrkVKalVrtFitter:: TrkVKalVrtFitter(const std::string& type,
     m_IterationPrecision(0),
     m_IDsizeR(1150.),
     m_IDsizeZ(3000.),
+    m_MSsizeR(8000.),
+    m_MSsizeZ(10000.),
     m_extPropagator(this),                   // Internal propagator
     // m_extPropagator("Trk::Extrapolator/InDetExtrapolator"),  // External propagator
     m_firstMeasuredPoint(false),
@@ -52,7 +54,8 @@ TrkVKalVrtFitter:: TrkVKalVrtFitter(const std::string& type,
     m_useZPointingCnst(false),
     m_usePassNear(false),
     m_usePassWithTrkErr(false),
-    m_frozenVersionForBTagging(false)
+    m_frozenVersionForBTagging(false),
+    m_allowUltraDisplaced(false)
    {
     declareInterface<IVertexFitter>(this);
     declareInterface<ITrkVKalVrtFitter>(this);
@@ -75,6 +78,8 @@ TrkVKalVrtFitter:: TrkVKalVrtFitter(const std::string& type,
     declareProperty("IterationPrecision",   m_IterationPrecision);
     declareProperty("IDsizeR",              m_IDsizeR);
     declareProperty("IDsizeZ",              m_IDsizeZ);
+    declareProperty("MSsizeR",              m_MSsizeR);
+    declareProperty("MSsizeZ",              m_MSsizeZ);
     declareProperty("VertexForConstraint",  m_c_VertexForConstraint);
     declareProperty("CovVrtForConstraint",  m_c_CovVrtForConstraint);
     declareProperty("InputParticleMasses",  m_c_MassInputParticles, "List of masses of input particles (pions assumed if this list is absent)" );
@@ -92,6 +97,7 @@ TrkVKalVrtFitter:: TrkVKalVrtFitter(const std::string& type,
     declareProperty("usePassNearCnst",        m_usePassNear);
     declareProperty("usePassWithTrkErrCnst",  m_usePassWithTrkErr);
     declareProperty("FrozenVersionForBTagging",  m_frozenVersionForBTagging);
+    declareProperty("allowUltraDisplaced",   m_allowUltraDisplaced);
 //
 
 /*--------------------------------------------------------------------------*/
@@ -177,6 +183,7 @@ StatusCode TrkVKalVrtFitter::initialize()
     if(msgLvl(MSG::DEBUG)){
        msg(MSG::DEBUG)<< "TrkVKalVrtFitter configuration:" << endmsg;
        msg(MSG::DEBUG)<< "   Frozen version for BTagging:          "<< m_frozenVersionForBTagging <<endmsg;
+       msg(MSG::DEBUG)<< "   Allow ultra displaced vertices:       "<< m_allowUltraDisplaced <<endmsg;
        msg(MSG::DEBUG)<< "   A priori vertex constraint:           "<< m_useAprioriVertex <<endmsg;
        msg(MSG::DEBUG)<< "   Angle dTheta=0 constraint:            "<< m_useThetaCnst <<endmsg;
        msg(MSG::DEBUG)<< "   Angle dPhi=0 constraint:              "<< m_usePhiCnst <<endmsg;
@@ -255,6 +262,7 @@ void TrkVKalVrtFitter::initState (const EventContext& ctx, State& state) const
   state.m_RobustScale = m_RobustScale;
   state.m_MassInputParticles = m_c_MassInputParticles;
   state.m_frozenVersionForBTagging = m_frozenVersionForBTagging;
+  state.m_allowUltraDisplaced = m_allowUltraDisplaced;
 }
 
 /** Interface for MeasuredPerigee with starting point */
