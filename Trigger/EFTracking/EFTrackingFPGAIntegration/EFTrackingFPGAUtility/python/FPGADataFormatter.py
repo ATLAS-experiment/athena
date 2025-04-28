@@ -85,7 +85,7 @@ def FPGAFormatterPrepCfg(flags, name = "FPGAFormatterPrep", **kwarg):
 if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
-    from EFTrackingFPGAUtility.IntegrationConfigFlag import addClusterMakerFlags
+    from EFTrackingFPGAPipeline.IntegrationConfigFlag import addClusterMakerFlags
 
     flags = initConfigFlags()
     flags = addClusterMakerFlags(flags)
@@ -98,7 +98,7 @@ if __name__=="__main__":
     flags.Detector.EnableCalo = False
     
     # set flag for the bulk-copy container creation method
-    flags.ClusterMaker.DoBulkCopy = True
+    flags.ClusterMaker.DoBulkCopy = False
 
     # ensure that the xAOD SP and cluster containers are available
     flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
