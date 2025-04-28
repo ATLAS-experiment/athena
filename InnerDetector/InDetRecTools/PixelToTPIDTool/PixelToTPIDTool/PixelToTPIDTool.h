@@ -1,71 +1,191 @@
-/*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-*/
-/** 
- * @file PixelToTPIDTool/PixelToTPIDTool.h
- * @author Thijs Cornelissen <thijs.cornelissen@cern.ch>
- * @date November, 2019
- * @brief Return pixel dEdx.
- */
+#ifndef PIXELTOTPIDTOOL_PIXELTOTPIDTOOL_H
+#define PIXELTOTPIDTOOL_PIXELTOTPIDTOOL_H
 
-#ifndef INDETPIXELTOTPIDTOOL_H
-#define INDETPIXELTOTPIDTOOL_H
+#include "TrkAnalysisInterfaces/IPixelToTPIDTool.h"
 
-#include "GaudiKernel/ServiceHandle.h"
-#include "AthenaBaseComps/AthAlgTool.h"    
+#include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
+#include "AsgDataHandles/ReadHandle.h"
+#include "AsgDataHandles/ReadHandleKey.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
+#include "PathResolver/PathResolver.h"
 
-#include "TrkToolInterfaces/IPixelToTPIDTool.h"
-#include "TrkEventPrimitives/ParticleHypothesis.h"
+#include "xAODEventInfo/EventInfo.h"
+#include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/TrackStateValidation.h"
+#include "xAODTracking/TrackStateValidationContainer.h"
+#include "xAODTracking/TrackMeasurementValidation.h"
+#include "xAODTracking/TrackMeasurementValidationContainer.h"
 
+
+#ifndef XAOD_STANDALONE
+#pragma message("NOT compiling in XAOD_STANDALONE mode")
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
-#include "PixelConditionsData/PixeldEdxData.h"
-#include "StoreGate/ReadCondHandleKey.h"
+//#include "PixelConditionsData/PixeldEdxData.h"
+//#include "StoreGate/ReadCondHandleKey.h"
+#include "PixelGeoModel/IIBLParameterSvc.h"
+//
+#include "TrkTrack/Track.h"
+#include "TrkTrack/TrackStateOnSurface.h"
+#include "TrkTrack/TrackInfo.h"
+#include "TrkMeasurementBase/MeasurementBase.h"
+#include "TrkParameters/TrackParameters.h"
+#include "TrkRIO_OnTrack/RIO_OnTrack.h"
+#include "TrkSurfaces/Surface.h"
+#include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
+#include "Identifier/Identifier.h" // needed?
+#include "InDetIdentifier/PixelID.h"
 
-class AtlasDetectorID;
-class Identifier;
-class PixelID;
-class IIBLParameterSvc;
+#else
+#pragma message("Compiling in XAOD_STANDALONE mode")
+#endif
 
-namespace Trk {
-  class Track;
-}
+// ROOT
+#include "TFile.h"
+#include <ROOT/RDataFrame.hxx>
 
-namespace InDet {
-  class PixelToTPIDTool : virtual public Trk::IPixelToTPIDTool, public AthAlgTool {
-    public:
-      PixelToTPIDTool(const std::string&,const std::string&,const IInterface*);
+// C++
+#include <cmath>
+#include <memory>
+#include <mutex>
 
-      virtual ~PixelToTPIDTool ();
-      virtual StatusCode initialize() override;
-      virtual StatusCode finalize  () override;
+namespace CP {
 
-      virtual float dEdx(const EventContext& ctx,
-                         const Trk::Track& track,
-                         int& nUsedHits,
-                         int& nUsedIBLOverflowHits) const override final;
+  /// Implementation of the Pixel ToT PID tool.
+  /// This is refactoring of the tool for dual use in Athena and AnalysisBase using CP Algs.
 
-      virtual std::vector<float> getLikelihoods(
-        const EventContext& ctx,
-        double dedx,
-        double p,
-        int nGoodPixels) const override final;
+  class PixelToTPIDTool : public virtual IPixelToTPIDTool, public asg::AsgTool {
+    /// Create a proper constructor for Athena
+    ASG_TOOL_CLASS(PixelToTPIDTool, CP::IPixelToTPIDTool)  // depends where I put the interface...
 
-      virtual float getMass(const EventContext& ctx,
-                            double dedx,
-                            double p,
-                            int nGoodPixels) const override final;
 
-    private:
-      ServiceHandle<IIBLParameterSvc> m_IBLParameterSvc;
-      const PixelID* m_pixelid;
-      double m_conversionfactor;
+    
+  public:
+    PixelToTPIDTool(const std::string& tool_name="PixelToTPIDTool");
+    
+    virtual ~PixelToTPIDTool();
+    
+    /// @name Function(s) implementing the asg::IAsgTool interface
+    /// @{
 
-      SG::ReadCondHandleKey<PixelChargeCalibCondData> m_moduleDataKey
-      {this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "ChargeCalibration data, for ToT overflow setting"};
+    /// Function initialising the tool
+    virtual StatusCode initialize() override;
 
-      SG::ReadCondHandleKey<PixeldEdxData> m_dedxKey
-      {this, "PixeldEdxData", "PixeldEdxData", "Output key of pixel dEdx"};
-  }; 
-} // end of namespace
+    /// @}
 
-#endif 
+    /// @name Function(s) implementing the IPixelToTPIDTool interface
+    /// @{
+
+    /// Athena with ESD EDM
+#ifndef XAOD_STANDALONE
+    virtual float dEdx(const EventContext& ctx,
+                       const Trk::Track& track,
+                       int& nUsedHits,
+                       int& nUsedIBLOverflowHits) const override;
+#endif
+
+    /// AnalysisBase with xAOD EDM
+#ifdef XAOD_STANDALONE
+    virtual float dEdx(const xAOD::TrackParticle& track,
+                       int& nUsedHits,
+                       int& nUsedIBLOverflowHits) const override;
+#endif
+
+
+
+
+  private:
+    
+    /// Common to both EDMs ///
+    Gaudi::Property<bool> m_equalizeClusterMeasurements
+    { this, "EqualizeClusterMeasurements", false, ""};
+
+    /// For charge -> dE/dx calc.
+    double m_conversionfactor;
+    float m_Pixel_sensorthickness; //250 microns Pixel Planars
+    float m_IBL_3D_sensorthickness; //230 microns IBL 3D
+    float m_IBL_PLANAR_sensorthickness; // 200 microns IBL Planars
+    
+    struct PixelCluster {  // Struct representing a pixel cluster to abstract away the two EDMs
+      double locx = -99.9;
+      double locy = -99.9;
+      int bec = -99;
+      int layer = -99;
+      int eta_module = -99;
+      float cosalpha = -99.9;
+      float charge = -99.9;
+      float dEdx = -99.9;
+      float dEdxEq = -99.9;
+      bool isIBL = false;
+      int iblOverflow = 0;
+    };
+
+    float getClusterdEdx(const PixelCluster& cluster,
+                         int& pixelhits,
+                         int& nUsedIBLOverflowHits) const;
+    
+    float getTruncatedMean(const std::vector<PixelCluster>& clusters,
+                           int& nUsedHits,
+                           int pixelhits,
+                           bool equalize = false) const;
+
+    /// Athena (ESD EDM) ///
+#ifndef XAOD_STANDALONE
+    ServiceHandle<IIBLParameterSvc> m_IBLParameterSvc {this, "IBLParameterSvc", "IBLParameterSvc"};
+    const PixelID* m_pixelid;
+    SG::ReadCondHandleKey<PixelChargeCalibCondData> m_moduleDataKey
+    {this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "ChargeCalibration data, for ToT overflow setting"};
+#endif
+
+
+    /// AnalysisBase (xAOD EDM) ///
+#ifdef XAOD_STANDALONE
+    StatusCode initSFsFromTrees();
+
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"}; // needed?
+
+    Gaudi::Property<std::string> m_msosLink
+    { this, "MSOSLink", "Reco_msosLink"};
+
+    Gaudi::Property<std::string> m_sfDir { this, "SFDir", "share/"};
+    Gaudi::Property<std::string> m_sfFileName { this, "SFFileName", "nTuple_data_lowMu_flat.root"};
+    Gaudi::Property<std::string> m_sfTreeName { this, "SFTreeName", "SFs_TTree"};
+    // possible override for the calibration version
+    Gaudi::Property<std::string> m_sfDirLocal {this, "SFDirLocal", ""};
+
+    /// dE/dx equalization scale factor dataframe read from trees.
+    std::shared_ptr<ROOT::RDataFrame> m_df;
+    std::shared_ptr<TFile> m_file;  // Keep the file open
+
+    /// Map where key = run number, value is a filtered scale factor RDF (an RDF::RNode) with only the rows for that run number.
+    /// So not filtering everytime in execute().
+    /// Will be updated in execute, so must be mutable
+    mutable std::map<unsigned int, std::shared_ptr<ROOT::RDF::RNode>> m_filteredRDFMap;
+    mutable std::mutex m_mapMutex;
+
+
+    /// Decorators for xAOD EDM
+    /// Raw track-level truncated mean dE/dx:
+    ///    Returned by dEdx() if m_equalizeClusterMeasurements == false.
+    ///    Already in AOD, calculated during reconstruction via this same tool using ESD EDM, stored by TrackParticleCreator.
+    ///    NB: dE/dx calculated from xAOD and ESD EDMs can differ, likely due to migrations of cluster local (x,y).
+    ///        We place cuts on cluster location when calculating dE/dx to avoid sensor edges.
+    ///        As a result, hits used for one EDM can be excluded in calculation for the other EDM.
+    /// Equalized track-level truncated mean dE/dx:
+    ///    Returned by dEdx() if m_equalizeClusterMeasurements == true.
+    ///    Called by PixelDEdxEqualizationAlg in TrackingAnalysisAlgorithms.  Decorate there instead.
+    /// Raw cluster dE/dx:
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxKey{this, "clusterdEdxKey", "PixelClusters.dEdx", "SG key for the raw pixel cluster dE/dx attribute"};
+    /// Equalized cluster dE/dx:
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxEqKey{this, "clusterdEdxEqKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
+
+#endif
+
+
+  }; // class PixelToTPIDTool
+
+
+} // namespace CP
+
+#endif  // PIXELTOTPIDTOOL_H

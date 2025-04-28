@@ -1,5 +1,5 @@
 <lcgdict>
-   <class name="CP::PixelToTPIDDualTool" />
+   <class name="CP::PixelToTPIDTool" />
    <exclusion>
      <class name="SG::IConstAuxStore"/>
      <class name="DataLink<SG::IConstAuxStore>"/>

@@ -1,3 +1,3 @@
 #include "PixelToTPIDTool/PixelToTPIDTool.h"
 
-DECLARE_COMPONENT( InDet::PixelToTPIDTool )
+DECLARE_COMPONENT( CP::PixelToTPIDTool )

@@ -244,8 +244,7 @@ TrackParticleCreatorTool::initialize()
   }
 
   ATH_CHECK(  m_eProbabilityTool.retrieve( DisableTool{m_eProbabilityTool.empty()} ) );
-  //ATH_CHECK(  m_dedxtool.retrieve( DisableTool{m_dedxtool.empty()} ) );
-  ATH_CHECK(  m_dedxdualtool.retrieve( DisableTool{m_dedxdualtool.empty()} ) );
+  ATH_CHECK(  m_dedxtool.retrieve( DisableTool{m_dedxtool.empty()} ) );
   ATH_CHECK(  m_testPixelLayerTool.retrieve( DisableTool{m_testPixelLayerTool.empty()} ) );
 
   ATH_CHECK(m_assoMapContainer.initialize(!m_assoMapContainer.key().empty()));
@@ -979,24 +978,15 @@ TrackParticleCreatorTool::addPIDInformation(const EventContext& ctx, const Trk::
   {
      const int initialValue{-1};
      float dedx = initialValue;
-     int nHitsUsed_dEdx = initialValue;
-     int nOverflowHits_dEdx = initialValue;
-     /*
+     int nHitsUsed_dedx = initialValue;
+     int nOverflowHits_dedx = initialValue;
      if (track && !m_dedxtool.empty() && track->info().trackFitter() != TrackInfo::Unknown) {
-        dedx = m_dedxtool->dEdx(ctx, *track, nHitsUsed_dEdx, nOverflowHits_dEdx);
+        dedx = m_dedxtool->dEdx(ctx, *track, nHitsUsed_dedx, nOverflowHits_dedx);
         ATH_MSG_INFO("dedx = " << dedx);
-        }
-     */
-     float dedxdual = initialValue;
-     int nHitsUsed_dEdxdual = initialValue;
-     int nOverflowHits_dEdxdual = initialValue;
-     if (track && !m_dedxdualtool.empty() && track->info().trackFitter() != TrackInfo::Unknown) {
-        dedxdual = m_dedxdualtool->dEdx(ctx, *track, nHitsUsed_dEdxdual, nOverflowHits_dEdxdual);
-        ATH_MSG_INFO("dedxdual = " << dedxdual);
      }
-     tp.setNumberOfUsedHitsdEdx(nHitsUsed_dEdxdual);
-     tp.setNumberOfIBLOverflowsdEdx(nOverflowHits_dEdxdual);
-     tp.setSummaryValue(dedxdual, static_cast<xAOD::SummaryType>(51));
+     tp.setNumberOfUsedHitsdEdx(nHitsUsed_dedx);
+     tp.setNumberOfIBLOverflowsdEdx(nOverflowHits_dedx);
+     tp.setSummaryValue(dedx, static_cast<xAOD::SummaryType>(51));
   }
 }
 

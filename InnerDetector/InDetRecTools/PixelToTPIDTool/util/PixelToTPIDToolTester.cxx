@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-/// a simple testing macro for the PixelToTPIDDualTool package
+/// a simple testing macro for the PixelToTPIDTool package
 /// shamelessly stolen from MuonSelectorToolsTester.cxx
 
 // System include(s):
@@ -32,10 +32,10 @@
 #include "AthContainers/ConstAccessor.h"
 
 // Local include(s):
-#include "PixelToTPIDDualTool/PixelToTPIDDualTool.h"
+#include "PixelToTPIDTool/PixelToTPIDTool.h"
 
 
-/// Example of how to run the PixelToTPIDDualTool package to obtain cluster and dE/dx information
+/// Example of how to run the PixelToTPIDTool package to obtain cluster and dE/dx information
 int main(int argc, char* argv[]) {
 
   // Whether or not to equalize.  Maybe make this an argument.
@@ -86,14 +86,14 @@ int main(int argc, char* argv[]) {
   }
 
   // Get tool
-  CP::PixelToTPIDDualTool* pidTool = new CP::PixelToTPIDDualTool("PixelToTPIDDualTool");
+  CP::PixelToTPIDTool* pidTool = new CP::PixelToTPIDTool("PixelToTPIDTool");
   pidTool->msg().setLevel(MSG::INFO);
 
   bool failed = false;
   failed = failed || pidTool->setProperty("EqualizeClusterMeasurements", equalize).isFailure();
   failed = failed || pidTool->initialize().isFailure();
   if (failed) {
-    Error( APP_NAME, "Failed to set up PixelToTPIDDualTool!");
+    Error( APP_NAME, "Failed to set up PixelToTPIDTool!");
     return 1;
   }
   

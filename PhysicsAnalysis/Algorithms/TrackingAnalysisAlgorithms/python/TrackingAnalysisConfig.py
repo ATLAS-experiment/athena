@@ -4,12 +4,10 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 import AthenaCommon.SystemOfUnits as Units
 
-#class PixelToTPIDDualToolConfig (ConfigBlock) :  ## should match the alg in ../TrackingAnalysisAlgorithms I think... not the tool...
 class PixelToTPIDBlock (ConfigBlock) :  ## should match the alg in ../TrackingAnalysisAlgorithms I think... not the tool...
     """the ConfigBlock for the Pixel ToT PID tool"""
 
     def __init__ (self, containerName='') :
-        # super (PixelToTPIDDualToolConfig, self).__init__ ()
         super (PixelToTPIDBlock, self).__init__ ()
         self.setBlockName('PixelToTPID')
         self.addOption ('containerName', containerName, type=str,
@@ -22,19 +20,13 @@ class PixelToTPIDBlock (ConfigBlock) :  ## should match the alg in ../TrackingAn
 
         
     def makeAlgs (self, config) :
-        # log = logging.getLogger('PixelToTPIDDualToolConfig')
-        # log = logging.getLogger('PixelToTPIDBlock')
-        
-        ### Setup the muon quality selection
-        # alg = config.createAlgorithm( 'CP::PixelDEdxEqualizationAlg', ## should match the alg in ../TrackingAnalysisAlgorithms I think... not the tool...
-        #                               'PixelDEdxEqualizationAlg' + self.postfix ) # not of required type???
         alg = config.createAlgorithm( 'CP::PixelDEdxEqualizationAlg',
                                       'PixelDEdxEqualizationAlg' + self.postfix,
                                       reentrant=True)
-        config.addPrivateTool( 'PixelToTPIDDualTool', 'CP::PixelToTPIDDualTool' )
-        # alg.PixelToTPIDDualTool.TrackContainerName = self.containerName
+        config.addPrivateTool( 'PixelToTPIDTool', 'CP::PixelToTPIDTool' )
+        # alg.PixelToTPIDTool.TrackContainerName = self.containerName
         alg.TrackContainerName = self.containerName # belongs to alg, not tool.
-        alg.PixelToTPIDDualTool.EqualizeClusterMeasurements = self.equalizeClusterMeasurements # belongs to tool, not alg.
+        alg.PixelToTPIDTool.EqualizeClusterMeasurements = self.equalizeClusterMeasurements # belongs to tool, not alg.
     
 
 

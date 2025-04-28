@@ -11,6 +11,6 @@
 
 // Includes for the dictionary generation:
 
-#include "TrkAnalysisInterfaces/IPixelToTPIDDualTool.h"
+#include "TrkAnalysisInterfaces/IPixelToTPIDTool.h"
 
 #endif  // TRKANALYSISINTERFACES_TRKANALYSISINTERFACESDICT_H

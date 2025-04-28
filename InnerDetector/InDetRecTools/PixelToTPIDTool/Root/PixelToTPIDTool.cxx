@@ -1,4 +1,4 @@
-#include "PixelToTPIDDualTool/PixelToTPIDDualTool.h"
+#include "PixelToTPIDTool/PixelToTPIDTool.h"
 
 namespace {
 
@@ -10,7 +10,7 @@ namespace {
 
 namespace CP {
   
-  PixelToTPIDDualTool::PixelToTPIDDualTool(const std::string& tool_name) : asg::AsgTool(tool_name) {    
+  PixelToTPIDTool::PixelToTPIDTool(const std::string& tool_name) : asg::AsgTool(tool_name) {    
 
     float energyPair = 3.68e-6; // Energy in MeV to create an electron-hole pair in silicon
     float sidensity = 2.329; // silicon density in g cm^-3
@@ -26,10 +26,10 @@ namespace CP {
 #endif
   }
 
-  PixelToTPIDDualTool::~PixelToTPIDDualTool() = default;
+  PixelToTPIDTool::~PixelToTPIDTool() = default;
 
-  StatusCode PixelToTPIDDualTool::initialize() {
-    ATH_MSG_INFO("Initializing PixelToTPIDDualTool");
+  StatusCode PixelToTPIDTool::initialize() {
+    ATH_MSG_INFO("Initializing PixelToTPIDTool");
 
     /// Common to both EDMs ///
     if (m_equalizeClusterMeasurements) {
@@ -92,7 +92,7 @@ namespace CP {
   /// When in XAOD_STANDALONE, initialize SFs from ROOT TTrees on CVMFS.
   /// Read into an RDataFrame.  Will filter to get SFs from closest run  in dEdx().
 #ifdef XAOD_STANDALONE
-  StatusCode PixelToTPIDDualTool::initSFsFromTrees()  {
+  StatusCode PixelToTPIDTool::initSFsFromTrees()  {
     
     ATH_MSG_INFO("Initializing dE/dx equalization scale factor trees");
 
@@ -107,8 +107,8 @@ namespace CP {
     }
 
     //// For testing
-    //filename = "../src/athena/InnerDetector/InDetRecTools//PixelToTPIDDualTool/share/nTuple_data_lowMu_flat.root"; // FIXME!!!!
-    filename = "../athena/InnerDetector/InDetRecTools//PixelToTPIDDualTool/share/nTuple_data_lowMu_flat.root";
+    //filename = "../src/athena/InnerDetector/InDetRecTools//PixelToTPIDTool/share/nTuple_data_lowMu_flat.root"; // FIXME!!!!
+    filename = "../athena/InnerDetector/InDetRecTools//PixelToTPIDTool/share/nTuple_data_lowMu_flat.root";
 
     if (filename.empty()) {
       ATH_MSG_ERROR("Could not find file: " << filename);
@@ -138,7 +138,7 @@ namespace CP {
   /// This is the version ran during reconstruction on the ESD EDM.
   /// Will return the dE/dx, and will update nUsedHits (the divisor in the truncated mean) and nUsedIBLOverflowHits.
   /// Whether this is the raw or equalized dE/dx will be determined by the tool properties.
-  float PixelToTPIDDualTool::dEdx(const EventContext& ctx,
+  float PixelToTPIDTool::dEdx(const EventContext& ctx,
                                   const Trk::Track& track,
                                   int& nUsedHits,
                                   int& nUsedIBLOverflowHits) const
@@ -277,7 +277,7 @@ namespace CP {
   /// This is the version ran via a CP alg on the xAOD EDM.
   /// Will return the dE/dx, and will update nUsedHits (the divisor in the truncated mean) and nUsedIBLOverflowHits.
   /// Whether this is the raw or equalized dE/dx will be determined by the tool properties.
-  float PixelToTPIDDualTool::dEdx(const xAOD::TrackParticle& track,
+  float PixelToTPIDTool::dEdx(const xAOD::TrackParticle& track,
                                   int& nUsedHits,
                                   int& nUsedIBLOverflowHits) const 
   {
@@ -593,7 +593,7 @@ namespace CP {
   /// As is the number of IBL hits in overflow (again, only if they are considered for the trunc mean calc).
 
   /// Returns the cluster dE/dx.
-  float PixelToTPIDDualTool::getClusterdEdx(const PixelCluster& cluster,
+  float PixelToTPIDTool::getClusterdEdx(const PixelCluster& cluster,
                                             int& pixelhits,
                                             int& nUsedIBLOverflowHits) const{    
     float dEdxValue;
@@ -651,7 +651,7 @@ namespace CP {
   /// Returns the truncated mean over the track. 
   /// If equalize == true, it will use the equalized cluster dE/dx measurement in the calculation.
   /// NB:  nUsedHits is passed by reference and updated.  Do not call this function multiple times with the same counter.
-  float PixelToTPIDDualTool::getTruncatedMean(const std::vector<PixelCluster>& clusters,
+  float PixelToTPIDTool::getTruncatedMean(const std::vector<PixelCluster>& clusters,
                                               int& nUsedHits, 
                                               int pixelhits,
                                               bool equalize) const {

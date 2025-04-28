@@ -1,20 +1,55 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
-
 # Declare the package name:
 atlas_subdir( PixelToTPIDTool )
 
 # External dependencies:
-find_package( CLHEP )
+find_package( ROOT COMPONENTS Core Hist RIO TMVA Tree TreePlayer ROOTDataFrame )
+find_package( VDT ) # might need for RDataFrame.  See Control/xAODDataSource/CMakeLists.txt
+#find_package( CLHEP )
 
-# Component(s) in the package:
-atlas_add_component( PixelToTPIDTool
-  PixelToTPIDTool/*.h  src/*.cxx src/components/*.cxx
-  INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-  LINK_LIBRARIES ${CLHEP_LIBRARIES}
-  AthenaBaseComps StoreGateLib GaudiKernel TrkEventPrimitives
-  AthenaPoolUtilities Identifier InDetIdentifier InDetRIO_OnTrack
-  PathResolver TrkSurfaces TrkMeasurementBase TrkParameters
-  TrkRIO_OnTrack TrkTrack TrkToolInterfaces PixelGeoModelLib PixelConditionsData )
+message(STATUS "XAOD_STANDALONE = ${XAOD_STANDALONE}")
+
+if( NOT XAOD_STANDALONE )
+    set(EXTRA_ATHENA_LIBS PixelConditionsData PixelGeoModelLib TrkRIO_OnTrack InDetRIO_OnTrack)
+else()
+    set(EXTRA_ATHENA_LIBS "")
+endif()
+
+# Libraries in the package:
+atlas_add_library( PixelToTPIDToolLib
+   PixelToTPIDTool/*.h Root/*.cxx
+   PUBLIC_HEADERS PixelToTPIDTool
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS} # ${CLHEP_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${VDT_LIBRARIES} # ${CLHEP_LIBRARIES}
+                 AsgTools xAODEventInfo PATCoreLib AsgDataHandlesLib PATInterfaces
+                 xAODTracking PathResolver TrkAnalysisInterfacesLib 
+                 ${EXTRA_ATHENA_LIBS} )
+
+# Athena Component Library
+if( NOT XAOD_STANDALONE )
+   atlas_add_component( PixelToTPIDTool
+      src/*.h src/*.cxx src/components/*.cxx
+      LINK_LIBRARIES PixelToTPIDToolLib )
+endif()
+
+# Dictionary Generation
+atlas_add_dictionary( PixelToTPIDToolDict
+   PixelToTPIDTool/PixelToTPIDToolDict.h
+   PixelToTPIDTool/selection.xml
+   LINK_LIBRARIES PixelToTPIDToolLib )
+
+
+# Executable(s) in the package:
+if( XAOD_STANDALONE )
+   atlas_add_executable( PixelToTPIDToolTester
+      util/PixelToTPIDToolTester.cxx
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODEventInfo xAODMuon
+      xAODTracking xAODCore PixelToTPIDToolLib PATCoreLib )
+endif()
+
+
+
+# Test(s) in the package:
 
 # Install files from the package:
-atlas_install_runtime( share/*.txt )
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

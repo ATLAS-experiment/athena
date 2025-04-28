@@ -19,7 +19,7 @@ endif()
 #    atlas_add_component( TrkAnalysisInterfaces
 #       src/*.h src/*.cxx src/components/*.cxx
 #       LINK_LIBRARIES AthenaBaseComps GaudiKernel xAODCore PathResolver xAODTracking
-#       PixelToTPIDDualToolLib PATCoreLib TrkTrack TrkSurfaces TrkMeasurementBase TrkParameters TrkRIO_OnTrack TrkToolInterfaces TrkAnalysisInterfacesLib )
+#       PixelToTPIDToolLib PATCoreLib TrkTrack TrkSurfaces TrkMeasurementBase TrkParameters TrkRIO_OnTrack TrkToolInterfaces TrkAnalysisInterfacesLib )
 # endif()
 
 atlas_add_dictionary( TrkAnalysisInterfacesDict
