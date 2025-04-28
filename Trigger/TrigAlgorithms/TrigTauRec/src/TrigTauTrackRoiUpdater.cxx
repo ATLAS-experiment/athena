@@ -105,23 +105,23 @@ StatusCode TrigTauTrackRoiUpdater::execute(const EventContext& ctx) const
 
         float trackPt = track->pt();
         if(trackPt > trkPtMax) {
-	  uint8_t nPix{}, nPixHoles{}, nSCTHoles{};
-	  track->summaryValue(nPix,xAOD::numberOfPixelHits);
+	  uint8_t nPix{}, nPixHoles{}, nSCTHoles{}, summaryVal{};
+	  nPix = track->summaryValue(summaryVal, xAOD::numberOfPixelHits) ? summaryVal : 0;
 	  if(nPix < m_nHitPix) {
-	    ATH_MSG_DEBUG("Track rejected because nHitPix " << nPix << " < " << m_nHitPix);
+	    ATH_MSG_DEBUG("Track rejected because nHitPix " << static_cast<int>(nPix) << " < " << m_nHitPix);
 	    continue;
 	  }
 
-	  track->summaryValue(nPixHoles, xAOD::numberOfPixelHoles);
-;
-	  track->summaryValue(nSCTHoles, xAOD::numberOfSCTHoles);
+	  nPixHoles = track->summaryValue(summaryVal, xAOD::numberOfPixelHoles) ? summaryVal : 0;
+	  nSCTHoles = track->summaryValue(summaryVal, xAOD::numberOfSCTHoles) ? summaryVal : 0;
 	  if((nPixHoles + nSCTHoles) > m_nSiHoles) {
-	    ATH_MSG_DEBUG("Track rejected because nSiHoles " << nPixHoles + nSCTHoles << " > " << m_nSiHoles);
+	    ATH_MSG_DEBUG("Track rejected because nSiHoles " << static_cast<int>(nPixHoles + nSCTHoles) << " > " << m_nSiHoles);
 	    continue;
 	  }
 
 	  leadTrack = track;
 	  trkPtMax = trackPt;
+	  ATH_MSG_VERBOSE("pTmax = " << trkPtMax);
         }
     }
 
@@ -135,6 +135,7 @@ StatusCode TrigTauTrackRoiUpdater::execute(const EventContext& ctx) const
     // else, only update the eta/phi width (etaMinus, etaPlus, phiMinus, phiPlus)
     if(leadTrack) {
       zed = leadTrack->z0() + leadTrack->vz();
+      ATH_MSG_DEBUG("Track z0 " << leadTrack->z0() <<" vz: " << leadTrack->vz() << " zed:" << zed);
       zedMinus = zed - m_z0HalfWidth;
       zedPlus = zed + m_z0HalfWidth;
       eta = leadTrack->eta();
