@@ -109,9 +109,6 @@ private :
     /// --------- Sub-Tools ---------
     /// -----------------------------
 
-    PublicToolHandle< Trig::TrigDecisionTool > m_trigDecTool {
-        this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "" };
-
     ToolHandle< IDTPM::ITrackSelectionTool > m_trackQualitySelectionTool {
         this, "TrackQualitySelectionTool", "IDTPM::InDetTrackPerfMon/ITrackSelectionTool", "Wrapper-tool to perform general quality-based track(truth) selection" };
 
