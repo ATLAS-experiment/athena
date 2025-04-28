@@ -27,7 +27,7 @@ import PyUtils.acmdlib as acmdlib
                   help="""Enable verbose printout""")
 
 ### functions -----------------------------------------------------------------
-def getEventList(tree, msg, reverse_order = False):
+def getEventsFromTree(tree, msg):
 
     eiNames = ['EventInfoAuxDyn.eventNumber',
                'EventInfoAux.',
@@ -53,21 +53,22 @@ def getEventList(tree, msg, reverse_order = False):
     if einame is None:
         msg.error('Cannot find event info, aborting.')
         return []
-
+    msg.info("Using branch: %s", einame)
+    
     tree.SetBranchStatus ('*', 0)
     tree.SetBranchStatus (einame, 1)
     if 'AuxDyn' in einame:
         tree.SetBranchStatus (runName, 1)
 
-    eventList = []    
+    eventList = []
     for idx in range(tree.GetEntriesFast()):
         tree.GetEntry(idx)
         if einame.endswith('Aux.'):
             ei = getattr(tree, einame)
             eventList.append((ei.runNumber, ei.eventNumber))
         elif einame.endswith('Info'):
-            ei = getattr(tree, einame)
-            eventList.append((ei.event_ID().run_number(), ei.event_ID().event_number()))
+            eid = getattr(tree, einame).m_event_ID
+            eventList.append((eid.m_run_number, eid.m_event_number))
         elif 'AuxDyn' in einame:
             eventList.append(( getattr(tree, runName),  getattr(tree, einame)))
             
@@ -77,24 +78,19 @@ def getEventList(tree, msg, reverse_order = False):
     return eventList
 
 
-def main(args):
-    """Print event numbers of events in a file. Format: (run#, event#)"""
+def getEventList(file, tree_name="CollectionTree", entries='', verbose=False):
+    """Get list of event+run numbers for given entries in a file/tree"""
 
     import PyUtils.Logging as L
     msg = L.logging.getLogger('list-events')
-    if args.verbose:
+    if verbose:
         msg.setLevel(L.logging.VERBOSE)
     else:
         msg.setLevel(L.logging.WARNING)
 
-    if args.entries == '':
-        args.entries = -1
-    if args.tree_name == '':
-        args.tree_name = "CollectionTree"
-        
-    msg.info('file:    [%s]', args.file)
-    msg.info('tree:    [%s]', args.tree_name)
-    msg.info('entries: %s',   args.entries)
+    msg.info('file:    [%s]', file)
+    msg.info('tree:    [%s]', tree_name)
+    msg.info('entries: %s',   entries)
     
     def get_event_range(entry):
             smin, smax = 0, None
@@ -117,19 +113,30 @@ def main(args):
             # If we come across an unhandled case, bail out
             else:
                 msg.warning(f"Unknown entries argument {entry}, will list all events...")
-            msg.debug(f"Event slice is parsed as [{smin},{smax}]")
             return smin, smax
 
     import PyUtils.RootUtils as ru
     ru.import_root()  # noqa: F841
-    dumper = ru.RootFileDumper(args.file, args.tree_name)
-    if args.entries in (-1,'','-1'):
-        entries = dumper.tree.GetEntries()
+    try:
+        dumper = ru.RootFileDumper(file, tree_name)
+    except AttributeError as e:
+        msg.error( *e.args )
+        return []
+
+    smin, smax = 0, None
+    if entries in (-1,'','-1'):
+        smax = dumper.tree.GetEntries()
     else:
-        entries = args.entries
-    smin, smax = get_event_range(entries)
+        smin, smax = get_event_range(entries)
+    msg.debug(f"Getting Event numbers for entries [{smin},{smax}]")
     
-    eventList = getEventList(dumper.tree, msg)[smin:smax]
+    return getEventsFromTree(dumper.tree, msg)[smin:smax]
+
+
+def main(args):
+    """Print event numbers of events in a file. Format: (run#, event#)"""
+
+    eventList = getEventList(args.file, args.tree_name, args.entries, args.verbose)
     # print the output here to get the desired format (event per line)
     for ent in eventList:
         print(ent)
@@ -139,16 +146,13 @@ def main(args):
 
 # example of direct use
 if __name__ == "__main__":
-    import types, sys
-    args=types.SimpleNamespace()
+    import sys
     if len(sys.argv) < 2:
         print("no filename given")
         sys.exit(1)
-    args.file = sys.argv[1]
-    args.entries = ''
-    args.tree_name = ''
-    args.verbose = False
-    main(args)
+    eventList = getEventList(sys.argv[1])
+    for ent in eventList:
+        print(ent)
 
 
 
