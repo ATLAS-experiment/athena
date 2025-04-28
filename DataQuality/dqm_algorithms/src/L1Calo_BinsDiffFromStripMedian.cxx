@@ -141,14 +141,14 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
         TRandom3 r;
         for ( int i = xmin; i <= xmax; ++i ) {
             std::vector<double> onestrip;
-            double stripSum=0, stripSum2=0;
+            double stripSum=0/*, stripSum2=0*/;
             for ( int j = ymin; j <= ymax; ++j ) {
                 double binvalue = (nBinsZ<=0) ? histogram->GetBinContent(i,j) : histogram->GetBinContent(t,reverseConvention ? ((ymax-ymin+1)*(i-1)+j) :  ((xmax-xmin+1)*(j-1)+i));
                 if (binvalue < ignoreBelow) continue;
                 if(binvalue>0) filledRows.insert(j); // used to veto running deadstrip tests on sparsely populated plots
                 onestrip.push_back(binvalue);
                 stripSum += binvalue;
-                stripSum2 += binvalue*binvalue;
+                //stripSum2 += binvalue*binvalue;
             }
             stripsAvg.push_back(stripSum/onestrip.size());
             // traditional variance calculation, not robust to outliers
