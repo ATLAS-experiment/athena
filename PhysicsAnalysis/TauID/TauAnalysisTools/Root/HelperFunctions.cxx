@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -488,84 +488,6 @@ void TauAnalysisTools::correctedPi0Vectors(const xAOD::TauJet* xTau, std::vector
     TauP4 += correctedPi0s[iPi0];
   }
 
-}
-
-//______________________________________________________________________________
-void TauAnalysisTools::truthHadrons(const xAOD::TruthParticle* xTruthTau, std::vector<const xAOD::TruthParticle*>& vChargedHadrons, std::vector<const xAOD::TruthParticle*>& vNeutralHadrons)
-{
-  vChargedHadrons.clear();
-  vNeutralHadrons.clear();
-
-  // skip this tau if it has no decay vertex
-  if ( !xTruthTau->hasDecayVtx() )
-  {
-    Warning("TauAnalysisTools::truthHadrons", "Passed truth particle has no decay vertex.");
-    return;
-  }
-
-  // get vertex and check if it is valid
-  const xAOD::TruthVertex* xDecayVertex = xTruthTau->decayVtx();
-  if (!xDecayVertex)
-  {
-    Warning("TauAnalysisTools::truthHadrons", "Passed truth particle has no valid decay vertex.");
-    return;
-  }
-
-  // loop over outgoing particles 
-  for ( size_t iOutgoingParticle = 0; iOutgoingParticle < xDecayVertex->nOutgoingParticles(); ++iOutgoingParticle )
-  {
-    const xAOD::TruthParticle* xTruthDaughter = xDecayVertex->outgoingParticle(iOutgoingParticle);
-    if (!xTruthDaughter)
-    {
-      Warning("TauAnalysisTools::truthHadrons", "Truth daughter of tau decay was not found. Please ensure that this container has the full tau decay information or produce the TruthTaus container in AtlasDerivation.\nInformation on how to do this can be found here:\nhttps://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/TauPreRecommendations2015#Accessing_Tau_Truth_Information");
-      return;
-    }
-
-    // if tau decays into tau this is not a proper tau decay
-    if ( xTruthDaughter->isTau() )
-    {
-      Warning("TauAnalysisTools::truthHadrons", "Tau decays into a tau itself. Skip this decay");
-      return;
-    }
-
-    // ignore electrons, muons and neutrinos
-    if (xTruthDaughter->isElectron() or xTruthDaughter->isMuon() or xTruthDaughter->isNeutrino())
-      continue;
-
-    if (xTruthDaughter->isCharged())
-      vChargedHadrons.push_back(xTruthDaughter);
-    else 
-      vNeutralHadrons.push_back(xTruthDaughter);
-  }
-
-  return;
-  
-}
-
-//______________________________________________________________________________
-void TauAnalysisTools::truthHadrons(const xAOD::TauJet* xTau, std::vector<const xAOD::TruthParticle*>& vChargedHadrons, std::vector<const xAOD::TruthParticle*>& vNeutralHadrons)
-{
-  vChargedHadrons.clear();
-  vNeutralHadrons.clear();
-
-  // check if reco tau is a truth hadronic tau
-  typedef ElementLink< xAOD::TruthParticleContainer > Link_t;
-  static const SG::ConstAccessor<Link_t> accTruthParticleLink("truthParticleLink");
-  if (!accTruthParticleLink.isAvailable(*xTau))
-  {
-    Error("TauAnalysisTools::truthHadrons", "No truth match information available. Please run TauTruthMatchingTool first");
-  }
-
-  const Link_t xTruthTauLink = accTruthParticleLink(*xTau);
-  const xAOD::TruthParticle* xTruthTau = xTruthTauLink.cachedElement();
-
-  static const SG::ConstAccessor<char> accIsHadronicTau("IsHadronicTau");
-  if (xTruthTau!=nullptr && accIsHadronicTau(*xTruthTau))
-  {
-    truthHadrons(xTruthTau, vChargedHadrons, vNeutralHadrons);
-  }
-
-  return;  
 }
 
 //______________________________________________________________________________
