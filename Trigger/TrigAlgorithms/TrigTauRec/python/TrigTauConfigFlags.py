@@ -67,9 +67,9 @@ def createTrigTauConfigFlags():
     flags.addFlag('Trigger.Offline.Tau.GNTau.OutputDiscriminant', 1) # 0: -log(PJet), 1: PTau
     flags.addFlag('Trigger.Offline.Tau.GNTau.ScoreFlatteningConfig', ['HLTGNTau_v1p1/0p_GNTau_map.root', 'HLTGNTau_v1p1/1p_GNTau_map.root', 'HLTGNTau_v1p1/mp_GNTau_map.root'])
     flags.addFlag('Trigger.Offline.Tau.GNTau.WPNames', ['VeryLoose', 'Loose', 'Medium', 'Tight'])
-    flags.addFlag("Trigger.Offline.Tau.GNTau.TargetEff", [[0.98,  0.90, 0.65,  0.50],  # 0p WPs: VL, L, M, T
-                                                          [0.992, 0.99, 0.973, 0.94],  # 1p WPs: VL, L, M, T
-                                                          [0.99,  0.95, 0.92,  0.80]]) # mp WPs: VL, L, M, T
+    flags.addFlag("Trigger.Offline.Tau.GNTau.TargetEff", [[0.98,  0.90, 0.65, 0.50],  # 0p WPs: VL, L, M, T
+                                                          [0.992, 0.99, 0.97, 0.94],  # 1p WPs: VL, L, M, T
+                                                          [0.99,  0.94, 0.92, 0.80]]) # mp WPs: VL, L, M, T
 
 
     return flags
