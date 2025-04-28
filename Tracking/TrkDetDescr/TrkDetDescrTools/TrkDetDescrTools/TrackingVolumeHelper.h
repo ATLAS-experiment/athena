@@ -134,17 +134,12 @@ public:
       --- Necessary as friendship cannot be inherited: your father's friend
      isn't necessary yours ---
    */
-  Trk::TrackingVolume* glueTrackingVolumeArrays(TrackingVolume& firstVol,
-                                                BoundarySurfaceFace firstFace,
-                                                TrackingVolume& secondVol,
-                                                BoundarySurfaceFace secondFace,
-                                                std::string name) const override;
-
-  std::unique_ptr<Trk::TrackingVolume> glueTrackingVolumeArrays(std::shared_ptr<TrackingVolume> firstVol,
-                                                                BoundarySurfaceFace firstFace,
-                                                                std::shared_ptr<TrackingVolume> secondVol,
-                                                                BoundarySurfaceFace secondFace,
-                                                                const std::string& name) const override;
+  std::unique_ptr<Trk::TrackingVolume> glueTrackingVolumeArrays(
+      std::shared_ptr<TrackingVolume> firstVol,
+      BoundarySurfaceFace firstFace,
+      std::shared_ptr<TrackingVolume> secondVol,
+      BoundarySurfaceFace secondFace,
+      const std::string& name) const override;
 
   /** protected method to set inside Volume of a BoundarySurface:
       input:
