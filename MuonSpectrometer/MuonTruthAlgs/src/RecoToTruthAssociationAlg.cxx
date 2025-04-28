@@ -55,7 +55,6 @@ StatusCode RecoToTruthAssociationAlg::initialize() {
     }
 
     ATH_CHECK(m_muonTruthRecoLink.initialize(!m_recoLink.empty()));
-    ATH_CHECK(m_recoInDetTrackParticles.initialize());
     ATH_CHECK(m_muonTruthParticleLink.initialize());
     ATH_CHECK(m_muonTruthParticleOrigin.initialize());
     ATH_CHECK(m_muonTruthParticleType.initialize());
