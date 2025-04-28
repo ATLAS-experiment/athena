@@ -55,6 +55,7 @@ class Hto4lPowhegMerge(object) :
     # we require four input files, 1 for 4e, 1 for 4mu, and 2 for 2e2mu. The two for 2e2mu will be merged
     myinputfiles  = self.input_powheg_file_name
     genInputFiles = myinputfiles.split(',')
+    inputsPath = os.path.dirname(genInputFiles[0])
     numberOfFiles = len(genInputFiles)
     # if there is a single file, make a symlink.  If multiple files, merge them into one output eventsFile
     if numberOfFiles > 0:
@@ -64,7 +65,7 @@ class Hto4lPowhegMerge(object) :
         # untar as needed
         if tarfile.is_tarfile(file):
           tar = tarfile.open(file)
-          tar.extractall()
+          tar.extractall(inputsPath)
           tar.close()
           file_1 = file.replace("tar.gz.1","events")
           self.logger.info( 'Extracted tar file, and renaming {0} to {1}'.format ( file, file_1 ) )
@@ -145,7 +146,7 @@ class Hto4lPowhegMerge(object) :
 
     # open new file for updates
     powheg_LHE_updated = "{}.updated".format(powheg_LHE_output)
-    with open(powheg_LHE_updated, "wb") as f_output:
+    with open(powheg_LHE_updated, "w") as f_output:
       f_output.write("{}".format(preamble))
       # for each event, check for an -1 Hto4l weight in XWGTUP. If it is -1, correct the <rwgt>
       # weights (-1 * wgt), and save the id=0 weight in XWGTUP.
