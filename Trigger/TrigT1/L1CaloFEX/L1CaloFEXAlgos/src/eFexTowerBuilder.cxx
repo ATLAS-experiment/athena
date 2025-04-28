@@ -103,7 +103,7 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
         int val =  std::round(digi->energy()/(12.5*std::cosh(digi->eta()))); // 12.5 is b.c. energy is in units of 12.5MeV per count
         // note: a val of < -99998 is what is produced if efex was sent an invalid code of 1022 (see LArRawtoSuperCell)
         bool isSaturated = (!isMC) ? (digi->quality()) : false; // not applying saturation codes in MC until the changes to trigger counts has been investigated
-        bool isMasked = m_applyMasking ? ((digi)->provenance()&0x80) : false;
+        bool isMasked = ((digi)->provenance()&0x80);
         bool isInvalid = m_applyMasking ? ((digi)->provenance()&0x40) : false;
         // note: if debugging, the SCIDs have value: digi->ID().get_compact()>>32
         if(isInvalid) {
