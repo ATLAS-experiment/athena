@@ -33,10 +33,6 @@ private:
         this, "MuonContainerName", "Muons",
         "container name for muon truth particles; the full handle name, including the reco muon link auxdata, is set in initialize()"};
 
-    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_recoInDetTrackParticles{
-        this, "InDetTrackParticleName", "InDetTrackParticles",
-        "container name for input InDetTrackParticles. truthLink guaranteed to be there by their constuction in MC"};
-
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_muonTruthRecoLink{
         this, "MuonTruthParticleRecoLink", m_truthMuKey, "",
         "container name for muon truth particles; the full handle name, including the reco muon link auxdata, is set in initialize()"};
