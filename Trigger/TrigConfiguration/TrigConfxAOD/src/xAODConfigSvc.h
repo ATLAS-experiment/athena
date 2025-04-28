@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFXAOD_XAODCONFIGSVC_H
@@ -314,7 +314,7 @@ namespace TrigConf {
       /// @}
 
       /// Connection to the metadata store
-      ServiceHandle< StoreGateSvc > m_metaStore{this, "MetaDataStore", "InputMetaDataStore"};
+      ServiceHandle< StoreGateSvc > m_metaStore{this, "MetaDataStore", "StoreGateSvc/InputMetaDataStore"};
 
       /// Is decoded R2 format data available?
       bool m_triggerMenuContainerAvailable{false};
