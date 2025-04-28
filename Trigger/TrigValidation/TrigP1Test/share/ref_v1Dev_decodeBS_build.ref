@@ -162,6 +162,25 @@ HLT_0e25_nopid_0g25_loose_0mu24_j20_xe0_tcpufit_anomdetL_L1ADVAET:
     5: 2
     6: 2
     7: 11
+HLT_0e25_nopid_0g25_loose_0mu24_j20_xe0_tcpufit_anomdetL_L1All:
+  eventCount: 0
+  stepCounts:
+    0: 50
+    1: 50
+    2: 50
+    3: 50
+    4: 50
+    5: 50
+    6: 50
+  stepFeatures:
+    0: 19
+    1: 14
+    2: 25
+    3: 10
+    4: 7
+    5: 7
+    6: 5
+    7: 172
 HLT_0e25_nopid_0g25_loose_0mu24_j20_xe0_tcpufit_anomdetM_L1ADVAEL:
   eventCount: 0
   stepCounts:
