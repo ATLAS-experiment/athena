@@ -40,7 +40,6 @@ namespace PanTau {
         virtual int getBinIndex(const std::vector<double>& binEdges, double value) const;
         
         virtual double stddev(double sumOfSquares, double sumOfValues, int numConsts) const;
-        virtual double deltaRprime(const TVector3& vec1, const TVector3& vec2) const;
 
 #ifdef XAOD_ANALYSIS
 	template<class T>
