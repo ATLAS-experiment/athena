@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -33,17 +33,10 @@ DiTauSelectionTool::DiTauSelectionTool( const std::string& name )
     other properties named in plural are a list of exact values to cut on
     other properties are single cuts
   */
-  declareProperty( "ConfigPath",     m_sConfigPath     = "");
-  declareProperty( "SelectionCuts",  m_iSelectionCuts  = NoDiTauCut); // initialize with 'no' cuts
+ 
   declareProperty( "PtRegion",       m_vPtRegion       = {});  // in GeV
-  declareProperty( "PtMin",          m_dPtMin          = NAN); // in GeV
-  declareProperty( "PtMax",          m_dPtMax          = NAN); // in GeV
   declareProperty( "AbsEtaRegion",   m_vAbsEtaRegion   = {});
-  declareProperty( "AbsEtaMin",      m_dAbsEtaMin      = NAN);
-  declareProperty( "AbsEtaMax",      m_dAbsEtaMax      = NAN);
   declareProperty( "NSubjetsRegion", m_vNSubjetsRegion = {});
-  declareProperty( "NSubjetsMin",    m_dNSubjetsMin    = NAN);
-  declareProperty( "NSubjetsMax",    m_dNSubjetsMax    = NAN);
 
 }
 

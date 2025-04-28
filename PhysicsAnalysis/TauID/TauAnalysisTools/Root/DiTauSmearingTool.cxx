@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -17,8 +17,6 @@ DiTauSmearingTool::DiTauSmearingTool( const std::string& sName )
   , m_tCommonDiTauSmearingTool(sName+"_CommonDiTauSmearingTool", this)
   , m_sInputFilePath("")
 {
-  declareProperty( "RecommendationTag",   m_sRecommendationTag = "2019-winter" );
-  declareProperty( "SkipTruthMatchCheck", m_bSkipTruthMatchCheck = false );
 }
 
 StatusCode DiTauSmearingTool::initialize()
