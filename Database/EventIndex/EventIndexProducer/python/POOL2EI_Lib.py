@@ -329,7 +329,7 @@ class POOL2EI(PyAthena.Alg):
             guids = []
             for i in range(pool.GetEntries()):
                 if pool.GetEntry(i) > 0:
-                    pool_string = pool.db_string
+                    pool_string = pool.db_string.as_string()
                     # take string until \0 is found
                     n = pool_string.find('\0')
                     if n != -1:
