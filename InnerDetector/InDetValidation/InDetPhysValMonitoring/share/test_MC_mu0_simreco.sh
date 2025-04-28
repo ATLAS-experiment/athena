@@ -84,7 +84,7 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
    --inputHITSFile $hits \
    --maxEvents -1 \
    --outputRDOFile $rdo \
-   --preInclude 'HITtoRDO:Campaigns.MC23NoPileUp' \
+   --preInclude 'HITtoRDO:Campaigns.MC23aNoPileUp' \
    --postInclude 'PyJobTransforms.UseFrontier' 
  echo "art-result: $? digi"
 

@@ -3,10 +3,8 @@ from AthenaConfiguration.Enums import ProductionStep
 from Campaigns.Utils import Campaign
 
 
-def MC23a(flags):
-    """MC23a flags for MC to match 2022 Run 3 data"""
-    flags.Input.MCCampaign = Campaign.MC23a
-
+def _MC23PileUp(flags):
+    """MC23 flags for MC with pile-up"""
     flags.Beam.NumberOfCollisions = 60.
 
     from LArConfiguration.LArConfigRun3 import LArConfigRun3PileUp
@@ -15,6 +13,17 @@ def MC23a(flags):
     # radiation damage
     from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
     flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
+
+    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        # ensure better randomisation of high-pt minbias events
+        flags.Digitization.PU.HighPtMinBiasInputColOffset = -1
+
+
+def MC23a(flags):
+    """MC23a flags for MC to match 2022 Run 3 data"""
+    _MC23PileUp(flags)
+
+    flags.Input.MCCampaign = Campaign.MC23a
 
     # pile-up
     # These numbers are based upon a relative XS scaling of the high-pt slice
@@ -27,22 +36,12 @@ def MC23a(flags):
     flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
     flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run410000_MC23a_MultiBeamspot'
 
-    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
-        # ensure better randomisation of high-pt minbias events
-        flags.Digitization.PU.HighPtMinBiasInputColOffset = -1
 
 def MC23c(flags):
     """MC23c flags for MC to match 2023 Run 3 data (initial pile-up profile estimate)"""
+    _MC23PileUp(flags)
+
     flags.Input.MCCampaign = Campaign.MC23c
-
-    flags.Beam.NumberOfCollisions = 60.
-
-    from LArConfiguration.LArConfigRun3 import LArConfigRun3PileUp
-    LArConfigRun3PileUp(flags)
-
-    # radiation damage
-    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
-    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
     # pile-up
     # These numbers are based upon a relative XS scaling of the high-pt slice
@@ -55,23 +54,12 @@ def MC23c(flags):
     flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
     flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run450000_MC23c_MultiBeamspot'
 
-    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
-        # ensure better randomisation of high-pt minbias events
-        flags.Digitization.PU.HighPtMinBiasInputColOffset = -1
-
 
 def MC23d(flags):
     """MC23d flags for MC to match 2023 Run 3 data (uses a pile-up profile based on the actual profile from 2023 data)"""
+    _MC23PileUp(flags)
+
     flags.Input.MCCampaign = Campaign.MC23d
-
-    flags.Beam.NumberOfCollisions = 60.
-
-    from LArConfiguration.LArConfigRun3 import LArConfigRun3PileUp
-    LArConfigRun3PileUp(flags)
-
-    # radiation damage
-    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
-    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
     # pile-up
     # These numbers are based upon a relative XS scaling of the high-pt slice
@@ -83,10 +71,6 @@ def MC23d(flags):
     flags.Digitization.PU.NumberOfHighPtMinBias = 0.187
     flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
     flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run450000_MC23d_MultiBeamspot' 
-
-    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
-        # ensure better randomisation of high-pt minbias events
-        flags.Digitization.PU.HighPtMinBiasInputColOffset = -1
 
 
 def MC23HeavyIons2023NoPileUp(flags):
@@ -146,16 +130,9 @@ def MC23HeavyIons2023(flags):
 
 def MC23e(flags):
     """MC23e flags for MC to match 2024 Run 3 data (initial pile-up estimate based on broadened 2023 data )"""
+    _MC23PileUp(flags)
+
     flags.Input.MCCampaign = Campaign.MC23e
-
-    flags.Beam.NumberOfCollisions = 60.
-
-    from LArConfiguration.LArConfigRun3 import LArConfigRun3PileUp
-    LArConfigRun3PileUp(flags)
-
-    # radiation damage
-    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
-    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
     # pile-up
     # These numbers are based upon a relative XS scaling of the high-pt slice
@@ -169,23 +146,12 @@ def MC23e(flags):
     flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
     flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run470000_MC23e_MultiBeamspot' 
 
-    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
-        # ensure better randomisation of high-pt minbias events
-        flags.Digitization.PU.HighPtMinBiasInputColOffset = -1
-
 
 def MC23g(flags):
     """MC23g flags for MC to match 2025 Run 3 data (initial pile-up estimate based on broadened 2024 data )"""
+    _MC23PileUp(flags)
+
     flags.Input.MCCampaign = Campaign.MC23g
-
-    flags.Beam.NumberOfCollisions = 60.
-
-    from LArConfiguration.LArConfigRun3 import LArConfigRun3PileUp
-    LArConfigRun3PileUp(flags)
-
-    # radiation damage
-    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
-    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
     # pile-up
     # These numbers are based upon a relative XS scaling of the high-pt slice
@@ -199,10 +165,6 @@ def MC23g(flags):
     flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
     # TODO: replace with the actual profile
     flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run470000_MC23e_MultiBeamspot' 
-
-    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
-        # ensure better randomisation of high-pt minbias events
-        flags.Digitization.PU.HighPtMinBiasInputColOffset = -1
 
 
 def MC23ppReferenceRun2024(flags): # FIXME This configuration is a placeholder
@@ -329,6 +291,7 @@ def MC23gSingleBeamspot(flags):
     # TODO: replace with the actual profile
     flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run470000_MC23e_SingleBeamspot'
 
+
 def MC23LowMu(flags):
     """MC23 flags for MC to match Run 3 data with low pile-up"""
     flags.Input.MCCampaign = Campaign.MC23a
@@ -354,12 +317,9 @@ def MC23LowMu(flags):
     flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
 
 
-def MC23NoPileUp(flags):
+def _MC23NoPileUp(flags):
     """MC23 flags for MC without pile-up"""
-    flags.Input.MCCampaign = Campaign.MC23a
-
     flags.Beam.NumberOfCollisions = 0.
-    flags.Input.ConditionsRunNumber = 410000
 
     from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
     LArConfigRun3NoPileUp(flags)
@@ -371,64 +331,48 @@ def MC23NoPileUp(flags):
 
 def MC23aNoPileUp(flags):
     """MC23a flags for MC without pile-up"""
-    MC23NoPileUp(flags)
+    _MC23NoPileUp(flags)
+
+    flags.Input.MCCampaign = Campaign.MC23a
+    flags.Input.ConditionsRunNumber = 410000
 
 
 def MC23dNoPileUp(flags):
     """MC23d flags for MC without pile-up"""
+    _MC23NoPileUp(flags)
+
     flags.Input.MCCampaign = Campaign.MC23d
-
-    flags.Beam.NumberOfCollisions = 0.
     flags.Input.ConditionsRunNumber = 450000
-
-    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
-    LArConfigRun3NoPileUp(flags)
-
-    # radiation damage
-    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
-    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
 
 def MC23eNoPileUp(flags):
     """MC23e flags for MC without pile-up"""
+    _MC23NoPileUp(flags)
+
     flags.Input.MCCampaign = Campaign.MC23e
-
-    flags.Beam.NumberOfCollisions = 0.
     flags.Input.ConditionsRunNumber = 470000
-
-    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
-    LArConfigRun3NoPileUp(flags)
-
-    # radiation damage
-    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
-    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
 
 def MC23gNoPileUp(flags):
     """MC23g flags for MC without pile-up"""
-    flags.Input.MCCampaign = Campaign.MC23g
+    _MC23NoPileUp(flags)
 
-    flags.Beam.NumberOfCollisions = 0.
+    flags.Input.MCCampaign = Campaign.MC23g
     # TODO: replace with the actual run number
     flags.Input.ConditionsRunNumber = 470000
-
-    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
-    LArConfigRun3NoPileUp(flags)
-
-    # radiation damage
-    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
-    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
 
 def MC23NoPileUpLowMuRun(flags):
     """MC23a flags for MC to match 2002 Low Mu data"""
-    MC23NoPileUp(flags)
+    _MC23NoPileUp(flags)
+
+    flags.Input.MCCampaign = Campaign.MC23a
     flags.Input.ConditionsRunNumber = 420000
 
     
 def MC23NoPileUpLowMuLowB(flags):
     """MC23d flags for MC to match special run 460348"""
-    MC23NoPileUp(flags)   
+    _MC23NoPileUp(flags)
 
     flags.Input.MCCampaign = Campaign.MC23d
     flags.Input.ConditionsRunNumber = 465000
