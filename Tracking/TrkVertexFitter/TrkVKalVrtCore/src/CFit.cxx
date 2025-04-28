@@ -248,7 +248,11 @@ int fitVertex(VKVertex * vk)
       for (tk = 0; tk < NTRK; ++tk) {
         //std::cout<<__func__<<" propagate trk="<<tk<<" X,Y,Z="<<targV[0]<<","<<targV[1]<<","<<targV[2]<<'\n';
         Trk::vkalPropagator::Propagate(vk->TrackList[tk].get(), vk->refV,  targV, tmpPer, tmpCov, (vk->vk_fitterControl).get());
-        if(std::abs(tmpCov[14])<1.e-20 || std::isnan(tmpCov[14])) {return -7;} // Zero Q/p covariance. Stop fit and return failure
+        if(std::isnan(tmpCov[14])) {return -7;} // want to make sure it isn't a nan
+        if (std::abs(tmpCov[14])<1.e-20                                  // Zero Q/p covariance. Stop fit and return failure
+            && !vk->vk_fitterControl->m_allowUltraDisplaced) {          //vertices approaching exterior of MS toroid can have wacky Q/P covariances -- that's ok
+           return -7;
+        }
         cfTrkCovarCorr(tmpCov);
         double eig5=cfSmallEigenvalue(tmpCov,5 );
         if(eig5>0 && eig5<1.e-15 ){
