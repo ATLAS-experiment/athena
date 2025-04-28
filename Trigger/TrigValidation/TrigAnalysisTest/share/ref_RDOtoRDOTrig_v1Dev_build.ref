@@ -4259,9 +4259,13 @@ HLT_e20_lhtight_ivarloose_L12eEM9:
     4: 6
     5: 6
     6: 3
+HLT_e20_lhtight_ivarloose_L1ZAFB-04DPHIM-eEM18M:
+  eventCount: 0
 HLT_e20_lhtight_ivarloose_L1ZAFB-25DPHI-eEM18M:
   eventCount: 0
 HLT_e20_lhtight_ivarloose_L1ZAFB-25DPHIM-eEM18M:
+  eventCount: 0
+HLT_e20_lhtight_ivarloose_L1eEM18M_jEM25:
   eventCount: 0
 HLT_e20_lhvloose_L1eEM18L:
   eventCount: 4
