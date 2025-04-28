@@ -192,7 +192,6 @@ def fromRunArgs(runArgs):
         loadFromSG.append(('xAOD::TrigConfKeys', 'StoreGateSvc+TrigConfKeys'))
     if job.item_xaod_TrigDecision:
         loadFromSG.append(('xAOD::TrigDecision', 'StoreGateSvc+xTrigDecision'))
-    loadFromSG.append(('DataHeader', 'StoreGateSvc+EventSelector'))
 
     from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
     cfg.merge(SGInputLoaderCfg(flags, loadFromSG))
