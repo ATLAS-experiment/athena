@@ -32,7 +32,9 @@ def defineMenu():
     try_add("L1_2eEM10L")
     try_add("L1_MU5VF_cTAU30M")
     try_add("L1_3jJ40")
-
+    try_add("L1_eEM20M")
+    try_add("L1_eEM24M")
+    
     # recover the ones removed by run3 MC
     try_recover("L1_eEM22M")
     try_recover("L1_jJ140")
