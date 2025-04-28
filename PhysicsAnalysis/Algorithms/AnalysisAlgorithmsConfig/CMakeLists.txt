@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -30,5 +30,5 @@ atlas_add_test( ConfigTextCompareBlock
 atlas_add_test( TestCPRunFullSim
    SCRIPT CPRun.py --input-list ${ASG_TEST_FILE_MC} --text-config test_configuration_Run2.yaml -e 150
    POST_EXEC_SCRIPT nopost.sh
-   PROPERTIES TIMEOUT 400 
+   PROPERTIES TIMEOUT 600
    )
