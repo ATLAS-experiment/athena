@@ -37,7 +37,7 @@ def TilePulseForTileMuonReceiverCfg(flags, **kwargs):
 
     if 'RndmSvc' not in kwargs:
         from RngComps.RngCompsConfig import AthRNGSvcCfg
-        kwargs['RndmSvc'] = acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name
+        kwargs['RndmSvc'] = acc.getPrimaryAndMerge(AthRNGSvcCfg(flags))
 
     if kwargs['UseCoolNoise'] or kwargs['UseCoolPedestal']:
         from TileConditions.TileSampleNoiseConfig import TileSampleNoiseCondAlgCfg

@@ -18,7 +18,7 @@ def BPHY18Cfg(flags):
     from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
 
     acc = ComponentAccumulator()
-    PartPropSvcName = acc.getPrimaryAndMerge(PartPropSvcCfg(flags)).name
+    PartPropSvcName = acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
     acc.merge(EGammaCommonCfg(flags))
     isSimulation = flags.Input.isMC
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))

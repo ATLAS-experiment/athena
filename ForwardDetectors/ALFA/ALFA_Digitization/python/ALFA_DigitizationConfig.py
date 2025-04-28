@@ -42,14 +42,14 @@ def ALFA_PileUpToolCfg(flags, name="ALFA_PileUpTool", **kwargs):
             kwargs.setdefault("LastXing", ALFA_LastXing() )
         else:
             intervals += [acc.popToolsAndMerge(ALFARangeCfg(flags))]
-        kwargs.setdefault("mergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("mergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
         #kwargs.setdefault("OnlyUseContainerName", True) # TODO in future MR
     else:
         kwargs.setdefault("mergeSvc", '')
         #kwargs.setdefault("OnlyUseContainerName", False) #TODO in future MR
 
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
     acc.setPrivateTools(CompFactory.ALFA_PileUpTool(name, **kwargs))
     return acc

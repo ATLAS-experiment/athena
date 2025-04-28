@@ -55,7 +55,7 @@ def ParticleSimAcceptList_ExtraParticlesCfg(flags, name="ISF_ParticleSimAcceptLi
 def ParticlePositionFilterCfg(flags, name="ISF_ParticlePositionFilter", **kwargs):
     result = ComponentAccumulator()
     # ParticlePositionFilter
-    kwargs.setdefault("GeoIDService", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)).name)
+    kwargs.setdefault("GeoIDService", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)))
     result.setPrivateTools(CompFactory.ISF.GenParticlePositionFilter(name, **kwargs))
     return result
 

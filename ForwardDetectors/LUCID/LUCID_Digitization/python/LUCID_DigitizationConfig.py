@@ -38,14 +38,14 @@ def LUCID_PileUpToolCfg(flags, name="LUCID_PileUpTool",**kwargs):
             kwargs.setdefault("LastXing", LUCID_LastXing() )
         else:
             intervals += [acc.popToolsAndMerge(LucidRangeCfg(flags))]
-        kwargs.setdefault("mergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("mergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
         #kwargs.setdefault("OnlyUseContainerName", True) # FIXME in future MR
     else:
         kwargs.setdefault("mergeSvc", '')
         #kwargs.setdefault("OnlyUseContainerName", False) # FIXME in future MR
 
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
     kwargs.setdefault('pmtSmearing', [0.317, 0.000, 0.292, 0.316, 0.208, 0.178, 0.204, 0.281, 0.233, 0.261, 0.223, 0.250, 0.254, 0.239, 0.202, 0.224,  1,  1,  1,  1,
                           0.268, 0.277, 0.297, 0.310, 0.203, 0.347, 0.269, 0.241, 0.234, 0.234, 0.277, 0.297, 0.225, 0.297, 0.238, 0.000,  1,  1,  1,  1] )

@@ -97,7 +97,7 @@ def FastSimNavigatorCfg(flags,
         from TrkConfig.AtlasTrackingGeometrySvcConfig import (
             TrackingGeometrySvcCfg)
         acc = TrackingGeometrySvcCfg(flags)
-        kwargs.setdefault("TrackingGeometrySvc", acc.getPrimary().name)
+        kwargs.setdefault("TrackingGeometrySvc", acc.getPrimary())
         kwargs.setdefault("TrackingGeometryKey", '')
         result.merge(acc)
 
@@ -152,7 +152,7 @@ def fatrasMultipleScatteringUpdatorCfg(flags,
 
     from ISF_FatrasServices.ISF_FatrasConfig import TrkExRndSvcMTCfg
     kwargs.setdefault("RandomNumberService",
-                      result.getPrimaryAndMerge(TrkExRndSvcMTCfg(flags)).name)
+                      result.getPrimaryAndMerge(TrkExRndSvcMTCfg(flags)))
     kwargs.setdefault("RandomStreamName",
                       flags.Sim.Fatras.TrkExRandomStreamName)
     kwargs.setdefault("GaussianMixtureModel",

@@ -42,7 +42,7 @@ def CSC_DigitizationToolCommonCfg(flags, name="CscDigitizationTool", **kwargs):
         if not flags.Digitization.DoXingByXingPileUp:
             intervals += [acc.popToolsAndMerge(CSC_RangeCfg(flags))]
             kwargs.setdefault("OnlyUseContainerName", True)
-        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     else:
         kwargs.setdefault("OnlyUseContainerName", False)
         kwargs.setdefault("PileUpMergeSvc", '')

@@ -50,7 +50,7 @@ def MM_DigitizationToolCfg(flags, name="MM_DigitizationTool", **kwargs):
             kwargs.setdefault("LastXing", MM_LastXing())
         else:
             intervals += [result.popToolsAndMerge(MM_RangeCfg(flags))]
-        kwargs.setdefault("PileUpMergeSvc", result.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("PileUpMergeSvc", result.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     else:
         kwargs.setdefault("PileUpMergeSvc", '')
 

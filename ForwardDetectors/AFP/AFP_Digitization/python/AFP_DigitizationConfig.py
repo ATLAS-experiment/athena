@@ -50,14 +50,14 @@ def AFP_DigitizationToolCfg(flags, name="AFP_PileUpTool", **kwargs):
         else:
             intervals += [acc.popToolsAndMerge(AFP_SIDPUXinfFolderCfg(flags))]
             intervals += [acc.popToolsAndMerge(AFP_TDPUXinfFolderCfg(flags))]
-        kwargs.setdefault("mergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("mergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
         kwargs.setdefault("OnlyUseContainerName", True)
     else:
         kwargs.setdefault("mergeSvc", '')
         kwargs.setdefault("OnlyUseContainerName", False)
 
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
     acc.setPrivateTools(CompFactory.AFP_PileUpTool(name, **kwargs))
     return acc

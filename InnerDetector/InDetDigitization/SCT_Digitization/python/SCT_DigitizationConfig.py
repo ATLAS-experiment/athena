@@ -43,7 +43,7 @@ def SCT_DigitizationCommonCfg(flags, name="SCT_DigitizationToolCommon", **kwargs
         kwargs.setdefault("FirstXing", SCT_FirstXing())
         kwargs.setdefault("LastXing", SCT_LastXing() )
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     
     SCT_DigitizationTool = CompFactory.SCT_DigitizationTool
     tool = SCT_DigitizationTool(name, **kwargs)
@@ -62,7 +62,7 @@ def SCT_DigitizationToolCfg(flags, name="SCT_DigitizationTool", **kwargs):
         intervals = []
         if not flags.Digitization.DoXingByXingPileUp:
             intervals += [acc.popToolsAndMerge(SCT_RangeCfg(flags))]
-        kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     else:
         kwargs.setdefault("MergeSvc", '')
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
@@ -82,7 +82,7 @@ def SCT_DigitizationHSToolCfg(flags, name="SCT_DigitizationHSTool", **kwargs):
     """Return ComponentAccumulator with hard scatter configured SCT digitization tool"""
     acc = ComponentAccumulator()
     rangetool = acc.popToolsAndMerge(SCT_RangeCfg(flags))
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)))
     kwargs.setdefault("OutputObjectName", "SCT_RDOs")
     kwargs.setdefault("OutputSDOName", "SCT_SDO_Map")
     kwargs.setdefault("HardScatterSplittingMode", 1)
@@ -95,7 +95,7 @@ def SCT_DigitizationPUToolCfg(flags, name="SCT_DigitizationPUTool",**kwargs):
     """Return ComponentAccumulator with pileup configured SCT digitization tool"""
     acc = ComponentAccumulator()
     rangetool = acc.popToolsAndMerge(SCT_RangeCfg(flags))
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)))
     kwargs.setdefault("OutputObjectName", "SCT_PU_RDOs")
     kwargs.setdefault("OutputSDOName", "SCT_PU_SDO_Map")
     kwargs.setdefault("HardScatterSplittingMode", 2)
@@ -121,7 +121,7 @@ def SCT_DigitizationToolSplitNoMergePUCfg(flags, name="SCT_DigitizationToolSplit
     """Return ComponentAccumulator with merged pileup configured SCT digitization tool"""
     acc = ComponentAccumulator()
     rangetool = acc.popToolsAndMerge(SCT_RangeCfg(flags))
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)))
     kwargs.setdefault("InputObjectName", "PileupSCT_Hits")
     kwargs.setdefault("HardScatterSplittingMode", 0)
     kwargs.setdefault("OutputObjectName", "SCT_PU_RDOs")

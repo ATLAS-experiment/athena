@@ -72,7 +72,7 @@ def GenericSimpleMergeMcEventCollCfg(flags, name="MergeMcEventCollTool", **kwarg
     if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
         kwargs.setdefault("PileUpMergeSvc", "")
     else: # 'Algorithm' approach (consider all bunch-crossings at once)
-        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags)).name)
+        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags)))
     kwargs.setdefault("OnlySaveSignalTruth", False)
     kwargs.setdefault("OverrideEventNumbers", True)
     kwargs.setdefault("TruthCollInputKey", "TruthEvent")

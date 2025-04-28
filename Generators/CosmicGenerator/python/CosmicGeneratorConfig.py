@@ -149,11 +149,11 @@ def CosmicGeneratorCfg(flags, name="CosmicGenerator", **kwargs):
     result = ComponentAccumulator()
 
     from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-    kwargs.setdefault('PartPropSvc', result.getPrimaryAndMerge(PartPropSvcCfg(flags)).name) # Property from GenBase
+    kwargs.setdefault('PartPropSvc', result.getPrimaryAndMerge(PartPropSvcCfg(flags))) # Property from GenBase
 
     ## Set up random seeds FIXME
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault('RndmSvc', result.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault('RndmSvc', result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
     from CosmicGenerator.CosmicGeneratorConfig import CavernPropertyCalculator
     theCavern = CavernPropertyCalculator()

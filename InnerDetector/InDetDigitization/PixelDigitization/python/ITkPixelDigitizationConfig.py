@@ -141,7 +141,7 @@ def ITkPixelDigitizationBasicToolCfg(flags, name="ITkPixelDigitizationBasicTool"
         kwargs.setdefault("FirstXing", ITkPixel_FirstXing(flags))
         kwargs.setdefault("LastXing", ITkPixel_LastXing(flags))
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
     acc.setPrivateTools(CompFactory.PixelDigitizationTool(name, **kwargs))
     return acc
@@ -154,7 +154,7 @@ def ITkPixelDigitizationToolCfg(flags, name="ITkPixelDigitizationTool", **kwargs
         intervals = []
         if not flags.Digitization.DoXingByXingPileUp:
             intervals += [acc.popToolsAndMerge(ITkPixelRangeCfg(flags))]
-        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     else:
         kwargs.setdefault("PileUpMergeSvc", '')
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
@@ -174,7 +174,7 @@ def ITkPixelDigitizationHSToolCfg(flags, name="ITkPixelDigitizationHSTool", **kw
     """Return ComponentAccumulator with PixelDigitizationTool configured for Hard Scatter ITk"""
     acc = ComponentAccumulator()
     rangetool = acc.popToolsAndMerge(ITkPixelRangeCfg(flags))
-    kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)).name)
+    kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)))
     kwargs.setdefault("HardScatterSplittingMode", 1)
     tool = acc.popToolsAndMerge(ITkPixelDigitizationBasicToolCfg(flags, name, **kwargs))
     acc.setPrivateTools(tool)
@@ -185,7 +185,7 @@ def ITkPixelDigitizationPUToolCfg(flags, name="ITkPixelDigitizationPUTool", **kw
     """Return ComponentAccumulator with PixelDigitizationTool configured for PileUp ITk"""
     acc = ComponentAccumulator()
     rangetool = acc.popToolsAndMerge(ITkPixelRangeCfg(flags))
-    kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)).name)
+    kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)))
     kwargs.setdefault("HardScatterSplittingMode", 2)
     kwargs.setdefault("RDOCollName", "ITkPixel_PU_RDOs")
     kwargs.setdefault("SDOCollName", "ITkPixel_PU_SDO_Map")
@@ -198,7 +198,7 @@ def ITkPixelDigitizationSplitNoMergePUToolCfg(flags, name="ITkPixelDigitizationS
     """Return ComponentAccumulator with PixelDigitizationTool configured for PileUpITkPixelHits"""
     acc = ComponentAccumulator()
     rangetool = acc.popToolsAndMerge(ITkPixelRangeCfg(flags))
-    kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)).name)
+    kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)))
     kwargs.setdefault("HardScatterSplittingMode", 0)
     kwargs.setdefault("InputObjectName", "PileupITkPixelHits")
     kwargs.setdefault("RDOCollName", "ITkPixel_PU_RDOs")

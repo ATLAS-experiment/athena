@@ -14,7 +14,7 @@ def EMECPosInnerWheelCalibrationCalculatorCfg(flags, name="EMECPosInnerWheelCali
     kwargs.setdefault("WheelType", LArWheelCalculatorEnum.InnerAbsorberWheel)
     kwargs.setdefault("zSide", 1)
     result = ComponentAccumulator()
-    kwargs.setdefault("GeometryCalculator",result.getPrimaryAndMerge(EMECPosInnerWheelCorrOffCalculatorCfg(flags)).name)
+    kwargs.setdefault("GeometryCalculator",result.getPrimaryAndMerge(EMECPosInnerWheelCorrOffCalculatorCfg(flags)))
     result.addService(CompFactory.LArG4.EC.CalibrationCalculator(name, **kwargs), primary=True)
     return result
 
@@ -22,7 +22,7 @@ def EMECNegInnerWheelCalibrationCalculatorCfg(flags, name="EMECNegInnerWheelCali
     kwargs.setdefault("WheelType", LArWheelCalculatorEnum.InnerAbsorberWheel)
     kwargs.setdefault("zSide", -1)
     result = ComponentAccumulator()
-    kwargs.setdefault("GeometryCalculator",result.getPrimaryAndMerge(EMECNegInnerWheelCorrOffCalculatorCfg(flags)).name)
+    kwargs.setdefault("GeometryCalculator",result.getPrimaryAndMerge(EMECNegInnerWheelCorrOffCalculatorCfg(flags)))
     result.addService(CompFactory.LArG4.EC.CalibrationCalculator(name, **kwargs), primary=True)
     return result
 
@@ -30,7 +30,7 @@ def EMECPosOuterWheelCalibrationCalculatorCfg(flags, name="EMECPosOuterWheelCali
     kwargs.setdefault("WheelType", LArWheelCalculatorEnum.OuterAbsorberWheel)
     kwargs.setdefault("zSide", 1)
     result = ComponentAccumulator()
-    kwargs.setdefault("GeometryCalculator",result.getPrimaryAndMerge(EMECPosOuterWheelCorrOffCalculatorCfg(flags)).name)
+    kwargs.setdefault("GeometryCalculator",result.getPrimaryAndMerge(EMECPosOuterWheelCorrOffCalculatorCfg(flags)))
     result.addService(CompFactory.LArG4.EC.CalibrationCalculator(name, **kwargs), primary=True)
     return result
 
@@ -38,7 +38,7 @@ def EMECNegOuterWheelCalibrationCalculatorCfg(flags, name="EMECNegOuterWheelCali
     kwargs.setdefault("WheelType", LArWheelCalculatorEnum.OuterAbsorberWheel)
     kwargs.setdefault("zSide", -1)
     result = ComponentAccumulator()
-    kwargs.setdefault("GeometryCalculator",result.getPrimaryAndMerge(EMECNegOuterWheelCorrOffCalculatorCfg(flags)).name)
+    kwargs.setdefault("GeometryCalculator",result.getPrimaryAndMerge(EMECNegOuterWheelCorrOffCalculatorCfg(flags)))
     result.addService(CompFactory.LArG4.EC.CalibrationCalculator(name, **kwargs), primary=True)
     return result
 
@@ -46,7 +46,7 @@ def EMECPosBackOuterBarretteCalibrationCalculatorCfg(flags, name="EMECPosBackOut
     kwargs.setdefault("WheelType", LArWheelCalculatorEnum.BackOuterBarretteWheelCalib)
     kwargs.setdefault("zSide", 1)
     result = ComponentAccumulator()
-    kwargs.setdefault("GeometryCalculator",result.getPrimaryAndMerge(EMECPosBackOuterBarretteCorrOffCalculatorCfg(flags)).name)
+    kwargs.setdefault("GeometryCalculator",result.getPrimaryAndMerge(EMECPosBackOuterBarretteCorrOffCalculatorCfg(flags)))
     result.addService(CompFactory.LArG4.EC.CalibrationCalculator(name, **kwargs), primary=True)
     return result
 
@@ -54,7 +54,7 @@ def EMECNegBackOuterBarretteCalibrationCalculatorCfg(flags, name="EMECNegBackOut
     kwargs.setdefault("WheelType", LArWheelCalculatorEnum.BackOuterBarretteWheelCalib)
     kwargs.setdefault("zSide", -1)
     result = ComponentAccumulator()
-    kwargs.setdefault("GeometryCalculator",result.getPrimaryAndMerge(EMECNegBackOuterBarretteCorrOffCalculatorCfg(flags)).name)
+    kwargs.setdefault("GeometryCalculator",result.getPrimaryAndMerge(EMECNegBackOuterBarretteCorrOffCalculatorCfg(flags)))
     result.addService(CompFactory.LArG4.EC.CalibrationCalculator(name, **kwargs), primary=True)
     return result
 
@@ -71,7 +71,7 @@ def EndcapCryostatCalibrationCalculatorCfg(flags, name="EndcapCryostatCalibratio
 def EndcapCryostatCalibrationLArCalculatorCfg(flags, name="EndcapCryostatCalibrationLArCalculator", **kwargs):
     result = ComponentAccumulator()
     from LArG4SD.LArG4SDToolConfig import CalibrationDefaultCalculatorCfg
-    kwargs.setdefault("CalibrationDefaultCalculator", result.getPrimaryAndMerge(CalibrationDefaultCalculatorCfg(flags)).name)
+    kwargs.setdefault("CalibrationDefaultCalculator", result.getPrimaryAndMerge(CalibrationDefaultCalculatorCfg(flags)))
     result.addService( CompFactory.LArG4.EndcapCryostat.CalibrationLArCalculator(name, **kwargs), primary=True)
     return result
 
@@ -82,13 +82,13 @@ def EndcapCryostatCalibrationMixedCalculatorCfg(flags, name="EndcapCryostatCalib
 
 def EMECSupportCalibrationCalculatorCfg(flags, name="EMECSupportCalibrationCalculator", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("BackupCalculator", result.getPrimaryAndMerge(EndcapCryostatCalibrationLArCalculatorCfg(flags)).name)
+    kwargs.setdefault("BackupCalculator", result.getPrimaryAndMerge(EndcapCryostatCalibrationLArCalculatorCfg(flags)))
     result.addService( CompFactory.LArG4.EMECSupportCalibrationCalculator(name, **kwargs), primary=True)
     return result
 
 def EnergyCalculatorCfg(flags, name="EnergyCalculator", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("SupportCalculator", result.getPrimaryAndMerge(EMECSupportCalibrationCalculatorCfg(flags)).name)
+    kwargs.setdefault("SupportCalculator", result.getPrimaryAndMerge(EMECSupportCalibrationCalculatorCfg(flags)))
     from AthenaCommon.SystemOfUnits import ns
     kwargs.setdefault("OOTcut", 300.0*ns)
 
@@ -156,7 +156,7 @@ def EMECNegBackOuterBarretteCorrOffCalculatorCfg(flags, name="EMECNegBackOuterBa
 
 def EMECPresamplerCalculatorCfg(flags, name="EMECPresamplerCalculator", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("GeometryCalculator",result.getPrimaryAndMerge(EMECPresamplerGeometryCfg(flags)).name)
+    kwargs.setdefault("GeometryCalculator",result.getPrimaryAndMerge(EMECPresamplerGeometryCfg(flags)))
     result.addService(CompFactory.LArEndcapPresamplerCalculator(name, **kwargs), primary=True)
     return result
 

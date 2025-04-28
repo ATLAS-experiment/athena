@@ -78,7 +78,7 @@ def InDetV0FinderToolCfg(flags, name="InDetV0FinderTool", **kwargs):
                                InputParticleMasses = [0.511,0.511])))
 
     from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-    kwargs.setdefault("PartPropSvc", acc.getPrimaryAndMerge(PartPropSvcCfg(flags)).name)
+    kwargs.setdefault("PartPropSvc", acc.getPrimaryAndMerge(PartPropSvcCfg(flags)))
     acc.setPrivateTools(CompFactory.InDet.InDetV0FinderTool(name, **kwargs))
     return acc
 
@@ -108,7 +108,7 @@ def V0MainDecoratorCfg(flags, name="V0Decorator", **kwargs):
 
     if "masses" not in kwargs or kwargs("masses") == 1:
         from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-        kwargs.setdefault("PartPropSvc", acc.getPrimaryAndMerge(PartPropSvcCfg(flags)).name)
+        kwargs.setdefault("PartPropSvc", acc.getPrimaryAndMerge(PartPropSvcCfg(flags)))
     acc.setPrivateTools(CompFactory.InDet.V0MainDecorator(name, **kwargs))
     return acc
 

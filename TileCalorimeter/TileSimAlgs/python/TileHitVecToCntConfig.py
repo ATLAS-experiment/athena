@@ -73,7 +73,7 @@ def TileHitVecToCntToolCfg(flags, **kwargs):
 
     if 'RndmSvc' not in kwargs:
         from RngComps.RngCompsConfig import AthRNGSvcCfg
-        kwargs['RndmSvc'] = acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name
+        kwargs['RndmSvc'] = acc.getPrimaryAndMerge(AthRNGSvcCfg(flags))
 
     if kwargs['RndmEvtOverlay']:
         kwargs.setdefault('PileUp', False)
@@ -93,7 +93,7 @@ def TileHitVecToCntToolCfg(flags, **kwargs):
             kwargs.setdefault("LastXing",  getTileLastXing() )
         else:
             intervals += [acc.popToolsAndMerge(TileRangeCfg(flags))]
-        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     else:
         kwargs.setdefault("PileUpMergeSvc", '')
 

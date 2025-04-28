@@ -50,10 +50,10 @@ def Kernel_GenericSimulatorMTCfg(flags, name="ISF_Kernel_GenericSimulatorMT", **
         kwargs.setdefault("TruthPreselectionTool", acc.popToolsAndMerge(TruthPreselectionToolCfg(flags)))
 
     if "GeoIDSvc" not in kwargs:
-        kwargs.setdefault("GeoIDSvc", acc.getPrimaryAndMerge(GeoIDSvcCfg(flags)).name)
+        kwargs.setdefault("GeoIDSvc", acc.getPrimaryAndMerge(GeoIDSvcCfg(flags)))
 
     if "TruthRecordService" not in kwargs:
-        kwargs.setdefault("TruthRecordService", acc.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
+        kwargs.setdefault("TruthRecordService", acc.getPrimaryAndMerge(TruthServiceCfg(flags)))
 
     if "EntryLayerTool" not in kwargs:
         kwargs.setdefault("EntryLayerTool", acc.addPublicTool(acc.popToolsAndMerge(EntryLayerToolMTCfg(flags))))
@@ -75,7 +75,7 @@ def Kernel_GenericSimulatorMTCfg(flags, name="ISF_Kernel_GenericSimulatorMT", **
             from BeamEffects.BeamEffectsAlgConfig import ZeroLifetimePositionerCfg
             kwargs.setdefault("QuasiStablePatcher", acc.getPrimaryAndMerge(ZeroLifetimePositionerCfg(flags)))
     if "InputConverter" not in kwargs:
-        kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(InputConverterCfg(flags)).name)
+        kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(InputConverterCfg(flags)))
 
     if flags.Sim.ISF.ReSimulation:
         acc.addSequence(AthSequencer('SimSequence'), parentName='AthAlgSeq') # TODO make the name configurable?
@@ -252,20 +252,20 @@ def Kernel_GenericSimulatorCfg(flags, name="ISF_Kernel_GenericSimulator", **kwar
         kwargs.setdefault( "TruthPreselectionTool", acc.popToolsAndMerge(TruthPreselectionToolCfg(flags)) )
 
     if "TruthRecordService" not in kwargs:
-        kwargs.setdefault("TruthRecordService", acc.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
+        kwargs.setdefault("TruthRecordService", acc.getPrimaryAndMerge(TruthServiceCfg(flags)))
 
     if "MemoryMonitoringTool" not in kwargs:
         kwargs.setdefault("MemoryMonitoringTool", acc.addPublicTool(acc.popToolsAndMerge(MemoryMonitorToolCfg(flags))))
 
     if "ParticleBroker" not in kwargs:
-        kwargs.setdefault("ParticleBroker", acc.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)).name)
+        kwargs.setdefault("ParticleBroker", acc.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)))
 
     if flags.Sim.ISF.Simulator.isQuasiStable():
         if "QuasiStablePatcher" not in kwargs:
             from BeamEffects.BeamEffectsAlgConfig import ZeroLifetimePositionerCfg
             kwargs.setdefault("QuasiStablePatcher", acc.getPrimaryAndMerge(ZeroLifetimePositionerCfg(flags)) )
     if "InputConverter" not in kwargs:
-        kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(InputConverterCfg(flags)).name)
+        kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(InputConverterCfg(flags)))
 
     kwargs.setdefault("InputHardScatterCollection", "BeamTruthEvent")
     kwargs.setdefault("OutputHardScatterTruthCollection", "TruthEvent")
@@ -352,7 +352,7 @@ def Kernel_CosmicsG4Cfg(flags, name="ISF_Kernel_CosmicsG4", **kwargs):
     acc = ComponentAccumulator()
     from ISF_Tools.ISF_ToolsConfig import CosmicEventFilterToolCfg
     kwargs.setdefault("EventFilterTools"            , [ acc.addPublicTool(acc.popToolsAndMerge(CosmicEventFilterToolCfg(flags))) ]   )
-    kwargs.setdefault("ParticleBroker", acc.getPrimaryAndMerge(ParticleBrokerSvcNoOrderingCfg(flags)).name)
+    kwargs.setdefault("ParticleBroker", acc.getPrimaryAndMerge(ParticleBrokerSvcNoOrderingCfg(flags)))
     kwargs.setdefault("MaximumParticleVectorSize"   , 1000000)
     pubTool = acc.addPublicTool(acc.popToolsAndMerge(FullGeant4SelectorCfg(flags)))
     kwargs.setdefault("BeamPipeSimulationSelectors" , [ pubTool ] )
