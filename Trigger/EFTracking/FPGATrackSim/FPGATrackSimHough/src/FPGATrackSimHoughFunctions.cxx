@@ -29,10 +29,10 @@ StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float
   track_passOR_barcodefrac.clear();
   int track_barcodefrac_num;
   int track_barcodefrac_den;
-  float track_barcodefrac;
+  float track_barcodefrac = -999;
   int ntrack_passOR_total = 0;
   int trackMuon_gt0pt5_passOR = 0;
-  float tmp_TrueTrack_BCF = 0.;
+  float tmp_TrueTrack_BCF = -999;
 
   // Create tracks to hold and compare
   FPGATrackSimTrack fit1, fit2;
@@ -101,7 +101,9 @@ StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float
 	      if(hit.getBarcode() == 10001) track_barcodefrac_num++;
       }
     track_barcodefrac_den = tracks.at(i).getFPGATrackSimHits().size();
-    track_barcodefrac = (float)track_barcodefrac_num/(float)track_barcodefrac_den;
+    if (track_barcodefrac_den > 0){
+      track_barcodefrac = (float)track_barcodefrac_num/(float)track_barcodefrac_den;
+    }
     fit1.setBarcodeFrac(track_barcodefrac);
     track_passOR_barcodefrac.push_back(track_barcodefrac);
     if(fit1.getBarcodeFrac() > 0.5 && tracks.at(i).passedOR()) {
