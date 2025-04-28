@@ -48,7 +48,7 @@ class FPGATrackSimHitFilteringTool : public extends<AthAlgTool, IFPGATrackSimHit
     void fill_cut_values(const FPGATrackSimHit&, float &, float &);
 
     // configuration
-    Gaudi::Property<bool> m_digitalClustering {this, "DigitalClustering", false, "flag to enable digital clustering instead of ToT weighted position calculation" };
+    Gaudi::Property<bool> m_digitalClustering {this, "DigitalClustering", true, "flag to enable digital clustering instead of ToT weighted position calculation" };
     Gaudi::Property<bool> m_doRandomRemoval {this, "doRandomRemoval", false, "remove hits/clusters at random"};
     Gaudi::Property<float> m_rndPixelHitRmFrac {this, "pixelHitRmFrac", 0.0, "fraction of pixel hits to randomly remove"};
     Gaudi::Property<float> m_rndStripHitRmFrac {this, "stripHitRmFrac", 0.0, "fraction of strip hits to randomly remove"};
