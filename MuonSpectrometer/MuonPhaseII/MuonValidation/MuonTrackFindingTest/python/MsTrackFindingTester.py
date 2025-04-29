@@ -10,6 +10,16 @@ def MsTrackTesterCfg(flags, name = "MsTrackTester", **kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+def MsTrackVisualizationToolCfg(flags, name = "VisualizationTool", **kwargs):
+    result = ComponentAccumulator()
+    if not flags.Input.isMC:
+        from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
+        result.merge(LegacyMuonRecoChainCfg(flags))
+        kwargs.setdefault("TruthSegkey", "MuonSegments")
+    the_tool = CompFactory.MuonValR4.TrackVisualizationTool(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result    
+
 
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, setupHistSvcCfg
@@ -46,7 +56,8 @@ if __name__=="__main__":
     cfg.merge(MuonPatternRecognitionCfg(flags))
 
     from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
-    cfg.merge(MSTrackFinderAlgCfg(flags))
+    cfg.merge(MSTrackFinderAlgCfg(flags,
+                                  VisualizationTool = cfg.popToolsAndMerge(MsTrackVisualizationToolCfg(flags))))
 
     cfg.merge(MsTrackTesterCfg(flags))
    

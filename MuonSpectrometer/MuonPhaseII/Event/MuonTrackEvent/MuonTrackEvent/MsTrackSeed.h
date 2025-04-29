@@ -10,9 +10,11 @@
 #include "MuonSpacePoint/SpacePointContainer.h"
 #include "MuonPatternEvent/Segment.h"
 #include "xAODMuon/MuonSegment.h"
-/** @brief The MsTrackSeed represents all segments which may be 
- *         compatible with a single track trajectory */
+/** @brief MsTrackSeed represents the collection of segments that may be compatible with
+ *         a muon track trajectory hypothesis. To construct a seed, the segments are projected
+ *         onto a cylinder which is roughly intersecting the middle stations of the spectrometer.  */
 namespace MuonR4{
+
     class MsTrackSeed {
         public:
             /** @brief Enum defining whether the seed is made in the endcap / barrel */
