@@ -11,6 +11,9 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadDecorHandleKeyArray.h"
 
+
+#include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
+
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
 #include "xAODMuon/MuonSegmentContainer.h"
@@ -82,7 +85,8 @@ namespace MuonValR4{
         /** @brief Links from the truth muon to the segments  */
         MuonVal::MatrixBranch<unsigned short>& m_truthMuRecoSegLinks{m_tree.newMatrix<unsigned short>("TruthMuons_recoSegLinks")};
 
-
+        /** @brief Segment selection tool to pick the good quality segments */
+        ToolHandle<MuonR4::ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
         /** @brief Radius of the barrel reference cylinder onto which all segments are projected */
         double m_refBarrelR{7.*Gaudi::Units::m};
         /** @brief Position along the beam axis of the referece disc onto which all endcap segments are projected */
